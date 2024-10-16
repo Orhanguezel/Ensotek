@@ -1,0 +1,309 @@
+/* Genel ayarlar */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  background-color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.kuhlturm-header-top {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  color: var(--border-color);
+}
+
+.kuhlturm-header-top img {
+  height: 50px;
+}
+
+.kuhlturm-header-top img.kuhlturm-logo {
+  width: 150px;
+  height: auto;
+}
+
+.kuhlturm-header-Links {
+  display: flex;
+  align-items: center;
+}
+
+.kuhlturm-header-Links a {
+  color: var(--border-color);
+  text-decoration: none;
+  margin-right: 10px;
+}
+
+.kuhlturm-header-Links a:hover {
+  text-decoration: underline;
+}
+
+.kuhlturm-mobile-menu-button {
+  display: none;
+  color: var(--primary-color);
+}
+
+/* Ana Menü */
+.kuhlturm-main-nav {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0;
+  margin-right: 15px;
+}
+
+.kuhlturm-main-nav ul {
+  list-style: none;
+  display: flex;
+  padding: 0;
+  margin: 0;
+}
+
+.kuhlturm-main-nav ul li {
+  margin: 0;
+  padding: 0;
+}
+
+.kuhlturm-dropdown {
+  display: flex;
+  justify-content: center;
+}
+
+/* Nav Butonları */
+.kuhlturm-nav-button {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 15px 20px;
+  text-decoration: none;
+  display: block;
+  font-weight: bold;
+  border-radius: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.1px solid white;
+}
+
+.kuhlturm-nav-button img {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+}
+
+/* Stil Koruma */
+#Unternehmen {
+  background-color: var(--primary-color);
+  color: white; /* Renk beyaz yapıldı */
+}
+#Unternehmen:hover {
+  background-color: var(--background2-color);
+  color: var(--primary-color);
+  text-decoration: none;
+  border: none;
+}
+
+#Kernenergie {
+  background-color: #7b587f;
+  color: white; /* Renk beyaz yapıldı */
+}
+#Kernenergie:hover {
+  background-color: var(--background2-color);
+  color: var(--primary-color);
+  text-decoration: none;
+  border: none;
+}
+
+#Besucherangebote {
+  background-color: #b42056;
+  color: white; /* Renk beyaz yapıldı */
+}
+#Besucherangebote:hover {
+  background-color: var(--background2-color);
+  color: var(--primary-color);
+  text-decoration: none;
+  border: none;
+}
+
+/* Dropdown Menü İçin Yatay Sıralama */
+.kuhlturm-dropdown-content {
+  display: none;
+  position: fixed;
+  top: 85px;
+  left: 20px;
+  background-color: white;
+  width: 100%;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* Alt linklerin sütunlar halinde gelmesi için */
+.kuhlturm-dropdown-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  width: 100%;
+}
+
+.kuhlturm-dropdown-column {
+  background-color: #f5f5f5; /* Orijinal sayfaya benzer bir arka plan rengi */
+  width: 100%;
+  margin: 0;
+}
+
+/* Sadece üst seviye linkleri hedef al */
+.kuhlturm-dropdown-column .upper-level {
+  flex-basis: 20%; /* Her üst kategoriye genişlik ver */
+  margin-right: 30px; /* Daha fazla boşluk sağlamak için */
+  font-weight: bold;
+}
+
+.kuhlturm-dropdown-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.kuhlturm-dropdown-column ul li {
+  margin-bottom: 20px;
+}
+
+.kuhlturm-dropdown-column ul li a {
+  text-decoration: none;
+  color: var(--primary-color);
+}
+
+.kuhlturm-dropdown-column ul li a:hover {
+  color: var(--secondary-color);
+}
+
+.kuhlturm-dropdown-column ul li ul {
+  display: flex;
+  flex-direction: column; /* Alt linkler column şeklinde dizilecek */
+  gap: 10px; /* Alt linkler arasında boşluk */
+  margin-top: 10px;
+}
+
+.kuhlturm-dropdown-column ul li ul li a {
+  color: var(--secondary-color);
+}
+
+.kuhlturm-dropdown-column ul li ul li a:hover {
+  color: var(--primary-color);
+}
+
+/* Dropdown Menü Gösterimi */
+.kuhlturm-show {
+  display: flex;
+}
+
+
+/* Mobil görünüm için hamburger menüsü */
+@media screen and (max-width: 768px) {
+  .kuhlturm-main-nav {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    z-index: 100;
+    background-color: var(
+      --text-color
+    ); /* Ana menü arka plan rengini ayarlıyoruz */
+  }
+
+  .kuhlturm-main-nav.kuhlturm-mobile-visible {
+    display: flex;
+  }
+
+  .kuhlturm-main-nav ul {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .kuhlturm-nav-button {
+    width: 100%;
+    padding: 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  /* Mobil dropdown içerikleri */
+  .kuhlturm-dropdown-content {
+    background-color: var(--text-color); /* Arka plan rengi */
+    top: 100%;
+    display: none;
+  }
+
+  .kuhlturm-dropdown-content.kuhlturm-show {
+    display: block;
+  }
+
+  .kuhlturm-dropdown-content ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .kuhlturm-dropdown-content ul li {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Mobilde alt linklerin düzenlenmesi */
+  .kuhlturm-dropdown-content ul li a {
+    color: var(--primary-color);
+    font-size: 16px;
+    padding: 5px 0;
+    display: block;
+    text-align: left;
+  }
+
+  /* Alt linklerin sütunlar halinde gelmesi için */
+  .kuhlturm-dropdown-row {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+
+  }
+
+  .kuhlturm-dropdown-column {
+    margin: 0;
+  }
+
+  .kuhlturm-dropdown-content ul li a:hover {
+    background-color: var(--background-color-hover);
+    color: white;
+  }
+
+  /* Mobilde hamburger menü simgesi */
+  .kuhlturm-mobile-menu-button {
+    display: block;
+    cursor: pointer;
+    font-size: 24px;
+    color: var(--primary-color);
+    padding: 10px;
+  }
+
+  /* Logo ve arama bölümü için mobil düzenlemeler */
+  .kuhlturm-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+  }
+
+  /* Menü kapandığında animasyon */
+  .kuhlturm-main-nav {
+    transition: all 0.3s ease-in-out;
+    transform: translateX(-100%);
+  }
+
+  .kuhlturm-main-nav.kuhlturm-mobile-visible {
+    transform: translateX(0);
+  }
+}

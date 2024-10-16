@@ -1,0 +1,21 @@
+:root {
+    /* Renkler */
+    --primary-color: #6b8e23; /* Yeşil tonları */
+    --secondary-color: #8a2be2; /* Mor tonları */
+    --text-color: #ffffff;
+    --background-color: #f5f5f5;
+    --background2-color: #EAEDF2;
+    --border-color: #ccc;
+
+    /* Yazı Tipleri */
+    --font-family: 'Arial', sans-serif;
+    --font-size-base: 16px;
+    --font-size-large: 18px;
+    --font-size-small: 14px;
+
+    /* Buton Stilleri */
+    --button-background-color: #004479;
+    --button-text-color: #fff;
+    --button-padding: 10px 20px;
+    --button-border-radius: 5px;
+}
