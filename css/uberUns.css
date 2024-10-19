@@ -1,0 +1,68 @@
+/* Über-uns Component Styling */
+#Uber-uns {
+    padding: 50px;
+    background-color: var(--background-color);
+    color: var(--text-color);
+}
+
+#Uber-uns h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+#Uber-uns h2 {
+    font-size: 24px;
+    margin-bottom: 30px;
+    color: var(--secondary-color);
+}
+
+.uber-uns-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.uber-uns-content {
+    width: 60%;
+}
+
+.uber-uns-content h3 {
+    font-size: 20px;
+    margin-top: 15px;
+    color: var(--primary-color);
+}
+
+.uber-uns-content p {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    color: var(--text-color);
+}
+
+.uber-uns-image {
+    width: 35%;
+}
+
+.uber-uns-image img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .uber-uns-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .uber-uns-content, 
+    .uber-uns-image {
+        width: 100%;
+    }
+
+    .uber-uns-image {
+        margin-top: 20px;
+    }
+}

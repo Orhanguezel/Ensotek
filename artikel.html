@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Artikel</title>
+
+        <!-- CSS Dosyaları -->
+        <link rel="stylesheet" href="css/root.css">
+        <link rel="stylesheet" href="css/layout.css">
+        <link rel="stylesheet" href="css/components.css">
+        <link rel="stylesheet" href="css/artikel.css">
+        <link rel="stylesheet" href="css/footer.css">
+
+    </head>
+
+    <body>
+        <!-- Header Component -->
+        <div id="header"></div>
+
+        <!-- Article Section -->
+        <section id="Artikel">
+            <div class="container">
+                <div class="sidebar">
+                    <h2>Inhaltsverzeichnis</h2>
+                    <ul id="article-titles">
+                        <!-- Makale başlıkları dinamik olarak yüklenecek -->
+                    </ul>
+                </div>
+                <div class="content-area">
+                    <div class="content" id="article-content">
+                        <h2 id="article-title">Wählen Sie einen Artikel aus dem Menü, um mehr zu erfahren.</h2>
+                        <div id="article-body">
+                            <!-- Makale içeriği burada yüklenecek -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer Component -->
+        <div id="footer"></div>
+
+        <!-- JavaScript Dosyaları -->
+        <script src="app.js" type="module"></script> 
+        <script src="components/artikel.js" type="module"></script> <!-- Artikel ile ilgili JavaScript dosyası -->
+    </body>
+</html>

@@ -1,0 +1,54 @@
+/* Zertifikate Section Styling */
+#zertifikate-section {
+    padding: 50px;
+    background-color: var(--background-color);
+    text-align: center;
+}
+
+#zertifikate-section h1 {
+    font-size: 36px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+#zertifikate-section h4 {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.container-zertifikate {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    justify-items: center;
+    margin-top: 30px;
+}
+
+.container-zertifikate img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.container-zertifikate img:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #zertifikate-section h1 {
+        font-size: 28px;
+    }
+
+    #zertifikate-section h4 {
+        font-size: 16px;
+    }
+
+    .container-zertifikate {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+}

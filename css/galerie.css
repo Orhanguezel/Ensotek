@@ -1,0 +1,60 @@
+/* Galerie Section Styling */
+#Galerie {
+    padding: 50px;
+    background-color: var(--background-color);
+    text-align: center;
+}
+
+#Galerie h1 {
+    font-size: 36px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+#Galerie h4 {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-bottom: 40px;
+}
+
+.gallery-demo {
+    max-width: 100%;
+    margin: 0 auto;
+}
+
+#lightSlider {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+}
+
+#lightSlider li {
+    position: relative;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#lightSlider img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+}
+
+#lightSlider img:hover {
+    transform: scale(1.05);
+}
+
+/* Responsive Styling */
+@media (max-width: 768px) {
+    #Galerie h1 {
+        font-size: 28px;
+    }
+
+    #Galerie h4 {
+        font-size: 16px;
+    }
+}
