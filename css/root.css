@@ -2,6 +2,12 @@
     /* Renkler */
     --primary-color: #6b8e23; /* Yeşil tonları */
     --secondary-color: #8a2be2; /* Mor tonları */
+    --tertiary-color: #ff4500; /* Turuncu tonları */
+    --highlight-color: #ffcc00; /* Vurgulama rengi - sarı tonları */
+    --background-dark-color: #333; /* Koyu arka plan rengi */
+    --accent-color: #00ced1; /* Deniz mavisi tonları */
+    --muted-color: #777; /* Soluk gri tonları */
+
     --text-color: #ffffff;
     --background-color: #f5f5f5;
     --background2-color: #EAEDF2;
