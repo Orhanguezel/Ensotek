@@ -1,0 +1,82 @@
+/* Genel stiller */
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* Container stil */
+.container {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+}
+
+/* Sidebar stil */
+.sidebar {
+    width: 25%;
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-right: 1px solid #ddd;
+}
+
+.sidebar h2 {
+    font-size: 1.4rem;
+    color: #428BFF;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+}
+
+.sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.sidebar ul li a {
+    text-decoration: none;
+    color: #333;
+    font-weight: bold;
+}
+
+.sidebar ul li a:hover {
+    color: #428BFF;
+}
+
+/* Content alanı stil */
+.content-area {
+    width: 70%;
+    padding: 20px;
+}
+
+.content-area h2 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.content-area #article-body {
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
+.content-area img {
+    max-width: 100%;
+    margin-top: 20px;
+}
+
+/* Responsive düzenlemeler */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+    
+    .sidebar {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .content-area {
+        width: 100%;
+    }
+}

@@ -1,0 +1,91 @@
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.news-section {
+    background-color: var(--background-color);
+    padding: 40px 20px;
+}
+
+.news-section h1 {
+    font-size: 32px;
+    color: var(--heading-color);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.news-section h2 {
+    font-size: 18px;
+    color: var(--text-color);
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.col-md-8, .col-md-4 {
+    padding: 10px;
+}
+
+.col-md-8 {
+    width: 66.66%;
+}
+
+.col-md-4 {
+    width: 33.33%;
+}
+
+.news, .latest-news, .archive {
+    background-color: var(--primary-color);
+    padding: 20px;
+    border-radius: 10px;
+    color: var(--text-color);
+}
+
+.news ul, .latest-news ul, .archive ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.news ul li, .latest-news ul li, .archive ul li {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.news ul li:last-child, .latest-news ul li:last-child, .archive ul li:last-child {
+    border-bottom: none;
+}
+
+.news ul li a, .latest-news ul li a, .archive ul li a {
+    color: var(--link-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.news ul li a:hover, .latest-news ul li a:hover, .archive ul li a:hover {
+    color: var(--hover-color);
+}
+
+.latest-news h4, .archive h4 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+}
+
+/* Responsive ayarlamalar */
+@media (max-width: 768px) {
+    .col-md-8, .col-md-4 {
+        width: 100%;
+    }
+    
+    .news-section {
+        padding: 20px 10px;
+    }
+}

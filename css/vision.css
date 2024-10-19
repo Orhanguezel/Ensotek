@@ -1,0 +1,72 @@
+/* Vision & Mission Section Styling */
+#vision-mission {
+    padding: 50px;
+    background-color: var(--background-color);
+    text-align: center;
+    color: var(--text-color);
+}
+
+#vision-mission h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+#vision-mission h2 {
+    font-size: 24px;
+    margin-bottom: 40px;
+    color: var(--secondary-color);
+}
+
+.vision-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.vision-text {
+    width: 60%;
+    text-align: left;
+}
+
+.vision-text h3 {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+}
+
+.vision-text h4 {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.vision-image {
+    width: 35%;
+}
+
+.vision-image img {
+    border-radius: 10px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .vision-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .vision-text {
+        width: 100%;
+    }
+
+    .vision-image {
+        width: 100%;
+        margin-top: 20px;
+    }
+}

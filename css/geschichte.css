@@ -1,0 +1,60 @@
+/* Geschichte Section Styling */
+#geschichte-section {
+    padding: 50px;
+    background-color: var(--background-color);
+    text-align: center;
+    color: var(--text-color);
+}
+
+#geschichte-section h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+}
+
+.geschichte-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.geschichte-text {
+    width: 60%;
+    text-align: left;
+}
+
+.geschichte-text h4 {
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-bottom: 20px;
+}
+
+.geschichte-image {
+    width: 35%;
+}
+
+.geschichte-image img {
+    border-radius: 10px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .geschichte-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .geschichte-text {
+        width: 100%;
+    }
+
+    .geschichte-image {
+        width: 100%;
+        margin-top: 20px;
+    }
+}

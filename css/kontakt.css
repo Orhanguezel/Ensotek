@@ -1,0 +1,66 @@
+/* Genel Stiller */
+#Kontakt {
+    padding: 50px;
+    background-color: var(--background-color);
+    text-align: center;
+}
+
+#Kontakt h1 {
+    font-size: 36px;
+    color: var(--primary-color);
+    margin-bottom: 20px;
+}
+
+#Kontakt h2 {
+    font-size: 18px;
+    color: var(--secondary-color);
+    margin-bottom: 40px;
+}
+
+/* Grid Layout */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 20px;
+}
+
+.grid-item {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.border {
+    border: 1px solid var(--border-color);
+}
+
+.contact-icon {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.contact-icon i {
+    font-size: 24px;
+    color: var(--primary-color);
+}
+
+/* Form Alanı */
+#form-item form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Google Maps iframe */
+iframe {
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+}
+
+/* Mobil görünüm için düzenleme */
+@media (max-width: 768px) {
+    .grid-container {
+        grid-template-columns: 1fr;
+    }
+}

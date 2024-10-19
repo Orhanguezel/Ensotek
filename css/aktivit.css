@@ -1,0 +1,117 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+#Aktivit {
+  background-color: var(--background-color);
+  padding: 20px;
+  margin: 0 auto;
+}
+
+.akt {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.akt ul {
+  list-style-type: none;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+}
+
+.akt ul li {
+  text-align: center;
+  flex: 1 1 auto;
+  min-width: 120px;
+}
+
+.akt ul li label {
+  cursor: pointer;
+  transition: color 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  padding: 5px;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  border-radius: 5px;
+  margin: 0 5px;
+}
+
+.akt ul li label:hover {
+  color: var(--highlight-color);
+}
+
+.akt ul li label:focus {
+  outline: none;
+}
+
+.akt .slider .indicator {
+  height: 5px;
+  background-color: var(--highlight-color);
+  transition: transform 0.3s ease;
+  border-radius: 5px;
+}
+
+.akt .content .content-section {
+  display: none; /* Varsayılan olarak gizlenmiş */
+  flex-wrap: wrap;
+  padding: 20px;
+  color: var(--text2-color);
+  background-color: var(--text-color);
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* Seçilen input ile bağlantılı section'ı göster */
+input#tab1:checked ~ .content section:nth-of-type(1),
+input#tab2:checked ~ .content section:nth-of-type(2),
+input#tab3:checked ~ .content section:nth-of-type(3),
+input#tab4:checked ~ .content section:nth-of-type(4),
+input#tab5:checked ~ .content section:nth-of-type(5),
+input#tab6:checked ~ .content section:nth-of-type(6) {
+  display: block;
+}
+
+/* Görsel stili */
+.akt .content section .img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+.akt .content section h4 {
+  font-size: var(--font-size-large);
+  color: blue;
+  margin-bottom: 10px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+@media (min-width: 768px) {
+  .akt .content section {
+    flex-direction: row;
+    align-items: flex-start;
+  }
+
+  .akt .content section .img {
+    width: 50%;
+    max-width: 400px;
+  }
+
+  .akt .content section h4 {
+    width: 50%;
+    margin-top: 0;
+    padding-left: 20px;
+  }
+}
