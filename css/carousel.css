@@ -24,17 +24,16 @@
 }
 
 .carousel-inf h2 {
-    font-size: 24px;
+    font-size: 1.5rem;
     margin-bottom: 10px;
     color: var(--text-color);
     text-align: start;
 }
 
 .carousel-inf p {
-    font-size: 18px;
+    font-size: 1rem;
     line-height: 1.6;
     color: var(--text-color);
-    margin-bottom: 40px;
 }
 
 /* Carousel container */
@@ -157,7 +156,6 @@
     
     #carousel-inf {
         width: 100%;
-        height: 200px;
         order: 2; /* Bilgi bölümünü slaytın altına al */
     }
 

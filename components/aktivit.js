@@ -3,7 +3,7 @@ export function loadAktivit() {
     aktivitSection.innerHTML = `
       <section id="Aktivit">
         <h1>Unsere Aktivitäten</h1>
-        <h2>Ensotek bietet eine breite Palette von Aktivitäten im Bereich industrieller Wasser-Kühltürme und zugehöriger Dienstleistungen.</h2>
+        <h2>Ensotek bietet eine breite Palette von Aktivitäten im Bereich industrieller Wasser-Kühltürme und zugehöriger Dienstleistungen. </h2>
         <div class="akt">
           <input type="radio" id="tab1" name="tab-control" checked>
           <input type="radio" id="tab2" name="tab-control">
