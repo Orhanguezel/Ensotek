@@ -1,13 +1,10 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
+/* Genel ayarlar */
 #Aktivit {
-  background-color: var(--background-color);
-  padding: 20px;
-  margin: 0 auto;
+  padding: 50px;
+    margin: 0 auto;
+    background-color: var(--background2-color);
+    text-align: center;
+    color: var(--text-color);
 }
 
 .akt {
@@ -53,36 +50,27 @@
   outline: none;
 }
 
-.akt .slider .indicator {
-  height: 5px;
-  background-color: var(--highlight-color);
-  transition: transform 0.3s ease;
-  border-radius: 5px;
+/* İçerik bölümleri */
+.content-section {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px);
 }
 
-.akt .content .content-section {
-  display: none; /* Varsayılan olarak gizlenmiş */
-  flex-wrap: wrap;
-  padding: 20px;
-  color: var(--text2-color);
-  background-color: var(--text-color);
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 20px;
-}
-
-/* Seçilen input ile bağlantılı section'ı göster */
-input#tab1:checked ~ .content section:nth-of-type(1),
-input#tab2:checked ~ .content section:nth-of-type(2),
-input#tab3:checked ~ .content section:nth-of-type(3),
-input#tab4:checked ~ .content section:nth-of-type(4),
-input#tab5:checked ~ .content section:nth-of-type(5),
-input#tab6:checked ~ .content section:nth-of-type(6) {
+.content-section.active {
   display: block;
+  opacity: 1;
+  transform: translateY(0);
 }
 
-/* Görsel stili */
-.akt .content section .img {
+.image-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.image-text-wrapper img {
   width: 100%;
   max-width: 100%;
   height: auto;
@@ -90,28 +78,28 @@ input#tab6:checked ~ .content section:nth-of-type(6) {
   border-radius: 8px;
 }
 
-.akt .content section h4 {
-  font-size: var(--font-size-large);
-  color: blue;
-  margin-bottom: 10px;
-  width: 100%;
-  margin-top: 10px;
+.image-text-wrapper h4 {
+  font-size: 16px;
+    line-height: 1.5;
+    color: var(--text2-color);
+    text-align: left;
 }
 
 @media (min-width: 768px) {
-  .akt .content section {
+  .image-text-wrapper {
     flex-direction: row;
+    justify-content: space-between;
     align-items: flex-start;
   }
 
-  .akt .content section .img {
+  .image-text-wrapper img {
     width: 50%;
     max-width: 400px;
   }
 
-  .akt .content section h4 {
+  .image-text-wrapper h4 {
     width: 50%;
-    margin-top: 0;
     padding-left: 20px;
+    text-align: left;
   }
 }

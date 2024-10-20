@@ -1,61 +1,62 @@
-*{
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+
 /* Carousel ve informasyon bölümü */
 .carousel-container {
     position: relative;
     width: 100%;
     margin: 0 auto;
     display: flex;
-    align-items: stretch; /* Bilgi ve slayt aynı yükseklikte olacak */
+    align-items: stretch !important; /* Bilgi ve slayt aynı yükseklikte olacak */
     justify-content: center;
+    background-color: var(--background-color);
 }
 
 /* Informasyon bölümü */
-.carousel-info {
+#carousel-inf {
     display: flex;
     flex-direction: column;
-    justify-content: center; /* Ortalanmış içerik */
+    justify-content:center;
+    align-items: flex-start;
+    letter-spacing: 2px;
     width: 50%;
-    background-color: var(--primary-color); /* Arka plan rengi */
-    color: white;
+    background-color: var(--background3-color);
     padding: 20px;
     transition: all 0.5s ease-in-out;
     opacity: 1;
 }
 
-.carousel-info h2 {
+.carousel-inf h2 {
     font-size: 24px;
     margin-bottom: 10px;
-    color: #000;
-
+    color: var(--text-color);
+    text-align: start;
 }
 
-.carousel-info p {
-    font-size: 16px;
+.carousel-inf p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-bottom: 40px;
 }
 
 /* Carousel container */
 #owlCarousel {
     position: relative;
     width: 50%;
-    height: 100%;
+    height: 100%; /* Yüksekliği bilgi ile eşit */
     overflow: hidden;
+    object-fit: cover;
     display: flex;
-    align-items: stretch; /* Slayt içeriğinin tam kapsanması için */
+    align-items: stretch !important;
+    justify-content: center;
 }
 
 /* Carousel içeriği */
 .slide {
-    position: relative;
     width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
-    align-items: stretch; /* Slaytın tamamen kaplanmasını sağlar */
-    transition: all 0.5s ease-in-out;
+    align-items: stretch;
 }
 
 /* Carousel item */
@@ -64,8 +65,7 @@
     height: 100%;
     object-fit: cover;
     display: block;
-    overflow: hidden;
-
+    transition: transform 0.3s ease-in-out;
 }
 
 .owl-item-bg img {
@@ -73,26 +73,62 @@
     height: 100%;
     display: block;
 }
+
+/* Radyo butonları */
+.radio-buttons {
+    position: absolute;
+    bottom: 20px; /* Butonların slaytın altına gelmesi için */
+    left: 75%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.radio-buttons input[type="radio"] {
+    display: none;
+}
+
+.radio-buttons label {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.radio-buttons input[type="radio"]:checked + label {
+    background-color:rgba(243, 244, 247, 0.6); /* #428BFF */
+}
+
 /* Carousel kontrol butonları */
 .owl-prev,
 .owl-next {
     position: absolute;
     top: 50%;
-    width: 50px;
-    height: 50px;
-    background-color: var(--nav-bg-color);
-    color: var(--nav-color);
+    width: 40px;
+    height: 40px;
+    background-color: rgba(243, 234, 234, 0.5)!important;
+    color: white;
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 50%;
-    border: 2px solid white;
+    border: none;
     cursor: pointer;
     transform: translateY(-50%);
-    transition: background-color 0.3s;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-/* Sol ve sağ ok butonları için konumlandırma */
+.owl-prev:hover,
+.owl-next:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+    transform: scale(1.1) translateY(-50%);
+}
+
 .owl-prev {
     left: 20px;
 }
@@ -101,20 +137,57 @@
     right: 20px;
 }
 
+.owl-prev::before,
+.owl-next::before {
+    content: '\f104'; /* FontAwesome sol ok */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 24px;
+}
+
+.owl-next::before {
+    content: '\f105'; /* FontAwesome sağ ok */
+}
 
 /* Mobil görünüm için düzenleme */
-@media (max-width: 767px) {
+@media (max-width: 992px) {
     .carousel-container {
-        flex-direction: column-reverse; /* Informasyon altta olacak */
+        display: flex;
+        flex-direction: column; /* Informasyon slaytın altına gelecek */
     }
     
-    .carousel-info{
+    #carousel-inf {
         width: 100%;
-        height: auto; /* Mobilde yükseklik otomatik */
+        height: 200px;
+        order: 2; /* Bilgi bölümünü slaytın altına al */
     }
 
     #owlCarousel {
         width: 100%;
-        height: 300px; /* Mobilde yükseklik ayarlandı */
+        height: auto; /* Mobilde slayt yüksekliği otomatik */
+        order: 1; /* Slayt üstte kalacak */
     }
+
+    .owl-prev,
+    .owl-next {
+        width: 40px;
+        height: 40px;
+    }
+
+    .owl-prev::before,
+    .owl-next::before {
+        font-size: 18px;
+    }
+
+    .radio-buttons {
+        top: 50%; /* Butonların slaytın altına gelmesi için */
+        left: 50%;
+    }
+    
+    .radio-buttons label {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+    }
+
 }

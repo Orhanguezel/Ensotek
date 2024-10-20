@@ -3,7 +3,7 @@ export function loadCarousel() {
     carousel.innerHTML = `
         <div class='carousel-container'>
             <!-- Informasyon bölümü -->
-            <div class='carousel-info' id='carousel-info'>
+            <div class='carousel-inf' id='carousel-inf'>
                 <h2>Normalbetrieb</h2>
                 <p>Mit Jahrgang 1984 ist das KKW Leibstadt das jüngste und leistungsstärkste Kernkraftwerk der Schweiz.</p>
             </div>
@@ -20,55 +20,65 @@ export function loadCarousel() {
                     <img class='owl-item-bg' src='img/slayt/3.png' alt='Bild 3'>
                 </div>
             </div>
+
+            <!-- Radyo butonları -->
+            <div class="radio-buttons" id="radio-buttons">
+                <input type="radio" id="radio1" name="slider" checked>
+                <label for="radio1"></label>
+                <input type="radio" id="radio2" name="slider">
+                <label for="radio2"></label>
+                <input type="radio" id="radio3" name="slider">
+                <label for="radio3"></label>
+            </div>
         </div>
     `;
 
-    jQuery(function () {
-        const owlCarousel = $('#owlCarousel').owlCarousel({
-            items: 1,
-            loop: true,
-            autoplay: true,
-            autoplayTimeout: 4000,
-            autoplayHoverPause: true,
-            nav: true,
-            dots: true,
-            responsive: {
-                0: {
-                    items: 1
-                },
-                768: {
-                    items: 1
-                },
-                1024: {
-                    items: 1
-                }
+    const owlCarousel = $('#owlCarousel').owlCarousel({
+        items: 1,
+        loop: true,
+        autoplay: true,
+        autoplayTimeout: 4000,
+        autoplayHoverPause: true,
+        nav: true,
+        dots: false,  // Owl Carousel dots'u kapatıyoruz çünkü kendi radio butonlarımız var.
+        responsive: {
+            0: {
+                items: 1
+            },
+            768: {
+                items: 1
+            },
+            1024: {
+                items: 1
             }
+        }
+    });
+
+    // Radio butonlarına tıklama ile slayt değişimi
+    document.querySelectorAll('.radio-buttons input').forEach((radio, index) => {
+        radio.addEventListener('click', () => {
+            owlCarousel.trigger('to.owl.carousel', [index, 300]);
         });
+    });
 
-        owlCarousel.on('changed.owl.carousel', function(event) {
-            const totalItems = event.item.count;
-            let currentIndex = event.item.index - event.relatedTarget._clones.length / 2;
-            currentIndex = (currentIndex < 0) ? totalItems - 1 : currentIndex % totalItems;
+    // Slayt değiştikçe radio butonları güncellensin
+    owlCarousel.on('changed.owl.carousel', function(event) {
+        const totalItems = event.item.count;
+        let currentIndex = event.item.index - event.relatedTarget._clones.length / 2;
+        currentIndex = (currentIndex < 0) ? totalItems - 1 : currentIndex % totalItems;
 
-            const items = $('#owlCarousel .slide');
-            const currentItem = items.eq(currentIndex).data();
+        document.querySelector(`#radio${currentIndex + 1}`).checked = true;
 
-            if (currentItem) {
-                const infoContainer = document.querySelector('#carousel-info');
-                infoContainer.classList.add('fade-out');
+        const currentItem = $('#owlCarousel .slide').eq(currentIndex).data();
+        if (currentItem) {
+            const infoContainer = document.querySelector('#carousel-inf');
+            infoContainer.classList.add('fade-out');
 
-                setTimeout(() => {
-                    document.querySelector('#carousel-info h2').textContent = currentItem.title;
-                    document.querySelector('#carousel-info p').textContent = currentItem.text;
-                    infoContainer.classList.remove('fade-out');
-                }, 500);
-            }
-        });
-
-        const initialItem = $('#owlCarousel .slide').eq(0).data();
-        if (initialItem) {
-            document.querySelector('#carousel-info h2').textContent = initialItem.title;
-            document.querySelector('#carousel-info p').textContent = initialItem.text;
+            setTimeout(() => {
+                document.querySelector('#carousel-inf h2').textContent = currentItem.title;
+                document.querySelector('#carousel-inf p').textContent = currentItem.text;
+                infoContainer.classList.remove('fade-out');
+            }, 500);
         }
     });
 }

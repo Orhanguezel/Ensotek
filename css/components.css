@@ -1,38 +1,36 @@
 /* Genel ayarlar */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: var(--font-family);
-  font-size: var(--font-size-base);
-  color: var(--text-color);
-  background-color: var(--text-color);
-  margin: 0;
-  padding: 0;
-}
-
 .kuhlturm-header-top {
+  position: fixed;
+  top: 0;
+  right: 0;
   display: flex;
   justify-content: space-between;
-  padding: 10px 20px;
+  align-items: flex-start;
+  padding: 10px 40px;
+  width: 100%;
+  height: 100px;
   color: var(--border-color);
+  background-color: var(--background-color);
+  z-index: 1000;
+}
+
+.kuhlturm-top-links {
+  display: inline-block;
+  height: 50px;
+  gap:70px;
+  margin-right: 150px;
 }
 
 .kuhlturm-header-top img {
+  display: inline-block;
+  margin-left: 50px;
   height: 50px;
+  width: auto;
 }
 
 .kuhlturm-header-top img.kuhlturm-logo {
   width: 150px;
   height: auto;
-}
-
-.kuhlturm-header-Links {
-  display: flex;
-  align-items: center;
 }
 
 .kuhlturm-header-Links a {
@@ -53,19 +51,22 @@ body {
 /* Ana Menü */
 .kuhlturm-main-nav {
   display: flex;
-  justify-content: flex-end;
-  padding: 0;
-  margin-right: 15px;
+  position: fixed;
+  top: 70px;
+  right: 10%;
+  z-index: 10000;
 }
 
 .kuhlturm-main-nav ul {
   list-style: none;
   display: flex;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
 .kuhlturm-main-nav ul li {
+  position: relative;
+top: px;
   margin: 0;
   padding: 0;
 }
@@ -135,12 +136,13 @@ body {
 .kuhlturm-dropdown-content {
   display: none;
   position: fixed;
-  top: 85px;
+  top: 125px;
   left: 20px;
   background-color: white;
-  width: 100%;
+  width: 96%;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
+  border: 1px solid greenyellow;
 }
 
 /* Alt linklerin sütunlar halinde gelmesi için */
@@ -206,6 +208,12 @@ body {
 
 /* Mobil görünüm için hamburger menüsü */
 @media screen and (max-width: 768px) {
+  .kuhlturm-top-links {
+    display: none;
+  }
+  .kuhlturm-header-top {
+    padding: 10px 10px;
+  }
   .kuhlturm-main-nav {
     display: none;
     flex-direction: column;
@@ -284,7 +292,7 @@ body {
   .kuhlturm-mobile-menu-button {
     display: block;
     cursor: pointer;
-    font-size: 24px;
+    font-size: 34px;
     color: var(--primary-color);
     padding: 10px;
   }

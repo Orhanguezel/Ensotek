@@ -1,9 +1,4 @@
 /* Genel stil */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-}
 
 .container {
     display: flex;
