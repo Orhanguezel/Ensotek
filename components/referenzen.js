@@ -1,60 +1,56 @@
+import { sectorImages } from "./referansImg.js"; // Resim veritabanını içe aktar
+
 export function loadReferenzen() {
-    const referenzenSection = document.getElementById('Referenzen');
-    referenzenSection.innerHTML = `
+  const referenzenSection = document.getElementById("Referenzen");
+  referenzenSection.innerHTML = `
         <section id="Referenzen">
             <h1>Referenzen</h1>
             <h2>Wir sind stolz auf unsere Referenzen, die unsere Arbeit und unser Engagement für Qualität widerspiegeln. Unsere Projekte erstrecken sich über verschiedene Branchen, darunter Energie, Lebensmittel, Automobil, und viele mehr.</h2>
             <div class="refe">
-                <div class="btn-group-vertical fixed-buttons">
-                    <h4 class="fst-italic">Branche</h4>
-                    <div class="btn-group w-100 m-1">
-                        <button class="btn btn-primary" onclick="showImages('Allgemein')">Allgemeine Referenzen</button>
-                        <button class="btn btn-primary" onclick="showImages('metall')">Metall</button>
-                        <button class="btn btn-primary" onclick="showImages('kunst')">Kunststoff</button>
-                        <button class="btn btn-primary" onclick="showImages('essen')">Lebensmittel-Öl</button>
-                        <button class="btn btn-primary" onclick="showImages('zement')">Zement Bergbau</button>
-                        <button class="btn btn-primary" onclick="showImages('tekstil')">Textil</button>
-                        <button class="btn btn-primary" onclick="showImages('energie')">Energie</button>
-                        <button class="btn btn-primary" onclick="showImages('chemie')">Chemische</button>
-                        <button class="btn btn-primary" onclick="showImages('einkaufs')">Einkaufszentrum, Geschäftsgebäude, Hotel</button>
-                        <button class="btn btn-primary" onclick="showImages('Automobil')">Automobil</button>
-                        <button class="btn btn-primary" onclick="showImages('aliminum')">Aluminium, Drahtziehen</button>
-                        <button class="btn btn-primary" onclick="showImages('verpact')">Verpackung, Papier, Isolierung</button>
-                        <button class="btn btn-primary" onclick="showImages('maschinenbau')">Ingenieurwesen</button>
+                <div class="button-container">
+                    <h4 class="category-heading">Branche</h4>
+                    <div class="category-buttons">
+                      <button class="custom-btn" onclick="showImages('Allgemein')">Allgemeine Referenzen</button>
+                      <button class="custom-btn" onclick="showImages('metall')">Metall</button>
+                      <button class="custom-btn" onclick="showImages('kunst')">Kunststoff</button>
+                      <button class="custom-btn" onclick="showImages('essen')">Lebensmittel-Öl</button>
+                      <button class="custom-btn" onclick="showImages('zement')">Zement Bergbau</button>
+                      <button class="custom-btn" onclick="showImages('tekstil')">Textil</button>
+                      <button class="custom-btn" onclick="showImages('energie')">Energie</button>
+                      <button class="custom-btn" onclick="showImages('chemie')">Chemische</button>
+                      <button class="custom-btn" onclick="showImages('einkaufs')">Einkaufszentrum, Geschäftsgebäude, Hotel</button>
+                      <button class="custom-btn" onclick="showImages('Automobil')">Automobil</button>
+                      <button class="custom-btn" onclick="showImages('aliminum')">Aluminium, Drahtziehen</button>
+                      <button class="custom-btn" onclick="showImages('verpact')">Verpackung, Papier, Isolierung</button>
+                      <button class="custom-btn" onclick="showImages('maschinenbau')">Ingenieurwesen</button>
                     </div>
                 </div>
-                <div class="col-12" id="imageContainer">
-                    <!-- Başlangıçta boş veya varsayılan içerikle -->
+                <div class="image-grid" id="imageContainer">
+                    <!-- Seçilen kategoriye ait görseller burada gösterilecek -->
                 </div>
             </div>
         </section>
     `;
 
-    // Dinamik olarak görselleri gösterme fonksiyonu
-    window.showImages = function (category) {
-        const images = {
-            Allgemein: [
-                "https://example.com/image1.jpg",
-                "https://example.com/image2.jpg",
-                // Diğer genel referanslar
-            ],
-            metall: [
-                "https://example.com/metall1.jpg",
-                "https://example.com/metall2.jpg",
-                // Diğer metal referansları
-            ],
-            // Diğer kategoriler için benzer diziler eklenebilir
-        };
+  // Görselleri gösterme fonksiyonu
+  window.showImages = function (category) {
+    const images = sectorImages[category] || []; // Seçilen kategoriye ait görseller
+    const imageContainer = document.getElementById("imageContainer");
+    imageContainer.innerHTML = ""; // Eski içeriği temizle
 
-        const imageContainer = document.getElementById('imageContainer');
-        imageContainer.innerHTML = ""; // Eski içeriği temizle
-
-        // Seçilen kategoriye ait görselleri döngü ile ekle
-        images[category].forEach(img => {
-            const imgElement = document.createElement('img');
-            imgElement.src = img;
-            imgElement.classList.add('img-fluid');
-            imageContainer.appendChild(imgElement);
-        });
+    if (images.length) {
+      images.forEach((imgData) => {
+        const imgElement = document.createElement("img");
+        imgElement.src = imgData.url;
+        imgElement.alt = imgData.alt;
+        imgElement.classList.add("custom-img");
+        imageContainer.appendChild(imgElement);
+      });
+    } else {
+      imageContainer.innerHTML = `<p>Bu kategoriye ait görsel bulunmamaktadır.</p>`;
     }
+  };
+
+  // Varsayılan olarak bir kategori (örneğin 'aliminum') seçilebilir:
+  showImages("aliminum");
 }

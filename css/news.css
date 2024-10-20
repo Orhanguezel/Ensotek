@@ -1,11 +1,4 @@
 
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
 .news-section {
     background-color: var(--background-color);
     padding: 40px 20px;

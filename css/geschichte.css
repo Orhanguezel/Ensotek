@@ -1,7 +1,7 @@
 /* Geschichte Section Styling */
 #geschichte-section {
     padding: 50px;
-    background-color: var(--background-color);
+    background-color: var(--background2-color);
     text-align: center;
     color: var(--text-color);
 }
@@ -17,6 +17,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    gap: 30px; /* Esneklik ve boşluk */
 }
 
 .geschichte-text {
@@ -26,9 +27,9 @@
 
 .geschichte-text h4 {
     font-size: 16px;
-    line-height: 1.6;
-    color: var(--text-color);
-    margin-bottom: 20px;
+    line-height: 1.5;
+    color: var(--text2-color);
+    text-align: left;
 }
 
 .geschichte-image {
@@ -40,6 +41,7 @@
     width: 100%;
     height: auto;
     object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Hafif bir gölge eklendi */
 }
 
 /* Responsive Design */
@@ -51,6 +53,7 @@
 
     .geschichte-text {
         width: 100%;
+        text-align: center; /* Küçük ekranlar için metin ortalanacak */
     }
 
     .geschichte-image {

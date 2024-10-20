@@ -1,4 +1,3 @@
-/* Galerie Section Styling */
 #Galerie {
     padding: 50px;
     background-color: var(--background-color);
@@ -14,41 +13,96 @@
 #Galerie h4 {
     font-size: 18px;
     line-height: 1.6;
-    color: var(--text-color);
+    color: var(--text2-color);
     margin-bottom: 40px;
 }
 
-.gallery-demo {
+.carousel-container {
     max-width: 100%;
     margin: 0 auto;
-}
-
-#lightSlider {
-    list-style: none;
-    padding: 0;
-    margin: 0 auto;
-}
-
-#lightSlider li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     position: relative;
-    margin-bottom: 10px;
-    border-radius: 10px;
+}
+
+/* Sol taraftaki büyük slayt alanı */
+.carousel {
+    width: 60%; /* Ekranın %60'ını kaplayacak */
+    position: relative;
     overflow: hidden;
 }
 
-#lightSlider img {
-    width: 100%;
-    height: auto;
-    display: block;
+.carousel-images {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+}
+
+.carousel-image {
+    min-width: 100%;
+    height: 400px; /* Slayt yüksekliği ayarlandı */
+    object-fit: cover;
     border-radius: 10px;
+    display: none;
+}
+
+.carousel-image.active {
+    display: block;
+    transition: opacity 0.5s ease-in-out;
+}
+
+/* Sağ tarafta küçük resimler */
+.carousel-thumbnails {
+    width: 50%; /* Ekranın %35'ini kaplayacak */
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Küçük resimler arasında boşluk */
+}
+
+.carousel-thumbnail {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 10px;
+    cursor: pointer;
     transition: transform 0.3s ease;
+    border: 2px solid transparent;
 }
 
-#lightSlider img:hover {
-    transform: scale(1.05);
+.carousel-thumbnail:hover {
+    transform: scale(1.1);
 }
 
-/* Responsive Styling */
+.carousel-thumbnail.active {
+    border: 2px solid #428BFF;
+    transform: scale(1.1);
+    transition: border-color 0.3s ease;
+}
+
+/* Carousel kontrol butonları */
+.carousel-control {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.prev {
+    left: 10px;
+}
+
+.next {
+    right: 10px;
+}
+
+/* Mobil görünüm için düzenleme */
 @media (max-width: 768px) {
     #Galerie h1 {
         font-size: 28px;
@@ -56,5 +110,30 @@
 
     #Galerie h4 {
         font-size: 16px;
+    }
+
+    .carousel-container {
+        flex-direction: column; /* Mobilde üst üste gelecek */
+    }
+
+    .carousel {
+        width: 100%; /* Mobilde tam genişlik */
+    }
+
+    .carousel-image {
+        height: 300px; /* Mobilde slayt yüksekliği ayarlandı */
+    }
+
+    .carousel-thumbnails {
+        flex-direction: row;
+        flex-wrap: wrap;
+        width: 100%;
+        margin-top: 20px;
+        gap: 5px;
+    }
+
+    .carousel-thumbnail {
+        width: 80px;
+        height: 80px;
     }
 }
