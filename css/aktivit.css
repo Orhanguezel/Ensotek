@@ -1,45 +1,91 @@
 /* Genel ayarlar */
 #Aktivit {
-  padding: 50px;
-    margin: 0 auto;
-    background-color: var(--background2-color);
-    text-align: center;
-    color: var(--text-color);
+  padding: 20px 10px; /* Daha küçük ekranlarda padding azaltıldı */
+  margin: 0 auto;
+  max-width: 1100px;
+  background-color: var(--background2-color);
+  text-align: center;
+  color: var(--text-color);
 }
 
+#Aktivit h2 {
+  text-align: start;
+  font-size: 1.2rem;
+}
+
+/* Radio butonlarını özelleştirme */
+.akt input[type="radio"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.akt input[type="radio"]:checked {
+  background-color: var(--primary-color); /* Radio butonunun içinin rengi */
+  border-color: var(--primary-color); /* Sınır rengini de aynı yapabilirsiniz */
+}
+
+/* Radio butonuna hover efekti */
+.akt input[type="radio"]:hover {
+  background-color: var(--highlight-hover-color); /* Hover sırasında farklı bir renk */
+}
+
+/* Eğer radio butonlarının label ile aynı hizada olmasını istiyorsanız: */
+.akt input[type="radio"] + label {
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+
 .akt {
-  max-width: 1200px;
   margin: 0 auto;
 }
 
 .akt ul {
   list-style-type: none;
   display: flex;
-  justify-content: space-between;
   flex-wrap: wrap;
   gap: 5px;
   border-radius: 5px;
   background-color: var(--primary-color);
+  padding: 10px;
 }
 
 .akt ul li {
   text-align: center;
   flex: 1 1 auto;
-  min-width: 120px;
+  margin: 5px 0;
 }
 
 .akt ul li label {
   cursor: pointer;
-  transition: color 0.3s ease;
+  transition: color 0.3s ease, background-color 0.3s ease;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
   display: inline-block;
   padding: 5px;
   font-size: var(--font-size-base);
   color: var(--text-color);
   border-radius: 5px;
-  margin: 0 5px;
+}
+
+.akt ul li label:hover {
+  color: var(--highlight-color);
+}
+
+/* Aktif label için stil */
+.akt ul li label.active-label {
+  background-color: var(--highlight-color); /* Aktif sekmenin arka plan rengi */
+  color: white; /* Aktif sekmenin yazı rengi */
+}
+
+.akt ul li label:focus {
+  outline: none;
 }
 
 .akt ul li label:hover {
@@ -80,12 +126,23 @@
 
 .image-text-wrapper h4 {
   font-size: 16px;
-    line-height: 1.5;
-    color: var(--text2-color);
-    text-align: left;
+  line-height: 1.5;
+  padding: 10px;
+  letter-spacing: 2px;
+  text-align: left;
+  color: var(--primary-color);
 }
 
+/* Tablet ve daha büyük ekranlar için */
 @media (min-width: 768px) {
+  .akt ul {
+    padding: 10px;
+  }
+
+  .akt ul li {
+    min-width: 100px;
+  }
+
   .image-text-wrapper {
     flex-direction: row;
     justify-content: space-between;
@@ -101,5 +158,34 @@
     width: 50%;
     padding-left: 20px;
     text-align: left;
+  }
+}
+
+/* Mobil görünüm için düzenlemeler */
+@media (max-width: 767px) {
+  .akt ul {
+    gap: 5px;
+  }
+
+  .akt ul li {
+      min-width: 60px;
+    
+  }
+
+  .image-text-wrapper {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .image-text-wrapper img {
+    width: 100%; /* Mobilde resimler tam genişlikte */
+    max-width: 100%;
+  }
+
+  .image-text-wrapper h4 {
+    width: 100%;
+    padding: 10px;
+    text-align: center; /* Mobilde ortalanmış metin */
   }
 }

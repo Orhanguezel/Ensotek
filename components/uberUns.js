@@ -3,7 +3,7 @@ export function loadUberUns() {
     uberUns.innerHTML = `
         <section id="Uber-uns">
             <h1>Über Ensotek</h1>
-            <h2>Wir sind stolz auf unsere Referenzen, die unsere Arbeit und unser Engagement für Qualität widerspiegeln. Unsere Projekte erstrecken sich über verschiedene Branchen, darunter Energie, Lebensmittel, Automobil, und viele mehr.</h2>
+            <h2>Wir sind stolz auf unsere Referenzen, die unsere Arbeit und unser Engagement für Qualität widerspiegeln.</h2>
             <div class="uber-uns-container">
                 <div class="uber-uns-content">
                     <h3>36 Jahre Erfahrung und Vertrauen</h3>

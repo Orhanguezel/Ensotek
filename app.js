@@ -1,5 +1,4 @@
 import { loadHeader } from './components/header.js';
-import { loadMainContent } from './components/mainContent.js';
 import { loadCarousel } from './components/carousel.js';
 import { loadAktivit } from './components/aktivit.js';
 import { loadUberUns } from './components/uberUns.js';
@@ -17,7 +16,6 @@ import { loadFooter } from './components/footer.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     loadHeader();
-    loadMainContent();
     loadCarousel();
     loadAktivit();
     loadUberUns();

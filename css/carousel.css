@@ -1,9 +1,8 @@
 
 /* Carousel ve informasyon bölümü */
 .carousel-container {
-    position: relative;
+    padding-top: 70px;
     width: 100%;
-    margin: 0 auto;
     display: flex;
     align-items: stretch !important; /* Bilgi ve slayt aynı yükseklikte olacak */
     justify-content: center;
@@ -19,7 +18,7 @@
     letter-spacing: 2px;
     width: 50%;
     background-color: var(--background3-color);
-    padding: 20px;
+    padding: 10px;
     transition: all 0.5s ease-in-out;
     opacity: 1;
 }
@@ -82,7 +81,7 @@
     transform: translateX(-50%);
     display: flex;
     justify-content: center;
-    z-index: 2000;
+    z-index: 200;
 }
 
 .radio-buttons input[type="radio"] {
@@ -91,8 +90,8 @@
 
 .radio-buttons label {
     display: inline-block;
-    width: 20px;
-    height: 20px;
+    width: 10px;
+    height: 10px;
     margin: 0 5px;
     border: 1px solid #ccc;
     border-radius: 50%;
@@ -180,7 +179,7 @@
     }
 
     .radio-buttons {
-        top: 50%; /* Butonların slaytın altına gelmesi için */
+        top: 70%; /* Butonların slaytın altına gelmesi için */
         left: 50%;
     }
     
@@ -188,6 +187,22 @@
         display: inline-block;
         width: 10px;
         height: 10px;
+    }
+
+}
+
+@media (max-width: 724px) {
+    .radio-buttons {
+        top: 63%; /* Butonların slaytın altına gelmesi için */
+        left: 50%;
+    }
+
+}
+
+@media (max-width: 576px) {
+    .radio-buttons {
+        top: 55%; /* Butonların slaytın altına gelmesi için */
+        left: 50%;
     }
 
 }
