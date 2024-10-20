@@ -1,15 +1,15 @@
 /* Geschichte Section Styling */
 #geschichte-section {
-    padding: 50px;
+    padding: 20px;
+    margin: 15px auto;
+    max-width: 1100px;
     background-color: var(--background2-color);
     text-align: center;
     color: var(--text-color);
 }
 
 #geschichte-section h1 {
-    font-size: 36px;
-    margin-bottom: 20px;
-    color: var(--primary-color);
+    margin-bottom: 20px;;
 }
 
 .geschichte-container {
@@ -26,7 +26,6 @@
 }
 
 .geschichte-text h4 {
-    font-size: 16px;
     line-height: 1.5;
     color: var(--text2-color);
     text-align: left;
@@ -37,7 +36,6 @@
 }
 
 .geschichte-image img {
-    border-radius: 10px;
     width: 100%;
     height: auto;
     object-fit: cover;

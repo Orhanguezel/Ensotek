@@ -5,10 +5,10 @@ export function loadReferenzen() {
   referenzenSection.innerHTML = `
         <section id="Referenzen">
             <h1>Referenzen</h1>
-            <h2>Wir sind stolz auf unsere Referenzen, die unsere Arbeit und unser Engagement für Qualität widerspiegeln. Unsere Projekte erstrecken sich über verschiedene Branchen, darunter Energie, Lebensmittel, Automobil, und viele mehr.</h2>
+            <h4>Wir sind stolz auf unsere Referenzen, die unsere Arbeit und unser Engagement für Qualität widerspiegeln. Unsere Projekte erstrecken sich über verschiedene Branchen, darunter Energie, Lebensmittel, Automobil, und viele mehr.</h4>
             <div class="refe">
                 <div class="button-container">
-                    <h4 class="category-heading">Branche</h4>
+                    <h3 class="category-heading">Branche</h3>
                     <div class="category-buttons">
                       <button class="custom-btn" onclick="showImages('Allgemein')">Allgemeine Referenzen</button>
                       <button class="custom-btn" onclick="showImages('metall')">Metall</button>

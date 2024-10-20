@@ -1,33 +1,31 @@
 /* Genel Stiller */
 #Kontakt {
-    padding: 50px;
-    background-color: var(--background-color);
-    text-align: center;
+    padding: 20px;
+    margin: 15px auto;
+    max-width: 1100px;
+    background-color: var(--background2-color);
+    text-align: center; 
 }
 
 #Kontakt h1 {
-    font-size: 36px;
-    color: var(--primary-color);
     margin-bottom: 20px;
 }
 
 #Kontakt h2 {
-    font-size: 18px;
     color: var(--secondary-color);
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 /* Grid Layout */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 20px;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 30px;
 }
 
 .grid-item {
     background-color: white;
     padding: 20px;
-    border-radius: 10px;
 }
 
 .border {
@@ -40,8 +38,14 @@
 }
 
 .contact-icon i {
-    font-size: 24px;
+    font-size: 2rem;
     color: var(--primary-color);
+}
+
+.contact-icon h5, .contact-icon h6 {
+    font-size: 1rem;
+    color: var(--primary-color);
+    text-align: start;
 }
 
 /* Form Alanı */
@@ -49,18 +53,122 @@
     display: flex;
     flex-direction: column;
     gap: 15px;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#form-item form .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#form-item form .form-group input,
+#form-item form .form-group textarea {
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #f9f9f9;
+}
+
+#form-item form .form-group input:focus,
+#form-item form .form-group textarea:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+#form-item form textarea {
+    resize: none;
+    height: 120px;
+}
+
+#form-item form button {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#form-item form button:hover {
+    background-color: var(--background3-color);
+}
+
+/* Form içindeki mesajlar */
+#form-item .loading,
+#form-item .error-message,
+#form-item .sent-message {
+    display: none;
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+#form-item .loading.active,
+#form-item .error-message.active,
+#form-item .sent-message.active {
+    display: block;
+    color: var(--text-color);
 }
 
 /* Google Maps iframe */
 iframe {
     width: 100%;
     border: none;
-    border-radius: 10px;
 }
 
 /* Mobil görünüm için düzenleme */
 @media (max-width: 768px) {
     .grid-container {
+        display: grid;
         grid-template-columns: 1fr;
+        grid-gap: 20px;
+    }
+
+    /* Grid item'ların sırası */
+    .grid-item {
+        order: 0;
+    }
+
+    /* İlk adres */
+    .grid-item:nth-child(1) {
+        order: 1;
+    }
+
+    /* İlk harita */
+    .grid-item:nth-child(4) {
+        order: 2;
+    }
+
+    /* İkinci adres */
+    .grid-item:nth-child(2) {
+        order: 3;
+    }
+
+    /* İkinci harita */
+    .grid-item:nth-child(5) {
+        order: 4;
+    }
+
+    /* Müşteri mesajı */
+    .grid-item:nth-child(3) {
+        order: 5;
+    }
+
+    /* İletişim formu */
+    .grid-item:nth-child(6) {
+        order: 6;
+    }
+
+    #form-item form {
+        padding: 15px;
+    }
+
+    #form-item form button {
+        width: 100%;
     }
 }

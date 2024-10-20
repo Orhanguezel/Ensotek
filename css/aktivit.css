@@ -1,7 +1,7 @@
 /* Genel ayarlar */
 #Aktivit {
-  padding: 20px 10px; /* Daha küçük ekranlarda padding azaltıldı */
-  margin: 0 auto;
+  padding: 20px;
+  margin: 15px auto;
   max-width: 1100px;
   background-color: var(--background2-color);
   text-align: center;
@@ -121,7 +121,6 @@
   max-width: 100%;
   height: auto;
   margin-top: 10px;
-  border-radius: 8px;
 }
 
 .image-text-wrapper h4 {
@@ -175,7 +174,6 @@
   .image-text-wrapper {
     flex-direction: column;
     align-items: center;
-    text-align: center;
   }
 
   .image-text-wrapper img {
@@ -186,6 +184,5 @@
   .image-text-wrapper h4 {
     width: 100%;
     padding: 10px;
-    text-align: center; /* Mobilde ortalanmış metin */
   }
 }
