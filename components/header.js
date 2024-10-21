@@ -10,7 +10,11 @@ export function loadHeader() {
                       <a href="#"><i class="fas fa-user"></i> Login</a> | 
                       <a href="#"><i class="fas fa-search"></i> Suche</a>
                   </div>
-                  <div class="kuhlturm-mobile-menu-button" id="menu-toggle"><i class="fas fa-bars"></i></div>
+                  <div class="kuhlturm-mobile-menu-button" id="menu-toggle">
+                      <span class="bar"></span>
+                      <span class="bar"></span>
+                      <span class="bar"></span>
+                  </div>
               </div>
               <nav class="kuhlturm-main-nav" id="main-nav">
                   <ul>
@@ -19,7 +23,7 @@ export function loadHeader() {
                           <a href="#" class="kuhlturm-nav-button" id="Unternehmen">
                               <i class="fas fa-briefcase"></i> Unternehmen
                           </a>
-                          <div class="kuhlturm-dropdown-content kuhlturm-show">
+                          <div class="kuhlturm-dropdown-content">
                               <div class="kuhlturm-dropdown-row">
                                   <!-- Leitbild und Geschäftsprinzipien -->
                                   <div class="kuhlturm-dropdown-column">
@@ -48,7 +52,7 @@ export function loadHeader() {
                           <a href="#" class="kuhlturm-nav-button" id="Kernenergie">
                               <i class="fas fa-atom"></i> Kernenergie
                           </a>
-                          <div class="kuhlturm-dropdown-content kuhlturm-show">
+                          <div class="kuhlturm-dropdown-content">
                               <div class="kuhlturm-dropdown-row">
                                   <!-- Stromproduktion -->
                                   <div class="kuhlturm-dropdown-column">
@@ -77,7 +81,7 @@ export function loadHeader() {
                           <a href="#" class="kuhlturm-nav-button" id="Besucherangebote">
                               <i class="fas fa-users"></i> Besucherangebote
                           </a>
-                          <div class="kuhlturm-dropdown-content kuhlturm-show">
+                          <div class="kuhlturm-dropdown-content">
                               <div class="kuhlturm-dropdown-row">
                                   <!-- Infozentrum -->
                                   <div class="kuhlturm-dropdown-column">
@@ -106,38 +110,55 @@ export function loadHeader() {
           </div>
       </header>
       `;
-  
+
     // FontAwesome ikonu kullanabilmek için kütüphaneyi dahil et
     const fontAwesomeLink = document.createElement("link");
     fontAwesomeLink.rel = "stylesheet";
     fontAwesomeLink.href =
       "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css";
     document.head.appendChild(fontAwesomeLink);
-  
-    // Dropdown menü açma/kapama
-    const dropdowns = document.querySelectorAll(".kuhlturm-dropdown");
+
+    // Dropdown menülerin başlangıçta kapalı olması için
+    const dropdowns = document.querySelectorAll(".kuhlturm-dropdown-content");
     dropdowns.forEach((dropdown) => {
-      const button = dropdown.querySelector(".kuhlturm-nav-button");
-      const content = dropdown.querySelector(".kuhlturm-dropdown-content");
-  
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        dropdowns.forEach((otherDropdown) => {
-          if (otherDropdown !== dropdown) {
-            otherDropdown
-              .querySelector(".kuhlturm-dropdown-content")
-              .classList.remove("kuhlturm-show");
-          }
-        });
-        content.classList.toggle("kuhlturm-show");
-      });
+      dropdown.classList.remove("kuhlturm-show"); // Başlangıçta kapalı olacak
     });
-  
-    // Mobil menü açma/kapatma
+
+    // Dropdown menü açma/kapama
+    const dropdownItems = document.querySelectorAll(".kuhlturm-dropdown");
+    dropdownItems.forEach((dropdown) => {
+        const button = dropdown.querySelector(".kuhlturm-nav-button");
+        const content = dropdown.querySelector(".kuhlturm-dropdown-content");
+
+        button.addEventListener("click", (event) => {
+            event.preventDefault();
+            dropdownItems.forEach((otherDropdown) => {
+                if (otherDropdown !== dropdown) {
+                    otherDropdown.querySelector(".kuhlturm-dropdown-content").classList.remove("kuhlturm-show");
+                }
+            });
+            content.classList.toggle("kuhlturm-show");
+        });
+    });
+
+    // Mobil menü açma/kapatma işlevselliği ve animasyonlar
     const menuToggle = document.getElementById("menu-toggle");
     const mainNav = document.getElementById("main-nav");
+    const bars = document.querySelectorAll('.bar');
+
     menuToggle.addEventListener("click", () => {
-      mainNav.classList.toggle("kuhlturm-mobile-visible");
+        mainNav.classList.toggle("kuhlturm-mobile-visible");
+        menuToggle.classList.toggle("open");
+
+        // Hamburger menünün çubuklarının animasyonu
+        bars.forEach((bar, index) => {
+            if (index === 0) {
+                bar.classList.toggle("rotate-down");
+            } else if (index === 1) {
+                bar.classList.toggle("hide");
+            } else if (index === 2) {
+                bar.classList.toggle("rotate-up");
+            }
+        });
     });
-  }
-  
+}
