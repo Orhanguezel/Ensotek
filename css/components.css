@@ -11,22 +11,24 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 40px;
-  height: 50px;
+  height: 70px;
   background-color: var(--background-color);
+  padding: 0 20px;
 }
 
 .kuhlturm-top-links {
   display: flex;
   gap: 20px;
   margin-right: 150px;
+  color:var(--primary-color);
 }
 
 .kuhlturm-header-top img {
   display: inline-block;
-  margin-left: 50px;
-  height: 50px;
+  padding-left: 10px;
+  height: 60px;
   width: auto;
+  
 }
 
 .kuhlturm-header-top img.kuhlturm-logo {
@@ -56,6 +58,7 @@
   padding-right: 20px;
   z-index: 100000;
   background-color: var(--background-color);
+
 }
 
 .kuhlturm-main-nav ul {
@@ -132,7 +135,6 @@
   width: 96%;
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
   z-index: 10;
-  border: 1px solid greenyellow;
 }
 
 /* Alt linklerin sütunlar halinde gelmesi için */
@@ -142,7 +144,6 @@
   flex-wrap: nowrap;
   width: 100%;
   padding: 20px 10px;
-  border: 1px solid red;
 }
 
 .kuhlturm-dropdown-column {
@@ -159,13 +160,11 @@
   margin-right: 30px; /* Daha fazla boşluk sağlamak için */
   font-weight: bold;
   padding: 20px 10px;
-  border: 1px solid blue;
 }
 
 .kuhlturm-dropdown-column ul {
   list-style: none;
   padding: 20px 0;
-  border: 1px solid yellow;
 }
 
 .kuhlturm-dropdown-column ul li {
@@ -203,12 +202,9 @@
 
 /* Mobil görünüm için hamburger menüsü */
 @media screen and (max-width: 768px) {
+
   .kuhlturm-top-links {
     display: none;
-  }
-
-  .kuhlturm-header-top {
-    padding: 10px 10px;
   }
 
   .kuhlturm-main-nav {
@@ -218,8 +214,9 @@
     z-index: 100;
     background-color: var(--text-color);
     position: fixed; /* Sabit konumlandır */
-    top: 50px; /* Sabit navbarın hemen altında */
+    top: 0; /* Sabit navbarın hemen altında */
     left: 0;
+
   }
 
   .kuhlturm-main-nav.kuhlturm-mobile-visible {
@@ -236,7 +233,7 @@
     padding: 20px;
     text-align: left;
     border-bottom: 1px solid var(--border-color);
-    border: 1px solid red;
+
   }
 
   /* Mobil dropdown içerikleri */
@@ -303,11 +300,13 @@
     background-color: var(--primary-color);
     border-radius: 10px;
     transition: all 0.3s ease;
+    
   }
 
   /* Hamburger Menü Açıldığında X İşaretine Dönüşmesi */
   .kuhlturm-mobile-menu-button.open .bar:nth-child(1) {
     transform: rotate(45deg) translate(5px, 5px);
+  
   }
 
   .kuhlturm-mobile-menu-button.open .bar:nth-child(2) {
@@ -325,10 +324,9 @@
     top: 224px; /* Sabit navbar altında */
     left: 0;
     background-color: white;
-    width: 100%;
+    width: 96%;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
     z-index: 10;
-    border: 1px solid red;
   }
 
   /* Dropdown gösterildiğinde */
@@ -342,7 +340,7 @@
     flex-direction: column;
     background-color: rgba(0, 0, 0, 0.9);
     position: fixed;
-    top: 50px; /* Sabit navbarın hemen altında */
+    top: 0; /* Sabit navbarın hemen altında */
     right: 0;
     width: 100%;
     height: 100vh;
