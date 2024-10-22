@@ -1,4 +1,3 @@
-İşte bu proje için örnek bir README dosyası içeriği:
 
 ---
 
@@ -154,4 +153,3 @@ This project is licensed under the MIT License.
 
 ---
 
-Bu README belgesinde, proje hakkında genel bilgiler, kurulum ve çalıştırma talimatları, projenin nasıl yapılandırıldığı ve geliştirme ipuçları yer alıyor. İhtiyaçlarınıza göre daha fazla bilgi ekleyebilirsiniz.
