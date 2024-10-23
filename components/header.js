@@ -4,7 +4,7 @@ export function loadHeader() {
       <header>
           <div class="kuhlturm-header">
               <div class="kuhlturm-header-top">
-                  <a href="#"> <img src="img/LOGO2/7.png" alt="KKL Logo" class="kuhlturm-logo"></a>
+                  <a href="#"> <img src="assets/img/LOGO2/7.png" alt="KKL Logo" class="kuhlturm-logo"></a>
                   <div class="kuhlturm-top-links">
                       <a href="#"><i class="fas fa-sitemap"></i> Sitemap</a> |
                       <a href="#"><i class="fas fa-user"></i> Login</a> | 

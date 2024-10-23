@@ -12,7 +12,7 @@ export function loadVision() {
                     <h4>Wir streben danach, unseren Kunden effiziente, kostengünstige und langlebige Wasserkühltürme anzubieten, die den Anforderungen der heutigen Industrie entsprechen. Mit kontinuierlicher Innovation wollen wir führend in der Branche bleiben.</h4>
                 </div>
                 <div class="vision-image">
-                    <img src="img/all/uber.jpg" alt="Vision and Mission" class="img-fluid rounded"> 
+                    <img src="assets/img/all/uber.jpg" alt="Vision and Mission" class="img-fluid rounded"> 
                 </div>
             </div>
         </section>

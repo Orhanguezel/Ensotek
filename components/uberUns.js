@@ -18,7 +18,7 @@ export function loadUberUns() {
                     <p>Mit der Eröffnung unserer Fabrik in Ankara Ende 2021 wurde Ensotek zum größten Kühlturm-Hersteller der Türkei.</p>
                 </div>
                 <div class="uber-uns-image">
-                    <img src="img/team/9.jpg" alt="Team" class="img-fluid rounded"> 
+                    <img src="assets/img/team/9.jpg" alt="Team" class="img-fluid rounded"> 
                 </div>
             </div>
         </section>
