@@ -1,9 +1,8 @@
-export const articles = [
+export const materials = [
     {
         title: "Wasserkühlturmmotor  Getriebe  Lüfter",
         id: "Wasserkühlturmmotor-Getriebe-Lüfter",
         content: `
-        <h1>Wasserkühlturmmotor - Getriebe - Lüfter</h1><br>
         <section>
             <p>An der Spitze des Turms (Deckteil) arbeitet der Elektromotor (oder Motor + Getriebeeinheit) mit Ventilator und Ventilatorstapel als Gruppe. Es übernimmt die wichtigste Verantwortung im Kühlturm. Es kann als das Herzstück des Kühlturms bezeichnet werden.</p>
             <p>Elektromotoren und Getriebe werden als vertikale Flanschausführung in V1-Position eingesetzt. Elektromotoren sind mit der Schutzart IP 56 gegen isolierte Hitze der Klasse F durch Staub, Öl und Feuchtigkeit geschützt.</p>
@@ -35,7 +34,6 @@ export const articles = [
         title: "Axialventilator (Lüfter) für Kühltürme",
         id: "Axialventilator(Lüfter)-für-Kühltürme",
         content: `
-        <h1>Axialventilator (Lüfter) für Kühltürme</h1><br>
         <section>
             <p>Es befindet sich im Lüfterschacht oben auf dem Turm. Seine Aufgabe besteht darin, die Luft durch den Turm zu leiten, was die Verdampfung als Hauptprinzip des Turms ermöglicht. Er nimmt die Luft bei äußeren Umgebungsbedingungen (Feuchtigkeit und Wärme) über die Jalousien auf, strömt durch die Kühlfüllungen und leitet sie vom Lüfterkamin weg, indem er sie in die Atmosphäre stößt.</p>
             <p>Lüfterflügel werden aus glasfaserverstärktem Polypropylen, FRP (glasfaserverstärktem Polyester), Aluminium-Pultrusionsprofil oder PP-Material (Polypropylen) hergestellt. Die Blattverbindungstische bestehen aus Aluminium-Pultrusionsprofilen oder kataphoretischem Kohlenstoffstahl. Wir verkaufen alle Typen von Kühlturmventilatoren.</p>
@@ -66,7 +64,6 @@ export const articles = [
         title: "Vibrationsschalter",
         id: "Vibrationsschalter",
         content: `
-        <h1>Vibrationsschalter</h1><br>
         <section>
             <p>Es befindet sich oben am Turm, in der Nähe des Lüfterstapels. Es schaltet den Elektromotor ab, indem es die Vibration in anormalen Betriebssituationen erkennt (Plattenbruch, gebrochener Plattenwinkel usw.). Es steuert den Motorkreislauf mithilfe von Quecksilber, Schalter oder Magnetkontakt. Sein Gehäuseteil besteht aus Aluminium.</p>
         </section>
@@ -92,7 +89,6 @@ export const articles = [
         title: "Drift Eliminator",
         id: "Drift-Eliminator",
         content: `
-        <h1>Drift-Eliminator</h1><br>
         <section>
             <p>Der Drift-Eliminator befindet sich zwischen der Plattform, auf der sich die Lüftergruppe befindet, und dem Wasserverteilungssystem im Inneren des Turms. Seine Aufgabe besteht darin, zu verhindern, dass Wasserpartikel, die im Wasserverteilungssystem aufgespalten werden, durch Abdriften mit der angesaugten Luft in die Atmosphäre geschleudert werden. Er wird im Kühlturm als modulare Kassetten montiert. Die Kassetten werden ohne Leerraum montiert und decken alle Turmabschnitte ab. Der Drift-Eliminator wird mit einem optimalen Design hergestellt, um eine hohe Abdriftbeseitigungsfähigkeit und einen geringen Druckabfall zu erzielen. Die Profile sind in regelmäßigen Abständen angeordnet und bestehen aus PP über fertige Zwischenelemente.</p>
         </section>
@@ -122,7 +118,6 @@ export const articles = [
         title: "Wasserverteilungssystem",
         id: "Wasserverteilungssystem",
         content: `
-        <h1>Wasserverteilungssystem</h1><br>
         <section>
             <p>Das Wasserverteilungssystem befindet sich zwischen dem Tropfenabscheider und der Turmfüllung im Turm. Es sorgt für die gleichmäßige Verteilung von heißem Wasser aus der Anlage auf Füllungen im Inneren des Turms. Wenn die Wassertemperatur weniger als 55 °C beträgt, besteht das Material des Hauptrohrs und des Bypass aus PVC; ist er höher, werden sie aus Polypropylen oder FRP (Glasfaserverstärkter Polyester) hergestellt.</p>
             <p>Hauptrohr und Bypass werden mit abgedichteter Verbindung hergestellt, sodass sie leicht befestigt und auseinandergezogen werden können. Sie werden hergestellt, ohne dass während der Wartungszeit Ausschneiden und Einfügen erforderlich sind.</p>
@@ -149,7 +144,6 @@ export const articles = [
         title: "Kühlturmdüse",
         id: "Kühlturmdüse",
         content: `
-        <h1>Kühlturmdüse</h1><br>
         <section>
             <p>Es besteht aus Polypropylen. Es ist so konzipiert, dass es zur Reinigung und Wartung leicht befestigt und auseinandergenommen werden kann. Es bietet die Möglichkeit, den Druck durch die Verwendung von Kegeln mit unterschiedlichem Durchmesser für variable Wasserströme einzustellen.</p>
             <p>Wir haben verschiedene Düsentypen für verschiedene Kühlturmmarken. Sie können die gewünschte Düse unter den Bildern auswählen.</p>
@@ -192,7 +186,6 @@ export const articles = [
         title: "Servicefenster",
         id: "Servicefenster",
         content: `
-        <h1>Servicefenster</h1><br>
         <section>
             <p>Das Servicefenster befindet sich an der Außenseite des Turms an der Seitenwand und ermöglicht so die Beobachtung des Wasserverteilungssystems und das einfache Befüllen.</p>
             <p>Es ermöglicht im Störungs- und Kontrollfall einen Blick ins Innere und dem Personal bei Wartungsarbeiten den Zugang zum Inneren.</p>
@@ -216,7 +209,6 @@ export const articles = [
         title: "Spritzring Kühlturmfüllung",
         id: "Spritzring-Kühlturmfüllung",
         content: `
-        <h1>Spritzring Kühlturmfüllung</h1><br>
         <section>
             <p>Es ist seit 25 Jahren der am meisten bevorzugte Fülltyp in Türmen. Es wird aus PP-Material (Polypropylen) im Spritzverfahren hergestellt. Es kann erfolgreich in Prozesswässern mit hoher Temperatur (ca. 100 °C) eingesetzt werden. Es wird in solchen Einrichtungen bevorzugt, in denen das Wasser sehr schmutzig, ölig, sandig und anfällig für Verkalkung ist, außerdem ist die Umgebung sehr staubig. Es kann zur Wiederverwendung gereinigt werden, die Wartungs- und Austauschkosten sind gering.</p>
         </section>
@@ -238,7 +230,6 @@ export const articles = [
         title: "Kühlturmfüllung in Folienform",
         id: "Kühlturmfüllung-in-Folienform",
         content: `
-        <h1>Kühlturmfüllung in Folienform</h1><br>
         <section>
             <p>Es bildet die Wärmeübertragungsfläche, die beim Wärmeaustausch von Wasser und Luft in Kühltürmen benötigt wird. PVC-Folio-Plaques werden unter Vakuum geformt. Es wird zu Ballen geformt, damit es später beklebt werden kann. Es wird in Prozesswässern mit niedriger Temperatur (maximal 55 °C) eingesetzt. Es wird in solchen Einrichtungen bevorzugt, in denen das Wasser sauber ist (frei von Staub, Schmutz und Kalk). Seine Leistung ist viel besser als bei anderen Fülltypen, da seine Wärmeaustauschfläche größer ist. Es wird in den Typen CF-12, CF-19, CF-30, CF-M und CF-O hergestellt. Füllungen vom Typ CF-30 werden erfolgreich in Kläranlagen, insbesondere in biologischen Kläranlagen, eingesetzt. Füllungen vom Typ CF-O werden in Querstromkühltürmen verwendet.</p>
             <table border="1" cellpadding="1" cellspacing="1" style="width:500px">
@@ -325,7 +316,6 @@ export const articles = [
         title: "Spritzgitter Kühlturmfüllung",
         id: "Spritzgitter-Kühlturmfüllung",
         content: `
-        <h1>Spritzgitter-Kühlturmfüllung</h1><br>
         <section>
             <p>Wird mit schmutzigem Wasser verwendet. Die am häufigsten genutzten Anlagen zum Füllen von Kühltürmen mit Spritzgittern sind die Tomatenmarkproduktion, Vakuumleitungen von Ölfabriken und Walzwerke.</p>
         </section>
@@ -347,7 +337,6 @@ export const articles = [
         title: "Raschig Ringe",
         id: "Raschig-Ringe",
         content: `
-        <h1>Raschig-Ringe</h1><br>
         <section>
             <p>Raschig-Ringe werden im Spritzgussverfahren aus PP-Material hergestellt. Sie werden in Wasserkühltürmen und Wäscheranlagen verwendet.</p>
             <p>In Kühltürmen dienen sie als Kühlfüllung. In Wäscheranlagen vergrößern sie die Kontaktfläche des Gases mit der zu reinigenden Flüssigkeit, entfernen Gerüche durch Waschen und Kondensieren des Gases und reinigen gefährliche Abfälle.</p>
@@ -403,7 +392,6 @@ export const articles = [
         title: "Lufteinlasslamellen",
         id: "Lufteinlasslamellen",
         content: `
-        <h1>Lufteinlasslamellen</h1><br>
         <section>
             <p>Es befindet sich am Körper, zwischen Kaltwasserbecken und Füllgrad, außerhalb des Turms. Seine Aufgabe besteht darin, die in den Turm eintretende Luft so auszurichten, dass sie sich gleichmäßig füllt, den Verlust von Wasser im Becken durch Spritzen verhindert und die Moosbildung reduziert, indem Sonnenstrahlen in bestimmten Mengen verhindert werden.</p>
             <p>Lamellenelemente werden aus PVC der 1. Klasse mit Traktionssystem hergestellt und haben eine spezielle Form, die minimalen Luftwiderstand bietet. Es werden Vorkehrungen getroffen, damit sie nicht vom Wind aufgewirbelt werden. Auf Wunsch können sie auch aus FRP-Material hergestellt werden. Sie können in allen Arten von Import- und lokalen Verpackungstürmen entworfen und verwendet werden.</p>
@@ -422,7 +410,6 @@ export const articles = [
         title: "FRP Pultrusionsprofil",
         id: "FRP-Pultrusionsprofil",
         content: `
-        <h1>FRP-Pultrusionsprofil</h1><br>
         <section>
             <p>Profile mit verschiedenen Querschnitten, die für den Turmbau erforderlich sind, werden aus glasfaserverstärktem Polyester (GFK) im Pultrusionsverfahren hergestellt. Im Pultrusionsverfahren hergestellte Profile werden grundsätzlich aus einer Kombination aus Fasern und Harz geformt. Aufgrund ihres hohen Faseranteils weisen sie eine sehr hohe Widerstandsfähigkeit und mechanische Werte auf. Sie müssen während ihrer Nutzungsdauer weder gestrichen noch gewartet werden. Sie werden durch Chemikalien nicht beeinträchtigt.</p>
         </section>
@@ -448,7 +435,6 @@ export const articles = [
         title: "Wasserkühlturmpumpe",
         id: "Wasserkühlturmpumpe",
         content: `
-        <h1>Wasserkühlturmpumpe</h1><br>
         <section>
             <p>Die Wasserkühlturmpumpe ist ein wesentlicher Bestandteil des Kühlturmsystems. Sie sorgt für die Zirkulation des Wassers zwischen dem Kühlturm und der Anlage. Diese Pumpen sind speziell für den Betrieb in rauen Umgebungen konzipiert und bieten eine hohe Effizienz und Zuverlässigkeit.</p>
         </section>
@@ -466,7 +452,6 @@ export const articles = [
         title: "Wasserkühltürme FRP Lüfterblätter",
         id: "Wasserkühltürme FRP-Lüfterblätter",
         content: `
-        <h1>Wasserkühltürme FRP-Lüfterblätter</h1><br>
         <section>
             <p>Die FRP-Lüfterblätter für Wasserkühltürme sind für ihre hohe Effizienz und Langlebigkeit bekannt. Sie bestehen aus faserverstärktem Kunststoff (FRP), der eine hervorragende Beständigkeit gegen Korrosion und chemische Einflüsse bietet. Diese Lüfterblätter sind leicht, robust und bieten eine hohe Leistung bei geringem Energieverbrauch.</p>
         </section>
@@ -496,7 +481,6 @@ export const articles = [
         title: "Wasserkühlturm-FRP Lüfterstapel",
         id: "Wasserkühlturm-FRP-Lüfterstapel",
         content: `
-        <h1>Wasserkühlturm-FRP-Lüfterstapel</h1><br>
         <section>
             <p>Der FRP-Lüfterstapel für Wasserkühltürme besteht aus glasfaserverstärktem Polyester (FRP) und bietet hervorragende Beständigkeit gegen Korrosion und chemische Einflüsse. Diese Lüfterstapel sind robust, langlebig und bieten eine hohe Leistung bei geringem Energieverbrauch.</p>
         </section>
@@ -526,7 +510,6 @@ export const articles = [
         title: "Plattenwärmetauscher",
         id: "Plattenwärmetauscher",
         content: `
-        <h1>Plattenwärmetauscher</h1><br>
         <section>
             <p>Plattenwärmetauscher werden zur effizienten Wärmeübertragung zwischen zwei Flüssigkeiten verwendet. Sie bestehen aus einer Reihe von gewellten Platten, die eine große Oberfläche für den Wärmeaustausch bieten.</p>
         </section>

@@ -9,61 +9,57 @@
     <link rel="stylesheet" href="css/root.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/materialien.css"> <!-- Materialien için özel CSS -->
-    <link rel="stylesheet" href="css/footer.css"> <!-- Footer için özel CSS -->
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/footer.css">
     
     <!-- Font Awesome İkonları -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
-<body>
+<body data-page-type="materials">
     <!-- Header Component -->
     <div id="header"></div>
 
     <!-- Materialien Section -->
     <section id="Materialien">
-        <div class="container">
-            <div class="sidebar">
-                <h2>Materialien</h2>
-                <ul id="article-titles">
-                    <!-- Materyal başlıkları dinamik olarak yüklenecek -->
-                </ul>
-            </div>
-    
-            <div class="content-area">
-                <div class="content" id="article-content">
-                    <!-- Zurück Düğmesi Başta -->
+            <div class="container">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <h2>Produkte</h2>
+                    <ul id="item-titles">
+                        <!-- Ürün başlıkları dinamik olarak eklenecek -->
+                    </ul>
+                </div>
+        
+                <!-- Content Area -->
+                <div class="content-area">
+                    <!-- Sabit mesaj -->
+                    <div id="static-message">
+                        <i class="fas fa-info-circle"></i> Wählen Sie ein Element aus dem Menü, um mehr zu erfahren.
+                    </div>
                     <button id="back-button-top" class="hidden" onclick="showMainPage()">Zurück</button>
-
-                    
-                    <p id="article-title">
-                        <i class="fas fa-info-circle"></i> Wählen Sie ein Material aus dem Menü, um mehr zu erfahren.
-                    </p><br>
-
-                    <div id="article-body">
-                        <!-- Materyal içeriği burada yüklenecek -->
-                    </div>
-
+        
+                    <!-- Ürün Başlığı -->
+                    <h2 id="item-title"></h2>
+        
+                    <!-- Ürün İçeriği -->
+                    <div id="item-content"></div>
+        
                     <!-- Ürün Resim Galerisi -->
-                    <div class="product-gallery" id="product-gallery">
-                        <!-- Resimler dinamik olarak eklenecek -->
-                    </div>
-
-                    <!-- Zurück Düğmesi Sonda -->
+                    <div class="product-gallery" id="gallery"></div>
+        
+                    <!-- Geri Dönme Düğmesi -->
                     <button id="back-button-bottom" class="hidden" onclick="showMainPage()">Zurück</button>
-
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
     
     <!-- Footer Component -->
     <div id="footer"></div>
 
     <!-- JavaScript Dosyaları -->
     <script src="app.js" type="module"></script>
-    <script src="components/materialien.js" type="module"></script>
+    <script src="components/scripts.js"></script>
 
 </body>
 </html>
-
