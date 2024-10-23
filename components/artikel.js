@@ -1,27 +1,11 @@
-export function loadArtikel() {
-    const articles = [
-        {
-            title: "Was ist eine Wasserkühlanlage?",
-            id: "Was-ist-eine-Wasserkühlanlage",
-            content: `
-            <h1>Was ist ein Kühlturm?</h1>
-            <p>Ein Kühlturm für Wasser ist eine Wärmeeinheit...</p>
-            `
-        },
-        {
-            title: "Eigenschaften der Ensotek Kühltürme",
-            id: "Eigenschaften-der-Ensotek-Kühltürme",
-            content: `
-            <h1>Eigenschaften der Ensotek Kühltürme</h1>
-            <p>Unsere Kühltürme haben viele einzigartige Merkmale...</p>
-            `
-        }
-    ];
+import { articles } from './articles.js';
 
+export function loadArtikel() {
     const articleTitles = document.getElementById('article-titles');
     const articleTitle = document.getElementById('article-title');
     const articleBody = document.getElementById('article-body');
 
+    // Makale başlıklarını yükle
     articles.forEach((article, index) => {
         const listItem = document.createElement('li');
         const link = document.createElement('a');
@@ -34,13 +18,20 @@ export function loadArtikel() {
         articleTitles.appendChild(listItem);
     });
 
+    // Varsayılan olarak ilk makaleyi göster
+    if (articles.length > 0) {
+        showArticle(articles[0]);
+    }
+
+    // Makale gösterim fonksiyonu
     function showArticle(article) {
         articleTitle.textContent = article.title;
         articleBody.innerHTML = article.content;
     }
 }
 
-// Artikel component'i yükleyelim
+// DOM yüklendiğinde çalıştır
 document.addEventListener('DOMContentLoaded', () => {
     loadArtikel();
 });
+
