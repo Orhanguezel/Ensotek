@@ -8,7 +8,7 @@ export function loadTeam() {
                   <div class="team-member">
                       <div class="team-top">
                           <div class="team-img">
-                              <img src="img/team/1.jpeg" alt="İbrahim YAĞAR" class="img-fluid">
+                              <img src="assets/img/team/1.jpeg" alt="İbrahim YAĞAR" class="img-fluid">
                           </div>
                           <div class="team-info">
                               <h3>İbrahim YAĞAR</h3>
@@ -27,7 +27,7 @@ export function loadTeam() {
                   <div class="team-member">
                       <div class="team-top">
                           <div class="team-img">
-                              <img src="img/team/2.jpeg" alt="Hamdi YAĞAR" class="img-fluid">
+                              <img src="assets/img/team/2.jpeg" alt="Hamdi YAĞAR" class="img-fluid">
                           </div>
                           <div class="team-info">
                               <h3>Hamdi YAĞAR</h3>
@@ -46,7 +46,7 @@ export function loadTeam() {
                   <div class="team-member">
                       <div class="team-top">
                           <div class="team-img">
-                              <img src="img/team/3.jpeg" alt="Ahmet Gökhan YAĞAR" class="img-fluid">
+                              <img src="assets/img/team/3.jpeg" alt="Ahmet Gökhan YAĞAR" class="img-fluid">
                           </div>
                           <div class="team-info">
                               <h3>Ahmet Gökhan YAĞAR</h3>
@@ -64,7 +64,7 @@ export function loadTeam() {
                   <div class="team-member">
                       <div class="team-top">
                           <div class="team-img">
-                              <img src="img/team/5.jpeg" alt="Can Zemheri" class="img-fluid">
+                              <img src="assets/img/team/5.jpeg" alt="Can Zemheri" class="img-fluid">
                           </div>
                           <div class="team-info">
                               <h3>Can Zemheri</h3>

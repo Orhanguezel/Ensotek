@@ -11,7 +11,6 @@ import { loadZertifikate } from './components/zertifikate.js'; // Yeni Zertifika
 import { loadReferenzen } from './components/referenzen.js';
 import { loadGalerie } from './components/galerie.js'; // Yeni Galerie Component
 import { loadKontakt } from './components/kontakt.js';
-import { loadNews } from './components/news.js'; // Haberler için doğru olan
 import { loadFooter } from './components/footer.js'; // Footer için doğru olan
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -27,5 +26,4 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGalerie(); // Yeni Galerie Component
     loadKontakt();
     loadFooter(); // Footer doğru tanımlama
-    loadNews(); // Haberler doğru tanımlama
 });

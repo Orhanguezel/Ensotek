@@ -5,7 +5,7 @@ export function loadKontakt() {
             <h1>Kontaktieren Sie uns</h1>
             <div class="logo">
                 <div class="logo3">
-                    <img src="img/LOGO2/7.png" alt="logo">
+                    <img src="assets/img/LOGO2/7.png" alt="logo">
                 </div>
             </div>
             <h2>Sie können uns jederzeit kontaktieren. Wir sind für Sie da.</h2>

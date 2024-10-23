@@ -11,13 +11,13 @@ export function loadCarousel() {
             <!-- Carousel bölümü -->
             <div class='owl-carousel' id='owlCarousel'>
                 <div class='slide' data-title="Normalbetrieb" data-text="Mit Jahrgang 1984 ist das KKW Leibstadt das jüngste und leistungsstärkste Kernkraftwerk der Schweiz.">
-                    <img class='owl-item-bg' src='img/slayt/1.png' alt='Bild 1'>
+                    <img class='owl-item-bg' src='assets/img/slayt/1.png' alt='Bild 1'>
                 </div>
                 <div class='slide' data-title="Sicherheit" data-text="Die Sicherheit unserer Anlagen hat höchste Priorität. Ständige Überwachung und Wartung garantieren einen sicheren Betrieb.">
-                    <img class='owl-item-bg' src='img/slayt/2.png' alt='Bild 2'>
+                    <img class='owl-item-bg' src='assets/img/slayt/2.png' alt='Bild 2'>
                 </div>
                 <div class='slide' data-title="Effizienz" data-text="Unsere fortschrittlichen Technologien ermöglichen eine hohe Energieeffizienz und tragen zur Energieversorgung der Zukunft bei.">
-                    <img class='owl-item-bg' src='img/slayt/3.png' alt='Bild 3'>
+                    <img class='owl-item-bg' src='assets/img/slayt/3.png' alt='Bild 3'>
                 </div>
             </div>
 

@@ -98,7 +98,9 @@
   color: var(--text3-color);
 }
 
-.content-area input[type="text"], .content-area input[type="email"], .content-area input[type="number"], .content-area textarea {
+.content-area input[type="text"], 
+.content-area input[type="number"], 
+.content-area textarea {
   width: 100%;
   padding: 10px;
   margin-bottom: 20px;

@@ -8,7 +8,7 @@ export function loadGeschichte() {
                     <h4>Ensotek Su Soğutma Kuleleri A.Ş. hat eine tiefe Expertise und Innovationsgeschichte, die bis ins Jahr 1986 zurückreicht. Mit stetigem Wachstum und Innovationskraft hat Ensotek die Kühlturmindustrie nachhaltig geprägt und ist zu einem vertrauenswürdigen Partner für zahlreiche Industrien geworden.</h4>
                 </div>
                 <div class="geschichte-image">
-                    <img src="img/all/cover_1.jpg" alt="Unsere Geschichte" class="img-fluid rounded"> <!-- Görsel -->
+                    <img src="assets/img/all/cover_1.jpg" alt="Unsere Geschichte" class="img-fluid rounded"> <!-- Görsel -->
                 </div>
             </div>
         </section>

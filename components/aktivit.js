@@ -48,7 +48,7 @@ export function loadAktivit() {
             <section class="content-section active">
               <h2><i class="fas fa-industry"></i> Produktion:</h2>
               <div class="image-text-wrapper">
-                <img src="img/aktiv/prod.jpg" alt="Produktion" class="img">
+                <img src="assets/img/aktiv/prod.jpg" alt="Produktion" class="img">
                 <h4>Ensotek ist auf die Herstellung industrieller Wasser-Kühltürme spezialisiert. Unser Produktionsprozess umfasst die Herstellung von offenen und geschlossenen Kühltürmen aus FRP (Glasfaserverstärktem Polyester).</h4>
               </div>
             </section>
@@ -56,7 +56,7 @@ export function loadAktivit() {
             <section class="content-section">
               <h2><i class="fas fa-tools"></i> Instandhaltung&Reparatur:</h2>
               <div class="image-text-wrapper">
-                <img src="img/aktiv/reparature.jpg" alt="Instandhaltung&Reparatur" class="img">
+                <img src="assets/img/aktiv/reparature.jpg" alt="Instandhaltung&Reparatur" class="img">
                 <h4>Wir bieten regelmäßige Wartungs- und Reparaturdienste an, um die Effizienz vorhandener Kühltürme zu gewährleisten.</h4>
               </div>
             </section>
@@ -64,7 +64,7 @@ export function loadAktivit() {
             <section class="content-section">
               <h2><i class="fas fa-sync-alt"></i> Modernisierung:</h2>
               <div class="image-text-wrapper">
-                <img src="img/aktiv/modern.jpg" alt="Modernisierung" class="img">
+                <img src="assets/img/aktiv/modern.jpg" alt="Modernisierung" class="img">
                 <h4>Ensotek bietet Dienstleistungen zur Modernisierung alter Kühltürme an, um deren Leistung zu verbessern.</h4>
               </div>
             </section>
@@ -72,7 +72,7 @@ export function loadAktivit() {
             <section class="content-section">
               <h2><i class="fas fa-cogs"></i> Ersatzteile&Komponenten:</h2>
               <div class="image-text-wrapper">
-                <img src="img/aktiv/komponent.jpg" alt="Ersatzteile&Komponenten" class="img">
+                <img src="assets/img/aktiv/komponent.jpg" alt="Ersatzteile&Komponenten" class="img">
                 <h4>Wir bieten ein breites Sortiment an Ersatzteilen und Komponenten, um den reibungslosen Betrieb von Kühltürmen sicherzustellen.</h4>
               </div>
             </section>
@@ -80,7 +80,7 @@ export function loadAktivit() {
             <section class="content-section">
               <h2><i class="fas fa-project-diagram"></i> Anwendungen&Referenzen:</h2>
               <div class="image-text-wrapper">
-                <img src="img/all/uber.jpg" alt="Anwendungen&Referenzen" class="img">
+                <img src="/assets/img/all/uber.jpg" alt="Anwendungen&Referenzen" class="img">
                 <h4>Ensotek verfügt über eine umfangreiche Referenzliste in verschiedenen industriellen und kommerziellen Anwendungsbereichen.</h4>
               </div>
             </section>
@@ -88,7 +88,7 @@ export function loadAktivit() {
             <section class="content-section">
               <h2><i class="fas fa-user-cog"></i> Ingenieurunterstützung:</h2>
               <div class="image-text-wrapper">
-                <img src="img/all/ingenieur.jpg" alt="Ingenieurunterstützung" class="img">
+                <img src="assets/img/all/ingenieur.jpg" alt="Ingenieurunterstützung" class="img">
                 <h4>Unser Ingenieurteam bietet spezialisierte Unterstützung, um sicherzustellen, dass Kühltürme effizient arbeiten.</h4>
               </div>
             </section>
