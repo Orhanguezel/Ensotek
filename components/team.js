@@ -78,9 +78,12 @@ export function loadTeam() {
                           <h4>Can Zemheri ist verantwortlich für die internationalen Handelsprozesse und spielt eine Schlüsselrolle bei der Entwicklung des globalen Handelsnetzwerks von Ensotek.</h4>
                       </div>
                   </div>
-  
               </div>
           </section>
       `;
-  }
-  
+}
+
+// Sayfa yüklendiğinde fonksiyonu çağır
+document.addEventListener("DOMContentLoaded", function() {
+  loadTeam();
+});
