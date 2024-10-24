@@ -35,6 +35,8 @@
   text-decoration: none;
   color: var(--text3-color);
   font-weight: bold;
+  line-height: 1.5;
+  letter-spacing: 1.5px;
   padding: 10px;
   display: block;
   transition: all 0.3s ease; /* Hover geçişi için */
@@ -58,7 +60,8 @@
 
 .content-area .text {
   font-size: 1.1rem;
-  line-height: 1.8;
+  line-height: 1.5;
+  letter-spacing: 1.5px;
 }
 
 .content-area h1,
@@ -75,6 +78,8 @@
 .content-area ol, .content-area ul {
   list-style: decimal inside; /* Numaralı liste için içeride numaralandırma */
   margin-bottom: 20px;
+  line-height: 1.5;
+  letter-spacing: 1.5px;
   padding-left: 15px; /* Liste elemanlarına biraz iç boşluk ekler */
 }
 

@@ -16,3 +16,9 @@ export function loadZertifikate() {
         </section>
     `;
 }
+
+// Sayfa yüklendiğinde fonksiyonu çağır
+document.addEventListener("DOMContentLoaded", function() {
+  loadZertifikate();
+});
+
