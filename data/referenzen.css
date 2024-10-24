@@ -1,9 +1,9 @@
 #Referenzen {
-  padding: 70px 20px;
-  text-align: center;
-  background-color: var(--background2-color);
-  margin: 0 auto;
+  padding: 20px;
+  margin: 15px auto;
   max-width: 1100px;
+  background-color: var(--background2-color);
+  text-align: center;
 }
 
 #Referenzen h1 {
@@ -67,29 +67,29 @@
   margin-top: 20px;
 }
 
-.image-grid img {
-  max-width: 150px;
-  height: auto;
-  border-radius: 10px;
+.custom-img {
+  max-width: 200px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease;
 }
 
-.image-grid img:hover {
-  transform: scale(1.05); /* Hover efekti */
+.custom-img:hover {
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
-/* Mobil uyumluluk */
+/* Responsive Düzenlemeler */
 @media (max-width: 768px) {
-  #Referenzen {
-    padding: 30px 10px;
+  .custom-btn {
+    margin: 5px 0;
   }
-  .image-grid {
-    gap: 5px;
-    margin-top: 20px;
-  }
-  
-  .image-grid img {
+
+  .custom-img {
     max-width: 100px;
+  }
+
+  .custom-btn {
+    padding: 5px 5px;
+    font-size: 0.8rem;
   }
 }
