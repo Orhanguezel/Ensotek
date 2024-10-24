@@ -1,7 +1,9 @@
-import { sectorImages } from "./referansImg.js"; // Resim veritabanını içe aktar
+import { sectorImages } from "../data/referansImg.js"; // Resim veritabanını içe aktar
 
 export function loadReferenzen() {
   const referenzenSection = document.getElementById("Referenzen");
+
+  // Referans sayfasının dinamik içeriğini oluşturuyoruz
   referenzenSection.innerHTML = `
         <section id="Referenzen">
             <h1>Referenzen</h1>
@@ -10,19 +12,19 @@ export function loadReferenzen() {
                 <div class="button-container">
                     <h3 class="category-heading">Branche</h3>
                     <div class="category-buttons">
-                      <button class="custom-btn" onclick="showImages('Allgemein')">Allgemeine Referenzen</button>
-                      <button class="custom-btn" onclick="showImages('metall')">Metall</button>
-                      <button class="custom-btn" onclick="showImages('kunst')">Kunststoff</button>
-                      <button class="custom-btn" onclick="showImages('essen')">Lebensmittel-Öl</button>
-                      <button class="custom-btn" onclick="showImages('zement')">Zement Bergbau</button>
-                      <button class="custom-btn" onclick="showImages('tekstil')">Textil</button>
-                      <button class="custom-btn" onclick="showImages('energie')">Energie</button>
-                      <button class="custom-btn" onclick="showImages('chemie')">Chemische</button>
-                      <button class="custom-btn" onclick="showImages('einkaufs')">Einkaufszentrum, Geschäftsgebäude, Hotel</button>
+                      <button class="custom-btn" onclick="showImages('Allgemein')">Allgemeine</button>
+                      <button class="custom-btn" onclick="showImages('maschinenbau')">Ingenieurwesen</button>
                       <button class="custom-btn" onclick="showImages('Automobil')">Automobil</button>
+                      <button class="custom-btn" onclick="showImages('energie')">Energie</button>
+                      <button class="custom-btn" onclick="showImages('essen')">Lebensmittel-Öl</button>
+                      <button class="custom-btn" onclick="showImages('kunst')">Kunststoff</button>
                       <button class="custom-btn" onclick="showImages('aliminum')">Aluminium, Drahtziehen</button>
                       <button class="custom-btn" onclick="showImages('verpact')">Verpackung, Papier, Isolierung</button>
-                      <button class="custom-btn" onclick="showImages('maschinenbau')">Ingenieurwesen</button>
+                      <button class="custom-btn" onclick="showImages('metall')">Metall</button>
+                      <button class="custom-btn" onclick="showImages('chemie')">Chemische</button>  
+                      <button class="custom-btn" onclick="showImages('einkaufs')">Einkaufszentrum, Geschäftsgebäude, Hotel</button>
+                      <button class="custom-btn" onclick="showImages('tekstil')">Textil</button>
+                      <button class="custom-btn" onclick="showImages('zement')">Zement Bergbau</button>
                     </div>
                 </div>
                 <div class="image-grid" id="imageContainer">
@@ -38,6 +40,7 @@ export function loadReferenzen() {
     const imageContainer = document.getElementById("imageContainer");
     imageContainer.innerHTML = ""; // Eski içeriği temizle
 
+    // Eğer seçilen kategoriye ait görseller varsa
     if (images.length) {
       images.forEach((imgData) => {
         const imgElement = document.createElement("img");
@@ -51,6 +54,11 @@ export function loadReferenzen() {
     }
   };
 
-  // Varsayılan olarak bir kategori (örneğin 'aliminum') seçilebilir:
+  // Sayfa ilk yüklendiğinde varsayılan olarak "aliminum" kategorisi gösterilecek
   showImages("aliminum");
 }
+
+// Sayfa yüklendiğinde fonksiyonu çağır
+document.addEventListener("DOMContentLoaded", function () {
+  loadReferenzen();
+});

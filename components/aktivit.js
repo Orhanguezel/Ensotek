@@ -80,7 +80,7 @@ export function loadAktivit() {
             <section class="content-section">
               <h2><i class="fas fa-project-diagram"></i> Anwendungen&Referenzen:</h2>
               <div class="image-text-wrapper">
-                <img src="/assets/img/all/uber.jpg" alt="Anwendungen&Referenzen" class="img">
+                <img src="assets/img/all/uber.jpg" alt="Anwendungen&Referenzen" class="img">
                 <h4>Ensotek verfügt über eine umfangreiche Referenzliste in verschiedenen industriellen und kommerziellen Anwendungsbereichen.</h4>
               </div>
             </section>
