@@ -117,6 +117,10 @@
 
 /* Mobil görünüm için düzenleme */
 @media (max-width: 768px) {
+
+    #Galerie {
+        padding: 10px;
+    }
     #Galerie h1 {
         font-size: 28px;
     }

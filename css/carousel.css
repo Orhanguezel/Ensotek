@@ -1,6 +1,8 @@
 
 /* Carousel ve informasyon bölümü */
 .carousel-container {
+    padding: 0;
+    margin: 0;
     padding-top: 70px;
     width: 100%;
     display: flex;
