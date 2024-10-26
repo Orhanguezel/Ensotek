@@ -52,21 +52,21 @@
 #form-item form {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     background-color: white;
-    padding: 20px;
+    padding: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 #form-item form .form-group {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 5px;
 }
 
 #form-item form .form-group input,
 #form-item form .form-group textarea {
-    padding: 10px;
+    padding: 5px;
     border: 1px solid var(--border-color);
     font-size: 1rem;
     transition: all 0.3s ease;
@@ -82,7 +82,7 @@
 
 #form-item form textarea {
     resize: none;
-    height: 120px;
+    height: 110px;
 }
 
 #form-item form button {

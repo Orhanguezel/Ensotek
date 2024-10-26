@@ -6,26 +6,19 @@ export function loadHeader() {
   
     // Sayfaya göre farklı linkler tanımlayın
     const linkPrefix = currentPage === "index.html" ? "" : "index.html";
-    const artikelPrefix = currentPage === "artikel.html" ? "" : "artikel.html";
-    const produktePrefix = currentPage === "produkte.html" ? "" : "produkte.html";
-    const referansPrefix = currentPage === "referans.html" ? "" : "referans.html";
-    const angebotPrefix = currentPage === "angebot.html" ? "" : "angebot.html";
-    const materialienPrefix = currentPage === "materialien.html" ? "" : "materialien.html";
-    const newsPrefix = currentPage === "news.html" ? "" : "news.html";
-    const unserTeamPrefix = currentPage === "unserTeam.html" ? "" : "unserTeam.html";
-    const zertifikatePrefix = currentPage === "zertifikate.html" ? "" : "zertifikate.html";
+
   
     header.innerHTML = `
         <header>
           <div class="kuhlturm-header">
               <div class="kuhlturm-header-top">
-                  <a href="${linkPrefix}index.html">
+                  <a href="index.html">
                       <img src="assets/img/LOGO2/7.png" alt="KKL Logo" class="kuhlturm-logo">
                   </a>
                   <div class="kuhlturm-top-links">
-                      <a href="${linkPrefix}sitemap.html"><i class="fas fa-sitemap"></i> Sitemap</a> |
-                      <a href="${linkPrefix}login.html"><i class="fas fa-user"></i> Login</a> |
-                      <a href="${linkPrefix}search.html"><i class="fas fa-search"></i> Suche</a>
+                      <a href="sitemap.html"><i class="fas fa-sitemap"></i> Sitemap</a> |
+                      <a href="login.html"><i class="fas fa-user"></i> Login</a> |
+                      <a href="search.html"><i class="fas fa-search"></i> Suche</a>
                   </div>
                   <div class="kuhlturm-mobile-menu-button" id="menu-toggle">
                       <span class="bar"></span>
@@ -57,7 +50,7 @@ export function loadHeader() {
                                           <li><a href="" class="upper-level">Organisation</a>
                                               <ul>
                                                   <li><a href="${linkPrefix}#Aktivit">Unsere Aktivitäten</a></li>
-                                                  <li><a href="unser-team.html">Unser Team</a></li>
+                                                  <li><a href="unserTeam.html">Unser Team</a></li>
                                                   <li><a href="${linkPrefix}#geschichte">Unsere Geschichte</a></li>
                                               </ul>
                                           </li>
