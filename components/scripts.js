@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         // Sayfa türüne göre ilgili veri dosyasını dinamik olarak import et
         if (pageType === 'articles') {
-            data = await import('../data/articles-data.js').then(module => module.articles);  // Doğru dosya buradan çekiliyor
+            data = await import('../data/articles-data.js').then(module => module.articles);
         } else if (pageType === 'materials') {
             data = await import('../data/materials-data.js').then(module => module.materials);
         } else if (pageType === 'products') {
@@ -31,19 +31,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             staticMessage.style.display = 'block'; // Sabit mesajı göster
         }
 
-        // Fonksiyonu dışarıya aç
-        window.showMainPage = showMainPage;
-
         // Başlıkları sol menüye ve galeriye ekle
         data.forEach((item, index) => {
+            // Başlıklar için URL dostu hash oluştur
+            const hashId = item.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+
             // Sol menüdeki başlıklar
             const listItem = document.createElement('li');
             const link = document.createElement('a');
-            link.href = '#';
+            link.href = `#${hashId}`;
             link.textContent = `${index + 1}. ${item.title}`;
-            link.addEventListener('click', () => {
-                showItem(item); // Başlığa tıklanınca ilgili içerik göster
-            });
             listItem.appendChild(link);
             itemTitles.appendChild(listItem);
 
@@ -65,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 caption.textContent = item.title;
 
                 image.addEventListener('click', () => {
-                    showItem(item); // Resme tıklayınca ilgili içerik göster
+                    window.location.hash = `#${hashId}`; // Hash'i güncelle
                 });
 
                 galleryDiv.appendChild(image);
@@ -76,8 +73,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // İçeriği göster
         function showItem(item) {
-            const itemContentDiv = document.getElementById('item-content');
-            itemContentDiv.innerHTML = `<h2>${item.title}</h2>` + item.content; // Ürün başlığı ve içerik
+            itemContent.innerHTML = `<h2>${item.title}</h2>` + item.content; // Ürün başlığı ve içerik
 
             // Galeri görünümünü kapat
             gallery.style.display = 'none';
@@ -85,13 +81,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Geri düğmelerini göster
             backButtonTop.classList.remove('hidden');
             backButtonBottom.classList.remove('hidden');
-
-            // Sabit mesaj her zaman görünür olacak
-            staticMessage.style.display = 'block'; // Sabit mesajı saklamıyoruz, görünür bırakıyoruz
         }
 
-        // Ana sayfa ilk açılışta görünsün
-        showMainPage();
+        // Hash değişimini dinleyerek ilgili içeriği gösterecek
+        function handleHashChange() {
+            const hash = window.location.hash.slice(1); // "#" işaretini kaldırarak al
+            const selectedItem = data.find(item => item.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') === hash);
+            if (selectedItem) {
+                showItem(selectedItem);
+            } else {
+                showMainPage(); // Geçersiz hash varsa ana sayfaya dön
+            }
+        }
+
+        // Hash değişikliklerini dinle
+        window.addEventListener('hashchange', handleHashChange);
+
+        // Sayfa yüklendiğinde mevcut hash varsa ilgili içeriği göster
+        handleHashChange();
 
     } catch (error) {
         console.error("Veri yükleme sırasında bir hata oluştu: ", error);
