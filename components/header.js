@@ -3,11 +3,10 @@ export function loadHeader() {
   
     // Şu anki sayfanın adını belirleyin
     const currentPage = window.location.pathname.split("/").pop();
-  
+    
     // Sayfaya göre farklı linkler tanımlayın
     const linkPrefix = currentPage === "index.html" ? "" : "index.html";
-
-  
+    
     header.innerHTML = `
         <header>
           <div class="kuhlturm-header">
@@ -160,32 +159,22 @@ export function loadHeader() {
   // FontAwesome İkonları dahil et
   const fontAwesomeLink = document.createElement("link");
   fontAwesomeLink.rel = "stylesheet";
-  fontAwesomeLink.href =
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css";
+  fontAwesomeLink.href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css";
   document.head.appendChild(fontAwesomeLink);
 
-  // Dropdown menülerin başlangıçta kapalı olması için
-  const dropdowns = document.querySelectorAll(".kuhlturm-dropdown-content");
-  dropdowns.forEach((dropdown) => {
-    dropdown.classList.remove("kuhlturm-show"); // Başlangıçta kapalı olacak
-  });
-
-  // Dropdown menü açma/kapama
+  // Dropdown menüyü hover olayına göre aç/kapat
   const dropdownItems = document.querySelectorAll(".kuhlturm-dropdown");
   dropdownItems.forEach((dropdown) => {
-    const button = dropdown.querySelector(".kuhlturm-nav-button");
     const content = dropdown.querySelector(".kuhlturm-dropdown-content");
 
-    button.addEventListener("click", (event) => {
-      event.preventDefault();
-      dropdownItems.forEach((otherDropdown) => {
-        if (otherDropdown !== dropdown) {
-          otherDropdown
-            .querySelector(".kuhlturm-dropdown-content")
-            .classList.remove("kuhlturm-show");
-        }
-      });
-      content.classList.toggle("kuhlturm-show");
+    // Hover ile açma
+    dropdown.addEventListener("mouseenter", () => {
+      content.classList.add("kuhlturm-show");
+    });
+
+    // Hover dışına çıkıldığında kapama
+    dropdown.addEventListener("mouseleave", () => {
+      content.classList.remove("kuhlturm-show");
     });
   });
 
