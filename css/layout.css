@@ -8,6 +8,7 @@ body {
     padding: 0;
     box-sizing: border-box;
     position: relative; /* Arka planın üstüne içerik eklemek için konumlandırmayı relative yapıyoruz */
+    overflow-x: hidden;
 }
 
 .background-blur {
@@ -36,14 +37,14 @@ h1 {
 }
 
 h2 {
-    font-size: 1.2em;
+    font-size: 1.5em;
     color: var(--secondary-color);
     text-align: start;
 
 }
 
 h3 {
-    font-size: 1.1em;
+    font-size: 1.2em;
     color: var(--tertiary-color);
 }
 

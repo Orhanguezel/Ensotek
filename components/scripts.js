@@ -8,15 +8,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     const staticMessage = document.getElementById('static-message'); // Sabit mesaj
 
     let data; // Veriyi burada saklayacağız
+    const sidebarTitle = document.querySelector('.sidebar h2'); // Başlık alanı seçilir
 
     try {
-        // Sayfa türüne göre ilgili veri dosyasını dinamik olarak import et
+        // Sayfa türüne göre ilgili veri dosyasını dinamik olarak import et ve başlığı ayarla
         if (pageType === 'articles') {
             data = await import('../data/articles-data.js').then(module => module.articles);
+            sidebarTitle.textContent = 'Artikel'; // Başlığı "Artikel" olarak ayarla
         } else if (pageType === 'materials') {
             data = await import('../data/materials-data.js').then(module => module.materials);
+            sidebarTitle.textContent = 'Turmmaterialien'; // Başlığı "Turmmaterialien" olarak ayarla
         } else if (pageType === 'products') {
             data = await import('../data/products-data.js').then(module => module.products);
+            sidebarTitle.textContent = 'Produkte'; // Başlığı "Produkte" olarak ayarla
         } else {
             console.error("Geçersiz sayfa türü.");
             return;
@@ -29,14 +33,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             backButtonTop.classList.add('hidden'); // Geri düğmesini gizle
             backButtonBottom.classList.add('hidden'); // Geri düğmesini gizle
             staticMessage.style.display = 'block'; // Sabit mesajı göster
+            window.location.hash = ''; // Hash'i temizle
         }
 
         // Başlıkları sol menüye ve galeriye ekle
         data.forEach((item, index) => {
-            // Başlıklar için URL dostu hash oluştur
             const hashId = item.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
 
-            // Sol menüdeki başlıklar
             const listItem = document.createElement('li');
             const link = document.createElement('a');
             link.href = `#${hashId}`;
@@ -44,7 +47,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             listItem.appendChild(link);
             itemTitles.appendChild(listItem);
 
-            // Galeri resimleri (Eğer varsa)
             const regexImgTag = /<img[^>]+src="([^">]+)"/g;
             let imgMatch;
             while ((imgMatch = regexImgTag.exec(item.content)) !== null) {
@@ -75,22 +77,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         function showItem(item) {
             itemContent.innerHTML = `<h2>${item.title}</h2>` + item.content; // Ürün başlığı ve içerik
 
-            // Galeri görünümünü kapat
-            gallery.style.display = 'none';
-
-            // Geri düğmelerini göster
-            backButtonTop.classList.remove('hidden');
+            gallery.style.display = 'none'; // Galeriyi gizle
+            backButtonTop.classList.remove('hidden'); // Geri düğmelerini göster
             backButtonBottom.classList.remove('hidden');
         }
 
         // Hash değişimini dinleyerek ilgili içeriği gösterecek
         function handleHashChange() {
-            const hash = window.location.hash.slice(1); // "#" işaretini kaldırarak al
+            const hash = window.location.hash.slice(1);
             const selectedItem = data.find(item => item.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '') === hash);
             if (selectedItem) {
                 showItem(selectedItem);
             } else {
-                showMainPage(); // Geçersiz hash varsa ana sayfaya dön
+                showMainPage();
             }
         }
 
@@ -99,6 +98,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Sayfa yüklendiğinde mevcut hash varsa ilgili içeriği göster
         handleHashChange();
+
+        // Geri düğmelerine click olayları ekle
+        backButtonTop.addEventListener('click', showMainPage);
+        backButtonBottom.addEventListener('click', showMainPage);
 
     } catch (error) {
         console.error("Veri yükleme sırasında bir hata oluştu: ", error);

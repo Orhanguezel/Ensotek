@@ -8,54 +8,59 @@
     color: var(--text-color);
 }
 
-#geschichte-section h1 {
-    margin-bottom: 20px;;
-}
-
 .geschichte-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 30px; /* Esneklik ve boşluk */
+}
+
+.geschichte-card {
+    display: flex;
+    background-color: var(--background-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    align-items: center;
+    gap: 20px;
 }
 
 .geschichte-text {
-    width: 60%;
+    flex: 2;
     text-align: left;
 }
 
-.geschichte-text h4 {
-    line-height: 1.5;
+.geschichte-text h2 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.geschichte-text p {
+    line-height: 1.6;
     color: var(--text2-color);
-    text-align: left;
 }
 
 .geschichte-image {
-    width: 35%;
+    flex: 1;
+    text-align: center;
 }
 
 .geschichte-image img {
-    width: 100%;
+    max-width: 100%;
     height: auto;
-    object-fit: cover;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Hafif bir gölge eklendi */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .geschichte-container {
+    .geschichte-card {
         flex-direction: column;
-        align-items: center;
+        text-align: center;
     }
 
-    .geschichte-text {
+    .geschichte-text, .geschichte-image {
         width: 100%;
-        text-align: center; /* Küçük ekranlar için metin ortalanacak */
     }
 
-    .geschichte-image {
-        width: 100%;
-        margin-top: 20px;
+    .geschichte-text p {
+        text-align: justify;
     }
 }

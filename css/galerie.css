@@ -6,15 +6,29 @@
     text-align: center;
 }
 
-#Galerie h1 {
+.gallery-header {
+    text-align: center;
     margin-bottom: 20px;
+    background-color: var(--background-color);
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-#Galerie h4 {
-    line-height: 1.6;
+.gallery-header h2 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.gallery-header p {
     color: var(--secondary-color);
     text-align: start;
     margin-bottom: 20px;
+}
+
+.gallery-card {
+    background-color: var(--background-color);
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .carousel-container {
@@ -24,6 +38,7 @@
     justify-content: space-between;
     align-items: center;
     position: relative;
+    padding-top: 0;
 }
 
 /* Sol taraftaki büyük slayt alanı */
@@ -120,9 +135,6 @@
 
     #Galerie {
         padding: 10px;
-    }
-    #Galerie h1 {
-        font-size: 28px;
     }
 
     #Galerie h4 {
