@@ -1,5 +1,5 @@
 #Referenzen {
-  padding: 70px 20px;
+  padding:20px;
   text-align: center;
   background-color: var(--background2-color);
   margin: 0 auto;
@@ -82,7 +82,7 @@
 /* Mobil uyumluluk */
 @media (max-width: 768px) {
   #Referenzen {
-    padding: 30px 10px;
+    padding:10px;
   }
   .image-grid {
     gap: 5px;

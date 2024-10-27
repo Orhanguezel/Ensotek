@@ -2,7 +2,7 @@
 #Neuigkeiten {
     display: flex;
     justify-content: space-between;
-    padding: 150px 20px;
+    padding:20px;
     margin: 0 auto;
     max-width: 1100px;
     gap: 20px;
@@ -156,7 +156,7 @@
   /* Mobil görünüm için düzenlemeler */
   @media (max-width: 768px) {
     #Neuigkeiten {
-        padding: 70px 20px;
+        padding: 10px;
       }
 
     .row {

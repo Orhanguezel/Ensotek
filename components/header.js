@@ -15,8 +15,8 @@ export function loadHeader() {
                       <img src="assets/img/LOGO2/7.png" alt="KKL Logo" class="kuhlturm-logo">
                   </a>
                   <div class="kuhlturm-top-links">
-                      <a href="sitemap.html"><i class="fas fa-sitemap"></i> Sitemap</a> |
-                      <a href="login.html"><i class="fas fa-user"></i> Login</a> |
+                      <a href="sitemap.html"><i class="fas fa-sitemap"></i> Sitemap</a> 
+                      <a href="login.html"><i class="fas fa-user"></i> Login</a> 
                       <a href="search.html"><i class="fas fa-search"></i> Suche</a>
                   </div>
                   <div class="kuhlturm-mobile-menu-button" id="menu-toggle">
@@ -29,7 +29,7 @@ export function loadHeader() {
                   <ul>
                       <!-- Unternehmen Menüsü -->
                       <li class="kuhlturm-dropdown">
-                          <a href="" class="kuhlturm-nav-button" id="Unternehmen">
+                          <a href="javascript:void(0);" class="kuhlturm-nav-button" id="Unternehmen">
                               <i class="fas fa-briefcase"></i> Unternehmen
                           </a>
                           <div class="kuhlturm-dropdown-content">
@@ -46,7 +46,7 @@ export function loadHeader() {
                                                   <li><a href="${linkPrefix}#galerie">Galerie</a></li>
                                               </ul>
                                           </li>
-                                          <li><a href="" class="upper-level">Organisation</a>
+                                          <li><a href="javascript:void(0);" class="upper-level">Organisation</a>
                                               <ul>
                                                   <li><a href="${linkPrefix}#Aktivit">Unsere Aktivitäten</a></li>
                                                   <li><a href="unserTeam.html">Unser Team</a></li>
@@ -66,7 +66,7 @@ export function loadHeader() {
                       </li>
                       <!-- Bibliothek Menüsü -->
                       <li class="kuhlturm-dropdown">
-                          <a href="bibliothek.html" class="kuhlturm-nav-button" id="Bibliothek">
+                          <a href="javascript:void(0);" class="kuhlturm-nav-button" id="Bibliothek">
                               <i class="fas fa-atom"></i> Bibliothek
                           </a>
                           <div class="kuhlturm-dropdown-content">
@@ -116,7 +116,7 @@ export function loadHeader() {
                       </li>
                       <!-- Besucherangebote Menüsü -->
                       <li class="kuhlturm-dropdown">
-                          <a href="" class="kuhlturm-nav-button" id="Hilfmittel">
+                          <a href="javascript:void(0);" class="kuhlturm-nav-button" id="Hilfmittel">
                               <i class="fas fa-users"></i> Hilfmittel
                           </a>
                           <div class="kuhlturm-dropdown-content">

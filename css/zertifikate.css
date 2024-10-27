@@ -1,7 +1,7 @@
 /* Zertifikate Section Styling */
 
 #zertifikate-section {
-  padding: 150px 20px;
+  padding:20px;
   text-align: center;
   background-color: var(--background2-color);
   margin: 0 auto;
@@ -44,7 +44,7 @@
   @media (max-width: 768px) {
 
     #zertifikate-section {
-      padding: 50px 10px;
+      padding:10px;
       }
   
     .container-zertifikate {

@@ -117,7 +117,6 @@ export const products = [
         content: `
         <section>
         <h4>Wenn Sie kurzfristig, saisonal oder während der Bauphase einen Kühlturm benötigen, können Sie sich zu diesem Zweck an unser Unternehmen wenden.</h4>
-        <h4><a href="https://www.kuhlturm.com/#kontact">Kontakt &gt;&gt;</a></h4>
     </section>
     `
     },

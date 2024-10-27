@@ -2,7 +2,7 @@
 .container {
   display: flex;
   justify-content: space-between;
-  padding: 150px 20px; /* Üst ve alt boşluk */
+  padding:20px; /* Üst ve alt boşluk */
   margin: 0 auto; /* Ortala */
   max-width: 1100px; /* Maksimum genişlik */
   gap: 20px; /* Daha fazla boşluk için */
@@ -267,7 +267,7 @@ table caption {
 /* Responsive düzenlemeler */
 @media (max-width: 768px) {
   .container {
-    padding: 70px 20px; /* Üst ve alt boşluk */
+    padding: 10px; /* Üst ve alt boşluk */
     flex-direction: column;
   }
 

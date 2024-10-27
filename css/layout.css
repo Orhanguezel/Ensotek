@@ -73,6 +73,14 @@ a:hover {
     text-decoration: underline;
 }
 
+.page-header-image img {
+    padding-top: 120px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+
 
 @media (max-width: 768px) {
 
@@ -100,6 +108,18 @@ a:hover {
     
     a {
         font-size: 0.9em;
+    }
+
+    .page-header-image {
+        
+        max-height: 300px; /* Mobilde belirli bir maksimum yükseklik */
+        overflow: hidden; /* Resmin taşmasını önlemek için */
+    }
+    .page-header-image img {
+        padding-top:50px;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
     }
 
 }
