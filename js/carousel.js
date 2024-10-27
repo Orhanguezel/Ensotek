@@ -4,36 +4,37 @@ export function loadCarousel() {
         <div class='carousel-container'>
             <!-- Informasyon bölümü -->
             <div class='carousel-inf' id='carousel-inf'>
-                <h2>Robustes Design für Langlebigkeit</h2>
-                <p>Unsere Produkte sind aus speziellen, rostfreien Materialien gefertigt und besonders langlebig.</p>
+                <h2>Langlebige Designs, Kein Rostproblem.</h2>
+                <p>Unsere Produkte sind langlebig und bestehen aus speziellen Materialien, die rostbeständig sind.</p>
             </div>
             
             <!-- Carousel bölümü -->
             <div class='owl-carousel' id='owlCarousel'>
-                <div class='slide' data-title="Robustes Design für Langlebigkeit" data-text="Unsere Produkte sind aus speziellen, rostfreien Materialien gefertigt und besonders langlebig.">
+                <div class='slide' data-title="Langlebige Designs, Kein Rostproblem." data-text="Unsere Produkte sind langlebig und bestehen aus speziellen Materialien, die rostbeständig sind.">
                     <img class='owl-item-bg' src='assets/img/slayt/1.png' alt='Bild 1'>
                 </div>
-                <div class='slide' data-title="Weltweit Anerkannt" data-text="Unsere Produkte werden weltweit geschätzt und sind die bevorzugte Wahl der Profis.">
+                <div class='slide' data-title="Weltweit Anerkannt und die Wahl der Profis." data-text="Unsere Produkte, die weltweit Anerkennung finden, sind die erste Wahl der Profis.">
                     <img class='owl-item-bg' src='assets/img/slayt/2.png' alt='Bild 2'>
                 </div>
-                <div class='slide' data-title="Stark und Zuverlässig" data-text="Langlebig und ideal für den dauerhaften Einsatz.">
+                <div class='slide' data-title="Starke und Zuverlässige Produkte." data-text="Unsere Produkte sind stark und zuverlässig, geeignet für den langfristigen Einsatz.">
                     <img class='owl-item-bg' src='assets/img/slayt/3.png' alt='Bild 3'>
                 </div>
-                <div class='slide' data-title="Effizient und Energiesparend" data-text="Unsere Produkte kombinieren hohe Effizienz mit geringem Energieverbrauch.">
+                <div class='slide' data-title="Hohe Effizienz, Niedriger Energieverbrauch." data-text="Unsere Produkte bieten hohe Effizienz und sind umweltfreundlich mit niedrigem Energieverbrauch.">
                     <img class='owl-item-bg' src='assets/img/slayt/4.png' alt='Bild 4'>
                 </div>
-                <div class='slide' data-title="Einfache Installation" data-text="Unsere benutzerfreundlichen Produkte sind leicht zu installieren und zu warten.">
+                <div class='slide' data-title="Benutzerfreundlich und Einfach zu Installieren." data-text="Unsere Produkte sind benutzerfreundlich und bieten einfache Installation und Wartung.">
                     <img class='owl-item-bg' src='assets/img/slayt/5.png' alt='Bild 5'>
                 </div>
-                <div class='slide' data-title="Nachhaltig und Umweltfreundlich" data-text="Aus nachhaltigen Materialien gefertigt, schonen unsere Produkte die Umwelt.">
+                <div class='slide' data-title="Umweltfreundlich und Nachhaltig." data-text="Unsere Produkte sind umweltfreundlich und aus nachhaltigen Materialien hergestellt.">
                     <img class='owl-item-bg' src='assets/img/slayt/6.png' alt='Bild 6'>
                 </div>
-                <div class='slide' data-title="Innovative Technologie" data-text="Mit modernster Technologie hergestellt, bieten unsere Produkte höchste Leistung.">
+                <div class='slide' data-title="Innovative Technologie und Überlegene Leistung." data-text="Unsere Produkte sind mit innovativer Technologie hergestellt und bieten überlegene Leistung.">
                     <img class='owl-item-bg' src='assets/img/slayt/7.png' alt='Bild 7'>
                 </div>
-                <div class='slide' data-title="Schnelle Lieferung & Kundenservice" data-text="Mit schneller Lieferung und exzellentem Kundenservice sind wir für Sie da.">
+                <div class='slide' data-title="Schnelle Lieferung und Hervorragender Kundenservice." data-text="Unsere Produkte werden schnell geliefert und bieten hervorragenden Kundenservice.">
                     <img class='owl-item-bg' src='assets/img/slayt/8.png' alt='Bild 8'>
                 </div>
+
             </div>
 
             <!-- Radyo butonları -->
@@ -65,20 +66,28 @@ export function loadCarousel() {
         autoplayTimeout: 4000,
         autoplayHoverPause: true,
         nav: true,
-        dots: false,
+        dots: false,  // Owl Carousel dots'u kapatıyoruz çünkü kendi radio butonlarımız var.
         responsive: {
-            0: { items: 1 },
-            768: { items: 1 },
-            1024: { items: 1 }
+            0: {
+                items: 1
+            },
+            768: {
+                items: 1
+            },
+            1024: {
+                items: 1
+            }
         }
     });
 
+    // Radio butonlarına tıklama ile slayt değişimi
     document.querySelectorAll('.radio-buttons input').forEach((radio, index) => {
         radio.addEventListener('click', () => {
             owlCarousel.trigger('to.owl.carousel', [index, 300]);
         });
     });
 
+    // Slayt değiştikçe radio butonları güncellensin
     owlCarousel.on('changed.owl.carousel', function(event) {
         const totalItems = event.item.count;
         let currentIndex = event.item.index - event.relatedTarget._clones.length / 2;

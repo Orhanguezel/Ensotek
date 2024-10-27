@@ -31,52 +31,52 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.carousel-container {
+.gallery-carousel-container {
     max-width: 100%;
     margin: 0 auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
     position: relative;
-    padding-top: 0;
+    z-index: 100;
 }
 
 /* Sol taraftaki büyük slayt alanı */
-.carousel {
-    width: 60%; /* Ekranın %60'ını kaplayacak */
+.gallery-carousel {
+    width: 60%;
     position: relative;
     overflow: hidden;
 }
 
-.carousel-images {
+.gallery-carousel-images {
     display: flex;
     transition: transform 0.5s ease-in-out;
 }
 
-.carousel-image {
+.gallery-carousel-image {
     min-width: 100%;
-    height: 400px; /* Slayt yüksekliği ayarlandı */
+    height: 400px;
     object-fit: cover;
     display: none;
 }
 
-.carousel-image.active {
+.gallery-carousel-image.active {
     display: block;
     transition: opacity 0.5s ease-in-out;
 }
 
 /* Sağ tarafta küçük resimler */
-.carousel-thumbnails {
-    width: 50%; /* Ekranın %35'ini kaplayacak */
+.gallery-carousel-thumbnails {
+    width: 35%;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    padding:15px 0;
-    gap: 10px; /* Küçük resimler arasında boşluk */
+    padding: 15px 0;
+    gap: 10px;
 }
 
-.carousel-thumbnail {
+.gallery-carousel-thumbnail {
     width: 100px;
     height: 100px;
     object-fit: cover;
@@ -85,18 +85,18 @@
     border: 2px solid transparent;
 }
 
-.carousel-thumbnail:hover {
+.gallery-carousel-thumbnail:hover {
     transform: scale(1.1);
 }
 
-.carousel-thumbnail.active {
+.gallery-carousel-thumbnail.active {
     border: 2px solid #428BFF;
     transform: scale(1.1);
     transition: border-color 0.3s ease;
 }
 
 /* Carousel kontrol butonları */
-.carousel-control {
+.gallery-carousel-control {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -106,62 +106,37 @@
     padding: 10px;
     cursor: pointer;
     border-radius: 50%;
+    z-index: 200; /* Diğer bileşenlerle çakışmayı önlemek için */
 }
 
-.prev {
+.gallery-prev {
     left: 10px;
 }
 
-.next {
+.gallery-next {
     right: 10px;
 }
 
 @media (max-width: 993px) {
-    .carousel-container {
+    .gallery-carousel-container {
         flex-direction: column;
     }
 
-    .carousel {
+    .gallery-carousel {
         width: 100%; 
     }
 
-    .carousel-thumbnails {
+    .gallery-carousel-thumbnails {
         width: 100%;
     }
 }
 
-/* Mobil görünüm için düzenleme */
 @media (max-width: 768px) {
-
-    #Galerie {
-        padding: 10px;
+    .gallery-carousel-image {
+        height: 300px;
     }
 
-    #Galerie h4 {
-        font-size: 16px;
-    }
-
-    .carousel-container {
-        flex-direction: column; /* Mobilde üst üste gelecek */
-    }
-
-    .carousel {
-        width: 100%; /* Mobilde tam genişlik */
-    }
-
-    .carousel-image {
-        height: 300px; /* Mobilde slayt yüksekliği ayarlandı */
-    }
-
-    .carousel-thumbnails {
-        flex-direction: row;
-        flex-wrap: wrap;
-        width: 100%;
-        margin-top: 20px;
-        gap: 5px;
-    }
-
-    .carousel-thumbnail {
+    .gallery-carousel-thumbnail {
         width: 80px;
         height: 80px;
     }

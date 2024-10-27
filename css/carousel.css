@@ -1,21 +1,20 @@
-
 /* Carousel ve informasyon bölümü */
 .carousel-container {
-    padding: 0;
-    margin: 0;
-    padding-top: 70px;
+    position: relative;
+    padding-top: 120px;
     width: 100%;
     display: flex;
-    align-items: stretch !important; /* Bilgi ve slayt aynı yükseklikte olacak */
+    align-items: stretch !important;
     justify-content: center;
     background-color: var(--background-color);
+    flex-direction: row;
 }
 
 /* Informasyon bölümü */
 #carousel-inf {
     display: flex;
     flex-direction: column;
-    justify-content:center;
+    justify-content: center;
     align-items: flex-start;
     letter-spacing: 2px;
     width: 50%;
@@ -42,7 +41,7 @@
 #owlCarousel {
     position: relative;
     width: 50%;
-    height: 100%; /* Yüksekliği bilgi ile eşit */
+    height: 100%;
     overflow: hidden;
     object-fit: cover;
     display: flex;
@@ -77,13 +76,14 @@
 /* Radyo butonları */
 .radio-buttons {
     position: absolute;
-    bottom: 20px; /* Butonların slaytın altına gelmesi için */
+    bottom: 10px;
     left: 75%;
     transform: translateX(-50%);
     display: flex;
     justify-content: center;
     z-index: 200;
 }
+
 
 .radio-buttons input[type="radio"] {
     display: none;
@@ -98,10 +98,11 @@
     border-radius: 50%;
     cursor: pointer;
     transition: background-color 0.3s ease;
+    background-color: transparent;
 }
 
 .radio-buttons input[type="radio"]:checked + label {
-    background-color:rgba(243, 244, 247, 0.6); /* #428BFF */
+    background-color: rgba(243, 244, 247, 0.6);
 }
 
 /* Carousel kontrol butonları */
@@ -118,7 +119,7 @@
     align-items: center;
     border-radius: 50%;
     border: none;
-    cursor: pointer;
+    cursor: pointer; 
     transform: translateY(-50%);
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
@@ -139,70 +140,46 @@
 
 .owl-prev::before,
 .owl-next::before {
-    content: '\f104'; /* FontAwesome sol ok */
+    content: '\f104';
     font-family: 'Font Awesome 5 Free';
     font-weight: 900;
     font-size: 24px;
 }
 
 .owl-next::before {
-    content: '\f105'; /* FontAwesome sağ ok */
+    content: '\f105';
 }
 
 /* Mobil görünüm için düzenleme */
 @media (max-width: 992px) {
     .carousel-container {
-        display: flex;
-        flex-direction: column; /* Informasyon slaytın altına gelecek */
+        padding-top:50px;
+        flex-direction: column;
     }
     
     #carousel-inf {
         width: 100%;
-        order: 2; /* Bilgi bölümünü slaytın altına al */
+        order: 2;
     }
 
     #owlCarousel {
         width: 100%;
-        height: auto; /* Mobilde slayt yüksekliği otomatik */
-        order: 1; /* Slayt üstte kalacak */
-    }
-
-    .owl-prev,
-    .owl-next {
-        width: 40px;
-        height: 40px;
-    }
-
-    .owl-prev::before,
-    .owl-next::before {
-        font-size: 18px;
+        height: auto;
+        order: 1;
     }
 
     .radio-buttons {
-        top: 70%; /* Butonların slaytın altına gelmesi için */
+        position: absolute;
+        bottom: 150px; /* Slaytın alt kenarından 10px yukarıda sabit */
         left: 50%;
+        transform: translateX(-50%);
     }
-    
-    .radio-buttons label {
-        display: inline-block;
-        width: 10px;
-        height: 10px;
-    }
-
 }
 
-@media (max-width: 724px) {
+/* Mobil görünüm için düzenleme */
+@media (max-width: 768px) {
     .radio-buttons {
-        top: 63%; /* Butonların slaytın altına gelmesi için */
-        left: 50%;
+        bottom: 180px
     }
-
 }
 
-@media (max-width: 576px) {
-    .radio-buttons {
-        top: 55%; /* Butonların slaytın altına gelmesi için */
-        left: 50%;
-    }
-
-}
