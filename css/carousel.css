@@ -160,6 +160,7 @@
     #carousel-inf {
         width: 100%;
         order: 2;
+        height: 200px;
     }
 
     #owlCarousel {
@@ -170,7 +171,7 @@
 
     .radio-buttons {
         position: absolute;
-        bottom: 150px; /* Slaytın alt kenarından 10px yukarıda sabit */
+        bottom: 230px; /* Slaytın alt kenarından 10px yukarıda sabit */
         left: 50%;
         transform: translateX(-50%);
     }
@@ -178,6 +179,11 @@
 
 /* Mobil görünüm için düzenleme */
 @media (max-width: 768px) {
+
+    #carousel-inf {
+        height: 150px;
+    }
+
     .radio-buttons {
         bottom: 180px
     }

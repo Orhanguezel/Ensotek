@@ -50,16 +50,15 @@
   list-style-type: none;
   display: flex;
   flex-wrap: wrap;
-  gap: 5px;
-  border-radius: 5px;
+  gap: 3px;
   background-color: var(--primary-color);
-  padding: 10px;
+  padding: 5px;
 }
 
 .akt ul li {
   text-align: center;
   flex: 1 1 auto;
-  margin: 5px 0;
+  margin: 2px 0;
 }
 
 .akt ul li label {
@@ -113,7 +112,7 @@
 .image-text-wrapper {
   display: flex;
   align-items: start;
-  gap: 20px; /* Resim ve metin arasındaki boşluk */
+  gap: 5px; /* Resim ve metin arasındaki boşluk */
 }
 
 .image-text-wrapper img {
@@ -139,7 +138,7 @@
     padding: 10px;
   }
   .akt ul {
-    gap: 5px;
+    gap: 2px;
   }
 
   .akt ul li {

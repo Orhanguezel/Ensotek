@@ -33,9 +33,11 @@ export function loadFooter() {
           <div class="footer-section">
             <h3>Kontakt Informationen</h3>
             <p>Wir freuen uns auf Ihre Nachricht!</p>
-            <p>Adresse: 22. Straße, Grevenbroich</p>
-            <p>Email: orhanguzell@gmail.com</p>
-            <p>Telefon: +49-123-456-78</p>
+            <p>Center: Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İSTANBUL - TÜRKİYE <br>
+            <br>
+            Factory: Saray Mah. Gimat Cad. No:6A 06980 Kahramankazan / ANKARA - TÜRKİYE</p>
+            <p>Email: ensotek@ensotek.com.tr</p>
+            <p>Telefon: +90 212 613 33 01</p>
           </div>
 
           <!-- Services Section -->
@@ -53,8 +55,11 @@ export function loadFooter() {
         <!-- Social Media and Copyright -->
         <div class="footer-bottom">
           <div class="social-media">
-            <a href="https://www.instagram.com/kazatlet?igsh=eWkyaWNydWhteG1t" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
-            <a href="https://www.linkedin.com/in/orhan-g%C3%BCzel-53b47b11a/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
+            <a href="https://www.facebook.com/Ensotek/" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+            <a href="https://www.instagram.com/ensotekcoolingtowers/" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+            <a href="https://www.linkedin.com/company/ensotek-su-so-utma-kuleleri-ltd-ti-/" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin"></i></a>
+            <a href="https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg" target="_blank" rel="noopener noreferrer"><i class="fab fa-youtube"></i></a>
+            <a href="https://x.com/Ensotek_Cooling" target="_blank" rel="noopener noreferrer"><i class="fab fa-xing"></i></a>
           </div>
           <p class="copyright">
             Copyright © 2024 Ensotek Kühlturm GmbH. Alle Rechte vorbehalten.
