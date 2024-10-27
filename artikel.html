@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artikel</title>
+
+    <!-- CSS Dosyaları -->
+    <link rel="stylesheet" href="css/root.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/footer.css" />
+  </head>
+
+  <body data-page-type="articles">
+    <!-- Header Component -->
+    <div id="header"></div>
+
+    <!-- Sayfa Üstü Görsel -->
+    <div class="page-header-image">
+      <img src="assets/img/genel/12.png" alt="Seite Banner Bild" />
+    </div>
+
+    <!-- Article Section -->
+    <section id="Artikel">
+      <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+          <h2>Produkte</h2>
+          <ul id="item-titles">
+            <!-- Ürün başlıkları dinamik olarak eklenecek -->
+          </ul>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-area">
+          <!-- Sabit mesaj -->
+          <div id="static-message">
+            <i class="fas fa-info-circle"></i> Wählen Sie ein Element aus dem
+            Menü, um mehr zu erfahren.
+          </div>
+          <button id="back-button-top" class="hidden" onclick="showMainPage()">
+            Zurück
+          </button>
+
+          <!-- Ürün Başlığı -->
+          <h2 id="item-title"></h2>
+
+          <!-- Ürün İçeriği -->
+          <div id="item-content"></div>
+
+          <!-- Ürün Resim Galerisi -->
+          <div class="product-gallery" id="gallery"></div>
+
+          <!-- Geri Dönme Düğmesi -->
+          <button
+            id="back-button-bottom"
+            class="hidden"
+            onclick="showMainPage()"
+          >
+            Zurück
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer Component -->
+    <div id="footer"></div>
+
+    <!-- JavaScript Dosyaları -->
+    <script src="app.js" type="module"></script>
+    <script src="components/scripts.js"></script>
+    <script src="components/feuchtkugeltemperatur.js"></script>
+  </body>
+</html>

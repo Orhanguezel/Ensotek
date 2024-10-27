@@ -1,0 +1,85 @@
+/* Ana konteyner */
+#Kontakt {
+    padding: 20px;
+    margin: 15px auto;
+    max-width: 1100px;
+    background-color: var(--background2-color);
+    text-align: center;
+}
+
+.contact-container {
+    display: flex;
+    flex-direction: column;
+    gap: 40px; /* Bölümler arası boşluk */
+}
+
+/* Her bir adres ve harita bölümü */
+.contact-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch; /* Kartların aynı yüksekliğe gelmesi için */
+    gap: 20px;
+}
+
+/* Adres kart tasarımı */
+.contact-card {
+    padding: 20px;
+    background-color: var(--background-color);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.contact-card i {
+    font-size: 2rem;
+    color: var(--tertiary-color2);
+    margin-right: 15px;
+}
+
+.contact-card h4 {
+    font-size: 1.2rem;
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.contact-card p {
+    font-size: 1rem;
+    color: var(--text2-color);
+    margin: 5px 0 0 0;
+    line-height: 1.6;
+}
+
+/* Harita kart tasarımı */
+.map-card {
+    flex: 1;
+    overflow: hidden;
+    background-color: var(--background-color);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: center;
+    height: auto; /* Adres kartının yüksekliğine uyum sağlar */
+}
+
+.map-card iframe {
+    width: 100%;
+    height: 100%; /* Kartın tamamını doldurması için */
+    border: none;
+}
+
+/* Mobil görünüm */
+@media (max-width: 768px) {
+    .contact-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .contact-card, .map-card {
+        width: 100%;
+    }
+
+    .contact-card p, .contact-card h4 {
+        text-align: center;
+    }
+}

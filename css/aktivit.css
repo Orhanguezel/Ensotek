@@ -1,0 +1,164 @@
+/* Genel ayarlar */
+#Aktivit {
+  padding: 20px;
+  margin: 0 auto;
+  max-width: 1100px;
+  background-color: var(--background2-color);
+  text-align: center;
+  color: var(--text-color);
+}
+
+#Aktivit h2 {
+  text-align: start;
+  font-size: 1.2rem;
+}
+
+/* Radio butonlarını özelleştirme */
+.akt input[type="radio"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #ccc;
+  border-radius: 50%;
+  outline: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.akt input[type="radio"]:checked {
+  background-color: var(--primary-color); /* Radio butonunun içinin rengi */
+  border-color: var(--primary-color); /* Sınır rengini de aynı yapabilirsiniz */
+}
+
+/* Radio butonuna hover efekti */
+.akt input[type="radio"]:hover {
+  background-color: var(--highlight-hover-color); /* Hover sırasında farklı bir renk */
+}
+
+/* Eğer radio butonlarının label ile aynı hizada olmasını istiyorsanız: */
+.akt input[type="radio"] + label {
+  margin-left: 10px;
+  vertical-align: middle;
+}
+
+
+.akt {
+  margin: 0 auto;
+}
+
+.akt ul {
+  list-style-type: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  border-radius: 5px;
+  background-color: var(--primary-color);
+  padding: 10px;
+}
+
+.akt ul li {
+  text-align: center;
+  flex: 1 1 auto;
+  margin: 5px 0;
+}
+
+.akt ul li label {
+  cursor: pointer;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  padding: 5px;
+  font-size: var(--font-size-base);
+  color: var(--text-color);
+  border-radius: 5px;
+}
+
+.akt ul li label:hover {
+  color: var(--highlight-color);
+}
+
+/* Aktif label için stil */
+.akt ul li label.active-label {
+  background-color: var(--highlight-color); /* Aktif sekmenin arka plan rengi */
+  color: white; /* Aktif sekmenin yazı rengi */
+}
+
+.akt ul li label:focus {
+  outline: none;
+}
+
+.akt ul li label:hover {
+  color: var(--highlight-color);
+}
+
+.akt ul li label:focus {
+  outline: none;
+}
+
+/* İçerik bölümleri */
+.content-section {
+  display: none;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  transform: translateY(20px);
+}
+
+.content-section.active {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.image-text-wrapper {
+  display: flex;
+  align-items: start;
+  gap: 20px; /* Resim ve metin arasındaki boşluk */
+}
+
+.image-text-wrapper img {
+  width: 40%;
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+}
+
+.image-text-wrapper h4 {
+  width: 60%; /* Metin genişliği */
+  font-size: 16px;
+  line-height: 1.5;
+  padding: 10px;
+  letter-spacing: 1.5px;
+  text-align: left;
+  color: var(--primary-color);
+}
+
+/* Mobil görünüm için düzenlemeler */
+@media (max-width: 767px) {
+  #Aktivit {
+    padding: 10px;
+  }
+  .akt ul {
+    gap: 5px;
+  }
+
+  .akt ul li {
+      min-width: 60px;
+    
+  }
+
+  .image-text-wrapper {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .image-text-wrapper img {
+    width: 100%; /* Mobilde resimler tam genişlikte */
+    max-width: 100%;
+  }
+
+  .image-text-wrapper h4 {
+    width: 100%;
+    padding: 10px;
+  }
+}

@@ -1,0 +1,336 @@
+/* Genel ayarlar */
+.kuhlturm-header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background-color: var(--background-color);
+}
+
+.kuhlturm-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+  background-color: var(--background-color);
+  padding: 0 20px;
+}
+
+.kuhlturm-header-top img {
+  display: inline-block;
+  padding-left: 10px;
+  padding-top: 50px;
+  height: 85px;
+  width: auto;
+}
+
+.kuhlturm-top-links a {
+  color: var(--primary-color);
+  margin-right: 10px;
+}
+
+.kuhlturm-top-links a:hover {
+  color: var(--highlight-color);
+  text-decoration: none;
+}
+
+#menu-toggle {
+  cursor: pointer;
+}
+
+/* Ana Menü */
+.kuhlturm-main-nav {
+  display: flex;
+  justify-content: flex-end;
+  width: 96%;
+  padding-right: 20px;
+  z-index: 100000;
+  background-color: var(--background-color);
+}
+
+.kuhlturm-main-nav ul {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+}
+
+
+/* Nav Butonları */
+.kuhlturm-nav-button {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  padding: 15px 20px;
+  text-decoration: none;
+  display: block;
+  font-weight: bold;
+  border: 0.1px solid var(--border-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Icon için temel stil */
+.kuhlturm-nav-button i {
+  margin-right: 8px;
+  color: var(--text-color); /* Icon rengi */
+  font-size: 24px; /* Icon boyutu */
+  vertical-align: middle; /* Icon'u metinle hizalar */
+}
+
+/* Hover durumda ikonun rengini değiştirme */
+.kuhlturm-nav-button:hover i {
+  color: var(--secondary-color); /* Hover durumunda ikon rengi değişir */
+}
+
+/* Menü Buton Renkleri */
+#Unternehmen { background-color: var(--tertiary-color2); }
+#Bibliothek { background-color: var(--text4-color); }
+#Hilfmittel { background-color: var(--text5-color); }
+#Unternehmen:hover, #Bibliothek:hover, #Hilfmittel:hover {
+  background-color: var(--background2-color);
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+
+/* Dropdown Menü İçin Yatay Sıralama */
+.kuhlturm-dropdown-content {
+  display: none;
+  position: fixed;
+  top: 120px;
+  left: 0;
+  background-color: var(--background-color);
+  width: 100%;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+/* Alt linklerin sütunlar halinde gelmesi için */
+.kuhlturm-dropdown-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: nowrap;
+  gap: 20px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.kuhlturm-dropdown-column {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Linklerin üstte kalmasını sağlar */
+  height: 100%; /* Sütunların eşit yükseklikte olmasını sağlar */
+  flex: 1;
+  min-width: 200px; /* Her bir sütunun minimum genişliği */
+}
+/* Alt linklerin sütunlar halinde gelmesi için */
+
+/* Sadece üst seviye linkleri hedef al */
+.kuhlturm-dropdown-column .upper-level {
+  flex-basis: 30%; /* Her üst kategoriye genişlik ver */
+  margin-right: 30px; /* Daha fazla boşluk sağlamak için */
+  font-weight: bold;
+  padding: 10px;
+  color: var(--text-color); /* Varsayılan renk */
+  border: 1px solid var(--border-color);
+}
+
+.kuhlturm-dropdown-column .upper-level:hover {
+  color: var(--primary-color);
+  background-color: var(--background2-color);
+}
+
+.unternehmen-dropdown .upper-level { background-color: var(--tertiary-color2); }
+.bibliothek-dropdown .upper-level { background-color: var(--text4-color); }
+.hilfmittel-dropdown .upper-level { background-color: var(--text5-color); }
+
+/* Sadece üst seviye linkleri hedef al bitti*/
+
+/* Sutunlar */
+.kuhlturm-dropdown-column ul {
+  flex-grow: 1; /* Sütunların eşit yükseklikte olmasını sağlar */
+  display: flex;
+  justify-content: flex-start; /* Linkler yukarıda kalır */
+  gap: 10px; /* Linkler arasındaki boşluk */
+}
+
+/* Flex özelliği ile sütunların eşit genişlikte olması */
+.kuhlturm-dropdown-column ul li {
+  width: 100%; /* Eşit genişlik */
+}
+
+/* Alt başlıklar (Linkler) */
+.kuhlturm-dropdown-column ul li a {
+  padding: 10px 15px;
+  text-decoration: none;
+  color: var(--primary-color);
+  display: inline-block;
+  width: 100%; /* Genişlik sabit */
+  text-align: left;
+  box-sizing: border-box; /* Padding dahil genişlik hesaplama */
+  background-color: var(--background-color);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.kuhlturm-dropdown-column ul li ul {
+  display: flex;
+  flex-direction: column; /* Alt linkler column şeklinde dizilecek */
+  margin-top: 10px;
+  width: 100%;
+}
+
+/* en alt menu */
+.kuhlturm-dropdown-column ul li ul li a {
+  color: var(--secondary-color);
+  padding: 5px 12px;
+  display: inline-block;
+  width: 100%;
+  border-bottom: 1px solid var(--border-color);
+  background-color: var(--background-color);
+}
+
+.kuhlturm-dropdown-column ul li ul li a:hover {
+  color: var(--text-color);
+  background-color: var(--tertiary-color2);
+}
+
+.unternehmen-dropdown ul li ul li a:hover { background-color: var(--tertiary-color2); }
+.bibliothek-dropdown ul li ul li a:hover{ background-color: var(--text4-color); }
+.hilfmittel-dropdown ul li ul li a:hover { background-color: var(--text5-color); }
+
+/* en alt menu sonu */
+
+/* Dropdown Menü Gösterimi */
+.kuhlturm-show {
+  display: flex;
+}
+
+/* Mobil görünüm için hamburger menüsü */
+@media screen and (max-width: 768px) {
+
+  .kuhlturm-header-top img {
+    padding-top: 5px;
+    height: 50px;
+  }
+
+  .kuhlturm-top-links a {
+    display: none;
+  }
+
+  /* Mobil menüde overflow ekleyerek kaydırma sağlama */
+
+  .kuhlturm-main-nav {
+    padding: 0;
+    z-index: 1100;
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    top: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.9);
+    width: 100%;
+    height: 100vh;
+    justify-content: flex-start;
+    padding-top: 50px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(100%);
+    transition: transform 0.4s ease, opacity 0.4s ease;
+  }
+
+  .kuhlturm-main-nav.kuhlturm-mobile-visible {
+    display: flex;
+    transform: translateX(0);
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .kuhlturm-main-nav ul {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .kuhlturm-nav-button {
+    width: 100%;
+    padding: 15px 20px;
+  }
+
+  /* Hamburger Menü Stili */
+  #menu-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-right: 10px;
+    width: 30px;
+    height: 21px;
+    z-index: 1500;
+  }
+
+  #menu-toggle .bar {
+    height: 3px;
+    width: 100%;
+    background-color: var(--primary-color);
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  /* Hamburger Menü Açıldığında X İşaretine Dönüşmesi */
+  #menu-toggle.open .bar:nth-child(1) {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  #menu-toggle.open .bar:nth-child(2) {
+    opacity: 0;
+  }
+
+  #menu-toggle.open .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  /* Dropdown menü konum ve görünüm */
+  .kuhlturm-dropdown-content {
+    position: fixed;
+    top: 219px;
+    width: 100%;
+    max-height: 70vh; /* Daha fazla içerik için max yükseklik */
+    padding: 4px;
+    background-color: var(--text-color);
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1200;
+    overflow-y: auto; /* Yatay kaydırmayı gizleyerek yalnızca dikey kaydırma sağlar */
+    overflow-x: hidden;
+    scroll-behavior: smooth; /* Kaydırmayı daha yumuşak hale getirir */
+    -webkit-overflow-scrolling: touch; /* Mobil cihazlarda doğal kaydırma */
+    box-sizing: border-box;
+}
+
+  .kuhlturm-dropdown-content ul li a {
+    padding: 5px 15px;
+    font-size: 14px;
+    color: var(--primary-color);
+
+  }
+
+  .kuhlturm-dropdown-content ul li a:hover {
+    background-color: var(--background-color-hover);
+    color:var(--text-color);
+  }
+
+  /* Dropdown Menü Gösterimi */
+  .kuhlturm-show {
+    display: flex;
+  }
+
+  /* X işaretine dönüş animasyonu */
+  .rotate-down {
+    transform: rotate(45deg) translate(5px, 5px);
+  }
+
+  .rotate-up {
+    transform: rotate(-45deg) translate(5px, -5px);
+  }
+
+  .hide {
+    opacity: 0;
+  }
+}

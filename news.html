@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neuigkeiten</title>
+    
+    <!-- CSS Dosyaları -->
+    <link rel="stylesheet" href="css/root.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/news.css"> <!-- Bu sayfa için özel CSS -->
+    <link rel="stylesheet" href="css/footer.css">
+
+    <!-- Font Awesome İkonları -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body data-page-type="news"> <!-- Sayfa türü haberler olarak belirlendi -->
+    <!-- Header Component -->
+    <div id="header"></div>
+
+    <!-- Sayfa Üstü Görsel -->
+    <div class="page-header-image">
+        <img src="assets/img/genel/1.png" alt="Seite Banner Bild">
+      </div>
+
+    <!-- Haberler Section -->
+    <section id="Neuigkeiten">
+        <div class="container">
+            <div class="row">
+                <!-- Sol tarafta haberlerin listelendiği kısım -->
+                <div class="col-left">
+                    <div class="news" id="news-content">
+                        <ul id="news-list">
+                            <!-- Haberler dinamik olarak buraya yüklenecek -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Sağ tarafta son haberler ve arşiv -->
+                <div class="col-right">
+                    <div class="latest-news">
+                        <h4>Neueste Beiträge</h4>
+                        <ul id="latest-news-list">
+                            <!-- Dinamik son haberler burada yüklenecek -->
+                        </ul>
+                    </div>
+                    <div class="archive">
+                        <h4>Archiv</h4>
+                        <ul id="archive-list">
+                            <!-- Dinamik arşiv burada yüklenecek -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Component -->
+    <div id="footer"></div>
+
+    <!-- JavaScript Dosyaları -->
+    <script src="app.js" type="module"></script>
+    <script src="components/news.js" type="module"></script> <!-- Haberler buradan yüklenecek -->
+</body>
+</html>

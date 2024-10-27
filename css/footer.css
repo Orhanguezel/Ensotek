@@ -1,0 +1,147 @@
+/* Footer Section */
+.footer {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  padding: 20px;
+  font-family: var(--font-family2);
+  border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logo-footer img {
+  height: 100px !important;
+  width: auto !important;
+}
+  
+
+/* Footer Content Layout */
+.footer-content {
+  max-width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.footer-section {
+  flex: 1;
+  min-width: 220px;
+}
+
+.footer-section h3 {
+  font-family: var(--font-family);
+  font-size: 1.2em;
+  margin-bottom: 15px;
+  color: var(--tertiary-color2);
+}
+
+.footer-section p {
+  color: var(--text-color);
+  font-size: 0.9em;
+  line-height: 1.8em;
+}
+
+.footer-section ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.footer-section ul li {
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.footer-section ul li a {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.footer-section ul li a:hover {
+  color: var(--highlight-color);
+}
+
+/* Social Media Icons */
+.social-media {
+  display: flex;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.social-media a {
+  color: var(--text-color);
+  margin: 0 10px;
+  font-size: 1.5em;
+}
+
+.social-media a:hover {
+  color: var(--highlight-color);
+}
+
+/* Footer Bottom Section */
+.footer-bottom {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 20px;
+  text-align: center;
+  margin-top: 40px;
+}
+
+.copyright {
+  font-size: 0.9em;
+  color: var(--text-color);
+}
+
+/* Scroll to Top Button */
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: var(--text-color);
+  color: var(--btn-text-color);
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-decoration: none;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, transform 0.3s ease;
+  z-index: 1000;
+}
+
+.designed-by-link {
+    color: var(--highlight-color); /* Ana renk */
+    font-weight: bold;
+    text-decoration: none;
+    padding: 5px 10px;
+    transition: color 0.3s ease, background-color 0.3s ease;
+    border-radius: 5px;
+  }
+  
+  .designed-by-link:hover {
+    color: var(--text-color); /* Hover text rengi */
+    background-color: var(--tertiary-color2); /* Hover arka plan rengi */
+  }
+  
+
+/* Responsive */
+@media (max-width: 768px) {
+  .footer-content {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .footer-section {
+    margin-bottom: 30px;
+  }
+
+  .scroll-to-top {
+    display: none;
+  }
+}

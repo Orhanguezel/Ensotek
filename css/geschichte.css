@@ -1,0 +1,66 @@
+/* Geschichte Section Styling */
+#geschichte-section {
+    padding: 20px;
+    margin: 15px auto;
+    max-width: 1100px;
+    background-color: var(--background2-color);
+    text-align: center;
+    color: var(--text-color);
+}
+
+.geschichte-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.geschichte-card {
+    display: flex;
+    background-color: var(--background-color);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    align-items: center;
+    gap: 20px;
+}
+
+.geschichte-text {
+    flex: 2;
+    text-align: left;
+}
+
+.geschichte-text h2 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.geschichte-text p {
+    line-height: 1.6;
+    color: var(--text2-color);
+}
+
+.geschichte-image {
+    flex: 1;
+    text-align: center;
+}
+
+.geschichte-image img {
+    max-width: 100%;
+    height: auto;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .geschichte-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .geschichte-text, .geschichte-image {
+        width: 100%;
+    }
+
+    .geschichte-text p {
+        text-align: justify;
+    }
+}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Angebot Einholen | ENSOTEK</title>
+    <!-- CSS Dosyaları -->
+    <link rel="stylesheet" href="css/root.css" />
+    <link rel="stylesheet" href="css/layout.css" />
+    <link rel="stylesheet" href="css/components.css" />
+    <!-- Angebot sayfası için özel CSS -->
+    <link rel="stylesheet" href="css/offer.css" />
+    <!-- Form için özel CSS -->
+    <link rel="stylesheet" href="css/footer.css" />
+  </head>
+
+  <body>
+    <!-- Header Component -->
+    <div id="header"></div>
+
+    <!-- Sayfa Üstü Görsel -->
+    <div class="page-header-image">
+      <img src="assets/img/all/contact.jpg" alt="Seite Banner Bild">
+    </div>
+    
+    <div class="angebot-section" id="angebot-section">
+      <!-- Sayfa Başlığı ve Açıklaması -->
+      <section id="offer-intro">
+        <h2>Angebot Einholen</h2>
+        <p>
+          Füllen Sie das untenstehende Formular aus, um ein maßgeschneidertes
+          Angebot für Ihre Kühlanlagen zu erhalten. Unser Team wird Ihre Anfrage
+          zeitnah bearbeiten und sich bei Ihnen melden. Egal ob Industrie oder
+          Handel, wir bieten individuelle Beratung und Service, der auf Ihre
+          Bedürfnisse abgestimmt ist.
+        </p>
+        <p>
+          Tragen Sie einfach Ihre Kontaktdaten und relevanten Informationen ein,
+          und wir unterbreiten Ihnen schnell ein passendes Angebot.
+        </p>
+      </section>
+
+      <!-- Form Bölümü -->
+      <div class="form-container">
+        <h2>Wie können wir helfen?</h2>
+        <p>
+          Füllen Sie dieses Formular aus und wir werden so schnell wie möglich
+          den richtigen Ansprechpartner für Sie gewinnen.
+        </p>
+        <form id="contact-form" method="POST" action="contact.php">
+          <div class="form-group">
+            <label for="vorname">Vorname *</label>
+            <input type="text" id="vorname" name="vorname" required />
+          </div>
+          <div class="form-group">
+            <label for="nachname">Nachname *</label>
+            <input type="text" id="nachname" name="nachname" required />
+          </div>
+          <div class="form-group">
+            <label for="firma">Name der Firma *</label>
+            <input type="text" id="firma" name="firma" required />
+          </div>
+          <div class="form-group">
+            <label for="email">E-Mail *</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="postleitzahl">Postleitzahl *</label>
+            <input type="text" id="postleitzahl" name="postleitzahl" required />
+          </div>
+          <div class="form-group">
+            <label for="berufsbezeichnung">Berufsbezeichnung *</label>
+            <input
+              type="text"
+              id="berufsbezeichnung"
+              name="berufsbezeichnung"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="markttyp">Markttyp *</label>
+            <select id="markttyp" name="markttyp" required>
+              <option value="">Bitte wählen Sie</option>
+              <option value="Industrie">Industrie</option>
+              <option value="Handel">Handel</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="stelle">Art der Stelle *</label>
+            <select id="stelle" name="stelle" required>
+              <option value="">Bitte wählen Sie</option>
+              <option value="Technisch">Technisch</option>
+              <option value="Verwaltung">Verwaltung</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="tower_seriennummer">Tower-Seriennummer</label>
+            <input
+              type="text"
+              id="tower_seriennummer"
+              name="tower_seriennummer"
+            />
+          </div>
+          <div class="form-group">
+            <label for="nachricht">Nachricht *</label>
+            <textarea id="nachricht" name="nachricht" required></textarea>
+          </div>
+          <button type="submit">Einreichen</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Footer Component -->
+    <div id="footer"></div>
+
+    <!-- JavaScript Dosyaları -->
+    <script src="app.js" type="module"></script>
+    <script src="components/footer.js" type="module"></script>
+    <script src="components/angebot.js" type="module"></script>
+    <!-- Angebot sayfası için özel JS -->
+  </body>
+</html>

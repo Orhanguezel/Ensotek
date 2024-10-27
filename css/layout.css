@@ -1,0 +1,125 @@
+/* Genel Sayfa Düzeni */
+body {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    color: var(--text-color);
+    background-color: var(--background-color);
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    position: relative; /* Arka planın üstüne içerik eklemek için konumlandırmayı relative yapıyoruz */
+    overflow-x: hidden;
+}
+
+.background-blur {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+   /* background: url('../img/artikel2.png') no-repeat center center fixed;*/
+    background-size: cover;
+    filter: blur(15px); /* Pusluluğu ayarlamak için blur efekti */
+    z-index: -1; /* Arka planda kalmasını sağlarız */
+}
+
+
+main {
+    padding: 20px;
+}
+
+
+
+h1 {
+    font-size: 2em;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+h2 {
+    font-size: 1.5em;
+    color: var(--secondary-color);
+    text-align: start;
+
+}
+
+h3 {
+    font-size: 1.2em;
+    color: var(--tertiary-color);
+}
+
+h4 {
+    font-size: 1em;
+    color: var(--text-color);
+    line-height: 1.5;
+    letter-spacing: 1.5px;
+}
+
+p {
+    font-size: 1em;
+    color: var(--primary-color);
+    line-height: 1.5;
+    letter-spacing: 1.5px;
+}
+
+a {
+    font-size: 1em;
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.page-header-image img {
+    padding-top: 120px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+
+
+@media (max-width: 768px) {
+
+    h1 {
+        font-size: 1.5em;
+    }
+    
+    h2 {
+        font-size: 1.2em;
+    
+    }
+    
+    h3 {
+        font-size: 1em;
+    }
+    
+    h4 {
+        font-size: 0.9em;
+   
+    }
+    
+    p {
+        font-size: 0.9em;
+    }
+    
+    a {
+        font-size: 0.9em;
+    }
+
+    .page-header-image {
+        
+        max-height: 300px; /* Mobilde belirli bir maksimum yükseklik */
+        overflow: hidden; /* Resmin taşmasını önlemek için */
+    }
+    .page-header-image img {
+        padding-top:50px;
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+}

@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "owl.carousel": "^2.3.4",
+    "gh-pages": "^6.1.1"
+  },
+  "name": "personal",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "build": "echo 'Building the project...'",
+    "deploy": "gh-pages -d ."
+  },
+  "keywords": [],
+  "author": "Orhan Guezel",
+  "license": "ISC"
+}
+
