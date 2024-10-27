@@ -10,7 +10,7 @@ export function loadCarousel() {
             
             <!-- Carousel bölümü -->
             <div class='owl-carousel' id='owlCarousel'>
-                <div class='slide' data-title="Robustes Design für Langlebigkeit" data-text="Unsere Produkte sind aus speziellen, rostfreien Materialien gefertigt und besonders langlebig.">
+                <div class='slide' data-title="Robustes Design" data-text="Unsere Produkte sind aus speziellen, rostfreien Materialien gefertigt und besonders langlebig.">
                     <img class='owl-item-bg' src='assets/img/slayt/1.png' alt='Bild 1'>
                 </div>
                 <div class='slide' data-title="Weltweit Anerkannt" data-text="Unsere Produkte werden weltweit geschätzt und sind die bevorzugte Wahl der Profis.">
@@ -31,7 +31,7 @@ export function loadCarousel() {
                 <div class='slide' data-title="Innovative Technologie" data-text="Mit modernster Technologie hergestellt, bieten unsere Produkte höchste Leistung.">
                     <img class='owl-item-bg' src='assets/img/slayt/7.png' alt='Bild 7'>
                 </div>
-                <div class='slide' data-title="Schnelle Lieferung & Kundenservice" data-text="Mit schneller Lieferung und exzellentem Kundenservice sind wir für Sie da.">
+                <div class='slide' data-title="Schnelle Lieferung" data-text="Mit schneller Lieferung und exzellentem Kundenservice sind wir für Sie da.">
                     <img class='owl-item-bg' src='assets/img/slayt/8.png' alt='Bild 8'>
                 </div>
             </div>
