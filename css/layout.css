@@ -1,11 +1,16 @@
 /* Genel Sayfa Düzeni */
+html, body {
+    overflow-x: hidden;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
 body {
     font-family: var(--font-family);
     font-size: var(--font-size-base);
     color: var(--text-color);
     background-color: var(--background-color);
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
     position: relative; /* Arka planın üstüne içerik eklemek için konumlandırmayı relative yapıyoruz */
     overflow-x: hidden;
@@ -80,6 +85,11 @@ a:hover {
     object-fit: cover;
 }
 
+img, iframe, table {
+    max-width: 100%;
+    height: auto;
+}
+
 
 
 @media (max-width: 768px) {
@@ -120,6 +130,11 @@ a:hover {
         width: 100%;
         height: auto;
         object-fit: cover;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0 10px; /* Yanlarda boşluk bırakmak isterseniz */
     }
 
 }
