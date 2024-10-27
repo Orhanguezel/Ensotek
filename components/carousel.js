@@ -25,7 +25,7 @@ export function loadCarousel() {
                 <div class='slide' data-title="Einfache Installation" data-text="Unsere benutzerfreundlichen Produkte sind leicht zu installieren und zu warten.">
                     <img class='owl-item-bg' src='assets/img/slayt/5.png' alt='Bild 5'>
                 </div>
-                <div class='slide' data-title="Nachhaltig und Umweltfreundlich" data-text="Aus nachhaltigen Materialien gefertigt, schonen unsere Produkte die Umwelt.">
+                <div class='slide' data-title="Umweltfreundlich" data-text="Aus nachhaltigen Materialien gefertigt, schonen unsere Produkte die Umwelt.">
                     <img class='owl-item-bg' src='assets/img/slayt/6.png' alt='Bild 6'>
                 </div>
                 <div class='slide' data-title="Innovative Technologie" data-text="Mit modernster Technologie hergestellt, bieten unsere Produkte höchste Leistung.">
