@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Suche | Ensotek</title>
+
+    <!-- CSS Dosyaları -->
+    <link rel="stylesheet" href="css/root.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/suche.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/news.css">    
+    <link rel="stylesheet" href="css/footer.css">
+
+    <!-- Font Awesome İkonları -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+
+<body data-page-type="search">
+    <!-- Header Component -->
+    <div id="header"></div>
+
+    <!-- Sayfa Üstü Görsel -->
+    <div class="page-header-image">
+        <img src="assets/img/genel/12.png" alt="Seite Banner Bild">
+    </div>
+
+      <!-- Arama Alanı -->
+      <section id="search-section">
+        <h2>Seite durchsuchen</h2>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Suchbegriff eingeben">
+            <button id="search-button">Suche</button>
+        </div>
+        <div id="search-results"></div>
+        <div id="latest-news"></div>
+    </section>
+
+   <!-- Footer Component -->
+   <div id="footer"></div>
+
+    <!-- JavaScript Dosyaları -->
+    <script src="js/app.js" type="module"></script> <!-- Ana JS dosyası -->
+    <script src="components/suche.js" type="module"></script> <!-- Arama sayfası JS dosyası -->
+</body>
+</html>

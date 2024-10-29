@@ -3,42 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Referenzen | Ensotek</title>
-    
+    <title>Partnerschaft | Ensotek</title>
+
     <!-- CSS Dosyaları -->
     <link rel="stylesheet" href="css/root.css">
     <link rel="stylesheet" href="css/layout.css">
     <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/referenzen.css"> <!-- Bu sayfa için özel CSS -->
+    <link rel="stylesheet" href="css/suche.css">
     <link rel="stylesheet" href="css/footer.css">
 
     <!-- Font Awesome İkonları -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 
-<body data-page-type="Referenzen"> <!-- Sayfa türü referanslar olarak belirlendi -->
+<body data-page-type="search">
     <!-- Header Component -->
     <div id="header"></div>
 
     <!-- Sayfa Üstü Görsel -->
     <div class="page-header-image">
-        <img src="assets/img/genel/9.png" alt="Seite Banner Bild">
-      </div>
+        <img src="assets/img/genel/12.png" alt="Seite Banner Bild">
+    </div>
 
-    <!-- Referanslar Section -->
-    <section id="Referenzen">
-        <!-- Dinamik olarak referans içerikleri buraya yüklenecek -->
-        <div class="image-grid" id="imageContainer">
-            <!-- Seçilen kategoriye ait görseller burada gösterilecek -->
-        </div>
+     <!-- Arama Bölümü -->
+     <section id="search-section">
+        <h2>Site Ara</h2>
+        <input type="text" id="search-input" placeholder="Arama yapın...">
+        <button id="search-button">Ara</button>
+        <div id="results"></div> <!-- Sonuçların görüneceği alan -->
     </section>
 
     <!-- Footer Component -->
     <div id="footer"></div>
 
     <!-- JavaScript Dosyaları -->
-    <script src="js/app.js" type="module"></script>
-    <script src="components/referans.js" type="module"></script> <!-- Referans içerikleri buradan yüklenecek -->
+    <script src="js/app.js" type="module"></script> <!-- Ana JS dosyası -->
+    <script src="components/suche.js" type="module"></script> <!-- Arama sayfası JS dosyası -->
 </body>
 </html>
-

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrierung | Ensotek</title>
+
+    <!-- CSS Dosyaları -->
+    <link rel="stylesheet" href="css/root.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/login.css">
+    <link rel="stylesheet" href="css/footer.css">
+</head>
+
+<body data-page-type="register">
+    <!-- Header Component -->
+    <div id="header"></div>
+
+    <!-- Kayıt Alanı -->
+    <div id="register-section"></div>
+
+    <!-- Footer Component -->
+    <div id="footer"></div>
+
+    <!-- JavaScript Dosyaları -->
+    <script src="js/app.js" type="module"></script> <!-- Ana JS dosyası -->
+    <script type="module">
+        import { loadRegister } from './components/register.js';
+        loadRegister();
+    </script>
+</body>
+</html>

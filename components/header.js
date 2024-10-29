@@ -17,7 +17,7 @@ export function loadHeader() {
                   <div class="kuhlturm-top-links">
                       <a href="sitemap.html"><i class="fas fa-sitemap"></i> Sitemap</a> 
                       <a href="login.html"><i class="fas fa-user"></i> Login</a> 
-                      <a href="search.html"><i class="fas fa-search"></i> Suche</a>
+                      <a href="suche.html"><i class="fas fa-search"></i> Suche</a>
                   </div>
                   <div class="kuhlturm-mobile-menu-button" id="menu-toggle">
                       <span class="bar"></span>
@@ -126,7 +126,7 @@ export function loadHeader() {
                                       <ul>
                                           <li><a href="hilfmittel.html#faq" class="upper-level">Hilfmittel</a>
                                               <ul>
-                                                  <li><a href="hilfmittel.html#faq">FAQ</a></li>
+                                                  <li><a href="faq.html">FAQ</a></li>
                                                   <li><a href="hilfmittel.html#glossar">Glossar der Kühltechnologien</a></li>
                                                   <li><a href="hilfmittel.html#technische-artikel">Technische Artikel</a></li>
                                               </ul>

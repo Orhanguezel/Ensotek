@@ -9,7 +9,9 @@ html, body {
 body {
     font-family: var(--font-family);
     font-size: var(--font-size-base);
-    color: var(--text-color);
+    color: var(--primary-color);
+    line-height: 1.2;
+    letter-spacing: 1.2px;
     background-color: var(--background-color);
     box-sizing: border-box;
     position: relative; /* Arka planın üstüne içerik eklemek için konumlandırmayı relative yapıyoruz */
@@ -55,9 +57,16 @@ h3 {
 
 h4 {
     font-size: 1em;
-    color: var(--text-color);
+    color: var(--primary-color);
     line-height: 1.5;
     letter-spacing: 1.5px;
+}
+
+h5 {
+    font-size: 0.9em;
+    color: var(--primary-color);
+    line-height: 1.2;
+    letter-spacing: 1.2px;
 }
 
 p {
