@@ -17,7 +17,7 @@ export function loadHeader() {
                   <div class="kuhlturm-top-links">
                       <a href="sitemap.html"><i class="fas fa-sitemap"></i> Sitemap</a> 
                       <a href="login.html"><i class="fas fa-user"></i> Login</a> 
-                      <a href="search.html"><i class="fas fa-search"></i> Suche</a>
+                      <a href="suche.html"><i class="fas fa-search"></i> Suche</a>
                   </div>
                   <div class="kuhlturm-mobile-menu-button" id="menu-toggle">
                       <span class="bar"></span>
