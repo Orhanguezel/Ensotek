@@ -1,0 +1,81 @@
+/* FAQ Sayfası için Genel Stil */
+#faq-section {
+    padding: 20px;
+    text-align: center;
+    background-color: var(--background-color);
+    margin: 0 auto;
+    max-width: 1100px;
+    box-sizing: border-box;
+}
+
+#faq-section h1 {
+    text-align: center;
+    margin-bottom: 40px;
+    color: var(--primary-color);
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.faq-item {
+    background-color: var(--background2-color);
+    border: 1px solid var(--text5-color);
+    padding: 15px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 15px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.faq-item:hover {
+    background-color: var(--text5-color);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.faq-question {
+    font-weight: bold;
+    color: var(--text5-color);
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+.faq-item:hover .faq-question{
+    color: var(--text-color);
+}
+
+.faq-icon {
+    margin-right: 10px;
+    transition: transform 0.3s ease;
+    font-size: 1.5rem;
+}
+
+.faq-answer {
+    overflow: hidden;
+    transition: max-height 0.3s ease-in-out;
+    max-height: 0;
+    margin-top: 10px;
+    color: var(--text5-color);
+    font-size: 1rem;
+    line-height: 1.6;
+}
+
+.faq-item:hover .faq-answer {
+    color: var(--text-color);
+}
+
+/* Açık yanıtlar */
+.faq-item.open .faq-answer {
+    max-height: 100%;
+}
+
+/* Mobil uyumluluk */
+@media (max-width: 768px) {
+    #faq-section {
+        padding: 20px;
+    }
+
+    .faq-item {
+        width: 100%;
+    }
+}

@@ -126,7 +126,7 @@ export function loadHeader() {
                                       <ul>
                                           <li><a href="hilfmittel.html#faq" class="upper-level">Hilfmittel</a>
                                               <ul>
-                                                  <li><a href="hilfmittel.html#faq">FAQ</a></li>
+                                                  <li><a href="faq.html">FAQ</a></li>
                                                   <li><a href="hilfmittel.html#glossar">Glossar der Kühltechnologien</a></li>
                                                   <li><a href="hilfmittel.html#technische-artikel">Technische Artikel</a></li>
                                               </ul>

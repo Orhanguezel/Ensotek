@@ -1,0 +1,63 @@
+/* Login sayfası stili */
+#login-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--background2-color);
+}
+
+.login-container {
+    background-color: var(--background-color);
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 400px;
+    width: 100%;
+    text-align: center;
+}
+
+.login-container h2 {
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    font-family: var(--font-family);
+}
+
+.login-container label {
+    display: block;
+    margin-bottom: 5px;
+    text-align: left;
+    color: var(--text3-color);
+    font-weight: bold;
+}
+
+.login-container input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: var(--font-size-base);
+}
+
+#login-button {
+    padding: var(--button-padding);
+    font-size: var(--font-size-base);
+    background-color: var(--button-background-color);
+    color: var(--button-text-color);
+    border: none;
+    cursor: pointer;
+    border-radius: var(--button-border-radius);
+    transition: background-color 0.3s ease;
+}
+
+#login-button:hover {
+    background-color: var(--accent-color);
+}
+
+#login-message {
+    margin-top: 10px;
+    font-weight: bold;
+    color: green;
+    text-align: center;
+}
