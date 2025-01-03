@@ -1,6 +1,6 @@
 const NODE_ENV = process.env.NODE_ENV || 'development';
 const SERVER_URL = NODE_ENV === 'development'
-    ? 'http://localhost:5000'
+    ? 'http://localhost:5004'
     : 'https://www.ensotek.de';
 
 const swaggerOptions = {
@@ -17,5 +17,6 @@ const swaggerOptions = {
             },
         ],
     },
-    apis: ['./routes/*.js'], // Swagger açıklamaları için dosyalar
+    apis: ['./routes/*.js'],
 };
+
