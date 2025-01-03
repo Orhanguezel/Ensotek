@@ -11,9 +11,16 @@ dotenv.config();
 
 const app = express();
 
+// Ortam Değişkenleri
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const PORT = process.env.PORT || 5004;
+const FRONTEND_URL = NODE_ENV === 'development'
+    ? process.env.LOCAL_FRONTEND_URL
+    : process.env.PROD_FRONTEND_URL;
+
 // Middleware
 app.use(cors({
-    origin: '*', // Geçici olarak tüm kaynaklara izin verir
+    origin: FRONTEND_URL, // Dinamik frontend URL'si
     credentials: true,
 }));
 
@@ -35,8 +42,8 @@ app.use('/api/references', require('./routes/references'));
 // Hata yönetimi middleware
 app.use(errorHandler);
 
-// Sunucu başlatma
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
-
+// Sunucu Başlatma
+app.listen(PORT, () => {
+    console.log(`Server running in ${NODE_ENV} mode on port ${PORT}`);
+    console.log(`Frontend URL: ${FRONTEND_URL}`);
+});
