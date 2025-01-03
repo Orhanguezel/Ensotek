@@ -9,13 +9,21 @@ const users = [
 
 (async () => {
     try {
-        const db = await connectDB(process.env.AUTH_DB);
+        const NODE_ENV = process.env.NODE_ENV || 'development';
+        const MONGO_URI =
+            NODE_ENV === 'development' ? process.env.LOCAL_MONGO_URI : process.env.PROD_MONGO_URI;
+        const DB_NAME = process.env.AUTH_DB;
+
+        const fullUri = `${MONGO_URI}/${DB_NAME}?authSource=admin`;
+        console.log(`Seeding users in ${NODE_ENV} mode: ${fullUri}`);
+
+        const db = await connectDB(fullUri);
         const User = db.model('User', UserSchema);
 
-        await User.deleteMany(); // Mevcut kullanıcıları sil
+        await User.deleteMany();
         console.log('Existing users deleted.');
 
-        await User.insertMany(users); // Yeni kullanıcıları ekle
+        await User.insertMany(users);
         console.log('Users seeded successfully.');
 
         process.exit();
@@ -24,3 +32,4 @@ const users = [
         process.exit(1);
     }
 })();
+
