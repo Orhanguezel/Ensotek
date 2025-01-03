@@ -1,4 +1,7 @@
-const swaggerJsDoc = require('swagger-jsdoc');
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const SERVER_URL = NODE_ENV === 'development'
+    ? 'http://localhost:5000'
+    : 'https://www.ensotek.de';
 
 const swaggerOptions = {
     definition: {
@@ -10,13 +13,9 @@ const swaggerOptions = {
         },
         servers: [
             {
-                url: 'http://localhost:5000',
+                url: SERVER_URL,
             },
         ],
     },
     apis: ['./routes/*.js'], // Swagger açıklamaları için dosyalar
 };
-
-const swaggerSpecs = swaggerJsDoc(swaggerOptions);
-module.exports = swaggerSpecs;
-
