@@ -1,12 +1,31 @@
 const mongoose = require('mongoose');
-const connections = {}; // Cache for database connections
+const connections = {}; // Cached connections
 
-const connectDB = async (uri) => {
+const connectDB = async (dbName) => {
+    const NODE_ENV = process.env.NODE_ENV || 'development';
+    const MONGO_URI =
+        NODE_ENV === 'development'
+            ? process.env.LOCAL_MONGO_URI
+            : process.env.PROD_MONGO_URI;
+
+    if (!MONGO_URI || !dbName) {
+        throw new Error('MongoDB URI and database name are required.');
+    }
+
+    // Geçersiz karakter kontrolü
+    if (dbName.includes('/')) {
+        throw new Error(`Invalid database name: '${dbName}'`);
+    }
+
+    const uri = `${MONGO_URI}/${dbName}`; // Tam URI oluşturma
+
     if (connections[uri]) {
-        return connections[uri]; // Return cached connection
+        console.log(`Using cached connection for ${uri}`);
+        return connections[uri];
     }
 
     try {
+        console.log(`Connecting to MongoDB with URI: ${uri}`);
         const conn = mongoose.createConnection(uri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
@@ -18,7 +37,7 @@ const connectDB = async (uri) => {
             throw err;
         });
 
-        connections[uri] = conn; // Cache the connection
+        connections[uri] = conn;
         return conn;
     } catch (err) {
         console.error(`MongoDB connection error for ${uri}:`, err.message);
@@ -27,6 +46,12 @@ const connectDB = async (uri) => {
 };
 
 module.exports = connectDB;
+
+
+
+
+
+
 
 
 

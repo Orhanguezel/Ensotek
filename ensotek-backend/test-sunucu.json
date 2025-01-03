@@ -1,0 +1,232 @@
+{
+    "info": {
+        "name": "Ensotek Backend API Full Tests",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth Register",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"username\": \"newUser\",\n    \"email\": \"newuser@example.com\",\n    \"password\": \"123456\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "https://www.ensotek.de/api/auth/register",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "auth", "register"]
+                }
+            }
+        },
+        {
+            "name": "Auth Login",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"email\": \"newuser@example.com\",\n    \"password\": \"123456\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "https://www.ensotek.de/api/auth/login",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "auth", "login"]
+                }
+            }
+        },
+        {
+            "name": "Get Articles",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer USER_OR_ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "url": {
+                    "raw": "https://www.ensotek.de/api/articles",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "articles"]
+                }
+            }
+        },
+        {
+            "name": "Create Article (Admin Only)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"title\": \"New Article\",\n    \"id\": \"1\",\n    \"summary\": \"This is a summary\",\n    \"content\": \"This is the content\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "https://www.ensotek.de/api/articles",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "articles"]
+                }
+            }
+        },
+        {
+            "name": "Get Products",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer USER_OR_ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "url": {
+                    "raw": "https://www.ensotek.de/api/products",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "products"]
+                }
+            }
+        },
+        {
+            "name": "Create Product (Admin Only)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Smartphone\",\n    \"category\": \"Electronics\",\n    \"price\": 500,\n    \"stock\": 10\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "https://www.ensotek.de/api/products",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "products"]
+                }
+            }
+        },
+        {
+            "name": "Get Spare Parts",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer USER_OR_ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "url": {
+                    "raw": "https://www.ensotek.de/api/spare-parts",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "spare-parts"]
+                }
+            }
+        },
+        {
+            "name": "Create Spare Part (Admin Only)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"name\": \"Battery\",\n    \"category\": \"Electronics\",\n    \"price\": 50,\n    \"stock\": 100\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "https://www.ensotek.de/api/spare-parts",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "spare-parts"]
+                }
+            }
+        },
+        {
+            "name": "Get References",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer USER_OR_ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "url": {
+                    "raw": "https://www.ensotek.de/api/references",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "references"]
+                }
+            }
+        },
+        {
+            "name": "Create Reference (Admin Only)",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer ADMIN_TOKEN_HERE"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\n    \"url\": \"https://example.com\",\n    \"company_name\": \"Example Company\",\n    \"sector\": \"IT\"\n}",
+                    "options": {
+                        "raw": {
+                            "language": "json"
+                        }
+                    }
+                },
+                "url": {
+                    "raw": "https://www.ensotek.de/api/references",
+                    "protocol": "https",
+                    "host": ["www", "ensotek", "de"],
+                    "path": ["api", "references"]
+                }
+            }
+        }
+    ]
+}

@@ -136,7 +136,7 @@ const {
 const authorize = require('../helpers/authorization');
 
 // Referans rotaları
-router.get('/', authorize(['user', 'admin']), asyncHandler(getAllReferences));
+router.get('/', asyncHandler(getAllReferences));
 router.post('/', authorize(['admin']), asyncHandler(createReference));
 router.put('/:id', authorize(['admin']), asyncHandler(updateReference));
 router.delete('/:id', authorize(['admin']), asyncHandler(deleteReference));

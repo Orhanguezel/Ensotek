@@ -134,7 +134,7 @@ const {
 } = require('../controllers/articleController');
 const authorize = require('../helpers/authorization');
 
-router.get('/', authorize(['user', 'admin']), asyncHandler(getAllArticles));
+router.get('/', asyncHandler(getAllArticles));
 router.post('/', authorize(['admin']), asyncHandler(createArticle));
 router.put('/:id', authorize(['admin']), asyncHandler(updateArticle));
 router.delete('/:id', authorize(['admin']), asyncHandler(deleteArticle));

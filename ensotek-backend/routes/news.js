@@ -132,7 +132,7 @@ const {
 const authorize = require('../helpers/authorization');
 
 // Haber rotaları
-router.get('/', authorize(['user', 'admin']), asyncHandler(getAllNews));
+router.get('/', asyncHandler(getAllNews));
 router.post('/', authorize(['admin']), asyncHandler(createNews));
 router.put('/:id', authorize(['admin']), asyncHandler(updateNews));
 router.delete('/:id', authorize(['admin']), asyncHandler(deleteNews));

@@ -8,13 +8,18 @@ const { setTokenCookie } = require('../utils/jwtHelpers'); // Helper'dan setToke
 // Kullanıcı kayıt işlemi
 exports.register = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
+
+    // Database connection
     const db = await connectDB(process.env.AUTH_DB);
     const User = db.models.User || db.model('User', userSchema);
 
-    const user = await User.create({ username, email, password });
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Token'ı cookie'ye ekleyin
+    const user = await User.create({ username, email, password: hashedPassword });
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION || '1d' });
+
+    // Set token in cookie
     setTokenCookie(res, token);
 
     res.status(201).json({ success: true, data: { token, user } });
@@ -23,23 +28,28 @@ exports.register = asyncHandler(async (req, res) => {
 // Kullanıcı giriş işlemi
 exports.login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
+
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: 'Email ve şifre zorunludur' });
+    }
+
     const db = await connectDB(process.env.AUTH_DB);
     const User = db.model('User', userSchema);
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
         return res.status(401).json({ success: false, message: 'Geçersiz email veya şifre' });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.checkPassword(password);
     if (!isPasswordValid) {
         return res.status(401).json({ success: false, message: 'Geçersiz email veya şifre' });
     }
 
-    const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION || '1h' });
 
-    // Token'ı cookie'ye ekleyin
-    setTokenCookie(res, token, 60 * 60 * 1000); // 1 saat geçerli
+    // Token'ı cookie'ye ekle
+    setTokenCookie(res, token);
 
     res.status(200).json({
         success: true,
@@ -53,6 +63,7 @@ exports.login = asyncHandler(async (req, res) => {
         },
     });
 });
+
 
 // Kullanıcı profil resmini güncelle
 exports.updateProfileImage = asyncHandler(async (req, res) => {
@@ -137,8 +148,7 @@ exports.updateUser = asyncHandler(async (req, res) => {
 
 // Refresh token endpoint
 exports.refreshToken = asyncHandler(async (req, res) => {
-    const refreshToken = req.cookies.refreshToken;
-
+    const refreshToken = req.cookies.refreshToken || req.headers['authorization'];
     if (!refreshToken) {
         return res.status(401).json({ success: false, message: 'Refresh token gerekli' });
     }
@@ -149,10 +159,11 @@ exports.refreshToken = asyncHandler(async (req, res) => {
             expiresIn: process.env.JWT_EXPIRATION || '15m',
         });
 
-        setTokenCookie(res, newAccessToken); // Yeni access token cookie'ye eklenir
+        setTokenCookie(res, newAccessToken);
 
         res.status(200).json({ success: true, token: newAccessToken });
     } catch (err) {
-        res.status(401).json({ success: false, message: 'Refresh token geçersiz' });
+        res.status(401).json({ success: false, message: 'Refresh token geçersiz veya süresi dolmuş' });
     }
 });
+

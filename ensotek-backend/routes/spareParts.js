@@ -140,7 +140,7 @@ const {
 const authorize = require('../helpers/authorization');
 
 // Yedek parça rotaları
-router.get('/', authorize(['user', 'admin']), asyncHandler(getAllSpareParts));
+router.get('/', asyncHandler(getAllSpareParts));
 router.post('/', authorize(['admin']), asyncHandler(createSparePart));
 router.put('/:id', authorize(['admin']), asyncHandler(updateSparePart));
 router.delete('/:id', authorize(['admin']), asyncHandler(deleteSparePart));
