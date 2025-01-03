@@ -14,10 +14,13 @@ dotenv.config();
             NODE_ENV === 'development' ? process.env.LOCAL_MONGO_URI : process.env.PROD_MONGO_URI;
         const DB_NAME = process.env.ARTICLES_DB;
 
-        console.log(`Seeding database in ${NODE_ENV} mode: ${MONGO_URI}/${DB_NAME}`);
+        // Construct full URI with authSource
+        const fullUri = `${MONGO_URI}/${DB_NAME}?authSource=admin`;
+
+        console.log(`Seeding database in ${NODE_ENV} mode: ${fullUri}`);
 
         // Connect to the database
-        const db = await connectDB(MONGO_URI, DB_NAME);
+        const db = await connectDB(fullUri);
         const Article = db.model('Article', ArticleSchema);
 
         // Clear existing data and seed new data
