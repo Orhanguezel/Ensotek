@@ -1,44 +1,33 @@
 const mongoose = require('mongoose');
 const connections = {}; // Cache for database connections
 
-const connectDB = async (uri, dbName) => {
-    if (!uri) {
-        throw new Error('MongoDB URI is required');
-    }
-    if (!dbName) {
-        throw new Error('Database name is required');
-    }
-
-    const fullUri = `${uri}/${dbName}`;
-
-    if (connections[fullUri]) {
-        return connections[fullUri]; // Return cached connection
+const connectDB = async (uri) => {
+    if (connections[uri]) {
+        return connections[uri]; // Return cached connection
     }
 
     try {
-        const conn = mongoose.createConnection(fullUri, {
+        const conn = mongoose.createConnection(uri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 30000, // Timeout set to 30 seconds
-            socketTimeoutMS: 45000, // Increase socket timeout
-            maxPoolSize: 10,
         });
 
-        conn.on('connected', () => console.log(`MongoDB connected to ${fullUri}`));
+        conn.on('connected', () => console.log(`MongoDB connected to ${uri}`));
         conn.on('error', (err) => {
-            console.error(`MongoDB error on ${fullUri}:`, err.message);
+            console.error(`MongoDB error on ${uri}:`, err.message);
             throw err;
         });
 
-        connections[fullUri] = conn; // Cache the connection
+        connections[uri] = conn; // Cache the connection
         return conn;
     } catch (err) {
-        console.error(`MongoDB connection error for ${fullUri}:`, err.message);
+        console.error(`MongoDB connection error for ${uri}:`, err.message);
         throw err;
     }
 };
 
 module.exports = connectDB;
+
 
 
 

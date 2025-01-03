@@ -14,7 +14,7 @@ dotenv.config();
             NODE_ENV === 'development' ? process.env.LOCAL_MONGO_URI : process.env.PROD_MONGO_URI;
         const DB_NAME = process.env.ARTICLES_DB;
 
-        // Construct full URI with authSource
+        // Construct full URI with database name and authSource
         const fullUri = `${MONGO_URI}/${DB_NAME}?authSource=admin`;
 
         console.log(`Seeding database in ${NODE_ENV} mode: ${fullUri}`);
@@ -36,4 +36,5 @@ dotenv.config();
         process.exit(1); // Exit the process with error
     }
 })();
+
 
