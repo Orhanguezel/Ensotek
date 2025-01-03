@@ -1,11 +1,12 @@
+const swaggerJsDoc = require('swagger-jsdoc');
+
 const NODE_ENV = process.env.NODE_ENV || 'development';
-const SERVER_URL = NODE_ENV === 'development'
-    ? 'http://localhost:5004'
-    : 'https://www.ensotek.de';
+const SERVER_URL =
+    NODE_ENV === 'development' ? 'http://localhost:5004' : 'https://www.ensotek.de';
 
 const swaggerOptions = {
     definition: {
-        openapi: '3.0.0',
+        openapi: '3.0.0', // OpenAPI sürümünü doğru belirtin
         info: {
             title: 'Ensotek API',
             version: '1.0.0',
@@ -17,6 +18,9 @@ const swaggerOptions = {
             },
         ],
     },
-    apis: ['./routes/*.js'],
+    apis: ['./routes/*.js'], // Swagger açıklamalarını içeren dosyalar
 };
+
+const swaggerSpecs = swaggerJsDoc(swaggerOptions);
+module.exports = swaggerSpecs;
 
