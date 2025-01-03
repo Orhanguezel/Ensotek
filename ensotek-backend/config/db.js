@@ -1,37 +1,45 @@
 const mongoose = require('mongoose');
 const connections = {}; // Cache for database connections
 
-const connectDB = async (dbName) => {
-    if (connections[dbName]) {
-        return connections[dbName]; // Cache'e kaydedilmiş bağlantıyı döndür
+const connectDB = async (uri, dbName) => {
+    if (!uri) {
+        throw new Error('MongoDB URI is required');
     }
     if (!dbName) {
         throw new Error('Database name is required');
     }
+
+    const fullUri = `${uri}/${dbName}`;
+
+    if (connections[fullUri]) {
+        return connections[fullUri]; // Return cached connection
+    }
+
     try {
-        const conn = mongoose.createConnection(`${process.env.MONGO_URI}/${dbName}`, {
+        const conn = mongoose.createConnection(fullUri, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 30000, // Timeout'u 30 saniye olarak ayarla
-            socketTimeoutMS: 45000, // Socket timeout'u artır
+            serverSelectionTimeoutMS: 30000, // Timeout set to 30 seconds
+            socketTimeoutMS: 45000, // Increase socket timeout
             maxPoolSize: 10,
         });
 
-        conn.on('connected', () => console.log(`MongoDB connected to ${dbName}`));
+        conn.on('connected', () => console.log(`MongoDB connected to ${fullUri}`));
         conn.on('error', (err) => {
-            console.error(`MongoDB error on ${dbName}:`, err.message);
+            console.error(`MongoDB error on ${fullUri}:`, err.message);
             throw err;
         });
 
-        connections[dbName] = conn; // Bağlantıyı cache'e kaydet
+        connections[fullUri] = conn; // Cache the connection
         return conn;
     } catch (err) {
-        console.error(`MongoDB connection error for ${dbName}:`, err.message);
+        console.error(`MongoDB connection error for ${fullUri}:`, err.message);
         throw err;
     }
 };
 
 module.exports = connectDB;
+
 
 
 

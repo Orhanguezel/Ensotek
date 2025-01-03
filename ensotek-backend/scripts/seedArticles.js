@@ -1,23 +1,36 @@
-// seedArticles.js
-const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const connectDB = require('../config/db');
 const ArticleSchema = require('../models/Article');
 const articles = require('./articles-data'); // Import article data
 
-(async () => {
-    const db = await connectDB(process.env.ARTICLES_DB);
-    const Article = db.model('Article', ArticleSchema);
+// Load environment variables
+dotenv.config();
 
+(async () => {
     try {
-        await Article.deleteMany(); // Clear existing articles
+        // Determine environment and set URI and database name
+        const NODE_ENV = process.env.NODE_ENV || 'development';
+        const MONGO_URI =
+            NODE_ENV === 'development' ? process.env.LOCAL_MONGO_URI : process.env.PROD_MONGO_URI;
+        const DB_NAME = process.env.ARTICLES_DB;
+
+        console.log(`Seeding database in ${NODE_ENV} mode: ${MONGO_URI}/${DB_NAME}`);
+
+        // Connect to the database
+        const db = await connectDB(MONGO_URI, DB_NAME);
+        const Article = db.model('Article', ArticleSchema);
+
+        // Clear existing data and seed new data
+        await Article.deleteMany();
         console.log('Existing articles deleted.');
 
-        await Article.insertMany(articles); // Insert new articles
+        await Article.insertMany(articles);
         console.log('Articles seeded successfully.');
 
         process.exit(); // Exit the process
     } catch (err) {
-        console.error(err);
-        process.exit(1);
+        console.error('Error seeding articles:', err.message);
+        process.exit(1); // Exit the process with error
     }
 })();
+
