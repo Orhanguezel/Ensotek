@@ -3,7 +3,7 @@ const connectDB = require('../config/db');
 const UserSchema = require('../models/User');
 
 const users = [
-    { username: 'admin', email: 'admin@example.com', password: '123456', role: 'admin' },
+    { username: 'admin5', email: 'admin5@example.com', password: '123456', role: 'admin' },
     { username: 'testuser', email: 'test@example.com', password: '123456', role: 'user' },
 ];
 
