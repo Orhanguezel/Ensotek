@@ -9,17 +9,24 @@ const { setTokenCookie } = require('../utils/jwtHelpers'); // Helper'dan setToke
 exports.register = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
 
-    // Database connection
+    console.log('Kayıt işlemi başlatıldı:', { username, email });
+
+    // Database bağlantısı
     const db = await connectDB(process.env.AUTH_DB);
     const User = db.models.User || db.model('User', userSchema);
 
-    // Hash password
+    // Şifre hashleme
     const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('Şifre hashlendi:', hashedPassword);
 
+    // Kullanıcı oluşturma
     const user = await User.create({ username, email, password: hashedPassword });
+    console.log('Kullanıcı oluşturuldu:', user);
+
+    // JWT Token oluştur
     const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION || '1d' });
 
-    // Set token in cookie
+    // Token'ı cookie'ye ekle
     setTokenCookie(res, token);
 
     res.status(201).json({ success: true, data: { token, user } });
@@ -29,26 +36,37 @@ exports.register = asyncHandler(async (req, res) => {
 exports.login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
 
-    if (!email || !password) {
-        return res.status(400).json({ success: false, message: 'Email ve şifre zorunludur' });
-    }
+    console.log('Giriş isteği alındı:', email);
 
     const db = await connectDB(process.env.AUTH_DB);
     const User = db.model('User', userSchema);
 
+    // Kullanıcıyı bul ve şifre alanını getir
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
+        console.log('Kullanıcı bulunamadı:', email);
         return res.status(401).json({ success: false, message: 'Geçersiz email veya şifre' });
     }
 
-    const isPasswordValid = await user.checkPassword(password);
+    console.log('Kullanıcı bulundu:', user);
+
+    // Şifre doğrulama
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    console.log('Şifre doğrulama sonucu:', isPasswordValid);
+
     if (!isPasswordValid) {
         return res.status(401).json({ success: false, message: 'Geçersiz email veya şifre' });
     }
 
-    const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRATION || '1h' });
+    // JWT Token oluştur
+    const token = jwt.sign(
+        { id: user._id, email: user.email, role: user.role },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRATION || '1h' }
+    );
 
-    // Token'ı cookie'ye ekle
+    console.log('Token oluşturuldu:', token);
+
     setTokenCookie(res, token);
 
     res.status(200).json({
@@ -63,6 +81,8 @@ exports.login = asyncHandler(async (req, res) => {
         },
     });
 });
+
+
 
 
 // Kullanıcı profil resmini güncelle

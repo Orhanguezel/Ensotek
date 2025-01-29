@@ -1,32 +1,27 @@
-require('dotenv').config(); // Ortam değişkenlerini yükle
+require('dotenv').config();
 const connectDB = require('../config/db');
-const UserSchema = require('../models/User');
+const userSchema = require('./models/User');
 
 const users = [
-    { username: 'admin5', email: 'admin5@example.com', password: '123456', role: 'admin' },
+    { username: 'admin', email: 'admin@example.com', password: '123456', role: 'admin' },
     { username: 'testuser', email: 'test@example.com', password: '123456', role: 'user' },
 ];
 
 (async () => {
     try {
-        const NODE_ENV = process.env.NODE_ENV || 'development';
-        const MONGO_URI =
-            NODE_ENV === 'development' ? process.env.LOCAL_MONGO_URI : process.env.PROD_MONGO_URI;
-        const DB_NAME = process.env.AUTH_DB;
-
-        const fullUri = `${MONGO_URI}/${DB_NAME}?authSource=admin`;
-        console.log(`Seeding users in ${NODE_ENV} mode: ${fullUri}`);
-
-        const db = await connectDB(fullUri);
-        const User = db.model('User', UserSchema);
+        const db = await connectDB(process.env.AUTH_DB);
+        const User = db.model('User', userSchema);
 
         await User.deleteMany();
         console.log('Existing users deleted.');
 
-        await User.insertMany(users);
-        console.log('Users seeded successfully.');
+        for (const user of users) {
+            const hashedPassword = await require('bcryptjs').hash(user.password, 10);
+            await User.create({ ...user, password: hashedPassword });
+        }
 
-        process.exit();
+        console.log('Users seeded successfully.');
+        process.exit(0);
     } catch (err) {
         console.error('Error while seeding users:', err.message);
         process.exit(1);
