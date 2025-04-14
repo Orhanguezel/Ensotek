@@ -99,6 +99,25 @@ img, iframe, table {
     height: auto;
 }
 
+#whatsapp-contact {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #25d366;
+    color: white;
+    font-size: 24px;
+    padding: 14px;
+    border-radius: 50%;
+    z-index: 999;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+  }
+  
+  #whatsapp-contact:hover {
+    background-color: #128c7e;
+  }
+
 
 
 @media (max-width: 768px) {

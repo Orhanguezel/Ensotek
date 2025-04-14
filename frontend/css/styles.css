@@ -264,6 +264,8 @@ table caption {
   display: none;
 }
 
+
+
 /* Responsive düzenlemeler */
 @media (max-width: 768px) {
   .container {
