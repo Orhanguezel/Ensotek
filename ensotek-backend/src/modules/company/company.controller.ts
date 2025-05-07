@@ -40,6 +40,15 @@ export const createCompany = asyncHandler(async (req: Request, res: Response, ne
       req.body.logoUrl = req.file.path.replace(/\\/g, "/");
     }
 
+    // 🧩 Ensure socialLinks object exists even if partially sent
+    req.body.socialLinks = {
+      facebook: req.body.socialLinks?.facebook || "",
+      instagram: req.body.socialLinks?.instagram || "",
+      twitter: req.body.socialLinks?.twitter || "",
+      linkedin: req.body.socialLinks?.linkedin || "",
+      youtube: req.body.socialLinks?.youtube || "",
+    };
+
     const newCompany = await Company.create(req.body);
 
     res.status(201).json({
@@ -68,6 +77,17 @@ export const updateCompanyInfo = asyncHandler(async (req: Request, res: Response
     // 🖼️ Normalize logo path if uploaded
     if (req.file && req.file.path) {
       req.body.logoUrl = req.file.path.replace(/\\/g, "/");
+    }
+
+    // 🧩 Ensure socialLinks object exists even if partially sent
+    if (req.body.socialLinks) {
+      req.body.socialLinks = {
+        facebook: req.body.socialLinks?.facebook || "",
+        instagram: req.body.socialLinks?.instagram || "",
+        twitter: req.body.socialLinks?.twitter || "",
+        linkedin: req.body.socialLinks?.linkedin || "",
+        youtube: req.body.socialLinks?.youtube || "",
+      };
     }
 
     const updated = await Company.findByIdAndUpdate(id, req.body, { new: true });
