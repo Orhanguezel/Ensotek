@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import path from "path";
 import fs from "fs";
 
-// 📦 Ortama özel .env dosyasını yükle (.env.metahub, .env.clientX, vs.)
+// 📦 Ortama özel .env dosyasını yükle (.env.ensotek, .env.clientX, vs.)
 const envProfile = process.env.APP_ENV;
 const envPath = envProfile
   ? path.resolve(process.cwd(), `.env.${envProfile}`)

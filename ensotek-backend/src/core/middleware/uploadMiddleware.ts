@@ -2,17 +2,17 @@ import multer, { FileFilterCallback } from "multer";
 import path from "path";
 import fs from "fs";
 import express from "express";
-import { NextFunction, Response, Request } from "express";
+import { Request } from "express";
+import slugify from "slugify";
+import { storageAdapter } from "./storageAdapter";
 
-// ✅ ENV değişkeni zaten server başlatırken yüklendiği için tekrar dotenv gerekmez
 const envProfile = process.env.APP_ENV || "ensotek";
+const provider = process.env.STORAGE_PROVIDER as "local" | "cloudinary" || "local";
 
-// 🌐 Temel ayarlar
-const BASE_UPLOAD_DIR = "uploads";
-const BASE_URL = process.env.BASE_URL || "http://localhost:5014";
-const CURRENT_PROJECT = envProfile; // klasör ayrımı için
+export const BASE_UPLOAD_DIR = "uploads";
+export const BASE_URL_VALUE = process.env.BASE_URL || "http://localhost:5014";
+export const CURRENT_PROJECT = envProfile;
 
-// 🔁 Klasör tanımları
 export const UPLOAD_FOLDERS = {
   profile: "profile-images",
   product: "product-images",
@@ -33,19 +33,18 @@ export const UPLOAD_FOLDERS = {
 
 export type UploadFolderKeys = keyof typeof UPLOAD_FOLDERS;
 
-// 📁 Klasör yolu hesaplama: uploads/<proje>/<kategori>
-const resolveUploadPath = (type: string) =>
+export const resolveUploadPath = (type: string): string =>
   path.join(BASE_UPLOAD_DIR, CURRENT_PROJECT, type);
 
-// 📁 Gerekli klasörleri oluştur
+// 💥 Fix: ensure folder is a string
 Object.values(UPLOAD_FOLDERS).forEach((folder) => {
-  const fullPath = resolveUploadPath(folder);
+  const fullPath = resolveUploadPath(String(folder));
   if (!fs.existsSync(fullPath)) {
     fs.mkdirSync(fullPath, { recursive: true });
   }
 });
 
-// ✅ MIME türleri
+const allowedExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".pdf", ".docx", ".pptx"];
 const allowedMimeTypes = [
   "image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif",
   "application/pdf",
@@ -55,60 +54,24 @@ const allowedMimeTypes = [
   "application/vnd.openxmlformats-officedocument.presentationml.presentation",
 ];
 
-// ✅ Dosya filtreleme
 const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-  console.log("🧾 Checking file:", file.originalname, file.mimetype);
-  if (!file?.mimetype || !allowedMimeTypes.includes(file.mimetype)) {
-    console.warn(`❌ Unsupported file type: ${file?.originalname}`);
-    return cb(new Error(`Unsupported file type: ${file?.mimetype}`));
+  const fileExtension = path.extname(file.originalname).toLowerCase();
+  console.log("Checking file:", file.originalname, file.mimetype, fileExtension);
+
+  if (!allowedMimeTypes.includes(file.mimetype) || !allowedExtensions.includes(fileExtension)) {
+    console.warn(`Unsupported file type or extension: ${file.originalname}`);
+    return cb(new Error(`Unsupported file type or extension: ${file.originalname}`));
   }
   cb(null, true);
 };
 
-// ✅ Genel storage
-const globalStorage = multer.diskStorage({
-  destination: (req, _file, cb) => {
-    const folderKey = req.uploadType as UploadFolderKeys;
-    const uploadFolder = UPLOAD_FOLDERS[folderKey] || UPLOAD_FOLDERS.default;
-    const fullPath = resolveUploadPath(uploadFolder);
-    console.log(`✅ [GLOBAL UPLOADER] Resolved path: ${fullPath}`);
-
-    cb(null, fullPath);
-  },
-  filename: (_req, file, cb) => {
-    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
-    cb(null, uniqueName);
-  },
-});
-
 const upload = multer({
-  storage: globalStorage,
+  storage: storageAdapter(provider),
   limits: { fileSize: 20 * 1024 * 1024 },
   fileFilter,
 });
 
-// ✅ Yeni helper middleware: uploadTypeWrapper
-export const uploadTypeWrapper = (type: UploadFolderKeys) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    req.uploadType = type;
-    console.log(`🛠 [UPLOAD TYPE WRAPPER] req.uploadType set edildi: ${type}`);
-    console.log("🔍 CURRENT_PROJECT:", CURRENT_PROJECT);
-    console.log("🔍 req.uploadType:", req.uploadType);
-    const folderKey = req.uploadType as UploadFolderKeys;
-    console.log("🛠 uploadType:", req.uploadType);
-    console.log("🛠 folderKey:", folderKey);
-    console.log("🛠 UPLOAD_FOLDERS KEYS:", Object.keys(UPLOAD_FOLDERS));
-
-    if (!UPLOAD_FOLDERS[folderKey]) {
-      console.warn(`⚠️ WARNING: uploadType '${folderKey}' not found. Falling back to 'misc'.`);
-    }
-
-    next();
-  };
-};
-
-// 🌐 Statik dosya servisi (örnek: localhost:5014/uploads/ensotek/...)
 export const serveUploads = express.static(BASE_UPLOAD_DIR);
-export { BASE_URL };
 export const UPLOAD_BASE_PATH = `${BASE_UPLOAD_DIR}/${envProfile}`;
+export { BASE_URL_VALUE as BASE_URL }; // 💥 renamed to avoid default export conflict
 export default upload;

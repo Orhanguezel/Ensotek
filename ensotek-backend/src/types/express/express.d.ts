@@ -31,7 +31,7 @@ declare global {
         | "setting"
         | "company"
         | "default";
-
+      uploadSizeLimit?: number; // 💥 ✅ New: uploadSizeLimit
       locale?: "tr" | "en" | "de"; // 🌍 Çok dilli destek (i18n)
     }
   }

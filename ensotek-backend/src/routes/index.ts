@@ -10,7 +10,7 @@ export const getRouter = async (): Promise<Router> => {
   const enabledModules =
     process.env.ENABLED_MODULES?.split(",").map((m) => m.trim().toLowerCase()) ?? [];
 
-  const metaConfigPath = path.resolve(process.cwd(), process.env.META_CONFIG_PATH || "src/meta-configs/metahub");
+  const metaConfigPath = path.resolve(process.cwd(), process.env.META_CONFIG_PATH || "src/meta-configs/ensotek");
   const modules = await fs.readdir(modulesPath, { withFileTypes: true });
 
   for (const mod of modules) {

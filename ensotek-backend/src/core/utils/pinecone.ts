@@ -3,7 +3,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 
-// 🔄 Ortama göre .env yükle (.env.metahub, .env.clientX vs.)
+// 🔄 Ortama göre .env yükle (.env.ensotek, .env.clientX vs.)
 const envProfile = process.env.APP_ENV || "ensotek";
 const envPath = path.resolve(process.cwd(), `.env.${envProfile}`);
 

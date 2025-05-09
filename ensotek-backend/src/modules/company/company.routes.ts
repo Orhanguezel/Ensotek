@@ -6,7 +6,8 @@ import {
 } from "./company.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import { analyticsLogger } from "@/core/middleware/analyticsLogger";
-import upload, { uploadTypeWrapper } from "@/core/middleware/uploadMiddleware";
+import upload from "@/core/middleware/uploadMiddleware";
+import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import {
   validateCreateCompany,
   validateUpdateCompany,
