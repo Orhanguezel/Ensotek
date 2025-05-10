@@ -1,23 +1,36 @@
-// ✅ Guard + Model Typing 
 import mongoose, { Schema, model, models, Document, Types, Model } from "mongoose";
 
+export interface IBlogImage {
+  url: string;
+  thumbnail?: string;
+  webp?: string;
+  publicId?: string;
+}
+
 export interface IBlog extends Document {
-  title: string;
+  title: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   slug: string;
-  content: string;
-  summary: string;
-  images: string[];
+  content: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  summary: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  images: IBlogImage[];
   tags: string[];
-  category: Types.ObjectId;
   author: string;
-  isPublished?: boolean;
+  category?: Types.ObjectId;
+  isPublished: boolean;
   publishedAt?: Date;
   isActive: boolean;
-  label: {
-    tr: string;
-    en: string;
-    de: string;
-  };
   comments: Types.ObjectId[];
   createdAt: Date;
   updatedAt: Date;
@@ -25,55 +38,55 @@ export interface IBlog extends Document {
 
 const blogSchema = new Schema<IBlog>(
   {
-    title: { type: String, required: true },
-    slug: { type: String, required: true, unique: true },
-    content: { type: String, required: true },
-    summary: { type: String, required: true, maxlength: 300 },
-    images: {
-      type: [String],
-      required: true,
-      validate: {
-        validator: (v: string[]) => v.length > 0,
-        message: "At least one image is required.",
-      },
-      default: ["blog.png"],
+    title: {
+      tr: { type: String, trim: true },
+      en: { type: String, trim: true },
+      de: { type: String, trim: true },
     },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    summary: {
+      tr: { type: String, maxlength: 300 },
+      en: { type: String, maxlength: 300 },
+      de: { type: String, maxlength: 300 },
+    },
+    content: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
+    },
+    images: [
+      {
+        url: { type: String, required: true },
+        thumbnail: String,
+        webp: String,
+        publicId: String,
+      },
+    ],
     tags: [{ type: String }],
+    author: { type: String },
     category: {
       type: Schema.Types.ObjectId,
       ref: "BlogCategory",
-      required: true,
     },
-    author: {
-      type: String,
-      default: "Anastasia König",
-    },
-    isPublished: {
-      type: Boolean,
-      default: true,
-    },
-    publishedAt: {
-      type: Date,
-      default: Date.now,
-    },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
-    label: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
-    },
+    isPublished: { type: Boolean, default: false },
+    publishedAt: { type: Date },
+    isActive: { type: Boolean, default: true },
     comments: [{ type: Schema.Types.ObjectId, ref: "Comment" }],
   },
   { timestamps: true }
 );
 
 // 🔁 Automatic slug generation
-blogSchema.pre("validate", function (this: IBlog, next) {
-  if (!this.slug && this.title) {
-    this.slug = this.title
+blogSchema.pre("validate", function (next) {
+  const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "blog";
+  if (!this.slug && baseTitle) {
+    this.slug = baseTitle
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -86,4 +99,5 @@ blogSchema.pre("validate", function (this: IBlog, next) {
 // ✅ Guard + Model Type
 const Blog: Model<IBlog> = models.Blog || model<IBlog>("Blog", blogSchema);
 
+export default Blog;
 export { Blog };

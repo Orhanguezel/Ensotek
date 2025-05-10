@@ -1,5 +1,4 @@
-// ✅ Guard + Model Type (ensures the model is properly typed and prevents recompilation issues)
-import mongoose, { Schema, model, Document, Model, models } from "mongoose";
+import mongoose, { Schema, model, models, Document, Model } from "mongoose";
 
 export interface IBlogCategory extends Document {
   name: {
@@ -8,11 +7,8 @@ export interface IBlogCategory extends Document {
     de: string;
   };
   slug: string;
-  description?: {
-    tr?: string;
-    en?: string;
-    de?: string;
-  };
+  description?: string;
+
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -29,25 +25,23 @@ const blogCategorySchema = new Schema<IBlogCategory>(
       type: String,
       required: true,
       unique: true,
-      trim: true,
       lowercase: true,
+      trim: true,
     },
     description: {
-      tr: { type: String, trim: true },
-      en: { type: String, trim: true },
-      de: { type: String, trim: true },
+      type: String,
+      default: "",
+      trim: true,
     },
-    isActive: {
-      type: Boolean,
-      default: true,
-    },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
 blogCategorySchema.pre("validate", function (next) {
-  if (!this.slug && this.name?.en) {
-    this.slug = this.name.en
+  const base = this.name?.en || this.name?.tr || this.name?.de || "category";
+  if (!this.slug && base) {
+    this.slug = base
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -56,6 +50,7 @@ blogCategorySchema.pre("validate", function (next) {
   }
   next();
 });
+
 
 const BlogCategory: Model<IBlogCategory> =
   models.BlogCategory || model<IBlogCategory>("BlogCategory", blogCategorySchema);

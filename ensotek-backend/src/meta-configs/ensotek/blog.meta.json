@@ -10,10 +10,25 @@
     {
       "method": "GET",
       "path": "/",
-      "auth": true,
+      "auth": false,
       "summary": "GET /",
-      "validationName": "authenticate",
-      "controllerName": "authorizeRoles(\"admin\")",
+      "pathPrefix": "public."
+    },
+    {
+      "method": "GET",
+      "path": "/slug/:slug",
+      "auth": false,
+      "summary": "GET /slug/:slug",
+      "pathPrefix": "public."
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin.",
       "body": {
         "type": "object",
         "properties": {}
@@ -21,11 +36,29 @@
     },
     {
       "method": "GET",
-      "path": "/slug/:slug",
+      "path": "/",
       "auth": true,
-      "summary": "GET /slug/:slug",
-      "validationName": "authenticate",
-      "controllerName": "authorizeRoles(\"admin\")"
+      "summary": "GET /",
+      "validationName": "\"/\"",
+      "controllerName": "adminGetAllBlogs",
+      "pathPrefix": "admin.",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin.",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ],
   "version": "1.0.1",
@@ -34,13 +67,13 @@
     "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
   },
   "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-  "lastUpdatedAt": "2025-05-09T20:26:37.886Z",
+  "lastUpdatedAt": "2025-05-10T23:06:07.482Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
       "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-      "date": "2025-05-09T20:26:37.886Z",
+      "date": "2025-05-10T23:06:07.482Z",
       "note": "Meta auto-generated"
     }
   ]

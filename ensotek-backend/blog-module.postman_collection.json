@@ -1,0 +1,284 @@
+{
+  "info": {
+    "name": "articles Module API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_postman_id": "articles-module-2025-05-10T20:52:57.827434"
+  },
+  "item": [
+    {
+      "name": "Create articles Category",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles-category",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles-category"
+          ]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": {\n    \"tr\": \"articles Kategorisi\",\n    \"en\": \"articles Category\",\n    \"de\": \"articles Kategorie\"\n  },\n  \"isActive\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Get All articles Categories",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles-category",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles-category"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get articles Category by ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles-category/:id",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles-category",
+            ":id"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create articles",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles/admin",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles",
+            "admin"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "{\"tr\": \"Ba\\u015fl\\u0131k\", \"en\": \"Title\", \"de\": \"Titel\"}",
+              "type": "text"
+            },
+            {
+              "key": "summary",
+              "value": "{\"tr\": \"\\u00d6zet\", \"en\": \"Summary\", \"de\": \"Zusammenfassung\"}",
+              "type": "text"
+            },
+            {
+              "key": "content",
+              "value": "{\"tr\": \"\\u0130\\u00e7erik\", \"en\": \"Content\", \"de\": \"Inhalt\"}",
+              "type": "text"
+            },
+            {
+              "key": "tags",
+              "value": "[\"etiket1\", \"etiket2\"]",
+              "type": "text"
+            },
+            {
+              "key": "label",
+              "value": "{\"tr\": \"Etiket\", \"en\": \"Label\", \"de\": \"Bezeichnung\"}",
+              "type": "text"
+            },
+            {
+              "key": "category",
+              "value": "articles_CATEGORY_ID",
+              "type": "text"
+            },
+            {
+              "key": "isPublished",
+              "value": "true",
+              "type": "text"
+            },
+            {
+              "key": "publishedAt",
+              "value": "2025-05-11T10:00:00.000Z",
+              "type": "text"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "/path/to/image1.jpg"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "/path/to/image2.jpg"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All articless (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get articles by Slug (Public)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles/slug/:slug",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles",
+            "slug",
+            ":slug"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get All articless (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles/admin",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles",
+            "admin"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get articles by ID (Admin)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles/admin/:id",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles",
+            "admin",
+            ":id"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Update articles (Admin)",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles/admin/:id",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles",
+            "admin",
+            ":id"
+          ]
+        },
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "title",
+              "value": "{\"tr\": \"Yeni Ba\\u015fl\\u0131k\", \"en\": \"New Title\", \"de\": \"Neuer Titel\"}",
+              "type": "text"
+            },
+            {
+              "key": "summary",
+              "value": "{\"tr\": \"Yeni \\u00d6zet\", \"en\": \"New Summary\", \"de\": \"Neue Zusammenfassung\"}",
+              "type": "text"
+            },
+            {
+              "key": "content",
+              "value": "{\"tr\": \"Yeni \\u0130\\u00e7erik\", \"en\": \"New Content\", \"de\": \"Neuer Inhalt\"}",
+              "type": "text"
+            },
+            {
+              "key": "label",
+              "value": "{\"tr\": \"Yeni Etiket\", \"en\": \"New Label\", \"de\": \"Neues Label\"}",
+              "type": "text"
+            },
+            {
+              "key": "tags",
+              "value": "[\"g\\u00fcncel\", \"etiket\"]",
+              "type": "text"
+            },
+            {
+              "key": "removedImages",
+              "value": "[]",
+              "type": "text"
+            },
+            {
+              "key": "images",
+              "type": "file",
+              "src": "/path/to/new_image.jpg"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Delete articles",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/articles/admin/:id",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "articles",
+            "admin",
+            ":id"
+          ]
+        }
+      }
+    }
+  ]
+}

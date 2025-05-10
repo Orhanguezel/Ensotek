@@ -1,9 +1,15 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-// 🎯 ID validation
+// 🎯 ID validation (params)
 export const validateObjectId = (field: string) => [
   param(field).isMongoId().withMessage(`${field} must be a valid Mongo ID.`),
+  validateRequest,
+];
+
+// 🎯 ID validation (body)
+export const validateObjectIdBody = (field: string) => [
+  body(field).isMongoId().withMessage(`${field} must be a valid Mongo ID.`),
   validateRequest,
 ];
 
@@ -21,8 +27,13 @@ export const validateCreateService = [
   body("detailedDescription.en").notEmpty().withMessage("Detailed description (EN) is required."),
   body("detailedDescription.de").notEmpty().withMessage("Detailed description (DE) is required."),
 
-  body("price").notEmpty().isNumeric().withMessage("Price must be a number."),
+  body("price").optional().isNumeric().withMessage("Price must be a number."),
   body("durationMinutes").optional().isInt({ min: 1 }).withMessage("Duration must be at least 1 minute."),
+
+  body("category").notEmpty().isObject().withMessage("Category is required and must be an object."),
+  body("category.slug").notEmpty().withMessage("Category slug is required."),
+
+  body("tags").optional().isArray().withMessage("Tags must be an array."),
 
   validateRequest,
 ];
@@ -36,5 +47,13 @@ export const validateUpdateService = [
   body("durationMinutes").optional().isInt({ min: 1 }).withMessage("Duration must be at least 1 minute."),
   body("isActive").optional().isBoolean().withMessage("isActive must be true or false."),
   body("isPublished").optional().isBoolean().withMessage("isPublished must be true or false."),
+
+  body("category").optional().isObject().withMessage("Category must be an object."),
+  body("category.slug").optional().notEmpty().withMessage("Category slug is required if category is provided."),
+
+  body("tags").optional().isArray().withMessage("Tags must be an array."),
+  body("removedImages").optional().isArray().withMessage("Removed images must be an array."),
+  body("removedPublicIds").optional().isArray().withMessage("Removed publicIds must be an array."),
+
   validateRequest,
 ];

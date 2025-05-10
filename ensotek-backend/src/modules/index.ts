@@ -5,7 +5,7 @@ export { Product } from "./product";
 export { Order } from "./order";
 export { Blog } from "./blog";
 export { News } from "./news";
-export { Article } from "./articles";
+export { Articles } from "./articles";
 export { SparePart } from "./sparepart";
 export { LibraryItem } from "./library";
 export { Reference } from "./references";

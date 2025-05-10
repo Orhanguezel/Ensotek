@@ -18,7 +18,7 @@ export const UPLOAD_FOLDERS = {
   product: "product-images",
   category: "category-images",
   news: "news-images",
-  article: "article-images",
+  articles: "articles-images",
   blog: "blog-images",
   gallery: "gallery",
   service: "service-images",

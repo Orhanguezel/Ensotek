@@ -4,31 +4,23 @@ import { BlogCategory } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Create Blog Category
-export const createBlogCategory = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { name, description } = req.body;
+export const createBlogCategory = asyncHandler(async (req: Request, res: Response) => {
+  const { name } = req.body;
 
-    if (!name?.tr || !name?.en || !name?.de) {
-      res
-        .status(400)
-        .json({ success: false, message: "Name (tr, en, de) is required." });
-      return;
-    }
-
-    const blogCategory = await BlogCategory.create({
-      name,
-      description,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Blog category created successfully.",
-      data: blogCategory,
-    });
-
+  if (!name?.tr || !name?.en || !name?.de) {
+    res.status(400).json({ success: false, message: "Name (tr, en, de) is required." });
     return;
   }
-);
+
+  const blogCategory = await BlogCategory.create({ name });
+
+  res.status(201).json({
+    success: true,
+    message: "Blog category created successfully.",
+    data: blogCategory,
+  });
+});
+
 
 // ✅ Get All Blog Categories
 export const getAllBlogCategories = asyncHandler(
@@ -73,43 +65,35 @@ export const getBlogCategoryById = asyncHandler(
 );
 
 // ✅ Update Blog Category
-export const updateBlogCategory = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { id } = req.params;
-    const updates = req.body;
+export const updateBlogCategory = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updates = req.body;
 
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid category ID." });
-      return;
-    }
-
-    const category = await BlogCategory.findById(id);
-
-    if (!category) {
-      res
-        .status(404)
-        .json({ success: false, message: "Blog category not found." });
-      return;
-    }
-
-    category.name = updates.name ?? category.name;
-    category.description = updates.description ?? category.description;
-    category.isActive =
-      typeof updates.isActive === "boolean"
-        ? updates.isActive
-        : category.isActive;
-
-    await category.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Blog category updated successfully.",
-      data: category,
-    });
-
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid category ID." });
     return;
   }
-);
+
+  const category = await BlogCategory.findById(id);
+  if (!category) {
+    res.status(404).json({ success: false, message: "Blog category not found." });
+    return;
+  }
+
+  category.name = updates.name ?? category.name;
+  category.description = updates.description ?? category.description;
+
+  category.isActive = typeof updates.isActive === "boolean" ? updates.isActive : category.isActive;
+
+  await category.save();
+
+  res.status(200).json({
+    success: true,
+    message: "Blog category updated successfully.",
+    data: category,
+  });
+});
+
 
 // ✅ Delete Blog Category
 export const deleteBlogCategory = asyncHandler(

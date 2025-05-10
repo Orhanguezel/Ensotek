@@ -16,7 +16,7 @@ declare global {
         | "library"
         | "references"
         | "news"
-        | "article"
+        | "articles"
         | "sport"
         | "spareparts"
         | "setting"

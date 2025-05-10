@@ -1,33 +1,80 @@
-// src/modules/articles/articles.validation.ts
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
-import { isValidObjectId } from "@/core/utils/validation";
 
-// ➕ Create Article validation
-export const validateCreateArticle = [
-  body("tr.title").isString().notEmpty().withMessage("Turkish title is required."),
-  body("en.title").isString().notEmpty().withMessage("English title is required."),
-  body("de.title").isString().notEmpty().withMessage("German title is required."),
-  body("tr.summary").isString().notEmpty().withMessage("Turkish summary is required."),
-  body("en.summary").isString().notEmpty().withMessage("English summary is required."),
-  body("de.summary").isString().notEmpty().withMessage("German summary is required."),
+// ✅ JSON string olarak gelen ve object olması beklenen alanlar için validator
+const isParsableObject = (fieldName: string) =>
+  body(fieldName)
+    .custom((value) => {
+      try {
+        const parsed = typeof value === "string" ? JSON.parse(value) : value;
+        return typeof parsed === "object" && parsed !== null;
+      } catch {
+        throw new Error(`${fieldName} must be a valid JSON object.`);
+      }
+    });
+
+// ✅ JSON string olarak gelen ve array olması beklenen alanlar için validator
+const isParsableArray = (fieldName: string) =>
+  body(fieldName)
+    .optional()
+    .custom((value) => {
+      try {
+        const parsed = typeof value === "string" ? JSON.parse(value) : value;
+        return Array.isArray(parsed);
+      } catch {
+        throw new Error(`${fieldName} must be a valid JSON array.`);
+      }
+    });
+
+export const validateCreateArticles = [
+  isParsableObject("title"),
+  isParsableObject("summary"),
+  isParsableObject("content"),
+  isParsableArray("tags"),
+  isParsableObject("label"),
+
+  body("category")
+    .notEmpty()
+    .withMessage("Category is required.")
+    .isMongoId()
+    .withMessage("Category must be a valid MongoDB ObjectId."),
+
   validateRequest,
 ];
 
-// ✏️ Update Article validation
-export const validateUpdateArticle = [
-  body("title").optional().isString(),
-  body("summary").optional().isString(),
-  body("content").optional().isString(),
-  body("slug").optional().isString(),
-  body("category").optional().isString(),
+export const validateUpdateArticles = [
+  body("title").optional().custom((val) => {
+    if (typeof val === "string") JSON.parse(val);
+    return true;
+  }),
+  body("summary").optional().custom((val) => {
+    if (typeof val === "string") JSON.parse(val);
+    return true;
+  }),
+  body("content").optional().custom((val) => {
+    if (typeof val === "string") JSON.parse(val);
+    return true;
+  }),
+  body("tags").optional().custom((val) => {
+    if (typeof val === "string") JSON.parse(val);
+    return true;
+  }),
+  body("label").optional().custom((val) => {
+    if (typeof val === "string") JSON.parse(val);
+    return true;
+  }),
+
+  body("category")
+    .optional()
+    .isMongoId()
+    .withMessage("Category must be a valid MongoDB ObjectId."),
+
   validateRequest,
 ];
 
-// 🔍 Validate ID param
-export const validateArticleId = [
-  param("id")
-    .custom((value) => isValidObjectId(value))
-    .withMessage("Invalid article ID."),
+export const validateObjectId = (field: string) => [
+  param(field)
+    .isMongoId()
+    .withMessage(`${field} must be a valid MongoDB ObjectId.`),
   validateRequest,
 ];

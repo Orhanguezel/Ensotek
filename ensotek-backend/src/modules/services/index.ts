@@ -2,12 +2,12 @@
 import express from "express";
 import routes from "./services.routes";
 import Service, { IService } from "./services.models";
-import * as serviceController from "./services.controller";
+import * as controller from "./services.controller";
+import * as validation from "./services.validation";
 
 const router = express.Router();
 router.use("/", routes);
 
-// ✅ Guard + Export (standart)
-export { Service, IService, serviceController };
-export * from "./services.validation";
+export { Service, IService, controller, validation };
 export default router;
+
