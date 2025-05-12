@@ -1,59 +1,76 @@
 import { body, param } from "express-validator";
 import { validateRequest } from "@/core/middleware/validateRequest";
 
-// 🎯 ID validation (params)
+// ✅ Param ID validation
 export const validateObjectId = (field: string) => [
-  param(field).isMongoId().withMessage(`${field} must be a valid Mongo ID.`),
+  param(field)
+    .isMongoId()
+    .withMessage(`${field} must be a valid MongoDB ObjectId.`),
   validateRequest,
 ];
 
-// 🎯 ID validation (body)
-export const validateObjectIdBody = (field: string) => [
-  body(field).isMongoId().withMessage(`${field} must be a valid Mongo ID.`),
-  validateRequest,
-];
-
-// 🎯 Create validation
+// ✅ Create Service Validation
 export const validateCreateService = [
+  body("title").isObject().withMessage("Title must be an object with tr, en, de."),
   body("title.tr").notEmpty().withMessage("Title (TR) is required."),
   body("title.en").notEmpty().withMessage("Title (EN) is required."),
   body("title.de").notEmpty().withMessage("Title (DE) is required."),
 
-  body("shortDescription.tr").notEmpty().withMessage("Short description (TR) is required."),
-  body("shortDescription.en").notEmpty().withMessage("Short description (EN) is required."),
-  body("shortDescription.de").notEmpty().withMessage("Short description (DE) is required."),
+  body("summary").isObject().withMessage("Summary must be an object with tr, en, de."),
+  body("summary.tr").notEmpty().withMessage("Summary (TR) is required."),
+  body("summary.en").notEmpty().withMessage("Summary (EN) is required."),
+  body("summary.de").notEmpty().withMessage("Summary (DE) is required."),
 
-  body("detailedDescription.tr").notEmpty().withMessage("Detailed description (TR) is required."),
-  body("detailedDescription.en").notEmpty().withMessage("Detailed description (EN) is required."),
-  body("detailedDescription.de").notEmpty().withMessage("Detailed description (DE) is required."),
+  body("content").isObject().withMessage("Content must be an object with tr, en, de."),
+  body("content.tr").notEmpty().withMessage("Content (TR) is required."),
+  body("content.en").notEmpty().withMessage("Content (EN) is required."),
+  body("content.de").notEmpty().withMessage("Content (DE) is required."),
 
   body("price").optional().isNumeric().withMessage("Price must be a number."),
   body("durationMinutes").optional().isInt({ min: 1 }).withMessage("Duration must be at least 1 minute."),
 
-  body("category").notEmpty().isObject().withMessage("Category is required and must be an object."),
-  body("category.slug").notEmpty().withMessage("Category slug is required."),
+  body("category")
+    .optional()
+    .isMongoId()
+    .withMessage("Category must be a valid MongoDB ObjectId."),
 
-  body("tags").optional().isArray().withMessage("Tags must be an array."),
+  body("tags")
+    .optional()
+    .custom((value) => {
+      if (Array.isArray(value)) return true;
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed);
+      } catch {
+        throw new Error("Tags must be an array or a JSON array string.");
+      }
+    }),
 
   validateRequest,
 ];
 
-// 🎯 Update validation
+// ✅ Update Service Validation
 export const validateUpdateService = [
   body("title").optional().isObject().withMessage("Title must be an object."),
-  body("shortDescription").optional().isObject().withMessage("Short description must be an object."),
-  body("detailedDescription").optional().isObject().withMessage("Detailed description must be an object."),
+  body("summary").optional().isObject().withMessage("Summary must be an object."),
+  body("content").optional().isObject().withMessage("Content must be an object."),
   body("price").optional().isNumeric().withMessage("Price must be a number."),
   body("durationMinutes").optional().isInt({ min: 1 }).withMessage("Duration must be at least 1 minute."),
-  body("isActive").optional().isBoolean().withMessage("isActive must be true or false."),
+  body("category").optional().isMongoId().withMessage("Category must be a valid MongoDB ObjectId."),
+
+  body("tags")
+    .optional()
+    .custom((value) => {
+      if (Array.isArray(value)) return true;
+      try {
+        const parsed = JSON.parse(value);
+        return Array.isArray(parsed);
+      } catch {
+        throw new Error("Tags must be an array or a JSON array string.");
+      }
+    }),
+
   body("isPublished").optional().isBoolean().withMessage("isPublished must be true or false."),
-
-  body("category").optional().isObject().withMessage("Category must be an object."),
-  body("category.slug").optional().notEmpty().withMessage("Category slug is required if category is provided."),
-
-  body("tags").optional().isArray().withMessage("Tags must be an array."),
-  body("removedImages").optional().isArray().withMessage("Removed images must be an array."),
-  body("removedPublicIds").optional().isArray().withMessage("Removed publicIds must be an array."),
-
+  body("publishedAt").optional().isISO8601().withMessage("publishedAt must be a valid ISO8601 date."),
   validateRequest,
 ];

@@ -99,3 +99,5 @@ const News: Model<INews> =
 
 export default News;
 export { News };
+
+

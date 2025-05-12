@@ -1,84 +1,118 @@
-import mongoose, { Schema, model, models, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
+import slugify from "slugify";
 
-export interface IServiceImage {
+export interface IServicesImage {
   url: string;
-  thumbnail?: string;
+  thumbnail: string;
   webp?: string;
   publicId?: string;
 }
 
-export interface IService extends Document {
-  title: { tr: string; en: string; de: string };
+export interface IServices extends Document {
+  title: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
   slug: string;
-  shortDescription: { tr: string; en: string; de: string };
-  detailedDescription: { tr: string; en: string; de: string };
+  summary: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  content: {
+    tr?: string;
+    en?: string;
+    de?: string;
+  };
+  images: IServicesImage[];
+  tags: string[];
+  author?: string;
+  category?: Types.ObjectId;
+  isPublished: boolean;
+  publishedAt?: Date;
+  comments: Types.ObjectId[];
+  isActive: boolean;
+  createdAt: Date;
+  updatedAt: Date;
   price?: number;
   durationMinutes?: number;
-  images: IServiceImage[];
-  category: { tr: string; en: string; de: string; slug: string };
-  tags?: string[];
-  isActive: boolean;
-  isPublished: boolean;
 }
 
-const imageSchema = new Schema<IServiceImage>(
+const servicesImageSchema = new Schema<IServicesImage>(
   {
     url: { type: String, required: true },
-    thumbnail: { type: String },  // 💥 Thumbnail path (local veya cloud)
-    webp: { type: String },       // 💥 WebP path (local veya cloud)
-    publicId: { type: String },   // 💥 Cloudinary için public ID
+    thumbnail: { type: String, required: true },
+    webp: { type: String },
+    publicId: { type: String },
   },
   { _id: false }
 );
 
-const serviceSchema = new Schema<IService>(
+const servicesSchema: Schema = new Schema<IServices>(
   {
     title: {
-      tr: { type: String, required: true, trim: true },
-      en: { type: String, required: true, trim: true },
-      de: { type: String, required: true, trim: true },
+      tr: { type: String, trim: true },
+      en: { type: String, trim: true },
+      de: { type: String, trim: true },
     },
-    slug: { type: String, unique: true, lowercase: true, trim: true },
-    shortDescription: {
-      tr: { type: String, required: true, maxlength: 300, trim: true },
-      en: { type: String, required: true, maxlength: 300, trim: true },
-      de: { type: String, required: true, maxlength: 300, trim: true },
+    slug: { type: String, required: true, unique: true, lowercase: true },
+    summary: {
+      tr: { type: String, maxlength: 300 },
+      en: { type: String, maxlength: 300 },
+      de: { type: String, maxlength: 300 },
     },
-    detailedDescription: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
+    content: {
+      tr: { type: String },
+      en: { type: String },
+      de: { type: String },
     },
-    price: { type: Number, min: 0 },
-    durationMinutes: { type: Number, default: 60, min: 1 },
-    images: { type: [imageSchema], default: [] },
+    images: { type: [servicesImageSchema], default: [] },
+    tags: [{ type: String }],
+    author: { type: String },
     category: {
-      tr: { type: String, required: true },
-      en: { type: String, required: true },
-      de: { type: String, required: true },
-      slug: { type: String, required: true, lowercase: true, trim: true },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "ServicesCategory",
     },
-    tags: { type: [String], default: [] },
+    isPublished: { type: Boolean, default: false },
+    publishedAt: { type: Date },
+    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     isActive: { type: Boolean, default: true },
-    isPublished: { type: Boolean, default: true },
+    price: { type: Number },
+    durationMinutes: { type: Number },
   },
   { timestamps: true }
 );
 
 // ✅ Slug middleware
-serviceSchema.pre("validate", function (next) {
-  const baseTitle = this.title?.en || this.title?.de || this.title?.tr || "service";
-  if (!this.slug && baseTitle) {
-    this.slug = baseTitle
-      .toLowerCase()
-      .replace(/ /g, "-")
-      .replace(/[^\w-]+/g, "");
+servicesSchema.pre("validate", async function (next) {
+  const doc = this as unknown as IServices;
+
+  if (!doc.slug) {
+    const base =
+      doc.title?.en?.toLowerCase() ||
+      doc.title?.tr?.toLowerCase() ||
+      doc.title?.de?.toLowerCase() ||
+      "service";
+
+    let slug = slugify(base, { lower: true, strict: true });
+    let count = 1;
+
+    while (await Services.exists({ slug })) {
+      slug = `${slugify(base, { lower: true, strict: true })}-${count++}`;
+    }
+
+    doc.slug = slug;
   }
+
   next();
 });
 
-// ✅ Guardlı model tanımı
-const Service: Model<IService> = models.Service || model<IService>("Service", serviceSchema);
 
-export default Service;
-export { Service };
+
+
+const Services: Model<IServices> =
+  models.Services || mongoose.model<IServices>("Services", servicesSchema);
+
+export default Services;
+export { Services };

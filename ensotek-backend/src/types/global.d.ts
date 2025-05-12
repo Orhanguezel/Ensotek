@@ -12,7 +12,7 @@ declare global {
         | "category"
         | "blog"
         | "gallery"
-        | "service"
+        | "services"
         | "library"
         | "references"
         | "news"

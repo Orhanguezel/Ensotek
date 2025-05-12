@@ -1,13 +1,16 @@
 // src/modules/services/index.ts
 import express from "express";
-import routes from "./services.routes";
-import Service, { IService } from "./services.models";
-import * as controller from "./services.controller";
-import * as validation from "./services.validation";
+import publicRoutes from "./public.services.routes";
+import adminRoutes from "./admin.services.routes";
+import Services, { IServices } from "./services.models";
+import * as publicServicesController from "./public.services.controller";
+import * as adminServicesController from "./admin.services.controller";
+import * as servicesValidation from "./services.validation";
 
 const router = express.Router();
-router.use("/", routes);
 
-export { Service, IService, controller, validation };
+router.use("/", publicRoutes);
+router.use("/admin", adminRoutes);
+
+export { Services, IServices, publicServicesController, adminServicesController, servicesValidation };
 export default router;
-

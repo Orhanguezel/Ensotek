@@ -7,7 +7,12 @@ import {
   deleteNews,
   createNews,
 } from "./admin.news.controller";
-import { validateObjectId } from "./news.validation";
+import { 
+  validateObjectId,
+  validateCreateNews,
+  validateUpdateNews,
+  validateAdminQuery,
+ } from "./news.validation";
 import upload from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import {transformNestedFields} from "@/core/middleware/transformNestedFields";
@@ -18,7 +23,8 @@ const router = express.Router();
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
 // 🌟 Admin Endpoints
-router.get("/", adminGetAllNews);
+router.get("/", validateAdminQuery, adminGetAllNews);
+
 router.get("/:id", validateObjectId("id"), adminGetNewsById);
 
 router.post(
@@ -26,6 +32,7 @@ router.post(
   uploadTypeWrapper("news"),
   upload.array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
+  validateCreateNews, 
   createNews
 );
 
@@ -35,6 +42,7 @@ router.put(
   upload.array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
+  validateUpdateNews, 
   updateNews
 );
 

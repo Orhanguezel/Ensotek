@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "05b2523a-4596-4499-9826-7d842257bce1",
+		"name": "services Module API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "20528167",
+		"_collection_link": "https://www.postman.com/red-eclipse-24199/workspace/orhan/collection/20528167-05b2523a-4596-4499-9826-7d842257bce1?action=share&source=collection_link&creator=20528167"
+	},
+	"item": [
+		{
+			"name": "Get All services (Public)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/services"
+			},
+			"response": []
+		},
+		{
+			"name": "Get services By ID (Public)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/services/{{services_id}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Get services By Slug (Public)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{base_url}}/services/slug/{{slug}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin - Get All services",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}"
+					}
+				],
+				"url": "{{base_url}}/services/admin"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin - Create services",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "{\"tr\":\"Başlık TR\",\"en\":\"Title EN\",\"de\":\"Titel DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "summary",
+							"value": "{\"tr\":\"Özet TR\",\"en\":\"Summary EN\",\"de\":\"Zusammenfassung DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "content",
+							"value": "{\"tr\":\"İçerik TR\",\"en\":\"Content EN\",\"de\":\"Inhalt DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "category",
+							"value": "{{category_id}}",
+							"type": "text"
+						},
+						{
+							"key": "tags",
+							"value": "[\"tag1\",\"tag2\"]",
+							"type": "text"
+						},
+						{
+							"key": "isPublished",
+							"value": "true",
+							"type": "text"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": "/path/to/image1.jpg"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": "/path/to/image2.jpg"
+						}
+					]
+				},
+				"url": "{{base_url}}/services/admin"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin - Update services",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "{\"tr\":\"Güncellendi TR\",\"en\":\"Updated EN\",\"de\":\"Aktualisiert DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "summary",
+							"value": "{\"tr\":\"Özet TR\",\"en\":\"Summary EN\",\"de\":\"Zusammenfassung DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "content",
+							"value": "{\"tr\":\"İçerik TR\",\"en\":\"Content EN\",\"de\":\"Inhalt DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "tags",
+							"value": "[\"updated-tag1\",\"updated-tag2\"]",
+							"type": "text"
+						},
+						{
+							"key": "removedImages",
+							"value": "[\"https://example.com/old_image.jpg\"]",
+							"type": "text"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": "/path/to/newimage.jpg"
+						}
+					]
+				},
+				"url": "{{base_url}}/services/admin/{{services_id}}"
+			},
+			"response": []
+		},
+		{
+			"name": "Admin - Delete services",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": "{{base_url}}/services/admin/681f88e7beb20b72980d5ec2"
+			},
+			"response": []
+		},
+		{
+			"name": "Create services",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "multipart/form-data",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "{\"tr\": \"Başlık TR\", \"en\": \"Title EN\", \"de\": \"Titel DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "summary",
+							"value": "{\"tr\": \"Özet TR\", \"en\": \"Summary EN\", \"de\": \"Zusammenfassung DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "content",
+							"value": "{\"tr\": \"İçerik TR\", \"en\": \"Content EN\", \"de\": \"Inhalt DE\"}",
+							"type": "text"
+						},
+						{
+							"key": "tags",
+							"value": "[\"tag1\", \"tag2\"]",
+							"type": "text"
+						},
+						{
+							"key": "category",
+							"value": "681f964627379dba02c2545d",
+							"type": "text"
+						},
+						{
+							"key": "isPublished",
+							"value": "true",
+							"type": "text"
+						},
+						{
+							"key": "publishedAt",
+							"value": "2025-05-10T19:00:00Z",
+							"type": "text"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": "/absolute/path/to/your/image1.jpg"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": "/absolute/path/to/your/image2.jpg"
+						}
+					]
+				},
+				"url": "http://localhost:5014/api/services/admin"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5014/api"
+		},
+		{
+			"key": "admin_token",
+			"value": "YOUR_JWT_TOKEN"
+		},
+		{
+			"key": "services_id",
+			"value": "YOUR_services_ID"
+		},
+		{
+			"key": "slug",
+			"value": "your-slug"
+		},
+		{
+			"key": "category_id",
+			"value": "YOUR_CATEGORY_ID"
+		}
+	]
+}

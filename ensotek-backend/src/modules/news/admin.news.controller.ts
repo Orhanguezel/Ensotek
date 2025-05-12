@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { News } from ".";
+import { News,INews } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 import slugify from "slugify";
 import path from "path";
@@ -76,17 +76,43 @@ export const createNews = asyncHandler(async (req: Request, res: Response) => {
 });
 
 // ✅ Admin - Get All News (Advanced filter)
-export const adminGetAllNews = asyncHandler(async (req: Request, res: Response) => {
-  const { language, category, isPublished, isActive } = req.query;
-  const filter: any = {};
 
-  if (language) filter[`title.${language}`] = { $exists: true };
-  if (category && isValidObjectId(category as string)) filter.category = category;
-  if (isPublished !== undefined) filter.isPublished = isPublished === "true";
-  filter.isActive = isActive !== undefined ? isActive === "true" : true;
+
+export const adminGetAllNews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { language, category, isPublished, isActive } = req.query;
+
+  const filter: Record<string, any> = {};
+
+  // ✅ Dil kontrolü: yalnızca geçerli diller işleme alınır
+  if (
+    typeof language === "string" &&
+    ["tr", "en", "de"].includes(language)
+  ) {
+    filter[`title.${language}`] = { $exists: true };
+  }
+
+  // ✅ Kategori kontrolü
+  if (typeof category === "string" && isValidObjectId(category)) {
+    filter.category = category;
+  }
+
+  // ✅ Yayın durumu (true/false string olarak geldiğinde)
+  if (typeof isPublished === "string") {
+    filter.isPublished = isPublished === "true";
+  }
+
+  // ✅ Aktiflik kontrolü (default: true)
+  if (typeof isActive === "string") {
+    filter.isActive = isActive === "true";
+  } else {
+    filter.isActive = true;
+  }
 
   const newsList = await News.find(filter)
-    .populate([{ path: "comments" }, { path: "category", select: "title" }])
+    .populate([
+      { path: "comments" },
+      { path: "category", select: "name" }, 
+    ])
     .sort({ createdAt: -1 })
     .lean();
 

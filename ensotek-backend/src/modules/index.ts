@@ -18,7 +18,7 @@ export { FAQ } from "./faq";
 export { Comment } from "./comment";
 export { Setting } from "./setting";
 export { Payment } from "./payment";
-export { Service } from "./services";
+export { Services } from "./services";
 export { MailMessage } from "./email";
 export { Address } from "./address";
 export { ModuleMeta } from "./admin";

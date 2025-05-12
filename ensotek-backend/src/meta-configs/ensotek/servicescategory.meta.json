@@ -1,5 +1,5 @@
 {
-  "name": "setting",
+  "name": "servicescategory",
   "icon": "box",
   "roles": [
     "admin"
@@ -8,16 +8,34 @@
   "language": "en",
   "routes": [
     {
+      "method": "POST",
+      "path": "/",
+      "auth": true,
+      "summary": "POST /"
+    },
+    {
       "method": "GET",
       "path": "/",
       "auth": true,
-      "summary": "GET /",
-      "validationName": "\"/\"",
-      "controllerName": "getAllSettings",
-      "body": {
-        "type": "object",
-        "properties": {}
-      }
+      "summary": "GET /"
+    },
+    {
+      "method": "GET",
+      "path": "/:id",
+      "auth": true,
+      "summary": "GET /:id"
+    },
+    {
+      "method": "PUT",
+      "path": "/:id",
+      "auth": true,
+      "summary": "PUT /:id"
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id"
     }
   ],
   "version": "1.0.1",
@@ -26,13 +44,13 @@
     "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
   },
   "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-  "lastUpdatedAt": "2025-05-12T20:54:08.103Z",
+  "lastUpdatedAt": "2025-05-12T20:54:08.129Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
       "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-      "date": "2025-05-12T20:54:08.103Z",
+      "date": "2025-05-12T20:54:08.129Z",
       "note": "Meta auto-generated"
     }
   ]
