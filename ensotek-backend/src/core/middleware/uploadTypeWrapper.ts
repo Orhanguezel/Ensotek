@@ -4,6 +4,7 @@ import { UploadFolderKeys } from "./uploadMiddleware";
 export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   profile: 5 * 1024 * 1024,
   product: 20 * 1024 * 1024,
+  ensotekprod: 20 * 1024 * 1024,
   category: 10 * 1024 * 1024,
   news: 15 * 1024 * 1024,
   articles: 15 * 1024 * 1024,
@@ -17,6 +18,7 @@ export const uploadSizeLimits: Record<UploadFolderKeys, number> = {
   setting: 5 * 1024 * 1024,
   company: 5 * 1024 * 1024,
   default: 20 * 1024 * 1024,
+  activity: 10 * 1024 * 1024,
 };
 
 export const uploadTypeWrapper = (type: UploadFolderKeys) => {

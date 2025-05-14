@@ -1,0 +1,349 @@
+{
+	"info": {
+		"_postman_id": "c6235983-02c8-46e7-bd7a-dd3753b237c4",
+		"name": "blog & blogCategory API",
+		"description": "Postman collection for testing blog and blogCategory endpoints in MetaHub backend.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "20528167",
+		"_collection_link": "https://www.postman.com/red-eclipse-24199/workspace/orhan/collection/20528167-c6235983-02c8-46e7-bd7a-dd3753b237c4?action=share&source=collection_link&creator=20528167"
+	},
+	"item": [
+		{
+			"name": "➕ Create blog Category",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{ACCESS_TOKEN}}"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": {\n    \"tr\": \"G\\u00fcndem\",\n    \"en\": \"Politics\",\n    \"de\": \"Politik\"\n  }\n}"
+				},
+				"url": "{{BASE_URL}}/blogcategory"
+			},
+			"response": []
+		},
+		{
+			"name": "📥 Get All blog Categories",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{BASE_URL}}/blogcategory"
+			},
+			"response": []
+		},
+		{
+			"name": "📥 Get blog Category by ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/blogcategory/:id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blogcategory",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✏️ Update blog Category",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{ACCESS_TOKEN}}"
+					}
+				},
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\": {\n    \"tr\": \"G\\u00fcncel\",\n    \"en\": \"Updated Politics\",\n    \"de\": \"Aktuelle Politik\"\n  }\n}"
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/blogcategory/:id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blogcategory",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "❌ Delete blog Category",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{ACCESS_TOKEN}}"
+					}
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/blogcategory/:id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blogcategory",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "➕ Create blog (Admin)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{ACCESS_TOKEN}}"
+					}
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "{\"tr\": \"Test\", \"en\": \"Test\", \"de\": \"Test\"}",
+							"type": "text"
+						},
+						{
+							"key": "summary",
+							"value": "{\"tr\": \"\\u00d6zet\", \"en\": \"Summary\", \"de\": \"Zusammenfassung\"}",
+							"type": "text"
+						},
+						{
+							"key": "content",
+							"value": "{\"tr\": \"\\u0130\\u00e7erik\", \"en\": \"Content\", \"de\": \"Inhalt\"}",
+							"type": "text"
+						},
+						{
+							"key": "tags",
+							"value": "[\"haber\", \"g\\u00fcndem\"]",
+							"type": "text"
+						},
+						{
+							"key": "isPublished",
+							"value": "true",
+							"type": "text"
+						},
+						{
+							"key": "publishedAt",
+							"value": "2025-05-12T19:39:43.943544Z",
+							"type": "text"
+						},
+						{
+							"key": "images",
+							"type": "file",
+							"src": []
+						}
+					]
+				},
+				"url": "{{BASE_URL}}/blog/admin"
+			},
+			"response": []
+		},
+		{
+			"name": "📥 Get All blog (Public)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": "{{BASE_URL}}/blog"
+			},
+			"response": []
+		},
+		{
+			"name": "🔍 Get blog by Slug (Public)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/blog/slug/:slug",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blog",
+						"slug",
+						":slug"
+					],
+					"variable": [
+						{
+							"key": "slug"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "🔍 Get blog by ID (Public)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/blog/:id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blog",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "📥 Get All blog (Admin)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/blog/admin?isPublished=true",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blog",
+						"admin"
+					],
+					"query": [
+						{
+							"key": "isPublished",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "🔍 Get blog by ID (Admin)",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{ACCESS_TOKEN}}"
+					}
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/blog/admin/:id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blog",
+						"admin",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "✏️ Update blog",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "title",
+							"value": "{\"tr\": \"G\\u00fcncelleme\", \"en\": \"Update\", \"de\": \"Aktualisieren\"}",
+							"type": "text"
+						},
+						{
+							"key": "tags",
+							"value": "[\"g\\u00fcncel\", \"haber\"]",
+							"type": "text"
+						},
+						{
+							"key": "removedImages",
+							"value": "[]",
+							"type": "text"
+						}
+					]
+				},
+				"url": "{{BASE_URL}}/blog/admin/681f97be27379dba02c25467"
+			},
+			"response": []
+		},
+		{
+			"name": "❌ Delete blog",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": {
+						"token": "{{ACCESS_TOKEN}}"
+					}
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/blog/admin/:id",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"blog",
+						"admin",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

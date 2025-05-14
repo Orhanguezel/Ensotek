@@ -19,6 +19,7 @@ export { Comment } from "./comment";
 export { Setting } from "./setting";
 export { Payment } from "./payment";
 export { Services } from "./services";
+export { Activity } from "./activity";
 export { MailMessage } from "./email";
 export { Address } from "./address";
 export { ModuleMeta } from "./admin";

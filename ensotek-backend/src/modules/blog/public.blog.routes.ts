@@ -1,14 +1,16 @@
-// src/modules/blog/public.blog.routes.ts
-
 import express from "express";
-import { getAllBlogs, getBlogBySlug } from "./public.blog.controller";
-import { validateApiKey } from "@/core/middleware/validateApiKey";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
+import {
+  getAllBlog,
+  getBlogById,
+  getBlogBySlug,
+} from "./public.blog.controller";
+import { validateObjectId } from "./blog.validation";
 
 const router = express.Router();
 
-// 🌍 Public Routes — Read-only
-router.get("/",  analyticsLogger, getAllBlogs);
-router.get("/slug/:slug",  analyticsLogger, getBlogBySlug);
+// 🌿 Public Endpoints
+router.get("/", getAllBlog); 
+router.get("/slug/:slug", getBlogBySlug);
+router.get("/:id", validateObjectId("id"), getBlogById);
 
 export default router;

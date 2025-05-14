@@ -1,48 +1,51 @@
-// src/modules/Articles/admin.Articles.routes.ts
-
 import express from "express";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
-  createArticles,
+  adminGetAllArticles,
+  adminGetArticlesById,
   updateArticles,
   deleteArticles,
-  adminGetAllArticless,
-  adminGetArticlesById,
+  createArticles,
 } from "./admin.articles.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateObjectId } from "./articles.validation";
+import {
+  validateObjectId,
+  validateCreateArticles,
+  validateUpdateArticles,
+  validateAdminQuery,
+} from "./articles.validation";
 import upload from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🔐 Admin Authentication & Authorization
+// 🌟 Admin Middleware
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-// 📥 Create Articles
+// 🌟 Admin Endpoints
+router.get("/", validateAdminQuery, adminGetAllArticles);
+
+router.get("/:id", validateObjectId("id"), adminGetArticlesById);
+
 router.post(
   "/",
   uploadTypeWrapper("articles"),
   upload.array("images", 5),
-  transformNestedFields(["label", "tags"]),
+  transformNestedFields(["title", "summary", "content", "tags"]),
+  validateCreateArticles,
   createArticles
 );
 
-// ✏️ Update Articles
 router.put(
   "/:id",
   uploadTypeWrapper("articles"),
   upload.array("images", 5),
-  transformNestedFields(["label", "tags"]),
+  transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
+  validateUpdateArticles,
   updateArticles
 );
 
-// 🗑️ Delete Articles
 router.delete("/:id", validateObjectId("id"), deleteArticles);
-
-// 📄 Get All / Get By ID
-router.get("/", adminGetAllArticless);
-router.get("/:id", validateObjectId("id"), adminGetArticlesById);
 
 export default router;

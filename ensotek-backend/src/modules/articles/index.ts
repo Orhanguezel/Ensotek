@@ -10,13 +10,21 @@ import * as validation from "./articles.validation";
 
 const router = express.Router();
 
-// 🌍 Public Routes
-router.use("/", publicRoutes);
-
 // 🔐 Admin Routes
 router.use("/admin", adminRoutes);
 
+// 🌍 Public Routes
+router.use("/", publicRoutes);
+
+
+
 // ✅ Exports (standardized)
-export { Articles, IArticles, adminController, publicController, validation };
+export {
+  Articles,
+  IArticles,
+  adminController,
+  publicController,
+  validation,
+};
 
 export default router;

@@ -12,8 +12,8 @@
       "path": "/",
       "auth": true,
       "summary": "GET /",
-      "validationName": "\"/\"",
-      "controllerName": "adminGetAllServices",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
       "pathPrefix": "admin.",
       "body": {
         "type": "object",
@@ -65,7 +65,7 @@
       "auth": false,
       "summary": "GET /slug/:slug",
       "validationName": "\"/slug/:slug\"",
-      "controllerName": "getServiceBySlug",
+      "controllerName": "getServicesBySlug",
       "pathPrefix": "public."
     },
     {
@@ -88,13 +88,13 @@
     "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
   },
   "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-  "lastUpdatedAt": "2025-05-12T20:54:08.254Z",
+  "lastUpdatedAt": "2025-05-14T20:36:43.296Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
       "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-      "date": "2025-05-12T20:54:08.254Z",
+      "date": "2025-05-14T20:36:43.296Z",
       "note": "Meta auto-generated"
     }
   ]

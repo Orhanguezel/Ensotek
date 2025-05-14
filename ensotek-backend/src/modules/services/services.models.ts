@@ -31,7 +31,6 @@ export interface IServices extends Document {
   category?: Types.ObjectId;
   isPublished: boolean;
   publishedAt?: Date;
-  comments: Types.ObjectId[];
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -68,15 +67,13 @@ const servicesSchema: Schema = new Schema<IServices>(
       de: { type: String },
     },
     images: { type: [servicesImageSchema], default: [] },
-    tags: [{ type: String }],
-    author: { type: String },
+    tags: [{ type: String, trim: true }],
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "ServicesCategory",
     },
     isPublished: { type: Boolean, default: false },
     publishedAt: { type: Date },
-    comments: [{ type: mongoose.Schema.Types.ObjectId, ref: "Comment" }],
     isActive: { type: Boolean, default: true },
     price: { type: Number },
     durationMinutes: { type: Number },

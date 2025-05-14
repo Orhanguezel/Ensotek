@@ -1,73 +1,48 @@
-import { Request, Response, NextFunction } from "express";
+import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
-import { ArticlesCategory } from ".";
+import {ArticlesCategory} from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 
 // ✅ Create Articles Category
-export const createArticlesCategory = asyncHandler(async (req: Request, res: Response) => {
+export const createArticlesCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { name } = req.body;
 
   if (!name?.tr || !name?.en || !name?.de) {
-    res.status(400).json({ success: false, message: "Name (tr, en, de) is required." });
+    res.status(400).json({ success: false, message: "Name in all languages is required." });
     return;
   }
 
-  const articlesCategory = await ArticlesCategory.create({ name });
+  const category = await ArticlesCategory.create({
+    name,
+    slug: name.en
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, ""),
+  });
 
   res.status(201).json({
     success: true,
     message: "Articles category created successfully.",
-    data: articlesCategory,
+    data: category,
   });
 });
 
-
 // ✅ Get All Articles Categories
-export const getAllArticlesCategories = asyncHandler(
-  async (_req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const categories = await ArticlesCategory.find({}).sort({ createdAt: -1 });
+export const getAllArticlesCategories = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+  const categories = await ArticlesCategory.find().sort({ createdAt: -1 });
 
-    res.status(200).json({
-      success: true,
-      data: categories,
-    });
+  res.status(200).json({
+    success: true,
+    message: "Articles categories fetched successfully.",
+    data: categories,
+  });
+});
 
-    return;
-  }
-);
-
-// ✅ Get Articles Category by ID
-export const getArticlesCategoryById = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { id } = req.params;
-
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid category ID." });
-      return;
-    }
-
-    const category = await ArticlesCategory.findById(id);
-
-    if (!category) {
-      res
-        .status(404)
-        .json({ success: false, message: "Articles category not found." });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      data: category,
-    });
-
-    return;
-  }
-);
-
-// ✅ Update Articles Category
-export const updateArticlesCategory = asyncHandler(async (req: Request, res: Response) => {
+// ✅ Get Single Articles Category
+export const getArticlesCategoryById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const updates = req.body;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid category ID." });
@@ -75,15 +50,52 @@ export const updateArticlesCategory = asyncHandler(async (req: Request, res: Res
   }
 
   const category = await ArticlesCategory.findById(id);
+
   if (!category) {
     res.status(404).json({ success: false, message: "Articles category not found." });
     return;
   }
 
-  category.name = updates.name ?? category.name;
-  category.description = updates.description ?? category.description;
+  res.status(200).json({
+    success: true,
+    message: "Articles category fetched successfully.",
+    data: category,
+  });
+});
 
-  category.isActive = typeof updates.isActive === "boolean" ? updates.isActive : category.isActive;
+// ✅ Update Articles Category
+export const updateArticlesCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
+  const { name, isActive } = req.body;
+
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid category ID." });
+    return;
+  }
+
+  const category = await ArticlesCategory.findById(id);
+
+  if (!category) {
+    res.status(404).json({ success: false, message: "Articles category not found." });
+    return;
+  }
+
+  if (name?.tr) category.name.tr = name.tr;
+  if (name?.en) category.name.en = name.en;
+  if (name?.de) category.name.de = name.de;
+
+  if (typeof isActive === "boolean") {
+    category.isActive = isActive;
+  }
+
+  if (name?.en) {
+    category.slug = name.en
+      .toLowerCase()
+      .replace(/ /g, "-")
+      .replace(/[^\w-]+/g, "")
+      .replace(/--+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
 
   await category.save();
 
@@ -94,31 +106,24 @@ export const updateArticlesCategory = asyncHandler(async (req: Request, res: Res
   });
 });
 
-
 // ✅ Delete Articles Category
-export const deleteArticlesCategory = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-    const { id } = req.params;
+export const deleteArticlesCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  const { id } = req.params;
 
-    if (!isValidObjectId(id)) {
-      res.status(400).json({ success: false, message: "Invalid category ID." });
-      return;
-    }
-
-    const deleted = await ArticlesCategory.findByIdAndDelete(id);
-
-    if (!deleted) {
-      res
-        .status(404)
-        .json({ success: false, message: "Articles category not found." });
-      return;
-    }
-
-    res.status(200).json({
-      success: true,
-      message: "Articles category deleted successfully.",
-    });
-
+  if (!isValidObjectId(id)) {
+    res.status(400).json({ success: false, message: "Invalid category ID." });
     return;
   }
-);
+
+  const deleted = await ArticlesCategory.findByIdAndDelete(id);
+
+  if (!deleted) {
+    res.status(404).json({ success: false, message: "Articles category not found." });
+    return;
+  }
+
+  res.status(200).json({
+    success: true,
+    message: "Articles category deleted successfully.",
+  });
+});

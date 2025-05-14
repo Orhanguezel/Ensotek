@@ -12,23 +12,31 @@
       "path": "/",
       "auth": false,
       "summary": "GET /",
-      "pathPrefix": "public."
+      "validationName": "\"/\"",
+      "controllerName": "getAllArticles",
+      "pathPrefix": "public.",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     },
     {
       "method": "GET",
       "path": "/slug/:slug",
       "auth": false,
       "summary": "GET /slug/:slug",
+      "validationName": "\"/slug/:slug\"",
+      "controllerName": "getArticlesBySlug",
       "pathPrefix": "public."
     },
     {
-      "method": "DELETE",
+      "method": "GET",
       "path": "/:id",
-      "auth": true,
-      "summary": "DELETE /:id",
+      "auth": false,
+      "summary": "GET /:id",
       "validationName": "\"/:id\"",
       "controllerName": "validateObjectId(\"id\"",
-      "pathPrefix": "admin.",
+      "pathPrefix": "public.",
       "body": {
         "type": "object",
         "properties": {}
@@ -39,8 +47,8 @@
       "path": "/",
       "auth": true,
       "summary": "GET /",
-      "validationName": "\"/\"",
-      "controllerName": "adminGetAllArticless",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
       "pathPrefix": "admin.",
       "body": {
         "type": "object",
@@ -59,6 +67,19 @@
         "type": "object",
         "properties": {}
       }
+    },
+    {
+      "method": "DELETE",
+      "path": "/:id",
+      "auth": true,
+      "summary": "DELETE /:id",
+      "validationName": "\"/:id\"",
+      "controllerName": "validateObjectId(\"id\"",
+      "pathPrefix": "admin.",
+      "body": {
+        "type": "object",
+        "properties": {}
+      }
     }
   ],
   "version": "1.0.1",
@@ -67,13 +88,13 @@
     "commitHash": "e011aa42ed8453b4e2face563628132a1f565587"
   },
   "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-  "lastUpdatedAt": "2025-05-12T20:54:07.880Z",
+  "lastUpdatedAt": "2025-05-14T20:36:42.861Z",
   "history": [
     {
       "version": "1.0.1",
       "by": "Orhan Güzel",
       "commitHash": "e011aa42ed8453b4e2face563628132a1f565587",
-      "date": "2025-05-12T20:54:07.880Z",
+      "date": "2025-05-14T20:36:42.861Z",
       "note": "Meta auto-generated"
     }
   ]

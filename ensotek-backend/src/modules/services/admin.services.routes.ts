@@ -2,41 +2,54 @@ import express from "express";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
   adminGetAllServices,
-  adminGetServiceById,
-  createService,
-  updateService,
-  deleteService,
+  adminGetServicesById,
+  updateServices,
+  deleteServices,
+  createServices,
 } from "./admin.services.controller";
-import { validateObjectId } from "./services.validation";
+import { 
+  validateObjectId,
+  validateCreateServices,
+  validateUpdateServices,
+  validateAdminQuery,
+} from "./services.validation";
 import upload from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🔐 Admin access
+// 🔐 Admin erişim kontrolü
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-router.get("/", adminGetAllServices);
-router.get("/:id", validateObjectId("id"), adminGetServiceById);
+// 🔍 Listeleme
+router.get("/", validateAdminQuery, adminGetAllServices);
 
+// 🔍 Detay
+router.get("/:id", validateObjectId("id"), adminGetServicesById);
+
+// ➕ Oluşturma
 router.post(
   "/",
   uploadTypeWrapper("services"),
   upload.array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
-  createService
+  validateCreateServices,
+  createServices
 );
 
+// ✏️ Güncelleme
 router.put(
   "/:id",
   uploadTypeWrapper("services"),
   upload.array("images", 5),
   transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
-  updateService
+  validateUpdateServices,
+  updateServices
 );
 
-router.delete("/:id", validateObjectId("id"), deleteService);
+// 🗑 Silme
+router.delete("/:id", validateObjectId("id"), deleteServices);
 
 export default router;

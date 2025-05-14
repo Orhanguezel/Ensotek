@@ -9,8 +9,10 @@ import * as servicesValidation from "./services.validation";
 
 const router = express.Router();
 
-router.use("/", publicRoutes);
+
 router.use("/admin", adminRoutes);
+router.use("/", publicRoutes);
+
 
 export { Services, IServices, publicServicesController, adminServicesController, servicesValidation };
 export default router;

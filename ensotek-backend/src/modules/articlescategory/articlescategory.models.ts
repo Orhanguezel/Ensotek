@@ -1,4 +1,4 @@
-import mongoose, { Schema, model, models, Document, Model } from "mongoose";
+import mongoose, { Schema, Document, Types, Model, models } from "mongoose";
 
 export interface IArticlesCategory extends Document {
   name: {
@@ -7,12 +7,10 @@ export interface IArticlesCategory extends Document {
     de: string;
   };
   slug: string;
-  description?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
-
 
 const ArticlesCategorySchema = new Schema<IArticlesCategory>(
   {
@@ -28,20 +26,17 @@ const ArticlesCategorySchema = new Schema<IArticlesCategory>(
       lowercase: true,
       trim: true,
     },
-    description: {
-      type: String,
-      default: "",
-      trim: true,
+    isActive: {
+      type: Boolean,
+      default: true,
     },
-    isActive: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
 ArticlesCategorySchema.pre("validate", function (next) {
-  const base = this.name?.en || this.name?.tr || this.name?.de || "category";
-  if (!this.slug && base) {
-    this.slug = base
+  if (!this.slug && this.name?.en) {
+    this.slug = this.name.en
       .toLowerCase()
       .replace(/ /g, "-")
       .replace(/[^\w-]+/g, "")
@@ -52,8 +47,10 @@ ArticlesCategorySchema.pre("validate", function (next) {
 });
 
 
-const ArticlesCategory: Model<IArticlesCategory> =
-  models.ArticlesCategory || model<IArticlesCategory>("ArticlesCategory", ArticlesCategorySchema);
+// ✅ Guard + Model Type
+const ArticlesCategory: Model<IArticlesCategory>=
+(models.ArticlesCategory as Model<IArticlesCategory>) || mongoose.model<IArticlesCategory>("ArticlesCategory", ArticlesCategorySchema);
 
 export default ArticlesCategory;
 export { ArticlesCategory };
+

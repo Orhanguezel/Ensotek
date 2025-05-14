@@ -1,48 +1,51 @@
-// src/modules/blog/admin.blog.routes.ts
-
 import express from "express";
+import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
 import {
-  createBlog,
+  adminGetAllBlog,
+  adminGetBlogById,
   updateBlog,
   deleteBlog,
-  adminGetAllBlogs,
-  adminGetBlogById,
+  createBlog,
 } from "./admin.blog.controller";
-import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import { validateObjectId } from "./blog.validation";
+import {
+  validateObjectId,
+  validateCreateBlog,
+  validateUpdateBlog,
+  validateAdminQuery,
+} from "./blog.validation";
 import upload from "@/core/middleware/uploadMiddleware";
 import { uploadTypeWrapper } from "@/core/middleware/uploadTypeWrapper";
 import { transformNestedFields } from "@/core/middleware/transformNestedFields";
 
 const router = express.Router();
 
-// 🔐 Admin Authentication & Authorization
+// 🌟 Admin Middleware
 router.use(authenticate, authorizeRoles("admin", "moderator"));
 
-// 📥 Create Blog
+// 🌟 Admin Endpoints
+router.get("/", validateAdminQuery, adminGetAllBlog);
+
+router.get("/:id", validateObjectId("id"), adminGetBlogById);
+
 router.post(
   "/",
   uploadTypeWrapper("blog"),
   upload.array("images", 5),
-  transformNestedFields(["label", "tags"]),
+  transformNestedFields(["title", "summary", "content", "tags"]),
+  validateCreateBlog,
   createBlog
 );
 
-// ✏️ Update Blog
 router.put(
   "/:id",
   uploadTypeWrapper("blog"),
   upload.array("images", 5),
-  transformNestedFields(["label", "tags"]),
+  transformNestedFields(["title", "summary", "content", "tags"]),
   validateObjectId("id"),
+  validateUpdateBlog,
   updateBlog
 );
 
-// 🗑️ Delete Blog
 router.delete("/:id", validateObjectId("id"), deleteBlog);
-
-// 📄 Get All / Get By ID
-router.get("/", adminGetAllBlogs);
-router.get("/:id", validateObjectId("id"), adminGetBlogById);
 
 export default router;

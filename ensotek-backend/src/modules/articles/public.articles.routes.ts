@@ -1,13 +1,16 @@
-// src/modules/Articles/public.Articles.routes.ts
-
 import express from "express";
-import { getAllArticles, getArticleBySlug } from "./public.articles.controller";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger";
+import {
+  getAllArticles,
+  getArticlesById,
+  getArticlesBySlug,
+} from "./public.articles.controller";
+import { validateObjectId } from "./articles.validation";
 
 const router = express.Router();
 
-// 🌍 Public Routes — Read-only
-router.get("/", analyticsLogger, getAllArticles);
-router.get("/slug/:slug", analyticsLogger, getArticleBySlug);
+// 🌿 Public Endpoints
+router.get("/", getAllArticles); 
+router.get("/slug/:slug", getArticlesBySlug);
+router.get("/:id", validateObjectId("id"), getArticlesById);
 
 export default router;

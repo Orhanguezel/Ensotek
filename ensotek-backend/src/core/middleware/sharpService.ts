@@ -8,19 +8,16 @@ export const generateThumbnails = async (filePath: string) => {
   const thumbPath = `${baseName}.thumb${ext}`;
 
   try {
-    // ➥ Thumbnail (300px genişlik)
     await sharp(filePath)
       .resize({ width: 300 })
       .toFile(thumbPath);
 
-    console.log(`✅ Thumbnail oluşturuldu: ${thumbPath}`);
-
-    // ➥ WebP versiyon
+    console.log(`Thumbnail created : ${thumbPath}`);
     await sharp(filePath)
       .toFormat("webp")
       .toFile(webpPath);
 
-    console.log(`✅ WebP oluşturuldu: ${webpPath}`);
+    console.log(`WebP created: ${webpPath}`);
   } catch (error) {
     console.error(`❌ Thumbnail/WebP hatası: ${error}`);
     throw error;

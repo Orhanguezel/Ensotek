@@ -9,10 +9,12 @@ declare global {
       uploadType?:
         | "profile"
         | "product"
+        | "ensotekprod"
         | "category"
         | "blog"
         | "gallery"
         | "services"
+        | "activity"
         | "library"
         | "references"
         | "news"

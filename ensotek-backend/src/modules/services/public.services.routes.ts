@@ -1,16 +1,16 @@
 import express from "express";
 import {
   getAllServices,
-  getServiceById,
-  getServiceBySlug,
+  getServicesById,
+  getServicesBySlug,
 } from "./public.services.controller";
 import { validateObjectId } from "./services.validation";
 
 const router = express.Router();
 
-// 🌍 Public service endpoints
+// 🌐 Public endpoints
 router.get("/", getAllServices);
-router.get("/slug/:slug", getServiceBySlug);
-router.get("/:id", validateObjectId("id"), getServiceById);
+router.get("/slug/:slug", getServicesBySlug);
+router.get("/:id", validateObjectId("id"), getServicesById);
 
 export default router;

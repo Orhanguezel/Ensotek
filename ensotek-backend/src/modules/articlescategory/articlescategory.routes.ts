@@ -7,46 +7,38 @@ import {
   deleteArticlesCategory,
 } from "./articlescategory.controller";
 import { authenticate, authorizeRoles } from "@/core/middleware/authMiddleware";
-import {
-  validateCreateArticlesCategory,
-  validateUpdateArticlesCategory,
-  validateObjectIdParam,
-} from "./articlescategory.validation";
-import { analyticsLogger } from "@/core/middleware/analyticsLogger"; 
+import { validateCreateArticlesCategory, validateUpdateArticlesCategory, validateObjectId } from "./articlescategory.validation";
 
 const router = express.Router();
 
-router.use(authenticate, authorizeRoles("admin"));
 
-// ➕ Create Category
+router.get("/", getAllArticlesCategories);
+router.get("/:id", validateObjectId("id"), getArticlesCategoryById);
+
 router.post(
   "/",
-  analyticsLogger,
+  authenticate,
+  authorizeRoles("admin"),
   validateCreateArticlesCategory,
   createArticlesCategory
 );
 
-// 📝 Get All Categories
-router.get("/", analyticsLogger, getAllArticlesCategories);
-
-// 🔍 Get Single Category
-router.get("/:id", analyticsLogger, validateObjectIdParam, getArticlesCategoryById);
-
-// ✏️ Update Category
 router.put(
   "/:id",
-  analyticsLogger,
-  validateObjectIdParam,
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
   validateUpdateArticlesCategory,
   updateArticlesCategory
 );
 
-// 🗑️ Delete Category
 router.delete(
   "/:id",
-  analyticsLogger,
-  validateObjectIdParam,
+  authenticate,
+  authorizeRoles("admin"),
+  validateObjectId("id"),
   deleteArticlesCategory
 );
+
 
 export default router;

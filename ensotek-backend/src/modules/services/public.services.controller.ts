@@ -3,54 +3,52 @@ import asyncHandler from "express-async-handler";
 import { Services } from ".";
 import { isValidObjectId } from "@/core/utils/validation";
 
-// ✅ Get All Services (public)
-export const getAllServices = asyncHandler(async (req: Request, res: Response) => {
+// ✅ Public - Get all services (optional: filter by category, language)
+export const getAllServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { category, language } = req.query;
-  const filter: any = { isActive: true, isPublished: true };
+  const filter: Record<string, any> = {
+    isActive: true,
+    isPublished: true,
+  };
 
   if (category && isValidObjectId(category.toString())) {
     filter.category = category;
   }
 
-  if (language) {
-    filter[`title.${language}`] = { $exists: true, $ne: "" };
+  if (typeof language === "string" && ["tr", "en", "de"].includes(language)) {
+    filter[`title.${language}`] = { $exists: true };
   }
 
-  const serviceList = await Services.find(filter)
-    .populate("comments")
+  const servicesList = await Services.find(filter)
     .populate("category", "title")
     .sort({ createdAt: -1 })
     .lean();
 
   res.status(200).json({
     success: true,
-    message: "Service list fetched successfully.",
-    data: serviceList,
+    message: "Services list fetched successfully.",
+    data: servicesList,
   });
 });
 
-// ✅ Get Service by ID (public)
-export const getServiceById = asyncHandler(async (req: Request, res: Response) => {
+// ✅ Public - Get service by ID
+export const getServicesById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { id } = req.params;
-  const { language } = req.query;
 
   if (!isValidObjectId(id)) {
     res.status(400).json({ success: false, message: "Invalid service ID." });
     return;
   }
 
-  const filter: any = { _id: id, isActive: true, isPublished: true };
-
-  if (language) {
-    filter[`title.${language}`] = { $exists: true, $ne: "" };
-  }
-
-  const service = await Services.findOne(filter)
-    .populate("comments")
+  const services = await Services.findOne({
+    _id: id,
+    isActive: true,
+    isPublished: true,
+  })
     .populate("category", "title")
     .lean();
 
-  if (!service) {
+  if (!services) {
     res.status(404).json({ success: false, message: "Service not found." });
     return;
   }
@@ -58,27 +56,23 @@ export const getServiceById = asyncHandler(async (req: Request, res: Response) =
   res.status(200).json({
     success: true,
     message: "Service fetched successfully.",
-    data: service,
+    data: services,
   });
 });
 
-// ✅ Get Service by Slug (public)
-export const getServiceBySlug = asyncHandler(async (req: Request, res: Response) => {
+// ✅ Public - Get service by Slug
+export const getServicesBySlug = asyncHandler(async (req: Request, res: Response): Promise<void> => {
   const { slug } = req.params;
-  const { language } = req.query;
 
-  const filter: any = { slug, isActive: true, isPublished: true };
-
-  if (language) {
-    filter[`title.${language}`] = { $exists: true, $ne: "" };
-  }
-
-  const service = await Services.findOne(filter)
-    .populate("comments")
+  const services = await Services.findOne({
+    slug,
+    isActive: true,
+    isPublished: true,
+  })
     .populate("category", "title")
     .lean();
 
-  if (!service) {
+  if (!services) {
     res.status(404).json({ success: false, message: "Service not found." });
     return;
   }
@@ -86,6 +80,6 @@ export const getServiceBySlug = asyncHandler(async (req: Request, res: Response)
   res.status(200).json({
     success: true,
     message: "Service fetched successfully.",
-    data: service,
+    data: services,
   });
 });
