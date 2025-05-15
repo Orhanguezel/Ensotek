@@ -17,6 +17,7 @@ export const UPLOAD_FOLDERS = {
   profile: "profile-images",
   product: "product-images",
   ensotekprod: "ensotekprod-images",
+  radonarprod: "radonarprod-images",
   category: "category-images",
   news: "news-images",
   articles: "articles-images",

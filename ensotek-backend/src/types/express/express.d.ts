@@ -19,6 +19,7 @@ declare global {
         | "profile"
         | "product"
         | "ensotekprod"
+        | "radonarprod"
         | "category"
         | "blog"
         | "gallery"
