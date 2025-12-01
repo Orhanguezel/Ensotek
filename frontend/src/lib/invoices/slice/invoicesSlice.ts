@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import apiCall from "@/lib/apiCall";
-import type { IInvoice, InvoiceListFilters, InvoiceStatus } from "../types";
+import type { IInvoice, InvoiceListFilters, InvoiceStatus } from "..";
 
 const BASE = "/invoicing" as const;
 

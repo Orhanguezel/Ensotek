@@ -1,9 +1,7 @@
 // src/i18n/IntlProviderClient.tsx
-
 "use client";
-
 import * as React from "react";
-import {NextIntlClientProvider} from "next-intl";
+import { NextIntlClientProvider } from "next-intl";
 
 type Props = {
   locale: string;
@@ -11,17 +9,15 @@ type Props = {
   children: React.ReactNode;
 };
 
-export default function IntlProviderClient({locale, messages, children}: Props) {
+export default function IntlProviderClient({ locale, messages, children }: Props) {
   return (
     <NextIntlClientProvider
       locale={locale}
       messages={messages}
       onError={(err: any) => {
         if (err?.code === "MISSING_MESSAGE") return;
-        // İstersen burada logla
-        // console.error(err);
       }}
-      getMessageFallback={({key, namespace}) =>
+      getMessageFallback={({ key, namespace }) =>
         (namespace ? `${namespace}.` : "") + key
       }
     >

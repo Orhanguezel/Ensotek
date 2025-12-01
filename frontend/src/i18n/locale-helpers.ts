@@ -1,21 +1,15 @@
-import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
+// src/i18n/locale-helpers.ts
+export { DEFAULT_LOCALE, isSupportedLocale, KNOWN_RTL } from "./config";
 
-export const KNOWN_RTL = new Set(["ar", "fa", "he", "ur", "ckb", "ps", "sd", "ug", "yi", "dv"]);
+export const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || "ensotek.de").trim();
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
 
-export const DEFAULT_LOCALE: SupportedLocale =
-  (process.env.NEXT_PUBLIC_DEFAULT_LOCALE as SupportedLocale) || "tr";
+export const isRTL = (l: string) => new Set(["ar","fa","he","ur","ckb","ps","sd","ug","yi","dv"]).has(l);
 
-export const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || "ensotek.com").trim();
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3001").replace(/\/+$/, "");
-
-export const isSupportedLocale = (x: unknown): x is SupportedLocale =>
-  typeof x === "string" && (SUPPORTED_LOCALES as readonly string[]).includes(x as any);
-
-export const isRTL = (l: SupportedLocale) => KNOWN_RTL.has(l);
-
-export function languageAlternates(defaultLocale: SupportedLocale) {
+/** <link rel="alternate" hreflang="..."> map’i */
+export function languageAlternates(defaultLocale: string) {
   const map: Record<string, string> = {};
-  for (const loc of SUPPORTED_LOCALES) map[loc] = `/${loc}/`;
+  // Burada common.ts’ten alanlar doğrudan kullanılmıyor; SEO tarafında gerekmiyorsa silebilirsin.
   map["x-default"] = `/${defaultLocale}/`;
   return map;
 }

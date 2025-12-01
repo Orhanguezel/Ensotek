@@ -1,7 +1,7 @@
+// src/lib/library/api.client.ts
 "use client";
 
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
+import { rootApi } from "@/lib/rtk/rootApi";
 import { buildCommonHeaders } from "@/lib/http";
 import type { SupportedLocale } from "@/types/common";
 import type {
@@ -12,18 +12,10 @@ import type {
   ApiEnvelope,
 } from "./types";
 
-/**
- * RTK Query — Library (public uçlar)
- *  - axiosBaseQuery: tenant + Accept-Language interceptor hazır
- *  - locale override gerekiyorsa buildCommonHeaders(locale)
- */
-export const libraryApi = createApi({
-  reducerPath: "libraryApi",
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ["Library", "LibraryList", "LibraryCategory"],
+export const libraryApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     /** GET /library — list */
-    list: builder.query<ILibrary[], LibraryListParams | void>({
+    libList: builder.query<ILibrary[], LibraryListParams | void>({
       query: (args) => {
         const locale: SupportedLocale | undefined = args?.locale as any;
         const qs = new URLSearchParams();
@@ -50,7 +42,7 @@ export const libraryApi = createApi({
     }),
 
     /** GET /library/slug/:slug — single */
-    bySlug: builder.query<ILibrary, LibraryBySlugParams>({
+    libBySlug: builder.query<ILibrary, LibraryBySlugParams>({
       query: ({ slug, locale }) => ({
         url: `library/slug/${encodeURIComponent(slug)}`,
         method: "GET",
@@ -60,8 +52,8 @@ export const libraryApi = createApi({
       providesTags: (result) => (result ? [{ type: "Library", id: result._id }] : []),
     }),
 
-    /** GET /librarycategory — categories (public) */
-    categories: builder.query<LibraryCategory[], { locale?: SupportedLocale } | void>({
+    /** GET /librarycategory — categories */
+    libCategories: builder.query<LibraryCategory[], { locale?: SupportedLocale } | void>({
       query: (args) => ({
         url: "librarycategory",
         method: "GET",
@@ -77,10 +69,12 @@ export const libraryApi = createApi({
           : [{ type: "LibraryCategory", id: "LIST" }],
     }),
   }),
+  overrideExisting: false,
 });
 
+// Hook alias'ları — bileşenlerdeki importlar aynı kalsın
 export const {
-  useListQuery: useLibraryListQuery,
-  useBySlugQuery: useLibraryBySlugQuery,
-  useCategoriesQuery: useLibraryCategoriesQuery,
+  useLibListQuery: useLibraryListQuery,
+  useLibBySlugQuery: useLibraryBySlugQuery,
+  useLibCategoriesQuery: useLibraryCategoriesQuery,
 } = libraryApi;

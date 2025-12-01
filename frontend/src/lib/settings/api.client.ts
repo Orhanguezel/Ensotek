@@ -1,94 +1,144 @@
+// src/lib/settings/api.client.ts
+
 "use client";
 
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
-import { buildCommonHeaders } from "@/lib/http";
+import { rootApi } from "@/lib/rtk/rootApi";
 import type { SupportedLocale } from "@/types/common";
 import type {
-  IAbout,
-  AboutCategory,
-  AboutListParams,
-  AboutBySlugParams,
+  ISetting,
   ApiEnvelope,
+  ApiMessage,
+  SettingsListParams,
+  UpsertSettingInput,
+  UploadSettingsImagesInput,
+  UpdateSettingsImagesInput,
+  DeleteSettingInput,
 } from "./types";
 
 /**
- * RTK Query — About & Category (public uçlar)
- *  - baseQuery: axiosBaseQuery() (tenant + Accept-Language interceptor’ları sizde zaten hazır)
- *  - locale override lazımsa buildCommonHeaders(locale) ile gönderiyoruz
+ * RTK Query — Settings (public & admin)
+ * Not: Header'lar interceptor'dan geliyor. Locale override etmek istersen
+ *      lower-case header gönder: { "accept-language": locale }
  */
-export const aboutApi = createApi({
-  reducerPath: "aboutApi",
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ["About", "AboutList", "AboutCategory"],
+export const settingsApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
-    /** /about — list */
-    list: builder.query<IAbout[], AboutListParams | void>({
-      query: (args) => {
-        const locale: SupportedLocale | undefined = args?.locale as any;
-        const params = new URLSearchParams();
+    /** GET /settings — public list */
+    list: builder.query<ISetting[], SettingsListParams | void>({
+      query: (args) => ({
+        url: "settings",
+        method: "GET",
+        headers: args?.locale ? { "accept-language": String(args.locale) } : undefined,
+      }),
+      transformResponse: (res: ISetting[] | ApiEnvelope<ISetting[]>) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
+      providesTags: (result) =>
+        Array.isArray(result)
+          ? [
+              { type: "SettingList" as const, id: "LIST" },
+              ...result.map((s) => ({ type: "Setting" as const, id: s.key })),
+            ]
+          : [{ type: "SettingList" as const, id: "LIST" }],
+    }),
 
-        if (args?.page) params.set("page", String(args.page));
-        if (args?.limit) params.set("limit", String(args.limit));
-        if (args?.categorySlug) params.set("category", args.categorySlug);
-        if (args?.q) params.set("q", args.q);
-        if (args?.sort) params.set("sort", args.sort);
+    /** GET /settings/admin — admin list */
+    adminList: builder.query<ISetting[], { locale?: SupportedLocale } | void>({
+      query: (args) => ({
+        url: "settings/admin",
+        method: "GET",
+        headers: args?.locale ? { "accept-language": String(args.locale) } : undefined,
+      }),
+      transformResponse: (res: ISetting[] | ApiEnvelope<ISetting[]>) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
+      providesTags: (result) =>
+        Array.isArray(result)
+          ? [
+              { type: "SettingAdminList" as const, id: "LIST" },
+              ...result.map((s) => ({ type: "Setting" as const, id: s.key })),
+            ]
+          : [{ type: "SettingAdminList" as const, id: "LIST" }],
+    }),
 
+    /** POST /settings/admin — upsert (admin) */
+    upsert: builder.mutation<ApiMessage<ISetting>, UpsertSettingInput>({
+      query: ({ locale, ...body }) => ({
+        url: "settings/admin",
+        method: "POST",
+        data: body,
+        headers: locale ? { "accept-language": String(locale) } : undefined,
+      }),
+      transformResponse: (res: ApiMessage<ISetting> | ApiEnvelope<ISetting>) =>
+        "data" in (res as any) ? (res as any) : { data: res as any },
+      invalidatesTags: (res) =>
+        res?.data
+          ? [{ type: "Setting", id: res.data.key }, { type: "SettingAdminList", id: "LIST" }]
+          : [{ type: "SettingAdminList", id: "LIST" }],
+    }),
+
+    /** POST /settings/admin/upload/:key — upload images (admin) */
+    uploadImages: builder.mutation<ApiMessage<ISetting>, UploadSettingsImagesInput>({
+      query: ({ key, files, locale }) => {
+        const fd = new FormData();
+        files.forEach((f) => fd.append("images", f));
         return {
-          url: `about${params.toString() ? `?${params.toString()}` : ""}`,
-          method: "GET",
-          headers: locale ? buildCommonHeaders(locale) : undefined,
+          url: `settings/admin/upload/${encodeURIComponent(key)}`,
+          method: "POST",
+          data: fd,
+          headers: locale ? { "accept-language": String(locale) } : undefined,
         };
       },
-      transformResponse: (res: ApiEnvelope<IAbout[]>) => res.data ?? [],
-      providesTags: (result) =>
-        Array.isArray(result)
-          ? [
-              { type: "AboutList", id: "LIST" },
-              ...result.map((x) => ({ type: "About" as const, id: x._id })),
-            ]
-          : [{ type: "AboutList", id: "LIST" }],
+      transformResponse: (res: ApiMessage<ISetting> | ApiEnvelope<ISetting>) =>
+        "data" in (res as any) ? (res as any) : { data: res as any },
+      invalidatesTags: (res) =>
+        res?.data
+          ? [{ type: "Setting", id: res.data.key }, { type: "SettingAdminList", id: "LIST" }]
+          : [{ type: "SettingAdminList", id: "LIST" }],
     }),
 
-    /** /about/slug/:slug — single */
-    bySlug: builder.query<IAbout, AboutBySlugParams>({
-      query: ({ slug, locale }) => ({
-        url: `about/slug/${encodeURIComponent(slug)}`,
-        method: "GET",
-        headers: locale ? buildCommonHeaders(locale) : undefined,
+    /** PUT /settings/admin/upload/:key — update images (admin) */
+    updateImages: builder.mutation<ApiMessage<ISetting>, UpdateSettingsImagesInput>({
+      query: ({ key, files, removedImages, locale }) => {
+        const fd = new FormData();
+        files.forEach((f) => fd.append("images", f));
+        if (removedImages?.length) {
+          fd.append("removedImages", JSON.stringify(removedImages));
+        }
+        return {
+          url: `settings/admin/upload/${encodeURIComponent(key)}`,
+          method: "PUT",
+          data: fd,
+          headers: locale ? { "accept-language": String(locale) } : undefined,
+        };
+      },
+      transformResponse: (res: ApiMessage<ISetting> | ApiEnvelope<ISetting>) =>
+        "data" in (res as any) ? (res as any) : { data: res as any },
+      invalidatesTags: (res) =>
+        res?.data
+          ? [{ type: "Setting", id: res.data.key }, { type: "SettingAdminList", id: "LIST" }]
+          : [{ type: "SettingAdminList", id: "LIST" }],
+    }),
+
+    /** DELETE /settings/admin/:key — delete (admin) */
+    delete: builder.mutation<{ key: string; message?: string }, DeleteSettingInput>({
+      query: ({ key, locale }) => ({
+        url: `settings/admin/${encodeURIComponent(key)}`,
+        method: "DELETE",
+        headers: locale ? { "accept-language": String(locale) } : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<IAbout>) => res.data,
-      providesTags: (result) =>
-        result ? [{ type: "About", id: result._id }] : [],
+      transformResponse: (_: unknown, _meta, arg) => ({ key: arg.key }),
+      invalidatesTags: (_res, _err, arg) => [
+        { type: "Setting", id: arg.key },
+        { type: "SettingAdminList", id: "LIST" },
+      ],
     }),
-
-    /** /aboutcategory — categories (public) */
-    categories: builder.query<AboutCategory[], { locale?: SupportedLocale } | void>({
-      query: (args) => ({
-        url: "aboutcategory",
-        method: "GET",
-        headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
-      }),
-      transformResponse: (res: ApiEnvelope<AboutCategory[]>) => res.data ?? [],
-      providesTags: (result) =>
-        Array.isArray(result)
-          ? [
-              { type: "AboutCategory", id: "LIST" },
-              ...result.map((c) => ({ type: "AboutCategory" as const, id: c._id })),
-            ]
-          : [{ type: "AboutCategory", id: "LIST" }],
-    }),
-
-    // ────────────────────────────────
-    // Admin uçları gerektiğinde ekleyebiliriz (create/update/delete/togglePublish)
-    // create: builder.mutation(...), update: builder.mutation(...), vs.
-    // ────────────────────────────────
   }),
+  overrideExisting: false,
 });
 
 export const {
-  useListQuery: useAboutListQuery,
-  useBySlugQuery: useAboutBySlugQuery,
-  useCategoriesQuery: useAboutCategoriesQuery,
-  // Admin mutations eklendiğinde export edin
-} = aboutApi;
+  useListQuery: useSettingsListQuery,
+  useAdminListQuery: useSettingsAdminListQuery,
+  useUpsertMutation: useUpsertSettingMutation,
+  useUploadImagesMutation: useSettingsUploadImagesMutation,
+  useUpdateImagesMutation: useSettingsUpdateImagesMutation,
+  useDeleteMutation: useDeleteSettingMutation,
+} = settingsApi;

@@ -1,9 +1,14 @@
 import type { SupportedLocale } from "@/types/common";
 
-/** Çok dilli alanlar için ortak tip */
-export type TranslatedField = Partial<Record<SupportedLocale, string>>;
+/* ================== Shared models ================== */
 
-export interface IAboutImage {
+// Çok dilli alanlar
+export type TranslatedField = {
+  [lang in SupportedLocale]?: string;
+};
+
+// Görsel tipi
+export interface IGalleryImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -11,38 +16,36 @@ export interface IAboutImage {
   _id?: string;
 }
 
-/** Ana "About" içeriği */
-export interface IAbout {
+// Ana model
+export interface IGallery {
   _id: string;
+  type: "image" | "video";
   title: TranslatedField;
-  slug: string;                // public unique
+  slug: string;
   summary: TranslatedField;
   content: TranslatedField;
-
   tenant: string;
   tags: string[];
-  images: IAboutImage[];
-
+  images: IGalleryImage[];
   category:
     | string
     | {
         _id: string;
         name: TranslatedField;
+        slug?: string;
       };
-
   author: string;
   isPublished: boolean;
   isActive: boolean;
   publishedAt?: string;
-
   comments: string[];
   order: number;
   createdAt: string;
   updatedAt: string;
 }
 
-/** Kategori modeli */
-export interface AboutCategory {
+// Kategori modeli
+export interface GalleryCategory {
   _id: string;
   name: TranslatedField;
   slug: string;
@@ -52,26 +55,36 @@ export interface AboutCategory {
   updatedAt: string;
 }
 
-/** BE genel response kalıbı */
+/* ================== API envelopes & params ================== */
+
+// Standart API zarfı (about vb. modüllerle aynı)
 export type ApiEnvelope<T> = {
-  success: boolean;
+  success?: boolean;
   message?: string;
   data: T;
-  meta?: unknown;
 };
 
-/** Listeleme parametreleri (public) */
-export type AboutListParams = {
+// /gallery/published için sorgu parametreleri
+export interface GalleryListParams {
+  locale?: SupportedLocale;
   page?: number;
   limit?: number;
-  categorySlug?: string;
+  sort?: string;
   q?: string;
-  sort?: string;           // opsiyonel: "-publishedAt" vb.
-  locale?: SupportedLocale;
-};
 
-/** Slug ile tek kayıt */
-export type AboutBySlugParams = {
+  // genişletilmiş filtreler
+  type?: "image" | "video";
+  /** id veya slug — backend tek param "category" ile her ikisini de kabul ediyor */
+  category?: string;
+  /** convenience: slug olarak gönderip client’ta category’e map’liyoruz */
+  categorySlug?: string;
+  tags?: string | string[];
+  select?: string;    // "title,summary,slug,images,category,tags"
+  populate?: string;  // "category"
+}
+
+// /gallery/slug/:slug için parametreler
+export interface GalleryBySlugParams {
   slug: string;
   locale?: SupportedLocale;
-};
+}

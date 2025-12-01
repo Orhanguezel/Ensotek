@@ -5,8 +5,8 @@ import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
 import { buildCommonHeaders } from "@/lib/http";
 import type { SupportedLocale } from "@/types/common";
 import type {
-  IEnsotekprod,
-  EnsotekCategory,
+  Iguezelwebdesignprod,
+  guezelwebdesignCategory,
   ProductsListParams,
   ProductBySlugParams,
   ApiEnvelope,
@@ -22,8 +22,8 @@ export const productsApi = createApi({
   baseQuery: axiosBaseQuery(),
   tagTypes: ["Product", "ProductList", "ProductCategory"],
   endpoints: (builder) => ({
-    /** GET /ensotekprod — list */
-    list: builder.query<IEnsotekprod[], ProductsListParams | void>({
+    /** GET /guezelwebdesignprod — list */
+    list: builder.query<Iguezelwebdesignprod[], ProductsListParams | void>({
       query: (args) => {
         const locale: SupportedLocale | undefined = args?.locale as any;
         const params = new URLSearchParams();
@@ -39,59 +39,59 @@ export const productsApi = createApi({
         if (typeof args?.isPublished === "boolean") params.set("isPublished", String(args.isPublished));
 
         return {
-          url: `ensotekprod${params.toString() ? `?${params.toString()}` : ""}`,
+          url: `guezelwebdesignprod${params.toString() ? `?${params.toString()}` : ""}`,
           method: "GET",
           headers: locale ? buildCommonHeaders(locale) : undefined,
         };
       },
-      transformResponse: (res: ApiEnvelope<IEnsotekprod[]>) => res.data ?? [],
+      transformResponse: (res: ApiEnvelope<Iguezelwebdesignprod[]>) => res.data ?? [],
       providesTags: (result) =>
         Array.isArray(result)
           ? [
-              { type: "ProductList", id: "LIST" },
-              ...result.map((x) => ({ type: "Product" as const, id: x._id })),
-            ]
+            { type: "ProductList", id: "LIST" },
+            ...result.map((x) => ({ type: "Product" as const, id: x._id })),
+          ]
           : [{ type: "ProductList", id: "LIST" }],
     }),
 
-    /** GET /ensotekprod/slug/:slug — single by slug */
-    bySlug: builder.query<IEnsotekprod, ProductBySlugParams>({
+    /** GET /guezelwebdesignprod/slug/:slug — single by slug */
+    bySlug: builder.query<Iguezelwebdesignprod, ProductBySlugParams>({
       query: ({ slug, locale }) => ({
-        url: `ensotekprod/slug/${encodeURIComponent(slug)}`,
+        url: `guezelwebdesignprod/slug/${encodeURIComponent(slug)}`,
         method: "GET",
         headers: locale ? buildCommonHeaders(locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<IEnsotekprod>) => res.data,
+      transformResponse: (res: ApiEnvelope<Iguezelwebdesignprod>) => res.data,
       providesTags: (result) =>
         result ? [{ type: "Product", id: result._id }] : [],
     }),
 
-    /** GET /ensotekprod/:id — single by id (public, gerektiğinde) */
-    byId: builder.query<IEnsotekprod, { id: string; locale?: SupportedLocale }>({
+    /** GET /guezelwebdesignprod/:id — single by id (public, gerektiğinde) */
+    byId: builder.query<Iguezelwebdesignprod, { id: string; locale?: SupportedLocale }>({
       query: ({ id, locale }) => ({
-        url: `ensotekprod/${encodeURIComponent(id)}`,
+        url: `guezelwebdesignprod/${encodeURIComponent(id)}`,
         method: "GET",
         headers: locale ? buildCommonHeaders(locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<IEnsotekprod>) => res.data,
+      transformResponse: (res: ApiEnvelope<Iguezelwebdesignprod>) => res.data,
       providesTags: (result) =>
         result ? [{ type: "Product", id: result._id }] : [],
     }),
 
-    /** GET /ensotekcategory — categories */
-    categories: builder.query<EnsotekCategory[], { locale?: SupportedLocale } | void>({
+    /** GET /guezelwebdesigncategory — categories */
+    categories: builder.query<guezelwebdesignCategory[], { locale?: SupportedLocale } | void>({
       query: (args) => ({
-        url: "ensotekcategory",
+        url: "guezelwebdesigncategory",
         method: "GET",
         headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<EnsotekCategory[]>) => res.data ?? [],
+      transformResponse: (res: ApiEnvelope<guezelwebdesignCategory[]>) => res.data ?? [],
       providesTags: (result) =>
         Array.isArray(result)
           ? [
-              { type: "ProductCategory", id: "LIST" },
-              ...result.map((c) => ({ type: "ProductCategory" as const, id: c._id })),
-            ]
+            { type: "ProductCategory", id: "LIST" },
+            ...result.map((c) => ({ type: "ProductCategory" as const, id: c._id })),
+          ]
           : [{ type: "ProductCategory", id: "LIST" }],
     }),
   }),

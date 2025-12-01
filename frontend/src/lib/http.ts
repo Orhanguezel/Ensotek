@@ -1,21 +1,33 @@
-import { ensureLeadingSlash, stripTrailingSlash, Locale } from "./strings";
-import { getEnvTenant } from "./config";
+import { ensureLeadingSlash, stripTrailingSlash, baseLocale } from "./strings";
+import { getEnvTenant, getEnvDefaultLocale } from "./config";
+import { isSupportedLocale, DEFAULT_LOCALE } from "@/i18n/config";
+import type { SupportedLocale } from "@/types/common";
 
 /** /api tabanı (same-origin default) */
 export function getApiBase(): string {
-  const raw = process.env.NEXT_PUBLIC_API_BASE || "/api";
+  const raw = (process.env.NEXT_PUBLIC_API_BASE || "/api").trim();
   const base = ensureLeadingSlash(raw);
   return stripTrailingSlash(base) || "/api";
 }
 
-/** Ortak başlık üretimi – TEK NOKTA
- *  - locale: 'de' gibi
- *  - tenant: verilmezse env’den alınır
+/** Ortak başlık üretimi – tek nokta
+ * - locale: verilmezse DEFAULT_LOCALE
+ * - tenant: verilmezse env’den alınır
  */
-export function buildCommonHeaders(locale: string | Locale, tenant?: string) {
-  const l = String(locale || "de").split("-")[0].toLowerCase();
+export function buildCommonHeaders(
+  locale?: string | SupportedLocale,
+  tenant?: string
+): Record<string, string> {
+  const cand = baseLocale(locale || getEnvDefaultLocale());
+  const l: SupportedLocale = isSupportedLocale(cand) ? (cand as SupportedLocale) : DEFAULT_LOCALE;
   const t = (tenant || getEnvTenant()).toLowerCase();
-  return { "Accept-Language": l, "x-lang": l, "X-Tenant": t };
+
+  // Node/Express header erişimi lower-case olur; burada key'ler standard casing ile
+  return {
+    "Accept-Language": l,
+    "X-Lang": l,
+    "X-Tenant": t,
+  };
 }
 
 /** Client’ta CSRF cookie oku */
@@ -27,9 +39,7 @@ function readCookie(name: string): string {
 }
 
 /** Client CSRF token (meta > cookie) */
-export function getClientCsrfToken():
-  | { token: string; source: "meta" | "cookie" | "none" }
-  | undefined {
+export function getClientCsrfToken(): { token: string; source: "meta" | "cookie" | "none" } {
   if (typeof document === "undefined") return { token: "", source: "none" };
 
   const meta = document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement | null;
@@ -45,9 +55,16 @@ export function getClientCsrfToken():
   return { token: "", source: "none" };
 }
 
-/** RSC/SSR için same-origin relative URL */
+/** RSC/SSR için same-origin relative URL
+ *  - Mutlak URL istiyorsan NEXT_PUBLIC_API_URL kullanabilirsin.
+ */
 export function getServerApiUrl(path = ""): string {
-  const base = (process.env.NEXT_PUBLIC_API_BASE || "/api").replace(/\/+$/, "");
+  const absolute = (process.env.NEXT_PUBLIC_API_URL || "").trim();
+  const base = absolute || getApiBase();
+  const isAbs = /^[a-zA-Z][a-zA-Z\d+.-]*:\/\//.test(base);
+  const cleanBase = base.replace(/\/+$/, "");
   const p = String(path || "").replace(/^\/+/, "");
-  return p ? `${ensureLeadingSlash(base)}/${p}` : ensureLeadingSlash(base);
+  if (isAbs) return p ? `${cleanBase}/${p}` : cleanBase;
+  const relBase = ensureLeadingSlash(cleanBase);
+  return p ? `${relBase}/${p}` : relBase;
 }

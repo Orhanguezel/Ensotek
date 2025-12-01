@@ -1,3 +1,5 @@
+//src/lib/server/http.ts
+
 import { headers as nextHeaders } from "next/headers";
 import { ensureLeadingSlash, stripTrailingSlash } from "@/lib/strings";
 

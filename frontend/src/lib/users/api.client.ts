@@ -3,87 +3,130 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
 import { buildCommonHeaders } from "@/lib/http";
-import type { Me, LoginResult, RegisterResult, ChangePasswordPayload } from "./types";
+import type { SupportedLocale } from "@/types/common";
+import type {
+  ApiEnvelope,
+  LiteUserPayload,
+  RegisterBody,
+  LoginBody,
+  GoogleBody,
+  FacebookBody,
+  ForgotPasswordBody,
+  ResetPasswordBody,
+} from "./types";
+
+/** Uç temel yolu — gerekirse 'auth-lite' vs. yapabilirsin */
+const AUTH_BASE = "authlite";
 
 /**
- * Axios baseQuery + interceptor:
- *  - X-Tenant ve Accept-Language zaten otomatik gider.
- *  - Endpoint bazında dil override etmek istersen buildCommonHeaders kullan.
+ * RTK Query – Auth (cookie-based)
+ * Notlar:
+ * - withCredentials:true → HTTP-only cookie token’ı taşımak için zorunlu
+ * - Accept-Language + X-Tenant header’ları buildCommonHeaders ile otomatik
  */
-export const usersApi = createApi({
-  reducerPath: "usersApi",
+export const userApi = createApi({
+  reducerPath: "userApi",
   baseQuery: axiosBaseQuery(),
+  tagTypes: ["AuthMe"],
   endpoints: (builder) => ({
-    register: builder.mutation<
-      RegisterResult,
-      { email: string; password: string; role?: "admin" | "editor" | "viewer"; locale?: string }
-    >({
-      query: ({ email, password, role = "admin", locale = "de" }) => ({
-        url: "users/register",
-        method: "POST",
-        headers: { ...buildCommonHeaders(locale), "Content-Type": "application/json" },
-        data: { email, password, role },
-      }),
-    }),
-
-    login: builder.mutation<LoginResult, { email: string; password: string; locale?: string }>({
-      query: ({ email, password, locale = "de" }) => ({
-        url: "users/login",
-        method: "POST",
-        headers: { ...buildCommonHeaders(locale), "Content-Type": "application/json" },
-        data: { email, password },
-      }),
-    }),
-
-    me: builder.query<Me, { locale?: string } | void>({
+    /* -------- session -------- */
+    me: builder.query<LiteUserPayload | null, { locale?: SupportedLocale } | void>({
       query: (args) => ({
-        url: "users/me",
+        url: `${AUTH_BASE}/me`,
         method: "GET",
         headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
       }),
+      transformResponse: (res: ApiEnvelope<LiteUserPayload>) => res?.data ?? null,
+      providesTags: ["AuthMe"],
     }),
 
-    changePassword: builder.mutation<
-      { ok: true },
-      { payload: ChangePasswordPayload; locale?: string; csrf?: string; bearer?: string }
-    >({
-      query: ({ payload, locale = "de", csrf, bearer }) => ({
-        url: "users/change-password",
-        method: "POST",
-        headers: {
-          ...buildCommonHeaders(locale),
-          "Content-Type": "application/json",
-          ...(csrf ? { "X-CSRF-Token": csrf } : {}),
-          ...(bearer ? { Authorization: `Bearer ${bearer}` } : {}),
-        },
-        data: payload,
-      }),
-    }),
-
-    refresh: builder.mutation<{ ok: true }, { locale?: string } | void>({
+    logout: builder.mutation<{ success: boolean; message?: string }, { locale?: SupportedLocale } | void>({
       query: (args) => ({
-        url: "users/refresh",
+        url: `${AUTH_BASE}/logout`,
         method: "POST",
         headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
       }),
+      invalidatesTags: ["AuthMe"],
+      transformResponse: (res: ApiEnvelope<any>) => ({ success: !!res?.success, message: res?.message }),
     }),
 
-    logout: builder.mutation<void, { locale?: string } | void>({
-      query: (args) => ({
-        url: "users/logout",
+    /* -------- email/pass -------- */
+    registerEmail: builder.mutation<LiteUserPayload, { body: RegisterBody; locale?: SupportedLocale }>({
+      query: ({ body, locale }) => ({
+        url: `${AUTH_BASE}/register-email`,
         method: "POST",
-        headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
+        data: body,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
       }),
+      transformResponse: (res: ApiEnvelope<LiteUserPayload>) => res.data as LiteUserPayload,
+      invalidatesTags: ["AuthMe"],
+    }),
+
+    loginEmail: builder.mutation<LiteUserPayload, { body: LoginBody; locale?: SupportedLocale }>({
+      query: ({ body, locale }) => ({
+        url: `${AUTH_BASE}/login-email`,
+        method: "POST",
+        data: body,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiEnvelope<LiteUserPayload>) => res.data as LiteUserPayload,
+      invalidatesTags: ["AuthMe"],
+    }),
+
+    /* -------- social -------- */
+    loginGoogle: builder.mutation<LiteUserPayload, { body: GoogleBody; locale?: SupportedLocale }>({
+      query: ({ body, locale }) => ({
+        url: `${AUTH_BASE}/login-google`,
+        method: "POST",
+        data: body,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiEnvelope<LiteUserPayload>) => res.data as LiteUserPayload,
+      invalidatesTags: ["AuthMe"],
+    }),
+
+    loginFacebook: builder.mutation<LiteUserPayload, { body: FacebookBody; locale?: SupportedLocale }>({
+      query: ({ body, locale }) => ({
+        url: `${AUTH_BASE}/login-facebook`,
+        method: "POST",
+        data: body,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiEnvelope<LiteUserPayload>) => res.data as LiteUserPayload,
+      invalidatesTags: ["AuthMe"],
+    }),
+
+    /* -------- reset -------- */
+    forgotPassword: builder.mutation<{ success: boolean; message?: string }, { body: ForgotPasswordBody; locale?: SupportedLocale }>({
+      query: ({ body, locale }) => ({
+        url: `${AUTH_BASE}/forgot-password`,
+        method: "POST",
+        data: body,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiEnvelope<any>) => ({ success: !!res?.success, message: res?.message }),
+    }),
+
+    resetPassword: builder.mutation<LiteUserPayload, { body: ResetPasswordBody; locale?: SupportedLocale }>({
+      query: ({ body, locale }) => ({
+        url: `${AUTH_BASE}/reset-password`,
+        method: "POST",
+        data: body,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiEnvelope<LiteUserPayload>) => res.data as LiteUserPayload,
+      invalidatesTags: ["AuthMe"],
     }),
   }),
 });
 
 export const {
-  useRegisterMutation,
-  useLoginMutation,
   useMeQuery,
-  useChangePasswordMutation,
-  useRefreshMutation,
   useLogoutMutation,
-} = usersApi;
-export const useRegisterAdminMutation = usersApi.useRegisterMutation;
+  useRegisterEmailMutation,
+  useLoginEmailMutation,
+  useLoginGoogleMutation,
+  useLoginFacebookMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+} = userApi;

@@ -4,7 +4,7 @@ import type { SupportedLocale } from "@/types/common";
 export type TranslatedLabel = Partial<Record<SupportedLocale, string>>;
 
 /** Görsel */
-export interface IEnsotekprodImage {
+export interface IguezelwebdesignprodImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -12,7 +12,7 @@ export interface IEnsotekprodImage {
 }
 
 /** Ürün */
-export interface IEnsotekprod {
+export interface Iguezelwebdesignprod {
   _id: string;
 
   // Temel
@@ -22,11 +22,11 @@ export interface IEnsotekprod {
   description: TranslatedLabel;
   brand: string;
   category:
-    | string
-    | {
-        _id: string;
-        name: TranslatedLabel;
-      };
+  | string
+  | {
+    _id: string;
+    name: TranslatedLabel;
+  };
   tags?: string[];
 
   // Stok & fiyat
@@ -35,7 +35,7 @@ export interface IEnsotekprod {
   stockThreshold?: number;
 
   // Görseller
-  images: IEnsotekprodImage[];
+  images: IguezelwebdesignprodImage[];
 
   // Teknik opsiyoneller
   material?: string;
@@ -71,7 +71,7 @@ export interface CategoryImage {
 }
 
 /** Kategori */
-export interface EnsotekCategory {
+export interface guezelwebdesignCategory {
   _id: string;
   name: TranslatedLabel;
   description?: TranslatedLabel;

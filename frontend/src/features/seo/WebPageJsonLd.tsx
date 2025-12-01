@@ -1,3 +1,5 @@
+// src/features/seo/WebPageJsonLd.tsx
+
 import React from "react";
 import type { SupportedLocale } from "@/types/common";
 import { absoluteUrl, compact } from "./utils";

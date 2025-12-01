@@ -70,7 +70,7 @@ const BatchAssignModuleForm: React.FC = () => {
           id="tenant-input"
           value={tenant}
           onChange={(e) => setTenant(e.target.value)}
-          placeholder={t("tenantPlaceholder", "e.g. ensotek")}
+          placeholder={t("tenantPlaceholder", "e.g. guezelwebdesign")}
           disabled={loading}
           autoComplete="off"
         />
@@ -169,7 +169,7 @@ const ActionButton = styled.button`
   &:hover,
   &:focus {
     background: ${({ theme }) =>
-      theme.buttons?.primary?.backgroundHover || theme.colors.primaryHover};
+    theme.buttons?.primary?.backgroundHover || theme.colors.primaryHover};
   }
   &:disabled {
     opacity: 0.6;

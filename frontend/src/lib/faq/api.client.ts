@@ -5,90 +5,151 @@ import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
 import { buildCommonHeaders } from "@/lib/http";
 import type { SupportedLocale } from "@/types/common";
 import type {
-  IAbout,
-  AboutCategory,
-  AboutListParams,
-  AboutBySlugParams,
+  IFaq,
   ApiEnvelope,
+  ApiMessage,
+  FaqListParams,
+  CreateFaqInput,
+  UpdateFaqInput,
+  DeleteFaqInput,
+  TogglePublishInput,
+  AskFaqInput,
+  AskFaqOutput,
 } from "./types";
 
 /**
- * RTK Query — About & Category (public uçlar)
- *  - baseQuery: axiosBaseQuery() (tenant + Accept-Language interceptor’ları sizde zaten hazır)
- *  - locale override lazımsa buildCommonHeaders(locale) ile gönderiyoruz
+ * RTK Query – FAQ (Public & Admin)
+ * Endpoints, slice'taki /faq, /faq/admin, /faq/ask rotalarıyla birebir uyumludur.
  */
-export const aboutApi = createApi({
-  reducerPath: "aboutApi",
+export const faqApi = createApi({
+  reducerPath: "faqApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["About", "AboutList", "AboutCategory"],
+  tagTypes: ["Faq", "FaqList", "FaqAdminList"],
   endpoints: (builder) => ({
-    /** /about — list */
-    list: builder.query<IAbout[], AboutListParams | void>({
-      query: (args) => {
-        const locale: SupportedLocale | undefined = args?.locale as any;
-        const params = new URLSearchParams();
-
-        if (args?.page) params.set("page", String(args.page));
-        if (args?.limit) params.set("limit", String(args.limit));
-        if (args?.categorySlug) params.set("category", args.categorySlug);
-        if (args?.q) params.set("q", args.q);
-        if (args?.sort) params.set("sort", args.sort);
-
-        return {
-          url: `about${params.toString() ? `?${params.toString()}` : ""}`,
-          method: "GET",
-          headers: locale ? buildCommonHeaders(locale) : undefined,
-        };
-      },
-      transformResponse: (res: ApiEnvelope<IAbout[]>) => res.data ?? [],
+    // PUBLIC
+    list: builder.query<IFaq[], FaqListParams | void>({
+      query: (args) => ({
+        url: "faq",
+        method: "GET",
+        params: args
+          ? {
+              limit: args.limit,
+              page: args.page,
+              sort: args.sort,
+              q: args.q,
+              category: args.category,
+              isPublished:
+                typeof args.isPublished === "boolean"
+                  ? String(args.isPublished)
+                  : undefined,
+            }
+          : undefined,
+        headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
+      }),
+      transformResponse: (res: IFaq[] | ApiEnvelope<IFaq[]>) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: (result) =>
         Array.isArray(result)
           ? [
-              { type: "AboutList", id: "LIST" },
-              ...result.map((x) => ({ type: "About" as const, id: x._id })),
+              { type: "FaqList", id: "LIST" },
+              ...result.map((f) => ({ type: "Faq" as const, id: f._id })),
             ]
-          : [{ type: "AboutList", id: "LIST" }],
+          : [{ type: "FaqList", id: "LIST" }],
     }),
 
-    /** /about/slug/:slug — single */
-    bySlug: builder.query<IAbout, AboutBySlugParams>({
-      query: ({ slug, locale }) => ({
-        url: `about/slug/${encodeURIComponent(slug)}`,
-        method: "GET",
-        headers: locale ? buildCommonHeaders(locale) : undefined,
-      }),
-      transformResponse: (res: ApiEnvelope<IAbout>) => res.data,
-      providesTags: (result) =>
-        result ? [{ type: "About", id: result._id }] : [],
-    }),
-
-    /** /aboutcategory — categories (public) */
-    categories: builder.query<AboutCategory[], { locale?: SupportedLocale } | void>({
+    // ADMIN
+    adminList: builder.query<IFaq[], { locale?: SupportedLocale } | void>({
       query: (args) => ({
-        url: "aboutcategory",
+        url: "faq/admin",
         method: "GET",
         headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<AboutCategory[]>) => res.data ?? [],
+      transformResponse: (res: IFaq[] | ApiEnvelope<IFaq[]>) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: (result) =>
         Array.isArray(result)
           ? [
-              { type: "AboutCategory", id: "LIST" },
-              ...result.map((c) => ({ type: "AboutCategory" as const, id: c._id })),
+              { type: "FaqAdminList", id: "LIST" },
+              ...result.map((f) => ({ type: "Faq" as const, id: f._id })),
             ]
-          : [{ type: "AboutCategory", id: "LIST" }],
+          : [{ type: "FaqAdminList", id: "LIST" }],
     }),
 
-    // ────────────────────────────────
-    // Admin uçları gerektiğinde ekleyebiliriz (create/update/delete/togglePublish)
-    // create: builder.mutation(...), update: builder.mutation(...), vs.
-    // ────────────────────────────────
+    create: builder.mutation<ApiMessage<IFaq>, CreateFaqInput>({
+      query: ({ payload, locale }) => ({
+        url: "faq/admin",
+        method: "POST",
+        data: payload,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiMessage<IFaq> | ApiEnvelope<IFaq>) =>
+        "data" in (res as any) ? (res as any) : { data: res as any },
+      invalidatesTags: [{ type: "FaqAdminList", id: "LIST" }],
+    }),
+
+    update: builder.mutation<ApiMessage<IFaq>, UpdateFaqInput>({
+      query: ({ id, payload, locale }) => ({
+        url: `faq/admin/${encodeURIComponent(id)}`,
+        method: "PUT",
+        data: payload,
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiMessage<IFaq> | ApiEnvelope<IFaq>) =>
+        "data" in (res as any) ? (res as any) : { data: res as any },
+      invalidatesTags: (res) =>
+        res?.data?._id
+          ? [{ type: "Faq", id: res.data._id }, { type: "FaqAdminList", id: "LIST" }]
+          : [{ type: "FaqAdminList", id: "LIST" }],
+    }),
+
+    delete: builder.mutation<{ id: string; message?: string }, DeleteFaqInput>({
+      query: ({ id, locale }) => ({
+        url: `faq/admin/${encodeURIComponent(id)}`,
+        method: "DELETE",
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (_: unknown, _meta, arg) => ({ id: arg.id }),
+      invalidatesTags: (_res, _err, arg) => [
+        { type: "Faq", id: arg.id },
+        { type: "FaqAdminList", id: "LIST" },
+      ],
+    }),
+
+    togglePublish: builder.mutation<ApiMessage<IFaq>, TogglePublishInput>({
+      query: ({ id, isPublished, locale }) => ({
+        url: `faq/admin/${encodeURIComponent(id)}`,
+        method: "PUT",
+        data: { isPublished }, // JSON body
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: ApiMessage<IFaq> | ApiEnvelope<IFaq>) =>
+        "data" in (res as any) ? (res as any) : { data: res as any },
+      invalidatesTags: (res) =>
+        res?.data?._id
+          ? [{ type: "Faq", id: res.data._id }, { type: "FaqAdminList", id: "LIST" }]
+          : [{ type: "FaqAdminList", id: "LIST" }],
+    }),
+
+    // AI / Ask
+    ask: builder.mutation<AskFaqOutput, AskFaqInput>({
+      query: ({ question, locale }) => ({
+        url: "faq/ask",
+        method: "POST",
+        data: { question },
+        headers: locale ? buildCommonHeaders(locale) : undefined,
+      }),
+      transformResponse: (res: AskFaqOutput | ApiEnvelope<AskFaqOutput>) =>
+        "data" in (res as any) ? (res as any).data : (res as AskFaqOutput),
+    }),
   }),
 });
 
 export const {
-  useListQuery: useAboutListQuery,
-  useBySlugQuery: useAboutBySlugQuery,
-  useCategoriesQuery: useAboutCategoriesQuery,
-  // Admin mutations eklendiğinde export edin
-} = aboutApi;
+  useListQuery: useFaqListQuery,
+  useAdminListQuery: useFaqAdminListQuery,
+  useCreateMutation: useFaqCreateMutation,
+  useUpdateMutation: useFaqUpdateMutation,
+  useDeleteMutation: useFaqDeleteMutation,
+  useTogglePublishMutation: useFaqTogglePublishMutation,
+  useAskMutation: useFaqAskMutation,
+} = faqApi;

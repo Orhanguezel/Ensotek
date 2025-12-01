@@ -6,7 +6,7 @@ type Props = {
   description?: string;
   areaServed?: string[];     // ["DE","TR"] veya ["Germany"]
   serviceType?: string;      // "Fire Protection Systems"
-  providerName?: string;     // Ensotek
+  providerName?: string;     // guezelwebdesign
   url?: string;
   images?: string[];
 };

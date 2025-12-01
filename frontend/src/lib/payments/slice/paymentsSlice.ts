@@ -115,7 +115,7 @@ const initialState: State = { items: [], selected: null, loading: false, error: 
 /* ---------------- thunks ---------------- */
 export const fetchPaymentsAdmin = createAsyncThunk<
   IPayment[],
-  PaymentsAdminFilters | undefined,   
+  PaymentsAdminFilters | undefined,
   { rejectValue: string }
 >(
   "payments/fetchAll",
