@@ -1,9 +1,19 @@
 import type { SupportedLocale } from "@/types/common";
 
-/** Çok dilli alanlar için ortak tip */
+/** Çok dilli alanlar için ortak tip (partial — içerik strict okunur) */
 export type TranslatedField = Partial<Record<SupportedLocale, string>>;
 
-export interface IAboutImage {
+/** Sosyal bağlantılar */
+export interface ISocialLink {
+  facebook?: string;
+  instagram?: string;
+  twitter?: string;
+  linkedin?: string;
+  youtube?: string;
+}
+
+/** Görsel nesne */
+export interface ICompanyImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -11,45 +21,51 @@ export interface IAboutImage {
   _id?: string;
 }
 
-/** Ana "About" içeriği */
-export interface IAbout {
-  _id: string;
-  title: TranslatedField;
-  slug: string;                // public unique
-  summary: TranslatedField;
-  content: TranslatedField;
+/** Address referansı (ID veya populate edilmiş obje) */
+export type AddressRef =
+  | string
+  | {
+      _id?: string;
+      title?: string;
+      name?: string;
+      street?: string;
+      city?: string;
+      state?: string;
+      postalCode?: string;
+      country?: string;
+      phone?: string;
+      [k: string]: unknown;
+    };
+
+/** Ana Company modeli */
+export interface ICompany {
+  _id?: string;
+  companyName: TranslatedField;
+  companyDesc?: TranslatedField;
 
   tenant: string;
-  tags: string[];
-  images: IAboutImage[];
+  language: SupportedLocale;
+  taxNumber: string;
+  handelsregisterNumber?: string;
+  registerCourt?: string;
 
-  category:
-    | string
-    | {
-        _id: string;
-        name: TranslatedField;
-      };
+  website?: string;
+  email: string;
+  phone: string;
 
-  author: string;
-  isPublished: boolean;
-  isActive: boolean;
-  publishedAt?: string;
+  addresses?: AddressRef[];
+  bankDetails: {
+    bankName: string;
+    iban: string;
+    swiftCode: string;
+  };
 
-  comments: string[];
-  order: number;
-  createdAt: string;
-  updatedAt: string;
-}
+  managers?: string[];
+  images?: ICompanyImage[];
+  socialLinks?: ISocialLink;
 
-/** Kategori modeli */
-export interface AboutCategory {
-  _id: string;
-  name: TranslatedField;
-  slug: string;
-  description?: TranslatedField;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string; // ISO
+  updatedAt: string; // ISO
 }
 
 /** BE genel response kalıbı */
@@ -60,18 +76,13 @@ export type ApiEnvelope<T> = {
   meta?: unknown;
 };
 
-/** Listeleme parametreleri (public) */
-export type AboutListParams = {
-  page?: number;
-  limit?: number;
-  categorySlug?: string;
-  q?: string;
-  sort?: string;           // opsiyonel: "-publishedAt" vb.
-  locale?: SupportedLocale;
-};
+/* ---------- Admin payload tipleri (RTK mutations için) ---------- */
+export type CreateCompanyPayload = Record<string, any>;
 
-/** Slug ile tek kayıt */
-export type AboutBySlugParams = {
-  slug: string;
-  locale?: SupportedLocale;
-};
+export type UpdateCompanyPayload = {
+  _id: string;
+  /** Yeni yüklenecek dosyalar (File[]) veya string referanslar gelebilir; File olanlar gönderilir */
+  images?: Array<File | string>;
+  /** Silinecek görsel publicId/_id listesi */
+  removedImages?: string[];
+} & Record<string, any>;

@@ -1,13 +1,13 @@
 openapi: 3.1.0
 info:
-  title: Ensotek Headless API
+  title: guezelwebdesign Headless API
   version: 1.0.0
   description: >
     Çoklu-tenant, çoklu dil içerik/tema/navigasyon API'sı.
     Tüm isteklerde **X-Tenant** zorunlu; dile göre içerik **Accept-Language**.
 
 servers:
-  - url: https://www.ensotek.de/api
+  - url: https://www.guezelwebdesign.de/api
     description: Prod
   - url: http://localhost:5035/api
     description: Local
@@ -25,7 +25,7 @@ components:
     cookieAuth:
       type: apiKey
       in: cookie
-      name: tt_session        # örnek cookie adı
+      name: tt_session # örnek cookie adı
     bearerAuth:
       type: http
       scheme: bearer
@@ -35,7 +35,7 @@ components:
       name: X-Tenant
       in: header
       required: true
-      schema: { type: string, example: ensotek }
+      schema: { type: string, example: guezelwebdesign }
       description: Aktif tenant slug'ı.
     AcceptLanguage:
       name: Accept-Language
@@ -147,7 +147,7 @@ components:
         type: { type: string, enum: [product, service, part, article, page] }
         title: { type: string }
         excerpt: { type: string, nullable: true }
-        cover: { type: string, nullable: true }       # image url
+        cover: { type: string, nullable: true } # image url
         updatedAt: { type: string, format: date-time }
         locale: { type: string }
         seo:
@@ -222,7 +222,6 @@ components:
         confirmNewPassword: { type: string, minLength: 6 }
 
 paths:
-
   /v1/tenants/self:
     get:
       tags: [Tenants]
@@ -482,7 +481,10 @@ paths:
       responses:
         '200':
           description: OK
-          content: { application/json: { schema: { type: object, properties: { ok: { type: boolean } } } } }
+          content:
+            {
+              application/json: { schema: { type: object, properties: { ok: { type: boolean } } } },
+            }
 
   /v1/users/logout:
     post:

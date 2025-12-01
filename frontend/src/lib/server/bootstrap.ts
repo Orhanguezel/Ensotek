@@ -1,8 +1,9 @@
+// personal/frontend/src/lib/server/bootstrap.ts
+
 import { getServerApiBaseAbsolute } from "@/lib/server/http";
 import { resolveTenant } from "@/lib/server/tenant";
 import { normalizeLocale } from "@/lib/server/locale";
 import { buildCommonHeaders } from "@/lib/http";
-import type { DefaultTheme } from "styled-components";
 
 export type TenantSelf = {
   id: string;

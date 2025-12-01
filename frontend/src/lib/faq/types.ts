@@ -1,77 +1,68 @@
 import type { SupportedLocale } from "@/types/common";
 
-/** Çok dilli alanlar için ortak tip */
-export type TranslatedField = Partial<Record<SupportedLocale, string>>;
+/** Çok dilli metin alanı */
+export type TranslatedField = {
+  [lang in SupportedLocale]?: string;
+};
 
-export interface IAboutImage {
-  url: string;
-  thumbnail: string;
-  webp?: string;
-  publicId?: string;
+export interface IFaq {
   _id?: string;
-}
-
-/** Ana "About" içeriği */
-export interface IAbout {
-  _id: string;
-  title: TranslatedField;
-  slug: string;                // public unique
-  summary: TranslatedField;
-  content: TranslatedField;
-
-  tenant: string;
-  tags: string[];
-  images: IAboutImage[];
-
-  category:
-    | string
-    | {
-        _id: string;
-        name: TranslatedField;
-      };
-
-  author: string;
+  question: TranslatedField;
+  answer: TranslatedField;
+  tenant?: string;
+  category?: string;
   isPublished: boolean;
+  publishedAt?: string | Date;
+  embedding?: number[];
   isActive: boolean;
-  publishedAt?: string;
-
-  comments: string[];
-  order: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string | Date;
+  updatedAt: string | Date;
 }
 
-/** Kategori modeli */
-export interface AboutCategory {
-  _id: string;
-  name: TranslatedField;
-  slug: string;
-  description?: TranslatedField;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+/* —— Generic API zarfları (diğer modüllerle uyumlu) ——————————————— */
+export type ApiEnvelope<T> = { data: T; message?: string };
+export type ApiMessage<T = any> = { data: T; message?: string };
 
-/** BE genel response kalıbı */
-export type ApiEnvelope<T> = {
-  success: boolean;
-  message?: string;
-  data: T;
-  meta?: unknown;
-};
-
-/** Listeleme parametreleri (public) */
-export type AboutListParams = {
-  page?: number;
+/* —— Listeleme parametreleri ——————————————————————————————— */
+export type FaqListParams = {
+  locale?: SupportedLocale;
   limit?: number;
-  categorySlug?: string;
-  q?: string;
-  sort?: string;           // opsiyonel: "-publishedAt" vb.
+  page?: number;
+  sort?: string;    // örn: "-publishedAt"
+  q?: string;       // arama
+  category?: string;
+  isPublished?: boolean;
+};
+
+/* —— Admin işlemleri için input tipleri ————————————————————— */
+export type CreateFaqInput = {
+  locale?: SupportedLocale;
+  payload: Omit<IFaq, "_id" | "createdAt" | "updatedAt">;
+};
+
+export type UpdateFaqInput = {
+  id: string;
+  locale?: SupportedLocale;
+  payload: Partial<IFaq>;
+};
+
+export type DeleteFaqInput = {
+  id: string;
   locale?: SupportedLocale;
 };
 
-/** Slug ile tek kayıt */
-export type AboutBySlugParams = {
-  slug: string;
+export type TogglePublishInput = {
+  id: string;
+  isPublished: boolean;
   locale?: SupportedLocale;
+};
+
+/* —— Ask (AI / KB) ———————————————————————————————————————— */
+export type AskFaqInput = {
+  question: string;
+  locale?: SupportedLocale;
+};
+
+export type AskFaqOutput = {
+  answer: string;
 };

@@ -1,3 +1,5 @@
+// src/lib/news/api.server.ts
+
 import { getServerApiBaseAbsolute } from "@/lib/server/http";
 import { buildCommonHeaders } from "@/lib/http";
 import { resolveTenant } from "@/lib/server/tenant";

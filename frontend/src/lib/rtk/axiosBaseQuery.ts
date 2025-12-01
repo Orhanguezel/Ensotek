@@ -1,9 +1,11 @@
+// src/lib/rtk/axiosBaseQuery.ts
 "use client";
 
 import type { BaseQueryFn } from "@reduxjs/toolkit/query";
 import type { AxiosRequestConfig, AxiosError } from "axios";
 import API from "@/lib/api";
 
+/** Tüm slice'lar buradaki baseQuery'yi kullanır */
 type Args = {
   url: string;
   method?: AxiosRequestConfig["method"];
@@ -14,7 +16,7 @@ type Args = {
 };
 
 export const axiosBaseQuery =
-  (): BaseQueryFn<Args, unknown, unknown> =>
+  (): BaseQueryFn<Args, unknown, { status: number | "FETCH_ERROR"; data: any }> =>
   async ({ url, method = "GET", data, params, headers, csrfDisabled }) => {
     try {
       const res = await API.request({ url, method, data, params, headers, csrfDisabled });
@@ -23,7 +25,7 @@ export const axiosBaseQuery =
       const err = e as AxiosError<any>;
       return {
         error: {
-          status: err.response?.status ?? "FETCH_ERROR",
+          status: (err.response?.status as any) ?? "FETCH_ERROR",
           data: err.response?.data ?? err.message,
         },
       };

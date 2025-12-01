@@ -1,3 +1,5 @@
+// src/lib/gallery/api.client.ts
+
 "use client";
 
 import { createApi } from "@reduxjs/toolkit/query/react";
@@ -5,90 +7,97 @@ import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
 import { buildCommonHeaders } from "@/lib/http";
 import type { SupportedLocale } from "@/types/common";
 import type {
-  IAbout,
-  AboutCategory,
-  AboutListParams,
-  AboutBySlugParams,
+  IGallery,
+  GalleryCategory,
+  GalleryListParams,
+  GalleryBySlugParams,
   ApiEnvelope,
 } from "./types";
 
 /**
- * RTK Query — About & Category (public uçlar)
- *  - baseQuery: axiosBaseQuery() (tenant + Accept-Language interceptor’ları sizde zaten hazır)
- *  - locale override lazımsa buildCommonHeaders(locale) ile gönderiyoruz
+ * RTK Query — Gallery (public)
  */
-export const aboutApi = createApi({
-  reducerPath: "aboutApi",
+export const galleryApi = createApi({
+  reducerPath: "galleryApi",
   baseQuery: axiosBaseQuery(),
-  tagTypes: ["About", "AboutList", "AboutCategory"],
+  tagTypes: ["Gallery", "GalleryList", "GalleryCategory"],
   endpoints: (builder) => ({
-    /** /about — list */
-    list: builder.query<IAbout[], AboutListParams | void>({
+    /** GET /gallery/published — list */
+    list: builder.query<IGallery[], GalleryListParams | void>({
       query: (args) => {
         const locale: SupportedLocale | undefined = args?.locale as any;
         const params = new URLSearchParams();
 
-        if (args?.page) params.set("page", String(args.page));
-        if (args?.limit) params.set("limit", String(args.limit));
-        if (args?.categorySlug) params.set("category", args.categorySlug);
-        if (args?.q) params.set("q", args.q);
-        if (args?.sort) params.set("sort", args.sort);
+        if (args?.page)   params.set("page", String(args.page));
+        if (args?.limit)  params.set("limit", String(args.limit));
+        if (args?.sort)   params.set("sort", args.sort);
+        if (args?.q)      params.set("q", args.q);
+        if (args?.type)   params.set("type", args.type);
+
+        if (args?.category)      params.set("category", args.category);
+        else if (args?.categorySlug) params.set("category", args.categorySlug);
+
+        if (args?.tags) {
+          const t = Array.isArray(args.tags) ? args.tags : [args.tags];
+          if (t.length) params.set("tags", t.join(","));
+        }
+
+        if (args?.select)   params.set("select", args.select);
+        if (args?.populate) params.set("populate", args.populate);
 
         return {
-          url: `about${params.toString() ? `?${params.toString()}` : ""}`,
+          url: `gallery/published${params.toString() ? `?${params.toString()}` : ""}`,
           method: "GET",
           headers: locale ? buildCommonHeaders(locale) : undefined,
         };
       },
-      transformResponse: (res: ApiEnvelope<IAbout[]>) => res.data ?? [],
+      // API bazen direkt array dönebilir; ikisini de karşıla
+      transformResponse: (res: ApiEnvelope<IGallery[]> | IGallery[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: (result) =>
         Array.isArray(result)
           ? [
-              { type: "AboutList", id: "LIST" },
-              ...result.map((x) => ({ type: "About" as const, id: x._id })),
+              { type: "GalleryList", id: "LIST" },
+              ...result.map((x) => ({ type: "Gallery" as const, id: x._id })),
             ]
-          : [{ type: "AboutList", id: "LIST" }],
+          : [{ type: "GalleryList", id: "LIST" }],
     }),
 
-    /** /about/slug/:slug — single */
-    bySlug: builder.query<IAbout, AboutBySlugParams>({
+    /** GET /gallery/slug/:slug — single */
+    bySlug: builder.query<IGallery, GalleryBySlugParams>({
       query: ({ slug, locale }) => ({
-        url: `about/slug/${encodeURIComponent(slug)}`,
+        url: `gallery/slug/${encodeURIComponent(slug)}`,
         method: "GET",
         headers: locale ? buildCommonHeaders(locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<IAbout>) => res.data,
+      transformResponse: (res: ApiEnvelope<IGallery> | IGallery) =>
+        (res && (res as any).data) ? (res as ApiEnvelope<IGallery>).data : (res as IGallery),
       providesTags: (result) =>
-        result ? [{ type: "About", id: result._id }] : [],
+        result ? [{ type: "Gallery", id: result._id }] : [],
     }),
 
-    /** /aboutcategory — categories (public) */
-    categories: builder.query<AboutCategory[], { locale?: SupportedLocale } | void>({
+    /** GET /gallerycategory — categories (public) */
+    categories: builder.query<GalleryCategory[], { locale?: SupportedLocale } | void>({
       query: (args) => ({
-        url: "aboutcategory",
+        url: "gallerycategory",
         method: "GET",
         headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<AboutCategory[]>) => res.data ?? [],
+      transformResponse: (res: ApiEnvelope<GalleryCategory[]> | GalleryCategory[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: (result) =>
         Array.isArray(result)
           ? [
-              { type: "AboutCategory", id: "LIST" },
-              ...result.map((c) => ({ type: "AboutCategory" as const, id: c._id })),
+              { type: "GalleryCategory", id: "LIST" },
+              ...result.map((c) => ({ type: "GalleryCategory" as const, id: c._id })),
             ]
-          : [{ type: "AboutCategory", id: "LIST" }],
+          : [{ type: "GalleryCategory", id: "LIST" }],
     }),
-
-    // ────────────────────────────────
-    // Admin uçları gerektiğinde ekleyebiliriz (create/update/delete/togglePublish)
-    // create: builder.mutation(...), update: builder.mutation(...), vs.
-    // ────────────────────────────────
   }),
 });
 
 export const {
-  useListQuery: useAboutListQuery,
-  useBySlugQuery: useAboutBySlugQuery,
-  useCategoriesQuery: useAboutCategoriesQuery,
-  // Admin mutations eklendiğinde export edin
-} = aboutApi;
+  useListQuery: useGalleryListQuery,
+  useBySlugQuery: useGalleryBySlugQuery,
+  useCategoriesQuery: useGalleryCategoriesQuery,
+} = galleryApi;

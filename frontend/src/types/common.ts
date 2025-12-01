@@ -1,30 +1,15 @@
 // src/types/common.ts
 
-// 🌍 Tenant genelinde desteklenen diller (alfabetik)
-export const SUPPORTED_LOCALES = [
-  "ar", // العربية
-  "de", // Deutsch
-  "en", // English
-  "es", // Español
-  "fr", // Français
-  "hi", // हिन्दी
-  "it", // Italiano
-  "pl", // Polski
-  "pt", // Português
-  "ru", // Русский
-  "tr", // Türkçe
-  "zh", // 中文 (简体)
-] as const;
+import LOCALES_JSON from "./locales.json";
 
+// 🌍 Tenant genelinde desteklenen diller — tek kaynaktan
+export const SUPPORTED_LOCALES = LOCALES_JSON as readonly string[];
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
 
-// 🏷️ Çok dilli etiket tipleri
+// (Aşağıdaki mevcut kodun aynen devam edebilir)
 export type TranslatedLabel = Partial<Record<SupportedLocale, string>>;
+export type StrictTranslatedLabel = Record<string, string>; // istersen koru
 
-// Tüm dillerin zorunlu olduğu durumlar için
-export type StrictTranslatedLabel = Record<SupportedLocale, string>;
-
-// 👁️‍🗨️ Dil label'ları
 export const LANG_LABELS: Record<SupportedLocale, string> = {
   ar: "العربية",
   de: "Deutsch",

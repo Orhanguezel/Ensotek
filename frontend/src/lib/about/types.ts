@@ -1,6 +1,6 @@
 import type { SupportedLocale } from "@/types/common";
 
-/** Çok dilli alanlar için ortak tip */
+/** Çok dilli alan: dil -> string (opsiyonel) */
 export type TranslatedField = Partial<Record<SupportedLocale, string>>;
 
 export interface IAboutImage {
@@ -8,51 +8,56 @@ export interface IAboutImage {
   thumbnail: string;
   webp?: string;
   publicId?: string;
-  _id?: string;
 }
 
-/** Ana "About" içeriği */
+/**
+ * Backend modeline paralel About tipi (FE tarafında tarih/string)
+ * - slug & slugLower çok dilli
+ * - category populate edilmiş gelebilir
+ */
 export interface IAbout {
   _id: string;
   title: TranslatedField;
-  slug: string;                // public unique
+  tenant: string;
+
+  slug: TranslatedField;
+  slugLower?: TranslatedField;
+
   summary: TranslatedField;
   content: TranslatedField;
-
-  tenant: string;
-  tags: string[];
   images: IAboutImage[];
+  tags: string[];
+  author?: string;
 
   category:
     | string
     | {
         _id: string;
         name: TranslatedField;
+        slug: string;
       };
 
-  author: string;
   isPublished: boolean;
-  isActive: boolean;
-  publishedAt?: string;
-
+  publishedAt?: string; // ISO
   comments: string[];
+  isActive: boolean;
   order: number;
-  createdAt: string;
-  updatedAt: string;
+
+  createdAt: string; // ISO
+  updatedAt: string; // ISO
 }
 
-/** Kategori modeli */
 export interface AboutCategory {
   _id: string;
   name: TranslatedField;
   slug: string;
   description?: TranslatedField;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string; // ISO
+  updatedAt: string; // ISO
 }
 
-/** BE genel response kalıbı */
+/** BE response zarfı (generic) */
 export type ApiEnvelope<T> = {
   success: boolean;
   message?: string;
@@ -60,17 +65,29 @@ export type ApiEnvelope<T> = {
   meta?: unknown;
 };
 
-/** Listeleme parametreleri (public) */
+/** Public list query params (BE doğrulamasına uygun) */
 export type AboutListParams = {
+  /** Kategori ObjectId (query: ?category=) */
+  category?: string;
+
+  /** Sadece aktif locale’de metni olan kayıtları getir (query: ?onlyLocalized=true) */
+  onlyLocalized?: boolean;
+
+  /** Dil override (header: accept-language) — normalde interceptor set eder */
+  locale?: SupportedLocale;
+
+  /**
+   * Aşağıdakiler BE public endpoint’inde şu an kullanılmıyor.
+   * İleride ihtiyaç olursa geriye dönük uyumluluk için burada duruyor.
+   */
   page?: number;
   limit?: number;
-  categorySlug?: string;
+  sort?: string;
   q?: string;
-  sort?: string;           // opsiyonel: "-publishedAt" vb.
-  locale?: SupportedLocale;
+  categorySlug?: string; // (varsa)
 };
 
-/** Slug ile tek kayıt */
+/** Slug ile tek kayıt (locale-aware endpoint) */
 export type AboutBySlugParams = {
   slug: string;
   locale?: SupportedLocale;

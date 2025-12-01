@@ -16,11 +16,19 @@ async function abs(path: string): Promise<string> {
   return base.replace(/\/+$/, "") + "/" + String(path).replace(/^\/+/, "");
 }
 
+/** Liste sonucunu meta ile döndürür */
+export type ReferencesListResult = {
+  items: IReferences[];
+  page: number;
+  totalPages: number;
+  totalItems: number;
+};
+
 /** SSR/RSC: /references (list) */
 export async function fetchReferencesListServer(
   params?: ReferencesListParams,
   cookie?: string
-): Promise<IReferences[]> {
+): Promise<ReferencesListResult> {
   const urlBase = await abs("references");
   const url = new URL(urlBase);
 
@@ -34,17 +42,60 @@ export async function fetchReferencesListServer(
   const l = normalizeLocale(params?.locale as SupportedLocale | undefined);
 
   const r = await fetch(url.toString(), {
-    headers: {
-      ...buildCommonHeaders(l, tenant),
-      ...(cookie ? { cookie } : {}),
-    },
+    headers: { ...buildCommonHeaders(l, tenant), ...(cookie ? { cookie } : {}) },
     credentials: "include",
     cache: "no-store",
   });
 
   if (!r.ok) throw new Error(`references list failed: ${r.status}`);
-  const j = (await r.json()) as ApiEnvelope<IReferences[]>;
-  return j.data ?? [];
+
+  // Header üzerinden toplam sayıları yakalamayı dene
+  const hdrTotal =
+    Number(r.headers.get("x-total-count")) ||
+    Number(r.headers.get("x-totalitems")) ||
+    Number(r.headers.get("x-total")) ||
+    undefined;
+
+  const hdrTotalPages =
+    Number(r.headers.get("x-total-pages")) ||
+    Number(r.headers.get("x-pages")) ||
+    undefined;
+
+  const j = (await r.json()) as ApiEnvelope<IReferences[]> & {
+    meta?: {
+      page?: number;
+      totalPages?: number;
+      totalItems?: number;
+      itemCount?: number;
+      limit?: number;
+      pagination?: { page?: number; totalPages?: number; totalItems?: number; perPage?: number };
+    };
+  };
+
+  const items = j.data ?? [];
+  const m = j.meta ?? {};
+  const mp = (m as any).pagination || {};
+
+  const page = Number(m.page ?? mp.page ?? params?.page ?? 1);
+
+  // perPage: önce meta/limit -> yoksa params.limit -> en son eldeki sayıyı kullan
+  const perPage = Number(
+    m.limit ?? mp.perPage ?? (params?.limit ?? (items.length || 1))
+  );
+
+  const totalItems = Number(
+    m.totalItems ?? m.itemCount ?? mp.totalItems ?? hdrTotal ?? (items.length || 0)
+  );
+
+  // totalPages öncelik: meta/header; yoksa fallback
+  let totalPages = Number(m.totalPages ?? mp.totalPages ?? hdrTotalPages ?? 0);
+  if (!totalPages || !Number.isFinite(totalPages)) {
+    // Fallback: Bu sayfada perPage kadar kayıt varsa en az bir sonraki sayfa olabilir
+    const maybeHasNext = items.length >= perPage;
+    totalPages = maybeHasNext ? page + 1 : page;
+  }
+
+  return { items, page, totalPages, totalItems };
 }
 
 /** SSR/RSC: /references/slug/:slug (single) */
@@ -58,10 +109,7 @@ export async function fetchReferencesBySlugServer(
   const l = normalizeLocale(locale);
 
   const r = await fetch(url, {
-    headers: {
-      ...buildCommonHeaders(l, tenant),
-      ...(cookie ? { cookie } : {}),
-    },
+    headers: { ...buildCommonHeaders(l, tenant), ...(cookie ? { cookie } : {}) },
     credentials: "include",
     cache: "no-store",
   });
@@ -83,10 +131,7 @@ export async function fetchReferencesCategoriesServer(
   const l = normalizeLocale(locale);
 
   const r = await fetch(url, {
-    headers: {
-      ...buildCommonHeaders(l, tenant),
-      ...(cookie ? { cookie } : {}),
-    },
+    headers: { ...buildCommonHeaders(l, tenant), ...(cookie ? { cookie } : {}) },
     credentials: "include",
     cache: "no-store",
   });

@@ -1,3 +1,4 @@
+// src/lib/api.ts
 import axios, {
   type AxiosRequestConfig,
   type AxiosError,
@@ -5,30 +6,47 @@ import axios, {
 } from "axios";
 import { getApiBase, getClientCsrfToken, buildCommonHeaders } from "./http";
 import { getEnvTenant } from "./config";
+import { baseLocale } from "./strings";
+import { isSupportedLocale, DEFAULT_LOCALE } from "@/i18n/config";
+import type { SupportedLocale } from "@/types/common";
 
 /** Base URL: absolute varsa onu kullan, yoksa /api */
 const API_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim() || getApiBase();
 
-/** Dil tespiti (client) */
-function getLang(): string {
-  if (typeof window === "undefined") return "de";
-  try { const s = localStorage.getItem("lang"); if (s) return s; } catch {}
-  const nav = (typeof navigator !== "undefined" && (navigator.language || (navigator as any).userLanguage)) || "de";
-  return String(nav).split("-")[0].toLowerCase() || "de";
+/** ---- Global aktif dil (runtime) ---- */
+let CURRENT_LANG: SupportedLocale = DEFAULT_LOCALE;
+export function setApiLang(lang?: string) {
+  const b = baseLocale(lang || DEFAULT_LOCALE);
+  if (isSupportedLocale(b)) {
+    CURRENT_LANG = b as SupportedLocale;
+    try { localStorage.setItem("lang", CURRENT_LANG); } catch {}
+  }
+}
+function getLang(): SupportedLocale {
+  if (typeof window === "undefined") return CURRENT_LANG; // SSR
+  return CURRENT_LANG;
 }
 
-/** CSRF cookie adı */
-const CSRF_COOKIE =
-  process.env.NEXT_PUBLIC_CSRF_COOKIE_NAME ||
-  process.env.CSRF_COOKIE_NAME ||
-  "tt_csrf";
-
-/** CSRF ısıtma */
+/** CSRF ısıtma — projede endpoint yoksa env ile belirle, yoksa generic yolları dene */
 async function ensureCsrfCookie(): Promise<void> {
   const base = API_BASE_URL.replace(/\/+$/, "");
-  const tryUrls = [`${base}/admin/recipes/csrf`, `${base}/csrf`, `${base}/ping`];
-  for (const u of tryUrls) {
-    try { await fetch(u, { credentials: "include", method: "GET" }); return; } catch {}
+  const customPath = (process.env.NEXT_PUBLIC_CSRF_WARMUP_PATH || "").trim();
+  const candidates = [
+    customPath && `${base}/${customPath.replace(/^\/+/, "")}`,
+    `${base}/csrf`,
+    `${base}/auth/csrf`,
+    `${base}/ping`,
+    `${base}/health`,
+    `${base}/status`,
+  ].filter(Boolean) as string[];
+
+  for (const u of candidates) {
+    try {
+      await fetch(u, { credentials: "include", method: "GET" });
+      return;
+    } catch {
+      // diğer adaya geç
+    }
   }
 }
 
@@ -38,39 +56,46 @@ const API = axios.create({
   withCredentials: true,
 });
 
-// Opsiyonel public API key
-let apiKey: string | null = null;
-export const setApiKey = (key: string) => { apiKey = key; };
-
 /** Request interceptor: dil + tenant + csrf */
-API.interceptors.request.use((config: InternalAxiosRequestConfig & { csrfDisabled?: boolean }) => {
-  config.headers = config.headers ?? {};
-  // Dil & Tenant (tek yerden)
-  const baseHeaders = buildCommonHeaders(getLang(), getEnvTenant());
-  Object.assign(config.headers as any, baseHeaders, { "X-Requested-With": "XMLHttpRequest" });
+API.interceptors.request.use(
+  (config: InternalAxiosRequestConfig & { csrfDisabled?: boolean }) => {
+    const baseHeaders = buildCommonHeaders(getLang(), getEnvTenant());
+    const incoming = (config.headers || {}) as Record<string, any>;
+    config.headers = {
+      "accept-language": baseHeaders["Accept-Language"],
+      "x-lang": baseHeaders["X-Lang"],
+      "x-tenant": baseHeaders["X-Tenant"],
+      "x-requested-with": "XMLHttpRequest",
+      ...incoming,
+    } as any;
 
-  // API Key (opsiyonel)
-  if (apiKey) (config.headers as any)["X-API-KEY"] = apiKey;
-
-  // CSRF (unsafe metodlarda)
-  const method = (config.method || "get").toUpperCase();
-  const unsafe = !["GET", "HEAD", "OPTIONS"].includes(method);
-  if (unsafe && !config.csrfDisabled) {
-    const metaOrCookie = getClientCsrfToken();
-    const token = metaOrCookie?.token;
-    if (token) (config.headers as any)["X-CSRF-Token"] = token;
+    // CSRF (unsafe metodlarda)
+    const method = (config.method || "get").toUpperCase();
+    const unsafe = !["GET", "HEAD", "OPTIONS"].includes(method);
+    if (unsafe && !config.csrfDisabled) {
+      const { token } = getClientCsrfToken();
+      if (token) (config.headers as any)["x-csrf-token"] = token;
+    }
+    return config;
   }
-  return config;
-});
+);
 
-/** Response interceptor: 403 → ısıtma + 1 kez retry */
+/** Response interceptor: 403/419 → (client’ta) ısıtma + 1 kez retry */
 API.interceptors.response.use(
   (r) => r,
   async (err: AxiosError<any>) => {
-    const cfg = (err.config || {}) as (AxiosRequestConfig & { __retriedOnce?: boolean; csrfDisabled?: boolean });
+    const cfg = (err.config || {}) as AxiosRequestConfig & {
+      __retriedOnce?: boolean;
+      csrfDisabled?: boolean;
+    };
     const status = err.response?.status;
 
-    if (status === 403 && !cfg.__retriedOnce && !cfg.csrfDisabled) {
+    if (
+      typeof window !== "undefined" &&
+      (status === 403 || status === 419) &&
+      !cfg.__retriedOnce &&
+      !cfg.csrfDisabled
+    ) {
       try {
         await ensureCsrfCookie();
         cfg.__retriedOnce = true;
@@ -78,7 +103,7 @@ API.interceptors.response.use(
       } catch {}
     }
 
-    if (process.env.NODE_ENV !== "production" && (status === 401 || status === 403)) {
+    if (process.env.NODE_ENV !== "production" && (status === 401 || status === 403 || status === 419)) {
       // eslint-disable-next-line no-console
       console.warn("Auth/CSRF warning:", status, err?.response?.data);
     }

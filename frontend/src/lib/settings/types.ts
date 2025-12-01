@@ -1,9 +1,10 @@
-import type { SupportedLocale } from "@/types/common";
+import type { SupportedLocale, TranslatedLabel } from "@/types/common";
 
-/** Çok dilli alanlar için ortak tip */
+/** Çok dilli basit alan */
 export type TranslatedField = Partial<Record<SupportedLocale, string>>;
 
-export interface IAboutImage {
+/** Görsel nesnesi */
+export interface ISettingsImage {
   url: string;
   thumbnail: string;
   webp?: string;
@@ -11,67 +12,80 @@ export interface IAboutImage {
   _id?: string;
 }
 
-/** Ana "About" içeriği */
-export interface IAbout {
-  _id: string;
-  title: TranslatedField;
-  slug: string;                // public unique
-  summary: TranslatedField;
-  content: TranslatedField;
+/** Etiketli link */
+export interface ILabeledLink {
+  label: TranslatedLabel;
+  href?: string;
+  url?: string;
+  icon?: string;
+  tenant?: string;
+}
 
+/** Navbar marka yazıları için nested yapı */
+export interface INavbarLogoTextValue {
+  title: { label: TranslatedLabel; url?: string };
+  slogan: { label: TranslatedLabel; url?: string };
+}
+
+/** Setting value union */
+export type ISettingValue =
+  | string
+  | string[]
+  | TranslatedLabel
+  | Record<string, ILabeledLink>
+  | Record<string, any>
+  | INavbarLogoTextValue
+  | { href: string; icon: string }
+  | { phone: string };
+
+/** Ana model */
+export interface ISetting {
+  key: string;
   tenant: string;
-  tags: string[];
-  images: IAboutImage[];
-
-  category:
-    | string
-    | {
-        _id: string;
-        name: TranslatedField;
-      };
-
-  author: string;
-  isPublished: boolean;
+  value: ISettingValue;
   isActive: boolean;
-  publishedAt?: string;
-
-  comments: string[];
-  order: number;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string; // ISO
+  updatedAt: string; // ISO
+  images?: ISettingsImage[];
 }
 
-/** Kategori modeli */
-export interface AboutCategory {
-  _id: string;
-  name: TranslatedField;
-  slug: string;
-  description?: TranslatedField;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-/** BE genel response kalıbı */
+/** BE genel response kalıpları */
 export type ApiEnvelope<T> = {
   success: boolean;
   message?: string;
   data: T;
   meta?: unknown;
 };
-
-/** Listeleme parametreleri (public) */
-export type AboutListParams = {
-  page?: number;
-  limit?: number;
-  categorySlug?: string;
-  q?: string;
-  sort?: string;           // opsiyonel: "-publishedAt" vb.
-  locale?: SupportedLocale;
+export type ApiMessage<T> = {
+  success?: boolean;
+  message?: string;
+  data: T;
 };
 
-/** Slug ile tek kayıt */
-export type AboutBySlugParams = {
-  slug: string;
-  locale?: SupportedLocale;
+/** Sorgu & mutasyon parametreleri */
+export type SettingsListParams = { locale?: SupportedLocale };
+
+export type UpsertSettingInput = {
+  key: string;
+  value: any;
+  isActive?: boolean;
+  locale?: SupportedLocale; // header için opsiyonel
+};
+
+export type UploadSettingsImagesInput = {
+  key: string;
+  files: File[];
+  locale?: SupportedLocale; // header için opsiyonel
+};
+
+export type UpdateSettingsImagesInput = {
+  key: string;
+  files: File[];
+  removedImages?: string[];
+  locale?: SupportedLocale; // header için opsiyonel
+};
+
+export type DeleteSettingInput = {
+  key: string;
+  locale?: SupportedLocale; // header için opsiyonel
 };

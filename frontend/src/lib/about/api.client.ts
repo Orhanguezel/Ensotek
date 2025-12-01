@@ -1,94 +1,72 @@
 "use client";
 
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
-import { buildCommonHeaders } from "@/lib/http";
+import { rootApi } from "@/lib/rtk/rootApi";
 import type { SupportedLocale } from "@/types/common";
-import type {
-  IAbout,
-  AboutCategory,
-  AboutListParams,
-  AboutBySlugParams,
-  ApiEnvelope,
-} from "./types";
+import type { IAbout, AboutCategory, AboutBySlugParams, ApiEnvelope } from "./types";
 
-/**
- * RTK Query — About & Category (public uçlar)
- *  - baseQuery: axiosBaseQuery() (tenant + Accept-Language interceptor’ları sizde zaten hazır)
- *  - locale override lazımsa buildCommonHeaders(locale) ile gönderiyoruz
- */
-export const aboutApi = createApi({
-  reducerPath: "aboutApi",
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ["About", "AboutList", "AboutCategory"],
+/** Public list query params */
+export type AboutListParams = {
+  category?: string;
+  onlyLocalized?: boolean;
+  locale?: SupportedLocale;
+};
+
+/** RTK Query — About (public, ABOUTUS kullan) */
+export const aboutApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
-    /** /about — list */
-    list: builder.query<IAbout[], AboutListParams | void>({
+    /** GET /aboutus — public list */
+    aboutList: builder.query<IAbout[], AboutListParams | void>({
       query: (args) => {
-        const locale: SupportedLocale | undefined = args?.locale as any;
-        const params = new URLSearchParams();
+        const params: Record<string, any> = {};
+        if (args?.category) params.category = String(args.category);
+        if (args?.onlyLocalized) params.onlyLocalized = "true";
 
-        if (args?.page) params.set("page", String(args.page));
-        if (args?.limit) params.set("limit", String(args.limit));
-        if (args?.categorySlug) params.set("category", args.categorySlug);
-        if (args?.q) params.set("q", args.q);
-        if (args?.sort) params.set("sort", args.sort);
+        const headers = args?.locale
+          ? { "accept-language": String(args.locale) }
+          : undefined;
 
-        return {
-          url: `about${params.toString() ? `?${params.toString()}` : ""}`,
-          method: "GET",
-          headers: locale ? buildCommonHeaders(locale) : undefined,
-        };
+        return { url: "aboutus", method: "GET", params, headers };
       },
-      transformResponse: (res: ApiEnvelope<IAbout[]>) => res.data ?? [],
+      transformResponse: (res: ApiEnvelope<IAbout[]> | IAbout[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: (result) =>
         Array.isArray(result)
-          ? [
-              { type: "AboutList", id: "LIST" },
-              ...result.map((x) => ({ type: "About" as const, id: x._id })),
-            ]
-          : [{ type: "AboutList", id: "LIST" }],
+          ? [{ type: "AboutList" as const, id: "LIST" }, ...result.map((x) => ({ type: "About" as const, id: x._id })) ]
+          : [{ type: "AboutList" as const, id: "LIST" }],
     }),
 
-    /** /about/slug/:slug — single */
-    bySlug: builder.query<IAbout, AboutBySlugParams>({
+    /** GET /aboutus/slug/:slug — public single */
+    aboutBySlug: builder.query<IAbout, AboutBySlugParams>({
       query: ({ slug, locale }) => ({
-        url: `about/slug/${encodeURIComponent(slug)}`,
+        url: `aboutus/slug/${encodeURIComponent(slug)}`,
         method: "GET",
-        headers: locale ? buildCommonHeaders(locale) : undefined,
+        headers: locale ? { "accept-language": String(locale) } : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<IAbout>) => res.data,
-      providesTags: (result) =>
-        result ? [{ type: "About", id: result._id }] : [],
+      transformResponse: (res: ApiEnvelope<IAbout> | IAbout) =>
+        (res as any)?.data ?? (res as IAbout),
+      providesTags: (result) => (result ? [{ type: "About" as const, id: result._id }] : []),
     }),
 
-    /** /aboutcategory — categories (public) */
-    categories: builder.query<AboutCategory[], { locale?: SupportedLocale } | void>({
+    /** GET /aboutcategory — categories (public) */
+    aboutCategories: builder.query<AboutCategory[], { locale?: SupportedLocale } | void>({
       query: (args) => ({
         url: "aboutcategory",
         method: "GET",
-        headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
+        headers: args?.locale ? { "accept-language": String(args.locale) } : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<AboutCategory[]>) => res.data ?? [],
+      transformResponse: (res: ApiEnvelope<AboutCategory[]> | AboutCategory[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: (result) =>
         Array.isArray(result)
-          ? [
-              { type: "AboutCategory", id: "LIST" },
-              ...result.map((c) => ({ type: "AboutCategory" as const, id: c._id })),
-            ]
-          : [{ type: "AboutCategory", id: "LIST" }],
+          ? [{ type: "AboutCategory" as const, id: "LIST" }, ...result.map((c) => ({ type: "AboutCategory" as const, id: c._id })) ]
+          : [{ type: "AboutCategory" as const, id: "LIST" }],
     }),
-
-    // ────────────────────────────────
-    // Admin uçları gerektiğinde ekleyebiliriz (create/update/delete/togglePublish)
-    // create: builder.mutation(...), update: builder.mutation(...), vs.
-    // ────────────────────────────────
   }),
+  overrideExisting: false,
 });
 
 export const {
-  useListQuery: useAboutListQuery,
-  useBySlugQuery: useAboutBySlugQuery,
-  useCategoriesQuery: useAboutCategoriesQuery,
-  // Admin mutations eklendiğinde export edin
+  useAboutListQuery,
+  useAboutBySlugQuery,
+  useAboutCategoriesQuery,
 } = aboutApi;

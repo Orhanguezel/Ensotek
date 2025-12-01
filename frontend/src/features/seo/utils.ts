@@ -1,12 +1,23 @@
+// src/features/seo/utils.ts (veya mevcut dosyanız)
 export function siteUrlBase() {
-  return (process.env.NEXT_PUBLIC_SITE_URL || "https://ensotek.de").replace(/\/+$/, "");
+  const raw = (process.env.NEXT_PUBLIC_SITE_URL || "https://guezelwebdesign.de").trim();
+  // Protokol yoksa https ekle, trailing slash temizle
+  const withProto = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
+  return withProto.replace(/\/+$/, "");
 }
 
 export function absoluteUrl(input: string) {
   const base = siteUrlBase();
-  if (!input) return base + "/";
-  if (/^https?:\/\//i.test(input)) return input;
-  return `${base}${input.startsWith("/") ? "" : "/"}${input}`;
+  try {
+    // URL ctor lokal/relatif tüm path'leri normalize eder
+    return new URL(input || "/", base + "/").toString().replace(/\/+$/, (m) =>
+      // base-only olmasın diye kök için tek slash bırak
+      m.length > 1 ? "/" : m
+    );
+  } catch {
+    // herhangi bir parse hatasında güvenli fallback
+    return `${base}/`;
+  }
 }
 
 /** ISO veya Date → RFC 1123 (HTTP date) */

@@ -1,61 +1,24 @@
+// src/lib/settings/api.server.ts
+
 import { getServerApiBaseAbsolute } from "@/lib/server/http";
 import { buildCommonHeaders } from "@/lib/http";
 import { resolveTenant } from "@/lib/server/tenant";
 import { normalizeLocale } from "@/lib/server/locale";
 import type { SupportedLocale } from "@/types/common";
-import type {
-  IAbout,
-  AboutCategory,
-  AboutListParams,
-  ApiEnvelope,
-} from "./types";
+import type { ISetting, ApiEnvelope } from "./types";
 
-/** abs("/about") → https://.../api/about */
+/** abs("/settings") → https://.../api/settings */
 async function abs(path: string): Promise<string> {
   const base = await getServerApiBaseAbsolute(); // "https://.../api"
   return base.replace(/\/+$/, "") + "/" + String(path).replace(/^\/+/, "");
 }
 
-/** SSR/RSC: /about (list) */
-export async function fetchAboutListServer(
-  params?: AboutListParams,
-  cookie?: string
-): Promise<IAbout[]> {
-  const urlBase = await abs("about");
-  const url = new URL(urlBase);
-
-  if (params?.page) url.searchParams.set("page", String(params.page));
-  if (params?.limit) url.searchParams.set("limit", String(params.limit));
-  if (params?.categorySlug) url.searchParams.set("category", params.categorySlug);
-  if (params?.q) url.searchParams.set("q", params.q);
-  if (params?.sort) url.searchParams.set("sort", params.sort);
-
-  const tenant = await resolveTenant();
-  const l = normalizeLocale(params?.locale as SupportedLocale | undefined);
-
-  const r = await fetch(url.toString(), {
-    headers: {
-      ...buildCommonHeaders(l, tenant),
-      ...(cookie ? { cookie } : {}),
-    },
-    credentials: "include",
-    cache: "no-store", // liste RSC’de taze kalsın (isteğe göre revalidate param. ile oynanır)
-  });
-
-  if (!r.ok) {
-    throw new Error(`about list failed: ${r.status}`);
-  }
-  const j = (await r.json()) as ApiEnvelope<IAbout[]>;
-  return j.data ?? [];
-}
-
-/** SSR/RSC: /about/slug/:slug (single) */
-export async function fetchAboutBySlugServer(
-  slug: string,
+/** SSR/RSC: /settings — public list */
+export async function fetchSettingsServer(
   locale?: SupportedLocale,
   cookie?: string
-): Promise<IAbout | null> {
-  const url = await abs(`about/slug/${encodeURIComponent(slug)}`);
+): Promise<ISetting[]> {
+  const url = await abs("settings");
   const tenant = await resolveTenant();
   const l = normalizeLocale(locale);
 
@@ -63,24 +26,22 @@ export async function fetchAboutBySlugServer(
     headers: {
       ...buildCommonHeaders(l, tenant),
       ...(cookie ? { cookie } : {}),
+      "X-Requested-With": "fetch",
     },
-    credentials: "include",
     cache: "no-store",
   });
 
-  if (r.status === 404) return null;
-  if (!r.ok) throw new Error(`about bySlug failed: ${r.status}`);
-
-  const j = (await r.json()) as ApiEnvelope<IAbout>;
-  return j.data ?? null;
+  if (!r.ok) throw new Error(`settings list failed: ${r.status}`);
+  const j = (await r.json()) as ApiEnvelope<ISetting[]> | ISetting[];
+  return Array.isArray(j) ? j : (j.data ?? []);
 }
 
-/** SSR/RSC: /aboutcategory (public list) */
-export async function fetchAboutCategoriesServer(
+/** SSR/RSC: /settings/admin — admin list */
+export async function fetchSettingsAdminServer(
   locale?: SupportedLocale,
   cookie?: string
-): Promise<AboutCategory[]> {
-  const url = await abs("aboutcategory");
+): Promise<ISetting[]> {
+  const url = await abs("settings/admin");
   const tenant = await resolveTenant();
   const l = normalizeLocale(locale);
 
@@ -88,13 +49,21 @@ export async function fetchAboutCategoriesServer(
     headers: {
       ...buildCommonHeaders(l, tenant),
       ...(cookie ? { cookie } : {}),
+      "X-Requested-With": "fetch",
     },
-    credentials: "include",
     cache: "no-store",
   });
 
-  if (!r.ok) throw new Error(`about categories failed: ${r.status}`);
+  if (!r.ok) throw new Error(`settings admin list failed: ${r.status}`);
+  const j = (await r.json()) as ApiEnvelope<ISetting[]> | ISetting[];
+  return Array.isArray(j) ? j : (j.data ?? []);
+}
 
-  const j = (await r.json()) as ApiEnvelope<AboutCategory[]>;
-  return j.data ?? [];
+export async function fetchSettingByKeyServer(
+  key: string,
+  locale?: SupportedLocale,
+  cookie?: string
+): Promise<ISetting | null> {
+  const all = await fetchSettingsServer(locale, cookie);
+  return all.find((s) => s.key === key) ?? null;
 }

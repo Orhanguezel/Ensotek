@@ -1,0 +1,284 @@
+-- 161_menu_items_seed.sql
+-- Seed for menu_items (parent) + menu_items_i18n (tr, en)
+
+SET NAMES utf8mb4;
+SET time_zone = '+00:00';
+
+-- ============================================================
+-- 1) PARENT KAYITLAR (menu_items)
+--    NOT: Artık label/url parent tabloda yok, sadece teknik alanlar
+-- ============================================================
+
+INSERT INTO `menu_items`
+(`id`, `parent_id`, `location`, `section_id`, `type`, `page_id`, `icon`, `order_num`, `is_active`)
+VALUES
+-- ================= HEADER =================
+-- 0) Home
+('fe8120b3-919a-49b8-8035-df6fd2a2433f',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 0, 1),
+
+-- 1) About
+('25740da6-c0f2-4c1d-b131-998018699bfd',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 1, 1),
+
+-- 2) Services
+('c47a1c3f-cea1-4780-9381-77336bc8ac59',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 2, 1),
+
+-- 3) Product
+('f2570596-db46-4028-902c-d6fe2c9a8312',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 3, 1),
+
+-- 4) Spare Part
+('11111111-2222-3333-4444-555555555555',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 4, 1),
+
+-- 5) References
+('22222222-3333-4444-5555-666666666666',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 5, 1),
+
+-- 6) Library / Blog
+('ceed431a-aafb-4aba-bf1f-6217b3960c01',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 6, 1),
+
+-- 7) News
+('33333333-4444-5555-6666-777777777777',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 7, 1),
+
+-- 8) Contact
+('455c6ddf-658b-4c0f-8a9e-0b104708dd07',
+  NULL, 'header', NULL, 'custom', NULL, NULL, 8, 1),
+
+-- ================= FOOTER: Hızlı Erişim =================
+('6a4f6b37-ed99-4d98-8c54-d658096aacde',
+  NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 0, 1), -- SSS
+
+('2e32b68d-ae71-4d44-8770-95b8dfb03c36',
+  NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 1, 1), -- Kampanyalar
+
+('f1573cc3-5392-448b-89eb-d0e02e947c6d',
+  NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 2, 1), -- Nasıl Sipariş Verilir?
+
+-- ================= FOOTER: Kurumsal =================
+('71c28444-7b6e-47ae-92be-f59206a1b820',
+  NULL, 'footer', 'f942a930-6743-4ecc-b4b3-1fd6b77f9d77', 'custom', NULL, NULL, 3, 1), -- Gizlilik Politikası
+
+('3d325c92-d59e-4730-8301-5c9bcff463bc',
+  NULL, 'footer', 'f942a930-6743-4ecc-b4b3-1fd6b77f9d77', 'custom', NULL, NULL, 4, 1), -- KVKK
+
+('9fa999a9-9e47-4a3c-9dac-6afba197d79c',
+  NULL, 'footer', 'f942a930-6743-4ecc-b4b3-1fd6b77f9d77', 'custom', NULL, NULL, 5, 1), -- İade ve Değişim
+
+('d8ec7f51-384f-400a-9ac6-3a179cb89087',
+  NULL, 'footer', 'f942a930-6743-4ecc-b4b3-1fd6b77f9d77', 'custom', NULL, NULL, 6, 1), -- Ödeme Yöntemleri
+
+('24c49639-01d0-4274-8fb9-c31ed64d0726',
+  NULL, 'footer', 'f942a930-6743-4ecc-b4b3-1fd6b77f9d77', 'custom', NULL, NULL, 7, 1)  -- Kullanım Koşulları
+ON DUPLICATE KEY UPDATE
+  `parent_id`  = VALUES(`parent_id`),
+  `location`   = VALUES(`location`),
+  `section_id` = VALUES(`section_id`),
+  `type`       = VALUES(`type`),
+  `page_id`    = VALUES(`page_id`),
+  `icon`       = VALUES(`icon`),
+  `order_num`  = VALUES(`order_num`),
+  `is_active`  = VALUES(`is_active`),
+  `updated_at` = CURRENT_TIMESTAMP(3);
+
+-- ============================================================
+-- 2) I18N KAYITLAR (menu_items_i18n) – locale: 'tr'
+-- ============================================================
+
+INSERT INTO `menu_items_i18n`
+(`id`, `menu_item_id`, `locale`, `title`, `url`, `created_at`, `updated_at`)
+VALUES
+-- ================= HEADER (tr) =================
+('ae8120b3-919a-49b8-8035-df6fd2a2433f',
+ 'fe8120b3-919a-49b8-8035-df6fd2a2433f',
+ 'tr', 'Anasayfa', '/',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('a5740da6-c0f2-4c1d-b131-998018699bfd',
+ '25740da6-c0f2-4c1d-b131-998018699bfd',
+ 'tr', 'Hakkımızda', '/about',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('a47a1c3f-cea1-4780-9381-77336bc8ac59',
+ 'c47a1c3f-cea1-4780-9381-77336bc8ac59',
+ 'tr', 'Hizmetler', '/service',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('a2570596-db46-4028-902c-d6fe2c9a8312',
+ 'f2570596-db46-4028-902c-d6fe2c9a8312',
+ 'tr', 'Ürünler', '/product',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('b1111111-2222-3333-4444-555555555555',
+ '11111111-2222-3333-4444-555555555555',
+ 'tr', 'Yedek Parça', '/sparepart',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('b2222222-3333-4444-5555-666666666666',
+ '22222222-3333-4444-5555-666666666666',
+ 'tr', 'Referanslar', '/references',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('aeed431a-aafb-4aba-bf1f-6217b3960c01',
+ 'ceed431a-aafb-4aba-bf1f-6217b3960c01',
+ 'tr', 'Kütüphane', '/library',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('b3333333-4444-5555-6666-777777777777',
+ '33333333-4444-5555-6666-777777777777',
+ 'tr', 'Haberler', '/news',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('a55c6ddf-658b-4c0f-8a9e-0b104708dd07',
+ '455c6ddf-658b-4c0f-8a9e-0b104708dd07',
+ 'tr', 'İletişim', '/contact',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+-- ================= FOOTER: Hızlı Erişim (tr) =================
+('7a4f6b37-ed99-4d98-8c54-d658096aacde',
+ '6a4f6b37-ed99-4d98-8c54-d658096aacde',
+ 'tr', 'SSS', '/sss',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('3e32b68d-ae71-4d44-8770-95b8dfb03c36',
+ '2e32b68d-ae71-4d44-8770-95b8dfb03c36',
+ 'tr', 'Kampanyalar', '/kampanyalar',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('f1573cc3-5392-448b-89eb-d0e02e947c6e',
+ 'f1573cc3-5392-448b-89eb-d0e02e947c6d',
+ 'tr', 'Nasıl Sipariş Verilir?', '/nasil-siparis-verilir',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+-- ================= FOOTER: Kurumsal (tr) =================
+('71c28444-7b6e-47ae-92be-f59206a1b821',
+ '71c28444-7b6e-47ae-92be-f59206a1b820',
+ 'tr', 'Gizlilik Politikası', '/gizlilik-politikasi',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('3d325c92-d59e-4730-8301-5c9bcff463bd',
+ '3d325c92-d59e-4730-8301-5c9bcff463bc',
+ 'tr', 'KVKK', '/kvkk',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('9fa999a9-9e47-4a3c-9dac-6afba197d79d',
+ '9fa999a9-9e47-4a3c-9dac-6afba197d79c',
+ 'tr', 'İade ve Değişim', '/iade-degisim',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('d8ec7f51-384f-400a-9ac6-3a179cb89088',
+ 'd8ec7f51-384f-400a-9ac6-3a179cb89087',
+ 'tr', 'Ödeme Yöntemleri', '/odeme-yontemleri',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('24c49639-01d0-4274-8fb9-c31ed64d0727',
+ '24c49639-01d0-4274-8fb9-c31ed64d0726',
+ 'tr', 'Kullanım Koşulları', '/kullanim-kosullari',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000')
+ON DUPLICATE KEY UPDATE
+  `title`      = VALUES(`title`),
+  `url`        = VALUES(`url`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- ============================================================
+-- 3) I18N KAYITLAR (menu_items_i18n) – locale: 'en'
+-- ============================================================
+
+INSERT INTO `menu_items_i18n`
+(`id`, `menu_item_id`, `locale`, `title`, `url`, `created_at`, `updated_at`)
+VALUES
+-- ================= HEADER (en) =================
+('00000000-0000-0000-0000-000000000001',
+ 'fe8120b3-919a-49b8-8035-df6fd2a2433f',
+ 'en', 'Home', '/',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000002',
+ '25740da6-c0f2-4c1d-b131-998018699bfd',
+ 'en', 'About', '/about',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000003',
+ 'c47a1c3f-cea1-4780-9381-77336bc8ac59',
+ 'en', 'Services', '/service',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000004',
+ 'f2570596-db46-4028-902c-d6fe2c9a8312',
+ 'en', 'Products', '/product',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000005',
+ '11111111-2222-3333-4444-555555555555',
+ 'en', 'Spare Parts', '/sparepart',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000006',
+ '22222222-3333-4444-5555-666666666666',
+ 'en', 'References', '/references',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000007',
+ 'ceed431a-aafb-4aba-bf1f-6217b3960c01',
+ 'en', 'Library', '/library',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000008',
+ '33333333-4444-5555-6666-777777777777',
+ 'en', 'News', '/news',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000009',
+ '455c6ddf-658b-4c0f-8a9e-0b104708dd07',
+ 'en', 'Contact', '/contact',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+-- ================= FOOTER: Quick Links (en) =================
+('00000000-0000-0000-0000-000000000010',
+ '6a4f6b37-ed99-4d98-8c54-d658096aacde',
+ 'en', 'FAQ', '/sss',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000011',
+ '2e32b68d-ae71-4d44-8770-95b8dfb03c36',
+ 'en', 'Campaigns', '/kampanyalar',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000012',
+ 'f1573cc3-5392-448b-89eb-d0e02e947c6d',
+ 'en', 'How to Order?', '/nasil-siparis-verilir',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+-- ================= FOOTER: Corporate (en) =================
+('00000000-0000-0000-0000-000000000013',
+ '71c28444-7b6e-47ae-92be-f59206a1b820',
+ 'en', 'Privacy Policy', '/gizlilik-politikasi',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000014',
+ '3d325c92-d59e-4730-8301-5c9bcff463bc',
+ 'en', 'KVKK', '/kvkk',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000015',
+ '9fa999a9-9e47-4a3c-9dac-6afba197d79c',
+ 'en', 'Returns & Exchanges', '/iade-degisim',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000016',
+ 'd8ec7f51-384f-400a-9ac6-3a179cb89087',
+ 'en', 'Payment Methods', '/odeme-yontemleri',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
+
+('00000000-0000-0000-0000-000000000017',
+ '24c49639-01d0-4274-8fb9-c31ed64d0726',
+ 'en', 'Terms & Conditions', '/kullanim-kosullari',
+ '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000')
+ON DUPLICATE KEY UPDATE
+  `title`      = VALUES(`title`),
+  `url`        = VALUES(`url`),
+  `updated_at` = VALUES(`updated_at`);

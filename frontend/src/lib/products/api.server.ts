@@ -4,24 +4,24 @@ import { resolveTenant } from "@/lib/server/tenant";
 import { normalizeLocale } from "@/lib/server/locale";
 import type { SupportedLocale } from "@/types/common";
 import type {
-  IEnsotekprod,
-  EnsotekCategory,
+  Iguezelwebdesignprod,
+  guezelwebdesignCategory,
   ProductsListParams,
   ApiEnvelope,
 } from "./types";
 
-/** abs("/ensotekprod") → https://.../api/ensotekprod */
+/** abs("/guezelwebdesignprod") → https://.../api/guezelwebdesignprod */
 async function abs(path: string): Promise<string> {
   const base = await getServerApiBaseAbsolute(); // "https://.../api"
   return base.replace(/\/+$/, "") + "/" + String(path).replace(/^\/+/, "");
 }
 
-/** SSR/RSC: /ensotekprod (list) */
+/** SSR/RSC: /guezelwebdesignprod (list) */
 export async function fetchProductsListServer(
   params?: ProductsListParams,
   cookie?: string
-): Promise<IEnsotekprod[]> {
-  const urlBase = await abs("ensotekprod");
+): Promise<Iguezelwebdesignprod[]> {
+  const urlBase = await abs("guezelwebdesignprod");
   const url = new URL(urlBase);
 
   if (params?.page) url.searchParams.set("page", String(params.page));
@@ -48,17 +48,17 @@ export async function fetchProductsListServer(
 
   if (!r.ok) throw new Error(`products list failed: ${r.status}`);
 
-  const j = (await r.json()) as ApiEnvelope<IEnsotekprod[]>;
+  const j = (await r.json()) as ApiEnvelope<Iguezelwebdesignprod[]>;
   return j.data ?? [];
 }
 
-/** SSR/RSC: /ensotekprod/slug/:slug (single) */
+/** SSR/RSC: /guezelwebdesignprod/slug/:slug (single) */
 export async function fetchProductBySlugServer(
   slug: string,
   locale?: SupportedLocale,
   cookie?: string
-): Promise<IEnsotekprod | null> {
-  const url = await abs(`ensotekprod/slug/${encodeURIComponent(slug)}`);
+): Promise<Iguezelwebdesignprod | null> {
+  const url = await abs(`guezelwebdesignprod/slug/${encodeURIComponent(slug)}`);
   const tenant = await resolveTenant();
   const l = normalizeLocale(locale);
 
@@ -74,17 +74,17 @@ export async function fetchProductBySlugServer(
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`product bySlug failed: ${r.status}`);
 
-  const j = (await r.json()) as ApiEnvelope<IEnsotekprod>;
+  const j = (await r.json()) as ApiEnvelope<Iguezelwebdesignprod>;
   return j.data ?? null;
 }
 
-/** SSR/RSC: /ensotekprod/:id (single by id) */
+/** SSR/RSC: /guezelwebdesignprod/:id (single by id) */
 export async function fetchProductByIdServer(
   id: string,
   locale?: SupportedLocale,
   cookie?: string
-): Promise<IEnsotekprod | null> {
-  const url = await abs(`ensotekprod/${encodeURIComponent(id)}`);
+): Promise<Iguezelwebdesignprod | null> {
+  const url = await abs(`guezelwebdesignprod/${encodeURIComponent(id)}`);
   const tenant = await resolveTenant();
   const l = normalizeLocale(locale);
 
@@ -100,16 +100,16 @@ export async function fetchProductByIdServer(
   if (r.status === 404) return null;
   if (!r.ok) throw new Error(`product byId failed: ${r.status}`);
 
-  const j = (await r.json()) as ApiEnvelope<IEnsotekprod>;
+  const j = (await r.json()) as ApiEnvelope<Iguezelwebdesignprod>;
   return j.data ?? null;
 }
 
-/** SSR/RSC: /ensotekcategory (public list) */
+/** SSR/RSC: /guezelwebdesigncategory (public list) */
 export async function fetchProductCategoriesServer(
   locale?: SupportedLocale,
   cookie?: string
-): Promise<EnsotekCategory[]> {
-  const url = await abs("ensotekcategory");
+): Promise<guezelwebdesignCategory[]> {
+  const url = await abs("guezelwebdesigncategory");
   const tenant = await resolveTenant();
   const l = normalizeLocale(locale);
 
@@ -124,6 +124,6 @@ export async function fetchProductCategoriesServer(
 
   if (!r.ok) throw new Error(`product categories failed: ${r.status}`);
 
-  const j = (await r.json()) as ApiEnvelope<EnsotekCategory[]>;
+  const j = (await r.json()) as ApiEnvelope<guezelwebdesignCategory[]>;
   return j.data ?? [];
 }

@@ -1,7 +1,6 @@
 "use client";
 
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
+import { rootApi } from "@/lib/rtk/rootApi";
 import { buildCommonHeaders } from "@/lib/http";
 import type { SupportedLocale } from "@/types/common";
 import type {
@@ -13,13 +12,10 @@ import type {
 } from "./types";
 
 /** RTK Query — News (public) */
-export const newsApi = createApi({
-  reducerPath: "newsApi",
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ["News", "NewsList", "NewsCategory"],
+export const newsApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
     /** GET /news — list */
-    list: builder.query<INews[], NewsListParams | void>({
+    newsList: builder.query<INews[], NewsListParams | void>({
       query: (args) => {
         const locale: SupportedLocale | undefined = args?.locale as any;
         const qs = new URLSearchParams();
@@ -35,48 +31,42 @@ export const newsApi = createApi({
           headers: locale ? buildCommonHeaders(locale) : undefined,
         };
       },
-      transformResponse: (res: ApiEnvelope<INews[]>) => res.data ?? [],
+      transformResponse: (res: ApiEnvelope<INews[]> | INews[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
       providesTags: (result) =>
         Array.isArray(result)
-          ? [
-              { type: "NewsList", id: "LIST" },
-              ...result.map((x) => ({ type: "News" as const, id: x._id })),
-            ]
-          : [{ type: "NewsList", id: "LIST" }],
+          ? [{ type: "NewsList" as const, id: "LIST" }, ...result.map((x) => ({ type: "News" as const, id: x._id })) ]
+          : [{ type: "NewsList" as const, id: "LIST" }],
     }),
 
     /** GET /news/slug/:slug — single */
-    bySlug: builder.query<INews, NewsBySlugParams>({
+    newsBySlug: builder.query<INews, NewsBySlugParams>({
       query: ({ slug, locale }) => ({
         url: `news/slug/${encodeURIComponent(slug)}`,
         method: "GET",
         headers: locale ? buildCommonHeaders(locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<INews>) => res.data,
-      providesTags: (result) => (result ? [{ type: "News", id: result._id }] : []),
+      transformResponse: (res: ApiEnvelope<INews> | INews) =>
+        (res && (res as any).data) ? (res as ApiEnvelope<INews>).data : (res as INews),
+      providesTags: (result) => (result ? [{ type: "News" as const, id: result._id }] : []),
     }),
 
     /** GET /newscategory — categories */
-    categories: builder.query<NewsCategory[], { locale?: SupportedLocale } | void>({
+    newsCategories: builder.query<NewsCategory[], { locale?: SupportedLocale } | void>({
       query: (args) => ({
         url: "newscategory",
         method: "GET",
         headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<NewsCategory[]>) => res.data ?? [],
-      providesTags: (result) =>
-        Array.isArray(result)
-          ? [
-              { type: "NewsCategory", id: "LIST" },
-              ...result.map((c) => ({ type: "NewsCategory" as const, id: c._id })),
-            ]
-          : [{ type: "NewsCategory", id: "LIST" }],
+      transformResponse: (res: ApiEnvelope<NewsCategory[]> | NewsCategory[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
     }),
   }),
+  overrideExisting: false, // artık isimler benzersiz, ezmeye gerek yok
 });
 
 export const {
-  useListQuery: useNewsListQuery,
-  useBySlugQuery: useNewsBySlugQuery,
-  useCategoriesQuery: useNewsCategoriesQuery,
+  useNewsListQuery,
+  useNewsBySlugQuery,
+  useNewsCategoriesQuery,
 } = newsApi;

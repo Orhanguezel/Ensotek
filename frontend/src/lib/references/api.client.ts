@@ -1,7 +1,6 @@
 "use client";
 
-import { createApi } from "@reduxjs/toolkit/query/react";
-import { axiosBaseQuery } from "@/lib/rtk/axiosBaseQuery";
+import { rootApi } from "@/lib/rtk/rootApi";
 import { buildCommonHeaders } from "@/lib/http";
 import type { SupportedLocale } from "@/types/common";
 import type {
@@ -12,13 +11,10 @@ import type {
   ApiEnvelope,
 } from "./types";
 
-export const referencesApi = createApi({
-  reducerPath: "referencesApi",
-  baseQuery: axiosBaseQuery(),
-  tagTypes: ["References", "ReferencesList", "ReferencesCategory"],
+export const referencesApi = rootApi.injectEndpoints({
   endpoints: (builder) => ({
-    /** GET /references — list */
-    list: builder.query<IReferences[], ReferencesListParams | void>({
+    /** GET /references — list (unique name: referencesList) */
+    referencesList: builder.query<IReferences[], ReferencesListParams | void>({
       query: (args) => {
         const locale: SupportedLocale | undefined = args?.locale as any;
         const qs = new URLSearchParams();
@@ -34,48 +30,40 @@ export const referencesApi = createApi({
           headers: locale ? buildCommonHeaders(locale) : undefined,
         };
       },
-      transformResponse: (res: ApiEnvelope<IReferences[]>) => res.data ?? [],
-      providesTags: (result) =>
-        Array.isArray(result)
-          ? [
-              { type: "ReferencesList", id: "LIST" },
-              ...result.map((x) => ({ type: "References" as const, id: x._id })),
-            ]
-          : [{ type: "ReferencesList", id: "LIST" }],
+      // Hem array hem { data: [...] } zarflarını destekle
+      transformResponse: (res: ApiEnvelope<IReferences[]> | IReferences[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
     }),
 
-    /** GET /references/slug/:slug — single */
-    bySlug: builder.query<IReferences, ReferencesBySlugParams>({
+    /** GET /references/slug/:slug — single (unique name: referencesBySlug) */
+    referencesBySlug: builder.query<IReferences, ReferencesBySlugParams>({
       query: ({ slug, locale }) => ({
         url: `references/slug/${encodeURIComponent(slug)}`,
         method: "GET",
         headers: locale ? buildCommonHeaders(locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<IReferences>) => res.data,
-      providesTags: (result) => (result ? [{ type: "References", id: result._id }] : []),
+      transformResponse: (res: ApiEnvelope<IReferences> | IReferences) =>
+        (res && (res as any).data) ? (res as ApiEnvelope<IReferences>).data : (res as IReferences),
     }),
 
-    /** GET /referencescategory — categories (public) */
-    categories: builder.query<ReferencesCategory[], { locale?: SupportedLocale } | void>({
+    /** GET /referencescategory — categories (unique name: referencesCategories) */
+    referencesCategories: builder.query<ReferencesCategory[], { locale?: SupportedLocale } | void>({
       query: (args) => ({
         url: "referencescategory",
         method: "GET",
         headers: args?.locale ? buildCommonHeaders(args.locale) : undefined,
       }),
-      transformResponse: (res: ApiEnvelope<ReferencesCategory[]>) => res.data ?? [],
-      providesTags: (result) =>
-        Array.isArray(result)
-          ? [
-              { type: "ReferencesCategory", id: "LIST" },
-              ...result.map((c) => ({ type: "ReferencesCategory" as const, id: c._id })),
-            ]
-          : [{ type: "ReferencesCategory", id: "LIST" }],
+      transformResponse: (res: ApiEnvelope<ReferencesCategory[]> | ReferencesCategory[]) =>
+        Array.isArray(res) ? res : (res?.data ?? []),
     }),
   }),
+  // Artık endpoint adları benzersiz, override gerekmez
+  overrideExisting: false,
 });
 
+// ➜ Üretilen hook’lar yeni endpoint adlarına göre:
 export const {
-  useListQuery: useReferencesListQuery,
-  useBySlugQuery: useReferencesBySlugQuery,
-  useCategoriesQuery: useReferencesCategoriesQuery,
+  useReferencesListQuery,
+  useReferencesBySlugQuery,
+  useReferencesCategoriesQuery,
 } = referencesApi;

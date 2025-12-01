@@ -1,3 +1,5 @@
+// personal/frontend/src/lib/server/locale.ts
+
 import { Locale } from "@/lib/strings";
 import { getEnvDefaultLocale, getEnvLocales } from "@/lib/config";
 

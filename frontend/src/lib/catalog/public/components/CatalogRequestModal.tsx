@@ -25,8 +25,8 @@ export default function CatalogRequestModal({
     (i18n.language?.slice(0, 2) as typeof SUPPORTED_LOCALES[number]) || "tr";
 
   const KATALOG_URL =
-    "https://res.cloudinary.com/dbozv7wqd/raw/upload/v1753910122/uploads/ensotek/library/ensotekcatalog-1753910118660-672914705";
-  const KATALOG_FILE_NAME = "ensotek.catalog.pdf";
+    "https://res.cloudinary.com/dbozv7wqd/raw/upload/v1753910122/uploads/guezelwebdesign/library/guezelwebdesigncatalog-1753910118660-672914705";
+  const KATALOG_FILE_NAME = "guezelwebdesign.catalog.pdf";
 
   const [form, setForm] = useState({
     name: "",
@@ -172,7 +172,7 @@ const Overlay = styled.div`
   z-index: ${({ theme }) => theme.zIndex.overlay};
 `;
 
-const Modal = styled(motion.div)<{ $offsetTop: string }>`
+const Modal = styled(motion.div) <{ $offsetTop: string }>`
   width: 380px;
   background: ${({ theme }) => theme.colors.backgroundAlt};
   border-radius: ${({ theme }) => theme.radii.xl} 0 0 ${({ theme }) => theme.radii.xl};
