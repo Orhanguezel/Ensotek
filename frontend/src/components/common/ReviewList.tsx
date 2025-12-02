@@ -93,14 +93,6 @@ const ReviewList: React.FC<ReviewListProps> = ({
         ? "Hilfreich"
         : "Helpful",
   );
-  const likeLabel = ui(
-    "ui_feedback_list_like",
-    locale === "tr"
-      ? "Faydalı buldum"
-      : locale === "de"
-        ? "Als hilfreich markieren"
-        : "Mark as helpful",
-  );
   const likedLabel = ui(
     "ui_feedback_list_liked",
     locale === "tr"
@@ -143,7 +135,11 @@ const ReviewList: React.FC<ReviewListProps> = ({
     null,
   );
 
-  const reviews: ReviewDto[] = data ?? [];
+  // data ?? [] işlemini de useMemo içine alıyoruz (eslint uyarısını çözmek için)
+  const reviews: ReviewDto[] = useMemo(
+    () => data ?? [],
+    [data],
+  );
 
   const stats = useMemo(() => {
     if (!reviews.length) {
