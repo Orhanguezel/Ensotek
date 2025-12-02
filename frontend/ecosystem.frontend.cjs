@@ -1,0 +1,28 @@
+// =============================================================
+// FILE: ecosystem.frontend.cjs
+// Ensotek – Frontend (Next.js) PM2 config
+// =============================================================
+
+module.exports = {
+  apps: [
+    {
+      name: "ensotek-frontend",
+      cwd: "/var/www/Ensotek/frontend",
+      script: "node_modules/next/dist/bin/next",
+      args: "start -p 3010",
+      exec_mode: "fork",
+      instances: 1,
+      watch: false,
+      autorestart: true,
+      max_memory_restart: "400M",
+      env: {
+        NODE_ENV: "production",
+        PORT: "3010",
+      },
+      out_file: "/var/log/pm2/ensotek-frontend.out.log",
+      error_file: "/var/log/pm2/ensotek-frontend.err.log",
+      combine_logs: true,
+      time: true,
+    },
+  ],
+};
