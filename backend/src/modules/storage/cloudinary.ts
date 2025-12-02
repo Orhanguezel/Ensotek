@@ -53,7 +53,9 @@ let cachedAt = 0;
 const CFG_CACHE_MS = 30_000; // 30sn cache
 
 const envDriver = (): Driver =>
-  (env.STORAGE_DRIVER || "").toLowerCase() === "local" ? "local" : "cloudinary";
+  (env.STORAGE_DRIVER || "").toLowerCase() === "cloudinary"
+    ? "cloudinary"
+    : "local";
 
 async function loadStorageSettingsSafe(): Promise<StorageSettings | null> {
   try {
@@ -63,6 +65,11 @@ async function loadStorageSettingsSafe(): Promise<StorageSettings | null> {
   }
 }
 
+/**
+ * Cloudinary / Local config:
+ *  1) site_settings (getStorageSettings)
+ *  2) .env fallback (CLOUDINARY_* + LOCAL_STORAGE_*)
+ */
 export async function getCloudinaryConfig(): Promise<Cfg | null> {
   const now = Date.now();
   if (cachedCfg && now - cachedAt < CFG_CACHE_MS) {
@@ -71,24 +78,71 @@ export async function getCloudinaryConfig(): Promise<Cfg | null> {
 
   const settings = await loadStorageSettingsSafe();
 
-  const driver: Driver = settings?.driver ?? envDriver();
+  // ---- Driver tespiti ----
+  const driverFromSettings = (settings?.driver || "").toLowerCase() as
+    | Driver
+    | "";
+  let driver: Driver =
+    driverFromSettings === "cloudinary" || driverFromSettings === "local"
+      ? driverFromSettings
+      : envDriver();
+
+  // Eğer driver "local" fakat ayarlarda Cloudinary key'leri doluysa,
+  // driver'ı otomatik cloudinary kabul et.
+  const hasSettingsCloudinaryKeys =
+    !!settings?.cloudName && !!settings?.apiKey && !!settings?.apiSecret;
+
+  if (driver === "local" && hasSettingsCloudinaryKeys) {
+    driver = "cloudinary";
+  }
+
+  // ---- Değerleri site_settings -> env sırasıyla doldur ----
+  const cloudName =
+    settings?.cloudName ||
+    env.CLOUDINARY_CLOUD_NAME ||
+    (driver === "local" ? "local" : "");
+
+  const apiKey =
+    settings?.apiKey ||
+    env.CLOUDINARY_API_KEY ||
+    undefined;
+
+  const apiSecret =
+    settings?.apiSecret ||
+    env.CLOUDINARY_API_SECRET ||
+    undefined;
+
+  const defaultFolder =
+    settings?.folder ??
+    undefined;
+
+  const localRoot =
+    settings?.localRoot ??
+    env.LOCAL_STORAGE_ROOT ??
+    null;
+
+  const localBaseUrl =
+    settings?.localBaseUrl ??
+    env.LOCAL_STORAGE_BASE_URL ??
+    null;
 
   const cfg: Cfg = {
     driver,
-    cloudName:
-      settings?.cloudName ||
-      (driver === "local" ? "local" : ""),
-    apiKey: settings?.apiKey || undefined,
-    apiSecret: settings?.apiSecret || undefined,
-    defaultFolder: settings?.folder || undefined,
+    cloudName,
+    apiKey,
+    apiSecret,
+    defaultFolder,
     unsignedUploadPreset: settings?.unsignedUploadPreset ?? null,
-    localRoot: settings?.localRoot ?? null,
-    localBaseUrl: settings?.localBaseUrl ?? null,
+    localRoot,
+    localBaseUrl,
   };
 
   // Cloudinary driver ise key'leri kontrol et
   if (driver === "cloudinary") {
     if (!cfg.cloudName || !cfg.apiKey || !cfg.apiSecret) {
+      // Eksik config → null döndür, adminDiag 501 göndersin.
+      cachedCfg = null;
+      cachedAt = now;
       return null;
     }
 
@@ -102,6 +156,7 @@ export async function getCloudinaryConfig(): Promise<Cfg | null> {
 
   cachedCfg = cfg;
   cachedAt = now;
+
   return cfg;
 }
 
@@ -185,7 +240,7 @@ async function uploadLocal(
   const url = `${baseUrl}/${rel}`;
 
   return {
-    public_id: relativePath.replace(/\.[^.]+$/, ""),
+    public_id: relativePath,
     secure_url: url,
     bytes: buffer.length,
     width: null,
@@ -196,7 +251,6 @@ async function uploadLocal(
     etag: null,
   };
 }
-
 
 /* -------------------------------------------------------------------------- */
 /*                         CLOUDINARY (SIGNED) UPLOAD                          */

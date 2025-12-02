@@ -6,6 +6,8 @@ import React, { useEffect } from "react";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { Toaster } from "sonner";
+import GAScripts from "@/features/analytics/GAScripts";
+
 
 // Global CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -55,6 +57,7 @@ function pathToTab(pathname: string): ActiveTab {
   if (pathname.startsWith("/admin/support")) return "support";
 
   if (pathname.startsWith("/admin/menuitem")) return "menuitem";
+  if (pathname.startsWith("/admin/storage")) return "storage";
 
   return "dashboard";
 }
@@ -106,6 +109,8 @@ function tabToPath(tab: ActiveTab): string {
 
     case "menuitem":
       return "/admin/menuitem";
+    case "storage":
+      return "/admin/storage";
 
     default:
       return "/admin";
@@ -196,7 +201,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <StoreProvider>
       <LangBoot />
-      {/* ⬇️ Global toast provider */}
+      <GAScripts />
       <Toaster position="top-right" richColors closeButton duration={4000} />
       {content}
     </StoreProvider>

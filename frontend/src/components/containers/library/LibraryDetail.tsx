@@ -12,12 +12,12 @@ import {
   useListLibraryFilesQuery,
 } from "@/integrations/rtk/endpoints/library.endpoints";
 
-import { toCdnSrc } from "@/lib/shared/media";
-import { stripHtml } from "@/lib/shared/text";
+import { toCdnSrc } from "@/shared/media";
+import { stripHtml } from "@/shared/text";
 
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 
 // Library section’de kullandığımız pattern ile aynı
@@ -28,7 +28,7 @@ const LibraryDetail: React.FC = () => {
 
   // FE locale
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_library", locale, UI_KEYS.library);
+  const { ui } = useUiSection("ui_library", locale);
 
   // slug param
   const slugParam = router.query.slug;
@@ -36,8 +36,8 @@ const LibraryDetail: React.FC = () => {
     typeof slugParam === "string"
       ? slugParam
       : Array.isArray(slugParam)
-      ? slugParam[0]
-      : "";
+        ? slugParam[0]
+        : "";
 
   // Router tam hazır + slug mevcut mu?
   const routerReady = router.isReady && !!slug;

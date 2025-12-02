@@ -34,10 +34,12 @@ CREATE TABLE `reference_images` (
 
 /* ================= SEED: GALLERY ================= */
 -- NOT:
--- @REF_TORONTO_ID, @REF_ECOM_ID, @ASSET_G1A_ID, @ASSET_G1B_ID, @ASSET_G2A_ID
+--   @REF_TORONTO_ID, @REF_ECOM_ID,
+--   @ASSET_G1A_ID, @ASSET_G1B_ID, @ASSET_G2A_ID
 -- değişkenleri 020_assets.sql / 030_references.sql içinde tanımlı olmalı.
+-- Eğer bu değişkenler NULL ise, aşağıdaki INSERT'ler satır eklemez (hata da vermez).
 
--- Toronto: image A
+-- ----------------- Toronto: image A -----------------
 SET @REFIMG_TORONTO_A_ID := (
   SELECT id
   FROM reference_images
@@ -49,15 +51,24 @@ SET @REFIMG_TORONTO_A_ID := COALESCE(@REFIMG_TORONTO_A_ID, UUID());
 
 INSERT INTO reference_images
 (id, reference_id, asset_id, image_url, display_order, is_active, created_at, updated_at)
-VALUES
-(@REFIMG_TORONTO_A_ID, @REF_TORONTO_ID, @ASSET_G1A_ID, NULL, 1, 1, NOW(3), NOW(3))
+SELECT
+  @REFIMG_TORONTO_A_ID,
+  @REF_TORONTO_ID,
+  @ASSET_G1A_ID,
+  NULL,
+  1,
+  1,
+  NOW(3),
+  NOW(3)
+WHERE @REF_TORONTO_ID IS NOT NULL
+  AND @ASSET_G1A_ID IS NOT NULL
 ON DUPLICATE KEY UPDATE
- asset_id      = VALUES(asset_id),
- display_order = VALUES(display_order),
- is_active     = VALUES(is_active),
- updated_at    = VALUES(updated_at);
+  asset_id      = VALUES(asset_id),
+  display_order = VALUES(display_order),
+  is_active     = VALUES(is_active),
+  updated_at    = VALUES(updated_at);
 
--- Toronto: image B
+-- ----------------- Toronto: image B -----------------
 SET @REFIMG_TORONTO_B_ID := (
   SELECT id
   FROM reference_images
@@ -69,15 +80,24 @@ SET @REFIMG_TORONTO_B_ID := COALESCE(@REFIMG_TORONTO_B_ID, UUID());
 
 INSERT INTO reference_images
 (id, reference_id, asset_id, image_url, display_order, is_active, created_at, updated_at)
-VALUES
-(@REFIMG_TORONTO_B_ID, @REF_TORONTO_ID, @ASSET_G1B_ID, NULL, 2, 1, NOW(3), NOW(3))
+SELECT
+  @REFIMG_TORONTO_B_ID,
+  @REF_TORONTO_ID,
+  @ASSET_G1B_ID,
+  NULL,
+  2,
+  1,
+  NOW(3),
+  NOW(3)
+WHERE @REF_TORONTO_ID IS NOT NULL
+  AND @ASSET_G1B_ID IS NOT NULL
 ON DUPLICATE KEY UPDATE
- asset_id      = VALUES(asset_id),
- display_order = VALUES(display_order),
- is_active     = VALUES(is_active),
- updated_at    = VALUES(updated_at);
+  asset_id      = VALUES(asset_id),
+  display_order = VALUES(display_order),
+  is_active     = VALUES(is_active),
+  updated_at    = VALUES(updated_at);
 
--- E-commerce: image A
+-- ----------------- E-commerce: image A -----------------
 SET @REFIMG_ECOM_A_ID := (
   SELECT id
   FROM reference_images
@@ -89,10 +109,19 @@ SET @REFIMG_ECOM_A_ID := COALESCE(@REFIMG_ECOM_A_ID, UUID());
 
 INSERT INTO reference_images
 (id, reference_id, asset_id, image_url, display_order, is_active, created_at, updated_at)
-VALUES
-(@REFIMG_ECOM_A_ID, @REF_ECOM_ID, @ASSET_G2A_ID, NULL, 1, 1, NOW(3), NOW(3))
+SELECT
+  @REFIMG_ECOM_A_ID,
+  @REF_ECOM_ID,
+  @ASSET_G2A_ID,
+  NULL,
+  1,
+  1,
+  NOW(3),
+  NOW(3)
+WHERE @REF_ECOM_ID IS NOT NULL
+  AND @ASSET_G2A_ID IS NOT NULL
 ON DUPLICATE KEY UPDATE
- asset_id      = VALUES(asset_id),
- display_order = VALUES(display_order),
- is_active     = VALUES(is_active),
- updated_at    = VALUES(updated_at);
+  asset_id      = VALUES(asset_id),
+  display_order = VALUES(display_order),
+  is_active     = VALUES(is_active),
+  updated_at    = VALUES(updated_at);

@@ -17,7 +17,6 @@ import ProjectThumb from "public/img/project/project-thumb.jpg";
 // Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper";
-// @ts-expect-error – Swiper CSS için TS tipi yok, side-effect import güvenli
 import "swiper/css";
 
 // Icons
@@ -30,13 +29,12 @@ import {
 import type { SliderPublicDto } from "@/integrations/types/slider.types";
 
 // Ortak helper'lar
-import { toCdnSrc } from "@/lib/shared/media";
-import { excerpt } from "@/lib/shared/text";
+import { toCdnSrc } from "@/shared/media";
+import { excerpt } from "@/shared/text";
 
 // Yeni i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 import { localizePath } from "@/i18n/url";
 
 type HeroSlide = {
@@ -53,7 +51,7 @@ const Hero: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI metinleri → site_settings.key = "ui_hero"
-  const { ui } = useUiSection("ui_hero", locale, UI_KEYS.hero);
+  const { ui } = useUiSection("ui_hero", locale);
 
   // ✅ Public slider listesi
   const {

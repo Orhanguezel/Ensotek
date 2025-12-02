@@ -21,7 +21,6 @@ SET @BLOG_MAINT_1 := '33330001-3333-4333-8333-333333330001';
 
 -- =============================================================
 -- REVIEW ID’LERİ (sabit, okunabilir olsun)
--- (İstersen UUID() ile de üretebilirsin; burada deterministik tuttum)
 -- =============================================================
 SET @REV_MISSION_TR := '44440001-4444-4444-8444-444444440001';
 SET @REV_MISSION_EN := '44440002-4444-4444-8444-444444440002';
@@ -39,7 +38,7 @@ INSERT INTO `reviews`
   (`id`, `target_type`, `target_id`,
    `name`, `email`,
    `rating`, `is_active`, `is_approved`, `display_order`,
-   `likes_count`, `dislikes_count`,
+   `likes_count`, `dislikes_count`, `helpful_count`,
    `submitted_locale`,
    `created_at`, `updated_at`)
 VALUES
@@ -56,6 +55,7 @@ VALUES
     10, -- display_order
     3,  -- likes
     0,  -- dislikes
+    3,  -- helpful_count (başlangıçta likes ile aynı)
     'tr',
     NOW(3),
     NOW(3)
@@ -71,8 +71,9 @@ VALUES
     1,
     1,
     20,
-    1,
-    0,
+    1,  -- likes
+    0,  -- dislikes
+    1,  -- helpful_count
     'en',
     NOW(3),
     NOW(3)
@@ -88,8 +89,9 @@ VALUES
     1,
     1,
     30,
-    5,
-    0,
+    5,  -- likes
+    0,  -- dislikes
+    5,  -- helpful_count
     'tr',
     NOW(3),
     NOW(3)
@@ -105,8 +107,9 @@ VALUES
     1,
     1,
     40,
-    2,
-    0,
+    2,  -- likes
+    0,  -- dislikes
+    2,  -- helpful_count
     'en',
     NOW(3),
     NOW(3)
@@ -122,8 +125,9 @@ VALUES
     1,
     1,
     50,
-    0,
-    0,
+    0,  -- likes
+    0,  -- dislikes
+    0,  -- helpful_count
     'tr',
     NOW(3),
     NOW(3)
@@ -139,6 +143,7 @@ ON DUPLICATE KEY UPDATE
   `display_order`    = VALUES(`display_order`),
   `likes_count`      = VALUES(`likes_count`),
   `dislikes_count`   = VALUES(`dislikes_count`),
+  `helpful_count`    = VALUES(`helpful_count`),
   `submitted_locale` = VALUES(`submitted_locale`),
   `updated_at`       = VALUES(`updated_at`);
 

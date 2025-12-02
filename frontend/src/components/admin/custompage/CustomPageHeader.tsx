@@ -4,6 +4,7 @@
 // =============================================================
 
 import React from "react";
+import Link from "next/link";
 
 export type LocaleOption = {
   value: string;
@@ -194,12 +195,12 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
 
             {/* Yeni sayfa oluşturma – route: /admin/custompage/new */}
             <div className="mt-2 d-flex justify-content-end">
-              <a
+              <Link
                 href="/admin/custompage/new"
                 className="btn btn-primary btn-sm"
               >
                 Yeni Sayfa Oluştur
-              </a>
+              </Link>
             </div>
           </div>
         </div>

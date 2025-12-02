@@ -13,7 +13,7 @@ import {
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
-/** storage_assets — tenantsiz (Cloudinary destekli) */
+/** storage_assets — tenantsiz (Cloudinary / local) */
 export const storageAssets = mysqlTable(
   "storage_assets",
   {
@@ -31,31 +31,47 @@ export const storageAssets = mysqlTable(
     width: int("width", { unsigned: true }),
     height: int("height", { unsigned: true }),
 
-    /** Provider absolute URL (Cloudinary secure_url) */
+    /** Provider absolute URL (Cloudinary secure_url / local URL) */
     url: text("url"),
     /** Opsiyonel hash / etag */
     hash: varchar("hash", { length: 64 }),
 
     /** Provider alanları — silme/rename için zorunlu */
-    provider: varchar("provider", { length: 16 }).notNull().default("cloudinary"),
+    provider: varchar("provider", { length: 16 })
+      .notNull()
+      .default("cloudinary"),
     provider_public_id: varchar("provider_public_id", { length: 255 }),
-    provider_resource_type: varchar("provider_resource_type", { length: 16 }), // image | video | raw
+    provider_resource_type: varchar("provider_resource_type", {
+      length: 16, // image | video | raw
+    }),
     provider_format: varchar("provider_format", { length: 32 }),
     provider_version: int("provider_version", { unsigned: true }),
     etag: varchar("etag", { length: 64 }),
 
-    metadata: json("metadata").$type<Record<string, string> | null>().default(null),
+    metadata: json("metadata")
+      .$type<Record<string, string> | null>()
+      .default(null),
 
-    created_at: datetime("created_at", { fsp: 3 }).notNull().default(sql`CURRENT_TIMESTAMP(3)`),
-    updated_at: datetime("updated_at", { fsp: 3 }).notNull().default(sql`CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3)`),
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
   },
   (t) => ({
-    uniq_bucket_path: uniqueIndex("uniq_bucket_path").on(t.bucket, t.path),
+    uniq_bucket_path: uniqueIndex("uniq_bucket_path").on(
+      t.bucket,
+      t.path,
+    ),
     idx_bucket: index("idx_storage_bucket").on(t.bucket),
     idx_folder: index("idx_storage_folder").on(t.folder),
     idx_created: index("idx_storage_created").on(t.created_at),
-    idx_provider_pubid: index("idx_provider_pubid").on(t.provider_public_id),
-  })
+    idx_provider_pubid: index("idx_provider_pubid").on(
+      t.provider_public_id,
+    ),
+  }),
 );
 
 export type StorageAsset = typeof storageAssets.$inferSelect;

@@ -13,19 +13,17 @@ import Image from "next/image";
 import Link from "next/link";
 
 // RTK – Custom Pages (public)
-import {
-  useListCustomPagesPublicQuery,
-} from "@/integrations/rtk/endpoints/custom_pages.endpoints";
+import { useListCustomPagesPublicQuery } from "@/integrations/rtk/endpoints/custom_pages.endpoints";
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // Ortak helper'lar
-import { toCdnSrc } from "@/lib/shared/media";
-import { excerpt } from "@/lib/shared/text";
+import { toCdnSrc } from "@/shared/media";
+import { excerpt } from "@/shared/text";
 
 // i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 
 // Fallback görsel
@@ -35,12 +33,11 @@ const CARD_W = 720;
 const CARD_H = 480;
 const PAGE_LIMIT = 12; // şimdilik tek seferde 12; backend offset ile büyütebiliriz
 
-const formatDate = (value: string | null | undefined, locale: string) => {
+const formatDate = (value: string | null | undefined, intlLocale: string) => {
   if (!value) return "";
-  const lang = locale === "tr" ? "tr-TR" : "en-US";
   try {
     const d = new Date(value);
-    return new Intl.DateTimeFormat(lang, {
+    return new Intl.DateTimeFormat(intlLocale, {
       year: "numeric",
       month: "long",
       day: "2-digit",
@@ -51,9 +48,16 @@ const formatDate = (value: string | null | undefined, locale: string) => {
 };
 
 const NewsPageContent: React.FC = () => {
-  const locale = useResolvedLocale();
+  const resolved = useResolvedLocale();
+  const locale = (resolved || "tr").split("-")[0];
+  const intlLocale =
+    locale === "tr"
+      ? "tr-TR"
+      : locale === "de"
+        ? "de-DE"
+        : "en-US";
 
-  const { ui } = useUiSection("ui_news", locale, UI_KEYS.news);
+  const { ui } = useUiSection("ui_news", locale);
 
   const sectionSubtitlePrefix = ui("ui_news_subprefix", "Ensotek");
   const sectionSubtitleLabel = ui(
@@ -95,11 +99,9 @@ const NewsPageContent: React.FC = () => {
     orderDir: "desc",
     limit: PAGE_LIMIT,
     is_published: 1,
-    locale,
+    locale, // <-- kısa locale backend'e gidiyor
   });
 
-  // eslint uyarısını çözmek için:
-  // items'ı dışarıda değil, useMemo içinde oluşturuyoruz
   const newsItems = useMemo(() => {
     const items: CustomPageDto[] = data?.items ?? [];
 
@@ -119,7 +121,7 @@ const NewsPageContent: React.FC = () => {
           (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
         "";
 
-      const dateStr = formatDate(n.created_at, locale);
+      const dateStr = formatDate(n.created_at, intlLocale);
 
       return {
         id: n.id,
@@ -130,7 +132,7 @@ const NewsPageContent: React.FC = () => {
         date: dateStr,
       };
     });
-  }, [data, locale, untitled]);
+  }, [data, intlLocale, untitled]);
 
   const newsListHref = localizePath(locale, "/news");
 

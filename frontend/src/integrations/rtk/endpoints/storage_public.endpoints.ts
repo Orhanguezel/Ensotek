@@ -1,5 +1,6 @@
 // =============================================================
 // Public Storage — tekli/çoklu dosya deterministik upload + sign-multipart
+// FILE: src/integrations/rtk/endpoints/storage.public.endpoints.ts
 // =============================================================
 import { baseApi } from "@/integrations/rtk/baseApi";
 import type {
@@ -46,7 +47,12 @@ export const storagePublicApi = baseApi.injectEndpoints({
           const rawList = Array.isArray(args.files) ? args.files : [args.files];
           const files = compactFiles(rawList as unknown[]);
           if (!files.length) {
-            return { error: { status: 400, data: { message: "no_files" } } as any };
+            return {
+              error: {
+                status: 400,
+                data: { message: "no_files" },
+              } as any,
+            };
           }
 
           const items: StoragePublicUploadResponse[] = [];
@@ -61,7 +67,9 @@ export const storagePublicApi = baseApi.injectEndpoints({
             if (args.upsert) qs.set("upsert", "1");
 
             const res = await baseQuery({
-              url: `/storage/${encodeURIComponent(args.bucket)}/upload${qs.toString() ? `?${qs}` : ""}`,
+              url: `/storage/${encodeURIComponent(args.bucket)}/upload${
+                qs.toString() ? `?${qs}` : ""
+              }`,
               method: "POST",
               body: fd,
             });
@@ -106,4 +114,5 @@ export const storagePublicApi = baseApi.injectEndpoints({
   overrideExisting: true,
 });
 
-export const { useUploadToBucketMutation, useSignMultipartMutation } = storagePublicApi;
+export const { useUploadToBucketMutation, useSignMultipartMutation } =
+  storagePublicApi;

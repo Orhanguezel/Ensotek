@@ -14,12 +14,12 @@ import {
 
 import type { ServiceImageDto } from "@/integrations/types/services.types";
 
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
-import { toCdnSrc } from "@/lib/shared/media";
-import { excerpt } from "@/lib/shared/text";
+
+import { toCdnSrc } from "@/shared/media";
+import { excerpt } from "@/shared/text";
 
 import { localizePath } from "@/i18n/url";
 import Link from "next/link";
@@ -33,7 +33,7 @@ interface ServiceDetailProps {
 
 const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_services", locale, UI_KEYS.services);
+  const { ui } = useUiSection("ui_services", locale);
 
   // ✅ RTK endpoint argümanı: { slug, locale?, default_locale? }
   const {
@@ -55,7 +55,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
     service?.id
       ? { serviceId: service.id, locale }
       : // skip true iken bu argüman kullanılmayacak
-        { serviceId: "", locale },
+      { serviceId: "", locale },
     {
       skip: !service?.id,
     },

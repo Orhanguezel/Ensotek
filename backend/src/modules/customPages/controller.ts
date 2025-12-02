@@ -7,6 +7,12 @@ import {
   getCustomPageMergedBySlug,
 } from "./repository";
 
+import {
+  customPageListQuerySchema,
+  customPageBySlugParamsSchema,
+  customPageBySlugQuerySchema,
+} from "./validation";
+
 type ListQuery = {
   order?: string;
   sort?: "created_at" | "updated_at";
@@ -94,18 +100,24 @@ export const getPage: RouteHandler<{ Params: { id: string } }> = async (
 };
 
 /** GET BY SLUG (public) */
-export const getPageBySlug: RouteHandler<{ Params: { slug: string } }> =
-  async (req, reply) => {
-    const locale: Locale =
-      ((req as any).locale as Locale | undefined) ?? DEFAULT_LOCALE;
+export const getPageBySlug: RouteHandler = async (req, reply) => {
+  const { slug } = customPageBySlugParamsSchema.parse(req.params ?? {});
+  const q = customPageBySlugQuerySchema.parse(req.query ?? {});
 
-    const row = await getCustomPageMergedBySlug(
-      locale,
-      DEFAULT_LOCALE,
-      req.params.slug,
-    );
-    if (!row) {
-      return reply.code(404).send({ error: { message: "not_found" } });
-    }
-    return reply.send(row);
-  };
+  const locale: Locale =
+    (q.locale as Locale | undefined) ??
+    ((req as any).locale as Locale | undefined) ??
+    DEFAULT_LOCALE;
+
+  const row = await getCustomPageMergedBySlug(
+    locale,
+    DEFAULT_LOCALE,
+    slug,
+  );
+
+  if (!row) {
+    return reply.code(404).send({ error: { message: "not_found" } });
+  }
+  return reply.send(row);
+};
+

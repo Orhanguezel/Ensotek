@@ -14,15 +14,16 @@ import NewsDetail from "@/components/containers/news/NewsDetail";
 import NewsMore from "@/components/containers/news/NewsMore";
 
 // i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
 const NewsDetailPage: React.FC = () => {
-  const locale = useResolvedLocale();
+  const resolved = useResolvedLocale();
+  // FE & backend için kısa locale
+  const locale = (resolved || "tr").split("-")[0];
 
   // ui_news section → sayfa başlığı
-  const { ui } = useUiSection("ui_news", locale, UI_KEYS.news);
+  const { ui } = useUiSection("ui_news", locale);
 
   const title = ui(
     "ui_news_detail_page_title",

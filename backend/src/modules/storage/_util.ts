@@ -1,4 +1,5 @@
-// src/modules/storage/_util.ts
+// =============================================================
+// FILE: src/modules/storage/_util.ts
 // =============================================================
 
 import { env } from "@/core/env";
@@ -75,8 +76,10 @@ export function publicUrlForAsset(
   return buildPublicUrl(asset.bucket, asset.path, asset.url ?? null, cfg);
 }
 
+/** Baştaki slash'ları sil */
 export const stripLeadingSlashes = (s: string) => s.replace(/^\/+/, "");
 
+/** Folder normalize (baş/son slash temizle, double slash düzelt, max 255) */
 export const normalizeFolder = (s?: string | null) => {
   if (!s) return null;
   let f = s
@@ -85,6 +88,26 @@ export const normalizeFolder = (s?: string | null) => {
     .replace(/\/{2,}/g, "/");
   return f.length ? f.slice(0, 255) : null;
 };
+
+/** Bucket + raw path → normalized path */
+export function normalizePath(bucket: string, raw: string): string {
+  let p = stripLeadingSlashes(raw).replace(/\/{2,}/g, "/");
+  if (p.startsWith(bucket + "/")) p = p.slice(bucket.length + 1);
+  return p;
+}
+
+/** Query string boolean parser (1/true/yes/on) */
+export function toBool(v: string | undefined): boolean {
+  if (!v) return false;
+  const s = v.toLowerCase();
+  return ["1", "true", "yes", "on"].includes(s);
+}
+
+/** NULL/undefined alanları objeden at (INSERT/PATCH için) */
+export const omitNullish = <T extends Record<string, unknown>>(o: T) =>
+  Object.fromEntries(
+    Object.entries(o).filter(([, v]) => v !== null && v !== undefined),
+  ) as Partial<T>;
 
 export function chunk<T>(arr: T[], size = 100) {
   const out: T[][] = [];

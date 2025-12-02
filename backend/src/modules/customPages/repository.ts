@@ -301,8 +301,7 @@ export async function getCustomPageMergedBySlug(
       ),
     )
     .where(
-      sql`( ${i18nReq.id} IS NOT NULL AND ${i18nReq.slug} = ${slug} )
-          OR ( ${i18nReq.id} IS NULL AND ${i18nDef.slug} = ${slug} )`,
+      sql`COALESCE(${i18nReq.slug}, ${i18nDef.slug}) = ${slug}`,
     )
     .limit(1);
 

@@ -251,4 +251,5 @@ export const {
   useBulkDeleteAssetsAdminMutation,
   useListFoldersAdminQuery,
   useDiagCloudinaryAdminQuery,
+  useLazyDiagCloudinaryAdminQuery,
 } = storageAdminApi;

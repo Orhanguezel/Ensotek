@@ -73,8 +73,11 @@ export interface CategoryCreatePayload {
 
 /**
  * Update payload – categoryUpdateSchema.partial()
+ *  - id body’de beklenmediği için hariç tutuldu
  */
-export type CategoryUpdatePayload = Partial<CategoryCreatePayload>;
+export type CategoryUpdatePayload = Partial<
+  Omit<CategoryCreatePayload, "id">
+>;
 
 /**
  * Sıralama endpoint’i için payload

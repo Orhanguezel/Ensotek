@@ -6,8 +6,6 @@ import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { useRouter } from "next/router";
 
-import { setApiLang } from "@/lib/api";
-
 import {
   SUPPORTED_LOCALES,
   LANG_LABELS,
@@ -40,9 +38,8 @@ import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
 
 // Yeni i18n helper’lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
 const IMG_W = 160;
 const IMG_H = 60;
@@ -95,13 +92,8 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
     return [...SUPPORTED_LOCALES];
   }, [appLocalesSetting]);
 
-  // ✅ API istekleri için aktif dili global olarak ayarla
-  useEffect(() => {
-    setApiLang(locale);
-  }, [locale]);
-
   // ✅ ui_header JSON + i18n fallback (UI_FALLBACK_EN) + hard fallback
-  const { ui } = useUiSection("ui_header", locale, UI_KEYS.header);
+  const { ui } = useUiSection("ui_header", locale);
 
   // Login / register URL'lerini locale-aware yap
   const loginHref = localizePath(locale, "/login");
@@ -221,7 +213,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
 
   const onLangChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value as SupportedLocale;
-    setApiLang(next); // API istekleri için aktif dili güncelle
     const nextHref = localizePath(next, asPath); // URL’i yeni dile göre güncelle
     if (typeof window !== "undefined") window.location.assign(nextHref);
   };
@@ -318,7 +309,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
                   className="border__btn d-inline-flex align-items-center gap-1"
                   onClick={onClose}
                 >
-                  <FiLogIn /> {ui("ui_header_login", "Login")}
+                  <FiLogIn /> {ui("ui_header_auth", "Login")}
                 </Link>
                 <Link
                   href={registerHref}

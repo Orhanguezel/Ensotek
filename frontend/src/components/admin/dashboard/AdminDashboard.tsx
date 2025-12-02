@@ -74,7 +74,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const loading = isLoading || isFetching;
 
-  const items = data?.items ?? [];
+  // ✅ items referansını useMemo ile stabilize et
+  const items = useMemo(
+    () => (data?.items ?? []) as DashboardCountItemDto[],
+    [data],
+  );
 
   const totalCount = useMemo(
     () => items.reduce((sum, it) => sum + (it.count ?? 0), 0),
@@ -90,6 +94,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     () => [...items].sort((a, b) => b.count - a.count).slice(0, 6),
     [items],
   );
+  
 
   return (
     <div className="container-fluid p-0">

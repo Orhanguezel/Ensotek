@@ -90,28 +90,6 @@ ON DUPLICATE KEY UPDATE
   `value`    = VALUES(`value`),
   updated_at = VALUES(updated_at);
 
--- Çalışma saatleri (TR)
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
-(
-  UUID(),
-  'businessHours',
-  'tr',
-  JSON_ARRAY(
-    JSON_OBJECT('day', 'Pazartesi', 'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Salı',      'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Çarşamba',  'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Perşembe',  'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Cuma',      'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Cumartesi', 'open', '10:00', 'close', '16:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Pazar',     'open', NULL,    'close', NULL,    'isClosed', TRUE)
-  ),
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
-
 -- Şirket / marka açıklaması (TR)
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
@@ -200,28 +178,6 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'linkedin',  'https://linkedin.com/company/ensotek',
     'x',         'https://x.com/ensotek',
     'tiktok',    'https://www.tiktok.com/@ensotek'
-  ),
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
-
--- Business hours (EN)
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
-(
-  UUID(),
-  'businessHours',
-  'en',
-  JSON_ARRAY(
-    JSON_OBJECT('day', 'Monday',    'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Tuesday',   'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Wednesday', 'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Thursday',  'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Friday',    'open', '09:00', 'close', '18:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Saturday',  'open', '10:00', 'close', '16:00', 'isClosed', FALSE),
-    JSON_OBJECT('day', 'Sunday',    'open', NULL,    'close', NULL,    'isClosed', TRUE)
   ),
   NOW(3),
   NOW(3)

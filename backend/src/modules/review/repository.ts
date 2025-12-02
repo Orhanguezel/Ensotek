@@ -18,18 +18,25 @@ function mapRowCore(
 ): ReviewView {
   return {
     id: r.id,
+    target_type: r.target_type,
+    target_id: r.target_id,
     name: r.name,
     email: r.email,
     rating: Number(r.rating),
     is_active: Number(r.is_active) === 1,
     is_approved: Number(r.is_approved) === 1,
     display_order: Number(r.display_order),
+    likes_count: Number(r.likes_count ?? 0),
+    dislikes_count: Number(r.dislikes_count ?? 0),
+    helpful_count: Number(r.helpful_count ?? 0),
+    submitted_locale: r.submitted_locale,
     created_at: r.created_at,
     updated_at: r.updated_at,
     comment,
     locale_resolved: localeResolved,
   };
 }
+
 
 function safeOrderBy(col?: string) {
   switch (col) {
@@ -113,12 +120,18 @@ export async function repoGetReviewPublic(
     `
     SELECT
       r.id,
+      r.target_type,
+      r.target_id,
       r.name,
       r.email,
       r.rating,
       r.is_active,
       r.is_approved,
       r.display_order,
+      r.likes_count,
+      r.dislikes_count,
+      r.helpful_count,
+      r.submitted_locale,
       r.created_at,
       r.updated_at
     FROM reviews r
@@ -154,6 +167,7 @@ export async function repoGetReviewPublic(
   return mapRowCore(row, comment, locale_resolved);
 }
 
+
 export async function repoCreateReviewPublic(
   app: FastifyInstance,
   body: ReviewCreateInput,
@@ -171,20 +185,37 @@ export async function repoCreateReviewPublic(
   await mysql.query(
     `
     INSERT INTO reviews
-      (id, name, email, rating,
-       is_active, is_approved, display_order,
-       created_at, updated_at)
+      (
+        id,
+        target_type,
+        target_id,
+        name,
+        email,
+        rating,
+        is_active,
+        is_approved,
+        display_order,
+        likes_count,
+        dislikes_count,
+        helpful_count,
+        submitted_locale,
+        created_at,
+        updated_at
+      )
     VALUES
-      (?, ?, ?, ?, ?, ?, ?, NOW(3), NOW(3))
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, 0, 0, 0, ?, NOW(3), NOW(3))
     `,
     [
       id,
+      body.target_type,
+      body.target_id,
       body.name,
       body.email,
       body.rating,
       isActive ? 1 : 0,
       isApproved ? 1 : 0,
       displayOrder,
+      locale, // submitted_locale
     ],
   );
 
@@ -192,9 +223,9 @@ export async function repoCreateReviewPublic(
   await mysql.query(
     `
     INSERT INTO review_i18n
-      (id, review_id, locale, comment, created_at, updated_at)
+      (id, review_id, locale, title, comment, admin_reply, created_at, updated_at)
     VALUES
-      (UUID(), ?, ?, ?, NOW(3), NOW(3))
+      (UUID(), ?, ?, NULL, ?, NULL, NOW(3), NOW(3))
     ON DUPLICATE KEY UPDATE
       comment = VALUES(comment),
       updated_at = VALUES(updated_at)
@@ -206,6 +237,36 @@ export async function repoCreateReviewPublic(
   if (!created) throw new Error("Review insert ok, but fetch failed.");
   return created;
 }
+
+
+
+/**
+ * Basit reaction: like/helpful sayacını artır
+ * (Şimdilik user/ip bazlı tekilleştirme yok, her istek +1)
+ */
+export async function repoAddReactionPublic(
+  app: FastifyInstance,
+  id: string,
+  locale: string,
+  defaultLocale: string,
+): Promise<ReviewView | null> {
+  const mysql = (app as any).mysql;
+
+  await mysql.query(
+    `
+    UPDATE reviews
+    SET helpful_count = helpful_count + 1,
+        updated_at = NOW(3)
+    WHERE id = ?
+    LIMIT 1
+    `,
+    [id],
+  );
+
+  return await repoGetReviewPublic(app, id, locale, defaultLocale);
+}
+
+
 
 /* ---------------- ADMIN ---------------- */
 
@@ -248,6 +309,14 @@ export async function repoListReviewsAdmin(
     where.push("r.rating <= ?");
     args.push(q.maxRating);
   }
+  if (q.target_type) {
+    where.push("r.target_type = ?");
+    args.push(q.target_type);
+  }
+  if (q.target_id) {
+    where.push("r.target_id = ?");
+    args.push(q.target_id);
+  }
 
   const orderCol = safeOrderBy(q.orderBy);
   const orderDir = q.order?.toUpperCase() === "DESC" ? "DESC" : "ASC";
@@ -258,6 +327,9 @@ export async function repoListReviewsAdmin(
       r.name,
       r.email,
       r.rating,
+      r.target_type,
+      r.target_id,
+      r.helpful_count,
       r.is_active,
       r.is_approved,
       r.display_order,
@@ -329,6 +401,18 @@ export async function repoUpdateReviewAdmin(
   if (typeof body.rating !== "undefined") {
     parentFields.push("rating = ?");
     parentArgs.push(body.rating);
+  }
+  if (typeof body.target_type !== "undefined") {
+    parentFields.push("target_type = ?");
+    parentArgs.push(body.target_type);
+  }
+  if (typeof body.target_id !== "undefined") {
+    parentFields.push("target_id = ?");
+    parentArgs.push(body.target_id);
+  }
+  if (typeof (body as any).helpful_count !== "undefined") {
+    parentFields.push("helpful_count = ?");
+    parentArgs.push((body as any).helpful_count);
   }
   if (typeof body.is_active !== "undefined") {
     parentFields.push("is_active = ?");
@@ -403,6 +487,16 @@ export async function repoListReviewsPublic(
   const where: string[] = [];
   const args: any[] = [];
 
+  // Hangi hedef için?
+  if (q.target_type) {
+    where.push("r.target_type = ?");
+    args.push(q.target_type);
+  }
+  if (q.target_id) {
+    where.push("r.target_id = ?");
+    args.push(q.target_id);
+  }
+
   // Public’te defaultlar:
   const approved =
     typeof q.approved === "boolean" ? q.approved : true;
@@ -441,12 +535,18 @@ export async function repoListReviewsPublic(
   const sqlStr = `
     SELECT
       r.id,
+      r.target_type,
+      r.target_id,
       r.name,
       r.email,
       r.rating,
       r.is_active,
       r.is_approved,
       r.display_order,
+      r.likes_count,
+      r.dislikes_count,
+      r.helpful_count,
+      r.submitted_locale,
       r.created_at,
       r.updated_at
     FROM reviews r

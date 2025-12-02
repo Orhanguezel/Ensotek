@@ -1,6 +1,6 @@
 'use client'
 
-import { cn } from '@/lib/utils'
+import { cn } from '@/utils/utils'
 import { Progress } from '@/components/ui/progress'
 
 interface RatingBarProps {
@@ -11,15 +11,15 @@ interface RatingBarProps {
   className?: string
 }
 
-export function RatingBar({ 
-  score, 
-  maxScore = 10, 
-  showScore = true, 
+export function RatingBar({
+  score,
+  maxScore = 10,
+  showScore = true,
   size = 'md',
-  className 
+  className
 }: RatingBarProps) {
   const percentage = (score / maxScore) * 100
-  
+
   const getColorClass = (score: number) => {
     if (score >= 8.5) return 'bg-green-600'
     if (score >= 7) return 'bg-green-500'
@@ -41,11 +41,11 @@ export function RatingBar({
   return (
     <div className={cn('flex items-center gap-3', className)}>
       <div className="flex-1">
-        <Progress 
-          value={percentage} 
+        <Progress
+          value={percentage}
           className={cn(getSizeClass(size), 'bg-gray-200 dark:bg-gray-700')}
         />
-        <div 
+        <div
           className={cn(
             'absolute top-0 left-0 h-full rounded-full transition-all duration-500',
             getSizeClass(size),
@@ -88,8 +88,8 @@ interface DetailedRatingProps {
   showWeights?: boolean
 }
 
-export function DetailedRating({ 
-  criteria, 
+export function DetailedRating({
+  criteria,
   weights = {
     performance: 0.35,
     stability: 0.25,
@@ -121,7 +121,7 @@ export function DetailedRating({
         <div className="text-3xl font-bold mb-2">{overallScore.toFixed(1)}/10</div>
         <RatingBar score={overallScore} size="lg" showScore={false} />
       </div>
-      
+
       <div className="space-y-3">
         {Object.entries(criteria).map(([key, score]) => (
           <div key={key} className="space-y-1">

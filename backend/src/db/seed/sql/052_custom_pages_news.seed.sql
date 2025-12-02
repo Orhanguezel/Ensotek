@@ -24,7 +24,7 @@ SET @IMG_NEWS_LAUNCH :=
 SET @IMG_NEWS_MAINT :=
   'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80';
 SET @IMG_NEWS_PRESS :=
-  'https://images.unsplash.com/photo-1581092334665-b9f9d5e8e9b2?auto=format&fit=crop&w=1200&h=600&q=80';
+  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80';
 
 /* PARENT INSERT */
 INSERT INTO `custom_pages`

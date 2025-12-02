@@ -1,6 +1,31 @@
+// src/types/style-imports.d.ts
+
 declare module "*.scss" {
-  const content: unknown;
-  export default content;
+  const classes: { [key: string]: string };
+  export default classes;
 }
-declare module "*.css";
-declare module "*.sass";
+
+declare module "*.sass" {
+  const classes: { [key: string]: string };
+  export default classes;
+}
+
+declare module "*.css" {
+  const classes: { [key: string]: string };
+  export default classes;
+}
+
+declare module "*.module.scss" {
+  const classes: { [key: string]: string };
+  export default classes;
+}
+
+declare module "*.module.sass" {
+  const classes: { [key: string]: string };
+  export default classes;
+}
+
+declare module "*.module.css" {
+  const classes: { [key: string]: string };
+  export default classes;
+}

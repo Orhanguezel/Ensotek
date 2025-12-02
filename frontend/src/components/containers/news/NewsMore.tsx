@@ -20,12 +20,12 @@ import {
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // Ortak helper'lar
-import { toCdnSrc } from "@/lib/shared/media";
+import { toCdnSrc } from "@/shared/media";
 
 // i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 
 // Fallback görsel
@@ -53,7 +53,7 @@ const NewsMore: React.FC = () => {
   const router = useRouter();
   const locale = useResolvedLocale();
 
-  const { ui } = useUiSection("ui_news", locale, UI_KEYS.news);
+  const { ui } = useUiSection("ui_news", locale);
 
   const moreTitle = ui(
     "ui_news_more_title",
@@ -135,9 +135,9 @@ const NewsMore: React.FC = () => {
           {items.map((n) => {
             const href = n.slug
               ? localizePath(
-                  locale,
-                  `/news/${encodeURIComponent(n.slug)}`,
-                )
+                locale,
+                `/news/${encodeURIComponent(n.slug)}`,
+              )
               : newsListHref;
 
             return (

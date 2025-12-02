@@ -16,18 +16,18 @@ import Two from "public/img/features/1.png";
 import { FiArrowRight, FiPlus, FiMinus } from "react-icons/fi";
 
 // ORTAK yardımcılar + i18n
-import { toCdnSrc } from "@/lib/shared/media";
-import { pickStrict, stripHtml, excerpt } from "@/lib/shared/text";
+import { toCdnSrc } from "@/shared/media";
+import { pickStrict, stripHtml, excerpt } from "@/shared/text";
 
 // Yeni i18n helper’lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 
 const Library: React.FC = () => {
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_library", locale, UI_KEYS.library);
+  const { ui } = useUiSection("ui_library", locale);
 
   const listHref = localizePath(locale, "/library");
   const [open, setOpen] = useState<number>(0);
@@ -156,9 +156,9 @@ const Library: React.FC = () => {
                       const isOpen = open === idx;
                       const href = it.slug
                         ? localizePath(
-                            locale,
-                            `/library/${encodeURIComponent(it.slug)}`,
-                          )
+                          locale,
+                          `/library/${encodeURIComponent(it.slug)}`,
+                        )
                         : listHref;
                       const headingId = `lib-heading-${idx}`;
                       const panelId = `lib-collapse-${idx}`;
@@ -166,9 +166,8 @@ const Library: React.FC = () => {
                         <div className="accordion-item" key={it.id}>
                           <h2 className="accordion-header" id={headingId}>
                             <button
-                              className={`accordion-button no-caret d-flex align-items-center${
-                                isOpen ? "" : " collapsed"
-                              }`}
+                              className={`accordion-button no-caret d-flex align-items-center${isOpen ? "" : " collapsed"
+                                }`}
                               aria-expanded={isOpen}
                               aria-controls={panelId}
                               onClick={() =>
@@ -190,9 +189,8 @@ const Library: React.FC = () => {
                             id={panelId}
                             role="region"
                             aria-labelledby={headingId}
-                            className={`accordion-collapse collapse${
-                              isOpen ? " show" : ""
-                            }`}
+                            className={`accordion-collapse collapse${isOpen ? " show" : ""
+                              }`}
                           >
                             <div className="accordion-body">
                               <p style={{ marginBottom: 12 }}>

@@ -1,5 +1,5 @@
 -- =============================================================
--- 020_products_schema.sql
+-- 013_products_schema.sql
 -- Products + Specs + FAQs + Reviews + Options + Stock
 -- Drizzle schema: src/modules/products/schema.ts ile birebir
 -- =============================================================

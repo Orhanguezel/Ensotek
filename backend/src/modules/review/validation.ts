@@ -1,8 +1,11 @@
-// src/modules/review/validation.ts
+// =============================================================
+// FILE: src/modules/review/validation.ts
+// =============================================================
 import { z } from "zod";
 import { LOCALES } from "@/core/i18n";
 
-export const IdParam = z.object({
+/** :id param */
+export const IdParamSchema = z.object({
   id: z.string().min(1, "id gereklidir"),
 });
 
@@ -16,13 +19,15 @@ const boolQuery = z.preprocess((v) => {
     if (s === "1" || s === "true") return true;
     if (s === "0" || s === "false") return false;
   }
-  // tanınmayan değer → filtre uygulama
   return undefined;
 }, z.boolean().optional());
 
 const LOCALE_ENUM = z.enum(LOCALES as unknown as [string, ...string[]]);
 
-export const ReviewListParams = z
+// -------------------------------------------------------------
+// LIST QUERY
+// -------------------------------------------------------------
+export const ReviewListParamsSchema = z
   .object({
     search: z.string().trim().optional(),
     approved: boolQuery,
@@ -38,6 +43,10 @@ export const ReviewListParams = z
 
     // Listelemede isteğe bağlı locale override
     locale: LOCALE_ENUM.optional(),
+
+    // Hedef filtreleri (product, news, custom_page vs.)
+    target_type: z.string().trim().optional(),
+    target_id: z.string().trim().optional(),
   })
   .refine(
     (o) =>
@@ -47,7 +56,22 @@ export const ReviewListParams = z
     { message: "minRating maxRating'den büyük olamaz", path: ["minRating"] },
   );
 
-export const ReviewCreateInput = z.object({
+// -------------------------------------------------------------
+// CREATE PAYLOAD
+// -------------------------------------------------------------
+export const ReviewCreateSchema = z.object({
+  // Hangi modul / kayıt için?
+  target_type: z
+    .string()
+    .trim()
+    .min(1, "target_type gereklidir")
+    .max(50, "target_type en fazla 50 karakter olabilir"),
+  target_id: z
+    .string()
+    .trim()
+    .min(1, "target_id gereklidir")
+    .max(36, "target_id en fazla 36 karakter olabilir"),
+
   // Yorumun gönderildiği dil (opsiyonel, yoksa server req.locale kullanır)
   locale: LOCALE_ENUM.optional(),
 
@@ -55,7 +79,7 @@ export const ReviewCreateInput = z.object({
   email: z.string().trim().email().max(255),
   rating: z.number().int().min(1).max(5),
 
-  // Artık comment i18n tabloda tutuluyor ama API aynen kalıyor
+  // Yorum metni i18n tabloda; API aynı kalıyor
   comment: z.string().trim().min(5),
 
   is_active: z.boolean().optional(),
@@ -63,9 +87,23 @@ export const ReviewCreateInput = z.object({
   display_order: z.number().int().min(0).optional(),
 });
 
-// UPDATE: tüm alanlar opsiyonel; locale burada "hangi dildeki yorumu edit ediyorum?" için kullanılır
-export const ReviewUpdateInput = ReviewCreateInput.partial();
+// -------------------------------------------------------------
+// UPDATE PAYLOAD (partial)
+// -------------------------------------------------------------
+export const ReviewUpdateSchema = ReviewCreateSchema.partial();
 
-export type ReviewListParams = z.infer<typeof ReviewListParams>;
-export type ReviewCreateInput = z.infer<typeof ReviewCreateInput>;
-export type ReviewUpdateInput = z.infer<typeof ReviewUpdateInput>;
+// -------------------------------------------------------------
+// REACTION PAYLOAD
+// -------------------------------------------------------------
+export const ReviewReactionSchema = z.object({
+  type: z.enum(["like", "dislike"]).optional(),
+});
+
+// -------------------------------------------------------------
+// TIPLER
+// -------------------------------------------------------------
+export type ReviewListParams = z.infer<typeof ReviewListParamsSchema>;
+export type ReviewCreateInput = z.infer<typeof ReviewCreateSchema>;
+export type ReviewUpdateInput = z.infer<typeof ReviewUpdateSchema>;
+export type ReviewReactionInput = z.infer<typeof ReviewReactionSchema>;
+export type IdParam = z.infer<typeof IdParamSchema>;

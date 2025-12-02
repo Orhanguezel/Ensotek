@@ -2,12 +2,18 @@
 // FILE: src/modules/review/admin.controller.ts (ADMIN)
 // =============================================================
 import type { FastifyRequest } from "fastify";
+
+// Zod şemaları (runtime değerler)
 import {
-  ReviewListParams as ReviewListParamsSchema,
-  ReviewCreateInput as ReviewCreateSchema,
-  ReviewUpdateInput as ReviewUpdateSchema,
-  IdParam as IdParamSchema,
+  ReviewListParamsSchema,
+  ReviewCreateSchema,
+  ReviewUpdateSchema,
+  IdParamSchema,
 } from "./validation";
+
+// Tipler gerekiyorsa ayrıca import type ile alabilirsin
+// import type { ReviewCreateInput, ReviewUpdateInput } from "./validation";
+
 import {
   repoListReviewsAdmin,
   repoGetReviewAdmin,

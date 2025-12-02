@@ -49,7 +49,7 @@ export const categories = mysqlTable(
     storage_asset_id: char("storage_asset_id", { length: 36 }),
     alt: varchar("alt", { length: 255 }),
 
-    icon: varchar("icon", { length: 100 }),
+    icon: varchar("icon", { length: 255 }),
 
     /** aktif/öne çıkarılmış ve sıralama */
     is_active: tinyint("is_active").notNull().default(1).$type<boolean>(),

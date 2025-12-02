@@ -2,10 +2,8 @@
 import React from "react";
 import type { SupportedLocale } from "@/types/common";
 import { siteUrlBase, absoluteUrl, compact } from "./utils";
-import { getServerApiBaseAbsolute } from "@/lib/server/http";
-import { resolveTenant } from "@/lib/server/tenant";
-import { normalizeLocale } from "@/lib/server/locale";
-import { buildCommonHeaders } from "@/lib/http";
+import { normalizeLocale } from "@/i18n/config";
+import { BASE_URL } from "@/integrations/rtk/constants";
 
 /* ---------- helpers ---------- */
 type SettingDoc = { key: string; value: any };
@@ -14,7 +12,9 @@ type CompanyDoc = {
   companyDesc?: Partial<Record<SupportedLocale, string>>;
   phone?: string;
   images?: Array<{ url?: string; webp?: string; thumbnail?: string }>;
-  socialLinks?: Partial<Record<"facebook" | "instagram" | "twitter" | "linkedin" | "youtube", string>>;
+  socialLinks?: Partial<
+    Record<"facebook" | "instagram" | "twitter" | "linkedin" | "youtube", string>
+  >;
 };
 
 function readLocalizedLabel(value: any, locale: SupportedLocale): string {
@@ -45,13 +45,18 @@ function readLocalizedLabel(value: any, locale: SupportedLocale): string {
 }
 
 async function fetchJSON<T>(path: string, locale: SupportedLocale): Promise<T> {
-  const base = await getServerApiBaseAbsolute(); // ".../api"
-  const url = base.replace(/\/+$/, "") + "/" + path.replace(/^\/+/, "");
-  const tenant = await resolveTenant();
+  const base = BASE_URL.replace(/\/+$/, ""); // örn: "/api" veya "https://ensotek.de/api"
+  const cleanPath = path.replace(/^\/+/, ""); // "settings" / "company"
+  const url = `${base}/${cleanPath}`;
+
   const l = normalizeLocale(locale);
   const r = await fetch(url, {
-    headers: buildCommonHeaders(l, tenant),
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": l,
+    },
     cache: "force-cache",
+    // JSON-LD çok sık değişmeyecek; 5dk revalidate yeterli
     next: { revalidate: 300 },
   });
   if (!r.ok) throw new Error(`${path} failed: ${r.status}`);
@@ -59,7 +64,11 @@ async function fetchJSON<T>(path: string, locale: SupportedLocale): Promise<T> {
 }
 
 /* ---------- component ---------- */
-export default async function SiteJsonLd({ locale }: { locale: SupportedLocale }) {
+export default async function SiteJsonLd({
+  locale,
+}: {
+  locale: SupportedLocale;
+}) {
   const base = siteUrlBase();
 
   // SETTINGS + COMPANY
@@ -67,29 +76,54 @@ export default async function SiteJsonLd({ locale }: { locale: SupportedLocale }
   let company: CompanyDoc | null = null;
 
   try {
-    const s = await fetchJSON<SettingDoc[] | { data: SettingDoc[] }>("settings", locale);
+    // BE tarafında /settings endpoint'i varsayımıyla
+    const s = await fetchJSON<SettingDoc[] | { data: SettingDoc[] }>(
+      "settings",
+      locale,
+    );
     settings = Array.isArray(s) ? s : (s?.data ?? []);
-  } catch { /* ignore, fallback devreye girecek */ }
+  } catch {
+    // ignore, fallback devreye girecek
+  }
 
   try {
-    const c = await fetchJSON<CompanyDoc | { data: CompanyDoc }>("company", locale);
-    company = ("data" in (c as any)) ? (c as any).data : (c as CompanyDoc);
-  } catch { /* ignore */ }
+    // BE tarafında /company endpoint'i varsayımıyla
+    const c = await fetchJSON<CompanyDoc | { data: CompanyDoc }>(
+      "company",
+      locale,
+    );
+    company =
+      "data" in
+      (c as {
+        data?: CompanyDoc;
+      })
+        ? (c as any).data
+        : (c as CompanyDoc);
+  } catch {
+    // ignore
+  }
 
   // --- name (brand) ---
   const brandFromCompany = readLocalizedLabel(company?.companyName, locale);
-  const name = (brandFromCompany || process.env.NEXT_PUBLIC_SITE_NAME || "guezelwebdesign.de").trim();
+  const name = (
+    brandFromCompany ||
+    process.env.NEXT_PUBLIC_SITE_NAME ||
+    "guezelwebdesign.de"
+  ).trim();
 
   // --- description ---
   const descFromCompany = readLocalizedLabel(company?.companyDesc, locale);
   const descFromSettings = readLocalizedLabel(
-    settings.find(s => s.key === "seo_default_description")?.value,
-    locale
+    settings.find((s) => s.key === "seo_default_description")?.value,
+    locale,
   );
   const orgDescription =
     descFromCompany ||
     descFromSettings ||
-    (process.env.NEXT_PUBLIC_ORG_DESCRIPTION || "guezelwebdesign – Industrial solutions & services.").trim();
+    (
+      process.env.NEXT_PUBLIC_ORG_DESCRIPTION ||
+      "guezelwebdesign – Industrial solutions & services."
+    ).trim();
 
   // --- logo ---
   const firstImg = (company?.images ?? []).find((i) => i.webp || i.url);
@@ -97,32 +131,50 @@ export default async function SiteJsonLd({ locale }: { locale: SupportedLocale }
   const logo = logoRaw ? logoRaw : absoluteUrl("/logo.png"); // company yoksa public/logo.png
 
   // --- sameAs (company + settings + env) ---
-  const fromCompany = Object.values(company?.socialLinks ?? {}).filter(Boolean) as string[];
+  const fromCompany = Object.values(company?.socialLinks ?? {}).filter(
+    Boolean,
+  ) as string[];
   const settingSameAs = (() => {
-    const v = settings.find(s => s.key === "org_sameas")?.value;
+    const v = settings.find((s) => s.key === "org_sameas")?.value;
     if (!v) return [] as string[];
-    if (Array.isArray(v)) return v.filter((x) => typeof x === "string") as string[];
+    if (Array.isArray(v))
+      return v.filter((x) => typeof x === "string") as string[];
     if (typeof v === "string") return [v];
     // record içinden string değerleri topla
-    return Object.values(v).filter((x) => typeof x === "string") as string[];
+    return Object.values(v).filter(
+      (x) => typeof x === "string",
+    ) as string[];
   })();
   const envSameAs = (process.env.NEXT_PUBLIC_ORG_SAMEAS || "")
-    .split(",").map(s => s.trim()).filter(Boolean);
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 
   const sameAs = [...fromCompany, ...settingSameAs, ...envSameAs]
     .filter((u, i, arr) => /^https?:\/\//i.test(u) && arr.indexOf(u) === i);
 
   // --- contactPoint ---
-  const telephone = (company?.phone || process.env.NEXT_PUBLIC_ORG_CONTACT_TELEPHONE || "").trim();
+  const telephone = (
+    company?.phone || process.env.NEXT_PUBLIC_ORG_CONTACT_TELEPHONE || ""
+  ).trim();
   const contactPoint = compact({
     "@type": "ContactPoint",
     telephone: telephone || undefined,
-    contactType: (process.env.NEXT_PUBLIC_ORG_CONTACT_TYPE || "customer support").trim(),
-    areaServed: (process.env.NEXT_PUBLIC_ORG_CONTACT_AREA || "").trim() || undefined,
-    availableLanguage: (process.env.NEXT_PUBLIC_ORG_CONTACT_LANGS || locale)
-      .split(",").map(s => s.trim()),
+    contactType: (
+      process.env.NEXT_PUBLIC_ORG_CONTACT_TYPE || "customer support"
+    ).trim(),
+    areaServed:
+      (process.env.NEXT_PUBLIC_ORG_CONTACT_AREA || "").trim() ||
+      undefined,
+    availableLanguage: (
+      process.env.NEXT_PUBLIC_ORG_CONTACT_LANGS || locale
+    )
+      .split(",")
+      .map((s) => s.trim()),
   });
-  if (!contactPoint.telephone) delete (contactPoint as any).telephone;
+  if (!(contactPoint as any).telephone) {
+    delete (contactPoint as any).telephone;
+  }
 
   const data = [
     compact({
@@ -146,9 +198,14 @@ export default async function SiteJsonLd({ locale }: { locale: SupportedLocale }
       url: `${base}/`,
       name,
       description: orgDescription,
-      logo: { "@type": "ImageObject", url: logo.startsWith("http") ? logo : absoluteUrl(logo) },
+      logo: {
+        "@type": "ImageObject",
+        url: logo.startsWith("http") ? logo : absoluteUrl(logo),
+      },
       ...(sameAs.length ? { sameAs } : {}),
-      ...(Object.keys(contactPoint).length ? { contactPoint: [contactPoint] } : {}),
+      ...(Object.keys(contactPoint).length
+        ? { contactPoint: [contactPoint] }
+        : {}),
     }),
   ];
 

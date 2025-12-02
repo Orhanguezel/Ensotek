@@ -8,9 +8,8 @@ import Image from "next/image";
 import One from "public/img/shape/breadcrum-1.png.png"; // tasarım dosyası; aynı bırakıldı
 
 // Yeni i18n helper’lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 import { localizePath } from "@/i18n/url";
 
 type Props = { title: string };
@@ -21,7 +20,7 @@ const Banner: React.FC<Props> = ({ title }) => {
 
   // ✅ UI yazıları: DB (ui_banner JSON) + eski i18n + hard fallback
   //   ui_banner site_setting değerinde "ui_breadcrumb_home" key'ini bekliyoruz.
-  const { ui } = useUiSection("ui_banner", locale, UI_KEYS.banner);
+  const { ui } = useUiSection("ui_banner", locale);
 
   // Ana sayfa linki – locale-aware
   const homeHref = localizePath(locale, "/");

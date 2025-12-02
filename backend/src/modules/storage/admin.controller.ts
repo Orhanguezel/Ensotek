@@ -22,8 +22,12 @@ import {
   type UploadResult,
 } from "./cloudinary";
 
-import { env } from "@/core/env";
-import { normalizeFolder } from "./_util";
+import {
+  normalizeFolder,
+  omitNullish,
+  publicUrlOf,
+} from "./_util";
+
 import {
   listAndCount,
   getById,
@@ -34,21 +38,10 @@ import {
   deleteById as repoDeleteById,
   deleteManyByIds as repoDeleteManyByIds,
   isDup,
+  listFolders,
 } from "./repository";
 
-import { publicUrlOf } from "@/modules/storage/_util";
-
 /* --------------------------------- utils ---------------------------------- */
-
-const encSeg = (s: string) => encodeURIComponent(s);
-const encPath = (p: string) => p.split("/").map(encSeg).join("/");
-
-/** NULL/undefined alanları INSERT’ten at */
-const omitNullish = <T extends Record<string, unknown>>(o: T) =>
-  Object.fromEntries(
-    Object.entries(o).filter(([, v]) => v !== null && v !== undefined),
-  ) as Partial<T>;
-
 
 /** Dosya adı sanitize */
 const sanitizeName = (name: string) => name.replace(/[^\w.\-]+/g, "_");
@@ -131,7 +124,10 @@ export const adminCreateAsset: RouteHandler = async (req, reply) => {
       { ...baseLog },
       "storage upload: storage_not_configured (no cfg)",
     );
-    return reply.code(501).send({ message: "storage_not_configured" });
+    return reply.code(501).send({
+      message: "storage_not_configured",
+      reason: "no_config_or_missing_keys",
+    });
   }
 
   const mp: MultipartFile | undefined = await (req as any).file();
@@ -179,7 +175,10 @@ export const adminCreateAsset: RouteHandler = async (req, reply) => {
     folder,
   };
 
-  req.log.info(fileLog, "storage upload: file received, starting provider upload");
+  req.log.info(
+    fileLog,
+    "storage upload: file received, starting provider upload",
+  );
 
   // 1) Upload (Cloudinary veya local)
   let up: UploadResult;
@@ -377,7 +376,9 @@ export const adminPatchAsset: RouteHandler<{
   if (folderChanged || nameChanged) {
     if (cur.provider_public_id) {
       const baseName = targetName.replace(/^\//, "").replace(/\.[^.]+$/, "");
-      const newPublicId = targetFolder ? `${targetFolder}/${baseName}` : baseName;
+      const newPublicId = targetFolder
+        ? `${targetFolder}/${baseName}`
+        : baseName;
 
       const renamed = await renameCloudinaryPublicId(
         cur.provider_public_id,
@@ -482,7 +483,10 @@ export const adminBulkCreateAssets: RouteHandler = async (req, reply) => {
       { ...baseLog },
       "storage bulk upload: storage_not_configured (no cfg)",
     );
-    return reply.code(501).send({ message: "storage_not_configured" });
+    return reply.code(501).send({
+      message: "storage_not_configured",
+      reason: "no_config_or_missing_keys",
+    });
   }
 
   const partsIt =
@@ -674,15 +678,29 @@ export const adminBulkCreateAssets: RouteHandler = async (req, reply) => {
 
 /** GET /admin/storage/folders → string[] */
 export const adminListFolders: RouteHandler = async (_req, reply) => {
-  const folders = await (await import("./repository")).listFolders();
+  const folders = await listFolders();
   return reply.send(folders);
 };
 
 /** GET /admin/storage/_diag/cloud */
 export const adminDiagCloudinary: RouteHandler = async (req, reply) => {
   const cfg = await getCloudinaryConfig();
-  if (!cfg || cfg.driver === "local") {
-    return reply.code(501).send({ message: "cloudinary_not_configured" });
+
+  // config hiç yok veya eksik
+  if (!cfg) {
+    return reply.code(501).send({
+      message: "cloudinary_not_configured",
+      reason: "no_config_or_missing_keys",
+    });
+  }
+
+  // driver local ise (yalnızca local upload aktif)
+  if (cfg.driver === "local") {
+    return reply.code(501).send({
+      message: "cloudinary_not_configured",
+      reason: "driver_is_local",
+      driver: cfg.driver,
+    });
   }
 
   try {

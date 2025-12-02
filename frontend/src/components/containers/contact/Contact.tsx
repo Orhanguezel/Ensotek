@@ -4,9 +4,9 @@ import React, { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 
 // i18n helper’lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 
 // Site settings (social links)
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
@@ -27,7 +27,7 @@ const Contact: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI: ui_contact JSON + i18n fallback zinciri
-  const { ui } = useUiSection("ui_contact", locale, UI_KEYS.contact);
+  const { ui } = useUiSection("ui_contact", locale);
 
   // Sol mini e-posta -> ana forma aktar
   const [quickEmail, setQuickEmail] = useState("");

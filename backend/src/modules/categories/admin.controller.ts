@@ -26,6 +26,7 @@ const toBool = (v: unknown): boolean | undefined => {
   if (s === "false" || s === "0") return false;
   return undefined;
 };
+
 const toNum = (v: unknown, def = 0) => {
   const n = Number(v);
   return Number.isFinite(n) ? n : def;
@@ -48,7 +49,7 @@ function isDup(err: any) {
   return code === "ER_DUP_ENTRY" || code === 1062;
 }
 
-/* 🌍 Çoklu dil helper'ları (products/subCategories ile aynı mantık) */
+/* 🌍 Çoklu dil helper'ları */
 
 const FALLBACK_LOCALES = ["tr"];
 
@@ -98,6 +99,14 @@ export const adminCreateCategory: RouteHandler<{
 }> = async (req, reply) => {
   const parsed = categoryCreateSchema.safeParse(req.body);
   if (!parsed.success) {
+    req.log.warn(
+      {
+        where: "adminCreateCategory",
+        body: req.body,
+        issues: parsed.error.flatten(),
+      },
+      "category create invalid_body",
+    );
     return reply.code(400).send({
       error: {
         message: "invalid_body",
@@ -106,16 +115,13 @@ export const adminCreateCategory: RouteHandler<{
     });
   }
 
-  // Base payload (id + locale + diğer alanlar burada normalize ediliyor)
   const basePayload = buildInsertPayload(parsed.data);
   const baseLocale = normalizeLocale(basePayload.locale) ?? "tr";
   const locales = getLocalesForCreate(baseLocale);
 
-  // base payload'ın locale'ini normalize edilmiş haliyle güncelle
   basePayload.locale = baseLocale;
   const baseId = basePayload.id;
 
-  // Tüm locale'ler için satır üret
   const rows = locales.map((loc) => {
     if (loc === baseLocale) {
       return basePayload;
@@ -160,6 +166,15 @@ export const adminPutCategory: RouteHandler<{
 
   const parsed = categoryUpdateSchema.safeParse(req.body);
   if (!parsed.success) {
+    req.log.warn(
+      {
+        where: "adminPutCategory",
+        id,
+        body: req.body,
+        issues: parsed.error.flatten(),
+      },
+      "category put invalid_body",
+    );
     return reply.code(400).send({
       error: {
         message: "invalid_body",
@@ -204,6 +219,15 @@ export const adminPatchCategory: RouteHandler<{
 
   const parsed = categoryUpdateSchema.safeParse(req.body);
   if (!parsed.success) {
+    req.log.warn(
+      {
+        where: "adminPatchCategory",
+        id,
+        body: req.body,
+        issues: parsed.error.flatten(),
+      },
+      "category patch invalid_body",
+    );
     return reply.code(400).send({
       error: {
         message: "invalid_body",
@@ -320,9 +344,7 @@ export const adminToggleFeatured: RouteHandler<{
   return reply.send(rows[0]);
 };
 
-/** ✅ PATCH /categories/:id/image (admin)
- * Body: { asset_id?: string | null, alt?: string | null }
- */
+/** ✅ PATCH /categories/:id/image (admin) */
 export const adminSetCategoryImage: RouteHandler<{
   Params: { id: string };
   Body: CategorySetImageInput;
@@ -331,6 +353,15 @@ export const adminSetCategoryImage: RouteHandler<{
 
   const parsed = categorySetImageSchema.safeParse(req.body ?? {});
   if (!parsed.success) {
+    req.log.warn(
+      {
+        where: "adminSetCategoryImage",
+        id,
+        body: req.body,
+        issues: parsed.error.flatten(),
+      },
+      "category setImage invalid_body",
+    );
     return reply.code(400).send({
       error: {
         message: "invalid_body",
@@ -382,7 +413,6 @@ export const adminSetCategoryImage: RouteHandler<{
       .send({ error: { message: "asset_not_found" } });
   }
 
-  // ✅ Storage modülünün URL builder’ı
   const publicUrl = buildPublicUrl(
     asset.bucket,
     asset.path,

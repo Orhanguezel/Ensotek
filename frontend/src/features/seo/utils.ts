@@ -1,43 +1,56 @@
-// src/features/seo/utils.ts (veya mevcut dosyanız)
-export function siteUrlBase() {
-  const raw = (process.env.NEXT_PUBLIC_SITE_URL || "https://guezelwebdesign.de").trim();
-  // Protokol yoksa https ekle, trailing slash temizle
-  const withProto = /^https?:\/\//i.test(raw) ? raw : `https://${raw}`;
-  return withProto.replace(/\/+$/, "");
+// =============================================================
+// FILE: src/features/seo/utils.ts
+// SEO yardımcıları: site URL, absoluteUrl, compact
+// =============================================================
+
+/** Site'nin temel URL'si (örn: https://ensotek.de) */
+export function siteUrlBase(): string {
+  const envUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").trim();
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, "");
+  }
+
+  // Env yoksa: SSR'da tahmin, client'ta window.location
+  if (typeof window !== "undefined") {
+    const { protocol, host } = window.location;
+    return `${protocol}//${host}`.replace(/\/+$/, "");
+  }
+
+  // En son fallback
+  return "http://localhost:3000";
 }
 
-export function absoluteUrl(input: string) {
+/** Verilen path'i tam URL'e çevirir. Zaten http(s) ise dokunmaz. */
+export function absoluteUrl(path: string): string {
   const base = siteUrlBase();
-  try {
-    // URL ctor lokal/relatif tüm path'leri normalize eder
-    return new URL(input || "/", base + "/").toString().replace(/\/+$/, (m) =>
-      // base-only olmasın diye kök için tek slash bırak
-      m.length > 1 ? "/" : m
-    );
-  } catch {
-    // herhangi bir parse hatasında güvenli fallback
-    return `${base}/`;
-  }
+  if (!path) return base;
+  if (/^https?:\/\//i.test(path)) return path;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${p}`;
 }
 
-/** ISO veya Date → RFC 1123 (HTTP date) */
-export function httpDate(d?: string | Date | null) {
-  if (!d) return undefined;
-  const date = typeof d === "string" ? new Date(d) : d;
-  return isNaN(date.getTime()) ? undefined : date.toUTCString();
-}
-
-/** Gereksiz boş/undefined alanları objeden çıkarır */
+/**
+ * Nesnedeki undefined / null / boş string / boş array / boş object alanları temizler.
+ * JSON-LD için gereksiz alanları çıkarmakta kullanıyoruz.
+ */
 export function compact<T extends Record<string, any>>(obj: T): T {
-  const out: any = {};
-  for (const [k, v] of Object.entries(obj)) {
+  const out: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined || value === null) continue;
+
+    if (typeof value === "string" && value.trim() === "") continue;
+    if (Array.isArray(value) && value.length === 0) continue;
     if (
-      v === undefined ||
-      v === null ||
-      (Array.isArray(v) && v.length === 0) ||
-      (typeof v === "string" && v.trim() === "")
-    ) continue;
-    out[k] = v;
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === 0
+    ) {
+      continue;
+    }
+
+    out[key] = value;
   }
-  return out;
+
+  return out as T;
 }

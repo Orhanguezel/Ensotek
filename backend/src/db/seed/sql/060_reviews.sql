@@ -31,6 +31,10 @@ CREATE TABLE `reviews` (
   `likes_count`     INT           NOT NULL DEFAULT 0,
   `dislikes_count`  INT           NOT NULL DEFAULT 0,
 
+  -- FE tarafında reaction/like butonu için kullanılan sayaç
+  -- (backend SELECT r.helpful_count bekliyor → burada ayrıca tutuluyor)
+  `helpful_count`   INT           NOT NULL DEFAULT 0,
+
   -- Kullanıcının ilk gönderdiği dil
   `submitted_locale` VARCHAR(8)   NOT NULL,
 
@@ -46,8 +50,8 @@ CREATE TABLE `reviews` (
   KEY `reviews_approved_idx`      (`is_approved`),
   KEY `reviews_display_order_idx` (`display_order`),
   KEY `reviews_created_idx`       (`created_at`),
-  KEY `reviews_updated_idx`       (`updated_at`)
-
+  KEY `reviews_updated_idx`       (`updated_at`),
+  KEY `reviews_helpful_idx`       (`helpful_count`)
   -- NOT: target_id için generic tasarım; custom_pages/product gibi farklı
   -- tablolara bağlanacağı için burada direkt foreign key vermiyoruz.
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -80,5 +84,4 @@ CREATE TABLE `review_i18n` (
   CONSTRAINT `fk_review_i18n_review`
     FOREIGN KEY (`review_id`) REFERENCES `reviews` (`id`)
     ON DELETE CASCADE
-
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
