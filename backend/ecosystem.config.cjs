@@ -2,9 +2,9 @@ module.exports = {
   apps: [
     {
       name: "ensotek-backend",
-      cwd: "/var/www/ensotek/backend",
-      script: "dist/index.js",
-      interpreter: "$bun_path",
+      cwd: "/var/www/Ensotek/backend",           
+      script: "/var/www/Ensotek/backend/dist/index.js", 
+      interpreter: "/usr/local/bin/bun",  
       exec_mode: "fork",
       instances: 1,
       watch: false,
