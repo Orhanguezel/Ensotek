@@ -3,12 +3,15 @@
 // Ensotek – Admin Support Ticket Detail Page
 // =============================================================
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
 
-import { SupportForm, type SupportFormValues } from "@/components/admin/support/SupportForm";
+import {
+  SupportForm,
+  type SupportFormValues,
+} from "@/components/admin/support/SupportForm";
 
 import {
   useGetSupportTicketAdminQuery,
@@ -33,13 +36,18 @@ const AdminSupportDetailPage: NextPage = () => {
   const router = useRouter();
   const { slug } = router.query;
 
-  const ticketId = useMemo(
-    () => (typeof slug === "string" ? slug : undefined),
-    [slug],
-  );
-  const isCreate = ticketId === "new";
+  // slug -> isCreate + ticketId (admin endpoints için)
+  const { isCreate, ticketId } = useMemo(() => {
+    if (!slug || Array.isArray(slug)) {
+      return { isCreate: false, ticketId: undefined as string | undefined };
+    }
+    if (slug === "new") {
+      return { isCreate: true, ticketId: undefined as string | undefined };
+    }
+    return { isCreate: false, ticketId: slug as string };
+  }, [slug]);
 
-  // CREATE mutation (public endpoint)
+  // Public CREATE mutation
   const [createTicket, { isLoading: isCreating }] =
     useCreateSupportTicketMutation();
 
@@ -51,7 +59,9 @@ const AdminSupportDetailPage: NextPage = () => {
     refetch: refetchTicket,
   } = useGetSupportTicketAdminQuery(
     { id: ticketId as string },
-    { skip: !ticketId || isCreate },
+    {
+      skip: !ticketId || isCreate,
+    },
   );
 
   const [updateTicket, { isLoading: isUpdating }] =
@@ -69,7 +79,9 @@ const AdminSupportDetailPage: NextPage = () => {
     refetch: refetchReplies,
   } = useListTicketRepliesAdminQuery(
     { ticketId: ticketId as string },
-    { skip: !ticketId || isCreate },
+    {
+      skip: !ticketId || isCreate,
+    },
   );
 
   const [createReply, { isLoading: isCreatingReply }] =
@@ -90,13 +102,10 @@ const AdminSupportDetailPage: NextPage = () => {
     isCreatingReply ||
     isDeletingReply;
 
-  useEffect(() => {
-    if (!router.isReady) return;
-    if (!ticketId) return;
-  }, [router.isReady, ticketId]);
-
+  // Form submit (create / update)
   const handleSubmit = async (values: SupportFormValues) => {
     try {
+      // CREATE
       if (isCreate) {
         const payload: SupportTicketCreatePayload = {
           user_id: values.user_id,
@@ -110,6 +119,7 @@ const AdminSupportDetailPage: NextPage = () => {
         return;
       }
 
+      // UPDATE
       if (!ticketId) return;
 
       const patch: SupportTicketUpdatePayload = {
