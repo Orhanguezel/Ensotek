@@ -2,9 +2,9 @@ module.exports = {
   apps: [
     {
       name: "ensotek-backend",
-      cwd: "/var/www/Ensotek/backend",           
-      script: "/var/www/Ensotek/backend/dist/index.js", 
-      interpreter: "/usr/local/bin/bun",  
+      cwd: "/var/www/Ensotek/backend",
+      script: "/var/www/Ensotek/backend/dist/index.js",
+      interpreter: "/root/.bun/bin/bun",   // BURAYI DÜZELT
       exec_mode: "fork",
       instances: 1,
       watch: false,
@@ -21,3 +21,4 @@ module.exports = {
     }
   ]
 };
+
