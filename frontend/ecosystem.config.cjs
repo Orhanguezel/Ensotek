@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: ecosystem.frontend.cjs
+// FILE: ecosystem.config.cjs
 // Ensotek – Frontend (Next.js) PM2 config
 // =============================================================
 
@@ -8,9 +8,8 @@ module.exports = {
     {
       name: "ensotek-frontend",
       cwd: "/var/www/Ensotek/frontend",
-      // Bun binary ile çalıştır
-      script: "/root/.bun/bin/bun",
-      args: "run start",
+      script: "node_modules/next/dist/bin/next",
+      args: "start -p 3011",
       exec_mode: "fork",
       instances: 1,
       watch: false,
@@ -27,4 +26,3 @@ module.exports = {
     },
   ],
 };
-
