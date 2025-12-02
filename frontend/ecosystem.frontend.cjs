@@ -8,8 +8,9 @@ module.exports = {
     {
       name: "ensotek-frontend",
       cwd: "/var/www/Ensotek/frontend",
-      script: "node_modules/next/dist/bin/next",
-      args: "start -p 3011",
+      // Bun binary ile çalıştır
+      script: "/root/.bun/bin/bun",
+      args: "run start",
       exec_mode: "fork",
       instances: 1,
       watch: false,
@@ -26,3 +27,4 @@ module.exports = {
     },
   ],
 };
+
