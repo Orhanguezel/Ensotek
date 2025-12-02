@@ -12,7 +12,7 @@ module.exports = {
       max_memory_restart: "300M",
       env: {
         NODE_ENV: "production",
-        PORT: "8088"
+        PORT: "8086"
       },
       out_file: "/var/log/pm2/ensotek-backend.out.log",
       error_file: "/var/log/pm2/ensotek-backend.err.log",
