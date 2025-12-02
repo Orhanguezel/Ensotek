@@ -7,9 +7,11 @@
       "esnext"
     ],
     "jsx": "preserve",
+    // ESM output
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
+    // Alias için
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -26,12 +28,12 @@
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true
   },
- "include": [
+  "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.d.ts",
+    "src/**/*",
     "src/types/**/*.d.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules"
+  ]
 }

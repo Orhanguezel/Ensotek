@@ -7,13 +7,12 @@ import Contact from "@/components/containers/contact/Contact";
 import ContactMap from "@/components/containers/contact/ContactMap";
 
 // Yeni i18n helper’lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
 const ContactPage: React.FC = () => {
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_contact", locale, UI_KEYS.contact);
+  const { ui } = useUiSection("ui_contact", locale);
 
   // Sayfa başlığı: "Get in touch" / "İletişime geçin" vb.
   const title =

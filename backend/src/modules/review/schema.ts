@@ -8,20 +8,30 @@ import {
   text,
   boolean,
   int,
+  tinyint,
   timestamp,
 } from "drizzle-orm/mysql-core";
 
 export const reviews = mysqlTable("reviews", {
   id: char("id", { length: 36 }).primaryKey().notNull(),
 
-  // Dil-bağımsız alanlar
+  target_type: varchar("target_type", { length: 50 }).notNull(),
+  target_id: char("target_id", { length: 36 }).notNull(),
+
   name: varchar("name", { length: 255 }).notNull(),
   email: varchar("email", { length: 255 }).notNull(),
-  rating: int("rating").notNull().default(5), // 1..5
+
+  rating: tinyint("rating").notNull(), // 1..5
 
   is_active: boolean("is_active").notNull().default(true),
   is_approved: boolean("is_approved").notNull().default(false),
   display_order: int("display_order").notNull().default(0),
+
+  likes_count: int("likes_count").notNull().default(0),
+  dislikes_count: int("dislikes_count").notNull().default(0),
+  helpful_count: int("helpful_count").notNull().default(0),
+
+  submitted_locale: varchar("submitted_locale", { length: 8 }).notNull(),
 
   created_at: timestamp("created_at", { fsp: 3 })
     .notNull()
@@ -33,12 +43,15 @@ export const reviews = mysqlTable("reviews", {
 });
 
 // I18N TABLO: review_i18n
-//  - Her satır: (review_id + locale) için comment
 export const reviewTranslations = mysqlTable("review_i18n", {
   id: char("id", { length: 36 }).primaryKey().notNull(),
   review_id: char("review_id", { length: 36 }).notNull(),
-  locale: varchar("locale", { length: 10 }).notNull(),
+  locale: varchar("locale", { length: 8 }).notNull(),
+
+  // NULL olabilir → default/null vermeye gerek yok, MySQL'de zaten DEFAULT NULL
+  title: varchar("title", { length: 255 }),
   comment: text("comment").notNull(),
+  admin_reply: text("admin_reply"),
 
   created_at: timestamp("created_at", { fsp: 3 })
     .notNull()
@@ -49,21 +62,7 @@ export const reviewTranslations = mysqlTable("review_i18n", {
     .onUpdateNow(),
 });
 
-// Önerilen indexler / constraintler (migration SQL):
-// CREATE INDEX reviews_active_idx   ON reviews (is_active);
-// CREATE INDEX reviews_approved_idx ON reviews (is_approved);
-// CREATE INDEX reviews_order_idx    ON reviews (display_order);
-// CREATE INDEX reviews_created_idx  ON reviews (created_at);
-// CREATE INDEX reviews_updated_idx  ON reviews (updated_at);
-// CREATE INDEX reviews_rating_idx   ON reviews (rating);
-//
-// CREATE UNIQUE INDEX review_i18n_review_locale_ux
-//   ON review_i18n (review_id, locale);
-//
-// ALTER TABLE review_i18n
-//   ADD CONSTRAINT fk_review_i18n_review
-//   FOREIGN KEY (review_id) REFERENCES reviews(id)
-//   ON DELETE CASCADE ON UPDATE CASCADE;
+// Önerilen indexler / constraintler migration SQL'de (060_reviews.sql)
 
 export type ReviewRow = typeof reviews.$inferSelect;
 export type ReviewInsert = typeof reviews.$inferInsert;

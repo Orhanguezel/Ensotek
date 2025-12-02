@@ -12,7 +12,6 @@ import Link from "next/link";
 // Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper";
-// @ts-expect-error Swiper CSS side-effect import
 import "swiper/css";
 
 // Icons
@@ -32,12 +31,12 @@ import Four from "public/img/brand/4.png";
 import Five from "public/img/brand/5.png";
 
 // Ortak helper'lar
-import { toCdnSrc } from "@/lib/shared/media";
+import { toCdnSrc } from "@/shared/media";
 
 // Yeni i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 
 const CARD_W = 160;
@@ -63,7 +62,7 @@ const References: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI metinleri → site_settings.key = "ui_references"
-  const { ui } = useUiSection("ui_references", locale, UI_KEYS.references);
+  const { ui } = useUiSection("ui_references", locale);
 
   // Public references listesi
   // NOT: Burada tüm yayınlananları çekiyoruz, öne çıkan filtresini

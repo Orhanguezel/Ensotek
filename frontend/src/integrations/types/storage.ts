@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/integrations/db/types/storage.ts
+// FILE: src/integrations/types/storage.ts
 // =============================================================
 
 export type StorageMeta = Record<string, string> | null;
@@ -43,6 +43,14 @@ export type StorageListParams = {
   order?: "asc" | "desc";
 };
 
+export type StorageListQuery = StorageListParams;
+
+export type StorageUpdateInput = {
+  name?: string;
+  folder?: string | null;
+  metadata?: Record<string, string> | null;
+};
+
 /** ---- Public endpoints tipleri ---- */
 
 /** POST /storage/uploads/sign-multipart */
@@ -65,22 +73,7 @@ export type StoragePublicUploadResponse = {
 export type StorageServerUploadArgs = {
   bucket: string;
   file: File;
-  path?: string;      // "folder/name.ext" gibi
+  /** "folder/name.ext" gibi deterministik path (opsiyonel) */
+  path?: string;
   upsert?: boolean;
-};
-
-
-export type StorageListQuery = {
-  q?: string;
-  bucket?: string;
-  folder?: string | null;
-  mime?: string;
-  limit?: number; offset?: number;
-  sort?: "created_at" | "name" | "size";
-  order?: "asc" | "desc";
-};
-export type StorageUpdateInput = {
-  name?: string;
-  folder?: string | null;
-  metadata?: Record<string, string> | null;
 };

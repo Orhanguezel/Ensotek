@@ -1,4 +1,4 @@
--- 062_catalog_subcategories.sql
+-- 012_catalog_subcategories.sql
 -- Alt Kategoriler - FINAL (çoklu dil, locale = 'tr')
 
 START TRANSACTION;

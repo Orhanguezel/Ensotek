@@ -18,6 +18,10 @@ export type BoolLike =
 /** Backend ReviewView ile hizalı DTO */
 export type ReviewDto = {
   id: string;
+
+  target_type: string;
+  target_id: string;
+
   name: string;
   email: string;
   rating: number;
@@ -25,6 +29,12 @@ export type ReviewDto = {
   is_active: boolean;
   is_approved: boolean;
   display_order: number;
+
+  likes_count: number;
+  dislikes_count: number;
+  helpful_count: number;
+
+  submitted_locale: string;
 
   created_at: string;
   updated_at: string;
@@ -49,10 +59,17 @@ export type ReviewListQueryParams = {
 
   // Listeleme locale override
   locale?: string;
+
+  // Target filtreleri
+  target_type?: string;
+  target_id?: string;
 };
 
 /** Public create input (ReviewCreateInput ile hizalı) */
 export type ReviewCreatePayload = {
+  target_type: string;
+  target_id: string;
+
   locale?: string; // yoksa server req.locale/DEFAULT_LOCALE kullanır
 
   name: string;
@@ -67,3 +84,8 @@ export type ReviewCreatePayload = {
 
 /** Update → tüm alanlar opsiyonel (ReviewUpdateInput.partial) */
 export type ReviewUpdatePayload = Partial<ReviewCreatePayload>;
+
+/** Reaction payload */
+export type ReviewReactionPayload = {
+  type: "like" | "dislike";
+};

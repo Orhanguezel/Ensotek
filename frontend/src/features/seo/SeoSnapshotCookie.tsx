@@ -1,66 +1,102 @@
-// src/features/seo/SeoSnapshotCookie.tsx
-"use client";
+// SSR-side settings helper'ları (SEO, başlık vs. için)
 
-import { useEffect, useMemo } from "react";
-import { usePathname } from "next/navigation";
+// ✅ Yeni importlar
+import { BASE_URL } from "@/integrations/rtk/constants";
+import { normalizeLocale } from "@/i18n/config";
 import type { SupportedLocale } from "@/types/common";
 
-type Props = {
-  /** İstersen override edebilirsin; boşsa ENV → "guezelwebdesign" */
-  tenant?: string;
-  /** İstersen override edebilirsin; boşsa pathname’den türetilir */
-  pageKey?: string;
-  /** Zorunlu: sayfanın aktif dili (layout/page’ten gönder) */
-  locale: SupportedLocale;
-};
+// RTK tarafındaki SiteSetting yapısına benzer basit tip
+type SettingDoc = { key: string; value: any };
 
-export default function SeoSnapshotCookie({ tenant, pageKey, locale }: Props) {
-  const pathname = usePathname() || "/";
+/** İç içe yapılardan sadece İLGİLİ dilin metnini, fallback yapmadan çıkarır */
+export function readLocalizedLabel(
+  value: any,
+  locale: SupportedLocale,
+): string {
+  if (!value) return "";
+  if (typeof value === "string") return value.trim();
 
-  // tenant: prop → ENV → default
-  const tenantKey = tenant || process.env.NEXT_PUBLIC_TENANT || "guezelwebdesign";
+  const cands = [
+    value?.[locale],
+    value?.label?.[locale],
+    value?.title?.label?.[locale],
+    value?.description?.label?.[locale],
+  ];
+  for (const c of cands) {
+    if (typeof c === "string" && c.trim()) return c.trim();
+  }
 
-  // pageKey: prop → pathname’den türet
-  const derivedKey = useMemo(() => {
-    // "/tr" veya "/tr/" → "home"
-    if (/^\/[a-z]{2}\/?$/.test(pathname)) return "home";
-    // "/tr/about/team" → "about_team"
-    const cleaned = pathname.replace(/^\/[a-z]{2}\//, "").replace(/^\/+|\/+$/g, "");
-    return cleaned ? cleaned.replace(/[^a-z0-9]+/gi, "_").toLowerCase() : "home";
-  }, [pathname]);
-
-  const finalPageKey = pageKey || derivedKey;
-
-  // cookie adı
-  const cookieName = useMemo(
-    () => `seo_snap_${tenantKey}_${finalPageKey}_${locale}`,
-    [tenantKey, finalPageKey, locale]
-  );
-
-  useEffect(() => {
-    try {
-      const title = document.title || "";
-      const ogTitle =
-        document.querySelector('meta[property="og:title"]')?.getAttribute("content") || "";
-      const ogDesc =
-        document.querySelector('meta[property="og:description"]')?.getAttribute("content") || "";
-      const desc =
-        document.querySelector('meta[name="description"]')?.getAttribute("content") || "";
-      const canonical =
-        document.querySelector('link[rel="canonical"]')?.getAttribute("href") || "";
-      const ogSiteName =
-        document.querySelector('meta[property="og:site_name"]')?.getAttribute("content") || "";
-
-      const payload = encodeURIComponent(
-        JSON.stringify({ title, ogTitle, ogDesc, desc, canonical, ogSiteName, locale, pathname })
-      );
-
-      // Session cookie (test sadece varlığını kontrol ediyor)
-      document.cookie = `${cookieName}=${payload}; path=/; SameSite=Lax`;
-    } catch {
-      // sessiz düş
+  if (typeof value === "object") {
+    if (value.label && typeof value.label === "object") {
+      const c = value.label?.[locale];
+      if (typeof c === "string" && c.trim()) return c.trim();
     }
-  }, [cookieName, locale, pathname]);
+    for (const k of Object.keys(value)) {
+      const out = readLocalizedLabel(value[k], locale);
+      if (out) return out;
+    }
+  }
+  return "";
+}
 
-  return null;
+/**
+ * site_settings listesini çeker.
+ * BE: GET /site_settings?locale=tr
+ */
+async function fetchSettingsList(
+  locale: SupportedLocale,
+): Promise<SettingDoc[]> {
+  const base = BASE_URL.replace(/\/+$/, ""); // örn: "/api" veya "https://ensotek.de/api"
+  const l = normalizeLocale(locale);
+  const url = `${base}/site_settings?locale=${encodeURIComponent(l)}`;
+
+  const res = await fetch(url, {
+    headers: {
+      Accept: "application/json",
+      "Accept-Language": l,
+    },
+    // SEO ayarları sık değişmez; istersen "force-cache" yapabilirsin
+    cache: "no-store",
+  });
+
+  if (!res.ok) throw new Error(`site_settings ${res.status}`);
+  const j = await res.json();
+
+  // RTK'ye paralel: API ya [] ya da {data: []} dönebilir
+  return Array.isArray(j) ? (j as SettingDoc[]) : (j?.data ?? []);
+}
+
+/** Ham value’yu döndürür (array/obje/string olabilir) */
+export async function getSettingValue(
+  locale: SupportedLocale,
+  key: string,
+): Promise<any> {
+  const list = await fetchSettingsList(locale);
+  return list.find((s) => s.key === key)?.value;
+}
+
+/** Tek bir label/string gerekirken kullan (ör. başlık) */
+export async function getSettingLabel(
+  locale: SupportedLocale,
+  key: string,
+): Promise<string> {
+  const val = await getSettingValue(locale, key);
+  return readLocalizedLabel(val, locale);
+}
+
+/** SEO için iki anahtarı birden oku (fallback sadece parametre ile) */
+export async function getSeoFromSettings(
+  locale: SupportedLocale,
+  keys: { titleKey: string; descKey: string },
+  fallback: { title: string; description: string },
+) {
+  const list = await fetchSettingsList(locale);
+  const tVal = list.find((s) => s.key === keys.titleKey)?.value;
+  const dVal = list.find((s) => s.key === keys.descKey)?.value;
+
+  const title = readLocalizedLabel(tVal, locale) || fallback.title;
+  const description =
+    readLocalizedLabel(dVal, locale) || fallback.description;
+
+  return { title, description };
 }

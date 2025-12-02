@@ -12,15 +12,14 @@ import NewsPageContent from "@/components/containers/news/NewsPageContent";
 import Feedback from "@/components/containers/feedback/Feedback";
 
 // i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
 const NewsPage: React.FC = () => {
   const locale = useResolvedLocale();
 
   // ui_news section → sayfa başlığı
-  const { ui } = useUiSection("ui_news", locale, UI_KEYS.news);
+  const { ui } = useUiSection("ui_news", locale);
 
   const title = ui(
     "ui_news_page_title",

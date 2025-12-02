@@ -18,13 +18,12 @@ import {
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // Ortak helper'lar
-import { excerpt } from "@/lib/shared/text";
-import { toCdnSrc } from "@/lib/shared/media";
+import { excerpt } from "@/shared/text";
+import { toCdnSrc } from "@/shared/media";
 
 // Yeni i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 import { localizePath } from "@/i18n/url";
 
 const About: React.FC = () => {
@@ -32,7 +31,7 @@ const About: React.FC = () => {
 
   // UI strings (subtitle parçaları + buton + fallback başlık)
   // site_settings.key = "ui_about"
-  const { ui } = useUiSection("ui_about", locale, UI_KEYS.about);
+  const { ui } = useUiSection("ui_about", locale);
 
   // Custom pages → module_key = "about"
   const { data, isLoading } = useListCustomPagesPublicQuery({

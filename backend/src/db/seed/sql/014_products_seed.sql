@@ -1,6 +1,8 @@
 -- =============================================================
--- 021_products_seed.sql
--- Örnek ürünler + specs + faqs + reviews + stock
+-- 014_products_seed.sql
+-- Örnek ürünler + specs + faqs + reviews + stock (tr + en)
+--  - products: TR + EN
+--  - specs/faqs/reviews/options/stock: şimdilik sadece TR ürünlere bağlı
 -- =============================================================
 
 START TRANSACTION;
@@ -35,7 +37,7 @@ INSERT INTO products (
   meta_description
 )
 VALUES
-  -- ÜRÜN 1: Modern Mermer Mezar Modeli
+  -- ÜRÜN 1 TR: Modern Mermer Mezar Modeli
   (
     'bbbb0001-2222-4222-8222-bbbbbbbb0001',
     'tr',
@@ -45,13 +47,13 @@ VALUES
     'Modern çizgilere sahip, dayanıklı mermerden üretilmiş mezar modeli. İstanbul ve çevresi için özel ölçülendirme ve montaj dahildir.',
     'aaaa0001-1111-4111-8111-aaaaaaaa0001', -- MEZAR MODELLERİ
     NULL,
-    '/uploads/products/modern-mermer-mezar-1/main.jpg',
+    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
     NULL,
     'Modern mermer mezar modeli',
     JSON_ARRAY(
-      '/uploads/products/modern-mermer-mezar-1/main.jpg',
-      '/uploads/products/modern-mermer-mezar-1/detail-1.jpg',
-      '/uploads/products/modern-mermer-mezar-1/detail-2.jpg'
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
     ),
     JSON_ARRAY(), -- storage_image_ids (şimdilik boş)
     1,
@@ -73,7 +75,45 @@ VALUES
     'Modern çizgilerle tasarlanmış, dayanıklı mermer mezar modeli. İstanbul içi montaj ve ölçülendirme dahildir.'
   ),
 
-  -- ÜRÜN 2: Granit Mezar Modeli
+  -- ÜRÜN 1 EN: Modern Marble Grave Model
+  (
+    'bbbb0101-2222-4222-8222-bbbbbbbb0101',
+    'en',
+    'Modern Marble Grave Model',
+    'modern-marble-grave-model',
+    15000.00,
+    'A durable marble grave model with modern lines. Includes custom sizing and installation for Istanbul and surrounding areas.',
+    'aaaa0001-1111-4111-8111-aaaaaaaa0001',
+    NULL,
+    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+    NULL,
+    'Modern marble grave model',
+    JSON_ARRAY(
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
+    ),
+    JSON_ARRAY(),
+    1,
+    1,
+    JSON_ARRAY('grave', 'marble', 'modern', 'istanbul'),
+    JSON_OBJECT(
+      'dimensions', '100 x 200 cm',
+      'weight', '450 kg',
+      'thickness', '8 cm',
+      'surfaceFinish', 'Polished marble finish',
+      'warranty', '2-year workmanship warranty',
+      'installationTime', '3–5 business days'
+    ),
+    'MM-001',
+    5,
+    4.90,
+    2,
+    'Modern Marble Grave Model | Mezarisim',
+    'A modern, durable marble grave model. Installation and custom sizing are included within Istanbul.'
+  ),
+
+  -- ÜRÜN 2 TR: Granit Mezar Modeli
   (
     'bbbb0002-2222-4222-8222-bbbbbbbb0002',
     'tr',
@@ -83,12 +123,12 @@ VALUES
     'Uzun ömürlü ve çizilmeye dayanıklı granit malzemeden üretilmiş mezar modeli. Farklı renk ve desen seçenekleri mevcuttur.',
     'aaaa0001-1111-4111-8111-aaaaaaaa0001', -- MEZAR MODELLERİ
     NULL,
-    '/uploads/products/granit-mezar-1/main.jpg',
+    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
     NULL,
     'Granit mezar modeli',
     JSON_ARRAY(
-      '/uploads/products/granit-mezar-1/main.jpg',
-      '/uploads/products/granit-mezar-1/detail-1.jpg'
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
     ),
     JSON_ARRAY(),
     1,
@@ -108,6 +148,43 @@ VALUES
     1,
     'Granit Mezar Modeli | Mezarisim',
     'Uzun ömürlü ve çizilmeye dayanıklı granit mezar modeli. Farklı renk ve desen seçenekleriyle mezarlığınıza değer katar.'
+  ),
+
+  -- ÜRÜN 2 EN: Granite Grave Model
+  (
+    'bbbb0102-2222-4222-8222-bbbbbbbb0102',
+    'en',
+    'Granite Grave Model',
+    'granite-grave-model',
+    18500.00,
+    'A long-lasting, scratch-resistant grave model made of high-quality granite. Available in different colors and patterns.',
+    'aaaa0001-1111-4111-8111-aaaaaaaa0001',
+    NULL,
+    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+    NULL,
+    'Granite grave model',
+    JSON_ARRAY(
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
+    ),
+    JSON_ARRAY(),
+    1,
+    0,
+    JSON_ARRAY('grave', 'granite', 'durable'),
+    JSON_OBJECT(
+      'dimensions', '90 x 190 cm',
+      'weight', '520 kg',
+      'thickness', '10 cm',
+      'surfaceFinish', 'Mat / semi-gloss granite',
+      'warranty', '5-year material warranty',
+      'installationTime', '4–7 business days'
+    ),
+    'GM-001',
+    3,
+    4.75,
+    1,
+    'Granite Grave Model | Mezarisim',
+    'A durable granite grave model with various color and pattern options to add value to your cemetery.'
   )
 
 ON DUPLICATE KEY UPDATE
@@ -135,7 +212,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- =========================
--- PRODUCT SPECS – ÖRNEK
+-- PRODUCT SPECS – ÖRNEK (ŞİMDİLİK SADECE TR ÜRÜNLER)
 -- =========================
 
 INSERT INTO product_specs (
@@ -149,6 +226,7 @@ INSERT INTO product_specs (
   updated_at
 )
 VALUES
+  -- TR specs – product 1
   (
     'cccc0001-3333-4333-8333-cccccccc0001',
     'bbbb0001-2222-4222-8222-bbbbbbbb0001',
@@ -169,6 +247,7 @@ VALUES
     NOW(3),
     NOW(3)
   ),
+  -- TR specs – product 2
   (
     'cccc0003-3333-4333-8333-cccccccc0003',
     'bbbb0002-2222-4222-8222-bbbbbbbb0002',
@@ -189,7 +268,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- =========================
--- PRODUCT FAQS – ÖRNEK
+-- PRODUCT FAQS – ÖRNEK (SADECE TR ÜRÜNLER)
 -- =========================
 
 INSERT INTO product_faqs (
@@ -203,6 +282,7 @@ INSERT INTO product_faqs (
   updated_at
 )
 VALUES
+  -- TR faqs – product 1
   (
     'dddd0001-4444-4444-8444-dddddddd0001',
     'bbbb0001-2222-4222-8222-bbbbbbbb0001',
@@ -223,6 +303,7 @@ VALUES
     NOW(3),
     NOW(3)
   ),
+  -- TR faqs – product 2
   (
     'dddd0003-4444-4444-8444-dddddddd0003',
     'bbbb0002-2222-4222-8222-bbbbbbbb0002',
@@ -243,7 +324,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- =========================
--- PRODUCT REVIEWS – ÖRNEK
+-- PRODUCT REVIEWS – ÖRNEK (SADECE TR ÜRÜNLER)
 -- =========================
 
 INSERT INTO product_reviews (
@@ -306,7 +387,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- =========================
--- PRODUCT OPTIONS – ÖRNEK
+-- PRODUCT OPTIONS – ÖRNEK (SADECE TR ÜRÜNLER)
 -- =========================
 
 INSERT INTO product_options (
@@ -342,7 +423,7 @@ ON DUPLICATE KEY UPDATE
 
 
 -- =========================
--- PRODUCT STOCK – ÖRNEK (daha çok dijital ürün için ama örnek olsun)
+-- PRODUCT STOCK – ÖRNEK (SADECE TR ÜRÜNLER)
 -- =========================
 
 INSERT INTO product_stock (

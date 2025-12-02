@@ -1,27 +1,20 @@
 // src/i18n/IntlProviderClient.tsx
 "use client";
+
 import * as React from "react";
-import { NextIntlClientProvider } from "next-intl";
 
 type Props = {
   locale: string;
-  messages: Record<string, any>;
+  messages: Record<string, unknown>;
   children: React.ReactNode;
 };
 
-export default function IntlProviderClient({ locale, messages, children }: Props) {
-  return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={messages}
-      onError={(err: any) => {
-        if (err?.code === "MISSING_MESSAGE") return;
-      }}
-      getMessageFallback={({ key, namespace }) =>
-        (namespace ? `${namespace}.` : "") + key
-      }
-    >
-      {children}
-    </NextIntlClientProvider>
-  );
+/**
+ * Not:
+ * Bu projede şu anda next-intl kullanılmıyor.
+ * Bu wrapper sadece children'ı dönen basit bir provider.
+ * İlerde farklı bir i18n kütüphanesi entegre etmek istersen burayı doldurabiliriz.
+ */
+export default function IntlProviderClient({ children }: Props) {
+  return <>{children}</>;
 }

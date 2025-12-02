@@ -35,6 +35,8 @@ export const metahubTags = [
   "EmailTemplate",
   "Notification",
   "Review",
+  "Health",
+  "ProductFAQs",
   
 ] as const;
 

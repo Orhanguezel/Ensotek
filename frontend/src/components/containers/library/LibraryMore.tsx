@@ -7,12 +7,12 @@ import Link from "next/link";
 
 import { useListLibraryQuery } from "@/integrations/rtk/endpoints/library.endpoints";
 
-import { toCdnSrc } from "@/lib/shared/media";
-import { pickStrict, stripHtml, excerpt } from "@/lib/shared/text";
+import { toCdnSrc } from "@/shared/media";
+import { pickStrict, stripHtml, excerpt } from "@/shared/text";
 
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 
 // Carousel (shadcn / embla)
@@ -34,7 +34,7 @@ interface LibraryMoreProps {
 
 const LibraryMore: React.FC<LibraryMoreProps> = ({ currentId }) => {
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_library", locale, UI_KEYS.library);
+  const { ui } = useUiSection("ui_library", locale);
 
   const { data = [], isLoading } = useListLibraryQuery({
     locale,
@@ -102,8 +102,8 @@ const LibraryMore: React.FC<LibraryMoreProps> = ({ currentId }) => {
         <Image
           src={WorkflowBg}
           alt="pattern"
-            loading="lazy"
-            sizes="400px"
+          loading="lazy"
+          sizes="400px"
         />
       </div>
 

@@ -10,13 +10,13 @@ import Link from "next/link";
 import { useListServicesPublicQuery } from "@/integrations/rtk/endpoints/services.public.endpoints";
 
 // Ortak yardımcılar
-import { excerpt } from "@/lib/shared/text";
-import { toCdnSrc } from "@/lib/shared/media";
+import { excerpt } from "@/shared/text";
+import { toCdnSrc } from "@/shared/media";
 
 // UI / i18n – site_settings üzerinden
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 import { DEFAULT_LOCALE } from "@/i18n/config";
 
@@ -58,7 +58,7 @@ const Service: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI metinleri site_settings.ui_services
-  const { ui } = useUiSection("ui_services", locale, UI_KEYS.services);
+  const { ui } = useUiSection("ui_services", locale);
 
   // ✅ Public services list – locale & default_locale gönder
   const { data, isLoading } = useListServicesPublicQuery({
@@ -92,9 +92,9 @@ const Service: React.FC = () => {
         rawSummary?.trim().length
           ? excerpt(String(rawSummary), 150)
           : ui(
-              "ui_services_placeholder_summary",
-              "Service description is coming soon.",
-            );
+            "ui_services_placeholder_summary",
+            "Service description is coming soon.",
+          );
 
       return {
         id: s.id,

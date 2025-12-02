@@ -149,3 +149,21 @@ export const patchCustomPageBodySchema =
 export type PatchCustomPageBody = z.infer<
   typeof patchCustomPageBodySchema
 >;
+
+
+/** BY-SLUG params */
+export const customPageBySlugParamsSchema = z.object({
+  slug: z.string().min(1),
+});
+
+/** BY-SLUG query (sadece locale override) */
+export const customPageBySlugQuerySchema = z.object({
+  locale: LOCALE_ENUM.optional(),
+});
+
+export type CustomPageBySlugParams = z.infer<
+  typeof customPageBySlugParamsSchema
+>;
+export type CustomPageBySlugQuery = z.infer<
+  typeof customPageBySlugQuerySchema
+>;

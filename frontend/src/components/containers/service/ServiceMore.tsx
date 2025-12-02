@@ -11,12 +11,12 @@ import Link from "next/link";
 import { useListServicesPublicQuery } from "@/integrations/rtk/endpoints/services.public.endpoints";
 import type { ServiceDto } from "@/integrations/types/services.types";
 
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
-import { toCdnSrc } from "@/lib/shared/media";
-import { excerpt } from "@/lib/shared/text";
+
+import { toCdnSrc } from "@/shared/media";
+import { excerpt } from "@/shared/text";
 import { localizePath } from "@/i18n/url";
 
 import { FiArrowRight } from "react-icons/fi";
@@ -29,7 +29,7 @@ interface ServiceMoreProps {
 
 const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_services", locale, UI_KEYS.services);
+  const { ui } = useUiSection("ui_services", locale);
 
   // ✅ locale & default_locale backend'e gönderiyoruz
   const { data, isLoading } = useListServicesPublicQuery({
@@ -95,15 +95,15 @@ const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
             const summary = summaryRaw
               ? excerpt(String(summaryRaw), 140)
               : ui(
-                  "ui_services_placeholder_summary",
-                  "Service description is coming soon.",
-                );
+                "ui_services_placeholder_summary",
+                "Service description is coming soon.",
+              );
 
             const href = s.slug
               ? localizePath(
-                  locale,
-                  `/service/${encodeURIComponent(s.slug)}`,
-                )
+                locale,
+                `/service/${encodeURIComponent(s.slug)}`,
+              )
               : localizePath(locale, "/service");
 
             return (

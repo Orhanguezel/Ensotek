@@ -7,6 +7,7 @@ import type {
   ReviewDto,
   ReviewListQueryParams,
   ReviewCreatePayload,
+  ReviewReactionPayload,
 } from "@/integrations/types/review.types";
 
 import { baseApi } from "../baseApi";
@@ -16,7 +17,6 @@ export const reviewsPublicEndpoints = baseApi.injectEndpoints({
     // GET /reviews
     listReviewsPublic: build.query<ReviewDto[], ReviewListQueryParams | void>({
       query: (params) => {
-        // RTK FetchArgs.params: Record<string, any> | undefined bekliyor
         const queryParams: Record<string, any> | undefined = params
           ? (params as Record<string, any>)
           : undefined;
@@ -54,6 +54,23 @@ export const reviewsPublicEndpoints = baseApi.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Review" as const, id: "LIST" }],
     }),
+
+    // POST /reviews/:id/reactions  (like/helpful)
+    addReviewReactionPublic: build.mutation<
+      ReviewDto,
+      { id: string; body?: ReviewReactionPayload }
+    >({
+      query: ({ id, body }) => ({
+        url: `/reviews/${encodeURIComponent(id)}/reactions`,
+        method: "POST",
+        body: body ?? { type: "like" },
+      }),
+      // Tek review ve listeyi invalid et
+      invalidatesTags: (_res, _err, { id }) => [
+        { type: "Review" as const, id },
+        { type: "Review" as const, id: "LIST" },
+      ],
+    }),
   }),
   overrideExisting: false,
 });
@@ -62,4 +79,5 @@ export const {
   useListReviewsPublicQuery,
   useGetReviewPublicQuery,
   useCreateReviewPublicMutation,
+  useAddReviewReactionPublicMutation,
 } = reviewsPublicEndpoints;

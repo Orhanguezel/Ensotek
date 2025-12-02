@@ -26,7 +26,9 @@ export type ActiveTab =
   | "db"
   | "reviews"
   | "support"
-  | "menuitem";
+  | "menuitem"
+  | "storage"
+  ;
 
 
 type AdminLayoutProps = {

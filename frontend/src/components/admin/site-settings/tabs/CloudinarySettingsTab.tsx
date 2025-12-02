@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/site-settings/tabs/CloudinarySettingsTab.tsx
-// Cloudinary / Storage Ayarları Tab
+// Cloudinary / Storage Ayarları Tab + Test Butonu
 // =============================================================
 
 import React from "react";
@@ -10,6 +10,7 @@ import {
   useUpdateSiteSettingAdminMutation,
   type SiteSetting,
 } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+import { useLazyDiagCloudinaryAdminQuery } from "@/integrations/rtk/endpoints/admin/storage_admin.endpoints";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -85,6 +86,12 @@ export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({
   const [updateSetting, { isLoading: isSaving }] =
     useUpdateSiteSettingAdminMutation();
 
+  // Cloudinary / storage diag (lazy)
+  const [
+    runDiag,
+    { data: diagResult, isFetching: isTesting, error: diagError },
+  ] = useLazyDiagCloudinaryAdminQuery();
+
   const [form, setForm] = React.useState<StorageForm>(EMPTY_FORM);
 
   React.useEffect(() => {
@@ -122,6 +129,71 @@ export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({
       toast.error(msg);
     }
   };
+
+  const handleTest = async () => {
+    try {
+      const res = await runDiag().unwrap();
+      if (res?.ok) {
+        toast.success(
+          `Cloudinary bağlantısı başarılı. Cloud: ${res.cloud}, test dosyası: ${res.uploaded?.public_id}`,
+        );
+      } else {
+        toast.error("Cloudinary testi başarısız. Detaylar için console'a bak.");
+        console.error("Cloudinary diag (unexpected response):", res);
+      }
+    } catch (err: any) {
+      console.error("Cloudinary diag error:", err);
+      const status = err?.status;
+      const data = err?.data as any;
+
+      if (status === 501) {
+        const reason = data?.reason;
+        if (reason === "driver_is_local") {
+          toast.error(
+            "Cloudinary testi başarısız: storage_driver şu an 'local'. Cloudinary kullanmak için storage_driver'ı 'cloudinary' yap ve Cloudinary keylerini doldur.",
+          );
+        } else {
+          toast.error(
+            "Cloudinary yapılandırılmamış: Cloud name, API key ve secret değerlerini doldurup tekrar dene.",
+          );
+        }
+        return;
+      }
+
+      if (status === 502) {
+        const step = data?.step;
+        const msg =
+          data?.error?.msg ||
+          data?.error?.message ||
+          data?.message ||
+          err?.message ||
+          "Cloudinary testi başarısız.";
+        toast.error(`Cloudinary testi başarısız (${step || "unknown"}): ${msg}`);
+        return;
+      }
+
+      const fallbackMsg =
+        data?.error?.msg ||
+        data?.error?.message ||
+        data?.message ||
+        err?.message ||
+        "Cloudinary testi başarısız.";
+      toast.error(fallbackMsg);
+    }
+  };
+
+  const lastTestInfo = React.useMemo(() => {
+    if (isTesting) {
+      return "Cloudinary testi yapılıyor...";
+    }
+    if (diagResult?.ok) {
+      return `Son test: BAŞARILI (cloud: ${diagResult.cloud})`;
+    }
+    if (diagError) {
+      return "Son test: HATA – detaylar için loglara bak.";
+    }
+    return 'Cloudinary bağlantısını test etmek için "Cloudinary Test" butonuna tıkla.';
+  }, [isTesting, diagResult, diagError]);
 
   return (
     <div className="card">
@@ -204,7 +276,7 @@ export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({
               onChange={(e) =>
                 handleChange("cloudinary_cloud_name", e.target.value)
               }
-              placeholder="ensotek"
+              placeholder="cloud-name"
             />
           </div>
 
@@ -255,15 +327,26 @@ export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({
           </div>
         </div>
 
-        <div className="d-flex justify-content-end mt-3">
-          <Button
-            type="button"
-            variant="default"
-            disabled={isSaving}
-            onClick={handleSave}
-          >
-            {isSaving ? "Kaydediliyor..." : "Kaydet"}
-          </Button>
+        <div className="d-flex justify-content-between align-items-center mt-3">
+          <div className="small text-muted">{lastTestInfo}</div>
+          <div className="d-flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={isTesting}
+              onClick={handleTest}
+            >
+              {isTesting ? "Test ediliyor..." : "Cloudinary Test"}
+            </Button>
+            <Button
+              type="button"
+              variant="default"
+              disabled={isSaving}
+              onClick={handleSave}
+            >
+              {isSaving ? "Kaydediliyor..." : "Kaydet"}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

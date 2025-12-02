@@ -13,9 +13,8 @@ import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
 import { localizePath } from "@/i18n/url";
 
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
 type SimpleBrand = {
   name: string;
@@ -46,8 +45,7 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   // ✅ UI stringleri: DB (ui_header JSON) + i18n (UI_FALLBACK_EN) + hard fallback
   const { ui, raw: uiHeaderJson } = useUiSection(
     "ui_header",
-    locale,
-    UI_KEYS.header,
+    locale
   );
 
   // Menü boş / yükleniyor mesajları – DB'de varsa onlardan, yoksa hard fallback

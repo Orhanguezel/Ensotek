@@ -4,11 +4,10 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
-import { rootApi } from "@/lib/rtk/rootApi";
 import { baseApi } from "@/integrations/rtk/baseApi";
-import { galleryApi } from "@/lib/gallery/api.client";
 
 // RTK Query api instance tipi (reducerPath, reducer, middleware taşıyan her şey)
+// Şimdilik sadece baseApi var ama ileride başka createApi instance’ları ekleyebilirsin.
 type AnyApi = {
   reducerPath: string;
   reducer: any;
@@ -16,11 +15,7 @@ type AnyApi = {
 };
 
 // Store’da kullanacağımız tüm createApi instance’ları
-const apis: AnyApi[] = [
-  rootApi,
-  baseApi,    // ⬅️ ENSOTEK public API (metahubApi)
-  galleryApi,
-].filter(Boolean) as AnyApi[];
+const apis: AnyApi[] = [baseApi];
 
 export function makeStore() {
   const reducer = {

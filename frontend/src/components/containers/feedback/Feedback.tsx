@@ -13,7 +13,7 @@ import AvatarPh from "public/img/feedback/author-1.png";
 // Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Navigation } from "swiper";
-// @ts-expect-error – Swiper CSS için TS tipleri yok, side-effect import güvenli
+
 import "swiper/css";
 
 // Icons
@@ -25,12 +25,12 @@ import { useListReviewsPublicQuery } from "@/integrations/rtk/endpoints/reviews.
 import type { ReviewDto } from "@/integrations/types/review.types";
 
 // Ortak yardımcılar
-import { excerpt } from "@/lib/shared/text";
+import { excerpt } from "@/shared/text";
 
 // i18n UI
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 
 type FeedbackSlide = {
   id: string;
@@ -45,7 +45,7 @@ const Feedback: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI metinleri site_settings.ui_feedback
-  const { ui } = useUiSection("ui_feedback", locale, UI_KEYS.feedback);
+  const { ui } = useUiSection("ui_feedback", locale);
 
   // ✅ Public reviews list – varsayılan: aktif + onaylı, minRating=3
   const { data, isLoading } = useListReviewsPublicQuery({

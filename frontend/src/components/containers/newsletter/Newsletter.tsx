@@ -6,13 +6,13 @@ import React, { useMemo, useRef, useState } from "react";
 import { useSubscribeNewsletterMutation } from "@/integrations/rtk/endpoints/newsletter_public.endpoints";
 
 // Yeni i18n helper’lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 
 const Newsletter: React.FC = () => {
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_newsletter", locale, UI_KEYS.newsletter);
+  const { ui } = useUiSection("ui_newsletter");
 
   const [email, setEmail] = useState("");
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(

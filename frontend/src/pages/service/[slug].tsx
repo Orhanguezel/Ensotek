@@ -11,16 +11,15 @@ import ServiceDetail from "@/components/containers/service/ServiceDetail";
 import ServiceMore from "@/components/containers/service/ServiceMore";
 import ServiceCta from "@/components/containers/cta/ServiceCta";
 
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
 const ServiceDetailPage: React.FC = () => {
   const router = useRouter();
   const { slug } = router.query;
 
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_services", locale, UI_KEYS.services);
+  const { ui } = useUiSection("ui_services", locale);
 
   const pageTitle = ui("ui_services_page_title", "Services");
 

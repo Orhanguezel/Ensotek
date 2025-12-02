@@ -17,16 +17,16 @@ import {
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // Helper'lar
-import { toCdnSrc } from "@/lib/shared/media";
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { toCdnSrc } from "@/shared/media";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 
 const AboutPageContent: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI başlık vs. için (istersen burada da kullanırız)
-  const { ui } = useUiSection("ui_about", locale, UI_KEYS.about);
+  const { ui } = useUiSection("ui_about", locale);
 
   const { data, isLoading } = useListCustomPagesPublicQuery({
     module_key: "about",

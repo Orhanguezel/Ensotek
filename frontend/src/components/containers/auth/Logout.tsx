@@ -10,16 +10,16 @@ import { tokenStore } from "@/integrations/core/token";
 import { normalizeError } from "@/integrations/core/errors";
 
 // i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 
 const Logout: React.FC = () => {
   const router = useRouter();
   const [logout, logoutState] = useLogoutMutation();
 
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_auth", locale, UI_KEYS.auth);
+  const { ui } = useUiSection("ui_auth", locale);
 
   useEffect(() => {
     let canceled = false;

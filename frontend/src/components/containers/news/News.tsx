@@ -18,20 +18,20 @@ import {
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // Ortak helper'lar
-import { toCdnSrc } from "@/lib/shared/media";
-import { excerpt } from "@/lib/shared/text";
+import { toCdnSrc } from "@/shared/media";
+import { excerpt } from "@/shared/text";
 
 // Yeni i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 import { localizePath } from "@/i18n/url";
 
 const News: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI yazıları → site_settings.key = "ui_news"
-  const { ui } = useUiSection("ui_news", locale, UI_KEYS.news);
+  const { ui } = useUiSection("ui_news", locale);
 
   const subprefix = ui("ui_news_subprefix", "Ensotek");
   const sublabel = ui(
@@ -148,9 +148,9 @@ const News: React.FC = () => {
               {items.map((n, idx) => {
                 const href = n.slug
                   ? localizePath(
-                      locale,
-                      `/news/${encodeURIComponent(n.slug)}`,
-                    )
+                    locale,
+                    `/news/${encodeURIComponent(n.slug)}`,
+                  )
                   : newsListHref;
 
                 return (

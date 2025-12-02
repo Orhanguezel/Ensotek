@@ -15,14 +15,14 @@ import { tokenStore } from "@/integrations/core/token";
 import { normalizeError } from "@/integrations/core/errors";
 
 // Yeni i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 
 const Register: React.FC = () => {
   const router = useRouter();
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_auth", locale, UI_KEYS.auth);
+  const { ui } = useUiSection("ui_auth", locale);
 
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
@@ -108,10 +108,10 @@ const Register: React.FC = () => {
       const n = normalizeError(err as any);
       setFormError(
         n.message ||
-          ui(
-            "register_error_google_generic",
-            "An error occurred while starting Google signup.",
-          ),
+        ui(
+          "register_error_google_generic",
+          "An error occurred while starting Google signup.",
+        ),
       );
     }
   };

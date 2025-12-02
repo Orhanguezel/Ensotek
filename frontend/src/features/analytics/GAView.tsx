@@ -1,3 +1,5 @@
+// src/features/analytics/GAView.tsx
+
 "use client";
 
 import { useEffect } from "react";

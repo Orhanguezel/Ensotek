@@ -1,5 +1,5 @@
 -- 011_catalog_categories.sql
--- Kategoriler (üst) ve Alt Kategoriler - FINAL (çoklu dil + module_key hizalı)
+-- Kategoriler (üst) - FINAL (çoklu dil + module_key hizalı)
 
 START TRANSACTION;
 
@@ -121,61 +121,51 @@ VALUES
   -- =====================
   -- REFERENCES modülü (sektörel)
   -- =====================
-  -- Genel / tüm referanslar
   ('aaaa5001-1111-4111-8111-aaaaaaaa5001', 'tr', 'references',
     'REFERANSLAR', 'referanslar',
     NULL, NULL, NULL, NULL, NULL,
     1, 1, 10
   ),
-  -- Enerji Santralleri
   ('aaaa5002-1111-4111-8111-aaaaaaaa5002', 'tr', 'references',
     'ENERJİ SANTRALLERİ', 'enerji-santralleri',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 20
   ),
-  -- Petrokimya & Kimya Tesisleri
   ('aaaa5003-1111-4111-8111-aaaaaaaa5003', 'tr', 'references',
     'PETROKİMYA & KİMYA TESİSLERİ', 'petrokimya-kimya-tesisleri',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 30
   ),
-  -- Çimento & Madencilik
   ('aaaa5004-1111-4111-8111-aaaaaaaa5004', 'tr', 'references',
     'ÇİMENTO & MADENCİLİK', 'cimento-madencilik',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 40
   ),
-  -- Gıda & İçecek Tesisleri
   ('aaaa5005-1111-4111-8111-aaaaaaaa5005', 'tr', 'references',
     'GIDA & İÇECEK TESİSLERİ', 'gida-icecek-tesisleri',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 50
   ),
-  -- Çelik & Metal Sanayi
   ('aaaa5006-1111-4111-8111-aaaaaaaa5006', 'tr', 'references',
     'ÇELİK & METAL SANAYİ', 'celik-metal-sanayi',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 60
   ),
-  -- Otomotiv & Yan Sanayi
   ('aaaa5007-1111-4111-8111-aaaaaaaa5007', 'tr', 'references',
     'OTOMOTİV & YAN SANAYİ', 'otomotiv-yan-sanayi',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 70
   ),
-  -- AVM & Ticari Binalar
   ('aaaa5008-1111-4111-8111-aaaaaaaa5008', 'tr', 'references',
     'AVM & TİCARİ BİNALAR', 'avm-ticari-binalar',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 80
   ),
-  -- Veri Merkezi & Hastane
   ('aaaa5009-1111-4111-8111-aaaaaaaa5009', 'tr', 'references',
     'VERİ MERKEZİ & HASTANE', 'veri-merkezi-hastane',
     NULL, NULL, NULL, NULL, NULL,
     1, 0, 90
   ),
-  -- Diğer Projeler
   ('aaaa5010-1111-4111-8111-aaaaaaaa5010', 'tr', 'references',
     'DİĞER PROJELER', 'diger-projeler',
     NULL, NULL, NULL, NULL, NULL,

@@ -5,7 +5,6 @@ export type ApiSettingsTabProps = {
 };
 
 export const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({
-  locale,
 }) => {
   return (
     <div className="card">

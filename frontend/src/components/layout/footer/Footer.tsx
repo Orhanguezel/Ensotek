@@ -18,9 +18,8 @@ import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";
 import { localizePath } from "@/i18n/url";
 
 // Yeni i18n helper’lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
 
 const IMG_W = 160;
 const IMG_H = 60;
@@ -30,7 +29,7 @@ const Footer: React.FC = () => {
   const locale = useResolvedLocale();
 
   // ✅ UI yazıları: DB (ui_footer JSON) + eski i18n + hard fallback
-  const { ui } = useUiSection("ui_footer", locale, UI_KEYS.footer);
+  const { ui } = useUiSection("ui_footer", locale);
 
   // 🔹 site_settings – contact_info + company_brand
   const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({

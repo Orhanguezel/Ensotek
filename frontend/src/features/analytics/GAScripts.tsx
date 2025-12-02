@@ -1,16 +1,18 @@
+// src/features/analytics/GAScripts.tsx
+
 import Script from "next/script";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 
 export default function GAScripts() {
-  if (!GA_ID) return null;
-
+  // GA_ID yoksa veya ortam production değilse hiçbir şey render etme
   const isProd = process.env.NODE_ENV === "production";
+  if (!GA_ID || !isProd) return null;
 
   return (
     <>
-      {/* (Opsiyonel) Consent Mode default - EEA için önerilir */}
-      <Script id="ga-consent" strategy="beforeInteractive">
+      {/* Consent Mode / dataLayer init – app seviyesinde afterInteractive yeterli */}
+      <Script id="ga-consent" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
@@ -27,7 +29,7 @@ export default function GAScripts() {
       {/* GA kaynak dosyası */}
       <Script
         id="ga-src"
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
+        src={"https://www.googletagmanager.com/gtag/js?id=" + GA_ID}
         strategy="afterInteractive"
       />
 

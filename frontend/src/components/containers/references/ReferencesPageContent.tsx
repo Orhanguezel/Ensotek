@@ -16,12 +16,12 @@ import { useListReferencesQuery } from "@/integrations/rtk/endpoints/references.
 import type { ReferenceDto } from "@/integrations/types/references.types";
 
 // Ortak helper'lar
-import { toCdnSrc } from "@/lib/shared/media";
+import { toCdnSrc } from "@/shared/media";
 
 // i18n helper'lar
-import { useResolvedLocale } from "@/lib/i18n/locale";
-import { useUiSection } from "@/lib/i18n/uiDb";
-import { UI_KEYS } from "@/lib/i18n/ui";
+import { useResolvedLocale } from "@/i18n/locale";
+import { useUiSection } from "@/i18n/uiDb";
+
 
 // Pagination UI
 import {
@@ -53,7 +53,7 @@ const ReferencesPageContent: React.FC = () => {
   const locale = useResolvedLocale();
 
   // UI: başlık, alt metin vs.
-  const { ui } = useUiSection("ui_references", locale, UI_KEYS.references);
+  const { ui } = useUiSection("ui_references", locale);
 
   const sectionSubtitlePrefix = ui("ui_references_subprefix", "Ensotek");
   const sectionSubtitleLabel = ui(

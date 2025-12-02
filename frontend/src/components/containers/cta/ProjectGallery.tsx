@@ -29,7 +29,7 @@ const allSuggestionsData: ProjectProps[] | string[] = [
 const ProjectGallery = () => {
   const [suggestedItems, setSuggestedItems] = useState(productItem);
 
-  const [suggestedFilterBtn, setSuggestedFilterBtn] =
+  const [suggestedFilterBtn] =
     useState(allSuggestionsData);
 
   const [selectedIndex, setSelectedIndex] = useState(0);

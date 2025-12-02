@@ -5,7 +5,6 @@ import type { RouteHandler } from "fastify";
 import { randomUUID } from "node:crypto";
 import type { MultipartFile } from "@fastify/multipart";
 
-import { env } from "@/core/env";
 import {
   getCloudinaryConfig,
   uploadBufferAuto,
@@ -23,32 +22,12 @@ import {
   isDup as repoIsDup,
 } from "./repository";
 
-import { publicUrlOf } from "./_util";
-
-/* --------------------------------- helpers -------------------------------- */
-
-const encSeg = (s: string) => encodeURIComponent(s);
-const encPath = (p: string) => p.split("/").map(encSeg).join("/");
-
-/** NULL/undefined alanları INSERT’ten at */
-const omitNullish = <T extends Record<string, unknown>>(o: T) =>
-  Object.fromEntries(
-    Object.entries(o).filter(([, v]) => v !== null && v !== undefined),
-  ) as Partial<T>;
-
-// --- path helpers ---
-const stripLeadingSlashes = (s: string) => s.replace(/^\/+/, "");
-const normalizePath = (bucket: string, raw: string) => {
-  let p = stripLeadingSlashes(raw).replace(/\/{2,}/g, "/");
-  if (p.startsWith(bucket + "/")) p = p.slice(bucket.length + 1);
-  return p;
-};
-
-const toBool = (v: string | undefined): boolean => {
-  if (!v) return false;
-  const s = v.toLowerCase();
-  return ["1", "true", "yes", "on"].includes(s);
-};
+import {
+  publicUrlOf,
+  normalizePath,
+  omitNullish,
+  toBool,
+} from "./_util";
 
 /* ---------------------------------- PUBLIC --------------------------------- */
 

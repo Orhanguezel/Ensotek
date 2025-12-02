@@ -6,6 +6,10 @@ import { z } from "zod";
 const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (v === "" ? null : v), schema);
 
+/**
+ * FE'den gelebilecek bütün boolean varyantlarını kabul et
+ * (true/false, 0/1, "0"/"1", "true"/"false")
+ */
 export const boolLike = z.union([
   z.boolean(),
   z.literal(0),
@@ -38,11 +42,14 @@ const baseCategorySchema = z
     slug: z.string().min(1).max(255),
 
     description: emptyToNull(z.string().optional().nullable()),
-    image_url: emptyToNull(z.string().url().optional().nullable()), // LONGTEXT, limit yok
+    image_url: emptyToNull(z.string().url().optional().nullable()),
     alt: emptyToNull(z.string().max(255).optional().nullable()),
 
-    icon: emptyToNull(z.string().max(100).optional().nullable()),
+    icon: emptyToNull(z.string().max(255).optional().nullable()),
 
+    // create/update tarafında boolLike ile gelen değeri
+    // olduğu gibi (true/false / "1"/"0" vs) kabul ediyoruz;
+    // DB update sırasında zaten bool'a cast edilecek.
     is_active: boolLike.optional(),
     is_featured: boolLike.optional(),
     display_order: z.coerce.number().int().min(0).optional(),
@@ -53,6 +60,9 @@ const baseCategorySchema = z
   })
   .passthrough();
 
+/**
+ * CREATE şeması
+ */
 export const categoryCreateSchema = baseCategorySchema.superRefine(
   (data, ctx) => {
     // Şu an için parent_id bu tabloda yok; ayrı alt kategori modülü gelecek.
@@ -66,15 +76,15 @@ export const categoryCreateSchema = baseCategorySchema.superRefine(
   },
 );
 
+/**
+ * UPDATE şeması (PATCH / PUT)
+ *  - partial: tüm alanlar opsiyonel
+ *  - parent_id hâlâ yasak
+ *  - ❌ no_fields_to_update kontrolünü kaldırdık (boş PATCH no-op olsun)
+ */
 export const categoryUpdateSchema = baseCategorySchema
   .partial()
   .superRefine((data, ctx) => {
-    if (Object.keys(data).length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "no_fields_to_update",
-      });
-    }
     if ("parent_id" in (data as Record<string, unknown>)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

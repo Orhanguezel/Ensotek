@@ -19,12 +19,24 @@ import type {
  */
 const cleanParams = (
   params?: Record<string, unknown>,
-): Record<string, unknown> | undefined => {
+): Record<string, string | number | boolean> | undefined => {
   if (!params) return undefined;
-  const out: Record<string, unknown> = {};
+  const out: Record<string, string | number | boolean> = {};
   for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === "") continue;
-    out[k] = v;
+    if (
+      v === undefined ||
+      v === null ||
+      v === "" ||
+      (typeof v === "number" && Number.isNaN(v))
+    ) {
+      continue;
+    }
+    // boolean / number / string dışındaki tipleri string’e çevirme
+    if (typeof v === "boolean" || typeof v === "number" || typeof v === "string") {
+      out[k] = v;
+    } else {
+      out[k] = String(v);
+    }
   }
   return Object.keys(out).length ? out : undefined;
 };
@@ -51,7 +63,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     getCategoryAdmin: build.query<CategoryDto, string>({
       query: (id) => ({
-        url: `/admin/categories/${id}`,
+        url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "GET",
       }),
     }),
@@ -69,15 +81,15 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
 
     /* --------------------------------------------------------- */
     /* PATCH (partial update) – /api/admin/categories/:id        */
-    /* PUT full update istiyorsan ayrıca ekleyebilirsin          */
     /* --------------------------------------------------------- */
     updateCategoryAdmin: build.mutation<
       CategoryDto,
       { id: string; patch: CategoryUpdatePayload }
     >({
       query: ({ id, patch }) => ({
-        url: `/admin/categories/${id}`,
+        url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "PATCH",
+        // 🔴 ÖNEMLİ: backend categoryUpdateSchema.partial() top-level body bekliyor
         body: patch,
       }),
     }),
@@ -87,7 +99,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     deleteCategoryAdmin: build.mutation<void, string>({
       query: (id) => ({
-        url: `/admin/categories/${id}`,
+        url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "DELETE",
       }),
     }),
@@ -116,7 +128,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
       { id: string; is_active: boolean }
     >({
       query: ({ id, is_active }) => ({
-        url: `/admin/categories/${id}/active`,
+        url: `/admin/categories/${encodeURIComponent(id)}/active`,
         method: "PATCH",
         body: { is_active },
       }),
@@ -131,7 +143,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
       { id: string; is_featured: boolean }
     >({
       query: ({ id, is_featured }) => ({
-        url: `/admin/categories/${id}/featured`,
+        url: `/admin/categories/${encodeURIComponent(id)}/featured`,
         method: "PATCH",
         body: { is_featured },
       }),
@@ -146,10 +158,9 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
       CategorySetImagePayload
     >({
       query: ({ id, asset_id, alt }) => ({
-        url: `/admin/categories/${id}/image`,
+        url: `/admin/categories/${encodeURIComponent(id)}/image`,
         method: "PATCH",
         body: {
-          // backend tarafındaki şema ile bire bir
           asset_id: asset_id ?? null,
           alt: alt ?? null,
         },
@@ -157,7 +168,6 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     }),
   }),
 
-  // başka yerde override etmiyorsan false kalsın
   overrideExisting: false,
 });
 
