@@ -46,13 +46,17 @@ export async function registerSubCategoriesAdmin(app: FastifyInstance) {
     adminListSubCategories,
   );
 
-  // READ
-  app.get<{ Params: { id: string } }>(
+  // READ (ID ile)
+  app.get<{
+    Params: { id: string };
+    Querystring: { locale?: string };
+  }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
     adminGetSubCategoryById,
   );
 
+  // READ (slug ile)
   app.get<{
     Params: { slug: string };
     Querystring: { category_id?: string; locale?: string };
@@ -62,32 +66,41 @@ export async function registerSubCategoriesAdmin(app: FastifyInstance) {
     adminGetSubCategoryBySlug,
   );
 
-  // CRUD
+  // CREATE
   app.post<{ Body: SubCategoryCreateInput }>(
     `${BASE}`,
     { preHandler: [requireAuth, requireAdmin] },
     adminCreateSubCategory,
   );
 
-  app.put<{ Params: { id: string }; Body: SubCategoryUpdateInput }>(
+  // PUT
+  app.put<{
+    Params: { id: string };
+    Body: SubCategoryUpdateInput;
+  }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
     adminPutSubCategory,
   );
 
-  app.patch<{ Params: { id: string }; Body: SubCategoryUpdateInput }>(
+  // PATCH
+  app.patch<{
+    Params: { id: string };
+    Body: SubCategoryUpdateInput;
+  }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
     adminPatchSubCategory,
   );
 
+  // DELETE
   app.delete<{ Params: { id: string } }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
     adminDeleteSubCategory,
   );
 
-  // Mutations
+  // REORDER
   app.post<{
     Body: { items: Array<{ id: string; display_order: number }> };
   }>(
@@ -96,13 +109,21 @@ export async function registerSubCategoriesAdmin(app: FastifyInstance) {
     adminReorderSubCategories,
   );
 
-  app.patch<{ Params: { id: string }; Body: { is_active: boolean } }>(
+  // TOGGLE ACTIVE
+  app.patch<{
+    Params: { id: string };
+    Body: { is_active: boolean };
+  }>(
     `${BASE}/:id/active`,
     { preHandler: [requireAuth, requireAdmin] },
     adminToggleSubActive,
   );
 
-  app.patch<{ Params: { id: string }; Body: { is_featured: boolean } }>(
+  // TOGGLE FEATURED
+  app.patch<{
+    Params: { id: string };
+    Body: { is_featured: boolean };
+  }>(
     `${BASE}/:id/featured`,
     { preHandler: [requireAuth, requireAdmin] },
     adminToggleSubFeatured,
