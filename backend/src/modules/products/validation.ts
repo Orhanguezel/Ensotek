@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/modules/products/validation.ts  (GÜNCELLEME - LOCALE DESTEKLİ)
+// FILE: src/modules/products/validation.ts  (LOCALE DESTEKLİ DTO)
 // =============================================================
 import { z } from "zod";
 
@@ -21,43 +21,47 @@ export const boolLike = z.union([
 const assetId = z.string().min(1).max(64);
 
 /* ----------------- PRODUCT ----------------- */
+/**
+ * NOT:
+ * - Base tablo: products
+ *   - category_id, sub_category_id, price, images, storage_asset_id, stock, vs.
+ * - I18N tablo: product_i18n
+ *   - locale, title, slug, description, alt, tags, specifications, meta_title, meta_description
+ *
+ * Admin create/update payload'ı ikisini birlikte taşımaya devam ediyor.
+ */
 export const productCreateSchema = z.object({
   id: z.string().uuid().optional(),
 
-  // 🌍 Çok dilli – ürün bazında locale
-  locale: z.string().min(2).max(8).optional(), // yoksa "tr" ile dolduracağız
+  // 🌍 Çok dilli – ürün bazında locale (product_i18n.locale)
+  locale: z.string().min(2).max(8).optional(), // yoksa backend "tr" ile dolduracak
 
+  // I18N alanlar
   title: z.string().min(1).max(255),
   slug: z.string().min(1).max(255),
-  price: z.coerce.number().nonnegative(),
   description: emptyToNull(z.string().optional().nullable()),
+  alt: emptyToNull(z.string().max(255).optional().nullable()),
+  tags: z.array(z.string()).optional().default([]),
+
+  // Teknik özellikler: serbest key/value (capacity, fanType, warranty, vs.)
+  specifications: z
+    .record(z.string(), z.string())
+    .optional(),
+
+  // Base alanlar
+  price: z.coerce.number().nonnegative(),
   category_id: z.string().uuid(),
   sub_category_id: emptyToNull(z.string().uuid().optional().nullable()),
 
   image_url: emptyToNull(z.string().url().optional().nullable()),
-  alt: emptyToNull(z.string().max(255).optional().nullable()),
   images: z.array(z.string().url()).optional().default([]),
 
-  // ❗ Artık uuid yerine assetId
+  // ❗ Artık uuid yerine assetId (ör. storage_assets.id gibi)
   storage_asset_id: emptyToNull(assetId.optional().nullable()),
   storage_image_ids: z.array(assetId).optional().default([]),
 
   is_active: boolLike.optional(),
   is_featured: boolLike.optional(),
-
-  tags: z.array(z.string()).optional().default([]),
-
-  specifications: z
-    .object({
-      dimensions: z.string().optional(),
-      weight: z.string().optional(),
-      thickness: z.string().optional(),
-      surfaceFinish: z.string().optional(),
-      warranty: z.string().optional(),
-      installationTime: z.string().optional(),
-    })
-    .partial()
-    .optional(),
 
   product_code: emptyToNull(z.string().max(64).optional().nullable()),
   stock_quantity: z.coerce.number().int().min(0).optional().default(0),

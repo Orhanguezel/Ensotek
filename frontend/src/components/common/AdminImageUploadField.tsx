@@ -35,6 +35,9 @@ export type AdminImageUploadFieldProps = {
   openLibraryHref?: string;
   /** Kütüphane butonuna özel onClick (href yerine) */
   onOpenLibraryClick?: () => void;
+
+  /** Bir seferde birden fazla dosya seçilebilsin mi? (örn. içerik görselleri) */
+  multiple?: boolean;
 };
 
 export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
@@ -48,6 +51,7 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   disabled,
   openLibraryHref,
   onOpenLibraryClick,
+  multiple = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [createAssetAdmin, { isLoading: isUploading }] =
@@ -61,41 +65,91 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   const handleFileChange = async (
     e: React.ChangeEvent<HTMLInputElement>,
   ) => {
-    const file = e.target.files?.[0];
+    const files = Array.from(e.target.files ?? []);
+    // input'u resetle (aynı dosyayı tekrar seçebilmek için)
     e.target.value = "";
-    if (!file) return;
+    if (!files.length) return;
 
-    try {
-      // Metadata değerlerini string'e çevir (backend tarafı için safe)
-      const meta: Record<string, string> | undefined = metadata
-        ? Object.fromEntries(
-            Object.entries(metadata).map(([k, v]) => [k, String(v)]),
-          )
-        : undefined;
+    // Metadata değerlerini string'e çevir (backend tarafı için safe)
+    const meta: Record<string, string> | undefined = metadata
+      ? Object.fromEntries(
+          Object.entries(metadata).map(([k, v]) => [k, String(v)]),
+        )
+      : undefined;
 
-      const res = await createAssetAdmin({
-        file,
-        bucket,
-        folder,
-        metadata: meta,
-      }).unwrap();
+    if (!multiple) {
+      // Tekli mod – önceki davranış
+      const file = files[0];
+      try {
+        const res = await createAssetAdmin({
+          file,
+          bucket,
+          folder,
+          metadata: meta,
+        }).unwrap();
 
-      const url = (res as any)?.url as string | undefined;
+        const url = (res as any)?.url as string | undefined;
 
-      if (url) {
-        onChange?.(url);
-        toast.success("Görsel yüklendi.");
-      } else {
-        toast.error("Görsel URL'i alınamadı.");
-        console.warn("AdminImageUploadField: storage cevabında url yok:", res);
+        if (url) {
+          onChange?.(url);
+          toast.success("Görsel yüklendi.");
+        } else {
+          toast.error("Görsel URL'i alınamadı.");
+          console.warn(
+            "AdminImageUploadField: storage cevabında url yok:",
+            res,
+          );
+        }
+      } catch (err: any) {
+        console.error("AdminImageUploadField upload error:", err);
+        const msg =
+          err?.data?.error?.message ||
+          err?.message ||
+          "Görsel yüklenirken bir hata oluştu.";
+        toast.error(msg);
       }
-    } catch (err: any) {
-      console.error("AdminImageUploadField upload error:", err);
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Görsel yüklenirken bir hata oluştu.";
-      toast.error(msg);
+      return;
+    }
+
+    // Çoklu mod – seçilen tüm dosyaları sırayla yükle
+    let successCount = 0;
+
+    for (const file of files) {
+      try {
+        const res = await createAssetAdmin({
+          file,
+          bucket,
+          folder,
+          metadata: meta,
+        }).unwrap();
+
+        const url = (res as any)?.url as string | undefined;
+
+        if (url) {
+          successCount += 1;
+          onChange?.(url); // üst component her görsel için ayrı tetiklenir
+        } else {
+          console.warn(
+            "AdminImageUploadField (multiple): storage cevabında url yok:",
+            res,
+          );
+        }
+      } catch (err: any) {
+        console.error("AdminImageUploadField upload error (multiple):", err);
+        const msg =
+          err?.data?.error?.message ||
+          err?.message ||
+          "Bazı görseller yüklenirken bir hata oluştu.";
+        toast.error(msg);
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(
+        successCount === 1
+          ? "Görsel yüklendi."
+          : `${successCount} görsel yüklendi ve eklendi.`,
+      );
     }
   };
 
@@ -128,6 +182,7 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
         ref={fileInputRef}
         type="file"
         accept="image/*"
+        multiple={multiple}
         className="d-none"
         onChange={handleFileChange}
       />
@@ -139,7 +194,7 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
           onClick={handlePickClick}
           disabled={disabled || isUploading}
         >
-          Görsel Yükle
+          {multiple ? "Görseller Yükle" : "Görsel Yükle"}
         </button>
 
         {openLibraryHref || onOpenLibraryClick ? (

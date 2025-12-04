@@ -12,7 +12,7 @@ import type {
   AdminProductCreatePayload,
   AdminProductUpdatePayload,
   AdminProductSetImagesPayload,
-} from "@/integrations/types/product_admin.types";
+} from "@/integrations/types/product_admin.types"; // path sende böyleyse dokunma
 import type { BoolLike } from "@/integrations/types/product.types";
 
 /* ---------- Kategori / Alt Kategori tipleri ---------- */
@@ -45,10 +45,21 @@ export type AdminProductSubCategoryListQueryParams = {
   is_active?: BoolLike;
 };
 
+/* ---------- Reorder payload tipleri ---------- */
+
+export type AdminProductsReorderItem = {
+  id: string;
+  order_num: number;
+};
+
+export type AdminProductsReorderPayload = {
+  items: AdminProductsReorderItem[];
+};
+
 export const productsAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // -------- LIST --------
-    listProductsAdmin: build.query<
+     listProductsAdmin: build.query<
       AdminProductListResponse,
       AdminProductListQueryParams | void
     >({
@@ -63,7 +74,6 @@ export const productsAdminApi = baseApi.injectEndpoints({
       ): AdminProductListResponse => {
         const items = response ?? [];
         const header =
-          // fetchBaseQuery meta
           (meta as any)?.response?.headers?.get?.("x-total-count") ??
           (meta as any)?.response?.headers?.get?.("X-Total-Count");
         const total = header ? Number(header) || items.length : items.length;
@@ -73,9 +83,11 @@ export const productsAdminApi = baseApi.injectEndpoints({
 
     // -------- DETAIL --------
     getProductAdmin: build.query<AdminProductDto, AdminGetProductParams>({
-      query: ({ id }) => ({
+      query: ({ id, locale }) => ({
         url: `/admin/products/${encodeURIComponent(id)}`,
         method: "GET",
+        // backend destekliyorsa ?locale=en
+        params: locale ? { locale } : undefined,
       }),
     }),
 
@@ -103,6 +115,7 @@ export const productsAdminApi = baseApi.injectEndpoints({
       }),
     }),
 
+    
     // -------- DELETE --------
     deleteProductAdmin: build.mutation<{ ok?: boolean }, { id: string }>({
       query: ({ id }) => ({
@@ -120,6 +133,18 @@ export const productsAdminApi = baseApi.injectEndpoints({
         url: `/admin/products/${encodeURIComponent(id)}/images`,
         method: "PUT",
         body: payload,
+      }),
+    }),
+
+    // -------- REORDER (drag & drop sıralama) --------
+    reorderProductsAdmin: build.mutation<
+      { ok: boolean },
+      AdminProductsReorderPayload
+    >({
+      query: (body) => ({
+        url: "/admin/products/reorder",
+        method: "POST",
+        body,
       }),
     }),
 
@@ -158,4 +183,6 @@ export const {
   useSetProductImagesAdminMutation,
   useListProductCategoriesAdminQuery,
   useListProductSubcategoriesAdminQuery,
+  // ⬇ drag & drop sıralama kaydetmek için
+  useReorderProductsAdminMutation,
 } = productsAdminApi;

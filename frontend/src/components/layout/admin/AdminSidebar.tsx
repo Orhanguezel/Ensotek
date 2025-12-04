@@ -18,6 +18,7 @@ import {
   Mail,
   ImageIcon,
   BookOpen,
+  Wrench,
 } from "lucide-react";
 import type { ActiveTab } from "./AdminLayout";
 import { useLogoutMutation } from "@/integrations/rtk/endpoints/auth.endpoints";
@@ -58,7 +59,11 @@ const menuGroups: MenuGroup[] = [
   {
     label: "İçerik Yönetimi",
     items: [
-      { title: "Ürünler", value: "products", icon: Package },
+      // 🔹 Kule ürünleri
+      { title: "Kuleler", value: "products", icon: Package },
+      // 🔹 Yedek parça ürünleri
+      { title: "Yedek Parçalar", value: "sparepart", icon: Wrench },
+
       { title: "Kategoriler", value: "categories", icon: FolderTree },
       { title: "Alt Kategoriler", value: "subcategories", icon: FolderTree },
       { title: "Slider", value: "slider", icon: ImageIcon },
@@ -146,7 +151,10 @@ export default function AdminSidebar({
     >
       {/* Logo / brand */}
       <div className="border-bottom border-secondary px-3 py-3 d-flex align-items-center gap-2">
-        <div className="bg-primary text-white rounded-2 d-flex align-items-center justify-content-center" style={{ width: 32, height: 32 }}>
+        <div
+          className="bg-primary text-white rounded-2 d-flex align-items-center justify-content-center"
+          style={{ width: 32, height: 32 }}
+        >
           <span className="fw-bold small">EN</span>
         </div>
         <div className="flex-grow-1">

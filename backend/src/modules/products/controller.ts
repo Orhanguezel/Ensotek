@@ -10,9 +10,16 @@ import {
   productFaqs,
   productSpecs,
   product_reviews,
+  productI18n,
 } from "./schema";
-import { categories } from "@/modules/categories/schema";
-import { subCategories } from "@/modules/subcategories/schema";
+import {
+  categories,
+  categoryI18n,
+} from "@/modules/categories/schema";
+import {
+  subCategories,
+  subCategoryI18n,
+} from "@/modules/subcategories/schema";
 
 /* ----------------- helpers ----------------- */
 const toNum = (x: any) =>
@@ -25,6 +32,7 @@ const toNum = (x: any) =>
 const normalizeProduct = (row: any) => {
   if (!row) return row;
   const p = { ...row };
+
   p.price = toNum(p.price);
   p.rating = toNum(p.rating);
   p.review_count = toNum(p.review_count) ?? 0;
@@ -109,46 +117,81 @@ export const listProducts: RouteHandler = async (req, reply) => {
     locale?: string;
   };
 
-  // shortcut: by slug (+ optional locale)
+  const locale = (q.locale && q.locale.trim()) || "tr";
+
+  // shortcut: by slug (+ locale)
   if (q.slug) {
     const conds: any[] = [
-      eq(products.slug, q.slug),
+      eq(productI18n.slug, q.slug),
+      eq(productI18n.locale, locale),
       eq(products.is_active, 1 as any),
     ];
-    if (q.locale) conds.push(eq(products.locale, q.locale));
 
     const rows = await db
       .select({
         p: products,
+        i: productI18n,
         c: {
           id: categories.id,
-          name: categories.name,
-          slug: categories.slug,
+          module_key: categories.module_key,
+          image_url: categories.image_url,
+          storage_asset_id: categories.storage_asset_id,
+          alt: categories.alt,
+          icon: categories.icon,
+          is_active: categories.is_active,
+          is_featured: categories.is_featured,
+          display_order: categories.display_order,
+          name: categoryI18n.name,
+          slug: categoryI18n.slug,
         },
         s: {
           id: subCategories.id,
-          name: subCategories.name,
-          slug: subCategories.slug,
           category_id: subCategories.category_id,
+          image_url: subCategories.image_url,
+          storage_asset_id: subCategories.storage_asset_id,
+          alt: subCategories.alt,
+          icon: subCategories.icon,
+          is_active: subCategories.is_active,
+          is_featured: subCategories.is_featured,
+          display_order: subCategories.display_order,
+          name: subCategoryI18n.name,
+          slug: subCategoryI18n.slug,
         },
       })
       .from(products)
+      .innerJoin(productI18n, eq(productI18n.product_id, products.id))
       .leftJoin(categories, eq(products.category_id, categories.id))
+      .leftJoin(
+        categoryI18n,
+        and(
+          eq(categoryI18n.category_id, categories.id),
+          eq(categoryI18n.locale, locale),
+        ),
+      )
       .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id))
+      .leftJoin(
+        subCategoryI18n,
+        and(
+          eq(subCategoryI18n.sub_category_id, subCategories.id),
+          eq(subCategoryI18n.locale, locale),
+        ),
+      )
       .where(and(...conds))
       .limit(1);
 
     if (!rows.length)
       return reply.code(404).send({ error: { message: "not_found" } });
+
     const r = rows[0];
+    const merged = { ...r.i, ...r.p }; // i18n alanları + base
     return reply.send({
-      ...normalizeProduct(r.p),
+      ...normalizeProduct(merged),
       category: r.c,
       sub_category: r.s,
     });
   }
 
-  const conds: any[] = [];
+  const conds: any[] = [eq(productI18n.locale, locale)];
   if (q.category_id) conds.push(eq(products.category_id, q.category_id));
   if (q.sub_category_id)
     conds.push(eq(products.sub_category_id, q.sub_category_id));
@@ -156,10 +199,9 @@ export const listProducts: RouteHandler = async (req, reply) => {
     const v = q.is_active === "1" || q.is_active === "true" ? 1 : 0;
     conds.push(eq(products.is_active, v as any));
   }
-  if (q.q) conds.push(like(products.title, `%${q.q}%`));
+  if (q.q) conds.push(like(productI18n.title, `%${q.q}%`));
   if (q.min_price) conds.push(sql`${products.price} >= ${q.min_price}`);
   if (q.max_price) conds.push(sql`${products.price} <= ${q.max_price}`);
-  if (q.locale) conds.push(eq(products.locale, q.locale));
 
   const whereExpr = conds.length ? and(...conds) : undefined;
 
@@ -196,42 +238,78 @@ export const listProducts: RouteHandler = async (req, reply) => {
 
   const countBase = db
     .select({ total: sql<number>`COUNT(*)` })
-    .from(products);
+    .from(products)
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id));
+
   const [{ total }] = await (whereExpr
-    ? countBase.where(whereExpr)
+    ? countBase.where(whereExpr as any)
     : countBase);
 
   const dataBase = db
     .select({
       p: products,
+      i: productI18n,
       c: {
         id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
+        module_key: categories.module_key,
+        image_url: categories.image_url,
+        storage_asset_id: categories.storage_asset_id,
+        alt: categories.alt,
+        icon: categories.icon,
+        is_active: categories.is_active,
+        is_featured: categories.is_featured,
+        display_order: categories.display_order,
+        name: categoryI18n.name,
+        slug: categoryI18n.slug,
       },
       s: {
         id: subCategories.id,
-        name: subCategories.name,
-        slug: subCategories.slug,
         category_id: subCategories.category_id,
+        image_url: subCategories.image_url,
+        storage_asset_id: subCategories.storage_asset_id,
+        alt: subCategories.alt,
+        icon: subCategories.icon,
+        is_active: subCategories.is_active,
+        is_featured: subCategories.is_featured,
+        display_order: subCategories.display_order,
+        name: subCategoryI18n.name,
+        slug: subCategoryI18n.slug,
       },
     })
     .from(products)
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id))
     .leftJoin(categories, eq(products.category_id, categories.id))
-    .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id));
+    .leftJoin(
+      categoryI18n,
+      and(
+        eq(categoryI18n.category_id, categories.id),
+        eq(categoryI18n.locale, locale),
+      ),
+    )
+    .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id))
+    .leftJoin(
+      subCategoryI18n,
+      and(
+        eq(subCategoryI18n.sub_category_id, subCategories.id),
+        eq(subCategoryI18n.locale, locale),
+      ),
+    );
 
   const rows = await (whereExpr
-    ? dataBase.where(whereExpr)
+    ? dataBase.where(whereExpr as any)
     : dataBase)
     .orderBy(orderExpr)
     .limit(limit)
     .offset(offset);
 
-  const out = rows.map((r) => ({
-    ...normalizeProduct(r.p),
-    category: r.c,
-    sub_category: r.s,
-  }));
+  const out = rows.map((r) => {
+    const merged = { ...r.i, ...r.p };
+    return {
+      ...normalizeProduct(merged),
+      category: r.c,
+      sub_category: r.s,
+    };
+  });
 
   reply.header("x-total-count", String(Number(total || 0)));
   reply.header("content-range", `*/${Number(total || 0)}`);
@@ -246,81 +324,150 @@ export const listProducts: RouteHandler = async (req, reply) => {
 /** GET /products/:idOrSlug?locale= */
 export const getProductByIdOrSlug: RouteHandler = async (req, reply) => {
   const { idOrSlug } = req.params as { idOrSlug: string };
-  const { locale } = (req.query || {}) as { locale?: string };
+  const { locale: localeParam } = (req.query || {}) as { locale?: string };
+  const locale = (localeParam && localeParam.trim()) || "tr";
   const isUuid = UUID_RE.test(idOrSlug);
 
-  let whereExpr: any;
+  const conds: any[] = [eq(productI18n.locale, locale)];
   if (isUuid) {
-    whereExpr = eq(products.id, idOrSlug);
+    conds.push(eq(products.id, idOrSlug));
   } else {
-    const conds: any[] = [
-      eq(products.slug, idOrSlug),
-      eq(products.is_active, 1 as any),
-    ];
-    if (locale) conds.push(eq(products.locale, locale));
-    whereExpr = and(...conds);
+    conds.push(eq(productI18n.slug, idOrSlug));
+    conds.push(eq(products.is_active, 1 as any));
   }
 
   const rows = await db
     .select({
       p: products,
+      i: productI18n,
       c: {
         id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
+        module_key: categories.module_key,
+        image_url: categories.image_url,
+        storage_asset_id: categories.storage_asset_id,
+        alt: categories.alt,
+        icon: categories.icon,
+        is_active: categories.is_active,
+        is_featured: categories.is_featured,
+        display_order: categories.display_order,
+        name: categoryI18n.name,
+        slug: categoryI18n.slug,
       },
       s: {
         id: subCategories.id,
-        name: subCategories.name,
-        slug: subCategories.slug,
         category_id: subCategories.category_id,
+        image_url: subCategories.image_url,
+        storage_asset_id: subCategories.storage_asset_id,
+        alt: subCategories.alt,
+        icon: subCategories.icon,
+        is_active: subCategories.is_active,
+        is_featured: subCategories.is_featured,
+        display_order: subCategories.display_order,
+        name: subCategoryI18n.name,
+        slug: subCategoryI18n.slug,
       },
     })
     .from(products)
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id))
     .leftJoin(categories, eq(products.category_id, categories.id))
+    .leftJoin(
+      categoryI18n,
+      and(
+        eq(categoryI18n.category_id, categories.id),
+        eq(categoryI18n.locale, locale),
+      ),
+    )
     .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id))
-    .where(whereExpr)
+    .leftJoin(
+      subCategoryI18n,
+      and(
+        eq(subCategoryI18n.sub_category_id, subCategories.id),
+        eq(subCategoryI18n.locale, locale),
+      ),
+    )
+    .where(and(...conds))
     .limit(1);
 
   if (!rows.length)
     return reply.code(404).send({ error: { message: "not_found" } });
   const r = rows[0];
+  const merged = { ...r.i, ...r.p };
   return reply.send({
-    ...normalizeProduct(r.p),
+    ...normalizeProduct(merged),
     category: r.c,
     sub_category: r.s,
   });
 };
 
-/** GET /products/id/:id */
+/** GET /products/id/:id?locale= */
 export const getProductById: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
+  const { locale: localeParam } = (req.query || {}) as { locale?: string };
+  const locale = (localeParam && localeParam.trim()) || "tr";
+
   const rows = await db
     .select({
       p: products,
+      i: productI18n,
       c: {
         id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
+        module_key: categories.module_key,
+        image_url: categories.image_url,
+        storage_asset_id: categories.storage_asset_id,
+        alt: categories.alt,
+        icon: categories.icon,
+        is_active: categories.is_active,
+        is_featured: categories.is_featured,
+        display_order: categories.display_order,
+        name: categoryI18n.name,
+        slug: categoryI18n.slug,
       },
       s: {
         id: subCategories.id,
-        name: subCategories.name,
-        slug: subCategories.slug,
         category_id: subCategories.category_id,
+        image_url: subCategories.image_url,
+        storage_asset_id: subCategories.storage_asset_id,
+        alt: subCategories.alt,
+        icon: subCategories.icon,
+        is_active: subCategories.is_active,
+        is_featured: subCategories.is_featured,
+        display_order: subCategories.display_order,
+        name: subCategoryI18n.name,
+        slug: subCategoryI18n.slug,
       },
     })
     .from(products)
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id))
     .leftJoin(categories, eq(products.category_id, categories.id))
+    .leftJoin(
+      categoryI18n,
+      and(
+        eq(categoryI18n.category_id, categories.id),
+        eq(categoryI18n.locale, locale),
+      ),
+    )
     .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id))
-    .where(eq(products.id, id))
+    .leftJoin(
+      subCategoryI18n,
+      and(
+        eq(subCategoryI18n.sub_category_id, subCategories.id),
+        eq(subCategoryI18n.locale, locale),
+      ),
+    )
+    .where(
+      and(
+        eq(products.id, id),
+        eq(productI18n.locale, locale),
+      ),
+    )
     .limit(1);
 
   if (!rows.length)
     return reply.code(404).send({ error: { message: "not_found" } });
   const r = rows[0];
+  const merged = { ...r.i, ...r.p };
   return reply.send({
-    ...normalizeProduct(r.p),
+    ...normalizeProduct(merged),
     category: r.c,
     sub_category: r.s,
   });
@@ -332,40 +479,72 @@ export const getProductBySlug: RouteHandler<{
   Querystring: { locale?: string };
 }> = async (req, reply) => {
   const { slug } = req.params;
-  const { locale } = req.query ?? {};
+  const locale = (req.query?.locale && req.query.locale.trim()) || "tr";
 
   const conds: any[] = [
-    eq(products.slug, slug),
+    eq(productI18n.slug, slug),
+    eq(productI18n.locale, locale),
     eq(products.is_active, 1 as any),
   ];
-  if (locale) conds.push(eq(products.locale, locale));
 
   const rows = await db
     .select({
       p: products,
+      i: productI18n,
       c: {
         id: categories.id,
-        name: categories.name,
-        slug: categories.slug,
+        module_key: categories.module_key,
+        image_url: categories.image_url,
+        storage_asset_id: categories.storage_asset_id,
+        alt: categories.alt,
+        icon: categories.icon,
+        is_active: categories.is_active,
+        is_featured: categories.is_featured,
+        display_order: categories.display_order,
+        name: categoryI18n.name,
+        slug: categoryI18n.slug,
       },
       s: {
         id: subCategories.id,
-        name: subCategories.name,
-        slug: subCategories.slug,
         category_id: subCategories.category_id,
+        image_url: subCategories.image_url,
+        storage_asset_id: subCategories.storage_asset_id,
+        alt: subCategories.alt,
+        icon: subCategories.icon,
+        is_active: subCategories.is_active,
+        is_featured: subCategories.is_featured,
+        display_order: subCategories.display_order,
+        name: subCategoryI18n.name,
+        slug: subCategoryI18n.slug,
       },
     })
     .from(products)
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id))
     .leftJoin(categories, eq(products.category_id, categories.id))
+    .leftJoin(
+      categoryI18n,
+      and(
+        eq(categoryI18n.category_id, categories.id),
+        eq(categoryI18n.locale, locale),
+      ),
+    )
     .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id))
+    .leftJoin(
+      subCategoryI18n,
+      and(
+        eq(subCategoryI18n.sub_category_id, subCategories.id),
+        eq(subCategoryI18n.locale, locale),
+      ),
+    )
     .where(and(...conds))
     .limit(1);
 
   if (!rows.length)
     return reply.code(404).send({ error: { message: "not_found" } });
   const r = rows[0];
+  const merged = { ...r.i, ...r.p };
   return reply.send({
-    ...normalizeProduct(r.p),
+    ...normalizeProduct(merged),
     category: r.c,
     sub_category: r.s,
   });

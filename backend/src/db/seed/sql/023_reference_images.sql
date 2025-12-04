@@ -1,9 +1,8 @@
 -- =============================================================
--- 032_reference_images.sql (gallery: reference_images)
+-- 023_reference_images.sql (gallery: reference_images)
 -- =============================================================
 
 /* ================= CLEANUP ================= */
--- Çocuk tabloyu önce düşür (FK yüzünden)
 DROP TABLE IF EXISTS `reference_images_i18n`;
 DROP TABLE IF EXISTS `reference_images`;
 
@@ -29,15 +28,13 @@ CREATE TABLE `reference_images` (
   CONSTRAINT fk_reference_images_parent
     FOREIGN KEY (reference_id) REFERENCES `references`(id)
     ON DELETE CASCADE ON UPDATE CASCADE
-  -- asset_id için Drizzle şemada FK yok; burada da tanımlamıyoruz
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 /* ================= SEED: GALLERY ================= */
 -- NOT:
 --   @REF_TORONTO_ID, @REF_ECOM_ID,
 --   @ASSET_G1A_ID, @ASSET_G1B_ID, @ASSET_G2A_ID
--- değişkenleri 020_assets.sql / 030_references.sql içinde tanımlı olmalı.
--- Eğer bu değişkenler NULL ise, aşağıdaki INSERT'ler satır eklemez (hata da vermez).
+-- bu değişkenler asset ve reference seedlerinde tanımlı olmalı.
 
 -- ----------------- Toronto: image A -----------------
 SET @REFIMG_TORONTO_A_ID := (

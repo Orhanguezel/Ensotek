@@ -21,16 +21,22 @@ const normalizeService = (
   type: row.type,
   category_id: row.category_id,
   sub_category_id: row.sub_category_id,
+
   featured: row.featured === 1,
   is_active: row.is_active === 1,
   display_order: row.display_order,
+
   featured_image: row.featured_image,
   image_url: row.image_url,
   image_asset_id: row.image_asset_id,
+
+  // Public endpoint'lerde featured_image_url var
   featured_image_url:
     typeof row.featured_image_url !== "undefined"
       ? row.featured_image_url
       : undefined,
+
+  // tip spesifik non-i18n alanlar
   area: row.area,
   duration: row.duration,
   maintenance: row.maintenance,
@@ -38,8 +44,10 @@ const normalizeService = (
   soil_type: row.soil_type,
   thickness: row.thickness,
   equipment: row.equipment,
+
   created_at: row.created_at,
   updated_at: row.updated_at,
+
   slug: row.slug,
   name: row.name,
   description: row.description,
@@ -48,6 +56,12 @@ const normalizeService = (
   includes: row.includes,
   warranty: row.warranty,
   image_alt: row.image_alt,
+
+  tags: row.tags,
+  meta_title: row.meta_title,
+  meta_description: row.meta_description,
+  meta_keywords: row.meta_keywords,
+
   locale_resolved: row.locale_resolved,
 });
 
@@ -79,7 +93,6 @@ export const servicesPublicApi = baseApi.injectEndpoints({
       query: (params?: ServiceListPublicQueryParams) => ({
         url: "/services",
         method: "GET",
-        // 🔑 locale / default_locale dahil tüm paramlar
         params: params ?? {},
       }),
       transformResponse: (response: ApiServicePublic[], meta) => {
@@ -131,7 +144,7 @@ export const servicesPublicApi = baseApi.injectEndpoints({
 
     /* ---------------------------------------------------------
      * GET /services/:id/images
-     * Public – sadece aktif görseller (onlyActive: true backend)
+     * Public – sadece aktif görseller
      * --------------------------------------------------------- */
     listServiceImagesPublic: build.query<
       ServiceImageDto[],

@@ -1,9 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/categories/CategoryFormPage.tsx
 // Ensotek – Kategori Form Sayfası (Create/Edit + Görsel Upload)
-//  - Çoklu dil desteği (locale değişince ilgili satırı çek)
-//  - İsimden otomatik slug üret (ama manuel override edilebilir)
-//  - Alternatif JSON editörü (aynı payload ile create/update)
 // =============================================================
 
 "use client";
@@ -26,27 +23,23 @@ import type {
 import {
   useCreateCategoryAdminMutation,
   useUpdateCategoryAdminMutation,
-  useLazyListCategoriesAdminQuery,
+  useLazyGetCategoryAdminQuery,
 } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
 import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
-import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
-import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
+
+import { CategoryFormHeader } from "./CategoryFormHeader";
+import {
+  CategoryFormFields,
+  type CategoryFormStateLike,
+} from "./CategoryFormFields";
+import { CategoryFormJsonSection } from "./CategoryFormJsonSection";
+import { CategoryFormImageColumn } from "./CategoryFormImageColumn";
+import { CategoryFormFooter } from "./CategoryFormFooter";
 
 /* ------------------------------------------------------------- */
-/*  Form state tipi                                               */
-/* ------------------------------------------------------------- */
 
-type CategoryFormState = {
-  id?: string;
-  locale: string;
-  module_key: string;
-  name: string;
-  slug: string;
-  description: string;
-  icon: string; // Şimdilik hem icon class hem de image URL için kullanıyoruz
-  is_active: boolean;
-  is_featured: boolean;
-  display_order: number;
+type CategoryFormState = CategoryFormStateLike & {
+  id?: string; // base kategori id (tüm dillerde aynı)
 };
 
 type CategoryFormMode = "create" | "edit";
@@ -55,12 +48,10 @@ type EditMode = "form" | "json";
 type CategoryFormPageProps = {
   mode: CategoryFormMode;
   initialData?: CategoryDto | null;
-  loading?: boolean; // Edit sayfasında data fetch loading
-  onDone?: () => void; // Kaydedince / iptal edince geri dönmek için
+  loading?: boolean;
+  onDone?: () => void;
 };
 
-/* ------------------------------------------------------------- */
-/*  Yardımcılar                                                  */
 /* ------------------------------------------------------------- */
 
 const STATIC_MODULE_OPTIONS: ModuleOption[] = [
@@ -86,18 +77,11 @@ const mapDtoToFormState = (item: CategoryDto): CategoryFormState => ({
   display_order: item.display_order ?? 0,
 });
 
-/**
- * Locale-aware slugify:
- *  - TR, DE karakterlerini normalize et
- *  - küçük harfe çevir
- *  - harf/rakam ve tire dışında her şeyi temizle
- */
 const slugify = (value: string): string => {
   if (!value) return "";
 
   let s = value.trim();
 
-  // TR özel harfleri
   const trMap: Record<string, string> = {
     ç: "c",
     Ç: "c",
@@ -118,20 +102,18 @@ const slugify = (value: string): string => {
     .map((ch) => trMap[ch] ?? ch)
     .join("");
 
-  // DE: ß -> ss
   s = s.replace(/ß/g, "ss").replace(/ẞ/g, "ss");
 
   return s
     .toLowerCase()
     .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "") // aksanları at
-    .replace(/[^a-z0-9\s-]/g, "") // geçersiz karakterleri at
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-");
 };
 
-// Form state → JSON modeli (backend'e giden payload ile uyumlu)
 const buildJsonModelFromForm = (state: CategoryFormState) => ({
   locale: state.locale,
   module_key: state.module_key,
@@ -145,8 +127,6 @@ const buildJsonModelFromForm = (state: CategoryFormState) => ({
 });
 
 /* ------------------------------------------------------------- */
-/*  Component                                                     */
-/* ------------------------------------------------------------- */
 
 const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   mode,
@@ -155,9 +135,12 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   onDone,
 }) => {
   const router = useRouter();
+  const currentLocaleFromRouter = (
+    router.locale as string | undefined
+  )?.toLowerCase();
 
   const [formState, setFormState] = useState<CategoryFormState | null>(null);
-  const [slugTouched, setSlugTouched] = useState(false); // slug manuel mi değiştirildi?
+  const [slugTouched, setSlugTouched] = useState(false);
   const [editMode, setEditMode] = useState<EditMode>("form");
   const [jsonError, setJsonError] = useState<string | null>(null);
 
@@ -166,8 +149,8 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   const [updateCategory, { isLoading: isUpdating }] =
     useUpdateCategoryAdminMutation();
 
-  const [triggerListCategories, { isLoading: isLocaleLoading }] =
-    useLazyListCategoriesAdminQuery();
+  const [triggerGetCategory, { isLoading: isLocaleLoading }] =
+    useLazyGetCategoryAdminQuery();
 
   const {
     data: appLocaleRows,
@@ -233,7 +216,6 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   /* -------------------- Form state init -------------------- */
 
   useEffect(() => {
-    // Edit modunda: initialData geldiyse doldur
     if (mode === "edit") {
       if (initialData && !formState) {
         setFormState(mapDtoToFormState(initialData));
@@ -242,9 +224,9 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       return;
     }
 
-    // Create modunda: localeOptions hazırsa default state kur
     if (mode === "create" && !formState && localeOptions.length > 0) {
-      const defaultLocale = localeOptions[0]?.value ?? "tr";
+      const defaultLocale =
+        currentLocaleFromRouter || localeOptions[0]?.value || "tr";
       const defaultModule = moduleOptions[0]?.value ?? "about";
 
       setFormState({
@@ -261,9 +243,16 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       });
       setSlugTouched(false);
     }
-  }, [mode, initialData, formState, localeOptions, moduleOptions]);
+  }, [
+    mode,
+    initialData,
+    formState,
+    localeOptions,
+    moduleOptions,
+    currentLocaleFromRouter,
+  ]);
 
-  /* -------------------- Görsel metadata (storage için) -------------------- */
+  /* -------------------- Görsel metadata -------------------- */
 
   const imageMetadata = useMemo(() => {
     if (!formState) return undefined;
@@ -274,7 +263,7 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
     };
   }, [formState]);
 
-  /* -------------------- JSON → Form normalize edici -------------------- */
+  /* -------------------- JSON → Form -------------------- */
 
   const applyJsonToForm = (json: any) => {
     if (!formState) return;
@@ -284,10 +273,9 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       const next: CategoryFormState = { ...prev };
 
       if (typeof json.locale === "string") next.locale = json.locale;
-      if (typeof json.module_key === "string")
-        next.module_key = json.module_key;
-
+      if (typeof json.module_key === "string") next.module_key = json.module_key;
       if (typeof json.name === "string") next.name = json.name;
+
       if (typeof json.slug === "string") {
         next.slug = json.slug;
         setSlugTouched(true);
@@ -316,17 +304,43 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
 
   /* -------------------- Handlers -------------------- */
 
-  const handleChange = (
-    field: keyof CategoryFormState,
+  const handleFieldChange = (
+    field: keyof CategoryFormStateLike,
     value: string | boolean | number,
   ) => {
     setFormState((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
+  const handleNameChange = (nameValue: string) => {
+    setFormState((prev) => {
+      if (!prev) return prev;
+      const next: CategoryFormState = {
+        ...prev,
+        name: nameValue,
+      };
+      if (!slugTouched) {
+        next.slug = slugify(nameValue);
+      }
+      return next;
+    });
+  };
+
+  const handleSlugChange = (slugValue: string) => {
+    setSlugTouched(true);
+    setFormState((prev) =>
+      prev ? { ...prev, slug: slugValue } : prev,
+    );
+  };
+
+  /**
+   * Locale değiştir:
+   *  - Create modunda sadece formState.locale güncellenir.
+   *  - Edit modunda aynı kategori id'si için backend'den id+locale ile çekilir.
+   *  - 404 gelirse: aynı id korunarak, yeni dil için çeviri moduna geçilir.
+   */
   const handleLocaleChange = async (nextLocale: string) => {
     if (!formState) return;
 
-    // Create modunda sadece locale'i değiştir, diğer alanları elle doldurursun
     if (mode === "create") {
       setFormState((prev) =>
         prev ? { ...prev, locale: nextLocale } : prev,
@@ -334,40 +348,45 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       return;
     }
 
-    // Edit modunda: aynı "logik kategori" için selected locale satırını çek
-    const baseSlug = initialData?.slug || formState.slug;
-    const baseModule = initialData?.module_key || formState.module_key;
+    const baseId = (initialData?.id ?? formState.id) as string | undefined;
+    if (!baseId) {
+      setFormState((prev) =>
+        prev ? { ...prev, locale: nextLocale } : prev,
+      );
+      return;
+    }
 
     try {
-      const rows = await triggerListCategories({
-        module_key: baseModule,
+      const row = await triggerGetCategory({
+        id: baseId,
         locale: nextLocale,
-        q: baseSlug, // slug üzerinden arama
-        limit: 20,
       }).unwrap();
 
-      const match = (rows || []).find(
-        (item) =>
-          item.slug === baseSlug &&
-          item.module_key === baseModule &&
-          item.locale === nextLocale,
-      );
-
-      if (match) {
-        setFormState(mapDtoToFormState(match));
+      setFormState(mapDtoToFormState(row));
+      setSlugTouched(false);
+    } catch (err: any) {
+      const status = err?.status ?? err?.originalStatus;
+      if (status === 404) {
+        setFormState((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            locale: nextLocale,
+          };
+        });
         setSlugTouched(false);
+        toast.info(
+          "Seçilen dil için kategori kaydı bulunamadı. Kaydettiğinde bu dil için yeni bir çeviri oluşturulacak (aynı kategori id ile).",
+        );
       } else {
-        // İlgili dilde satır bulunamadıysa en azından locale'i değiştir
+        console.error("Locale change error (category):", err);
+        toast.error(
+          "Seçilen dil için kategori yüklenirken bir hata oluştu.",
+        );
         setFormState((prev) =>
           prev ? { ...prev, locale: nextLocale } : prev,
         );
-        toast.info(
-          "Seçilen dil için kayıt bulunamadı, mevcut içerik üzerinden düzenleyebilirsin.",
-        );
       }
-    } catch (err) {
-      console.error("Locale change error", err);
-      toast.error("Seçilen dil için kategori yüklenirken hata oluştu.");
     }
   };
 
@@ -375,7 +394,6 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
     e.preventDefault();
     if (!formState) return;
 
-    // JSON modunda parse hatası varsa kayda izin vermeyelim
     if (editMode === "json" && jsonError) {
       toast.error("JSON geçerli değil. Lütfen JSON hatasını düzeltin.");
       return;
@@ -387,7 +405,7 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       name: formState.name.trim(),
       slug: formState.slug.trim(),
       description: formState.description.trim() || undefined,
-      icon: formState.icon.trim() || undefined, // image URL veya icon class
+      icon: formState.icon.trim() || undefined,
       is_active: formState.is_active,
       is_featured: formState.is_featured,
       display_order: formState.display_order ?? 0,
@@ -408,6 +426,9 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
           patch: payloadBase as any,
         }).unwrap();
         toast.success("Kategori güncellendi.");
+      } else {
+        await createCategory(payloadBase as any).unwrap();
+        toast.success("Kategori oluşturuldu.");
       }
 
       if (onDone) onDone();
@@ -470,7 +491,7 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
 
   const jsonModel = buildJsonModelFromForm(formState);
 
-  /* -------------------- Render form -------------------- */
+  /* -------------------- Render -------------------- */
 
   return (
     <div className="container-fluid py-4">
@@ -485,308 +506,65 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       </div>
 
       <div className="card">
-        <div className="card-header py-2 d-flex justify-content-between align-items-center">
-          <div>
-            <h1 className="h5 mb-0">
-              {mode === "create" ? "Yeni Kategori" : "Kategori Düzenle"}
-            </h1>
-            <div className="small text-muted">
-              {formState.module_key} · {formState.locale.toUpperCase()}
-            </div>
-          </div>
-
-          <div className="d-flex align-items-center gap-2">
-            <div className="btn-group btn-group-sm" role="group">
-              <button
-                type="button"
-                className={`btn btn-outline-secondary ${
-                  editMode === "form" ? "active" : ""
-                }`}
-                onClick={() => setEditMode("form")}
-                disabled={saving}
-              >
-                Form
-              </button>
-              <button
-                type="button"
-                className={`btn btn-outline-secondary ${
-                  editMode === "json" ? "active" : ""
-                }`}
-                onClick={() => setEditMode("json")}
-                disabled={saving}
-              >
-                JSON
-              </button>
-            </div>
-
-            {(saving || isLocaleLoading) && (
-              <span className="badge bg-secondary small">
-                {isLocaleLoading ? "Dil değiştiriliyor..." : "Kaydediliyor..."}
-              </span>
-            )}
-          </div>
-        </div>
+        <CategoryFormHeader
+          mode={mode}
+          moduleKey={formState.module_key}
+          locale={formState.locale}
+          editMode={editMode}
+          onChangeEditMode={setEditMode}
+          saving={saving}
+          isLocaleLoading={isLocaleLoading}
+        />
 
         <form onSubmit={handleSubmit}>
           <div className="card-body">
             <div className="row g-3">
-              {/* Sol kolon: Form veya JSON mode */}
               <div className="col-md-7">
                 {editMode === "form" ? (
-                  <div className="row g-2">
-                    <div className="col-md-4">
-                      <label className="form-label small">Dil</label>
-                      <select
-                        className="form-select form-select-sm"
-                        value={formState.locale}
-                        onChange={(e) =>
-                          handleLocaleChange(e.target.value)
-                        }
-                        disabled={saving || loading || isLocaleLoading}
-                      >
-                        {localeOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="col-md-4">
-                      <label className="form-label small">Modül</label>
-                      <select
-                        className="form-select form-select-sm"
-                        value={formState.module_key}
-                        onChange={(e) =>
-                          handleChange("module_key", e.target.value)
-                        }
-                        disabled={saving}
-                      >
-                        {moduleOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="col-md-4">
-                      <label className="form-label small">
-                        Sıralama (display_order)
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        value={formState.display_order}
-                        onChange={(e) =>
-                          handleChange(
-                            "display_order",
-                            Number(e.target.value) || 0,
-                          )
-                        }
-                        disabled={saving}
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">Ad</label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.name}
-                        onChange={(e) => {
-                          const nameValue = e.target.value;
-                          setFormState((prev) => {
-                            if (!prev) return prev;
-                            const next: CategoryFormState = {
-                              ...prev,
-                              name: nameValue,
-                            };
-                            // slug henüz manuel dokunulmadıysa otomatik doldur
-                            if (!slugTouched) {
-                              next.slug = slugify(nameValue);
-                            }
-                            return next;
-                          });
-                        }}
-                        disabled={saving}
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">Slug</label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.slug}
-                        onFocus={() => setSlugTouched(true)}
-                        onChange={(e) => {
-                          setSlugTouched(true);
-                          handleChange("slug", e.target.value);
-                        }}
-                        disabled={saving}
-                      />
-                      <div className="form-text small">
-                        İsim alanını doldururken otomatik oluşur, istersen
-                        slug&apos;ı manuel değiştirebilirsin.
-                      </div>
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">
-                        Icon / Görsel URL
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.icon}
-                        onChange={(e) =>
-                          handleChange("icon", e.target.value)
-                        }
-                        disabled={saving}
-                        placeholder="Örn: https://... veya /images/cat.jpg"
-                      />
-                      <div className="form-text small">
-                        Şimdilik bu alan hem ikon metni hem de görsel URL için
-                        kullanılıyor. Storage üzerinden yüklediğinde otomatik
-                        doldurulur.
-                      </div>
-                    </div>
-
-                    <div className="col-md-6 d-flex align-items-end">
-                      <div className="d-flex flex-wrap gap-3 small">
-                        <div className="form-check form-switch">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="form-active"
-                            checked={formState.is_active}
-                            onChange={(e) =>
-                              handleChange("is_active", e.target.checked)
-                            }
-                            disabled={saving}
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor="form-active"
-                          >
-                            Aktif
-                          </label>
-                        </div>
-                        <div className="form-check form-switch">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="form-featured"
-                            checked={formState.is_featured}
-                            onChange={(e) =>
-                              handleChange(
-                                "is_featured",
-                                e.target.checked,
-                              )
-                            }
-                            disabled={saving}
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor="form-featured"
-                          >
-                            Öne çıkan
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-12">
-                      <label className="form-label small">
-                        Açıklama (opsiyonel)
-                      </label>
-                      <textarea
-                        className="form-control form-control-sm"
-                        rows={4}
-                        value={formState.description}
-                        onChange={(e) =>
-                          handleChange("description", e.target.value)
-                        }
-                        disabled={saving}
-                      />
-                    </div>
-                  </div>
+                  <CategoryFormFields
+                    formState={formState}
+                    localeOptions={localeOptions}
+                    moduleOptions={moduleOptions}
+                    disabled={saving || loading}
+                    isLocaleLoading={isLocaleLoading}
+                    onLocaleChange={handleLocaleChange}
+                    onFieldChange={handleFieldChange}
+                    onNameChange={handleNameChange}
+                    onSlugChange={(slug) => {
+                      setSlugTouched(true);
+                      handleSlugChange(slug);
+                    }}
+                  />
                 ) : (
-                  <AdminJsonEditor
-                    label="Kategori JSON (create/update payload)"
-                    value={jsonModel}
-                    onChange={applyJsonToForm}
-                    onErrorChange={setJsonError}
+                  <CategoryFormJsonSection
+                    jsonModel={jsonModel}
                     disabled={saving}
-                    height={340}
-                    helperText={
-                      <>
-                        Bu JSON, create / update isteğine gönderilecek payload
-                        ile uyumludur.{" "}
-                        <code>locale</code>, <code>module_key</code>,{" "}
-                        <code>name</code>, <code>slug</code>,{" "}
-                        <code>description</code>, <code>icon</code>,{" "}
-                        <code>is_active</code>, <code>is_featured</code>,{" "}
-                        <code>display_order</code> alanlarını düzenleyebilirsin.
-                        Geçerli JSON&apos;da yaptığın değişiklikler forma
-                        yansır.
-                      </>
-                    }
+                    onChangeJson={applyJsonToForm}
+                    onErrorChange={setJsonError}
                   />
                 )}
               </div>
 
-              {/* Sağ kolon – Görsel alanı (ortak bileşen) */}
               <div className="col-md-5">
-                <AdminImageUploadField
-                  label="Kategori Görseli"
-                  helperText={
-                    <>
-                      Storage modülü üzerinden kategori için bir görsel
-                      yükleyebilirsin. Yüklenen görselin URL&apos;i yukarıdaki{" "}
-                      <strong>Icon / Görsel URL</strong> alanına otomatik
-                      yazılır (ve JSON modeline de yansır).
-                    </>
-                  }
-                  bucket="public"
-                  folder="categories"
+                <CategoryFormImageColumn
                   metadata={imageMetadata}
-                  value={formState.icon}
-                  onChange={(url) =>
+                  iconValue={formState.icon}
+                  disabled={saving}
+                  onIconChange={(url) =>
                     setFormState((prev) =>
                       prev ? { ...prev, icon: url } : prev,
                     )
                   }
-                  disabled={saving}
-                  openLibraryHref="/admin/storage"
-                  onOpenLibraryClick={() => router.push("/admin/storage")}
                 />
               </div>
             </div>
           </div>
 
-          <div className="card-footer py-2 d-flex justify-content-between">
-            <button
-              type="button"
-              className="btn btn-outline-secondary btn-sm"
-              onClick={handleCancel}
-              disabled={saving}
-            >
-              İptal
-            </button>
-            <button
-              type="submit"
-              className="btn btn-primary btn-sm"
-              disabled={saving}
-            >
-              {saving
-                ? "Kaydediliyor..."
-                : mode === "create"
-                  ? "Oluştur"
-                  : "Kaydet"}
-            </button>
-          </div>
+          <CategoryFormFooter
+            mode={mode}
+            saving={saving}
+            onCancel={handleCancel}
+          />
         </form>
       </div>
     </div>

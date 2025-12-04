@@ -32,21 +32,12 @@ export const services = mysqlTable(
 
     featured: tinyint("featured").notNull().default(0),
     is_active: tinyint("is_active").notNull().default(1),
-    display_order: int("display_order").notNull().default(1),
+    display_order: int("display_order").notNull().default(0),
 
     // ana görsel alanları (legacy + storage)
     featured_image: varchar("featured_image", { length: 500 }), // legacy
     image_url: varchar("image_url", { length: 500 }), // legacy
     image_asset_id: char("image_asset_id", { length: 36 }), // storage_assets.id
-
-    // tip-özeline özgü (non-i18n)
-    area: varchar("area", { length: 64 }),
-    duration: varchar("duration", { length: 64 }),
-    maintenance: varchar("maintenance", { length: 64 }),
-    season: varchar("season", { length: 64 }),
-    soil_type: varchar("soil_type", { length: 128 }),
-    thickness: varchar("thickness", { length: 64 }),
-    equipment: varchar("equipment", { length: 128 }),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()
@@ -95,7 +86,7 @@ export const services = mysqlTable(
 export type ServiceRow = typeof services.$inferSelect;
 export type NewServiceRow = typeof services.$inferInsert;
 
-/** i18n: slug, name, description, material, price, includes, warranty, image_alt */
+/** i18n: slug, name, description, material, price, includes, warranty, image_alt, tags, meta_* */
 export const servicesI18n = mysqlTable(
   "services_i18n",
   {
@@ -116,6 +107,11 @@ export const servicesI18n = mysqlTable(
     includes: varchar("includes", { length: 255 }),
     warranty: varchar("warranty", { length: 128 }),
     image_alt: varchar("image_alt", { length: 255 }),
+
+    tags: varchar("tags", { length: 255 }),
+    meta_title: varchar("meta_title", { length: 255 }),
+    meta_description: varchar("meta_description", { length: 500 }),
+    meta_keywords: varchar("meta_keywords", { length: 255 }),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()

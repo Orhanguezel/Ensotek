@@ -61,6 +61,9 @@ export type ProductDto = {
   tags: string[];
   specifications?: ProductSpecifications | null;
 
+  // 🔢 Drag & drop sıralama için
+  order_num: number;
+
   product_code?: string | null;
   stock_quantity: number;
   rating: number;
@@ -86,7 +89,7 @@ export type ProductListQueryParams = {
   q?: string;
   limit?: number;
   offset?: number;
-  sort?: "price" | "rating" | "created_at";
+  sort?: "price" | "rating" | "created_at" | "order_num";
   order?: "asc" | "desc";
   min_price?: number;
   max_price?: number;

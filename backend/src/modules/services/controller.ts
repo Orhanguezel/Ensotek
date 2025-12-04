@@ -1,12 +1,20 @@
 // src/modules/services/controller.ts
 // =============================================================
+// Ensotek – Public Services Controller
+//  - GET /services
+//  - GET /services/:id
+//  - GET /services/by-slug/:slug
+//  - GET /services/:id/images
+// =============================================================
 
 import type { RouteHandler } from "fastify";
 import { DEFAULT_LOCALE, type Locale } from "@/core/i18n";
+
 import {
   serviceListQuerySchema,
   type ServiceListQuery,
 } from "./validation";
+
 import {
   listServices,
   getServiceMergedById,
@@ -14,49 +22,30 @@ import {
   listServiceImages,
 } from "./repository";
 
-const imgUrl = (
-  row: {
-    featured_image: any;
-    image_url: any;
-    image_asset_id: any;
-  },
-) => {
-  // Eğer storage asset var ve PUBLIC_API_BASE varsa /storage yolu ile sun. (opsiyonel)
-  if (row.image_asset_id && !row.image_url && !row.featured_image) {
-    const base = (process.env.PUBLIC_API_BASE || "").replace(
-      /\/+$/,
-      "",
-    );
-    if (base) {
-      return `${base}/storage/${encodeURIComponent(
-        "default",
-      )}/${encodeURIComponent(row.image_asset_id)}`;
-    }
-  }
-  return (row.featured_image ?? row.image_url ?? null) as string | null;
-};
-
-// src/modules/services/controller.ts
-
+/* ----------------------------- LIST (PUBLIC) ----------------------------- */
+/**
+ * GET /services
+ * - Public liste endpoint'i
+ * - Varsayılan olarak sadece is_active = 1 kayıtları döner
+ * - Admin'deki listServicesAdmin ile aynı query şemasını kullanır
+ */
 export const listServicesPublic: RouteHandler<{
   Querystring: ServiceListQuery;
 }> = async (req, reply) => {
   const parsed = serviceListQuerySchema.safeParse(req.query ?? {});
   if (!parsed.success) {
-    return reply
-      .code(400)
-      .send({ error: { message: "invalid_query", issues: parsed.error.issues } });
+    return reply.code(400).send({
+      error: { message: "invalid_query", issues: parsed.error.issues },
+    });
   }
+
   const q = parsed.data;
+  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
+  const def = DEFAULT_LOCALE;
 
-  // 💡 Önce query.locale, yoksa req.locale, en sonda DEFAULT_LOCALE
-  const locale: Locale =
-    (q.locale as Locale | undefined) ??
-    ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
-
-  const def: Locale =
-    (q.default_locale as Locale | undefined) ?? DEFAULT_LOCALE;
+  // Public tarafta default: sadece aktif kayıtlar
+  const isActive =
+    typeof q.is_active === "undefined" ? true : q.is_active;
 
   const { items, total } = await listServices({
     locale,
@@ -71,71 +60,70 @@ export const listServicesPublic: RouteHandler<{
     category_id: q.category_id,
     sub_category_id: q.sub_category_id,
     featured: q.featured,
-    is_active: 1, // public: sadece aktifler
+    is_active: isActive,
   });
 
-  const mapped = items
-    .filter((x) => x.is_active === 1)
-    .map((x) => ({ ...x, featured_image_url: imgUrl(x) }));
-
   reply.header("x-total-count", String(total ?? 0));
-  return reply.send(mapped);
+  return reply.send(items);
 };
 
-
+/* ----------------------------- GET BY ID (PUBLIC) ----------------------------- */
+/**
+ * GET /services/:id
+ * - Public detay
+ * - Varsayılan locale + fallback
+ * - is_active = 0 olanlar için 404 döndürmek mantıklı
+ */
 export const getServicePublic: RouteHandler<{
   Params: { id: string };
-  Querystring: { locale?: string; default_locale?: string };
 }> = async (req, reply) => {
-  const q = (req.query || {}) as { locale?: string; default_locale?: string };
-
-  const locale: Locale =
-    (q.locale as Locale | undefined) ??
-    ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
-
-  const def: Locale =
-    (q.default_locale as Locale | undefined) ?? DEFAULT_LOCALE;
+  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
+  const def = DEFAULT_LOCALE;
 
   const row = await getServiceMergedById(locale, def, req.params.id);
-  if (!row || row.is_active !== 1)
+  if (!row || row.is_active !== 1) {
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send({ ...row, featured_image_url: imgUrl(row) });
+  }
+
+  return reply.send(row);
 };
 
+/* ----------------------------- GET BY SLUG (PUBLIC) ----------------------------- */
+/**
+ * GET /services/by-slug/:slug
+ * - Public detay (slug ile)
+ * - is_active = 0 olanlar için 404
+ */
 export const getServiceBySlugPublic: RouteHandler<{
   Params: { slug: string };
-  Querystring: { locale?: string; default_locale?: string };
 }> = async (req, reply) => {
-  const q = (req.query || {}) as { locale?: string; default_locale?: string };
+  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
+  const def = DEFAULT_LOCALE;
 
-  const locale: Locale =
-    (q.locale as Locale | undefined) ??
-    ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
+  const row = await getServiceMergedBySlug(
+    locale,
+    def,
+    req.params.slug,
+  );
 
-  const def: Locale =
-    (q.default_locale as Locale | undefined) ?? DEFAULT_LOCALE;
-
-  const row = await getServiceMergedBySlug(locale, def, req.params.slug);
-  if (!row || row.is_active !== 1)
+  if (!row || row.is_active !== 1) {
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send({ ...row, featured_image_url: imgUrl(row) });
+  }
+
+  return reply.send(row);
 };
 
+/* ----------------------------- IMAGES (PUBLIC) ----------------------------- */
+/**
+ * GET /services/:id/images
+ * - Public gallery
+ * - Varsayılan: sadece aktif görseller (onlyActive: true)
+ */
 export const listServiceImagesPublic: RouteHandler<{
   Params: { id: string };
-  Querystring: { locale?: string; default_locale?: string };
 }> = async (req, reply) => {
-  const q = (req.query || {}) as { locale?: string; default_locale?: string };
-
-  const locale: Locale =
-    (q.locale as Locale | undefined) ??
-    ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
-
-  const def: Locale =
-    (q.default_locale as Locale | undefined) ?? DEFAULT_LOCALE;
+  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
+  const def = DEFAULT_LOCALE;
 
   const rows = await listServiceImages({
     serviceId: req.params.id,
@@ -143,6 +131,6 @@ export const listServiceImagesPublic: RouteHandler<{
     defaultLocale: def,
     onlyActive: true,
   });
+
   return reply.send(rows);
 };
-

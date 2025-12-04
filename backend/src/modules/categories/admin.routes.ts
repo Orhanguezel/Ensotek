@@ -39,76 +39,82 @@ export async function registerCategoriesAdmin(app: FastifyInstance) {
 
   const BASE = "/categories";
 
-  // ⬇️ LIST endpointini /list'e aldık — /api/admin/categories ile çakışma kalkar
+  // LIST
   app.get<{ Querystring: AdminListCategoriesQS }>(
     `${BASE}/list`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminListCategories
+    adminListCategories,
   );
 
   // Tekil okuma
-  app.get<{ Params: { id: string } }>(
+  app.get<{
+    Params: { id: string };
+    Querystring: { locale?: string };
+  }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminGetCategoryById
+    adminGetCategoryById,
   );
 
   // Slug ile okuma
-  app.get<{ Params: { slug: string } }>(
+  app.get<{
+    Params: { slug: string };
+    Querystring: { locale?: string; module_key?: string };
+  }>(
     `${BASE}/by-slug/:slug`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminGetCategoryBySlug
+    adminGetCategoryBySlug,
   );
 
   // CRUD
   app.post<{ Body: CategoryCreateInput }>(
     `${BASE}`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminCreateCategory
+    adminCreateCategory,
   );
 
   app.put<{ Params: { id: string }; Body: CategoryUpdateInput }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminPutCategory
+    adminPutCategory,
   );
 
   app.patch<{ Params: { id: string }; Body: CategoryUpdateInput }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminPatchCategory
+    adminPatchCategory,
   );
 
   app.delete<{ Params: { id: string } }>(
     `${BASE}/:id`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminDeleteCategory
+    adminDeleteCategory,
   );
 
   // Sıralama
   app.post<{ Body: { items: Array<{ id: string; display_order: number }> } }>(
     `${BASE}/reorder`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminReorderCategories
+    adminReorderCategories,
   );
 
   // Toggle'lar
   app.patch<{ Params: { id: string }; Body: { is_active: boolean } }>(
     `${BASE}/:id/active`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminToggleActive
+    adminToggleActive,
   );
 
   app.patch<{ Params: { id: string }; Body: { is_featured: boolean } }>(
     `${BASE}/:id/featured`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminToggleFeatured
+    adminToggleFeatured,
   );
 
   // Kapak görseli (storage) + alt
   app.patch<{ Params: { id: string }; Body: CategorySetImageInput }>(
     `${BASE}/:id/image`,
     { preHandler: [requireAuth, requireAdmin] },
-    adminSetCategoryImage
+    adminSetCategoryImage,
   );
 }

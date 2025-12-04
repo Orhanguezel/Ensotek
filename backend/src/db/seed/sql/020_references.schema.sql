@@ -1,5 +1,5 @@
 -- =============================================================
--- 030_references.schema.sql  (schema + parent seeds)
+-- 020_references.schema.sql  (schema)
 -- =============================================================
 
 -- ================= CLEANUP =================
@@ -7,8 +7,8 @@ DROP TABLE IF EXISTS `references_i18n`;
 DROP TABLE IF EXISTS `references`;
 
 -- ================= TABLE: references =================
---  Drizzle şeması ile bire bir:
---  - featured_image_asset_id: CHAR(36), sadece INDEX (FK yok)
+-- Drizzle şeması ile bire bir:
+--  - featured_image_asset_id: CHAR(36), FK YOK, sadece INDEX
 --  - category_id, sub_category_id: CHAR(36), NULL + FK -> categories / sub_categories
 
 CREATE TABLE `references` (
@@ -51,7 +51,7 @@ CREATE TABLE `references` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ================= TABLE: references_i18n =================
---  Drizzle longtext customType ile uyumlu:
+-- Drizzle longtext customType ile uyumlu:
 --  - summary: LONGTEXT NULL
 --  - content: LONGTEXT NOT NULL
 
@@ -74,6 +74,7 @@ CREATE TABLE `references_i18n` (
   updated_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
+
   UNIQUE KEY ux_references_i18n_parent_locale (reference_id, locale),
   UNIQUE KEY ux_references_i18n_locale_slug   (locale, slug),
   KEY references_i18n_locale_idx              (locale),

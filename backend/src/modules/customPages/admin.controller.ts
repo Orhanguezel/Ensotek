@@ -1,11 +1,7 @@
-// src/modules/customPages/admin.controller.ts
 import type { RouteHandler } from "fastify";
 import { randomUUID } from "crypto";
-import {
-  DEFAULT_LOCALE,
-  LOCALES,
-  type Locale,
-} from "@/core/i18n";
+import { DEFAULT_LOCALE } from "@/core/i18n";
+
 import {
   listCustomPages,
   getCustomPageMergedById,
@@ -16,6 +12,7 @@ import {
   deleteCustomPageParent,
   getCustomPageI18nRow,
   packContent,
+  reorderCustomPages,
 } from "./repository";
 import {
   customPageListQuerySchema,
@@ -26,6 +23,26 @@ import {
   type PatchCustomPageBody,
 } from "./validation";
 import { setContentRange } from "@/common/utils/contentRange";
+
+const DEFAULT_LOCALE_NORMALIZED = DEFAULT_LOCALE.toLowerCase();
+
+/** Fastify / query / req.locale içinden locale çekip normalize eder */
+const resolveLocale = (
+  explicit?: string | null,
+  reqLocale?: unknown,
+): string => {
+  const fromExplicit =
+    typeof explicit === "string" && explicit.trim().length > 0
+      ? explicit.trim()
+      : null;
+  const fromReq =
+    typeof reqLocale === "string" && reqLocale.trim().length > 0
+      ? reqLocale.trim()
+      : null;
+
+  const raw = fromExplicit ?? fromReq ?? DEFAULT_LOCALE_NORMALIZED;
+  return raw.toLowerCase();
+};
 
 const toBool = (v: unknown): boolean =>
   v === true || v === 1 || v === "1" || v === "true";
@@ -42,10 +59,7 @@ export const listPagesAdmin: RouteHandler<{
   }
   const q = parsed.data;
 
-  const locale: Locale =
-    (q.locale as Locale) ??
-    (req.locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
+  const locale = resolveLocale(q.locale ?? null, req.locale);
 
   const { items, total } = await listCustomPages({
     orderParam: typeof q.order === "string" ? q.order : undefined,
@@ -60,7 +74,7 @@ export const listPagesAdmin: RouteHandler<{
     sub_category_id: q.sub_category_id,
     module_key: q.module_key,
     locale,
-    defaultLocale: DEFAULT_LOCALE,
+    defaultLocale: DEFAULT_LOCALE_NORMALIZED,
   });
 
   const offset = q.offset ?? 0;
@@ -76,9 +90,11 @@ export const getPageAdmin: RouteHandler<{ Params: { id: string } }> = async (
   req,
   reply,
 ) => {
+  const locale = resolveLocale(null, req.locale);
+
   const row = await getCustomPageMergedById(
-    req.locale as Locale,
-    DEFAULT_LOCALE,
+    locale,
+    DEFAULT_LOCALE_NORMALIZED,
     req.params.id,
   );
   if (!row) {
@@ -91,9 +107,11 @@ export const getPageAdmin: RouteHandler<{ Params: { id: string } }> = async (
 export const getPageBySlugAdmin: RouteHandler<{
   Params: { slug: string };
 }> = async (req, reply) => {
+  const locale = resolveLocale(null, req.locale);
+
   const row = await getCustomPageMergedBySlug(
-    req.locale as Locale,
-    DEFAULT_LOCALE,
+    locale,
+    DEFAULT_LOCALE_NORMALIZED,
     req.params.slug,
   );
   if (!row) {
@@ -115,10 +133,7 @@ export const createPageAdmin: RouteHandler<{
   const b = parsed.data;
 
   // Primary locale: body.locale > req.locale > DEFAULT_LOCALE
-  const primaryLocale: Locale =
-    (b.locale as Locale) ??
-    (req.locale as Locale) ??
-    DEFAULT_LOCALE;
+  const primaryLocale = resolveLocale(b.locale ?? null, req.locale);
 
   try {
     const id = randomUUID();
@@ -149,12 +164,17 @@ export const createPageAdmin: RouteHandler<{
       updated_at: new Date() as any,
     });
 
-    // Tek dilde gelen içeriği İLK SEFERDE tüm diller için klonla
+    // İlk içerik sadece primaryLocale için yazılır,
+    // gerektiğinde admin diğer dillerde çeviri ekler.
     const packedContent = packContent(b.content);
     const basePayload = {
       title: b.title.trim(),
       slug: b.slug.trim(),
       content: packedContent,
+      summary:
+        typeof b.summary === "string"
+          ? b.summary.trim()
+          : b.summary ?? null,
       featured_image_alt:
         typeof b.featured_image_alt === "string"
           ? b.featured_image_alt.trim()
@@ -167,23 +187,27 @@ export const createPageAdmin: RouteHandler<{
         typeof b.meta_description === "string"
           ? b.meta_description.trim()
           : b.meta_description ?? null,
+      tags:
+        typeof b.tags === "string" ? b.tags.trim() : b.tags ?? null,
     };
 
-    // Önce primary locale, sonra diğerleri (hepsi aynı içerik)
-    const localesToCreate: Locale[] = [...LOCALES];
+    // Primary locale için i18n kaydı
+    await upsertCustomPageI18n(id, primaryLocale, basePayload);
 
-    localesToCreate.sort((a, b) =>
-      a === primaryLocale ? -1 : b === primaryLocale ? 1 : 0,
-    );
-
-    for (const loc of localesToCreate) {
-      await upsertCustomPageI18n(id, loc, basePayload);
+    // Eğer primaryLocale, defaultLocale'den farklıysa
+    // fallback düzgün çalışsın diye defaultLocale için de kopya oluştur.
+    if (primaryLocale !== DEFAULT_LOCALE_NORMALIZED) {
+      await upsertCustomPageI18n(
+        id,
+        DEFAULT_LOCALE_NORMALIZED,
+        basePayload,
+      );
     }
 
-    // Response, primary locale’e göre coalesced kayıt
+    // Response: primary locale’e göre coalesced kayıt
     const row = await getCustomPageMergedById(
       primaryLocale,
-      DEFAULT_LOCALE,
+      DEFAULT_LOCALE_NORMALIZED,
       id,
     );
     return reply.code(201).send(row);
@@ -212,10 +236,7 @@ export const updatePageAdmin: RouteHandler<{
     });
   }
   const b = parsed.data;
-  const locale: Locale =
-    (b.locale as Locale) ??
-    (req.locale as Locale) ??
-    DEFAULT_LOCALE;
+  const locale = resolveLocale(b.locale ?? null, req.locale);
 
   try {
     // parent patch (varsa)
@@ -257,9 +278,11 @@ export const updatePageAdmin: RouteHandler<{
       typeof b.title !== "undefined" ||
       typeof b.slug !== "undefined" ||
       typeof b.content !== "undefined" ||
+      typeof b.summary !== "undefined" ||
       typeof b.featured_image_alt !== "undefined" ||
       typeof b.meta_title !== "undefined" ||
-      typeof b.meta_description !== "undefined";
+      typeof b.meta_description !== "undefined" ||
+      typeof b.tags !== "undefined";
 
     if (hasI18nFields) {
       const exists = await getCustomPageI18nRow(req.params.id, locale);
@@ -275,6 +298,10 @@ export const updatePageAdmin: RouteHandler<{
           title: b.title!.trim(),
           slug: b.slug!.trim(),
           content: packContent(b.content!),
+          summary:
+            typeof b.summary === "string"
+              ? b.summary.trim()
+              : b.summary ?? null,
           featured_image_alt:
             typeof b.featured_image_alt === "string"
               ? b.featured_image_alt.trim()
@@ -287,6 +314,10 @@ export const updatePageAdmin: RouteHandler<{
             typeof b.meta_description === "string"
               ? b.meta_description.trim()
               : b.meta_description ?? null,
+          tags:
+            typeof b.tags === "string"
+              ? b.tags.trim()
+              : b.tags ?? null,
         });
       } else {
         await upsertCustomPageI18n(req.params.id, locale, {
@@ -297,6 +328,12 @@ export const updatePageAdmin: RouteHandler<{
           content:
             typeof b.content === "string"
               ? packContent(b.content)
+              : undefined,
+          summary:
+            typeof b.summary !== "undefined"
+              ? typeof b.summary === "string"
+                ? b.summary.trim()
+                : b.summary ?? null
               : undefined,
           featured_image_alt:
             typeof b.featured_image_alt !== "undefined"
@@ -316,13 +353,19 @@ export const updatePageAdmin: RouteHandler<{
                 ? b.meta_description.trim()
                 : b.meta_description ?? null
               : undefined,
+          tags:
+            typeof b.tags !== "undefined"
+              ? typeof b.tags === "string"
+                ? b.tags.trim()
+                : b.tags ?? null
+              : undefined,
         });
       }
     }
 
     const row = await getCustomPageMergedById(
       locale,
-      DEFAULT_LOCALE,
+      DEFAULT_LOCALE_NORMALIZED,
       req.params.id,
     );
     if (!row) {
@@ -351,3 +394,37 @@ export const removePageAdmin: RouteHandler<{ Params: { id: string } }> =
     }
     return reply.code(204).send();
   };
+
+/** REORDER (admin) – display_order toplu güncelle */
+export const reorderCustomPagesAdmin: RouteHandler<{
+  Body: { items?: { id?: string; display_order?: number }[] };
+}> = async (req, reply) => {
+  const body = (req.body ?? {}) as {
+    items?: { id?: string; display_order?: number }[];
+  };
+
+  if (!Array.isArray(body.items) || body.items.length === 0) {
+    return reply.code(400).send({
+      error: { message: "invalid_body", detail: "items boş olamaz" },
+    });
+  }
+
+  const normalized = body.items
+    .map((item) => ({
+      id: String(item.id ?? "").trim(),
+      display_order:
+        typeof item.display_order === "number"
+          ? item.display_order
+          : 0,
+    }))
+    .filter((x) => x.id.length > 0);
+
+  if (!normalized.length) {
+    return reply.code(400).send({
+      error: { message: "invalid_body", detail: "geçerli id bulunamadı" },
+    });
+  }
+
+  await reorderCustomPages(normalized);
+  return reply.code(204).send();
+};

@@ -1,25 +1,27 @@
 // =============================================================
 // FILE: src/pages/admin/subcategories/index.tsx
-// Ensotek – Admin Alt Kategoriler Sayfası
-// (Liste + filtreler + drag & drop reorder + create/edit modal)
+// Ensotek – Admin Alt Kategoriler Sayfası (liste + filtre + reorder)
+// Create/Edit artık ayrı form sayfalarında
 // =============================================================
 
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import { toast } from "sonner";
 
 import {
   useListSubCategoriesAdminQuery,
-  useCreateSubCategoryAdminMutation,
-  useUpdateSubCategoryAdminMutation,
   useDeleteSubCategoryAdminMutation,
   useReorderSubCategoriesAdminMutation,
   useToggleSubCategoryActiveAdminMutation,
   useToggleSubCategoryFeaturedAdminMutation,
 } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
 
-import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
+import {
+  useListCategoriesAdminQuery,
+} from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
+
 import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
 
 import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
@@ -32,29 +34,12 @@ import { SubCategoriesHeader } from "@/components/admin/subcategories/SubCategor
 import { SubCategoriesList } from "@/components/admin/subcategories/SubCategoriesList";
 
 /* ------------------------------------------------------------- */
-/*  Form state tipi                                               */
-/* ------------------------------------------------------------- */
-
-type SubCategoryFormState = {
-  id?: string;
-  category_id: string;
-  locale: string;
-  name: string;
-  slug: string;
-  description: string;
-  icon: string;
-  is_active: boolean;
-  is_featured: boolean;
-  display_order: number;
-};
-
-type FormMode = "create" | "edit";
-
-/* ------------------------------------------------------------- */
 /*  Sayfa bileşeni                                               */
 /* ------------------------------------------------------------- */
 
 const SubCategoriesAdminPage: React.FC = () => {
+  const router = useRouter();
+
   const [search, setSearch] = useState("");
   const [localeFilter, setLocaleFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
@@ -62,30 +47,28 @@ const SubCategoriesAdminPage: React.FC = () => {
   const [showOnlyActive, setShowOnlyActive] = useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
 
-  // Alt kategoriler listesi + filtreler
+  // Liste + filtreler
   const {
     data: subCategories,
     isLoading,
     isFetching,
     refetch,
-  } = useListSubCategoriesAdminQuery(
-    {
-      q: search || undefined,
-      locale: localeFilter || undefined,
-      category_id: categoryFilter || undefined,
-      is_active: showOnlyActive ? true : undefined,
-      is_featured: showOnlyFeatured ? true : undefined,
-    },
-  );
+  } = useListSubCategoriesAdminQuery({
+    q: search || undefined,
+    locale: localeFilter || undefined,
+    category_id: categoryFilter || undefined,
+    is_active: showOnlyActive ? true : undefined,
+    is_featured: showOnlyFeatured ? true : undefined,
+  });
 
-  // Lokal state (drag & drop için)
+  // Drag & drop sıralama için lokal state
   const [rows, setRows] = useState<SubCategoryDto[]>([]);
 
   useEffect(() => {
     setRows(subCategories || []);
   }, [subCategories]);
 
-  // Locale'ler (site_settings.app_locales üzerinden)
+  // app_locales kaydını (site_settings) üzerinden dilleri çek
   const {
     data: appLocaleRows,
     isLoading: isLocalesLoading,
@@ -93,7 +76,7 @@ const SubCategoriesAdminPage: React.FC = () => {
     keys: ["app_locales"],
   });
 
-  // Kategori listesi (filter + form için)
+  // Kategori listesi (filter + list header için)
   const {
     data: categoryRows,
     isLoading: isCategoriesLoading,
@@ -106,10 +89,6 @@ const SubCategoriesAdminPage: React.FC = () => {
   });
 
   // Mutations
-  const [createSubCategory, { isLoading: isCreating }] =
-    useCreateSubCategoryAdminMutation();
-  const [updateSubCategory, { isLoading: isUpdating }] =
-    useUpdateSubCategoryAdminMutation();
   const [deleteSubCategory, { isLoading: isDeleting }] =
     useDeleteSubCategoryAdminMutation();
   const [reorderSubCategories, { isLoading: isReordering }] =
@@ -118,8 +97,7 @@ const SubCategoriesAdminPage: React.FC = () => {
   const [toggleFeatured] = useToggleSubCategoryFeaturedAdminMutation();
 
   const loading = isLoading || isFetching;
-  const busy =
-    loading || isCreating || isUpdating || isDeleting || isReordering;
+  const busy = loading || isDeleting || isReordering;
 
   /* -------------------- Locale options (DB'den) -------------------- */
 
@@ -194,119 +172,16 @@ const SubCategoriesAdminPage: React.FC = () => {
       return map;
     }, [categoryRows]);
 
-  /* -------------------- Form / Modal state -------------------- */
+  /* -------------------- Create/Edit navigasyonu -------------------- */
 
-  const [formMode, setFormMode] = useState<FormMode>("create");
-  const [formState, setFormState] =
-    useState<SubCategoryFormState | null>(null);
-  const [showModal, setShowModal] = useState(false);
-
-  const openCreateModal = () => {
-    if (!categoryRows || categoryRows.length === 0) {
-      toast.error(
-        "Önce en az bir üst kategori (Kategori) oluşturman gerekiyor.",
-      );
-      return;
-    }
-
-    const defaultLocale = localeFilter || (localeOptions[0]?.value ?? "tr");
-    const defaultCategory =
-      categoryFilter || categoryRows[0]?.id || "";
-
-    setFormMode("create");
-    setFormState({
-      id: undefined,
-      category_id: defaultCategory,
-      locale: defaultLocale,
-      name: "",
-      slug: "",
-      description: "",
-      icon: "",
-      is_active: true,
-      is_featured: false,
-      display_order: rows.length,
-    });
-    setShowModal(true);
+  const openCreatePage = () => {
+    router.push("/admin/subcategories/new");
   };
 
-  const openEditModal = (item: SubCategoryDto) => {
-    setFormMode("edit");
-    setFormState({
-      id: item.id,
-      category_id: item.category_id,
-      locale: item.locale || "tr",
-      name: item.name,
-      slug: item.slug,
-      description: item.description || "",
-      icon: item.icon || "",
-      is_active: !!item.is_active,
-      is_featured: !!item.is_featured,
-      display_order: item.display_order ?? 0,
-    });
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    if (busy) return;
-    setShowModal(false);
-    setFormState(null);
-  };
-
-  const handleFormChange = (
-    field: keyof SubCategoryFormState,
-    value: string | boolean | number,
-  ) => {
-    setFormState((prev) =>
-      prev ? { ...prev, [field]: value } : prev,
+  const openEditPage = (item: SubCategoryDto) => {
+    router.push(
+      `/admin/subcategories/${encodeURIComponent(item.id)}`,
     );
-  };
-
-  const handleSaveForm = async () => {
-    if (!formState) return;
-
-    if (!formState.category_id) {
-      toast.error("Bir üst kategori seçmelisin.");
-      return;
-    }
-
-    const payloadBase = {
-      category_id: formState.category_id,
-      locale: formState.locale || "tr",
-      name: formState.name.trim(),
-      slug: formState.slug.trim(),
-      description: formState.description.trim() || undefined,
-      icon: formState.icon.trim() || undefined,
-      is_active: formState.is_active,
-      is_featured: formState.is_featured,
-      display_order: formState.display_order ?? 0,
-    };
-
-    if (!payloadBase.name || !payloadBase.slug) {
-      toast.error("Ad ve slug alanları zorunludur.");
-      return;
-    }
-
-    try {
-      if (formMode === "create") {
-        await createSubCategory(payloadBase).unwrap();
-        toast.success("Alt kategori oluşturuldu.");
-      } else if (formMode === "edit" && formState.id) {
-        await updateSubCategory({
-          id: formState.id,
-          patch: payloadBase,
-        }).unwrap();
-        toast.success("Alt kategori güncellendi.");
-      }
-
-      closeModal();
-      await refetch();
-    } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Alt kategori kaydedilirken bir hata oluştu.";
-      toast.error(msg);
-    }
   };
 
   /* -------------------- Silme / Toggle / Reorder -------------------- */
@@ -422,7 +297,7 @@ const SubCategoriesAdminPage: React.FC = () => {
         localesLoading={isLocalesLoading}
         categories={categoryOptions}
         categoriesLoading={isCategoriesLoading}
-        onCreateClick={openCreateModal}
+        onCreateClick={openCreatePage}
       />
 
       <div className="row">
@@ -431,7 +306,7 @@ const SubCategoriesAdminPage: React.FC = () => {
             items={rows}
             loading={busy}
             categoriesMap={categoriesMap}
-            onEdit={openEditModal}
+            onEdit={openEditPage}
             onDelete={handleDelete}
             onToggleActive={handleToggleActive}
             onToggleFeatured={handleToggleFeatured}
@@ -441,218 +316,6 @@ const SubCategoriesAdminPage: React.FC = () => {
           />
         </div>
       </div>
-
-      {/* --------------------- Sabit Create/Edit Modal --------------------- */}
-      {showModal && formState && (
-        <>
-          {/* Backdrop */}
-          <div className="modal-backdrop fade show" />
-
-          {/* Modal */}
-          <div
-            className="modal d-block"
-            tabIndex={-1}
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="modal-dialog modal-lg modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header py-2">
-                  <h5 className="modal-title small mb-0">
-                    {formMode === "create"
-                      ? "Yeni Alt Kategori Oluştur"
-                      : "Alt Kategori Düzenle"}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Kapat"
-                    onClick={closeModal}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="modal-body">
-                  <div className="row g-2">
-                    <div className="col-md-4">
-                      <label className="form-label small">Dil</label>
-                      <select
-                        className="form-select form-select-sm"
-                        value={formState.locale}
-                        onChange={(e) =>
-                          handleFormChange("locale", e.target.value)
-                        }
-                      >
-                        {localeOptions.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="col-md-8">
-                      <label className="form-label small">
-                        Üst Kategori (category_id)
-                      </label>
-                      <select
-                        className="form-select form-select-sm"
-                        value={formState.category_id}
-                        onChange={(e) =>
-                          handleFormChange("category_id", e.target.value)
-                        }
-                      >
-                        {(categoryRows ?? []).map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name} ({c.locale || "tr"})
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">Ad</label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.name}
-                        onChange={(e) =>
-                          handleFormChange("name", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">Slug</label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.slug}
-                        onChange={(e) =>
-                          handleFormChange("slug", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">
-                        Icon (opsiyonel)
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.icon}
-                        onChange={(e) =>
-                          handleFormChange("icon", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="col-md-6 d-flex align-items-end">
-                      <div className="d-flex flex-wrap gap-3 small">
-                        <div className="form-check form-switch">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="sub-modal-active"
-                            checked={formState.is_active}
-                            onChange={(e) =>
-                              handleFormChange(
-                                "is_active",
-                                e.target.checked,
-                              )
-                            }
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor="sub-modal-active"
-                          >
-                            Aktif
-                          </label>
-                        </div>
-                        <div className="form-check form-switch">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="sub-modal-featured"
-                            checked={formState.is_featured}
-                            onChange={(e) =>
-                              handleFormChange(
-                                "is_featured",
-                                e.target.checked,
-                              )
-                            }
-                          />
-                          <label
-                            className="form-check-label"
-                            htmlFor="sub-modal-featured"
-                          >
-                            Öne çıkan
-                          </label>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="col-md-4">
-                      <label className="form-label small">
-                        Sıralama (display_order)
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        value={formState.display_order}
-                        onChange={(e) =>
-                          handleFormChange(
-                            "display_order",
-                            Number(e.target.value) || 0,
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div className="col-12">
-                      <label className="form-label small">
-                        Açıklama (opsiyonel)
-                      </label>
-                      <textarea
-                        className="form-control form-control-sm"
-                        rows={4}
-                        value={formState.description}
-                        onChange={(e) =>
-                          handleFormChange("description", e.target.value)
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="modal-footer py-2">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={closeModal}
-                    disabled={busy}
-                  >
-                    İptal
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveForm}
-                    disabled={busy}
-                  >
-                    {busy
-                      ? "Kaydediliyor..."
-                      : formMode === "create"
-                        ? "Oluştur"
-                        : "Kaydet"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

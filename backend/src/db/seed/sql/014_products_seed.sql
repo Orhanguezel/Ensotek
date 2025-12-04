@@ -1,472 +1,258 @@
 -- =============================================================
 -- 014_products_seed.sql
--- Örnek ürünler + specs + faqs + reviews + stock (tr + en)
---  - products: TR + EN
---  - specs/faqs/reviews/options/stock: şimdilik sadece TR ürünlere bağlı
+-- Ensotek Ürünleri (Soğutma Kuleleri + Isı Transfer Çözümleri)
+--   - TR + EN (product_i18n ile)
+--   - Base ürünler tek ID
 -- =============================================================
 
 START TRANSACTION;
 
 -- =========================
--- PRODUCTS – ÖRNEK KAYITLAR
+-- 1) BASE PRODUCTS
 -- =========================
 
 INSERT INTO products (
   id,
-  locale,
-  title,
-  slug,
-  price,
-  description,
   category_id,
   sub_category_id,
+  price,
   image_url,
   storage_asset_id,
-  alt,
   images,
   storage_image_ids,
   is_active,
   is_featured,
-  tags,
-  specifications,
+  order_num,
   product_code,
   stock_quantity,
   rating,
-  review_count,
+  review_count
+)
+VALUES
+  -- PRODUCT 1: Açık Devre Soğutma Kulesi (base)
+  (
+    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
+    'aaaa0002-1111-4111-8111-aaaaaaaa0002', -- AÇIK DEVRE (TR)
+    'bbbb0101-1111-4111-8111-bbbbbbbb0101', -- Doğrudan Temaslı Açık Devre Kuleler (TR)
+    185000.00,
+    'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&h=600&q=80',
+    NULL,
+    JSON_ARRAY(
+      'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1200&h=600&q=80'
+    ),
+    JSON_ARRAY(),
+    1,
+    1,
+    1,                 -- order_num
+    'CT-OC-001-TR',    -- base product_code (istersen sadeleştirirsin)
+    4,
+    4.90,
+    3
+  ),
+
+  -- PRODUCT 2: Kapalı Devre Soğutma Kulesi (Film Tip)
+  (
+    'bbbb0002-2222-4222-8222-bbbbbbbb0002',
+    'aaaa0003-1111-4111-8111-aaaaaaaa0003', -- KAPALI DEVRE (TR)
+    'bbbb0202-1111-4111-8111-bbbbbbbb0202', -- Film Tip Kapalı Devre Kuleler (TR)
+    235000.00,
+    'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&h=600&q=80',
+    NULL,
+    JSON_ARRAY(
+      'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&h=600&q=80',
+      'https://images.unsplash.com/photo-1582719478250-cc50a1f5a1aa?auto=format&fit=crop&w=1200&h=600&q=80'
+    ),
+    JSON_ARRAY(),
+    1,
+    1,
+    2,                 -- order_num
+    'CT-CC-010-TR',
+    3,
+    4.85,
+    2
+  ),
+
+  -- PRODUCT 3: Hibrit Adyabatik Soğutma Sistemi
+  (
+    'bbbb0003-2222-4222-8222-bbbbbbbb0003',
+    'aaaa0004-1111-4111-8111-aaaaaaaa0004', -- HİBRİT SOĞUTMA SİSTEMLERİ (TR)
+    'bbbb0301-1111-4111-8111-bbbbbbbb0301', -- Hibrit Adyabatik Sistemler (TR)
+    310000.00,
+    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+    NULL,
+    JSON_ARRAY(
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
+    ),
+    JSON_ARRAY(),
+    1,
+    0,
+    3,                 -- order_num
+    'CT-HY-001-TR',
+    2,
+    4.95,
+    1
+  )
+ON DUPLICATE KEY UPDATE
+  category_id       = VALUES(category_id),
+  sub_category_id   = VALUES(sub_category_id),
+  price             = VALUES(price),
+  image_url         = VALUES(image_url),
+  storage_asset_id  = VALUES(storage_asset_id),
+  images            = VALUES(images),
+  storage_image_ids = VALUES(storage_image_ids),
+  is_active         = VALUES(is_active),
+  is_featured       = VALUES(is_featured),
+  order_num         = VALUES(order_num),
+  product_code      = VALUES(product_code),
+  stock_quantity    = VALUES(stock_quantity),
+  rating            = VALUES(rating),
+  review_count      = VALUES(review_count);
+
+-- =========================
+-- 2) PRODUCT I18N (TR + EN)
+-- =========================
+
+INSERT INTO product_i18n (
+  product_id,
+  locale,
+  title,
+  slug,
+  description,
+  alt,
+  tags,
+  specifications,
   meta_title,
   meta_description
 )
 VALUES
-  -- ÜRÜN 1 TR: Modern Mermer Mezar Modeli
+  -- ---------- PRODUCT 1: TR ----------
   (
     'bbbb0001-2222-4222-8222-bbbbbbbb0001',
     'tr',
-    'Modern Mermer Mezar Modeli',
-    'modern-mermer-mezar-modeli',
-    15000.00,
-    'Modern çizgilere sahip, dayanıklı mermerden üretilmiş mezar modeli. İstanbul ve çevresi için özel ölçülendirme ve montaj dahildir.',
-    'aaaa0001-1111-4111-8111-aaaaaaaa0001', -- MEZAR MODELLERİ
-    NULL,
-    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
-    'Modern mermer mezar modeli',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(), -- storage_image_ids (şimdilik boş)
-    1,
-    1,
-    JSON_ARRAY('mezar', 'mermer', 'modern', 'istanbul'),
+    'Endüstriyel Açık Devre Soğutma Kulesi',
+    'endüstriyel-acik-devre-sogutma-kulesi',
+    'Endüstriyel prosesler, HVAC ve enerji santrallerinde kullanılan, yüksek verimli açık devre soğutma kulesi. Doğrudan temaslı ısı transferi sayesinde düşük işletme maliyeti ve yüksek performans sunar.',
+    'Endüstriyel açık devre soğutma kulesi',
+    JSON_ARRAY('sogutma kulesi', 'acik devre', 'endustriyel', 'ensotek'),
     JSON_OBJECT(
-      'dimensions', '100 x 200 cm',
-      'weight', '450 kg',
-      'thickness', '8 cm',
-      'surfaceFinish', 'Parlak cilalı mermer',
-      'warranty', '2 yıl işçilik garantisi',
-      'installationTime', '3-5 iş günü'
+      'capacity', '1.500 m³/h – 4.500 m³/h',
+      'fanType', 'Mekanik çekişli, aksiyal fan',
+      'structure', 'Galvaniz çelik + GRP paneller',
+      'fillType', 'Film tip PVC dolgu',
+      'waterLoss', 'Optimize edilmiş sürüklenme ayırıcılar',
+      'warranty', '2 yıl sistem garantisi'
     ),
-    'MM-001',
-    5,
-    4.90,
-    2,
-    'Modern Mermer Mezar Modeli | Mezarisim',
-    'Modern çizgilerle tasarlanmış, dayanıklı mermer mezar modeli. İstanbul içi montaj ve ölçülendirme dahildir.'
+    'Endüstriyel Açık Devre Soğutma Kulesi | Ensotek',
+    'Endüstriyel prosesler ve HVAC uygulamaları için yüksek verimli açık devre soğutma kulesi. Düşük enerji tüketimi ve uzun ömürlü tasarım.'
   ),
 
-  -- ÜRÜN 1 EN: Modern Marble Grave Model
+  -- ---------- PRODUCT 1: EN ----------
   (
-    'bbbb0101-2222-4222-8222-bbbbbbbb0101',
+    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
     'en',
-    'Modern Marble Grave Model',
-    'modern-marble-grave-model',
-    15000.00,
-    'A durable marble grave model with modern lines. Includes custom sizing and installation for Istanbul and surrounding areas.',
-    'aaaa0001-1111-4111-8111-aaaaaaaa0001',
-    NULL,
-    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
-    'Modern marble grave model',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(),
-    1,
-    1,
-    JSON_ARRAY('grave', 'marble', 'modern', 'istanbul'),
+    'Industrial Open Circuit Cooling Tower',
+    'industrial-open-circuit-cooling-tower',
+    'High-efficiency open circuit cooling tower designed for industrial processes, HVAC systems and power plants. Direct-contact heat transfer provides low operating cost and high performance.',
+    'Industrial open circuit cooling tower',
+    JSON_ARRAY('cooling tower', 'open circuit', 'industrial', 'ensotek'),
     JSON_OBJECT(
-      'dimensions', '100 x 200 cm',
-      'weight', '450 kg',
-      'thickness', '8 cm',
-      'surfaceFinish', 'Polished marble finish',
-      'warranty', '2-year workmanship warranty',
-      'installationTime', '3–5 business days'
+      'capacity', '1,500 m³/h – 4,500 m³/h',
+      'fanType', 'Mechanical draft axial fan',
+      'structure', 'Hot-dip galvanized steel + GRP panels',
+      'fillType', 'Film-type PVC fill media',
+      'waterLoss', 'Optimized drift eliminators',
+      'warranty', '2-year system warranty'
     ),
-    'MM-001',
-    5,
-    4.90,
-    2,
-    'Modern Marble Grave Model | Mezarisim',
-    'A modern, durable marble grave model. Installation and custom sizing are included within Istanbul.'
+    'Industrial Open Circuit Cooling Tower | Ensotek',
+    'High-efficiency open circuit cooling tower for industrial and HVAC applications with low energy consumption and long service life.'
   ),
 
-  -- ÜRÜN 2 TR: Granit Mezar Modeli
+  -- ---------- PRODUCT 2: TR ----------
   (
     'bbbb0002-2222-4222-8222-bbbbbbbb0002',
     'tr',
-    'Granit Mezar Modeli',
-    'granit-mezar-modeli',
-    18500.00,
-    'Uzun ömürlü ve çizilmeye dayanıklı granit malzemeden üretilmiş mezar modeli. Farklı renk ve desen seçenekleri mevcuttur.',
-    'aaaa0001-1111-4111-8111-aaaaaaaa0001', -- MEZAR MODELLERİ
-    NULL,
-    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
-    'Granit mezar modeli',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(),
-    1,
-    0,
-    JSON_ARRAY('mezar', 'granit', 'dayanikli'),
+    'Film Tip Kapalı Devre Soğutma Kulesi',
+    'film-tip-kapali-devre-sogutma-kulesi',
+    'Suyun prosesle temas etmediği, film tip eşanjör yüzeyleri ile çalışan kapalı devre soğutma kulesi. Kireçlenme ve kirlenmeye karşı düşük bakım ihtiyacı sunar.',
+    'Film tip kapalı devre soğutma kulesi',
+    JSON_ARRAY('kapali devre', 'sogutma kulesi', 'film tip', 'proses sogutma'),
     JSON_OBJECT(
-      'dimensions', '90 x 190 cm',
-      'weight', '520 kg',
-      'thickness', '10 cm',
-      'surfaceFinish', 'Mat / Yarı parlak granit',
-      'warranty', '5 yıl malzeme garantisi',
-      'installationTime', '4-7 iş günü'
+      'capacity', '500 kW – 2.000 kW',
+      'coilMaterial', 'Galvaniz çelik veya paslanmaz çelik serpantin',
+      'waterCircuit', 'Kapalı devre proses devresi + açık devre kule devresi',
+      'application', 'Proses soğutma, chiller kondenser devreleri',
+      'warranty', '3 yıl serpantin sızdırmazlık garantisi'
     ),
-    'GM-001',
-    3,
-    4.75,
-    1,
-    'Granit Mezar Modeli | Mezarisim',
-    'Uzun ömürlü ve çizilmeye dayanıklı granit mezar modeli. Farklı renk ve desen seçenekleriyle mezarlığınıza değer katar.'
+    'Film Tip Kapalı Devre Soğutma Kulesi | Ensotek',
+    'Proses akışkanının hava ile temas etmediği, düşük bakım ihtiyacına sahip film tip kapalı devre soğutma kulesi.'
   ),
 
-  -- ÜRÜN 2 EN: Granite Grave Model
+  -- ---------- PRODUCT 2: EN ----------
   (
-    'bbbb0102-2222-4222-8222-bbbbbbbb0102',
+    'bbbb0002-2222-4222-8222-bbbbbbbb0002',
     'en',
-    'Granite Grave Model',
-    'granite-grave-model',
-    18500.00,
-    'A long-lasting, scratch-resistant grave model made of high-quality granite. Available in different colors and patterns.',
-    'aaaa0001-1111-4111-8111-aaaaaaaa0001',
-    NULL,
-    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
-    'Granite grave model',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(),
-    1,
-    0,
-    JSON_ARRAY('grave', 'granite', 'durable'),
+    'Film Type Closed Circuit Cooling Tower',
+    'film-type-closed-circuit-cooling-tower',
+    'Closed circuit cooling tower with film-type coil surfaces, where process water does not come into direct contact with air. Provides low maintenance and high reliability.',
+    'Film type closed circuit cooling tower',
+    JSON_ARRAY('closed circuit', 'cooling tower', 'film type', 'process cooling'),
     JSON_OBJECT(
-      'dimensions', '90 x 190 cm',
-      'weight', '520 kg',
-      'thickness', '10 cm',
-      'surfaceFinish', 'Mat / semi-gloss granite',
-      'warranty', '5-year material warranty',
-      'installationTime', '4–7 business days'
+      'capacity', '500 kW – 2,000 kW',
+      'coilMaterial', 'Galvanized steel or stainless steel coil',
+      'waterCircuit', 'Closed process circuit + open tower circuit',
+      'application', 'Process cooling, chiller condenser loops',
+      'warranty', '3-year coil leak-tightness warranty'
     ),
-    'GM-001',
-    3,
-    4.75,
-    1,
-    'Granite Grave Model | Mezarisim',
-    'A durable granite grave model with various color and pattern options to add value to your cemetery.'
-  )
+    'Film Type Closed Circuit Cooling Tower | Ensotek',
+    'Closed circuit cooling tower with film-type coil surfaces, low maintenance requirements and high reliability.'
+  ),
 
+  -- ---------- PRODUCT 3: TR ----------
+  (
+    'bbbb0003-2222-4222-8222-bbbbbbbb0003',
+    'tr',
+    'Hibrit Adyabatik Soğutma Sistemi',
+    'hibrit-adyabatik-sogutma-sistemi',
+    'Kuru soğutucu ve adyabatik ön soğutma teknolojisini birleştiren hibrit soğutma sistemi. Su tüketiminin kritik olduğu projeler için enerji verimliliği ve esnek işletme imkanı sunar.',
+    'Hibrit adyabatik soğutma sistemi',
+    JSON_ARRAY('hibrit sogutma', 'adyabatik', 'kuru sogutucu', 'enerji verimliligi'),
+    JSON_OBJECT(
+      'waterSaving', 'Klasik kulelere göre %60’a varan su tasarrufu',
+      'operationModes', 'Kuru, adyabatik ve hibrit mod',
+      'application', 'Veri merkezleri, hastaneler, endüstriyel prosesler',
+      'warranty', '2 yıl sistem garantisi'
+    ),
+    'Hibrit Adyabatik Soğutma Sistemi | Ensotek',
+    'Su tüketiminin kritik olduğu projeler için geliştirilen, kuru soğutucu ve adyabatik soğutmayı birleştiren hibrit soğutma sistemi.'
+  ),
+
+  -- ---------- PRODUCT 3: EN ----------
+  (
+    'bbbb0003-2222-4222-8222-bbbbbbbb0003',
+    'en',
+    'Hybrid Adiabatic Cooling System',
+    'hybrid-adiabatic-cooling-system',
+    'Hybrid cooling system that combines dry cooler technology with adiabatic pre-cooling. Provides energy efficiency and flexible operation in projects where water consumption is critical.',
+    'Hybrid adiabatic cooling system',
+    JSON_ARRAY('hybrid cooling', 'adiabatic', 'dry cooler', 'energy efficiency'),
+    JSON_OBJECT(
+      'waterSaving', 'Up to 60% water saving compared to conventional towers',
+      'operationModes', 'Dry, adiabatic and hybrid modes',
+      'application', 'Data centers, hospitals, industrial processes',
+      'warranty', '2-year system warranty'
+    ),
+    'Hybrid Adiabatic Cooling System | Ensotek',
+    'Hybrid cooling system combining dry coolers and adiabatic pre-cooling, designed for projects with limited water resources.'
+  )
 ON DUPLICATE KEY UPDATE
-  locale           = VALUES(locale),
   title            = VALUES(title),
-  price            = VALUES(price),
+  slug             = VALUES(slug),
   description      = VALUES(description),
-  category_id      = VALUES(category_id),
-  sub_category_id  = VALUES(sub_category_id),
-  image_url        = VALUES(image_url),
-  storage_asset_id = VALUES(storage_asset_id),
   alt              = VALUES(alt),
-  images           = VALUES(images),
-  storage_image_ids= VALUES(storage_image_ids),
-  is_active        = VALUES(is_active),
-  is_featured      = VALUES(is_featured),
   tags             = VALUES(tags),
   specifications   = VALUES(specifications),
-  product_code     = VALUES(product_code),
-  stock_quantity   = VALUES(stock_quantity),
-  rating           = VALUES(rating),
-  review_count     = VALUES(review_count),
   meta_title       = VALUES(meta_title),
   meta_description = VALUES(meta_description);
-
-
--- =========================
--- PRODUCT SPECS – ÖRNEK (ŞİMDİLİK SADECE TR ÜRÜNLER)
--- =========================
-
-INSERT INTO product_specs (
-  id,
-  product_id,
-  name,
-  value,
-  category,
-  order_num,
-  created_at,
-  updated_at
-)
-VALUES
-  -- TR specs – product 1
-  (
-    'cccc0001-3333-4333-8333-cccccccc0001',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    'Malzeme',
-    '1. sınıf beyaz mermer',
-    'material',
-    10,
-    NOW(3),
-    NOW(3)
-  ),
-  (
-    'cccc0002-3333-4333-8333-cccccccc0002',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    'Baş taşı yüksekliği',
-    '90 cm',
-    'physical',
-    20,
-    NOW(3),
-    NOW(3)
-  ),
-  -- TR specs – product 2
-  (
-    'cccc0003-3333-4333-8333-cccccccc0003',
-    'bbbb0002-2222-4222-8222-bbbbbbbb0002',
-    'Malzeme',
-    'Siyah granit',
-    'material',
-    10,
-    NOW(3),
-    NOW(3)
-  )
-
-ON DUPLICATE KEY UPDATE
-  name      = VALUES(name),
-  value     = VALUES(value),
-  category  = VALUES(category),
-  order_num = VALUES(order_num),
-  updated_at= VALUES(updated_at);
-
-
--- =========================
--- PRODUCT FAQS – ÖRNEK (SADECE TR ÜRÜNLER)
--- =========================
-
-INSERT INTO product_faqs (
-  id,
-  product_id,
-  question,
-  answer,
-  display_order,
-  is_active,
-  created_at,
-  updated_at
-)
-VALUES
-  -- TR faqs – product 1
-  (
-    'dddd0001-4444-4444-8444-dddddddd0001',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    'Montaj süresine neler dahildir?',
-    'Mezar alanının hazırlanması, mezarın kurulumu ve son temizlik işlemleri montaj süresine dahildir.',
-    10,
-    1,
-    NOW(3),
-    NOW(3)
-  ),
-  (
-    'dddd0002-4444-4444-8444-dddddddd0002',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    'Ödeme koşulları nelerdir?',
-    'Sözleşme sırasında kapora, montaj tamamlandıktan sonra kalan ödeme alınmaktadır.',
-    20,
-    1,
-    NOW(3),
-    NOW(3)
-  ),
-  -- TR faqs – product 2
-  (
-    'dddd0003-4444-4444-8444-dddddddd0003',
-    'bbbb0002-2222-4222-8222-bbbbbbbb0002',
-    'Granit renk seçenekleri mevcut mu?',
-    'Evet, siyah, gri ve açık tonlarda granit seçeneklerimiz mevcuttur.',
-    10,
-    1,
-    NOW(3),
-    NOW(3)
-  )
-
-ON DUPLICATE KEY UPDATE
-  question      = VALUES(question),
-  answer        = VALUES(answer),
-  display_order = VALUES(display_order),
-  is_active     = VALUES(is_active),
-  updated_at    = VALUES(updated_at);
-
-
--- =========================
--- PRODUCT REVIEWS – ÖRNEK (SADECE TR ÜRÜNLER)
--- =========================
-
-INSERT INTO product_reviews (
-  id,
-  product_id,
-  user_id,
-  rating,
-  comment,
-  is_active,
-  customer_name,
-  review_date,
-  created_at,
-  updated_at
-)
-VALUES
-  (
-    'eeee0001-5555-4555-8555-eeeeeeee0001',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    NULL,
-    5,
-    'İşçilik ve ilgi harikaydı, mezar görseldeki gibi çok şık duruyor.',
-    1,
-    'Ahmet Y.',
-    '2025-01-10 10:00:00.000',
-    '2025-01-10 10:00:00.000',
-    '2025-01-10 10:00:00.000'
-  ),
-  (
-    'eeee0002-5555-4555-8555-eeeeeeee0002',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    NULL,
-    4,
-    'Teslimat süresi 1 gün gecikti ama sonuçtan memnun kaldık.',
-    1,
-    'Mehmet K.',
-    '2025-01-15 14:30:00.000',
-    '2025-01-15 14:30:00.000',
-    '2025-01-15 14:30:00.000'
-  ),
-  (
-    'eeee0003-5555-4555-8555-eeeeeeee0003',
-    'bbbb0002-2222-4222-8222-bbbbbbbb0002',
-    NULL,
-    5,
-    'Granit kalitesi gerçekten çok iyi, uzun yıllar sorunsuz gidecek gibi duruyor.',
-    1,
-    'Selma D.',
-    '2025-01-20 11:15:00.000',
-    '2025-01-20 11:15:00.000',
-    '2025-01-20 11:15:00.000'
-  )
-
-ON DUPLICATE KEY UPDATE
-  rating        = VALUES(rating),
-  comment       = VALUES(comment),
-  is_active     = VALUES(is_active),
-  customer_name = VALUES(customer_name),
-  review_date   = VALUES(review_date),
-  updated_at    = VALUES(updated_at);
-
-
--- =========================
--- PRODUCT OPTIONS – ÖRNEK (SADECE TR ÜRÜNLER)
--- =========================
-
-INSERT INTO product_options (
-  id,
-  product_id,
-  option_name,
-  option_values,
-  created_at,
-  updated_at
-)
-VALUES
-  (
-    'ffff0001-6666-4666-8666-ffffffff0001',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    'Baş taşı modeli',
-    JSON_ARRAY('Klasik', 'Modern', 'Yuvarlak'),
-    NOW(3),
-    NOW(3)
-  ),
-  (
-    'ffff0002-6666-4666-8666-ffffffff0002',
-    'bbbb0002-2222-4222-8222-bbbbbbbb0002',
-    'Granit rengi',
-    JSON_ARRAY('Siyah', 'Gri', 'Açık gri'),
-    NOW(3),
-    NOW(3)
-  )
-
-ON DUPLICATE KEY UPDATE
-  option_name   = VALUES(option_name),
-  option_values = VALUES(option_values),
-  updated_at    = VALUES(updated_at);
-
-
--- =========================
--- PRODUCT STOCK – ÖRNEK (SADECE TR ÜRÜNLER)
--- =========================
-
-INSERT INTO product_stock (
-  id,
-  product_id,
-  stock_content,
-  is_used,
-  used_at,
-  created_at,
-  order_item_id
-)
-VALUES
-  (
-    'gggg0001-7777-4777-8777-gggggggg0001',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    'MM-001-STOCK-001',
-    0,
-    NULL,
-    NOW(3),
-    NULL
-  ),
-  (
-    'gggg0002-7777-4777-8777-gggggggg0002',
-    'bbbb0001-2222-4222-8222-bbbbbbbb0001',
-    'MM-001-STOCK-002',
-    0,
-    NULL,
-    NOW(3),
-    NULL
-  ),
-  (
-    'gggg0003-7777-4777-8777-gggggggg0003',
-    'bbbb0002-2222-4222-8222-bbbbbbbb0002',
-    'GM-001-STOCK-001',
-    0,
-    NULL,
-    NOW(3),
-    NULL
-  )
-
-ON DUPLICATE KEY UPDATE
-  stock_content = VALUES(stock_content),
-  is_used       = VALUES(is_used),
-  used_at       = VALUES(used_at);
 
 COMMIT;

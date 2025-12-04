@@ -16,32 +16,29 @@ import {
   uniqueIndex,
   foreignKey,
   mysqlEnum,
+  primaryKey,
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 import { categories } from "../categories/schema";
 import { subCategories } from "../subcategories/schema";
 
+/* =========================
+ * PRODUCTS (BASE TABLO – DİL BAĞIMSIZ)
+ * ========================= */
 export const products = mysqlTable(
   "products",
   {
     id: char("id", { length: 36 }).primaryKey().notNull(),
 
-    // 🌍 Çok dilli ürünler
-    locale: varchar("locale", { length: 8 }).notNull().default("tr"),
-
-    title: varchar("title", { length: 255 }).notNull(),
-    slug: varchar("slug", { length: 255 }).notNull(),
-
-    price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-    description: text("description"),
-
+    // Dilden bağımsız alanlar
     category_id: char("category_id", { length: 36 }).notNull(),
     sub_category_id: char("sub_category_id", { length: 36 }),
+
+    price: decimal("price", { precision: 10, scale: 2 }).notNull(),
 
     // ✅ Görseller (tekil kapak + çoklu galeri)
     image_url: longtext("image_url"),
     storage_asset_id: char("storage_asset_id", { length: 36 }),
-    alt: varchar("alt", { length: 255 }),
     images: json("images").$type<string[]>().default(sql`JSON_ARRAY()`),
     storage_image_ids: json("storage_image_ids")
       .$type<string[]>()
@@ -50,16 +47,8 @@ export const products = mysqlTable(
     is_active: tinyint("is_active").notNull().default(1).$type<boolean>(),
     is_featured: tinyint("is_featured").notNull().default(0).$type<boolean>(),
 
-    tags: json("tags").$type<string[]>().default(sql`JSON_ARRAY()`),
-
-    specifications: json("specifications").$type<{
-      dimensions?: string;
-      weight?: string;
-      thickness?: string;
-      surfaceFinish?: string;
-      warranty?: string;
-      installationTime?: string;
-    }>(),
+    // 🔢 Drag & drop sıralama için
+    order_num: int("order_num").notNull().default(0),
 
     product_code: varchar("product_code", { length: 64 }),
     stock_quantity: int("stock_quantity").notNull().default(0),
@@ -67,9 +56,6 @@ export const products = mysqlTable(
       .notNull()
       .default("5.00"),
     review_count: int("review_count").notNull().default(0),
-
-    meta_title: varchar("meta_title", { length: 255 }),
-    meta_description: varchar("meta_description", { length: 500 }),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()
@@ -80,15 +66,13 @@ export const products = mysqlTable(
       .$onUpdateFn(() => new Date()),
   },
   (t) => [
-    // 🌍 slug artık locale ile birlikte tekil
-    uniqueIndex("products_locale_slug_uq").on(t.locale, t.slug),
     uniqueIndex("products_code_uq").on(t.product_code),
 
     index("products_category_id_idx").on(t.category_id),
     index("products_sub_category_id_idx").on(t.sub_category_id),
-    index("products_locale_idx").on(t.locale),
     index("products_active_idx").on(t.is_active),
     index("products_asset_idx").on(t.storage_asset_id),
+    index("products_order_idx").on(t.order_num),
 
     foreignKey({
       columns: [t.category_id],
@@ -104,6 +88,57 @@ export const products = mysqlTable(
       name: "fk_products_subcategory",
     })
       .onDelete("set null")
+      .onUpdate("cascade"),
+  ],
+);
+
+/* =========================
+ * PRODUCT I18N (LOCALE BAZLI)
+ * ========================= */
+export const productI18n = mysqlTable(
+  "product_i18n",
+  {
+    product_id: char("product_id", { length: 36 }).notNull(),
+    locale: varchar("locale", { length: 8 }).notNull().default("tr"),
+
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+
+    description: text("description"),
+    alt: varchar("alt", { length: 255 }),
+
+    tags: json("tags").$type<string[]>().default(sql`JSON_ARRAY()`),
+    specifications: json("specifications").$type<Record<string, string>>(),
+
+    meta_title: varchar("meta_title", { length: 255 }),
+    meta_description: varchar("meta_description", { length: 500 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    // 🔑 Her ürün + locale kombinasyonu tekil (PK)
+    primaryKey({
+      name: "product_i18n_pk",
+      columns: [t.product_id, t.locale],
+    }),
+
+    // 🧩 Aynı locale içinde slug tekil olsun
+    uniqueIndex("product_i18n_locale_slug_uq").on(t.locale, t.slug),
+
+    index("product_i18n_locale_idx").on(t.locale),
+
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: "fk_product_i18n_product",
+    })
+      .onDelete("cascade")
       .onUpdate("cascade"),
   ],
 );
@@ -275,6 +310,10 @@ export { productStock as product_stock };
 // Types
 export type ProductRow = typeof products.$inferSelect;
 export type NewProductRow = typeof products.$inferInsert;
+
+export type ProductI18nRow = typeof productI18n.$inferSelect;
+export type NewProductI18nRow = typeof productI18n.$inferInsert;
+
 export type ProductSpecRow = typeof productSpecs.$inferSelect;
 export type NewProductSpecRow = typeof productSpecs.$inferInsert;
 export type ProductFaqRow = typeof productFaqs.$inferSelect;

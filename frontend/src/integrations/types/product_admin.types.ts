@@ -30,10 +30,11 @@ export type AdminProductListResponse = {
   total: number;
 };
 
+// ⬇⬇⬇ BURAYI DÜZELTİYORUZ
 export type AdminGetProductParams = {
   id: string;
+  locale?: string; // ← yeni
 };
-
 /* --------- Create / Update payloadları --------- */
 
 export type AdminProductCreatePayload = {

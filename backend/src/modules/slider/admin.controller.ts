@@ -1,5 +1,6 @@
 // =============================================================
 // FILE: src/modules/slider/admin.controller.ts
+// Slider – parent + i18n (kategori style admin controller)
 // =============================================================
 import type { RouteHandler } from "fastify";
 import {
@@ -28,29 +29,31 @@ import {
 import type { RowWithAsset } from "./repository";
 
 const toAdminView = (row: RowWithAsset) => {
-  const a = row.sl;
+  const base = row.sl;
+  const t = row.i18n;
+
   return {
-    id: a.id,
-    uuid: a.uuid,
-    locale: a.locale,
-    name: a.name,
-    slug: a.slug,
-    description: a.description ?? null,
+    id: base.id,
+    uuid: base.uuid,
+    locale: t.locale,
+    name: t.name,
+    slug: t.slug,
+    description: t.description ?? null,
 
-    image_url: a.image_url ?? null,
-    image_asset_id: a.image_asset_id ?? null,
-    image_effective_url: row.asset_url ?? a.image_url ?? null,
+    image_url: base.image_url ?? null,
+    image_asset_id: base.image_asset_id ?? null,
+    image_effective_url: row.asset_url ?? base.image_url ?? null,
 
-    alt: a.alt ?? null,
-    buttonText: a.buttonText ?? null,
-    buttonLink: a.buttonLink ?? null,
+    alt: t.alt ?? null,
+    buttonText: t.buttonText ?? null,
+    buttonLink: t.buttonLink ?? null,
 
-    featured: !!a.featured,
-    is_active: !!a.is_active,
-    display_order: a.display_order,
+    featured: !!base.featured,
+    is_active: !!base.is_active,
+    display_order: base.display_order,
 
-    created_at: a.created_at,
-    updated_at: a.updated_at,
+    created_at: base.created_at,
+    updated_at: base.updated_at,
   };
 };
 
@@ -58,21 +61,19 @@ const toAdminView = (row: RowWithAsset) => {
 export const adminListSlides: RouteHandler = async (req, reply) => {
   const parsed = adminListQuerySchema.safeParse(req.query);
   if (!parsed.success) {
-    return reply
-      .code(400)
-      .send({
-        error: {
-          message: "invalid_query",
-          issues: parsed.error.flatten(),
-        },
-      });
+    return reply.code(400).send({
+      error: {
+        message: "invalid_query",
+        issues: parsed.error.flatten(),
+      },
+    });
   }
   const q = parsed.data as AdminListQuery;
   const rows = await repoListAdmin(q);
   return rows.map(toAdminView);
 };
 
-/** GET /admin/sliders/:id */
+/** GET /admin/sliders/:id?locale=tr */
 export const adminGetSlide: RouteHandler = async (req, reply) => {
   const v = idParamSchema.safeParse(req.params);
   if (!v.success) {
@@ -80,7 +81,14 @@ export const adminGetSlide: RouteHandler = async (req, reply) => {
       .code(400)
       .send({ error: { message: "invalid_params" } });
   }
-  const row = await repoGetById(v.data.id);
+
+  const q = (req.query ?? {}) as Record<string, unknown>;
+  const locale =
+    typeof q.locale === "string" && q.locale.trim()
+      ? q.locale.trim()
+      : undefined;
+
+  const row = await repoGetById(v.data.id, locale);
   if (!row) {
     return reply
       .code(404)
@@ -93,17 +101,28 @@ export const adminGetSlide: RouteHandler = async (req, reply) => {
 export const adminCreateSlide: RouteHandler = async (req, reply) => {
   const b = createSchema.safeParse(req.body);
   if (!b.success) {
-    return reply
-      .code(400)
-      .send({
-        error: {
-          message: "invalid_body",
-          issues: b.error.flatten(),
-        },
-      });
+    return reply.code(400).send({
+      error: {
+        message: "invalid_body",
+        issues: b.error.flatten(),
+      },
+    });
   }
-  const created = await repoCreate(b.data as CreateBody);
-  return reply.code(201).send(toAdminView(created));
+
+  try {
+    const created = await repoCreate(b.data as CreateBody);
+    return reply.code(201).send(toAdminView(created));
+  } catch (err: any) {
+    if (err?.code === "ER_DUP_ENTRY") {
+      return reply
+        .code(409)
+        .send({ error: { message: "slug_locale_already_exists" } });
+    }
+    req.log.error({ err }, "slider_create_failed");
+    return reply
+      .code(500)
+      .send({ error: { message: "slider_create_failed" } });
+  }
 };
 
 /** PATCH /admin/sliders/:id */
@@ -116,22 +135,33 @@ export const adminUpdateSlide: RouteHandler = async (req, reply) => {
   }
   const b = updateSchema.safeParse(req.body);
   if (!b.success) {
-    return reply
-      .code(400)
-      .send({
-        error: {
-          message: "invalid_body",
-          issues: b.error.flatten(),
-        },
-      });
+    return reply.code(400).send({
+      error: {
+        message: "invalid_body",
+        issues: b.error.flatten(),
+      },
+    });
   }
-  const updated = await repoUpdate(p.data.id, b.data as UpdateBody);
-  if (!updated) {
+
+  try {
+    const updated = await repoUpdate(p.data.id, b.data as UpdateBody);
+    if (!updated) {
+      return reply
+        .code(404)
+        .send({ error: { message: "not_found" } });
+    }
+    return toAdminView(updated);
+  } catch (err: any) {
+    if (err?.code === "ER_DUP_ENTRY") {
+      return reply
+        .code(409)
+        .send({ error: { message: "slug_locale_already_exists" } });
+    }
+    req.log.error({ err }, "slider_update_failed");
     return reply
-      .code(404)
-      .send({ error: { message: "not_found" } });
+      .code(500)
+      .send({ error: { message: "slider_update_failed" } });
   }
-  return toAdminView(updated);
 };
 
 /** DELETE /admin/sliders/:id */
@@ -150,14 +180,12 @@ export const adminDeleteSlide: RouteHandler = async (req, reply) => {
 export const adminReorderSlides: RouteHandler = async (req, reply) => {
   const b = reorderSchema.safeParse(req.body);
   if (!b.success) {
-    return reply
-      .code(400)
-      .send({
-        error: {
-          message: "invalid_body",
-          issues: b.error.flatten(),
-        },
-      });
+    return reply.code(400).send({
+      error: {
+        message: "invalid_body",
+        issues: b.error.flatten(),
+      },
+    });
   }
   await repoReorder(b.data.ids);
   return reply.send({ ok: true });
@@ -173,14 +201,12 @@ export const adminSetStatus: RouteHandler = async (req, reply) => {
   }
   const b = setStatusSchema.safeParse(req.body);
   if (!b.success) {
-    return reply
-      .code(400)
-      .send({
-        error: {
-          message: "invalid_body",
-          issues: b.error.flatten(),
-        },
-      });
+    return reply.code(400).send({
+      error: {
+        message: "invalid_body",
+        issues: b.error.flatten(),
+      },
+    });
   }
   const updated = await repoSetStatus(p.data.id, b.data.is_active);
   if (!updated) {
@@ -192,7 +218,10 @@ export const adminSetStatus: RouteHandler = async (req, reply) => {
 };
 
 /** ✅ PATCH /admin/sliders/:id/image */
-export const adminSetSliderImage: RouteHandler = async (req, reply) => {
+export const adminSetSliderImage: RouteHandler = async (
+  req,
+  reply,
+) => {
   const p = idParamSchema.safeParse(req.params);
   if (!p.success) {
     return reply
@@ -201,25 +230,21 @@ export const adminSetSliderImage: RouteHandler = async (req, reply) => {
   }
   const b = setImageSchema.safeParse(req.body);
   if (!b.success) {
-    return reply
-      .code(400)
-      .send({
-        error: {
-          message: "invalid_body",
-          issues: b.error.flatten(),
-        },
-      });
+    return reply.code(400).send({
+      error: {
+        message: "invalid_body",
+        issues: b.error.flatten(),
+      },
+    });
   }
   const updated = await repoSetImage(
     p.data.id,
     b.data as SetImageBody,
   );
   if (!updated) {
-    return reply
-      .code(404)
-      .send({
-        error: { message: "not_found_or_asset_missing" },
-      });
+    return reply.code(404).send({
+      error: { message: "not_found_or_asset_missing" },
+    });
   }
   return toAdminView(updated);
 };

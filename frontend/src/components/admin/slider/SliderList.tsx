@@ -257,8 +257,8 @@ export const SliderList: React.FC<SliderListProps> = ({
             </tbody>
             <caption className="px-3 py-2 text-start">
               <span className="text-muted small">
-                Satırları sürükleyip bırakarak slider sırasını değiştirebilirsin.
-                Değişiklikleri kalıcı yapmak için{" "}
+                Satırları sürükleyip bırakarak slider sırasını
+                değiştirebilirsin. Değişiklikleri kalıcı yapmak için{" "}
                 <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonuna
                 basman gerekir.
               </span>

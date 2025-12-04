@@ -22,6 +22,7 @@ const cleanParams = (
 ): Record<string, string | number | boolean> | undefined => {
   if (!params) return undefined;
   const out: Record<string, string | number | boolean> = {};
+
   for (const [k, v] of Object.entries(params)) {
     if (
       v === undefined ||
@@ -31,21 +32,25 @@ const cleanParams = (
     ) {
       continue;
     }
-    // boolean / number / string dışındaki tipleri string’e çevirme
-    if (typeof v === "boolean" || typeof v === "number" || typeof v === "string") {
+
+    if (
+      typeof v === "boolean" ||
+      typeof v === "number" ||
+      typeof v === "string"
+    ) {
       out[k] = v;
     } else {
       out[k] = String(v);
     }
   }
+
   return Object.keys(out).length ? out : undefined;
 };
 
 export const categoriesAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     /* --------------------------------------------------------- */
-    /* LIST                                                       */
-    /* GET /api/admin/categories/list                            */
+    /* LIST – GET /api/admin/categories/list                     */
     /* --------------------------------------------------------- */
     listCategoriesAdmin: build.query<
       CategoryDto[],
@@ -54,24 +59,33 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
       query: (params) => ({
         url: "/admin/categories/list",
         method: "GET",
-        params: cleanParams(params as Record<string, unknown> | undefined),
+        params: cleanParams(
+          params as Record<string, unknown> | undefined,
+        ),
       }),
     }),
 
     /* --------------------------------------------------------- */
-    /* GET by id – /api/admin/categories/:id                     */
+    /* GET by id – /api/admin/categories/:id?locale=xx           */
     /* --------------------------------------------------------- */
-    getCategoryAdmin: build.query<CategoryDto, string>({
-      query: (id) => ({
+    getCategoryAdmin: build.query<
+      CategoryDto,
+      { id: string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
         url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "GET",
+        params: cleanParams(locale ? { locale } : undefined),
       }),
     }),
 
     /* --------------------------------------------------------- */
     /* CREATE – POST /api/admin/categories                       */
     /* --------------------------------------------------------- */
-    createCategoryAdmin: build.mutation<CategoryDto, CategoryCreatePayload>({
+    createCategoryAdmin: build.mutation<
+      CategoryDto,
+      CategoryCreatePayload
+    >({
       query: (body) => ({
         url: "/admin/categories",
         method: "POST",
@@ -80,7 +94,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     }),
 
     /* --------------------------------------------------------- */
-    /* PATCH (partial update) – /api/admin/categories/:id        */
+    /* PATCH – /api/admin/categories/:id                         */
     /* --------------------------------------------------------- */
     updateCategoryAdmin: build.mutation<
       CategoryDto,
@@ -89,7 +103,6 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
       query: ({ id, patch }) => ({
         url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "PATCH",
-        // 🔴 ÖNEMLİ: backend categoryUpdateSchema.partial() top-level body bekliyor
         body: patch,
       }),
     }),
@@ -106,7 +119,6 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
 
     /* --------------------------------------------------------- */
     /* REORDER – /api/admin/categories/reorder                   */
-    /* Body: { items: [{id, display_order}, ...] }               */
     /* --------------------------------------------------------- */
     reorderCategoriesAdmin: build.mutation<
       { ok: boolean },
@@ -121,7 +133,6 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
 
     /* --------------------------------------------------------- */
     /* TOGGLE ACTIVE – PATCH /api/admin/categories/:id/active    */
-    /* Body: { is_active: boolean }                              */
     /* --------------------------------------------------------- */
     toggleCategoryActiveAdmin: build.mutation<
       CategoryDto,
@@ -136,7 +147,6 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
 
     /* --------------------------------------------------------- */
     /* TOGGLE FEATURED – PATCH /api/admin/categories/:id/featured*/
-    /* Body: { is_featured: boolean }                            */
     /* --------------------------------------------------------- */
     toggleCategoryFeaturedAdmin: build.mutation<
       CategoryDto,
@@ -151,7 +161,6 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
 
     /* --------------------------------------------------------- */
     /* SET IMAGE – PATCH /api/admin/categories/:id/image         */
-    /* Body: { asset_id?: string|null, alt?: string|null }       */
     /* --------------------------------------------------------- */
     setCategoryImageAdmin: build.mutation<
       CategoryDto,

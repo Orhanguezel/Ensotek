@@ -11,14 +11,19 @@ import {
 export async function registerCategories(app: FastifyInstance) {
   // PUBLIC READ
   app.get("/categories", { config: { public: true } }, listCategories);
-  app.get<{ Params: { id: string } }>(
+
+  app.get<{ Params: { id: string }; Querystring: { locale?: string } }>(
     "/categories/:id",
     { config: { public: true } },
-    getCategoryById
+    getCategoryById,
   );
-  app.get<{ Params: { slug: string } }>(
+
+  app.get<{
+    Params: { slug: string };
+    Querystring: { locale?: string; module_key?: string };
+  }>(
     "/categories/by-slug/:slug",
     { config: { public: true } },
-    getCategoryBySlug
+    getCategoryBySlug,
   );
 }

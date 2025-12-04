@@ -1,65 +1,52 @@
 -- =============================================================
 -- 013_products_schema.sql
--- Products + Specs + FAQs + Reviews + Options + Stock
--- Drizzle schema: src/modules/products/schema.ts ile birebir
+-- Products + Product_i18n + Specs + FAQs + Reviews + Options + Stock
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- =========================
--- PRODUCTS (LOCALE DESTEKLİ)
+-- PRODUCTS (BASE TABLO – DİL BAĞIMSIZ)
 -- =========================
 CREATE TABLE IF NOT EXISTS products (
   id                 CHAR(36)      NOT NULL,
 
-  -- 🌍 Çok dilli ürünler
-  locale             VARCHAR(8)    NOT NULL DEFAULT 'tr',
-
-  title              VARCHAR(255)  NOT NULL,
-  slug               VARCHAR(255)  NOT NULL,
-
-  price              DECIMAL(10,2) NOT NULL,
-  description        TEXT          DEFAULT NULL,
-
+  -- Dilden bağımsız alanlar
   category_id        CHAR(36)      NOT NULL,
   sub_category_id    CHAR(36)      DEFAULT NULL,
+
+  price              DECIMAL(10,2) NOT NULL,
 
   -- Kapak + galeri (tekil kapak + çoklu galeri)
   image_url          LONGTEXT      DEFAULT NULL,
   storage_asset_id   CHAR(36)      DEFAULT NULL,
-  alt                VARCHAR(255)  DEFAULT NULL,
   images             JSON          DEFAULT (JSON_ARRAY()),
   storage_image_ids  JSON          DEFAULT (JSON_ARRAY()),
 
   is_active          TINYINT(1)    NOT NULL DEFAULT 1,
   is_featured        TINYINT(1)    NOT NULL DEFAULT 0,
 
-  tags               JSON          DEFAULT (JSON_ARRAY()),
-  specifications     JSON          DEFAULT NULL,
+  -- 🔢 Drag & drop sıralama için
+  order_num          INT(11)       NOT NULL DEFAULT 0,
 
   product_code       VARCHAR(64)   DEFAULT NULL,
   stock_quantity     INT(11)       NOT NULL DEFAULT 0,
   rating             DECIMAL(3,2)  NOT NULL DEFAULT 5.00,
   review_count       INT(11)       NOT NULL DEFAULT 0,
 
-  meta_title         VARCHAR(255)  DEFAULT NULL,
-  meta_description   VARCHAR(500)  DEFAULT NULL,
-
   created_at         DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   updated_at         DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
 
-  -- 🌍 slug artık locale ile birlikte tekil
-  UNIQUE KEY products_locale_slug_uq (locale, slug),
   UNIQUE KEY products_code_uq        (product_code),
 
   KEY products_category_id_idx       (category_id),
   KEY products_sub_category_id_idx   (sub_category_id),
-  KEY products_locale_idx            (locale),
   KEY products_active_idx            (is_active),
   KEY products_asset_idx             (storage_asset_id),
+  KEY products_order_idx             (order_num),
 
   CONSTRAINT fk_products_category
     FOREIGN KEY (category_id) REFERENCES categories(id)
@@ -68,6 +55,43 @@ CREATE TABLE IF NOT EXISTS products (
   CONSTRAINT fk_products_subcategory
     FOREIGN KEY (sub_category_id) REFERENCES sub_categories(id)
     ON DELETE SET NULL ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- =========================
+-- PRODUCT I18N (LOCALE BAZLI ALANLAR)
+-- =========================
+CREATE TABLE IF NOT EXISTS product_i18n (
+  product_id       CHAR(36)     NOT NULL,
+  locale           VARCHAR(8)   NOT NULL DEFAULT 'tr',
+
+  title            VARCHAR(255) NOT NULL,
+  slug             VARCHAR(255) NOT NULL,
+
+  description      TEXT         DEFAULT NULL,
+
+  alt              VARCHAR(255) DEFAULT NULL,
+
+  tags             JSON         DEFAULT (JSON_ARRAY()),
+  specifications   JSON         DEFAULT NULL,
+
+  meta_title       VARCHAR(255)  DEFAULT NULL,
+  meta_description VARCHAR(500)  DEFAULT NULL,
+
+  created_at       DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at       DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+
+  -- 🔑 Her ürün + locale kombinasyonu tekil
+  PRIMARY KEY (product_id, locale),
+
+  -- 🧩 Aynı locale içinde slug tekil olsun
+  UNIQUE KEY product_i18n_locale_slug_uq (locale, slug),
+
+  KEY product_i18n_locale_idx (locale),
+
+  CONSTRAINT fk_product_i18n_product
+    FOREIGN KEY (product_id) REFERENCES products(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 

@@ -1,9 +1,8 @@
+-- =============================================================
+-- 021_references.seeds.sql  (parent seeds)
+-- =============================================================
 
---- =============================================================
--- 030-1_references.seeds.sql  (parent seeds)
---- =============================================================
 -- ================= SEED: Parent satırlar =================
--- Her references kategorisi için 2 örnek firma
 -- 011_catalog_categories.sql içindeki IDs:
 --  aaaa5002 = ENERJİ SANTRALLERİ
 --  aaaa5003 = PETROKİMYA & KİMYA TESİSLERİ
@@ -15,7 +14,7 @@
 --  aaaa5009 = VERİ MERKEZİ & HASTANE
 --  aaaa5010 = DİĞER PROJELER
 
--- ID değişkenleri (bu değişkenler 031/032/033 tarafından da kullanılır)
+-- ID değişkenleri (022/023/024 içinde de kullanılır)
 SET @REF_ENERGY_PP1_ID     := UUID();
 SET @REF_ENERGY_PP2_ID     := UUID();
 

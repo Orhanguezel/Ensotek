@@ -37,6 +37,7 @@ function pathToTab(pathname: string): ActiveTab {
   if (pathname.startsWith("/admin/services")) return "services";
 
   if (pathname.startsWith("/admin/products")) return "products";
+  if (pathname.startsWith("/admin/sparepart")) return "sparepart";
   if (pathname.startsWith("/admin/categories")) return "categories";
   if (pathname.startsWith("/admin/subcategories")) return "subcategories";
 
@@ -75,6 +76,8 @@ function tabToPath(tab: ActiveTab): string {
 
     case "products":
       return "/admin/products";
+    case "sparepart":
+      return "/admin/sparepart";
     case "categories":
       return "/admin/categories";
     case "subcategories":

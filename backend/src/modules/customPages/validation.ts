@@ -1,5 +1,3 @@
-// src/modules/customPages/validation.ts
-
 import { z } from "zod";
 import { LOCALES } from "@/core/i18n";
 
@@ -68,7 +66,7 @@ export type PatchCustomPageParentBody = z.infer<
   typeof patchCustomPageParentBodySchema
 >;
 
-/** i18n create/update (title/slug/content/meta/alt) */
+/** i18n create/update (title/slug/content/meta/alt/summary/tags) */
 export const upsertCustomPageI18nBodySchema = z.object({
   locale: LOCALE_ENUM.optional(),
   title: z.string().min(1).max(255).trim(),
@@ -84,11 +82,18 @@ export const upsertCustomPageI18nBodySchema = z.object({
   /** düz HTML (repo.packContent ile {"html":"..."}’a sarılır) */
   content: z.string().min(1),
 
+  /** Kısa özet (liste ve meta için) */
+  summary: z.string().max(1000).nullable().optional(),
+
   /** Görsel alt metni (çeviri) */
   featured_image_alt: z.string().max(255).nullable().optional(),
 
+  /** Meta alanları */
   meta_title: z.string().max(255).nullable().optional(),
   meta_description: z.string().max(500).nullable().optional(),
+
+  /** Tags – virgülle ayrılmış string (örn: "cooling,tower,frp") */
+  tags: z.string().max(1000).nullable().optional(),
 });
 
 export type UpsertCustomPageI18nBody = z.infer<
@@ -110,10 +115,14 @@ export const patchCustomPageI18nBodySchema = z.object({
     .optional(),
   content: z.string().min(1).optional(),
 
+  summary: z.string().max(1000).nullable().optional(),
+
   featured_image_alt: z.string().max(255).nullable().optional(),
 
   meta_title: z.string().max(255).nullable().optional(),
   meta_description: z.string().max(500).nullable().optional(),
+
+  tags: z.string().max(1000).nullable().optional(),
 });
 
 export type PatchCustomPageI18nBody = z.infer<
@@ -150,7 +159,6 @@ export type PatchCustomPageBody = z.infer<
   typeof patchCustomPageBodySchema
 >;
 
-
 /** BY-SLUG params */
 export const customPageBySlugParamsSchema = z.object({
   slug: z.string().min(1),
@@ -167,3 +175,4 @@ export type CustomPageBySlugParams = z.infer<
 export type CustomPageBySlugQuery = z.infer<
   typeof customPageBySlugQuerySchema
 >;
+

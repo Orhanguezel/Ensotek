@@ -1,6 +1,7 @@
 // =============================================================
 // FILE: src/integrations/types/slider.types.ts
 // Ensotek – Slider tipleri + normalizer'lar
+// Parent + i18n (slider + slider_i18n) backend ile uyumlu
 // =============================================================
 
 /* -------------------- Helper'lar -------------------- */
@@ -21,37 +22,55 @@ const asNum = (v: unknown): number => {
 
 /**
  * Admin controller'ın döndürdüğü şekil
- * toAdminView() ile oluşan obje
+ * toAdminView() ile oluşan obje (parent + i18n join edilmiş)
  */
 export interface ApiSliderAdmin {
+  /** Parent slider.id */
   id: number;
+  /** Parent slider.uuid */
   uuid: string;
+
+  /** i18n.locale */
   locale: string;
+  /** i18n.name */
   name: string;
+  /** i18n.slug */
   slug: string;
+  /** i18n.description */
   description: string | null;
 
+  /** Parent image_url (veya publicUrlOf ile hesaplanmış) */
   image_url: string | null;
+  /** Parent image_asset_id (storage_assets.id) */
   image_asset_id: string | null;
+  /** storage üzerinden efektif URL (asset_url || image_url) */
   image_effective_url: string | null;
 
+  /** i18n.alt */
   alt: string | null;
+  /** i18n.button_text */
   buttonText: string | null;
+  /** i18n.button_link */
   buttonLink: string | null;
 
-  featured: boolean;
-  is_active: boolean;
+  /** Parent featured / is_active / order */
+  featured: boolean | 0 | 1;
+  is_active: boolean | 0 | 1;
   display_order: number;
 
   created_at: string;
   updated_at: string;
+
+  /** Esnek JSON alan (çok dilli ayarlar, flags vs.) */
+  meta?: Record<string, unknown> | null;
 }
 
 /**
  * Public controller'daki SlideData tipi
- * rowToPublic() ile dönen obje
+ * rowToPublic() ile dönen obje (i18n + parent)
  */
 export interface ApiSliderPublic {
+  /** Parent slider.id (string'e çevrilmiş) */
   id: string;
   title: string;
   description: string;
@@ -76,6 +95,7 @@ export interface ApiSliderPublic {
 export interface SliderAdminDto {
   id: string;
   uuid: string;
+
   locale: string;
   name: string;
   slug: string;
@@ -95,6 +115,9 @@ export interface SliderAdminDto {
 
   created_at: string;
   updated_at: string;
+
+  /** Esnek JSON alan – FE & BE ortak (şu an zorunlu değil) */
+  meta: Record<string, unknown> | null;
 }
 
 /**
@@ -129,6 +152,7 @@ export type SliderSortOrder = "asc" | "desc";
 
 /**
  * Admin list query (adminListQuerySchema ile uyumlu)
+ * - locale opsiyonel (verilmezse tüm diller)
  */
 export interface SliderAdminListQueryParams {
   q?: string;
@@ -142,6 +166,7 @@ export interface SliderAdminListQueryParams {
 
 /**
  * Public list query (publicListQuerySchema ile uyumlu)
+ * - locale verilmezse backend default 'tr'
  */
 export interface SliderPublicListQueryParams {
   locale?: string;
@@ -165,28 +190,34 @@ export interface SliderPublicDetailQuery {
 
 /**
  * CreateBody (createSchema) ile uyumlu payload
+ * - Hem parent hem i18n alanlarını içerir
  */
 export interface SliderCreatePayload {
+  /** i18n.locale; verilmezse backend default 'tr' kullanır */
   locale?: string;
 
+  /** i18n alanları */
   name: string;
   slug?: string;
   description?: string | null;
-
-  image_url?: string | null;
-  image_asset_id?: string | null;
   alt?: string | null;
   buttonText?: string | null;
   buttonLink?: string | null;
 
+  /** Parent alanları */
+  image_url?: string | null;
+  image_asset_id?: string | null;
   featured?: boolean;
   is_active?: boolean;
-
   display_order?: number;
+
+  /** Esnek JSON meta – backend şu an ignore edebilir */
+  meta?: Record<string, unknown> | null;
 }
 
 /**
  * UpdateBody (updateSchema.partial) ile uyumlu payload
+ * - Hem parent hem i18n alanlarını opsiyonel olarak günceller
  */
 export interface SliderUpdatePayload {
   locale?: string;
@@ -194,21 +225,22 @@ export interface SliderUpdatePayload {
   name?: string;
   slug?: string;
   description?: string | null;
-
-  image_url?: string | null;
-  image_asset_id?: string | null;
   alt?: string | null;
   buttonText?: string | null;
   buttonLink?: string | null;
 
+  image_url?: string | null;
+  image_asset_id?: string | null;
   featured?: boolean;
   is_active?: boolean;
-
   display_order?: number;
+
+  meta?: Record<string, unknown> | null;
 }
 
 /**
  * Reorder body – reorderSchema (ids: number[])
+ * - ids: parent slider.id listesi
  */
 export interface SliderReorderPayload {
   ids: number[];
@@ -216,6 +248,7 @@ export interface SliderReorderPayload {
 
 /**
  * Status set – setStatusSchema
+ * - Parent is_active toggling
  */
 export interface SliderSetStatusPayload {
   is_active: boolean;
@@ -223,6 +256,7 @@ export interface SliderSetStatusPayload {
 
 /**
  * Image set – setImageSchema (asset_id null ise image temizlenir)
+ * - Parent image_url / image_asset_id ayarlanır
  */
 export interface SliderSetImagePayload {
   asset_id: string | null;
@@ -252,6 +286,8 @@ export const normalizeSliderAdmin = (api: ApiSliderAdmin): SliderAdminDto => ({
 
   created_at: asStr(api.created_at),
   updated_at: asStr(api.updated_at),
+
+  meta: api.meta ?? null,
 });
 
 export const normalizeSliderPublic = (

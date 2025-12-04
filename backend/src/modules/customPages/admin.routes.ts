@@ -8,6 +8,7 @@ import {
   createPageAdmin,
   updatePageAdmin,
   removePageAdmin,
+  reorderCustomPagesAdmin,
 } from "./admin.controller";
 
 const BASE = "/custom_pages";
@@ -40,4 +41,10 @@ export async function registerCustomPagesAdmin(app: FastifyInstance) {
     { config: { auth: true, admin: true } },
     removePageAdmin,
   );
+  app.post(
+  `${BASE}/reorder`,
+  { config: { auth: true } },
+  reorderCustomPagesAdmin,
+);
+
 }

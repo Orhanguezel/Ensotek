@@ -38,15 +38,6 @@ export type ServiceMerged = {
   image_url: string | null;
   image_asset_id: string | null;
 
-  // special
-  area: string | null;
-  duration: string | null;
-  maintenance: string | null;
-  season: string | null;
-  soil_type: string | null;
-  thickness: string | null;
-  equipment: string | null;
-
   created_at: string | Date;
   updated_at: string | Date;
 
@@ -59,6 +50,12 @@ export type ServiceMerged = {
   includes: string | null;
   warranty: string | null;
   image_alt: string | null;
+
+  tags: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  meta_keywords: string | null;
+
   locale_resolved: string | null;
 };
 
@@ -135,14 +132,6 @@ function baseSelect(iReq: any, iDef: any) {
     image_url: services.image_url,
     image_asset_id: services.image_asset_id,
 
-    area: services.area,
-    duration: services.duration,
-    maintenance: services.maintenance,
-    season: services.season,
-    soil_type: services.soil_type,
-    thickness: services.thickness,
-    equipment: services.equipment,
-
     created_at: services.created_at,
     updated_at: services.updated_at,
 
@@ -164,6 +153,18 @@ function baseSelect(iReq: any, iDef: any) {
     image_alt: sql<string>`COALESCE(${iReq.image_alt}, ${iDef.image_alt})`.as(
       "image_alt",
     ),
+
+    tags: sql<string>`COALESCE(${iReq.tags}, ${iDef.tags})`.as("tags"),
+    meta_title: sql<string>`COALESCE(${iReq.meta_title}, ${iDef.meta_title})`.as(
+      "meta_title",
+    ),
+    meta_description: sql<string>`COALESCE(${iReq.meta_description}, ${iDef.meta_description})`.as(
+      "meta_description",
+    ),
+    meta_keywords: sql<string>`COALESCE(${iReq.meta_keywords}, ${iDef.meta_keywords})`.as(
+      "meta_keywords",
+    ),
+
     locale_resolved: sql<string>`
       CASE WHEN ${iReq.id} IS NOT NULL THEN ${iReq.locale} ELSE ${iDef.locale} END
     `.as("locale_resolved"),
@@ -238,6 +239,7 @@ export async function listServices(params: {
         OR COALESCE(${iReq.slug}, ${iDef.slug}) LIKE ${s}
         OR COALESCE(${iReq.material}, ${iDef.material}) LIKE ${s}
         OR COALESCE(${iReq.description}, ${iDef.description}) LIKE ${s}
+        OR COALESCE(${iReq.tags}, ${iDef.tags}) LIKE ${s}
       )
     `);
   }
@@ -385,6 +387,19 @@ export async function upsertServiceI18n(
       typeof data.warranty === "string" ? data.warranty : null,
     image_alt:
       typeof data.image_alt === "string" ? data.image_alt : null,
+
+    tags: typeof data.tags === "string" ? data.tags : null,
+    meta_title:
+      typeof data.meta_title === "string" ? data.meta_title : null,
+    meta_description:
+      typeof data.meta_description === "string"
+        ? data.meta_description
+        : null,
+    meta_keywords:
+      typeof data.meta_keywords === "string"
+        ? data.meta_keywords
+        : null,
+
     created_at: new Date() as any,
     updated_at: new Date() as any,
   };
@@ -399,6 +414,10 @@ export async function upsertServiceI18n(
     "includes",
     "warranty",
     "image_alt",
+    "tags",
+    "meta_title",
+    "meta_description",
+    "meta_keywords",
   ] as const) {
     if (typeof (data as any)[k] !== "undefined")
       (setObj as any)[k] = (data as any)[k];
@@ -595,3 +614,26 @@ export async function deleteServiceImage(id: string) {
       : 0;
   return affected;
 }
+
+export async function reorderServices(
+  items: { id: string; display_order: number }[],
+) {
+  if (!items || !items.length) return;
+
+  const now = new Date() as any;
+
+  await db.transaction(async (tx) => {
+    for (const it of items) {
+      if (!it.id || typeof it.display_order !== "number") continue;
+
+      await tx
+        .update(services)
+        .set({
+          display_order: it.display_order,
+          updated_at: now,
+        })
+        .where(eq(services.id, it.id));
+    }
+  });
+}
+

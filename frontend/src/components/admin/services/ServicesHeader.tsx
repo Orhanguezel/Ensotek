@@ -1,19 +1,27 @@
 // =============================================================
 // FILE: src/components/admin/services/ServicesHeader.tsx
 // Ensotek – Admin Services Header (filtreler + özet)
+//  - Dinamik kategori / alt kategori (module_key = "services")
+//  - Locale'e göre i18n isimler
 // =============================================================
 
-import React from "react";
-import type {
-  BoolLike,
-  ServiceType,
-} from "@/integrations/types/services.types";
+import React, { useMemo } from "react";
+import type { BoolLike } from "@/integrations/types/services.types";
+import type { LocaleOption } from "@/components/admin/custompage/CustomPageHeader";
+
+import type { CategoryDto } from "@/integrations/types/category.types";
+import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
+
+import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
+import { useListSubCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
 
 export type ServicesFilterState = {
   q?: string;
-  type?: ServiceType;
+  category_id?: string;
+  sub_category_id?: string;
   is_active?: BoolLike;
   featured?: BoolLike;
+  locale?: string;
 };
 
 export type ServicesHeaderProps = {
@@ -23,6 +31,8 @@ export type ServicesHeaderProps = {
   onChangeFilters: (patch: Partial<ServicesFilterState>) => void;
   onRefresh?: () => void;
   onCreateNew?: () => void;
+  locales: LocaleOption[];
+  localesLoading?: boolean;
 };
 
 const boolLikeToSelectValue = (v: BoolLike | undefined): string => {
@@ -39,6 +49,11 @@ const selectValueToBoolLike = (v: string): BoolLike | undefined => {
   return undefined;
 };
 
+type CategoryOption = {
+  value: string;
+  label: string;
+};
+
 export const ServicesHeader: React.FC<ServicesHeaderProps> = ({
   loading,
   total,
@@ -46,18 +61,86 @@ export const ServicesHeader: React.FC<ServicesHeaderProps> = ({
   onChangeFilters,
   onRefresh,
   onCreateNew,
+  locales,
+  localesLoading,
 }) => {
   const handleReset = () => {
     onChangeFilters({
       q: undefined,
-      type: undefined,
+      category_id: undefined,
+      sub_category_id: undefined,
       is_active: undefined,
       featured: undefined,
+      locale: undefined,
     });
   };
 
   const activeValue = boolLikeToSelectValue(filters.is_active);
   const featuredValue = boolLikeToSelectValue(filters.featured);
+
+  /* -------------------- Kategori / Alt kategori (services modülü) -------------------- */
+
+  const categoryQueryParams = useMemo(
+    () => ({
+      locale: filters.locale || undefined,
+      module_key: "services",
+      limit: 500,
+      offset: 0,
+    }),
+    [filters.locale],
+  );
+
+  const {
+    data: categoryRows,
+    isLoading: isCategoriesLoading,
+  } = useListCategoriesAdminQuery(categoryQueryParams as any);
+
+  const categoryOptions: CategoryOption[] = useMemo(
+    () =>
+      (categoryRows ?? []).map((c: CategoryDto) => ({
+        value: c.id,
+        label:
+          (c as any).name ||
+          (c as any).slug ||
+          (c as any).name_default ||
+          c.id,
+      })),
+    [categoryRows],
+  );
+
+  const subCategoryQueryParams = useMemo(
+    () => ({
+      locale: filters.locale || undefined,
+      category_id: filters.category_id || undefined,
+      limit: 500,
+      offset: 0,
+    }),
+    [filters.locale, filters.category_id],
+  );
+
+  const {
+    data: subCategoryRows,
+    isLoading: isSubCategoriesLoading,
+  } = useListSubCategoriesAdminQuery(subCategoryQueryParams as any);
+
+  const subCategoryOptions: CategoryOption[] = useMemo(
+    () =>
+      (subCategoryRows ?? []).map((sc: SubCategoryDto) => ({
+        value: sc.id,
+        label:
+          (sc as any).name ||
+          (sc as any).slug ||
+          (sc as any).name_default ||
+          sc.id,
+      })),
+    [subCategoryRows],
+  );
+
+  const categoriesDisabled = loading || isCategoriesLoading;
+  const subCategoriesDisabled =
+    loading || isSubCategoriesLoading || !filters.category_id;
+
+  /* -------------------- Render -------------------- */
 
   return (
     <div className="card mb-3">
@@ -71,8 +154,8 @@ export const ServicesHeader: React.FC<ServicesHeaderProps> = ({
                   Hizmetler (Services) Yönetimi
                 </h5>
                 <div className="text-muted small">
-                  Mezarlık hizmetleri, bahçe bakımı, toprak dolgusu vb. kayıtları
-                  yönet.
+                  Ensotek endüstriyel soğutma kulesi hizmetlerini (üretim,
+                  bakım, modernizasyon, mühendislik desteği vb.) yönet.
                 </div>
               </div>
               <div className="text-end d-none d-lg-block">
@@ -87,12 +170,15 @@ export const ServicesHeader: React.FC<ServicesHeaderProps> = ({
             </div>
 
             <div className="row g-2 align-items-end">
-              <div className="col-sm-6 col-md-5">
-                <label className="form-label small mb-1">Ara (isim / slug / açıklama)</label>
+              {/* Arama */}
+              <div className="col-sm-6 col-md-3">
+                <label className="form-label small mb-1">
+                  Ara (isim / slug / açıklama)
+                </label>
                 <input
                   type="search"
                   className="form-control form-control-sm"
-                  placeholder="Örn: bahçe bakımı, toprak, sulama..."
+                  placeholder="Örn: bakım, modernizasyon, üretim..."
                   value={filters.q ?? ""}
                   onChange={(e) =>
                     onChangeFilters({
@@ -102,24 +188,93 @@ export const ServicesHeader: React.FC<ServicesHeaderProps> = ({
                 />
               </div>
 
+              {/* Dil */}
               <div className="col-sm-6 col-md-3">
-                <label className="form-label small mb-1">Hizmet tipi</label>
+                <label className="form-label small mb-1">Dil</label>
                 <select
                   className="form-select form-select-sm"
-                  value={filters.type ?? ""}
+                  value={filters.locale ?? ""}
                   onChange={(e) =>
                     onChangeFilters({
-                      type: (e.target.value || undefined) as ServiceType | undefined,
+                      locale: e.target.value || undefined,
+                      // locale değişince alt seçimleri koruyabilirsin;
+                      // istersen burada category_id / sub_category_id'yi de sıfırlayabilirsin.
                     })
                   }
+                  disabled={localesLoading && !locales.length}
                 >
-                  <option value="">Tümü</option>
-                  <option value="gardening">Gardening / Bahçe</option>
-                  <option value="soil">Soil / Toprak</option>
-                  <option value="other">Diğer</option>
+                  <option value="">Tüm diller</option>
+                  {locales.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
                 </select>
+                {localesLoading && (
+                  <div className="form-text small">
+                    Diller yükleniyor...
+                  </div>
+                )}
               </div>
 
+              {/* Kategori (services) */}
+              <div className="col-sm-6 col-md-3">
+                <label className="form-label small mb-1">
+                  Kategori (Hizmet)
+                </label>
+                <select
+                  className="form-select form-select-sm"
+                  value={filters.category_id ?? ""}
+                  onChange={(e) =>
+                    onChangeFilters({
+                      category_id: e.target.value || undefined,
+                      sub_category_id: undefined,
+                    })
+                  }
+                  disabled={categoriesDisabled}
+                >
+                  <option value="">Tüm kategoriler</option>
+                  {categoryOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                {isCategoriesLoading && (
+                  <div className="form-text small">
+                    Kategoriler yükleniyor...
+                  </div>
+                )}
+              </div>
+
+              {/* Alt kategori */}
+              <div className="col-sm-6 col-md-3">
+                <label className="form-label small mb-1">Alt kategori</label>
+                <select
+                  className="form-select form-select-sm"
+                  value={filters.sub_category_id ?? ""}
+                  onChange={(e) =>
+                    onChangeFilters({
+                      sub_category_id: e.target.value || undefined,
+                    })
+                  }
+                  disabled={subCategoriesDisabled}
+                >
+                  <option value="">Tüm alt kategoriler</option>
+                  {subCategoryOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                {isSubCategoriesLoading && (
+                  <div className="form-text small">
+                    Alt kategoriler yükleniyor...
+                  </div>
+                )}
+              </div>
+
+              {/* Durum */}
               <div className="col-sm-6 col-md-2">
                 <label className="form-label small mb-1">Durum</label>
                 <select
@@ -137,6 +292,7 @@ export const ServicesHeader: React.FC<ServicesHeaderProps> = ({
                 </select>
               </div>
 
+              {/* Öne çıkan */}
               <div className="col-sm-6 col-md-2">
                 <label className="form-label small mb-1">Öne çıkan</label>
                 <select

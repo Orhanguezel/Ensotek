@@ -12,6 +12,7 @@ import {
   datetime,
   index,
   uniqueIndex,
+  primaryKey,
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
@@ -20,9 +21,6 @@ export const categories = mysqlTable(
   {
     id: char("id", { length: 36 }).notNull().primaryKey(),
 
-    /** Dil kodu: tr, en, de ... */
-    locale: varchar("locale", { length: 8 }).notNull().default("tr"),
-
     /**
      * Kategori hangi modüle / alana ait?
      * Örnekler:
@@ -30,19 +28,14 @@ export const categories = mysqlTable(
      *  - "news"
      *  - "library"
      *  - "product"
-     *  - "docs"
-     *  - "general"
+     *  - "sparepart"
+     *  - "references"
+     *  - "about"
+     *  - "services"
      */
     module_key: varchar("module_key", { length: 64 })
       .notNull()
       .default("general"),
-
-    /** FE Category.label (locale'ye göre) */
-    name: varchar("name", { length: 255 }).notNull(),
-    /** FE Category.value — slug (genelde sabit, locale'den bağımsız ama istersen locale spesifik de kullanabilirsin) */
-    slug: varchar("slug", { length: 255 }).notNull(),
-
-    description: text("description"),
 
     // ✅ STORAGE entegrasyonu (tekil asset)
     image_url: longtext("image_url"),
@@ -65,25 +58,50 @@ export const categories = mysqlTable(
       .$onUpdateFn(() => new Date()),
   },
   (t) => ({
-    // ✅ Aynı slug farklı modüllerde ve/veya farklı dillerde tekrar kullanılabilir
-    // Örn: module_key="blog", locale="tr", slug="teknik"
-    //      module_key="news", locale="tr", slug="teknik"
-    //      module_key="blog", locale="en", slug="technical"
-    ux_slug_locale_module: uniqueIndex("categories_slug_locale_module_uq").on(
-      t.slug,
-      t.locale,
-      t.module_key,
-    ),
-
     categories_active_idx: index("categories_active_idx").on(t.is_active),
     categories_order_idx: index("categories_order_idx").on(t.display_order),
     categories_storage_asset_idx: index("categories_storage_asset_idx").on(
       t.storage_asset_id,
     ),
-    categories_locale_idx: index("categories_locale_idx").on(t.locale),
     categories_module_idx: index("categories_module_idx").on(t.module_key),
   }),
 );
 
 export type CategoryRow = typeof categories.$inferSelect;
 export type NewCategoryRow = typeof categories.$inferInsert;
+
+export const categoryI18n = mysqlTable(
+  "category_i18n",
+  {
+    category_id: char("category_id", { length: 36 }).notNull(),
+    locale: varchar("locale", { length: 8 }).notNull().default("tr"),
+
+    name: varchar("name", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+
+    description: text("description"),
+    alt: varchar("alt", { length: 255 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => ({
+    pk: primaryKey({
+      columns: [t.category_id, t.locale],
+      name: "category_i18n_pk",
+    }),
+    ux_locale_slug: uniqueIndex("category_i18n_locale_slug_uq").on(
+      t.locale,
+      t.slug,
+    ),
+    category_i18n_locale_idx: index("category_i18n_locale_idx").on(t.locale),
+  }),
+);
+
+export type CategoryI18nRow = typeof categoryI18n.$inferSelect;
+export type NewCategoryI18nRow = typeof categoryI18n.$inferInsert;

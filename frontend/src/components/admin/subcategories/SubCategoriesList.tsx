@@ -212,27 +212,55 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                     onDrop={(e) => handleDrop(e, item.id)}
                     style={{
                       cursor: "move",
-                      opacity:
-                        dragId && dragId === item.id ? 0.6 : 1,
+                      opacity: dragId && dragId === item.id ? 0.6 : 1,
                     }}
                   >
                     <td className="text-muted small align-middle">
                       <span className="me-1">≡</span>
                       {globalIndex + 1}
                     </td>
+
+                    {/* Alt Kategori + Görsel */}
                     <td className="align-middle">
-                      <div className="fw-semibold small">
-                        {item.name}
-                        {item.icon && (
-                          <span className="text-muted ms-1">
-                            <small>({item.icon})</small>
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-muted small">
-                        <code>{item.slug}</code>
+                      <div className="d-flex align-items-center gap-2">
+                        {item.image_url ? (
+                          <div
+                            className="border rounded bg-light"
+                            style={{
+                              width: 64,
+                              height: 40,
+                              overflow: "hidden",
+                              flex: "0 0 auto",
+                            }}
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              src={item.image_url}
+                              alt={item.alt || item.name}
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                              }}
+                              onError={(e) => {
+                                (e.currentTarget as HTMLImageElement).style.display =
+                                  "none";
+                              }}
+                            />
+                          </div>
+                        ) : null}
+
+                        <div>
+                          <div className="fw-semibold small">
+                            {item.name}
+                          </div>
+                          <div className="text-muted small">
+                            <code>{item.slug}</code>
+                          </div>
+                        </div>
                       </div>
                     </td>
+
                     <td className="align-middle small">{categoryLabel}</td>
                     <td className="align-middle small">
                       {item.locale || "tr"}

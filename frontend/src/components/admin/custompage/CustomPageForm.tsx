@@ -1,27 +1,55 @@
 // =============================================================
 // FILE: src/components/admin/custompage/CustomPageForm.tsx
-// Ensotek – Admin Custom Page Create/Edit Form
+// Ensotek – Admin Custom Page Create/Edit Form (container)
 // =============================================================
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
-import { RichTextEditorBasic } from "@/components/ui/RichTextEditorBasic";
+import type { CategoryDto } from "@/integrations/types/category.types";
+import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
+
 import type { LocaleOption } from "./CustomPageHeader";
+import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
+
+import { useLazyListCustomPagesAdminQuery } from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
+import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
+import { useListSubCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
+
+import { CustomPageMainColumn } from "./CustomPageMainColumn";
+import { CustomPageSidebarColumn } from "./CustomPageSidebarColumn";
+
+/* ------------------------------------------------------------- */
+/*  Tipler                                                       */
+/* ------------------------------------------------------------- */
 
 export type CustomPageFormValues = {
+  id?: string;
+  page_id?: string;
+
   locale: string;
   is_published: boolean;
   title: string;
   slug: string;
   content: string;
 
+  // Öne çıkan görsel
   featured_image: string;
   featured_image_asset_id: string;
   featured_image_alt: string;
 
+  // Kısa özet (summary)
+  summary: string;
+
+  // SEO
   meta_title: string;
   meta_description: string;
 
+  // Tag'ler – virgülle ayrılmış string
+  tags: string;
+
+  // Kategori ilişkileri
   category_id: string;
   sub_category_id: string;
 };
@@ -38,31 +66,16 @@ export type CustomPageFormProps = {
   onCancel?: () => void;
 };
 
-/** Backend'ten gelen content JSON ise {"html": "..."} -> html'e çevir */
-const unpackContent = (raw: string | null | undefined): string => {
-  if (!raw) return "";
-  const s = String(raw);
-  const trimmed = s.trim();
-  if (!trimmed) return "";
-
-  // {"html":"..."} formatını çöz
-  if (trimmed.startsWith("{")) {
-    try {
-      const parsed = JSON.parse(trimmed);
-      if (
-        parsed &&
-        typeof parsed === "object" &&
-        typeof (parsed as any).html === "string"
-      ) {
-        return (parsed as any).html;
-      }
-    } catch {
-      // JSON değilse ignore
-    }
-  }
-
-  return s;
+export type CategoryOption = {
+  value: string;
+  label: string;
 };
+
+export type ContentImageSize = "sm" | "md" | "lg" | "full";
+
+/* ------------------------------------------------------------- */
+/*  Yardımcılar                                                   */
+/* ------------------------------------------------------------- */
 
 const buildInitialValues = (
   initial: CustomPageDto | undefined,
@@ -70,6 +83,9 @@ const buildInitialValues = (
 ): CustomPageFormValues => {
   if (!initial) {
     return {
+      id: undefined,
+      page_id: undefined,
+
       locale: fallbackLocale ?? "",
       is_published: false,
       title: "",
@@ -80,33 +96,96 @@ const buildInitialValues = (
       featured_image_asset_id: "",
       featured_image_alt: "",
 
+      summary: "",
       meta_title: "",
       meta_description: "",
+
+      tags: "",
 
       category_id: "",
       sub_category_id: "",
     };
   }
 
+  const tagsString =
+    initial.tags && initial.tags.length
+      ? initial.tags.join(", ")
+      : (initial as any).tags_raw ?? "";
+
+  const pageId =
+    (initial as any).page_id ??
+    (initial as any).parent_id ??
+    initial.id;
+
   return {
-    locale: initial.locale_resolved ?? fallbackLocale ?? "",
+    id: initial.id,
+    page_id: pageId,
+
+    locale:
+      (initial as any).locale_resolved ??
+      (initial as any).locale ??
+      fallbackLocale ??
+      "",
+
     is_published: initial.is_published,
 
     title: initial.title ?? "",
     slug: initial.slug ?? "",
-    content: unpackContent(initial.content),
+    content:
+      (initial as any).content ??
+      (initial as any).content_html ??
+      "",
 
     featured_image: initial.featured_image ?? "",
     featured_image_asset_id: initial.featured_image_asset_id ?? "",
-    featured_image_alt: initial.featured_image_alt ?? "",
+    featured_image_alt: (initial as any).featured_image_alt ?? "",
 
-    meta_title: initial.meta_title ?? "",
-    meta_description: initial.meta_description ?? "",
+    summary: (initial as any).summary ?? "",
+    meta_title: (initial as any).meta_title ?? "",
+    meta_description: (initial as any).meta_description ?? "",
 
-    category_id: initial.category_id ?? "",
-    sub_category_id: initial.sub_category_id ?? "",
+    tags: tagsString,
+
+    category_id: (initial as any).category_id ?? "",
+    sub_category_id: (initial as any).sub_category_id ?? "",
   };
 };
+
+const buildContentImageHtml = (
+  url: string,
+  alt = "",
+  size: ContentImageSize = "lg",
+): string => {
+  const safeAlt = alt.replace(/"/g, "&quot;");
+
+  let widthStyle: string;
+  switch (size) {
+    case "sm":
+      widthStyle = "width: 50%; max-width: 480px;";
+      break;
+    case "md":
+      widthStyle = "width: 75%; max-width: 720px;";
+      break;
+    case "full":
+      widthStyle = "width: 100%; max-width: 100%;";
+      break;
+    case "lg":
+    default:
+      widthStyle = "width: 100%; max-width: 900px;";
+      break;
+  }
+
+  return `
+<figure class="content-image-block content-image-${size}" style="${widthStyle} margin: 1.5rem auto; text-align: center;">
+  <img src="${url}" alt="${safeAlt}" loading="lazy"
+       style="max-width: 100%; height: auto; display: block; margin: 0 auto;" />
+</figure>
+`.trim();
+};
+
+/* ------------------------------------------------------------- */
+/*  Ana Form Component (container)                               */
+/* ------------------------------------------------------------- */
 
 export const CustomPageForm: React.FC<CustomPageFormProps> = ({
   mode,
@@ -123,9 +202,24 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     buildInitialValues(initialData, defaultLocale),
   );
 
-  // initialData veya defaultLocale değiştiğinde formu yeniden doldur
+  const [slugTouched, setSlugTouched] = useState(false);
+  const [activeMode, setActiveMode] = useState<"form" | "json">("form");
+
+  const [contentImagePreview, setContentImagePreview] =
+    useState<string>("");
+
+  const [contentImageSize, setContentImageSize] =
+    useState<ContentImageSize>("lg");
+
+  const [manualImageUrl, setManualImageUrl] = useState<string>("");
+  const [manualImageAlt, setManualImageAlt] = useState<string>("");
+
+  const [triggerListPages, { isLoading: isLocaleSwitchLoading }] =
+    useLazyListCustomPagesAdminQuery();
+
   useEffect(() => {
     setValues(buildInitialValues(initialData, defaultLocale));
+    setSlugTouched(false);
   }, [initialData, defaultLocale]);
 
   const disabled = loading || saving;
@@ -134,28 +228,239 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     (field: keyof CustomPageFormValues) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const val = e.target.value;
-      setValues((prev) => ({ ...prev, [field]: val }));
+      setValues((prev) => ({ ...prev, [field]: val } as CustomPageFormValues));
     };
 
   const handleCheckboxChange =
     (field: keyof CustomPageFormValues) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const checked = e.target.checked;
-      setValues((prev) => ({ ...prev, [field]: checked as never }));
+      setValues((prev) => ({ ...prev, [field]: checked } as CustomPageFormValues));
     };
 
-  const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    setValues((prev) => ({ ...prev, locale: val }));
+  const handleLocaleChange = async (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const nextLocale = e.target.value;
+
+    if (mode === "create" || !initialData) {
+      setValues((prev) => ({ ...prev, locale: nextLocale }));
+      return;
+    }
+
+    const basePageId =
+      values.page_id ??
+      (initialData as any).page_id ??
+      (initialData as any).parent_id ??
+      null;
+
+    if (!basePageId) {
+      setValues((prev) => ({ ...prev, locale: nextLocale }));
+      return;
+    }
+
+    try {
+      const res = await triggerListPages({
+        locale: nextLocale || undefined,
+        limit: 200,
+        offset: 0,
+      }).unwrap();
+
+      const items: CustomPageDto[] =
+        (res as any)?.items ?? (res as any) ?? [];
+
+      const match = items.find((item: any) => {
+        const itemPageId =
+          (item as any).page_id ??
+          (item as any).parent_id ??
+          item.id;
+        return itemPageId === basePageId;
+      });
+
+      if (match) {
+        const nextValues = buildInitialValues(match, defaultLocale);
+        nextValues.locale = nextLocale;
+        setValues(nextValues);
+        setSlugTouched(false);
+      } else {
+        setValues((prev) => ({ ...prev, locale: nextLocale }));
+        toast.info(
+          "Seçilen dil için mevcut kayıt bulunamadı, bu dilde yeni içerik oluşturabilirsin.",
+        );
+      }
+    } catch (err: any) {
+      const status = err?.status ?? err?.originalStatus;
+      if (status === 400) {
+        console.warn(
+          "Locale change: /admin/custom_pages 400 – bu dil için liste alınamadı.",
+          err,
+        );
+        setValues((prev) => ({ ...prev, locale: nextLocale }));
+        toast.info(
+          "Seçilen dil için kayıt listesi alınamadı. Bu dilde yeni içerik oluşturabilirsin.",
+        );
+      } else {
+        console.error("Locale change error (custom page):", err);
+        toast.error(
+          "Seçilen dil için özel sayfa yüklenirken bir hata oluştu.",
+        );
+        setValues((prev) => ({ ...prev, locale: nextLocale }));
+      }
+    }
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (disabled) return;
-    void onSubmit(values);
+
+    if (!values.title.trim() || !values.slug.trim()) {
+      toast.error("Başlık ve slug alanları zorunludur.");
+      return;
+    }
+
+    void onSubmit({
+      ...values,
+      title: values.title.trim(),
+      slug: values.slug.trim(),
+      summary: values.summary.trim(),
+      meta_title: values.meta_title.trim(),
+      meta_description: values.meta_description.trim(),
+      tags: values.tags.trim(),
+    });
   };
 
   const effectiveDefaultLocale = defaultLocale ?? "tr";
+
+  /* -------------------- Görsel metadata (storage için) -------------------- */
+
+  const imageMetadata = useMemo<
+    Record<string, string | number | boolean>
+  >(
+    () => ({
+      module_key: "custom_page",
+      locale: values.locale || "",
+      page_slug: values.slug || values.title || "",
+      ...(values.page_id ? { page_id: values.page_id } : {}),
+    }),
+    [values.locale, values.slug, values.title, values.page_id],
+  );
+
+  /* -------------------- Kategori listesi (isimle select) -------------------- */
+
+  const categoryQueryParams = useMemo(
+    () => ({
+      limit: 500,
+      offset: 0,
+      locale: values.locale || undefined,
+    }),
+    [values.locale],
+  );
+
+  const {
+    data: categoryRows,
+    isLoading: isCategoriesLoading,
+  } = useListCategoriesAdminQuery(categoryQueryParams as any);
+
+  const categoryOptions: CategoryOption[] = useMemo(() => {
+    const base: CategoryOption[] = (categoryRows ?? []).map(
+      (c: CategoryDto) => ({
+        value: c.id,
+        label: (c as any).name || (c as any).slug || c.id,
+      }),
+    );
+
+    if (
+      values.category_id &&
+      !base.some((opt) => opt.value === values.category_id)
+    ) {
+      base.unshift({
+        value: values.category_id,
+        label:
+          (initialData as any)?.category_name ||
+          (initialData as any)?.category_slug ||
+          values.category_id,
+      });
+    }
+
+    return base;
+  }, [categoryRows, values.category_id, initialData]);
+
+  const subCategoryQueryParams = useMemo(
+    () => ({
+      category_id: values.category_id || undefined,
+      limit: 500,
+      offset: 0,
+      locale: values.locale || undefined,
+    }),
+    [values.category_id, values.locale],
+  );
+
+  const {
+    data: subCategoryRows,
+    isLoading: isSubCategoriesLoading,
+  } = useListSubCategoriesAdminQuery(subCategoryQueryParams as any);
+
+  const subCategoryOptions: CategoryOption[] = useMemo(() => {
+    const base: CategoryOption[] = (subCategoryRows ?? []).map(
+      (sc: SubCategoryDto) => ({
+        value: sc.id,
+        label: (sc as any).name || (sc as any).slug || sc.id,
+      }),
+    );
+
+    if (
+      values.sub_category_id &&
+      !base.some((opt) => opt.value === values.sub_category_id)
+    ) {
+      base.unshift({
+        value: values.sub_category_id,
+        label:
+          (initialData as any)?.sub_category_name ||
+          (initialData as any)?.sub_category_slug ||
+          values.sub_category_id,
+      });
+    }
+
+    return base;
+  }, [subCategoryRows, values.sub_category_id, initialData]);
+
+  const categoriesDisabled = disabled || isCategoriesLoading;
+  const subCategoriesDisabled =
+    disabled || isSubCategoriesLoading || !values.category_id;
+
+  /* -------------------- İçerik görsel ekleme handler'ı -------------------- */
+
+  const handleAddContentImage = (url: string, alt?: string) => {
+    if (!url) return;
+
+    const htmlBlock = buildContentImageHtml(
+      url,
+      alt ?? "",
+      contentImageSize,
+    );
+
+    setContentImagePreview(url);
+    setValues((prev) => ({
+      ...prev,
+      content: (prev.content || "") + "\n\n" + htmlBlock + "\n\n",
+    }));
+    toast.success(
+      "Görsel içerik alanının sonuna eklendi. Metin editöründe konumunu istersen değiştirebilirsin.",
+    );
+  };
+
+  const handleAddManualImage = () => {
+    const url = manualImageUrl.trim();
+    if (!url) {
+      toast.error("Lütfen geçerli bir görsel URL'i gir.");
+      return;
+    }
+    handleAddContentImage(url, manualImageAlt.trim());
+    setManualImageUrl("");
+    setManualImageAlt("");
+  };
+
+  /* -------------------- Render ------------------------------------------- */
 
   return (
     <form onSubmit={handleSubmit}>
@@ -166,256 +471,126 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
               {mode === "create" ? "Yeni Sayfa Oluştur" : "Sayfa Düzenle"}
             </h5>
             <div className="text-muted small">
-              Başlık, slug, zengin metin içerik (HTML) ve SEO alanlarını doldur.
+              Başlık, slug, özet, zengin metin içerik (HTML), etiketler ve SEO
+              alanlarını doldur. Dilersen Form veya JSON modunda
+              çalışabilirsin.
             </div>
           </div>
-          <div className="d-flex gap-2">
-            {onCancel && (
+          <div className="d-flex flex-column align-items-end gap-2">
+            <div className="btn-group btn-group-sm">
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-sm"
-                onClick={onCancel}
+                className={
+                  "btn btn-outline-secondary btn-sm" +
+                  (activeMode === "form" ? " active" : "")
+                }
+                onClick={() => setActiveMode("form")}
+              >
+                Form
+              </button>
+              <button
+                type="button"
+                className={
+                  "btn btn-outline-secondary btn-sm" +
+                  (activeMode === "json" ? " active" : "")
+                }
+                onClick={() => setActiveMode("json")}
+              >
+                JSON
+              </button>
+            </div>
+
+            <div className="d-flex gap-2">
+              {onCancel && (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary btn-sm"
+                  onClick={onCancel}
+                  disabled={disabled}
+                >
+                  Geri
+                </button>
+              )}
+              <button
+                type="submit"
+                className="btn btn-primary btn-sm"
                 disabled={disabled}
               >
-                Geri
+                {saving
+                  ? mode === "create"
+                    ? "Oluşturuluyor..."
+                    : "Kaydediliyor..."
+                  : mode === "create"
+                    ? "Sayfayı Oluştur"
+                    : "Değişiklikleri Kaydet"}
               </button>
+            </div>
+
+            {(loading || isLocaleSwitchLoading) && (
+              <span className="badge bg-secondary small mt-1">
+                {isLocaleSwitchLoading
+                  ? "Dil değiştiriliyor..."
+                  : "Yükleniyor..."}
+              </span>
             )}
-            <button
-              type="submit"
-              className="btn btn-primary btn-sm"
-              disabled={disabled}
-            >
-              {saving
-                ? mode === "create"
-                  ? "Oluşturuluyor..."
-                  : "Kaydediliyor..."
-                : mode === "create"
-                  ? "Sayfayı Oluştur"
-                  : "Değişiklikleri Kaydet"}
-            </button>
           </div>
         </div>
 
         <div className="card-body">
-          <div className="row g-4">
-            {/* Sol kolon: içerik */}
-            <div className="col-lg-8">
-              {/* Locale + yayın durumu */}
-              <div className="row g-2 mb-3">
-                <div className="col-sm-4">
-                  <label className="form-label small mb-1">
-                    Locale (Dil)
-                  </label>
-                  <select
-                    className="form-select form-select-sm"
-                    value={values.locale}
-                    onChange={handleLocaleChange}
-                    disabled={disabled || (localesLoading && !locales.length)}
-                  >
-                    <option value="">
-                      (Site varsayılanı
-                      {effectiveDefaultLocale
-                        ? `: ${effectiveDefaultLocale}`
-                        : ""}
-                      )
-                    </option>
-                    {locales.map((loc) => (
-                      <option key={loc.value} value={loc.value}>
-                        {loc.label}
-                      </option>
-                    ))}
-                  </select>
-                  <div className="form-text small">
-                    Dil listesi veritabanındaki{" "}
-                    <code>site_settings.app_locales</code> kaydından gelir.
-                    Boş bırakırsan backend{" "}
-                    <code>req.locale</code> / varsayılan locale kullanır.
-                  </div>
-                </div>
-                <div className="col-sm-4 d-flex align-items-end">
-                  <div className="form-check">
-                    <input
-                      id="is_published"
-                      type="checkbox"
-                      className="form-check-input"
-                      checked={values.is_published}
-                      onChange={handleCheckboxChange("is_published")}
-                      disabled={disabled}
-                    />
-                    <label
-                      className="form-check-label small"
-                      htmlFor="is_published"
-                    >
-                      Yayında olsun
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              {/* Başlık ve slug */}
-              <div className="mb-3">
-                <label className="form-label small mb-1">Başlık</label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={values.title}
-                  onChange={handleChange("title")}
+          {activeMode === "json" ? (
+            <AdminJsonEditor
+              value={values}
+              disabled={disabled}
+              onChange={(next) =>
+                setValues(next as CustomPageFormValues)
+              }
+              label="Custom Page JSON"
+              helperText="Bu JSON, formdaki tüm alanların bire bir karşılığıdır (summary, tags, kategori ilişkileri dahil). Değişiklikleri kaydetmek için üstteki 'Kaydet' butonunu kullan."
+            />
+          ) : (
+            <div className="row g-4">
+              <div className="col-lg-8">
+                <CustomPageMainColumn
+                  values={values}
                   disabled={disabled}
-                  required
+                  slugTouched={slugTouched}
+                  setSlugTouched={setSlugTouched}
+                  setValues={setValues}
+                  handleChange={handleChange}
+                  effectiveDefaultLocale={effectiveDefaultLocale}
+                  locales={locales}
+                  localesLoading={localesLoading}
+                  isLocaleSwitchLoading={isLocaleSwitchLoading}
+                  handleLocaleChange={handleLocaleChange}
+                  handleCheckboxChange={handleCheckboxChange}
                 />
               </div>
 
-              <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Slug
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={values.slug}
-                  onChange={handleChange("slug")}
+              <div className="col-lg-4">
+                <CustomPageSidebarColumn
+                  values={values}
                   disabled={disabled}
-                  required
+                  categoriesDisabled={categoriesDisabled}
+                  subCategoriesDisabled={subCategoriesDisabled}
+                  categoryOptions={categoryOptions}
+                  subCategoryOptions={subCategoryOptions}
+                  isCategoriesLoading={isCategoriesLoading}
+                  isSubCategoriesLoading={isSubCategoriesLoading}
+                  imageMetadata={imageMetadata}
+                  contentImageSize={contentImageSize}
+                  setContentImageSize={setContentImageSize}
+                  contentImagePreview={contentImagePreview}
+                  handleAddContentImage={handleAddContentImage}
+                  manualImageUrl={manualImageUrl}
+                  manualImageAlt={manualImageAlt}
+                  setManualImageUrl={setManualImageUrl}
+                  setManualImageAlt={setManualImageAlt}
+                  handleAddManualImage={handleAddManualImage}
+                  setValues={setValues}
                 />
-                <div className="form-text small">
-                  Sadece küçük harf, rakam ve tire:
-                  <code> hakkimizda</code>,{" "}
-                  <code>blog-yazi-1</code> gibi.
-                </div>
-              </div>
-
-              {/* İçerik (zengin HTML) */}
-              <div className="mb-0">
-                <label className="form-label small mb-1">
-                  İçerik (zengin metin / HTML)
-                </label>
-                <RichTextEditorBasic
-                  value={values.content}
-                  onChange={(html) =>
-                    setValues((prev) => ({ ...prev, content: html }))
-                  }
-                  disabled={disabled}
-                />
-                <div className="form-text small">
-                  Zengin metin editörü HTML içerik üretir. Backend bu alanı{" "}
-                  <code>packContent</code> ile{" "}
-                  <code>{'{"html":"..."}'}</code> formatına çevirerek kaydeder.
-                  Eğer backend&apos;den JSON{" "}
-                  <code>{'{"html":"..."}'}</code> gelirse, FE otomatik olarak
-                  sadece <code>html</code> içeriğini editöre basar.
-                </div>
               </div>
             </div>
-
-            {/* Sağ kolon: görsel + kategori + SEO */}
-            <div className="col-lg-4">
-              {/* Kategori alanları */}
-              <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Kategori ID
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  placeholder="category_id (opsiyonel)"
-                  value={values.category_id}
-                  onChange={handleChange("category_id")}
-                  disabled={disabled}
-                />
-              </div>
-              <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Alt Kategori ID
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  placeholder="sub_category_id (opsiyonel)"
-                  value={values.sub_category_id}
-                  onChange={handleChange("sub_category_id")}
-                  disabled={disabled}
-                />
-              </div>
-
-              {/* Görsel alanları */}
-              <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Öne Çıkan Görsel URL
-                </label>
-                <input
-                  type="url"
-                  className="form-control form-control-sm"
-                  placeholder="https://..."
-                  value={values.featured_image}
-                  onChange={handleChange("featured_image")}
-                  disabled={disabled}
-                />
-                <div className="form-text small">
-                  Eski/serbest URL. Storage asset kullanıyorsan boş bırak.
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Öne Çıkan Görsel Asset ID
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  placeholder="storage asset id (36 char)"
-                  value={values.featured_image_asset_id}
-                  onChange={handleChange("featured_image_asset_id")}
-                  disabled={disabled}
-                />
-                <div className="form-text small">
-                  Storage modülüyle ilişkilendirmek için{" "}
-                  <code>featured_image_asset_id</code>.
-                </div>
-              </div>
-
-              <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Görsel Alt Metni
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={values.featured_image_alt}
-                  onChange={handleChange("featured_image_alt")}
-                  disabled={disabled}
-                />
-              </div>
-
-              {/* SEO alanları */}
-              <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Meta Title
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={values.meta_title}
-                  onChange={handleChange("meta_title")}
-                  disabled={disabled}
-                />
-              </div>
-              <div className="mb-0">
-                <label className="form-label small mb-1">
-                  Meta Description
-                </label>
-                <textarea
-                  className="form-control form-control-sm"
-                  rows={3}
-                  value={values.meta_description}
-                  onChange={handleChange("meta_description")}
-                  disabled={disabled}
-                />
-                <div className="form-text small">
-                  Arama motorları için kısa özet.
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </form>

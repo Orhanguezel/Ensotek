@@ -65,7 +65,7 @@ export const SliderHeader: React.FC<SliderHeaderProps> = ({
             />
           </div>
 
-          {/* Dil filtre */}
+          {/* Dil filtre – DİĞER MODÜLLER GİBİ: sadece gerçek diller */}
           <div className="input-group input-group-sm">
             <span className="input-group-text">
               Dil
@@ -78,7 +78,6 @@ export const SliderHeader: React.FC<SliderHeaderProps> = ({
               value={locale}
               onChange={(e) => onLocaleChange(e.target.value)}
             >
-              <option value="">Tüm Diller</option>
               {locales.map((opt) => (
                 <option key={opt.value} value={opt.value}>
                   {opt.label}

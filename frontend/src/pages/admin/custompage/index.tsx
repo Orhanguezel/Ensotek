@@ -1,21 +1,27 @@
 // =============================================================
 // FILE: src/pages/admin/custompage/index.tsx
-// Ensotek – Admin Custom Pages Liste Sayfası
+// Ensotek – Admin Custom Pages Liste + Filtre + Reorder
 // =============================================================
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { NextPage } from "next";
+import { toast } from "sonner";
+
 import {
   CustomPageHeader,
   type CustomPageFilters,
   type LocaleOption,
 } from "@/components/admin/custompage/CustomPageHeader";
 import { CustomPageList } from "@/components/admin/custompage/CustomPageList";
-import { useListCustomPagesAdminQuery } from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
+import {
+  useListCustomPagesAdminQuery,
+  useReorderCustomPagesAdminMutation,
+} from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
 import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
 import type {
   CustomPageListAdminQueryParams,
   BoolLike,
+  CustomPageDto,
 } from "@/integrations/types/custom_pages.types";
 
 const mapPublishedFilterToBoolLike = (
@@ -99,7 +105,7 @@ const AdminCustomPageIndex: NextPage = () => {
       module_key: filters.moduleKey || undefined,
       locale: filters.locale || undefined,
       is_published,
-      limit: 50,
+      limit: 200,
       offset: 0,
     };
   }, [filters]);
@@ -111,9 +117,55 @@ const AdminCustomPageIndex: NextPage = () => {
     refetch,
   } = useListCustomPagesAdminQuery(queryParams);
 
-  const loading = isLoading || isFetching;
-  const items = data?.items ?? [];
+  // API'den gelen items'i stabil tutmak için useMemo
+  const items: CustomPageDto[] = useMemo(
+    () => data?.items ?? [],
+    [data],
+  );
   const total = data?.total ?? items.length;
+
+  // Drag & drop için lokal sıralama state'i
+  const [rows, setRows] = useState<CustomPageDto[]>([]);
+
+  useEffect(() => {
+    setRows(items);
+  }, [items]);
+
+  const [reorderCustomPages, { isLoading: isReordering }] =
+    useReorderCustomPagesAdminMutation();
+
+  const loading = isLoading || isFetching || isLocalesLoading || isReordering;
+
+  const handleFiltersChange = (next: CustomPageFilters) => {
+    setFilters(next);
+  };
+
+  /* -------------------- Reorder handlers -------------------- */
+
+  const handleReorderLocal = (next: CustomPageDto[]) => {
+    setRows(next);
+  };
+
+  const handleSaveOrder = async () => {
+    if (!rows.length) return;
+
+    try {
+      const itemsPayload = rows.map((p, index) => ({
+        id: p.id,
+        display_order: index,
+      }));
+
+      await reorderCustomPages({ items: itemsPayload }).unwrap();
+      toast.success("Sayfa sıralaması kaydedildi.");
+      await refetch();
+    } catch (err: any) {
+      const msg =
+        err?.data?.error?.message ||
+        err?.message ||
+        "Sıralama kaydedilirken bir hata oluştu.";
+      toast.error(msg);
+    }
+  };
 
   return (
     <div className="container-fluid py-3">
@@ -122,20 +174,26 @@ const AdminCustomPageIndex: NextPage = () => {
         <h4 className="h5 mb-1">Özel Sayfalar Yönetimi</h4>
         <p className="text-muted small mb-0">
           Blog, haber, hakkında ve benzeri içerik sayfalarını görüntüle,
-          filtrele ve yönet.
+          filtrele, sırala ve yönet.
         </p>
       </div>
 
       <CustomPageHeader
         filters={filters}
         total={total}
-        onFiltersChange={setFilters}
+        onFiltersChange={handleFiltersChange}
         onRefresh={refetch}
         locales={localeOptions}
         localesLoading={isLocalesLoading}
       />
 
-      <CustomPageList items={items} loading={loading} />
+      <CustomPageList
+        items={rows}
+        loading={loading}
+        onReorder={handleReorderLocal}
+        onSaveOrder={handleSaveOrder}
+        savingOrder={isReordering}
+      />
     </div>
   );
 };

@@ -13,6 +13,7 @@ import {
   createServiceImageAdmin,
   updateServiceImageAdmin,
   removeServiceImageAdmin,
+  reorderServicesAdmin,
 } from "./admin.controller";
 
 const BASE = "/services";
@@ -51,5 +52,11 @@ export async function registerServicesAdmin(app: FastifyInstance) {
     `${BASE}/:id/images/:imageId`,
     { config: { auth: true } },
     removeServiceImageAdmin,
+  );
+   // reorder (display_order)
+  app.post(
+    `${BASE}/reorder`,
+    { config: { auth: true } },
+    reorderServicesAdmin,
   );
 }

@@ -3,7 +3,7 @@
 
 import type { RouteHandler } from "fastify";
 import { randomUUID } from "crypto";
-import { DEFAULT_LOCALE, LOCALES, type Locale } from "@/core/i18n";
+import { DEFAULT_LOCALE, type Locale } from "@/core/i18n";
 import {
   serviceListQuerySchema,
   upsertServiceBodySchema,
@@ -31,10 +31,42 @@ import {
   upsertServiceImageI18nAllLocales,
   updateServiceImage,
   deleteServiceImage,
+  reorderServices
 } from "./repository";
 
 const toBool = (v: unknown): boolean =>
   v === true || v === 1 || v === "1" || v === "true";
+
+/* ----------------------------- locale helper ----------------------------- */
+
+type LocaleQueryLike = { locale?: string; default_locale?: string };
+
+/**
+ * Hem query’den hem de req.locale’den locale/default_locale üretir.
+ * - Öncelik: query.locale > req.locale > DEFAULT_LOCALE
+ * - default_locale: query.default_locale > DEFAULT_LOCALE
+ */
+function resolveLocales(
+  req: any,
+  query?: LocaleQueryLike,
+): { locale: Locale; def: Locale } {
+  const q = query ?? ((req.query ?? {}) as LocaleQueryLike);
+
+  const rawLocale =
+    typeof q.locale === "string" && q.locale.length > 0
+      ? q.locale
+      : (req.locale as string | undefined);
+
+  const rawDef =
+    typeof q.default_locale === "string" && q.default_locale.length > 0
+      ? q.default_locale
+      : undefined;
+
+  const locale = (rawLocale ?? DEFAULT_LOCALE) as Locale;
+  const def = (rawDef ?? DEFAULT_LOCALE) as Locale;
+
+  return { locale, def };
+}
 
 /* ----------------------------- list/get ----------------------------- */
 
@@ -45,11 +77,21 @@ export const listServicesAdmin: RouteHandler<{
   if (!parsed.success) {
     return reply
       .code(400)
-      .send({ error: { message: "invalid_query", issues: parsed.error.issues } });
+      .send({
+        error: {
+          message: "invalid_query",
+          issues: parsed.error.issues,
+        },
+      });
   }
+
   const q = parsed.data;
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+
+  // 🔥 QUERY ÜZERİNDEN LOCALE / DEFAULT_LOCALE DESTEĞİ
+  const { locale, def } = resolveLocales(req, {
+    locale: q.locale,
+    default_locale: q.default_locale,
+  });
 
   const { items, total } = await listServices({
     locale,
@@ -74,26 +116,30 @@ export const listServicesAdmin: RouteHandler<{
 export const getServiceAdmin: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+  // 🔥 GET /admin/services/:id?locale=...&default_locale=...
+  const { locale, def } = resolveLocales(req);
+
   const row = await getServiceMergedById(locale, def, req.params.id);
-  if (!row)
+  if (!row) {
     return reply.code(404).send({ error: { message: "not_found" } });
+  }
   return reply.send(row);
 };
 
 export const getServiceBySlugAdmin: RouteHandler<{
   Params: { slug: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+  // 🔥 GET /admin/services/by-slug/:slug?locale=...&default_locale=...
+  const { locale, def } = resolveLocales(req);
+
   const row = await getServiceMergedBySlug(
     locale,
     def,
     req.params.slug,
   );
-  if (!row)
+  if (!row) {
     return reply.code(404).send({ error: { message: "not_found" } });
+  }
   return reply.send(row);
 };
 
@@ -106,7 +152,12 @@ export const createServiceAdmin: RouteHandler<{
   if (!parsed.success) {
     return reply
       .code(400)
-      .send({ error: { message: "invalid_body", issues: parsed.error.issues } });
+      .send({
+        error: {
+          message: "invalid_body",
+          issues: parsed.error.issues,
+        },
+      });
   }
   const b = parsed.data;
   const id = randomUUID();
@@ -142,19 +193,6 @@ export const createServiceAdmin: RouteHandler<{
         ? b.image_asset_id ?? null
         : null,
 
-    area: typeof b.area === "string" ? b.area : null,
-    duration: typeof b.duration === "string" ? b.duration : null,
-    maintenance:
-      typeof b.maintenance === "string" ? b.maintenance : null,
-    season: typeof b.season === "string" ? b.season : null,
-
-    soil_type:
-      typeof b.soil_type === "string" ? b.soil_type : null,
-    thickness:
-      typeof b.thickness === "string" ? b.thickness : null,
-    equipment:
-      typeof b.equipment === "string" ? b.equipment : null,
-
     created_at: now as any,
     updated_at: now as any,
   });
@@ -168,7 +206,11 @@ export const createServiceAdmin: RouteHandler<{
     typeof b.price !== "undefined" ||
     typeof b.includes !== "undefined" ||
     typeof b.warranty !== "undefined" ||
-    typeof b.image_alt !== "undefined";
+    typeof b.image_alt !== "undefined" ||
+    typeof b.tags !== "undefined" ||
+    typeof b.meta_title !== "undefined" ||
+    typeof b.meta_description !== "undefined" ||
+    typeof b.meta_keywords !== "undefined";
 
   const reqLocale: Locale =
     (b.locale as Locale) ??
@@ -191,6 +233,11 @@ export const createServiceAdmin: RouteHandler<{
       includes: b.includes,
       warranty: b.warranty,
       image_alt: b.image_alt,
+
+      tags: b.tags,
+      meta_title: b.meta_title,
+      meta_description: b.meta_description,
+      meta_keywords: b.meta_keywords,
     };
 
     const replicateAll = b.replicate_all_locales ?? true;
@@ -217,7 +264,12 @@ export const updateServiceAdmin: RouteHandler<{
   if (!parsed.success) {
     return reply
       .code(400)
-      .send({ error: { message: "invalid_body", issues: parsed.error.issues } });
+      .send({
+        error: {
+          message: "invalid_body",
+          issues: parsed.error.issues,
+        },
+      });
   }
   const b = parsed.data;
 
@@ -231,14 +283,7 @@ export const updateServiceAdmin: RouteHandler<{
     typeof b.display_order !== "undefined" ||
     typeof b.featured_image !== "undefined" ||
     typeof b.image_url !== "undefined" ||
-    typeof b.image_asset_id !== "undefined" ||
-    typeof b.area !== "undefined" ||
-    typeof b.duration !== "undefined" ||
-    typeof b.maintenance !== "undefined" ||
-    typeof b.season !== "undefined" ||
-    typeof b.soil_type !== "undefined" ||
-    typeof b.thickness !== "undefined" ||
-    typeof b.equipment !== "undefined";
+    typeof b.image_asset_id !== "undefined";
 
   if (hasParentPatch) {
     const parentPatch: any = {};
@@ -262,20 +307,6 @@ export const updateServiceAdmin: RouteHandler<{
     if (typeof b.image_asset_id !== "undefined")
       parentPatch.image_asset_id = b.image_asset_id ?? null;
 
-    for (const key of [
-      "area",
-      "duration",
-      "maintenance",
-      "season",
-      "soil_type",
-      "thickness",
-      "equipment",
-    ] as const) {
-      if (typeof (b as any)[key] !== "undefined") {
-        (parentPatch as any)[key] = (b as any)[key];
-      }
-    }
-
     await updateServiceParent(req.params.id, parentPatch);
   }
 
@@ -288,7 +319,11 @@ export const updateServiceAdmin: RouteHandler<{
     typeof b.price !== "undefined" ||
     typeof b.includes !== "undefined" ||
     typeof b.warranty !== "undefined" ||
-    typeof b.image_alt !== "undefined";
+    typeof b.image_alt !== "undefined" ||
+    typeof b.tags !== "undefined" ||
+    typeof b.meta_title !== "undefined" ||
+    typeof b.meta_description !== "undefined" ||
+    typeof b.meta_keywords !== "undefined";
 
   if (hasI18n) {
     const loc: Locale =
@@ -317,6 +352,21 @@ export const updateServiceAdmin: RouteHandler<{
         typeof b.image_alt !== "undefined"
           ? b.image_alt
           : undefined,
+
+      tags:
+        typeof b.tags !== "undefined" ? b.tags : undefined,
+      meta_title:
+        typeof b.meta_title !== "undefined"
+          ? b.meta_title
+          : undefined,
+      meta_description:
+        typeof b.meta_description !== "undefined"
+          ? b.meta_description
+          : undefined,
+      meta_keywords:
+        typeof b.meta_keywords !== "undefined"
+          ? b.meta_keywords
+          : undefined,
     };
 
     if (b.apply_all_locales) {
@@ -326,17 +376,19 @@ export const updateServiceAdmin: RouteHandler<{
     }
   }
 
-  const locale: Locale =
-    (b.locale as Locale) ??
-    ((req as any).locale as Locale) ??
-    DEFAULT_LOCALE;
+  // 🔥 Güncellenmiş veriyi de doğru locale ile geri döndür
+  const { locale, def } = resolveLocales(req, {
+    locale: (b.locale as string | undefined) ?? undefined,
+  });
+
   const row = await getServiceMergedById(
     locale,
-    DEFAULT_LOCALE,
+    def,
     req.params.id,
   );
-  if (!row)
+  if (!row) {
     return reply.code(404).send({ error: { message: "not_found" } });
+  }
   return reply.send(row);
 };
 
@@ -344,8 +396,9 @@ export const removeServiceAdmin: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
   const affected = await deleteServiceParent(req.params.id);
-  if (!affected)
+  if (!affected) {
     return reply.code(404).send({ error: { message: "not_found" } });
+  }
   return reply.code(204).send();
 };
 
@@ -354,8 +407,9 @@ export const removeServiceAdmin: RouteHandler<{
 export const listServiceImagesAdmin: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+  // 🔥 GET /admin/services/:id/images?locale=...&default_locale=...
+  const { locale, def } = resolveLocales(req);
+
   const rows = await listServiceImages({
     serviceId: req.params.id,
     locale,
@@ -374,7 +428,12 @@ export const createServiceImageAdmin: RouteHandler<{
   if (!parsed.success) {
     return reply
       .code(400)
-      .send({ error: { message: "invalid_body", issues: parsed.error.issues } });
+      .send({
+        error: {
+          message: "invalid_body",
+          issues: parsed.error.issues,
+        },
+      });
   }
   const b = parsed.data;
   const id = randomUUID();
@@ -446,7 +505,12 @@ export const updateServiceImageAdmin: RouteHandler<{
   if (!parsed.success) {
     return reply
       .code(400)
-      .send({ error: { message: "invalid_body", issues: parsed.error.issues } });
+      .send({
+        error: {
+          message: "invalid_body",
+          issues: parsed.error.issues,
+        },
+      });
   }
   const b = parsed.data;
 
@@ -514,12 +578,50 @@ export const removeServiceImageAdmin: RouteHandler<{
   Params: { id: string; imageId: string };
 }> = async (req, reply) => {
   const affected = await deleteServiceImage(req.params.imageId);
-  if (!affected)
+  if (!affected) {
     return reply.code(404).send({ error: { message: "not_found" } });
+  }
+
+  // 🔥 Silme sonrası da locale’i query / req.locale’e göre kullan
+  const { locale, def } = resolveLocales(req);
+
   const rows = await listServiceImages({
     serviceId: req.params.id,
-    locale: (req as any).locale ?? DEFAULT_LOCALE,
-    defaultLocale: DEFAULT_LOCALE,
+    locale,
+    defaultLocale: def,
   });
   return reply.send(rows);
 };
+
+/* ----------------------------- reorder (display_order) ----------------------------- */
+
+type ReorderServicesBody = {
+  items?: { id: string; display_order: number }[];
+};
+
+export const reorderServicesAdmin: RouteHandler<{
+  Body: ReorderServicesBody;
+}> = async (req, reply) => {
+  const body = (req.body ?? {}) as ReorderServicesBody;
+  const items = Array.isArray(body.items) ? body.items : [];
+
+  if (!items.length) {
+    return reply.code(400).send({
+      error: { message: "invalid_body", details: "items boş olamaz" },
+    });
+  }
+
+  try {
+    await reorderServices(items);
+    return reply.code(204).send();
+  } catch (err) {
+    (req as any).log?.error?.(
+      { err },
+      "services_reorder_failed",
+    );
+    return reply.code(500).send({
+      error: { message: "reorder_failed" },
+    });
+  }
+};
+

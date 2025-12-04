@@ -3,7 +3,7 @@
 // =============================================================
 import type { RouteHandler } from "fastify";
 import { db } from "@/db/client";
-import { subCategories } from "./schema";
+import { subCategories, subCategoryI18n } from "./schema";
 import { storageAssets } from "@/modules/storage/schema";
 import { and, or, like, eq, sql, asc, desc } from "drizzle-orm";
 import {
@@ -14,12 +14,36 @@ import {
   type SubCategoryUpdateInput,
   type SubCategorySetImageInput,
 } from "./validation";
-import { buildInsertPayload, buildUpdatePayload } from "./controller";
 import { buildPublicUrl } from "@/modules/storage/_util";
+import { randomUUID } from "crypto";
+
+/* ---------- VIEW FIELDS (Base + i18n) ---------- */
+
+const SUBCATEGORY_VIEW_FIELDS = {
+  id: subCategories.id,
+  category_id: subCategories.category_id,
+
+  // i18n
+  locale: subCategoryI18n.locale,
+  name: subCategoryI18n.name,
+  slug: subCategoryI18n.slug,
+  description: subCategoryI18n.description,
+  alt: subCategoryI18n.alt,
+
+  // base
+  image_url: subCategories.image_url,
+  storage_asset_id: subCategories.storage_asset_id,
+  icon: subCategories.icon,
+  is_active: subCategories.is_active,
+  is_featured: subCategories.is_featured,
+  display_order: subCategories.display_order,
+  created_at: subCategories.created_at,
+  updated_at: subCategories.updated_at,
+} as const;
 
 /* ---------- helpers ---------- */
 
-const toBool = (v: unknown): boolean | undefined => {
+const toBoolQS = (v: unknown): boolean | undefined => {
   if (v === undefined) return undefined;
   if (typeof v === "boolean") return v;
   const s = String(v).toLowerCase();
@@ -33,22 +57,10 @@ const toNum = (v: unknown, def = 0) => {
   return Number.isFinite(n) ? n : def;
 };
 
-// LIST QS tipi
-export type AdminSubListQS = {
-  q?: string;
-  category_id?: string;
-  locale?: string;
-  is_active?: string | boolean;
-  is_featured?: string | boolean;
-  limit?: number | string;
-  offset?: number | string;
-  sort?: "display_order" | "name" | "created_at" | "updated_at";
-  order?: "asc" | "desc";
-};
-
 const isDup = (e: any) =>
   (e?.code ?? e?.errno) === "ER_DUP_ENTRY" ||
   (e?.code ?? e?.errno) === 1062;
+
 const isFk = (e: any) =>
   (e?.code ?? e?.errno) === "ER_NO_REFERENCED_ROW_2" ||
   (e?.code ?? e?.errno) === 1452;
@@ -56,9 +68,6 @@ const isFk = (e: any) =>
 // 🌍 Çoklu dil oluşturma için yardımcılar
 const FALLBACK_LOCALES = ["tr"];
 
-/**
- * Locale string'i normalize eder (trim + lowercase).
- */
 function normalizeLocale(loc: unknown): string | null {
   if (!loc) return null;
   const s = String(loc).trim();
@@ -73,10 +82,6 @@ function normalizeLocale(loc: unknown): string | null {
  *   1) .env'den APP_LOCALES / NEXT_PUBLIC_APP_LOCALES / LOCALES  (örn: "tr,en,de")
  *   2) Fallback: ["tr"]
  *   3) Base locale listede yoksa başa eklenir
- *
- * İleride:
- *   - Burayı site_settings tablosundan aktif dilleri okuyan bir helper ile
- *     değiştirebilirsin (örn: getActiveLocalesFromSettings()).
  */
 function getLocalesForCreate(baseLocale: string): string[] {
   const base = normalizeLocale(baseLocale) ?? "tr";
@@ -105,18 +110,57 @@ function getLocalesForCreate(baseLocale: string): string[] {
   return list;
 }
 
+function toBoolBody(v: unknown): boolean {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v !== 0;
+  const s = String(v).toLowerCase();
+  return s === "1" || s === "true";
+}
+
+function nullIfEmpty(v: unknown): string | null {
+  if (v === "" || v === null || v === undefined) return null;
+  return String(v);
+}
+
+/** Ortak: admin tarafı için view query helper */
+async function fetchSubCategoryViewByIdAndLocale(id: string, locale: string) {
+  const rows = await db
+    .select(SUBCATEGORY_VIEW_FIELDS)
+    .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      and(
+        eq(subCategoryI18n.sub_category_id, subCategories.id),
+        eq(subCategoryI18n.locale, locale),
+      ),
+    )
+    .where(eq(subCategories.id, id))
+    .limit(1);
+
+  return rows[0] ?? null;
+}
+
+// LIST QS tipi
+export type AdminSubListQS = {
+  q?: string;
+  category_id?: string;
+  locale?: string;
+  is_active?: string | boolean;
+  is_featured?: string | boolean;
+  limit?: number | string;
+  offset?: number | string;
+  sort?: "display_order" | "name" | "created_at" | "updated_at";
+  order?: "asc" | "desc";
+};
+
 /* ========================= */
 /* CREATE / UPDATE / DELETE  */
 /* ========================= */
 
 /**
- * CREATE
- *
- * - İstek sadece tek bir locale ile gelse bile (veya hiç locale vermese bile),
- *   create sırasında tüm desteklenen locale'ler için kayıt açar.
- * - Her locale için ayrı bir row (id) üretilir.
- * - Response olarak sadece "base locale" kaydını döndürür
- *   (FE mevcut mantıkla çalışmaya devam eder).
+ * POST /sub-categories (admin)
+ *  - Base tablo: sub_categories
+ *  - Çoklu dil: sub_category_i18n (tüm aktif locale'ler için row)
  */
 export const adminCreateSubCategory: RouteHandler<{
   Body: SubCategoryCreateInput;
@@ -131,35 +175,53 @@ export const adminCreateSubCategory: RouteHandler<{
     });
   }
 
-  // İstekten gelen base locale (yoksa "tr")
-  const input = parsed.data;
-  const baseLocale = normalizeLocale(input.locale) ?? "tr";
+  const data = parsed.data;
 
-  // Tüm diller (site settings / env'den)
-  const targetLocales = getLocalesForCreate(baseLocale);
+  const baseId = data.id ?? randomUUID();
+  const baseLocale = normalizeLocale(data.locale) ?? "tr";
+  const locales = getLocalesForCreate(baseLocale);
 
-  // Base payload
-  const basePayload = buildInsertPayload({
-    ...input,
-    locale: baseLocale,
-  });
+  const basePayload = {
+    id: baseId,
+    category_id: data.category_id,
+    image_url:
+      (nullIfEmpty(data.image_url) as string | null) ?? null,
+    storage_asset_id: null as string | null,
+    alt: (nullIfEmpty(data.alt) as string | null) ?? null,
+    icon: (nullIfEmpty(data.icon) as string | null) ?? null,
+    is_active:
+      data.is_active === undefined
+        ? true
+        : toBoolBody(data.is_active),
+    is_featured:
+      data.is_featured === undefined
+        ? false
+        : toBoolBody(data.is_featured),
+    display_order: data.display_order ?? 0,
+  };
 
-  // Tüm locale'ler için insert payload listesi
-  const rows = targetLocales.map((loc) =>
-    loc === baseLocale
-      ? basePayload
-      : buildInsertPayload({
-          ...input,
-          id: undefined, // her locale için yeni id
-          locale: loc,
-        }),
-  );
+  const baseName = String(data.name ?? "").trim();
+  const baseSlug = String(data.slug ?? "").trim();
+  const baseDescription =
+    (nullIfEmpty(data.description) as string | null) ?? null;
+  const baseAlt =
+    (nullIfEmpty(data.alt) as string | null) ?? null;
+
+  const i18nRows = locales.map((loc) => ({
+    sub_category_id: baseId,
+    locale: loc,
+    name: baseName,
+    slug: baseSlug,
+    description: baseDescription,
+    alt: baseAlt,
+  }));
 
   try {
-    // Tek seferde insert dene
-    await db.insert(subCategories).values(rows as any);
+    await db.transaction(async (tx) => {
+      await tx.insert(subCategories).values(basePayload as any);
+      await tx.insert(subCategoryI18n).values(i18nRows as any);
+    });
   } catch (err: any) {
-    // duplicate ise (ör: aynı kategori + locale + slug daha önce açılmış)
     if (isDup(err)) {
       return reply
         .code(409)
@@ -178,23 +240,14 @@ export const adminCreateSubCategory: RouteHandler<{
     });
   }
 
-  // Base locale kaydını döndür (FE bu id ile çalışmaya devam eder)
-  const [row] = await db
-    .select()
-    .from(subCategories)
-    .where(
-      and(
-        eq(subCategories.category_id, basePayload.category_id),
-        eq(subCategories.slug, basePayload.slug),
-        eq(subCategories.locale, basePayload.locale),
-      ),
-    )
-    .limit(1);
-
-  return reply.code(201).send(row);
+  const created = await fetchSubCategoryViewByIdAndLocale(
+    baseId,
+    baseLocale,
+  );
+  return reply.code(201).send(created);
 };
 
-/* PUT */
+/* PUT /sub-categories/:id (admin) */
 export const adminPutSubCategory: RouteHandler<{
   Params: { id: string };
   Body: SubCategoryUpdateInput;
@@ -209,12 +262,84 @@ export const adminPutSubCategory: RouteHandler<{
       },
     });
 
-  const set = buildUpdatePayload(parsed.data);
+  const patch = parsed.data;
+  const targetLocale = normalizeLocale(patch.locale) ?? "tr";
+
+  const baseSet: Record<string, unknown> = {
+    updated_at: sql`CURRENT_TIMESTAMP(3)`,
+  };
+  const i18nSet: Record<string, unknown> = {
+    updated_at: sql`CURRENT_TIMESTAMP(3)`,
+  };
+  let hasBase = false;
+  let hasI18n = false;
+
+  if (patch.category_id !== undefined) {
+    baseSet.category_id = String(patch.category_id);
+    hasBase = true;
+  }
+  if (patch.image_url !== undefined) {
+    baseSet.image_url = nullIfEmpty(patch.image_url);
+    hasBase = true;
+  }
+  if (patch.icon !== undefined) {
+    baseSet.icon = nullIfEmpty(patch.icon);
+    hasBase = true;
+  }
+  if (patch.is_active !== undefined) {
+    baseSet.is_active = toBoolBody(patch.is_active);
+    hasBase = true;
+  }
+  if (patch.is_featured !== undefined) {
+    baseSet.is_featured = toBoolBody(patch.is_featured);
+    hasBase = true;
+  }
+  if (patch.display_order !== undefined) {
+    baseSet.display_order = Number(patch.display_order) || 0;
+    hasBase = true;
+  }
+
+  if (patch.name !== undefined) {
+    i18nSet.name = String(patch.name).trim();
+    hasI18n = true;
+  }
+  if (patch.slug !== undefined) {
+    i18nSet.slug = String(patch.slug).trim();
+    hasI18n = true;
+  }
+  if (patch.description !== undefined) {
+    i18nSet.description = nullIfEmpty(patch.description);
+    hasI18n = true;
+  }
+  if (patch.alt !== undefined) {
+    const altVal = nullIfEmpty(patch.alt);
+    i18nSet.alt = altVal;
+    baseSet.alt = altVal;
+    hasI18n = true;
+    hasBase = true;
+  }
+
   try {
-    await db
-      .update(subCategories)
-      .set(set as any)
-      .where(eq(subCategories.id, id));
+    await db.transaction(async (tx) => {
+      if (hasBase) {
+        await tx
+          .update(subCategories)
+          .set(baseSet as any)
+          .where(eq(subCategories.id, id));
+      }
+
+      if (hasI18n) {
+        await tx
+          .update(subCategoryI18n)
+          .set(i18nSet as any)
+          .where(
+            and(
+              eq(subCategoryI18n.sub_category_id, id),
+              eq(subCategoryI18n.locale, targetLocale),
+            ),
+          );
+      }
+    });
   } catch (err: any) {
     if (isDup(err))
       return reply
@@ -231,17 +356,17 @@ export const adminPutSubCategory: RouteHandler<{
       },
     });
   }
-  const rows = await db
-    .select()
-    .from(subCategories)
-    .where(eq(subCategories.id, id))
-    .limit(1);
-  if (!rows.length)
+
+  const row = await fetchSubCategoryViewByIdAndLocale(
+    id,
+    targetLocale,
+  );
+  if (!row)
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send(rows[0]);
+  return reply.send(row);
 };
 
-/* PATCH */
+/* PATCH /sub-categories/:id (admin) */
 export const adminPatchSubCategory: RouteHandler<{
   Params: { id: string };
   Body: SubCategoryUpdateInput;
@@ -256,12 +381,84 @@ export const adminPatchSubCategory: RouteHandler<{
       },
     });
 
-  const set = buildUpdatePayload(parsed.data);
+  const patch = parsed.data;
+  const targetLocale = normalizeLocale(patch.locale) ?? "tr";
+
+  const baseSet: Record<string, unknown> = {
+    updated_at: sql`CURRENT_TIMESTAMP(3)`,
+  };
+  const i18nSet: Record<string, unknown> = {
+    updated_at: sql`CURRENT_TIMESTAMP(3)`,
+  };
+  let hasBase = false;
+  let hasI18n = false;
+
+  if (patch.category_id !== undefined) {
+    baseSet.category_id = String(patch.category_id);
+    hasBase = true;
+  }
+  if (patch.image_url !== undefined) {
+    baseSet.image_url = nullIfEmpty(patch.image_url);
+    hasBase = true;
+  }
+  if (patch.icon !== undefined) {
+    baseSet.icon = nullIfEmpty(patch.icon);
+    hasBase = true;
+  }
+  if (patch.is_active !== undefined) {
+    baseSet.is_active = toBoolBody(patch.is_active);
+    hasBase = true;
+  }
+  if (patch.is_featured !== undefined) {
+    baseSet.is_featured = toBoolBody(patch.is_featured);
+    hasBase = true;
+  }
+  if (patch.display_order !== undefined) {
+    baseSet.display_order = Number(patch.display_order) || 0;
+    hasBase = true;
+  }
+
+  if (patch.name !== undefined) {
+    i18nSet.name = String(patch.name).trim();
+    hasI18n = true;
+  }
+  if (patch.slug !== undefined) {
+    i18nSet.slug = String(patch.slug).trim();
+    hasI18n = true;
+  }
+  if (patch.description !== undefined) {
+    i18nSet.description = nullIfEmpty(patch.description);
+    hasI18n = true;
+  }
+  if (patch.alt !== undefined) {
+    const altVal = nullIfEmpty(patch.alt);
+    i18nSet.alt = altVal;
+    baseSet.alt = altVal;
+    hasI18n = true;
+    hasBase = true;
+  }
+
   try {
-    await db
-      .update(subCategories)
-      .set(set as any)
-      .where(eq(subCategories.id, id));
+    await db.transaction(async (tx) => {
+      if (hasBase) {
+        await tx
+          .update(subCategories)
+          .set(baseSet as any)
+          .where(eq(subCategories.id, id));
+      }
+
+      if (hasI18n) {
+        await tx
+          .update(subCategoryI18n)
+          .set(i18nSet as any)
+          .where(
+            and(
+              eq(subCategoryI18n.sub_category_id, id),
+              eq(subCategoryI18n.locale, targetLocale),
+            ),
+          );
+      }
+    });
   } catch (err: any) {
     if (isDup(err))
       return reply
@@ -278,27 +475,28 @@ export const adminPatchSubCategory: RouteHandler<{
       },
     });
   }
-  const rows = await db
-    .select()
-    .from(subCategories)
-    .where(eq(subCategories.id, id))
-    .limit(1);
-  if (!rows.length)
+
+  const row = await fetchSubCategoryViewByIdAndLocale(
+    id,
+    targetLocale,
+  );
+  if (!row)
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send(rows[0]);
+  return reply.send(row);
 };
 
-/* DELETE */
+/* DELETE /sub-categories/:id */
 export const adminDeleteSubCategory: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
   await db
     .delete(subCategories)
     .where(eq(subCategories.id, req.params.id));
+  // ON DELETE CASCADE ile i18n otomatik silinecek
   return reply.code(204).send();
 };
 
-/* REORDER */
+/* POST /sub-categories/reorder */
 export const adminReorderSubCategories: RouteHandler<{
   Body: { items: Array<{ id: string; display_order: number }> };
 }> = async (req, reply) => {
@@ -306,6 +504,7 @@ export const adminReorderSubCategories: RouteHandler<{
     ? req.body.items
     : [];
   if (!items.length) return reply.send({ ok: true });
+
   for (const it of items) {
     await db
       .update(subCategories)
@@ -318,51 +517,51 @@ export const adminReorderSubCategories: RouteHandler<{
   return reply.send({ ok: true });
 };
 
-/* ACTIVE */
+/* PATCH /sub-categories/:id/active */
 export const adminToggleSubActive: RouteHandler<{
   Params: { id: string };
   Body: { is_active: boolean };
 }> = async (req, reply) => {
+  const { id } = req.params;
+  const v = !!req.body?.is_active;
+
   await db
     .update(subCategories)
     .set({
-      is_active: !!req.body?.is_active,
+      is_active: v,
       updated_at: sql`CURRENT_TIMESTAMP(3)`,
     } as any)
-    .where(eq(subCategories.id, req.params.id));
-  const rows = await db
-    .select()
-    .from(subCategories)
-    .where(eq(subCategories.id, req.params.id))
-    .limit(1);
-  if (!rows.length)
+    .where(eq(subCategories.id, id));
+
+  const row = await fetchSubCategoryViewByIdAndLocale(id, "tr");
+  if (!row)
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send(rows[0]);
+  return reply.send(row);
 };
 
-/* FEATURED */
+/* PATCH /sub-categories/:id/featured */
 export const adminToggleSubFeatured: RouteHandler<{
   Params: { id: string };
   Body: { is_featured: boolean };
 }> = async (req, reply) => {
+  const { id } = req.params;
+  const v = !!req.body?.is_featured;
+
   await db
     .update(subCategories)
     .set({
-      is_featured: !!req.body?.is_featured,
+      is_featured: v,
       updated_at: sql`CURRENT_TIMESTAMP(3)`,
     } as any)
-    .where(eq(subCategories.id, req.params.id));
-  const rows = await db
-    .select()
-    .from(subCategories)
-    .where(eq(subCategories.id, req.params.id))
-    .limit(1);
-  if (!rows.length)
+    .where(eq(subCategories.id, id));
+
+  const row = await fetchSubCategoryViewByIdAndLocale(id, "tr");
+  if (!row)
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send(rows[0]);
+  return reply.send(row);
 };
 
-/* IMAGE (asset_id + alt) */
+/* PATCH /sub-categories/:id/image (asset_id + alt) */
 export const adminSetSubCategoryImage: RouteHandler<{
   Params: { id: string };
   Body: SubCategorySetImageInput;
@@ -377,8 +576,9 @@ export const adminSetSubCategoryImage: RouteHandler<{
       },
     });
   const assetId = parsed.data.asset_id ?? null;
-  const alt = parsed.data.alt;
+  const alt = parsed.data.alt; // undefined ⇒ dokunma, null ⇒ temizle
 
+  // Görseli kaldır
   if (!assetId) {
     const patch: Record<string, unknown> = {
       image_url: null,
@@ -386,20 +586,19 @@ export const adminSetSubCategoryImage: RouteHandler<{
       updated_at: sql`CURRENT_TIMESTAMP(3)`,
     };
     if (alt !== undefined) patch.alt = alt as string | null;
+
     await db
       .update(subCategories)
       .set(patch as any)
       .where(eq(subCategories.id, id));
-    const rows = await db
-      .select()
-      .from(subCategories)
-      .where(eq(subCategories.id, id))
-      .limit(1);
-    if (!rows.length)
+
+    const row = await fetchSubCategoryViewByIdAndLocale(id, "tr");
+    if (!row)
       return reply.code(404).send({ error: { message: "not_found" } });
-    return reply.send(rows[0]);
+    return reply.send(row);
   }
 
+  // Asset’i getir
   const [asset] = await db
     .select({
       bucket: storageAssets.bucket,
@@ -415,7 +614,6 @@ export const adminSetSubCategoryImage: RouteHandler<{
       .code(404)
       .send({ error: { message: "asset_not_found" } });
 
-  // ✅ Storage modülünün merkezi URL builder’ı
   const publicUrl = buildPublicUrl(
     asset.bucket,
     asset.path,
@@ -433,17 +631,14 @@ export const adminSetSubCategoryImage: RouteHandler<{
     .update(subCategories)
     .set(patch as any)
     .where(eq(subCategories.id, id));
-  const rows = await db
-    .select()
-    .from(subCategories)
-    .where(eq(subCategories.id, id))
-    .limit(1);
-  if (!rows.length)
+
+  const row = await fetchSubCategoryViewByIdAndLocale(id, "tr");
+  if (!row)
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send(rows[0]);
+  return reply.send(row);
 };
 
-/* LIST */
+/* GET /sub-categories/list (admin) */
 export const adminListSubCategories: RouteHandler<{
   Querystring: AdminSubListQS;
 }> = async (req, reply) => {
@@ -460,35 +655,45 @@ export const adminListSubCategories: RouteHandler<{
   } = req.query ?? {};
   const conds: any[] = [];
 
+  const effectiveLocale = normalizeLocale(locale) ?? "tr";
+  conds.push(eq(subCategoryI18n.locale, effectiveLocale));
+
   if (q && q.trim()) {
     const p = `%${q.trim()}%`;
     conds.push(
       or(
-        like(subCategories.name, p),
-        like(subCategories.slug, p),
+        like(subCategoryI18n.name, p),
+        like(subCategoryI18n.slug, p),
       ),
     );
   }
-  if (category_id) conds.push(eq(subCategories.category_id, category_id));
-  if (locale && locale.trim())
-    conds.push(eq(subCategories.locale, locale.trim()));
+  if (category_id)
+    conds.push(eq(subCategories.category_id, category_id));
 
-  const a = toBool(is_active);
+  const a = toBoolQS(is_active);
   if (a !== undefined) conds.push(eq(subCategories.is_active, a));
-  const f = toBool(is_featured);
+  const f = toBoolQS(is_featured);
   if (f !== undefined)
     conds.push(eq(subCategories.is_featured, f));
 
   const col =
     sort === "name"
-      ? subCategories.name
+      ? subCategoryI18n.name
       : sort === "created_at"
         ? subCategories.created_at
         : sort === "updated_at"
           ? subCategories.updated_at
           : subCategories.display_order;
 
-  let qb = db.select().from(subCategories).$dynamic();
+  let qb = db
+    .select(SUBCATEGORY_VIEW_FIELDS)
+    .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      eq(subCategoryI18n.sub_category_id, subCategories.id),
+    )
+    .$dynamic();
+
   if (conds.length) qb = qb.where(and(...conds));
 
   const rows = await qb
@@ -499,35 +704,50 @@ export const adminListSubCategories: RouteHandler<{
   return reply.send(rows);
 };
 
-/* GET BY ID */
+/* GET /sub-categories/:id (admin) */
 export const adminGetSubCategoryById: RouteHandler<{
   Params: { id: string };
+  Querystring: { locale?: string };
 }> = async (req, reply) => {
-  const rows = await db
-    .select()
-    .from(subCategories)
-    .where(eq(subCategories.id, req.params.id))
-    .limit(1);
-  if (!rows.length)
+  const { id } = req.params;
+  const effectiveLocale =
+    normalizeLocale(req.query?.locale) ?? "tr";
+
+  const row = await fetchSubCategoryViewByIdAndLocale(
+    id,
+    effectiveLocale,
+  );
+  if (!row)
     return reply.code(404).send({ error: { message: "not_found" } });
-  return reply.send(rows[0]);
+  return reply.send(row);
 };
 
-/* GET BY SLUG (opsiyonel category_id + locale) */
+/* GET /sub-categories/by-slug/:slug (admin) */
 export const adminGetSubCategoryBySlug: RouteHandler<{
   Params: { slug: string };
   Querystring: { category_id?: string; locale?: string };
 }> = async (req, reply) => {
-  const conds: any[] = [eq(subCategories.slug, req.params.slug)];
-  if (req.query?.category_id)
-    conds.push(eq(subCategories.category_id, req.query.category_id));
-  if (req.query?.locale)
-    conds.push(eq(subCategories.locale, req.query.locale));
+  const { slug } = req.params;
+  const { category_id, locale } = req.query ?? {};
+  const effectiveLocale = normalizeLocale(locale) ?? "tr";
+
+  const conds: any[] = [
+    eq(subCategoryI18n.slug, slug),
+    eq(subCategoryI18n.locale, effectiveLocale),
+  ];
+  if (category_id)
+    conds.push(eq(subCategories.category_id, category_id));
+
   const rows = await db
-    .select()
+    .select(SUBCATEGORY_VIEW_FIELDS)
     .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      eq(subCategoryI18n.sub_category_id, subCategories.id),
+    )
     .where(and(...conds))
     .limit(1);
+
   if (!rows.length)
     return reply.code(404).send({ error: { message: "not_found" } });
   return reply.send(rows[0]);

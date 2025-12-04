@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/admin/sliders_admin.endpoints.ts
-// Ensotek – ADMIN Slider RTK endpoints
+// FIXED – Fully locale-aware (BaseID + locale)
 // =============================================================
 
 import { baseApi } from "../../baseApi";
@@ -14,65 +14,77 @@ import type {
   SliderReorderPayload,
   SliderSetStatusPayload,
   SliderSetImagePayload,
-} from "../../../types/slider.types";
-import { normalizeSliderAdmin } from "../../../types/slider.types";
+} from "@/integrations/types/slider.types";
+import { normalizeSliderAdmin } from "@/integrations/types/slider.types";
+
+const cleanParams = (
+  params?: Record<string, unknown>,
+): Record<string, string | number | boolean> | undefined => {
+  if (!params) return undefined;
+  const out: Record<string, string | number | boolean> = {};
+
+  for (const [k, v] of Object.entries(params)) {
+    if (
+      v === undefined ||
+      v === null ||
+      v === "" ||
+      (typeof v === "number" && Number.isNaN(v))
+    ) {
+      continue;
+    }
+    out[k] =
+      typeof v === "boolean" ||
+      typeof v === "number" ||
+      typeof v === "string"
+        ? v
+        : String(v);
+  }
+
+  return Object.keys(out).length ? out : undefined;
+};
 
 export const slidersAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    /* --------------------------------------------------------- */
-    /*  ADMIN: Liste                                              */
-    /*  GET /admin/sliders                                        */
-    /* --------------------------------------------------------- */
-    listSlidersAdmin: build.query<SliderAdminDto[], SliderAdminListQueryParams | void>(
-      {
-        query: (params) => {
-          const queryParams: Record<string, any> | undefined = params
-            ? (params as Record<string, any>)
-            : undefined;
-
-          return {
-            url: "/admin/sliders",
-            method: "GET",
-            params: queryParams,
-          };
-        },
-        transformResponse: (response: ApiSliderAdmin[]) =>
-          Array.isArray(response)
-            ? response.map(normalizeSliderAdmin)
-            : [],
-        providesTags: (result) =>
-          result && result.length
-            ? [
-                ...result.map((r) => ({
-                  type: "Sliders" as const,
-                  id: r.id,
-                })),
-                { type: "Sliders" as const, id: "LIST" },
-              ]
-            : [{ type: "Sliders" as const, id: "LIST" }],
-      },
-    ),
-
-    /* --------------------------------------------------------- */
-    /*  ADMIN: Tekil (ID)                                         */
-    /*  GET /admin/sliders/:id                                    */
-    /* --------------------------------------------------------- */
-    getSliderAdmin: build.query<SliderAdminDto, number | string>({
-      query: (id) => ({
-        url: `/admin/sliders/${id}`,
+    listSlidersAdmin: build.query<
+      SliderAdminDto[],
+      SliderAdminListQueryParams | void
+    >({
+      query: (params) => ({
+        url: "/admin/sliders",
         method: "GET",
+        params: cleanParams(params as Record<string, unknown>),
       }),
-      transformResponse: (response: ApiSliderAdmin) =>
-        normalizeSliderAdmin(response),
-      providesTags: (_res, _err, id) => [
-        { type: "Sliders" as const, id: String(id) },
+      transformResponse: (response: ApiSliderAdmin[]) =>
+        Array.isArray(response)
+          ? response.map(normalizeSliderAdmin)
+          : [],
+      providesTags: (result) =>
+        result && result.length
+          ? [
+              ...result.map((r) => ({
+                type: "Sliders" as const,
+                id: r.id,
+              })),
+              { type: "Sliders" as const, id: "LIST" },
+            ]
+          : [{ type: "Sliders" as const, id: "LIST" }],
+    }),
+
+    getSliderAdmin: build.query<
+      SliderAdminDto,
+      { id: number | string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
+        url: `/admin/sliders/${encodeURIComponent(id)}`,
+        method: "GET",
+        params: cleanParams(locale ? { locale } : undefined),
+      }),
+      transformResponse: normalizeSliderAdmin,
+      providesTags: (_res, _err, arg) => [
+        { type: "Sliders" as const, id: String(arg.id) },
       ],
     }),
 
-    /* --------------------------------------------------------- */
-    /*  ADMIN: CREATE                                             */
-    /*  POST /admin/sliders                                       */
-    /* --------------------------------------------------------- */
     createSliderAdmin: build.mutation<
       SliderAdminDto,
       SliderCreatePayload
@@ -82,39 +94,29 @@ export const slidersAdminApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      transformResponse: (response: ApiSliderAdmin) =>
-        normalizeSliderAdmin(response),
+      transformResponse: normalizeSliderAdmin,
       invalidatesTags: [{ type: "Sliders" as const, id: "LIST" }],
     }),
 
-    /* --------------------------------------------------------- */
-    /*  ADMIN: UPDATE (PATCH)                                     */
-    /*  PATCH /admin/sliders/:id                                  */
-    /* --------------------------------------------------------- */
     updateSliderAdmin: build.mutation<
       SliderAdminDto,
       { id: number | string; patch: SliderUpdatePayload }
     >({
       query: ({ id, patch }) => ({
-        url: `/admin/sliders/${id}`,
+        url: `/admin/sliders/${encodeURIComponent(id)}`,
         method: "PATCH",
         body: patch,
       }),
-      transformResponse: (response: ApiSliderAdmin) =>
-        normalizeSliderAdmin(response),
+      transformResponse: normalizeSliderAdmin,
       invalidatesTags: (_res, _err, arg) => [
         { type: "Sliders" as const, id: String(arg.id) },
         { type: "Sliders" as const, id: "LIST" },
       ],
     }),
 
-    /* --------------------------------------------------------- */
-    /*  ADMIN: DELETE                                             */
-    /*  DELETE /admin/sliders/:id                                 */
-    /* --------------------------------------------------------- */
     deleteSliderAdmin: build.mutation<void, number | string>({
       query: (id) => ({
-        url: `/admin/sliders/${id}`,
+        url: `/admin/sliders/${encodeURIComponent(id)}`,
         method: "DELETE",
       }),
       invalidatesTags: (_res, _err, id) => [
@@ -123,10 +125,6 @@ export const slidersAdminApi = baseApi.injectEndpoints({
       ],
     }),
 
-    /* --------------------------------------------------------- */
-    /*  ADMIN: REORDER                                            */
-    /*  POST /admin/sliders/reorder                               */
-    /* --------------------------------------------------------- */
     reorderSlidersAdmin: build.mutation<
       { ok: boolean },
       SliderReorderPayload
@@ -139,42 +137,32 @@ export const slidersAdminApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: "Sliders" as const, id: "LIST" }],
     }),
 
-    /* --------------------------------------------------------- */
-    /*  ADMIN: Set Status (aktif/pasif)                           */
-    /*  POST /admin/sliders/:id/status                            */
-    /* --------------------------------------------------------- */
     setSliderStatusAdmin: build.mutation<
       SliderAdminDto,
       { id: number | string; payload: SliderSetStatusPayload }
     >({
       query: ({ id, payload }) => ({
-        url: `/admin/sliders/${id}/status`,
+        url: `/admin/sliders/${encodeURIComponent(id)}/status`,
         method: "POST",
         body: payload,
       }),
-      transformResponse: (response: ApiSliderAdmin) =>
-        normalizeSliderAdmin(response),
+      transformResponse: normalizeSliderAdmin,
       invalidatesTags: (_res, _err, arg) => [
         { type: "Sliders" as const, id: String(arg.id) },
         { type: "Sliders" as const, id: "LIST" },
       ],
     }),
 
-    /* --------------------------------------------------------- */
-    /*  ADMIN: Set Image                                          */
-    /*  PATCH /admin/sliders/:id/image                            */
-    /* --------------------------------------------------------- */
     setSliderImageAdmin: build.mutation<
       SliderAdminDto,
       { id: number | string; payload: SliderSetImagePayload }
     >({
       query: ({ id, payload }) => ({
-        url: `/admin/sliders/${id}/image`,
+        url: `/admin/sliders/${encodeURIComponent(id)}/image`,
         method: "PATCH",
         body: payload,
       }),
-      transformResponse: (response: ApiSliderAdmin) =>
-        normalizeSliderAdmin(response),
+      transformResponse: normalizeSliderAdmin,
       invalidatesTags: (_res, _err, arg) => [
         { type: "Sliders" as const, id: String(arg.id) },
         { type: "Sliders" as const, id: "LIST" },
@@ -186,7 +174,9 @@ export const slidersAdminApi = baseApi.injectEndpoints({
 
 export const {
   useListSlidersAdminQuery,
+  useLazyListSlidersAdminQuery,
   useGetSliderAdminQuery,
+  useLazyGetSliderAdminQuery,
   useCreateSliderAdminMutation,
   useUpdateSliderAdminMutation,
   useDeleteSliderAdminMutation,

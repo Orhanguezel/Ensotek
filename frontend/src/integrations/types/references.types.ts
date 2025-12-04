@@ -15,17 +15,21 @@ export type BoolLike =
 
 /* -------------------------------------------------------------
  * LIST QUERY (public + admin ortak)
- * backend: ReferenceListQuery + ListQuery
+ * backend: ReferenceListQuery + ListParams
  * ----------------------------------------------------------- */
 
 export type ReferenceListQueryParams = {
-  order?: string; // "created_at.asc" gibi
+  // shared order param (örn: "created_at.asc")
+  order?: string;
+
+  // sort + orderDir: shared util
   sort?: "created_at" | "updated_at" | "display_order";
   orderDir?: "asc" | "desc";
+
   limit?: number;
   offset?: number;
 
-  is_published?: BoolLike;
+  is_published?: BoolLike; // admin kullanıyor, public ignore
   is_featured?: BoolLike;
 
   q?: string;
@@ -34,11 +38,20 @@ export type ReferenceListQueryParams = {
 
   category_id?: string;
   sub_category_id?: string;
+
+  /** categories.module_key üzerinden filtre (ör: 'references') */
+  module_key?: string;
+
+  /** website_url var/yok filtresi */
+  has_website?: BoolLike;
+
+  /** locale-aware list için opsiyonel locale paramı */
+  locale?: string;
 };
 
 /* -------------------------------------------------------------
  * ReferenceView (public + admin aynı yapı)
- * backend: ReferenceView (repository.ts)
+ * backend: ReferenceMerged (repository.ts)
  * ----------------------------------------------------------- */
 
 export interface ReferenceAssetInfo {
@@ -121,7 +134,7 @@ export interface ReferenceUpsertPayload {
 
 /* -------------------------------------------------------------
  * GALLERY tipleri
- * backend: ReferenceImageView / UpsertReferenceImageBody / PatchReferenceImageBody
+ * backend: ReferenceImageMerged / UpsertReferenceImageBody / PatchReferenceImageBody
  * ----------------------------------------------------------- */
 
 export interface ReferenceImageAssetInfo {

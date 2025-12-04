@@ -12,9 +12,23 @@ export type BoolLike = boolean | 0 | 1 | "0" | "1" | "true" | "false";
 
 /**
  * Backend ServiceTypeEnum ile uyumlu.
- * Yeni tip eklenirse buraya da eklenmesi gerekiyor.
+ * Seed'de kullanılan tipler:
+ *  - maintenance_repair
+ *  - modernization
+ *  - spare_parts_components
+ *  - applications_references
+ *  - engineering_support
+ *  - production
+ *  - other
  */
-export type ServiceType = "gardening" | "soil" | "other";
+export type ServiceType =
+  | "maintenance_repair"
+  | "modernization"
+  | "spare_parts_components"
+  | "applications_references"
+  | "engineering_support"
+  | "production"
+  | "other";
 
 /** Sıralama alanları (serviceListQuerySchema.sort ile uyumlu) */
 export type ServiceSortField = "created_at" | "updated_at" | "display_order";
@@ -78,7 +92,7 @@ export interface ApiServiceBase {
   image_url: string | null;
   image_asset_id: string | null;
 
-  // tip özel alanlar (non-i18n)
+  // tip spesifik (non-i18n) alanlar
   area: string | null;
   duration: string | null;
   maintenance: string | null;
@@ -99,6 +113,13 @@ export interface ApiServiceBase {
   includes: string | null;
   warranty: string | null;
   image_alt: string | null;
+
+  // SEO + tags
+  tags: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  meta_keywords: string | null;
+
   locale_resolved: string | null;
 }
 
@@ -139,7 +160,7 @@ export interface ServiceDto {
    */
   featured_image_url?: string | null;
 
-  // tip özel alanlar
+  // tip spesifik non-i18n alanlar
   area: string | null;
   duration: string | null;
   maintenance: string | null;
@@ -160,6 +181,13 @@ export interface ServiceDto {
   includes: string | null;
   warranty: string | null;
   image_alt: string | null;
+
+  // SEO + tags
+  tags: string | null;
+  meta_title: string | null;
+  meta_description: string | null;
+  meta_keywords: string | null;
+
   locale_resolved: string | null;
 }
 
@@ -234,12 +262,11 @@ export interface ServiceCreatePayload {
   image_url?: string | null;
   image_asset_id?: string | null;
 
-  // type specific
+  // tip spesifik alanlar
   area?: string | null;
   duration?: string | null;
   maintenance?: string | null;
   season?: string | null;
-
   soil_type?: string | null;
   thickness?: string | null;
   equipment?: string | null;
@@ -254,6 +281,12 @@ export interface ServiceCreatePayload {
   includes?: string;
   warranty?: string;
   image_alt?: string;
+
+  // SEO + tags
+  tags?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  meta_keywords?: string | null;
 
   /**
    * create: aynı içeriği tüm dillere kopyala? (default: true)
@@ -281,11 +314,11 @@ export interface ServiceUpdatePayload {
   image_url?: string | null;
   image_asset_id?: string | null;
 
+  // tip spesifik alanlar
   area?: string | null;
   duration?: string | null;
   maintenance?: string | null;
   season?: string | null;
-
   soil_type?: string | null;
   thickness?: string | null;
   equipment?: string | null;
@@ -300,6 +333,12 @@ export interface ServiceUpdatePayload {
   includes?: string;
   warranty?: string;
   image_alt?: string;
+
+  // SEO + tags
+  tags?: string | null;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  meta_keywords?: string | null;
 
   /**
    * patch: tüm dillere uygula? (default: false)

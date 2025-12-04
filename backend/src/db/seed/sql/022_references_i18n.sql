@@ -1,6 +1,6 @@
 -- =============================================================
--- 031_references_i18n.sql (only seeds)
---   NOT: @REF_TORONTO_ID ve @REF_ECOM_ID, 030_references.sql
+-- 022_references_i18n.sql (i18n seeds)
+--   NOT: @REF_TORONTO_ID ve @REF_ECOM_ID, 021_references.seeds.sql
 --        içinde tanımlanmış olmalıdır.
 -- =============================================================
 

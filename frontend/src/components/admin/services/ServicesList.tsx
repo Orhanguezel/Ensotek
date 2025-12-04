@@ -1,7 +1,9 @@
 // =============================================================
 // FILE: src/components/admin/services/ServicesList.tsx
 // Ensotek – Admin Services Liste Bileşeni
-// (Bootstrap table + mobile cards + client-side pagination)
+//  - Bootstrap table + mobile cards
+//  - Client-side pagination
+//  - Drag & drop reorder (parent.display_order için)
 // =============================================================
 
 import React, { useEffect, useState } from "react";
@@ -25,6 +27,11 @@ export type ServicesListProps = {
   onToggleFeatured?: (service: ServiceDto, value: boolean) => void;
   onEdit?: (service: ServiceDto) => void;
   onDelete?: (service: ServiceDto) => void;
+
+  // 🔹 Drag & drop sıralama için
+  onReorder?: (next: ServiceDto[]) => void;
+  onSaveOrder?: () => void;
+  savingOrder?: boolean;
 };
 
 function formatDate(value: string | null | undefined): string {
@@ -36,10 +43,25 @@ function formatDate(value: string | null | undefined): string {
 
 function formatType(t: ServiceDto["type"]): string {
   if (!t) return "Diğer";
-  if (t === "gardening") return "Bahçe / Gardening";
-  if (t === "soil") return "Toprak / Soil";
-  if (t === "other") return "Diğer";
-  return t;
+
+  switch (t) {
+    case "maintenance_repair":
+      return "Bakım & Onarım";
+    case "modernization":
+      return "Modernizasyon";
+    case "spare_parts_components":
+      return "Yedek Parça & Bileşenler";
+    case "applications_references":
+      return "Uygulamalar & Referanslar";
+    case "engineering_support":
+      return "Mühendislik Desteği";
+    case "production":
+      return "Üretim";
+    case "other":
+      return "Diğer";
+    default:
+      return String(t);
+  }
 }
 
 function formatPrice(price: string | null): string {
@@ -54,6 +76,9 @@ export const ServicesList: React.FC<ServicesListProps> = ({
   onToggleFeatured,
   onEdit,
   onDelete,
+  onReorder,
+  onSaveOrder,
+  savingOrder,
 }) => {
   const rows = items ?? [];
   const totalItems = rows.length;
@@ -61,6 +86,9 @@ export const ServicesList: React.FC<ServicesListProps> = ({
 
   const [page, setPage] = useState(1);
   const pageCount = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+
+  // 🔹 Dragging state
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   useEffect(() => {
     setPage((prev) => {
@@ -111,6 +139,32 @@ export const ServicesList: React.FC<ServicesListProps> = ({
     setPage(nextPage);
   };
 
+  /* -------------------- Drag & Drop -------------------- */
+
+  const handleDragStart = (id: string) => {
+    setDraggingId(id);
+  };
+
+  const handleDragEnd = () => {
+    setDraggingId(null);
+  };
+
+  const handleDropOn = (targetId: string) => {
+    if (!draggingId || draggingId === targetId || !onReorder) return;
+
+    const currentIndex = rows.findIndex((r) => r.id === draggingId);
+    const targetIndex = rows.findIndex((r) => r.id === targetId);
+    if (currentIndex === -1 || targetIndex === -1) return;
+
+    const next = [...rows];
+    const [moved] = next.splice(currentIndex, 1);
+    next.splice(targetIndex, 0, moved);
+
+    onReorder(next);
+  };
+
+  /* -------------------- Render Helpers -------------------- */
+
   const renderStatusBadges = (s: ServiceDto) => {
     return (
       <div className="d-flex flex-column gap-1 small">
@@ -141,14 +195,40 @@ export const ServicesList: React.FC<ServicesListProps> = ({
   const renderTypeBadge = (s: ServiceDto) => {
     const t = s.type;
     let cls = "bg-secondary";
-    if (t === "gardening") cls = "bg-success";
-    else if (t === "soil") cls = "bg-info";
+
+    switch (t) {
+      case "maintenance_repair":
+        cls = "bg-success";
+        break;
+      case "modernization":
+        cls = "bg-info";
+        break;
+      case "spare_parts_components":
+        cls = "bg-warning";
+        break;
+      case "applications_references":
+        cls = "bg-primary";
+        break;
+      case "engineering_support":
+        cls = "bg-dark";
+        break;
+      case "production":
+        cls = "bg-secondary";
+        break;
+      case "other":
+      default:
+        cls = "bg-secondary";
+        break;
+    }
+
     return (
       <span className={`badge ${cls} ms-1`} style={{ fontSize: "0.7rem" }}>
         {formatType(t)}
       </span>
     );
   };
+
+  /* -------------------- Render -------------------- */
 
   return (
     <div className="card">
@@ -161,6 +241,18 @@ export const ServicesList: React.FC<ServicesListProps> = ({
           <span className="text-muted small">
             Toplam: <strong>{totalItems}</strong>
           </span>
+          {onSaveOrder && (
+            <button
+              type="button"
+              className="btn btn-outline-primary btn-sm"
+              onClick={onSaveOrder}
+              disabled={savingOrder || !hasData}
+            >
+              {savingOrder
+                ? "Sıralama kaydediliyor..."
+                : "Sıralamayı Kaydet"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -171,7 +263,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
             <table className="table table-hover mb-0 align-middle table-sm">
               <thead className="table-light">
                 <tr>
-                  <th style={{ width: "5%" }}>#</th>
+                  <th style={{ width: "5%" }} />
                   <th style={{ width: "30%" }}>Hizmet</th>
                   <th style={{ width: "15%" }}>Tip</th>
                   <th style={{ width: "15%" }}>Durum</th>
@@ -186,8 +278,22 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                   pageRows.map((s, index) => {
                     const globalIndex = startIndex + index;
                     return (
-                      <tr key={s.id}>
-                        <td className="text-muted small">{globalIndex + 1}</td>
+                      <tr
+                        key={s.id}
+                        draggable
+                        onDragStart={() => handleDragStart(s.id)}
+                        onDragEnd={handleDragEnd}
+                        onDragOver={(e) => e.preventDefault()}
+                        onDrop={() => handleDropOn(s.id)}
+                        className={
+                          draggingId === s.id ? "table-active" : undefined
+                        }
+                        style={{ cursor: "move" }}
+                      >
+                        <td className="text-muted small">
+                          <span className="me-1">≡</span>
+                          <span>{globalIndex + 1}</span>
+                        </td>
                         <td>
                           <div className="fw-semibold small">
                             {s.name || (
@@ -204,6 +310,11 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                               <span className="text-muted">Slug yok</span>
                             )}
                           </div>
+                          {s.locale_resolved && (
+                            <div className="text-muted small">
+                              Locale: <code>{s.locale_resolved}</code>
+                            </div>
+                          )}
                           {s.description && (
                             <div
                               className="text-muted small text-truncate"
@@ -225,7 +336,9 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                             {formatDate(s.created_at)}
                           </div>
                           <div>
-                            <span className="text-muted me-1">Güncelleme:</span>
+                            <span className="text-muted me-1">
+                              Güncelleme:
+                            </span>
                             {formatDate(s.updated_at)}
                           </div>
                         </td>
@@ -296,6 +409,14 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                   </tr>
                 )}
               </tbody>
+              <caption className="px-3 py-2 text-start">
+                <span className="text-muted small">
+                  Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin.
+                  Değişiklikleri kalıcı yapmak için{" "}
+                  <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu
+                  kullanman gerekir.
+                </span>
+              </caption>
             </table>
           </div>
         </div>
@@ -306,7 +427,16 @@ export const ServicesList: React.FC<ServicesListProps> = ({
             pageRows.map((s, index) => {
               const globalIndex = startIndex + index;
               return (
-                <div key={s.id} className="border-bottom px-3 py-2">
+                <div
+                  key={s.id}
+                  className="border-bottom px-3 py-2"
+                  draggable
+                  onDragStart={() => handleDragStart(s.id)}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => handleDropOn(s.id)}
+                  style={{ cursor: "move" }}
+                >
                   <div className="d-flex justify-content-between align-items-start gap-2">
                     <div>
                       <div className="fw-semibold small">
@@ -327,6 +457,11 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                           <span className="text-muted">Slug yok</span>
                         )}
                       </div>
+                      {s.locale_resolved && (
+                        <div className="text-muted small">
+                          Locale: <code>{s.locale_resolved}</code>
+                        </div>
+                      )}
                       {s.description && (
                         <div className="text-muted small mt-1">
                           {s.description}
@@ -406,6 +541,15 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               Kayıtlı hizmet bulunamadı.
             </div>
           )}
+
+          <div className="px-3 py-2 border-top">
+            <span className="text-muted small">
+              Mobil görünümde kayıtlar kart formatında listelenir. Kartları
+              sürükleyerek sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
+              yapmak için üstteki{" "}
+              <strong>Sıralamayı Kaydet</strong> butonunu kullan.
+            </span>
+          </div>
         </div>
 
         {/* Pagination */}
