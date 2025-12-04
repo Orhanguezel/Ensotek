@@ -39,7 +39,7 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
   const [deletePage, { isLoading: isDeleting }] =
     useDeleteCustomPageAdminMutation();
 
-  const busy = loading || isDeleting || savingOrder;
+  const busy = loading || isDeleting || !!savingOrder;
 
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -53,7 +53,8 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
     if (!ok) return;
 
     try {
-      await deletePage({ id: page.id }).unwrap();
+      // ❗ Argüman sadece string id olmalı
+      await deletePage(page.id).unwrap();
       toast.success("Sayfa başarıyla silindi.");
     } catch (err: unknown) {
       const msg =
@@ -195,7 +196,7 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
                         )}
                       </td>
 
-                      {/* Kategori / Alt kategori – İSİM + SLUG (backend i18n join) */}
+                      {/* Kategori / Alt kategori */}
                       <td className="small">
                         {/* Ana kategori */}
                         {p.category_name || p.category_slug ? (
@@ -223,7 +224,9 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
                         {p.sub_category_name || p.sub_category_slug ? (
                           <div className="mt-1">
                             <div className="text-truncate">
-                              <span className="small">Alt Kategori: </span>
+                              <span className="small">
+                                Alt Kategori:{" "}
+                              </span>
                               <span className="fw-semibold">
                                 {p.sub_category_name ??
                                   "(Alt kategori adı yok)"}

@@ -4,8 +4,15 @@
 import type { RouteHandler } from "fastify";
 import { db } from "@/db/client";
 import { and, asc, eq } from "drizzle-orm";
-import { categories } from "@/modules/categories/schema";
-import { subCategories } from "@/modules/subcategories/schema";
+
+import {
+  categories,
+  categoryI18n,
+} from "@/modules/categories/schema";
+import {
+  subCategories,
+  subCategoryI18n,
+} from "@/modules/subcategories/schema";
 
 // küçük yardımcı – query string bool parse
 const toBool = (v: unknown): boolean | undefined => {
@@ -26,41 +33,51 @@ export const adminListCategories: RouteHandler = async (req, reply) => {
     }) ?? {};
 
   const conds: any[] = [];
+
   if (locale && locale.trim()) {
-    conds.push(eq(categories.locale, locale.trim()));
+    // locale artık categoryI18n tablosunda
+    conds.push(eq(categoryI18n.locale, locale.trim()));
   }
+
   if (module_key && module_key.trim()) {
     conds.push(eq(categories.module_key, module_key.trim()));
   }
 
   const active = toBool(is_active);
   if (active !== undefined) {
-    // categories.is_active drizzle tarafında tinyint/bool olabilir, o yüzden as any
-    conds.push(eq(categories.is_active as any, active as any));
+    // categories.is_active boolean tipli ($type<boolean>()), o yüzden direkt eq ile kullanabiliriz
+    conds.push(eq(categories.is_active, active));
   }
 
   const base = db
     .select({
       id: categories.id,
-      name: categories.name,
-      slug: categories.slug,
-      locale: categories.locale,
+      name: categoryI18n.name,
+      slug: categoryI18n.slug,
+      locale: categoryI18n.locale,
       module_key: categories.module_key,
     })
-    .from(categories);
+    .from(categories)
+    .innerJoin(
+      categoryI18n,
+      eq(categoryI18n.category_id, categories.id),
+    );
 
   const qb = conds.length ? base.where(and(...conds)) : base;
 
   const rows = await qb.orderBy(
     asc(categories.display_order),
-    asc(categories.name),
+    asc(categoryI18n.name),
   );
 
   return reply.send(rows);
 };
 
 /** Admin için alt kategori drop-down (category_id + locale + is_active) */
-export const adminListSubcategories: RouteHandler = async (req, reply) => {
+export const adminListSubcategories: RouteHandler = async (
+  req,
+  reply,
+) => {
   const { category_id, locale, is_active } =
     (req.query as {
       category_id?: string;
@@ -69,33 +86,39 @@ export const adminListSubcategories: RouteHandler = async (req, reply) => {
     }) ?? {};
 
   const conds: any[] = [];
+
   if (category_id) {
     conds.push(eq(subCategories.category_id, category_id));
   }
+
   if (locale && locale.trim()) {
-    conds.push(eq(subCategories.locale, locale.trim()));
+    conds.push(eq(subCategoryI18n.locale, locale.trim()));
   }
 
   const active = toBool(is_active);
   if (active !== undefined) {
-    conds.push(eq(subCategories.is_active as any, active as any));
+    conds.push(eq(subCategories.is_active, active));
   }
 
   const base = db
     .select({
       id: subCategories.id,
-      name: subCategories.name,
-      slug: subCategories.slug,
+      name: subCategoryI18n.name,
+      slug: subCategoryI18n.slug,
       category_id: subCategories.category_id,
-      locale: subCategories.locale,
+      locale: subCategoryI18n.locale,
     })
-    .from(subCategories);
+    .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      eq(subCategoryI18n.sub_category_id, subCategories.id),
+    );
 
   const qb = conds.length ? base.where(and(...conds)) : base;
 
   const rows = await qb.orderBy(
     asc(subCategories.display_order),
-    asc(subCategories.name),
+    asc(subCategoryI18n.name),
   );
 
   return reply.send(rows);

@@ -46,9 +46,13 @@ const AdminCustomPageDetail: NextPage = () => {
     isLoading: isLoadingPage,
     isFetching: isFetchingPage,
     error: pageError,
-  } = useGetCustomPageBySlugAdminQuery(slug as string, {
-    skip: shouldSkipQuery,
-  });
+  } = useGetCustomPageBySlugAdminQuery(
+    // ❗ Argüman tipi: { slug: string; locale?: string }
+    { slug: slug as string },
+    {
+      skip: shouldSkipQuery,
+    },
+  );
 
   const [createPage, { isLoading: isCreating }] =
     useCreateCustomPageAdminMutation();
@@ -141,8 +145,7 @@ const AdminCustomPageDetail: NextPage = () => {
           featured_image: values.featured_image || null,
           featured_image_asset_id:
             values.featured_image_asset_id || null,
-          featured_image_alt:
-            values.featured_image_alt || null,
+          featured_image_alt: values.featured_image_alt || null,
           meta_title: values.meta_title || null,
           meta_description: values.meta_description || null,
 
@@ -174,8 +177,7 @@ const AdminCustomPageDetail: NextPage = () => {
           featured_image: values.featured_image || null,
           featured_image_asset_id:
             values.featured_image_asset_id || null,
-          featured_image_alt:
-            values.featured_image_alt || null,
+          featured_image_alt: values.featured_image_alt || null,
           meta_title: values.meta_title || null,
           meta_description: values.meta_description || null,
 
