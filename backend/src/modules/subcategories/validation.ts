@@ -6,6 +6,10 @@ import { z } from "zod";
 const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (v === "" ? null : v), schema);
 
+/**
+ * FE'den gelebilecek bütün boolean varyantlarını kabul et
+ * (true/false, 0/1, "0"/"1", "true"/"false")
+ */
 export const boolLike = z.union([
   z.boolean(),
   z.literal(0),
@@ -21,8 +25,12 @@ const baseSubCategorySchema = z
     id: z.string().uuid().optional(),
     category_id: z.string().uuid(),
 
-    // 🌍 Çok dilli – isteğe bağlı, yoksa backend "tr" ile dolduracak
-    locale: z.string().min(2).max(8).optional(),
+    // 🌍 Çok dilli – yoksa "tr"
+    locale: z
+      .string()
+      .min(2)
+      .max(8)
+      .default("tr"),
 
     name: z.string().min(1).max(255),
     slug: z.string().min(1).max(255),
@@ -42,25 +50,27 @@ const baseSubCategorySchema = z
   })
   .passthrough();
 
+/**
+ * CREATE şeması
+ */
 export const subCategoryCreateSchema = baseSubCategorySchema;
 
-export const subCategoryUpdateSchema = baseSubCategorySchema
-  .partial()
-  .superRefine((data, ctx) => {
-    if (Object.keys(data).length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "no_fields_to_update",
-      });
-    }
-  });
+/**
+ * UPDATE şeması (PATCH / PUT)
+ *  - partial: tüm alanlar opsiyonel
+ *  - Boş PATCH → no-op (categories ile uyumlu)
+ */
+export const subCategoryUpdateSchema = baseSubCategorySchema.partial();
 
 export type SubCategoryCreateInput = z.infer<typeof subCategoryCreateSchema>;
 export type SubCategoryUpdateInput = z.infer<typeof subCategoryUpdateSchema>;
 
+/** ✅ Storage asset ile alt kategori görselini ayarlama/silme (+ alt) */
 export const subCategorySetImageSchema = z
   .object({
-    asset_id: z.string().uuid().nullable().optional(), // null/undefined ⇒ kaldır
+    /** null/undefined ⇒ görseli kaldır */
+    asset_id: z.string().uuid().nullable().optional(),
+    /** alt gelirse güncellenir; null/"" ⇒ alt temizlenir */
     alt: emptyToNull(z.string().max(255).optional().nullable()),
   })
   .strict();

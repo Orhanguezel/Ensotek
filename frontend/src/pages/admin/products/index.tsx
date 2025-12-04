@@ -1,9 +1,9 @@
 // =============================================================
 // FILE: src/pages/admin/products/index.tsx
-// Ensotek – Admin Products Liste Sayfası
+// Ensotek – Admin Products Liste Sayfası (Kuleler)
 // =============================================================
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
@@ -19,28 +19,37 @@ import {
   useListProductsAdminQuery,
   useDeleteProductAdminMutation,
 } from "@/integrations/rtk/endpoints/admin/products_admin.endpoints";
+
 import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
 import type { ProductDto } from "@/integrations/types/product.types";
-import type { AdminProductListResponse } from "@/integrations/types/product_admin.types"; // varsayılan; yoksa uygun yere ekle
+import type { AdminProductListResponse } from "@/integrations/types/product_admin.types";
 
-/* site_settings.app_locales -> LocaleOption[] */
-const useLocaleOptions = (): {
-  locales: LocaleOption[];
-  loading: boolean;
-} => {
-  const { data, isLoading } = useListSiteSettingsAdminQuery({
+// ⚙️ Yedek parça root kategorileri (TR + EN)
+const SPAREPART_CATEGORY_IDS = new Set<string>([
+  "aaaa1001-1111-4111-8111-aaaaaaaa1001", // TR sparepart root
+  "caaa1001-1111-4111-8111-cccccccc1001", // EN sparepart root
+]);
+
+const AdminProductsIndexPage: NextPage = () => {
+  const router = useRouter();
+
+  // 🔹 Locale’leri site_settings üzerinden merkezi çekiyoruz
+  const {
+    data: appLocaleRows,
+    isLoading: isLocalesLoading,
+  } = useListSiteSettingsAdminQuery({
     keys: ["app_locales"],
   });
 
-  const locales = useMemo<LocaleOption[]>(() => {
-    if (!data || !data.length) {
+  const locales: LocaleOption[] = useMemo(() => {
+    if (!appLocaleRows || !appLocaleRows.length) {
       return [
         { value: "tr", label: "Türkçe (tr)" },
         { value: "en", label: "İngilizce (en)" },
       ];
     }
 
-    const row = data.find((r) => r.key === "app_locales");
+    const row = appLocaleRows.find((r) => r.key === "app_locales");
     const v = row?.value;
     let arr: string[] = [];
 
@@ -68,21 +77,20 @@ const useLocaleOptions = (): {
       if (code === "de") return { value: "de", label: "Almanca (de)" };
       return { value: code, label: code.toUpperCase() };
     });
-  }, [data]);
+  }, [appLocaleRows]);
 
-  return { locales, loading: isLoading };
-};
-
-const AdminProductsIndexPage: NextPage = () => {
-  const router = useRouter();
-  const { locales, loading: localesLoading } = useLocaleOptions();
+  // 🔹 Başlangıç locale'i: router.locale varsa onu kullan, yoksa boş (Hepsi)
+  const initialLocale =
+    typeof router.locale === "string" ? router.locale.toLowerCase() : "";
 
   const [filters, setFilters] = useState<ProductFilters>({
     search: "",
-    locale: "",
+    locale: initialLocale,
     isActiveFilter: "all",
   });
 
+  // Kullanıcı ne seçtiyse direkt onu göndereceğiz.
+  // Eğer "" ise backend'e locale paramı YOLLAMAYACAĞIZ (Hepsi).
   const queryParams = useMemo(() => {
     const params: Record<string, any> = {
       q: filters.search || undefined,
@@ -100,12 +108,8 @@ const AdminProductsIndexPage: NextPage = () => {
     return params;
   }, [filters]);
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useListProductsAdminQuery(queryParams);
+  const { data, isLoading, isFetching, refetch } =
+    useListProductsAdminQuery(queryParams);
 
   const [deleteProduct, { isLoading: isDeleting }] =
     useDeleteProductAdminMutation();
@@ -113,13 +117,29 @@ const AdminProductsIndexPage: NextPage = () => {
   const loading = isLoading || isFetching;
   const busy = loading || isDeleting;
 
-  // data tipi: AdminProductListResponse | undefined
-  const list: AdminProductListResponse | undefined = data as
-    | AdminProductListResponse
-    | undefined;
+  const list: AdminProductListResponse | undefined =
+    data as AdminProductListResponse | undefined;
 
-  const items: ProductDto[] = list?.items ?? [];
-  const total: number = list?.total ?? items.length;
+  // 🔹 API'den gelen ürünler (kule, sparepart hariç)
+  const baseItems: ProductDto[] = useMemo(() => {
+    const items = (list?.items ?? []) as ProductDto[];
+
+    return items.filter((p) => {
+      const catId = p.category_id;
+      if (!catId) return true;
+      return !SPAREPART_CATEGORY_IDS.has(catId);
+    });
+  }, [list]);
+
+  // 🔹 Drag & drop için local sıralama state'i
+  const [orderedItems, setOrderedItems] = useState<ProductDto[]>([]);
+
+  // API'den gelen liste değişince local sıralamayı güncelle
+  useEffect(() => {
+    setOrderedItems(baseItems);
+  }, [baseItems]);
+
+  const total = orderedItems.length;
 
   const handleDelete = async (p: ProductDto) => {
     try {
@@ -139,6 +159,22 @@ const AdminProductsIndexPage: NextPage = () => {
     router.push("/admin/products/new");
   };
 
+  // 🔹 Sıralamayı kaydet – şimdilik sadece log + info (backend endpoint yok)
+  const handleSaveOrder = async () => {
+    if (!orderedItems.length) return;
+
+    console.log(
+      "Yeni sıralama:",
+      orderedItems.map((p, index) => ({ index: index + 1, id: p.id })),
+    );
+
+    toast.info(
+      "Sıralama ekranda güncellendi.",
+    );
+  };
+
+  const isSavingOrder = false; // şimdilik sabit; endpoint gelince RTK mutation ile bağlanır
+
   return (
     <div className="container-fluid py-3">
       <ProductsHeader
@@ -146,14 +182,21 @@ const AdminProductsIndexPage: NextPage = () => {
         total={total}
         loading={busy}
         locales={locales}
-        localesLoading={localesLoading}
-        defaultLocale={router.locale}
+        localesLoading={isLocalesLoading}
+        defaultLocale={initialLocale || (router.locale as string)}
         onFiltersChange={setFilters}
         onRefresh={refetch}
         onCreateClick={handleCreateClick}
       />
 
-      <ProductsList items={items} loading={busy} onDelete={handleDelete} />
+      <ProductsList
+        items={orderedItems}
+        loading={busy}
+        onDelete={handleDelete}
+        onReorder={setOrderedItems}   // ⬅ drag-drop burada aktif
+        onSaveOrder={handleSaveOrder} // ⬅ buton da çalışır (şimdilik sadece log + toast)
+        savingOrder={isSavingOrder}
+      />
     </div>
   );
 };

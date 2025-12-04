@@ -8,7 +8,9 @@
 import React, { useMemo } from "react";
 import { useRouter } from "next/router";
 
-import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
+import {
+  useGetCategoryAdminQuery,
+} from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
 import CategoryFormPage from "@/components/admin/categories/CategoryFormPage";
 import type { CategoryDto } from "@/integrations/types/category.types";
 
@@ -22,16 +24,21 @@ const AdminCategoryEditPage: React.FC = () => {
     return "";
   }, [rawId]);
 
+  const currentLocale =
+    (router.locale as string | undefined)?.toLowerCase() ?? "tr";
+
+  const shouldSkip = !router.isReady || !id;
+
   const {
-    data: categories,
+    data: category,
     isLoading,
     isFetching,
-  } = useListCategoriesAdminQuery({});
+  } = useGetCategoryAdminQuery(
+    { id, locale: currentLocale },
+    { skip: shouldSkip },
+  );
 
-  const category: CategoryDto | null =
-    (categories || []).find((c) => c.id === id) || null;
-
-  const loading = isLoading || isFetching || !id;
+  const loading = isLoading || isFetching || shouldSkip;
 
   const handleDone = () => {
     router.push("/admin/categories");
@@ -40,7 +47,7 @@ const AdminCategoryEditPage: React.FC = () => {
   return (
     <CategoryFormPage
       mode="edit"
-      initialData={category}
+      initialData={(category as CategoryDto) ?? null}
       loading={loading}
       onDone={handleDone}
     />

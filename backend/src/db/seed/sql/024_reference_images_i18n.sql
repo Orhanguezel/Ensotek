@@ -1,5 +1,5 @@
 -- =============================================================
--- 033_reference_images_i18n.sql (gallery: reference_images_i18n)
+-- 024_reference_images_i18n.sql (gallery: reference_images_i18n)
 -- =============================================================
 
 -- ================= TABLE =================

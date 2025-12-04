@@ -7,6 +7,7 @@ import React, { useMemo } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
+
 import {
   CustomPageForm,
   type CustomPageFormValues,
@@ -26,8 +27,6 @@ import type { LocaleOption } from "@/components/admin/custompage/CustomPageHeade
 const AdminCustomPageDetail: NextPage = () => {
   const router = useRouter();
   const { slug: slugParam } = router.query;
-
-  // Next.js'te ilk render'da router.query boş gelebilir
   const isRouterReady = router.isReady;
 
   const slug = useMemo(
@@ -40,10 +39,7 @@ const AdminCustomPageDetail: NextPage = () => {
 
   // /admin/custompage/new => create mode
   const isCreateMode = slug === "new";
-
-  // RTK Query'yi ne zaman çalıştıracağımızı netleştirelim
-  const shouldSkipQuery =
-    !isRouterReady || isCreateMode || !slug;
+  const shouldSkipQuery = !isRouterReady || isCreateMode || !slug;
 
   const {
     data: page,
@@ -72,9 +68,9 @@ const AdminCustomPageDetail: NextPage = () => {
     if (!appLocaleRows || appLocaleRows.length === 0) {
       return ["tr", "en"];
     }
+
     const row = appLocaleRows.find((r) => r.key === "app_locales");
     const v = row?.value;
-
     let arr: string[] = [];
 
     if (Array.isArray(v)) {
@@ -94,7 +90,11 @@ const AdminCustomPageDetail: NextPage = () => {
       return ["tr", "en"];
     }
 
-    return Array.from(new Set(arr));
+    // uniq + lower
+    const uniqLower = Array.from(
+      new Set(arr.map((x) => String(x).toLowerCase())),
+    );
+    return uniqLower;
   }, [appLocaleRows]);
 
   const localeOptions: LocaleOption[] = useMemo(
@@ -112,7 +112,11 @@ const AdminCustomPageDetail: NextPage = () => {
     [localeCodes],
   );
 
-  const defaultLocale = localeOptions[0]?.value ?? "tr";
+  // router.locale varsa onu kullan, yoksa ilk locale veya 'tr'
+  const defaultLocale =
+    (router.locale as string | undefined)?.toLowerCase() ||
+    localeOptions[0]?.value ||
+    "tr";
 
   const loading = isLoadingPage || isFetchingPage || isLocalesLoading;
   const saving = isCreating || isUpdating;
@@ -179,7 +183,10 @@ const AdminCustomPageDetail: NextPage = () => {
           sub_category_id: values.sub_category_id || null,
         };
 
-        await updatePage({ id: page.id, patch: payload }).unwrap();
+        // 🔁 Eğer form başka bir locale satırına geçtiyse onun id'sini kullan
+        const targetId = values.id || page.id;
+
+        await updatePage({ id: targetId, patch: payload }).unwrap();
         toast.success("Sayfa güncellendi.");
 
         // Slug değiştiyse URL'i de güncelle
@@ -206,7 +213,6 @@ const AdminCustomPageDetail: NextPage = () => {
     ? "Yeni Sayfa Oluştur"
     : page?.title || "Sayfa Düzenle";
 
-  // Router hazır değilken hiçbir şey göstermeyelim
   if (!isRouterReady) {
     return (
       <div className="container-fluid py-3">
@@ -215,7 +221,6 @@ const AdminCustomPageDetail: NextPage = () => {
     );
   }
 
-  // Backend slug’ı bulamazsa – 404 yerine kendi mesajımız
   if (!isCreateMode && pageError && !loading && !page) {
     return (
       <div className="container-fluid py-3">
@@ -237,12 +242,12 @@ const AdminCustomPageDetail: NextPage = () => {
 
   return (
     <div className="container-fluid py-3">
-      {/* Basit başlık – layout içinde breadcrumb vs. eklenebilir */}
       <div className="mb-3">
         <h4 className="h5 mb-1">{pageTitle}</h4>
         <p className="text-muted small mb-0">
-          Özel sayfaları (blog, haber, hakkında vb.) burada
-          oluşturup düzenleyebilirsin.
+          Özel sayfaları (blog, haber, hakkında vb.) burada oluşturup
+          düzenleyebilirsin. Dil seçimi, JSON modunda düzenleme ve storage
+          üzerinden görsel yükleme desteklenir.
         </p>
       </div>
 

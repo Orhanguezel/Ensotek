@@ -9,6 +9,7 @@ import {
   index,
   customType,
   foreignKey,
+  int,       
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 import { categories } from "@/modules/categories/schema";
@@ -28,6 +29,10 @@ export const customPages = mysqlTable(
 
     // dil-bağımsız alanlar
     is_published: tinyint("is_published").notNull().default(0),
+
+    /** Sıralama */
+    display_order: int("display_order").notNull().default(0),  // 👈 YENİ
+
     /** Eski/serbest URL (opsiyonel) */
     featured_image: varchar("featured_image", { length: 500 }),
     /** Storage bağı: asset id (opsiyonel) */
@@ -55,6 +60,8 @@ export const customPages = mysqlTable(
 
     index("custom_pages_category_id_idx").on(t.category_id),
     index("custom_pages_sub_category_id_idx").on(t.sub_category_id),
+
+    index("custom_pages_display_order_idx").on(t.display_order), // 👈 opsiyonel ama güzel
 
     foreignKey({
       columns: [t.category_id],
@@ -91,10 +98,17 @@ export const customPagesI18n = mysqlTable(
     slug: varchar("slug", { length: 255 }).notNull(),
     content: longtext("content").notNull(),
 
+    /** Kısa özet (body’den ayrı, liste ve SEO için) */
+    summary: varchar("summary", { length: 1000 }),
+
+    /** Görsel alt metni (çeviri) */
     featured_image_alt: varchar("featured_image_alt", { length: 255 }),
 
     meta_title: varchar("meta_title", { length: 255 }),
     meta_description: varchar("meta_description", { length: 500 }),
+
+    /** Virgülle ayrılmış tag listesi */
+    tags: varchar("tags", { length: 1000 }),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()

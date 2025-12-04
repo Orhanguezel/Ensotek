@@ -13,6 +13,8 @@ import {
   adminUpdateProduct,
   adminDeleteProduct,
   adminSetProductImages,
+  // ⬇ YENİ: reorder
+  adminReorderProducts,
 } from "./admin.controller";
 
 /* Ayrı controller'lar */
@@ -82,6 +84,13 @@ export async function registerProductsAdmin(app: FastifyInstance) {
     `${BASE}/:id/images`,
     { preHandler: [requireAuth, requireAdmin] },
     adminSetProductImages,
+  );
+
+  // -------- REORDER (drag & drop sıralama kaydı) --------
+  app.post(
+    `${BASE}/reorder`,
+    { preHandler: [requireAuth, requireAdmin] },
+    adminReorderProducts,
   );
 
   // -------- Category helpers --------

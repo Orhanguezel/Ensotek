@@ -28,14 +28,18 @@ const normalizeService = (
   featured: row.featured === 1,
   is_active: row.is_active === 1,
   display_order: row.display_order,
+
   featured_image: row.featured_image,
   image_url: row.image_url,
   image_asset_id: row.image_asset_id,
-  // Admin endpoint'lerde featured_image_url gelmiyor; yine de opsiyonel
+
+  // Admin endpoint'lerde featured_image_url gelmeyebilir; yine de opsiyonel
   featured_image_url:
     typeof row.featured_image_url !== "undefined"
       ? row.featured_image_url
       : undefined,
+
+  // tip spesifik alanlar
   area: row.area,
   duration: row.duration,
   maintenance: row.maintenance,
@@ -43,8 +47,10 @@ const normalizeService = (
   soil_type: row.soil_type,
   thickness: row.thickness,
   equipment: row.equipment,
+
   created_at: row.created_at,
   updated_at: row.updated_at,
+
   slug: row.slug,
   name: row.name,
   description: row.description,
@@ -53,6 +59,12 @@ const normalizeService = (
   includes: row.includes,
   warranty: row.warranty,
   image_alt: row.image_alt,
+
+  tags: row.tags,
+  meta_title: row.meta_title,
+  meta_description: row.meta_description,
+  meta_keywords: row.meta_keywords,
+
   locale_resolved: row.locale_resolved,
 });
 
@@ -104,18 +116,24 @@ export const servicesAdminApi = baseApi.injectEndpoints({
 
     /* ---------------------------------------------------------
      * GET /admin/services/:id
+     *  - locale opsiyonel query param
      * --------------------------------------------------------- */
-    getServiceAdmin: build.query<ServiceDto, string>({
-      query: (id) => ({
+    getServiceAdmin: build.query<
+      ServiceDto,
+      { id: string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
         url: `/admin/services/${encodeURIComponent(id)}`,
         method: "GET",
         credentials: "include",
+        params: locale ? { locale } : undefined,
       }),
       transformResponse: (resp: ApiServiceAdmin) => normalizeService(resp),
     }),
 
     /* ---------------------------------------------------------
      * GET /admin/services/by-slug/:slug
+     * (İstersen sonra buna da locale ekleriz)
      * --------------------------------------------------------- */
     getServiceBySlugAdmin: build.query<ServiceDto, string>({
       query: (slug) => ({
@@ -163,6 +181,23 @@ export const servicesAdminApi = baseApi.injectEndpoints({
       query: ({ id }) => ({
         url: `/admin/services/${encodeURIComponent(id)}`,
         method: "DELETE",
+        credentials: "include",
+      }),
+    }),
+
+    /* ---------------------------------------------------------
+     * REORDER: POST /admin/services/reorder
+     *  - Categories'deki pattern ile aynı
+     *  - Body: { items: [{ id, display_order }, ...] }
+     * --------------------------------------------------------- */
+    reorderServicesAdmin: build.mutation<
+      void,
+      { items: { id: string; display_order: number }[] }
+    >({
+      query: (body) => ({
+        url: "/admin/services/reorder",
+        method: "POST",
+        body,
         credentials: "include",
       }),
     }),
@@ -255,8 +290,10 @@ export const {
   useCreateServiceAdminMutation,
   useUpdateServiceAdminMutation,
   useDeleteServiceAdminMutation,
+  useReorderServicesAdminMutation,      // 🔹 burada export edildi
   useListServiceImagesAdminQuery,
   useCreateServiceImageAdminMutation,
   useUpdateServiceImageAdminMutation,
   useDeleteServiceImageAdminMutation,
+  useLazyListServicesAdminQuery, 
 } = servicesAdminApi;

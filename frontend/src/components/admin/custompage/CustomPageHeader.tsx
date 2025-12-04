@@ -58,7 +58,8 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
   const handlePublishedChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
-    const value = e.target.value as CustomPageFilters["publishedFilter"];
+    const value =
+      e.target.value as CustomPageFilters["publishedFilter"];
     onFiltersChange({
       ...filters,
       publishedFilter: value,
@@ -68,10 +69,20 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
   const handleLocaleChange = (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
+    const raw = e.target.value;
+    // "" → tüm diller, diğerleri lower-case locale kodu
+    const nextLocale = raw ? raw.trim().toLowerCase() : "";
+
     onFiltersChange({
       ...filters,
-      locale: e.target.value,
+      locale: nextLocale,
     });
+
+    // RTK Query zaten args değişince refetch edeceği için
+    // burada onRefresh zorunlu değil, ama istersen kalsın:
+    if (onRefresh) {
+      onRefresh();
+    }
   };
 
   return (
@@ -85,8 +96,9 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
                 Özel Sayfalar (Blog / Haber / Hakkında vb.)
               </h5>
               <div className="text-muted small">
-                Blog, haber, hakkında ve benzeri içerik sayfalarını burada
-                kategorilere, dillere ve modüllere göre yönetebilirsin.
+                Blog, haber, hakkında ve benzeri içerik sayfalarını
+                burada kategorilere, dillere ve modüllere göre
+                yönetebilirsin.
               </div>
             </div>
 
@@ -107,9 +119,7 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
 
               {/* Dil */}
               <div className="col-md-3">
-                <label className="form-label small mb-1">
-                  Dil
-                </label>
+                <label className="form-label small mb-1">Dil</label>
                 <select
                   className="form-select form-select-sm"
                   value={filters.locale}
@@ -188,8 +198,15 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
 
             <div className="text-muted small">
               <ul className="mb-0 ps-3">
-                <li>Liste backend üzerinde coalesced i18n olarak gelir.</li>
-                <li>Slug çakışmaları backend tarafından kontrol edilir.</li>
+                <li>
+                  Liste backend üzerinde coalesced i18n olarak gelir
+                  (seçili dile göre title/slug/meta döner, gerekirse
+                  fallback kullanılır).
+                </li>
+                <li>
+                  Kategori / alt kategori isim ve slug&apos;ları da
+                  backend join&apos;inden gelir.
+                </li>
               </ul>
             </div>
 

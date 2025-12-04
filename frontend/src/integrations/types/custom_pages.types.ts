@@ -69,6 +69,14 @@ export interface ApiCustomPage {
   category_id: string | null;
   sub_category_id: string | null;
 
+  /** categories join’inden gelen alanlar (opsiyonel) */
+  category_name: string | null;
+  category_slug: string | null;
+
+  /** sub_categories join’inden gelen alanlar (opsiyonel) */
+  sub_category_name: string | null;
+  sub_category_slug: string | null;
+
   title: string | null;
   slug: string | null;
 
@@ -78,9 +86,16 @@ export interface ApiCustomPage {
    */
   content: string | null;
 
+  /** Kısa özet */
+  summary: string | null;
+
   featured_image_alt: string | null;
   meta_title: string | null;
   meta_description: string | null;
+
+  /** Virgülle ayrılmış tag listesi (örn: "ensotek,su sogutma kuleleri") */
+  tags: string | null;
+
   locale_resolved: string | null;
 }
 
@@ -89,6 +104,8 @@ export interface ApiCustomPage {
  *  - is_published → boolean
  *  - content_raw: backend JSON-string
  *  - content_html / content: düz HTML
+ *  - tags_raw: backend string
+ *  - tags: string[]
  * ------------------------------------------------------------------ */
 
 export interface CustomPageDto {
@@ -101,6 +118,11 @@ export interface CustomPageDto {
 
   category_id: string | null;
   sub_category_id: string | null;
+
+  category_name: string | null;
+  category_slug: string | null;
+  sub_category_name: string | null;
+  sub_category_slug: string | null;
 
   title: string | null;
   slug: string | null;
@@ -121,9 +143,18 @@ export interface CustomPageDto {
    */
   content: string;
 
+  /** Liste kartları ve meta için kısa özet */
+  summary: string | null;
+
   featured_image_alt: string | null;
   meta_title: string | null;
   meta_description: string | null;
+
+  /** Backend’ten gelen virgüllü tag string’i */
+  tags_raw: string | null;
+  /** FE tarafında normalize edilmiş tag listesi */
+  tags: string[];
+
   locale_resolved: string | null;
 }
 
@@ -154,11 +185,36 @@ const unpackContent = (raw: string | null): string => {
 
 const toBoolFrom01 = (v: 0 | 1): boolean => v === 1;
 
+const parseTags = (raw: string | null): string[] => {
+  if (!raw) return [];
+  return raw
+    .split(/[;,]/)
+    .map((t) => t.trim())
+    .filter((t, idx, arr) => t.length > 0 && arr.indexOf(t) === idx);
+};
+
+/**
+ * API içinden ham content string'ini seç:
+ * - Öncelik sırası: content → content_raw → content_html
+ * - Tip güvenli kalsın diye any cast ile opsiyonel alanları da yokluyoruz
+ */
+const pickApiContentRaw = (api: ApiCustomPage): string | null => {
+  const anyApi = api as any;
+  return (
+    api.content ??           // beklenen alan
+    anyApi.content_raw ??    // backend farklı isimle göndermiş olabilir
+    anyApi.content_html ??   // direkt html alanı
+    null
+  );
+};
+
 /**
  * API -> FE DTO dönüşümü
  */
 export const normalizeCustomPage = (api: ApiCustomPage): CustomPageDto => {
-  const html = unpackContent(api.content);
+  const rawContent = pickApiContentRaw(api);
+  const html = unpackContent(rawContent);
+  const tagsArray = parseTags(api.tags);
 
   return {
     id: api.id,
@@ -171,16 +227,28 @@ export const normalizeCustomPage = (api: ApiCustomPage): CustomPageDto => {
     category_id: api.category_id ?? null,
     sub_category_id: api.sub_category_id ?? null,
 
+    category_name: api.category_name ?? null,
+    category_slug: api.category_slug ?? null,
+    sub_category_name: api.sub_category_name ?? null,
+    sub_category_slug: api.sub_category_slug ?? null,
+
     title: api.title ?? null,
     slug: api.slug ?? null,
 
-    content_raw: api.content ?? null,
+    // 🔽 content tek merkezden yönetiliyor
+    content_raw: rawContent,
     content_html: html,
     content: html,
+
+    summary: api.summary ?? null,
 
     featured_image_alt: api.featured_image_alt ?? null,
     meta_title: api.meta_title ?? null,
     meta_description: api.meta_description ?? null,
+
+    tags_raw: api.tags ?? null,
+    tags: tagsArray,
+
     locale_resolved: api.locale_resolved ?? null,
   };
 };
@@ -205,9 +273,15 @@ export interface CustomPageCreatePayload {
   /** düz HTML – backend packContent ile {"html":"..."} yapar */
   content: string;
 
+  /** Kısa özet */
+  summary?: string | null;
+
   featured_image_alt?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
+
+  /** Virgülle ayrılmış tag listesi (örn: "ensotek,blog,yazi-1") */
+  tags?: string | null;
 
   // parent alanları
   is_published?: BoolLike;
@@ -233,7 +307,14 @@ export interface CustomPageUpdatePayload {
   title?: string;
   slug?: string;
   content?: string;
+
+  /** Kısa özet */
+  summary?: string | null;
+
   featured_image_alt?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
+
+  /** Virgülle ayrılmış tag listesi (örn: "ensotek,blog,yazi-1") */
+  tags?: string | null;
 }

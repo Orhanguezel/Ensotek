@@ -19,7 +19,28 @@ export const boolLike = z.union([
 const LOCALE_ENUM = z.enum(LOCALES as unknown as [string, ...string[]]);
 
 /* ------- enums ------- */
-export const ServiceTypeEnum = z.enum(["gardening", "soil", "other"]);
+/**
+ * Ensotek service tipleri (seed ile uyumlu):
+ *
+ *  - maintenance_repair
+ *  - modernization
+ *  - spare_parts_components
+ *  - applications_references
+ *  - engineering_support
+ *  - production
+ *  - other
+ */
+const SERVICE_TYPES = [
+  "maintenance_repair",
+  "modernization",
+  "spare_parts_components",
+  "applications_references",
+  "engineering_support",
+  "production",
+  "other",
+] as const;
+
+export const ServiceTypeEnum = z.enum(SERVICE_TYPES);
 
 /* ------- list (public/admin) ------- */
 export const serviceListQuerySchema = z.object({
@@ -48,8 +69,6 @@ export const serviceListQuerySchema = z.object({
 });
 export type ServiceListQuery = z.infer<typeof serviceListQuerySchema>;
 
-
-
 /* ------- parent (non-i18n) ------- */
 
 export const upsertServiceParentBodySchema = z.object({
@@ -67,17 +86,6 @@ export const upsertServiceParentBodySchema = z.object({
   featured_image: z.string().url().max(500).nullable().optional(),
   image_url: z.string().url().max(500).nullable().optional(),
   image_asset_id: z.string().length(36).nullable().optional(),
-
-  // Gardening
-  area: z.string().max(64).nullable().optional(),
-  duration: z.string().max(64).nullable().optional(),
-  maintenance: z.string().max(64).nullable().optional(),
-  season: z.string().max(64).nullable().optional(),
-
-  // Soil
-  soil_type: z.string().max(128).nullable().optional(),
-  thickness: z.string().max(64).nullable().optional(),
-  equipment: z.string().max(128).nullable().optional(),
 });
 export type UpsertServiceParentBody = z.infer<
   typeof upsertServiceParentBodySchema
@@ -112,6 +120,12 @@ export const upsertServiceI18nBodySchema = z.object({
   warranty: z.string().max(128).optional(),
   image_alt: z.string().max(255).optional(),
 
+  // tags + SEO meta
+  tags: z.string().max(255).optional(),
+  meta_title: z.string().max(255).optional(),
+  meta_description: z.string().max(500).optional(),
+  meta_keywords: z.string().max(255).optional(),
+
   /** create: aynı içeriği tüm dillere kopyala? (default: true) */
   replicate_all_locales: z.coerce.boolean().default(true).optional(),
 });
@@ -139,6 +153,11 @@ export const patchServiceI18nBodySchema = z.object({
   warranty: z.string().max(128).optional(),
   image_alt: z.string().max(255).optional(),
 
+  tags: z.string().max(255).optional(),
+  meta_title: z.string().max(255).optional(),
+  meta_description: z.string().max(500).optional(),
+  meta_keywords: z.string().max(255).optional(),
+
   /** patch: tüm dillere uygula? (default: false) */
   apply_all_locales: z.coerce.boolean().default(false).optional(),
 });
@@ -157,6 +176,7 @@ export const patchServiceBodySchema =
 export type PatchServiceBody = z.infer<typeof patchServiceBodySchema>;
 
 /* ------- images (gallery) ------- */
+
 /** Base obje → hem upsert hem patch için ortak */
 const upsertServiceImageBodyBase = z.object({
   // storage bağ(ı) → en az birisi zorunlu (yalnızca UPSERT’te kontrol edeceğiz)

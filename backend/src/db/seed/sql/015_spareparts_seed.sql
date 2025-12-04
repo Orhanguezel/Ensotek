@@ -1,202 +1,193 @@
 -- =============================================================
 -- 015_spareparts_seed.sql
--- Sparepart ürünleri – Ensotek (tr + en)
---   category_id = aaaa1001-1111-4111-8111-aaaaaaaa1001 (sparepart)
---   sub_categories: bbbb1001 / bbbb1002 / bbbb1003
+-- Ensotek Yedek Parça Ürünleri – Cooling Tower Spareparts (TR + EN)
+--   Base ürünler tek ID
 -- =============================================================
 
 START TRANSACTION;
 
+-- =========================
+-- 1) BASE PRODUCTS (SPAREPARTS)
+-- =========================
+
 INSERT INTO products (
   id,
-  locale,
-  title,
-  slug,
-  price,
-  description,
   category_id,
   sub_category_id,
+  price,
   image_url,
   storage_asset_id,
-  alt,
   images,
   storage_image_ids,
   is_active,
   is_featured,
-  tags,
-  specifications,
+  order_num,
   product_code,
   stock_quantity,
   rating,
-  review_count,
+  review_count
+)
+VALUES
+  -- SPAREPART 1: Fan Motoru
+  (
+    'bbbb1001-2222-4222-8222-bbbbbbbb1001',
+    'aaaa1001-1111-4111-8111-aaaaaaaa1001', -- SOĞUTMA KULESİ YEDEK PARÇALARI (TR)
+    'bbbb1004-1111-4111-8111-bbbbbbbb1004', -- Fan ve Motor Grubu (TR)
+    9500.00,
+    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+    NULL,
+    JSON_ARRAY(
+      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
+    ),
+    JSON_ARRAY(),
+    1,
+    1,
+    1,                        -- order_num
+    'SP-FAN-001-TR',
+    10,
+    4.80,
+    3
+  ),
+
+  -- SPAREPART 2: PVC Dolgu Bloğu
+  (
+    'bbbb1002-2222-4222-8222-bbbbbbbb1002',
+    'aaaa1001-1111-4111-8111-aaaaaaaa1001',
+    'bbbb1003-1111-4111-8111-bbbbbbbb1003', -- Dolgu Malzemeleri (TR)
+    4200.00,
+    'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&h=600&q=80',
+    NULL,
+    JSON_ARRAY(
+      'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&h=600&q=80'
+    ),
+    JSON_ARRAY(),
+    1,
+    0,
+    2,                        -- order_num
+    'SP-FILL-001-TR',
+    50,
+    4.90,
+    5
+  )
+ON DUPLICATE KEY UPDATE
+  category_id       = VALUES(category_id),
+  sub_category_id   = VALUES(sub_category_id),
+  price             = VALUES(price),
+  image_url         = VALUES(image_url),
+  storage_asset_id  = VALUES(storage_asset_id),
+  images            = VALUES(images),
+  storage_image_ids = VALUES(storage_image_ids),
+  is_active         = VALUES(is_active),
+  is_featured       = VALUES(is_featured),
+  order_num         = VALUES(order_num),
+  product_code      = VALUES(product_code),
+  stock_quantity    = VALUES(stock_quantity),
+  rating            = VALUES(rating),
+  review_count      = VALUES(review_count);
+
+-- =========================
+-- 2) PRODUCT I18N (SPAREPARTS TR + EN)
+-- =========================
+
+INSERT INTO product_i18n (
+  product_id,
+  locale,
+  title,
+  slug,
+  description,
+  alt,
+  tags,
+  specifications,
   meta_title,
   meta_description
 )
 VALUES
-  -- YEDEK PARÇA 1 TR: Kule Fan Motoru
+  -- --------- SPAREPART 1: Fan Motoru (TR) ---------
   (
     'bbbb1001-2222-4222-8222-bbbbbbbb1001',
     'tr',
     'Kule Fan Motoru',
     'kule-fan-motoru',
-    9500.00,
-    'Endüstriyel su soğutma kuleleri için yüksek verimli fan motoru. Farklı güç ve devir seçenekleri mevcuttur.',
-    'aaaa1001-1111-4111-8111-aaaaaaaa1001', -- SPAREPART ROOT
-    'bbbb1002-1111-4111-8111-bbbbbbbb1002', -- Mekanik Parçalar
-    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
-    'Kule fan motoru',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(),
-    1,
-    1,
-    JSON_ARRAY('sparepart', 'fan motoru', 'mekanik', 'kule'),
+    'Soğutma kuleleri için yüksek verimli, IP55 koruma sınıfına sahip fan motoru. Farklı güç ve devir seçenekleri mevcuttur.',
+    'Soğutma kulesi fan motoru',
+    JSON_ARRAY('sparepart', 'fan motoru', 'kule', 'ip55', 'ensotek'),
     JSON_OBJECT(
-      'dimensions', 'Standard IEC gövde',
-      'weight', '35 kg',
-      'thickness', 'N/A',
-      'surfaceFinish', 'Endüstriyel boya kaplı gövde',
-      'warranty', '2 yıl motor garantisi',
-      'installationTime', '1 iş günü (saha koşuluna bağlı)'
+      'powerRange', '7,5 kW – 30 kW',
+      'protectionClass', 'IP55',
+      'voltage', '400V / 3 Faz / 50 Hz',
+      'mounting', 'Flanş montaj',
+      'warranty', '2 yıl motor garantisi'
     ),
-    'SP-FAN-001',
-    10,
-    4.80,
-    3,
     'Kule Fan Motoru | Ensotek Yedek Parçalar',
-    'Su soğutma kuleleri için yüksek verimli fan motoru. Farklı güç seçenekleri ve endüstriyel kullanım için uygundur.'
+    'Soğutma kuleleri için yüksek verimli, IP55 koruma sınıfına sahip fan motoru. Endüstriyel kullanıma uygundur.'
   ),
 
-  -- YEDEK PARÇA 1 EN: Cooling Tower Fan Motor
+  -- --------- SPAREPART 1: Fan Motoru (EN) ---------
   (
-    'bbbb1101-2222-4222-8222-bbbbbbbb1101',
+    'bbbb1001-2222-4222-8222-bbbbbbbb1001',
     'en',
     'Cooling Tower Fan Motor',
     'cooling-tower-fan-motor',
-    9500.00,
-    'High-efficiency fan motor for industrial cooling towers. Available in different power and speed options.',
-    'aaaa1001-1111-4111-8111-aaaaaaaa1001',
-    'bbbb1002-1111-4111-8111-bbbbbbbb1002',
-    'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
+    'High-efficiency fan motor with IP55 protection class for cooling towers. Available in different power and speed ratings.',
     'Cooling tower fan motor',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(),
-    1,
-    1,
-    JSON_ARRAY('sparepart', 'fan motor', 'mechanical', 'tower'),
+    JSON_ARRAY('sparepart', 'fan motor', 'tower', 'ip55', 'ensotek'),
     JSON_OBJECT(
-      'dimensions', 'Standard IEC frame',
-      'weight', '35 kg',
-      'thickness', 'N/A',
-      'surfaceFinish', 'Industrial painted housing',
-      'warranty', '2-year motor warranty',
-      'installationTime', '1 business day (depending on site conditions)'
+      'powerRange', '7.5 kW – 30 kW',
+      'protectionClass', 'IP55',
+      'voltage', '400V / 3 Phase / 50 Hz',
+      'mounting', 'Flange mounted',
+      'warranty', '2-year motor warranty'
     ),
-    'SP-FAN-001',
-    10,
-    4.80,
-    3,
     'Cooling Tower Fan Motor | Ensotek Spare Parts',
-    'High-efficiency fan motor for cooling towers. Suitable for industrial use with different power options.'
+    'High-efficiency fan motor with IP55 protection class for cooling towers. Suitable for industrial applications.'
   ),
 
-  -- YEDEK PARÇA 2 TR: Nozul Seti
+  -- --------- SPAREPART 2: PVC Dolgu Bloğu (TR) ---------
   (
     'bbbb1002-2222-4222-8222-bbbbbbbb1002',
     'tr',
-    'Kule Püskürtme Nozul Seti',
-    'kule-puskurtme-nozul-seti',
-    3200.00,
-    'Su soğutma kulelerinde homojen su dağılımı için tasarlanmış nozul seti. Farklı debi aralıkları için seçenekler mevcuttur.',
-    'aaaa1001-1111-4111-8111-aaaaaaaa1001', -- SPAREPART ROOT
-    'bbbb1003-1111-4111-8111-bbbbbbbb1003', -- Montaj Aksesuarları
-    'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
-    'Kule püskürtme nozul seti',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(),
-    1,
-    0,
-    JSON_ARRAY('sparepart', 'nozul', 'su dagitim', 'kule'),
+    'PVC Dolgu Bloğu',
+    'pvc-dolgu-blogu',
+    'Soğutma kulelerinde ısı transfer yüzeyini artırmak için kullanılan, yüksek ısı ve kimyasal dayanımlı PVC dolgu bloğu. Film tip tasarım.',
+    'Soğutma kulesi PVC dolgu bloğu',
+    JSON_ARRAY('sparepart', 'dolgu', 'pvc', 'film tip'),
     JSON_OBJECT(
-      'dimensions', 'Farklı bağlantı çapları mevcuttur',
-      'weight', 'Set başına ~4 kg',
-      'thickness', 'N/A',
-      'surfaceFinish', 'Korozyona dayanıklı plastik/metal',
-      'warranty', '1 yıl üretim hatalarına karşı garanti',
-      'installationTime', '2-3 saat (kule erişimine bağlı)'
+      'material', 'PVC',
+      'maxTemp', '60 °C',
+      'type', 'Film tip dolgu',
+      'dimensions', '600 x 300 x 150 mm (örnek)',
+      'warranty', '1 yıl üretim hatalarına karşı garanti'
     ),
-    'SP-NOZ-001',
-    25,
-    4.90,
-    4,
-    'Kule Püskürtme Nozul Seti | Ensotek Yedek Parçalar',
-    'Su soğutma kulelerinde homojen su dağılımı sağlayan püskürtme nozul seti. Farklı debi ve çap seçenekleri bulunmaktadır.'
+    'PVC Dolgu Bloğu | Ensotek Yedek Parçalar',
+    'Soğutma kulelerinde ısı transfer yüzeyini artıran, film tip PVC dolgu bloğu. Yüksek ısı ve kimyasal dayanımı sunar.'
   ),
 
-  -- YEDEK PARÇA 2 EN: Cooling Tower Spray Nozzle Set
+  -- --------- SPAREPART 2: PVC Fill Media Block (EN) ---------
   (
-    'bbbb1102-2222-4222-8222-bbbbbbbb1102',
+    'bbbb1002-2222-4222-8222-bbbbbbbb1002',
     'en',
-    'Cooling Tower Spray Nozzle Set',
-    'cooling-tower-spray-nozzle-set',
-    3200.00,
-    'Spray nozzle set designed for homogeneous water distribution in cooling towers. Available for different flow ranges.',
-    'aaaa1001-1111-4111-8111-aaaaaaaa1001',
-    'bbbb1003-1111-4111-8111-bbbbbbbb1003',
-    'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&h=600&q=80',
-    NULL,
-    'Cooling tower spray nozzle set',
-    JSON_ARRAY(
-      'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&h=600&q=80'
-    ),
-    JSON_ARRAY(),
-    1,
-    0,
-    JSON_ARRAY('sparepart', 'nozzle', 'water distribution', 'tower'),
+    'PVC Fill Media Block',
+    'pvc-fill-media-block',
+    'PVC fill media block used in cooling towers to increase heat transfer surface. High temperature and chemical resistance with film-type design.',
+    'Cooling tower PVC fill media block',
+    JSON_ARRAY('sparepart', 'fill media', 'pvc', 'film type'),
     JSON_OBJECT(
-      'dimensions', 'Various connection diameters available',
-      'weight', 'Approx. 4 kg per set',
-      'thickness', 'N/A',
-      'surfaceFinish', 'Corrosion-resistant plastic/metal',
-      'warranty', '1-year warranty against manufacturing defects',
-      'installationTime', '2–3 hours (depending on tower accessibility)'
+      'material', 'PVC',
+      'maxTemp', '60 °C',
+      'type', 'Film-type fill media',
+      'dimensions', '600 x 300 x 150 mm (sample)',
+      'warranty', '1-year warranty against manufacturing defects'
     ),
-    'SP-NOZ-001',
-    25,
-    4.90,
-    4,
-    'Cooling Tower Spray Nozzle Set | Ensotek Spare Parts',
-    'Spray nozzle set that provides homogeneous water distribution in cooling towers. Available in different flow and diameter options.'
+    'PVC Fill Media Block | Ensotek Spare Parts',
+    'Film-type PVC fill media block that increases heat transfer surface in cooling towers. Provides high temperature and chemical resistance.'
   )
-
 ON DUPLICATE KEY UPDATE
-  locale           = VALUES(locale),
   title            = VALUES(title),
-  price            = VALUES(price),
+  slug             = VALUES(slug),
   description      = VALUES(description),
-  category_id      = VALUES(category_id),
-  sub_category_id  = VALUES(sub_category_id),
-  image_url        = VALUES(image_url),
-  storage_asset_id = VALUES(storage_asset_id),
   alt              = VALUES(alt),
-  images           = VALUES(images),
-  storage_image_ids= VALUES(storage_image_ids),
-  is_active        = VALUES(is_active),
-  is_featured      = VALUES(is_featured),
   tags             = VALUES(tags),
   specifications   = VALUES(specifications),
-  product_code     = VALUES(product_code),
-  stock_quantity   = VALUES(stock_quantity),
-  rating           = VALUES(rating),
-  review_count     = VALUES(review_count),
   meta_title       = VALUES(meta_title),
   meta_description = VALUES(meta_description);
 

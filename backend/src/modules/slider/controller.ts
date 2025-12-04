@@ -31,22 +31,24 @@ type SlideData = {
 };
 
 const rowToPublic = (row: RowWithAsset): SlideData => {
-  const a = row.sl;
-  const url = row.asset_url ?? a.image_url ?? "";
+  const base = row.sl;
+  const t = row.i18n;
+  const url = row.asset_url ?? base.image_url ?? "";
+
   return {
-    id: String(a.id),
-    title: a.name,
-    description: a.description ?? "",
+    id: String(base.id),
+    title: t.name,
+    description: t.description ?? "",
     image: url,
-    alt: a.alt ?? undefined,
-    buttonText: a.buttonText ?? "İncele",
-    buttonLink: a.buttonLink ?? "",
-    isActive: !!a.is_active,
-    order: a.display_order ?? 0,
-    priority: a.featured ? "high" : "medium",
+    alt: t.alt ?? undefined,
+    buttonText: t.buttonText ?? "İncele",
+    buttonLink: t.buttonLink ?? "",
+    isActive: !!base.is_active,
+    order: base.display_order ?? 0,
+    priority: base.featured ? "high" : "medium",
     showOnMobile: true,
     showOnDesktop: true,
-    locale: a.locale,
+    locale: t.locale,
   };
 };
 
@@ -54,14 +56,12 @@ const rowToPublic = (row: RowWithAsset): SlideData => {
 export const listPublicSlides: RouteHandler = async (req, reply) => {
   const parsed = publicListQuerySchema.safeParse(req.query);
   if (!parsed.success) {
-    return reply
-      .code(400)
-      .send({
-        error: {
-          message: "invalid_query",
-          issues: parsed.error.flatten(),
-        },
-      });
+    return reply.code(400).send({
+      error: {
+        message: "invalid_query",
+        issues: parsed.error.flatten(),
+      },
+    });
   }
   const q = parsed.data as PublicListQuery;
   const rows = await repoListPublic(q);

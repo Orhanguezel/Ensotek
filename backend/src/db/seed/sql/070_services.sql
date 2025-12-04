@@ -4,6 +4,7 @@
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- Önce child tabloları düşür (varsa)
 DROP TABLE IF EXISTS `service_images_i18n`;
@@ -23,23 +24,20 @@ CREATE TABLE `services` (
 
   `featured`         TINYINT(1)   NOT NULL DEFAULT 0,
   `is_active`        TINYINT(1)   NOT NULL DEFAULT 1,
-  `display_order`    INT          NOT NULL DEFAULT 1,
+  `display_order`    INT          NOT NULL DEFAULT 0,
 
   -- Ana görsel (legacy + storage)
   `featured_image`   VARCHAR(500)          DEFAULT NULL, -- legacy
   `image_url`        VARCHAR(500)          DEFAULT NULL,
   `image_asset_id`   CHAR(36)              DEFAULT NULL, -- storage_assets.id
 
-  -- Gardening
-  `area`             VARCHAR(64)           DEFAULT NULL,
-  `duration`         VARCHAR(64)           DEFAULT NULL,
-  `maintenance`      VARCHAR(64)           DEFAULT NULL,
-  `season`           VARCHAR(64)           DEFAULT NULL,
-
-  -- Soil
-  `soil_type`        VARCHAR(128)          DEFAULT NULL,
-  `thickness`        VARCHAR(64)           DEFAULT NULL,
-  `equipment`        VARCHAR(128)          DEFAULT NULL,
+  -- Teknik alanlar (non-i18n)
+  `area`             VARCHAR(255)          DEFAULT NULL,
+  `duration`         VARCHAR(255)          DEFAULT NULL,
+  `maintenance`      VARCHAR(255)          DEFAULT NULL,
+  `season`           VARCHAR(255)          DEFAULT NULL,
+  `thickness`        VARCHAR(255)          DEFAULT NULL,
+  `equipment`        VARCHAR(255)          DEFAULT NULL,
 
   `created_at`       DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`       DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
@@ -68,7 +66,7 @@ CREATE TABLE `services` (
 
 
 -- ================= TABLE: services_i18n =================
--- slug, name, description, material, price, includes, warranty, image_alt
+-- slug, name, description, material, price, includes, warranty, image_alt, tags, meta_*
 
 CREATE TABLE `services_i18n` (
   `id`               CHAR(36)      NOT NULL,
@@ -83,6 +81,11 @@ CREATE TABLE `services_i18n` (
   `includes`         VARCHAR(255)           DEFAULT NULL,
   `warranty`         VARCHAR(128)           DEFAULT NULL,
   `image_alt`        VARCHAR(255)           DEFAULT NULL,
+
+  `tags`             VARCHAR(255)           DEFAULT NULL,
+  `meta_title`       VARCHAR(255)           DEFAULT NULL,
+  `meta_description` VARCHAR(500)           DEFAULT NULL,
+  `meta_keywords`    VARCHAR(255)           DEFAULT NULL,
 
   `created_at`       DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`       DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
@@ -148,3 +151,6 @@ CREATE TABLE `service_images_i18n` (
     FOREIGN KEY (`image_id`) REFERENCES `service_images`(`id`)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;
+

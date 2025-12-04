@@ -11,14 +11,16 @@ import {
 export async function registerSubCategories(app: FastifyInstance) {
   // PUBLIC READ
   app.get("/sub-categories", { config: { public: true } }, listSubCategories);
+
   app.get<{ Params: { id: string } }>(
     "/sub-categories/:id",
     { config: { public: true } },
-    getSubCategoryById
+    getSubCategoryById,
   );
-  app.get<{ Params: { slug: string }; Querystring: { category_id?: string } }>(
+
+  app.get<{ Params: { slug: string }; Querystring: { category_id?: string; locale?: string } }>(
     "/sub-categories/by-slug/:slug",
     { config: { public: true } },
-    getSubCategoryBySlug
+    getSubCategoryBySlug,
   );
 }

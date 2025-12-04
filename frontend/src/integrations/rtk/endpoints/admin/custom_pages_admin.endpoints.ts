@@ -1,175 +1,201 @@
 // =============================================================
-// FILE: src/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints.ts
-// Ensotek – Custom Pages Admin RTK Endpoints
-// Backend: src/modules/customPages/admin.routes.ts
+// FILE: src/integrations/rtk/endpoints/admin/categories_admin.endpoints.ts
+// Ensotek – Admin Kategori RTK Endpoints
+// Base URL: /api/admin (baseApi üzerinden)
 // =============================================================
 
 import { baseApi } from "../../baseApi";
 import type {
-  ApiCustomPage,
-  CustomPageDto,
-  CustomPageListAdminQueryParams,
-  CustomPageCreatePayload,
-  CustomPageUpdatePayload,
-} from "@/integrations/types/custom_pages.types";
-import { mapApiCustomPageToDto } from "@/integrations/types/custom_pages.types";
+  CategoryDto,
+  CategoryListQueryParams,
+  CategoryCreatePayload,
+  CategoryUpdatePayload,
+  CategoryReorderPayload,
+  CategorySetImagePayload,
+} from "@/integrations/types/category.types";
 
-const getTotalFromHeaders = (
-  responseHeaders: Headers | undefined,
-  fallbackLength: number,
-): number => {
-  const headerValue =
-    responseHeaders?.get("x-total-count") ??
-    responseHeaders?.get("X-Total-Count");
-  if (!headerValue) return fallbackLength;
-  const n = Number(headerValue);
-  return Number.isFinite(n) && n >= 0 ? n : fallbackLength;
+/**
+ * Query paramlarından undefined / boş stringleri temizlemek için
+ */
+const cleanParams = (
+  params?: Record<string, unknown>,
+): Record<string, string | number | boolean> | undefined => {
+  if (!params) return undefined;
+  const out: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(params)) {
+    if (
+      v === undefined ||
+      v === null ||
+      v === "" ||
+      (typeof v === "number" && Number.isNaN(v))
+    ) {
+      continue;
+    }
+    // boolean / number / string dışındaki tipleri string’e çevirme
+    if (
+      typeof v === "boolean" ||
+      typeof v === "number" ||
+      typeof v === "string"
+    ) {
+      out[k] = v;
+    } else {
+      out[k] = String(v);
+    }
+  }
+  return Object.keys(out).length ? out : undefined;
 };
 
-export const customPagesAdminApi = baseApi.injectEndpoints({
+export const categoriesAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    /**
-     * GET /admin/custom_pages
-     * Admin – coalesced custom pages list
-     */
-    listCustomPagesAdmin: build.query<
-      { items: CustomPageDto[]; total: number },
-      CustomPageListAdminQueryParams | void
+    /* --------------------------------------------------------- */
+    /* LIST                                                       */
+    /* GET /api/admin/categories/list                            */
+    /* --------------------------------------------------------- */
+    listCategoriesAdmin: build.query<
+      CategoryDto[],
+      CategoryListQueryParams | void
     >({
-      query: (params?: CustomPageListAdminQueryParams) => ({
-        url: "/admin/custom_pages",
+      query: (params) => ({
+        url: "/admin/categories/list",
         method: "GET",
-        params,
+        params: cleanParams(
+          params as Record<string, unknown> | undefined,
+        ),
       }),
-      transformResponse: (response: ApiCustomPage[], meta) => {
-        const total = getTotalFromHeaders(
-          meta?.response?.headers,
-          response.length,
-        );
-        return {
-          items: response.map((row) => mapApiCustomPageToDto(row)),
-          total,
-        };
-      },
-      providesTags: (result) =>
-        result?.items
-          ? [
-              ...result.items.map((p) => ({
-                type: "CustomPage" as const,
-                id: p.id,
-              })),
-              { type: "CustomPage" as const, id: "ADMIN_LIST" },
-            ]
-          : [{ type: "CustomPage" as const, id: "ADMIN_LIST" }],
     }),
 
-    /**
-     * GET /admin/custom_pages/:id
-     * Admin – tekil page (id)
-     */
-    getCustomPageAdmin: build.query<CustomPageDto, string>({
-      query: (id) => ({
-        url: `/admin/custom_pages/${encodeURIComponent(id)}`,
+    /* --------------------------------------------------------- */
+    /* GET by id – /api/admin/categories/:id?locale=xx           */
+    /* --------------------------------------------------------- */
+    getCategoryAdmin: build.query<
+      CategoryDto,
+      { id: string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
+        url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "GET",
+        params: cleanParams(
+          locale ? { locale } : undefined,
+        ),
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      providesTags: (_result, _error, id) => [
-        { type: "CustomPage" as const, id },
-      ],
     }),
 
-    /**
-     * GET /admin/custom_pages/by-slug/:slug
-     * Admin – tekil page (slug)
-     */
-    getCustomPageBySlugAdmin: build.query<CustomPageDto, string>({
-      query: (slug) => ({
-        url: `/admin/custom_pages/by-slug/${encodeURIComponent(slug)}`,
-        method: "GET",
-      }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      providesTags: (_result, _error, slug) => [
-        { type: "CustomPageSlug" as const, id: slug },
-      ],
-    }),
-
-    /**
-     * POST /admin/custom_pages
-     * Admin – create
-     */
-    createCustomPageAdmin: build.mutation<
-      CustomPageDto,
-      CustomPageCreatePayload
+    /* --------------------------------------------------------- */
+    /* CREATE – POST /api/admin/categories                       */
+    /* --------------------------------------------------------- */
+    createCategoryAdmin: build.mutation<
+      CategoryDto,
+      CategoryCreatePayload
     >({
       query: (body) => ({
-        url: "/admin/custom_pages",
+        url: "/admin/categories",
         method: "POST",
         body,
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      invalidatesTags: () => [
-        { type: "CustomPage" as const, id: "ADMIN_LIST" },
-        { type: "CustomPage" as const, id: "PUBLIC_LIST" },
-      ],
     }),
 
-    /**
-     * PATCH /admin/custom_pages/:id
-     * Admin – update (partial)
-     */
-    updateCustomPageAdmin: build.mutation<
-      CustomPageDto,
-      { id: string; patch: CustomPageUpdatePayload }
+    /* --------------------------------------------------------- */
+    /* PATCH (partial update) – /api/admin/categories/:id        */
+    /* --------------------------------------------------------- */
+    updateCategoryAdmin: build.mutation<
+      CategoryDto,
+      { id: string; patch: CategoryUpdatePayload }
     >({
       query: ({ id, patch }) => ({
-        url: `/admin/custom_pages/${encodeURIComponent(id)}`,
+        url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "PATCH",
+        // backend categoryUpdateSchema.partial() top-level body bekliyor
         body: patch,
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      invalidatesTags: (result) => {
-        const id = result?.id;
-        return id
-          ? [
-              { type: "CustomPage" as const, id },
-              { type: "CustomPage" as const, id: "ADMIN_LIST" },
-              { type: "CustomPage" as const, id: "PUBLIC_LIST" },
-            ]
-          : [
-              { type: "CustomPage" as const, id: "ADMIN_LIST" },
-              { type: "CustomPage" as const, id: "PUBLIC_LIST" },
-            ];
-      },
     }),
 
-    /**
-     * DELETE /admin/custom_pages/:id
-     * Admin – delete
-     */
-    deleteCustomPageAdmin: build.mutation<void, { id: string }>({
-      query: ({ id }) => ({
-        url: `/admin/custom_pages/${encodeURIComponent(id)}`,
+    /* --------------------------------------------------------- */
+    /* DELETE – /api/admin/categories/:id                        */
+    /* --------------------------------------------------------- */
+    deleteCategoryAdmin: build.mutation<void, string>({
+      query: (id) => ({
+        url: `/admin/categories/${encodeURIComponent(id)}`,
         method: "DELETE",
       }),
-      invalidatesTags: (_result, _error, arg) => [
-        { type: "CustomPage" as const, id: arg.id },
-        { type: "CustomPage" as const, id: "ADMIN_LIST" },
-        { type: "CustomPage" as const, id: "PUBLIC_LIST" },
-      ],
+    }),
+
+    /* --------------------------------------------------------- */
+    /* REORDER – /api/admin/categories/reorder                   */
+    /* Body: { items: [{id, display_order}, ...] }               */
+    /* --------------------------------------------------------- */
+    reorderCategoriesAdmin: build.mutation<
+      { ok: boolean },
+      CategoryReorderPayload
+    >({
+      query: (payload) => ({
+        url: "/admin/categories/reorder",
+        method: "POST",
+        body: payload,
+      }),
+    }),
+
+    /* --------------------------------------------------------- */
+    /* TOGGLE ACTIVE – PATCH /api/admin/categories/:id/active    */
+    /* Body: { is_active: boolean }                              */
+    /* --------------------------------------------------------- */
+    toggleCategoryActiveAdmin: build.mutation<
+      CategoryDto,
+      { id: string; is_active: boolean }
+    >({
+      query: ({ id, is_active }) => ({
+        url: `/admin/categories/${encodeURIComponent(id)}/active`,
+        method: "PATCH",
+        body: { is_active },
+      }),
+    }),
+
+    /* --------------------------------------------------------- */
+    /* TOGGLE FEATURED – PATCH /api/admin/categories/:id/featured*/
+    /* Body: { is_featured: boolean }                            */
+    /* --------------------------------------------------------- */
+    toggleCategoryFeaturedAdmin: build.mutation<
+      CategoryDto,
+      { id: string; is_featured: boolean }
+    >({
+      query: ({ id, is_featured }) => ({
+        url: `/admin/categories/${encodeURIComponent(id)}/featured`,
+        method: "PATCH",
+        body: { is_featured },
+      }),
+    }),
+
+    /* --------------------------------------------------------- */
+    /* SET IMAGE – PATCH /api/admin/categories/:id/image         */
+    /* Body: { asset_id?: string|null, alt?: string|null }       */
+    /* --------------------------------------------------------- */
+    setCategoryImageAdmin: build.mutation<
+      CategoryDto,
+      CategorySetImagePayload
+    >({
+      query: ({ id, asset_id, alt }) => ({
+        url: `/admin/categories/${encodeURIComponent(id)}/image`,
+        method: "PATCH",
+        body: {
+          asset_id: asset_id ?? null,
+          alt: alt ?? null,
+        },
+      }),
     }),
   }),
+
   overrideExisting: false,
 });
 
 export const {
-  useListCustomPagesAdminQuery,
-  useGetCustomPageAdminQuery,
-  useGetCustomPageBySlugAdminQuery,
-  useCreateCustomPageAdminMutation,
-  useUpdateCustomPageAdminMutation,
-  useDeleteCustomPageAdminMutation,
-} = customPagesAdminApi;
+  useListCategoriesAdminQuery,
+  useLazyListCategoriesAdminQuery,
+  useGetCategoryAdminQuery,
+  useLazyGetCategoryAdminQuery,
+  useCreateCategoryAdminMutation,
+  useUpdateCategoryAdminMutation,
+  useDeleteCategoryAdminMutation,
+  useReorderCategoriesAdminMutation,
+  useToggleCategoryActiveAdminMutation,
+  useToggleCategoryFeaturedAdminMutation,
+  useSetCategoryImageAdminMutation,
+} = categoriesAdminApi;

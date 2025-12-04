@@ -24,7 +24,10 @@ export async function registerSliderAdmin(app: FastifyInstance) {
   const BASE = "/sliders";
 
   // ✔ Tek guard: önce auth, sonra admin. reply.sent pattern.
-  const adminGuard = async (req: FastifyRequest, reply: FastifyReply) => {
+  const adminGuard = async (
+    req: FastifyRequest,
+    reply: FastifyReply,
+  ) => {
     await requireAuth(req, reply);
     if (reply.sent) return;
     await requireAdmin(req, reply);
@@ -40,7 +43,7 @@ export async function registerSliderAdmin(app: FastifyInstance) {
     adminListSlides,
   );
 
-  // DETAIL
+  // DETAIL (id + optional locale query)
   app.get(
     `${BASE}/:id`,
     {
@@ -60,7 +63,7 @@ export async function registerSliderAdmin(app: FastifyInstance) {
     adminCreateSlide,
   );
 
-  // UPDATE (partial)
+  // UPDATE (partial + locale i18n upsert)
   app.patch(
     `${BASE}/:id`,
     {
@@ -80,7 +83,7 @@ export async function registerSliderAdmin(app: FastifyInstance) {
     adminDeleteSlide,
   );
 
-  // REORDER
+  // REORDER (parent id listesi)
   app.post(
     `${BASE}/reorder`,
     {
@@ -90,7 +93,7 @@ export async function registerSliderAdmin(app: FastifyInstance) {
     adminReorderSlides,
   );
 
-  // STATUS
+  // STATUS (parent is_active)
   app.post(
     `${BASE}/:id/status`,
     {
@@ -100,7 +103,7 @@ export async function registerSliderAdmin(app: FastifyInstance) {
     adminSetStatus,
   );
 
-  // IMAGE (storage ile set/kaldır)
+  // IMAGE (storage ile set/kaldır – parent)
   app.patch(
     `${BASE}/:id/image`,
     {

@@ -200,6 +200,7 @@ export interface SubCategoryReorderItem {
  * ADMIN image set payload
  */
 export interface SubCategorySetImagePayload {
+  id: string;
   asset_id?: string | null;
   alt?: string | null;
 }

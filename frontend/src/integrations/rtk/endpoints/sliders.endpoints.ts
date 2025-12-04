@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/sliders.endpoints.ts
-// Ensotek – PUBLIC Slider RTK endpoints
+// FIXED – Public Slider endpoints
 // =============================================================
 
 import { baseApi } from "../baseApi";
@@ -10,31 +10,46 @@ import type {
   SliderPublicDto,
   SliderPublicListQueryParams,
   SliderPublicDetailQuery,
-} from "../../types/slider.types";
-import { normalizeSliderPublic } from "../../types/slider.types";
+} from "@/integrations/types/slider.types";
+import { normalizeSliderPublic } from "@/integrations/types/slider.types";
+
+const cleanParams = (
+  params?: Record<string, unknown>,
+): Record<string, string | number | boolean> | undefined => {
+  if (!params) return undefined;
+  const out: Record<string, string | number | boolean> = {};
+
+  for (const [k, v] of Object.entries(params)) {
+    if (
+      v === undefined ||
+      v === null ||
+      v === "" ||
+      (typeof v === "number" && Number.isNaN(v))
+    )
+      continue;
+
+    out[k] =
+      typeof v === "boolean" ||
+      typeof v === "number" ||
+      typeof v === "string"
+        ? v
+        : String(v);
+  }
+
+  return Object.keys(out).length ? out : undefined;
+};
 
 export const slidersApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    /* --------------------------------------------------------- */
-    /*  PUBLIC: Liste                                            */
-    /*  GET /sliders                                             */
-    /*  (Sadece aktifler, locale filtresi backend'de)            */
-    /* --------------------------------------------------------- */
     listSliders: build.query<
       SliderPublicDto[],
       SliderPublicListQueryParams | void
     >({
-      query: (params) => {
-        const queryParams: Record<string, any> | undefined = params
-          ? (params as Record<string, any>)
-          : undefined;
-
-        return {
-          url: "/sliders",
-          method: "GET",
-          params: queryParams,
-        };
-      },
+      query: (params) => ({
+        url: "/sliders",
+        method: "GET",
+        params: cleanParams(params as Record<string, unknown>),
+      }),
       transformResponse: (response: ApiSliderPublic[]) =>
         Array.isArray(response)
           ? response.map(normalizeSliderPublic)
@@ -51,27 +66,16 @@ export const slidersApi = baseApi.injectEndpoints({
           : [{ type: "Sliders" as const, id: "LIST_PUBLIC" }],
     }),
 
-    /* --------------------------------------------------------- */
-    /*  PUBLIC: Tekil (slug + locale)                            */
-    /*  GET /sliders/:slug?locale=...                            */
-    /* --------------------------------------------------------- */
     getSliderPublic: build.query<
       SliderPublicDto,
       SliderPublicDetailQuery
     >({
-      query: ({ slug, locale }) => {
-        const queryParams: Record<string, any> | undefined = locale
-          ? { locale }
-          : undefined;
-
-        return {
-          url: `/sliders/${slug}`,
-          method: "GET",
-          params: queryParams,
-        };
-      },
-      transformResponse: (response: ApiSliderPublic) =>
-        normalizeSliderPublic(response),
+      query: ({ slug, locale }) => ({
+        url: `/sliders/${encodeURIComponent(slug)}`,
+        method: "GET",
+        params: cleanParams(locale ? { locale } : undefined),
+      }),
+      transformResponse: normalizeSliderPublic,
       providesTags: (res) =>
         res
           ? [{ type: "Sliders" as const, id: res.id }]
@@ -81,7 +85,4 @@ export const slidersApi = baseApi.injectEndpoints({
   overrideExisting: false,
 });
 
-export const {
-  useListSlidersQuery,
-  useGetSliderPublicQuery,
-} = slidersApi;
+export const { useListSlidersQuery, useGetSliderPublicQuery } = slidersApi;

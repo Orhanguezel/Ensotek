@@ -1,11 +1,6 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/references.endpoints.ts
-// Ensotek – References (public API)
-// Backend routes:
-//   GET    /references
-//   GET    /references/:id
-//   GET    /references/by-slug/:slug
-//   GET    /references/:id/images
+// Ensotek – References (public API) – LOCALE AWARE
 // =============================================================
 
 import { baseApi } from "../baseApi";
@@ -14,7 +9,7 @@ import type {
   ReferenceImageDto,
   ReferenceListQueryParams,
   ReferenceListResponse,
-} from "../../types/references.types";
+} from "@/integrations/types/references.types";
 
 const serializeListQuery = (
   q?: ReferenceListQueryParams,
@@ -26,13 +21,16 @@ const serializeListQuery = (
     orderDir,
     limit,
     offset,
-    is_published,
+    // public endpoint'te is_published gönderme (BE şeması almıyor)
     is_featured,
     q: search,
     slug,
     select,
     category_id,
     sub_category_id,
+    module_key,
+    has_website,
+    locale,
   } = q;
 
   const params: Record<string, any> = {};
@@ -42,8 +40,6 @@ const serializeListQuery = (
   if (typeof limit === "number") params.limit = limit;
   if (typeof offset === "number") params.offset = offset;
 
-  if (typeof is_published !== "undefined")
-    params.is_published = is_published;
   if (typeof is_featured !== "undefined")
     params.is_featured = is_featured;
 
@@ -52,6 +48,10 @@ const serializeListQuery = (
   if (select) params.select = select;
   if (category_id) params.category_id = category_id;
   if (sub_category_id) params.sub_category_id = sub_category_id;
+  if (module_key) params.module_key = module_key;
+  if (typeof has_website !== "undefined")
+    params.has_website = has_website;
+  if (locale) params.locale = locale;
 
   return params;
 };
@@ -68,7 +68,10 @@ export const referencesApi = baseApi.injectEndpoints({
         method: "GET",
         params: serializeListQuery(params),
       }),
-      transformResponse: (response: ReferenceDto[], meta): ReferenceListResponse => {
+      transformResponse: (
+        response: ReferenceDto[],
+        meta,
+      ): ReferenceListResponse => {
         const totalHeader =
           meta?.response?.headers?.get("x-total-count") ?? "0";
         const total = Number(totalHeader) || 0;
@@ -86,31 +89,56 @@ export const referencesApi = baseApi.injectEndpoints({
           : [{ type: "References", id: "LIST" }],
     }),
 
-    /* -------------------- GET BY ID (public) -------------------- */
-    getReferenceById: build.query<ReferenceDto, string>({
-      query: (id) => ({
-        url: `/references/${id}`,
-        method: "GET",
-      }),
-      providesTags: (_res, _err, id) => [
-        { type: "References", id },
-      ],
+    /* -------------------- GET BY ID (public, locale-aware) -- */
+    getReferenceById: build.query<
+      ReferenceDto,
+      { id: string; locale?: string } | string
+    >({
+      query: (arg) => {
+        const id = typeof arg === "string" ? arg : arg.id;
+        const locale =
+          typeof arg === "object" && arg !== null && "locale" in arg
+            ? (arg as { locale?: string }).locale
+            : undefined;
+
+        return {
+          url: `/references/${encodeURIComponent(id)}`,
+          method: "GET",
+          params: locale ? { locale } : undefined,
+        };
+      },
+      providesTags: (_res, _err, arg) => {
+        const id = typeof arg === "string" ? arg : arg.id;
+        return [{ type: "References", id }];
+      },
     }),
 
-    /* -------------------- GET BY SLUG (public) -------------------- */
-    getReferenceBySlug: build.query<ReferenceDto, string>({
-      query: (slug) => ({
-        url: `/references/by-slug/${slug}`,
-        method: "GET",
-      }),
+    /* -------------------- GET BY SLUG (public, locale-aware) */
+    getReferenceBySlug: build.query<
+      ReferenceDto,
+      { slug: string; locale?: string } | string
+    >({
+      query: (arg) => {
+        const slug = typeof arg === "string" ? arg : arg.slug;
+        const locale =
+          typeof arg === "object" && arg !== null && "locale" in arg
+            ? (arg as { locale?: string }).locale
+            : undefined;
+
+        return {
+          url: `/references/by-slug/${encodeURIComponent(slug)}`,
+          method: "GET",
+          params: locale ? { locale } : undefined,
+        };
+      },
       providesTags: (res) =>
         res?.id ? [{ type: "References", id: res.id }] : [],
     }),
 
-    /* -------------------- LIST IMAGES (public) -------------------- */
+    /* -------------------- LIST IMAGES (public) -------------- */
     listReferenceImages: build.query<ReferenceImageDto[], string>({
       query: (referenceId) => ({
-        url: `/references/${referenceId}/images`,
+        url: `/references/${encodeURIComponent(referenceId)}/images`,
         method: "GET",
       }),
       providesTags: (_res, _err, referenceId) => [

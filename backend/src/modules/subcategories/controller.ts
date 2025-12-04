@@ -4,8 +4,8 @@
 import type { RouteHandler } from "fastify";
 import { randomUUID } from "crypto";
 import { db } from "@/db/client";
-import { subCategories } from "./schema";
-import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
+import { subCategories, subCategoryI18n } from "./schema";
+import { and, asc, desc, eq, sql } from "drizzle-orm";
 import type {
   SubCategoryCreateInput,
   SubCategoryUpdateInput,
@@ -13,6 +13,7 @@ import type {
 
 const nullIfEmpty = (v: unknown) => (v === "" ? null : v);
 
+// FE’den gelen her türü -> boolean
 function toBool(v: unknown): boolean {
   if (typeof v === "boolean") return v;
   if (typeof v === "number") return v !== 0;
@@ -22,7 +23,7 @@ function toBool(v: unknown): boolean {
 
 const ORDER_WHITELIST = {
   display_order: subCategories.display_order,
-  name: subCategories.name,
+  name: subCategoryI18n.name,
   created_at: subCategories.created_at,
   updated_at: subCategories.updated_at,
 } as const;
@@ -54,6 +55,24 @@ function parseOrder(q: Record<string, unknown>) {
   return { primary, primaryCol: col };
 }
 
+const subCategorySelectFields = {
+  id: subCategories.id,
+  category_id: subCategories.category_id,
+  image_url: subCategories.image_url,
+  storage_asset_id: subCategories.storage_asset_id,
+  alt: subCategories.alt,
+  icon: subCategories.icon,
+  is_active: subCategories.is_active,
+  is_featured: subCategories.is_featured,
+  display_order: subCategories.display_order,
+  created_at: subCategories.created_at,
+  updated_at: subCategories.updated_at,
+  locale: subCategoryI18n.locale,
+  name: subCategoryI18n.name,
+  slug: subCategoryI18n.slug,
+  description: subCategoryI18n.description,
+};
+
 /** GET /sub-categories (public) */
 export const listSubCategories: RouteHandler<{
   Querystring: {
@@ -71,23 +90,24 @@ export const listSubCategories: RouteHandler<{
   const q = req.query ?? {};
   const conds: any[] = [];
 
+  const locale =
+    typeof q.locale === "string" && q.locale.trim()
+      ? q.locale.trim()
+      : "tr";
+  conds.push(eq(subCategoryI18n.locale, locale));
+
   if (q.q) {
     const s = `%${String(q.q).trim()}%`;
     conds.push(
-      sql`${subCategories.name} LIKE ${s} OR ${subCategories.slug} LIKE ${s}`,
+      sql`${subCategoryI18n.name} LIKE ${s} OR ${subCategoryI18n.slug} LIKE ${s}`,
     );
   }
 
-  if (q.category_id !== undefined) {
-    const v = q.category_id;
-    if (v === null || v === "null")
-      conds.push(isNull(subCategories.category_id));
-    else if (typeof v === "string" && v.length > 0)
+  if (q.category_id) {
+    const v = String(q.category_id).trim();
+    if (v.length > 0) {
       conds.push(eq(subCategories.category_id, v));
-  }
-
-  if (q.locale) {
-    conds.push(eq(subCategories.locale, q.locale));
+    }
   }
 
   if (q.is_active !== undefined)
@@ -103,12 +123,22 @@ export const listSubCategories: RouteHandler<{
 
   const countBase = db
     .select({ total: sql<number>`COUNT(*)` })
-    .from(subCategories);
+    .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      eq(subCategoryI18n.sub_category_id, subCategories.id),
+    );
   const [{ total }] = where
     ? await countBase.where(where as any)
     : await countBase;
 
-  const rowsBase = db.select().from(subCategories);
+  const rowsBase = db
+    .select(subCategorySelectFields)
+    .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      eq(subCategoryI18n.sub_category_id, subCategories.id),
+    );
   const rowsQ = where ? rowsBase.where(where as any) : rowsBase;
 
   const orderExprs: any[] = [primary as any];
@@ -135,11 +165,21 @@ export const getSubCategoryById: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
   const { id } = req.params;
+  const locale = "tr"; // public by-id için default locale
+
   const rows = await db
-    .select()
+    .select(subCategorySelectFields)
     .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      and(
+        eq(subCategoryI18n.sub_category_id, subCategories.id),
+        eq(subCategoryI18n.locale, locale),
+      ),
+    )
     .where(eq(subCategories.id, id))
     .limit(1);
+
   if (!rows.length)
     return reply.code(404).send({ error: { message: "not_found" } });
   return reply.send(rows[0]);
@@ -153,18 +193,22 @@ export const getSubCategoryBySlug: RouteHandler<{
   const { slug } = req.params;
   const { category_id, locale } = req.query ?? {};
 
-  const conds: any[] = [eq(subCategories.slug, slug)];
+  const conds: any[] = [
+    eq(subCategoryI18n.slug, slug),
+    eq(subCategoryI18n.locale, (locale ?? "tr").trim() || "tr"),
+  ];
 
   if (category_id) {
     conds.push(eq(subCategories.category_id, category_id));
   }
-  if (locale) {
-    conds.push(eq(subCategories.locale, locale));
-  }
 
   const rows = await db
-    .select()
+    .select(subCategorySelectFields)
     .from(subCategories)
+    .innerJoin(
+      subCategoryI18n,
+      eq(subCategoryI18n.sub_category_id, subCategories.id),
+    )
     .where(and(...conds))
     .limit(1);
 
@@ -176,26 +220,26 @@ export const getSubCategoryBySlug: RouteHandler<{
 /** Ortak payload yardımcıları (admin controller kullanıyor) */
 export function buildInsertPayload(input: SubCategoryCreateInput) {
   const id = input.id ?? randomUUID();
-  const name = String(input.name ?? "").trim();
-  const slug = String(input.slug ?? "").trim();
   const category_id = String(input.category_id ?? "").trim();
-  const locale = (input.locale ?? "tr").trim() || "tr";
 
   return {
     id,
     category_id,
-    locale,
-    name,
-    slug,
-    description: (nullIfEmpty(input.description) as string | null) ?? null,
-    image_url: (nullIfEmpty(input.image_url) as string | null) ?? null,
+    image_url:
+      (nullIfEmpty(input.image_url) as string | null) ?? null,
+    storage_asset_id: null as string | null,
     alt: (nullIfEmpty(input.alt) as string | null) ?? null,
     icon: (nullIfEmpty(input.icon) as string | null) ?? null,
-    is_active: input.is_active === undefined ? true : toBool(input.is_active),
+
+    is_active:
+      input.is_active === undefined
+        ? true
+        : toBool(input.is_active),
     is_featured:
       input.is_featured === undefined
         ? false
         : toBool(input.is_featured),
+
     display_order: input.display_order ?? 0,
   };
 }
@@ -207,14 +251,7 @@ export function buildUpdatePayload(patch: SubCategoryUpdateInput) {
 
   if (patch.category_id !== undefined)
     set.category_id = String(patch.category_id).trim();
-  if (patch.locale !== undefined)
-    set.locale = String(patch.locale).trim() || "tr";
-  if (patch.name !== undefined) set.name = String(patch.name).trim();
-  if (patch.slug !== undefined) set.slug = String(patch.slug).trim();
-  if (patch.description !== undefined)
-    set.description = nullIfEmpty(
-      patch.description,
-    ) as string | null;
+
   if (patch.image_url !== undefined)
     set.image_url = nullIfEmpty(
       patch.image_url,
@@ -231,5 +268,6 @@ export function buildUpdatePayload(patch: SubCategoryUpdateInput) {
 
   if (patch.display_order !== undefined)
     set.display_order = Number(patch.display_order) || 0;
+
   return set;
 }

@@ -20,11 +20,16 @@ export const boolLike = z.union([
   z.literal("false"),
 ]);
 
+/**
+ * NOT: DB artık base + i18n (categories + category_i18n)
+ * ama API input'unda name/slug/locale almaya devam ediyoruz.
+ * Admin tarafında bunları base ve i18n tablosuna paylaştırıyoruz.
+ */
 const baseCategorySchema = z
   .object({
     id: z.string().uuid().optional(),
 
-    /** Çoklu dil */
+    /** Çoklu dil (i18n tablosu için) */
     locale: z
       .string()
       .min(2)
@@ -38,10 +43,13 @@ const baseCategorySchema = z
       .max(64)
       .default("general"),
 
+    /** i18n alanları */
     name: z.string().min(1).max(255),
     slug: z.string().min(1).max(255),
 
     description: emptyToNull(z.string().optional().nullable()),
+
+    /** Base tablo görsel alanları */
     image_url: emptyToNull(z.string().url().optional().nullable()),
     alt: emptyToNull(z.string().max(255).optional().nullable()),
 
@@ -65,7 +73,7 @@ const baseCategorySchema = z
  */
 export const categoryCreateSchema = baseCategorySchema.superRefine(
   (data, ctx) => {
-    // Şu an için parent_id bu tabloda yok; ayrı alt kategori modülü gelecek.
+    // Şu an için parent_id bu tabloda yok; ayrı alt kategori modülü var.
     if ("parent_id" in (data as Record<string, unknown>)) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

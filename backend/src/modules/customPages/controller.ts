@@ -1,4 +1,3 @@
-// src/modules/customPages/controller.ts
 import type { RouteHandler } from "fastify";
 import { DEFAULT_LOCALE, type Locale } from "@/core/i18n";
 import {
@@ -120,4 +119,3 @@ export const getPageBySlug: RouteHandler = async (req, reply) => {
   }
   return reply.send(row);
 };
-
