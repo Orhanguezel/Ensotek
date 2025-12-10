@@ -18,10 +18,13 @@ import {
   useUpdateSupportTicketAdminMutation,
   useDeleteSupportTicketAdminMutation,
   useToggleSupportTicketAdminMutation,
+} from "@/integrations/rtk/endpoints/admin/support_admin.endpoints";
+
+import {
   useListTicketRepliesAdminQuery,
   useCreateTicketReplyAdminMutation,
   useDeleteTicketReplyAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/support_admin.endpoints";
+} from "@/integrations/rtk/endpoints/admin/ticket_replies_admin.endpoints";
 
 import { useCreateSupportTicketMutation } from "@/integrations/rtk/endpoints/support.endpoints";
 
@@ -39,15 +42,21 @@ const AdminSupportDetailPage: NextPage = () => {
   // slug -> isCreate + ticketId (admin endpoints için)
   const { isCreate, ticketId } = useMemo(() => {
     if (!slug || Array.isArray(slug)) {
-      return { isCreate: false, ticketId: undefined as string | undefined };
+      return {
+        isCreate: false,
+        ticketId: undefined as string | undefined,
+      };
     }
     if (slug === "new") {
-      return { isCreate: true, ticketId: undefined as string | undefined };
+      return {
+        isCreate: true,
+        ticketId: undefined as string | undefined,
+      };
     }
     return { isCreate: false, ticketId: slug as string };
   }, [slug]);
 
-  // Public CREATE mutation
+  // Public CREATE mutation (POST /support_tickets)
   const [createTicket, { isLoading: isCreating }] =
     useCreateSupportTicketMutation();
 
@@ -77,12 +86,9 @@ const AdminSupportDetailPage: NextPage = () => {
     isLoading: isLoadingReplies,
     isFetching: isFetchingReplies,
     refetch: refetchReplies,
-  } = useListTicketRepliesAdminQuery(
-    { ticketId: ticketId as string },
-    {
-      skip: !ticketId || isCreate,
-    },
-  );
+  } = useListTicketRepliesAdminQuery(ticketId ?? "", {
+    skip: !ticketId || isCreate,
+  });
 
   const [createReply, { isLoading: isCreatingReply }] =
     useCreateTicketReplyAdminMutation();
@@ -115,7 +121,9 @@ const AdminSupportDetailPage: NextPage = () => {
         };
         const created = await createTicket(payload).unwrap();
         toast.success("Destek talebi oluşturuldu.");
-        router.replace(`/admin/support/${encodeURIComponent(created.id)}`);
+        router.replace(
+          `/admin/support/${encodeURIComponent(created.id)}`,
+        );
         return;
       }
 
@@ -291,8 +299,8 @@ const AdminSupportDetailPage: NextPage = () => {
                           <span className="text-muted">
                             {r.created_at
                               ? new Date(
-                                  r.created_at,
-                                ).toLocaleString("tr-TR")
+                                r.created_at,
+                              ).toLocaleString("tr-TR")
                               : "-"}
                           </span>
                         </div>
@@ -336,7 +344,7 @@ const AdminSupportDetailPage: NextPage = () => {
             </div>
           </div>
 
-          {/* Sağ tarafta küçük özet blok istersen buraya ekleyebilirsin */}
+          {/* Sağ tarafta özet/stat blokları istersen buraya ekleyebilirsin */}
         </div>
       )}
     </div>

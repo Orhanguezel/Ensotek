@@ -58,23 +58,28 @@ export const menuItemsAdminApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result?.items
           ? [
-              { type: "MenuItem" as const, id: "LIST" },
-              ...result.items.map((m) => ({
-                type: "MenuItem" as const,
-                id: m.id,
-              })),
-            ]
+            { type: "MenuItem" as const, id: "LIST" },
+            ...result.items.map((m) => ({
+              type: "MenuItem" as const,
+              id: m.id,
+            })),
+          ]
           : [{ type: "MenuItem" as const, id: "LIST" }],
     }),
 
     // GET by id – GET /admin/menu_items/:id
-    getMenuItemAdmin: build.query<AdminMenuItemDto, string>({
-      query: (id) => ({
+    // locale destekli: arg.id + arg.locale
+    getMenuItemAdmin: build.query<
+      AdminMenuItemDto,
+      { id: string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
         url: `/admin/menu_items/${encodeURIComponent(id)}`,
         method: "GET",
+        params: locale ? { locale } : undefined,
       }),
-      providesTags: (_r, _e, id) => [
-        { type: "MenuItem" as const, id },
+      providesTags: (_r, _e, arg) => [
+        { type: "MenuItem" as const, id: arg.id },
       ],
     }),
 
@@ -91,9 +96,9 @@ export const menuItemsAdminApi = baseApi.injectEndpoints({
       invalidatesTags: (result) =>
         result
           ? [
-              { type: "MenuItem" as const, id: "LIST" },
-              { type: "MenuItem" as const, id: result.id },
-            ]
+            { type: "MenuItem" as const, id: "LIST" },
+            { type: "MenuItem" as const, id: result.id },
+          ]
           : [{ type: "MenuItem" as const, id: "LIST" }],
     }),
 

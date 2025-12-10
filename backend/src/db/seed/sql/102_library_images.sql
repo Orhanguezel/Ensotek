@@ -4,18 +4,18 @@
 
 /* ================= TABLE ================= */
 CREATE TABLE IF NOT EXISTS `library_images` (
-  id            CHAR(36)    NOT NULL,
-  library_id    CHAR(36)    NOT NULL,
-  asset_id      CHAR(36)    NOT NULL,
+  id            CHAR(36)      NOT NULL,
+  library_id    CHAR(36)      NOT NULL,
+  asset_id      CHAR(36)      NOT NULL,
   image_url     VARCHAR(500)  DEFAULT NULL,
   thumb_url     VARCHAR(500)  DEFAULT NULL,
   webp_url      VARCHAR(500)  DEFAULT NULL,
 
-  display_order INT         NOT NULL DEFAULT 0,
-  is_active     TINYINT(1)  NOT NULL DEFAULT 1,
+  display_order INT           NOT NULL DEFAULT 0,
+  is_active     TINYINT(1)    NOT NULL DEFAULT 1,
 
-  created_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  updated_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  created_at    DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at    DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
   KEY library_images_library_idx (library_id),
@@ -33,19 +33,13 @@ CREATE TABLE IF NOT EXISTS `library_images` (
 
 
 /* ================= SEED: GALLERY ================= */
-/*
-  NOT:
-  - Aşağıdaki asset değişkenleri storage seed tarafında tanımlanabilir:
-    @ASSET_LIB_BROCHURE_COVER_ID
-    @ASSET_LIB_GUIDE_COVER_ID
-  - Eğer tanımlanmazsa, WHERE @ASSET_... IS NOT NULL koşulu nedeniyle
-    INSERT hiçbir satır eklemez ve hata oluşmaz.
-*/
 
 -- Broşür: kapak görseli
 SET @LIBIMG_BROCHURE_COVER_ID := (
-  SELECT id FROM library_images
-  WHERE library_id = @LIB_BROCHURE_ID AND display_order = 1
+  SELECT id
+  FROM library_images
+  WHERE library_id = @LIB_BROCHURE_ID
+  ORDER BY display_order ASC, created_at ASC, id ASC
   LIMIT 1
 );
 SET @LIBIMG_BROCHURE_COVER_ID := COALESCE(@LIBIMG_BROCHURE_COVER_ID, UUID());
@@ -72,8 +66,10 @@ ON DUPLICATE KEY UPDATE
 
 -- Hizmet Rehberi: kapak görseli
 SET @LIBIMG_GUIDE_COVER_ID := (
-  SELECT id FROM library_images
-  WHERE library_id = @LIB_GUIDE_ID AND display_order = 1
+  SELECT id
+  FROM library_images
+  WHERE library_id = @LIB_GUIDE_ID
+  ORDER BY display_order ASC, created_at ASC, id ASC
   LIMIT 1
 );
 SET @LIBIMG_GUIDE_COVER_ID := COALESCE(@LIBIMG_GUIDE_COVER_ID, UUID());

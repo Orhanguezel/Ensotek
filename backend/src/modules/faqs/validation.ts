@@ -17,15 +17,25 @@ export const boolLike = z.union([
 
 /** LIST query (public/admin ortak) */
 export const faqListQuerySchema = z.object({
+  // Sıralama
   order: z.string().optional(), // "created_at.asc" gibi
   sort: z.enum(["created_at", "updated_at", "display_order"]).optional(),
   orderDir: z.enum(["asc", "desc"]).optional(),
+
+  // Paging
   limit: z.coerce.number().int().min(1).max(200).optional(),
   offset: z.coerce.number().int().min(0).optional(),
+
+  // Filtreler
   is_active: boolLike.optional(),
   q: z.string().optional(),
   slug: z.string().optional(),
-  category: z.string().optional(),
+
+  // Kategori filtreleri (ID bazlı – category modülü ile uyumlu)
+  category_id: z.string().min(1).max(36).optional(),
+  sub_category_id: z.string().min(1).max(36).optional(),
+
+  // İleride SELECT kolon opt. kullanmak istersen
   select: z.string().optional(),
 });
 export type FaqListQuery = z.infer<typeof faqListQuerySchema>;
@@ -34,6 +44,10 @@ export type FaqListQuery = z.infer<typeof faqListQuerySchema>;
 export const upsertFaqParentBodySchema = z.object({
   is_active: boolLike.optional().default(true),
   display_order: z.coerce.number().int().min(0).optional(),
+
+  // Kategori ID'leri (dil bağımsız)
+  category_id: z.string().min(1).max(36).nullable().optional(),
+  sub_category_id: z.string().min(1).max(36).nullable().optional(),
 });
 export type UpsertFaqParentBody = z.infer<typeof upsertFaqParentBodySchema>;
 
@@ -59,7 +73,6 @@ export const upsertFaqI18nBodySchema = z.object({
       "slug sadece küçük harf, rakam ve tire içermelidir",
     )
     .trim(),
-  category: z.string().max(255).nullable().optional(),
 });
 export type UpsertFaqI18nBody = z.infer<typeof upsertFaqI18nBodySchema>;
 
@@ -77,7 +90,6 @@ export const patchFaqI18nBodySchema = z.object({
     )
     .trim()
     .optional(),
-  category: z.string().max(255).nullable().optional(),
 });
 export type PatchFaqI18nBody = z.infer<typeof patchFaqI18nBodySchema>;
 
@@ -99,12 +111,15 @@ export const upsertFaqBodySchema = z.object({
       "slug sadece küçük harf, rakam ve tire içermelidir",
     )
     .trim(),
-  category: z.string().max(255).nullable().optional(),
   locale: LOCALE_ENUM.optional(),
 
   // parent
   is_active: boolLike.optional().default(true),
   display_order: z.coerce.number().int().min(0).optional(),
+
+  // Kategori ID'leri (dil bağımsız)
+  category_id: z.string().min(1).max(36).nullable().optional(),
+  sub_category_id: z.string().min(1).max(36).nullable().optional(),
 });
 export type UpsertFaqBody = z.infer<typeof upsertFaqBodySchema>;
 
@@ -122,11 +137,12 @@ export const patchFaqBodySchema = z.object({
     )
     .trim()
     .optional(),
-  category: z.string().max(255).nullable().optional(),
   locale: LOCALE_ENUM.optional(),
 
   // parent
   is_active: boolLike.optional(),
   display_order: z.coerce.number().int().min(0).optional(),
+  category_id: z.string().min(1).max(36).nullable().optional(),
+  sub_category_id: z.string().min(1).max(36).nullable().optional(),
 });
 export type PatchFaqBody = z.infer<typeof patchFaqBodySchema>;

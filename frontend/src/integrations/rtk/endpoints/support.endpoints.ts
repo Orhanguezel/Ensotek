@@ -1,6 +1,7 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/support.endpoints.ts
 // Public Support Tickets + Replies RTK Endpoints
+// Backend: src/modules/support/router.ts
 // =============================================================
 
 import { baseApi } from "../baseApi";
@@ -17,6 +18,7 @@ import type {
 export const supportApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // -------- TICKETS: LIST (PUBLIC) --------
+    // GET /support_tickets
     listSupportTickets: build.query<
       SupportTicketListResponse,
       SupportTicketListQueryParams | void
@@ -40,6 +42,7 @@ export const supportApi = baseApi.injectEndpoints({
     }),
 
     // -------- TICKETS: GET BY ID (PUBLIC) --------
+    // GET /support_tickets/:id
     getSupportTicket: build.query<SupportTicketDto, { id: string }>({
       query: ({ id }) => ({
         url: `/support_tickets/${encodeURIComponent(id)}`,
@@ -48,6 +51,7 @@ export const supportApi = baseApi.injectEndpoints({
     }),
 
     // -------- TICKETS: CREATE (PROTECTED) --------
+    // POST /support_tickets
     createSupportTicket: build.mutation<
       SupportTicketDto,
       SupportTicketCreatePayload
@@ -60,6 +64,7 @@ export const supportApi = baseApi.injectEndpoints({
     }),
 
     // -------- TICKETS: UPDATE (PROTECTED) --------
+    // PATCH /support_tickets/:id
     updateSupportTicket: build.mutation<
       SupportTicketDto,
       { id: string; patch: SupportTicketUpdatePayload }
@@ -72,6 +77,7 @@ export const supportApi = baseApi.injectEndpoints({
     }),
 
     // -------- REPLIES: LIST BY TICKET (PUBLIC) --------
+    // GET /ticket_replies/by-ticket/:ticketId
     listTicketReplies: build.query<TicketReplyDto[], { ticketId: string }>({
       query: ({ ticketId }) => ({
         url: `/ticket_replies/by-ticket/${encodeURIComponent(ticketId)}`,
@@ -80,6 +86,7 @@ export const supportApi = baseApi.injectEndpoints({
     }),
 
     // -------- REPLIES: CREATE (PROTECTED) --------
+    // POST /ticket_replies
     createTicketReply: build.mutation<TicketReplyDto, TicketReplyCreatePayload>(
       {
         query: (body) => ({

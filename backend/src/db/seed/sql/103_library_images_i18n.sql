@@ -2,7 +2,6 @@
 -- 103_library_images_i18n.sql  (gallery: library_images_i18n)
 -- =============================================================
 
--- ================= TABLE (şema, TS ile uyumlu) =================
 CREATE TABLE IF NOT EXISTS `library_images_i18n` (
   id         CHAR(36)     NOT NULL,
   image_id   CHAR(36)     NOT NULL,
@@ -23,32 +22,24 @@ CREATE TABLE IF NOT EXISTS `library_images_i18n` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
--- =============================================================
--- EXISTING IMAGE ID’LERİ BUL
--- (102_library_images.sql ile eklenen ilk 2 görseli:
---  1: Broşür kapağı
---  2: Hizmet rehberi kapağı
---  varsayıyoruz. display_order + created_at sırasına göre alıyoruz.)
--- =============================================================
-
 SET @LIBIMG_BROCHURE_COVER_ID := (
   SELECT li.id
   FROM library_images li
-  ORDER BY li.display_order ASC, li.created_at ASC
+  WHERE li.library_id = @LIB_BROCHURE_ID
+  ORDER BY li.display_order ASC, li.created_at ASC, li.id ASC
   LIMIT 1
 );
 
 SET @LIBIMG_GUIDE_COVER_ID := (
   SELECT li.id
   FROM library_images li
-  ORDER BY li.display_order ASC, li.created_at ASC
-  LIMIT 1 OFFSET 1
+  WHERE li.library_id = @LIB_GUIDE_ID
+  ORDER BY li.display_order ASC, li.created_at ASC, li.id ASC
+  LIMIT 1
 );
 
 
--- ================= SEED: TR =================
-
--- Broşür kapağı (TR)
+-- TR
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 SELECT
@@ -62,7 +53,6 @@ ON DUPLICATE KEY UPDATE
   caption    = VALUES(caption),
   updated_at = VALUES(updated_at);
 
--- Rehber kapağı (TR)
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 SELECT
@@ -77,9 +67,7 @@ ON DUPLICATE KEY UPDATE
   updated_at = VALUES(updated_at);
 
 
--- ================= SEED: EN =================
-
--- Broşür kapağı (EN)
+-- EN
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 SELECT
@@ -93,7 +81,6 @@ ON DUPLICATE KEY UPDATE
   caption    = VALUES(caption),
   updated_at = VALUES(updated_at);
 
--- Rehber kapağı (EN)
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 SELECT

@@ -1,6 +1,7 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/admin/support_admin.endpoints.ts
-// Ensotek – Admin Support Tickets & Replies (RTK Query)
+// Ensotek – Admin Support Tickets (RTK Query)
+// Backend: src/modules/support/admin.routes.ts
 // =============================================================
 
 import { baseApi } from "@/integrations/rtk/baseApi";
@@ -9,8 +10,6 @@ import type {
   AdminSupportTicketDto,
   AdminSupportTicketListQueryParams,
   AdminSupportTicketListResponse,
-  TicketReplyDto,
-  TicketReplyAdminCreatePayload,
   SupportTicketUpdatePayload,
 } from "@/integrations/types/support.types";
 
@@ -25,14 +24,15 @@ type UpdateTicketArgs = {
 
 type DeleteTicketArgs = { id: string };
 
+/**
+ * Backend:
+ *  POST /admin/support_tickets/:id/:action
+ *  action ∈ ["close","reopen"]  (adminActionSchema)
+ */
 type ToggleTicketArgs = {
   id: string;
-  action: "open" | "close" | "reopen" | "in_progress" | "waiting_response";
+  action: "close" | "reopen";
 };
-
-type ListRepliesArgs = { ticketId: string };
-
-type DeleteReplyArgs = { id: string };
 
 // =============================================================
 // RTK endpoints
@@ -40,83 +40,73 @@ type DeleteReplyArgs = { id: string };
 
 export const supportAdminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Ticket list (admin)
+    // -------- Ticket list (admin) --------
+    // GET /admin/support_tickets
     listSupportTicketsAdmin: builder.query<
       AdminSupportTicketListResponse,
       AdminSupportTicketListQueryParams | undefined
     >({
       query: (params) => ({
-        url: "/admin/support/tickets",
+        url: "/admin/support_tickets",
         method: "GET",
         params: params ?? undefined,
       }),
+      transformResponse: (
+        response: AdminSupportTicketDto[],
+        meta,
+      ): AdminSupportTicketListResponse => {
+        const items = response ?? [];
+        const header =
+          (meta as any)?.response?.headers?.get?.("x-total-count") ??
+          (meta as any)?.response?.headers?.get?.("X-Total-Count");
+        const total = header ? Number(header) || items.length : items.length;
+        return { items, total };
+      },
     }),
 
-    // Ticket detail (admin)
+    // -------- Ticket detail (admin) --------
+    // GET /admin/support_tickets/:id
     getSupportTicketAdmin: builder.query<AdminSupportTicketDto, GetTicketArgs>({
       query: ({ id }) => ({
-        url: `/admin/support/tickets/${encodeURIComponent(id)}`,
+        url: `/admin/support_tickets/${encodeURIComponent(id)}`,
         method: "GET",
       }),
     }),
 
-    // Ticket update (admin)
+    // -------- Ticket update (admin) --------
+    // PATCH /admin/support_tickets/:id
     updateSupportTicketAdmin: builder.mutation<
       AdminSupportTicketDto,
       UpdateTicketArgs
     >({
       query: ({ id, patch }) => ({
-        url: `/admin/support/tickets/${encodeURIComponent(id)}`,
+        url: `/admin/support_tickets/${encodeURIComponent(id)}`,
         method: "PATCH",
         body: patch,
       }),
     }),
 
-    // Ticket delete (admin)
+    // -------- Ticket delete (admin) --------
+    // DELETE /admin/support_tickets/:id
     deleteSupportTicketAdmin: builder.mutation<void, DeleteTicketArgs>({
       query: ({ id }) => ({
-        url: `/admin/support/tickets/${encodeURIComponent(id)}`,
+        url: `/admin/support_tickets/${encodeURIComponent(id)}`,
         method: "DELETE",
       }),
     }),
 
-    // Ticket status toggle (admin)
+    // -------- Ticket status toggle (admin) --------
+    // POST /admin/support_tickets/:id/:action
+    //   action = "close" | "reopen"
     toggleSupportTicketAdmin: builder.mutation<
       AdminSupportTicketDto,
       ToggleTicketArgs
     >({
       query: ({ id, action }) => ({
-        url: `/admin/support/tickets/${encodeURIComponent(id)}/status`,
+        url: `/admin/support_tickets/${encodeURIComponent(
+          id,
+        )}/${encodeURIComponent(action)}`,
         method: "POST",
-        body: { action },
-      }),
-    }),
-
-    // Replies list (admin)
-    listTicketRepliesAdmin: builder.query<TicketReplyDto[], ListRepliesArgs>({
-      query: ({ ticketId }) => ({
-        url: `/admin/support/tickets/${encodeURIComponent(ticketId)}/replies`,
-        method: "GET",
-      }),
-    }),
-
-    // Create reply (admin)
-    createTicketReplyAdmin: builder.mutation<
-      TicketReplyDto,
-      TicketReplyAdminCreatePayload
-    >({
-      query: (body) => ({
-        url: "/admin/support/replies",
-        method: "POST",
-        body,
-      }),
-    }),
-
-    // Delete reply (admin)
-    deleteTicketReplyAdmin: builder.mutation<void, DeleteReplyArgs>({
-      query: ({ id }) => ({
-        url: `/admin/support/replies/${encodeURIComponent(id)}`,
-        method: "DELETE",
       }),
     }),
   }),
@@ -124,7 +114,7 @@ export const supportAdminApi = baseApi.injectEndpoints({
 });
 
 // =============================================================
-// Hooks – İSİMLER BİREBİR BURADA
+// Hooks
 // =============================================================
 
 export const {
@@ -133,7 +123,4 @@ export const {
   useUpdateSupportTicketAdminMutation,
   useDeleteSupportTicketAdminMutation,
   useToggleSupportTicketAdminMutation,
-  useListTicketRepliesAdminQuery,
-  useCreateTicketReplyAdminMutation,
-  useDeleteTicketReplyAdminMutation,
 } = supportAdminApi;

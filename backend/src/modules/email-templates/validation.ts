@@ -79,7 +79,7 @@ export const listQuerySchema = z.object({
   // public/admin list için istenen locale (i18n tablosu)
   locale: z
     .string()
-    .transform((s) => (s === "null" ? null : s))
+    .transform((s) => (s === "null" || s === "" ? null : s))
     .optional(),
   is_active: z.union([z.string(), z.number(), z.boolean()]).optional(),
 });

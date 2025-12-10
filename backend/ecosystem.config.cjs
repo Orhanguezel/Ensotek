@@ -4,7 +4,7 @@ module.exports = {
       name: "ensotek-backend",
       cwd: "/var/www/Ensotek/backend",
       script: "/var/www/Ensotek/backend/dist/index.js",
-      interpreter: "/root/.bun/bin/bun", 
+      interpreter: "/home/nodeapp/.bun/bin/bun",
       exec_mode: "fork",
       instances: 1,
       watch: false,

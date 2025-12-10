@@ -29,6 +29,10 @@ export const faqs = mysqlTable(
     is_active: tinyint("is_active").notNull().default(1),
     display_order: int("display_order").notNull().default(0),
 
+    // Kategori ilişkileri (dil bağımsız; ID bazlı)
+    category_id: char("category_id", { length: 36 }),
+    sub_category_id: char("sub_category_id", { length: 36 }),
+
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),
@@ -42,6 +46,8 @@ export const faqs = mysqlTable(
     index("faqs_order_idx").on(t.display_order),
     index("faqs_created_idx").on(t.created_at),
     index("faqs_updated_idx").on(t.updated_at),
+    index("faqs_category_idx").on(t.category_id),
+    index("faqs_sub_category_idx").on(t.sub_category_id),
   ],
 );
 
@@ -61,7 +67,6 @@ export const faqsI18n = mysqlTable(
     question: varchar("question", { length: 500 }).notNull(),
     answer: longtext("answer").notNull(),
     slug: varchar("slug", { length: 255 }).notNull(),
-    category: varchar("category", { length: 255 }),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()
@@ -78,7 +83,6 @@ export const faqsI18n = mysqlTable(
     uniqueIndex("ux_faqs_i18n_locale_slug").on(t.locale, t.slug),
     index("faqs_i18n_locale_idx").on(t.locale),
     index("faqs_i18n_slug_idx").on(t.slug),
-    index("faqs_i18n_category_idx").on(t.category),
   ],
 );
 

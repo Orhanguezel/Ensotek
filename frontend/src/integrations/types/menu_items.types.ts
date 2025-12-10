@@ -20,18 +20,21 @@ export type BoolLike =
 export interface PublicMenuItemDto {
   id: string;
   title: string;
-  url: string; // mapRowPublic → "" fallback yok, ama backend "" da dönebilir
+  url: string; // backend "" de dönebilir
   section_id: string | null;
   icon: string | null;
   is_active: boolean;
   href: string;
   slug: string | null;
   parent_id: string | null;
-  position: number; // order_num ile aynı
+  position: number;
   order_num: number;
   locale?: string | null;
   created_at?: string;
   updated_at?: string;
+
+  // nested tree için opsiyonel children
+  children?: PublicMenuItemDto[];
 }
 
 // Public list query (menuItemListQuerySchema ile uyumlu)
@@ -42,6 +45,8 @@ export interface PublicMenuItemListQueryParams {
   location?: MenuLocation;
   section_id?: string | null;
   locale?: string;
+  // nested tree istiyorsan
+  nested?: BoolLike;
   // "display_order|position|order_num|created_at|updated_at[.desc]"
   order?: string;
   limit?: number | string;
@@ -65,6 +70,9 @@ export interface AdminMenuItemDto {
   locale?: string | null;
   created_at?: string;
   updated_at?: string;
+
+  // admin tree view için opsiyonel children
+  children?: AdminMenuItemDto[];
 }
 
 // adminMenuItemListQuerySchema ile uyumlu
@@ -79,13 +87,14 @@ export interface AdminMenuItemListQueryParams {
   limit?: number;
   offset?: number;
   locale?: string;
+  nested?: BoolLike;
 }
 
-// Create/Update payload'ları (adminMenuItemCreateSchema / UpdateSchema)
+// Create/Update payload'ları
 
 export interface AdminMenuItemCreatePayload {
   title: string;
-  url: string | null; // "custom" için zorunlu, backend zaten validate ediyor
+  url: string | null; // "custom" için zorunlu, backend validate ediyor
   type: MenuItemType;
   page_id?: string | null;
   parent_id?: string | null;
@@ -111,7 +120,7 @@ export interface AdminMenuItemUpdatePayload {
   locale?: string;
 }
 
-// Reorder payload (adminMenuItemReorderSchema ile uyumlu)
+// Reorder payload
 
 export interface AdminMenuItemReorderItem {
   id: string;
@@ -122,7 +131,7 @@ export interface AdminMenuItemReorderPayload {
   items: AdminMenuItemReorderItem[];
 }
 
-// Generic list response helper (RTK transformResponse ile dolduruluyor)
+// Generic list response helper
 export interface MenuItemListResponse<TItem> {
   items: TItem[];
   total: number;

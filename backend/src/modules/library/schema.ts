@@ -221,6 +221,9 @@ export const libraryFiles = mysqlTable(
     size_bytes: int("size_bytes"),
     mime_type: varchar("mime_type", { length: 255 }),
 
+    // tags_json → DTO'da tags: string[] | null
+    tags_json: longtext("tags_json"),
+
     display_order: int("display_order").notNull().default(0),
     is_active: tinyint("is_active").notNull().default(1),
 

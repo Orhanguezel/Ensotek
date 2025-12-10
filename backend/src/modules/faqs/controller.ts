@@ -41,7 +41,8 @@ export const listFaqsPublic: RouteHandler<{
     is_active: q.is_active ?? 1,
     q: q.q,
     slug: q.slug,
-    category: q.category,
+    category_id: q.category_id,
+    sub_category_id: q.sub_category_id,
     locale: (req as any).locale,
     defaultLocale: DEFAULT_LOCALE,
   });

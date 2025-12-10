@@ -145,7 +145,10 @@ export const SupportAdminController = {
           replyMessage: body.message,
         });
       } catch (err) {
-        req.log.error({ err }, "admin_ticket_replied_side_effects_failed");
+        req.log.error(
+          { err },
+          "admin_ticket_replied_side_effects_failed",
+        );
       }
 
       reply.code(201);

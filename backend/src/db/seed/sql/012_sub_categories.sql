@@ -1,5 +1,5 @@
 -- 012_catalog_subcategories.sql
--- Alt Kategoriler - Ensotek (product + sparepart + news + blog + slider + references + library + about + services)
+-- Alt Kategoriler - Ensotek (product + sparepart + news + blog + slider + references + library + about + services + faq + team)
 -- Base + i18n pattern (şimdilik tr + en, ileride yeni locale eklenebilir)
 
 START TRANSACTION;
@@ -306,6 +306,41 @@ VALUES
   ('bbbb8006-1111-4111-8111-bbbbbbbb8006', 'aaaa8001-1111-4111-8111-aaaaaaaa8001',
     NULL, NULL, NULL, NULL,
     1, 0, 60
+  ),
+  -- =====================
+  -- FAQ: SIKÇA SORULAN SORULAR (aaaa9001) – TR/EN
+  -- =====================
+  ('bbbb9001-1111-4111-8111-bbbbbbbb9001', 'aaaa9001-1111-4111-8111-aaaaaaaa9001',
+    NULL, NULL, NULL, NULL,
+    1, 0, 10
+  ),
+  ('bbbb9002-1111-4111-8111-bbbbbbbb9002', 'aaaa9001-1111-4111-8111-aaaaaaaa9001',
+    NULL, NULL, NULL, NULL,
+    1, 0, 20
+  ),
+  ('bbbb9003-1111-4111-8111-bbbbbbbb9003', 'aaaa9001-1111-4111-8111-aaaaaaaa9001',
+    NULL, NULL, NULL, NULL,
+    1, 0, 30
+  ),
+  ('bbbb9004-1111-4111-8111-bbbbbbbb9004', 'aaaa9001-1111-4111-8111-aaaaaaaa9001',
+    NULL, NULL, NULL, NULL,
+    1, 0, 40
+  ),
+
+  -- =====================
+  -- TEAM: EKİBİMİZ (aaaa9101) – TR/EN
+  -- =====================
+  ('bbbb9101-1111-4111-8111-bbbbbbbb9101', 'aaaa9101-1111-4111-8111-aaaaaaaa9101',
+    NULL, NULL, NULL, NULL,
+    1, 0, 10
+  ),
+  ('bbbb9102-1111-4111-8111-bbbbbbbb9102', 'aaaa9101-1111-4111-8111-aaaaaaaa9101',
+    NULL, NULL, NULL, NULL,
+    1, 0, 20
+  ),
+  ('bbbb9103-1111-4111-8111-bbbbbbbb9103', 'aaaa9101-1111-4111-8111-aaaaaaaa9101',
+    NULL, NULL, NULL, NULL,
+    1, 0, 30
   )
 ON DUPLICATE KEY UPDATE
   category_id       = VALUES(category_id),
@@ -876,6 +911,71 @@ VALUES
     'Engineering Support', 'engineering-support',
     'Ensotek provides comprehensive engineering support for cooling tower projects, including design, consulting, system optimisation, performance analysis and technical training from concept to commissioning.',
     NULL
+  ),
+  -- =====================
+  -- FAQ: SIKÇA SORULAN SORULAR (TR + EN)
+  -- =====================
+  ('bbbb9001-1111-4111-8111-bbbbbbbb9001', 'tr',
+    'Genel Sorular', 'genel-sorular',
+    NULL, NULL
+  ),
+  ('bbbb9002-1111-4111-8111-bbbbbbbb9002', 'tr',
+    'Ürünler Hakkında', 'urunler-hakkinda',
+    NULL, NULL
+  ),
+  ('bbbb9003-1111-4111-8111-bbbbbbbb9003', 'tr',
+    'Teknik Destek', 'teknik-destek',
+    NULL, NULL
+  ),
+  ('bbbb9004-1111-4111-8111-bbbbbbbb9004', 'tr',
+    'Bakım ve Servis', 'bakim-ve-servis',
+    NULL, NULL
+  ),
+
+  ('bbbb9001-1111-4111-8111-bbbbbbbb9001', 'en',
+    'General Questions', 'general-questions',
+    NULL, NULL
+  ),
+  ('bbbb9002-1111-4111-8111-bbbbbbbb9002', 'en',
+    'About Products', 'about-products',
+    NULL, NULL
+  ),
+  ('bbbb9003-1111-4111-8111-bbbbbbbb9003', 'en',
+    'Technical Support', 'technical-support',
+    NULL, NULL
+  ),
+  ('bbbb9004-1111-4111-8111-bbbbbbbb9004', 'en',
+    'Maintenance & Service', 'maintenance-and-service',
+    NULL, NULL
+  ),
+
+  -- =====================
+  -- TEAM: EKİBİMİZ (TR + EN)
+  -- =====================
+  ('bbbb9101-1111-4111-8111-bbbbbbbb9101', 'tr',
+    'Yönetim ve Kurucu Ortaklar', 'yonetim-ve-kurucu-ortaklar',
+    NULL, NULL
+  ),
+  ('bbbb9102-1111-4111-8111-bbbbbbbb9102', 'tr',
+    'Mühendislik Ekibi', 'muhendislik-ekibi',
+    NULL, NULL
+  ),
+  ('bbbb9103-1111-4111-8111-bbbbbbbb9103', 'tr',
+    'Saha ve Servis Ekibi', 'saha-ve-servis-ekibi',
+    NULL, NULL
+  ),
+
+  ('bbbb9101-1111-4111-8111-bbbbbbbb9101', 'en',
+    'Management & Founders', 'management-and-founders',
+    NULL, NULL
+  ),
+  ('bbbb9102-1111-4111-8111-bbbbbbbb9102', 'en',
+    'Engineering Team', 'engineering-team',
+    NULL, NULL
+  ),
+  ('bbbb9103-1111-4111-8111-bbbbbbbb9103', 'en',
+    'Field & Service Team', 'field-and-service-team',
+    NULL, NULL
   )
 ON DUPLICATE KEY UPDATE
   name        = VALUES(name),

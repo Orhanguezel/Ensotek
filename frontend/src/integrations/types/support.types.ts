@@ -22,6 +22,10 @@ export interface SupportTicketDto {
   priority: SupportTicketPriority;
   created_at: string; // ISO datetime string
   updated_at: string; // ISO datetime string
+
+  // Admin tarafında göstermek için opsiyonel alanlar
+  user_display_name?: string | null;
+  user_email?: string | null;
 }
 
 // --- List query / response ---

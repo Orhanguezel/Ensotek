@@ -26,6 +26,11 @@ type SimpleBrand = {
 
 type Props = { brand?: SimpleBrand; logoSrc?: StaticImageData | string };
 
+// Menü item + children (dropdown için local type)
+type MenuItemWithChildren = PublicMenuItemDto & {
+  children?: MenuItemWithChildren[];
+};
+
 const IMG_W = 160;
 const IMG_H = 60;
 const imgStyle: React.CSSProperties = {
@@ -43,10 +48,7 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   const locale = useResolvedLocale();
 
   // ✅ UI stringleri: DB (ui_header JSON) + i18n (UI_FALLBACK_EN) + hard fallback
-  const { ui, raw: uiHeaderJson } = useUiSection(
-    "ui_header",
-    locale
-  );
+  const { ui, raw: uiHeaderJson } = useUiSection("ui_header", locale);
 
   // Menü boş / yükleniyor mesajları – DB'de varsa onlardan, yoksa hard fallback
   const menuEmptyLabel =
@@ -145,20 +147,38 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   }, [logoSrc, brandFromSettings.logo]);
 
   // Header menü item'larını API'den al – aktif locale ile (tamamen dinamik)
+  // nested: true → BE tree döndürürse dropdown menü kullanacağız
   const { data: menuData, isLoading: isMenuLoading } = useListMenuItemsQuery({
     location: "header",
     is_active: true,
     locale,
+    nested: true,
   });
 
-  const headerMenuItems: PublicMenuItemDto[] = useMemo(() => {
-    const items = menuData?.items ?? [];
-    // order_num varsa ona göre sırala
-    return [...items].sort((a, b) => {
-      const ao = (a as any)?.order_num ?? 0;
-      const bo = (b as any)?.order_num ?? 0;
-      return ao - bo;
-    });
+  // RTK response şekli hem dizi hem {items: []} olabilir diye normalize ediyoruz
+  const headerMenuItems: MenuItemWithChildren[] = useMemo(() => {
+    const raw = menuData as any;
+    const list: MenuItemWithChildren[] = Array.isArray(raw)
+      ? raw
+      : Array.isArray(raw?.items)
+        ? raw.items
+        : [];
+
+    // Her level için order_num’a göre sort
+    const sortRecursive = (items: MenuItemWithChildren[]): MenuItemWithChildren[] =>
+      items
+        .slice()
+        .sort((a, b) => {
+          const ao = (a as any)?.order_num ?? 0;
+          const bo = (b as any)?.order_num ?? 0;
+          return ao - bo;
+        })
+        .map((it) => ({
+          ...it,
+          children: it.children ? sortRecursive(it.children as MenuItemWithChildren[]) : undefined,
+        }));
+
+    return sortRecursive(list);
   }, [menuData]);
 
   useEffect(() => {
@@ -166,6 +186,55 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
     window.addEventListener("scroll", onScroll);
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Desktop dropdown menü item renderer (stil class’larını bozmadan)
+  const renderDesktopMenuItem = (item: MenuItemWithChildren) => {
+    const rawUrl = item.url || (item as any).href || "#";
+    const href = localizePath(locale, rawUrl);
+    const hasChildren = !!item.children && item.children.length > 0;
+
+    const isNowrap = rawUrl === "/sparepart" || rawUrl === "/blog";
+
+    if (!hasChildren) {
+      return (
+        <li key={item.id}>
+          <Link href={href}>
+            <span className={isNowrap ? "nowrap" : undefined}>
+              {item.title || rawUrl}
+            </span>
+          </Link>
+        </li>
+      );
+    }
+
+    return (
+      <li key={item.id} className="has-dropdown">
+        <Link href={href}>
+          <span className={isNowrap ? "nowrap" : undefined}>
+            {item.title || rawUrl}
+          </span>
+        </Link>
+        <ul className="submenu">
+          {item.children!.map((child) => {
+            const childRawUrl = child.url || (child as any).href || "#";
+            const childHref = localizePath(locale, childRawUrl);
+            const childNowrap =
+              childRawUrl === "/sparepart" || childRawUrl === "/blog";
+
+            return (
+              <li key={child.id}>
+                <Link href={childHref}>
+                  <span className={childNowrap ? "nowrap" : undefined}>
+                    {child.title || childRawUrl}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </li>
+    );
+  };
 
   return (
     <Fragment>
@@ -210,30 +279,13 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
                 </div>
               </div>
 
-              {/* Desktop menü – tamamen menu_items’den */}
+              {/* Desktop menü – tamamen menu_items’den (dropdown destekli) */}
               <div className="col-xl-8 col-lg-9 d-none d-lg-block">
                 <div className="menu__main-wrapper d-flex justify-content-center">
                   <div className="main-menu d-none d-lg-block">
                     <nav id="mobile-menu">
                       <ul className="nav-inline">
-                        {headerMenuItems.map((item) => {
-                          const rawUrl = item.url || item.href || "#";
-                          const href = localizePath(locale, rawUrl);
-                          const isNowrap =
-                            rawUrl === "/sparepart" || rawUrl === "/blog";
-
-                          return (
-                            <li key={item.id}>
-                              <Link href={href}>
-                                <span
-                                  className={isNowrap ? "nowrap" : undefined}
-                                >
-                                  {item.title || rawUrl}
-                                </span>
-                              </Link>
-                            </li>
-                          );
-                        })}
+                        {headerMenuItems.map(renderDesktopMenuItem)}
 
                         {!headerMenuItems.length && !isMenuLoading && (
                           <li>
@@ -327,11 +379,21 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
           .nav-inline > li {
             margin: 0 !important;
           }
+          .nav-inline > li.has-dropdown {
+            position: relative;
+          }
           .nav-inline > li > a {
             display: inline-block;
             padding: 6px 8px !important;
             line-height: 1.2;
             white-space: nowrap;
+          }
+          .nav-inline > li.has-dropdown > ul.submenu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 1000;
+            min-width: 180px;
           }
           .nowrap {
             white-space: nowrap;

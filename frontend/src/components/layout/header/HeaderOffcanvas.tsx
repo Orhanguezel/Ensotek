@@ -64,6 +64,11 @@ export type HeaderOffcanvasProps = {
   logoSrc?: StaticImageData | string;
 };
 
+// Menü item + children (dropdown için local type)
+type MenuItemWithChildren = PublicMenuItemDto & {
+  children?: MenuItemWithChildren[];
+};
+
 const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
   open,
   onClose,
@@ -225,21 +230,89 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  // Menü item'larını API'den al (header location + aktif locale)
+  // Menü item'larını API'den al (header location + aktif locale, nested)
   const { data: menuData, isLoading: isMenuLoading } = useListMenuItemsQuery({
     location: "header",
     is_active: true,
     locale,
+    nested: true,
   });
 
-  const headerMenuItems: PublicMenuItemDto[] = useMemo(() => {
-    const items = menuData?.items ?? [];
-    return [...items].sort((a, b) => {
-      const ao = (a as any)?.order_num ?? 0;
-      const bo = (b as any)?.order_num ?? 0;
-      return ao - bo;
-    });
+  const headerMenuItems: MenuItemWithChildren[] = useMemo(() => {
+    const raw = menuData as any;
+    const list: MenuItemWithChildren[] = Array.isArray(raw)
+      ? raw
+      : Array.isArray(raw?.items)
+        ? raw.items
+        : [];
+
+    const sortRecursive = (
+      items: MenuItemWithChildren[],
+    ): MenuItemWithChildren[] =>
+      items
+        .slice()
+        .sort((a, b) => {
+          const ao = (a as any)?.order_num ?? 0;
+          const bo = (b as any)?.order_num ?? 0;
+          return ao - bo;
+        })
+        .map((it) => ({
+          ...it,
+          children: it.children
+            ? sortRecursive(it.children as MenuItemWithChildren[])
+            : undefined,
+        }));
+
+    return sortRecursive(list);
   }, [menuData]);
+
+  // Mobil offcanvas menü için recursive render
+  const renderMobileMenuItem = (item: MenuItemWithChildren) => {
+    const rawUrl = item.url || (item as any).href || "#";
+    const href = localizePath(locale, rawUrl);
+    const hasChildren = !!item.children && item.children.length > 0;
+    const isNowrap = rawUrl === "/sparepart" || rawUrl === "/blog";
+
+    if (!hasChildren) {
+      return (
+        <li key={item.id}>
+          <Link href={href} onClick={onClose}>
+            <span className={isNowrap ? "nowrap" : undefined}>
+              {item.title || rawUrl}
+            </span>
+          </Link>
+        </li>
+      );
+    }
+
+    return (
+      <li key={item.id} className="has-submenu">
+        <Link href={href} onClick={onClose}>
+          <span className={isNowrap ? "nowrap" : undefined}>
+            {item.title || rawUrl}
+          </span>
+        </Link>
+        <ul className="submenu">
+          {item.children!.map((child) => {
+            const childRawUrl = child.url || (child as any).href || "#";
+            const childHref = localizePath(locale, childRawUrl);
+            const childNowrap =
+              childRawUrl === "/sparepart" || childRawUrl === "/blog";
+
+            return (
+              <li key={child.id}>
+                <Link href={childHref} onClick={onClose}>
+                  <span className={childNowrap ? "nowrap" : undefined}>
+                    {child.title || childRawUrl}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </li>
+    );
+  };
 
   return (
     <>
@@ -341,27 +414,12 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
               </form>
             </div>
 
-            {/* menu – TAMAMEN menu_items’den */}
+            {/* menu – TAMAMEN menu_items’den (nested destekli) */}
             <div className="mobile-menu fix mb-40 mean-container">
               <div className="mean-bar d-block">
                 <nav className="mean-nav">
                   <ul>
-                    {headerMenuItems.map((item) => {
-                      const rawUrl = item.url || item.href || "#";
-                      const href = localizePath(locale, rawUrl);
-                      const isNowrap =
-                        rawUrl === "/sparepart" || rawUrl === "/blog";
-
-                      return (
-                        <li key={item.id}>
-                          <Link href={href} onClick={onClose}>
-                            <span className={isNowrap ? "nowrap" : undefined}>
-                              {item.title || rawUrl}
-                            </span>
-                          </Link>
-                        </li>
-                      );
-                    })}
+                    {headerMenuItems.map(renderMobileMenuItem)}
 
                     {!headerMenuItems.length && !isMenuLoading && (
                       <li>
@@ -454,6 +512,23 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
         onClick={onClose}
       />
       <div className="offcanvas__overlay-white" />
+
+      <style jsx>{`
+        /* Alt menüler varsayılan KAPALI, hover ile AÇIK.
+           Temadaki olası display:block kurallarını ezmek için !important kullanıyoruz. */
+        .mean-nav ul li.has-submenu > ul.submenu {
+          display: none !important;
+        }
+        .mean-nav ul li.has-submenu:hover > ul.submenu {
+          display: block !important;
+        }
+        .mean-nav ul li.has-submenu > a {
+          position: relative;
+        }
+        .nowrap {
+          white-space: nowrap;
+        }
+      `}</style>
     </>
   );
 };

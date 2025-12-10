@@ -1,9 +1,7 @@
 import React from "react";
 import Banner from "@/components/layout/banner/Breadcrum";
 import Service from "@/components/containers/service/Service";
-import HomeThreeFeatures from "@/components/containers/features/Features";
-import ServiceBoost from "@/components/containers/boost/ServiceBoost";
-import ServiceCta from "@/components/containers/cta/ServiceCta";
+import ServiceMore from "@/components/containers/service/ServiceMore";
 
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
@@ -18,9 +16,7 @@ const ServicePage: React.FC = () => {
     <>
       <Banner title={title} />
       <Service />
-      <HomeThreeFeatures />
-      <ServiceBoost />
-      <ServiceCta />
+      <ServiceMore />
     </>
   );
 };

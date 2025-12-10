@@ -97,6 +97,11 @@ export type ProductListQueryParams = {
   slug?: string; // listProducts içindeki slug shortcuta da izin
 };
 
+export type ProductListResponse = {
+  items: ProductDto[];
+  total: number;
+};
+
 export type GetProductByIdOrSlugParams = {
   idOrSlug: string;
   locale?: string;

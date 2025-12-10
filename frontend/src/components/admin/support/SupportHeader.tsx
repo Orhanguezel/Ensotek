@@ -35,10 +35,10 @@ export const SupportHeader: React.FC<SupportHeaderProps> = ({
 }) => {
   const handleInputChange =
     (field: keyof SupportFilters) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const value = e.target.value as any;
-      onFiltersChange({ ...filters, [field]: value });
-    };
+      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const value = e.target.value as any;
+        onFiltersChange({ ...filters, [field]: value });
+      };
 
   const handleOrderToggle = () => {
     onFiltersChange({
@@ -134,7 +134,6 @@ export const SupportHeader: React.FC<SupportHeaderProps> = ({
               className="btn btn-outline-primary btn-sm"
               disabled={loading}
               onClick={() => {
-                // refetch veya başka herhangi bir fonksiyon olabilir
                 void onRefresh();
               }}
             >

@@ -54,30 +54,32 @@ export const menuItemsApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result?.items
           ? [
-              { type: "MenuItemPublic" as const, id: "LIST" },
-              ...result.items.map((m) => ({
-                type: "MenuItemPublic" as const,
-                id: m.id,
-              })),
-            ]
+            { type: "MenuItemPublic" as const, id: "LIST" },
+            ...result.items.map((m) => ({
+              type: "MenuItemPublic" as const,
+              id: m.id,
+            })),
+          ]
           : [{ type: "MenuItemPublic" as const, id: "LIST" }],
     }),
 
     // GET by id – GET /menu_items/:id
-    getMenuItem: build.query<PublicMenuItemDto, string>({
-      query: (id) => ({
+    // locale destekli: arg.id + arg.locale
+    getMenuItem: build.query<
+      PublicMenuItemDto,
+      { id: string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
         url: `/menu_items/${encodeURIComponent(id)}`,
         method: "GET",
+        params: locale ? { locale } : undefined,
       }),
-      providesTags: (_r, _e, id) => [
-        { type: "MenuItemPublic" as const, id },
+      providesTags: (_r, _e, arg) => [
+        { type: "MenuItemPublic" as const, id: arg.id },
       ],
     }),
   }),
   overrideExisting: false,
 });
 
-export const {
-  useListMenuItemsQuery,
-  useGetMenuItemQuery,
-} = menuItemsApi;
+export const { useListMenuItemsQuery, useGetMenuItemQuery } = menuItemsApi;

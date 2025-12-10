@@ -3,8 +3,7 @@
 // =============================================================
 import type { RouteHandler } from "fastify";
 import { randomUUID } from "crypto";
-import { and, desc, eq, like, type SQL } from "drizzle-orm";
-import { ZodError } from "zod";
+import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
 import { db } from "@/db/client";
 import {
   emailTemplates,
@@ -27,6 +26,7 @@ import {
   normalizeVariablesInput,
 } from "./utils";
 import { DEFAULT_LOCALE } from "@/core/i18n";
+import { ZodError } from "zod";
 
 type ListQuery = {
   q?: string;
@@ -93,12 +93,12 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
       const q = qdata.q.trim();
       const likeQ = `%${q}%`;
       filters.push(
-        and(
-          // parent + i18n alanlarında arama
+        or(
           like(emailTemplates.template_key, likeQ),
+          like(emailTemplatesI18n.template_name, likeQ),
+          like(emailTemplatesI18n.subject, likeQ),
         ) as SQL,
       );
-      // i18n tarafını where yerine select join içinde LIKE ile kullanacağız
     }
 
     if (typeof qdata.is_active !== "undefined") {
@@ -268,8 +268,8 @@ export const createEmailTemplateAdmin: RouteHandler = async (req, reply) => {
         typeof input.is_active === "undefined"
           ? 1
           : toBool(input.is_active)
-          ? 1
-          : 0,
+            ? 1
+            : 0,
       created_at: nowDate,
       updated_at: nowDate,
     };
@@ -318,7 +318,10 @@ export const createEmailTemplateAdmin: RouteHandler = async (req, reply) => {
     });
   } catch (e) {
     const msg = String((e as Error).message || "");
-    if (msg.includes("ux_email_tpl_key_locale") || msg.includes("ux_email_tpl_key")) {
+    if (
+      msg.includes("ux_email_tpl_key_locale") ||
+      msg.includes("ux_email_tpl_key")
+    ) {
       return reply
         .code(409)
         .send({ error: { message: "key_exists_for_locale" } });
@@ -419,7 +422,10 @@ export const updateEmailTemplateAdmin: RouteHandler = async (req, reply) => {
     });
   } catch (e) {
     const msg = String((e as Error).message || "");
-    if (msg.includes("ux_email_tpl_key_locale") || msg.includes("ux_email_tpl_key")) {
+    if (
+      msg.includes("ux_email_tpl_key_locale") ||
+      msg.includes("ux_email_tpl_key")
+    ) {
       return reply
         .code(409)
         .send({ error: { message: "key_exists_for_locale" } });

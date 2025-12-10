@@ -52,7 +52,8 @@ export const listFaqsAdmin: RouteHandler<{
     is_active: q.is_active, // admin tümünü görebilir
     q: q.q,
     slug: q.slug,
-    category: q.category,
+    category_id: q.category_id,
+    sub_category_id: q.sub_category_id,
     locale: (req as any).locale,
     defaultLocale: DEFAULT_LOCALE,
   });
@@ -123,6 +124,15 @@ export const createFaqAdmin: RouteHandler<{
       is_active: toBool(b.is_active) ? 1 : 0,
       display_order:
         typeof b.display_order === "number" ? b.display_order : 0,
+      category_id:
+        typeof b.category_id === "string" && b.category_id.trim() !== ""
+          ? b.category_id.trim()
+          : null,
+      sub_category_id:
+        typeof b.sub_category_id === "string" &&
+          b.sub_category_id.trim() !== ""
+          ? b.sub_category_id.trim()
+          : null,
       created_at: new Date() as any,
       updated_at: new Date() as any,
     });
@@ -132,10 +142,6 @@ export const createFaqAdmin: RouteHandler<{
       question: b.question.trim(),
       answer: b.answer,
       slug: b.slug.trim(),
-      category:
-        typeof b.category === "string"
-          ? b.category.trim()
-          : b.category ?? null,
     });
 
     const row = await getFaqMergedById(
@@ -182,7 +188,9 @@ export const updateFaqAdmin: RouteHandler<{
     // parent patch (varsa)
     if (
       typeof b.is_active !== "undefined" ||
-      typeof b.display_order !== "undefined"
+      typeof b.display_order !== "undefined" ||
+      typeof b.category_id !== "undefined" ||
+      typeof b.sub_category_id !== "undefined"
     ) {
       await updateFaqParent(req.params.id, {
         is_active:
@@ -195,6 +203,18 @@ export const updateFaqAdmin: RouteHandler<{
           typeof b.display_order === "number"
             ? b.display_order
             : undefined,
+        category_id:
+          typeof b.category_id === "string"
+            ? b.category_id.trim() || null
+            : typeof b.category_id === "object"
+              ? null
+              : undefined,
+        sub_category_id:
+          typeof b.sub_category_id === "string"
+            ? b.sub_category_id.trim() || null
+            : typeof b.sub_category_id === "object"
+              ? null
+              : undefined,
       } as any);
     }
 
@@ -202,8 +222,7 @@ export const updateFaqAdmin: RouteHandler<{
     const hasI18nFields =
       typeof b.question !== "undefined" ||
       typeof b.answer !== "undefined" ||
-      typeof b.slug !== "undefined" ||
-      typeof b.category !== "undefined";
+      typeof b.slug !== "undefined";
 
     if (hasI18nFields) {
       const exists = await getFaqI18nRow(req.params.id, locale);
@@ -222,10 +241,6 @@ export const updateFaqAdmin: RouteHandler<{
           question: b.question!.trim(),
           answer: b.answer!,
           slug: b.slug!.trim(),
-          category:
-            typeof b.category === "string"
-              ? b.category.trim()
-              : b.category ?? null,
         });
       } else {
         await upsertFaqI18n(req.params.id, locale, {
@@ -240,10 +255,6 @@ export const updateFaqAdmin: RouteHandler<{
           slug:
             typeof b.slug === "string"
               ? b.slug.trim()
-              : undefined,
-          category:
-            typeof b.category !== "undefined"
-              ? b.category ?? null
               : undefined,
         });
       }

@@ -10,31 +10,10 @@ import {
   listLibraryImagesMerged,
   listLibraryFilesMerged,
 } from "./repository";
-
-type ListQuery = {
-  order?: string;
-  sort?:
-    | "created_at"
-    | "updated_at"
-    | "published_at"
-    | "display_order"
-    | "views"
-    | "download_count";
-  orderDir?: "asc" | "desc";
-  limit?: string;
-  offset?: string;
-  is_published?: "0" | "1" | "true" | "false";
-  is_active?: "0" | "1" | "true" | "false";
-  q?: string;
-  slug?: string;
-  select?: string;
-
-  category_id?: string;
-  sub_category_id?: string;
-
-  // 🔥 yeni: frontend’den gelen locale query
-  locale?: string;
-};
+import {
+  publicLibraryListQuerySchema,
+  type PublicLibraryListQuery,
+} from "./validation";
 
 const normalizeLocale = (raw?: unknown): Locale => {
   const cand = String(raw || "")
@@ -48,34 +27,43 @@ const normalizeLocale = (raw?: unknown): Locale => {
 
 /** LIST (public) */
 export const listLibraryPublic: RouteHandler<{
-  Querystring: ListQuery;
+  Querystring: PublicLibraryListQuery;
 }> = async (req, reply) => {
-  const q = (req.query ?? {}) as ListQuery;
+  const parsed = publicLibraryListQuerySchema.safeParse(
+    req.query ?? {},
+  );
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: {
+        message: "invalid_query",
+        issues: parsed.error.issues,
+      },
+    });
+  }
+
+  const q = parsed.data;
 
   // ÖNCE query.locale, yoksa req.locale, en sonda DEFAULT
   const locale: Locale = normalizeLocale(
     q.locale ?? (req as any).locale,
   );
 
-  const limitNum = q.limit ? Number(q.limit) : undefined;
-  const offsetNum = q.offset ? Number(q.offset) : undefined;
-
   const { items, total } = await listLibraries({
     orderParam: typeof q.order === "string" ? q.order : undefined,
     sort: q.sort,
     order: q.orderDir,
-    limit: Number.isFinite(limitNum as number)
-      ? (limitNum as number)
-      : undefined,
-    offset: Number.isFinite(offsetNum as number)
-      ? (offsetNum as number)
-      : undefined,
-    is_published: q.is_published,
-    is_active: q.is_active,
+    limit: q.limit,
+    offset: q.offset,
+    // public: sadece yayınlanmış + aktif
+    is_published: 1,
+    is_active: 1,
     q: q.q,
     slug: q.slug,
     category_id: q.category_id,
     sub_category_id: q.sub_category_id,
+    author: q.author,
+    published_before: q.published_before,
+    published_after: q.published_after,
     locale,
     defaultLocale: DEFAULT_LOCALE,
   });
@@ -87,6 +75,7 @@ export const listLibraryPublic: RouteHandler<{
 /** GET BY ID (public) */
 export const getLibraryPublic: RouteHandler<{
   Params: { id: string };
+  Querystring: { locale?: string };
 }> = async (req, reply) => {
   const q = (req.query ?? {}) as { locale?: string };
   const locale: Locale = normalizeLocale(
@@ -106,6 +95,7 @@ export const getLibraryPublic: RouteHandler<{
 /** GET BY SLUG (public) */
 export const getLibraryBySlugPublic: RouteHandler<{
   Params: { slug: string };
+  Querystring: { locale?: string };
 }> = async (req, reply) => {
   const q = (req.query ?? {}) as { locale?: string };
   const locale: Locale = normalizeLocale(
@@ -125,6 +115,7 @@ export const getLibraryBySlugPublic: RouteHandler<{
 /** LIST IMAGES of a library (public) */
 export const listLibraryImagesPublic: RouteHandler<{
   Params: { id: string };
+  Querystring: { locale?: string };
 }> = async (req, reply) => {
   const q = (req.query ?? {}) as { locale?: string };
   const locale: Locale = normalizeLocale(

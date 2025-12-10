@@ -65,28 +65,26 @@ const References: React.FC = () => {
   const { ui } = useUiSection("ui_references", locale);
 
   // Public references listesi
-  // NOT: Burada tüm yayınlananları çekiyoruz, öne çıkan filtresini
-  // sadece front-end tarafında uygulayacağız.
+  // ÖNEMLİ: Sadece is_featured=1 referansları istiyoruz.
   const { data, isLoading } = useListReferencesQuery({
     limit: 30,
     sort: "display_order",
     orderDir: "asc",
     is_published: 1,
+    is_featured: 1,
+    module_key: "references",
+    locale,
   });
 
   const logos = useMemo(() => {
     const list: ReferenceDto[] = data?.items ?? [];
 
-    // Önce sadece yayınlanan + öne çıkanları al
+    // Güvenlik için FE tarafında da filtre uygula
     const featured = list.filter(
       (r) => r.is_published === 1 && r.is_featured === 1,
     );
 
-    // Eğer hiç öne çıkan yoksa, fallback olarak tüm yayınlananları kullan
-    const source =
-      featured.length > 0
-        ? featured
-        : list.filter((r) => r.is_published === 1);
+    const source = featured;
 
     const base = source
       .slice(0, 30)
@@ -119,6 +117,7 @@ const References: React.FC = () => {
       })
       .filter(Boolean) as { id: string; alt: string; src: string }[];
 
+    // Eğer hiç öne çıkan yoksa → placeholder logolar
     if (!base.length) {
       return [
         { id: "ph-1", alt: "brand", src: One as any },

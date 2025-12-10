@@ -10,10 +10,26 @@ export async function registerSupportAdmin(app: FastifyInstance) {
   const REPLIES_BASE = "/ticket_replies";
 
   // Tickets (admin)
-  app.get(`${BASE}`,        { config: { auth: true } }, SupportAdminController.list);
-  app.get(`${BASE}/:id`,    { config: { auth: true } }, SupportAdminController.get);
-  app.patch(`${BASE}/:id`,  { config: { auth: true } }, SupportAdminController.update);
-  app.delete(`${BASE}/:id`, { config: { auth: true } }, SupportAdminController.remove);
+  app.get(
+    `${BASE}`,
+    { config: { auth: true } },
+    SupportAdminController.list,
+  );
+  app.get(
+    `${BASE}/:id`,
+    { config: { auth: true } },
+    SupportAdminController.get,
+  );
+  app.patch(
+    `${BASE}/:id`,
+    { config: { auth: true } },
+    SupportAdminController.update,
+  );
+  app.delete(
+    `${BASE}/:id`,
+    { config: { auth: true } },
+    SupportAdminController.remove,
+  );
 
   // :action = "close" | "reopen"
   app.post(

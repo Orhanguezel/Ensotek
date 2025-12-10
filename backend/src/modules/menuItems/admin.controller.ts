@@ -11,7 +11,6 @@ import {
   desc,
   eq,
   isNull,
-  like,
   inArray,
   sql,
   type SQL,
@@ -32,7 +31,6 @@ import {
   type AdminMenuItemListQuery,
   type AdminMenuItemCreate,
   type AdminMenuItemUpdate,
-  boolLike,
 } from "./validation";
 
 function toBool(v: unknown): boolean | undefined {
@@ -115,23 +113,38 @@ function mapRowToAdmin(r: MenuItemMerged) {
   };
 }
 
-/** Sıralama */
-function resolveOrder(q: AdminMenuItemListQuery) {
-  const dir = q.order === "desc" ? "desc" : "asc";
-  const col =
-    q.sort === "created_at"
-      ? menuItems.created_at
-      : q.sort === "title"
-      ? menuItemsI18n.title
-      : menuItems.order_num; // display_order default
-  return { col, dir };
+export type AdminMenuItemDto = ReturnType<typeof mapRowToAdmin> & {
+  children?: AdminMenuItemDto[];
+};
+
+function buildNestedTree(
+  items: AdminMenuItemDto[],
+): AdminMenuItemDto[] {
+  const byId = new Map<string, AdminMenuItemDto>();
+  for (const item of items) {
+    byId.set(item.id, { ...item, children: [] });
+  }
+
+  const roots: AdminMenuItemDto[] = [];
+
+  for (const node of byId.values()) {
+    if (node.parent_id && byId.has(node.parent_id)) {
+      const parent = byId.get(node.parent_id)!;
+      if (!parent.children) parent.children = [];
+      parent.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
 }
 
 /* ----------------- i18n helpers ----------------- */
 
 async function getMenuItemI18nRow(
   id: string,
-  locale: string
+  locale: string,
 ) {
   const rows = await db
     .select()
@@ -139,8 +152,8 @@ async function getMenuItemI18nRow(
     .where(
       and(
         eq(menuItemsI18n.menu_item_id, id),
-        eq(menuItemsI18n.locale, locale)
-      )
+        eq(menuItemsI18n.locale, locale),
+      ),
     )
     .limit(1);
   return rows[0] ?? null;
@@ -151,7 +164,7 @@ async function upsertMenuItemI18n(
   locale: string,
   data: Partial<Pick<NewMenuItemI18nRow, "title" | "url">> & {
     id?: string;
-  }
+  },
 ) {
   const insertVals: NewMenuItemI18nRow = {
     id: data.id ?? randomUUID(),
@@ -190,17 +203,22 @@ async function upsertMenuItemI18n(
 /** GET /admin/menu_items */
 export const adminListMenuItems: RouteHandler = async (req, reply) => {
   const parsed = adminMenuItemListQuerySchema.safeParse(
-    req.query ?? {}
+    req.query ?? {},
   );
   if (!parsed.success) {
     return reply
       .code(400)
       .send({ error: "INVALID_QUERY", details: parsed.error.flatten() });
   }
-  const q = parsed.data;
+  const q = parsed.data as AdminMenuItemListQuery;
+
+  const queryLocale =
+    typeof q.locale === "string" && q.locale.trim()
+      ? q.locale.trim().toLowerCase()
+      : undefined;
 
   const locale =
-    (q.locale as string | undefined) ||
+    queryLocale ||
     ((req as any).locale as string | undefined) ||
     DEFAULT_LOCALE;
   const defaultLocale = DEFAULT_LOCALE;
@@ -216,7 +234,7 @@ export const adminListMenuItems: RouteHandler = async (req, reply) => {
       sql`(
         COALESCE(${i18nReq.title}, ${i18nDef.title}) LIKE ${likeExpr}
         OR COALESCE(${i18nReq.url}, ${i18nDef.url}) LIKE ${likeExpr}
-      )`
+      )`,
     );
   }
 
@@ -248,9 +266,9 @@ export const adminListMenuItems: RouteHandler = async (req, reply) => {
   const whereExpr: SQL | undefined =
     filters.length > 0 ? (and(...filters) as SQL) : undefined;
 
-  const { col, dir } = resolveOrder(q);
   const lim = toIntMaybe(q.limit);
   const off = toIntMaybe(q.offset);
+  const dir = q.order === "desc" ? "desc" : "asc";
 
   // COUNT
   const countBase = db
@@ -260,15 +278,15 @@ export const adminListMenuItems: RouteHandler = async (req, reply) => {
       i18nReq,
       and(
         eq(i18nReq.menu_item_id, menuItems.id),
-        eq(i18nReq.locale, locale)
-      )
+        eq(i18nReq.locale, locale),
+      ),
     )
     .leftJoin(
       i18nDef,
       and(
         eq(i18nDef.menu_item_id, menuItems.id),
-        eq(i18nDef.locale, defaultLocale)
-      )
+        eq(i18nDef.locale, defaultLocale),
+      ),
     );
   const countQuery = (whereExpr
     ? countBase.where(whereExpr as any)
@@ -284,22 +302,33 @@ export const adminListMenuItems: RouteHandler = async (req, reply) => {
       i18nReq,
       and(
         eq(i18nReq.menu_item_id, menuItems.id),
-        eq(i18nReq.locale, locale)
-      )
+        eq(i18nReq.locale, locale),
+      ),
     )
     .leftJoin(
       i18nDef,
       and(
         eq(i18nDef.menu_item_id, menuItems.id),
-        eq(i18nDef.locale, defaultLocale)
-      )
+        eq(i18nDef.locale, defaultLocale),
+      ),
     );
   const dataQuery = (whereExpr
     ? dataBase.where(whereExpr as any)
     : dataBase) as any;
 
+  // sort: display_order | created_at | title
+  let orderExpr: any;
+  if (q.sort === "created_at") {
+    orderExpr = menuItems.created_at;
+  } else if (q.sort === "title") {
+    orderExpr = sql`COALESCE(${i18nReq.title}, ${i18nDef.title})`;
+  } else {
+    // display_order default
+    orderExpr = menuItems.order_num;
+  }
+
   const rows = (await dataQuery
-    .orderBy(dir === "desc" ? desc(col) : asc(col))
+    .orderBy(dir === "desc" ? desc(orderExpr) : asc(orderExpr))
     .limit(lim && lim > 0 ? lim : 1000)
     .offset(off && off >= 0 ? off : 0)) as MenuItemMerged[];
 
@@ -307,21 +336,37 @@ export const adminListMenuItems: RouteHandler = async (req, reply) => {
   reply.header("content-range", `*/${total}`);
   reply.header(
     "access-control-expose-headers",
-    "x-total-count, content-range"
+    "x-total-count, content-range",
   );
 
-  return reply.send(rows.map(mapRowToAdmin));
+  const flat: AdminMenuItemDto[] = rows.map(mapRowToAdmin);
+  const nestedFlag = toBool((q as any).nested);
+
+  if (nestedFlag) {
+    const tree = buildNestedTree(flat);
+    return reply.send(tree);
+  }
+
+  return reply.send(flat);
 };
 
 /** GET /admin/menu_items/:id */
 export const adminGetMenuItemById: RouteHandler = async (
   req,
-  reply
+  reply,
 ) => {
   const { id } = req.params as { id: string };
 
+  const rawQuery = (req.query ?? {}) as { locale?: string };
+  const queryLocale =
+    typeof rawQuery.locale === "string" && rawQuery.locale.trim()
+      ? rawQuery.locale.trim().toLowerCase()
+      : undefined;
+
   const locale =
-    ((req as any).locale as string | undefined) || DEFAULT_LOCALE;
+    queryLocale ||
+    ((req as any).locale as string | undefined) ||
+    DEFAULT_LOCALE;
   const defaultLocale = DEFAULT_LOCALE;
 
   const i18nReq = alias(menuItemsI18n, "mi_req");
@@ -334,15 +379,15 @@ export const adminGetMenuItemById: RouteHandler = async (
       i18nReq,
       and(
         eq(i18nReq.menu_item_id, menuItems.id),
-        eq(i18nReq.locale, locale)
-      )
+        eq(i18nReq.locale, locale),
+      ),
     )
     .leftJoin(
       i18nDef,
       and(
         eq(i18nDef.menu_item_id, menuItems.id),
-        eq(i18nDef.locale, defaultLocale)
-      )
+        eq(i18nDef.locale, defaultLocale),
+      ),
     )
     .where(eq(menuItems.id, id))
     .limit(1)) as MenuItemMerged[];
@@ -357,23 +402,43 @@ export const adminGetMenuItemById: RouteHandler = async (
 /** POST /admin/menu_items */
 export const adminCreateMenuItem: RouteHandler = async (
   req,
-  reply
+  reply,
 ) => {
   try {
     const body = adminMenuItemCreateSchema.parse(
-      req.body ?? {}
+      req.body ?? {},
     ) as AdminMenuItemCreate;
 
+    const bodyLocale =
+      typeof body.locale === "string" && body.locale.trim()
+        ? body.locale.trim().toLowerCase()
+        : undefined;
+
     const locale =
-      (body.locale as string | undefined) ||
+      bodyLocale ||
       ((req as any).locale as string | undefined) ||
       DEFAULT_LOCALE;
 
     const id = randomUUID();
 
+    // parent_id validation (submenu için sağlam referans)
+    let parentId: string | null = body.parent_id ?? null;
+    if (parentId) {
+      const [exists] = await db
+        .select({ id: menuItems.id })
+        .from(menuItems)
+        .where(eq(menuItems.id, parentId))
+        .limit(1);
+      if (!exists) {
+        return reply
+          .code(400)
+          .send({ error: { message: "invalid_parent_id" } });
+      }
+    }
+
     const parentInsert: NewMenuItemRow = {
       id,
-      parent_id: body.parent_id ?? null,
+      parent_id: parentId,
       type: body.type,
       page_id: body.page_id ?? null,
       location: body.location,
@@ -402,15 +467,15 @@ export const adminCreateMenuItem: RouteHandler = async (
         i18nReq,
         and(
           eq(i18nReq.menu_item_id, menuItems.id),
-          eq(i18nReq.locale, locale)
-        )
+          eq(i18nReq.locale, locale),
+        ),
       )
       .leftJoin(
         i18nDef,
         and(
           eq(i18nDef.menu_item_id, menuItems.id),
-          eq(i18nDef.locale, DEFAULT_LOCALE)
-        )
+          eq(i18nDef.locale, DEFAULT_LOCALE),
+        ),
       )
       .where(eq(menuItems.id, id))
       .limit(1)) as MenuItemMerged[];
@@ -432,16 +497,21 @@ export const adminCreateMenuItem: RouteHandler = async (
 /** PATCH /admin/menu_items/:id */
 export const adminUpdateMenuItem: RouteHandler = async (
   req,
-  reply
+  reply,
 ) => {
   try {
     const { id } = req.params as { id: string };
     const patch = adminMenuItemUpdateSchema.parse(
-      req.body ?? {}
+      req.body ?? {},
     ) as AdminMenuItemUpdate;
 
+    const patchLocale =
+      typeof patch.locale === "string" && patch.locale.trim()
+        ? patch.locale.trim().toLowerCase()
+        : undefined;
+
     const locale =
-      (patch.locale as string | undefined) ||
+      patchLocale ||
       ((req as any).locale as string | undefined) ||
       DEFAULT_LOCALE;
 
@@ -547,15 +617,15 @@ export const adminUpdateMenuItem: RouteHandler = async (
         i18nReq,
         and(
           eq(i18nReq.menu_item_id, menuItems.id),
-          eq(i18nReq.locale, locale)
-        )
+          eq(i18nReq.locale, locale),
+        ),
       )
       .leftJoin(
         i18nDef,
         and(
           eq(i18nDef.menu_item_id, menuItems.id),
-          eq(i18nDef.locale, DEFAULT_LOCALE)
-        )
+          eq(i18nDef.locale, DEFAULT_LOCALE),
+        ),
       )
       .where(eq(menuItems.id, id))
       .limit(1)) as MenuItemMerged[];
@@ -583,7 +653,7 @@ export const adminUpdateMenuItem: RouteHandler = async (
 /** DELETE /admin/menu_items/:id */
 export const adminDeleteMenuItem: RouteHandler = async (
   req,
-  reply
+  reply,
 ) => {
   const { id } = req.params as { id: string };
 
@@ -601,10 +671,10 @@ export const adminDeleteMenuItem: RouteHandler = async (
 /** POST /admin/menu_items/reorder */
 export const adminReorderMenuItems: RouteHandler = async (
   req,
-  reply
+  reply,
 ) => {
   const { items } = adminMenuItemReorderSchema.parse(
-    req.body ?? {}
+    req.body ?? {},
   );
 
   const ids = items.map((i) => i.id);
@@ -617,7 +687,7 @@ export const adminReorderMenuItems: RouteHandler = async (
     .where(inArray(menuItems.id, ids));
 
   const parentSet = new Set(
-    rows.map((r) => (r.parent_id ?? "ROOT") as string)
+    rows.map((r) => (r.parent_id ?? "ROOT") as string),
   );
   if (parentSet.size > 1) {
     return reply

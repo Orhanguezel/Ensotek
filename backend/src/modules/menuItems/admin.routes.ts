@@ -20,26 +20,26 @@ export async function registerMenuItemsAdmin(app: FastifyInstance) {
   app.get(
     `${BASE}/:id`,
     { preHandler: [requireAuth] },
-    adminGetMenuItemById
+    adminGetMenuItemById,
   );
   app.post(
     BASE,
     { preHandler: [requireAuth] },
-    adminCreateMenuItem
+    adminCreateMenuItem,
   );
   app.patch(
     `${BASE}/:id`,
     { preHandler: [requireAuth] },
-    adminUpdateMenuItem
+    adminUpdateMenuItem,
   );
   app.delete(
     `${BASE}/:id`,
     { preHandler: [requireAuth] },
-    adminDeleteMenuItem
+    adminDeleteMenuItem,
   );
   app.post(
     `${BASE}/reorder`,
     { preHandler: [requireAuth] },
-    adminReorderMenuItems
+    adminReorderMenuItems,
   );
 }

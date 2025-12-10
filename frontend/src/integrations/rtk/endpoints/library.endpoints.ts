@@ -1,6 +1,10 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/library.endpoints.ts
 // Ensotek – Public Library RTK Endpoints
+// Base URL: /api (baseApi üzerinden)
+// - /library            : içerik listesi
+// - /library/:id/files  : bu içeriğe bağlı PDF/Word/Excel vb. dosyalar
+// - /library/:id/images : görseller (galeri / kapak vs.)
 // =============================================================
 
 import { baseApi } from "../baseApi";
@@ -29,6 +33,7 @@ export const libraryApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     /* --------------------------------------------------------- */
     /* LIST – GET /library                                       */
+    /* locale: query + x-locale header                           */
     /* --------------------------------------------------------- */
     listLibrary: build.query<
       LibraryDto[],
@@ -41,9 +46,7 @@ export const libraryApi = baseApi.injectEndpoints({
         return {
           url: "/library",
           method: "GET",
-          // locale’i de query’ye ekliyoruz → i18n plugin’i kullanabiliyorsa kullansın
           params: cleanParams({ ...rest, locale }),
-          // ve aynı zamanda header olarak da gönderiyoruz
           headers: locale ? { "x-locale": locale } : undefined,
         };
       },
@@ -52,7 +55,10 @@ export const libraryApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     /* GET BY ID – GET /library/:id                              */
     /* --------------------------------------------------------- */
-    getLibraryById: build.query<LibraryDto, { id: string; locale?: string }>({
+    getLibraryById: build.query<
+      LibraryDto,
+      { id: string; locale?: string }
+    >({
       query: ({ id, locale }) => ({
         url: `/library/${id}`,
         method: "GET",
@@ -93,6 +99,7 @@ export const libraryApi = baseApi.injectEndpoints({
 
     /* --------------------------------------------------------- */
     /* LIST FILES – GET /library/:id/files                       */
+    /* - PDF/Word/Excel/ZIP vb. dosyalar için indirilebilir url  */
     /* --------------------------------------------------------- */
     listLibraryFiles: build.query<
       LibraryFileDto[],

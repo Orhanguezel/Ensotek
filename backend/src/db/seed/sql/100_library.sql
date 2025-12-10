@@ -79,6 +79,27 @@ CREATE TABLE IF NOT EXISTS `library_i18n` (
 
 /* ================= SEED: Parent satırlar ================= */
 
+-- Library ana kategori ve alt kategori ID'leri
+-- category: module_key='library' (011_catalog_categories.sql)
+-- sub_category: slug='pdf-dokumanlar' (012_catalog_subcategories.sql, TR)
+SET @LIB_CATEGORY_ID := (
+  SELECT c.id
+  FROM categories c
+  WHERE c.module_key = 'library'
+  LIMIT 1
+);
+
+SET @LIB_SUBCATEGORY_PDF := (
+  SELECT sc.id
+  FROM sub_categories sc
+  JOIN sub_category_i18n sci
+    ON sci.sub_category_id = sc.id
+   AND sci.locale = 'tr'
+   AND sci.slug   = 'pdf-dokumanlar'
+  WHERE sc.category_id = @LIB_CATEGORY_ID
+  LIMIT 1
+);
+
 -- Kurumsal Tanıtım Broşürü
 SET @LIB_BROCHURE_ID := (
   SELECT l.id
@@ -98,9 +119,10 @@ INSERT INTO library
 VALUES
 (@LIB_BROCHURE_ID,
   1, 1, 10,
-  '["brochure","pdf","kurumsal"]',
-  NULL, NULL,
-  'Güzel Web Design', 0, 0,
+  -- Çok dilli tags: tr + en
+  '{"tr":["broşür","pdf","ensotek","kurumsal"],"en":["brochure","pdf","ensotek","corporate"]}',
+  @LIB_CATEGORY_ID, @LIB_SUBCATEGORY_PDF,
+  'Ensotek', 0, 0,
   NOW(3), NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
@@ -133,9 +155,10 @@ INSERT INTO library
 VALUES
 (@LIB_GUIDE_ID,
   1, 1, 20,
-  '["guide","pdf","services"]',
-  NULL, NULL,
-  'Güzel Web Design', 0, 0,
+  -- Çok dilli tags: tr + en
+  '{"tr":["rehber","pdf","hizmetler","ensotek"],"en":["guide","pdf","services","ensotek"]}',
+  @LIB_CATEGORY_ID, @LIB_SUBCATEGORY_PDF,
+  'Ensotek', 0, 0,
   NOW(3), NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE

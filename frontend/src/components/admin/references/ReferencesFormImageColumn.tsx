@@ -1,21 +1,25 @@
 // =============================================================
 // FILE: src/components/admin/references/ReferencesFormImageColumn.tsx
-// Sağ kolon – Referans görseli (featured_image)
+// Ensotek – Referans Form – Sağ kolon (görsel upload alanı)
+// CategoryFormImageColumn pattern’i
 // =============================================================
 
 "use client";
 
 import React from "react";
+import { useRouter } from "next/router";
+import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
 
 export type ReferenceImageMetadata = {
-  module_key: "references";
+  module_key: string; // örn: "references"
   locale: string;
   reference_slug?: string;
   reference_id?: string;
+  // Gerekirse ileride ek metadata alanları buraya eklenebilir
 };
 
 export type ReferencesFormImageColumnProps = {
-  metadata?: ReferenceImageMetadata;
+  metadata?: ReferenceImageMetadata | Record<string, string | number | boolean>;
   imageUrl: string;
   disabled: boolean;
   onImageUrlChange: (url: string) => void;
@@ -24,39 +28,28 @@ export type ReferencesFormImageColumnProps = {
 export const ReferencesFormImageColumn: React.FC<
   ReferencesFormImageColumnProps
 > = ({ metadata, imageUrl, disabled, onImageUrlChange }) => {
-  return (
-    <div className="card">
-      <div className="card-header">
-        <strong>Referans Görseli</strong>
-      </div>
-      <div className="card-body">
-        <div className="mb-2">
-          <label className="form-label small">
-            Öne çıkan görsel URL (featured_image)
-          </label>
-          <input
-            className="form-control form-control-sm"
-            disabled={disabled}
-            value={imageUrl}
-            onChange={(e) => onImageUrlChange(e.target.value)}
-          />
-        </div>
+  const router = useRouter();
 
-        {imageUrl ? (
-          <div className="border rounded overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={imageUrl}
-              alt={metadata?.reference_slug || "Reference image"}
-              style={{ width: "100%", display: "block", objectFit: "cover" }}
-            />
-          </div>
-        ) : (
-          <div className="text-muted small">
-            Henüz bir görsel URL’i girilmedi.
-          </div>
-        )}
-      </div>
-    </div>
+  return (
+    <AdminImageUploadField
+      label="Referans Görseli"
+      helperText={
+        <>
+          Storage modülü üzerinden referans için bir{" "}
+          <strong>öne çıkan görsel</strong> yükleyebilirsin.
+          Yüklenen görselin URL&apos;i soldaki formda{" "}
+          <strong>Öne çıkan görsel URL (featured_image)</strong>{" "}
+          alanına otomatik yazılabilir (burada direkt state&apos;e yazıyoruz).
+        </>
+      }
+      bucket="public"
+      folder="references"
+      metadata={metadata}
+      value={imageUrl}
+      onChange={(url) => onImageUrlChange(url)}
+      disabled={disabled}
+      openLibraryHref="/admin/storage"
+      onOpenLibraryClick={() => router.push("/admin/storage")}
+    />
   );
 };

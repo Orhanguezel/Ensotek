@@ -12,9 +12,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  useListProductsQuery,
-} from "@/integrations/rtk/endpoints/products.endpoints";
+import { useListProductsQuery } from "@/integrations/rtk/endpoints/products.endpoints";
 import type { ProductDto } from "@/integrations/types/product.types";
 
 import { toCdnSrc } from "@/shared/media";
@@ -78,17 +76,17 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
   );
 
   // Ürün listesi – optional kategori filtresi
-  const { data, isLoading } = useListProductsQuery(
-    {
-      is_active: 1,
-      locale,
-      limit: 6,
-      ...(categoryId ? { category_id: categoryId } : {}),
-    },
-  );
+  // NOT: BE ile sorun olmaması için sort/order paramlarını kaldırdım.
+  // ProductPageContent ile birebir aynı pattern, sadece limit ve kategori filtresi farklı.
+  const { data, isLoading } = useListProductsQuery({
+    is_active: 1,
+    locale,
+    limit: 6,
+    ...(categoryId ? { category_id: categoryId } : {}),
+  });
 
   const items = useMemo(() => {
-    const list: ProductDto[] = data ?? [];
+    const list: ProductDto[] = data?.items ?? [];
 
     return list
       .filter((p) => p.is_active)
@@ -97,9 +95,13 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
         const title = (p.title || "").trim();
         const slug = (p.slug || "").trim();
 
-        const imgRaw = (p.image_url || "").trim() || (p.images[0] || "").trim();
+        const imgRaw =
+          (p.image_url || "").trim() ||
+          ((p.images && p.images[0]) || "").trim();
+
         const hero =
-          (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
+          (imgRaw &&
+            (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
           "";
 
         return {
@@ -134,11 +136,7 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
         </div>
 
         {/* Liste */}
-        <div
-          className="row"
-          data-aos="fade-up"
-          data-aos-delay="300"
-        >
+        <div className="row" data-aos="fade-up" data-aos-delay="300">
           {!isLoading && items.length === 0 && (
             <div className="col-12">
               <p className="text-center">{emptyText}</p>
@@ -148,9 +146,9 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
           {items.map((p) => {
             const href = p.slug
               ? localizePath(
-                  locale,
-                  `/product/${encodeURIComponent(p.slug)}`,
-                )
+                locale,
+                `/product/${encodeURIComponent(p.slug)}`,
+              )
               : productListHref;
 
             return (
