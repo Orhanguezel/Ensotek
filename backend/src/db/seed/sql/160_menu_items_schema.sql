@@ -40,11 +40,14 @@ CREATE TABLE IF NOT EXISTS `menu_items` (
   KEY `menu_items_created_idx`  (`created_at`),
   KEY `menu_items_updated_idx`  (`updated_at`),
 
-  -- New filters
+  -- Yeni filtreler
   KEY `menu_items_location_idx` (`location`),
   KEY `menu_items_section_idx`  (`section_id`),
 
-  -- Self reference: when parent deleted, set children parent_id to NULL
+  -- Sık kullanılan kombinasyon: location + parent + order
+  KEY `menu_items_loc_parent_order_idx` (`location`, `parent_id`, `order_num`),
+
+  -- Self reference: parent silinince çocukların parent_id'si NULL olsun
   CONSTRAINT `menu_items_parent_fk`
     FOREIGN KEY (`parent_id`) REFERENCES `menu_items` (`id`)
     ON DELETE SET NULL
@@ -80,6 +83,3 @@ CREATE TABLE IF NOT EXISTS `menu_items_i18n` (
     ON DELETE CASCADE
     ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
-
-

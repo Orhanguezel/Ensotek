@@ -3,6 +3,7 @@
 // Ensotek – Sparepart Detail Content
 //   - Data: products (by slug, locale-aware, category: sparepart)
 //   - i18n: site_settings.ui_spareparts
+//   - Fiyat GÖSTERME, sadece "Teklif isteyiniz" CTA
 // =============================================================
 
 "use client";
@@ -11,9 +12,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
-import {
-  useGetProductBySlugQuery,
-} from "@/integrations/rtk/endpoints/products.endpoints";
+import { useGetProductBySlugQuery } from "@/integrations/rtk/endpoints/products.endpoints";
 import type { ProductDto } from "@/integrations/types/product.types";
 
 import { toCdnSrc } from "@/shared/media";
@@ -44,10 +43,6 @@ const SparepartDetail: React.FC = () => {
     "ui_spareparts_not_found",
     locale === "tr" ? "Yedek parça bulunamadı." : "Spare part not found.",
   );
-  const priceLabel = ui(
-    "ui_spareparts_price_label",
-    locale === "tr" ? "Fiyat" : "Price",
-  );
   const specsTitle = ui(
     "ui_spareparts_specs_title",
     locale === "tr" ? "Teknik Özellikler" : "Technical Specifications",
@@ -55,6 +50,10 @@ const SparepartDetail: React.FC = () => {
   const tagsTitle = ui(
     "ui_spareparts_tags_title",
     locale === "tr" ? "Etiketler" : "Tags",
+  );
+  const requestQuoteText = ui(
+    "ui_spareparts_request_quote",
+    locale === "tr" ? "Teklif isteyiniz" : "Request a quote",
   );
 
   const slugParam = router.query.slug;
@@ -78,39 +77,41 @@ const SparepartDetail: React.FC = () => {
 
   const title = (sparepart?.title || "").trim();
   const description = (sparepart?.description || "").trim();
-  const price = sparepart?.price ?? 0;
+  const sparepartId = sparepart?.id ?? "";
 
   const heroSrc = useMemo(() => {
     if (!sparepart) return "";
     const raw =
       (sparepart.image_url || "").trim() ||
-      (sparepart.images[0] || "").trim();
+      ((sparepart.images && sparepart.images[0]) || "").trim();
     if (!raw) return "";
     return toCdnSrc(raw, HERO_W, HERO_H, "fill") || raw;
   }, [sparepart]);
 
   const specsEntries = useMemo(() => {
     const specs = sparepart?.specifications || null;
-    if (!specs) return [] as Array<{ key: string; label: string; value: string }>;
+    if (!specs) {
+      return [] as Array<{ key: string; label: string; value: string }>;
+    }
 
     const labels: Record<string, string> =
       locale === "tr"
         ? {
-            dimensions: "Ölçüler",
-            weight: "Ağırlık",
-            thickness: "Kalınlık",
-            surfaceFinish: "Yüzey",
-            warranty: "Garanti",
-            installationTime: "Montaj süresi",
-          }
+          dimensions: "Ölçüler",
+          weight: "Ağırlık",
+          thickness: "Kalınlık",
+          surfaceFinish: "Yüzey",
+          warranty: "Garanti",
+          installationTime: "Montaj süresi",
+        }
         : {
-            dimensions: "Dimensions",
-            weight: "Weight",
-            thickness: "Thickness",
-            surfaceFinish: "Surface finish",
-            warranty: "Warranty",
-            installationTime: "Installation time",
-          };
+          dimensions: "Dimensions",
+          weight: "Weight",
+          thickness: "Thickness",
+          surfaceFinish: "Surface finish",
+          warranty: "Warranty",
+          installationTime: "Installation time",
+        };
 
     return Object.entries(specs)
       .filter(([, v]) => !!v)
@@ -122,6 +123,18 @@ const SparepartDetail: React.FC = () => {
   }, [sparepart, locale]);
 
   const tags = sparepart?.tags ?? [];
+
+  const handleRequestQuote = () => {
+    const contactPath = localizePath(
+      locale,
+      `/contact?sparepart=${encodeURIComponent(slug || sparepartId)}`,
+    );
+    void router.push(contactPath);
+  };
+
+  const showSkeleton =
+    isLoading ||
+    (!sparepart && !isError && !slug);
 
   return (
     <section className="product__detail-area grey-bg-3 pt-120 pb-90">
@@ -140,7 +153,7 @@ const SparepartDetail: React.FC = () => {
         </div>
 
         {/* Loading / error / not found */}
-        {isLoading && (
+        {showSkeleton && (
           <div className="row">
             <div className="col-12">
               <p>{loadingText}</p>
@@ -158,7 +171,7 @@ const SparepartDetail: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && (isError || !sparepart) && (
+        {!showSkeleton && (isError || !sparepart) && (
           <div className="row">
             <div className="col-12">
               <p>{notFoundText}</p>
@@ -166,7 +179,7 @@ const SparepartDetail: React.FC = () => {
           </div>
         )}
 
-        {!isLoading && !isError && sparepart && (
+        {!showSkeleton && !isError && sparepart && (
           <div
             className="row"
             data-aos="fade-up"
@@ -194,15 +207,15 @@ const SparepartDetail: React.FC = () => {
                     {title || notFoundText}
                   </h1>
 
-                  <div className="product__detail-price">
-                    <span>{priceLabel}:</span>{" "}
-                    <strong>
-                      {price.toLocaleString(locale, {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 2,
-                      })}{" "}
-                      €
-                    </strong>
+                  {/* Fiyat YOK – sadece teklif CTA */}
+                  <div className="product__detail-cta mt-15">
+                    <button
+                      type="button"
+                      className="solid__btn"
+                      onClick={handleRequestQuote}
+                    >
+                      {requestQuoteText}
+                    </button>
                   </div>
                 </header>
 
@@ -214,11 +227,21 @@ const SparepartDetail: React.FC = () => {
 
                 {/* Specs */}
                 {!!specsEntries.length && (
-                  <div className="product__detail-specs mb-25">
+                  <div
+                    className="product__detail-specs mb-25 card p-3"
+                    style={{ overflow: "hidden" }}
+                  >
                     <h3 className="product__detail-subtitle mb-10">
                       {specsTitle}
                     </h3>
-                    <ul className="product__spec-list">
+                    <ul
+                      className="product__spec-list"
+                      style={{
+                        paddingLeft: "1.2rem",
+                        marginBottom: 0,
+                        overflowWrap: "break-word",
+                      }}
+                    >
                       {specsEntries.map((s) => (
                         <li key={s.key}>
                           <strong>{s.label}:</strong> {s.value}

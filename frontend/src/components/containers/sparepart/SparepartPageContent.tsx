@@ -12,9 +12,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import {
-  useListProductsQuery,
-} from "@/integrations/rtk/endpoints/products.endpoints";
+import { useListProductsQuery } from "@/integrations/rtk/endpoints/products.endpoints";
 import type { ProductDto } from "@/integrations/types/product.types";
 
 import { toCdnSrc } from "@/shared/media";
@@ -22,12 +20,14 @@ import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 import { localizePath } from "@/i18n/url";
 
+// Fallback görsel
 import FallbackCover from "public/img/blog/3/1.jpg";
 
 const CARD_W = 720;
 const CARD_H = 480;
 const PAGE_LIMIT = 12;
 
+// Root sparepart kategorisi – sadece bu kategorinin ürünleri listelenir
 const SPAREPART_ROOT_CATEGORY_ID =
   "aaaa1001-1111-4111-8111-aaaaaaaa1001";
 
@@ -35,10 +35,7 @@ const SparepartPageContent: React.FC = () => {
   const locale = useResolvedLocale();
   const { ui } = useUiSection("ui_spareparts", locale);
 
-  const sectionSubtitlePrefix = ui(
-    "ui_spareparts_kicker_prefix",
-    "Ensotek",
-  );
+  const sectionSubtitlePrefix = ui("ui_spareparts_kicker_prefix", "Ensotek");
   const sectionSubtitleLabel = ui(
     "ui_spareparts_kicker_label",
     locale === "tr" ? "Yedek Parçalar" : "Spare Parts",
@@ -74,6 +71,7 @@ const SparepartPageContent: React.FC = () => {
       : "There are no spare parts to display at the moment.",
   );
 
+  // RTK: listProducts → ProductListResponse (items + total)
   const { data, isLoading } = useListProductsQuery({
     is_active: 1,
     locale,
@@ -82,7 +80,7 @@ const SparepartPageContent: React.FC = () => {
   });
 
   const items = useMemo(() => {
-    const list: ProductDto[] = data ?? [];
+    const list: ProductDto[] = data?.items ?? [];
 
     return list.map((p) => {
       const title = (p.title || "").trim();
@@ -90,7 +88,7 @@ const SparepartPageContent: React.FC = () => {
 
       const imgRaw =
         (p.image_url || "").trim() ||
-        (p.images[0] || "").trim();
+        ((p.images && p.images[0]) || "").trim();
 
       const hero =
         (imgRaw &&
@@ -141,11 +139,7 @@ const SparepartPageContent: React.FC = () => {
         </div>
 
         {/* Liste */}
-        <div
-          className="row"
-          data-aos="fade-up"
-          data-aos-delay="300"
-        >
+        <div className="row" data-aos="fade-up" data-aos-delay="300">
           {!isLoading && items.length === 0 && (
             <div className="col-12">
               <p className="text-center">{emptyText}</p>
@@ -155,9 +149,9 @@ const SparepartPageContent: React.FC = () => {
           {items.map((p) => {
             const href = p.slug
               ? localizePath(
-                  locale,
-                  `/sparepart/${encodeURIComponent(p.slug)}`,
-                )
+                locale,
+                `/sparepart/${encodeURIComponent(p.slug)}`,
+              )
               : sparepartListHref;
 
             return (

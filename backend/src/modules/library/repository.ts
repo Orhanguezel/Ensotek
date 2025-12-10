@@ -23,6 +23,16 @@ import { LOCALES, type Locale } from "@/core/i18n";
 import { storageAssets } from "@/modules/storage/schema";
 import { publicUrlOf } from "@/modules/storage/_util";
 
+// 🔗 Kategoriler (base + i18n)
+import {
+  categories,
+  categoryI18n,
+} from "@/modules/categories/schema";
+import {
+  subCategories,
+  subCategoryI18n,
+} from "@/modules/subcategories/schema";
+
 /* ============== helpers ============== */
 
 type Sortable =
@@ -41,27 +51,36 @@ export type LibraryListParams = {
   offset?: number;
 
   is_published?:
-    | boolean
-    | 0
-    | 1
-    | "0"
-    | "1"
-    | "true"
-    | "false";
+  | boolean
+  | 0
+  | 1
+  | "0"
+  | "1"
+  | "true"
+  | "false";
   is_active?:
-    | boolean
-    | 0
-    | 1
-    | "0"
-    | "1"
-    | "true"
-    | "false";
+  | boolean
+  | 0
+  | 1
+  | "0"
+  | "1"
+  | "true"
+  | "false";
 
   q?: string;
   slug?: string;
 
+  // 🔗 Kategori filtreleri
   category_id?: string;
   sub_category_id?: string;
+
+  // 🔗 Module filtresi (kategorinin module_key üzerinden)
+  module_key?: string;
+
+  author?: string;
+
+  published_before?: string;
+  published_after?: string;
 
   locale: Locale;
   defaultLocale: Locale;
@@ -104,18 +123,22 @@ const parseOrder = (
 const isRec = (v: unknown): v is Record<string, unknown> =>
   typeof v === "object" && v !== null;
 
-/** HTML string → JSON-string {"html": "..."} */
+/** HTML string → JSON-string {"html": "..."} (şu an kullanılmıyor ama dursun) */
 export const packContent = (htmlOrJson: string): string => {
   try {
     const parsed = JSON.parse(htmlOrJson) as unknown;
     if (isRec(parsed) && typeof (parsed as any).html === "string") {
       return JSON.stringify({ html: (parsed as any).html });
     }
-  } catch {}
+  } catch { }
   return JSON.stringify({ html: htmlOrJson });
 };
 
-const packTags = (tags?: string[] | null): string | null => {
+/**
+ * Eski davranış: düz string[] → JSON-string
+ * (library_files.tags_json ve eski düz yapılar için)
+ */
+export const packTags = (tags?: string[] | null): string | null => {
   if (!tags || !tags.length) return null;
   try {
     return JSON.stringify(tags);
@@ -124,17 +147,72 @@ const packTags = (tags?: string[] | null): string | null => {
   }
 };
 
-const unpackTags = (json?: string | null): string[] | null => {
+/**
+ * Düz string[] JSON'undan tags çıkar (locale bağımsız)
+ * - ["a","b"] → ["a","b"]
+ * - geçersiz JSON → null
+ */
+export const unpackTagsSimple = (
+  json?: string | null,
+): string[] | null => {
   if (!json) return null;
   try {
     const val = JSON.parse(json);
-    return Array.isArray(val)
-      ? (val.filter((x) => typeof x === "string") as string[])
-      : null;
+    if (Array.isArray(val)) {
+      return val.filter((x) => typeof x === "string") as string[];
+    }
+    return null;
   } catch {
     return null;
   }
 };
+
+/**
+ * Locale-aware tags parser:
+ * - {"tr":["..."],"en":["..."]} → o anki locale’e göre tags
+ * - Eğer obje değil ama array ise → array olduğu gibi döner (backward compat)
+ * - Hiçbir şey tutmuyorsa → null
+ */
+export const unpackTagsLocalized = (
+  json: string | null | undefined,
+  locale: Locale,
+  defaultLocale: Locale,
+): string[] | null => {
+  if (!json) return null;
+  try {
+    const val = JSON.parse(json);
+
+    // Eski yapı: düz string[]
+    if (Array.isArray(val)) {
+      return val.filter((x) => typeof x === "string") as string[];
+    }
+
+    // Yeni yapı: { "tr": [...], "en": [...] }
+    if (val && typeof val === "object") {
+      const obj = val as Record<string, unknown>;
+      const fromLocale = obj[locale];
+      const fromDefault = obj[defaultLocale];
+
+      let picked: unknown[] | null = null;
+
+      if (Array.isArray(fromLocale)) {
+        picked = fromLocale as unknown[];
+      } else if (Array.isArray(fromDefault)) {
+        picked = fromDefault as unknown[];
+      }
+
+      if (!picked) return null;
+      return picked.filter((x) => typeof x === "string") as string[];
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+// Eski import'lar kırılmasın diye:
+export const unpackTags = unpackTagsSimple;
 
 /* ============== merged select (library) ============== */
 
@@ -146,7 +224,12 @@ export type LibraryMerged = {
   tags_json: string | null;
 
   category_id: string | null;
+  category_name: string | null;
+  category_slug: string | null;
+
   sub_category_id: string | null;
+  sub_category_name: string | null;
+  sub_category_slug: string | null;
 
   author: string | null;
   views: number;
@@ -173,7 +256,12 @@ export type LibraryView = {
   tags: string[] | null;
 
   category_id: string | null;
+  category_name: string | null;
+  category_slug: string | null;
+
   sub_category_id: string | null;
+  sub_category_name: string | null;
+  sub_category_slug: string | null;
 
   author: string | null;
   views: number;
@@ -192,7 +280,14 @@ export type LibraryView = {
   locale_resolved: string | null;
 };
 
-function baseLibrarySelect(reqI: any, defI: any) {
+function baseLibrarySelect(
+  reqI: any,
+  defI: any,
+  catReq: any,
+  catDef: any,
+  subCatReq: any,
+  subCatDef: any,
+) {
   return {
     id: library.id,
     is_published: library.is_published,
@@ -202,6 +297,22 @@ function baseLibrarySelect(reqI: any, defI: any) {
 
     category_id: library.category_id,
     sub_category_id: library.sub_category_id,
+
+    // 🔹 Kategori isim/slug – category_i18n üzerinden coalesced
+    category_name: sql<string>`
+      COALESCE(${catReq.name}, ${catDef.name})
+    `.as("category_name"),
+    category_slug: sql<string>`
+      COALESCE(${catReq.slug}, ${catDef.slug})
+    `.as("category_slug"),
+
+    // 🔹 Alt kategori isim/slug – sub_category_i18n üzerinden coalesced
+    sub_category_name: sql<string>`
+      COALESCE(${subCatReq.name}, ${subCatDef.name})
+    `.as("sub_category_name"),
+    sub_category_slug: sql<string>`
+      COALESCE(${subCatReq.slug}, ${subCatDef.slug})
+    `.as("sub_category_slug"),
 
     author: library.author,
     views: library.views,
@@ -238,6 +349,14 @@ export async function listLibraries(
   const reqI = alias(libraryI18n, "li_req");
   const defI = alias(libraryI18n, "li_def");
 
+  // 🔹 category_i18n için alias (requested + default locale)
+  const catReq = alias(categoryI18n, "cat_req");
+  const catDef = alias(categoryI18n, "cat_def");
+
+  // 🔹 sub_category_i18n için alias
+  const subCatReq = alias(subCategoryI18n, "subcat_req");
+  const subCatDef = alias(subCategoryI18n, "subcat_def");
+
   const filters: SQL[] = [];
 
   const pub = to01(params.is_published);
@@ -267,6 +386,32 @@ export async function listLibraries(
     filters.push(eq(library.sub_category_id, params.sub_category_id));
   }
 
+  // 🔗 module_key filtresi: categories.module_key üzerinden
+  if (params.module_key) {
+    const mk = params.module_key;
+    filters.push(
+      sql`
+        EXISTS (
+          SELECT 1
+          FROM ${categories} c
+          WHERE c.id = ${library.category_id}
+            AND c.module_key = ${mk}
+        )
+      `,
+    );
+  }
+
+  if (params.author && params.author.trim()) {
+    filters.push(eq(library.author, params.author.trim()));
+  }
+
+  if (params.published_before) {
+    filters.push(sql`${library.published_at} < ${params.published_before}`);
+  }
+  if (params.published_after) {
+    filters.push(sql`${library.published_at} > ${params.published_after}`);
+  }
+
   const whereExpr: SQL =
     filters.length ? ((and(...filters) as SQL)) : sql`1=1`;
 
@@ -281,7 +426,9 @@ export async function listLibraries(
   const skip = params.offset && params.offset >= 0 ? params.offset : 0;
 
   const rows = await db
-    .select(baseLibrarySelect(reqI, defI))
+    .select(
+      baseLibrarySelect(reqI, defI, catReq, catDef, subCatReq, subCatDef),
+    )
     .from(library)
     .leftJoin(
       reqI,
@@ -292,6 +439,38 @@ export async function listLibraries(
       and(
         eq(defI.library_id, library.id),
         eq(defI.locale, params.defaultLocale),
+      ),
+    )
+    // kategori i18n (requested)
+    .leftJoin(
+      catReq,
+      and(
+        eq(catReq.category_id, library.category_id),
+        eq(catReq.locale, params.locale),
+      ),
+    )
+    // kategori i18n (default)
+    .leftJoin(
+      catDef,
+      and(
+        eq(catDef.category_id, library.category_id),
+        eq(catDef.locale, params.defaultLocale),
+      ),
+    )
+    // alt kategori i18n (requested)
+    .leftJoin(
+      subCatReq,
+      and(
+        eq(subCatReq.sub_category_id, library.sub_category_id),
+        eq(subCatReq.locale, params.locale),
+      ),
+    )
+    // alt kategori i18n (default)
+    .leftJoin(
+      subCatDef,
+      and(
+        eq(subCatDef.sub_category_id, library.sub_category_id),
+        eq(subCatDef.locale, params.defaultLocale),
       ),
     )
     .where(whereExpr)
@@ -322,10 +501,20 @@ export async function listLibraries(
     is_published: r.is_published,
     is_active: r.is_active,
     display_order: r.display_order,
-    tags: unpackTags(r.tags_json),
+    // 🔹 tags artık locale-aware
+    tags: unpackTagsLocalized(
+      r.tags_json,
+      params.locale,
+      params.defaultLocale,
+    ),
 
     category_id: r.category_id ?? null,
+    category_name: r.category_name ?? null,
+    category_slug: r.category_slug ?? null,
+
     sub_category_id: r.sub_category_id ?? null,
+    sub_category_name: r.sub_category_name ?? null,
+    sub_category_slug: r.sub_category_slug ?? null,
 
     author: r.author ?? null,
     views: r.views ?? 0,
@@ -355,8 +544,15 @@ export async function getLibraryMergedById(
   const reqI = alias(libraryI18n, "li_req");
   const defI = alias(libraryI18n, "li_def");
 
+  const catReq = alias(categoryI18n, "cat_req");
+  const catDef = alias(categoryI18n, "cat_def");
+  const subCatReq = alias(subCategoryI18n, "subcat_req");
+  const subCatDef = alias(subCategoryI18n, "subcat_def");
+
   const rows = await db
-    .select(baseLibrarySelect(reqI, defI))
+    .select(
+      baseLibrarySelect(reqI, defI, catReq, catDef, subCatReq, subCatDef),
+    )
     .from(library)
     .leftJoin(
       reqI,
@@ -364,7 +560,38 @@ export async function getLibraryMergedById(
     )
     .leftJoin(
       defI,
-      and(eq(defI.library_id, library.id), eq(defI.locale, defaultLocale)),
+      and(
+        eq(defI.library_id, library.id),
+        eq(defI.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      catReq,
+      and(
+        eq(catReq.category_id, library.category_id),
+        eq(catReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      catDef,
+      and(
+        eq(catDef.category_id, library.category_id),
+        eq(catDef.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      subCatReq,
+      and(
+        eq(subCatReq.sub_category_id, library.sub_category_id),
+        eq(subCatReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      subCatDef,
+      and(
+        eq(subCatDef.sub_category_id, library.sub_category_id),
+        eq(subCatDef.locale, defaultLocale),
+      ),
     )
     .where(eq(library.id, id))
     .limit(1);
@@ -377,9 +604,13 @@ export async function getLibraryMergedById(
     is_published: r.is_published,
     is_active: r.is_active,
     display_order: r.display_order,
-    tags: unpackTags(r.tags_json),
+    tags: unpackTagsLocalized(r.tags_json, locale, defaultLocale),
     category_id: r.category_id ?? null,
+    category_name: r.category_name ?? null,
+    category_slug: r.category_slug ?? null,
     sub_category_id: r.sub_category_id ?? null,
+    sub_category_name: r.sub_category_name ?? null,
+    sub_category_slug: r.sub_category_slug ?? null,
     author: r.author ?? null,
     views: r.views ?? 0,
     download_count: r.download_count ?? 0,
@@ -404,8 +635,15 @@ export async function getLibraryMergedBySlug(
   const reqI = alias(libraryI18n, "li_req");
   const defI = alias(libraryI18n, "li_def");
 
+  const catReq = alias(categoryI18n, "cat_req");
+  const catDef = alias(categoryI18n, "cat_def");
+  const subCatReq = alias(subCategoryI18n, "subcat_req");
+  const subCatDef = alias(subCategoryI18n, "subcat_def");
+
   const rows = await db
-    .select(baseLibrarySelect(reqI, defI))
+    .select(
+      baseLibrarySelect(reqI, defI, catReq, catDef, subCatReq, subCatDef),
+    )
     .from(library)
     .leftJoin(
       reqI,
@@ -413,7 +651,38 @@ export async function getLibraryMergedBySlug(
     )
     .leftJoin(
       defI,
-      and(eq(defI.library_id, library.id), eq(defI.locale, defaultLocale)),
+      and(
+        eq(defI.library_id, library.id),
+        eq(defI.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      catReq,
+      and(
+        eq(catReq.category_id, library.category_id),
+        eq(catReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      catDef,
+      and(
+        eq(catDef.category_id, library.category_id),
+        eq(catDef.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      subCatReq,
+      and(
+        eq(subCatReq.sub_category_id, library.sub_category_id),
+        eq(subCatReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      subCatDef,
+      and(
+        eq(subCatDef.sub_category_id, library.sub_category_id),
+        eq(subCatDef.locale, defaultLocale),
+      ),
     )
     .where(
       sql`( ${reqI.id} IS NOT NULL AND ${reqI.slug} = ${slugValue} )
@@ -429,9 +698,13 @@ export async function getLibraryMergedBySlug(
     is_published: r.is_published,
     is_active: r.is_active,
     display_order: r.display_order,
-    tags: unpackTags(r.tags_json),
+    tags: unpackTagsLocalized(r.tags_json, locale, defaultLocale),
     category_id: r.category_id ?? null,
+    category_name: r.category_name ?? null,
+    category_slug: r.category_slug ?? null,
     sub_category_id: r.sub_category_id ?? null,
+    sub_category_name: r.sub_category_name ?? null,
+    sub_category_slug: r.sub_category_slug ?? null,
     author: r.author ?? null,
     views: r.views ?? 0,
     download_count: r.download_count ?? 0,
@@ -469,7 +742,7 @@ export async function deleteLibraryParent(id: string) {
   const res = await db.delete(library).where(eq(library.id, id)).execute();
   const affected =
     typeof (res as unknown as { affectedRows?: number }).affectedRows ===
-    "number"
+      "number"
       ? (res as unknown as { affectedRows: number }).affectedRows
       : 0;
   return affected;
@@ -695,13 +968,13 @@ export async function listLibraryImagesMerged(
       asset:
         b && p
           ? {
-              bucket: b,
-              path: p,
-              url: u ?? null,
-              width: (r.img_width ?? null) as number | null,
-              height: (r.img_height ?? null) as number | null,
-              mime: (r.img_mime ?? null) as string | null,
-            }
+            bucket: b,
+            path: p,
+            url: u ?? null,
+            width: (r.img_width ?? null) as number | null,
+            height: (r.img_height ?? null) as number | null,
+            mime: (r.img_mime ?? null) as string | null,
+          }
           : null,
     };
   });
@@ -733,7 +1006,7 @@ export async function deleteLibraryImageParent(id: string) {
     .execute();
   const affected =
     typeof (res as unknown as { affectedRows?: number }).affectedRows ===
-    "number"
+      "number"
       ? (res as unknown as { affectedRows: number }).affectedRows
       : 0;
   return affected;
@@ -795,6 +1068,10 @@ export type LibraryFileView = {
   name: string;
   size_bytes: number | null;
   mime_type: string | null;
+
+  // tags_json’dan çözümlenen dizi
+  tags: string[] | null;
+
   display_order: number;
   is_active: 0 | 1;
   created_at: string | Date;
@@ -816,6 +1093,7 @@ function baseFileSelect(sa: any) {
     name: libraryFiles.name,
     size_bytes: libraryFiles.size_bytes,
     mime_type: libraryFiles.mime_type,
+    tags_json: libraryFiles.tags_json,
     display_order: libraryFiles.display_order,
     is_active: libraryFiles.is_active,
     created_at: libraryFiles.created_at,
@@ -857,6 +1135,8 @@ export async function listLibraryFilesMerged(
       name: r.name,
       size_bytes: r.size_bytes ?? null,
       mime_type: r.mime_type ?? (r.f_mime ?? null),
+      // 🔹 files tarafında eski düz array yapısını kullanıyoruz
+      tags: unpackTagsSimple(r.tags_json),
       display_order: r.display_order,
       is_active: r.is_active,
       created_at: r.created_at,
@@ -864,11 +1144,11 @@ export async function listLibraryFilesMerged(
       asset:
         b && p
           ? {
-              bucket: b,
-              path: p,
-              url: u ?? null,
-              mime: (r.f_mime ?? null) as string | null,
-            }
+            bucket: b,
+            path: p,
+            url: u ?? null,
+            mime: (r.f_mime ?? null) as string | null,
+          }
           : null,
     };
   });
@@ -900,7 +1180,7 @@ export async function deleteLibraryFileParent(id: string) {
     .execute();
   const affected =
     typeof (res as unknown as { affectedRows?: number }).affectedRows ===
-    "number"
+      "number"
       ? (res as unknown as { affectedRows: number }).affectedRows
       : 0;
   return affected;

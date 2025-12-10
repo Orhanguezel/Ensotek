@@ -11,8 +11,13 @@ import {
   type SupportFilters,
 } from "@/components/admin/support/SupportHeader";
 import { SupportList } from "@/components/admin/support/SupportList";
-import { useListSupportTicketsAdminQuery } from "@/integrations/rtk/endpoints/admin/support_admin.endpoints";
-import type { AdminSupportTicketDto } from "@/integrations/types/support.types";
+import {
+  useListSupportTicketsAdminQuery,
+} from "@/integrations/rtk/endpoints/admin/support_admin.endpoints";
+import type {
+  AdminSupportTicketDto,
+  AdminSupportTicketListQueryParams,
+} from "@/integrations/types/support.types";
 
 const AdminSupportIndexPage: NextPage = () => {
   const [filters, setFilters] = useState<SupportFilters>({
@@ -23,8 +28,8 @@ const AdminSupportIndexPage: NextPage = () => {
     order: "desc",
   });
 
-  const queryParams = useMemo(() => {
-    const params: Record<string, any> = {
+  const queryParams = useMemo<AdminSupportTicketListQueryParams>(() => {
+    return {
       q: filters.search || undefined,
       status: filters.status === "all" ? undefined : filters.status,
       priority:
@@ -34,7 +39,6 @@ const AdminSupportIndexPage: NextPage = () => {
       limit: 50,
       offset: 0,
     };
-    return params;
   }, [filters]);
 
   const {

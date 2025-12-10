@@ -220,8 +220,8 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                       onDragOver={
                         onReorder
                           ? (e) => {
-                              e.preventDefault();
-                            }
+                            e.preventDefault();
+                          }
                           : undefined
                       }
                       onDrop={onReorder ? () => handleDropOn(item.id) : undefined}
@@ -357,8 +357,8 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                   onDragOver={
                     onReorder
                       ? (e) => {
-                          e.preventDefault();
-                        }
+                        e.preventDefault();
+                      }
                       : undefined
                   }
                   onDrop={onReorder ? () => handleDropOn(item.id) : undefined}

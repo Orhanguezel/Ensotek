@@ -14,6 +14,9 @@ export const boolLike = z.union([
   z.literal("false"),
 ]);
 
+// Ortak locale enum
+const LOCALE_ENUM = z.enum(LOCALES as unknown as [string, ...string[]]);
+
 /* ============== LIST QUERY (public/admin) ============== */
 
 export const libraryListQuerySchema = z.object({
@@ -42,8 +45,32 @@ export const libraryListQuerySchema = z.object({
   // 🔗 Kategori / alt kategori filtreleri
   category_id: z.string().uuid().optional(),
   sub_category_id: z.string().uuid().optional(),
+
+  // 🔗 Kategorinin module_key üzerinden filtre
+  module_key: z.string().max(100).optional(),
+
+  // Yazar filtresi
+  author: z.string().max(255).optional(),
+
+  // Yayın tarihi filtreleri
+  published_before: z.string().datetime().optional(),
+  published_after: z.string().datetime().optional(),
+
+  // 🔗 Listeleme için locale override (admin tarafı)
+  locale: LOCALE_ENUM.optional(),
 });
 export type LibraryListQuery = z.infer<typeof libraryListQuerySchema>;
+
+/** PUBLIC list query – is_published/is_active dışarıdan alınmıyor */
+export const publicLibraryListQuerySchema =
+  libraryListQuerySchema.omit({
+    is_published: true,
+    is_active: true,
+  });
+
+export type PublicLibraryListQuery = z.infer<
+  typeof publicLibraryListQuerySchema
+>;
 
 /* ============== PARENT (library) ============== */
 
@@ -52,6 +79,7 @@ export const upsertLibraryParentBodySchema = z.object({
   is_active: boolLike.optional().default(true),
   display_order: z.coerce.number().int().min(0).optional(),
 
+  // library.tags_json
   tags: z.array(z.string().max(100)).max(100).optional(),
 
   // 🔗 Kategori bağları
@@ -78,7 +106,7 @@ export type PatchLibraryParentBody = z.infer<
 
 /* ============== I18N (library_i18n) ============== */
 
-const LOCALE_ENUM = z.enum(LOCALES as unknown as [string, ...string[]]);
+// LOCALE_ENUM yukarıda tanımlı
 
 // 🧩 Önemli: i18n alanları opsiyonel.
 // İstersen hiç title/slug/content göndermezsin => sadece parent kayıt oluşur.
@@ -223,6 +251,10 @@ export const upsertLibraryFileParentBodySchema = z.object({
   name: z.string().min(1).max(255),
   size_bytes: z.coerce.number().int().min(0).nullable().optional(),
   mime_type: z.string().max(255).nullable().optional(),
+
+  // library_files.tags_json
+  tags: z.array(z.string().max(100)).max(100).optional(),
+
   display_order: z.coerce.number().int().min(0).optional(),
   is_active: boolLike.optional().default(true),
 });
@@ -231,7 +263,13 @@ export type UpsertLibraryFileParentBody = z.infer<
 >;
 
 export const patchLibraryFileParentBodySchema =
-  upsertLibraryFileParentBodySchema.partial();
+  upsertLibraryFileParentBodySchema
+    .omit({ name: true }) // name opsiyonel olsun
+    .extend({
+      name: z.string().min(1).max(255).optional(),
+      // patch’te null ile temizleme desteği
+      tags: z.array(z.string().max(100)).max(100).nullable().optional(),
+    });
 export type PatchLibraryFileParentBody = z.infer<
   typeof patchLibraryFileParentBodySchema
 >;

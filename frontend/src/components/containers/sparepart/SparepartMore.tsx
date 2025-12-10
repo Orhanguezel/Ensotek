@@ -13,9 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import {
-  useListProductsQuery,
-} from "@/integrations/rtk/endpoints/products.endpoints";
+import { useListProductsQuery } from "@/integrations/rtk/endpoints/products.endpoints";
 import type { ProductDto } from "@/integrations/types/product.types";
 
 import { toCdnSrc } from "@/shared/media";
@@ -28,6 +26,7 @@ import FallbackCover from "public/img/blog/3/2.jpg";
 const CARD_W = 480;
 const CARD_H = 320;
 
+// Root sparepart kategorisi – sadece bu kategoriden diğer ürünler
 const SPAREPART_ROOT_CATEGORY_ID =
   "aaaa1001-1111-4111-8111-aaaaaaaa1001";
 
@@ -48,6 +47,7 @@ const SparepartMore: React.FC = () => {
     [slugParam],
   );
 
+  // RTK: listProducts → ProductListResponse (items + total)
   const { data, isLoading } = useListProductsQuery({
     is_active: 1,
     locale,
@@ -58,7 +58,7 @@ const SparepartMore: React.FC = () => {
   const sparepartListHref = localizePath(locale, "/sparepart");
 
   const items = useMemo(() => {
-    const list: ProductDto[] = data ?? [];
+    const list: ProductDto[] = data?.items ?? [];
 
     return list
       .filter((p) => {
@@ -72,9 +72,10 @@ const SparepartMore: React.FC = () => {
       .map((p) => {
         const slug = (p.slug || "").trim();
         const title = (p.title || "").trim();
+
         const imgRaw =
           (p.image_url || "").trim() ||
-          (p.images[0] || "").trim();
+          ((p.images && p.images[0]) || "").trim();
 
         const hero =
           (imgRaw &&
@@ -111,17 +112,13 @@ const SparepartMore: React.FC = () => {
         </div>
 
         {/* Liste */}
-        <div
-          className="row"
-          data-aos="fade-up"
-          data-aos-delay="200"
-        >
+        <div className="row" data-aos="fade-up" data-aos-delay="200">
           {items.map((p) => {
             const href = p.slug
               ? localizePath(
-                  locale,
-                  `/sparepart/${encodeURIComponent(p.slug)}`,
-                )
+                locale,
+                `/sparepart/${encodeURIComponent(p.slug)}`,
+              )
               : sparepartListHref;
 
             return (
@@ -154,10 +151,7 @@ const SparepartMore: React.FC = () => {
                       })}{" "}
                       €
                     </p>
-                    <Link
-                      href={href}
-                      className="link-more"
-                    >
+                    <Link href={href} className="link-more">
                       {locale === "tr"
                         ? "Yedek parçaya git"
                         : "View spare part"}{" "}

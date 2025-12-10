@@ -57,7 +57,7 @@ export const menuItems = mysqlTable(
     })
       .onDelete("set null")
       .onUpdate("cascade"),
-  ]
+  ],
 );
 
 export const menuItemsI18n = mysqlTable(
@@ -86,11 +86,11 @@ export const menuItemsI18n = mysqlTable(
   (t) => [
     uniqueIndex("ux_menu_items_i18n_item_locale").on(
       t.menu_item_id,
-      t.locale
+      t.locale,
     ),
     index("menu_items_i18n_locale_idx").on(t.locale),
     index("menu_items_i18n_title_idx").on(t.title),
-  ]
+  ],
 );
 
 export type MenuItemRow = typeof menuItems.$inferSelect;

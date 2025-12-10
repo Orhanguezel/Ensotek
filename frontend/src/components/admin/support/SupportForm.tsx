@@ -75,10 +75,14 @@ export const SupportForm: React.FC<SupportFormProps> = ({
 
   const handleChange =
     (field: keyof SupportFormValues) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const val = e.target.value as any;
-      setValues((prev) => ({ ...prev, [field]: val }));
-    };
+      (
+        e: React.ChangeEvent<
+          HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >,
+      ) => {
+        const val = e.target.value as any;
+        setValues((prev) => ({ ...prev, [field]: val }));
+      };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,12 +97,20 @@ export const SupportForm: React.FC<SupportFormProps> = ({
         ? { text: "İşlemde", className: "badge bg-info-subtle text-info" }
         : initialData?.status === "waiting_response"
           ? {
-              text: "Müşteri Yanıtı Bekleniyor",
-              className: "badge bg-warning-subtle text-warning",
-            }
+            text: "Müşteri Yanıtı Bekleniyor",
+            className: "badge bg-warning-subtle text-warning",
+          }
           : initialData?.status === "open"
             ? { text: "Açık", className: "badge bg-success-subtle text-success" }
             : null;
+
+  // Kullanıcı gösterimi (isim > email > id fallback)
+  const userDisplay =
+    (initialData as any)?.user_display_name ||
+    (initialData as any)?.user_email ||
+    initialData?.user_id ||
+    values.user_id ||
+    "-";
 
   return (
     <form onSubmit={handleSubmit}>
@@ -165,20 +177,40 @@ export const SupportForm: React.FC<SupportFormProps> = ({
           <div className="row g-4">
             {/* Sol kolon – temel bilgiler */}
             <div className="col-lg-8">
+              {/* Kullanıcı bilgisi */}
               <div className="mb-3">
-                <label className="form-label small mb-1">
-                  Kullanıcı ID
-                </label>
-                <input
-                  type="text"
-                  className="form-control form-control-sm"
-                  value={values.user_id}
-                  onChange={handleChange("user_id")}
-                  disabled={disabled || isEdit} // edit modunda genelde değiştirmeyiz
-                />
-                <div className="form-text small">
-                  Talebi oluşturan kullanıcının ID değeri.
-                </div>
+                <label className="form-label small mb-1">Kullanıcı</label>
+
+                {isEdit ? (
+                  <>
+                    <div className="form-control-plaintext small">
+                      {userDisplay}
+                    </div>
+                    {/* ID'yi form state'te tutmak için hidden input */}
+                    <input
+                      type="hidden"
+                      value={values.user_id}
+                      readOnly
+                    />
+                    <div className="form-text small">
+                      Bu talebi oluşturan kullanıcı. ID sadece arka planda
+                      kullanılır.
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      className="form-control form-control-sm"
+                      value={values.user_id}
+                      onChange={handleChange("user_id")}
+                      disabled={disabled}
+                    />
+                    <div className="form-text small">
+                      Talebi ilişkilendirmek istediğin kullanıcının ID değeri.
+                    </div>
+                  </>
+                )}
               </div>
 
               <div className="mb-3">
@@ -258,9 +290,9 @@ export const SupportForm: React.FC<SupportFormProps> = ({
                     </div>
                     <div className="text-muted small">
                       {initialData.created_at
-                        ? new Date(initialData.created_at).toLocaleString(
-                            "tr-TR",
-                          )
+                        ? new Date(
+                          initialData.created_at,
+                        ).toLocaleString("tr-TR")
                         : "-"}
                     </div>
                   </div>
@@ -270,9 +302,9 @@ export const SupportForm: React.FC<SupportFormProps> = ({
                     </div>
                     <div className="text-muted small">
                       {initialData.updated_at
-                        ? new Date(initialData.updated_at).toLocaleString(
-                            "tr-TR",
-                          )
+                        ? new Date(
+                          initialData.updated_at,
+                        ).toLocaleString("tr-TR")
                         : "-"}
                     </div>
                   </div>

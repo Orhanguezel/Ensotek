@@ -9,7 +9,6 @@ import { db } from "@/db/client";
 import {
   emailTemplates,
   emailTemplatesI18n,
-  type EmailTemplateRow,
 } from "./schema";
 import {
   extractVariablesFromText,

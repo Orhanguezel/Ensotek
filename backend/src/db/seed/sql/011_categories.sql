@@ -1,5 +1,5 @@
 -- 011_catalog_categories.sql
--- Kategoriler (üst) - Ensotek (çoklu dil, product + sparepart + news + blog + slider + references + library + about + services)
+-- Kategoriler (üst) - Ensotek (çoklu dil, product + sparepart + news + blog + slider + references + library + about + services + faq + team)
 -- Base + i18n pattern (şimdilik sadece tr + en, ileride yeni locale eklenebilir)
 
 START TRANSACTION;
@@ -178,6 +178,21 @@ VALUES
   ('aaaa8001-1111-4111-8111-aaaaaaaa8001', 'services',
     NULL, NULL, NULL, NULL,
     1, 0, 40
+  ),
+  -- =====================
+  -- FAQ modülü
+  -- =====================
+  ('aaaa9001-1111-4111-8111-aaaaaaaa9001', 'faq',
+    NULL, NULL, NULL, NULL,
+    1, 0, 41
+  ),
+
+  -- =====================
+  -- TEAM modülü (Ekibimiz sayfaları / custom_pages team)
+  -- =====================
+  ('aaaa9101-1111-4111-8111-aaaaaaaa9101', 'team',
+    NULL, NULL, NULL, NULL,
+    1, 0, 42
   )
 ON DUPLICATE KEY UPDATE
   module_key       = VALUES(module_key),
@@ -498,6 +513,30 @@ VALUES
     'Services', 'services',
     'Ensotek provides production, maintenance and repair, modernization, spare parts, applications and engineering support for industrial cooling towers.',
     NULL
+  ),
+
+  -- =====================
+  -- FAQ modülü (TR + EN)
+  -- =====================
+  ('aaaa9001-1111-4111-8111-aaaaaaaa9001', 'tr',
+    'SIKÇA SORULAN SORULAR', 'sikca-sorulan-sorular',
+    NULL, NULL
+  ),
+  ('aaaa9001-1111-4111-8111-aaaaaaaa9001', 'en',
+    'Frequently Asked Questions', 'frequently-asked-questions',
+    NULL, NULL
+  ),
+
+  -- =====================
+  -- TEAM modülü (TR + EN)
+  -- =====================
+  ('aaaa9101-1111-4111-8111-aaaaaaaa9101', 'tr',
+    'EKİBİMİZ', 'ekibimiz',
+    'Ensotek mühendislik, proje, saha ve servis ekiplerinden oluşan uzman kadromuz.', NULL
+  ),
+  ('aaaa9101-1111-4111-8111-aaaaaaaa9101', 'en',
+    'Our Team', 'our-team',
+    'Our expert team consisting of engineering, project, field and service professionals at Ensotek.', NULL
   )
 ON DUPLICATE KEY UPDATE
   name        = VALUES(name),

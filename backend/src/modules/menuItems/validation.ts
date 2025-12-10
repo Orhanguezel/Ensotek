@@ -53,6 +53,9 @@ export const menuItemListQuerySchema = z.object({
   // "display_order|position|order_num|created_at|updated_at[.desc]"
   order: z.string().optional(),
 
+  // opsiyonel: nested tree response (dropdown / submenu için)
+  nested: boolLike.optional(),
+
   limit: z.union([z.string(), z.number()]).optional(),
   offset: z.union([z.string(), z.number()]).optional(),
 });
@@ -71,6 +74,9 @@ export const adminMenuItemListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(1000).optional(),
   offset: z.coerce.number().int().min(0).optional(),
   locale: LOCALE_ENUM.optional(),
+
+  // Admin listte de isteğe bağlı nested tree dönebilmek için
+  nested: boolLike.optional(),
 });
 export type AdminMenuItemListQuery = z.infer<
   typeof adminMenuItemListQuerySchema
@@ -101,18 +107,19 @@ export const adminMenuItemCreateSchema = adminMenuItemUpsertBase.refine(
     v.type === "custom"
       ? !!(v.url && v.url.trim().length > 0)
       : true,
-  { message: "url_required_for_custom", path: ["url"] }
+  { message: "url_required_for_custom", path: ["url"] },
 );
 
 // Update: partial
 export const adminMenuItemUpdateSchema = adminMenuItemUpsertBase.partial();
+
 export const adminMenuItemReorderSchema = z.object({
   items: z
     .array(
       z.object({
         id: z.string().uuid(),
         display_order: z.number().int().min(0),
-      })
+      }),
     )
     .min(1),
 });

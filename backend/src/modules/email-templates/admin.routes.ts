@@ -14,9 +14,9 @@ import { requireAuth } from "@/common/middleware/auth";
 export async function registerEmailTemplatesAdmin(app: FastifyInstance) {
   const base = "/email_templates";
 
-  app.get(base,             { preHandler: [requireAuth] }, listEmailTemplatesAdmin);
-  app.get(`${base}/:id`,    { preHandler: [requireAuth] }, getEmailTemplateAdmin);
-  app.post(base,            { preHandler: [requireAuth] }, createEmailTemplateAdmin);
-  app.patch(`${base}/:id`,  { preHandler: [requireAuth] }, updateEmailTemplateAdmin);
+  app.get(base, { preHandler: [requireAuth] }, listEmailTemplatesAdmin);
+  app.get(`${base}/:id`, { preHandler: [requireAuth] }, getEmailTemplateAdmin);
+  app.post(base, { preHandler: [requireAuth] }, createEmailTemplateAdmin);
+  app.patch(`${base}/:id`, { preHandler: [requireAuth] }, updateEmailTemplateAdmin);
   app.delete(`${base}/:id`, { preHandler: [requireAuth] }, deleteEmailTemplateAdmin);
 }

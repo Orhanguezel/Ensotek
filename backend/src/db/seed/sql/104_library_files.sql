@@ -1,24 +1,25 @@
 -- =============================================================
--- 044_library_files.sql (files: library_files)
+-- 104_library_files.sql (files: library_files)
 -- =============================================================
 
-/* ================= TABLE ================= */
 CREATE TABLE IF NOT EXISTS `library_files` (
-  id           CHAR(36)    NOT NULL,
-  library_id   CHAR(36)    NOT NULL,
-  asset_id     CHAR(36)    NOT NULL,
+  id            CHAR(36)      NOT NULL,
+  library_id    CHAR(36)      NOT NULL,
+  asset_id      CHAR(36)      NOT NULL,
 
-  file_url     VARCHAR(500) DEFAULT NULL,
-  name         VARCHAR(255) NOT NULL,
+  file_url      VARCHAR(500)  DEFAULT NULL,
+  name          VARCHAR(255)  NOT NULL,
 
-  size_bytes   INT          DEFAULT NULL,
-  mime_type    VARCHAR(255) DEFAULT NULL,
+  size_bytes    INT           DEFAULT NULL,
+  mime_type     VARCHAR(255)  DEFAULT NULL,
 
-  display_order INT        NOT NULL DEFAULT 0,
-  is_active     TINYINT(1) NOT NULL DEFAULT 1,
+  tags_json     LONGTEXT      DEFAULT NULL,
 
-  created_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  updated_at    DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  display_order INT           NOT NULL DEFAULT 0,
+  is_active     TINYINT(1)    NOT NULL DEFAULT 1,
+
+  created_at    DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at    DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
   KEY library_files_library_idx (library_id),
@@ -36,14 +37,6 @@ CREATE TABLE IF NOT EXISTS `library_files` (
 
 
 /* ================= SEED: FILES (PDF) ================= */
-/*
-  NOT:
-  - Aşağıdaki asset değişkenleri, storage_assets seed içinde set edilmelidir:
-      @ASSET_LIB_BROCHURE_PDF_ID
-      @ASSET_LIB_GUIDE_PDF_ID
-  - Set edilmezse, WHERE @ASSET_... IS NOT NULL şartı nedeniyle
-    INSERT 0 satır ekler, constraint hatası vermez.
-*/
 
 -- Broşür PDF
 SET @LIBFILE_BROCHURE_ID := (
@@ -55,16 +48,17 @@ SET @LIBFILE_BROCHURE_ID := COALESCE(@LIBFILE_BROCHURE_ID, UUID());
 
 INSERT INTO library_files
 (id, library_id, asset_id, file_url, name,
- size_bytes, mime_type, display_order, is_active,
+ size_bytes, mime_type, tags_json, display_order, is_active,
  created_at, updated_at)
 SELECT
   @LIBFILE_BROCHURE_ID,
   @LIB_BROCHURE_ID,
   @ASSET_LIB_BROCHURE_PDF_ID,
-  NULL, -- file_url: storage URL üzerinden üretilecekse NULL bırak
-  'Kurumsal Tanıtım Broşürü (TR/EN)',
+  NULL,
+  'Ensotek Kurumsal Tanıtım Broşürü (TR/EN)',
   NULL,
   'application/pdf',
+  '["brochure","pdf","ensotek","corporate"]',
   1, 1,
   NOW(3), NOW(3)
 FROM DUAL
@@ -75,6 +69,7 @@ ON DUPLICATE KEY UPDATE
  name          = VALUES(name),
  size_bytes    = VALUES(size_bytes),
  mime_type     = VALUES(mime_type),
+ tags_json     = VALUES(tags_json),
  display_order = VALUES(display_order),
  is_active     = VALUES(is_active),
  updated_at    = VALUES(updated_at);
@@ -82,23 +77,24 @@ ON DUPLICATE KEY UPDATE
 -- Hizmet Rehberi PDF
 SET @LIBFILE_GUIDE_ID := (
   SELECT id FROM library_files
-  WHERE library_id = @LIB_GUIDE_ID AND display_order = 1
+  WHERE library_id = @LIB_GUIDE_ID AND display_order = 2
   LIMIT 1
 );
 SET @LIBFILE_GUIDE_ID := COALESCE(@LIBFILE_GUIDE_ID, UUID());
 
 INSERT INTO library_files
 (id, library_id, asset_id, file_url, name,
- size_bytes, mime_type, display_order, is_active,
+ size_bytes, mime_type, tags_json, display_order, is_active,
  created_at, updated_at)
 SELECT
   @LIBFILE_GUIDE_ID,
   @LIB_GUIDE_ID,
   @ASSET_LIB_GUIDE_PDF_ID,
   NULL,
-  'Hizmet Rehberi (TR/EN)',
+  'Ensotek Hizmet Rehberi (TR/EN)',
   NULL,
   'application/pdf',
+  '["guide","pdf","services","ensotek"]',
   2, 1,
   NOW(3), NOW(3)
 FROM DUAL
@@ -109,6 +105,7 @@ ON DUPLICATE KEY UPDATE
  name          = VALUES(name),
  size_bytes    = VALUES(size_bytes),
  mime_type     = VALUES(mime_type),
+ tags_json     = VALUES(tags_json),
  display_order = VALUES(display_order),
  is_active     = VALUES(is_active),
  updated_at    = VALUES(updated_at);

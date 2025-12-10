@@ -2,7 +2,7 @@ import React from "react";
 import Banner from "@/components/layout/banner/Breadcrum";
 import AboutCounter from "@/components/containers/counter/AboutCounter";
 import About from "@/components/containers/about/AboutPageContent";
-import AboutTeam from "@/components/containers/team/AboutTeam";
+import TeamPageContent from "@/components/containers/team/TeamPageContent";
 import Sponsor from "@/components/containers/references/References";
 import Feedback from "@/components/containers/feedback/Feedback";
 
@@ -26,7 +26,7 @@ const AboutPage = () => {
       <Banner title={title} />
       <About />
       <AboutCounter />
-      <AboutTeam />
+      <TeamPageContent />
       <Sponsor />
       <Feedback />
     </>

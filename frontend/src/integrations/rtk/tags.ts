@@ -23,7 +23,7 @@ export const metahubTags = [
   "Mail",
   "Newsletter",
   "Notifications",
-  "Products",
+  "Products", "ProductFaqs", "ProductSpecs" ,"ProductReviews",
   "Reviews",
   "Support",
   "Storage",

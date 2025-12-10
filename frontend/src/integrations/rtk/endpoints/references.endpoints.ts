@@ -21,7 +21,8 @@ const serializeListQuery = (
     orderDir,
     limit,
     offset,
-    // public endpoint'te is_published gönderme (BE şeması almıyor)
+    // public endpoint'te is_published zorunlu değil ama gönderilirse de sorun olmaz
+    is_published,
     is_featured,
     q: search,
     slug,
@@ -34,14 +35,15 @@ const serializeListQuery = (
   } = q;
 
   const params: Record<string, any> = {};
+
   if (order) params.order = order;
   if (sort) params.sort = sort;
   if (orderDir) params.orderDir = orderDir;
   if (typeof limit === "number") params.limit = limit;
   if (typeof offset === "number") params.offset = offset;
 
-  if (typeof is_featured !== "undefined")
-    params.is_featured = is_featured;
+  if (typeof is_published !== "undefined") params.is_published = is_published;
+  if (typeof is_featured !== "undefined") params.is_featured = is_featured;
 
   if (search) params.q = search;
   if (slug) params.slug = slug;
@@ -49,8 +51,7 @@ const serializeListQuery = (
   if (category_id) params.category_id = category_id;
   if (sub_category_id) params.sub_category_id = sub_category_id;
   if (module_key) params.module_key = module_key;
-  if (typeof has_website !== "undefined")
-    params.has_website = has_website;
+  if (typeof has_website !== "undefined") params.has_website = has_website;
   if (locale) params.locale = locale;
 
   return params;
@@ -73,19 +74,19 @@ export const referencesApi = baseApi.injectEndpoints({
         meta,
       ): ReferenceListResponse => {
         const totalHeader =
-          meta?.response?.headers?.get("x-total-count") ?? "0";
-        const total = Number(totalHeader) || 0;
+          (meta as any)?.response?.headers?.get("x-total-count") ?? "0";
+        const total = Number(totalHeader) || (response?.length ?? 0);
         return { items: response ?? [], total };
       },
       providesTags: (result) =>
         result?.items
           ? [
-              { type: "References", id: "LIST" },
-              ...result.items.map((r: ReferenceDto) => ({
-                type: "References" as const,
-                id: r.id,
-              })),
-            ]
+            { type: "References", id: "LIST" },
+            ...result.items.map((r: ReferenceDto) => ({
+              type: "References" as const,
+              id: r.id,
+            })),
+          ]
           : [{ type: "References", id: "LIST" }],
     }),
 

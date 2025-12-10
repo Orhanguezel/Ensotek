@@ -13,12 +13,15 @@ import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
 import type { LocaleOption } from "./CustomPageHeader";
 import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
 
-import { useLazyListCustomPagesAdminQuery } from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
+import {
+  useLazyListCustomPagesAdminQuery,
+} from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
 import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
 import { useListSubCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
 
 import { CustomPageMainColumn } from "./CustomPageMainColumn";
 import { CustomPageSidebarColumn } from "./CustomPageSidebarColumn";
+import { CustomPageFormImageColumn } from "./CustomPageFormImageColumn";
 
 /* ------------------------------------------------------------- */
 /*  Tipler                                                       */
@@ -228,14 +231,18 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     (field: keyof CustomPageFormValues) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const val = e.target.value;
-      setValues((prev) => ({ ...prev, [field]: val } as CustomPageFormValues));
+      setValues(
+        (prev) => ({ ...prev, [field]: val } as CustomPageFormValues),
+      );
     };
 
   const handleCheckboxChange =
     (field: keyof CustomPageFormValues) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const checked = e.target.checked;
-      setValues((prev) => ({ ...prev, [field]: checked } as CustomPageFormValues));
+      setValues(
+        (prev) => ({ ...prev, [field]: checked } as CustomPageFormValues),
+      );
     };
 
   const handleLocaleChange = async (
@@ -567,27 +574,43 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
               </div>
 
               <div className="col-lg-4">
-                <CustomPageSidebarColumn
-                  values={values}
+                {/* Öne çıkan görsel – CategoryFormImageColumn patterni */}
+                <CustomPageFormImageColumn
+                  metadata={imageMetadata}
+                  featuredImageValue={values.featured_image}
                   disabled={disabled}
-                  categoriesDisabled={categoriesDisabled}
-                  subCategoriesDisabled={subCategoriesDisabled}
-                  categoryOptions={categoryOptions}
-                  subCategoryOptions={subCategoryOptions}
-                  isCategoriesLoading={isCategoriesLoading}
-                  isSubCategoriesLoading={isSubCategoriesLoading}
-                  imageMetadata={imageMetadata}
-                  contentImageSize={contentImageSize}
-                  setContentImageSize={setContentImageSize}
-                  contentImagePreview={contentImagePreview}
-                  handleAddContentImage={handleAddContentImage}
-                  manualImageUrl={manualImageUrl}
-                  manualImageAlt={manualImageAlt}
-                  setManualImageUrl={setManualImageUrl}
-                  setManualImageAlt={setManualImageAlt}
-                  handleAddManualImage={handleAddManualImage}
-                  setValues={setValues}
+                  onFeaturedImageChange={(url) =>
+                    setValues((prev) => ({
+                      ...prev,
+                      featured_image: url,
+                    }))
+                  }
                 />
+
+                {/* Diğer sidebar alanları */}
+                <div className="mt-3">
+                  <CustomPageSidebarColumn
+                    values={values}
+                    disabled={disabled}
+                    categoriesDisabled={categoriesDisabled}
+                    subCategoriesDisabled={subCategoriesDisabled}
+                    categoryOptions={categoryOptions}
+                    subCategoryOptions={subCategoryOptions}
+                    isCategoriesLoading={isCategoriesLoading}
+                    isSubCategoriesLoading={isSubCategoriesLoading}
+                    imageMetadata={imageMetadata}
+                    contentImageSize={contentImageSize}
+                    setContentImageSize={setContentImageSize}
+                    contentImagePreview={contentImagePreview}
+                    handleAddContentImage={handleAddContentImage}
+                    manualImageUrl={manualImageUrl}
+                    manualImageAlt={manualImageAlt}
+                    setManualImageUrl={setManualImageUrl}
+                    setManualImageAlt={setManualImageAlt}
+                    handleAddManualImage={handleAddManualImage}
+                    setValues={setValues}
+                  />
+                </div>
               </div>
             </div>
           )}

@@ -11,10 +11,10 @@ INSERT INTO library_i18n
 VALUES
 (UUID(), @LIB_BROCHURE_ID, 'tr',
  'Kurumsal Tanıtım Broşürü', 'kurumsal-brosur',
- 'Ajansın sunduğu hizmetleri ve referansları özetleyen PDF broşür.',
- JSON_OBJECT('html','<p>Ajansımızın hizmetlerini, süreçlerini ve öne çıkan projelerini içeren kurumsal tanıtım broşürüdür.</p>'),
- 'Kurumsal Tanıtım Broşürü',
- 'Ajans ve hizmet tanıtımını içeren kurumsal PDF broşür.',
+ 'Ensotek\'in endüstriyel soğutma kuleleri, hizmetleri ve referans projelerini özetleyen PDF broşür.',
+ '<p>Bu kurumsal broşür, Ensotek\'in endüstriyel su soğutma kuleleri, bakım ve modernizasyon hizmetleri ile farklı sektörlerde gerçekleştirdiği projeleri özetler.</p>',
+ 'Ensotek Kurumsal Tanıtım Broşürü',
+ 'Ensotek çözümlerini ve referans projelerini içeren kurumsal PDF broşür.',
  NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
  title            = VALUES(title),
@@ -32,10 +32,10 @@ INSERT INTO library_i18n
 VALUES
 (UUID(), @LIB_GUIDE_ID, 'tr',
  'Hizmet Rehberi', 'hizmet-rehberi',
- 'Ajansın sunduğu dijital ve kreatif hizmetlerin kısa özeti.',
- JSON_OBJECT('html','<p>Tasarım, yazılım geliştirme, e-ticaret, performans optimizasyonu ve danışmanlık hizmetlerini içeren kapsamlı hizmet rehberi.</p>'),
- 'Hizmet Rehberi',
- 'Dijital ajans hizmetlerini anlatan PDF rehber.',
+ 'Ensotek\'in üretim, bakım-onarım, modernizasyon, yedek parça ve mühendislik hizmetlerini özetleyen PDF rehberi.',
+ '<p>Bu hizmet rehberi; üretim, bakım ve onarım, modernizasyon, yedek parçalar, uygulamalar ve mühendislik desteği dahil olmak üzere Ensotek\'in sunduğu hizmetleri ayrıntılı olarak açıklar.</p>',
+ 'Ensotek Hizmet Rehberi',
+ 'Ensotek\'in soğutma kuleleri ve ilgili mühendislik hizmetlerini anlatan PDF rehber.',
  NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
  title            = VALUES(title),
@@ -56,10 +56,10 @@ INSERT INTO library_i18n
 VALUES
 (UUID(), @LIB_BROCHURE_ID, 'en',
  'Company Brochure', 'company-brochure',
- 'PDF brochure that summarizes our agency, services and selected projects.',
- JSON_OBJECT('html','<p>This company brochure presents our digital services, workflow and selected case studies in English.</p>'),
- 'Company Brochure',
- 'Corporate PDF brochure about our agency and services.',
+ 'PDF brochure that summarizes Ensotek\'s cooling tower solutions, services and reference projects.',
+ '<p>This company brochure presents Ensotek\'s industrial cooling tower solutions, maintenance and modernization services, as well as selected reference projects in English.</p>',
+ 'Ensotek Company Brochure',
+ 'Corporate PDF brochure about Ensotek\'s solutions and services.',
  NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
  title            = VALUES(title),
@@ -77,10 +77,10 @@ INSERT INTO library_i18n
 VALUES
 (UUID(), @LIB_GUIDE_ID, 'en',
  'Service Guide', 'service-guide',
- 'PDF guide that describes our main digital and creative services.',
- JSON_OBJECT('html','<p>A compact guide that explains our design, development, e-commerce and consulting services in English.</p>'),
- 'Service Guide',
- 'PDF guide that presents our digital services.',
+ 'PDF guide that describes Ensotek\'s main services such as production, maintenance, modernization, spare parts and engineering support.',
+ '<p>A compact guide that explains Ensotek\'s production, maintenance & repair, modernization, spare parts and engineering support services for industrial cooling towers.</p>',
+ 'Ensotek Service Guide',
+ 'PDF guide that presents Ensotek\'s cooling tower services.',
  NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
  title            = VALUES(title),

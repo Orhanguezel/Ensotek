@@ -1,43 +1,52 @@
 // =============================================================
 // FILE: src/pages/admin/faqs/index.tsx
-// Ensotek – Admin FAQ Sayfası (Liste + filtreler + create/edit modal)
+// Ensotek – Admin FAQ Sayfası (Liste + filtreler)
+// CustomPage pattern'ine göre kategori gösterimi
 // =============================================================
 
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/router";
 import { toast } from "sonner";
 
 import {
   useListFaqsAdminQuery,
-  useCreateFaqAdminMutation,
   useUpdateFaqAdminMutation,
   useDeleteFaqAdminMutation,
 } from "@/integrations/rtk/endpoints/admin/faqs_admin.endpoints";
+
+import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
+import { useListSubCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
 
 import type {
   FaqDto,
   FaqListQueryParams,
 } from "@/integrations/types/faqs.types";
-import { FaqsHeader } from "@/components/admin/faqs/FaqsHeader";
+import type { CategoryDto } from "@/integrations/types/category.types";
+import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
+
+import {
+  FaqsHeader,
+  type LocaleOption,
+} from "@/components/admin/faqs/FaqsHeader";
 import { FaqsList } from "@/components/admin/faqs/FaqsList";
 
-type FormMode = "create" | "edit";
-
-type FaqFormState = {
-  id?: string;
-  is_active: boolean;
-  display_order: number;
-  question: string;
-  answer: string;
-  slug: string;
-  category: string;
+/* Param type'ı locale ile genişletiyoruz (BE için ekstra param sorun değil) */
+type FaqListQueryWithLocale = FaqListQueryParams & {
+  locale?: string;
 };
 
+/** SSS modülü için kategori module_key */
+const FAQ_CATEGORY_MODULE_KEY = "faq"; // BE'de farklıysa buna göre düzelt
+
+/* ------------------------------------------------------------- */
+
 const FaqsAdminPage: React.FC = () => {
-  /* -------------------- Filtre state -------------------- */
+  const router = useRouter();
+
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("");
   const [showOnlyActive, setShowOnlyActive] = useState(false);
 
   const [orderBy, setOrderBy] =
@@ -46,20 +55,165 @@ const FaqsAdminPage: React.FC = () => {
     );
   const [orderDir, setOrderDir] = useState<"asc" | "desc">("asc");
 
+  // Dil filtresi – "" = tüm diller
+  const [locale, setLocale] = useState<string>("");
+
+  // Kategori / alt kategori filtreleri (ID bazlı)
+  const [categoryId, setCategoryId] = useState<string>("");
+  const [subCategoryId, setSubCategoryId] = useState<string>("");
+
+  /* -------------------- Locale options (site_settings.app_locales) -------------------- */
+
+  const {
+    data: appLocaleRows,
+    isLoading: isLocalesLoading,
+  } = useListSiteSettingsAdminQuery({
+    keys: ["app_locales"],
+  });
+
+  const localeCodes = useMemo(() => {
+    if (!appLocaleRows || appLocaleRows.length === 0) {
+      return ["tr", "en"];
+    }
+
+    const row = appLocaleRows.find((r) => r.key === "app_locales");
+    const v = row?.value;
+    let arr: string[] = [];
+
+    if (Array.isArray(v)) {
+      arr = v.map((x) => String(x)).filter(Boolean);
+    } else if (typeof v === "string") {
+      try {
+        const parsed = JSON.parse(v);
+        if (Array.isArray(parsed)) {
+          arr = parsed.map((x) => String(x)).filter(Boolean);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!arr.length) {
+      return ["tr", "en"];
+    }
+
+    const uniqLower = Array.from(
+      new Set(arr.map((x) => String(x).toLowerCase())),
+    );
+    return uniqLower;
+  }, [appLocaleRows]);
+
+  const localeOptions: LocaleOption[] = useMemo(
+    () =>
+      localeCodes.map((code) => {
+        const lower = code.toLowerCase();
+        let label = `${code.toUpperCase()} (${lower})`;
+
+        if (lower === "tr") label = "Türkçe (tr)";
+        else if (lower === "en") label = "İngilizce (en)";
+        else if (lower === "de") label = "Almanca (de)";
+
+        return { value: lower, label };
+      }),
+    [localeCodes],
+  );
+
+  const handleLocaleChange = (next: string) => {
+    const normalized = next ? next.trim().toLowerCase() : "";
+    setLocale(normalized);
+  };
+
+  /* -------------------- Kategori / Alt kategori listeleri (header filtreleri için) -------------------- */
+
+  const { data: categoryRows } = useListCategoriesAdminQuery(undefined);
+  const { data: subCategoryRows } =
+    useListSubCategoriesAdminQuery(undefined);
+
+  // 1) Sadece SSS modülüne ait kategoriler
+  const faqCategoryRows = useMemo(
+    () =>
+      (categoryRows ?? []).filter((c: CategoryDto) => {
+        const cEx = c as CategoryDto & { module_key?: string };
+        return cEx.module_key === FAQ_CATEGORY_MODULE_KEY;
+      }),
+    [categoryRows],
+  );
+
+  const faqCategoryIds = useMemo(
+    () => faqCategoryRows.map((c) => c.id),
+    [faqCategoryRows],
+  );
+
+  // 2) Bu kategorilere bağlı alt kategoriler
+  const faqSubCategoryRows = useMemo(
+    () =>
+      (subCategoryRows ?? []).filter((s: SubCategoryDto) =>
+        faqCategoryIds.includes(s.category_id),
+      ),
+    [subCategoryRows, faqCategoryIds],
+  );
+
+  // 3) Header select için options (label = name || slug || id)
+  const categoryOptions = useMemo(
+    () =>
+      faqCategoryRows.map((c: CategoryDto) => {
+        const cEx = c as CategoryDto & {
+          name?: string;
+          slug?: string;
+        };
+        const label = cEx.name ?? cEx.slug ?? c.id;
+        return { value: c.id, label };
+      }),
+    [faqCategoryRows],
+  );
+
+  const subCategoryOptions = useMemo(
+    () =>
+      faqSubCategoryRows.map((s: SubCategoryDto) => {
+        const sEx = s as SubCategoryDto & {
+          name?: string;
+          slug?: string;
+        };
+        const label = sEx.name ?? sEx.slug ?? s.id;
+        return { value: s.id, label };
+      }),
+    [faqSubCategoryRows],
+  );
+
   /* -------------------- Liste + filtreler -------------------- */
 
-  const listParams: FaqListQueryParams = useMemo(
+  const listParams = useMemo<FaqListQueryWithLocale>(
     () => ({
+      // arama
       q: search || undefined,
-      category: category || undefined,
-      // BoolLike ile uyumlu: boolean kullanıyoruz
-      is_active: showOnlyActive ? true : undefined,
+
+      // filtreler
+      is_active: showOnlyActive ? "1" : undefined,
+
+      // kategori filtreleri – ID bazlı
+      category_id: categoryId || undefined,
+      sub_category_id: subCategoryId || undefined,
+
+      // sıralama
       sort: orderBy,
       orderDir,
+
+      // pagination
       limit: 200,
       offset: 0,
+
+      // locale (opsiyonel)
+      locale: locale || undefined,
     }),
-    [search, category, showOnlyActive, orderBy, orderDir],
+    [
+      search,
+      showOnlyActive,
+      orderBy,
+      orderDir,
+      categoryId,
+      subCategoryId,
+      locale,
+    ],
   );
 
   const {
@@ -75,126 +229,28 @@ const FaqsAdminPage: React.FC = () => {
     setRows(listData ?? []);
   }, [listData]);
 
-  const total = rows.length;
-
-  /* -------------------- Mutations ----------------------------- */
-
-  const [createFaq, { isLoading: isCreating }] =
-    useCreateFaqAdminMutation();
   const [updateFaq, { isLoading: isUpdating }] =
     useUpdateFaqAdminMutation();
   const [deleteFaq, { isLoading: isDeleting }] =
     useDeleteFaqAdminMutation();
 
   const loading = isLoading || isFetching;
-  const busy = loading || isCreating || isUpdating || isDeleting;
+  const busy = loading || isUpdating || isDeleting;
 
-  /* -------------------- Form / Modal state -------------------- */
+  /* -------------------- Handlers ----------------------------- */
 
-  const [formMode, setFormMode] = useState<FormMode>("create");
-  const [formState, setFormState] = useState<FaqFormState | null>(
-    null,
-  );
-  const [showModal, setShowModal] = useState(false);
-
-  const openCreateModal = () => {
-    setFormMode("create");
-    setFormState({
-      id: undefined,
-      is_active: true,
-      display_order: total + 1,
-      question: "",
-      answer: "",
-      slug: "",
-      category: "",
-    });
-    setShowModal(true);
+  const handleCreateClick = () => {
+    router.push("/admin/faqs/new");
   };
 
-  const openEditModal = (item: FaqDto) => {
-    setFormMode("edit");
-    setFormState({
-      id: item.id,
-      // Backend 0 | 1 döndürüyor
-      is_active: item.is_active === 1,
-      display_order: item.display_order ?? 0,
-      question: item.question ?? "",
-      answer: item.answer ?? "",
-      slug: item.slug ?? "",
-      category: item.category ?? "",
-    });
-    setShowModal(true);
+  const handleEditRow = (item: FaqDto) => {
+    router.push(`/admin/faqs/${item.id}`);
   };
-
-  const closeModal = () => {
-    if (busy) return;
-    setShowModal(false);
-    setFormState(null);
-  };
-
-  const handleFormChange = (
-    field: keyof FaqFormState,
-    value: string | boolean | number,
-  ) => {
-    setFormState((prev) =>
-      prev ? { ...prev, [field]: value } : prev,
-    );
-  };
-
-  const handleSaveForm = async () => {
-    if (!formState) return;
-
-    const payloadBase = {
-      question: formState.question.trim(),
-      answer: formState.answer.trim(),
-      slug: formState.slug.trim(),
-      category: formState.category.trim() || undefined,
-      is_active: formState.is_active,
-      display_order: formState.display_order ?? 0,
-    };
-
-    if (!payloadBase.question || !payloadBase.answer || !payloadBase.slug) {
-      toast.error("Soru, cevap ve slug alanları zorunludur.");
-      return;
-    }
-
-    try {
-      if (formMode === "create") {
-        await createFaq({
-          ...payloadBase,
-        }).unwrap();
-        toast.success("FAQ kaydı oluşturuldu.");
-      } else if (formMode === "edit" && formState.id) {
-        await updateFaq({
-          id: formState.id,
-          patch: {
-            ...payloadBase,
-          },
-        }).unwrap();
-        toast.success("FAQ kaydı güncellendi.");
-      }
-
-      closeModal();
-      await refetch();
-    } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "FAQ kaydedilirken bir hata oluştu.";
-      if (msg === "slug_already_exists") {
-        toast.error("Bu slug ile zaten bir kayıt var.");
-      } else {
-        toast.error(msg);
-      }
-    }
-  };
-
-  /* -------------------- Delete / Toggle ----------------------- */
 
   const handleDelete = async (item: FaqDto) => {
     if (
       !window.confirm(
-        `"${item.question || item.slug || item.id}" FAQ kaydını silmek üzeresin. Devam etmek istiyor musun?`,
+        `"${item.question || item.slug || item.id}" kayıtlı içeriği silmek üzeresin. Devam etmek istiyor musun?`,
       )
     ) {
       return;
@@ -202,13 +258,15 @@ const FaqsAdminPage: React.FC = () => {
 
     try {
       await deleteFaq(item.id).unwrap();
-      toast.success(`"${item.question || item.slug || item.id}" silindi.`);
+      toast.success(
+        `"${item.question || item.slug || item.id}" silindi.`,
+      );
       await refetch();
     } catch (err: any) {
       const msg =
         err?.data?.error?.message ||
         err?.message ||
-        "FAQ silinirken bir hata oluştu.";
+        "Kayıt silinirken bir hata oluştu.";
       toast.error(msg);
     }
   };
@@ -217,24 +275,19 @@ const FaqsAdminPage: React.FC = () => {
     try {
       await updateFaq({
         id: item.id,
-        patch: { is_active: value },
+        patch: { is_active: value ? "1" : "0" },
       }).unwrap();
 
       setRows((prev) =>
         prev.map((r) =>
-          r.id === item.id
-            ? {
-                ...r,
-                is_active: value ? 1 : 0,
-              }
-            : r,
+          r.id === item.id ? { ...r, is_active: value ? 1 : 0 } : r,
         ),
       );
     } catch (err: any) {
       const msg =
         err?.data?.error?.message ||
         err?.message ||
-        "Aktif durumu güncellenirken bir hata oluştu.";
+        "Aktiflik durumu güncellenirken bir hata oluştu.";
       toast.error(msg);
     }
   };
@@ -246,8 +299,16 @@ const FaqsAdminPage: React.FC = () => {
       <FaqsHeader
         search={search}
         onSearchChange={setSearch}
-        category={category}
-        onCategoryChange={setCategory}
+        locale={locale}
+        onLocaleChange={handleLocaleChange}
+        locales={localeOptions}
+        localesLoading={isLocalesLoading}
+        categoryId={categoryId}
+        onCategoryIdChange={setCategoryId}
+        subCategoryId={subCategoryId}
+        onSubCategoryIdChange={setSubCategoryId}
+        categoryOptions={categoryOptions}
+        subCategoryOptions={subCategoryOptions}
         showOnlyActive={showOnlyActive}
         onShowOnlyActiveChange={setShowOnlyActive}
         orderBy={orderBy}
@@ -256,7 +317,7 @@ const FaqsAdminPage: React.FC = () => {
         onOrderDirChange={setOrderDir}
         loading={busy}
         onRefresh={refetch}
-        onCreateClick={openCreateModal}
+        onCreateClick={handleCreateClick}
       />
 
       <div className="row">
@@ -264,182 +325,12 @@ const FaqsAdminPage: React.FC = () => {
           <FaqsList
             items={rows}
             loading={busy}
-            onEdit={openEditModal}
+            onEdit={handleEditRow}
             onDelete={handleDelete}
             onToggleActive={handleToggleActive}
           />
         </div>
       </div>
-
-      {/* --------------------- Create/Edit Modal --------------------- */}
-      {showModal && formState && (
-        <>
-          {/* Backdrop */}
-          <div className="modal-backdrop fade show" />
-
-          {/* Modal */}
-          <div
-            className="modal d-block"
-            tabIndex={-1}
-            role="dialog"
-            aria-modal="true"
-          >
-            <div className="modal-dialog modal-lg modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header py-2">
-                  <h5 className="modal-title small mb-0">
-                    {formMode === "create"
-                      ? "Yeni Soru Oluştur"
-                      : "Soru Düzenle"}
-                  </h5>
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Kapat"
-                    onClick={closeModal}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="modal-body">
-                  <div className="row g-2">
-                    <div className="col-md-3">
-                      <label className="form-label small">
-                        Sıralama (display_order)
-                      </label>
-                      <input
-                        type="number"
-                        className="form-control form-control-sm"
-                        value={formState.display_order}
-                        onChange={(e) =>
-                          handleFormChange(
-                            "display_order",
-                            Number(e.target.value) || 0,
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div className="col-md-9 d-flex align-items-end">
-                      <div className="form-check form-switch small">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          id="faq-modal-active"
-                          checked={formState.is_active}
-                          onChange={(e) =>
-                            handleFormChange(
-                              "is_active",
-                              e.target.checked,
-                            )
-                          }
-                        />
-                        <label
-                          className="form-check-label ms-1"
-                          htmlFor="faq-modal-active"
-                        >
-                          Aktif
-                        </label>
-                      </div>
-                    </div>
-
-                    <div className="col-12">
-                      <label className="form-label small">
-                        Soru (question)
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.question}
-                        onChange={(e) =>
-                          handleFormChange(
-                            "question",
-                            e.target.value,
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div className="col-12">
-                      <label className="form-label small">
-                        Cevap (answer)
-                      </label>
-                      <textarea
-                        className="form-control form-control-sm"
-                        rows={6}
-                        value={formState.answer}
-                        onChange={(e) =>
-                          handleFormChange(
-                            "answer",
-                            e.target.value,
-                          )
-                        }
-                      />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">
-                        Slug
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.slug}
-                        onChange={(e) =>
-                          handleFormChange("slug", e.target.value)
-                        }
-                      />
-                      <div className="form-text small">
-                        Küçük harf, rakam ve tire kullanılmalıdır.
-                      </div>
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label small">
-                        Kategori (opsiyonel)
-                      </label>
-                      <input
-                        type="text"
-                        className="form-control form-control-sm"
-                        value={formState.category}
-                        onChange={(e) =>
-                          handleFormChange(
-                            "category",
-                            e.target.value,
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="modal-footer py-2">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={closeModal}
-                    disabled={busy}
-                  >
-                    İptal
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveForm}
-                    disabled={busy}
-                  >
-                    {busy
-                      ? "Kaydediliyor..."
-                      : formMode === "create"
-                        ? "Oluştur"
-                        : "Kaydet"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

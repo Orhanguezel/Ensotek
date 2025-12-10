@@ -145,7 +145,9 @@ const ReferencesFormPage: React.FC<ReferencesFormPageProps> = ({
       try {
         const parsed: unknown = JSON.parse(v);
         if (Array.isArray(parsed)) {
-          arr = parsed.filter((x): x is string => typeof x === "string");
+          arr = parsed.filter(
+            (x): x is string => typeof x === "string",
+          );
         }
       } catch {
         // ignore
@@ -420,7 +422,7 @@ const ReferencesFormPage: React.FC<ReferencesFormPageProps> = ({
                 <ReferencesFormImageColumn
                   metadata={imageMetadata}
                   imageUrl={formState.featured_image}
-                  disabled={saving}
+                  disabled={saving || loading}
                   onImageUrlChange={(url) =>
                     setFormState((prev) =>
                       prev ? { ...prev, featured_image: url } : prev,

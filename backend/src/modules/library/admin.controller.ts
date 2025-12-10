@@ -31,6 +31,7 @@ import {
   upsertLibraryI18nAllLocales,
   getLibraryI18nRow,
   packContent,
+  packTags,
   listLibraryImagesMerged,
   createLibraryImageParent,
   updateLibraryImageParent,
@@ -61,7 +62,11 @@ export const listLibraryAdmin: RouteHandler<{
     });
   }
   const q = parsed.data;
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
+
+  const locale: Locale =
+    (q.locale as Locale) ??
+    ((req as any).locale as Locale) ??
+    DEFAULT_LOCALE;
 
   const { items, total } = await listLibraries({
     orderParam: typeof q.order === "string" ? q.order : undefined,
@@ -75,6 +80,9 @@ export const listLibraryAdmin: RouteHandler<{
     slug: q.slug,
     category_id: q.category_id ?? undefined,
     sub_category_id: q.sub_category_id ?? undefined,
+    author: q.author,
+    published_before: q.published_before,
+    published_after: q.published_after,
     locale,
     defaultLocale: DEFAULT_LOCALE,
   });
@@ -85,8 +93,13 @@ export const listLibraryAdmin: RouteHandler<{
 
 export const getLibraryAdmin: RouteHandler<{
   Params: { id: string };
+  Querystring: { locale?: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
+  const q = (req.query ?? {}) as { locale?: string };
+  const locale: Locale =
+    (q.locale as Locale) ??
+    ((req as any).locale as Locale) ??
+    DEFAULT_LOCALE;
 
   const row = await getLibraryMergedById(
     locale,
@@ -100,8 +113,13 @@ export const getLibraryAdmin: RouteHandler<{
 
 export const getLibraryBySlugAdmin: RouteHandler<{
   Params: { slug: string };
+  Querystring: { locale?: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
+  const q = (req.query ?? {}) as { locale?: string };
+  const locale: Locale =
+    (q.locale as Locale) ??
+    ((req as any).locale as Locale) ??
+    DEFAULT_LOCALE;
 
   const row = await getLibraryMergedBySlug(
     locale,
@@ -140,8 +158,7 @@ export const createLibraryAdmin: RouteHandler<{
       is_active: toBool(b.is_active) ? 1 : 0,
       display_order:
         typeof b.display_order === "number" ? b.display_order : 0,
-      tags_json:
-        typeof b.tags !== "undefined" ? JSON.stringify(b.tags) : null,
+      tags_json: packTags(b.tags),
       category_id:
         typeof b.category_id !== "undefined"
           ? b.category_id ?? null
@@ -219,7 +236,7 @@ export const createLibraryAdmin: RouteHandler<{
         .code(409)
         .send({ error: { message: "slug_already_exists" } });
     }
-    req.log.error({ err }, "library_create_failed");
+    (req as any).log?.error?.({ err }, "library_create_failed");
     return reply
       .code(500)
       .send({ error: { message: "library_create_failed" } });
@@ -276,7 +293,7 @@ export const updateLibraryAdmin: RouteHandler<{
             : undefined,
         tags_json:
           typeof b.tags !== "undefined"
-            ? JSON.stringify(b.tags ?? [])
+            ? packTags(b.tags)
             : undefined,
         category_id:
           typeof b.category_id !== "undefined"
@@ -393,7 +410,7 @@ export const updateLibraryAdmin: RouteHandler<{
         .code(409)
         .send({ error: { message: "slug_already_exists" } });
     }
-    req.log.error({ err }, "library_update_failed");
+    (req as any).log?.error?.({ err }, "library_update_failed");
     return reply
       .code(500)
       .send({ error: { message: "library_update_failed" } });
@@ -648,6 +665,7 @@ export const createLibraryFileAdmin: RouteHandler<{
       typeof b.mime_type !== "undefined"
         ? b.mime_type ?? null
         : null,
+    tags_json: packTags(b.tags),
     display_order:
       typeof b.display_order === "number" ? b.display_order : 0,
     is_active: toBool(b.is_active) ? 1 : 0,
@@ -684,6 +702,7 @@ export const updateLibraryFileAdmin: RouteHandler<{
     typeof b.name !== "undefined" ||
     typeof b.size_bytes !== "undefined" ||
     typeof b.mime_type !== "undefined" ||
+    typeof b.tags !== "undefined" ||
     typeof b.display_order !== "undefined" ||
     typeof b.is_active !== "undefined"
   ) {
@@ -705,6 +724,10 @@ export const updateLibraryFileAdmin: RouteHandler<{
       mime_type:
         typeof b.mime_type !== "undefined"
           ? b.mime_type ?? null
+          : undefined,
+      tags_json:
+        typeof b.tags !== "undefined"
+          ? packTags(b.tags)
           : undefined,
       display_order:
         typeof b.display_order === "number"

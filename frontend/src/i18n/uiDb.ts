@@ -16,6 +16,7 @@ export type UiSectionKey =
   | "ui_hero"
   | "ui_contact"
   | "ui_about"
+  | "ui_about_stats"
   | "ui_pricing"
   | "ui_testimonials"
   | "ui_faq"
@@ -31,6 +32,8 @@ export type UiSectionKey =
   | "ui_news"
   | "ui_products"
   | "ui_spareparts"
+  | "ui_faqs"
+  | "ui_team"
   ;
 
 // Hangi section hangi UI_KEYS grubunu kullanacak?
@@ -43,6 +46,9 @@ const SECTION_UI_KEYS_MAP: Record<UiSectionKey, readonly UIKey[]> = {
   ui_hero: UI_KEYS.hero,
   ui_contact: UI_KEYS.contact,
   ui_about: UI_KEYS.about,
+  ui_about_stats: UI_KEYS.about_stats,
+  ui_team: UI_KEYS.team, 
+  ui_faqs: UI_KEYS.faqs,
   ui_pricing: [], // şimdilik boş, ileride eklenebilir
   ui_testimonials: UI_KEYS.feedback,
   ui_faq: [], // ileride FAQ key'leri tanımlarsan buraya

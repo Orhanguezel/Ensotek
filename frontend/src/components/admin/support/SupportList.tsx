@@ -83,6 +83,11 @@ const priorityBadge = (priority: AdminSupportTicketDto["priority"]) => {
   }
 };
 
+const getUserDisplay = (t: AdminSupportTicketDto) =>
+  (t as any).user_display_name ||
+  (t as any).user_email ||
+  t.user_id;
+
 export const SupportList: React.FC<SupportListProps> = ({
   items,
   loading,
@@ -111,7 +116,7 @@ export const SupportList: React.FC<SupportListProps> = ({
             <tr>
               <th style={{ width: "24px" }}>#</th>
               <th>Konu</th>
-              <th>Kullanıcı ID</th>
+              <th>Kullanıcı</th>
               <th>Durum</th>
               <th>Öncelik</th>
               <th>Oluşturulma</th>
@@ -131,7 +136,9 @@ export const SupportList: React.FC<SupportListProps> = ({
                     ? `${t.subject.slice(0, 80)}…`
                     : t.subject}
                 </td>
-                <td className="text-muted small">{t.user_id}</td>
+                <td className="text-muted small">
+                  {getUserDisplay(t)}
+                </td>
                 <td>{statusBadge(t.status)}</td>
                 <td>{priorityBadge(t.priority)}</td>
                 <td className="text-muted small">

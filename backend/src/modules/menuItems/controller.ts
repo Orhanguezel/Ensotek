@@ -18,12 +18,10 @@ import { DEFAULT_LOCALE } from "@/core/i18n";
 import {
   menuItems,
   menuItemsI18n,
-  type MenuItemRow,
 } from "./schema";
 import {
   menuItemListQuerySchema,
   type MenuItemListQuery,
-  boolLike,
 } from "./validation";
 
 function toBool(v: unknown): boolean | undefined {
@@ -90,10 +88,10 @@ function resolveOrderCol(s?: string) {
     col === "display_order" || col === "position" || col === "order_num"
       ? menuItems.order_num
       : col === "created_at"
-      ? menuItems.created_at
-      : col === "updated_at"
-      ? menuItems.updated_at
-      : menuItems.order_num;
+        ? menuItems.created_at
+        : col === "updated_at"
+          ? menuItems.updated_at
+          : menuItems.order_num;
   return { colRef, dir };
 }
 
@@ -121,10 +119,38 @@ function mapRowPublic(r: MenuItemMerged) {
   };
 }
 
+export type MenuItemPublicDto = ReturnType<typeof mapRowPublic> & {
+  children?: MenuItemPublicDto[];
+};
+
+function buildNestedTree(
+  items: MenuItemPublicDto[],
+): MenuItemPublicDto[] {
+  const byId = new Map<string, MenuItemPublicDto>();
+  // önce copy + children init
+  for (const item of items) {
+    byId.set(item.id, { ...item, children: [] });
+  }
+
+  const roots: MenuItemPublicDto[] = [];
+
+  for (const node of byId.values()) {
+    if (node.parent_id && byId.has(node.parent_id)) {
+      const parent = byId.get(node.parent_id)!;
+      if (!parent.children) parent.children = [];
+      parent.children.push(node);
+    } else {
+      roots.push(node);
+    }
+  }
+
+  return roots;
+}
+
 /** GET /menu_items */
 export const listMenuItems: RouteHandler = async (req, reply) => {
   const parsed = menuItemListQuerySchema.safeParse(
-    req.query ?? {}
+    req.query ?? {},
   );
   if (!parsed.success) {
     return reply
@@ -133,10 +159,16 @@ export const listMenuItems: RouteHandler = async (req, reply) => {
   }
   const q = parsed.data as MenuItemListQuery;
 
+  // locale: query.locale → req.locale → DEFAULT_LOCALE
+  const queryLocale =
+    typeof q.locale === "string" && q.locale.trim()
+      ? q.locale.trim().toLowerCase()
+      : undefined;
   const locale =
-    (q.locale as string | undefined) ||
+    queryLocale ||
     ((req as any).locale as string | undefined) ||
     DEFAULT_LOCALE;
+
   const defaultLocale = DEFAULT_LOCALE;
 
   const i18nReq = alias(menuItemsI18n, "mi_req");
@@ -190,15 +222,15 @@ export const listMenuItems: RouteHandler = async (req, reply) => {
       i18nReq,
       and(
         eq(i18nReq.menu_item_id, menuItems.id),
-        eq(i18nReq.locale, locale)
-      )
+        eq(i18nReq.locale, locale),
+      ),
     )
     .leftJoin(
       i18nDef,
       and(
         eq(i18nDef.menu_item_id, menuItems.id),
-        eq(i18nDef.locale, defaultLocale)
-      )
+        eq(i18nDef.locale, defaultLocale),
+      ),
     );
 
   const countQuery = (whereExpr
@@ -215,15 +247,15 @@ export const listMenuItems: RouteHandler = async (req, reply) => {
       i18nReq,
       and(
         eq(i18nReq.menu_item_id, menuItems.id),
-        eq(i18nReq.locale, locale)
-      )
+        eq(i18nReq.locale, locale),
+      ),
     )
     .leftJoin(
       i18nDef,
       and(
         eq(i18nDef.menu_item_id, menuItems.id),
-        eq(i18nDef.locale, defaultLocale)
-      )
+        eq(i18nDef.locale, defaultLocale),
+      ),
     );
 
   const dataQuery = (whereExpr
@@ -239,18 +271,35 @@ export const listMenuItems: RouteHandler = async (req, reply) => {
   reply.header("content-range", `*/${total}`);
   reply.header(
     "access-control-expose-headers",
-    "x-total-count, content-range"
+    "x-total-count, content-range",
   );
 
-  return reply.send(rows.map(mapRowPublic));
+  const flat: MenuItemPublicDto[] = rows.map(mapRowPublic);
+  const nestedFlag = toBool((q as any).nested);
+
+  if (nestedFlag) {
+    const tree = buildNestedTree(flat);
+    return reply.send(tree);
+  }
+
+  return reply.send(flat);
 };
 
 /** GET /menu_items/:id */
 export const getMenuItemById: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
 
+  // ?locale query + req.locale fallback
+  const rawQuery = (req.query ?? {}) as { locale?: string };
+  const queryLocale =
+    typeof rawQuery.locale === "string" && rawQuery.locale.trim()
+      ? rawQuery.locale.trim().toLowerCase()
+      : undefined;
+
   const locale =
-    ((req as any).locale as string | undefined) || DEFAULT_LOCALE;
+    queryLocale ||
+    ((req as any).locale as string | undefined) ||
+    DEFAULT_LOCALE;
   const defaultLocale = DEFAULT_LOCALE;
 
   const i18nReq = alias(menuItemsI18n, "mi_req");
@@ -263,15 +312,15 @@ export const getMenuItemById: RouteHandler = async (req, reply) => {
       i18nReq,
       and(
         eq(i18nReq.menu_item_id, menuItems.id),
-        eq(i18nReq.locale, locale)
-      )
+        eq(i18nReq.locale, locale),
+      ),
     )
     .leftJoin(
       i18nDef,
       and(
         eq(i18nDef.menu_item_id, menuItems.id),
-        eq(i18nDef.locale, defaultLocale)
-      )
+        eq(i18nDef.locale, defaultLocale),
+      ),
     )
     .where(eq(menuItems.id, id))
     .limit(1)) as MenuItemMerged[];

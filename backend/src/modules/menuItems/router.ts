@@ -3,10 +3,7 @@
 // ===================================================================
 
 import type { FastifyInstance } from "fastify";
-import {
-  listMenuItems,
-  getMenuItemById,
-} from "./controller";
+import { listMenuItems, getMenuItemById } from "./controller";
 
 const BASE = "/menu_items";
 

@@ -7,6 +7,7 @@ import { baseApi } from "../baseApi";
 import type {
   ProductDto,
   ProductListQueryParams,
+  ProductListResponse,
   GetProductByIdOrSlugParams,
   GetProductBySlugParams,
   GetProductByIdParams,
@@ -21,25 +22,55 @@ import type {
 export const productsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // ---------- Products list ----------
-    listProducts: build.query<ProductDto[], ProductListQueryParams | undefined>(
-      {
-        // arg: ProductListQueryParams | undefined
-        query: (params?: ProductListQueryParams) => ({
-          url: "/products",
-          method: "GET",
-          // params: ProductListQueryParams | undefined
-          params,
-        }),
+    listProducts: build.query<
+      ProductListResponse,
+      ProductListQueryParams | void
+    >({
+      // arg: ProductListQueryParams | void
+      query: (params?: ProductListQueryParams) => ({
+        url: "/products",
+        method: "GET",
+        params: params ?? undefined,
+      }),
+      transformResponse: (
+        response: ProductDto[],
+        meta,
+      ): ProductListResponse => {
+        const header =
+          (meta as any)?.response?.headers?.get("x-total-count") ??
+          (meta as any)?.response?.headers?.get("X-Total-Count");
+        const items = response ?? [];
+        const total = header ? Number(header) || items.length : items.length;
+        return { items, total };
       },
-    ),
+      providesTags: (result) =>
+        result?.items
+          ? [
+            { type: "Products" as const, id: "LIST" },
+            ...result.items.map((p) => ({
+              type: "Products" as const,
+              id: p.id,
+            })),
+          ]
+          : [{ type: "Products" as const, id: "LIST" }],
+    }),
 
     // ---------- Detail (id veya slug) ----------
-    getProductByIdOrSlug: build.query<ProductDto, GetProductByIdOrSlugParams>({
+    getProductByIdOrSlug: build.query<
+      ProductDto,
+      GetProductByIdOrSlugParams
+    >({
       query: ({ idOrSlug, ...params }) => ({
         url: `/products/${encodeURIComponent(idOrSlug)}`,
         method: "GET",
         params,
       }),
+      // 3. parametreyi (arg) kullanmak için 2. paramı da tanımlamak zorundayız
+      // eslint'i susturmak için _err'i "kullanıyoruz".
+      providesTags: (_res, _err, arg) => {
+        void _err;
+        return [{ type: "Products" as const, id: arg.idOrSlug }];
+      },
     }),
 
     getProductBySlug: build.query<ProductDto, GetProductBySlugParams>({
@@ -48,6 +79,10 @@ export const productsApi = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
+      providesTags: (_res, _err, arg) => {
+        void _err;
+        return [{ type: "Products" as const, id: `slug:${arg.slug}` }];
+      },
     }),
 
     getProductById: build.query<ProductDto, GetProductByIdParams>({
@@ -55,30 +90,55 @@ export const productsApi = baseApi.injectEndpoints({
         url: `/products/id/${encodeURIComponent(id)}`,
         method: "GET",
       }),
+      providesTags: (_res, _err, arg) => {
+        void _err;
+        return [{ type: "Products" as const, id: arg.id }];
+      },
     }),
 
     // ---------- Public FAQ ----------
     listProductFaqs: build.query<
       ProductFaqDto[],
-      ProductFaqListQueryParams | undefined
+      ProductFaqListQueryParams | void
     >({
       query: (params?: ProductFaqListQueryParams) => ({
         url: "/product_faqs",
         method: "GET",
         params,
       }),
+      // error ve arg kullanılmıyor → imzadan kaldır
+      providesTags: (result) =>
+        result
+          ? [
+            { type: "ProductFaqs" as const, id: "LIST" },
+            ...result.map((f) => ({
+              type: "ProductFaqs" as const,
+              id: f.id,
+            })),
+          ]
+          : [{ type: "ProductFaqs" as const, id: "LIST" }],
     }),
 
     // ---------- Public Specs ----------
     listProductSpecs: build.query<
       ProductSpecDto[],
-      ProductSpecListQueryParams | undefined
+      ProductSpecListQueryParams | void
     >({
       query: (params?: ProductSpecListQueryParams) => ({
         url: "/product_specs",
         method: "GET",
         params,
       }),
+      providesTags: (result) =>
+        result
+          ? [
+            { type: "ProductSpecs" as const, id: "LIST" },
+            ...result.map((s) => ({
+              type: "ProductSpecs" as const,
+              id: s.id,
+            })),
+          ]
+          : [{ type: "ProductSpecs" as const, id: "LIST" }],
     }),
 
     // ---------- Public Reviews ----------
@@ -91,6 +151,17 @@ export const productsApi = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
+      // arg kullanılmıyordu → tek parametre
+      providesTags: (result) =>
+        result
+          ? [
+            { type: "ProductReviews" as const, id: "LIST" },
+            ...result.map((r) => ({
+              type: "ProductReviews" as const,
+              id: r.id,
+            })),
+          ]
+          : [{ type: "ProductReviews" as const, id: "LIST" }],
     }),
   }),
   overrideExisting: false,

@@ -11,26 +11,56 @@ import type {
   RenderEmailTemplateByKeyPayload,
 } from "@/integrations/types/email_templates.types";
 
+type WithLocale<T> = T & { locale?: string | null };
+
+const cleanParams = (
+  params?: Record<string, unknown>,
+): Record<string, unknown> | undefined => {
+  if (!params) return undefined;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === "") continue;
+    out[k] = v;
+  }
+  return Object.keys(out).length ? out : undefined;
+};
+
+const makeLocaleHeaders = (locale?: string | null) =>
+  locale
+    ? {
+      "x-locale": locale,
+      "Accept-Language": locale,
+    }
+    : undefined;
+
 export const emailTemplatesPublicApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     /**
      * GET /email_templates
      * Query: { q?, locale?, is_active? }
+     * Backend: listEmailTemplatesPublic
      */
     listEmailTemplatesPublic: build.query<
       EmailTemplatePublicDto[],
-      EmailTemplatePublicListQueryParams | void
+      WithLocale<EmailTemplatePublicListQueryParams> | void
     >({
-      query: (params?: EmailTemplatePublicListQueryParams) => ({
-        url: "/email_templates",
-        method: "GET",
-        params,
-      }),
+      query: (params) => {
+        const p = (params || {}) as WithLocale<EmailTemplatePublicListQueryParams>;
+        const { locale, ...rest } = p;
+
+        return {
+          url: "/email_templates",
+          method: "GET",
+          params: cleanParams({ ...rest, locale }),
+          headers: makeLocaleHeaders(locale),
+        };
+      },
     }),
 
     /**
      * GET /email_templates/by-key/:key
      * Query: { locale? }
+     * Backend: getEmailTemplateByKeyPublic
      */
     getEmailTemplateByKeyPublic: build.query<
       EmailTemplatePublicDto,
@@ -39,7 +69,8 @@ export const emailTemplatesPublicApi = baseApi.injectEndpoints({
       query: ({ key, locale }) => ({
         url: `/email_templates/by-key/${encodeURIComponent(key)}`,
         method: "GET",
-        params: locale ? { locale } : undefined,
+        params: cleanParams({ locale }),
+        headers: makeLocaleHeaders(locale),
       }),
     }),
 
@@ -47,6 +78,7 @@ export const emailTemplatesPublicApi = baseApi.injectEndpoints({
      * POST /email_templates/by-key/:key/render
      * Body: { params?: Record<string, unknown> }
      * Query: { locale? }
+     * Backend: renderTemplateByKeyPublic
      */
     renderEmailTemplateByKeyPublic: build.mutation<
       RenderedEmailTemplateDto,
@@ -55,7 +87,8 @@ export const emailTemplatesPublicApi = baseApi.injectEndpoints({
       query: ({ key, locale, params }) => ({
         url: `/email_templates/by-key/${encodeURIComponent(key)}/render`,
         method: "POST",
-        params: locale ? { locale } : undefined,
+        params: cleanParams({ locale }),
+        headers: makeLocaleHeaders(locale),
         body: {
           params: params ?? {},
         },

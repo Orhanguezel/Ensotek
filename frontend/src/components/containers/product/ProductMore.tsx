@@ -13,9 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 
-import {
-  useListProductsQuery,
-} from "@/integrations/rtk/endpoints/products.endpoints";
+import { useListProductsQuery } from "@/integrations/rtk/endpoints/products.endpoints";
 import type { ProductDto } from "@/integrations/types/product.types";
 
 import { toCdnSrc } from "@/shared/media";
@@ -45,6 +43,7 @@ const ProductMore: React.FC = () => {
     [slugParam],
   );
 
+  // RTK: listProducts → ProductListResponse (items + total)
   const { data, isLoading } = useListProductsQuery({
     is_active: 1,
     locale,
@@ -54,7 +53,7 @@ const ProductMore: React.FC = () => {
   const productListHref = localizePath(locale, "/product");
 
   const items = useMemo(() => {
-    const list: ProductDto[] = data ?? [];
+    const list: ProductDto[] = data?.items ?? [];
 
     return list
       .filter((p) => {
@@ -68,9 +67,11 @@ const ProductMore: React.FC = () => {
       .map((p) => {
         const slug = (p.slug || "").trim();
         const title = (p.title || "").trim();
+
         const imgRaw =
           (p.image_url || "").trim() ||
-          (p.images[0] || "").trim();
+          ((p.images && p.images[0]) || "").trim();
+
         const hero =
           (imgRaw &&
             (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
@@ -106,17 +107,13 @@ const ProductMore: React.FC = () => {
         </div>
 
         {/* Liste */}
-        <div
-          className="row"
-          data-aos="fade-up"
-          data-aos-delay="200"
-        >
+        <div className="row" data-aos="fade-up" data-aos-delay="200">
           {items.map((p) => {
             const href = p.slug
               ? localizePath(
-                  locale,
-                  `/product/${encodeURIComponent(p.slug)}`,
-                )
+                locale,
+                `/product/${encodeURIComponent(p.slug)}`,
+              )
               : productListHref;
 
             return (
@@ -149,10 +146,7 @@ const ProductMore: React.FC = () => {
                       })}{" "}
                       €
                     </p>
-                    <Link
-                      href={href}
-                      className="link-more"
-                    >
+                    <Link href={href} className="link-more">
                       {locale === "tr" ? "Ürüne git" : "View product"} →
                     </Link>
                   </div>

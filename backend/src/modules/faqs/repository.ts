@@ -20,6 +20,16 @@ import {
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
 
+// 🔗 Kategoriler (base + i18n)
+import {
+  categories,
+  categoryI18n,
+} from "@/modules/categories/schema";
+import {
+  subCategories,
+  subCategoryI18n,
+} from "@/modules/subcategories/schema";
+
 type Sortable = "created_at" | "updated_at" | "display_order";
 
 export type ListParams = {
@@ -32,7 +42,10 @@ export type ListParams = {
   is_active?: boolean | 0 | 1 | "0" | "1" | "true" | "false";
   q?: string;
   slug?: string;
-  category?: string;
+
+  // Kategori filtreleri (ID bazlı)
+  category_id?: string;
+  sub_category_id?: string;
 
   locale: string;
   defaultLocale: string;
@@ -73,20 +86,60 @@ export type FaqMerged = {
   display_order: number;
   created_at: string | Date;
   updated_at: string | Date;
+
+  // 🔗 Kategori ID'leri (dil bağımsız)
+  category_id: string | null;
+  sub_category_id: string | null;
+
+  // 🔗 Kategori isim/slug (locale-aware)
+  category_name: string | null;
+  category_slug: string | null;
+
+  // 🔗 Alt kategori isim/slug (locale-aware)
+  sub_category_name: string | null;
+  sub_category_slug: string | null;
+
+  // Localize alanlar (coalesced: req.locale > defaultLocale)
   question: string | null;
   answer: string | null;
   slug: string | null;
-  category: string | null;
   locale_resolved: string | null;
 };
 
-function baseSelect(i18nReq: any, i18nDef: any) {
+function baseSelect(
+  i18nReq: any,
+  i18nDef: any,
+  catReq: any,
+  catDef: any,
+  subCatReq: any,
+  subCatDef: any,
+) {
   return {
     id: faqs.id,
     is_active: faqs.is_active,
     display_order: faqs.display_order,
     created_at: faqs.created_at,
     updated_at: faqs.updated_at,
+
+    category_id: faqs.category_id,
+    sub_category_id: faqs.sub_category_id,
+
+    // 🔹 Kategori isim/slug – category_i18n üzerinden coalesced
+    category_name: sql<string>`
+      COALESCE(${catReq.name}, ${catDef.name})
+    `.as("category_name"),
+    category_slug: sql<string>`
+      COALESCE(${catReq.slug}, ${catDef.slug})
+    `.as("category_slug"),
+
+    // 🔹 Alt kategori isim/slug – sub_category_i18n üzerinden coalesced
+    sub_category_name: sql<string>`
+      COALESCE(${subCatReq.name}, ${subCatDef.name})
+    `.as("sub_category_name"),
+    sub_category_slug: sql<string>`
+      COALESCE(${subCatReq.slug}, ${subCatDef.slug})
+    `.as("sub_category_slug"),
+
     question: sql<string>`
       COALESCE(${i18nReq.question}, ${i18nDef.question})
     `.as("question"),
@@ -96,9 +149,6 @@ function baseSelect(i18nReq: any, i18nDef: any) {
     slug: sql<string>`
       COALESCE(${i18nReq.slug}, ${i18nDef.slug})
     `.as("slug"),
-    category: sql<string>`
-      COALESCE(${i18nReq.category}, ${i18nDef.category})
-    `.as("category"),
     locale_resolved: sql<string>`
       CASE 
         WHEN ${i18nReq.id} IS NOT NULL THEN ${i18nReq.locale}
@@ -111,6 +161,14 @@ function baseSelect(i18nReq: any, i18nDef: any) {
 export async function listFaqs(params: ListParams) {
   const i18nReq = alias(faqsI18n, "fi_req");
   const i18nDef = alias(faqsI18n, "fi_def");
+
+  // 🔹 category_i18n için alias (requested + default locale)
+  const catReq = alias(categoryI18n, "cat_req");
+  const catDef = alias(categoryI18n, "cat_def");
+
+  // 🔹 sub_category_i18n için alias
+  const subCatReq = alias(subCategoryI18n, "subcat_req");
+  const subCatDef = alias(subCategoryI18n, "subcat_def");
 
   const filters: SQL[] = [];
 
@@ -126,11 +184,14 @@ export async function listFaqs(params: ListParams) {
     );
   }
 
-  if (params.category && params.category.trim()) {
-    const v = params.category.trim();
-    filters.push(
-      sql`COALESCE(${i18nReq.category}, ${i18nDef.category}) = ${v}`,
-    );
+  if (params.category_id && params.category_id.trim()) {
+    const v = params.category_id.trim();
+    filters.push(eq(faqs.category_id, v));
+  }
+
+  if (params.sub_category_id && params.sub_category_id.trim()) {
+    const v = params.sub_category_id.trim();
+    filters.push(eq(faqs.sub_category_id, v));
   }
 
   if (params.q && params.q.trim()) {
@@ -139,7 +200,6 @@ export async function listFaqs(params: ListParams) {
       sql`(
         COALESCE(${i18nReq.question}, ${i18nDef.question}) LIKE ${s}
         OR COALESCE(${i18nReq.slug}, ${i18nDef.slug}) LIKE ${s}
-        OR COALESCE(${i18nReq.category}, ${i18nDef.category}) LIKE ${s}
         OR COALESCE(${i18nReq.answer}, ${i18nDef.answer}) LIKE ${s}
       )`,
     );
@@ -159,9 +219,11 @@ export async function listFaqs(params: ListParams) {
   const take = params.limit && params.limit > 0 ? params.limit : 50;
   const skip = params.offset && params.offset >= 0 ? params.offset : 0;
 
-  // ---- Liste query (any hack ile .where step’ini rahat bırakıyoruz) ----
+  // ---- Liste query ----
   const baseQuery = db
-    .select(baseSelect(i18nReq, i18nDef))
+    .select(
+      baseSelect(i18nReq, i18nDef, catReq, catDef, subCatReq, subCatDef),
+    )
     .from(faqs)
     .leftJoin(
       i18nReq,
@@ -173,6 +235,38 @@ export async function listFaqs(params: ListParams) {
         eq(i18nDef.faq_id, faqs.id),
         eq(i18nDef.locale, params.defaultLocale),
       ),
+    )
+    // kategori i18n (requested)
+    .leftJoin(
+      catReq,
+      and(
+        eq(catReq.category_id, faqs.category_id),
+        eq(catReq.locale, params.locale),
+      ),
+    )
+    // kategori i18n (default)
+    .leftJoin(
+      catDef,
+      and(
+        eq(catDef.category_id, faqs.category_id),
+        eq(catDef.locale, params.defaultLocale),
+      ),
+    )
+    // alt kategori i18n (requested)
+    .leftJoin(
+      subCatReq,
+      and(
+        eq(subCatReq.sub_category_id, faqs.sub_category_id),
+        eq(subCatReq.locale, params.locale),
+      ),
+    )
+    // alt kategori i18n (default)
+    .leftJoin(
+      subCatDef,
+      and(
+        eq(subCatDef.sub_category_id, faqs.sub_category_id),
+        eq(subCatDef.locale, params.defaultLocale),
+      ),
     );
 
   let query: any = baseQuery;
@@ -182,7 +276,7 @@ export async function listFaqs(params: ListParams) {
 
   const rows = await query.orderBy(orderBy).limit(take).offset(skip);
 
-  // ---- Count query (aynı pattern) ----
+  // ---- Count query (aynı filtreler) ----
   const baseCountQuery = db
     .select({ c: sql<number>`COUNT(1)` })
     .from(faqs)
@@ -220,8 +314,15 @@ export async function getFaqMergedById(
   const i18nReq = alias(faqsI18n, "fi_req");
   const i18nDef = alias(faqsI18n, "fi_def");
 
+  const catReq = alias(categoryI18n, "cat_req");
+  const catDef = alias(categoryI18n, "cat_def");
+  const subCatReq = alias(subCategoryI18n, "subcat_req");
+  const subCatDef = alias(subCategoryI18n, "subcat_def");
+
   const rows = await db
-    .select(baseSelect(i18nReq, i18nDef))
+    .select(
+      baseSelect(i18nReq, i18nDef, catReq, catDef, subCatReq, subCatDef),
+    )
     .from(faqs)
     .leftJoin(
       i18nReq,
@@ -232,6 +333,34 @@ export async function getFaqMergedById(
       and(
         eq(i18nDef.faq_id, faqs.id),
         eq(i18nDef.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      catReq,
+      and(
+        eq(catReq.category_id, faqs.category_id),
+        eq(catReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      catDef,
+      and(
+        eq(catDef.category_id, faqs.category_id),
+        eq(catDef.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      subCatReq,
+      and(
+        eq(subCatReq.sub_category_id, faqs.sub_category_id),
+        eq(subCatReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      subCatDef,
+      and(
+        eq(subCatDef.sub_category_id, faqs.sub_category_id),
+        eq(subCatDef.locale, defaultLocale),
       ),
     )
     .where(eq(faqs.id, id))
@@ -248,8 +377,15 @@ export async function getFaqMergedBySlug(
   const i18nReq = alias(faqsI18n, "fi_req");
   const i18nDef = alias(faqsI18n, "fi_def");
 
+  const catReq = alias(categoryI18n, "cat_req");
+  const catDef = alias(categoryI18n, "cat_def");
+  const subCatReq = alias(subCategoryI18n, "subcat_req");
+  const subCatDef = alias(subCategoryI18n, "subcat_def");
+
   const rows = await db
-    .select(baseSelect(i18nReq, i18nDef))
+    .select(
+      baseSelect(i18nReq, i18nDef, catReq, catDef, subCatReq, subCatDef),
+    )
     .from(faqs)
     .leftJoin(
       i18nReq,
@@ -260,6 +396,34 @@ export async function getFaqMergedBySlug(
       and(
         eq(i18nDef.faq_id, faqs.id),
         eq(i18nDef.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      catReq,
+      and(
+        eq(catReq.category_id, faqs.category_id),
+        eq(catReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      catDef,
+      and(
+        eq(catDef.category_id, faqs.category_id),
+        eq(catDef.locale, defaultLocale),
+      ),
+    )
+    .leftJoin(
+      subCatReq,
+      and(
+        eq(subCatReq.sub_category_id, faqs.sub_category_id),
+        eq(subCatReq.locale, locale),
+      ),
+    )
+    .leftJoin(
+      subCatDef,
+      and(
+        eq(subCatDef.sub_category_id, faqs.sub_category_id),
+        eq(subCatDef.locale, defaultLocale),
       ),
     )
     .where(
@@ -289,7 +453,7 @@ export async function upsertFaqI18n(
   faqId: string,
   locale: string,
   data: Partial<
-    Pick<NewFaqI18nRow, "question" | "answer" | "slug" | "category">
+    Pick<NewFaqI18nRow, "question" | "answer" | "slug">
   > & { id?: string },
 ) {
   const insertVals: NewFaqI18nRow = {
@@ -299,10 +463,6 @@ export async function upsertFaqI18n(
     question: data.question ?? "",
     answer: data.answer ?? "",
     slug: data.slug ?? "",
-    category:
-      typeof data.category === "undefined"
-        ? (null as any)
-        : data.category ?? null,
     created_at: new Date() as any,
     updated_at: new Date() as any,
   };
@@ -316,9 +476,6 @@ export async function upsertFaqI18n(
   }
   if (typeof data.slug !== "undefined") {
     setObj.slug = data.slug;
-  }
-  if (typeof data.category !== "undefined") {
-    setObj.category = data.category ?? null;
   }
   setObj.updated_at = new Date();
 

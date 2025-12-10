@@ -5,9 +5,20 @@
 
 import React from "react";
 
+export type LocaleOption = {
+  value: string;
+  label: string;
+};
+
 export type ReferencesHeaderProps = {
   search: string;
   onSearchChange: (v: string) => void;
+
+  // Dil filtre
+  locale: string;
+  onLocaleChange: (v: string) => void;
+  locales: LocaleOption[];
+  localesLoading?: boolean;
 
   showOnlyPublished: boolean;
   onShowOnlyPublishedChange: (v: boolean) => void;
@@ -30,6 +41,10 @@ export type ReferencesHeaderProps = {
 export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
   search,
   onSearchChange,
+  locale,
+  onLocaleChange,
+  locales,
+  localesLoading,
   showOnlyPublished,
   onShowOnlyPublishedChange,
   showOnlyFeatured,
@@ -42,14 +57,24 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
   onRefresh,
   onCreateClick,
 }) => {
+  const handleLocaleChange = (
+    e: React.ChangeEvent<HTMLSelectElement>,
+  ) => {
+    const raw = e.target.value;
+    // "" → tüm diller, diğerleri lower-case locale kodu
+    const nextLocale = raw ? raw.trim().toLowerCase() : "";
+    onLocaleChange(nextLocale);
+  };
+
   return (
     <div className="row mb-3 g-2 align-items-end">
-      {/* Sol: Arama + sıralama */}
-      <div className="col-md-6">
+      {/* Sol: Arama + dil + sıralama */}
+      <div className="col-md-7">
         <div className="card">
           <div className="card-body py-2">
             <div className="row g-2 align-items-end">
-              <div className="col-12 col-md-6">
+              {/* Arama */}
+              <div className="col-12 col-md-5">
                 <label className="form-label small mb-1">
                   Ara (başlık / slug / özet)
                 </label>
@@ -62,7 +87,31 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
                 />
               </div>
 
+              {/* Dil */}
               <div className="col-6 col-md-3">
+                <label className="form-label small mb-1">
+                  Dil{" "}
+                  {localesLoading && (
+                    <span className="spinner-border spinner-border-sm ms-1" />
+                  )}
+                </label>
+                <select
+                  className="form-select form-select-sm"
+                  value={locale}
+                  onChange={handleLocaleChange}
+                  disabled={localesLoading && !locales.length}
+                >
+                  <option value="">Tüm diller</option>
+                  {locales.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Sıralama alanı */}
+              <div className="col-6 col-md-2">
                 <label className="form-label small mb-1">
                   Sıralama alanı
                 </label>
@@ -86,10 +135,9 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
                 </select>
               </div>
 
-              <div className="col-6 col-md-3">
-                <label className="form-label small mb-1">
-                  Yön
-                </label>
+              {/* Yön */}
+              <div className="col-6 col-md-2">
+                <label className="form-label small mb-1">Yön</label>
                 <select
                   className="form-select form-select-sm"
                   value={orderDir}
@@ -107,7 +155,7 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
       </div>
 
       {/* Sağ: Filtreler + aksiyonlar */}
-      <div className="col-md-6">
+      <div className="col-md-5">
         <div className="card">
           <div className="card-body py-2">
             <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">

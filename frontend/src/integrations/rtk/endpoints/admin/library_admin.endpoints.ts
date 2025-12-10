@@ -2,6 +2,9 @@
 // FILE: src/integrations/rtk/endpoints/admin/library_admin.endpoints.ts
 // Ensotek – Admin Library RTK Endpoints
 // Base URL: /api/admin (baseApi üzerinden)
+// - Library kayıtları
+// - Library images (kapak / galeri görselleri)
+// - Library files (PDF, Word, Excel, ZIP vb. indirilebilir dosyalar)
 // =============================================================
 
 import { baseApi } from "../../baseApi";
@@ -17,6 +20,8 @@ import type {
   LibraryFileCreatePayload,
   LibraryFileUpdatePayload,
 } from "@/integrations/types/library.types";
+
+type WithLocale<T> = T & { locale?: string };
 
 /**
  * Query paramlarından undefined / boş stringleri temizlemek için
@@ -38,57 +43,74 @@ export const libraryAdminApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     /* LIST – GET /api/admin/library                             */
     /* x-total-count header'ı varsa UI tarafında erişebilirsin   */
+    /* locale: query + x-locale header (opsiyonel)               */
     /* --------------------------------------------------------- */
     listLibraryAdmin: build.query<
       LibraryDto[],
-      LibraryListQueryParams | void
+      WithLocale<LibraryListQueryParams> | void
     >({
-      query: (params) => ({
-        url: "/admin/library",
-        method: "GET",
-        params: cleanParams(
-          params as Record<string, unknown> | undefined,
-        ),
-      }),
+      query: (params) => {
+        const p = (params || {}) as WithLocale<LibraryListQueryParams>;
+        const { locale, ...rest } = p;
+
+        return {
+          url: "/admin/library",
+          method: "GET",
+          params: cleanParams({ ...rest, locale }),
+          headers: locale ? { "x-locale": locale } : undefined,
+        };
+      },
     }),
 
     /* --------------------------------------------------------- */
     /* GET BY ID – GET /api/admin/library/:id                    */
+    /* locale: query + x-locale header (opsiyonel)               */
     /* --------------------------------------------------------- */
-    getLibraryAdmin: build.query<LibraryDto, string>({
-      query: (id) => ({
+    getLibraryAdmin: build.query<
+      LibraryDto,
+      { id: string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
         url: `/admin/library/${id}`,
         method: "GET",
+        params: cleanParams({ locale }),
+        headers: locale ? { "x-locale": locale } : undefined,
       }),
     }),
 
     /* --------------------------------------------------------- */
     /* GET BY SLUG – GET /api/admin/library/by-slug/:slug        */
+    /* locale: query + x-locale header (opsiyonel)               */
     /* --------------------------------------------------------- */
-    getLibraryBySlugAdmin: build.query<LibraryDto, string>({
-      query: (slug) => ({
+    getLibraryBySlugAdmin: build.query<
+      LibraryDto,
+      { slug: string; locale?: string }
+    >({
+      query: ({ slug, locale }) => ({
         url: `/admin/library/by-slug/${encodeURIComponent(slug)}`,
         method: "GET",
+        params: cleanParams({ locale }),
+        headers: locale ? { "x-locale": locale } : undefined,
       }),
     }),
 
     /* --------------------------------------------------------- */
     /* CREATE – POST /api/admin/library                          */
-    /* Body: UpsertLibraryBody                                   */
+    /* Body: upsertLibraryBodySchema                             */
+    /* i18n: body.locale + replicate_all_locales                 */
     /* --------------------------------------------------------- */
-    createLibraryAdmin: build.mutation<LibraryDto, LibraryCreatePayload>(
-      {
-        query: (body) => ({
-          url: "/admin/library",
-          method: "POST",
-          body,
-        }),
-      },
-    ),
+    createLibraryAdmin: build.mutation<LibraryDto, LibraryCreatePayload>({
+      query: (body) => ({
+        url: "/admin/library",
+        method: "POST",
+        body,
+      }),
+    }),
 
     /* --------------------------------------------------------- */
     /* UPDATE (PATCH) – PATCH /api/admin/library/:id             */
-    /* Body: PatchLibraryBody                                    */
+    /* Body: patchLibraryBodySchema                              */
+    /* i18n: body.locale + apply_all_locales                     */
     /* --------------------------------------------------------- */
     updateLibraryAdmin: build.mutation<
       LibraryDto,
@@ -114,15 +136,22 @@ export const libraryAdminApi = baseApi.injectEndpoints({
     /* ================== IMAGES (gallery) ===================== */
 
     /* LIST IMAGES – GET /api/admin/library/:id/images           */
-    listLibraryImagesAdmin: build.query<LibraryImageDto[], string>({
-      query: (id) => ({
+    /* locale: alt/caption için hangi dili döneceğini belirler   */
+    listLibraryImagesAdmin: build.query<
+      LibraryImageDto[],
+      { id: string; locale?: string }
+    >({
+      query: ({ id, locale }) => ({
         url: `/admin/library/${id}/images`,
         method: "GET",
+        params: cleanParams({ locale }),
+        headers: locale ? { "x-locale": locale } : undefined,
       }),
     }),
 
     /* CREATE IMAGE – POST /api/admin/library/:id/images         */
-    /* Body: UpsertLibraryImageBody, Response: LibraryImageView[]*/
+    /* Body: upsertLibraryImageBodySchema                        */
+    /* i18n: payload.locale + replicate_all_locales              */
     createLibraryImageAdmin: build.mutation<
       LibraryImageDto[],
       { id: string; payload: LibraryImageCreatePayload }
@@ -135,6 +164,8 @@ export const libraryAdminApi = baseApi.injectEndpoints({
     }),
 
     /* UPDATE IMAGE – PATCH /api/admin/library/:id/images/:imageId */
+    /* Body: patchLibraryImageBodySchema                         */
+    /* i18n: patch.locale + apply_all_locales                    */
     updateLibraryImageAdmin: build.mutation<
       LibraryImageDto[],
       {
@@ -161,17 +192,30 @@ export const libraryAdminApi = baseApi.injectEndpoints({
       }),
     }),
 
-    /* ================== FILES ================================ */
+    /* ================== FILES (PDF / DOCX / XLSX / ZIP) ====== */
 
-    /* LIST FILES – GET /api/admin/library/:id/files             */
-    listLibraryFilesAdmin: build.query<LibraryFileDto[], string>({
-      query: (id) => ({
+    /**
+     * LIST FILES – GET /api/admin/library/:id/files
+     * - Bir library kaydına bağlı tüm dosyalar (PDF, Word, Excel, vb.)
+     */
+    listLibraryFilesAdmin: build.query<
+      LibraryFileDto[],
+      { id: string }
+    >({
+      query: ({ id }) => ({
         url: `/admin/library/${id}/files`,
         method: "GET",
       }),
     }),
 
-    /* CREATE FILE – POST /api/admin/library/:id/files           */
+    /**
+     * CREATE FILE – POST /api/admin/library/:id/files
+     * Body: upsertLibraryFileParentBodySchema
+     *
+     * Tipik kullanım:
+     *  1) Storage modülüne dosya upload (asset_id, mime_type, size_bytes)
+     *  2) asset_id + name (+ mime_type, size_bytes) ile burada kayıt oluştur
+     */
     createLibraryFileAdmin: build.mutation<
       LibraryFileDto[],
       { id: string; payload: LibraryFileCreatePayload }
@@ -183,7 +227,10 @@ export const libraryAdminApi = baseApi.injectEndpoints({
       }),
     }),
 
-    /* UPDATE FILE – PATCH /api/admin/library/:id/files/:fileId  */
+    /**
+     * UPDATE FILE – PATCH /api/admin/library/:id/files/:fileId
+     * Body: patchLibraryFileParentBodySchema
+     */
     updateLibraryFileAdmin: build.mutation<
       LibraryFileDto[],
       {
@@ -199,7 +246,9 @@ export const libraryAdminApi = baseApi.injectEndpoints({
       }),
     }),
 
-    /* DELETE FILE – DELETE /api/admin/library/:id/files/:fileId */
+    /**
+     * DELETE FILE – DELETE /api/admin/library/:id/files/:fileId
+     */
     removeLibraryFileAdmin: build.mutation<
       void,
       { id: string; fileId: string }

@@ -42,6 +42,11 @@ export const UI_FALLBACK_EN = {
   ui_about_view_all: "View All",
   ui_about_fallback_title: "About Us",
 
+  // ===== ABOUT STATS =====
+  ui_about_stats_refs_title: "Industrial references",
+  ui_about_stats_projects_title: "Completed projects",
+  ui_about_stats_years_title: "Years of experience",
+
   // ===== SERVICES =====
   ui_services_subprefix: "What",
   ui_services_sublabel: "we do",
@@ -207,6 +212,12 @@ export const UI_FALLBACK_EN = {
   ui_spareparts_price_label: "Starting from",
   ui_spareparts_view_all: "All spare parts",
   ui_spareparts_empty: "There are no spare parts to display at the moment.",
+
+  // ===== FAQS =====
+  ui_faqs_page_title: "FAQs",
+
+  ui_team_page_title: "Our Team",
+  
 } as const;
 
 export type UIKey = keyof typeof UI_FALLBACK_EN;
@@ -416,6 +427,17 @@ export const UI_KEYS = {
     "ui_spareparts_price_label",
     "ui_spareparts_view_all",
     "ui_spareparts_empty",
+  ] as const,
+  team: [
+    "ui_team_page_title",
+  ] as const,
+  faqs: [
+    "ui_faqs_page_title",
+  ] as const,
+  about_stats: [
+    "ui_about_stats_refs_title",
+    "ui_about_stats_projects_title",
+    "ui_about_stats_years_title",
   ] as const,
 } as const;
 

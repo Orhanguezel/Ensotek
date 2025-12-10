@@ -16,12 +16,17 @@ import {
   useDeleteReferenceAdminMutation,
 } from "@/integrations/rtk/endpoints/admin/references_admin.endpoints";
 
+import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+
 import type {
   ReferenceDto,
   ReferenceListQueryParams,
 } from "@/integrations/types/references.types";
 
-import { ReferencesHeader } from "@/components/admin/references/ReferencesHeader";
+import {
+  ReferencesHeader,
+  type LocaleOption,
+} from "@/components/admin/references/ReferencesHeader";
 import { ReferencesList } from "@/components/admin/references/ReferencesList";
 
 /* ------------------------------------------------------------- */
@@ -34,11 +39,76 @@ const ReferencesAdminPage: React.FC = () => {
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
 
   const [orderBy, setOrderBy] =
-    useState<"created_at" | "updated_at" | "display_order">("display_order");
+    useState<"created_at" | "updated_at" | "display_order">(
+      "display_order",
+    );
   const [orderDir, setOrderDir] = useState<"asc" | "desc">("asc");
 
-  // Not: şimdilik locale sabit "tr"
-  const locale = "tr";
+  // Dil filtresi – "" = tüm diller
+  const [locale, setLocale] = useState<string>("");
+
+  /* -------------------- Locale options (site_settings.app_locales) -------------------- */
+
+  const {
+    data: appLocaleRows,
+    isLoading: isLocalesLoading,
+  } = useListSiteSettingsAdminQuery({
+    keys: ["app_locales"],
+  });
+
+  const localeCodes = useMemo(() => {
+    if (!appLocaleRows || appLocaleRows.length === 0) {
+      return ["tr", "en"];
+    }
+
+    const row = appLocaleRows.find((r) => r.key === "app_locales");
+    const v = row?.value;
+    let arr: string[] = [];
+
+    if (Array.isArray(v)) {
+      arr = v.map((x) => String(x)).filter(Boolean);
+    } else if (typeof v === "string") {
+      try {
+        const parsed = JSON.parse(v);
+        if (Array.isArray(parsed)) {
+          arr = parsed.map((x) => String(x)).filter(Boolean);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    if (!arr.length) {
+      return ["tr", "en"];
+    }
+
+    // uniq + lower
+    const uniqLower = Array.from(
+      new Set(arr.map((x) => String(x).toLowerCase())),
+    );
+    return uniqLower;
+  }, [appLocaleRows]);
+
+  const localeOptions: LocaleOption[] = useMemo(
+    () =>
+      localeCodes.map((code) => {
+        const lower = code.toLowerCase();
+        let label = `${code.toUpperCase()} (${lower})`;
+
+        if (lower === "tr") label = "Türkçe (tr)";
+        else if (lower === "en") label = "İngilizce (en)";
+        else if (lower === "de") label = "Almanca (de)";
+
+        return { value: lower, label };
+      }),
+    [localeCodes],
+  );
+
+  const handleLocaleChange = (next: string) => {
+    // Header already lower-cases, ama garanti olsun:
+    const normalized = next ? next.trim().toLowerCase() : "";
+    setLocale(normalized);
+  };
 
   /* -------------------- Liste + filtreler -------------------- */
 
@@ -61,9 +131,16 @@ const ReferencesAdminPage: React.FC = () => {
 
       // references modülü için module_key + locale
       module_key: "references",
-      locale,
+      locale: locale || undefined,
     }),
-    [search, showOnlyPublished, showOnlyFeatured, orderBy, orderDir, locale],
+    [
+      search,
+      showOnlyPublished,
+      showOnlyFeatured,
+      orderBy,
+      orderDir,
+      locale,
+    ],
   );
 
   const {
@@ -174,6 +251,10 @@ const ReferencesAdminPage: React.FC = () => {
       <ReferencesHeader
         search={search}
         onSearchChange={setSearch}
+        locale={locale}
+        onLocaleChange={handleLocaleChange}
+        locales={localeOptions}
+        localesLoading={isLocalesLoading}
         showOnlyPublished={showOnlyPublished}
         onShowOnlyPublishedChange={setShowOnlyPublished}
         showOnlyFeatured={showOnlyFeatured}

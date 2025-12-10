@@ -26,9 +26,9 @@ import { sendTemplatedEmail } from "@/modules/email-templates/mailer";
 /** Auth tarafında beklediğimiz user şekli (JWT payload) */
 type AuthUser =
   | {
-      id?: string;
-      role?: string;
-    }
+    id?: string;
+    role?: string;
+  }
   | undefined;
 
 /* ========== ortak helpers (mail + notification için) ========== */
@@ -116,10 +116,7 @@ export async function fireTicketRepliedEventsForTicket(args: {
         ticket_id: ticket.id,
         ticket_subject: ticket.subject ?? "",
         reply_message: replyMessage,
-        // site_name paramını globalde ekliyorsan burada vermene gerek yok;
-        // yoksa buradan da en azından fallback bir değer geçebilirsin.
       },
-      // eksik param varsa patlatmak istersen false bırak
       allowMissing: false,
     });
   } catch (err) {
@@ -169,7 +166,7 @@ export const SupportController = {
         user_id: body.user_id,
         subject: body.subject,
         message: body.message,
-        priority: body.priority,
+        priority: body.priority as any,
       });
       reply.code(201);
       return created;

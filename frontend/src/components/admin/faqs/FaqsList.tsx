@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/faqs/FaqsList.tsx
-// Admin FAQ Listesi (tablo)
+// Admin FAQ Listesi (tablo) – Kategorisiz sade liste
 // =============================================================
 
 import React from "react";
@@ -14,6 +14,13 @@ interface FaqsListProps {
   onToggleActive: (item: FaqDto, value: boolean) => void;
 }
 
+const formatDate = (value: string | null | undefined): string => {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  return d.toLocaleString();
+};
+
 export const FaqsList: React.FC<FaqsListProps> = ({
   items,
   loading,
@@ -21,64 +28,63 @@ export const FaqsList: React.FC<FaqsListProps> = ({
   onDelete,
   onToggleActive,
 }) => {
+  const rows = items ?? [];
+
   return (
     <div className="card">
       <div className="card-body p-2">
         <div className="table-responsive">
-          <table className="table table-sm align-middle mb-0">
-            <thead>
+          <table className="table table-hover table-sm align-middle mb-0">
+            <thead className="table-light">
               <tr>
-                <th style={{ width: "60px" }}>Sıra</th>
-                <th>Soru</th>
-                <th>Slug</th>
-                <th>Kategori</th>
-                <th style={{ width: "80px" }}>Aktif</th>
-                <th style={{ width: "180px" }}>Tarih</th>
-                <th style={{ width: "130px" }} className="text-end">
+                <th style={{ width: "5%" }}>Sıra</th>
+                <th style={{ width: "35%" }}>Soru</th>
+                <th style={{ width: "25%" }}>Slug</th>
+                <th style={{ width: "10%" }}>Aktif</th>
+                <th style={{ width: "15%" }}>Tarih</th>
+                <th style={{ width: "10%" }} className="text-end">
                   İşlemler
                 </th>
               </tr>
             </thead>
             <tbody>
-              {loading && (
+              {loading ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-4">
+                  <td colSpan={6} className="text-center py-4">
                     Yükleniyor...
                   </td>
                 </tr>
-              )}
-
-              {!loading && items.length === 0 && (
+              ) : rows.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-4">
+                  <td colSpan={6} className="text-center py-4">
                     Kayıt bulunamadı.
                   </td>
                 </tr>
-              )}
-
-              {!loading &&
-                items.map((item) => {
-                  // FaqDto.is_active: 0 | 1
+              ) : (
+                rows.map((item, idx) => {
                   const isActive = item.is_active === 1;
 
                   const created =
                     typeof item.created_at === "string"
                       ? item.created_at
-                      : item.created_at?.toISOString?.() ?? "";
+                      : item.created_at?.toString?.() ?? "";
+
                   const updated =
                     typeof item.updated_at === "string"
                       ? item.updated_at
-                      : item.updated_at?.toISOString?.() ?? "";
+                      : item.updated_at?.toString?.() ?? "";
 
                   return (
                     <tr key={item.id}>
-                      <td>
-                        <span className="badge bg-light text-muted">
-                          {item.display_order ?? 0}
-                        </span>
+                      {/* sıra */}
+                      <td className="text-muted small align-middle">
+                        <span className="me-1">#</span>
+                        <span>{item.display_order ?? idx + 1}</span>
                       </td>
-                      <td>
-                        <div className="fw-semibold small">
+
+                      {/* soru + locale */}
+                      <td className="small">
+                        <div className="fw-semibold text-truncate">
                           {item.question || (
                             <span className="text-muted">
                               (soru yok)
@@ -87,20 +93,23 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                         </div>
                         {item.locale_resolved && (
                           <div className="text-muted small">
-                            locale: {item.locale_resolved}
+                            locale:{" "}
+                            <code>{item.locale_resolved}</code>
                           </div>
                         )}
                       </td>
+
+                      {/* slug */}
                       <td className="small">
-                        {item.slug || (
-                          <span className="text-muted">(yok)</span>
-                        )}
+                        <div
+                          className="text-truncate"
+                          style={{ maxWidth: 260 }}
+                        >
+                          <code>{item.slug ?? "-"}</code>
+                        </div>
                       </td>
-                      <td className="small">
-                        {item.category || (
-                          <span className="text-muted">(yok)</span>
-                        )}
-                      </td>
+
+                      {/* aktif toggle */}
                       <td>
                         <div className="form-check form-switch d-flex justify-content-center">
                           <input
@@ -113,10 +122,16 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                           />
                         </div>
                       </td>
+
+                      {/* tarihler */}
                       <td className="small">
-                        <div>Oluşturma: {created}</div>
-                        <div>Güncelleme: {updated}</div>
+                        <div>{formatDate(created)}</div>
+                        <div className="text-muted small">
+                          Güncelleme: {formatDate(updated)}
+                        </div>
                       </td>
+
+                      {/* işlemler */}
                       <td className="text-end">
                         <div className="btn-group btn-group-sm">
                           <button
@@ -137,7 +152,8 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                       </td>
                     </tr>
                   );
-                })}
+                })
+              )}
             </tbody>
           </table>
         </div>
