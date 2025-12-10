@@ -172,7 +172,7 @@ const AdminMenuItemDetailPage: NextPage = () => {
   const [editMode, setEditMode] = useState<EditMode>("form");
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  const saving = isCreating || isUpdating;
+  const saving = isCreating || isUpdating || isDeleting;
   const loading = (!isNew && isLoadingItem) || localesLoading;
 
   /* -------------------- INITIAL FORM SETUP -------------------- */

@@ -90,7 +90,8 @@ const Sparepart: React.FC<SparepartSectionProps> = ({ categoryId }) => {
   });
 
   const items = useMemo(() => {
-    const list: ProductDto[] = data ?? [];
+    // data: ProductListResponse | undefined
+    const list: ProductDto[] = data?.items ?? [];
 
     return list
       .filter((p) => p.is_active)
@@ -118,6 +119,7 @@ const Sparepart: React.FC<SparepartSectionProps> = ({ categoryId }) => {
         };
       });
   }, [data]);
+
 
   const sparepartListHref = localizePath(locale, "/sparepart");
 
@@ -154,9 +156,9 @@ const Sparepart: React.FC<SparepartSectionProps> = ({ categoryId }) => {
           {items.map((p) => {
             const href = p.slug
               ? localizePath(
-                  locale,
-                  `/sparepart/${encodeURIComponent(p.slug)}`,
-                )
+                locale,
+                `/sparepart/${encodeURIComponent(p.slug)}`,
+              )
               : sparepartListHref;
 
             return (

@@ -37,7 +37,6 @@ export type MenuItemFormProps = {
 };
 
 export const MenuItemForm: React.FC<MenuItemFormProps> = ({
-  mode,
   values,
   saving,
   loading,

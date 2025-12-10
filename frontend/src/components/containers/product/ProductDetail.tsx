@@ -21,7 +21,6 @@ import {
   useListProductReviewsQuery,
 } from "@/integrations/rtk/endpoints/products.endpoints";
 import type {
-  ProductDto,
   ProductFaqDto,
   ProductSpecDto,
   ProductReviewDto,
