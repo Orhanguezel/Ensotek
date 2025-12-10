@@ -103,3 +103,37 @@ export interface FaqListQueryParams {
   // 🔥 Locale destekli public liste için
   locale?: string;
 }
+
+/* =============================================================
+ * Create / Update payload tipleri – backend validation ile uyumlu
+ * (create: question/answer/slug zorunlu, diğerleri opsiyonel)
+ * ============================================================= */
+
+interface FaqBasePayload {
+  is_active?: BoolLike;
+  display_order?: number;
+  category_id?: string;
+  sub_category_id?: string;
+}
+
+/**
+ * POST /admin/faqs
+ * Formdaki create payload ile bire bir uyumlu
+ */
+export interface FaqCreatePayload extends FaqBasePayload {
+  question: string;
+  answer: string;
+  slug: string;
+  locale?: string;
+}
+
+/**
+ * PATCH /admin/faqs/:id
+ * Tüm alanlar opsiyonel; patch mantığı
+ */
+export interface FaqUpdatePayload extends FaqBasePayload {
+  question?: string;
+  answer?: string;
+  slug?: string;
+  locale?: string;
+}

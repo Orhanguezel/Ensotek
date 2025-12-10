@@ -1,7 +1,6 @@
 // =============================================================
 // FILE: src/pages/admin/faqs/index.tsx
 // Ensotek – Admin FAQ Sayfası (Liste + filtreler)
-// CustomPage pattern'ine göre kategori gösterimi
 // =============================================================
 
 "use client";
@@ -17,19 +16,16 @@ import {
 } from "@/integrations/rtk/endpoints/admin/faqs_admin.endpoints";
 
 import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
-import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
-import { useListSubCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
 
 import type {
   FaqDto,
   FaqListQueryParams,
 } from "@/integrations/types/faqs.types";
-import type { CategoryDto } from "@/integrations/types/category.types";
-import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
 
 import {
   FaqsHeader,
   type LocaleOption,
+  type FaqOrderField,
 } from "@/components/admin/faqs/FaqsHeader";
 import { FaqsList } from "@/components/admin/faqs/FaqsList";
 
@@ -37,9 +33,6 @@ import { FaqsList } from "@/components/admin/faqs/FaqsList";
 type FaqListQueryWithLocale = FaqListQueryParams & {
   locale?: string;
 };
-
-/** SSS modülü için kategori module_key */
-const FAQ_CATEGORY_MODULE_KEY = "faq"; // BE'de farklıysa buna göre düzelt
 
 /* ------------------------------------------------------------- */
 
@@ -50,17 +43,11 @@ const FaqsAdminPage: React.FC = () => {
   const [showOnlyActive, setShowOnlyActive] = useState(false);
 
   const [orderBy, setOrderBy] =
-    useState<"created_at" | "updated_at" | "display_order">(
-      "display_order",
-    );
+    useState<FaqOrderField>("display_order");
   const [orderDir, setOrderDir] = useState<"asc" | "desc">("asc");
 
   // Dil filtresi – "" = tüm diller
   const [locale, setLocale] = useState<string>("");
-
-  // Kategori / alt kategori filtreleri (ID bazlı)
-  const [categoryId, setCategoryId] = useState<string>("");
-  const [subCategoryId, setSubCategoryId] = useState<string>("");
 
   /* -------------------- Locale options (site_settings.app_locales) -------------------- */
 
@@ -123,63 +110,6 @@ const FaqsAdminPage: React.FC = () => {
     setLocale(normalized);
   };
 
-  /* -------------------- Kategori / Alt kategori listeleri (header filtreleri için) -------------------- */
-
-  const { data: categoryRows } = useListCategoriesAdminQuery(undefined);
-  const { data: subCategoryRows } =
-    useListSubCategoriesAdminQuery(undefined);
-
-  // 1) Sadece SSS modülüne ait kategoriler
-  const faqCategoryRows = useMemo(
-    () =>
-      (categoryRows ?? []).filter((c: CategoryDto) => {
-        const cEx = c as CategoryDto & { module_key?: string };
-        return cEx.module_key === FAQ_CATEGORY_MODULE_KEY;
-      }),
-    [categoryRows],
-  );
-
-  const faqCategoryIds = useMemo(
-    () => faqCategoryRows.map((c) => c.id),
-    [faqCategoryRows],
-  );
-
-  // 2) Bu kategorilere bağlı alt kategoriler
-  const faqSubCategoryRows = useMemo(
-    () =>
-      (subCategoryRows ?? []).filter((s: SubCategoryDto) =>
-        faqCategoryIds.includes(s.category_id),
-      ),
-    [subCategoryRows, faqCategoryIds],
-  );
-
-  // 3) Header select için options (label = name || slug || id)
-  const categoryOptions = useMemo(
-    () =>
-      faqCategoryRows.map((c: CategoryDto) => {
-        const cEx = c as CategoryDto & {
-          name?: string;
-          slug?: string;
-        };
-        const label = cEx.name ?? cEx.slug ?? c.id;
-        return { value: c.id, label };
-      }),
-    [faqCategoryRows],
-  );
-
-  const subCategoryOptions = useMemo(
-    () =>
-      faqSubCategoryRows.map((s: SubCategoryDto) => {
-        const sEx = s as SubCategoryDto & {
-          name?: string;
-          slug?: string;
-        };
-        const label = sEx.name ?? sEx.slug ?? s.id;
-        return { value: s.id, label };
-      }),
-    [faqSubCategoryRows],
-  );
-
   /* -------------------- Liste + filtreler -------------------- */
 
   const listParams = useMemo<FaqListQueryWithLocale>(
@@ -189,10 +119,6 @@ const FaqsAdminPage: React.FC = () => {
 
       // filtreler
       is_active: showOnlyActive ? "1" : undefined,
-
-      // kategori filtreleri – ID bazlı
-      category_id: categoryId || undefined,
-      sub_category_id: subCategoryId || undefined,
 
       // sıralama
       sort: orderBy,
@@ -205,15 +131,7 @@ const FaqsAdminPage: React.FC = () => {
       // locale (opsiyonel)
       locale: locale || undefined,
     }),
-    [
-      search,
-      showOnlyActive,
-      orderBy,
-      orderDir,
-      categoryId,
-      subCategoryId,
-      locale,
-    ],
+    [search, showOnlyActive, orderBy, orderDir, locale],
   );
 
   const {
@@ -303,12 +221,6 @@ const FaqsAdminPage: React.FC = () => {
         onLocaleChange={handleLocaleChange}
         locales={localeOptions}
         localesLoading={isLocalesLoading}
-        categoryId={categoryId}
-        onCategoryIdChange={setCategoryId}
-        subCategoryId={subCategoryId}
-        onSubCategoryIdChange={setSubCategoryId}
-        categoryOptions={categoryOptions}
-        subCategoryOptions={subCategoryOptions}
         showOnlyActive={showOnlyActive}
         onShowOnlyActiveChange={setShowOnlyActive}
         orderBy={orderBy}
