@@ -1,9 +1,9 @@
 // =============================================================
 // FILE: src/pages/sparepart/[slug].tsx
-// Ensotek – Sparepart Detail Page (by slug)
+// Ensotek – Sparepart Detail Page (by slug, products modülü reuse)
 //   - Data: products
 //   - Locale-aware via useResolvedLocale
-//   - UI i18n: site_settings.ui_spareparts
+//   - UI i18n: site_settings.ui_spareparts (sadece sayfa başlığı için)
 // =============================================================
 
 "use client";
@@ -11,8 +11,8 @@
 import React from "react";
 
 import Banner from "@/components/layout/banner/Breadcrum";
-import SparepartDetail from "@/components/containers/sparepart/SparepartDetail";
-import SparepartMore from "@/components/containers/sparepart/SparepartMore";
+import ProductDetail from "@/components/containers/product/ProductDetail";
+import ProductMore from "@/components/containers/product/ProductMore";
 import Feedback from "@/components/containers/feedback/Feedback";
 
 import { useResolvedLocale } from "@/i18n/locale";
@@ -31,8 +31,9 @@ const SparepartDetailPage: React.FC = () => {
   return (
     <>
       <Banner title={title} />
-      <SparepartDetail />
-      <SparepartMore />
+      {/* Ürün detayı, specs, FAQ, reviews: products container’ları */}
+      <ProductDetail />
+      <ProductMore />
       <Feedback />
     </>
   );

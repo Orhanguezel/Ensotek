@@ -3,8 +3,9 @@
 // =============================================================
 import type { RouteHandler } from "fastify";
 import type { FastifyRequest, FastifyReply } from "fastify";
-import { db } from "@/db/client";
 import { and, asc, desc, eq, like, sql } from "drizzle-orm";
+
+import { db } from "@/db/client";
 import {
   products,
   productFaqs,
@@ -98,6 +99,15 @@ const safeLimit = (v: unknown, def = 100, max = 500): number => {
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const normalizeLocaleFromString = (raw?: string | null, fallback = "tr") => {
+  if (!raw) return fallback;
+  const trimmed = raw.trim();
+  if (!trimmed) return fallback;
+  const [short] = trimmed.split("-");
+  const norm = (short || fallback).toLowerCase();
+  return norm || fallback;
+};
+
 /* ----------------- LIST / GET (PUBLIC) ----------------- */
 
 /** GET /products?category_id=&sub_category_id=&is_active=&q=&limit=&offset=&sort=&order=&slug=&locale= */
@@ -117,7 +127,7 @@ export const listProducts: RouteHandler = async (req, reply) => {
     locale?: string;
   };
 
-  const locale = (q.locale && q.locale.trim()) || "tr";
+  const locale = normalizeLocaleFromString(q.locale, "tr");
 
   // shortcut: by slug (+ locale)
   if (q.slug) {
@@ -325,7 +335,7 @@ export const listProducts: RouteHandler = async (req, reply) => {
 export const getProductByIdOrSlug: RouteHandler = async (req, reply) => {
   const { idOrSlug } = req.params as { idOrSlug: string };
   const { locale: localeParam } = (req.query || {}) as { locale?: string };
-  const locale = (localeParam && localeParam.trim()) || "tr";
+  const locale = normalizeLocaleFromString(localeParam, "tr");
   const isUuid = UUID_RE.test(idOrSlug);
 
   const conds: any[] = [eq(productI18n.locale, locale)];
@@ -403,7 +413,7 @@ export const getProductByIdOrSlug: RouteHandler = async (req, reply) => {
 export const getProductById: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
   const { locale: localeParam } = (req.query || {}) as { locale?: string };
-  const locale = (localeParam && localeParam.trim()) || "tr";
+  const locale = normalizeLocaleFromString(localeParam, "tr");
 
   const rows = await db
     .select({
@@ -479,7 +489,7 @@ export const getProductBySlug: RouteHandler<{
   Querystring: { locale?: string };
 }> = async (req, reply) => {
   const { slug } = req.params;
-  const locale = (req.query?.locale && req.query.locale.trim()) || "tr";
+  const locale = normalizeLocaleFromString(req.query?.locale, "tr");
 
   const conds: any[] = [
     eq(productI18n.slug, slug),
@@ -554,33 +564,48 @@ export const getProductBySlug: RouteHandler<{
 /* FAQ & SPECS & REVIEWS */
 /* ===================== */
 
-/** GET /product_faqs?product_id=&only_active=1 */
+/** GET /product_faqs?product_id=&only_active=1&locale= */
 export const listProductFaqs: RouteHandler = async (req, reply) => {
   const q = (req.query || {}) as {
     product_id?: string;
     only_active?: string;
+    locale?: string;
   };
-  const conds: any[] = [];
+
+  const locale = normalizeLocaleFromString(q.locale, "tr");
+  const conds: any[] = [eq(productFaqs.locale, locale)];
+
   if (q.product_id) conds.push(eq(productFaqs.product_id, q.product_id));
   if (q.only_active === "1" || q.only_active === "true")
     conds.push(eq(productFaqs.is_active, 1 as any));
+
   const whereExpr = conds.length ? and(...conds) : undefined;
 
   const base = db.select().from(productFaqs);
   const rows = await (whereExpr ? base.where(whereExpr as any) : base).orderBy(
     productFaqs.display_order,
   );
+
   return reply.send(rows);
 };
 
-/** GET /product_specs?product_id= */
+/** GET /product_specs?product_id=&locale= */
 export const listProductSpecs: RouteHandler = async (req, reply) => {
-  const q = (req.query || {}) as { product_id?: string };
-  const base = db.select().from(productSpecs);
-  const rows = await (q.product_id
-    ? base.where(eq(productSpecs.product_id, q.product_id))
-    : base
-  ).orderBy(asc(productSpecs.order_num));
+  const q = (req.query || {}) as { product_id?: string; locale?: string };
+
+  const locale = normalizeLocaleFromString(q.locale, "tr");
+  const conds: any[] = [eq(productSpecs.locale, locale)];
+
+  if (q.product_id) conds.push(eq(productSpecs.product_id, q.product_id));
+
+  const whereExpr = and(...conds);
+
+  const rows = await db
+    .select()
+    .from(productSpecs)
+    .where(whereExpr as any)
+    .orderBy(asc(productSpecs.order_num));
+
   return reply.send(rows);
 };
 

@@ -41,17 +41,25 @@ export const sendTestMail: RouteHandler = async (req, reply) => {
 
     await sendMailRaw({
       to,
-      subject: "SMTP Test – ProductsPark",
+      subject: "SMTP Test – Ensotek",
       text: "Bu bir test mailidir. SMTP ayarlarınız başarılı görünüyor.",
       html: "<p>Bu bir <strong>test mailidir</strong>. SMTP ayarlarınız başarılı görünüyor.</p>",
     });
 
     return reply.send({ ok: true });
   } catch (e: any) {
-    req.log.error(e);
-    return reply
-      .code(500)
-      .send({ error: { message: "mail_test_failed", details: e?.message } });
+    req.log.error(
+      { err: e, code: e?.code, response: e?.response },
+      "smtp_test_failed",
+    );
+
+    return reply.code(500).send({
+      error: {
+        message: "mail_test_failed",
+        details: e?.message,
+        code: e?.code,
+      },
+    });
   }
 };
 

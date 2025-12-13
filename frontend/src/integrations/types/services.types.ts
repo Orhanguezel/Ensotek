@@ -76,6 +76,8 @@ export type ServiceListPublicQueryParams = Omit<
  *  - Admin list/get + admin slug + public get slug/id hepsi bu formda
  *    dönüyor. Public list ek olarak featured_image_url alanı da ekliyor.
  */
+// ... üst kısım aynı
+
 export interface ApiServiceBase {
   id: string;
   type: ServiceType | string;
@@ -86,6 +88,9 @@ export interface ApiServiceBase {
   featured: 0 | 1; // DB tinyint
   is_active: 0 | 1; // DB tinyint
   display_order: number;
+
+  // İsteğe bağlı: backend join ile gelen kategori adı
+  category_name?: string | null;
 
   // ana görsel alanları (legacy + storage)
   featured_image: string | null;
@@ -123,6 +128,7 @@ export interface ApiServiceBase {
   locale_resolved: string | null;
 }
 
+
 /** Admin tarafında list/get için cevap tipi */
 export type ApiServiceAdmin = ApiServiceBase;
 
@@ -149,6 +155,9 @@ export interface ServiceDto {
   featured: boolean;
   is_active: boolean;
   display_order: number;
+
+  // join'den gelen kategori adı (public için daha okunur)
+  category_name?: string | null;
 
   featured_image: string | null;
   image_url: string | null;
@@ -392,3 +401,5 @@ export interface ServiceImageUpdatePayload {
   /** patch: tüm dillere uygula? (default: false) */
   apply_all_locales?: boolean;
 }
+
+

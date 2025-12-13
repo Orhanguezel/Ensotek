@@ -22,12 +22,46 @@ import {
   listServiceImages,
 } from "./repository";
 
+/* ----------------------------- locale helper (PUBLIC) ----------------------------- */
+
+type LocaleQueryLike = { locale?: string; default_locale?: string };
+
+/**
+ * Public endpoint'ler için locale çözümü:
+ *  - Öncelik: query.locale > req.locale > DEFAULT_LOCALE
+ *  - default_locale: query.default_locale > DEFAULT_LOCALE
+ *
+ * Admin tarafındaki resolveLocales ile aynı davranış.
+ */
+function resolveLocalesPublic(
+  req: any,
+  query?: LocaleQueryLike,
+): { locale: Locale; def: Locale } {
+  const q = query ?? ((req.query ?? {}) as LocaleQueryLike);
+
+  const rawLocale =
+    typeof q.locale === "string" && q.locale.length > 0
+      ? q.locale
+      : (req.locale as string | undefined);
+
+  const rawDef =
+    typeof q.default_locale === "string" && q.default_locale.length > 0
+      ? q.default_locale
+      : undefined;
+
+  const locale = (rawLocale ?? DEFAULT_LOCALE) as Locale;
+  const def = (rawDef ?? DEFAULT_LOCALE) as Locale;
+
+  return { locale, def };
+}
+
 /* ----------------------------- LIST (PUBLIC) ----------------------------- */
 /**
  * GET /services
  * - Public liste endpoint'i
- * - Varsayılan olarak sadece is_active = 1 kayıtları döner
+ * - Varsayılan olarak sadece is_active = 1 kayıtlar
  * - Admin'deki listServicesAdmin ile aynı query şemasını kullanır
+ *   (locale / default_locale dahil)
  */
 export const listServicesPublic: RouteHandler<{
   Querystring: ServiceListQuery;
@@ -40,8 +74,12 @@ export const listServicesPublic: RouteHandler<{
   }
 
   const q = parsed.data;
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+
+  // 🔥 QUERY ÜZERİNDEN LOCALE / DEFAULT_LOCALE DESTEĞİ (public)
+  const { locale, def } = resolveLocalesPublic(req, {
+    locale: q.locale,
+    default_locale: q.default_locale,
+  });
 
   // Public tarafta default: sadece aktif kayıtlar
   const isActive =
@@ -71,14 +109,16 @@ export const listServicesPublic: RouteHandler<{
 /**
  * GET /services/:id
  * - Public detay
- * - Varsayılan locale + fallback
- * - is_active = 0 olanlar için 404 döndürmek mantıklı
+ * - Varsayılan locale + fallback (locale/default_locale)
+ * - is_active = 0 olanlar için 404
+ *
+ * Not: İstersen burada da query'den locale/default_locale alabilirsin:
+ *   GET /services/:id?locale=tr&default_locale=en
  */
 export const getServicePublic: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+  const { locale, def } = resolveLocalesPublic(req);
 
   const row = await getServiceMergedById(locale, def, req.params.id);
   if (!row || row.is_active !== 1) {
@@ -93,12 +133,15 @@ export const getServicePublic: RouteHandler<{
  * GET /services/by-slug/:slug
  * - Public detay (slug ile)
  * - is_active = 0 olanlar için 404
+ *
+ * FE:
+ *   GET /services/by-slug/modernization?locale=en&default_locale=tr
+ *   GET /services/by-slug/bakim-ve-onarim?locale=tr&default_locale=tr
  */
 export const getServiceBySlugPublic: RouteHandler<{
   Params: { slug: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+  const { locale, def } = resolveLocalesPublic(req);
 
   const row = await getServiceMergedBySlug(
     locale,
@@ -118,12 +161,12 @@ export const getServiceBySlugPublic: RouteHandler<{
  * GET /services/:id/images
  * - Public gallery
  * - Varsayılan: sadece aktif görseller (onlyActive: true)
+ * - locale/default_locale query'den ya da req.locale'den çözülür
  */
 export const listServiceImagesPublic: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
-  const locale: Locale = (req as any).locale ?? DEFAULT_LOCALE;
-  const def = DEFAULT_LOCALE;
+  const { locale, def } = resolveLocalesPublic(req);
 
   const rows = await listServiceImages({
     serviceId: req.params.id,

@@ -27,6 +27,15 @@ const CARD_W = 720;
 const CARD_H = 480;
 const PAGE_LIMIT = 12;
 
+// Kısa açıklama helper'ı
+function makeExcerpt(text: string, maxLength = 140): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (!clean) return "";
+  if (clean.length <= maxLength) return clean;
+  const sliced = clean.slice(0, maxLength);
+  return sliced.replace(/[,.;:\s]+$/g, "") + "…";
+}
+
 const ProductPageContent: React.FC = () => {
   const locale = useResolvedLocale();
 
@@ -54,10 +63,6 @@ const ProductPageContent: React.FC = () => {
   const readMoreAria = ui(
     "ui_products_read_more_aria",
     locale === "tr" ? "ürün detayını görüntüle" : "view product details",
-  );
-  const priceLabel = ui(
-    "ui_products_price_label",
-    locale === "tr" ? "Başlangıç fiyatı" : "Starting from",
   );
   const emptyText = ui(
     "ui_products_empty",
@@ -89,16 +94,19 @@ const ProductPageContent: React.FC = () => {
           (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
         "";
 
+      const description = (p.description || "").trim();
+      const excerpt = makeExcerpt(description);
+
       return {
         id: p.id,
         slug,
         title,
-        price: p.price,
         hero,
         alt: p.alt || title || "product image",
+        excerpt,
       };
     });
-  }, [data]); // locale dependency'si kaldırıldı
+  }, [data]);
 
   const productListHref = localizePath(locale, "/product");
 
@@ -168,19 +176,16 @@ const ProductPageContent: React.FC = () => {
                     <h3>
                       <Link href={href}>{p.title}</Link>
                     </h3>
-                    <p
-                      className="product__meta"
-                      style={{ marginTop: 6, marginBottom: 10 }}
-                    >
-                      {priceLabel}:{" "}
-                      <strong>
-                        {p.price.toLocaleString(locale, {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 2,
-                        })}{" "}
-                        €
-                      </strong>
-                    </p>
+
+                    {p.excerpt && (
+                      <p
+                        className="product__meta"
+                        style={{ marginTop: 6, marginBottom: 10 }}
+                      >
+                        {p.excerpt}
+                      </p>
+                    )}
+
                     <Link
                       href={href}
                       className="link-more"

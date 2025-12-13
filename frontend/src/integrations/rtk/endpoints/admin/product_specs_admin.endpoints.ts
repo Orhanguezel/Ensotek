@@ -14,18 +14,19 @@ import type {
 
 export const productSpecsAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    // LIST
+    // ---------- LIST ----------
     listProductSpecsAdmin: build.query<
       AdminProductSpecDto[],
       AdminProductSpecListParams
     >({
-      query: ({ productId }) => ({
+      query: ({ productId, locale }) => ({
         url: `/admin/products/${encodeURIComponent(productId)}/specs`,
         method: "GET",
+        params: locale ? { locale } : undefined,
       }),
     }),
 
-    // CREATE
+    // ---------- CREATE ----------
     createProductSpecAdmin: build.mutation<
       AdminProductSpecDto,
       { productId: string; payload: AdminProductSpecCreatePayload }
@@ -33,14 +34,20 @@ export const productSpecsAdminApi = baseApi.injectEndpoints({
       query: ({ productId, payload }) => ({
         url: `/admin/products/${encodeURIComponent(productId)}/specs`,
         method: "POST",
+        // locale hem body'de hem query'de olabilir; backend query.locale'i baz alıyor
+        params: payload.locale ? { locale: payload.locale } : undefined,
         body: payload,
       }),
     }),
 
-    // UPDATE
+    // ---------- UPDATE ----------
     updateProductSpecAdmin: build.mutation<
       AdminProductSpecDto,
-      { productId: string; specId: string; patch: AdminProductSpecUpdatePayload }
+      {
+        productId: string;
+        specId: string;
+        patch: AdminProductSpecUpdatePayload;
+      }
     >({
       query: ({ productId, specId, patch }) => ({
         url: `/admin/products/${encodeURIComponent(
@@ -51,7 +58,7 @@ export const productSpecsAdminApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // DELETE
+    // ---------- DELETE ----------
     deleteProductSpecAdmin: build.mutation<
       { ok: boolean },
       { productId: string; specId: string }
@@ -64,15 +71,22 @@ export const productSpecsAdminApi = baseApi.injectEndpoints({
       }),
     }),
 
-    // REPLACE
+    // ---------- REPLACE (PUT /specs) ----------
+    // - locale: query string'de
+    // - body: { items: AdminProductSpecCreatePayload[] }
     replaceProductSpecsAdmin: build.mutation<
       AdminProductSpecDto[],
-      { productId: string; payload: AdminProductSpecReplacePayload }
+      {
+        productId: string;
+        locale: string;
+        payload: AdminProductSpecReplacePayload;
+      }
     >({
-      query: ({ productId, payload }) => ({
+      query: ({ productId, locale, payload }) => ({
         url: `/admin/products/${encodeURIComponent(productId)}/specs`,
         method: "PUT",
-        body: payload,
+        params: locale ? { locale } : undefined,
+        body: payload, // { items }
       }),
     }),
   }),

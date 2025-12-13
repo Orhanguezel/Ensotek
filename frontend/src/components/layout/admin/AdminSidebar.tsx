@@ -54,6 +54,7 @@ const menuGroups: MenuGroup[] = [
         icon: FileText,
       },
       { title: "Hizmetler", value: "services", icon: FolderTree },
+      { title: "Teklif Formu", value: "offers", icon: FileText },
     ],
   },
   {

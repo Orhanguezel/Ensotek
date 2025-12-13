@@ -1,9 +1,5 @@
 // =============================================================
 // FILE: src/components/admin/products/tabs/ProductReviewsTab.tsx
-// Admin – Product Reviews Tab (product_reviews tablosu)
-// - Listeyi çeker
-// - Yeni review ekler
-// - Aktif/pasif toggling + silme
 // =============================================================
 
 "use client";
@@ -72,17 +68,17 @@ export const ProductReviewsTab: React.FC<ProductReviewsTabProps> = ({
 
   const handleNewChange =
     (field: keyof AdminProductReviewCreatePayload) =>
-    (
-      e:
-        | React.ChangeEvent<HTMLInputElement>
-        | React.ChangeEvent<HTMLTextAreaElement>,
-    ) => {
-      const v = e.target.value;
-      setNewReview((prev) => ({
-        ...prev,
-        [field]: field === "rating" ? Number(v) : (v as any),
-      }));
-    };
+      (
+        e:
+          | React.ChangeEvent<HTMLInputElement>
+          | React.ChangeEvent<HTMLTextAreaElement>,
+      ) => {
+        const v = e.target.value;
+        setNewReview((prev) => ({
+          ...prev,
+          [field]: field === "rating" ? Number(v) : (v as any),
+        }));
+      };
 
   const handleNewActiveChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -330,11 +326,10 @@ export const ProductReviewsTab: React.FC<ProductReviewsTabProps> = ({
                   </td>
                   <td>
                     <span
-                      className={`badge border ${
-                        r.is_active
+                      className={`badge border ${r.is_active
                           ? "bg-success-subtle text-success"
                           : "bg-secondary-subtle text-secondary"
-                      }`}
+                        }`}
                     >
                       {r.is_active ? "Aktif" : "Pasif"}
                     </span>

@@ -23,6 +23,14 @@ const toBool = (v: unknown): boolean | undefined => {
   return undefined;
 };
 
+const normalizeLocale = (raw?: string | null): string | undefined => {
+  if (!raw) return undefined;
+  const trimmed = raw.trim();
+  if (!trimmed) return undefined;
+  const [short] = trimmed.split("-");
+  return short.toLowerCase();
+};
+
 /** Admin panel için kategori drop-down (locale + module_key + is_active destekli) */
 export const adminListCategories: RouteHandler = async (req, reply) => {
   const { locale, module_key, is_active } =
@@ -34,9 +42,10 @@ export const adminListCategories: RouteHandler = async (req, reply) => {
 
   const conds: any[] = [];
 
-  if (locale && locale.trim()) {
+  const normLocale = normalizeLocale(locale);
+  if (normLocale) {
     // locale artık categoryI18n tablosunda
-    conds.push(eq(categoryI18n.locale, locale.trim()));
+    conds.push(eq(categoryI18n.locale, normLocale));
   }
 
   if (module_key && module_key.trim()) {
@@ -91,8 +100,9 @@ export const adminListSubcategories: RouteHandler = async (
     conds.push(eq(subCategories.category_id, category_id));
   }
 
-  if (locale && locale.trim()) {
-    conds.push(eq(subCategoryI18n.locale, locale.trim()));
+  const normLocale = normalizeLocale(locale);
+  if (normLocale) {
+    conds.push(eq(subCategoryI18n.locale, normLocale));
   }
 
   const active = toBool(is_active);

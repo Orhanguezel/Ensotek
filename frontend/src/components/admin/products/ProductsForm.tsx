@@ -1,11 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/products/ProductsForm.tsx
 // Ensotek – Admin Product Create/Edit Form (Modüler + Tab'li)
-// Tabs:
-//  - Genel (temel bilgiler, kategori, görseller, SEO)  [Form <-> JSON]
-//  - Specs (product_specs tablosu – ayrı modül, kendi içinde Form/JSON)
-//  - FAQs (product_faqs tablosu – ayrı modül, kendi içinde Form/JSON)
-//  - Reviews (product_reviews tablosu – ayrı modül)
 // =============================================================
 
 "use client";
@@ -84,18 +79,8 @@ export type ProductsFormProps = {
   locales: LocaleOption[];
   localesLoading?: boolean;
   defaultLocale?: string;
-  /**
-   * onSubmit: UI'den gelen değerler (string + JSON)
-   * Sayfa tarafında AdminProductCreatePayload / UpdatePayload'a çevirebilirsin.
-   */
   onSubmit: (values: ProductFormValues) => void | Promise<void>;
   onCancel?: () => void;
-
-  /**
-   * Dil değiştiğinde parent'a haber ver.
-   * Genellikle parent burada API'den yeni locale için ürün datasını çeker
-   * ve initialData prop'unu günceller.
-   */
   onLocaleChange?: (locale: string) => void | Promise<void>;
 };
 
@@ -201,8 +186,7 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
   const [values, setValues] = useState<ProductFormValues>(
     buildInitialValues(initialData, defaultLocale),
   );
-  const [activeTab, setActiveTab] =
-    useState<ProductFormTab>("general");
+  const [activeTab, setActiveTab] = useState<ProductFormTab>("general");
   const [generalViewMode, setGeneralViewMode] =
     useState<GeneralViewMode>("form");
 
@@ -216,8 +200,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
       const base = buildInitialValues(initialData, defaultLocale);
       return {
         ...base,
-        // Eğer kullanıcı select'ten bir locale seçtiyse onu koru;
-        // yoksa backend'den geleni kullan.
         locale:
           prev.locale ||
           base.locale ||
@@ -233,9 +215,7 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
     data: categoryData,
     isLoading: categoriesLoading,
     isFetching: categoriesFetching,
-  } = useListProductCategoriesAdminQuery(
-    { is_active: 1 }, // istersen buraya module_key: 'product' / 'sparepart' koyabilirsin
-  );
+  } = useListProductCategoriesAdminQuery({ is_active: 1 });
 
   const {
     data: subCategoryData,
@@ -250,29 +230,50 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
     },
   );
 
-  const categoryOptions = useMemo(
-    () =>
-      ((categoryData ?? []) as AdminProductCategoryDto[]).map((c) => ({
+  const categoryOptions = useMemo(() => {
+    const rows = (categoryData ?? []) as AdminProductCategoryDto[];
+
+    const seen = new Set<string>();
+
+    return rows
+      .filter((c) => {
+        if (!c.id) return false;
+        if (seen.has(c.id)) {
+          // Aynı id için birden fazla satır varsa, ilkini tut, diğerlerini at
+          return false;
+        }
+        seen.add(c.id);
+        return true;
+      })
+      .map((c) => ({
         id: c.id,
         name: c.name,
         slug: c.slug,
         module_key: c.module_key ?? undefined,
-      })),
-    [categoryData],
-  );
+      }));
+  }, [categoryData]);
 
-  const subCategoryOptions = useMemo(
-    () =>
-      ((subCategoryData ?? []) as AdminProductSubCategoryDto[]).map(
-        (s) => ({
-          id: s.id,
-          name: s.name,
-          slug: s.slug,
-          category_id: s.category_id,
-        }),
-      ),
-    [subCategoryData],
-  );
+
+  const subCategoryOptions = useMemo(() => {
+    const rows = (subCategoryData ?? []) as AdminProductSubCategoryDto[];
+
+    const seen = new Set<string>();
+
+    return rows
+      .filter((s) => {
+        if (!s.id) return false;
+        if (seen.has(s.id)) return false;
+        seen.add(s.id);
+        return true;
+      })
+      .map((s) => ({
+        id: s.id,
+        name: s.name,
+        slug: s.slug,
+        category_id: s.category_id,
+      }));
+  }, [subCategoryData]);
+
 
   const categoriesBusy = categoriesLoading || categoriesFetching;
   const subCategoriesBusy =
@@ -282,27 +283,25 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
 
   const handleChange =
     (field: keyof ProductFormValues) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const val = e.target.value;
-      setValues((prev) => ({ ...prev, [field]: val }));
-    };
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const val = e.target.value;
+        setValues((prev) => ({ ...prev, [field]: val }));
+      };
 
   const handleCheckboxChange =
     (field: keyof ProductFormValues) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const checked = e.target.checked;
-      setValues((prev) => ({ ...prev, [field]: checked as never }));
-    };
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const checked = e.target.checked;
+        setValues((prev) => ({ ...prev, [field]: checked as never }));
+      };
 
   const handleLocaleChange = async (
     e: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const val = e.target.value;
 
-    // Önce state'teki locale'i güncelle
     setValues((prev) => ({ ...prev, locale: val }));
 
-    // Edit modunda, ürün varsa ve callback gelmişse parent'a haber ver
     if (mode === "edit" && productId && onLocaleChange) {
       try {
         await onLocaleChange(val);
@@ -350,7 +349,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
     setValues(next as ProductFormValues);
   };
 
-  // Seçili kategori / alt kategori isimleri
   const selectedCategory = categoryOptions.find(
     (c) => c.id === values.category_id,
   );
@@ -358,7 +356,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
     (s) => s.id === values.sub_category_id,
   );
 
-  // Storage upload için meta
   const storageMeta = {
     module_key: "product",
     locale: values.locale || effectiveDefaultLocale,
@@ -366,10 +363,13 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
   };
 
   const changeTab =
-    (tab: ProductFormTab) => (e: React.MouseEvent<HTMLButtonElement>) => {
-      e.preventDefault();
-      setActiveTab(tab);
-    };
+    (tab: ProductFormTab) =>
+      (e: React.MouseEvent<HTMLButtonElement>) => {
+        e.preventDefault();
+        setActiveTab(tab);
+      };
+
+  const effectiveLocale = values.locale || effectiveDefaultLocale || "tr";
 
   return (
     <form onSubmit={handleSubmit}>
@@ -418,9 +418,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${
-                  activeTab === "general" ? "active" : ""
-                }`}
+                className={`nav-link ${activeTab === "general" ? "active" : ""
+                  }`}
                 onClick={changeTab("general")}
               >
                 Genel
@@ -429,9 +428,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${
-                  activeTab === "specs" ? "active" : ""
-                }`}
+                className={`nav-link ${activeTab === "specs" ? "active" : ""
+                  }`}
                 onClick={changeTab("specs")}
                 disabled={!productId}
               >
@@ -441,9 +439,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${
-                  activeTab === "faqs" ? "active" : ""
-                }`}
+                className={`nav-link ${activeTab === "faqs" ? "active" : ""
+                  }`}
                 onClick={changeTab("faqs")}
                 disabled={!productId}
               >
@@ -453,9 +450,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${
-                  activeTab === "reviews" ? "active" : ""
-                }`}
+                className={`nav-link ${activeTab === "reviews" ? "active" : ""
+                  }`}
                 onClick={changeTab("reviews")}
                 disabled={!productId}
               >
@@ -467,9 +463,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
           <div className="tab-content">
             {/* ------------ TAB: GENEL ------------ */}
             <div
-              className={`tab-pane fade ${
-                activeTab === "general" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === "general" ? "show active" : ""
+                }`}
             >
               {/* Genel tab içi Form / JSON toggle */}
               <div className="d-flex justify-content-between align-items-center mb-3">
@@ -484,9 +479,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                 <div className="btn-group btn-group-sm" role="group">
                   <button
                     type="button"
-                    className={`btn btn-outline-secondary ${
-                      generalViewMode === "form" ? "active" : ""
-                    }`}
+                    className={`btn btn-outline-secondary ${generalViewMode === "form" ? "active" : ""
+                      }`}
                     onClick={() => setGeneralViewMode("form")}
                     disabled={disabled}
                   >
@@ -494,9 +488,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                   </button>
                   <button
                     type="button"
-                    className={`btn btn-outline-secondary ${
-                      generalViewMode === "json" ? "active" : ""
-                    }`}
+                    className={`btn btn-outline-secondary ${generalViewMode === "json" ? "active" : ""
+                      }`}
                     onClick={() => setGeneralViewMode("json")}
                     disabled={disabled}
                   >
@@ -539,13 +532,9 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                             ))}
                           </select>
                           <div className="form-text small">
-                            Dil listesi veritabanındaki{" "}
-                            <code>site_settings.app_locales</code>{" "}
-                            kaydından gelir. Boş bırakırsan backend
-                            varsayılan locale kullanır. Edit modunda dil
-                            değiştirince ilgili locale kaydı yüklenmelidir
-                            (parent bileşen <code>onLocaleChange</code>{" "}
-                            ile API çağrısı yapar).
+                            Bu seçim aynı zamanda Teknik Özellikler ve
+                            SSS sekmelerinde hangi dilde kayıt
+                            düzenleyeceğini belirler.
                           </div>
                         </div>
                         <div className="col-sm-4 d-flex align-items-end">
@@ -597,9 +586,7 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                             min="0"
                           />
                           <div className="form-text small">
-                            Liste sıralaması için kullanılır. Drag &amp;
-                            drop <code>Reorder</code> uçları da bu alanı
-                            günceller.
+                            Liste sıralaması için kullanılır.
                           </div>
                         </div>
                       </div>
@@ -632,10 +619,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           required
                         />
                         <div className="form-text small">
-                          Sadece küçük harf, rakam ve tire:
-                          <code> beton-kule</code>,{" "}
-                          <code>pompa-200</code> gibi.
-                          <br />
                           <code>(locale, slug)</code> birlikte unique
                           tutulur.
                         </div>
@@ -682,10 +665,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                             onChange={handleChange("product_code")}
                             disabled={disabled}
                           />
-                          <div className="form-text small">
-                            <code>product_code</code> veritabanında
-                            unique.
-                          </div>
                         </div>
                       </div>
 
@@ -717,10 +696,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           disabled={disabled}
                         />
                         <div className="form-text small">
-                          Backend bu alanı{" "}
-                          <code>tags: string[]</code> olarak saklar.
-                          Virgülle ayırarak yaz.{" "}
-                          <code>ürün,sogutma,kule</code> gibi.
+                          Virgülle ayrılmış değerler{" "}
+                          <code>string[]</code> olarak saklanır.
                         </div>
                       </div>
                     </div>
@@ -745,14 +722,7 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           </option>
                           {categoryOptions.map((c) => (
                             <option key={c.id} value={c.id}>
-                              {c.name}{" "}
-                              {c.module_key
-                                ? `(${
-                                    c.module_key === "sparepart"
-                                      ? "Yedek parça"
-                                      : c.module_key
-                                  })`
-                                : ""}
+                              {c.name}
                             </option>
                           ))}
                         </select>
@@ -800,13 +770,10 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           <code className="ms-1">
                             {values.sub_category_id || "-"}
                           </code>
-                          <br />
-                          Boş bırakırsan ürün doğrudan üst kategori
-                          altında listelenir.
                         </div>
                       </div>
 
-                      {/* Görsel upload (storage) */}
+                      {/* Görsel upload */}
                       <div className="mb-3">
                         <AdminImageUploadField
                           label="Kapak Görseli"
@@ -815,10 +782,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                               Storage üzerinden görsel yüklemek için
                               kullanılır. Yüklenen görselin URL&apos;i{" "}
                               <code>image_url</code> alanına yazılır.
-                              İstersen asset id&apos;yi aşağıdaki
-                              alanlardan manuel doldurup{" "}
-                              <code>setProductImagesAdmin</code> ile de
-                              güncelleyebilirsin.
                             </>
                           }
                           bucket="public"
@@ -848,11 +811,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           onChange={handleChange("image_url")}
                           disabled={disabled}
                         />
-                        <div className="form-text small">
-                          Boş bırakıp sadece storage asset id ile de
-                          çalışabilirsin. Public site tarafında{" "}
-                          <code>image_url</code> gösterilecek.
-                        </div>
                       </div>
 
                       <div className="mb-3">
@@ -867,11 +825,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           onChange={handleChange("storage_asset_id")}
                           disabled={disabled}
                         />
-                        <div className="form-text small">
-                          <code>adminSetProductImages</code> uçlarıyla
-                          da güncellenir. Buradaki id, storage
-                          tablosundaki kayda karşılık gelir.
-                        </div>
                       </div>
 
                       <div className="mb-3">
@@ -886,12 +839,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           onChange={handleChange("storage_image_ids")}
                           disabled={disabled}
                         />
-                        <div className="form-text small">
-                          Virgülle ayırarak storage asset id listesi
-                          girebilirsin. Backend bunları{" "}
-                          <code>storage_image_ids: string[]</code>{" "}
-                          olarak saklar.
-                        </div>
                       </div>
 
                       <div className="mb-3">
@@ -922,10 +869,6 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           onChange={handleChange("rating")}
                           disabled={disabled}
                         />
-                        <div className="form-text small">
-                          İstersen burayı readonly tutup review
-                          modülünden otomatik hesaplatabilirsin.
-                        </div>
                       </div>
 
                       <div className="mb-3">
@@ -952,15 +895,10 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           onChange={handleChange("meta_description")}
                           disabled={disabled}
                         />
-                        <div className="form-text small">
-                          Arama motorları için kısa özet. ~140–160
-                          karakter idealdir.
-                        </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Özet */}
                   {selectedCategory && (
                     <div className="mt-3 text-muted small">
                       Seçilen kategori:{" "}
@@ -993,19 +931,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                   helperText={
                     <>
                       Bu alan formdaki tüm genel alanların JSON
-                      karşılığıdır. Buradan düzenlediğin değerler form
-                      tarafına da yansır.
-                      <pre className="mb-0 mt-1 small">
-{`{
-  "locale": "tr",
-  "title": "Örnek ürün",
-  "price": "1000",
-  "category_id": "1",
-  "specifications": {
-    "capacity": "1.500 m³/h – 4.500 m³/h"
-  }
-}`}
-                      </pre>
+                      karşılığıdır. Buradan düzenlediğin değerler forma
+                      da yansır.
                     </>
                   }
                   height={320}
@@ -1015,33 +942,32 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
 
             {/* ------------ TAB: SPECS ------------ */}
             <div
-              className={`tab-pane fade ${
-                activeTab === "specs" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === "specs" ? "show active" : ""
+                }`}
             >
               <ProductSpecsTab
                 productId={productId}
+                locale={effectiveLocale}
                 disabled={disabled || !productId}
               />
             </div>
 
             {/* ------------ TAB: FAQS ------------ */}
             <div
-              className={`tab-pane fade ${
-                activeTab === "faqs" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === "faqs" ? "show active" : ""
+                }`}
             >
               <ProductFaqsTab
                 productId={productId}
+                locale={effectiveLocale}
                 disabled={disabled || !productId}
               />
             </div>
 
             {/* ------------ TAB: REVIEWS ------------ */}
             <div
-              className={`tab-pane fade ${
-                activeTab === "reviews" ? "show active" : ""
-              }`}
+              className={`tab-pane fade ${activeTab === "reviews" ? "show active" : ""
+                }`}
             >
               <ProductReviewsTab
                 productId={productId}

@@ -1,3 +1,8 @@
+// =============================================================
+// FILE: src/pages/service/index.tsx
+// Public Services Page (list)
+// =============================================================
+
 import React from "react";
 import Banner from "@/components/layout/banner/Breadcrum";
 import Service from "@/components/containers/service/Service";

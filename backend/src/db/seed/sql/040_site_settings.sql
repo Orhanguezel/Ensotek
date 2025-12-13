@@ -186,24 +186,6 @@ ON DUPLICATE KEY UPDATE
   `value`    = VALUES(`value`),
   updated_at = VALUES(updated_at);
 
--- Company profile (EN)
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
-(
-  UUID(),
-  'company_profile',
-  'en',
-  JSON_OBJECT(
-    'headline', 'Smart Energy & Automation with Ensotek',
-    'subline',  'We provide end-to-end automation and energy efficiency solutions for industrial facilities, restaurants, and commercial businesses.',
-    'body',     'Ensotek Energy Systems is an integrated technology partner covering project design, on-site inspection, installation, commissioning, and maintenance. With IoT-based remote monitoring, energy consumption analytics, and custom reporting dashboards, we help you digitalize your operations and optimize your energy usage.'
-  ),
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
-
 -- Brand / logo info (EN)
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
@@ -350,6 +332,13 @@ ON DUPLICATE KEY UPDATE
    TEKNİK: SMTP / Mail ayarları
    ============================================================= */
 
+-- Not:
+--  - smtp_* ayarları TR için seed edilir, dosyanın sonunda TR → EN / TR → DE
+--    kopyası ile EN ve DE için de birebir aynı değerler oluşturulur.
+--  - Bu değerler backend'de sadece site_settings üzerinden okunur,
+--    ENV / process.env fallback YOKTUR.
+--  - Üretimde gerçek SMTP bilgilerini admin paneli üzerinden güncellemen gerekir.
+
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
@@ -440,7 +429,7 @@ ON DUPLICATE KEY UPDATE
    OTOMATİK KOPYA: TR → EN / TR → DE
    ============================================================= */
 
--- TR → EN
+-- TR → EN (EN tarafında olmayan tüm key'ler TR'den kopyalanır)
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
 SELECT UUID(), s.`key`, 'en', s.`value`, NOW(3), NOW(3)
 FROM site_settings s
@@ -452,7 +441,7 @@ WHERE s.locale = 'tr'
       AND t.locale = 'en'
   );
 
--- TR → DE
+-- TR → DE (DE tarafında olmayan tüm key'ler TR'den kopyalanır)
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
 SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
 FROM site_settings s

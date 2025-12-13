@@ -171,3 +171,42 @@ ON DUPLICATE KEY UPDATE
  author          = VALUES(author),
  published_at    = VALUES(published_at),
  updated_at      = VALUES(updated_at);
+
+-- Yaz kuru / yaş termometre tasarım değerleri
+SET @LIB_SUMMER_TW_ID := (
+  SELECT l.id
+  FROM library l
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  WHERE i.slug = 'yaz-kuru-yas-termometre-tasarim-degerleri'
+  LIMIT 1
+);
+SET @LIB_SUMMER_TW_ID := COALESCE(@LIB_SUMMER_TW_ID, UUID());
+
+INSERT INTO library
+(id, is_published, is_active, display_order,
+ tags_json,
+ category_id, sub_category_id,
+ author, views, download_count,
+ published_at, created_at, updated_at)
+VALUES
+(@LIB_SUMMER_TW_ID,
+  1, 1, 30,
+  -- Çok dilli tags: tr + en
+  '{
+    "tr":["yaz tasarım sıcaklığı","kuru termometre","yaş termometre","soğutma kulesi","iklim verisi","tasarım verisi"],
+    "en":["summer design temperature","dry-bulb","wet-bulb","cooling tower","climate data","design data"]
+  }',
+  @LIB_CATEGORY_ID, @LIB_SUBCATEGORY_PDF,
+  'Ensotek', 0, 0,
+  NOW(3), NOW(3), NOW(3)
+)
+ON DUPLICATE KEY UPDATE
+ is_published    = VALUES(is_published),
+ is_active       = VALUES(is_active),
+ display_order   = VALUES(display_order),
+ tags_json       = VALUES(tags_json),
+ category_id     = VALUES(category_id),
+ sub_category_id = VALUES(sub_category_id),
+ author          = VALUES(author),
+ published_at    = VALUES(published_at),
+ updated_at      = VALUES(updated_at);

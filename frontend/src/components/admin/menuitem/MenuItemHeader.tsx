@@ -1,10 +1,15 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemHeader.tsx
 // Ensotek – Admin Menu Items Header / Filters (locale destekli)
-// LibraryHeader pattern’ine göre düzenlenmiş
+// LibraryHeader / ProductsHeader pattern’ine göre düzenlenmiş
 // =============================================================
 
 import React from "react";
+
+export type LocaleOption = {
+  value: string;
+  label: string;
+};
 
 export type MenuItemFilters = {
   search: string;
@@ -19,6 +24,9 @@ export type MenuItemHeaderProps = {
   filters: MenuItemFilters;
   total: number;
   loading: boolean;
+  locales: LocaleOption[];
+  localesLoading?: boolean;
+  defaultLocale?: string;
   onFiltersChange: (next: MenuItemFilters) => void;
   onRefresh: () => void;
   onCreateClick: () => void;
@@ -28,6 +36,9 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
   filters,
   total,
   loading,
+  locales,
+  localesLoading,
+  defaultLocale,
   onFiltersChange,
   onRefresh,
   onCreateClick,
@@ -46,9 +57,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
     });
   };
 
-  const handleLocaleChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const raw = e.target.value;
     const next = raw ? raw.trim().toLowerCase() : "";
     onFiltersChange({
@@ -56,6 +65,8 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
       locale: next,
     });
   };
+
+  const effectiveDefaultLocale = defaultLocale ?? "tr";
 
   return (
     <div className="row mb-3 g-2 align-items-end">
@@ -79,20 +90,31 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                 />
               </div>
 
-              {/* Dil filtresi */}
+              {/* Dil filtresi – dinamik (site_settings.app_locales) */}
               <div className="col-6 col-md-3">
                 <label className="form-label small mb-1">Dil</label>
                 <select
                   className="form-select form-select-sm"
                   value={filters.locale}
                   onChange={handleLocaleChange}
-                  disabled={loading}
+                  disabled={loading || (localesLoading && !locales.length)}
                 >
-                  <option value="">Tüm diller</option>
-                  <option value="tr">Türkçe (tr)</option>
-                  <option value="en">English (en)</option>
-                  <option value="de">Deutsch (de)</option>
+                  <option value="">
+                    Tüm diller
+                    {effectiveDefaultLocale
+                      ? ` (varsayılan: ${effectiveDefaultLocale})`
+                      : ""}
+                  </option>
+                  {locales.map((loc) => (
+                    <option key={loc.value} value={loc.value}>
+                      {loc.label}
+                    </option>
+                  ))}
                 </select>
+                <div className="form-text small">
+                  Dil listesi{" "}
+                  <code>site_settings.app_locales</code> kaydından yüklenir.
+                </div>
               </div>
 
               {/* Konum filtresi */}
@@ -146,9 +168,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
 
               {/* Yön butonu – desktop */}
               <div className="col-6 col-md-3 d-none d-md-block">
-                <label className="form-label small mb-1 d-block">
-                  Yön
-                </label>
+                <label className="form-label small mb-1 d-block">Yön</label>
                 <button
                   type="button"
                   className="btn btn-outline-secondary btn-sm w-100"
