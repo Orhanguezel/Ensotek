@@ -1,9 +1,5 @@
 // =============================================================
 // FILE: src/components/admin/products/tabs/ProductSpecsTab.tsx
-// Admin – Product Specs Tab (product_specs tablosu)
-// - Listeyi çeker
-// - Form veya JSON modunda aynı veriyi düzenler
-// - PUT /specs (replaceProductSpecsAdmin) ile kaydeder
 // =============================================================
 
 "use client";
@@ -18,12 +14,15 @@ import {
 import type {
   AdminProductSpecDto,
   AdminProductSpecCreatePayload,
+  AdminProductSpecListParams,
 } from "@/integrations/types/product_specs_admin.types";
 
 import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
 
 export type ProductSpecsTabProps = {
   productId?: string;
+  // Locale artık zorunlu; parent her zaman string gönderecek
+  locale: string;
   disabled?: boolean;
 };
 
@@ -31,11 +30,25 @@ type SpecsViewMode = "form" | "json";
 
 export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
   productId,
+  locale,
   disabled,
 }) => {
-  // TEK KAYNAK: items
   const [items, setItems] = useState<AdminProductSpecCreatePayload[]>([]);
   const [viewMode, setViewMode] = useState<SpecsViewMode>("form");
+
+  // Seçili dil (boş string gelirse trim edip boş kabul ediyoruz)
+  const effectiveLocale = (locale || "").trim();
+
+  // -------- LIST QUERY ARG & SKIP --------
+  const shouldSkipList =
+    !productId || !effectiveLocale; // ürün yoksa veya dil seçili değilse istek atma
+
+  const queryArgs: AdminProductSpecListParams | undefined = !shouldSkipList
+    ? {
+      productId,
+      locale: effectiveLocale,
+    }
+    : undefined;
 
   const {
     data,
@@ -43,8 +56,10 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
     isFetching,
     refetch,
   } = useListProductSpecsAdminQuery(
-    { productId: productId as string },
-    { skip: !productId },
+    queryArgs as AdminProductSpecListParams,
+    {
+      skip: shouldSkipList,
+    },
   );
 
   const [replaceSpecs, { isLoading: isSaving }] =
@@ -52,15 +67,17 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
 
   useEffect(() => {
     if (!data) return;
-    const mapped: AdminProductSpecCreatePayload[] = (data as AdminProductSpecDto[]).map(
-      (s) => ({
-        id: s.id,
-        name: s.name,
-        value: s.value,
-        category: s.category,
-        order_num: s.order_num,
-      }),
-    );
+
+    const mapped: AdminProductSpecCreatePayload[] = (
+      data as AdminProductSpecDto[]
+    ).map((s) => ({
+      id: s.id,
+      name: s.name,
+      value: s.value,
+      category: s.category,
+      order_num: s.order_num,
+    }));
+
     setItems(mapped);
   }, [data]);
 
@@ -69,13 +86,18 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
   const handleSave = async () => {
     if (!productId) return;
 
+    if (!effectiveLocale) {
+      toast.error("Lütfen önce ürün formundan bir dil (locale) seç.");
+      return;
+    }
+
     try {
       const normalized: AdminProductSpecCreatePayload[] = (items ?? []).map(
         (raw) => ({
           id: raw.id,
           name: String(raw.name ?? "").trim(),
-          value: String(raw.value ?? ""),
-          category: raw.category ?? "custom",
+          value: String(raw.value ?? "").trim(),
+          category: (raw.category as any) ?? "custom",
           order_num:
             typeof raw.order_num === "number"
               ? raw.order_num
@@ -85,7 +107,10 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
 
       await replaceSpecs({
         productId,
-        payload: { items: normalized },
+        locale: effectiveLocale, // mutation arg tipine birebir uyumlu
+        payload: {
+          items: normalized,
+        },
       }).unwrap();
 
       toast.success("Teknik özellikler kaydedildi.");
@@ -102,28 +127,27 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
 
   const handleItemChange =
     (index: number, field: keyof AdminProductSpecCreatePayload) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const value = e.target.value;
-      setItems((prev) =>
-        prev.map((item, i) =>
-          i === index
-            ? {
+      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const value = e.target.value;
+        setItems((prev) =>
+          prev.map((item, i) =>
+            i === index
+              ? {
                 ...item,
                 [field]:
                   field === "order_num"
-                    ? (parseInt(value, 10) || 0)
-                    : value,
+                    ? parseInt(value, 10) || 0
+                    : (value as any),
               }
-            : item,
-        ),
-      );
-    };
+              : item,
+          ),
+        );
+      };
 
   const handleAddRow = () => {
     setItems((prev) => [
       ...prev,
       {
-        // id boş → backend yeni record yaratır
         name: "",
         value: "",
         category: "custom",
@@ -153,6 +177,15 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
     );
   }
 
+  if (!effectiveLocale) {
+    return (
+      <div className="alert alert-info small mb-0">
+        Teknik özellikleri görmek için önce Genel sekmeden bir dil
+        (locale) seçmelisin.
+      </div>
+    );
+  }
+
   return (
     <div>
       {/* Başlık + actions */}
@@ -162,7 +195,8 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
             Teknik Özellikler (product_specs)
           </h6>
           <div className="text-muted small">
-            Aynı veriyi ister form, ister JSON olarak düzenleyebilirsin.
+            Aktif locale: <code>{effectiveLocale}</code>. Aynı veriyi
+            ister form, ister JSON olarak düzenleyebilirsin.
           </div>
         </div>
 
@@ -171,9 +205,8 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
           <div className="btn-group btn-group-sm" role="group">
             <button
               type="button"
-              className={`btn btn-outline-secondary ${
-                viewMode === "form" ? "active" : ""
-              }`}
+              className={`btn btn-outline-secondary ${viewMode === "form" ? "active" : ""
+                }`}
               onClick={() => setViewMode("form")}
               disabled={busy || disabled}
             >
@@ -181,9 +214,8 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
             </button>
             <button
               type="button"
-              className={`btn btn-outline-secondary ${
-                viewMode === "json" ? "active" : ""
-              }`}
+              className={`btn btn-outline-secondary ${viewMode === "json" ? "active" : ""
+                }`}
               onClick={() => setViewMode("json")}
               disabled={busy || disabled}
             >
@@ -319,17 +351,8 @@ export const ProductSpecsTab: React.FC<ProductSpecsTabProps> = ({
           disabled={busy || disabled}
           helperText={
             <>
-              JSON formatı örneği:
-              <pre className="mb-0 mt-1 small">
-{`[
-  {
-    "name": "capacity",
-    "value": "1.500 m³/h – 4.500 m³/h",
-    "category": "physical",
-    "order_num": 0
-  }
-]`}
-              </pre>
+              Aktif locale: <code>{effectiveLocale}</code>. JSON formatı
+              örneği:
             </>
           }
           height={260}

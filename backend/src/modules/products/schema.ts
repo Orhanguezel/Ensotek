@@ -122,15 +122,12 @@ export const productI18n = mysqlTable(
       .$onUpdateFn(() => new Date()),
   },
   (t) => [
-    // 🔑 Her ürün + locale kombinasyonu tekil (PK)
     primaryKey({
       name: "product_i18n_pk",
       columns: [t.product_id, t.locale],
     }),
 
-    // 🧩 Aynı locale içinde slug tekil olsun
     uniqueIndex("product_i18n_locale_slug_uq").on(t.locale, t.slug),
-
     index("product_i18n_locale_idx").on(t.locale),
 
     foreignKey({
@@ -145,11 +142,17 @@ export const productI18n = mysqlTable(
 
 // ========== SPECS / FAQS / REVIEWS / OPTIONS / STOCK ==========
 
+/**
+ * PRODUCT SPECS – LOCALE DESTEKLİ
+ *   - tablo: product_specs (id PK)
+ *   - TR / EN için ayrı satır, id farklı, locale alanı ile filtrelenecek
+ */
 export const productSpecs = mysqlTable(
   "product_specs",
   {
     id: char("id", { length: 36 }).primaryKey().notNull(),
     product_id: char("product_id", { length: 36 }).notNull(),
+    locale: varchar("locale", { length: 8 }).notNull().default("tr"),
 
     name: varchar("name", { length: 255 }).notNull(),
     value: text("value").notNull(),
@@ -173,6 +176,8 @@ export const productSpecs = mysqlTable(
   },
   (t) => [
     index("product_specs_product_id_idx").on(t.product_id),
+    index("product_specs_product_locale_idx").on(t.product_id, t.locale),
+    index("product_specs_locale_idx").on(t.locale),
     foreignKey({
       columns: [t.product_id],
       foreignColumns: [products.id],
@@ -183,15 +188,23 @@ export const productSpecs = mysqlTable(
   ],
 );
 
+/**
+ * PRODUCT FAQS – LOCALE DESTEKLİ
+ *   - tablo: product_faqs (id PK)
+ *   - TR / EN için ayrı satır, id farklı, locale alanı ile filtrelenecek
+ */
 export const productFaqs = mysqlTable(
   "product_faqs",
   {
     id: char("id", { length: 36 }).primaryKey().notNull(),
     product_id: char("product_id", { length: 36 }).notNull(),
+    locale: varchar("locale", { length: 8 }).notNull().default("tr"),
+
     question: varchar("question", { length: 500 }).notNull(),
     answer: text("answer").notNull(),
     display_order: int("display_order").notNull().default(0),
     is_active: tinyint("is_active").notNull().default(1).$type<boolean>(),
+
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),
@@ -203,6 +216,8 @@ export const productFaqs = mysqlTable(
   (t) => [
     index("product_faqs_product_id_idx").on(t.product_id),
     index("product_faqs_order_idx").on(t.display_order),
+    index("product_faqs_product_locale_idx").on(t.product_id, t.locale),
+    index("product_faqs_locale_idx").on(t.locale),
     foreignKey({
       columns: [t.product_id],
       foreignColumns: [products.id],
@@ -213,6 +228,9 @@ export const productFaqs = mysqlTable(
   ],
 );
 
+/**
+ * PRODUCT REVIEWS – şimdilik locale YOK (TR yorumlar)
+ */
 export const productReviews = mysqlTable(
   "product_reviews",
   {
@@ -254,7 +272,8 @@ export const productOptions = mysqlTable(
     id: char("id", { length: 36 }).primaryKey().notNull(),
     product_id: char("product_id", { length: 36 }).notNull(),
     option_name: varchar("option_name", { length: 100 }).notNull(),
-    option_values: json("option_values").$type<string[]>().notNull(),
+    // NOT: JSON içinde aslında {code,label} objeleri var;
+    option_values: json("option_values").$type<any[]>().notNull(),
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),

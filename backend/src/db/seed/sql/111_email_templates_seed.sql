@@ -46,7 +46,60 @@ VALUES
 ('e7fae474-c1cf-4600-8466-2f915146cfb9',
  'welcome',
  JSON_ARRAY('user_name','user_email','site_name'),
- 1, '2025-10-09 19:38:58.000', '2025-10-13 15:06:38.000')
+ 1, '2025-10-09 19:38:58.000', '2025-10-13 15:06:38.000'),
+
+-- ============================================================
+-- OFFER EMAIL TEMPLATES – PARENT KAYITLAR
+-- ============================================================
+
+-- offer_sent_customer
+('1111aaaa-2222-3333-4444-555566667777',
+ 'offer_sent_customer',
+ JSON_ARRAY(
+   'customer_name',
+   'company_name',
+   'offer_no',
+   'email',
+   'phone',
+   'currency',
+   'net_total',
+   'vat_total',
+   'gross_total',
+   'valid_until',
+   'pdf_url'
+ ),
+ 1, '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- offer_sent_admin
+('2222bbbb-2222-3333-4444-555566667777',
+ 'offer_sent_admin',
+ JSON_ARRAY(
+   'customer_name',
+   'company_name',
+   'offer_no',
+   'email',
+   'phone',
+   'currency',
+   'net_total',
+   'vat_total',
+   'gross_total',
+   'valid_until',
+   'pdf_url'
+ ),
+ 1, '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- offer_request_received_admin
+('3333cccc-2222-3333-4444-555566667777',
+ 'offer_request_received_admin',
+ JSON_ARRAY(
+   'customer_name',
+   'company_name',
+   'email',
+   'phone',
+   'offer_id',
+   'message'
+ ),
+ 1, '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000')
 ON DUPLICATE KEY UPDATE
   `variables`   = VALUES(`variables`),
   `is_active`   = VALUES(`is_active`),
@@ -66,7 +119,7 @@ VALUES
  'tr',
  'Ticket Replied',
  'Destek Talebiniz Yanıtlandı - {{site_name}}',
- '<h1 class=\"ql-align-center\">Destek Talebiniz Yanıtlandı</h1><p>Merhaba <strong>{{user_name}}</strong>,</p><p>Destek talebiniz yanıtlandı.</p><p><br></p><p>Detayları görüntülemek için kullanıcı paneline giriş yapabilirsiniz.</p><p>Saygılarımızla,</p><p>{{site_name}} Ekibi</p>',
+ '<h1 class="ql-align-center">Destek Talebiniz Yanıtlandı</h1><p>Merhaba <strong>{{user_name}}</strong>,</p><p>Destek talebiniz yanıtlandı.</p><p><br></p><p>Detayları görüntülemek için kullanıcı paneline giriş yapabilirsiniz.</p><p>Saygılarımızla,</p><p>{{site_name}} Ekibi</p>',
  '2025-10-09 19:38:58.000', '2025-10-13 20:28:47.000'),
 
 -- ticket_replied (en)
@@ -75,7 +128,7 @@ VALUES
  'en',
  'Ticket Replied',
  'Your Support Ticket Has Been Answered - {{site_name}}',
- '<h1 class=\"ql-align-center\">Your Support Ticket Has Been Answered</h1><p>Hello <strong>{{user_name}}</strong>,</p><p>Your support ticket has been answered.</p><p><br></p><p>You can log in to your account to view the full details.</p><p>Best regards,</p><p>{{site_name}} Team</p>',
+ '<h1 class="ql-align-center">Your Support Ticket Has Been Answered</h1><p>Hello <strong>{{user_name}}</strong>,</p><p>Your support ticket has been answered.</p><p><br></p><p>You can log in to your account to view the full details.</p><p>Best regards,</p><p>{{site_name}} Team</p>',
  '2025-10-09 19:38:58.000', '2025-10-13 20:28:47.000'),
 
 -- password_reset (tr)
@@ -84,7 +137,17 @@ VALUES
  'tr',
  'Password Reset',
  'Şifre Sıfırlama Talebi - {{site_name}}',
- '<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n    <h1 style=\"color: #333; text-align: center;\">Şifre Sıfırlama</h1>\n    <p style=\"color: #666; font-size: 16px;\">Merhaba,</p>\n    <p style=\"color: #666; font-size: 16px;\">Hesabınız için şifre sıfırlama talebi aldık.</p>\n    <div style=\"background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;\">\n      <a href=\"{{reset_link}}\" style=\"display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;\">Şifremi Sıfırla</a>\n    </div>\n    <p style=\"color: #666; font-size: 14px;\">Bu linkin geçerlilik süresi 1 saattir.</p>\n    <p style=\"color: #666; font-size: 14px;\">Bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.</p>\n    <p style=\"color: #666; font-size: 16px;\">Saygılarımızla,<br>{{site_name}} Ekibi</p>\n  </div>',
+ '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="color: #333; text-align: center;">Şifre Sıfırlama</h1>
+    <p style="color: #666; font-size: 16px;">Merhaba,</p>
+    <p style="color: #666; font-size: 16px;">Hesabınız için şifre sıfırlama talebi aldık.</p>
+    <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+      <a href="{{reset_link}}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Şifremi Sıfırla</a>
+    </div>
+    <p style="color: #666; font-size: 14px;">Bu linkin geçerlilik süresi 1 saattir.</p>
+    <p style="color: #666; font-size: 14px;">Bu talebi siz yapmadıysanız, bu e-postayı görmezden gelebilirsiniz.</p>
+    <p style="color: #666; font-size: 16px;">Saygılarımızla,<br>{{site_name}} Ekibi</p>
+  </div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- password_reset (en)
@@ -93,7 +156,17 @@ VALUES
  'en',
  'Password Reset',
  'Password Reset Request - {{site_name}}',
- '<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n    <h1 style=\"color: #333; text-align: center;\">Password Reset</h1>\n    <p style=\"color: #666; font-size: 16px;\">Hello,</p>\n    <p style=\"color: #666; font-size: 16px;\">We received a password reset request for your account.</p>\n    <div style=\"background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;\">\n      <a href=\"{{reset_link}}\" style=\"display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;\">Reset My Password</a>\n    </div>\n    <p style=\"color: #666; font-size: 14px;\">This link is valid for 1 hour.</p>\n    <p style=\"color: #666; font-size: 14px;\">If you did not request this, you can safely ignore this email.</p>\n    <p style=\"color: #666; font-size: 16px;\">Best regards,<br>{{site_name}} Team</p>\n  </div>',
+ '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="color: #333; text-align: center;">Password Reset</h1>
+    <p style="color: #666; font-size: 16px;">Hello,</p>
+    <p style="color: #666; font-size: 16px;">We received a password reset request for your account.</p>
+    <div style="background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0; text-align: center;">
+      <a href="{{reset_link}}" style="display: inline-block; background: #3b82f6; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold;">Reset My Password</a>
+    </div>
+    <p style="color: #666; font-size: 14px;">This link is valid for 1 hour.</p>
+    <p style="color: #666; font-size: 14px;">If you did not request this, you can safely ignore this email.</p>
+    <p style="color: #666; font-size: 16px;">Best regards,<br>{{site_name}} Team</p>
+  </div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- password_changed (tr)
@@ -102,7 +175,14 @@ VALUES
  'tr',
  'Password Changed',
  'Şifreniz Güncellendi - {{site_name}}',
- '<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n    <h1 style=\"font-size:20px; text-align:center;\">Şifreniz Güncellendi</h1>\n    <p>Merhaba <strong>{{user_name}}</strong>,</p>\n    <p>Hesap şifreniz başarıyla değiştirildi.</p>\n    <p>Eğer bu işlemi siz yapmadıysanız lütfen en kısa sürede bizimle iletişime geçin.</p>\n    <p>Saygılarımızla,</p>\n    <p>{{site_name}} Ekibi</p>\n</div>',
+ '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="font-size:20px; text-align:center;">Şifreniz Güncellendi</h1>
+    <p>Merhaba <strong>{{user_name}}</strong>,</p>
+    <p>Hesap şifreniz başarıyla değiştirildi.</p>
+    <p>Eğer bu işlemi siz yapmadıysanız lütfen en kısa sürede bizimle iletişime geçin.</p>
+    <p>Saygılarımızla,</p>
+    <p>{{site_name}} Ekibi</p>
+</div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- password_changed (en)
@@ -111,7 +191,14 @@ VALUES
  'en',
  'Password Changed',
  'Your Password Has Been Updated - {{site_name}}',
- '<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;\">\n    <h1 style=\"font-size:20px; text-align:center;\">Your Password Has Been Updated</h1>\n    <p>Hello <strong>{{user_name}}</strong>,</p>\n    <p>Your account password has been successfully changed.</p>\n    <p>If you did not perform this action, please contact us as soon as possible.</p>\n    <p>Best regards,</p>\n    <p>{{site_name}} Team</p>\n</div>',
+ '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+    <h1 style="font-size:20px; text-align:center;">Your Password Has Been Updated</h1>
+    <p>Hello <strong>{{user_name}}</strong>,</p>
+    <p>Your account password has been successfully changed.</p>
+    <p>If you did not perform this action, please contact us as soon as possible.</p>
+    <p>Best regards,</p>
+    <p>{{site_name}} Team</p>
+</div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- contact_admin_notification (tr)
@@ -120,7 +207,18 @@ VALUES
  'tr',
  'Contact Admin Notification',
  'Yeni İletişim Mesajı - {{subject}}',
- '<div style=\"font-family:system-ui,-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;font-size:14px;line-height:1.5;color:#111827;\">\n  <h1 style=\"font-size:18px;margin-bottom:12px;\">Yeni iletişim formu mesajı</h1>\n  <p><strong>Ad Soyad:</strong> {{name}}</p>\n  <p><strong>E-posta:</strong> {{email}}</p>\n  <p><strong>Telefon:</strong> {{phone}}</p>\n  <p><strong>Konu:</strong> {{subject}}</p>\n  <p><strong>IP:</strong> {{ip}}</p>\n  <p><strong>User-Agent:</strong> {{user_agent}}</p>\n  <hr style=\"margin:16px 0;border:none;border-top:1px solid #e5e7eb;\" />\n  <p><strong>Mesaj:</strong></p>\n  <pre style=\"white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;\">{{message}}</pre>\n</div>',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;">
+  <h1 style="font-size:18px;margin-bottom:12px;">Yeni iletişim formu mesajı</h1>
+  <p><strong>Ad Soyad:</strong> {{name}}</p>
+  <p><strong>E-posta:</strong> {{email}}</p>
+  <p><strong>Telefon:</strong> {{phone}}</p>
+  <p><strong>Konu:</strong> {{subject}}</p>
+  <p><strong>IP:</strong> {{ip}}</p>
+  <p><strong>User-Agent:</strong> {{user_agent}}</p>
+  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;" />
+  <p><strong>Mesaj:</strong></p>
+  <pre style="white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{{message}}</pre>
+</div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- contact_admin_notification (en)
@@ -129,7 +227,18 @@ VALUES
  'en',
  'Contact Admin Notification',
  'New Contact Message - {{subject}}',
- '<div style=\"font-family:system-ui,-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;font-size:14px;line-height:1.5;color:#111827;\">\n  <h1 style=\"font-size:18px;margin-bottom:12px;\">New contact form message</h1>\n  <p><strong>Name:</strong> {{name}}</p>\n  <p><strong>Email:</strong> {{email}}</p>\n  <p><strong>Phone:</strong> {{phone}}</p>\n  <p><strong>Subject:</strong> {{subject}}</p>\n  <p><strong>IP:</strong> {{ip}}</p>\n  <p><strong>User-Agent:</strong> {{user_agent}}</p>\n  <hr style=\"margin:16px 0;border:none;border-top:1px solid #e5e7eb;\" />\n  <p><strong>Message:</strong></p>\n  <pre style=\"white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;\">{{message}}</pre>\n</div>',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;">
+  <h1 style="font-size:18px;margin-bottom:12px;">New contact form message</h1>
+  <p><strong>Name:</strong> {{name}}</p>
+  <p><strong>Email:</strong> {{email}}</p>
+  <p><strong>Phone:</strong> {{phone}}</p>
+  <p><strong>Subject:</strong> {{subject}}</p>
+  <p><strong>IP:</strong> {{ip}}</p>
+  <p><strong>User-Agent:</strong> {{user_agent}}</p>
+  <hr style="margin:16px 0;border:none;border-top:1px solid #e5e7eb;" />
+  <p><strong>Message:</strong></p>
+  <pre style="white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{{message}}</pre>
+</div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- contact_user_autoreply (tr)
@@ -138,7 +247,13 @@ VALUES
  'tr',
  'Contact User Autoreply',
  'Mesajınızı Aldık - {{subject}}',
- '<div style=\"font-family:system-ui,-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;font-size:14px;line-height:1.5;color:#111827;\">\n  <h1 style=\"font-size:18px;margin-bottom:12px;\">Mesajınızı Aldık</h1>\n  <p>Merhaba <strong>{{name}}</strong>,</p>\n  <p>İletişim formu üzerinden göndermiş olduğunuz mesaj bize ulaştı.</p>\n  <p>En kısa süre içinde size dönüş yapacağız.</p>\n  <p>İyi günler dileriz.</p>\n</div>',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;">
+  <h1 style="font-size:18px;margin-bottom:12px;">Mesajınızı Aldık</h1>
+  <p>Merhaba <strong>{{name}}</strong>,</p>
+  <p>İletişim formu üzerinden göndermiş olduğunuz mesaj bize ulaştı.</p>
+  <p>En kısa süre içinde size dönüş yapacağız.</p>
+  <p>İyi günler dileriz.</p>
+</div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- contact_user_autoreply (en)
@@ -146,8 +261,14 @@ VALUES
  '99990000-aaaa-bbbb-cccc-ddddeeee0000',
  'en',
  'Contact User Autoreply',
- 'We\'ve Received Your Message - {{subject}}',
- '<div style=\"font-family:system-ui,-apple-system,BlinkMacSystemFont,\'Segoe UI\',sans-serif;font-size:14px;line-height:1.5;color:#111827;\">\n  <h1 style=\"font-size:18px;margin-bottom:12px;\">We\'ve received your message</h1>\n  <p>Hello <strong>{{name}}</strong>,</p>\n  <p>Your message sent via our contact form has reached us.</p>\n  <p>We will get back to you as soon as possible.</p>\n  <p>Have a nice day.</p>\n</div>',
+ 'We''ve Received Your Message - {{subject}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;">
+  <h1 style="font-size:18px;margin-bottom:12px;">We''ve received your message</h1>
+  <p>Hello <strong>{{name}}</strong>,</p>
+  <p>Your message sent via our contact form has reached us.</p>
+  <p>We will get back to you as soon as possible.</p>
+  <p>Have a nice day.</p>
+</div>',
  '2025-10-09 19:38:58.000', '2025-10-09 19:38:58.000'),
 
 -- welcome (tr)
@@ -156,7 +277,7 @@ VALUES
  'tr',
  'Welcome',
  'Hesabiniz Oluşturuldu - {{site_name}}',
- '<h1 class=\"ql-align-center\">Hesabınız Oluşturuldu</h1><p>Merhaba <strong>{{user_name}}</strong>,</p><p>{{site_name}} ailesine hoş geldiniz! Hesabınız başarıyla oluşturuldu.</p><p><br></p><p>E-posta: <strong>{{user_email}}</strong></p><p>Herhangi bir sorunuz olursa bizimle iletişime geçmekten çekinmeyin.</p><p>Saygılarımızla,</p><p>{{site_name}} Ekibi</p>',
+ '<h1 class="ql-align-center">Hesabınız Oluşturuldu</h1><p>Merhaba <strong>{{user_name}}</strong>,</p><p>{{site_name}} ailesine hoş geldiniz! Hesabınız başarıyla oluşturuldu.</p><p><br></p><p>E-posta: <strong>{{user_email}}</strong></p><p>Herhangi bir sorunuz olursa bizimle iletişime geçmekten çekinmeyin.</p><p>Saygılarımızla,</p><p>{{site_name}} Ekibi</p>',
  '2025-10-09 19:38:58.000', '2025-10-13 15:06:38.000'),
 
 -- welcome (en)
@@ -165,8 +286,156 @@ VALUES
  'en',
  'Welcome',
  'Your Account Has Been Created - {{site_name}}',
- '<h1 class=\"ql-align-center\">Your Account Has Been Created</h1><p>Hello <strong>{{user_name}}</strong>,</p><p>Welcome to {{site_name}}! Your account has been successfully created.</p><p><br></p><p>Email: <strong>{{user_email}}</strong></p><p>If you have any questions, feel free to contact us anytime.</p><p>Best regards,</p><p>{{site_name}} Team</p>',
- '2025-10-09 19:38:58.000', '2025-10-13 15:06:38.000')
+ '<h1 class="ql-align-center">Your Account Has Been Created</h1><p>Hello <strong>{{user_name}}</strong>,</p><p>Welcome to {{site_name}}! Your account has been successfully created.</p><p><br></p><p>Email: <strong>{{user_email}}</strong></p><p>If you have any questions, feel free to contact us anytime.</p><p>Best regards,</p><p>{{site_name}} Team</p>',
+ '2025-10-09 19:38:58.000', '2025-10-13 15:06:38.000'),
+
+-- ============================================================
+-- OFFER EMAIL TEMPLATES – I18N KAYITLARI (tr + en)
+-- ============================================================
+
+-- offer_sent_customer (tr)
+('1111aaaa-2222-3333-4444-aaaabbbb0001',
+ '1111aaaa-2222-3333-4444-555566667777',
+ 'tr',
+ 'Offer Sent (Customer)',
+ 'Teklifiniz Hazır - Teklif No: {{offer_no}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:20px;margin-bottom:12px;">Teklifiniz Hazır</h1>
+  <p>Merhaba <strong>{{customer_name}}</strong>,</p>
+  <p>Talebiniz doğrultusunda hazırladığımız teklif bilgilerini aşağıda bulabilirsiniz.</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Teklif No:</strong> {{offer_no}}</li>
+    <li><strong>Müşteri:</strong> {{customer_name}} ({{company_name}})</li>
+    <li><strong>E-posta:</strong> {{email}}</li>
+    <li><strong>Telefon:</strong> {{phone}}</li>
+    <li><strong>Para Birimi:</strong> {{currency}}</li>
+    <li><strong>Ara Toplam (Net):</strong> {{net_total}}</li>
+    <li><strong>KDV:</strong> {{vat_total}}</li>
+    <li><strong>Genel Toplam (Brüt):</strong> {{gross_total}}</li>
+    <li><strong>Geçerlilik Tarihi:</strong> {{valid_until}}</li>
+  </ul>
+  <p>Teklif detaylarını PDF olarak görüntülemek için aşağıdaki bağlantıyı kullanabilirsiniz:</p>
+  <p><a href="{{pdf_url}}" style="display:inline-block;padding:10px 18px;border-radius:6px;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:600;">PDF Teklifi Görüntüle</a></p>
+  <p style="margin-top:20px;">Herhangi bir sorunuz olması durumunda bu e-postayı yanıtlayarak veya telefonla bizimle iletişime geçebilirsiniz.</p>
+  <p>Saygılarımızla,<br>Satış Ekibi</p>
+</div>',
+ '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- offer_sent_customer (en)
+('1111aaaa-2222-3333-4444-aaaabbbb0002',
+ '1111aaaa-2222-3333-4444-555566667777',
+ 'en',
+ 'Offer Sent (Customer)',
+ 'Your Quotation is Ready - Offer No: {{offer_no}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:20px;margin-bottom:12px;">Your Quotation is Ready</h1>
+  <p>Hello <strong>{{customer_name}}</strong>,</p>
+  <p>We have prepared your quotation based on your request. You can find the summary below.</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Offer No:</strong> {{offer_no}}</li>
+    <li><strong>Customer:</strong> {{customer_name}} ({{company_name}})</li>
+    <li><strong>Email:</strong> {{email}}</li>
+    <li><strong>Phone:</strong> {{phone}}</li>
+    <li><strong>Currency:</strong> {{currency}}</li>
+    <li><strong>Net Total:</strong> {{net_total}}</li>
+    <li><strong>VAT:</strong> {{vat_total}}</li>
+    <li><strong>Gross Total:</strong> {{gross_total}}</li>
+    <li><strong>Valid Until:</strong> {{valid_until}}</li>
+  </ul>
+  <p>You can view the full quotation as a PDF using the link below:</p>
+  <p><a href="{{pdf_url}}" style="display:inline-block;padding:10px 18px;border-radius:6px;background:#2563eb;color:#ffffff;text-decoration:none;font-weight:600;">View PDF Quotation</a></p>
+  <p style="margin-top:20px;">If you have any questions, simply reply to this email or call us.</p>
+  <p>Best regards,<br>Sales Team</p>
+</div>',
+ '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- offer_sent_admin (tr)
+('2222bbbb-2222-3333-4444-bbbbcccc0001',
+ '2222bbbb-2222-3333-4444-555566667777',
+ 'tr',
+ 'Offer Sent (Admin)',
+ 'Teklif Gönderildi - Teklif No: {{offer_no}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:18px;margin-bottom:12px;">Teklif Müşteriye Gönderildi</h1>
+  <p>Aşağıdaki teklif müşteriye e-posta ile gönderildi:</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Teklif No:</strong> {{offer_no}}</li>
+    <li><strong>Müşteri:</strong> {{customer_name}} ({{company_name}})</li>
+    <li><strong>E-posta:</strong> {{email}}</li>
+    <li><strong>Telefon:</strong> {{phone}}</li>
+    <li><strong>Para Birimi:</strong> {{currency}}</li>
+    <li><strong>Ara Toplam (Net):</strong> {{net_total}}</li>
+    <li><strong>KDV:</strong> {{vat_total}}</li>
+    <li><strong>Genel Toplam (Brüt):</strong> {{gross_total}}</li>
+    <li><strong>Geçerlilik Tarihi:</strong> {{valid_until}}</li>
+  </ul>
+  <p>PDF linki: <a href="{{pdf_url}}">{{pdf_url}}</a></p>
+</div>',
+ '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- offer_sent_admin (en)
+('2222bbbb-2222-3333-4444-bbbbcccc0002',
+ '2222bbbb-2222-3333-4444-555566667777',
+ 'en',
+ 'Offer Sent (Admin)',
+ 'Offer Sent to Customer - Offer No: {{offer_no}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:18px;margin-bottom:12px;">Quotation Sent to Customer</h1>
+  <p>The following quotation has been sent to the customer:</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Offer No:</strong> {{offer_no}}</li>
+    <li><strong>Customer:</strong> {{customer_name}} ({{company_name}})</li>
+    <li><strong>Email:</strong> {{email}}</li>
+    <li><strong>Phone:</strong> {{phone}}</li>
+    <li><strong>Currency:</strong> {{currency}}</li>
+    <li><strong>Net Total:</strong> {{net_total}}</li>
+    <li><strong>VAT:</strong> {{vat_total}}</li>
+    <li><strong>Gross Total:</strong> {{gross_total}}</li>
+    <li><strong>Valid Until:</strong> {{valid_until}}</li>
+  </ul>
+  <p>PDF link: <a href="{{pdf_url}}">{{pdf_url}}</a></p>
+</div>',
+ '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- offer_request_received_admin (tr)
+('3333cccc-2222-3333-4444-ccccdddd0001',
+ '3333cccc-2222-3333-4444-555566667777',
+ 'tr',
+ 'Offer Request Received (Admin)',
+ 'Yeni Teklif Talebi - {{customer_name}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:18px;margin-bottom:12px;">Yeni teklif talebi</h1>
+  <p>Aşağıdaki bilgilerle yeni bir teklif talebi oluşturuldu:</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Teklif ID:</strong> {{offer_id}}</li>
+    <li><strong>Müşteri:</strong> {{customer_name}} ({{company_name}})</li>
+    <li><strong>E-posta:</strong> {{email}}</li>
+    <li><strong>Telefon:</strong> {{phone}}</li>
+  </ul>
+  <p><strong>Müşteri Mesajı:</strong></p>
+  <pre style="white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{{message}}</pre>
+</div>',
+ '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- offer_request_received_admin (en)
+('3333cccc-2222-3333-4444-ccccdddd0002',
+ '3333cccc-2222-3333-4444-555566667777',
+ 'en',
+ 'Offer Request Received (Admin)',
+ 'New Offer Request - {{customer_name}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:18px;margin-bottom:12px;">New offer request</h1>
+  <p>A new offer request has been created with the following details:</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Offer ID:</strong> {{offer_id}}</li>
+    <li><strong>Customer:</strong> {{customer_name}} ({{company_name}})</li>
+    <li><strong>Email:</strong> {{email}}</li>
+    <li><strong>Phone:</strong> {{phone}}</li>
+  </ul>
+  <p><strong>Customer Message:</strong></p>
+  <pre style="white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{{message}}</pre>
+</div>',
+ '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000')
 ON DUPLICATE KEY UPDATE
   `template_name` = VALUES(`template_name`),
   `subject`       = VALUES(`subject`),

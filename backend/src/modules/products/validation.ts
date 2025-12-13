@@ -20,6 +20,16 @@ export const boolLike = z.union([
 // ❗ Storage asset ID'leri için (uuid'e zorlamıyoruz)
 const assetId = z.string().min(1).max(64);
 
+// ❗ Admin tarafında client'tan gelen id alanları için (FAQ, SPEC vs.)
+//    Eski verilerde "1", "2" gibi değerler olabildiği için uuid zorlamıyoruz.
+const entityId = z.preprocess(
+  (v) => {
+    if (v == null || v === "") return undefined;
+    return String(v);
+  },
+  z.string().max(64),
+);
+
 /* ----------------- PRODUCT ----------------- */
 /**
  * NOT:
@@ -44,9 +54,7 @@ export const productCreateSchema = z.object({
   tags: z.array(z.string()).optional().default([]),
 
   // Teknik özellikler: serbest key/value (capacity, fanType, warranty, vs.)
-  specifications: z
-    .record(z.string(), z.string())
-    .optional(),
+  specifications: z.record(z.string(), z.string()).optional(),
 
   // Base alanlar
   price: z.coerce.number().nonnegative(),
@@ -85,8 +93,10 @@ export type ProductSetImagesInput = z.infer<typeof productSetImagesSchema>;
 
 /* ----------------- FAQ ----------------- */
 export const productFaqCreateSchema = z.object({
-  id: z.string().uuid().optional(),
+  // ❗ uuid zorlamıyoruz; eski kayıtlar "1", "2" vb. olabilir
+  id: entityId.optional(),
   product_id: z.string().uuid(),
+  locale: z.string().min(2).max(8).optional(), // default backend'de "tr"
   question: z.string().min(1).max(500),
   answer: z.string().min(1),
   display_order: z.coerce.number().int().min(0).optional().default(0),
@@ -98,8 +108,10 @@ export type ProductFaqUpdateInput = z.infer<typeof productFaqUpdateSchema>;
 
 /* ----------------- SPEC ----------------- */
 export const productSpecCreateSchema = z.object({
-  id: z.string().uuid().optional(),
+  // ❗ uuid zorlamıyoruz; FE'den boş veya string gelebilir
+  id: entityId.optional(),
   product_id: z.string().uuid(),
+  locale: z.string().min(2).max(8).optional(), // default backend'de "tr"
   name: z.string().min(1).max(255),
   value: z.string().min(1),
   category: z

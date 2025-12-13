@@ -12,8 +12,8 @@ export type ActiveTab =
   | "site_settings"
   | "custom_pages"
   | "services"
-  | "products"   
-  | "sparepart"   
+  | "products"
+  | "sparepart"
   | "categories"
   | "subcategories"
   | "slider"
@@ -28,7 +28,8 @@ export type ActiveTab =
   | "reviews"
   | "support"
   | "menuitem"
-  | "storage";
+  | "storage"
+  | "offers";
 
 type AdminLayoutProps = {
   activeTab: ActiveTab;

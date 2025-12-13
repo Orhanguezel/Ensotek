@@ -2,9 +2,10 @@
 // FILE: src/modules/products/admin.faqs.controller.ts
 // =============================================================
 import type { RouteHandler } from "fastify";
-import { db } from "@/db/client";
-import { and, asc, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { and, asc, eq, or, isNull } from "drizzle-orm";
+
+import { db } from "@/db/client";
 import { products, productFaqs } from "./schema";
 import {
   productFaqCreateSchema,
@@ -25,17 +26,44 @@ function andOrSingle<T>(conds: T[]) {
   return conds.length > 1 ? and(...conds) : conds[0];
 }
 
+const getLocale = (req: any): string => {
+  const q = (req.query || {}) as { locale?: string };
+  const b = (req.body || {}) as { locale?: string };
+
+  const raw =
+    (q.locale && String(q.locale).trim()) ||
+    (b.locale && String(b.locale).trim()) ||
+    "tr";
+
+  const [short] = raw.split("-");
+  const norm = (short || "tr").toLowerCase();
+  return norm || "tr";
+};
+
+/* ----------------- LIST ----------------- */
 export const adminListProductFaqs: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
   const q = (req.query || {}) as {
     only_active?: string | number | boolean;
+    locale?: string;
   };
 
-  const conds = [eq(productFaqs.product_id, id)];
-  if (q.only_active !== undefined) {
+  const locale = getLocale(req);
+
+  const conds: any[] = [eq(productFaqs.product_id, id)];
+
+  // Locale'e göre filtrele + eski NULL kayıtları da göster
+  if (locale) {
     conds.push(
-      eq(productFaqs.is_active, toBool(q.only_active) as any),
+      or(
+        eq(productFaqs.locale, locale),
+        isNull(productFaqs.locale as any),
+      ),
     );
+  }
+
+  if (q.only_active !== undefined) {
+    conds.push(eq(productFaqs.is_active, toBool(q.only_active) as any));
   }
 
   const rows = await db
@@ -47,8 +75,11 @@ export const adminListProductFaqs: RouteHandler = async (req, reply) => {
   return reply.send(rows);
 };
 
+/* ----------------- CREATE ----------------- */
 export const adminCreateProductFaq: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
+  const locale = getLocale(req);
+
   try {
     // Ürün var mı?
     const [p] = await db
@@ -56,19 +87,21 @@ export const adminCreateProductFaq: RouteHandler = async (req, reply) => {
       .from(products)
       .where(eq(products.id, id))
       .limit(1);
-    if (!p)
+    if (!p) {
       return reply
         .code(404)
         .send({ error: { message: "product_not_found" } });
+    }
 
     const bodyParsed = productFaqCreateSchema.parse({
       ...(req.body || {}),
       product_id: id,
+      locale,
     });
 
-    // is_active'i güvenle boolean'a çevir
     const row = {
       ...bodyParsed,
+      locale: bodyParsed.locale || locale,
       is_active:
         bodyParsed.is_active === undefined
           ? true
@@ -81,10 +114,14 @@ export const adminCreateProductFaq: RouteHandler = async (req, reply) => {
     await db.insert(productFaqs).values(row);
     return reply.code(201).send(row);
   } catch (e: any) {
-    if (e?.name === "ZodError")
-      return reply
-        .code(422)
-        .send({ error: { message: "validation_error", details: e.issues } });
+    if (e?.name === "ZodError") {
+      return reply.code(422).send({
+        error: {
+          message: "validation_error",
+          details: e.issues,
+        },
+      });
+    }
     req.log.error(e);
     return reply
       .code(500)
@@ -92,18 +129,19 @@ export const adminCreateProductFaq: RouteHandler = async (req, reply) => {
   }
 };
 
+/* ----------------- UPDATE ----------------- */
 export const adminUpdateProductFaq: RouteHandler = async (req, reply) => {
   const { id, faqId } = req.params as {
     id: string;
     faqId: string;
   };
+
   try {
     const parsed = productFaqUpdateSchema.parse({
       ...(req.body || {}),
       product_id: id,
     });
 
-    // Yalnızca izinli alanları güncelle
     const patchClean: Record<string, unknown> = {};
     if (parsed.question !== undefined) patchClean.question = parsed.question;
     if (parsed.answer !== undefined) patchClean.answer = parsed.answer;
@@ -111,6 +149,7 @@ export const adminUpdateProductFaq: RouteHandler = async (req, reply) => {
       patchClean.display_order = parsed.display_order;
     if (parsed.is_active !== undefined)
       patchClean.is_active = toBool(parsed.is_active);
+    if (parsed.locale !== undefined) patchClean.locale = parsed.locale;
 
     patchClean.updated_at = now();
 
@@ -130,16 +169,21 @@ export const adminUpdateProductFaq: RouteHandler = async (req, reply) => {
       .where(eq(productFaqs.id, faqId))
       .limit(1);
 
-    if (!row)
+    if (!row) {
       return reply
         .code(404)
         .send({ error: { message: "not_found" } });
+    }
     return reply.send(row);
   } catch (e: any) {
-    if (e?.name === "ZodError")
-      return reply
-        .code(422)
-        .send({ error: { message: "validation_error", details: e.issues } });
+    if (e?.name === "ZodError") {
+      return reply.code(422).send({
+        error: {
+          message: "validation_error",
+          details: e.issues,
+        },
+      });
+    }
     req.log.error(e);
     return reply
       .code(500)
@@ -147,6 +191,7 @@ export const adminUpdateProductFaq: RouteHandler = async (req, reply) => {
   }
 };
 
+/* ----------------- TOGGLE ACTIVE ----------------- */
 export const adminToggleFaqActive: RouteHandler = async (req, reply) => {
   const { id, faqId } = req.params as {
     id: string;
@@ -169,18 +214,22 @@ export const adminToggleFaqActive: RouteHandler = async (req, reply) => {
     .from(productFaqs)
     .where(eq(productFaqs.id, faqId))
     .limit(1);
-  if (!row)
+
+  if (!row) {
     return reply
       .code(404)
       .send({ error: { message: "not_found" } });
+  }
   return reply.send(row);
 };
 
+/* ----------------- DELETE ----------------- */
 export const adminDeleteProductFaq: RouteHandler = async (req, reply) => {
   const { id, faqId } = req.params as {
     id: string;
     faqId: string;
   };
+
   await db
     .delete(productFaqs)
     .where(
@@ -189,41 +238,80 @@ export const adminDeleteProductFaq: RouteHandler = async (req, reply) => {
         eq(productFaqs.product_id, id),
       ),
     );
+
   return reply.send({ ok: true });
 };
 
-/** REPLACE uç – hem { faqs } hem { items } kabul eder */
+/* ----------------- REPLACE (ürün + locale bazlı) ----------------- */
 export const adminReplaceFaqs: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
-  const raw = (req.body as any) || {};
-  const items: any[] = Array.isArray(raw.faqs)
-    ? raw.faqs
-    : Array.isArray(raw.items)
-      ? raw.items
-      : [];
+  const locale = getLocale(req);
 
-  // Komple sil → tekrar yaz
-  await db
-    .delete(productFaqs)
-    .where(eq(productFaqs.product_id, id));
+  try {
+    const raw = (req.body as any) || {};
+    const items: any[] = Array.isArray(raw.faqs)
+      ? raw.faqs
+      : Array.isArray(raw.items)
+        ? raw.items
+        : [];
 
-  for (const it of items) {
-    const v = productFaqCreateSchema.parse({ ...it, product_id: id });
-    await db.insert(productFaqs).values({
-      ...v,
-      is_active:
-        v.is_active === undefined ? true : toBool(v.is_active),
-      id: v.id ?? randomUUID(),
-      created_at: now(),
-      updated_at: now(),
-    } as any);
+    // İlgili ürün + locale için tüm SSS'leri sil
+    // Eski NULL locale kayıtlarını da temizliyoruz
+    await db
+      .delete(productFaqs)
+      .where(
+        and(
+          eq(productFaqs.product_id, id),
+          or(
+            eq(productFaqs.locale, locale),
+            isNull(productFaqs.locale as any),
+          ),
+        ),
+      );
+
+    // Sonra gelen listeyi yeniden insert et
+    for (const it of items) {
+      const v = productFaqCreateSchema.parse({
+        ...it,
+        product_id: id,
+        locale,
+      });
+
+      await db.insert(productFaqs).values({
+        ...v,
+        locale: v.locale || locale,
+        is_active:
+          v.is_active === undefined ? true : toBool(v.is_active),
+        id: v.id ?? randomUUID(),
+        created_at: now(),
+        updated_at: now(),
+      } as any);
+    }
+
+    const rows = await db
+      .select()
+      .from(productFaqs)
+      .where(
+        and(
+          eq(productFaqs.product_id, id),
+          eq(productFaqs.locale, locale),
+        ),
+      )
+      .orderBy(asc(productFaqs.display_order));
+
+    return reply.send(rows);
+  } catch (e: any) {
+    if (e?.name === "ZodError") {
+      return reply.code(422).send({
+        error: {
+          message: "validation_error",
+          details: e.issues,
+        },
+      });
+    }
+    req.log.error(e);
+    return reply
+      .code(500)
+      .send({ error: { message: "internal_error" } });
   }
-
-  const rows = await db
-    .select()
-    .from(productFaqs)
-    .where(eq(productFaqs.product_id, id))
-    .orderBy(asc(productFaqs.display_order));
-
-  return reply.send(rows);
 };

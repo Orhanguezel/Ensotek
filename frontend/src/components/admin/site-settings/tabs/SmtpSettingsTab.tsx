@@ -14,7 +14,7 @@ import type { SettingValue } from "@/integrations/types/site";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-// 🔹 SMTP test mail endpoint’i
+// SMTP test mail endpoint’i
 import { useSendTestMailMutation } from "@/integrations/rtk/endpoints/mail.endpoints";
 
 export type SmtpSettingsTabProps = {
@@ -104,12 +104,12 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
   const [updateSetting, { isLoading: isSaving }] =
     useUpdateSiteSettingAdminMutation();
 
-  // 🔹 Test mail mutation
+  // Test mail mutation
   const [sendTestMail, { isLoading: isTesting }] = useSendTestMailMutation();
 
   const [form, setForm] = React.useState<SmtpForm>(EMPTY_FORM);
 
-  // 🔹 Test mail alıcısı – sadece UI state, DB'ye yazmıyoruz
+  // Test mail alıcısı – sadece UI state, DB'ye yazmıyoruz
   const [testEmail, setTestEmail] = React.useState<string>("");
 
   React.useEffect(() => {
@@ -223,7 +223,7 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
             <Input
               value={form.smtp_host}
               onChange={(e) => handleChange("smtp_host", e.target.value)}
-              placeholder="smtp.gmail.com"
+              placeholder="smtp.hostinger.com veya smtp.gmail.com"
             />
           </div>
 
@@ -232,7 +232,7 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
             <Input
               value={form.smtp_port}
               onChange={(e) => handleChange("smtp_port", e.target.value)}
-              placeholder="465"
+              placeholder="465 veya 587"
             />
           </div>
 
@@ -256,7 +256,7 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
             <Input
               value={form.smtp_username}
               onChange={(e) => handleChange("smtp_username", e.target.value)}
-              placeholder="smtp kullanıcı adı"
+              placeholder="SMTP kullanıcı adı"
             />
           </div>
 
@@ -292,7 +292,7 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
           </div>
         </div>
 
-        {/* 🔹 Test mail alıcısı + butonlar */}
+        {/* Test mail alıcısı + butonlar */}
         <div className="row g-3 mt-4 align-items-end">
           <div className="col-md-6">
             <label className="form-label small">Test mail alıcısı</label>

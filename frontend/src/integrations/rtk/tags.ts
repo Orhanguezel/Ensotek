@@ -4,15 +4,15 @@
 // =============================================================
 
 export const metahubTags = [
-  "Auth","User","AdminUsers",
-  "Profiles","Profile",
-  "UserRoles","UserRole",
-  "SiteSettings","SiteSettingsBulk",
-  "CustomPages","CustomPageSlug","CustomPage",
+  "Auth", "User", "AdminUsers",
+  "Profiles", "Profile",
+  "UserRoles", "UserRole",
+  "SiteSettings", "SiteSettingsBulk",
+  "CustomPages", "CustomPageSlug", "CustomPage",
   "Faqs",
   "Services",
   "References",
-  "MenuItems","MenuItem","MenuItemPublic",
+  "MenuItems", "MenuItem", "MenuItemPublic",
   "Slider",
   "Categories",
   "SubCategories",
@@ -23,7 +23,7 @@ export const metahubTags = [
   "Mail",
   "Newsletter",
   "Notifications",
-  "Products", "ProductFaqs", "ProductSpecs" ,"ProductReviews",
+  "Products", "ProductFaqs", "ProductSpecs", "ProductReviews",
   "Reviews",
   "Support",
   "Storage",
@@ -37,7 +37,8 @@ export const metahubTags = [
   "Review",
   "Health",
   "ProductFAQs",
-  
+  "Offers"
+
 ] as const;
 
 export type MetahubTag = (typeof metahubTags)[number];

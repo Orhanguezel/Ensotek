@@ -34,6 +34,7 @@ export type UiSectionKey =
   | "ui_spareparts"
   | "ui_faqs"
   | "ui_team"
+  | "ui_offer"
   ;
 
 // Hangi section hangi UI_KEYS grubunu kullanacak?
@@ -47,7 +48,7 @@ const SECTION_UI_KEYS_MAP: Record<UiSectionKey, readonly UIKey[]> = {
   ui_contact: UI_KEYS.contact,
   ui_about: UI_KEYS.about,
   ui_about_stats: UI_KEYS.about_stats,
-  ui_team: UI_KEYS.team, 
+  ui_team: UI_KEYS.team,
   ui_faqs: UI_KEYS.faqs,
   ui_pricing: [], // şimdilik boş, ileride eklenebilir
   ui_testimonials: UI_KEYS.feedback,
@@ -64,6 +65,7 @@ const SECTION_UI_KEYS_MAP: Record<UiSectionKey, readonly UIKey[]> = {
   ui_news: UI_KEYS.news,
   ui_products: UI_KEYS.products,
   ui_spareparts: UI_KEYS.spareparts,
+  ui_offer: UI_KEYS.offer,
 };
 
 type UiSectionResult = {
@@ -103,8 +105,8 @@ export function useUiSection(
   // 4) DB JSON normalize et (sadece düz object bekliyoruz)
   const json: Record<string, unknown> =
     uiSetting?.value &&
-    typeof uiSetting.value === "object" &&
-    !Array.isArray(uiSetting.value)
+      typeof uiSetting.value === "object" &&
+      !Array.isArray(uiSetting.value)
       ? (uiSetting.value as Record<string, unknown>)
       : {};
 

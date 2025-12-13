@@ -216,8 +216,12 @@ export const UI_FALLBACK_EN = {
   // ===== FAQS =====
   ui_faqs_page_title: "FAQs",
 
+  // ===== TEAM =====
   ui_team_page_title: "Our Team",
-  
+
+  // ===== OFFER =====
+  ui_offer_page_title: "Offer",
+
 } as const;
 
 export type UIKey = keyof typeof UI_FALLBACK_EN;
@@ -439,6 +443,9 @@ export const UI_KEYS = {
     "ui_about_stats_projects_title",
     "ui_about_stats_years_title",
   ] as const,
+  offer: [
+    "ui_offer_page_title",
+  ] as const,
 } as const;
 
 type KeysArray = readonly UIKey[];
@@ -469,9 +476,9 @@ export function useUIStrings<T extends KeysArray>(
   const { data } = useListSiteSettingsQuery(
     keysForQuery.length
       ? {
-          keys: keysForQuery,
-          locale,
-        }
+        keys: keysForQuery,
+        locale,
+      }
       : undefined
   );
 

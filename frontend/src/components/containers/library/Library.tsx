@@ -32,11 +32,12 @@ const Library: React.FC = () => {
   const listHref = localizePath(locale, "/library");
   const [open, setOpen] = useState<number>(0);
 
-  // İlk 4 içerik, yayınlanmış + aktif, display_order & published_at’e göre
+  // Yayınlanmış + aktif içeriklerin TAM listesi
   const { data = [], isLoading } = useListLibraryQuery({
-    locale,                           // 🔥 backend’e ?locale=tr/en
-    limit: 4,
-    order: "display_order.desc",      // backend tek kolon bekliyor
+    locale, // 🔥 backend’e ?locale=tr/en
+    // limit'i kaldırıyoruz veya yüksek bir değer veriyoruz
+    limit: 200,
+    order: "display_order.desc", // backend tek kolon bekliyor
     sort: "published_at",
     orderDir: "desc",
     is_published: "1",
@@ -92,7 +93,9 @@ const Library: React.FC = () => {
         },
       ];
     }
-    return base.slice(0, 4);
+
+    // 🔥 Artık slice(0, 4) yok – tüm kayıtlar görünecek
+    return base;
   }, [data, locale, ui]);
 
   const firstWithHero = items.find((x) => x.hero && x.hero.trim());
@@ -170,9 +173,7 @@ const Library: React.FC = () => {
                                 }`}
                               aria-expanded={isOpen}
                               aria-controls={panelId}
-                              onClick={() =>
-                                setOpen(isOpen ? -1 : idx)
-                              }
+                              onClick={() => setOpen(isOpen ? -1 : idx)}
                               type="button"
                             >
                               <span className="acc-icon" aria-hidden="true">
@@ -193,9 +194,7 @@ const Library: React.FC = () => {
                               }`}
                           >
                             <div className="accordion-body">
-                              <p style={{ marginBottom: 12 }}>
-                                {it.summary}
-                              </p>
+                              <p style={{ marginBottom: 12 }}>{it.summary}</p>
                               <Link
                                 href={href}
                                 className="link-more d-inline-flex align-items-center gap-1"
@@ -233,10 +232,7 @@ const Library: React.FC = () => {
               {/* Tümünü gör */}
               <div className="project__view">
                 <Link href={listHref} className="solid__btn">
-                  {ui(
-                    "ui_library_view_all",
-                    "View all documents",
-                  )}
+                  {ui("ui_library_view_all", "View all documents")}
                 </Link>
               </div>
             </div>

@@ -36,13 +36,13 @@ type UpsertMyProfileResp = Profile;
 export const profilesApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     getMyProfile: b.query<GetMyProfileResp, void>({
-      query: () => ({ url: "/profiles/v1/me", method: "GET" }),
+      query: () => ({ url: "/profiles/me", method: "GET" }),
       providesTags: ["Profile"],
     }),
 
     upsertMyProfile: b.mutation<UpsertMyProfileResp, UpsertMyProfileReq>({
       query: (body) => ({
-        url: "/profiles/v1/me",
+        url: "/profiles/me",
         method: "PUT",
         body,
       }),

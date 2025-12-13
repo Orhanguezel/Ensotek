@@ -114,6 +114,7 @@ export type GetProductBySlugParams = {
 
 export type GetProductByIdParams = {
   id: string;
+  locale?: string;
 };
 
 /* ---------- Public FAQ / Spec / Review tipleri ---------- */
@@ -121,6 +122,7 @@ export type GetProductByIdParams = {
 export type ProductFaqDto = {
   id: string;
   product_id: string;
+  locale: string;
   question: string;
   answer: string;
   display_order: number;
@@ -132,6 +134,7 @@ export type ProductFaqDto = {
 export type ProductFaqListQueryParams = {
   product_id?: string;
   only_active?: BoolLike;
+  locale?: string;
 };
 
 export type ProductSpecCategory =
@@ -143,6 +146,7 @@ export type ProductSpecCategory =
 export type ProductSpecDto = {
   id: string;
   product_id: string;
+  locale: string;
   name: string;
   value: string;
   category: ProductSpecCategory;
@@ -153,6 +157,7 @@ export type ProductSpecDto = {
 
 export type ProductSpecListQueryParams = {
   product_id?: string;
+  locale?: string;
 };
 
 export type ProductReviewDto = {

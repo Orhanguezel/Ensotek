@@ -14,6 +14,7 @@ import type {
   ServiceListResult,
 } from "@/integrations/types/services.types";
 
+// Service normalize
 const normalizeService = (
   row: ApiServiceBase & { featured_image_url?: string | null },
 ): ServiceDto => ({
@@ -26,11 +27,14 @@ const normalizeService = (
   is_active: row.is_active === 1,
   display_order: row.display_order,
 
+  // backend join'den gelebilen kategori adı
+  category_name: (row as any).category_name ?? null,
+
   featured_image: row.featured_image,
   image_url: row.image_url,
   image_asset_id: row.image_asset_id,
 
-  // Public endpoint'lerde featured_image_url var
+  // Public endpoint'lerde hesaplanmış featured_image_url var
   featured_image_url:
     typeof row.featured_image_url !== "undefined"
       ? row.featured_image_url
@@ -48,6 +52,7 @@ const normalizeService = (
   created_at: row.created_at,
   updated_at: row.updated_at,
 
+  // i18n coalesced alanlar
   slug: row.slug,
   name: row.name,
   description: row.description,
@@ -57,6 +62,7 @@ const normalizeService = (
   warranty: row.warranty,
   image_alt: row.image_alt,
 
+  // SEO + tags
   tags: row.tags,
   meta_title: row.meta_title,
   meta_description: row.meta_description,
@@ -65,6 +71,7 @@ const normalizeService = (
   locale_resolved: row.locale_resolved,
 });
 
+// Image endpoint için normalizer
 const normalizeServiceImage = (row: ApiServiceImage): ServiceImageDto => ({
   id: row.id,
   service_id: row.service_id,

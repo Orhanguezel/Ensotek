@@ -94,13 +94,16 @@ CREATE TABLE IF NOT EXISTS product_i18n (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 -- =========================
 -- PRODUCT SPECS (technicalSpecs)
 -- =========================
 CREATE TABLE IF NOT EXISTS product_specs (
   id          CHAR(36)     NOT NULL,
   product_id  CHAR(36)     NOT NULL,
+
+  -- 🌐 Locale bazlı spesifikasyon (tr, en, de ...)
+  locale      VARCHAR(8)   NOT NULL DEFAULT 'tr',
+
   name        VARCHAR(255) NOT NULL,
   value       TEXT         NOT NULL,
   category    ENUM('physical','material','service','custom') NOT NULL DEFAULT 'custom',
@@ -110,7 +113,10 @@ CREATE TABLE IF NOT EXISTS product_specs (
   updated_at  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
-  KEY product_specs_product_id_idx (product_id),
+
+  KEY product_specs_product_id_idx       (product_id),
+  KEY product_specs_product_locale_idx   (product_id, locale),
+  KEY product_specs_locale_order_idx     (locale, order_num),
 
   CONSTRAINT fk_product_specs_product
     FOREIGN KEY (product_id) REFERENCES products(id)
@@ -124,6 +130,10 @@ CREATE TABLE IF NOT EXISTS product_specs (
 CREATE TABLE IF NOT EXISTS product_faqs (
   id            CHAR(36)     NOT NULL,
   product_id    CHAR(36)     NOT NULL,
+
+  -- 🌐 Locale bazlı SSS (tr, en, de ...)
+  locale        VARCHAR(8)   NOT NULL DEFAULT 'tr',
+
   question      VARCHAR(500) NOT NULL,
   answer        TEXT         NOT NULL,
   display_order INT(11)      NOT NULL DEFAULT 0,
@@ -132,13 +142,16 @@ CREATE TABLE IF NOT EXISTS product_faqs (
   updated_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
-  KEY product_faqs_product_id_idx (product_id),
-  KEY product_faqs_order_idx      (display_order),
+
+  KEY product_faqs_product_id_idx      (product_id),
+  KEY product_faqs_order_idx           (display_order),
+  KEY product_faqs_product_locale_idx  (product_id, locale),
 
   CONSTRAINT fk_product_faqs_product
     FOREIGN KEY (product_id) REFERENCES products(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 
 
 -- =========================

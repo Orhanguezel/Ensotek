@@ -1,16 +1,12 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductDetail.tsx
-// Ensotek – Product Detail Content
-//   - Data: products (by slug, locale-aware)
-//   - FAQs, Specs, Reviews: public uçlar
-//   - i18n: site_settings.ui_products
-//   - Fiyat GÖSTERME, sadece "Teklif isteyiniz" CTA
-//   - Reviews: Carousel ile slider
+// Ensotek – Product Detail (locale-aware FAQ + Specs + Reviews)
+//   — İçerik yoksa ilgili bloklar hiç render edilmez
 // =============================================================
 
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/router";
 
@@ -20,10 +16,12 @@ import {
   useListProductSpecsQuery,
   useListProductReviewsQuery,
 } from "@/integrations/rtk/endpoints/products.endpoints";
+
 import type {
   ProductFaqDto,
   ProductSpecDto,
   ProductReviewDto,
+  ProductSpecifications,
 } from "@/integrations/types/product.types";
 
 import { toCdnSrc } from "@/shared/media";
@@ -31,13 +29,13 @@ import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 import { localizePath } from "@/i18n/url";
 
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselPrevious,
-  CarouselNext,
-} from "@/components/ui/carousel";
+import ProductSpecsBlock, {
+  type ProductSpecEntry,
+} from "@/components/containers/product/ProductSpecsBlock";
+import ProductFaqBlock from "@/components/containers/product/ProductFaqBlock";
+import ProductReviewsBlock from "@/components/containers/product/ProductReviewsBlock";
+
+import { OfferSection } from "@/components/containers/offer/OfferSection";
 
 import FallbackCover from "public/img/blog/3/1.jpg";
 
@@ -95,13 +93,16 @@ const ProductDetail: React.FC = () => {
     locale === "tr" ? "Teklif isteyiniz" : "Request a quote",
   );
 
+  const [showOfferForm, setShowOfferForm] = useState(false);
+  const offerFormRef = useRef<HTMLDivElement | null>(null);
+
   const slugParam = router.query.slug;
   const slug = useMemo(
     () => (Array.isArray(slugParam) ? slugParam[0] : slugParam) || "",
     [slugParam],
   );
 
-  // ---------- ÜRÜN DETAY ----------
+  // ---------- PRODUCT DETAIL ----------
   const {
     data: product,
     isLoading: isProductLoading,
@@ -111,6 +112,7 @@ const ProductDetail: React.FC = () => {
     { skip: !slug },
   );
 
+  const productId = product?.id ?? "";
   const productListHref = localizePath(locale, "/product");
 
   const title = (product?.title || "").trim();
@@ -125,35 +127,46 @@ const ProductDetail: React.FC = () => {
     return toCdnSrc(raw, HERO_W, HERO_H, "fill") || raw;
   }, [product]);
 
-  const tags = (product?.tags ?? []).filter(Boolean);
-  const productId = product?.id ?? "";
+  const tags = useMemo(
+    () =>
+      (product?.tags ?? [])
+        .map((t) => (t || "").trim())
+        .filter((t) => t.length > 0),
+    [product],
+  );
 
-  // ---------- FAQS ----------
+  // ---------- FAQ (locale-aware) ----------
   const {
     data: faqsData,
     isLoading: isFaqsLoading,
   } = useListProductFaqsQuery(
-    { product_id: productId, only_active: 1 },
+    {
+      product_id: productId,
+      only_active: 1,
+      locale,
+    },
     { skip: !productId },
   );
+
   const faqs: ProductFaqDto[] = faqsData ?? [];
 
-  // ---------- SPECS ----------
+  // ---------- SPECS (locale-aware) ----------
   const {
     data: specsData,
     isLoading: isSpecsLoading,
   } = useListProductSpecsQuery(
-    { product_id: productId },
+    {
+      product_id: productId,
+      locale,
+    },
     { skip: !productId },
   );
 
-  // specs birleşik: önce API'den gelenler, yoksa eski specifications objesi
-  const specsEntries = useMemo(() => {
-    const entries: Array<{ key: string; label: string; value: string }> = [];
-
+  const specsEntries: ProductSpecEntry[] = useMemo(() => {
+    const entries: ProductSpecEntry[] = [];
     const specsList: ProductSpecDto[] = specsData ?? [];
 
-    // 1) API’den gelen satırlar
+    // 1) NEW MODEL: specs table
     if (specsList.length) {
       specsList
         .slice()
@@ -167,9 +180,8 @@ const ProductDetail: React.FC = () => {
         });
     }
 
-    // 2) Eski structured specifications objesini fallback olarak ekle
+    // 2) FALLBACK (structured specifications in product_i18n)
     if (!entries.length && product?.specifications) {
-      const specs = product.specifications;
       const labels: Record<string, string> =
         locale === "tr"
           ? {
@@ -189,8 +201,8 @@ const ProductDetail: React.FC = () => {
             installationTime: "Installation time",
           };
 
-      Object.entries(specs)
-        .filter(([, v]) => !!v)
+      Object.entries(product.specifications as ProductSpecifications)
+        .filter(([, value]) => !!value)
         .forEach(([key, value]) => {
           entries.push({
             key,
@@ -203,23 +215,21 @@ const ProductDetail: React.FC = () => {
     return entries;
   }, [specsData, product, locale]);
 
-  // ---------- REVIEWS ----------
-  const {
-    data: reviewsData,
-    isLoading: isReviewsLoading,
-  } = useListProductReviewsQuery(
-    {
-      product_id: productId,
-      only_active: 1,
-      limit: 10,
-      offset: 0,
-    },
-    { skip: !productId },
-  );
+  // ---------- REVIEWS (not locale-aware) ----------
+  const { data: reviewsRaw, isLoading: isReviewsLoading } =
+    useListProductReviewsQuery(
+      {
+        product_id: productId,
+        only_active: 1,
+        limit: 10,
+        offset: 0,
+      },
+      { skip: !productId },
+    );
 
   const reviews: ProductReviewDto[] = useMemo(
-    () => (reviewsData ?? []) as ProductReviewDto[],
-    [reviewsData],
+    () => (reviewsRaw ?? []) as ProductReviewDto[],
+    [reviewsRaw],
   );
 
   const averageRating = useMemo(() => {
@@ -229,22 +239,38 @@ const ProductDetail: React.FC = () => {
   }, [reviews]);
 
   const handleRequestQuote = () => {
-    // Örnek: iletişim sayfasına ürün slug/id ile git
-    const contactPath = localizePath(
-      locale,
-      `/contact?product=${encodeURIComponent(slug || productId)}`,
-    );
-    void router.push(contactPath);
+    setShowOfferForm(true);
   };
+
+  // Form açıldıktan sonra otomatik scroll
+  useEffect(() => {
+    if (showOfferForm && offerFormRef.current) {
+      offerFormRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [showOfferForm]);
 
   const showSkeleton =
     isProductLoading ||
     (!product && !isProductError && !slug);
 
+  // ----------- BLOK GÖSTERİM KOŞULLARI -----------
+  const hasSpecs = specsEntries.length > 0;
+  const hasFaqs = faqs.length > 0;
+  const hasReviews = reviews.length > 0;
+
+  const showSpecsBlock = isSpecsLoading || hasSpecs;
+  const showFaqsBlock = isFaqsLoading || hasFaqs;
+  const showSpecsOrFaqsRow = showSpecsBlock || showFaqsBlock;
+
+  const showReviewsBlock = isReviewsLoading || hasReviews;
+
   return (
     <section className="product__detail-area grey-bg-3 pt-120 pb-90">
       <div className="container">
-        {/* Back link */}
+        {/* Back Link */}
         <div className="row mb-30">
           <div className="col-12">
             <button
@@ -257,25 +283,21 @@ const ProductDetail: React.FC = () => {
           </div>
         </div>
 
-        {/* Loading / error / not found */}
+        {/* LOADING */}
         {showSkeleton && (
           <div className="row">
             <div className="col-12">
               <p>{loadingText}</p>
-              <div
-                className="skeleton-line mt-10"
-                style={{ height: 16 }}
-                aria-hidden
-              />
+              <div className="skeleton-line mt-10" style={{ height: 16 }} />
               <div
                 className="skeleton-line mt-10"
                 style={{ height: 16, width: "80%" }}
-                aria-hidden
               />
             </div>
           </div>
         )}
 
+        {/* ERROR / NOT FOUND */}
         {!showSkeleton && (isProductError || !product) && (
           <div className="row">
             <div className="col-12">
@@ -284,15 +306,11 @@ const ProductDetail: React.FC = () => {
           </div>
         )}
 
+        {/* PRODUCT CONTENT */}
         {!showSkeleton && !isProductError && product && (
           <>
-            {/* Üst blok: görsel + temel bilgiler + teklif CTA */}
-            <div
-              className="row"
-              data-aos="fade-up"
-              data-aos-delay="200"
-            >
-              {/* Sol: görsel */}
+            {/* HERO + MAIN INFO */}
+            <div className="row" data-aos="fade-up" data-aos-delay="200">
               <div className="col-lg-6 mb-30">
                 <div className="product__detail-hero w-img">
                   <Image
@@ -306,7 +324,6 @@ const ProductDetail: React.FC = () => {
                 </div>
               </div>
 
-              {/* Sağ: içerik */}
               <div className="col-lg-6 mb-30">
                 <article className="product__detail">
                   <header className="product__detail-header mb-20">
@@ -314,7 +331,6 @@ const ProductDetail: React.FC = () => {
                       {title || notFoundText}
                     </h1>
 
-                    {/* Fiyat YOK – sadece teklif CTA */}
                     <div className="product__detail-cta mt-15">
                       <button
                         type="button"
@@ -332,20 +348,18 @@ const ProductDetail: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Tags */}
                   {!!tags.length && (
                     <div className="product__detail-tags mb-20">
                       <h4 className="product__detail-subtitle mb-10">
                         {tagsTitle}
                       </h4>
-                      <div className="product__tag-list">
+                      <div className="product__tag-list d-flex flex-wrap">
                         {tags.map((t) => (
                           <span
-                            className="tag"
                             key={t}
-                            style={{ marginRight: 6, marginBottom: 4 }}
+                            className="badge bg-light text-dark border rounded-pill me-2 mb-2"
                           >
-                            {t}
+                            #{t}
                           </span>
                         ))}
                       </div>
@@ -355,168 +369,57 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Alt bloklar: Specs + FAQs */}
-            <div className="row mt-10">
-              {/* Specs */}
-              {(isSpecsLoading || specsEntries.length > 0) && (
-                <div className="col-lg-6 mb-30">
-                  <div
-                    className="product__detail-specs card p-3 h-100"
-                    style={{ overflow: "hidden" }}
-                  >
-                    <h3 className="product__detail-subtitle mb-10">
-                      {specsTitle}
-                    </h3>
-
-                    {isSpecsLoading && !specsEntries.length && (
-                      <div className="skeleton-line" aria-hidden />
-                    )}
-
-                    {!!specsEntries.length && (
-                      <ul
-                        className="product__spec-list"
-                        style={{
-                          paddingLeft: "1.2rem",
-                          marginBottom: 0,
-                          overflowWrap: "break-word",
-                        }}
-                      >
-                        {specsEntries.map((s) => (
-                          <li key={s.key}>
-                            <strong>{s.label}:</strong> {s.value}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
+            {/* SPECS + FAQS */}
+            {showSpecsOrFaqsRow && (
+              <div className="row mt-10">
+                {showSpecsBlock && (
+                  <div className="col-lg-6 mb-30">
+                    <ProductSpecsBlock
+                      title={specsTitle}
+                      entries={specsEntries}
+                      isLoading={isSpecsLoading}
+                    />
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* FAQs */}
-              {(isFaqsLoading || faqs.length > 0) && (
-                <div className="col-lg-6 mb-30">
-                  <div className="product__detail-faq card p-3 h-100">
-                    <h3 className="product__detail-subtitle mb-10">
-                      {faqsTitle}
-                    </h3>
-
-                    {isFaqsLoading && !faqs.length && (
-                      <div className="skeleton-line" aria-hidden />
-                    )}
-
-                    {!isFaqsLoading && !faqs.length && (
-                      <p className="text-muted small mb-0">
-                        {noFaqsText}
-                      </p>
-                    )}
-
-                    {!!faqs.length && (
-                      <div className="accordion" id="productFaq">
-                        {faqs
-                          .slice()
-                          .sort(
-                            (a, b) =>
-                              a.display_order - b.display_order,
-                          )
-                          .map((f) => (
-                            <details
-                              key={f.id}
-                              className="mb-2"
-                            >
-                              <summary
-                                style={{
-                                  cursor: "pointer",
-                                  fontWeight: 600,
-                                }}
-                              >
-                                {f.question}
-                              </summary>
-                              <div
-                                style={{
-                                  marginTop: 4,
-                                  fontSize: 14,
-                                }}
-                              >
-                                {f.answer}
-                              </div>
-                            </details>
-                          ))}
-                      </div>
-                    )}
+                {showFaqsBlock && (
+                  <div className="col-lg-6 mb-30">
+                    <ProductFaqBlock
+                      title={faqsTitle}
+                      faqs={faqs}
+                      isLoading={isFaqsLoading}
+                      emptyText={noFaqsText}
+                    />
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
-            {/* Reviews – Carousel */}
-            {(isReviewsLoading || reviews.length > 0) && (
+            {/* REVIEWS */}
+            {showReviewsBlock && (
               <div className="row mt-10">
                 <div className="col-12">
-                  <div className="product__detail-reviews card p-3">
-                    <div className="d-flex justify-content-between align-items-center mb-10">
-                      <h3 className="product__detail-subtitle mb-0">
-                        {reviewsTitle}
-                      </h3>
-                      {averageRating !== null && (
-                        <div className="product__review-summary small text-muted">
-                          {averageRating.toFixed(1)} / 5 ·{" "}
-                          {reviews.length}{" "}
-                          {locale === "tr" ? "yorum" : "reviews"}
-                        </div>
-                      )}
-                    </div>
+                  <ProductReviewsBlock
+                    title={reviewsTitle}
+                    reviews={reviews}
+                    averageRating={averageRating}
+                    isLoading={isReviewsLoading}
+                    emptyText={noReviewsText}
+                    locale={locale}
+                  />
+                </div>
+              </div>
+            )}
 
-                    {isReviewsLoading && !reviews.length && (
-                      <div className="skeleton-line" aria-hidden />
-                    )}
-
-                    {!isReviewsLoading && !reviews.length && (
-                      <p className="text-muted small mb-0">
-                        {noReviewsText}
-                      </p>
-                    )}
-
-                    {!!reviews.length && (
-                      <Carousel className="mt-2">
-                        <CarouselContent className="py-2">
-                          {reviews.map((r) => (
-                            <CarouselItem
-                              key={r.id}
-                              className="basis-full md:basis-1/2 lg:basis-1/3"
-                            >
-                              <div className="border rounded-2 p-3 h-100 small">
-                                <div className="d-flex justify-content-between mb-1">
-                                  <strong>
-                                    {r.customer_name ||
-                                      (locale === "tr"
-                                        ? "Müşteri"
-                                        : "Customer")}
-                                  </strong>
-                                  <span className="text-muted">
-                                    {r.rating} / 5
-                                  </span>
-                                </div>
-                                {r.comment && (
-                                  <div>{r.comment}</div>
-                                )}
-                                {r.review_date && (
-                                  <div className="text-muted mt-1">
-                                    {new Date(
-                                      r.review_date,
-                                    ).toLocaleDateString(locale)}
-                                  </div>
-                                )}
-                              </div>
-                            </CarouselItem>
-                          ))}
-                        </CarouselContent>
-
-                        {/* Oklar sadece md+ ekranlarda görünsün */}
-                        <CarouselPrevious className="hidden md:flex" />
-                        <CarouselNext className="hidden md:flex" />
-                      </Carousel>
-                    )}
-                  </div>
+            {/* OFFER FORM – Bu ürün için */}
+            {showOfferForm && productId && (
+              <div className="row mt-40" ref={offerFormRef}>
+                <div className="col-12">
+                  <OfferSection
+                    locale={locale}
+                    productId={productId}
+                    productName={title || product.slug || ""}
+                  />
                 </div>
               </div>
             )}

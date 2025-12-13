@@ -29,9 +29,9 @@ VALUES
 ('f2570596-db46-4028-902c-d6fe2c9a8312',
   NULL, 'header', NULL, 'custom', NULL, NULL, 3, 1),
 
--- 4) Spare Part
+-- 4) Spare Part (ROOT) – ARTIK KULLANILMIYOR, GİZLİ (is_active=0)
 ('11111111-2222-3333-4444-555555555555',
-  NULL, 'header', NULL, 'custom', NULL, NULL, 4, 1),
+  NULL, 'header', NULL, 'custom', NULL, NULL, 4, 0),
 
 -- 6) Library / Blog
 ('ceed431a-aafb-4aba-bf1f-6217b3960c01',
@@ -65,10 +65,12 @@ VALUES
   'c47a1c3f-cea1-4780-9381-77336bc8ac59', 'header', NULL, 'custom', NULL, NULL, 1, 1),
 
 -- ================= HEADER SUBMENUS: PRODUCTS =================
--- Alt menü örnekleri (Products altında)
+-- Alt menüler (Products altında)
+-- 0) All Products
 ('88888888-1111-2222-3333-444444444444',
   'f2570596-db46-4028-902c-d6fe2c9a8312', 'header', NULL, 'custom', NULL, NULL, 0, 1),
 
+-- 1) Spare Parts (Products altına taşındı)
 ('88888888-1111-2222-3333-555555555555',
   'f2570596-db46-4028-902c-d6fe2c9a8312', 'header', NULL, 'custom', NULL, NULL, 1, 1),
 
@@ -136,6 +138,7 @@ VALUES
  'tr', 'Ürünler', '/product',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
+-- Top-level Spare Part (tr) – kayıt duruyor ama item is_active=0
 ('b1111111-2222-3333-4444-555555555555',
  '11111111-2222-3333-4444-555555555555',
  'tr', 'Yedek Parça', '/sparepart',
@@ -184,7 +187,7 @@ VALUES
  'tr', 'Proje & Danışmanlık', '/service/proje-danismanlik',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
--- Products alt menüleri
+-- Products alt menüleri (tr)
 ('c8888888-1111-2222-3333-444444444444',
  '88888888-1111-2222-3333-444444444444',
  'tr', 'Tüm Ürünler', '/product',
@@ -192,7 +195,7 @@ VALUES
 
 ('c8888888-1111-2222-3333-555555555555',
  '88888888-1111-2222-3333-555555555555',
- 'tr', 'Kategorilere Göre', '/product/kategoriler',
+ 'tr', 'Yedek Parçalar', '/sparepart',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
 -- ================= FOOTER: Hızlı Erişim (tr) =================
@@ -201,10 +204,6 @@ VALUES
  'tr', 'SSS', '/sss',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
-('3e32b68d-ae71-4d44-8770-95b8dfb03c36',
- '2e32b68d-ae71-4d44-8770-95b8dfb03c36',
- 'tr', 'Kampanyalar', '/kampanyalar',
- '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
 ('f1573cc3-5392-448b-89eb-d0e02e947c6e',
  'f1573cc3-5392-448b-89eb-d0e02e947c6d',
@@ -220,16 +219,6 @@ VALUES
 ('3d325c92-d59e-4730-8301-5c9bcff463bd',
  '3d325c92-d59e-4730-8301-5c9bcff463bc',
  'tr', 'KVKK', '/kvkk',
- '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
-
-('9fa999a9-9e47-4a3c-9dac-6afba197d79d',
- '9fa999a9-9e47-4a3c-9dac-6afba197d79c',
- 'tr', 'İade ve Değişim', '/iade-degisim',
- '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
-
-('d8ec7f51-384f-400a-9ac6-3a179cb89088',
- 'd8ec7f51-384f-400a-9ac6-3a179cb89087',
- 'tr', 'Ödeme Yöntemleri', '/odeme-yontemleri',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
 ('24c49639-01d0-4274-8fb9-c31ed64d0727',
@@ -269,6 +258,7 @@ VALUES
  'en', 'Products', '/product',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
+-- Top-level Spare Parts (en) – item is_active=0
 ('00000000-0000-0000-0000-000000000005',
  '11111111-2222-3333-4444-555555555555',
  'en', 'Spare Parts', '/sparepart',
@@ -317,7 +307,7 @@ VALUES
  'en', 'Project & Consulting', '/service/project-consulting',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
--- Products submenus
+-- Products submenus (en)
 ('00000000-0000-0000-0000-000000000103',
  '88888888-1111-2222-3333-444444444444',
  'en', 'All Products', '/product',
@@ -325,7 +315,7 @@ VALUES
 
 ('00000000-0000-0000-0000-000000000104',
  '88888888-1111-2222-3333-555555555555',
- 'en', 'By Categories', '/product/categories',
+ 'en', 'Spare Parts', '/sparepart',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
 -- ================= FOOTER: Quick Links (en) =================
@@ -334,10 +324,6 @@ VALUES
  'en', 'FAQ', '/sss',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
-('00000000-0000-0000-0000-000000000011',
- '2e32b68d-ae71-4d44-8770-95b8dfb03c36',
- 'en', 'Campaigns', '/kampanyalar',
- '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
 ('00000000-0000-0000-0000-000000000012',
  'f1573cc3-5392-448b-89eb-d0e02e947c6d',
@@ -353,16 +339,6 @@ VALUES
 ('00000000-0000-0000-0000-000000000014',
  '3d325c92-d59e-4730-8301-5c9bcff463bc',
  'en', 'KVKK', '/kvkk',
- '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
-
-('00000000-0000-0000-0000-000000000015',
- '9fa999a9-9e47-4a3c-9dac-6afba197d79c',
- 'en', 'Returns & Exchanges', '/iade-degisim',
- '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
-
-('00000000-0000-0000-0000-000000000016',
- 'd8ec7f51-384f-400a-9ac6-3a179cb89087',
- 'en', 'Payment Methods', '/odeme-yontemleri',
  '2024-01-01 00:00:00.000', '2024-01-01 00:00:00.000'),
 
 ('00000000-0000-0000-0000-000000000017',

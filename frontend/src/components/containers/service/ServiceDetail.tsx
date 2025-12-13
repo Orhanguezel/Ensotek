@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useRef, useEffect } from "react";
 
 import {
   useGetServiceBySlugPublicQuery,
@@ -17,13 +17,17 @@ import type { ServiceImageDto } from "@/integrations/types/services.types";
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 
-
 import { toCdnSrc } from "@/shared/media";
 import { excerpt } from "@/shared/text";
 
 import { localizePath } from "@/i18n/url";
+import { DEFAULT_LOCALE } from "@/i18n/config";
+
 import Link from "next/link";
 import Image from "next/image";
+
+import { OfferSection } from "@/components/containers/offer/OfferSection";
+import { OfferWhatsAppButton } from "@/components/containers/offer/OfferWhatsAppButton";
 
 const FALLBACK_IMG = "/img/project/project-thumb.jpg";
 
@@ -31,31 +35,66 @@ interface ServiceDetailProps {
   slug: string;
 }
 
+// Hizmet tip kodlarını, kullanıcıya gösterilecek label’a çevirir
+const resolveServiceTypeLabel = (
+  type: string | null | undefined,
+  locale: string,
+): string => {
+  const isTr = locale === "tr";
+  const key = (type || "").toString();
+
+  const mapTr: Record<string, string> = {
+    maintenance_repair: "Bakım & Onarım",
+    modernization: "Modernizasyon",
+    spare_parts_components: "Yedek Parça & Bileşenler",
+    applications_references: "Uygulamalar & Referanslar",
+    engineering_support: "Mühendislik Desteği",
+    production: "Üretim",
+    other: "Diğer Hizmetler",
+  };
+
+  const mapEn: Record<string, string> = {
+    maintenance_repair: "Maintenance & Repair",
+    modernization: "Modernization",
+    spare_parts_components: "Spare Parts & Components",
+    applications_references: "Applications & References",
+    engineering_support: "Engineering Support",
+    production: "Production",
+    other: "Other Services",
+  };
+
+  return isTr ? mapTr[key] || key : mapEn[key] || key;
+};
+
 const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   const locale = useResolvedLocale();
   const { ui } = useUiSection("ui_services", locale);
+  const isTr = locale === "tr";
 
-  // ✅ RTK endpoint argümanı: { slug, locale?, default_locale? }
+  // Teklif formu göster / gizle + scroll
+  const [showOfferForm, setShowOfferForm] = useState(false);
+  const offerFormRef = useRef<HTMLDivElement | null>(null);
+
+  // ✅ RTK endpoint argümanı: { slug, locale, default_locale }
   const {
     data: service,
     isLoading,
     isError,
   } = useGetServiceBySlugPublicQuery(
-    { slug, locale },
+    { slug, locale, default_locale: DEFAULT_LOCALE },
     {
       skip: !slug,
     },
   );
 
-  // ✅ RTK endpoint argümanı: { serviceId, locale?, default_locale? }
+  // ✅ RTK endpoint argümanı: { serviceId, locale, default_locale }
   const {
     data: images,
     isLoading: isImagesLoading,
   } = useListServiceImagesPublicQuery(
     service?.id
-      ? { serviceId: service.id, locale }
-      : // skip true iken bu argüman kullanılmayacak
-      { serviceId: "", locale },
+      ? { serviceId: service.id, locale, default_locale: DEFAULT_LOCALE }
+      : { serviceId: "", locale, default_locale: DEFAULT_LOCALE },
     {
       skip: !service?.id,
     },
@@ -86,8 +125,58 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
       "Service description is coming soon.",
     );
 
+  const shortSummary = excerpt(String(summary), 350);
+
   const backHref = localizePath(locale, "/service");
 
+  const hasGardeningMeta =
+    service?.area ||
+    service?.duration ||
+    service?.maintenance ||
+    service?.season;
+
+  const hasSoilMeta =
+    service?.soil_type || service?.thickness || service?.equipment;
+
+  const serviceTypeLabel = resolveServiceTypeLabel(service?.type, locale);
+  const categoryLabel = service?.category_name || "";
+
+  // --- CTA textleri ---
+  const moreInfoText = ui(
+    "ui_services_cta_more_info",
+    isTr
+      ? "Bu hizmet ile ilgili detaylı bilgi ve teknik destek için ekibimizle iletişime geçebilirsiniz."
+      : "Contact our team for detailed information and technical support about this service.",
+  );
+  const whatsappText = ui(
+    "ui_services_cta_whatsapp",
+    isTr ? "WhatsApp üzerinden yazın" : "Write on WhatsApp",
+  );
+  const requestQuoteText = ui(
+    "ui_services_cta_request_quote",
+    isTr ? "Bu hizmet için teklif iste" : "Request a quote for this service",
+  );
+
+  const whatsappPhone =
+    process.env.NEXT_PUBLIC_WHATSAPP_PHONE || "+905555555555";
+
+  const whatsappMessage = isTr
+    ? `Merhaba, "${title}" hizmeti hakkında detaylı bilgi ve fiyat teklifi almak istiyorum.`
+    : `Hello, I would like to get more information and a quotation about the "${title}" service.`;
+
+  // Form açıldıktan sonra otomatik scroll
+  useEffect(() => {
+    if (showOfferForm && offerFormRef.current) {
+      offerFormRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  }, [showOfferForm]);
+
+  // ------------------------------------------------------------------
+  // LOADING / ERROR STATES
+  // ------------------------------------------------------------------
   if (isLoading) {
     return (
       <div className="service__area pt-120 pb-90">
@@ -124,7 +213,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                   "The service you are looking for could not be found or is no longer available.",
                 )}
               </p>
-              <Link href={backHref} className="tp-btn">
+              <Link href={backHref} className="btn btn-primary">
                 {ui("ui_services_back_to_list", "Back to services")}
               </Link>
             </div>
@@ -134,17 +223,9 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
     );
   }
 
-  const shortSummary = excerpt(String(summary), 250);
-
-  const hasGardeningMeta =
-    service.area ||
-    service.duration ||
-    service.maintenance ||
-    service.season;
-
-  const hasSoilMeta =
-    service.soil_type || service.thickness || service.equipment;
-
+  // ------------------------------------------------------------------
+  // NORMAL CONTENT
+  // ------------------------------------------------------------------
   return (
     <div className="service__area pt-120 pb-90">
       <div className="container">
@@ -156,16 +237,18 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
               <div className="mb-25">
                 <Link href={backHref} className="back-link d-inline-flex">
                   <span className="me-2">←</span>
-                  {ui("ui_services_back_to_list", "Back to services")}
+                  {isTr ? "Hizmetlere geri dön" : "Back to services"}
                 </Link>
               </div>
 
               {/* Title & meta */}
               <div className="service__details-title-wrapper mb-25">
-                <span className="service__details-tag">
-                  {service.type || "service"}
-                </span>
-                <h2 className="service__details-title">{title}</h2>
+                {serviceTypeLabel && (
+                  <span className="service__details-tag">
+                    {serviceTypeLabel}
+                  </span>
+                )}
+                <h1 className="service__details-title">{title}</h1>
                 {service.price && (
                   <p className="service__price mt-10">
                     <strong>
@@ -181,8 +264,8 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                 <Image
                   src={mainImageSrc}
                   alt={service.image_alt || String(title)}
-                  width={640}
-                  height={420}
+                  width={960}
+                  height={540}
                   className="img-fluid w-100"
                 />
               </div>
@@ -192,42 +275,50 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                 <p>{shortSummary}</p>
 
                 {/* Includes / warranty / material */}
-                <div className="service__meta mt-25">
-                  <ul>
-                    {service.includes && (
-                      <li>
-                        <span>
-                          {ui(
-                            "ui_services_includes_label",
-                            "Service includes",
-                          )}
-                          :
-                        </span>{" "}
-                        {service.includes}
-                      </li>
-                    )}
-                    {service.material && (
-                      <li>
-                        <span>
-                          {ui(
-                            "ui_services_material_label",
-                            "Material",
-                          )}
-                          :
-                        </span>{" "}
-                        {service.material}
-                      </li>
-                    )}
-                    {service.warranty && (
-                      <li>
-                        <span>
-                          {ui("ui_services_warranty_label", "Warranty")}:
-                        </span>{" "}
-                        {service.warranty}
-                      </li>
-                    )}
-                  </ul>
-                </div>
+                {(service.includes || service.material || service.warranty) && (
+                  <div className="service__meta mt-25">
+                    <ul>
+                      {service.includes && (
+                        <li>
+                          <span>
+                            {ui(
+                              "ui_services_includes_label",
+                              isTr ? "Hizmet kapsamı" : "Service includes",
+                            )}
+                            :
+                          </span>{" "}
+                          {service.includes}
+                        </li>
+                      )}
+                      {service.material && (
+                        <li>
+                          <span>
+                            {ui(
+                              "ui_services_material_label",
+                              isTr
+                                ? "Kullanılan ekipman / malzeme"
+                                : "Equipment / Material",
+                            )}
+                            :
+                          </span>{" "}
+                          {service.material}
+                        </li>
+                      )}
+                      {service.warranty && (
+                        <li>
+                          <span>
+                            {ui(
+                              "ui_services_warranty_label",
+                              isTr ? "Garanti süresi" : "Warranty",
+                            )}
+                            :
+                          </span>{" "}
+                          {service.warranty}
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Type specific meta */}
                 {(hasGardeningMeta || hasSoilMeta) && (
@@ -235,7 +326,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                     <h4 className="service__meta-title">
                       {ui(
                         "ui_services_specs_title",
-                        "Service specifications",
+                        isTr ? "Hizmet özellikleri" : "Service specifications",
                       )}
                     </h4>
                     <div className="row">
@@ -247,7 +338,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                                 <span>
                                   {ui(
                                     "ui_services_area_label",
-                                    "Area",
+                                    isTr ? "Uygulama alanı" : "Area",
                                   )}
                                   :
                                 </span>{" "}
@@ -259,7 +350,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                                 <span>
                                   {ui(
                                     "ui_services_duration_label",
-                                    "Duration",
+                                    isTr ? "Tahmini süre" : "Duration",
                                   )}
                                   :
                                 </span>{" "}
@@ -271,7 +362,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                                 <span>
                                   {ui(
                                     "ui_services_maintenance_label",
-                                    "Maintenance",
+                                    isTr ? "Bakım periyodu" : "Maintenance",
                                   )}
                                   :
                                 </span>{" "}
@@ -283,7 +374,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                                 <span>
                                   {ui(
                                     "ui_services_season_label",
-                                    "Season",
+                                    isTr ? "Önerilen dönem" : "Season",
                                   )}
                                   :
                                 </span>{" "}
@@ -346,16 +437,14 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                     <h4 className="service__gallery-title">
                       {ui(
                         "ui_services_gallery_title",
-                        "Service gallery",
+                        isTr ? "Hizmet galerisi" : "Service gallery",
                       )}
                     </h4>
                     <div className="row">
                       {gallery.map((img) => {
-                        const base =
-                          (img.image_url || "")?.trim() || "";
+                        const base = (img.image_url || "")?.trim() || "";
                         const src =
-                          toCdnSrc(base, 400, 280, "fill") ||
-                          FALLBACK_IMG;
+                          toCdnSrc(base, 400, 280, "fill") || FALLBACK_IMG;
 
                         return (
                           <div
@@ -398,6 +487,13 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                     </div>
                   </div>
                 )}
+
+                {/* Teklif Formu – bu hizmet için */}
+                {showOfferForm && (
+                  <div className="service__offer mt-40" ref={offerFormRef}>
+                    <OfferSection locale={locale} contextType="service" />
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -407,68 +503,62 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
             <aside className="service__sidebar">
               <div className="service__widget mb-30">
                 <h4 className="service__widget-title">
-                  {ui(
-                    "ui_services_sidebar_info_title",
-                    "Service info",
-                  )}
+                  {isTr ? "Hizmet bilgileri" : "Service information"}
                 </h4>
                 <ul>
-                  <li>
-                    <span>
-                      {ui(
-                        "ui_services_sidebar_type",
-                        "Service type",
-                      )}
-                      :
-                    </span>{" "}
-                    {service.type}
-                  </li>
-                  {service.category_id && (
+                  {serviceTypeLabel && (
                     <li>
                       <span>
-                        {ui(
-                          "ui_services_sidebar_category",
-                          "Category",
-                        )}
-                        :
+                        {isTr ? "Hizmet tipi" : "Service type"}:
                       </span>{" "}
-                      {service.category_id}
+                      {serviceTypeLabel}
                     </li>
                   )}
-                  <li>
-                    <span>
-                      {ui(
-                        "ui_services_sidebar_status",
-                        "Status",
-                      )}
-                      :
-                    </span>{" "}
-                    {service.is_active
-                      ? ui("ui_common_active", "Active")
-                      : ui("ui_common_passive", "Inactive")}
-                  </li>
+                  {categoryLabel && (
+                    <li>
+                      <span>
+                        {isTr ? "Kategori" : "Category"}:
+                      </span>{" "}
+                      {categoryLabel}
+                    </li>
+                  )}
                 </ul>
               </div>
 
               <div className="service__widget service__cta-widget">
                 <h4 className="service__widget-title">
-                  {ui(
-                    "ui_services_sidebar_cta_title",
-                    "Need more information?",
-                  )}
+                  {isTr
+                    ? "Detaylı bilgi ister misiniz?"
+                    : "Would you like more details?"}
                 </h4>
-                <p>
-                  {ui(
-                    "ui_services_sidebar_cta_desc",
-                    "Contact us to get a custom offer or detailed information about this service.",
-                  )}
-                </p>
-                <Link
-                  href={localizePath(locale, "/contact")}
-                  className="tp-btn w-100 text-center"
-                >
-                  {ui("ui_services_sidebar_cta_button", "Contact us")}
-                </Link>
+                <p className="mb-3">{moreInfoText}</p>
+
+                {/* CTA butonları: iletişim, WhatsApp, teklif iste */}
+                <div className="d-grid gap-2">
+                  <Link
+                    href={localizePath(locale, "/contact")}
+                    className="btn btn-primary btn-sm w-100"
+                  >
+                    {isTr ? "İletişim Formu" : "Contact form"}
+                  </Link>
+
+                  <OfferWhatsAppButton
+                    locale={locale}
+                    phone={whatsappPhone}
+                    message={whatsappMessage}
+                    className="btn btn-outline-success btn-sm w-100"
+                  >
+                    {whatsappText}
+                  </OfferWhatsAppButton>
+
+                  <button
+                    type="button"
+                    className="btn btn-outline-primary btn-sm w-100"
+                    onClick={() => setShowOfferForm(true)}
+                  >
+                    {requestQuoteText}
+                  </button>
+                </div>
               </div>
             </aside>
           </div>

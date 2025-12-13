@@ -14,6 +14,7 @@ import Banner from "@/components/layout/banner/Breadcrum";
 import ProductDetail from "@/components/containers/product/ProductDetail";
 import ProductMore from "@/components/containers/product/ProductMore";
 import Feedback from "@/components/containers/feedback/Feedback";
+import ServiceCta from "@/components/containers/cta/ServiceCta";
 
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
@@ -34,6 +35,7 @@ const ProductDetailPage: React.FC = () => {
       <ProductDetail />
       <ProductMore />
       <Feedback />
+      <ServiceCta />
     </>
   );
 };

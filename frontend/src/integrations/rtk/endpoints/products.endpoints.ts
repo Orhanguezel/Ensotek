@@ -26,7 +26,6 @@ export const productsApi = baseApi.injectEndpoints({
       ProductListResponse,
       ProductListQueryParams | void
     >({
-      // arg: ProductListQueryParams | void
       query: (params?: ProductListQueryParams) => ({
         url: "/products",
         method: "GET",
@@ -65,8 +64,6 @@ export const productsApi = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
-      // 3. parametreyi (arg) kullanmak için 2. paramı da tanımlamak zorundayız
-      // eslint'i susturmak için _err'i "kullanıyoruz".
       providesTags: (_res, _err, arg) => {
         void _err;
         return [{ type: "Products" as const, id: arg.idOrSlug }];
@@ -86,9 +83,10 @@ export const productsApi = baseApi.injectEndpoints({
     }),
 
     getProductById: build.query<ProductDto, GetProductByIdParams>({
-      query: ({ id }) => ({
+      query: ({ id, ...params }) => ({
         url: `/products/id/${encodeURIComponent(id)}`,
         method: "GET",
+        params: Object.keys(params).length ? params : undefined,
       }),
       providesTags: (_res, _err, arg) => {
         void _err;
@@ -106,7 +104,6 @@ export const productsApi = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
-      // error ve arg kullanılmıyor → imzadan kaldır
       providesTags: (result) =>
         result
           ? [
@@ -151,7 +148,6 @@ export const productsApi = baseApi.injectEndpoints({
         method: "GET",
         params,
       }),
-      // arg kullanılmıyordu → tek parametre
       providesTags: (result) =>
         result
           ? [

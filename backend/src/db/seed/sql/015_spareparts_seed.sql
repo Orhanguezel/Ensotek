@@ -1,8 +1,12 @@
 -- =============================================================
 -- 015_spareparts_seed.sql
 -- Ensotek Yedek Parça Ürünleri – Cooling Tower Spareparts (TR + EN)
---   Base ürünler tek ID
+--   - Base ürünler tek ID
+--   - TR + EN product_i18n
 -- =============================================================
+
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
@@ -31,8 +35,8 @@ VALUES
   -- SPAREPART 1: Fan Motoru
   (
     'bbbb1001-2222-4222-8222-bbbbbbbb1001',
-    'aaaa1001-1111-4111-8111-aaaaaaaa1001', -- SOĞUTMA KULESİ YEDEK PARÇALARI (TR)
-    'bbbb1004-1111-4111-8111-bbbbbbbb1004', -- Fan ve Motor Grubu (TR)
+    'aaaa1001-1111-4111-8111-aaaaaaaa1001', -- SOĞUTMA KULESİ YEDEK PARÇALARI
+    'bbbb1004-1111-4111-8111-bbbbbbbb1004', -- Fan ve Motor Grubu
     9500.00,
     'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
     NULL,
@@ -53,7 +57,7 @@ VALUES
   (
     'bbbb1002-2222-4222-8222-bbbbbbbb1002',
     'aaaa1001-1111-4111-8111-aaaaaaaa1001',
-    'bbbb1003-1111-4111-8111-bbbbbbbb1003', -- Dolgu Malzemeleri (TR)
+    'bbbb1003-1111-4111-8111-bbbbbbbb1003', -- Dolgu Malzemeleri
     4200.00,
     'https://images.unsplash.com/photo-1509391366360-2e959784a276?auto=format&fit=crop&w=1200&h=600&q=80',
     NULL,
@@ -192,3 +196,5 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description);
 
 COMMIT;
+
+SET FOREIGN_KEY_CHECKS = 1;

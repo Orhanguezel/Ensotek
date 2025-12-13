@@ -15,18 +15,19 @@ import type {
 export const productFaqsAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // LIST
-    listProductFaqsAdmin: build.query<AdminProductFaqDto[], AdminProductFaqListParams>(
-      {
-        query: ({ productId, only_active }) => ({
-          url: `/admin/products/${encodeURIComponent(productId)}/faqs`,
-          method: "GET",
-          params:
-            only_active === undefined
-              ? undefined
-              : { only_active },
-        }),
-      },
-    ),
+    listProductFaqsAdmin: build.query<
+      AdminProductFaqDto[],
+      AdminProductFaqListParams
+    >({
+      query: ({ productId, only_active, locale }) => ({
+        url: `/admin/products/${encodeURIComponent(productId)}/faqs`,
+        method: "GET",
+        params: {
+          ...(only_active === undefined ? {} : { only_active }),
+          ...(locale ? { locale } : {}),
+        },
+      }),
+    }),
 
     // CREATE
     createProductFaqAdmin: build.mutation<
@@ -36,6 +37,8 @@ export const productFaqsAdminApi = baseApi.injectEndpoints({
       query: ({ productId, payload }) => ({
         url: `/admin/products/${encodeURIComponent(productId)}/faqs`,
         method: "POST",
+        // locale body'de de olabilir, ama backend query.locale'i baz alıyor
+        params: payload.locale ? { locale: payload.locale } : undefined,
         body: payload,
       }),
     }),
@@ -82,13 +85,20 @@ export const productFaqsAdminApi = baseApi.injectEndpoints({
     }),
 
     // REPLACE (PUT /faqs)
+    //  - locale: query string'de
+    //  - body: { items: AdminProductFaqCreatePayload[] }
     replaceProductFaqsAdmin: build.mutation<
       AdminProductFaqDto[],
-      { productId: string; payload: AdminProductFaqReplacePayload }
+      {
+        productId: string;
+        locale: string;
+        payload: AdminProductFaqReplacePayload;
+      }
     >({
-      query: ({ productId, payload }) => ({
+      query: ({ productId, locale, payload }) => ({
         url: `/admin/products/${encodeURIComponent(productId)}/faqs`,
         method: "PUT",
+        params: locale ? { locale } : undefined,
         body: payload,
       }),
     }),

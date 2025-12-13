@@ -24,7 +24,6 @@ const ServiceDetailPage: React.FC = () => {
   const pageTitle = ui("ui_services_page_title", "Services");
 
   if (!slug || typeof slug !== "string") {
-    // Router henüz hazır değilse basit bir skeleton
     return (
       <>
         <Banner title={pageTitle} />

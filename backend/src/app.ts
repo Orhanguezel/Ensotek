@@ -4,6 +4,7 @@ import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
 import authPlugin from './plugins/authPlugin';
 import mysqlPlugin from '@/plugins/mysql';
+import staticUploads from "./plugins/staticUploads";
 import { localeMiddleware } from '@/common/middleware/locale';
 
 import type { FastifyInstance } from 'fastify';
@@ -34,6 +35,7 @@ import { registerNotifications } from '@/modules/notifications/router';
 import { registerProducts } from '@/modules/products/router';
 import { registerReviews } from '@/modules/review/router';
 import { registerSupport } from '@/modules/support/router';
+import { registerOffer } from '@/modules/offer/router';
 
 // Admin modüller
 import { registerCustomPagesAdmin } from '@/modules/customPages/admin.routes';
@@ -57,6 +59,7 @@ import { registerProductsAdmin } from '@/modules/products/admin.routes';
 import { registerReviewsAdmin } from '@/modules/review/admin.routes';
 import { registerSupportAdmin } from '@/modules/support/admin.routes';
 import { registerDashboardAdmin } from '@/modules/dashboard/admin.routes';
+import { registerOfferAdmin } from '@/modules/offer/admin.routes';
 
 function parseCorsOrigins(v?: string | string[]): boolean | string[] {
   if (!v) return true;
@@ -137,6 +140,8 @@ export async function createApp() {
     limits: { fileSize: 20 * 1024 * 1024 },
   });
 
+  await app.register(staticUploads);
+
   // ==========================
   // /api prefix'li tüm modüller
   // ==========================
@@ -212,6 +217,9 @@ export async function createApp() {
       await api.register(async (i) => registerDashboardAdmin(i), {
         prefix: '/admin',
       });
+      await api.register(async (i) => registerOfferAdmin(i), {
+        prefix: '/admin',
+      });
 
       // --- Public modüller: /api/...
       await registerAuth(api);
@@ -237,6 +245,7 @@ export async function createApp() {
       await registerProducts(api);
       await registerReviews(api);
       await registerSupport(api);
+      await registerOffer(api);
     },
     { prefix: '/api' },
   );

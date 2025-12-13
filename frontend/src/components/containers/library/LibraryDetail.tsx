@@ -17,10 +17,8 @@ import { stripHtml } from "@/shared/text";
 
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
-
 import { localizePath } from "@/i18n/url";
 
-// Library section’de kullandığımız pattern ile aynı
 import ShapePattern from "public/img/shape/features-shape.png";
 
 const LibraryDetail: React.FC = () => {

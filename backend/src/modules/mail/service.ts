@@ -5,7 +5,7 @@
 import nodemailer from "nodemailer";
 import type { Transporter } from "nodemailer";
 import { z } from "zod";
-import { env } from "@/core/env";
+
 import {
   sendMailSchema,
   type SendMailInput,
@@ -29,13 +29,94 @@ import { eq } from "drizzle-orm";
 let cachedTransporter: Transporter | null = null;
 let cachedSignature: string | null = null;
 
-function buildSignature(cfg: SmtpSettings): string {
+// -------------------------------------------------------------------
+// SMTP CONFIG
+//   - Tamamen site_settings (getSmtpSettings) üzerinden
+//   - Gmail / Hostinger / başka SMTP sağlayıcı fark etmez
+//   - host / port / secure / username / password / fromEmail / fromName
+//     hepsi DB'deki smtp_* alanlarından gelir
+// -------------------------------------------------------------------
+
+type ResolvedSmtpConfig = SmtpSettings & {
+  host: string;
+  port: number;
+  secure: boolean;
+  username?: string | null;
+  password?: string | null;
+  fromEmail?: string | null;
+  fromName?: string | null;
+};
+
+function buildSignature(cfg: {
+  host?: string;
+  port?: number;
+  username?: string | null;
+  secure?: boolean;
+}) {
   return [
     cfg.host ?? "",
     cfg.port ?? "",
     cfg.username ?? "",
     cfg.secure ? "1" : "0",
   ].join("|");
+}
+
+/**
+ * DB tabanlı SMTP config’i üretir.
+ *
+ * Beklenen DB alanları (örnek):
+ *  - smtp_host        → SmtpSettings.host
+ *  - smtp_port        → SmtpSettings.port (number)
+ *  - smtp_username    → SmtpSettings.username
+ *  - smtp_password    → SmtpSettings.password
+ *  - smtp_from_email  → SmtpSettings.fromEmail
+ *  - smtp_from_name   → SmtpSettings.fromName
+ *  - smtp_ssl         → SmtpSettings.secure (boolean)
+ *
+ * Host zorunlu; diğerleri yoksa makul default'lar kullanılır.
+ */
+async function resolveSmtpConfig(): Promise<ResolvedSmtpConfig> {
+  const dbCfg = await getSmtpSettings();
+
+  // HOST (zorunlu)
+  const host = (dbCfg.host ?? "").trim();
+  if (!host) {
+    throw new Error("smtp_host_not_configured");
+  }
+
+  // PORT
+  let port: number;
+  if (typeof dbCfg.port === "number" && dbCfg.port > 0) {
+    port = dbCfg.port;
+  } else {
+    // default 587 (TLS / STARTTLS)
+    port = 587;
+  }
+
+  // SECURE
+  let secure: boolean;
+  if (typeof dbCfg.secure === "boolean") {
+    secure = dbCfg.secure;
+  } else {
+    // Port 465 ise default secure:true, diğerlerinde false
+    secure = port === 465;
+  }
+
+  const username = dbCfg.username ?? null;
+  const password = dbCfg.password ?? null;
+  const fromEmail = dbCfg.fromEmail ?? null;
+  const fromName = dbCfg.fromName ?? null;
+
+  return {
+    ...dbCfg,
+    host,
+    port,
+    secure,
+    username,
+    password,
+    fromEmail,
+    fromName,
+  };
 }
 
 /* ==================================================================
@@ -107,20 +188,33 @@ async function enrichParamsWithSiteName(
    ================================================================== */
 
 /**
- * SMTP config'ini site_settings + env'den okuyup transporter üretir
+ * SMTP config'ini:
+ *  - site_settings (getSmtpSettings)
+ * ile birleştirip transporter üretir
+ *
+ * Gmail için:
+ *   smtp_host = "smtp.gmail.com"
+ *   smtp_port = 465 (veya 587)
+ *   smtp_ssl  = true (465 için) veya false (587 için)
+ *   smtp_username = gmail adresi
+ *   smtp_password = app password
+ *
+ * Hostinger için:
+ *   smtp_host = "smtp.hostinger.com"
+ *   smtp_port = 465
+ *   smtp_ssl  = true
+ *   smtp_username / smtp_password = Hostinger SMTP bilgileri
  */
 async function getTransporter(): Promise<Transporter> {
-  const cfg = await getSmtpSettings();
+  const cfg = await resolveSmtpConfig();
 
-  if (!cfg.host) {
-    throw new Error("smtp_host_not_configured");
-  }
-  if (!cfg.port) {
-    // default 587 (TLS) fallback
-    cfg.port = 587;
-  }
+  const signature = buildSignature({
+    host: cfg.host,
+    port: cfg.port,
+    username: cfg.username ?? undefined,
+    secure: cfg.secure,
+  });
 
-  const signature = buildSignature(cfg);
   if (cachedTransporter && cachedSignature === signature) {
     return cachedTransporter;
   }
@@ -128,15 +222,15 @@ async function getTransporter(): Promise<Transporter> {
   const auth =
     cfg.username && cfg.password
       ? {
-          user: cfg.username,
-          pass: cfg.password,
-        }
+        user: cfg.username,
+        pass: cfg.password,
+      }
       : undefined;
 
   const transporter = nodemailer.createTransport({
     host: cfg.host,
     port: cfg.port,
-    secure: cfg.secure, // smtp_ssl:true ise 465, değilse 587 vb.
+    secure: cfg.secure, // 465 ise true, 587 vb. ise false (STARTTLS)
     auth,
   });
 
@@ -152,18 +246,23 @@ async function getTransporter(): Promise<Transporter> {
 
 /**
  * Düşük seviye mail gönderici (genel kullanım)
- * SMTP config'ini site_settings tablosundan okur.
+ * SMTP config'ini sadece site_settings üzerinden okur.
+ *
+ * Aynı mekanizma ile:
+ *  - Gmail (smtp.gmail.com),
+ *  - Hostinger (smtp.hostinger.com),
+ *  - veya başka bir SMTP provider
+ * kullanılabilir. Her şey paneldeki SMTP ayarlarına bağlı.
  */
 export async function sendMailRaw(input: SendMailInput) {
   const data = sendMailSchema.parse(input);
 
-  const smtpCfg = await getSmtpSettings();
+  const smtpCfg = await resolveSmtpConfig();
 
-  // From alanını DB'den kur
+  // From alanını config'ten kur
   const fromEmail =
     smtpCfg.fromEmail ||
-    env.MAIL_FROM ||
-    env.SMTP_USER ||
+    smtpCfg.username || // yoksa username'den dene
     "no-reply@example.com";
 
   const from =
@@ -394,11 +493,6 @@ export type TicketRepliedMailInput = z.infer<typeof ticketRepliedMailSchema>;
 /**
  * ticket_replied template'ine uygun payload:
  *  - { to, user_name, ticket_id, ticket_subject, reply_message, site_name?, locale? }
- *
- * NOT:
- *  - Seed'deki HTML içinde reply_message şu an direkt kullanılmıyor olabilir,
- *    ama JSON_ARRAY içinde var → ileride şablonu güncelleyip
- *    {{reply_message}} eklediğinde burası hazır.
  */
 export async function sendTicketRepliedMail(input: TicketRepliedMailInput) {
   const data = ticketRepliedMailSchema.parse(input);
@@ -507,7 +601,8 @@ const passwordChangedMailSchema = z.object({
   locale: z.string().optional(),
 });
 
-export type PasswordChangedMailInput = z.infer<typeof passwordChangedMailSchema>;
+export type PasswordChangedMailInput =
+  z.infer<typeof passwordChangedMailSchema>;
 
 /**
  * Şifre değişikliğinde kullanıcıya bilgilendirme maili

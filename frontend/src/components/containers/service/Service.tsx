@@ -1,5 +1,6 @@
 // =============================================================
-// FILE: src/components/containers/services/Service.tsx
+// FILE: src/components/containers/service/Service.tsx
+// Public Services List
 // =============================================================
 "use client";
 
@@ -57,7 +58,6 @@ function ServiceIcon({ label, size = 40 }: { label: string; size?: number }) {
 const Service: React.FC = () => {
   const locale = useResolvedLocale();
 
-  // UI metinleri site_settings.ui_services
   const { ui } = useUiSection("ui_services", locale);
 
   // ✅ Public services list – locale & default_locale gönder
@@ -65,20 +65,19 @@ const Service: React.FC = () => {
     locale,
     default_locale: DEFAULT_LOCALE,
     limit: 6,
-    order: "display_order.asc", // repo.parseOrder single field bekliyor
+    order: "display_order.asc",
   });
 
   const cards = useMemo(() => {
     const items = Array.isArray(data?.items) ? data!.items : [];
 
-    const arr = items.map((s: any) => {
+    const arr = items.map((s) => {
       const imgBase =
         (s.featured_image_url ||
           s.image_url ||
           s.featured_image ||
           "").trim();
 
-      // Backend zaten i18n coalesced string veriyor; direkt string kullan
       const title =
         (s.name as string | null) ??
         ui("ui_services_placeholder_title", "Our service");
@@ -106,7 +105,6 @@ const Service: React.FC = () => {
     });
 
     if (!arr.length) {
-      // Placeholder kartlar
       return new Array(3).fill(0).map((_, i) => ({
         id: `ph-${i + 1}`,
         title: ui("ui_services_placeholder_title", "Our service"),

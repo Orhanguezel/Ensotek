@@ -1,9 +1,5 @@
 // =============================================================
 // FILE: src/components/admin/products/tabs/ProductFaqsTab.tsx
-// Admin – Product FAQs Tab (product_faqs tablosu)
-// - Listeyi çeker
-// - Form veya JSON modunda aynı veriyi düzenler
-// - PUT /faqs (replaceProductFaqsAdmin) ile kaydeder
 // =============================================================
 
 "use client";
@@ -15,15 +11,19 @@ import {
   useListProductFaqsAdminQuery,
   useReplaceProductFaqsAdminMutation,
 } from "@/integrations/rtk/endpoints/admin/products_admin.faqs.endpoints";
+
 import type {
   AdminProductFaqDto,
   AdminProductFaqCreatePayload,
+  AdminProductFaqListParams,
 } from "@/integrations/types/product_faqs_admin.types";
 
 import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
 
 export type ProductFaqsTabProps = {
   productId?: string;
+  // Locale zorunlu; üst formdan gelecek
+  locale: string;
   disabled?: boolean;
 };
 
@@ -31,35 +31,43 @@ type FaqsViewMode = "form" | "json";
 
 export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
   productId,
+  locale,
   disabled,
 }) => {
   const [items, setItems] = useState<AdminProductFaqCreatePayload[]>([]);
   const [viewMode, setViewMode] = useState<FaqsViewMode>("form");
+
+  const effectiveLocale = locale; // üstten gelen, boş olmamalı
+
+  const queryArgs: AdminProductFaqListParams | undefined =
+    productId && effectiveLocale
+      ? { productId, locale: effectiveLocale }
+      : undefined;
 
   const {
     data,
     isLoading,
     isFetching,
     refetch,
-  } = useListProductFaqsAdminQuery(
-    { productId: productId as string },
-    { skip: !productId },
-  );
+  } = useListProductFaqsAdminQuery(queryArgs as AdminProductFaqListParams, {
+    skip: !productId || !effectiveLocale,
+  });
+
 
   const [replaceFaqs, { isLoading: isSaving }] =
     useReplaceProductFaqsAdminMutation();
 
   useEffect(() => {
     if (!data) return;
-    const mapped: AdminProductFaqCreatePayload[] = (data as AdminProductFaqDto[]).map(
-      (f) => ({
-        id: f.id,
-        question: f.question,
-        answer: f.answer,
-        display_order: f.display_order,
-        is_active: f.is_active,
-      }),
-    );
+    const mapped: AdminProductFaqCreatePayload[] = (
+      data as AdminProductFaqDto[]
+    ).map((f) => ({
+      id: f.id,
+      question: f.question,
+      answer: f.answer,
+      display_order: f.display_order,
+      is_active: f.is_active,
+    }));
     setItems(mapped);
   }, [data]);
 
@@ -67,6 +75,10 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
 
   const handleSave = async () => {
     if (!productId) return;
+    if (!effectiveLocale) {
+      toast.error("Lütfen önce ürün formundan bir dil (locale) seç.");
+      return;
+    }
 
     try {
       const normalized: AdminProductFaqCreatePayload[] = (items ?? []).map(
@@ -79,9 +91,7 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
               ? raw.display_order
               : parseInt(String(raw.display_order ?? "0"), 10) || 0,
           is_active:
-            raw.is_active === false ||
-            raw.is_active === "0" ||
-            raw.is_active === 0
+            raw.is_active === false
               ? false
               : true,
         }),
@@ -89,8 +99,12 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
 
       await replaceFaqs({
         productId,
-        payload: { items: normalized },
+        locale: effectiveLocale,
+        payload: {
+          items: normalized,
+        },
       }).unwrap();
+
       toast.success("SSS (FAQ) kayıtları kaydedildi.");
       void refetch();
     } catch (err: any) {
@@ -105,38 +119,37 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
 
   const handleItemChange =
     (index: number, field: keyof AdminProductFaqCreatePayload) =>
-    (
-      e:
-        | React.ChangeEvent<HTMLInputElement>
-        | React.ChangeEvent<HTMLTextAreaElement>,
-    ) => {
-      const value = e.target.value;
-      setItems((prev) =>
-        prev.map((item, i) =>
-          i === index
-            ? {
+      (
+        e:
+          | React.ChangeEvent<HTMLInputElement>
+          | React.ChangeEvent<HTMLTextAreaElement>,
+      ) => {
+        const value = e.target.value;
+        setItems((prev) =>
+          prev.map((item, i) =>
+            i === index
+              ? {
                 ...item,
                 [field]:
                   field === "display_order"
-                    ? (parseInt(value, 10) || 0)
+                    ? parseInt(value, 10) || 0
                     : value,
               }
-            : item,
-        ),
-      );
-    };
+              : item,
+          ),
+        );
+      };
 
   const handleActiveChange =
-    (index: number) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    (index: number) => (e: React.ChangeEvent<HTMLInputElement>) => {
       const checked = e.target.checked;
       setItems((prev) =>
         prev.map((item, i) =>
           i === index
             ? {
-                ...item,
-                is_active: checked,
-              }
+              ...item,
+              is_active: checked,
+            }
             : item,
         ),
       );
@@ -184,7 +197,8 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
             Sık Sorulan Sorular (product_faqs)
           </h6>
           <div className="text-muted small">
-            Aynı veriyi ister form, ister JSON olarak düzenleyebilirsin.
+            Aktif locale: <code>{effectiveLocale}</code>. Aynı veriyi
+            ister form, ister JSON olarak düzenleyebilirsin.
           </div>
         </div>
 
@@ -193,9 +207,8 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
           <div className="btn-group btn-group-sm" role="group">
             <button
               type="button"
-              className={`btn btn-outline-secondary ${
-                viewMode === "form" ? "active" : ""
-              }`}
+              className={`btn btn-outline-secondary ${viewMode === "form" ? "active" : ""
+                }`}
               onClick={() => setViewMode("form")}
               disabled={busy || disabled}
             >
@@ -203,9 +216,8 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
             </button>
             <button
               type="button"
-              className={`btn btn-outline-secondary ${
-                viewMode === "json" ? "active" : ""
-              }`}
+              className={`btn btn-outline-secondary ${viewMode === "json" ? "active" : ""
+                }`}
               onClick={() => setViewMode("json")}
               disabled={busy || disabled}
             >
@@ -344,17 +356,7 @@ export const ProductFaqsTab: React.FC<ProductFaqsTabProps> = ({
           disabled={busy || disabled}
           helperText={
             <>
-              JSON formatı örneği:
-              <pre className="mb-0 mt-1 small">
-{`[
-  {
-    "question": "Teslim süresi nedir?",
-    "answer": "Proje detayına göre 4-6 hafta.",
-    "display_order": 0,
-    "is_active": true
-  }
-]`}
-              </pre>
+              Aktif locale: <code>{effectiveLocale}</code>. JSON formatı:
             </>
           }
           height={260}

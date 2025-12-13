@@ -7,7 +7,7 @@ import About from "@/components/containers/about/About";
 import Product from "@/components/containers/product/Product";
 import Service from "@/components/containers/service/Service";
 import Newsletter from "@/components/containers/newsletter/Newsletter";
-import Library from "@/components/containers/library/Library";
+import LibrarySection from "@/components/containers/library/LibrarySection";
 import Feedback from "@/components/containers/feedback/Feedback";
 import References from "@/components/containers/references/References";
 import News from "@/components/containers/news/News";
@@ -22,10 +22,10 @@ const Home: NextPage = () => {
       <About />
       <Product />
       <Newsletter />
-      <Library />
+      <LibrarySection />
       <Feedback />
       <References />
-      <News />    
+      <News />
       <Contact />
     </>
   );

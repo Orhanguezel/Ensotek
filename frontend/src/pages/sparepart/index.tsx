@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/pages/sparepart/index.tsx
-// Ensotek – Spareparts Page (full list)
+// Ensotek – Spareparts Page (full list, products modülü reuse)
 // =============================================================
 
 "use client";
@@ -8,7 +8,7 @@
 import React from "react";
 
 import Banner from "@/components/layout/banner/Breadcrum";
-import SparepartPageContent from "@/components/containers/sparepart/SparepartPageContent";
+import ProductPageContent from "@/components/containers/product/ProductPageContent";
 import Feedback from "@/components/containers/feedback/Feedback";
 
 import { useResolvedLocale } from "@/i18n/locale";
@@ -17,6 +17,7 @@ import { useUiSection } from "@/i18n/uiDb";
 const SparepartPage: React.FC = () => {
   const locale = useResolvedLocale();
 
+  // Sayfa başlığını yine ui_spareparts üzerinden alıyoruz
   const { ui } = useUiSection("ui_spareparts", locale);
 
   const title = ui(
@@ -27,7 +28,8 @@ const SparepartPage: React.FC = () => {
   return (
     <>
       <Banner title={title} />
-      <SparepartPageContent />
+      {/* Liste tarafında direkt ProductPageContent kullanıyoruz */}
+      <ProductPageContent />
       <Feedback />
     </>
   );
