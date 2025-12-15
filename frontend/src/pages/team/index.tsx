@@ -13,7 +13,7 @@ import React from "react";
 
 import Banner from "@/components/layout/banner/Breadcrum";
 import TeamPageContent from "@/components/containers/team/TeamPageContent";
-import ServiceCtaTwo from "@/components/containers/cta/ServiceCtaTwo";
+import ServiceCtaTwo from "@/components/containers/cta/CatalogCta";
 
 // i18n helper'lar
 import { useResolvedLocale } from "@/i18n/locale";

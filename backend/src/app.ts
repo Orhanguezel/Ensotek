@@ -36,6 +36,7 @@ import { registerProducts } from '@/modules/products/router';
 import { registerReviews } from '@/modules/review/router';
 import { registerSupport } from '@/modules/support/router';
 import { registerOffer } from '@/modules/offer/router';
+import { registerCatalog } from '@/modules/catalog/router';
 
 // Admin modüller
 import { registerCustomPagesAdmin } from '@/modules/customPages/admin.routes';
@@ -60,6 +61,7 @@ import { registerReviewsAdmin } from '@/modules/review/admin.routes';
 import { registerSupportAdmin } from '@/modules/support/admin.routes';
 import { registerDashboardAdmin } from '@/modules/dashboard/admin.routes';
 import { registerOfferAdmin } from '@/modules/offer/admin.routes';
+import { registerCatalogAdmin } from '@/modules/catalog/admin.routes';
 
 function parseCorsOrigins(v?: string | string[]): boolean | string[] {
   if (!v) return true;
@@ -220,6 +222,9 @@ export async function createApp() {
       await api.register(async (i) => registerOfferAdmin(i), {
         prefix: '/admin',
       });
+      await api.register(async (i) => registerCatalogAdmin(i), {
+        prefix: '/admin',
+      });
 
       // --- Public modüller: /api/...
       await registerAuth(api);
@@ -246,6 +251,7 @@ export async function createApp() {
       await registerReviews(api);
       await registerSupport(api);
       await registerOffer(api);
+      await registerCatalog(api);
     },
     { prefix: '/api' },
   );

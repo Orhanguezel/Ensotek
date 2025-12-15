@@ -3,77 +3,37 @@
 // ===================================================================
 
 import type { RouteHandler } from "fastify";
-import { randomUUID } from "crypto";
 import { db } from "@/db/client";
 import { and, desc, eq, sql } from "drizzle-orm";
-import {
-  notifications,
-  type NotificationRow,
-  type NotificationInsert,
-  type NotificationType,
-} from "./schema";
+import { notifications } from "./schema";
 import {
   notificationCreateSchema,
   notificationUpdateSchema,
   notificationMarkAllReadSchema,
 } from "./validation";
+import { createUserNotification } from "./service";
 
 /* ---------------------------------------------------------------
- * Ortak user helper (orders modülündeki pattern ile aynı)
+ * Auth helper
  * --------------------------------------------------------------- */
 
 function getAuthUserId(req: any): string {
-  const sub = req.user?.sub ?? req.user?.id ?? null;
+  const sub = req.user?.id ?? req.user?.sub ?? req.user?.user_id ?? null;
   if (!sub) throw new Error("unauthorized");
   return String(sub);
 }
 
-/* ---------------------------------------------------------------
- * Programatik kullanım: createUserNotification (orders vs. çağıracak)
- * --------------------------------------------------------------- */
 
-export async function createUserNotification(input: {
-  userId: string;
-  title: string;
-  message: string;
-  type?: NotificationType;
-}): Promise<NotificationRow> {
-  const insert: NotificationInsert = {
-    id: randomUUID(),
-    user_id: input.userId,
-    title: input.title,
-    message: input.message,
-    type: input.type ?? "system",
-    is_read: false,
-    created_at: new Date(),
-  };
-
-  await db.insert(notifications).values(insert);
-
-  const [row] = await db
-    .select()
-    .from(notifications)
-    .where(eq(notifications.id, insert.id))
-    .limit(1);
-
-  return row;
-}
 
 /* ---------------------------------------------------------------
  * HTTP Handlers
  * --------------------------------------------------------------- */
 
-// GET /notifications  → aktif kullanıcının bildirim listesi
 export const listNotifications: RouteHandler = async (req, reply) => {
   try {
     const userId = getAuthUserId(req);
 
-    const {
-      is_read,
-      type,
-      limit = 50,
-      offset = 0,
-    } = (req.query ?? {}) as {
+    const { is_read, type, limit = 50, offset = 0 } = (req.query ?? {}) as {
       is_read?: string | boolean;
       type?: string;
       limit?: number;
@@ -114,22 +74,18 @@ export const listNotifications: RouteHandler = async (req, reply) => {
   }
 };
 
-// GET /notifications/unread-count → okunmamış bildirim sayısı
 export const getUnreadCount: RouteHandler = async (req, reply) => {
   try {
     const userId = getAuthUserId(req);
 
     const [row] = await db
-      .select({
-        count: sql<number>`COUNT(*)`,
-      })
+      .select({ count: sql<number>`COUNT(*)` })
       .from(notifications)
       .where(
         and(eq(notifications.user_id, userId), eq(notifications.is_read, false)),
       );
 
-    const count = Number(row?.count ?? 0);
-    return reply.send({ count });
+    return reply.send({ count: Number(row?.count ?? 0) });
   } catch (e: any) {
     if (e?.message === "unauthorized") {
       return reply.code(401).send({ error: { message: "unauthorized" } });
@@ -141,7 +97,6 @@ export const getUnreadCount: RouteHandler = async (req, reply) => {
   }
 };
 
-// POST /notifications → manuel bildirim oluşturma (örn. panelden)
 export const createNotificationHandler: RouteHandler = async (req, reply) => {
   try {
     const authUserId = getAuthUserId(req);
@@ -173,15 +128,12 @@ export const createNotificationHandler: RouteHandler = async (req, reply) => {
   }
 };
 
-// PATCH /notifications/:id → okundu/okunmadı
 export const markNotificationRead: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
 
   try {
     const userId = getAuthUserId(req);
     const patch = notificationUpdateSchema.parse(req.body ?? {});
-
-    // Varsayılan: is_read true
     const isRead = patch.is_read ?? true;
 
     const [existing] = await db
@@ -190,7 +142,7 @@ export const markNotificationRead: RouteHandler = async (req, reply) => {
       .where(eq(notifications.id, id))
       .limit(1);
 
-    if (!existing || existing.user_id !== userId) {
+    if (!existing || (existing as any).user_id !== userId) {
       return reply.code(404).send({ error: { message: "not_found" } });
     }
 
@@ -222,11 +174,10 @@ export const markNotificationRead: RouteHandler = async (req, reply) => {
   }
 };
 
-// POST /notifications/mark-all-read → tüm bildirimleri okundu yap
 export const markAllRead: RouteHandler = async (req, reply) => {
   try {
     const userId = getAuthUserId(req);
-    notificationMarkAllReadSchema.parse(req.body ?? {});
+    notificationMarkAllReadSchema?.parse(req.body ?? {});
 
     await db
       .update(notifications)
@@ -252,7 +203,6 @@ export const markAllRead: RouteHandler = async (req, reply) => {
   }
 };
 
-// DELETE /notifications/:id → tek bildirim sil
 export const deleteNotification: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
 
@@ -265,12 +215,11 @@ export const deleteNotification: RouteHandler = async (req, reply) => {
       .where(eq(notifications.id, id))
       .limit(1);
 
-    if (!existing || existing.user_id !== userId) {
+    if (!existing || (existing as any).user_id !== userId) {
       return reply.code(404).send({ error: { message: "not_found" } });
     }
 
     await db.delete(notifications).where(eq(notifications.id, id));
-
     return reply.send({ ok: true });
   } catch (e: any) {
     if (e?.message === "unauthorized") {

@@ -14,7 +14,7 @@ import { useRouter } from "next/router";
 
 import Banner from "@/components/layout/banner/Breadcrum";
 import TeamDetail from "@/components/containers/team/TeamDetail";
-import ServiceCtaTwo from "@/components/containers/cta/ServiceCtaTwo";
+import ServiceCtaTwo from "@/components/containers/cta/CatalogCta";
 
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";

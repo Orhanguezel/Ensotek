@@ -39,14 +39,11 @@ export const notifications = mysqlTable(
 export type NotificationRow = typeof notifications.$inferSelect;
 export type NotificationInsert = typeof notifications.$inferInsert;
 
-/**
- * Bildirim türleri için tavsiye edilen enum.
- * DB tarafında serbest string; burada union ile DX kolaylaştırıyoruz.
- */
 export type NotificationType =
   | "order_created"
   | "order_paid"
   | "order_failed"
+  | "catalog_request_created" // ✅ EKLENDİ
   | "system"
   | "custom"
   | (string & {});

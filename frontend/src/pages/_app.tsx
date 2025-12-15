@@ -60,6 +60,7 @@ function pathToTab(pathname: string): ActiveTab {
   if (pathname.startsWith("/admin/menuitem")) return "menuitem";
   if (pathname.startsWith("/admin/storage")) return "storage";
   if (pathname.startsWith("/admin/offers")) return "offers";
+  if (pathname.startsWith("/admin/catalog-requests")) return "catalog_requests";
 
   return "dashboard";
 }
@@ -117,6 +118,8 @@ function tabToPath(tab: ActiveTab): string {
       return "/admin/storage";
     case "offers":
       return "/admin/offers";
+    case "catalog_requests":
+      return "/admin/catalog-requests";
 
     default:
       return "/admin";

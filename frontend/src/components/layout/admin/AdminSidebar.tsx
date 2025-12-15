@@ -72,6 +72,7 @@ const menuGroups: MenuGroup[] = [
       { title: "SSS (FAQ)", value: "faqs", icon: HelpCircle },
       { title: "İletişim Mesajları", value: "contacts", icon: Mail },
       { title: "Bülten Aboneleri", value: "newsletter", icon: Mail },
+      { title: "Katalog Talepleri", value: "catalog_requests", icon: FileText },
       { title: "E-posta Şablonları", value: "email_templates", icon: Mail },
       { title: "Kütüphane / Library", value: "library", icon: BookOpen },
       { title: "Yorumlar", value: "reviews", icon: FileText },
