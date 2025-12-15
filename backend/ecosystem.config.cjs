@@ -4,7 +4,7 @@ module.exports = {
       name: "ensotek-backend",
       cwd: "/var/www/Ensotek/backend",
       script: "/var/www/Ensotek/backend/dist/index.js",
-      interpreter: "/home/nodeapp/.bun/bin/bun",
+
       exec_mode: "fork",
       instances: 1,
       watch: false,
@@ -12,13 +12,14 @@ module.exports = {
       max_memory_restart: "300M",
       env: {
         NODE_ENV: "production",
-        PORT: "8086"
+        PORT: "8086",
       },
       out_file: "/var/log/pm2/ensotek-backend.out.log",
       error_file: "/var/log/pm2/ensotek-backend.err.log",
       combine_logs: true,
-      time: true
-    }
-  ]
+      time: true,
+    },
+  ],
 };
+
 
