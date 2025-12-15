@@ -222,6 +222,9 @@ export const UI_FALLBACK_EN = {
   // ===== OFFER =====
   ui_offer_page_title: "Offer",
 
+  // ===== CATALOG =====
+  ui_catalog_page_title: "Catalog",
+
 } as const;
 
 export type UIKey = keyof typeof UI_FALLBACK_EN;
@@ -445,6 +448,9 @@ export const UI_KEYS = {
   ] as const,
   offer: [
     "ui_offer_page_title",
+  ] as const,
+  catalog: [
+    "ui_catalog_page_title",
   ] as const,
 } as const;
 

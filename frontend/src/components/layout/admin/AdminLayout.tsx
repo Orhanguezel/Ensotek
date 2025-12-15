@@ -29,7 +29,8 @@ export type ActiveTab =
   | "support"
   | "menuitem"
   | "storage"
-  | "offers";
+  | "offers"
+  | "catalog_requests";
 
 type AdminLayoutProps = {
   activeTab: ActiveTab;

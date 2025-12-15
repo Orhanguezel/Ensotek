@@ -1,6 +1,6 @@
 -- 111_email_templates_seed.sql
-
 -- EMAIL_TEMPLATES SEED (i18n'li)
+
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
@@ -9,7 +9,7 @@ SET time_zone = '+00:00';
 --    (locale'den bağımsız, sadece key + variables)
 -- ============================================================
 
-INSERT IGNORE INTO `email_templates`
+INSERT INTO `email_templates`
 (`id`, `template_key`, `variables`, `is_active`, `created_at`, `updated_at`)
 VALUES
 -- ticket_replied
@@ -47,10 +47,6 @@ VALUES
  'welcome',
  JSON_ARRAY('user_name','user_email','site_name'),
  1, '2025-10-09 19:38:58.000', '2025-10-13 15:06:38.000'),
-
--- ============================================================
--- OFFER EMAIL TEMPLATES – PARENT KAYITLAR
--- ============================================================
 
 -- offer_sent_customer
 ('1111aaaa-2222-3333-4444-555566667777',
@@ -99,18 +95,51 @@ VALUES
    'offer_id',
    'message'
  ),
- 1, '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000')
+ 1, '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- catalog_request_received_admin
+('4444dddd-2222-3333-4444-555566667777',
+ 'catalog_request_received_admin',
+ JSON_ARRAY(
+   'site_title',
+   'site_name',
+   'customer_name',
+   'company_name',
+   'email',
+   'phone',
+   'message',
+   'locale',
+   'country_code',
+   'catalog_url',
+   'catalog_request_id'
+ ),
+ 1, '2025-12-14 00:00:00.000', '2025-12-14 00:00:00.000'),
+
+-- catalog_sent_customer
+('5555eeee-2222-3333-4444-555566667777',
+ 'catalog_sent_customer',
+ JSON_ARRAY(
+   'site_title',
+   'site_name',
+   'customer_name',
+   'company_name',
+   'email',
+   'phone',
+   'catalog_url',
+   'catalog_filename'
+ ),
+ 1, '2025-12-14 00:00:00.000', '2025-12-14 00:00:00.000')
 ON DUPLICATE KEY UPDATE
-  `variables`   = VALUES(`variables`),
-  `is_active`   = VALUES(`is_active`),
-  `updated_at`  = VALUES(`updated_at`);
+  `variables`  = VALUES(`variables`),
+  `is_active`  = VALUES(`is_active`),
+  `updated_at` = VALUES(`updated_at`);
 
 -- ============================================================
 -- 2) I18N KAYITLAR (email_templates_i18n)
 --    Aynı template_id için birden fazla locale: tr + en
 -- ============================================================
 
-INSERT IGNORE INTO `email_templates_i18n`
+INSERT INTO `email_templates_i18n`
 (`id`, `template_id`, `locale`, `template_name`, `subject`, `content`, `created_at`, `updated_at`)
 VALUES
 -- ticket_replied (tr)
@@ -289,10 +318,6 @@ VALUES
  '<h1 class="ql-align-center">Your Account Has Been Created</h1><p>Hello <strong>{{user_name}}</strong>,</p><p>Welcome to {{site_name}}! Your account has been successfully created.</p><p><br></p><p>Email: <strong>{{user_email}}</strong></p><p>If you have any questions, feel free to contact us anytime.</p><p>Best regards,</p><p>{{site_name}} Team</p>',
  '2025-10-09 19:38:58.000', '2025-10-13 15:06:38.000'),
 
--- ============================================================
--- OFFER EMAIL TEMPLATES – I18N KAYITLARI (tr + en)
--- ============================================================
-
 -- offer_sent_customer (tr)
 ('1111aaaa-2222-3333-4444-aaaabbbb0001',
  '1111aaaa-2222-3333-4444-555566667777',
@@ -435,7 +460,103 @@ VALUES
   <p><strong>Customer Message:</strong></p>
   <pre style="white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{{message}}</pre>
 </div>',
- '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000')
+ '2025-10-10 10:00:00.000', '2025-10-10 10:00:00.000'),
+
+-- catalog_request_received_admin (tr)
+('4444dddd-2222-3333-4444-aaaabbbb0001',
+ '4444dddd-2222-3333-4444-555566667777',
+ 'tr',
+ 'Catalog Request Received (Admin)',
+ 'Yeni Katalog Talebi - {{customer_name}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:18px;margin-bottom:12px;">Yeni katalog talebi</h1>
+  <p>Yeni bir katalog talebi oluşturuldu. Detaylar:</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Talep ID:</strong> {{catalog_request_id}}</li>
+    <li><strong>Müşteri:</strong> {{customer_name}}</li>
+    <li><strong>Firma:</strong> {{company_name}}</li>
+    <li><strong>E-posta:</strong> {{email}}</li>
+    <li><strong>Telefon:</strong> {{phone}}</li>
+    <li><strong>Ülke Kodu:</strong> {{country_code}}</li>
+    <li><strong>Locale:</strong> {{locale}}</li>
+  </ul>
+  <p style="margin:16px 0 6px;"><strong>Müşteri Mesajı:</strong></p>
+  <pre style="white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{{message}}</pre>
+  <p style="margin-top:16px;">Admin panelden talebi onaylayıp kataloğu gönderin.</p>
+  <p style="margin-top:12px;font-size:12px;color:#6b7280;">
+    Katalog PDF (referans link): <a href="{{catalog_url}}">{{catalog_url}}</a>
+  </p>
+</div>',
+ '2025-12-14 00:00:00.000', '2025-12-14 00:00:00.000'),
+
+-- catalog_request_received_admin (en)
+('4444dddd-2222-3333-4444-aaaabbbb0002',
+ '4444dddd-2222-3333-4444-555566667777',
+ 'en',
+ 'Catalog Request Received (Admin)',
+ 'New Catalog Request - {{customer_name}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:18px;margin-bottom:12px;">New catalog request</h1>
+  <p>A new catalog request has been created. Details:</p>
+  <ul style="padding-left:18px;margin:12px 0;">
+    <li><strong>Request ID:</strong> {{catalog_request_id}}</li>
+    <li><strong>Customer:</strong> {{customer_name}}</li>
+    <li><strong>Company:</strong> {{company_name}}</li>
+    <li><strong>Email:</strong> {{email}}</li>
+    <li><strong>Phone:</strong> {{phone}}</li>
+    <li><strong>Country Code:</strong> {{country_code}}</li>
+    <li><strong>Locale:</strong> {{locale}}</li>
+  </ul>
+  <p style="margin:16px 0 6px;"><strong>Customer message:</strong></p>
+  <pre style="white-space:pre-wrap;word-break:break-word;background:#f9fafb;padding:12px;border-radius:8px;border:1px solid #e5e7eb;">{{message}}</pre>
+  <p style="margin-top:16px;">Please approve the request and send the catalog from the admin panel.</p>
+  <p style="margin-top:12px;font-size:12px;color:#6b7280;">
+    Catalog PDF (reference link): <a href="{{catalog_url}}">{{catalog_url}}</a>
+  </p>
+</div>',
+ '2025-12-14 00:00:00.000', '2025-12-14 00:00:00.000'),
+
+-- catalog_sent_customer (tr)
+('5555eeee-2222-3333-4444-aaaabbbb0001',
+ '5555eeee-2222-3333-4444-555566667777',
+ 'tr',
+ 'Catalog Sent (Customer)',
+ 'Kataloğunuz Hazır - {{site_name}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.6;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:20px;margin-bottom:12px;">Katalog Talebiniz</h1>
+  <p>Merhaba <strong>{{customer_name}}</strong>,</p>
+  <p>Katalog talebiniz alınmıştır. Katalog PDF dosyası bu e-postaya eklenmiştir.</p>
+  <p style="margin:14px 0;">Eğer e-posta istemciniz ek dosyayı açmada sorun yaşarsa, kataloğu aşağıdaki bağlantıdan da görüntüleyebilirsiniz:</p>
+  <p>
+    <a href="{{catalog_url}}" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#2563eb;color:#fff;text-decoration:none;font-weight:600;">
+      Kataloğu Görüntüle
+    </a>
+  </p>
+  <p style="margin-top:20px;color:#374151;">Saygılarımızla,<br/>{{site_name}} Ekibi</p>
+  <p style="margin-top:12px;font-size:12px;color:#6b7280;">Ek dosya adı: {{catalog_filename}}</p>
+</div>',
+ '2025-12-14 00:00:00.000', '2025-12-14 00:00:00.000'),
+
+-- catalog_sent_customer (en)
+('5555eeee-2222-3333-4444-aaaabbbb0002',
+ '5555eeee-2222-3333-4444-555566667777',
+ 'en',
+ 'Catalog Sent (Customer)',
+ 'Your Catalog is Ready - {{site_name}}',
+ '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.6;color:#111827;max-width:640px;margin:0 auto;">
+  <h1 style="font-size:20px;margin-bottom:12px;">Your catalog request</h1>
+  <p>Hello <strong>{{customer_name}}</strong>,</p>
+  <p>Your catalog request has been processed. The PDF catalog is attached to this email.</p>
+  <p style="margin:14px 0;">If your email client has trouble opening the attachment, you can also view the catalog using the link below:</p>
+  <p>
+    <a href="{{catalog_url}}" style="display:inline-block;padding:10px 16px;border-radius:8px;background:#2563eb;color:#fff;text-decoration:none;font-weight:600;">
+      View Catalog
+    </a>
+  </p>
+  <p style="margin-top:20px;color:#374151;">Best regards,<br/>{{site_name}} Team</p>
+  <p style="margin-top:12px;font-size:12px;color:#6b7280;">Attachment name: {{catalog_filename}}</p>
+</div>',
+ '2025-12-14 00:00:00.000', '2025-12-14 00:00:00.000')
 ON DUPLICATE KEY UPDATE
   `template_name` = VALUES(`template_name`),
   `subject`       = VALUES(`subject`),

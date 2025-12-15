@@ -35,6 +35,7 @@ export type UiSectionKey =
   | "ui_faqs"
   | "ui_team"
   | "ui_offer"
+  | "ui_catalog"
   ;
 
 // Hangi section hangi UI_KEYS grubunu kullanacak?
@@ -66,6 +67,7 @@ const SECTION_UI_KEYS_MAP: Record<UiSectionKey, readonly UIKey[]> = {
   ui_products: UI_KEYS.products,
   ui_spareparts: UI_KEYS.spareparts,
   ui_offer: UI_KEYS.offer,
+  ui_catalog: UI_KEYS.catalog,
 };
 
 type UiSectionResult = {
