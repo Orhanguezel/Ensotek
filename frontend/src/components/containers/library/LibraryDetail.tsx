@@ -10,7 +10,7 @@ import {
   useGetLibraryBySlugQuery,
   useListLibraryImagesQuery,
   useListLibraryFilesQuery,
-} from "@/integrations/rtk/endpoints/library.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import { toCdnSrc } from "@/shared/media";
 import { stripHtml } from "@/shared/text";

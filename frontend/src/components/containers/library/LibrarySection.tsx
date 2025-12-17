@@ -10,7 +10,7 @@ import React, { useMemo, useState } from "react";
 import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 
-import { useListLibraryQuery } from "@/integrations/rtk/endpoints/library.endpoints";
+import { useListLibraryQuery } from "@/integrations/rtk/hooks";
 
 // Pattern + fallback görseller
 import One from "public/img/shape/features-shape.png";

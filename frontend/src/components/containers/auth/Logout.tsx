@@ -5,7 +5,7 @@
 
 import React, { useEffect } from "react";
 import { useRouter } from "next/router";
-import { useLogoutMutation } from "@/integrations/rtk/endpoints/auth.endpoints";
+import { useLogoutMutation } from "@/integrations/rtk/hooks";
 import { tokenStore } from "@/integrations/core/token";
 import { normalizeError } from "@/integrations/core/errors";
 

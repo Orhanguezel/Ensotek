@@ -13,7 +13,7 @@ import { useUiSection } from "@/i18n/uiDb";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-import { useCreateCatalogRequestPublicMutation } from "@/integrations/rtk/endpoints/catalog_public.endpoints";
+import { useCreateCatalogRequestPublicMutation } from "@/integrations/rtk/hooks";
 import type { CreateCatalogRequestPublicBody } from "@/integrations/types/catalog_public.types";
 
 const isEmailValid = (email: string) =>

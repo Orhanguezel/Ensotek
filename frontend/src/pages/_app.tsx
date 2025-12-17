@@ -1,13 +1,10 @@
 // src/pages/_app.tsx
 
-"use client";
-
 import React, { useEffect } from "react";
 import type { AppProps } from "next/app";
 import { useRouter } from "next/router";
 import { Toaster } from "sonner";
 import GAScripts from "@/features/analytics/GAScripts";
-
 
 // Global CSS
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -16,163 +13,98 @@ import "@/styles/main.scss";
 import "aos/dist/aos.css";
 import "nprogress/nprogress.css";
 
+import "@/integrations/rtk/endpoints/_register";
+
+
 import { StoreProvider } from "@/store";
 import LangBoot from "@/i18n/LangBoot";
 import Layout from "@/components/layout/Layout";
 
 // ✅ Admin shell importları
-import AdminLayoutShell, {
-  type ActiveTab,
-} from "@/components/layout/admin/AdminLayout";
+import AdminLayoutShell, { type ActiveTab } from "@/components/layout/admin/AdminLayout";
 import AdminHeader from "@/components/layout/admin/AdminHeader";
 import AdminFooter from "@/components/layout/admin/AdminFooter";
 
-/* --------- Admin path ↔ tab mapping (Ensotek modülleri) --------- */
-
-function pathToTab(pathname: string): ActiveTab {
-  if (pathname === "/admin" || pathname === "/admin/") return "dashboard";
-
-  if (pathname.startsWith("/admin/site-settings")) return "site_settings";
-  if (pathname.startsWith("/admin/custompage")) return "custom_pages";
-  if (pathname.startsWith("/admin/services")) return "services";
-
-  if (pathname.startsWith("/admin/products")) return "products";
-  if (pathname.startsWith("/admin/sparepart")) return "sparepart";
-  if (pathname.startsWith("/admin/categories")) return "categories";
-  if (pathname.startsWith("/admin/subcategories")) return "subcategories";
-
-  if (pathname.startsWith("/admin/slider")) return "slider";
-  if (pathname.startsWith("/admin/references")) return "references";
-
-  if (pathname.startsWith("/admin/faqs")) return "faqs";
-  if (pathname.startsWith("/admin/contacts")) return "contacts";
-
-  if (pathname.startsWith("/admin/newsletter")) return "newsletter";
-  if (pathname.startsWith("/admin/email-templates")) return "email_templates";
-  if (pathname.startsWith("/admin/library")) return "library";
-
-  if (pathname.startsWith("/admin/users")) return "users";
-  if (pathname.startsWith("/admin/db")) return "db";
-
-  if (pathname.startsWith("/admin/reviews")) return "reviews";
-  if (pathname.startsWith("/admin/support")) return "support";
-
-  if (pathname.startsWith("/admin/menuitem")) return "menuitem";
-  if (pathname.startsWith("/admin/storage")) return "storage";
-  if (pathname.startsWith("/admin/offers")) return "offers";
-  if (pathname.startsWith("/admin/catalog-requests")) return "catalog_requests";
-
-  return "dashboard";
-}
-
-function tabToPath(tab: ActiveTab): string {
-  switch (tab) {
-    case "dashboard":
-      return "/admin";
-    case "site_settings":
-      return "/admin/site-settings";
-    case "custom_pages":
-      return "/admin/custompage";
-    case "services":
-      return "/admin/services";
-
-    case "products":
-      return "/admin/products";
-    case "sparepart":
-      return "/admin/sparepart";
-    case "categories":
-      return "/admin/categories";
-    case "subcategories":
-      return "/admin/subcategories";
-
-    case "slider":
-      return "/admin/slider";
-    case "references":
-      return "/admin/references";
-
-    case "faqs":
-      return "/admin/faqs";
-    case "contacts":
-      return "/admin/contacts";
-
-    case "newsletter":
-      return "/admin/newsletter";
-    case "email_templates":
-      return "/admin/email-templates";
-    case "library":
-      return "/admin/library";
-
-    case "users":
-      return "/admin/users";
-    case "db":
-      return "/admin/db";
-
-    case "reviews":
-      return "/admin/reviews";
-    case "support":
-      return "/admin/support";
-
-    case "menuitem":
-      return "/admin/menuitem";
-    case "storage":
-      return "/admin/storage";
-    case "offers":
-      return "/admin/offers";
-    case "catalog_requests":
-      return "/admin/catalog-requests";
-
-    default:
-      return "/admin";
-  }
-}
+// ✅ Admin nav helpers (dışarı alındı)
+import { isAdminPath, pathToTab, tabToPath } from "@/components/layout/admin/adminNav";
 
 /* ------------------------------- App ------------------------------- */
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  const isAdminRoute = router.pathname.startsWith("/admin");
 
-  // NProgress + AOS
+  // Admin tespiti için asPath daha güvenli (query/hash dahil olabilir)
+  const isAdminRoute = isAdminPath(router.asPath || router.pathname);
+
+  // NProgress + AOS (handler cleanup doğru şekilde)
   useEffect(() => {
-    let removeRouteHooks: (() => void) | undefined;
+    let mounted = true;
+
+    let NProgressMod: any = null;
+    let AOSMod: any = null;
+
+    const start = () => {
+      try {
+        NProgressMod?.start?.();
+      } catch {
+        void 0;
+      }
+    };
+
+    const done = () => {
+      try {
+        NProgressMod?.done?.();
+      } catch {
+        void 0;
+      }
+    };
+
+    const onComplete = () => {
+      done();
+      // route tamamlandıktan sonra AOS refresh
+      setTimeout(() => {
+        try {
+          AOSMod?.refreshHard?.();
+        } catch {
+          void 0;
+        }
+      }, 0);
+    };
 
     (async () => {
-      const [{ default: NProgress }, { default: AOS }] = await Promise.all([
+      const [{ default: NP }, { default: AO }] = await Promise.all([
         import("nprogress"),
         import("aos"),
       ]);
 
-      AOS.init({ once: true, duration: 500, easing: "ease-out" });
+      if (!mounted) return;
 
-      NProgress.configure({ showSpinner: false, trickleSpeed: 120 });
-      const start = () => NProgress.start();
-      const done = () => NProgress.done();
+      NProgressMod = NP;
+      AOSMod = AO;
 
-      router.events.on("routeChangeStart", start);
-      router.events.on("routeChangeComplete", () => {
-        done();
-        setTimeout(() => {
-          try {
-            AOS.refreshHard();
-          } catch {
-            void 0;
-          }
-        }, 0);
-      });
-      router.events.on("routeChangeError", done);
-
-      removeRouteHooks = () => {
-        router.events.off("routeChangeStart", start);
-        router.events.off("routeChangeComplete", done);
-        router.events.off("routeChangeError", done);
-      };
-    })();
-
-    return () => {
       try {
-        if (removeRouteHooks) removeRouteHooks();
+        AOSMod.init?.({ once: true, duration: 500, easing: "ease-out" });
       } catch {
         void 0;
       }
+
+      try {
+        NProgressMod.configure?.({ showSpinner: false, trickleSpeed: 120 });
+      } catch {
+        void 0;
+      }
+
+      router.events.on("routeChangeStart", start);
+      router.events.on("routeChangeComplete", onComplete);
+      router.events.on("routeChangeError", done);
+    })();
+
+    return () => {
+      mounted = false;
+
+      // ÖNEMLİ: aynı referanslarla off çağırıyoruz
+      router.events.off("routeChangeStart", start);
+      router.events.off("routeChangeComplete", onComplete);
+      router.events.off("routeChangeError", done);
     };
   }, [router.events]);
 
@@ -180,8 +112,9 @@ export default function App({ Component, pageProps }: AppProps) {
   let content = <Component {...pageProps} />;
 
   if (isAdminRoute) {
+    // pathname admin içinde daha stabil; tab mapping için pathname kullan
     const pathname = router.pathname;
-    const activeTab = pathToTab(pathname);
+    const activeTab: ActiveTab = pathToTab(pathname);
 
     const handleTabChange = (next: ActiveTab) => {
       const target = tabToPath(next);

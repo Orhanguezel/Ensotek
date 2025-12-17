@@ -12,7 +12,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useListProductsQuery } from "@/integrations/rtk/endpoints/products.endpoints";
+import { useListProductsQuery } from "@/integrations/rtk/hooks";
 import type { ProductDto } from "@/integrations/types/product.types";
 
 import { toCdnSrc } from "@/shared/media";

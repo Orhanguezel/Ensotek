@@ -1,12 +1,9 @@
 // src/components/layout/admin/AdminLayout.tsx
-// Ensotek Admin Shell – Sidebar + Header + Footer
-
 "use client";
 
 import type { ReactNode } from "react";
 import AdminSidebar from "./AdminSidebar";
 
-// Ensotek admin modülleri için sekmeler
 export type ActiveTab =
   | "dashboard"
   | "site_settings"
@@ -46,14 +43,13 @@ export default function AdminLayout({
   activeTab,
   onTabChange,
   onNavigateHome,
-  onNavigateLogin, // şimdilik kullanılmıyor ama prop olarak dursun
+  onNavigateLogin,
   header,
   footer,
   children,
 }: AdminLayoutProps) {
   return (
     <div className="ensotek-admin-shell d-flex min-vh-100 bg-light">
-      {/* Sol: Sidebar */}
       <AdminSidebar
         activeTab={activeTab}
         onTabChange={onTabChange}
@@ -61,12 +57,17 @@ export default function AdminLayout({
         onNavigateLogin={onNavigateLogin}
       />
 
-      {/* Sağ: Header + Content + Footer */}
-      <div className="flex-grow-1 d-flex flex-column">
+      <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
         {header}
-        <main className="flex-grow-1 overflow-auto p-3 p-md-4">
+
+        <main
+          role="main"
+          className="flex-grow-1 overflow-auto p-3 p-md-4"
+          style={{ minHeight: 0 }}
+        >
           {children}
         </main>
+
         {footer}
       </div>
     </div>

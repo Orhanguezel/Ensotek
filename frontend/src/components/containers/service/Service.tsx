@@ -8,7 +8,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 
 // RTK – public services
-import { useListServicesPublicQuery } from "@/integrations/rtk/endpoints/services.public.endpoints";
+import { useListServicesPublicQuery } from "@/integrations/rtk/hooks";
 
 // Ortak yardımcılar
 import { excerpt } from "@/shared/text";

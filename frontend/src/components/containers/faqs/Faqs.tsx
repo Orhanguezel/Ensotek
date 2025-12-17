@@ -13,7 +13,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 // RTK – PUBLIC FAQs
-import { useListFaqsQuery } from "@/integrations/rtk/endpoints/faqs.endpoints";
+import { useListFaqsQuery } from "@/integrations/rtk/hooks";
 import {
   type FaqDto,
   type Faq,

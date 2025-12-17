@@ -9,10 +9,10 @@ import { useUiSection } from "@/i18n/uiDb";
 
 
 // Site settings (social links)
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
+import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 
 // RTK – public contact endpoint
-import { useCreateContactPublicMutation } from "@/integrations/rtk/endpoints/contacts.endpoints";
+import { useCreateContactPublicMutation } from "@/integrations/rtk/hooks";
 
 // React Icons – sosyal
 import {

@@ -5,15 +5,25 @@
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
--- ui_auth : Login / Register / Logout metinleri
-
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
   'ui_auth',
   'tr',
   JSON_OBJECT(
-    -- Meta
+    /* =========================================================
+       META (NEW KEYS - preferred)
+       ========================================================= */
+    'ui_auth_login_meta_title',           'Giriş Yap | Ensotek',
+    'ui_auth_login_meta_description',     'Ensotek hesabınıza giriş yapın.',
+    'ui_auth_register_meta_title',        'Kayıt Ol | Ensotek',
+    'ui_auth_register_meta_description',  'Ensotek hesabı oluşturun.',
+    'ui_auth_logout_meta_title',          'Çıkış Yapılıyor | Ensotek',
+    'ui_auth_logout_meta_description',    'Ensotek hesabınızdan çıkış yapılıyor.',
+
+    /* =========================================================
+       META (LEGACY KEYS - backward compatible)
+       ========================================================= */
     'login_meta_title',      'Giriş Yap | Ensotek',
     'login_meta_desc',       'Ensotek hesabınıza giriş yapın.',
     'register_meta_title',   'Kayıt Ol | Ensotek',
@@ -21,7 +31,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'logout_meta_title',     'Çıkış Yapılıyor | Ensotek',
     'logout_meta_desc',      'Ensotek hesabınızdan çıkış yapılıyor.',
 
-    -- Login
+    /* =========================================================
+       LOGIN
+       ========================================================= */
     'login_title',                   'Giriş Yap',
     'login_lead',                    'Hesabınıza giriş yapın veya yeni hesap oluşturun.',
     'login_email_label',             'E-posta',
@@ -40,7 +52,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'login_error_required',          'E-posta ve şifre zorunludur.',
     'login_error_google_generic',    'Google ile giriş başlatılırken bir hata oluştu.',
 
-    -- Register
+    /* =========================================================
+       REGISTER
+       ========================================================= */
     'register_title',                        'Kayıt Ol',
     'register_lead_has_account',             'Zaten hesabın var mı?',
     'register_login_link',                   'Giriş yap',
@@ -64,7 +78,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'register_error_password_mismatch',      'Şifreler eşleşmiyor.',
     'register_error_google_generic',         'Google ile kayıt başlatılırken bir hata oluştu.',
 
-    -- Logout
+    /* =========================================================
+       LOGOUT
+       ========================================================= */
     'logout_title',   'Çıkış yapılıyor...',
     'logout_lead',    'Lütfen bekleyin, birkaç saniye içinde giriş sayfasına yönlendirileceksiniz.',
     'logout_error',   'Sunucudan çıkış yapılırken bir sorun oluştu, ancak yerel oturumunuz temizlendi.'
@@ -77,7 +93,19 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   'ui_auth',
   'en',
   JSON_OBJECT(
-    -- Meta
+    /* =========================================================
+       META (NEW KEYS - preferred)
+       ========================================================= */
+    'ui_auth_login_meta_title',           'Sign In | Ensotek',
+    'ui_auth_login_meta_description',     'Sign in to your Ensotek account.',
+    'ui_auth_register_meta_title',        'Sign Up | Ensotek',
+    'ui_auth_register_meta_description',  'Create your Ensotek account.',
+    'ui_auth_logout_meta_title',          'Signing out | Ensotek',
+    'ui_auth_logout_meta_description',    'Signing you out of your Ensotek account.',
+
+    /* =========================================================
+       META (LEGACY KEYS - backward compatible)
+       ========================================================= */
     'login_meta_title',      'Sign In | Ensotek',
     'login_meta_desc',       'Sign in to your Ensotek account.',
     'register_meta_title',   'Sign Up | Ensotek',
@@ -85,7 +113,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'logout_meta_title',     'Signing out | Ensotek',
     'logout_meta_desc',      'Signing you out of your Ensotek account.',
 
-    -- Login
+    /* =========================================================
+       LOGIN
+       ========================================================= */
     'login_title',                   'Sign In',
     'login_lead',                    'Sign in to your account or create a new one.',
     'login_email_label',             'Email',
@@ -104,7 +134,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'login_error_required',          'Email and password are required.',
     'login_error_google_generic',    'An error occurred while starting Google login.',
 
-    -- Register
+    /* =========================================================
+       REGISTER
+       ========================================================= */
     'register_title',                        'Sign Up',
     'register_lead_has_account',             'Already have an account?',
     'register_login_link',                   'Sign in',
@@ -128,7 +160,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'register_error_password_mismatch',      'Passwords do not match.',
     'register_error_google_generic',         'An error occurred while starting Google signup.',
 
-    -- Logout
+    /* =========================================================
+       LOGOUT
+       ========================================================= */
     'logout_title',   'Signing out...',
     'logout_lead',    'Please wait, you will be redirected to the login page in a few seconds.',
     'logout_error',   'There was a problem signing out from the server, but your local session has been cleared.'

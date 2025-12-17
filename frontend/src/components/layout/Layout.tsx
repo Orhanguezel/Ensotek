@@ -3,6 +3,7 @@
 
 import React, { Fragment, useMemo } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 
 import Header from "./header/Header";
 import Footer from "./footer/Footer";
@@ -11,9 +12,11 @@ import ScrollProgress from "./ScrollProgress";
 import type { StaticImageData } from "next/image";
 
 import { useResolvedLocale } from "@/i18n/locale";
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
+import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 
-// HeaderOffcanvas'taki SimpleBrand ile aynı mantıkta basit tip
+import { buildMeta, type MetaInput } from "@/seo/meta";
+
+// HeaderOffcanvas ile aynı mantıkta
 type SimpleBrand = {
   name: string;
   email?: string;
@@ -24,78 +27,105 @@ type SimpleBrand = {
 
 type LayoutProps = {
   children: React.ReactNode;
-  /** Sayfa özel title – verilmezse site_settings.site_meta_default'tan gelir */
+
+  /**
+   * Sayfa override alanları (opsiyonel).
+   * Verilmezse DB site_seo (ve fallback) kullanılır.
+   */
   title?: string;
-  /** Sayfa özel description – verilmezse site_settings.site_meta_default'tan gelir */
   description?: string;
-  /** Sayfa özel keywords – verilmezse site_settings.site_meta_default'tan gelir */
   keywords?: string;
-  /** Opsiyonel override brand; gelmezse site_settings.company_brand + contact_info'dan hesaplanır */
+
+  /** Opsiyonel override brand */
   brand?: SimpleBrand;
-  /** Opsiyonel override logo; gelmezse company_brand.logo / images'tan gelir */
+  /** Opsiyonel override logo */
   logoSrc?: StaticImageData | string;
+
+  /**
+   * Eğer bazı sayfalarda noindex istiyorsan (admin, preview vs.)
+   */
+  noindex?: boolean;
+
+  /**
+   * OG image override (opsiyonel) — yoksa site_seo.open_graph.image/images
+   */
+  ogImage?: string;
 };
 
-const Layout = ({
+const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
+
+function absUrl(pathOrUrl: string): string {
+  const v = String(pathOrUrl || "").trim();
+  if (!v) return BASE_URL;
+  if (/^https?:\/\//i.test(v)) return v;
+  return `${BASE_URL}${v.startsWith("/") ? v : `/${v}`}`;
+}
+
+function stripHashQuery(asPath: string): string {
+  // canonical için query/hash istemiyorsan:
+  const [pathOnly] = asPath.split("#");
+  const [pathname] = pathOnly.split("?");
+  return pathname || "/";
+}
+
+export default function Layout({
   children,
   title,
   description,
   keywords,
   brand,
   logoSrc,
-}: LayoutProps) => {
+  noindex,
+  ogImage,
+}: LayoutProps) {
+  const router = useRouter();
   const locale = useResolvedLocale();
 
-  // 1) Varsayılan meta bilgileri (title/description/keywords) DB'den
-  // site_settings:
-  //   key: "site_meta_default"
-  //   locale: "tr" | "en" | "de"
-  //   value: { "title": "...", "description": "...", "keywords": "..." }
-  const { data: metaSetting } = useGetSiteSettingByKeyQuery({
-    key: "site_meta_default",
-    locale,
-  });
+  // 1) SEO kaydı (DB) — site_seo / seo fallback mantığını serverMetadata zaten yapıyordu.
+  // Client tarafında da aynı fallback’i uygulayalım:
+  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: "seo", locale });
+  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: "site_seo", locale });
 
-  const metaFromSettings = useMemo(() => {
-    const raw = metaSetting?.value;
-    if (raw && typeof raw === "object" && !Array.isArray(raw)) {
-      const obj = raw as {
-        title?: string;
-        description?: string;
-        keywords?: string;
-      };
-      return {
-        title: (obj.title || "").trim(),
-        description: (obj.description || "").trim(),
-        keywords: (obj.keywords || "").trim(),
-      };
-    }
-    return {
-      title: "",
-      description: "",
-      keywords: "",
-    };
-  }, [metaSetting]);
+  const seo = useMemo(() => {
+    // Öncelik: seo -> site_seo
+    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    return raw && typeof raw === "object" && !Array.isArray(raw) ? raw : {};
+  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  const finalTitle = title || metaFromSettings.title || "Ensotek";
-  const finalDescription = description || metaFromSettings.description || "";
-  const finalKeywords = keywords || metaFromSettings.keywords || "";
+  // 2) Varsayılan meta alanları (DB’den)
+  const seoTitleDefault = String(seo?.title_default ?? "").trim();
+  const seoDescription = String(seo?.description ?? "").trim();
+  const seoSiteName = String(seo?.site_name ?? "").trim();
 
-  // 2) site_settings → company_brand + contact_info’dan marka + logo çıkar
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
-    key: "contact_info",
-    locale,
-  });
+  const og = (seo?.open_graph && typeof seo.open_graph === "object") ? seo.open_graph : {};
+  const ogImage1 =
+    (typeof ogImage === "string" && ogImage.trim())
+      ? ogImage.trim()
+      : (typeof og?.image === "string" && og.image.trim())
+        ? og.image.trim()
+        : Array.isArray(og?.images) && og.images[0]
+          ? String(og.images[0]).trim()
+          : "";
 
-  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
-    key: "company_brand",
-    locale,
-  });
+  const tw = (seo?.twitter && typeof seo.twitter === "object") ? seo.twitter : {};
+  const twitterCard = String(tw?.card ?? "").trim() || "summary_large_image";
+  const twitterSite = typeof tw?.site === "string" ? tw.site.trim() : "";
+  const twitterCreator = typeof tw?.creator === "string" ? tw.creator.trim() : "";
 
-  const {
-    normalizedBrand,
-    logoHrefFromSettings,
-  } = useMemo(() => {
+  // 3) Sayfa override > DB fallback
+  const finalTitle = (title && title.trim()) || seoTitleDefault || "Ensotek";
+  const finalDescription = (description && description.trim()) || seoDescription || "";
+  const finalKeywords = (keywords && keywords.trim()) || String(seo?.keywords ?? "").trim() || "";
+
+  // 4) Canonical + OG url
+  const canonicalPath = stripHashQuery(router.asPath || "/");
+  const canonical = absUrl(canonicalPath);
+
+  // 5) Brand + logo (Header için)
+  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({ key: "contact_info", locale });
+  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({ key: "company_brand", locale });
+
+  const { normalizedBrand, logoHrefFromSettings } = useMemo(() => {
     const contact = (contactInfoSetting?.value ?? {}) as any;
     const brandVal = (companyBrandSetting?.value ?? {}) as any;
 
@@ -132,7 +162,6 @@ const Layout = ({
 
     const logoHref =
       (logoObj.url && String(logoObj.url).trim()) ||
-      // hard fallback – Cloudinary logo
       "https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp";
 
     return {
@@ -145,33 +174,71 @@ const Layout = ({
       } as SimpleBrand,
       logoHrefFromSettings: logoHref,
     };
-  }, [contactInfoSetting, companyBrandSetting]);
+  }, [contactInfoSetting?.value, companyBrandSetting?.value]);
 
-  // Dışarıdan brand geldiyse override, yoksa DB'den normalize edilen
   const effectiveBrand: SimpleBrand = brand ?? normalizedBrand;
 
-  // Header'a geçecek logoSrc: prop > DB logo > (yoksa undefined)
   const headerLogoSrc: StaticImageData | string | undefined =
     logoSrc || logoHrefFromSettings || undefined;
 
-  // Preload için kullanılacak logo HREF (sadece string olması önemli)
   const preloadLogoHref =
     typeof headerLogoSrc === "string" ? headerLogoSrc : logoHrefFromSettings;
+
+  // 6) Head tag’lerini seo/meta.ts ile üret
+  const headMetaSpecs = useMemo(() => {
+    const meta: MetaInput = {
+      title: finalTitle,
+      description: finalDescription,
+      canonical,
+      url: canonical,
+      image: ogImage1 ? absUrl(ogImage1) : undefined,
+      siteName: seoSiteName || effectiveBrand.name || "Ensotek",
+      // OG locale burada istersen tr_TR gibi basabilirsin (opsiyonel)
+      // locale: "tr_TR",
+      noindex: !!noindex,
+
+      twitterCard,
+      twitterSite: twitterSite || undefined,
+      twitterCreator: twitterCreator || undefined,
+    };
+
+    return buildMeta(meta);
+  }, [
+    finalTitle,
+    finalDescription,
+    canonical,
+    ogImage1,
+    seoSiteName,
+    effectiveBrand.name,
+    noindex,
+    twitterCard,
+    twitterSite,
+    twitterCreator,
+  ]);
 
   return (
     <Fragment>
       <Head>
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
-        <title>{finalTitle}</title>
-        {finalKeywords && <meta name="keywords" content={finalKeywords} />}
-        {finalDescription && (
-          <meta name="description" content={finalDescription} />
-        )}
 
-        {/* Ana logo biliniyorsa preload et */}
-        {preloadLogoHref ? (
-          <link rel="preload" as="image" href={preloadLogoHref} />
-        ) : null}
+        <title>{finalTitle}</title>
+
+        {/* Eski keywords alanın varsa tutuyoruz (isteğe bağlı) */}
+        {finalKeywords ? <meta name="keywords" content={finalKeywords} /> : null}
+
+        {/* meta.ts çıktıları */}
+        {headMetaSpecs.map((spec, idx) => {
+          if (spec.kind === "link") {
+            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+          }
+          if (spec.kind === "meta-name") {
+            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+          }
+          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
+        })}
+
+        {/* Logo preload */}
+        {preloadLogoHref ? <link rel="preload" as="image" href={preloadLogoHref} /> : null}
       </Head>
 
       <div className="my-app">
@@ -182,6 +249,4 @@ const Layout = ({
       </div>
     </Fragment>
   );
-};
-
-export default Layout;
+}

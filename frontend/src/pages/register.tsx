@@ -1,19 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Layout from "@/components/layout/Layout";
 import Register from "@/components/containers/auth/Register";
 
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 
-const RegisterPage = () => {
-  const locale = useResolvedLocale();
+const toLocaleShort = (l: unknown) =>
+  String(l || "tr").trim().toLowerCase().split("-")[0] || "tr";
+
+const RegisterPage: React.FC = () => {
+  const resolvedLocale = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+
   const { ui } = useUiSection("ui_auth", locale);
 
-  const title = ui("register_meta_title", "Sign Up | Ensotek");
+  const title = ui("ui_auth_register_meta_title", "Sign Up | Ensotek");
   const description = ui(
-    "register_meta_desc",
+    "ui_auth_register_meta_description",
     "Create your Ensotek account.",
   );
 

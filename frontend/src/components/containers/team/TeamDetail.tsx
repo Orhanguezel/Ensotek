@@ -13,7 +13,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/endpoints/custom_pages.endpoints";
+import { useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/hooks";
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 import { toCdnSrc } from "@/shared/media";

@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useState } from "react";
 
 // RTK – PUBLIC newsletter
-import { useSubscribeNewsletterMutation } from "@/integrations/rtk/endpoints/newsletter_public.endpoints";
+import { useSubscribeNewsletterMutation } from "@/integrations/rtk/hooks";
 
 // Yeni i18n helper’lar
 import { useResolvedLocale } from "@/i18n/locale";

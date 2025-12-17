@@ -1,19 +1,24 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import Layout from "@/components/layout/Layout";
 import Logout from "@/components/containers/auth/Logout";
 
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 
-const LogoutPage = () => {
-  const locale = useResolvedLocale();
+const toLocaleShort = (l: unknown) =>
+  String(l || "tr").trim().toLowerCase().split("-")[0] || "tr";
+
+const LogoutPage: React.FC = () => {
+  const resolvedLocale = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+
   const { ui } = useUiSection("ui_auth", locale);
 
-  const title = ui("logout_meta_title", "Signing out | Ensotek");
+  const title = ui("ui_auth_logout_meta_title", "Signing out | Ensotek");
   const description = ui(
-    "logout_meta_desc",
+    "ui_auth_logout_meta_description",
     "Signing you out of your Ensotek account.",
   );
 

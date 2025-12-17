@@ -10,7 +10,7 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import {
   useGetServiceBySlugPublicQuery,
   useListServiceImagesPublicQuery,
-} from "@/integrations/rtk/endpoints/services.public.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import type { ServiceImageDto } from "@/integrations/types/services.types";
 
