@@ -21,7 +21,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 import { FaStar } from "react-icons/fa";
 
 // RTK – Public reviews
-import { useListReviewsPublicQuery } from "@/integrations/rtk/endpoints/reviews.public.endpoints";
+import { useListReviewsPublicQuery } from "@/integrations/rtk/hooks";
 import type { ReviewDto } from "@/integrations/types/review.types";
 
 // Ortak yardımcılar

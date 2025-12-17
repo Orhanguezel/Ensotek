@@ -1,7 +1,7 @@
 // src/lib/i18n/uiDb.ts
 "use client";
 
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
+import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 import type { SupportedLocale } from "@/types/common";
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUIStrings, UI_KEYS, type UIKey } from "./ui";

@@ -8,7 +8,7 @@
 import React, { useMemo } from "react";
 import Link from "next/link";
 
-import { useListServicesPublicQuery } from "@/integrations/rtk/endpoints/services.public.endpoints";
+import { useListServicesPublicQuery } from "@/integrations/rtk/hooks";
 import type { ServiceDto } from "@/integrations/types/services.types";
 
 import { useResolvedLocale } from "@/i18n/locale";

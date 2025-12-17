@@ -7,10 +7,10 @@ import Image, { type StaticImageData } from "next/image";
 
 import HeaderOffcanvas from "./HeaderOffcanvas";
 
-import { useListMenuItemsQuery } from "@/integrations/rtk/endpoints/menu_items.endpoints";
+import { useListMenuItemsQuery } from "@/integrations/rtk/hooks";
 import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";
 
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
+import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 import { localizePath } from "@/i18n/url";
 
 import { useResolvedLocale } from "@/i18n/locale";

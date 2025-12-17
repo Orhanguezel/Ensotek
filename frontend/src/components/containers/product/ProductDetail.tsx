@@ -1,9 +1,3 @@
-// =============================================================
-// FILE: src/components/containers/product/ProductDetail.tsx
-// Ensotek – Product Detail (locale-aware FAQ + Specs + Reviews)
-//   — İçerik yoksa ilgili bloklar hiç render edilmez
-// =============================================================
-
 "use client";
 
 import React, { useMemo, useState, useRef, useEffect } from "react";
@@ -15,7 +9,7 @@ import {
   useListProductFaqsQuery,
   useListProductSpecsQuery,
   useListProductReviewsQuery,
-} from "@/integrations/rtk/endpoints/products.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import type {
   ProductFaqDto,
@@ -29,9 +23,7 @@ import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 import { localizePath } from "@/i18n/url";
 
-import ProductSpecsBlock, {
-  type ProductSpecEntry,
-} from "@/components/containers/product/ProductSpecsBlock";
+import ProductSpecsBlock, { type ProductSpecEntry } from "@/components/containers/product/ProductSpecsBlock";
 import ProductFaqBlock from "@/components/containers/product/ProductFaqBlock";
 import ProductReviewsBlock from "@/components/containers/product/ProductReviewsBlock";
 
@@ -42,56 +34,28 @@ import FallbackCover from "public/img/blog/3/1.jpg";
 const HERO_W = 960;
 const HERO_H = 540;
 
+const toLocaleShort = (l: any) =>
+  String(l || "tr").trim().toLowerCase().split("-")[0] || "tr";
+
 const ProductDetail: React.FC = () => {
   const router = useRouter();
-  const locale = useResolvedLocale();
+
+  // ✅ API + UI için kısa locale
+  const resolvedLocale = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
   const { ui } = useUiSection("ui_products", locale);
 
-  const backToListText = ui(
-    "ui_products_back_to_list",
-    locale === "tr" ? "Tüm ürünlere dön" : "Back to all products",
-  );
-  const loadingText = ui(
-    "ui_products_loading",
-    locale === "tr" ? "Ürün yükleniyor..." : "Loading product...",
-  );
-  const notFoundText = ui(
-    "ui_products_not_found",
-    locale === "tr" ? "Ürün bulunamadı." : "Product not found.",
-  );
-  const specsTitle = ui(
-    "ui_products_specs_title",
-    locale === "tr" ? "Teknik Özellikler" : "Technical Specifications",
-  );
-  const tagsTitle = ui(
-    "ui_products_tags_title",
-    locale === "tr" ? "Etiketler" : "Tags",
-  );
-  const faqsTitle = ui(
-    "ui_products_faqs_title",
-    locale === "tr" ? "Sık Sorulan Sorular" : "Frequently Asked Questions",
-  );
-  const reviewsTitle = ui(
-    "ui_products_reviews_title",
-    locale === "tr" ? "Müşteri Yorumları" : "Customer Reviews",
-  );
-  const noFaqsText = ui(
-    "ui_products_faqs_empty",
-    locale === "tr"
-      ? "Bu ürün için kayıtlı SSS bulunmamaktadır."
-      : "There are no FAQs for this product yet.",
-  );
-  const noReviewsText = ui(
-    "ui_products_reviews_empty",
-    locale === "tr"
-      ? "Bu ürün için henüz yorum yapılmamıştır."
-      : "There are no reviews for this product yet.",
-  );
-  const requestQuoteText = ui(
-    "ui_products_request_quote",
-    locale === "tr" ? "Teklif isteyiniz" : "Request a quote",
-  );
+  const backToListText = ui("ui_products_back_to_list", locale === "tr" ? "Tüm ürünlere dön" : "Back to all products");
+  const loadingText = ui("ui_products_loading", locale === "tr" ? "Ürün yükleniyor..." : "Loading product...");
+  const notFoundText = ui("ui_products_not_found", locale === "tr" ? "Ürün bulunamadı." : "Product not found.");
+  const specsTitle = ui("ui_products_specs_title", locale === "tr" ? "Teknik Özellikler" : "Technical Specifications");
+  const tagsTitle = ui("ui_products_tags_title", locale === "tr" ? "Etiketler" : "Tags");
+  const faqsTitle = ui("ui_products_faqs_title", locale === "tr" ? "Sık Sorulan Sorular" : "Frequently Asked Questions");
+  const reviewsTitle = ui("ui_products_reviews_title", locale === "tr" ? "Müşteri Yorumları" : "Customer Reviews");
+  const noFaqsText = ui("ui_products_faqs_empty", locale === "tr" ? "Bu ürün için kayıtlı SSS bulunmamaktadır." : "There are no FAQs for this product yet.");
+  const noReviewsText = ui("ui_products_reviews_empty", locale === "tr" ? "Bu ürün için henüz yorum yapılmamıştır." : "There are no reviews for this product yet.");
+  const requestQuoteText = ui("ui_products_request_quote", locale === "tr" ? "Teklif isteyiniz" : "Request a quote");
 
   const [showOfferForm, setShowOfferForm] = useState(false);
   const offerFormRef = useRef<HTMLDivElement | null>(null);
@@ -102,7 +66,7 @@ const ProductDetail: React.FC = () => {
     [slugParam],
   );
 
-  // ---------- PRODUCT DETAIL ----------
+  // ✅ PRODUCT (locale short)
   const {
     data: product,
     isLoading: isProductLoading,
@@ -135,30 +99,16 @@ const ProductDetail: React.FC = () => {
     [product],
   );
 
-  // ---------- FAQ (locale-aware) ----------
-  const {
-    data: faqsData,
-    isLoading: isFaqsLoading,
-  } = useListProductFaqsQuery(
-    {
-      product_id: productId,
-      only_active: 1,
-      locale,
-    },
+  // ✅ FAQ (locale short)
+  const { data: faqsData, isLoading: isFaqsLoading } = useListProductFaqsQuery(
+    { product_id: productId, only_active: 1, locale },
     { skip: !productId },
   );
-
   const faqs: ProductFaqDto[] = faqsData ?? [];
 
-  // ---------- SPECS (locale-aware) ----------
-  const {
-    data: specsData,
-    isLoading: isSpecsLoading,
-  } = useListProductSpecsQuery(
-    {
-      product_id: productId,
-      locale,
-    },
+  // ✅ SPECS (locale short)
+  const { data: specsData, isLoading: isSpecsLoading } = useListProductSpecsQuery(
+    { product_id: productId, locale },
     { skip: !productId },
   );
 
@@ -166,21 +116,15 @@ const ProductDetail: React.FC = () => {
     const entries: ProductSpecEntry[] = [];
     const specsList: ProductSpecDto[] = specsData ?? [];
 
-    // 1) NEW MODEL: specs table
     if (specsList.length) {
       specsList
         .slice()
         .sort((a, b) => a.order_num - b.order_num)
         .forEach((s) => {
-          entries.push({
-            key: s.id,
-            label: s.name,
-            value: s.value,
-          });
+          entries.push({ key: s.id, label: s.name, value: s.value });
         });
     }
 
-    // 2) FALLBACK (structured specifications in product_i18n)
     if (!entries.length && product?.specifications) {
       const labels: Record<string, string> =
         locale === "tr"
@@ -215,17 +159,11 @@ const ProductDetail: React.FC = () => {
     return entries;
   }, [specsData, product, locale]);
 
-  // ---------- REVIEWS (not locale-aware) ----------
-  const { data: reviewsRaw, isLoading: isReviewsLoading } =
-    useListProductReviewsQuery(
-      {
-        product_id: productId,
-        only_active: 1,
-        limit: 10,
-        offset: 0,
-      },
-      { skip: !productId },
-    );
+  // REVIEWS (locale-aware değil)
+  const { data: reviewsRaw, isLoading: isReviewsLoading } = useListProductReviewsQuery(
+    { product_id: productId, only_active: 1, limit: 10, offset: 0 },
+    { skip: !productId },
+  );
 
   const reviews: ProductReviewDto[] = useMemo(
     () => (reviewsRaw ?? []) as ProductReviewDto[],
@@ -238,25 +176,14 @@ const ProductDetail: React.FC = () => {
     return sum / reviews.length;
   }, [reviews]);
 
-  const handleRequestQuote = () => {
-    setShowOfferForm(true);
-  };
-
-  // Form açıldıktan sonra otomatik scroll
   useEffect(() => {
     if (showOfferForm && offerFormRef.current) {
-      offerFormRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      offerFormRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [showOfferForm]);
 
-  const showSkeleton =
-    isProductLoading ||
-    (!product && !isProductError && !slug);
+  const showSkeleton = isProductLoading || (!product && !isProductError && !slug);
 
-  // ----------- BLOK GÖSTERİM KOŞULLARI -----------
   const hasSpecs = specsEntries.length > 0;
   const hasFaqs = faqs.length > 0;
   const hasReviews = reviews.length > 0;
@@ -270,34 +197,24 @@ const ProductDetail: React.FC = () => {
   return (
     <section className="product__detail-area grey-bg-3 pt-120 pb-90">
       <div className="container">
-        {/* Back Link */}
         <div className="row mb-30">
           <div className="col-12">
-            <button
-              type="button"
-              className="link-more"
-              onClick={() => router.push(productListHref)}
-            >
+            <button type="button" className="link-more" onClick={() => router.push(productListHref)}>
               ← {backToListText}
             </button>
           </div>
         </div>
 
-        {/* LOADING */}
         {showSkeleton && (
           <div className="row">
             <div className="col-12">
               <p>{loadingText}</p>
               <div className="skeleton-line mt-10" style={{ height: 16 }} />
-              <div
-                className="skeleton-line mt-10"
-                style={{ height: 16, width: "80%" }}
-              />
+              <div className="skeleton-line mt-10" style={{ height: 16, width: "80%" }} />
             </div>
           </div>
         )}
 
-        {/* ERROR / NOT FOUND */}
         {!showSkeleton && (isProductError || !product) && (
           <div className="row">
             <div className="col-12">
@@ -306,10 +223,8 @@ const ProductDetail: React.FC = () => {
           </div>
         )}
 
-        {/* PRODUCT CONTENT */}
         {!showSkeleton && !isProductError && product && (
           <>
-            {/* HERO + MAIN INFO */}
             <div className="row" data-aos="fade-up" data-aos-delay="200">
               <div className="col-lg-6 mb-30">
                 <div className="product__detail-hero w-img">
@@ -327,16 +242,10 @@ const ProductDetail: React.FC = () => {
               <div className="col-lg-6 mb-30">
                 <article className="product__detail">
                   <header className="product__detail-header mb-20">
-                    <h1 className="section__title-3 mb-15">
-                      {title || notFoundText}
-                    </h1>
+                    <h1 className="section__title-3 mb-15">{title || notFoundText}</h1>
 
                     <div className="product__detail-cta mt-15">
-                      <button
-                        type="button"
-                        className="solid__btn"
-                        onClick={handleRequestQuote}
-                      >
+                      <button type="button" className="solid__btn" onClick={() => setShowOfferForm(true)}>
                         {requestQuoteText}
                       </button>
                     </div>
@@ -350,15 +259,10 @@ const ProductDetail: React.FC = () => {
 
                   {!!tags.length && (
                     <div className="product__detail-tags mb-20">
-                      <h4 className="product__detail-subtitle mb-10">
-                        {tagsTitle}
-                      </h4>
+                      <h4 className="product__detail-subtitle mb-10">{tagsTitle}</h4>
                       <div className="product__tag-list d-flex flex-wrap">
                         {tags.map((t) => (
-                          <span
-                            key={t}
-                            className="badge bg-light text-dark border rounded-pill me-2 mb-2"
-                          >
+                          <span key={t} className="badge bg-light text-dark border rounded-pill me-2 mb-2">
                             #{t}
                           </span>
                         ))}
@@ -369,33 +273,22 @@ const ProductDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* SPECS + FAQS */}
             {showSpecsOrFaqsRow && (
               <div className="row mt-10">
                 {showSpecsBlock && (
                   <div className="col-lg-6 mb-30">
-                    <ProductSpecsBlock
-                      title={specsTitle}
-                      entries={specsEntries}
-                      isLoading={isSpecsLoading}
-                    />
+                    <ProductSpecsBlock title={specsTitle} entries={specsEntries} isLoading={isSpecsLoading} />
                   </div>
                 )}
 
                 {showFaqsBlock && (
                   <div className="col-lg-6 mb-30">
-                    <ProductFaqBlock
-                      title={faqsTitle}
-                      faqs={faqs}
-                      isLoading={isFaqsLoading}
-                      emptyText={noFaqsText}
-                    />
+                    <ProductFaqBlock title={faqsTitle} faqs={faqs} isLoading={isFaqsLoading} emptyText={noFaqsText} />
                   </div>
                 )}
               </div>
             )}
 
-            {/* REVIEWS */}
             {showReviewsBlock && (
               <div className="row mt-10">
                 <div className="col-12">
@@ -411,15 +304,10 @@ const ProductDetail: React.FC = () => {
               </div>
             )}
 
-            {/* OFFER FORM – Bu ürün için */}
             {showOfferForm && productId && (
               <div className="row mt-40" ref={offerFormRef}>
                 <div className="col-12">
-                  <OfferSection
-                    locale={locale}
-                    productId={productId}
-                    productName={title || product.slug || ""}
-                  />
+                  <OfferSection locale={locale} productId={productId} productName={title || product.slug || ""} />
                 </div>
               </div>
             )}

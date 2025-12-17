@@ -12,7 +12,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import Image from "next/image";
 
 // RTK – References public
-import { useListReferencesQuery } from "@/integrations/rtk/endpoints/references.endpoints";
+import { useListReferencesQuery } from "@/integrations/rtk/hooks";
 import type { ReferenceDto } from "@/integrations/types/references.types";
 
 // Ortak helper'lar

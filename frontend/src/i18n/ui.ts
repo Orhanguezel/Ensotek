@@ -1,7 +1,7 @@
 // src/lib/i18n/ui.ts
 
 import { useMemo } from "react";
-import { useListSiteSettingsQuery } from "@/integrations/rtk/endpoints/site_settings.endpoints";
+import { useListSiteSettingsQuery } from "@/integrations/rtk/hooks";
 import type { SupportedLocale, TranslatedLabel } from "@/types/common";
 
 /**

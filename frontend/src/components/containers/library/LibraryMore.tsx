@@ -5,7 +5,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useListLibraryQuery } from "@/integrations/rtk/endpoints/library.endpoints";
+import { useListLibraryQuery } from "@/integrations/rtk/hooks";
 
 import { toCdnSrc } from "@/shared/media";
 import { pickStrict, stripHtml, excerpt } from "@/shared/text";

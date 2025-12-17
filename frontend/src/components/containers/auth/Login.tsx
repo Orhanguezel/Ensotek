@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 import {
   useLoginMutation,
   useOauthStartMutation,
-} from "@/integrations/rtk/endpoints/auth.endpoints";
+} from "@/integrations/rtk/hooks";
 import { tokenStore } from "@/integrations/core/token";
 import { normalizeError } from "@/integrations/core/errors";
 

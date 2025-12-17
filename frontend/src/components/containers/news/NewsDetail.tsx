@@ -14,7 +14,7 @@ import Image from "next/image";
 import { useRouter } from "next/router";
 
 // RTK – Custom Pages (public)
-import { useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/endpoints/custom_pages.endpoints";
+import { useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/hooks";
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // Ortak helper'lar

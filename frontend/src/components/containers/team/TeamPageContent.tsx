@@ -18,7 +18,7 @@ import { Autoplay, Navigation } from "swiper";
 import "swiper/css";
 
 // RTK – Custom Pages (public)
-import { useListCustomPagesPublicQuery } from "@/integrations/rtk/endpoints/custom_pages.endpoints";
+import { useListCustomPagesPublicQuery } from "@/integrations/rtk/hooks";
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // Ortak helper’lar

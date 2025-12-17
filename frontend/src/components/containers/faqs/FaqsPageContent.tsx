@@ -11,7 +11,7 @@
 import React, { useMemo, useState } from "react";
 
 // RTK – PUBLIC faqs
-import { useListFaqsQuery } from "@/integrations/rtk/endpoints/faqs.endpoints";
+import { useListFaqsQuery } from "@/integrations/rtk/hooks";
 import type { FaqDto } from "@/integrations/types/faqs.types";
 import { normalizeFaq } from "@/integrations/types/faqs.types";
 
