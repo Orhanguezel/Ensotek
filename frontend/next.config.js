@@ -2,13 +2,6 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /** @type {import('next').NextConfig} */
 
-const locales = require("./src/types/locales.json");
-
-const envDefault = String(process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "").trim();
-const defaultLocale = locales.includes(envDefault)
-  ? envDefault
-  : (locales.includes("en") ? "en" : locales[0]);
-
 const nextConfig = {
   reactStrictMode: true,
 
@@ -20,17 +13,32 @@ const nextConfig = {
     ],
   },
 
-  i18n: {
-    locales,
-    defaultLocale,
-    localeDetection: true,
+  // ✅ i18n intentionally removed
+
+  async rewrites() {
+    return [
+      // ✅ /tr  => /
+      {
+        source: "/:lc([a-zA-Z]{2})",
+        destination: "/?__lc=:lc",
+      },
+
+      // ✅ /tr/blog  => /blog
+      {
+        source: "/:lc([a-zA-Z]{2})/:path*",
+        destination: "/:path*?__lc=:lc",
+      },
+    ];
   },
 
+  // İstersen tüm site prefix'li olsun diye ana sayfayı default locale'e at:
+  // (DB default_locale dinamik olduğu için burada sabit tutmak zorundasın.)
+  // async redirects() {
+  //   return [{ source: "/", destination: "/tr", permanent: false }];
+  // },
+
   webpack: (config) => {
-    // Disk bazlı persistent cache yerine memory cache kullan
-    config.cache = {
-      type: "memory",
-    };
+    config.cache = { type: "memory" };
     return config;
   },
 };

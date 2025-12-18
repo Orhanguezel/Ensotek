@@ -1,16 +1,21 @@
-// src/i18n/request.ts
+// =============================================================
+// FILE: src/i18n/request.ts
+// =============================================================
+
 import type { SupportedLocale } from "@/types/common";
-import { DEFAULT_LOCALE, isSupportedLocale } from "@/i18n/config";
 
 /* ----------------------- getRequestConfig SHIM ----------------------- */
 type RequestCtx = { requestLocale?: string | null };
 type RequestConfigFn<R = any> = (ctx: RequestCtx) => Promise<R>;
-function getRequestConfig<R = { locale: SupportedLocale; messages: Record<string, unknown> }>(
-  cb: RequestConfigFn<R>
-): RequestConfigFn<R> {
+function getRequestConfig<
+  R = { locale: SupportedLocale; messages: Record<string, unknown> }
+>(cb: RequestConfigFn<R>): RequestConfigFn<R> {
   return cb;
 }
 /* ------------------------------------------------------------------- */
+
+import { normLocaleTag } from "@/i18n/localeUtils";
+import { getServerI18nContext } from "@/i18n/server";
 
 /**
  * Namespace listesi (UI textleri)
@@ -24,6 +29,7 @@ const NAMESPACES = [
   "products","productDetail",
   "spareParts","sparePartDetail",
   "news","newsDetail",
+  "blog","blogDetail",
   "search",
   "comments","legal","notFound","tagPage","categories","tagLabels",
 ] as const;
@@ -62,7 +68,10 @@ function mergeDeep<T extends Record<string, unknown>>(target: T, src: T): T {
 }
 
 /** Sadece İSTENEN locale’den dener; dosya yoksa BOŞ döner. */
-async function loadNamespace(locale: SupportedLocale, ns: string): Promise<Record<string, unknown>> {
+async function loadNamespace(
+  locale: string,
+  ns: string,
+): Promise<Record<string, unknown>> {
   try {
     const mod = (await import(`@/i18n/messages/${locale}/${ns}.json`)) as {
       default?: Record<string, unknown>;
@@ -78,8 +87,15 @@ async function loadNamespace(locale: SupportedLocale, ns: string): Promise<Recor
 }
 
 export default getRequestConfig(async ({ requestLocale }: RequestCtx) => {
-  const req = (requestLocale ?? undefined) as string | undefined;
-  const locale: SupportedLocale = isSupportedLocale(req) ? (req as any) : DEFAULT_LOCALE;
+  const { activeLocales, defaultLocale } = await getServerI18nContext();
+
+  const req = normLocaleTag(requestLocale);
+  const activeSet = new Set((activeLocales || []).map(normLocaleTag));
+
+  const chosen = (req && activeSet.has(req)) ? req : defaultLocale;
+
+  // SupportedLocale tipin muhtemelen sabit union; runtime string’i cast ediyoruz.
+  const locale = chosen as SupportedLocale;
 
   let messages: Record<string, unknown> = {};
   for (const ns of NAMESPACES) {

@@ -1,18 +1,24 @@
-// src/components/layout/header/HeaderOffcanvas.tsx
+// =============================================================
+// FILE: src/components/layout/header/HeaderOffcanvas.tsx
+// =============================================================
+
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image, { type StaticImageData } from "next/image";
 import { useRouter } from "next/router";
+import { useResolvedLocale } from "@/i18n/locale";
 
 import {
   SUPPORTED_LOCALES,
   LANG_LABELS,
   type SupportedLocale,
 } from "@/types/common";
-import { localizePath } from "@/i18n/url";
+
 import { switchLocale } from "@/i18n/switchLocale";
+import { normalizeLocales } from "@/i18n/localeUtils";
+import { localizePath } from "@/i18n/url";
 
 import {
   FiX,
@@ -23,6 +29,7 @@ import {
   FiLogIn,
   FiUserPlus,
 } from "react-icons/fi";
+
 import {
   FaFacebookF,
   FaTwitter,
@@ -35,14 +42,25 @@ import { useListMenuItemsQuery } from "@/integrations/rtk/endpoints/menu_items.e
 import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";
 
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 
 const IMG_W = 160;
 const IMG_H = 60;
 
+const STATIC_SUPPORTED = new Set(
+  (SUPPORTED_LOCALES as readonly string[]).map((x) => String(x).toLowerCase()),
+);
+
 const isSupportedLocale = (val: string): val is SupportedLocale =>
-  (SUPPORTED_LOCALES as readonly string[]).includes(val);
+  STATIC_SUPPORTED.has(String(val || "").toLowerCase());
+
+const toShortLocale = (v: unknown): string =>
+  String(v || "")
+    .trim()
+    .toLowerCase()
+    .replace("_", "-")
+    .split("-")[0]
+    .trim();
 
 type SimpleBrand = {
   name: string;
@@ -70,51 +88,40 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
   logoSrc,
 }) => {
   const router = useRouter();
-  const locale = useResolvedLocale();
 
-  // app_locales
+  // ✅ Tek kaynak: URL prefix → useResolvedLocale
+  const resolvedLocale = useResolvedLocale();
+
+  // locales (DB)
   const { data: appLocalesSetting } = useGetSiteSettingByKeyQuery({
     key: "app_locales",
   });
 
-  const availableLocales: SupportedLocale[] = useMemo(() => {
-    const raw = appLocalesSetting?.value;
-
-    const extract = (v: any): string[] => {
-      if (Array.isArray(v)) return v.map(String);
-      if (v && typeof v === "object" && Array.isArray((v as any).locales)) {
-        return (v as any).locales.map(String);
-      }
-      return [];
-    };
-
-    const cleaned = extract(raw)
-      .map((x) => String(x).toLowerCase().trim().split("-")[0])
+  const availableLocales = useMemo<SupportedLocale[]>(() => {
+    const normalized = normalizeLocales(appLocalesSetting?.value);
+    const cleaned = normalized
+      .map(toShortLocale)
       .filter(Boolean)
       .filter(isSupportedLocale);
 
-    return cleaned.length
-      ? (Array.from(new Set(cleaned)) as SupportedLocale[])
-      : [...SUPPORTED_LOCALES];
+    const uniq = Array.from(new Set(cleaned)) as SupportedLocale[];
+    return uniq.length ? uniq : ([...SUPPORTED_LOCALES] as SupportedLocale[]);
   }, [appLocalesSetting?.value]);
 
-  const { ui } = useUiSection("ui_header", locale);
+  const { ui } = useUiSection("ui_header", resolvedLocale);
 
-  const loginHref = localizePath(locale, "/login");
-  const registerHref = localizePath(locale, "/register");
-
-  // brand settings
+  // Brand settings (locale-aware)
   const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
     key: "contact_info",
-    locale,
+    locale: resolvedLocale,
   });
   const { data: socialsSetting } = useGetSiteSettingByKeyQuery({
     key: "socials",
-    locale,
+    locale: resolvedLocale,
   });
   const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
     key: "company_brand",
-    locale,
+    locale: resolvedLocale,
   });
 
   const brandFromSettings = useMemo(() => {
@@ -153,15 +160,12 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
       (Array.isArray(brandVal.images) ? brandVal.images[0] : null) ||
       {}) as { url?: string; width?: number; height?: number };
 
-    return {
-      name,
-      website,
-      phone,
-      email,
-      socials: mergedSocials,
-      logo,
-    };
-  }, [contactInfoSetting, socialsSetting, companyBrandSetting]);
+    return { name, website, phone, email, socials: mergedSocials, logo };
+  }, [
+    contactInfoSetting?.value,
+    socialsSetting?.value,
+    companyBrandSetting?.value,
+  ]);
 
   const effectiveBrand: SimpleBrand & {
     logo?: { url?: string; width?: number; height?: number };
@@ -202,22 +206,27 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
 
   const webHost = useMemo(
     () =>
-      (effectiveBrand.website || "https://ensotek.de").replace(/^https?:\/\//, ""),
+      (effectiveBrand.website || "https://ensotek.de").replace(
+        /^https?:\/\//,
+        "",
+      ),
     [effectiveBrand.website],
   );
 
   const safePhone = (effectiveBrand.phone || "").replace(/\s+/g, "");
 
   const onLangChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const next = e.target.value as SupportedLocale;
-    await switchLocale(router, next);
+    const next = toShortLocale(e.target.value);
+    if (!next || !isSupportedLocale(next)) return;
+    await switchLocale(router, next as SupportedLocale);
+    onClose();
   };
 
-  // menu
+  // Menu
   const { data: menuData, isLoading: isMenuLoading } = useListMenuItemsQuery({
     location: "header",
     is_active: true,
-    locale,
+    locale: resolvedLocale,
     nested: true,
   });
 
@@ -249,7 +258,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
     return sortRecursive(list);
   }, [menuData]);
 
-  // submenu state
   const [openSubmenus, setOpenSubmenus] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
@@ -270,7 +278,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
 
   const renderMobileMenuItem = (item: MenuItemWithChildren, depth = 0) => {
     const rawUrl = item.url || (item as any).href || "#";
-    const href = localizePath(locale, rawUrl);
+    const href = localizePath(resolvedLocale, rawUrl);
 
     const hasChildren = !!item.children && item.children.length > 0;
     const isNowrap = rawUrl === "/sparepart" || rawUrl === "/blog";
@@ -278,7 +286,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
     const id = String(item.id ?? rawUrl ?? Math.random());
     const isOpen = !!openSubmenus[id];
     const submenuId = `submenu:${id}`;
-
     const indent = depth * 14;
 
     if (!hasChildren) {
@@ -293,7 +300,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
       );
     }
 
-    // Parent: sadece toggle (Go yok)
     return (
       <li
         key={id}
@@ -314,29 +320,36 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
         </button>
 
         <ul id={submenuId} className={`submenu ${isOpen ? "open" : ""}`}>
-          {item.children!.map((child) => renderMobileMenuItem(child, depth + 1))}
+          {item.children!.map((child) =>
+            renderMobileMenuItem(child, depth + 1),
+          )}
         </ul>
       </li>
     );
   };
+
+  const homeHref = localizePath(resolvedLocale, "/");
+  const loginHref = localizePath(resolvedLocale, "/login");
+  const registerHref = localizePath(resolvedLocale, "/register");
 
   return (
     <>
       <div className={(open ? " info-open" : " ") + " offcanvas__info"}>
         <div className="offcanvas__wrapper">
           <div className="offcanvas__content">
-            {/* top */}
             <div className="offcanvas__top mb-40 d-flex justify-content-between align-items-center">
               <div className="offcanvas__logo">
                 <Link
-                  href={localizePath(locale, "/")}
+                  href={homeHref}
                   aria-label={effectiveBrand.name}
                   onClick={onClose}
                 >
                   {effectiveLogo ? (
                     <Image
                       key={
-                        typeof effectiveLogo === "string" ? effectiveLogo : "static"
+                        typeof effectiveLogo === "string"
+                          ? effectiveLogo
+                          : "static"
                       }
                       src={effectiveLogo}
                       alt={effectiveBrand.name}
@@ -360,7 +373,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
               </div>
             </div>
 
-            {/* language + auth */}
             <div className="d-flex flex-column gap-2 mb-25">
               <label
                 htmlFor="lang-any"
@@ -372,14 +384,14 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
 
               <select
                 id="lang-any"
-                value={locale}
+                value={resolvedLocale}
                 onChange={onLangChange}
                 className="form-select"
                 style={{ maxWidth: 240 }}
               >
                 {availableLocales.map((loc) => (
                   <option key={loc} value={loc}>
-                    {LANG_LABELS[loc] ?? loc.toUpperCase()}
+                    {LANG_LABELS[loc] ?? String(loc).toUpperCase()}
                   </option>
                 ))}
               </select>
@@ -403,9 +415,8 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
               </div>
             </div>
 
-            {/* search */}
             <div className="offcanvas__search mb-25">
-              <form action={localizePath(locale, "/")}>
+              <form action="/">
                 <input
                   type="text"
                   placeholder={ui("ui_header_search_placeholder", "Search...")}
@@ -420,7 +431,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
               </form>
             </div>
 
-            {/* menu */}
             <div className="mobile-menu fix mb-40 mean-container">
               <div className="mean-bar d-block">
                 <nav className="mean-nav">
@@ -447,7 +457,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
               </div>
             </div>
 
-            {/* contact info */}
             <div className="offcanvas__contact mt-30 mb-20">
               <h4>{ui("ui_header_contact_info", "Contact Info")}</h4>
               <ul>
@@ -468,8 +477,9 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
                   </div>
                   <div className="offcanvas__contact-text">
                     <Link
-                      href={safePhone ? `tel:${safePhone}` : localizePath(locale, "/contact")}
+                      href={safePhone ? `tel:${safePhone}` : localizePath(resolvedLocale, "/contact")}
                       aria-label={ui("ui_header_call", "Call")}
+                      onClick={safePhone ? undefined : onClose}
                     >
                       {effectiveBrand.phone || "—"}
                     </Link>
@@ -492,7 +502,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
               </ul>
             </div>
 
-            {/* social */}
             <div className="offcanvas__social">
               <ul>
                 {socialItems.map(({ key, Icon, url }) => (
@@ -514,7 +523,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
         </div>
       </div>
 
-      {/* overlay */}
       <div
         className={(open ? " overlay-open" : " ") + " offcanvas__overlay"}
         onClick={onClose}
@@ -525,31 +533,24 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
         .nowrap {
           white-space: nowrap;
         }
-
-        /* Parent satır: link gibi görünmesin */
         .submenu-toggle {
           width: 100%;
           display: flex;
           align-items: center;
           justify-content: space-between;
           gap: 10px;
-
           background: transparent;
           border: 0;
           padding: 10px 0;
           margin: 0;
-
           text-align: left;
           cursor: pointer;
-
           font: inherit;
           color: inherit;
         }
-
         .submenu-toggle:focus {
           outline: none;
         }
-
         .caret {
           width: 8px;
           height: 8px;
@@ -561,25 +562,20 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({
           opacity: 0.8;
           flex: 0 0 auto;
         }
-
         li.has-submenu.is-open .caret {
           transform: rotate(-135deg);
         }
-
-        /* submenu indent + open/close */
         ul.submenu {
           display: none;
           margin: 6px 0 8px 0;
           padding-left: 12px;
           border-left: 1px solid rgba(0, 0, 0, 0.08);
         }
-
         ul.submenu.open {
           display: block;
         }
-
         ul.submenu li {
-          padding-left: 0; /* li inline style depth ile geliyor */
+          padding-left: 0;
         }
       `}</style>
     </>

@@ -1,58 +1,44 @@
-// src/i18n/url.ts
-import { LOCALES, LOCALE_SET, DEFAULT_LOCALE } from "./config";
-import type { SupportedLocale } from "@/types/common";
+// =============================================================
+// FILE: src/i18n/url.ts
+// =============================================================
+import { SUPPORTED_LOCALES, type SupportedLocale } from "@/types/common";
 
-const DEFAULT_LOCALE_PREFIXLESS = true;
+const LOCALE_SET = new Set((SUPPORTED_LOCALES as readonly string[]).map((x) => x.toLowerCase()));
 
-// Başta tek bir locale varsa sök
-const leadingLocaleRe = new RegExp(`^\\/(${LOCALES.join("|")})(?=\\/|$)`, "i");
-
-export function stripLeadingLocale(pathname: string): string {
-  const out = (pathname || "/").replace(leadingLocaleRe, "");
-  return out || "/";
+function toShortLocale(v: unknown): string {
+  return String(v || "")
+    .trim()
+    .toLowerCase()
+    .replace("_", "-")
+    .split("-")[0]
+    .trim();
 }
 
-// Yan yana iki locale varsa ilkini at ("/tr/en/..." -> "/en/...")
-export function collapseDoubleLocale(pathname: string): string {
-  const parts = (pathname || "/").replace(/^\/+/, "").split("/");
-  if (parts.length >= 2 && LOCALE_SET.has(parts[0]!) && LOCALE_SET.has(parts[1]!)) {
-    parts.shift();
-    return "/" + parts.join("/");
+function splitPath(asPath: string) {
+  const s = String(asPath || "/");
+  const [pathAndQuery, hash = ""] = s.split("#");
+  const [pathname = "/", query = ""] = pathAndQuery.split("?");
+  return {
+    pathname: pathname || "/",
+    query: query ? `?${query}` : "",
+    hash: hash ? `#${hash}` : "",
+  };
+}
+
+function stripLocalePrefix(pathname: string): string {
+  const p = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const seg = p.replace(/^\/+/, "").split("/")[0] || "";
+  const cand = toShortLocale(seg);
+  if (cand && LOCALE_SET.has(cand)) {
+    const rest = p.replace(new RegExp(`^/${seg}(?=/|$)`), "");
+    return rest ? (rest.startsWith("/") ? rest : `/${rest}`) : "/";
   }
-  return pathname || "/";
-}
-
-function normPath(pathname: string): string {
-  let p = (pathname || "/").trim();
-  if (!p.startsWith("/")) p = `/${p}`;
-  if (p !== "/" && p.endsWith("/")) p = p.slice(0, -1);
   return p;
 }
 
-/**
- * Hedef dile göre absolute path üret (query/hash korunur)
- * - default locale prefixless ise: target=DEFAULT_LOCALE => "/about"
- * - diğerleri: "/en/about"
- */
-export function localizePath(target: SupportedLocale, asPath: string) {
-  const [pathWithHash, queryString = ""] = String(asPath || "/").split("?");
-  const [pathnameRaw, hash = ""] = pathWithHash.split("#");
-
-  const collapsed = collapseDoubleLocale(pathnameRaw || "/");
-  const stripped = stripLeadingLocale(collapsed);
-  const base = normPath(stripped);
-
-  const query = queryString ? `?${queryString}` : "";
-  const h = hash ? `#${hash}` : "";
-
-  const isDefault = String(target) === String(DEFAULT_LOCALE);
-
-  if (DEFAULT_LOCALE_PREFIXLESS && isDefault) {
-    return `${base}${query}${h}`;
-  }
-
-  // "/" için "/en" gibi üret
-  if (base === "/") return `/${target}${query}${h}`;
-
-  return `/${target}${base}${query}${h}`;
+export function localizePath(locale: SupportedLocale, asPath: string): string {
+  const { pathname, query, hash } = splitPath(asPath);
+  const clean = stripLocalePrefix(pathname);
+  const base = clean === "/" ? "" : clean;
+  return `/${locale}${base}${query}${hash}`;
 }

@@ -1,12 +1,15 @@
-// src/lib/i18n/ui.ts
+// =============================================================
+// FILE: src/lib/i18n/ui.ts
+// =============================================================
+"use client";
 
 import { useMemo } from "react";
-import { useListSiteSettingsQuery } from "@/integrations/rtk/hooks";
 import type { SupportedLocale, TranslatedLabel } from "@/types/common";
+import { useListSiteSettingsQuery } from "@/integrations/rtk/hooks";
 
 /**
  * Tüm UI yazıları için tek noktadan EN fallback.
- * Yeni bir sayfanın anahtarlarını buna ALT ALTA ekleyin.
+ * (Senin uzun obje AYNEN kalır)
  */
 export const UI_FALLBACK_EN = {
   // ===== CONTACT =====
@@ -226,6 +229,7 @@ export const UI_FALLBACK_EN = {
   ui_catalog_page_title: "Catalog",
 
 } as const;
+
 
 export type UIKey = keyof typeof UI_FALLBACK_EN;
 
@@ -454,90 +458,107 @@ export const UI_KEYS = {
   ] as const,
 } as const;
 
-type KeysArray = readonly UIKey[];
-
-// Settings tarafında beklenen minimal shape
 type SettingsValueRecord = {
   label?: TranslatedLabel;
-  // gerektiğinde başka alanlar eklenebilir
   [k: string]: unknown;
 };
 
-/**
- * Settings -> label (çok dilli) + EN fallback zinciri:
- *   locale → en → tr → ilk değer → EN_FALLBACK
- *
- * Artık useSettingsMap yerine RTK Query (listSiteSettings) kullanıyor.
- */
-export function useUIStrings<T extends KeysArray>(
-  keys: T,
-  locale?: SupportedLocale
-) {
-  // RTK ile backend'den ilgili key'leri çekiyoruz
-  const keysForQuery = useMemo(
-    () => keys.map((k) => k as string),
-    [keys]
-  );
+function normShortLocale(x: unknown): string {
+  return String(x || "")
+    .trim()
+    .toLowerCase()
+    .replace("_", "-")
+    .split("-")[0]
+    .trim();
+}
+
+function normalizeValueToLabel(value: unknown): SettingsValueRecord {
+  // 1) string -> {label:{en:string}} (legacy)
+  if (typeof value === "string") {
+    return { label: { en: value } as TranslatedLabel };
+  }
+
+  // 2) object -> ya {label:{...}} ya da direkt {en:"",tr:""} gibi
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    const v = value as any;
+
+    // { label: {...} }
+    if (v.label && typeof v.label === "object" && !Array.isArray(v.label)) {
+      return v as SettingsValueRecord;
+    }
+
+    // { en:"", tr:"" } gibi -> label'a sar
+    return { label: v as TranslatedLabel };
+  }
+
+  return {};
+}
+
+// ✅ Overload’lar: eski kullanım (UIKey[]) + yeni kullanım (string[])
+export function useUIStrings(
+  keys: readonly UIKey[],
+  locale?: SupportedLocale,
+): {
+  t: (key: UIKey) => string;
+  map: Record<string, SettingsValueRecord>;
+};
+
+export function useUIStrings(
+  keys: readonly string[],
+  locale?: SupportedLocale,
+): {
+  t: (key: string) => string;
+  map: Record<string, SettingsValueRecord>;
+};
+
+// ✅ Tek implementasyon (string[] üzerinden)
+export function useUIStrings(keys: readonly string[], locale?: SupportedLocale) {
+  const keysForQuery = useMemo(() => keys.map((k) => String(k)), [keys]);
 
   const { data } = useListSiteSettingsQuery(
     keysForQuery.length
       ? {
-        keys: keysForQuery,
-        locale,
-      }
-      : undefined
+          keys: keysForQuery,
+          locale,
+        }
+      : undefined,
   );
 
-  // data -> map[key] = { label: TranslatedLabel }
   const map = useMemo(() => {
     const out: Record<string, SettingsValueRecord> = {};
-
     if (!data) return out;
 
     for (const item of data) {
-      const key = item.key;
-      let value = item.value as any;
+      const k = String((item as any)?.key || "").trim();
+      if (!k) continue;
 
-      // value STRING ise -> basit durumda EN label olarak sar
-      if (typeof value === "string") {
-        value = {
-          label: {
-            en: value,
-          } as TranslatedLabel,
-        };
-      } else if (value && typeof value === "object") {
-        // { label: {...} } formu
-        if ("label" in value) {
-          // olduğu gibi bırak
-        } else {
-          // direkt { en: "...", tr: "..." } gibi ise label olarak sar
-          value = {
-            label: value as TranslatedLabel,
-          };
-        }
-      } else {
-        value = {};
-      }
-
-      out[key] = value;
+      const normalized = normalizeValueToLabel((item as any)?.value);
+      out[k] = normalized;
     }
 
     return out;
   }, [data]);
 
-  function t<K extends T[number]>(key: K): string {
-    const raw = map?.[key as string];
+  function t(key: string): string {
+    const k = String(key || "").trim();
+    if (!k) return "";
+
+    const raw = map[k];
     const label = (raw?.label || {}) as TranslatedLabel;
 
+    const l = normShortLocale(locale);
+    const fallbackFromConst = (UI_FALLBACK_EN as Record<string, string>)[k] ?? "";
+
     const val =
-      (locale && label[locale]) ||
-      label?.en ||
-      label?.tr ||
+      (l && (label as any)[l]) ||
+      (label as any).en ||
+      (label as any).tr ||
       (Object.values(label || {})[0] as string) ||
-      UI_FALLBACK_EN[key];
+      fallbackFromConst ||
+      k;
 
     const s = (typeof val === "string" ? val : "").trim();
-    return s || UI_FALLBACK_EN[key] || String(key);
+    return s || fallbackFromConst || k;
   }
 
   return { t, map };

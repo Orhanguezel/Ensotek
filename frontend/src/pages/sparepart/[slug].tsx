@@ -1,6 +1,5 @@
 // =============================================================
 // FILE: src/pages/sparepart/[slug].tsx
-// Ensotek – Sparepart Detail Page (by slug) + SEO (HOOK-SAFE)
 // =============================================================
 
 "use client";
@@ -33,18 +32,17 @@ import { excerpt } from "@/shared/text";
 
 const SPAREPART_PATH = "/sparepart";
 
-const toLocaleShort = (l: any) => String(l || "tr").trim().toLowerCase().split("-")[0] || "tr";
+const toLocaleShort = (l: any) =>
+  String(l || "tr").trim().toLowerCase().split("-")[0] || "tr";
 
 const SparepartDetailPage: React.FC = () => {
   const router = useRouter();
 
-  // IMPORTANT: API/DB tarafı için kısa locale
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
   const { ui } = useUiSection("ui_spareparts", locale);
 
-  // slug normalize
   const slugParam = router.query.slug;
   const slug =
     typeof slugParam === "string"
@@ -55,11 +53,9 @@ const SparepartDetailPage: React.FC = () => {
 
   const isSlugReady = Boolean(slug);
 
-  // UI fallbacks
   const listTitleFallback = ui("ui_spareparts_page_title", "Spare Parts");
   const detailTitleFallback = ui("ui_spareparts_detail_page_title", "Spare Part");
 
-  // Global SEO settings (seo -> site_seo fallback)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: "seo", locale });
   const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: "site_seo", locale });
 
@@ -68,21 +64,17 @@ const SparepartDetailPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  // Product data
-  const { data: product } = useGetProductBySlugQuery(
-    { slug, locale },
-    { skip: !isSlugReady },
-  );
+  const { data: product } = useGetProductBySlugQuery({ slug, locale }, { skip: !isSlugReady });
 
-  // Banner title
+  // ✅ ESLint: dependency olarak product kullan
   const bannerTitle = useMemo(() => {
-    const t = (product?.title ?? "").trim();
+    const t = String(product?.title ?? "").trim();
     return t || detailTitleFallback || listTitleFallback;
-  }, [product?.title, detailTitleFallback, listTitleFallback]);
+  }, [product, detailTitleFallback, listTitleFallback]);
 
-  // Canonical
   const canonical = useMemo(() => {
     const fallbackPathname = isSlugReady ? `${SPAREPART_PATH}/${slug}` : SPAREPART_PATH;
+
     return buildCanonical({
       asPath: router.asPath,
       locale,
@@ -97,34 +89,26 @@ const SparepartDetailPage: React.FC = () => {
     [seo],
   );
 
-  // SEO fields
   const pageTitleRaw = useMemo(() => {
     if (!isSlugReady) return String(listTitleFallback).trim();
 
-    const metaTitle = (product?.meta_title ?? "").trim();
-    const title = (product?.title ?? "").trim();
+    const metaTitle = String(product?.meta_title ?? "").trim();
+    const title = String(product?.title ?? "").trim();
 
     return metaTitle || title || String(bannerTitle).trim();
-  }, [isSlugReady, listTitleFallback, product?.meta_title, product?.title, bannerTitle]);
+  }, [isSlugReady, listTitleFallback, product, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
     if (!isSlugReady) return String(seo?.description ?? "").trim() || "";
 
-    const metaDesc = (product?.meta_description ?? "").trim();
-    const desc = (product?.description ?? "").trim();
+    const metaDesc = String(product?.meta_description ?? "").trim();
+    const desc = String(product?.description ?? "").trim();
 
-    return (
-      metaDesc ||
-      excerpt(desc, 160).trim() ||
-      String(seo?.description ?? "").trim() ||
-      ""
-    );
-  }, [isSlugReady, product?.meta_description, product?.description, seo]);
+    return metaDesc || excerpt(desc, 160).trim() || String(seo?.description ?? "").trim() || "";
+  }, [isSlugReady, product, seo]);
 
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes("%s")
-      ? titleTemplate.replace("%s", pageTitleRaw)
-      : pageTitleRaw;
+    const t = titleTemplate.includes("%s") ? titleTemplate.replace("%s", pageTitleRaw) : pageTitleRaw;
     return String(t).trim();
   }, [titleTemplate, pageTitleRaw]);
 
@@ -134,15 +118,14 @@ const SparepartDetailPage: React.FC = () => {
 
     if (!isSlugReady) return fallback || absUrl("/favicon.ico");
 
-    const rawImg =
-      (product?.image_url ?? "") ||
-      (Array.isArray(product?.images) && product.images.length ? product.images[0] : "");
+    const images: unknown[] = Array.isArray(product?.images) ? (product?.images as unknown[]) : [];
+    const firstImage = String(images[0] ?? "").trim();
 
-    const imgRaw = String(rawImg || "").trim();
-    const img = imgRaw ? (toCdnSrc(imgRaw, 1200, 630, "fill") || imgRaw) : "";
+    const rawImg = String(product?.image_url ?? "").trim() || firstImage;
+    const img = rawImg ? (toCdnSrc(rawImg, 1200, 630, "fill") || rawImg) : "";
 
     return (img && absUrl(img)) || fallback || absUrl("/favicon.ico");
-  }, [isSlugReady, product?.image_url, product?.images, seo]);
+  }, [isSlugReady, product, seo]);
 
   const headSpecs = useMemo(() => {
     const tw = asObj(seo?.twitter) || {};
@@ -168,12 +151,8 @@ const SparepartDetailPage: React.FC = () => {
       <Head>
         <title>{pageTitle}</title>
         {headSpecs.map((spec, idx) => {
-          if (spec.kind === "link") {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === "meta-name") {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
+          if (spec.kind === "link") return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+          if (spec.kind === "meta-name") return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
           return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
         })}
       </Head>

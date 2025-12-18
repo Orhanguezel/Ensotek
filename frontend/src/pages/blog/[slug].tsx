@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 
 import Banner from "@/components/layout/banner/Breadcrum";
 import BlogDetailsArea from "@/components/containers/blog/BlogDetailsArea";
+import Feedback from "@/components/containers/feedback/Feedback";
 
 // i18n
 import { useResolvedLocale } from "@/i18n/locale";
@@ -19,16 +20,10 @@ import { localizePath } from "@/i18n/url";
 
 // SEO
 import { buildMeta } from "@/seo/meta";
-import {
-  asObj,
-  absUrl,
-  pickFirstImageFromSeo,
-  buildCanonical,
-} from "@/seo/pageSeo";
+import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
 
 // data
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import { useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/hooks";
+import { useGetSiteSettingByKeyQuery, useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/hooks";
 
 // helpers
 import { toCdnSrc } from "@/shared/media";
@@ -38,8 +33,10 @@ const BLOG_PATH = "/blog";
 
 const BlogDetailPage: React.FC = () => {
   const router = useRouter();
-  const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_blog", locale);
+
+  const resolved = useResolvedLocale();
+  const localeShort = (resolved || "tr").split("-")[0]; // ✅ kritik
+  const { ui } = useUiSection("ui_blog", localeShort);
 
   const slugParam = router.query.slug;
   const slug =
@@ -52,11 +49,11 @@ const BlogDetailPage: React.FC = () => {
   // Global SEO settings (seo -> site_seo fallback)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
     key: "seo",
-    locale,
+    locale: localeShort,
   });
   const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
     key: "site_seo",
-    locale,
+    locale: localeShort,
   });
 
   const seo = useMemo(() => {
@@ -64,33 +61,25 @@ const BlogDetailPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  // Blog item data
+  // Blog item by slug
   const { data: page } = useGetCustomPageBySlugPublicQuery(
-    { slug, locale },
+    { slug, locale: localeShort }, // ✅ kritik
     { skip: !slug },
   );
 
-  // Banner title
-  const listTitleFallback = ui(
-    "ui_blog_page_title",
-    locale === "tr" ? "Blog" : "Blog",
-  );
-
+  const listTitleFallback = ui("ui_blog_page_title", "Blog");
   const detailTitleFallback = ui(
     "ui_blog_detail_page_title",
-    locale === "tr" ? "Blog Detayı" : "Blog Detail",
+    localeShort === "tr" ? "Blog Detayı" : "Blog Detail",
   );
 
   const bannerTitle =
     (page?.title || "").trim() || detailTitleFallback || listTitleFallback;
 
-  // --- SEO fields ---
-  const titleFallback = bannerTitle || "Blog";
-
   const pageTitleRaw =
     (page?.meta_title ?? "").trim() ||
     (page?.title ?? "").trim() ||
-    String(titleFallback).trim();
+    String(bannerTitle || "Blog").trim();
 
   const pageDescRaw =
     (page?.meta_description ?? "").trim() ||
@@ -103,15 +92,14 @@ const BlogDetailPage: React.FC = () => {
     const fallbackPathname = slug ? `${BLOG_PATH}/${slug}` : BLOG_PATH;
     return buildCanonical({
       asPath: router.asPath,
-      locale,
+      locale: localeShort, // ✅
       fallbackPathname,
       localizePath,
     });
-  }, [router.asPath, locale, slug]);
+  }, [router.asPath, localeShort, slug]);
 
   const seoSiteName = String(seo?.site_name ?? "").trim() || "Ensotek";
-  const titleTemplate =
-    String(seo?.title_template ?? "").trim() || "%s | Ensotek";
+  const titleTemplate = String(seo?.title_template ?? "").trim() || "%s | Ensotek";
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes("%s")
@@ -122,9 +110,7 @@ const BlogDetailPage: React.FC = () => {
 
   const ogImage = useMemo(() => {
     const pageImgRaw = (page?.featured_image ?? "").trim();
-    const pageImg = pageImgRaw
-      ? (toCdnSrc(pageImgRaw, 1200, 630, "fill") || pageImgRaw)
-      : "";
+    const pageImg = pageImgRaw ? (toCdnSrc(pageImgRaw, 1200, 630, "fill") || pageImgRaw) : "";
 
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : "";
@@ -145,11 +131,9 @@ const BlogDetailPage: React.FC = () => {
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
-
       twitterCard: String(tw.card ?? "").trim() || "summary_large_image",
       twitterSite: typeof tw.site === "string" ? tw.site.trim() : undefined,
-      twitterCreator:
-        typeof tw.creator === "string" ? tw.creator.trim() : undefined,
+      twitterCreator: typeof tw.creator === "string" ? tw.creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, canonical, ogImage, seoSiteName]);
 
@@ -158,36 +142,15 @@ const BlogDetailPage: React.FC = () => {
       <Head>
         <title>{pageTitle}</title>
         {headSpecs.map((spec, idx) => {
-          if (spec.kind === "link") {
-            return (
-              <link
-                key={`l:${spec.rel}:${idx}`}
-                rel={spec.rel}
-                href={spec.href}
-              />
-            );
-          }
-          if (spec.kind === "meta-name") {
-            return (
-              <meta
-                key={`n:${spec.key}:${idx}`}
-                name={spec.key}
-                content={spec.value}
-              />
-            );
-          }
-          return (
-            <meta
-              key={`p:${spec.key}:${idx}`}
-              property={spec.key}
-              content={spec.value}
-            />
-          );
+          if (spec.kind === "link") return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+          if (spec.kind === "meta-name") return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
         })}
       </Head>
 
       <Banner title={bannerTitle} />
       <BlogDetailsArea />
+      <Feedback />
     </>
   );
 };

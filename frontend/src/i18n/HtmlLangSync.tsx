@@ -1,4 +1,6 @@
-// src/i18n/HtmlLangSync.tsx
+// =============================================================
+// FILE: src/i18n/HtmlLangSync.tsx
+// =============================================================
 "use client";
 import { useEffect } from "react";
 

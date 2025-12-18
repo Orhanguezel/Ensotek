@@ -60,10 +60,6 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
     "ui_products_read_more_aria",
     locale === "tr" ? "ürün detayını görüntüle" : "view product details",
   );
-  const priceLabel = ui(
-    "ui_products_price_label",
-    locale === "tr" ? "Başlangıç fiyatı" : "Starting from",
-  );
   const viewAllText = ui(
     "ui_products_view_all",
     locale === "tr" ? "Tüm Ürünler" : "All products",
@@ -175,16 +171,6 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
                       className="product__meta"
                       style={{ marginTop: 8, marginBottom: 10 }}
                     >
-                      <span className="product__price">
-                        {priceLabel}:{" "}
-                        <strong>
-                          {p.price.toLocaleString(locale, {
-                            minimumFractionDigits: 0,
-                            maximumFractionDigits: 2,
-                          })}{" "}
-                          €
-                        </strong>
-                      </span>
                     </div>
                     <Link
                       href={href}

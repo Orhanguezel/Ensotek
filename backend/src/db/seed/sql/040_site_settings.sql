@@ -1,5 +1,6 @@
 -- =============================================================
 -- 040_site_settings.sql  (çok dilli site ayarları - Ensotek)
+--  - Active locales + Default locale DB'den (site_settings)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -31,6 +32,17 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`) VALUES
 (UUID(), 'app_locales', 'tr', CAST(JSON_ARRAY('tr','en') AS CHAR), NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- =============================================================
+-- GENEL: Varsayılan dil (default_locale)
+-- - Gerçek default locale buradan okunacak (server/client)
+-- - (key, locale) unique olduğu için aynı değeri locale başına seedliyoruz.
+-- =============================================================
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`) VALUES
+(UUID(), 'default_locale', 'tr', 'tr', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -110,6 +122,9 @@ ON DUPLICATE KEY UPDATE
 -- SEED: EN (minimum)
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`) VALUES
+-- ✅ default_locale (deterministik seed)
+(UUID(), 'default_locale', 'en', 'tr', NOW(3), NOW(3)),
+
 (UUID(), 'catalog_pdf_url', 'en', 'https://example.com/path/to/ensotek_catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_pdf_filename', 'en', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'contact_info', 'en', CAST(JSON_OBJECT(
@@ -155,6 +170,9 @@ ON DUPLICATE KEY UPDATE
 -- OPSİYONEL: DE (örnek)
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`) VALUES
+-- ✅ default_locale (deterministik seed)
+(UUID(), 'default_locale', 'de', 'tr', NOW(3), NOW(3)),
+
 (UUID(), 'contact_info', 'de', CAST(JSON_OBJECT(
   'companyName','Ensotek Energiesysteme',
   'phones',JSON_ARRAY('+49 152 000 0000'),
@@ -171,16 +189,16 @@ ON DUPLICATE KEY UPDATE
 -- TEKNİK: Storage (TR)
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`) VALUES
-(UUID(), 'storage_driver',           'tr', 'cloudinary', NOW(3), NOW(3)),
-(UUID(), 'storage_local_root',       'tr', '',          NOW(3), NOW(3)),
-(UUID(), 'storage_local_base_url',   'tr', '/uploads',  NOW(3), NOW(3)),
-(UUID(), 'cloudinary_cloud_name',    'tr', '',          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_key',       'tr', '',          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_secret',    'tr', '',          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_folder',        'tr', 'uploads',   NOW(3), NOW(3)),
-(UUID(), 'cloudinary_unsigned_preset','tr','',         NOW(3), NOW(3)),
-(UUID(), 'storage_cdn_public_base',  'tr', '',          NOW(3), NOW(3)),
-(UUID(), 'storage_public_api_base',  'tr', '',          NOW(3), NOW(3))
+(UUID(), 'storage_driver',            'tr', 'cloudinary', NOW(3), NOW(3)),
+(UUID(), 'storage_local_root',        'tr', '',          NOW(3), NOW(3)),
+(UUID(), 'storage_local_base_url',    'tr', '/uploads',  NOW(3), NOW(3)),
+(UUID(), 'cloudinary_cloud_name',     'tr', '',          NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_key',        'tr', '',          NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_secret',     'tr', '',          NOW(3), NOW(3)),
+(UUID(), 'cloudinary_folder',         'tr', 'uploads',   NOW(3), NOW(3)),
+(UUID(), 'cloudinary_unsigned_preset','tr', '',          NOW(3), NOW(3)),
+(UUID(), 'storage_cdn_public_base',   'tr', '',          NOW(3), NOW(3)),
+(UUID(), 'storage_public_api_base',   'tr', '',          NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -189,13 +207,13 @@ ON DUPLICATE KEY UPDATE
 -- TEKNİK: SMTP (TR)
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`) VALUES
-(UUID(), 'smtp_host',       'tr', '',      NOW(3), NOW(3)),
-(UUID(), 'smtp_port',       'tr', '465',   NOW(3), NOW(3)),
-(UUID(), 'smtp_username',   'tr', '',      NOW(3), NOW(3)),
-(UUID(), 'smtp_password',   'tr', '',      NOW(3), NOW(3)),
-(UUID(), 'smtp_from_email', 'tr', '',      NOW(3), NOW(3)),
-(UUID(), 'smtp_from_name',  'tr', 'Ensotek', NOW(3), NOW(3)),
-(UUID(), 'smtp_ssl',        'tr', 'true',  NOW(3), NOW(3))
+(UUID(), 'smtp_host',        'tr', '',        NOW(3), NOW(3)),
+(UUID(), 'smtp_port',        'tr', '465',     NOW(3), NOW(3)),
+(UUID(), 'smtp_username',    'tr', '',        NOW(3), NOW(3)),
+(UUID(), 'smtp_password',    'tr', '',        NOW(3), NOW(3)),
+(UUID(), 'smtp_from_email',  'tr', '',        NOW(3), NOW(3)),
+(UUID(), 'smtp_from_name',   'tr', 'Ensotek', NOW(3), NOW(3)),
+(UUID(), 'smtp_ssl',         'tr', 'true',    NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);

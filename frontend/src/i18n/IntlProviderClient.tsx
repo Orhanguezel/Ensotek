@@ -1,4 +1,6 @@
-// src/i18n/IntlProviderClient.tsx
+// =============================================================
+// FILE: src/i18n/IntlProviderClient.tsx
+// =============================================================
 "use client";
 
 import * as React from "react";
@@ -12,8 +14,7 @@ type Props = {
 /**
  * Not:
  * Bu projede şu anda next-intl kullanılmıyor.
- * Bu wrapper sadece children'ı dönen basit bir provider.
- * İlerde farklı bir i18n kütüphanesi entegre etmek istersen burayı doldurabiliriz.
+ * Wrapper sadece children'ı döndürür.
  */
 export default function IntlProviderClient({ children }: Props) {
   return <>{children}</>;
