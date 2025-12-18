@@ -1,14 +1,20 @@
-// src/seo/alternates.ts
+// =============================================================
+// FILE: src/seo/alternates.ts
+// =============================================================
 import "server-only";
 
-import { fetchActiveLocales, DEFAULT_LOCALE } from "@/i18n/server";
+import { fetchActiveLocales, getDefaultLocale } from "@/i18n/server";
 
-const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");
+const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
+  /\/+$/,
+  "",
+);
+
 const DEFAULT_LOCALE_PREFIXLESS = true;
 
-function normLocale(l: any): string {
+function normLocale(l: any, defaultLocale: string): string {
   const v = String(l || "").trim().toLowerCase().replace("_", "-");
-  return v.split("-")[0] || DEFAULT_LOCALE;
+  return (v.split("-")[0] || "").trim() || defaultLocale;
 }
 
 function normPath(pathname?: string): string {
@@ -18,10 +24,13 @@ function normPath(pathname?: string): string {
   return p;
 }
 
-function localizedPath(locale: string, pathname: string): string {
-  const loc = normLocale(locale);
+function localizedPath(locale: string, pathname: string, defaultLocale: string): string {
+  const loc = normLocale(locale, defaultLocale);
   const p = normPath(pathname);
-  if (DEFAULT_LOCALE_PREFIXLESS && loc === normLocale(DEFAULT_LOCALE)) return p;
+
+  // ✅ default locale prefixsiz
+  if (DEFAULT_LOCALE_PREFIXLESS && loc === normLocale(defaultLocale, defaultLocale)) return p;
+
   if (p === "/") return `/${loc}`;
   return `/${loc}${p}`;
 }
@@ -36,19 +45,24 @@ function absUrl(pathOrUrl: string): string {
 
 /** hreflang için mutlak URL haritası üretir (DB app_locales) */
 export async function languagesMap(pathname?: string) {
-  const active = (await fetchActiveLocales()).map(normLocale);
+  const defaultLocale = await getDefaultLocale();
+  const active = (await fetchActiveLocales()).map((l) => normLocale(l, defaultLocale));
   const p = normPath(pathname);
 
   const map: Record<string, string> = {};
   for (const l of active) {
-    map[l] = absUrl(localizedPath(l, p));
+    map[l] = absUrl(localizedPath(l, p, defaultLocale));
   }
-  map["x-default"] = absUrl(localizedPath(normLocale(DEFAULT_LOCALE), p));
+
+  // ✅ x-default: default locale canonical
+  map["x-default"] = absUrl(localizedPath(defaultLocale, p, defaultLocale));
+
   return map as Readonly<Record<string, string>>;
 }
 
 /** Canonical URL (mutlak) – seçilen dil için */
-export function canonicalFor(locale: string, pathname?: string) {
+export async function canonicalFor(locale: string, pathname?: string) {
+  const defaultLocale = await getDefaultLocale();
   const p = normPath(pathname);
-  return absUrl(localizedPath(locale, p));
+  return absUrl(localizedPath(locale, p, defaultLocale));
 }

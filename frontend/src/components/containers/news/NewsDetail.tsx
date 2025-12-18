@@ -219,11 +219,13 @@ const NewsDetail: React.FC = () => {
               {/* Yorum formu */}
               <div className="col-lg-5 col-md-12 mb-30">
                 <ReviewForm
-                  targetType="news"
-                  targetId={news.id}
-                  locale={localeShort}
-                  className="news__detail-review-form"
-                />
+  targetType="news"
+  targetId={news.id}
+  locale={localeShort}
+  className="news__detail-review-form"
+  toggleLabel={ui("ui_news_write_comment", localeShort === "tr" ? "Yorum Gönder" : "Write a review")}
+/>
+
               </div>
             </div>
           </>

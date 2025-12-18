@@ -140,11 +140,6 @@ const ProductMore: React.FC = () => {
                       className="product__meta"
                       style={{ marginTop: 6 }}
                     >
-                      {p.price.toLocaleString(locale, {
-                        minimumFractionDigits: 0,
-                        maximumFractionDigits: 2,
-                      })}{" "}
-                      €
                     </p>
                     <Link href={href} className="link-more">
                       {locale === "tr" ? "Ürüne git" : "View product"} →

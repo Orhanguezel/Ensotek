@@ -1,9 +1,5 @@
 // =============================================================
 // FILE: src/pages/product/[slug].tsx
-// Ensotek – Product Detail Page (by slug) + SEO (HOOK-SAFE)
-//   - Route: /product/[slug] (locale segmenti sende /tr/... olabilir)
-//   - Data: products/by-slug
-//   - SEO: site_settings seo|site_seo fallback + product.meta_* override
 // =============================================================
 
 "use client";
@@ -43,13 +39,11 @@ const toLocaleShort = (l: any) =>
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();
 
-  // API/DB için kısa locale
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
   const { ui } = useUiSection("ui_products", locale);
 
-  // slug normalize
   const slugParam = router.query.slug;
   const slug =
     typeof slugParam === "string"
@@ -60,11 +54,15 @@ const ProductDetailPage: React.FC = () => {
 
   const isSlugReady = Boolean(slug);
 
-  // UI fallbacks
-  const listTitleFallback = ui("ui_products_page_title", locale === "tr" ? "Ürünler" : "Products");
-  const detailTitleFallback = ui("ui_products_detail_page_title", locale === "tr" ? "Ürün Detayı" : "Product");
+  const listTitleFallback = ui(
+    "ui_products_page_title",
+    locale === "tr" ? "Ürünler" : "Products",
+  );
+  const detailTitleFallback = ui(
+    "ui_products_detail_page_title",
+    locale === "tr" ? "Ürün Detayı" : "Product",
+  );
 
-  // Global SEO settings (seo -> site_seo fallback)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: "seo", locale });
   const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: "site_seo", locale });
 
@@ -73,19 +71,14 @@ const ProductDetailPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  // Product data (meta override)
-  const { data: product } = useGetProductBySlugQuery(
-    { slug, locale },
-    { skip: !isSlugReady },
-  );
+  const { data: product } = useGetProductBySlugQuery({ slug, locale }, { skip: !isSlugReady });
 
-  // Banner title (ürün geldiyse ürün title, değilse fallback)
+  // ✅ ESLint: dependency olarak product kullan
   const bannerTitle = useMemo(() => {
-    const t = (product?.title ?? "").trim();
+    const t = String(product?.title ?? "").trim();
     return t || detailTitleFallback || listTitleFallback;
-  }, [product?.title, detailTitleFallback, listTitleFallback]);
+  }, [product, detailTitleFallback, listTitleFallback]);
 
-  // Canonical: slug yoksa /product; varsa /product/[slug]
   const canonical = useMemo(() => {
     const fallbackPathname = isSlugReady ? `${PRODUCT_PATH}/${slug}` : PRODUCT_PATH;
 
@@ -97,44 +90,32 @@ const ProductDetailPage: React.FC = () => {
     });
   }, [router.asPath, locale, isSlugReady, slug]);
 
-  const seoSiteName = useMemo(
-    () => String(seo?.site_name ?? "").trim() || "Ensotek",
-    [seo],
-  );
-
+  const seoSiteName = useMemo(() => String(seo?.site_name ?? "").trim() || "Ensotek", [seo]);
   const titleTemplate = useMemo(
     () => String(seo?.title_template ?? "").trim() || "%s | Ensotek",
     [seo],
   );
 
-  // --- SEO fields (ProductDto ile uyumlu) ---
   const pageTitleRaw = useMemo(() => {
     if (!isSlugReady) return String(listTitleFallback).trim();
 
-    const metaTitle = (product?.meta_title ?? "").trim();
-    const title = (product?.title ?? "").trim();
+    const metaTitle = String(product?.meta_title ?? "").trim();
+    const title = String(product?.title ?? "").trim();
 
     return metaTitle || title || String(bannerTitle).trim();
-  }, [isSlugReady, listTitleFallback, product?.meta_title, product?.title, bannerTitle]);
+  }, [isSlugReady, listTitleFallback, product, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
     if (!isSlugReady) return String(seo?.description ?? "").trim() || "";
 
-    const metaDesc = (product?.meta_description ?? "").trim();
-    const desc = (product?.description ?? "").trim();
+    const metaDesc = String(product?.meta_description ?? "").trim();
+    const desc = String(product?.description ?? "").trim();
 
-    return (
-      metaDesc ||
-      excerpt(desc, 160).trim() ||
-      String(seo?.description ?? "").trim() ||
-      ""
-    );
-  }, [isSlugReady, product?.meta_description, product?.description, seo]);
+    return metaDesc || excerpt(desc, 160).trim() || String(seo?.description ?? "").trim() || "";
+  }, [isSlugReady, product, seo]);
 
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes("%s")
-      ? titleTemplate.replace("%s", pageTitleRaw)
-      : pageTitleRaw;
+    const t = titleTemplate.includes("%s") ? titleTemplate.replace("%s", pageTitleRaw) : pageTitleRaw;
     return String(t).trim();
   }, [titleTemplate, pageTitleRaw]);
 
@@ -144,16 +125,15 @@ const ProductDetailPage: React.FC = () => {
 
     if (!isSlugReady) return fallback || absUrl("/favicon.ico");
 
-    // ProductDto: image_url ve images
-    const rawImg =
-      (product?.image_url ?? "") ||
-      (Array.isArray(product?.images) && product.images.length ? product.images[0] : "");
+    // ✅ images kesin array; product undefined ise [] olur
+    const images: unknown[] = Array.isArray(product?.images) ? (product?.images as unknown[]) : [];
+    const firstImage = String(images[0] ?? "").trim();
 
-    const imgRaw = String(rawImg || "").trim();
-    const img = imgRaw ? (toCdnSrc(imgRaw, 1200, 630, "fill") || imgRaw) : "";
+    const rawImg = String(product?.image_url ?? "").trim() || firstImage;
+    const img = rawImg ? (toCdnSrc(rawImg, 1200, 630, "fill") || rawImg) : "";
 
     return (img && absUrl(img)) || fallback || absUrl("/favicon.ico");
-  }, [isSlugReady, product?.image_url, product?.images, seo]);
+  }, [isSlugReady, product, seo]);
 
   const headSpecs = useMemo(() => {
     const tw = asObj(seo?.twitter) || {};
@@ -179,12 +159,8 @@ const ProductDetailPage: React.FC = () => {
       <Head>
         <title>{pageTitle}</title>
         {headSpecs.map((spec, idx) => {
-          if (spec.kind === "link") {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === "meta-name") {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
+          if (spec.kind === "link") return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+          if (spec.kind === "meta-name") return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
           return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
         })}
       </Head>

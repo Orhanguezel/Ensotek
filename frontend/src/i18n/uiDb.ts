@@ -1,12 +1,20 @@
-// src/lib/i18n/uiDb.ts
+// =============================================================
+// FILE: src/lib/i18n/uiDb.ts
+// Ensotek – UI strings resolver (DB override + i18n fallback)
+//  - UI_KEYS bağımlılığını kaldırdık (TS {} hatası biter)
+//  - useUIStrings çağrısını string[] ile yaptık (never hatası biter)
+// =============================================================
 "use client";
 
+import { useMemo } from "react";
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 import type { SupportedLocale } from "@/types/common";
 import { useResolvedLocale } from "@/i18n/locale";
-import { useUIStrings, UI_KEYS, type UIKey } from "./ui";
+import { useUIStrings } from "./ui";
 
-// DB tarafında kullanacağın section key'leri (site_settings.key)
+/**
+ * DB tarafında kullanacağın section key'leri (site_settings.key)
+ */
 export type UiSectionKey =
   | "ui_header"
   | "ui_home"
@@ -35,107 +43,300 @@ export type UiSectionKey =
   | "ui_faqs"
   | "ui_team"
   | "ui_offer"
-  | "ui_catalog"
-  ;
+  | "ui_catalog";
 
-// Hangi section hangi UI_KEYS grubunu kullanacak?
-const SECTION_UI_KEYS_MAP: Record<UiSectionKey, readonly UIKey[]> = {
-  ui_header: UI_KEYS.header,
-  ui_home: UI_KEYS.hero, // istersen hero+services+news vs ile genişletebilirsin
-  ui_footer: UI_KEYS.footer,
-  ui_services: UI_KEYS.services,
-  ui_banner: UI_KEYS.banner,
-  ui_hero: UI_KEYS.hero,
-  ui_contact: UI_KEYS.contact,
-  ui_about: UI_KEYS.about,
-  ui_about_stats: UI_KEYS.about_stats,
-  ui_team: UI_KEYS.team,
-  ui_faqs: UI_KEYS.faqs,
-  ui_pricing: [], // şimdilik boş, ileride eklenebilir
-  ui_testimonials: UI_KEYS.feedback,
-  ui_faq: [], // ileride FAQ key'leri tanımlarsan buraya
-  ui_features: [], // ileride feature key'leri tanımlarsan buraya
-  ui_cta: [], // şimdilik boş
-  ui_blog: UI_KEYS.news,
+/**
+ * UI key listeleri:
+ * - Burayı "UI_FALLBACK_EN" içindeki key isimleriyle aynı tut.
+ * - UI_KEYS import etmeden burada string[] olarak tanımlarız (TS stabil).
+ */
+const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
+  ui_header: [
+    "ui_header_nav_home",
+    "ui_header_nav_about",
+    "ui_header_nav_services",
+    "ui_header_nav_product",
+    "ui_header_nav_sparepart",
+    "ui_header_nav_references",
+    "ui_header_nav_library",
+    "ui_header_nav_news",
+    "ui_header_nav_contact",
+    "ui_header_cta",
+    "ui_header_open_menu",
+    "ui_header_open_sidebar",
+    "ui_header_close",
+    "ui_header_language",
+    "ui_header_auth",
+    "ui_header_register",
+    "ui_header_search_placeholder",
+    "ui_header_search",
+    "ui_header_contact_info",
+    "ui_header_call",
+    "ui_header_email",
+  ],
+
+  ui_home: [
+    // istersen hero + services + news gibi genişlet
+    "ui_hero_kicker_prefix",
+    "ui_hero_kicker_brand",
+    "ui_hero_title_fallback",
+    "ui_hero_desc_fallback",
+    "ui_hero_cta",
+    "ui_hero_prev",
+    "ui_hero_next",
+  ],
+
+  ui_footer: [
+    "ui_footer_company",
+    "ui_footer_about",
+    "ui_footer_blog",
+    "ui_footer_resources",
+    "ui_footer_free_tools",
+    "ui_footer_contact_us",
+    "ui_footer_services",
+    "ui_footer_service_seo",
+    "ui_footer_service_ppc",
+    "ui_footer_service_smm",
+    "ui_footer_service_link_building",
+    "ui_footer_service_cro",
+    "ui_footer_explore",
+    "ui_footer_account",
+    "ui_footer_privacy",
+    "ui_footer_affiliate",
+    "ui_footer_product_design",
+    "ui_footer_web_design",
+    "ui_footer_contact",
+    "ui_footer_phone_aria",
+    "ui_footer_email_aria",
+    "ui_footer_copyright_prefix",
+    "ui_footer_copyright_suffix",
+  ],
+
+  ui_services: [
+    "ui_services_subprefix",
+    "ui_services_sublabel",
+    "ui_services_title",
+    "ui_services_placeholder_title",
+    "ui_services_placeholder_summary",
+    "ui_services_details_aria",
+  ],
+
+  ui_banner: ["ui_breadcrumb_home"],
+
+  ui_hero: [
+    "ui_hero_kicker_prefix",
+    "ui_hero_kicker_brand",
+    "ui_hero_title_fallback",
+    "ui_hero_desc_fallback",
+    "ui_hero_cta",
+    "ui_hero_prev",
+    "ui_hero_next",
+  ],
+
+  ui_contact: [
+    "ui_contact_subprefix",
+    "ui_contact_sublabel",
+    "ui_contact_title_left",
+    "ui_contact_tagline",
+    "ui_contact_quick_email_placeholder",
+    "ui_contact_form_title",
+    "ui_contact_first_name",
+    "ui_contact_last_name",
+    "ui_contact_company",
+    "ui_contact_website",
+    "ui_contact_phone",
+    "ui_contact_email",
+    "ui_contact_select_label",
+    "ui_contact_service_cooling_towers",
+    "ui_contact_service_maintenance",
+    "ui_contact_service_modernization",
+    "ui_contact_service_other",
+    "ui_contact_terms_prefix",
+    "ui_contact_terms",
+    "ui_contact_conditions",
+    "ui_contact_submit",
+    "ui_contact_sending",
+    "ui_contact_success",
+    "ui_contact_error_generic",
+  ],
+
+  ui_about: [
+    "ui_about_subprefix",
+    "ui_about_sublabel",
+    "ui_about_view_all",
+    "ui_about_fallback_title",
+  ],
+
+  ui_about_stats: [
+    "ui_about_stats_refs_title",
+    "ui_about_stats_projects_title",
+    "ui_about_stats_years_title",
+  ],
+
+  ui_pricing: [],
+  ui_testimonials: [
+    "ui_feedback_subprefix",
+    "ui_feedback_sublabel",
+    "ui_feedback_title",
+    "ui_feedback_paragraph",
+    "ui_feedback_prev",
+    "ui_feedback_next",
+    "ui_feedback_role_customer",
+  ],
+
+  ui_faq: [],
+  ui_features: [],
+  ui_cta: [],
+
+  ui_blog: [
+    "ui_news_subprefix",
+    "ui_news_sublabel",
+    "ui_news_title_prefix",
+    "ui_news_title_mark",
+    "ui_news_read_more",
+    "ui_news_read_more_aria",
+    "ui_news_view_all",
+    "ui_news_untitled",
+    "ui_news_sample_one",
+    "ui_news_sample_two",
+  ],
+
   ui_dashboard: [],
-  ui_auth: UI_KEYS.auth,
-  ui_newsletter: UI_KEYS.newsletter,
-  ui_library: UI_KEYS.library,
-  ui_feedback: UI_KEYS.feedback,
-  ui_references: UI_KEYS.references,
-  ui_news: UI_KEYS.news,
-  ui_products: UI_KEYS.products,
-  ui_spareparts: UI_KEYS.spareparts,
-  ui_offer: UI_KEYS.offer,
-  ui_catalog: UI_KEYS.catalog,
+  ui_auth: [
+    "ui_auth_title",
+    "ui_auth_lead",
+    "ui_auth_register_link",
+    "ui_auth_email_label",
+    "ui_auth_email_placeholder",
+    "ui_auth_password_label",
+    "ui_auth_password_placeholder",
+    "ui_auth_remember_me",
+    "ui_auth_submit",
+    "ui_auth_loading",
+    "ui_auth_or",
+    "ui_auth_google_button",
+    "ui_auth_google_loading",
+    "ui_auth_error_required",
+    "ui_auth_error_google_generic",
+  ],
+
+  ui_newsletter: [
+    "ui_newsletter_title",
+    "ui_newsletter_desc",
+    "ui_newsletter_cta",
+    "ui_newsletter_ok",
+    "ui_newsletter_fail",
+    "ui_newsletter_placeholder",
+    "ui_newsletter_section_aria",
+    "ui_newsletter_email_aria",
+  ],
+
+  ui_library: [
+    "ui_library_subprefix",
+    "ui_library_sublabel",
+    "ui_library_title_prefix",
+    "ui_library_title_mark",
+    "ui_library_view_detail",
+    "ui_library_view_detail_aria",
+    "ui_library_view_all",
+    "ui_library_untitled",
+    "ui_library_sample_one",
+    "ui_library_sample_two",
+  ],
+
+  ui_feedback: [
+    "ui_feedback_subprefix",
+    "ui_feedback_sublabel",
+    "ui_feedback_title",
+    "ui_feedback_paragraph",
+    "ui_feedback_prev",
+    "ui_feedback_next",
+    "ui_feedback_role_customer",
+  ],
+
+  ui_references: [
+    "ui_references_subprefix",
+    "ui_references_sublabel",
+    "ui_references_title",
+    "ui_references_view_all",
+  ],
+
+  ui_news: [
+    "ui_news_subprefix",
+    "ui_news_sublabel",
+    "ui_news_title_prefix",
+    "ui_news_title_mark",
+    "ui_news_read_more",
+    "ui_news_read_more_aria",
+    "ui_news_view_all",
+    "ui_news_untitled",
+    "ui_news_sample_one",
+    "ui_news_sample_two",
+  ],
+
+  ui_products: [
+    "ui_products_kicker_prefix",
+    "ui_products_kicker_label",
+    "ui_products_title_prefix",
+    "ui_products_title_mark",
+    "ui_products_read_more",
+    "ui_products_read_more_aria",
+    "ui_products_price_label",
+    "ui_products_view_all",
+    "ui_products_empty",
+    "ui_products_page_title",
+    "ui_products_detail_page_title",
+  ],
+
+  ui_spareparts: [
+    "ui_spareparts_kicker_prefix",
+    "ui_spareparts_kicker_label",
+    "ui_spareparts_title_prefix",
+    "ui_spareparts_title_mark",
+    "ui_spareparts_read_more",
+    "ui_spareparts_read_more_aria",
+    "ui_spareparts_price_label",
+    "ui_spareparts_view_all",
+    "ui_spareparts_empty",
+    "ui_spareparts_page_title",
+    "ui_spareparts_detail_page_title",
+  ],
+
+  ui_faqs: ["ui_faqs_page_title"],
+  ui_team: ["ui_team_page_title"],
+  ui_offer: ["ui_offer_page_title"],
+  ui_catalog: ["ui_catalog_page_title"],
 };
 
 type UiSectionResult = {
   ui: (key: string, hardFallback?: string) => string;
   raw: Record<string, unknown>;
   locale: SupportedLocale;
-};
 
-/**
- * useUiSection:
- *   - section: site_settings.key (ör: "ui_header")
- *   - localeOverride: zorunlu değil, verilmezse useResolvedLocale() kullanılır
- *
- * Önce section JSON'unu (ui_header gibi) okur -> (DB override)
- * Sonra useUIStrings ile i18n + UI_FALLBACK_EN zincirini uygular
- * En sonda hardFallback string'ini kullanır.
- */
-export function useUiSection(
-  section: UiSectionKey,
-  localeOverride?: SupportedLocale
-): UiSectionResult {
+  
+};
+export function useUiSection(section: UiSectionKey, localeOverride?: SupportedLocale): UiSectionResult {
   const locale = useResolvedLocale(localeOverride);
 
-  // 1) DB'den section JSON'unu çek
-  const { data: uiSetting } = useGetSiteSettingByKeyQuery({
-    key: section,
-    locale,
-  });
+  const { data: uiSetting } = useGetSiteSettingByKeyQuery({ key: section, locale });
 
-  // 2) Bu section için kullanılacak UI key listesi
-  const keys = SECTION_UI_KEYS_MAP[section] ?? [];
+  const json = useMemo<Record<string, unknown>>(() => {
+    const v = uiSetting?.value;
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+  }, [uiSetting?.value]);
 
-  // 3) i18n zinciri (settings.label → en → tr → UI_FALLBACK_EN)
-  const { t: tInner } = useUIStrings(keys as readonly UIKey[], locale);
-  const t = (key: string): string => tInner(key as any);
+  const keys = SECTION_KEYS[section] ?? [];
+  const { t: tInner } = useUIStrings(keys, locale);
 
-  // 4) DB JSON normalize et (sadece düz object bekliyoruz)
-  const json: Record<string, unknown> =
-    uiSetting?.value &&
-      typeof uiSetting.value === "object" &&
-      !Array.isArray(uiSetting.value)
-      ? (uiSetting.value as Record<string, unknown>)
-      : {};
-
-  /**
-   * Öncelik sırası:
-   *   1. DB JSON (uiSetting.value[key] string ise)
-   *   2. i18n (t(key)) → ama sadece key string'inin aynısı değilse
-   *   3. hardFallback parametresi
-   */
   const ui = (key: string, hardFallback = ""): string => {
     const raw = json[key];
 
-    // 1) DB JSON override
-    if (typeof raw === "string" && raw.trim()) {
-      return raw;
-    }
+    if (typeof raw === "string" && raw.trim()) return raw.trim();
 
-    // 2) i18n fallback
-    const fromI18n = t(key).trim();
-    // eğer i18n gerçekten bir çeviri döndürüyorsa ve
-    // sadece "menu_empty" gibi key'in kendisi değilse kullan
-    if (fromI18n && fromI18n !== key) {
-      return fromI18n;
-    }
+    const fromI18n = String(tInner(key) || "").trim();
+    if (fromI18n && fromI18n !== key) return fromI18n;
 
-    // 3) En son hard-coded fallback
-    return hardFallback;
+    return String(hardFallback || "").trim();
   };
 
   return { ui, raw: json, locale };

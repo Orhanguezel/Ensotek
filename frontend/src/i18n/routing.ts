@@ -1,16 +1,21 @@
-// src/i18n/routing.ts
+// =============================================================
+// FILE: src/i18n/routing.ts
+// =============================================================
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { LOCALES, DEFAULT_LOCALE } from "./config";
 import type { NextRouter } from "next/router";
 import type { SupportedLocale } from "@/types/common";
 
+import { LOCALES } from "./config";
+import { normLocaleTag } from "@/i18n/localeUtils";
+
 export const locales = LOCALES;
+
+// ✅ Client tarafında DB default locale okunamayacağı için fallback:
+export const defaultLocale = ("tr" as SupportedLocale);
 
 const isLocale = (x?: string): x is SupportedLocale =>
   !!x && (LOCALES as readonly string[]).includes(x);
-
-export const defaultLocale: SupportedLocale = DEFAULT_LOCALE;
 
 /** SEO-dostu path sabitleri */
 export const pathnames = {
@@ -30,20 +35,41 @@ export const pathnames = {
   "/spare-parts": "/spare-parts",
   "/spare-parts/[slug]": "/spare-parts/[slug]",
 
+  // ✅ BLOG
+  "/blog": "/blog",
+  "/blog/[slug]": "/blog/[slug]",
+
+
   "/news": "/news",
   "/news/[slug]": "/news/[slug]",
 
   "/search": "/search",
 } as const;
 
-/** /{locale}/... kalıbı üretir; slug varsa doldurur */
+/**
+ * ✅ /{locale}/... kalıbı üretir; slug varsa doldurur
+ *
+ * - locale verilmezse:
+ *    1) activeLocales[0] (varsa)
+ *    2) defaultLocale fallback
+ *
+ * - locale verilirse:
+ *    - SupportedLocale değilse ignore edilir ve fallback’e düşer
+ */
 export function localePath(
   pathname: keyof typeof pathnames | string,
   locale?: SupportedLocale,
-  params?: Record<string, string | number>
+  params?: Record<string, string | number>,
+  activeLocales?: string[],
 ) {
   const p = typeof pathname === "string" ? pathname : pathnames[pathname];
-  const l = isLocale(locale) ? locale : defaultLocale;
+
+  const activeDefault =
+    Array.isArray(activeLocales) && activeLocales.length
+      ? (normLocaleTag(activeLocales[0]) as SupportedLocale)
+      : undefined;
+
+  const l = isLocale(locale) ? locale : (activeDefault || defaultLocale);
 
   let filled = p;
   if (params) {
@@ -51,6 +77,7 @@ export function localePath(
       filled = filled.replace(`[${k}]`, String(v));
     }
   }
+
   return filled === "/" ? `/${l}` : `/${l}${filled}`;
 }
 
@@ -65,7 +92,6 @@ export function usePathname() {
 
 /**
  * Hook OLMAYAN, SSR-safe yardımcı: hook çağırmaz.
- * (İstersen tamamen kaldırabilirsin; lint kuralını ihlal ETMİYOR.)
  */
 export function getPathnameFrom(router?: Pick<NextRouter, "asPath">) {
   if (router?.asPath) return router.asPath;
