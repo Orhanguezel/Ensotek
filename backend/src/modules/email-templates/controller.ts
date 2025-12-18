@@ -3,13 +3,10 @@
 // (public endpoints)
 // =============================================================
 import type { FastifyReply, FastifyRequest } from "fastify";
-import { and, desc, eq, like, or, sql } from "drizzle-orm";
+import { and, desc, eq, like, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
 import { db } from "@/db/client";
-import {
-  emailTemplates,
-  emailTemplatesI18n,
-} from "./schema";
+import { emailTemplates, emailTemplatesI18n } from "./schema";
 import {
   extractVariablesFromText,
   parseVariablesColumn,
@@ -18,8 +15,6 @@ import {
 } from "./utils";
 import { renderByKeySchema } from "./validation";
 import { DEFAULT_LOCALE } from "@/core/i18n";
-
-// ✅ site_settings tablosu için import (schema sende farklıysa path’i uyarlarsın)
 import { siteSettings } from "@/modules/siteSettings/schema";
 
 type ListQuery = {
@@ -27,6 +22,9 @@ type ListQuery = {
   is_active?: string | number | boolean;
   q?: string;
 };
+
+/** like() için NULL/undefined riskini sıfırlar (SQL'e çevirir) */
+const safeText = (col: unknown) => sql<string>`COALESCE(${col as any}, '')`;
 
 /* ------------------------------------------------------------------
    SITE NAME HELPER (site_settings → site_name)
@@ -37,7 +35,7 @@ let cachedSiteNameLoadedAt: number | null = null;
 
 async function getSiteNameFromSettings(): Promise<string> {
   const now = Date.now();
-  // 5 dakikalık basit cache
+
   if (
     cachedSiteName &&
     cachedSiteNameLoadedAt &&
@@ -46,7 +44,6 @@ async function getSiteNameFromSettings(): Promise<string> {
     return cachedSiteName;
   }
 
-  // 1) site_title
   const [titleRow] = await db
     .select({ value: siteSettings.value })
     .from(siteSettings)
@@ -59,7 +56,6 @@ async function getSiteNameFromSettings(): Promise<string> {
     return cachedSiteName;
   }
 
-  // 2) footer_company_name
   const [companyRow] = await db
     .select({ value: siteSettings.value })
     .from(siteSettings)
@@ -72,26 +68,18 @@ async function getSiteNameFromSettings(): Promise<string> {
     return cachedSiteName;
   }
 
-  // 3) Fallback
   cachedSiteName = "Site";
   cachedSiteNameLoadedAt = now;
   return cachedSiteName;
 }
 
-/** vars içine site_name yoksa settings’ten inject eder */
 async function enrichParamsWithSiteName(
   params: Record<string, unknown>,
 ): Promise<Record<string, unknown>> {
-  // Kullanıcı zaten site_name gönderdiyse override ETME
-  if (Object.prototype.hasOwnProperty.call(params, "site_name")) {
-    return params;
-  }
+  if (Object.prototype.hasOwnProperty.call(params, "site_name")) return params;
 
   const siteName = await getSiteNameFromSettings();
-  return {
-    ...params,
-    site_name: siteName,
-  };
+  return { ...params, site_name: siteName };
 }
 
 /* ------------------------------------------------------------------
@@ -113,33 +101,32 @@ export async function listEmailTemplatesPublic(
     const iReq = alias(emailTemplatesI18n, "eti_req");
     const iDef = alias(emailTemplatesI18n, "eti_def");
 
-    const filters = [];
+    const filters: SQL[] = [];
 
+    // is_active filtresi
     if (typeof is_active !== "undefined") {
-      filters.push(
-        eq(emailTemplates.is_active, toBool(is_active) ? 1 : 0) as any,
-      );
+      filters.push(eq(emailTemplates.is_active, toBool(is_active) ? 1 : 0));
     } else {
-      // public default: sadece aktifleri ver
-      filters.push(eq(emailTemplates.is_active, 1) as any);
+      filters.push(eq(emailTemplates.is_active, 1));
     }
 
+    // q filtresi
     if (q && q.trim().length > 0) {
       const qq = `%${q.trim()}%`;
-      filters.push(
-        or(
-          like(emailTemplates.template_key, qq),
-          like(iReq.template_name, qq),
-          like(iDef.template_name, qq),
-          like(iReq.subject, qq),
-          like(iDef.subject, qq),
-        ) as any,
+
+      const search = or(
+        like(emailTemplates.template_key, qq),
+        like(safeText(iReq.template_name), qq),
+        like(safeText(iDef.template_name), qq),
+        like(safeText(iReq.subject), qq),
+        like(safeText(iDef.subject), qq),
       );
+
+      // ✅ or(...) -> SQL | undefined olabilir; sadece SQL ise ekle
+      if (search) filters.push(search);
     }
 
-    const where = filters.length ? (and(...filters) as any) : undefined;
-
-    const rows = await db
+    const baseQuery = db
       .select({
         id: emailTemplates.id,
         key: emailTemplates.template_key,
@@ -155,7 +142,7 @@ export async function listEmailTemplatesPublic(
           COALESCE(${iReq.content}, ${iDef.content})
         `.as("content"),
         locale_resolved: sql<string>`
-          CASE 
+          CASE
             WHEN ${iReq.id} IS NOT NULL THEN ${iReq.locale}
             ELSE ${iDef.locale}
           END
@@ -178,8 +165,11 @@ export async function listEmailTemplatesPublic(
           eq(iDef.locale, DEFAULT_LOCALE),
         ),
       )
-      .where(where as any)
       .orderBy(desc(emailTemplates.updated_at));
+
+    // ✅ and(...) da SQL | undefined olabilir; güvenli uygula
+    const where = filters.length ? and(...filters) : undefined;
+    const rows = await (where ? baseQuery.where(where) : baseQuery);
 
     const out = rows.map((r) => ({
       id: r.id,
@@ -223,6 +213,11 @@ export async function getEmailTemplateByKeyPublic(
     const iReq = alias(emailTemplatesI18n, "eti_req");
     const iDef = alias(emailTemplatesI18n, "eti_def");
 
+    const where = and(
+      eq(emailTemplates.template_key, key),
+      eq(emailTemplates.is_active, 1),
+    );
+
     const rows = await db
       .select({
         id: emailTemplates.id,
@@ -239,7 +234,7 @@ export async function getEmailTemplateByKeyPublic(
           COALESCE(${iReq.content}, ${iDef.content})
         `.as("content"),
         locale_resolved: sql<string>`
-          CASE 
+          CASE
             WHEN ${iReq.id} IS NOT NULL THEN ${iReq.locale}
             ELSE ${iDef.locale}
           END
@@ -250,24 +245,13 @@ export async function getEmailTemplateByKeyPublic(
       .from(emailTemplates)
       .leftJoin(
         iReq,
-        and(
-          eq(iReq.template_id, emailTemplates.id),
-          eq(iReq.locale, desiredLocale),
-        ),
+        and(eq(iReq.template_id, emailTemplates.id), eq(iReq.locale, desiredLocale)),
       )
       .leftJoin(
         iDef,
-        and(
-          eq(iDef.template_id, emailTemplates.id),
-          eq(iDef.locale, DEFAULT_LOCALE),
-        ),
+        and(eq(iDef.template_id, emailTemplates.id), eq(iDef.locale, DEFAULT_LOCALE)),
       )
-      .where(
-        and(
-          eq(emailTemplates.template_key, key),
-          eq(emailTemplates.is_active, 1),
-        ),
-      )
+      .where(where)
       .limit(1);
 
     if (!rows.length) {
@@ -315,8 +299,6 @@ export async function renderTemplateByKeyPublic(
     });
 
     const baseParams: Record<string, unknown> = parsed.params || {};
-
-    // ✅ site_settings → site_name inject
     const params = await enrichParamsWithSiteName(baseParams);
 
     const iReq = alias(emailTemplatesI18n, "eti_req");
@@ -326,6 +308,11 @@ export async function renderTemplateByKeyPublic(
       (parsed.locale as string | null | undefined) ||
       (req as any).locale ||
       DEFAULT_LOCALE;
+
+    const where = and(
+      eq(emailTemplates.template_key, parsed.key),
+      eq(emailTemplates.is_active, 1),
+    );
 
     const rows = await db
       .select({
@@ -343,7 +330,7 @@ export async function renderTemplateByKeyPublic(
           COALESCE(${iReq.content}, ${iDef.content})
         `.as("contentTpl"),
         locale_resolved: sql<string>`
-          CASE 
+          CASE
             WHEN ${iReq.id} IS NOT NULL THEN ${iReq.locale}
             ELSE ${iDef.locale}
           END
@@ -353,24 +340,13 @@ export async function renderTemplateByKeyPublic(
       .from(emailTemplates)
       .leftJoin(
         iReq,
-        and(
-          eq(iReq.template_id, emailTemplates.id),
-          eq(iReq.locale, desiredLocale),
-        ),
+        and(eq(iReq.template_id, emailTemplates.id), eq(iReq.locale, desiredLocale)),
       )
       .leftJoin(
         iDef,
-        and(
-          eq(iDef.template_id, emailTemplates.id),
-          eq(iDef.locale, DEFAULT_LOCALE),
-        ),
+        and(eq(iDef.template_id, emailTemplates.id), eq(iDef.locale, DEFAULT_LOCALE)),
       )
-      .where(
-        and(
-          eq(emailTemplates.template_key, parsed.key),
-          eq(emailTemplates.is_active, 1),
-        ),
-      )
+      .where(where)
       .limit(1);
 
     if (!rows.length) {

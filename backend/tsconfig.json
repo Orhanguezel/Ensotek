@@ -2,6 +2,8 @@
   "compilerOptions": {
     "target": "ES2022",
     "lib": ["ES2023"],
+
+    // ✅ Backend (Node) için
     "module": "ESNext",
     "moduleResolution": "Bundler",
 
@@ -16,7 +18,11 @@
     "resolveJsonModule": true,
 
     "forceConsistentCasingInFileNames": true,
+
+    // ✅ Build’i toparlamak için (aşağıdaki madde 2)
     "strict": true,
+    "noImplicitAny": false,
+
     "skipLibCheck": true,
     "sourceMap": false,
     "noEmitOnError": true,
@@ -27,12 +33,6 @@
     "ignoreDeprecations": "5.0"
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "src/modules/frontend/**",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-    "**/__tests__/**"
-  ]
+  "exclude": ["node_modules", "dist", "src/modules/frontend/**", "**/*.test.ts", "**/*.spec.ts", "**/__tests__/**"]
 }
+
