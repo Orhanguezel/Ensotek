@@ -19,7 +19,7 @@ module.exports = {
         // Sunucunda hangi path varsa onu koy:
         //   which chromium || which chromium-browser || which google-chrome
         // Yaygın default:
-        PUPPETEER_EXECUTABLE_PATH: "/usr/bin/chromium",
+        PUPPETEER_EXECUTABLE_PATH: "/snap/bin/chromium",
 
         // Puppeteer çoğu VPS'de sandbox yüzünden patlar; argümanları kodda veriyorsan gerek yok
         // Ama bazı projelerde env ile okunuyor:
