@@ -4,11 +4,11 @@
 
 import { db } from "@/db/client";
 import { siteSettings } from "./schema";
-import { inArray } from "drizzle-orm";
+import { and, eq, inArray } from "drizzle-orm";
 import { env } from "@/core/env";
 
 // ---------------------------------------------------------------------------
-// KEY LİSTELERİ
+// KEY LISTELERİ
 // ---------------------------------------------------------------------------
 
 const SMTP_KEYS = [
@@ -34,12 +34,11 @@ const STORAGE_KEYS = [
   "storage_public_api_base",
 ] as const;
 
-const GOOGLE_KEYS = [
-  "google_client_id",
-  "google_client_secret",
-] as const;
+const GOOGLE_KEYS = ["google_client_id", "google_client_secret"] as const;
 
 const APP_LOCALES_KEYS = ["app_locales"] as const;
+
+const DEFAULT_LOCALE_KEYS = ["default_locale"] as const;
 
 // ---------------------------------------------------------------------------
 // COMMON HELPERS
@@ -51,50 +50,146 @@ const toBool = (v: string | null | undefined): boolean => {
   return ["1", "true", "yes", "on"].includes(s);
 };
 
-/**
- * Boş stringleri ("" / "   ") null olarak ele al.
- */
+/** Boş stringleri null say. */
 const normalizeStr = (v: string | null | undefined): string | null => {
   if (v == null) return null;
   const trimmed = String(v).trim();
   return trimmed === "" ? null : trimmed;
 };
 
-/**
- * Ortak setting loader:
- *  - İstenen key listesi için site_settings tablosunu okur
- *  - JSON string ise primitive string/number'ı normalize eder
- *
- * NOT: Bir key için birden fazla locale satırı varsa
- *      bu fonksiyon "son gelen" ile overwrite eder.
- *      SMTP için bundan bağımsız özel logic kullanıyoruz.
- */
-async function loadSettingsMap(
-  keys: readonly string[],
-): Promise<Map<string, string>> {
-  const rows = await db
-    .select()
-    .from(siteSettings)
-    .where(inArray(siteSettings.key, keys));
+function uniq(arr: string[]) {
+  return Array.from(new Set(arr.filter(Boolean)));
+}
 
-  const map = new Map<string, string>();
-  for (const r of rows) {
-    let v = r.value as string;
-    try {
-      const parsed = JSON.parse(v);
-      if (typeof parsed === "string" || typeof parsed === "number") {
-        v = String(parsed);
-      }
-    } catch {
-      // value zaten plain string
+/**
+ * Locale fallback sırası:
+ *   exact (tr-TR) → prefix (tr) → en → tr
+ */
+export function buildLocaleCandidates(rawLocale?: string | null): string[] {
+  const lc = (rawLocale || "").trim();
+  const langPart = lc.includes("-") ? lc.split("-")[0] : lc;
+  return uniq([lc, langPart, "en", "tr"].map((x) => x?.trim()).filter(Boolean));
+}
+
+/**
+ * DB value alanı TEXT.
+ * - JSON primitive ("string"/number/bool) ise primitive string'e indir.
+ * - JSON array/object ise olduğu gibi JSON string kalır (parse eden fonksiyon ayrıca ele alır)
+ */
+function normalizeDbValueToString(raw: unknown): string {
+  const v = String(raw ?? "");
+  try {
+    const parsed = JSON.parse(v);
+    if (
+      typeof parsed === "string" ||
+      typeof parsed === "number" ||
+      typeof parsed === "boolean"
+    ) {
+      return String(parsed);
     }
-    map.set(r.key, v);
+  } catch {
+    // plain string
   }
-  return map;
+  return v;
 }
 
 // ---------------------------------------------------------------------------
-// SMTP SETTINGS  💡 SADECE site_settings TABLOSUNDAN OKUR
+// LOW-LEVEL READERS (locale-aware)
+// ---------------------------------------------------------------------------
+
+type SettingRow = {
+  key: string;
+  locale: string;
+  value: string;
+};
+
+/**
+ * Verilen key listesi için, verilen locale adaylarında kayıtları getirir.
+ * Eğer locale verilmezse: tüm locale’ler gelir (legacy kullanım).
+ */
+async function fetchSettingsRows(opts: {
+  keys: readonly string[];
+  locale?: string | null;
+}): Promise<SettingRow[]> {
+  const { keys, locale } = opts;
+  const candidates = locale ? buildLocaleCandidates(locale) : null;
+
+  const rows = await db
+    .select({
+      key: siteSettings.key,
+      locale: siteSettings.locale,
+      value: siteSettings.value,
+    })
+    .from(siteSettings)
+    .where(
+      candidates
+        ? and(inArray(siteSettings.key, keys), inArray(siteSettings.locale, candidates))
+        : inArray(siteSettings.key, keys),
+    );
+
+  return rows.map((r) => ({
+    key: r.key as string,
+    locale: r.locale as string,
+    value: normalizeDbValueToString(r.value as any),
+  }));
+}
+
+/**
+ * Locale-aware “effective map”:
+ * - Her key için candidates sırasına göre ilk bulunan satır seçilir.
+ * - Sonuç: key → string (bulunamazsa yok)
+ */
+async function loadSettingsMap(opts: {
+  keys: readonly string[];
+  locale?: string | null;
+}): Promise<Map<string, string>> {
+  const { keys, locale } = opts;
+  const candidates = buildLocaleCandidates(locale);
+
+  const rows = await fetchSettingsRows({ keys, locale });
+
+  const map = new Map<string, string>();
+
+  for (const key of keys) {
+    const sameKey = rows.filter((r) => r.key === key);
+
+    // candidate sırasına göre ilk match
+    for (const loc of candidates) {
+      const hit = sameKey.find((r) => r.locale === loc);
+      if (hit) {
+        map.set(key, hit.value);
+        break;
+      }
+    }
+
+    // hiç bulamazsa: map'e koyma
+  }
+
+  return map;
+}
+
+/**
+ * Locale-aware: bir key için “boş olmayan” değeri seç.
+ * - candidates sırasına göre gider, normalizeStr sonrası dolu olan ilk değeri döndürür.
+ * - yoksa null
+ */
+async function getFirstNonEmptySetting(opts: {
+  key: string;
+  locale?: string | null;
+}): Promise<string | null> {
+  const candidates = buildLocaleCandidates(opts.locale);
+  const rows = await fetchSettingsRows({ keys: [opts.key], locale: opts.locale });
+
+  for (const loc of candidates) {
+    const hit = rows.find((r) => r.locale === loc);
+    const norm = normalizeStr(hit?.value ?? null);
+    if (norm) return norm;
+  }
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// SMTP SETTINGS  💡 SADECE site_settings TABLOSUNDAN OKUR (ENV FALLBACK YOK)
 // ---------------------------------------------------------------------------
 
 export type SmtpSettings = {
@@ -108,86 +203,34 @@ export type SmtpSettings = {
 };
 
 /**
- * SMTP ayar okuyucu
+ * SMTP ayar okuyucu:
+ * - locale-aware, boş olmayan ilk değer (locale → prefix → en → tr)
+ * - ENV FALLBACK YOK
  *
- * Kaynak:
- *   - Sadece site_settings tablosundaki global key'ler
- *   - ENV FALLBACK YOK
- *
- * ÖZEL NOKTA:
- *   - Aynı key için birden fazla locale satırı olabilir (tr/en/de).
- *   - Burada "boş olmayan" değeri tercih ediyoruz.
- *   - Hiç dolu değer yoksa null.
- *
- * Beklenen key'ler:
- *   smtp_host        → host
- *   smtp_port        → port (string, number'a parse edilir)
- *   smtp_username    → username
- *   smtp_password    → password
- *   smtp_from_email  → fromEmail
- *   smtp_from_name   → fromName
- *   smtp_ssl         → secure (boolean string)
+ * locale paramı opsiyonel: vermezsen yine (en,tr) ile çalışır.
  */
-export async function getSmtpSettings(): Promise<SmtpSettings> {
-  const rows = await db
-    .select()
-    .from(siteSettings)
-    .where(inArray(siteSettings.key, SMTP_KEYS));
+export async function getSmtpSettings(locale?: string | null): Promise<SmtpSettings> {
+  const [host, portStr, username, password, fromEmail, fromName, sslStr] =
+    await Promise.all([
+      getFirstNonEmptySetting({ key: "smtp_host", locale }),
+      getFirstNonEmptySetting({ key: "smtp_port", locale }),
+      getFirstNonEmptySetting({ key: "smtp_username", locale }),
+      getFirstNonEmptySetting({ key: "smtp_password", locale }),
+      getFirstNonEmptySetting({ key: "smtp_from_email", locale }),
+      getFirstNonEmptySetting({ key: "smtp_from_name", locale }),
+      getFirstNonEmptySetting({ key: "smtp_ssl", locale }),
+    ]);
 
-  // key → "en iyi değer" map’i
-  const map = new Map<string, string | null>();
-
-  for (const r of rows) {
-    const key = r.key;
-    let v = r.value as string;
-
-    // JSON ise primitive string/number'a indir
-    try {
-      const parsed = JSON.parse(v);
-      if (typeof parsed === "string" || typeof parsed === "number") {
-        v = String(parsed);
-      }
-    } catch {
-      // plain string ise aynen bırak
-    }
-
-    const norm = normalizeStr(v);
-    const current = map.get(key);
-
-    // Eğer henüz bir değer yoksa → yaz
-    if (current === undefined) {
-      map.set(key, norm);
-      continue;
-    }
-
-    // Eğer mevcut değer boş/null ise ve yeni gelen doluysa → overwrite
-    if ((current == null || current === "") && norm != null) {
-      map.set(key, norm);
-      continue;
-    }
-
-    // Mevcut dolu, yeni de dolu → birini seçmek için ek bir kurala
-    // ihtiyacımız yok; ilk dolu değeri koruyabiliriz.
-    // (İstersek son dolu değeri de alabilirdik, fark etmez.)
-  }
-
-  const host = normalizeStr(map.get("smtp_host") ?? null);
-  const portStr = normalizeStr(map.get("smtp_port") ?? null);
   const port = portStr ? Number(portStr) : null;
-
-  const username = normalizeStr(map.get("smtp_username") ?? null);
-  const password = normalizeStr(map.get("smtp_password") ?? null);
-  const fromEmail = normalizeStr(map.get("smtp_from_email") ?? null);
-  const fromName = normalizeStr(map.get("smtp_from_name") ?? null);
-  const secure = toBool(normalizeStr(map.get("smtp_ssl") ?? null));
+  const secure = toBool(sslStr);
 
   return {
-    host,
-    port,
-    username,
-    password,
-    fromEmail,
-    fromName,
+    host: normalizeStr(host),
+    port: Number.isFinite(port as any) ? port : null,
+    username: normalizeStr(username),
+    password: normalizeStr(password),
+    fromEmail: normalizeStr(fromEmail),
+    fromName: normalizeStr(fromName),
     secure,
   };
 }
@@ -229,30 +272,11 @@ const toDriver = (raw: string | null | undefined): StorageDriver => {
   return "cloudinary";
 };
 
-export async function getStorageSettings(): Promise<StorageSettings> {
-  const rows = await db
-    .select()
-    .from(siteSettings)
-    .where(inArray(siteSettings.key, STORAGE_KEYS));
+export async function getStorageSettings(locale?: string | null): Promise<StorageSettings> {
+  const map = await loadSettingsMap({ keys: STORAGE_KEYS, locale });
 
-  const map = new Map<string, string>();
-  for (const r of rows) {
-    let v = r.value as string;
-    try {
-      const parsed = JSON.parse(v);
-      if (typeof parsed === "string" || typeof parsed === "number") {
-        v = String(parsed);
-      }
-    } catch {
-      // plain string ise aynen bırak
-    }
-    map.set(r.key, v);
-  }
-
-  // Driver: önce DB, sonra env, sonra default
   const driver = toDriver(map.get("storage_driver"));
 
-  // 👇 HER ALANDA önce site_settings, sonra env fallback
   const localRoot =
     normalizeStr(map.get("storage_local_root")) ??
     normalizeStr(env.LOCAL_STORAGE_ROOT) ??
@@ -319,7 +343,7 @@ export async function getStorageSettings(): Promise<StorageSettings> {
 }
 
 // ---------------------------------------------------------------------------
-// GOOGLE OAUTH SETTINGS
+// GOOGLE OAUTH SETTINGS - site_settings + ENV fallback (locale-aware)
 // ---------------------------------------------------------------------------
 
 export type GoogleSettings = {
@@ -327,13 +351,8 @@ export type GoogleSettings = {
   clientSecret: string | null;
 };
 
-/**
- * Google OAuth ayarları:
- *   1) Öncelik: site_settings tablosu (google_client_id / google_client_secret)
- *   2) Fallback: ENV (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET)
- */
-export async function getGoogleSettings(): Promise<GoogleSettings> {
-  const map = await loadSettingsMap(GOOGLE_KEYS);
+export async function getGoogleSettings(locale?: string | null): Promise<GoogleSettings> {
+  const map = await loadSettingsMap({ keys: GOOGLE_KEYS, locale });
 
   const clientId =
     normalizeStr(map.get("google_client_id")) ??
@@ -345,50 +364,60 @@ export async function getGoogleSettings(): Promise<GoogleSettings> {
     normalizeStr(env.GOOGLE_CLIENT_SECRET) ??
     null;
 
-  return {
-    clientId,
-    clientSecret,
-  };
+  return { clientId, clientSecret };
 }
 
 // ---------------------------------------------------------------------------
-// APP LOCALES – site_settings.app_locales
-// FE / BE ortak kullanabilecek
+// APP LOCALES – site_settings.app_locales (locale-aware)
 // ---------------------------------------------------------------------------
 
-export async function getAppLocales(): Promise<string[]> {
-  const map = await loadSettingsMap(APP_LOCALES_KEYS);
+export async function getAppLocales(locale?: string | null): Promise<string[]> {
+  const map = await loadSettingsMap({ keys: APP_LOCALES_KEYS, locale });
 
   const raw = map.get("app_locales");
-  if (!raw) {
-    // fallback: en azından tr + en
-    return ["tr", "en"];
-  }
+  if (!raw) return ["tr", "en"];
 
-  // JSON_ARRAY('tr','en') gibi bir değer bekliyoruz
+  // JSON array beklenir; değilse CSV kabul
   try {
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed)) {
-      const list = parsed
-        .map((v) => String(v).trim())
-        .filter(Boolean);
-
-      if (list.length) {
-        return list;
-      }
+      const list = parsed.map((v) => String(v).trim()).filter(Boolean);
+      return list.length ? list : ["tr", "en"];
     }
   } catch {
-    // value JSON değilse, virgülle ayrılmış string olabilir
-    const list = raw
-      .split(/[;,]+/)
-      .map((v) => v.trim())
-      .filter(Boolean);
-
-    if (list.length) {
-      return list;
-    }
+    // CSV
   }
 
-  // Her durumda son fallback
-  return ["tr", "en"];
+  const list = raw
+    .split(/[;,]+/)
+    .map((v) => v.trim())
+    .filter(Boolean);
+
+  return list.length ? list : ["tr", "en"];
+}
+
+// ---------------------------------------------------------------------------
+// DEFAULT LOCALE – site_settings.default_locale (locale-aware)
+//  - Seed'in mantığı: her locale için value="tr" yazıyorsun.
+//    Bu fonksiyon: mevcut locale için okur, yoksa en/tr fallback.
+// ---------------------------------------------------------------------------
+
+export async function getDefaultLocale(locale?: string | null): Promise<string> {
+  const map = await loadSettingsMap({ keys: DEFAULT_LOCALE_KEYS, locale });
+  const raw = normalizeStr(map.get("default_locale") ?? null);
+  return raw ?? "tr";
+}
+
+// ---------------------------------------------------------------------------
+// PUBLIC BASE URL – mail linkleri, absolute URL üretimi için (locale-aware)
+// ---------------------------------------------------------------------------
+
+export async function getPublicBaseUrl(locale?: string | null): Promise<string | null> {
+  // DB: public_base_url
+  const v = await getFirstNonEmptySetting({ key: "public_base_url", locale });
+  if (v) return v.replace(/\/+$/, "");
+
+  // opsiyonel env fallback (istersen kapatabilirsin)
+  const envV = normalizeStr((env as any).PUBLIC_BASE_URL) ?? normalizeStr(process.env.PUBLIC_BASE_URL);
+  return envV ? envV.replace(/\/+$/, "") : null;
 }
