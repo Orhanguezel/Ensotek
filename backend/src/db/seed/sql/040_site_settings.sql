@@ -203,6 +203,18 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
+
+-- =============================================================
+-- TEKNİK: Public Base URL (TR)
+-- =============================================================
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`) VALUES
+(UUID(), 'public_base_url', 'tr', 'https://ensotek.guezelwebdesign.com', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`=VALUES(`value`),
+  `updated_at`=VALUES(`updated_at`);
+
+
+
 -- =============================================================
 -- TEKNİK: SMTP (TR)
 -- =============================================================
