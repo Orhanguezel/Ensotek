@@ -111,7 +111,6 @@ const normalizeUploadsPathNoApi = (pathLike: string): string => {
   // slash garanti
   let p = cleaned.startsWith("/") ? cleaned : `/${cleaned}`;
 
-  // /api/api/... düzelt
   while (p.startsWith("/api/api/")) p = p.replace("/api/api/", "/api/");
 
   // "/api/uploads/..." -> "/uploads/..."
@@ -125,19 +124,22 @@ const normalizeUploadsPathNoApi = (pathLike: string): string => {
   const idx = p.indexOf("/uploads/");
   if (idx >= 0) return `${p.substring(idx)}${suffix}`;
 
-  // son çare
-  return `/uploads${p}${suffix}`;
+  // "uploads/..." yazılmışsa
+  if (p === "/uploads" || p.startsWith("/uploads/")) return `${p}${suffix}`;
+
+  // son çare: /uploads + path (ama çift uploads üretme)
+  return `/uploads${p.startsWith("/") ? "" : "/"}${p}${suffix}`.replace(
+    /^\/uploads\/uploads(\/|$)/,
+    "/uploads$1",
+  );
 };
 
 const resolvePdfUrl = (pdfUrl: string | null): string | null => {
   if (!pdfUrl) return null;
-
-  // absolute ise elleme (prod’da full url gelebilir)
-  if (/^https?:\/\//i.test(pdfUrl)) return pdfUrl;
-
-  // relative ise /uploads/... formatına normalize et (API EKLEME, VARSA SÖK)
+  if (/^https?:\/\//i.test(pdfUrl)) return pdfUrl; // absolute ise elleme
   return normalizeUploadsPathNoApi(pdfUrl);
 };
+
 
 /* -------------------------------------------------------------
  * DTO → STATE MAP
