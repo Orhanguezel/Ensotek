@@ -4,11 +4,11 @@
 // Create/Edit artık ayrı form sayfalarında
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import {
   useListSubCategoriesAdminQuery,
@@ -16,22 +16,22 @@ import {
   useReorderSubCategoriesAdminMutation,
   useToggleSubCategoryActiveAdminMutation,
   useToggleSubCategoryFeaturedAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
+  useListCategoriesAdminQuery
+} from '@/integrations/rtk/hooks';
 
-import {
-  useListCategoriesAdminQuery,
-} from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
 
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
+import type { CategoryDto } from '@/integrations/types/category.types';
 
-import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
-import type { CategoryDto } from "@/integrations/types/category.types";
 import type {
   LocaleOption,
   CategoryOption,
-} from "@/components/admin/subcategories/SubCategoriesHeader";
-import { SubCategoriesHeader } from "@/components/admin/subcategories/SubCategoriesHeader";
-import { SubCategoriesList } from "@/components/admin/subcategories/SubCategoriesList";
+} from '@/components/admin/subcategories/SubCategoriesHeader';
+import { SubCategoriesHeader } from '@/components/admin/subcategories/SubCategoriesHeader';
+import { SubCategoriesList } from '@/components/admin/subcategories/SubCategoriesList';
+
+// ✅ DB’den locale seçenekleri
+import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 /* ------------------------------------------------------------- */
 /*  Sayfa bileşeni                                               */
@@ -40,12 +40,26 @@ import { SubCategoriesList } from "@/components/admin/subcategories/SubCategorie
 const SubCategoriesAdminPage: React.FC = () => {
   const router = useRouter();
 
-  const [search, setSearch] = useState("");
-  const [localeFilter, setLocaleFilter] = useState<string>("");
-  const [categoryFilter, setCategoryFilter] = useState<string>("");
+  const [search, setSearch] = useState('');
+  const [localeFilter, setLocaleFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
 
   const [showOnlyActive, setShowOnlyActive] = useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
+
+  // ✅ Locale options (DB’den)
+  const { localeOptions: adminLocaleOptions, loading: isLocalesLoading } = useAdminLocales();
+
+  const localeOptions: LocaleOption[] = useMemo(() => {
+    const list = (adminLocaleOptions ?? []).map((x) => ({
+      value: x.value,
+      label: x.label,
+    }));
+
+    // Header component bazen "Tüm Diller" bekliyor olabilir (CategoriesHeader’daki gibi)
+    const hasAll = list.some((x) => x.value === '');
+    return hasAll ? list : [{ value: '', label: 'Tüm Diller' }, ...list];
+  }, [adminLocaleOptions]);
 
   // Liste + filtreler
   const {
@@ -68,19 +82,8 @@ const SubCategoriesAdminPage: React.FC = () => {
     setRows(subCategories || []);
   }, [subCategories]);
 
-  // app_locales kaydını (site_settings) üzerinden dilleri çek
-  const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
-
   // Kategori listesi (filter + list header için)
-  const {
-    data: categoryRows,
-    isLoading: isCategoriesLoading,
-  } = useListCategoriesAdminQuery({
+  const { data: categoryRows, isLoading: isCategoriesLoading } = useListCategoriesAdminQuery({
     q: undefined,
     locale: localeFilter || undefined,
     module_key: undefined,
@@ -89,8 +92,7 @@ const SubCategoriesAdminPage: React.FC = () => {
   });
 
   // Mutations
-  const [deleteSubCategory, { isLoading: isDeleting }] =
-    useDeleteSubCategoryAdminMutation();
+  const [deleteSubCategory, { isLoading: isDeleting }] = useDeleteSubCategoryAdminMutation();
   const [reorderSubCategories, { isLoading: isReordering }] =
     useReorderSubCategoriesAdminMutation();
   const [toggleActive] = useToggleSubCategoryActiveAdminMutation();
@@ -99,98 +101,44 @@ const SubCategoriesAdminPage: React.FC = () => {
   const loading = isLoading || isFetching;
   const busy = loading || isDeleting || isReordering;
 
-  /* -------------------- Locale options (DB'den) -------------------- */
-
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    return Array.from(new Set(arr));
-  }, [appLocaleRows]);
-
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
-
   /* -------------------- Category options + map --------------------- */
 
   const categoryOptions: CategoryOption[] = useMemo(() => {
-    const base: CategoryOption[] = [
-      { value: "", label: "Tüm Kategoriler" },
-    ];
-
+    const base: CategoryOption[] = [{ value: '', label: 'Tüm Kategoriler' }];
     if (!categoryRows || categoryRows.length === 0) return base;
 
     return [
       ...base,
       ...categoryRows.map((c) => ({
         value: c.id,
-        label: `${c.name} (${c.locale || "tr"})`,
+        label: `${c.name} (${c.locale || '-'})`,
       })),
     ];
   }, [categoryRows]);
 
-  const categoriesMap: Record<string, CategoryDto | undefined> =
-    useMemo(() => {
-      const map: Record<string, CategoryDto> = {};
-      (categoryRows ?? []).forEach((c) => {
-        map[c.id] = c;
-      });
-      return map;
-    }, [categoryRows]);
+  const categoriesMap: Record<string, CategoryDto | undefined> = useMemo(() => {
+    const map: Record<string, CategoryDto> = {};
+    (categoryRows ?? []).forEach((c) => {
+      map[c.id] = c;
+    });
+    return map;
+  }, [categoryRows]);
 
   /* -------------------- Create/Edit navigasyonu -------------------- */
 
   const openCreatePage = () => {
-    router.push("/admin/subcategories/new");
+    router.push('/admin/subcategories/new');
   };
 
   const openEditPage = (item: SubCategoryDto) => {
-    router.push(
-      `/admin/subcategories/${encodeURIComponent(item.id)}`,
-    );
+    router.push(`/admin/subcategories/${encodeURIComponent(item.id)}`);
   };
 
   /* -------------------- Silme / Toggle / Reorder -------------------- */
 
   const handleDelete = async (item: SubCategoryDto) => {
     if (
-      !window.confirm(
-        `"${item.name}" alt kategorisini silmek üzeresin. Devam etmek istiyor musun?`,
-      )
+      !window.confirm(`"${item.name}" alt kategorisini silmek üzeresin. Devam etmek istiyor musun?`)
     ) {
       return;
     }
@@ -201,52 +149,31 @@ const SubCategoriesAdminPage: React.FC = () => {
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Alt kategori silinirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Alt kategori silinirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const handleToggleActive = async (
-    item: SubCategoryDto,
-    value: boolean,
-  ) => {
+  const handleToggleActive = async (item: SubCategoryDto, value: boolean) => {
     try {
       await toggleActive({ id: item.id, is_active: value }).unwrap();
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === item.id ? { ...r, is_active: value } : r,
-        ),
-      );
+      setRows((prev) => prev.map((r) => (r.id === item.id ? { ...r, is_active: value } : r)));
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Aktif durumu güncellenirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Aktif durumu güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const handleToggleFeatured = async (
-    item: SubCategoryDto,
-    value: boolean,
-  ) => {
+  const handleToggleFeatured = async (item: SubCategoryDto, value: boolean) => {
     try {
-      await toggleFeatured({
-        id: item.id,
-        is_featured: value,
-      }).unwrap();
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === item.id ? { ...r, is_featured: value } : r,
-        ),
-      );
+      await toggleFeatured({ id: item.id, is_featured: value }).unwrap();
+      setRows((prev) => prev.map((r) => (r.id === item.id ? { ...r, is_featured: value } : r)));
     } catch (err: any) {
       const msg =
         err?.data?.error?.message ||
         err?.message ||
-        "Öne çıkarma durumu güncellenirken bir hata oluştu.";
+        'Öne çıkarma durumu güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -259,19 +186,13 @@ const SubCategoriesAdminPage: React.FC = () => {
     if (!rows.length) return;
 
     try {
-      const items = rows.map((r, index) => ({
-        id: r.id,
-        display_order: index,
-      }));
-
+      const items = rows.map((r, index) => ({ id: r.id, display_order: index }));
       await reorderSubCategories({ items }).unwrap();
-      toast.success("Sıralama kaydedildi.");
+      toast.success('Sıralama kaydedildi.');
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Sıralama kaydedilirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Sıralama kaydedilirken bir hata oluştu.';
       toast.error(msg);
     }
   };

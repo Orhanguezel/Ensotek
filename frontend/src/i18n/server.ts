@@ -1,122 +1,114 @@
 // =============================================================
-// FILE: src/i18n/server.ts
+// FILE: src/i18n/server.ts  (DYNAMIC DEFAULT FROM DB via META endpoints)
 // =============================================================
-import "server-only";
+import 'server-only';
 
-import { cache } from "react";
-import { headers, cookies } from "next/headers";
+import { cache } from 'react';
+import { headers, cookies } from 'next/headers';
 
-import {
-  normalizeLocales,
-  normLocaleTag,
-  pickFromAcceptLanguage,
-  pickFromCookie,
-} from "@/i18n/localeUtils";
+import { normLocaleTag, pickFromAcceptLanguage, pickFromCookie } from '@/i18n/localeUtils';
 
-const API = (process.env.API_BASE_URL || "").trim();
+const API = (process.env.API_BASE_URL || '').trim();
 
-// ✅ Hard fallback sadece "DB yoksa" devreye girer (env/static default değil)
-export const DEFAULT_LOCALE_FALLBACK = "tr";
+// Hard fallback only if DB/API not reachable or empty
+export const DEFAULT_LOCALE_FALLBACK = 'tr';
 
-export type JsonLike =
-  | string
-  | number
-  | boolean
-  | null
-  | { [k: string]: JsonLike }
-  | JsonLike[];
-
-export type SiteSettingResp = {
-  key?: string;
-  locale?: string;
-  value?: JsonLike;
-  updated_at?: string;
+export type AppLocaleMeta = {
+  code: string;
+  label?: string;
+  is_default?: boolean;
+  is_active?: boolean;
 };
 
-function tryParse(x: unknown): unknown {
-  if (typeof x === "string") {
-    const s = x.trim();
-    if (
-      (s.startsWith("{") && s.endsWith("}")) ||
-      (s.startsWith("[") && s.endsWith("]"))
-    ) {
-      try {
-        return JSON.parse(s);
-      } catch {
-        /* ignore */
-      }
-    }
-  }
-  return x;
-}
-
-export async function fetchSetting(
-  key: string,
-  locale?: string,
-  opts?: { revalidate?: number },
-): Promise<SiteSettingResp | null> {
+async function fetchJson<T>(path: string, opts?: { revalidate?: number }): Promise<T | null> {
   if (!API) return null;
 
   try {
-    const url = new URL(
-      `${API.replace(/\/+$/, "")}/site_settings/${encodeURIComponent(key)}`,
-    );
+    const base = API.replace(/\/+$/, '');
+    const url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
 
-    const l = normLocaleTag(locale);
-    if (l) url.searchParams.set("locale", l);
-
-    const res = await fetch(url.toString(), {
+    const res = await fetch(url, {
       next: { revalidate: opts?.revalidate ?? 600 },
     });
 
     if (!res.ok) return null;
-
-    const data = (await res.json()) as SiteSettingResp;
-    if (!data || typeof data !== "object") return null;
-
-    const value = tryParse((data as any).value) as JsonLike;
-    return { ...data, value };
+    return (await res.json()) as T;
   } catch {
     return null;
   }
 }
 
-/**
- * DB: site_settings(app_locales) => aktif diller
- * Her zaman "kısa locale" normalize beklenir (tr/en/de gibi)
- */
-export async function fetchActiveLocales(): Promise<string[]> {
+function computeActiveLocales(meta: AppLocaleMeta[] | null | undefined): {
+  activeLocales: string[];
+  preferredDefault: string | null; // from is_default
+} {
   const def = DEFAULT_LOCALE_FALLBACK;
+  const arr = Array.isArray(meta) ? meta : [];
 
-  if (!API) return [def];
+  const active = arr
+    .filter((x) => x && x.is_active !== false)
+    .map((x) => normLocaleTag(x.code))
+    .filter(Boolean) as string[];
 
-  const row = await fetchSetting("app_locales", undefined, { revalidate: 600 });
-  const locales = normalizeLocales(row?.value);
+  const uniq = Array.from(new Set(active));
 
-  return locales.length ? locales : [def];
+  const preferredDefault =
+    arr.find((x) => x?.is_default === true && x?.is_active !== false)?.code ?? null;
+
+  return {
+    activeLocales: uniq.length ? uniq : [def],
+    preferredDefault: preferredDefault ? normLocaleTag(preferredDefault) : null,
+  };
 }
 
 /**
- * ✅ Dinamik default locale:
- * - app_locales içinden "ilk locale" default kabul edilir
- * - DB yoksa fallback "tr"
- *
- * Not: Bu yöntem %100 dinamik ve multi-tenant pattern’ine uygun.
- * (İstersen ileride "default_locale" key’i ekleyip buradan okuyabiliriz.)
+ * DB: /site_settings/app-locales => active locales
+ */
+export async function fetchActiveLocales(): Promise<string[]> {
+  const def = DEFAULT_LOCALE_FALLBACK;
+  if (!API) return [def];
+
+  const meta = await fetchJson<AppLocaleMeta[]>('/site_settings/app-locales', { revalidate: 600 });
+  const parsed = computeActiveLocales(meta);
+  return parsed.activeLocales.length ? parsed.activeLocales : [def];
+}
+
+/**
+ * ✅ Dynamic default locale (DB):
+ * Priority:
+ *  1) /site_settings/default-locale (if in activeLocales)
+ *  2) /site_settings/app-locales[].is_default=true (active)
+ *  3) app-locales[0]
+ *  4) fallback "tr"
  */
 export const getDefaultLocale = cache(async (): Promise<string> => {
-  const active = await fetchActiveLocales();
-  const first = (active?.[0] ?? "").toString();
-  return normLocaleTag(first) || DEFAULT_LOCALE_FALLBACK;
+  const def = DEFAULT_LOCALE_FALLBACK;
+  if (!API) return def;
+
+  const [meta, defaultMeta] = await Promise.all([
+    fetchJson<AppLocaleMeta[]>('/site_settings/app-locales', { revalidate: 600 }),
+    fetchJson<string | null>('/site_settings/default-locale', { revalidate: 600 }),
+  ]);
+
+  const parsed = computeActiveLocales(meta);
+  const active = parsed.activeLocales;
+  const activeSet = new Set(active.map(normLocaleTag));
+
+  const fromDefaultEndpoint = normLocaleTag(defaultMeta);
+  if (fromDefaultEndpoint && activeSet.has(fromDefaultEndpoint)) return fromDefaultEndpoint;
+
+  const fromAppIsDefault = normLocaleTag(parsed.preferredDefault);
+  if (fromAppIsDefault && activeSet.has(fromAppIsDefault)) return fromAppIsDefault;
+
+  const first = normLocaleTag(active?.[0]);
+  return (first && activeSet.has(first) ? first : def) || def;
 });
 
 /**
- * ✅ Tek noktadan request i18n context:
- * - activeLocales (app_locales)
- * - defaultLocale (app_locales[0])
+ * ✅ Single request i18n context:
+ * - activeLocales (META)
+ * - defaultLocale (META + validation)
  * - detectedLocale (cookie > accept-language > defaultLocale)
- *
- * ✅ cache() => aynı request içinde tekrar fetch yok.
  */
 export const getServerI18nContext = cache(async () => {
   const h = await headers();
@@ -125,13 +117,11 @@ export const getServerI18nContext = cache(async () => {
   const activeLocales = await fetchActiveLocales();
   const defaultLocale = await getDefaultLocale();
 
-  const cookieLocale = c.get("NEXT_LOCALE")?.value;
+  const cookieLocale = c.get('NEXT_LOCALE')?.value;
   const fromCookie = pickFromCookie(cookieLocale, activeLocales);
 
   const detectedLocale =
-    fromCookie ??
-    pickFromAcceptLanguage(h.get("accept-language"), activeLocales) ??
-    defaultLocale;
+    fromCookie ?? pickFromAcceptLanguage(h.get('accept-language'), activeLocales) ?? defaultLocale;
 
   return { activeLocales, defaultLocale, detectedLocale };
 });

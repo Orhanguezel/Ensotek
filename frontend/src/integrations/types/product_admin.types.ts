@@ -82,3 +82,44 @@ export type AdminProductSetImagesPayload = {
   image_ids: string[];
   alt?: string | null;
 };
+
+
+
+export type AdminProductCategoryDto = {
+  id: string;
+  name: string;
+  slug: string;
+  locale: string;
+  module_key?: string | null;
+};
+
+export type AdminProductSubCategoryDto = {
+  id: string;
+  category_id: string;
+  name: string;
+  slug: string;
+  locale: string;
+};
+
+export type AdminProductCategoryListQueryParams = {
+  module_key?: string;
+  locale?: string;
+  is_active?: BoolLike;
+};
+
+export type AdminProductSubCategoryListQueryParams = {
+  category_id?: string;
+  locale?: string;
+  is_active?: BoolLike;
+};
+
+/* ---------- Reorder payload tipleri ---------- */
+
+export type AdminProductsReorderItem = {
+  id: string;
+  order_num: number;
+};
+
+export type AdminProductsReorderPayload = {
+  items: AdminProductsReorderItem[];
+};

@@ -1,71 +1,82 @@
 // src/components/layout/admin/adminNav.ts
-import type { ActiveTab } from "@/components/layout/admin/AdminLayout";
+import type { ActiveTab } from '@/components/layout/admin/AdminLayout';
 
+/**
+ * Admin tab -> route eşlemesi.
+ * Tüm admin navigasyonu buraya bakmalı.
+ */
 export const ADMIN_TAB_ROUTES: Record<ActiveTab, string> = {
-    dashboard: "/admin",
+  dashboard: '/admin',
 
-    site_settings: "/admin/site-settings",
-    custom_pages: "/admin/custompage",
-    services: "/admin/services",
+  site_settings: '/admin/site-settings',
+  custom_pages: '/admin/custompage',
+  services: '/admin/services',
 
-    products: "/admin/products",
-    sparepart: "/admin/sparepart",
-    categories: "/admin/categories",
-    subcategories: "/admin/subcategories",
+  products: '/admin/products',
+  sparepart: '/admin/sparepart',
+  categories: '/admin/categories',
+  subcategories: '/admin/subcategories',
 
-    slider: "/admin/slider",
-    references: "/admin/references",
+  slider: '/admin/slider',
+  references: '/admin/references',
 
-    faqs: "/admin/faqs",
-    contacts: "/admin/contacts",
+  faqs: '/admin/faqs',
+  contacts: '/admin/contacts',
 
-    newsletter: "/admin/newsletter",
-    email_templates: "/admin/email-templates",
-    library: "/admin/library",
+  newsletter: '/admin/newsletter',
+  email_templates: '/admin/email-templates',
+  library: '/admin/library',
 
-    users: "/admin/users",
-    db: "/admin/db",
+  users: '/admin/users',
+  db: '/admin/db',
 
-    reviews: "/admin/reviews",
-    support: "/admin/support",
+  reviews: '/admin/reviews',
+  support: '/admin/support',
 
-    menuitem: "/admin/menuitem",
-    storage: "/admin/storage",
-    offers: "/admin/offers",
-    catalog_requests: "/admin/catalog-requests",
+  menuitem: '/admin/menuitem',
+  storage: '/admin/storage',
+  offers: '/admin/offers',
+  catalog_requests: '/admin/catalog-requests',
 };
 
+/**
+ * Path'in admin alanına ait olup olmadığını tespit eder.
+ * Burada Next.js `router.pathname` pattern'leri kullanıyoruz:
+ *  - "/admin"
+ *  - "/admin/..."
+ */
 export function isAdminPath(path: string): boolean {
-    const p = String(path || "/");
-    return p === "/admin" || p.startsWith("/admin/");
+  const p = String(path || '/');
+  return p === '/admin' || p.startsWith('/admin/');
 }
 
 /**
- * "/admin/products/123" gibi alt rotalarda tab bulur.
+ * "/admin/products/123" gibi alt rotalarda aktif tab'ı bulur.
  * En uzun prefix’i seçerek yanlış eşleşmeleri azaltır.
  */
 export function pathToTab(pathname: string): ActiveTab {
-    const p = String(pathname || "/");
+  const p = String(pathname || '/');
 
-    // exact dashboard
-    if (p === "/admin" || p === "/admin/") return "dashboard";
+  // exact dashboard
+  if (p === '/admin' || p === '/admin/') return 'dashboard';
 
-    let best: { tab: ActiveTab; len: number } | null = null;
+  let best: { tab: ActiveTab; len: number } | null = null;
 
-    for (const [tab, base] of Object.entries(ADMIN_TAB_ROUTES) as Array<
-        [ActiveTab, string]
-    >) {
-        if (tab === "dashboard") continue;
+  for (const [tab, base] of Object.entries(ADMIN_TAB_ROUTES) as Array<[ActiveTab, string]>) {
+    if (tab === 'dashboard') continue;
 
-        if (p === base || p.startsWith(base + "/")) {
-            const len = base.length;
-            if (!best || len > best.len) best = { tab, len };
-        }
+    if (p === base || p.startsWith(base + '/')) {
+      const len = base.length;
+      if (!best || len > best.len) best = { tab, len };
     }
+  }
 
-    return best?.tab ?? "dashboard";
+  return best?.tab ?? 'dashboard';
 }
 
+/**
+ * Tab -> temel route çevirimi.
+ */
 export function tabToPath(tab: ActiveTab): string {
-    return ADMIN_TAB_ROUTES[tab] ?? "/admin";
+  return ADMIN_TAB_ROUTES[tab] ?? '/admin';
 }

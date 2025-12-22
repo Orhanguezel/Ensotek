@@ -1,10 +1,12 @@
 // =============================================================
 // FILE: src/components/admin/newsletter/NewsletterHeader.tsx
-// Admin Newsletter – Filtre / Toolbar
+// Admin Newsletter – Filtre / Toolbar (dynamic locale)
 // =============================================================
 
-import React from "react";
-import type { NewsletterOrderBy } from "@/integrations/types/newsletter.types";
+import React from 'react';
+import type { NewsletterOrderBy } from '@/integrations/types/newsletter.types';
+
+export type LocaleOption = { value: string; label: string };
 
 interface NewsletterHeaderProps {
   search: string;
@@ -13,8 +15,10 @@ interface NewsletterHeaderProps {
   email: string;
   onEmailChange: (val: string) => void;
 
-  locale: string;
+  locale: string; // "" => all
   onLocaleChange: (val: string) => void;
+  locales: LocaleOption[];
+  localesLoading?: boolean;
 
   onlyVerified: boolean;
   onOnlyVerifiedChange: (val: boolean) => void;
@@ -23,9 +27,9 @@ interface NewsletterHeaderProps {
   onOnlySubscribedChange: (val: boolean) => void;
 
   orderBy: NewsletterOrderBy;
-  order: "asc" | "desc";
+  order: 'asc' | 'desc';
   onOrderByChange: (val: NewsletterOrderBy) => void;
-  onOrderChange: (val: "asc" | "desc") => void;
+  onOrderChange: (val: 'asc' | 'desc') => void;
 
   loading: boolean;
   onRefresh: () => void;
@@ -39,6 +43,8 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
   onEmailChange,
   locale,
   onLocaleChange,
+  locales,
+  localesLoading,
   onlyVerified,
   onOnlyVerifiedChange,
   onlySubscribed,
@@ -56,9 +62,7 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
       <div className="card-body py-2">
         <div className="row g-2 align-items-end">
           <div className="col-md-3">
-            <label className="form-label small mb-1">
-              Ara (email / genel)
-            </label>
+            <label className="form-label small mb-1">Ara (email / genel)</label>
             <input
               type="text"
               className="form-control form-control-sm"
@@ -80,14 +84,22 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
           </div>
 
           <div className="col-md-2">
-            <label className="form-label small mb-1">Dil (locale)</label>
-            <input
-              type="text"
-              className="form-control form-control-sm"
-              placeholder="tr, en..."
+            <label className="form-label small mb-1">
+              Dil (locale){' '}
+              {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
+            </label>
+            <select
+              className="form-select form-select-sm"
               value={locale}
               onChange={(e) => onLocaleChange(e.target.value)}
-            />
+              disabled={!!localesLoading && !locales.length}
+            >
+              {(locales ?? []).map((opt) => (
+                <option key={`${opt.value}:${opt.label}`} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="col-md-2 d-flex flex-column">
@@ -99,10 +111,7 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
                 checked={onlyVerified}
                 onChange={(e) => onOnlyVerifiedChange(e.target.checked)}
               />
-              <label
-                className="form-check-label ms-1"
-                htmlFor="newsletter-filter-verified"
-              >
+              <label className="form-check-label ms-1" htmlFor="newsletter-filter-verified">
                 Sadece doğrulanmış
               </label>
             </div>
@@ -115,10 +124,7 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
                 checked={onlySubscribed}
                 onChange={(e) => onOnlySubscribedChange(e.target.checked)}
               />
-              <label
-                className="form-check-label ms-1"
-                htmlFor="newsletter-filter-subscribed"
-              >
+              <label className="form-check-label ms-1" htmlFor="newsletter-filter-subscribed">
                 Sadece aboneler
               </label>
             </div>
@@ -127,17 +133,11 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
           <div className="col-md-2">
             <div className="row g-1">
               <div className="col-7">
-                <label className="form-label small mb-1">
-                  Sırala (orderBy)
-                </label>
+                <label className="form-label small mb-1">Sırala (orderBy)</label>
                 <select
                   className="form-select form-select-sm"
                   value={orderBy}
-                  onChange={(e) =>
-                    onOrderByChange(
-                      e.target.value as NewsletterOrderBy,
-                    )
-                  }
+                  onChange={(e) => onOrderByChange(e.target.value as NewsletterOrderBy)}
                 >
                   <option value="created_at">Oluşturma</option>
                   <option value="updated_at">Güncelleme</option>
@@ -147,15 +147,11 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
                 </select>
               </div>
               <div className="col-5">
-                <label className="form-label small mb-1">
-                  Yön (order)
-                </label>
+                <label className="form-label small mb-1">Yön (order)</label>
                 <select
                   className="form-select form-select-sm"
                   value={order}
-                  onChange={(e) =>
-                    onOrderChange(e.target.value as "asc" | "desc")
-                  }
+                  onChange={(e) => onOrderChange(e.target.value as 'asc' | 'desc')}
                 >
                   <option value="asc">Artan</option>
                   <option value="desc">Azalan</option>
@@ -166,11 +162,7 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
 
           <div className="col-md-12 d-flex justify-content-between align-items-center mt-1">
             <div className="small text-muted">
-              Toplam{" "}
-              <span className="fw-semibold">
-                {total.toLocaleString("de-DE")}
-              </span>{" "}
-              kayıt
+              Toplam <span className="fw-semibold">{total.toLocaleString('de-DE')}</span> kayıt
             </div>
             <div className="d-flex gap-2">
               <button
@@ -179,7 +171,7 @@ export const NewsletterHeader: React.FC<NewsletterHeaderProps> = ({
                 onClick={onRefresh}
                 disabled={loading}
               >
-                {loading ? "Yenileniyor..." : "Yenile"}
+                {loading ? 'Yenileniyor...' : 'Yenile'}
               </button>
             </div>
           </div>

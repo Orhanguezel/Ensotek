@@ -12,7 +12,7 @@ import {
   useCreateProductReviewAdminMutation,
   useToggleProductReviewActiveAdminMutation,
   useDeleteProductReviewAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/products_admin.reviews.endpoints";
+} from "@/integrations/rtk/hooks";
 import type {
   AdminProductReviewDto,
   AdminProductReviewCreatePayload,

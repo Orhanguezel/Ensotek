@@ -3,9 +3,9 @@
 // Ensotek – SubCategory Listesi (Bootstrap table + drag & drop + pagination)
 // =============================================================
 
-import React, { useEffect, useState } from "react";
-import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
-import type { CategoryDto } from "@/integrations/types/category.types";
+import React, { useEffect, useState } from 'react';
+import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
+import type { CategoryDto } from '@/integrations/types/category.types';
 import {
   Pagination,
   PaginationContent,
@@ -14,7 +14,7 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 export type SubCategoriesListProps = {
   items: SubCategoryDto[];
@@ -52,7 +52,6 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
   const totalItems = items.length;
   const pageCount = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
 
-  // items sayısı değişince sayfa taşmasın
   useEffect(() => {
     setPage((prev) => {
       const maxPage = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
@@ -67,23 +66,17 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
 
   const hasData = totalItems > 0;
 
-  const handleDragStart = (
-    e: React.DragEvent<HTMLTableRowElement>,
-    id: string,
-  ) => {
+  const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, id: string) => {
     setDragId(id);
-    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLTableRowElement>) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (
-    e: React.DragEvent<HTMLTableRowElement>,
-    targetId: string,
-  ) => {
+  const handleDrop = (e: React.DragEvent<HTMLTableRowElement>, targetId: string) => {
     e.preventDefault();
     if (!dragId || dragId === targetId) return;
 
@@ -99,10 +92,8 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
     setDragId(null);
   };
 
-  /* ---------- Pagination page butonları ---------- */
-
   const buildPages = () => {
-    const pages: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
+    const pages: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
     if (pageCount <= 7) {
       for (let i = 1; i <= pageCount; i += 1) pages.push(i);
       return pages;
@@ -113,21 +104,13 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
     let left = Math.max(2, currentPage - siblings);
     let right = Math.min(pageCount - 1, currentPage + siblings);
 
-    if (left > 2) {
-      pages.push("ellipsis-left");
-    } else {
-      left = 2;
-    }
+    if (left > 2) pages.push('ellipsis-left');
+    else left = 2;
 
-    for (let i = left; i <= right; i += 1) {
-      pages.push(i);
-    }
+    for (let i = left; i <= right; i += 1) pages.push(i);
 
-    if (right < pageCount - 1) {
-      pages.push("ellipsis-right");
-    } else {
-      right = pageCount - 1;
-    }
+    if (right < pageCount - 1) pages.push('ellipsis-right');
+    else right = pageCount - 1;
 
     pages.push(pageCount);
     return pages;
@@ -147,10 +130,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
         <div className="d-flex align-items-center gap-2">
           {loading && (
             <span className="small text-muted d-flex align-items-center gap-1">
-              <span
-                className="spinner-border spinner-border-sm"
-                role="status"
-              />
+              <span className="spinner-border spinner-border-sm" role="status" />
               <span>Yükleniyor...</span>
             </span>
           )}
@@ -160,7 +140,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
             onClick={onSaveOrder}
             disabled={!hasData || savingOrder}
           >
-            {savingOrder ? "Sıralama kaydediliyor..." : "Sıralamayı Kaydet"}
+            {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
           </button>
         </div>
       </div>
@@ -188,9 +168,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
               {!hasData && (
                 <tr>
                   <td colSpan={8} className="text-center py-4 small text-muted">
-                    {loading
-                      ? "Alt kategoriler yükleniyor..."
-                      : "Henüz alt kategori bulunmuyor."}
+                    {loading ? 'Alt kategoriler yükleniyor...' : 'Henüz alt kategori bulunmuyor.'}
                   </td>
                 </tr>
               )}
@@ -198,10 +176,10 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
               {pageItems.map((item, index) => {
                 const category = categoriesMap[item.category_id];
                 const categoryLabel = category
-                  ? `${category.name} (${category.locale || "tr"})`
+                  ? `${category.name} (${category.locale || '-'})`
                   : item.category_id;
 
-                const globalIndex = startIndex + index; // 0-based
+                const globalIndex = startIndex + index;
 
                 return (
                   <tr
@@ -211,7 +189,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, item.id)}
                     style={{
-                      cursor: "move",
+                      cursor: 'move',
                       opacity: dragId && dragId === item.id ? 0.6 : 1,
                     }}
                   >
@@ -220,7 +198,6 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                       {globalIndex + 1}
                     </td>
 
-                    {/* Alt Kategori + Görsel */}
                     <td className="align-middle">
                       <div className="d-flex align-items-center gap-2">
                         {item.image_url ? (
@@ -229,31 +206,24 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                             style={{
                               width: 64,
                               height: 40,
-                              overflow: "hidden",
-                              flex: "0 0 auto",
+                              overflow: 'hidden',
+                              flex: '0 0 auto',
                             }}
                           >
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                               src={item.image_url}
                               alt={item.alt || item.name}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                objectFit: "cover",
-                              }}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                               onError={(e) => {
-                                (e.currentTarget as HTMLImageElement).style.display =
-                                  "none";
+                                (e.currentTarget as HTMLImageElement).style.display = 'none';
                               }}
                             />
                           </div>
                         ) : null}
 
                         <div>
-                          <div className="fw-semibold small">
-                            {item.name}
-                          </div>
+                          <div className="fw-semibold small">{item.name}</div>
                           <div className="text-muted small">
                             <code>{item.slug}</code>
                           </div>
@@ -262,36 +232,32 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                     </td>
 
                     <td className="align-middle small">{categoryLabel}</td>
-                    <td className="align-middle small">
-                      {item.locale || "tr"}
-                    </td>
+                    <td className="align-middle small">{item.locale || '-'}</td>
+
                     <td className="align-middle text-center">
                       <div className="form-check form-switch d-inline-flex">
                         <input
                           className="form-check-input"
                           type="checkbox"
                           checked={!!item.is_active}
-                          onChange={(e) =>
-                            onToggleActive(item, e.target.checked)
-                          }
+                          onChange={(e) => onToggleActive(item, e.target.checked)}
                         />
                       </div>
                     </td>
+
                     <td className="align-middle text-center">
                       <div className="form-check form-switch d-inline-flex">
                         <input
                           className="form-check-input"
                           type="checkbox"
                           checked={!!item.is_featured}
-                          onChange={(e) =>
-                            onToggleFeatured(item, e.target.checked)
-                          }
+                          onChange={(e) => onToggleFeatured(item, e.target.checked)}
                         />
                       </div>
                     </td>
-                    <td className="align-middle text-center small">
-                      {item.display_order ?? 0}
-                    </td>
+
+                    <td className="align-middle text-center small">{item.display_order ?? 0}</td>
+
                     <td className="align-middle text-end">
                       <div className="btn-group btn-group-sm">
                         <button
@@ -317,7 +283,6 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
           </table>
         </div>
 
-        {/* Pagination */}
         {pageCount > 1 && (
           <div className="py-2">
             <Pagination>
@@ -333,7 +298,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                 </PaginationItem>
 
                 {pages.map((p, idx) =>
-                  typeof p === "number" ? (
+                  typeof p === 'number' ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

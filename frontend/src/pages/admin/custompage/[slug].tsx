@@ -1,28 +1,36 @@
 // =============================================================
 // FILE: src/pages/admin/custompage/[slug].tsx
 // Ensotek – Admin Custom Page Create/Edit Page (slug bazlı)
+// FIX (Locale):
+//  - Locale source single: GET /site_settings/app-locales + /site_settings/default-locale
+//  - Active locales only (is_active !== false)
+//  - Default locale: meta default > default-locale endpoint > first active > "tr"
 // =============================================================
 
-import React, { useMemo } from "react";
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useMemo } from 'react';
+import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import {
   CustomPageForm,
   type CustomPageFormValues,
-} from "@/components/admin/custompage/CustomPageForm";
+} from '@/components/admin/custompage/CustomPageForm';
+
 import {
   useGetCustomPageBySlugAdminQuery,
   useCreateCustomPageAdminMutation,
   useUpdateCustomPageAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+  useGetAppLocalesPublicQuery,
+  useGetDefaultLocalePublicQuery,
+} from '@/integrations/rtk/hooks';
+
+
 import type {
   CustomPageCreatePayload,
   CustomPageUpdatePayload,
-} from "@/integrations/types/custom_pages.types";
-import type { LocaleOption } from "@/components/admin/custompage/CustomPageHeader";
+} from '@/integrations/types/custom_pages.types';
+import type { LocaleOption } from '@/components/admin/custompage/CustomPageHeader';
 
 const AdminCustomPageDetail: NextPage = () => {
   const router = useRouter();
@@ -30,15 +38,11 @@ const AdminCustomPageDetail: NextPage = () => {
   const isRouterReady = router.isReady;
 
   const slug = useMemo(
-    () =>
-      isRouterReady && typeof slugParam === "string"
-        ? slugParam
-        : undefined,
+    () => (isRouterReady && typeof slugParam === 'string' ? slugParam : undefined),
     [isRouterReady, slugParam],
   );
 
-  // /admin/custompage/new => create mode
-  const isCreateMode = slug === "new";
+  const isCreateMode = slug === 'new';
   const shouldSkipQuery = !isRouterReady || isCreateMode || !slug;
 
   const {
@@ -46,105 +50,86 @@ const AdminCustomPageDetail: NextPage = () => {
     isLoading: isLoadingPage,
     isFetching: isFetchingPage,
     error: pageError,
-  } = useGetCustomPageBySlugAdminQuery(
-    // ❗ Argüman tipi: { slug: string; locale?: string }
-    { slug: slug as string },
-    {
-      skip: shouldSkipQuery,
-    },
-  );
+  } = useGetCustomPageBySlugAdminQuery({ slug: slug as string }, { skip: shouldSkipQuery });
 
-  const [createPage, { isLoading: isCreating }] =
-    useCreateCustomPageAdminMutation();
-  const [updatePage, { isLoading: isUpdating }] =
-    useUpdateCustomPageAdminMutation();
+  const [createPage, { isLoading: isCreating }] = useCreateCustomPageAdminMutation();
+  const [updatePage, { isLoading: isUpdating }] = useUpdateCustomPageAdminMutation();
 
-  /* --------- Locale options – site_settings.app_locales üzerinden --------- */
+  /* --------- Locale meta (PUBLIC endpoints) --------- */
 
   const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
+    data: appLocalesMeta,
+    isLoading: isLocalesLoading1,
+    isFetching: isLocalesFetching1,
+  } = useGetAppLocalesPublicQuery();
 
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
+  const {
+    data: defaultLocaleMeta,
+    isLoading: isLocalesLoading2,
+    isFetching: isLocalesFetching2,
+  } = useGetDefaultLocalePublicQuery();
 
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-    let arr: string[] = [];
+  const { localeOptions, defaultLocale } = useMemo(() => {
+    const metas = (appLocalesMeta ?? [])
+      .filter((m) => m && m.code)
+      .filter((m) => m.is_active !== false)
+      .map((m) => ({
+        code: String(m.code).trim().toLowerCase(),
+        label: typeof m.label === 'string' ? m.label.trim() : undefined,
+        is_default: m.is_default === true,
+      }))
+      .filter((m) => !!m.code);
 
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
+    // unique by code
+    const uniq = new Map<string, (typeof metas)[number]>();
+    for (const m of metas) uniq.set(m.code, m);
+    const active = Array.from(uniq.values());
 
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
+    const metaDefault = active.find((m) => m.is_default)?.code || null;
 
-    // uniq + lower
-    const uniqLower = Array.from(
-      new Set(arr.map((x) => String(x).toLowerCase())),
-    );
-    return uniqLower;
-  }, [appLocaleRows]);
+    const defFromEndpoint =
+      typeof defaultLocaleMeta === 'string' ? defaultLocaleMeta.trim().toLowerCase() : null;
 
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
+    const effectiveDefault = (
+      metaDefault ||
+      defFromEndpoint ||
+      active[0]?.code ||
+      'tr'
+    ).toLowerCase();
 
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
+    const options: LocaleOption[] = active.map((m) => {
+      const labelBase = (m.label && m.label.length ? m.label : m.code.toUpperCase()).trim();
+      return { value: m.code, label: `${labelBase} (${m.code})` };
+    });
 
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
+    return { localeOptions: options, defaultLocale: effectiveDefault };
+  }, [appLocalesMeta, defaultLocaleMeta]);
 
-  // router.locale varsa onu kullan, yoksa ilk locale veya 'tr'
-  const defaultLocale =
-    (router.locale as string | undefined)?.toLowerCase() ||
-    localeOptions[0]?.value ||
-    "tr";
+  const isLocalesLoading =
+    isLocalesLoading1 || isLocalesLoading2 || isLocalesFetching1 || isLocalesFetching2;
 
   const loading = isLoadingPage || isFetchingPage || isLocalesLoading;
   const saving = isCreating || isUpdating;
 
   const handleCancel = () => {
-    router.push("/admin/custompage");
+    router.push('/admin/custompage');
   };
 
-  // Form submit handler (create + update)
   const handleSubmit = async (values: CustomPageFormValues) => {
     try {
+      const safeLocale = (values.locale || defaultLocale || 'tr').trim().toLowerCase();
+
       if (isCreateMode) {
         const payload: CustomPageCreatePayload = {
-          // i18n
-          locale: values.locale || undefined,
+          locale: safeLocale,
+
           title: values.title.trim(),
           slug: values.slug.trim(),
           content: values.content,
 
-          // parent
           is_published: values.is_published,
           featured_image: values.featured_image || null,
-          featured_image_asset_id:
-            values.featured_image_asset_id || null,
+          featured_image_asset_id: values.featured_image_asset_id || null,
           featured_image_alt: values.featured_image_alt || null,
           meta_title: values.meta_title || null,
           meta_description: values.meta_description || null,
@@ -154,20 +139,18 @@ const AdminCustomPageDetail: NextPage = () => {
         };
 
         const created = await createPage(payload).unwrap();
-        toast.success("Sayfa başarıyla oluşturuldu.");
+        toast.success('Sayfa başarıyla oluşturuldu.');
 
         const nextSlug = created.slug || values.slug.trim();
-        router.replace(
-          `/admin/custompage/${encodeURIComponent(nextSlug)}`,
-        );
+        router.replace(`/admin/custompage/${encodeURIComponent(nextSlug)}`);
       } else {
         if (!page) {
-          toast.error("Sayfa verisi yüklenemedi.");
+          toast.error('Sayfa verisi yüklenemedi.');
           return;
         }
 
         const payload: CustomPageUpdatePayload = {
-          locale: values.locale || undefined,
+          locale: safeLocale,
           is_published: values.is_published,
 
           title: values.title.trim(),
@@ -175,8 +158,7 @@ const AdminCustomPageDetail: NextPage = () => {
           content: values.content,
 
           featured_image: values.featured_image || null,
-          featured_image_asset_id:
-            values.featured_image_asset_id || null,
+          featured_image_asset_id: values.featured_image_asset_id || null,
           featured_image_alt: values.featured_image_alt || null,
           meta_title: values.meta_title || null,
           meta_description: values.meta_description || null,
@@ -185,35 +167,26 @@ const AdminCustomPageDetail: NextPage = () => {
           sub_category_id: values.sub_category_id || null,
         };
 
-        // 🔁 Eğer form başka bir locale satırına geçtiyse onun id'sini kullan
         const targetId = values.id || page.id;
 
         await updatePage({ id: targetId, patch: payload }).unwrap();
-        toast.success("Sayfa güncellendi.");
+        toast.success('Sayfa güncellendi.');
 
-        // Slug değiştiyse URL'i de güncelle
         const nextSlug = values.slug.trim();
         if (slug !== nextSlug) {
-          router.replace(
-            `/admin/custompage/${encodeURIComponent(nextSlug)}`,
-          );
+          router.replace(`/admin/custompage/${encodeURIComponent(nextSlug)}`);
         }
       }
     } catch (err: unknown) {
       const msg =
-        (err as {
-          data?: { error?: { message?: string } };
-          message?: string;
-        })?.data?.error?.message ||
-        (err as { message?: string })?.message ||
-        "İşlem sırasında bir hata oluştu.";
+        (err as any)?.data?.error?.message ||
+        (err as any)?.message ||
+        'İşlem sırasında bir hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const pageTitle = isCreateMode
-    ? "Yeni Sayfa Oluştur"
-    : page?.title || "Sayfa Düzenle";
+  const pageTitle = isCreateMode ? 'Yeni Sayfa Oluştur' : page?.title || 'Sayfa Düzenle';
 
   if (!isRouterReady) {
     return (
@@ -228,14 +201,9 @@ const AdminCustomPageDetail: NextPage = () => {
       <div className="container-fluid py-3">
         <h4 className="h5 mb-2">Sayfa bulunamadı</h4>
         <p className="text-muted small mb-3">
-          Bu slug için kayıtlı bir özel sayfa yok:
-          <code className="ms-1">{slug}</code>
+          Bu slug için kayıtlı bir özel sayfa yok: <code className="ms-1">{slug}</code>
         </p>
-        <button
-          type="button"
-          className="btn btn-sm btn-outline-secondary"
-          onClick={handleCancel}
-        >
+        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCancel}>
           Listeye dön
         </button>
       </div>
@@ -247,14 +215,13 @@ const AdminCustomPageDetail: NextPage = () => {
       <div className="mb-3">
         <h4 className="h5 mb-1">{pageTitle}</h4>
         <p className="text-muted small mb-0">
-          Özel sayfaları (blog, haber, hakkında vb.) burada oluşturup
-          düzenleyebilirsin. Dil seçimi, JSON modunda düzenleme ve storage
-          üzerinden görsel yükleme desteklenir.
+          Özel sayfaları burada oluşturup düzenleyebilirsin. Dil seçenekleri aktif locale listesi
+          üzerinden dinamik gelir.
         </p>
       </div>
 
       <CustomPageForm
-        mode={isCreateMode ? "create" : "edit"}
+        mode={isCreateMode ? 'create' : 'edit'}
         initialData={!isCreateMode && page ? page : undefined}
         loading={loading}
         saving={saving}

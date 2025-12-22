@@ -1,64 +1,78 @@
 // =============================================================
-// FILE: src/i18n/LangBoot.tsx
+// FILE: src/i18n/LangBoot.tsx  (DYNAMIC via META endpoints)
 // =============================================================
-"use client";
+'use client';
 
-import { useMemo } from "react";
-import { useRouter } from "next/router";
+import { useMemo } from 'react';
+import { useRouter } from 'next/router';
 
-import HtmlLangSync from "./HtmlLangSync";
-import { KNOWN_RTL, DEFAULT_LOCALE as STATIC_DEFAULT } from "./config";
-import { normLocaleTag, normalizeLocales } from "@/i18n/localeUtils";
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import type { SupportedLocale } from "@/types/common";
-
-type AppLocalesValue =
-  | SupportedLocale[]
-  | string[]
-  | { locales?: string[] | SupportedLocale[] }
-  | null;
+import HtmlLangSync from './HtmlLangSync';
+import { KNOWN_RTL } from './config';
+import { normLocaleTag } from '@/i18n/localeUtils';
+import {
+  useGetAppLocalesPublicQuery,
+  useGetDefaultLocalePublicQuery,
+} from '@/integrations/rtk/hooks';
 
 function readLocaleFromPath(asPath?: string): string {
-  const p = String(asPath || "/").trim();
-  const seg = p.replace(/^\/+/, "").split("/")[0] || "";
+  const p = String(asPath || '/').trim();
+  const seg = p.replace(/^\/+/, '').split('/')[0] || '';
   return normLocaleTag(seg);
+}
+
+function computeActiveLocales(meta: any[] | undefined): string[] {
+  const arr = Array.isArray(meta) ? meta : [];
+
+  const active = arr
+    .filter((x) => x && x.is_active !== false)
+    .map((x) => normLocaleTag(x.code))
+    .filter(Boolean) as string[];
+
+  const uniq = Array.from(new Set(active));
+
+  const def = arr.find((x) => x?.is_default === true && x?.is_active !== false);
+  const defCode = def ? normLocaleTag(def.code) : '';
+  if (defCode) {
+    const rest = uniq.filter((x) => x !== defCode);
+    return [defCode, ...rest];
+  }
+
+  return uniq;
 }
 
 export default function LangBoot() {
   const router = useRouter();
 
-  // ✅ runtime active locales
-  const { data: appLocalesRow } = useGetSiteSettingByKeyQuery({ key: "app_locales" });
+  const { data: appLocalesMeta } = useGetAppLocalesPublicQuery();
+  const { data: defaultLocaleMeta } = useGetDefaultLocalePublicQuery();
 
-  // ✅ runtime default locale
-  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: "default_locale" });
-
-  const activeLocales = useMemo(() => {
-    const raw = (appLocalesRow?.value ?? null) as AppLocalesValue;
-    return normalizeLocales(raw); // string[]
-  }, [appLocalesRow?.value]);
+  const activeLocales = useMemo(
+    () => computeActiveLocales(appLocalesMeta as any),
+    [appLocalesMeta],
+  );
 
   const runtimeDefault = useMemo(() => {
-    const cand = normLocaleTag(defaultLocaleRow?.value);
     const activeSet = new Set(activeLocales.map(normLocaleTag));
 
+    const cand = normLocaleTag(defaultLocaleMeta);
     if (cand && activeSet.has(cand)) return cand;
-    return normLocaleTag(activeLocales[0]) || normLocaleTag(STATIC_DEFAULT) || "tr";
-  }, [defaultLocaleRow?.value, activeLocales]);
+
+    const first = normLocaleTag(activeLocales[0]);
+    if (first) return first;
+
+    // En son çare: app kırılmasın
+    return 'tr';
+  }, [defaultLocaleMeta, activeLocales]);
 
   const resolved = useMemo(() => {
-    // ✅ önce path prefix
     const fromPath = readLocaleFromPath(router.asPath);
     const activeSet = new Set(activeLocales.map(normLocaleTag));
 
-    const l =
-      (fromPath && activeSet.has(fromPath))
-        ? fromPath
-        : runtimeDefault;
+    const lang = fromPath && activeSet.has(fromPath) ? fromPath : runtimeDefault;
+    const dir = KNOWN_RTL.has(lang) ? 'rtl' : 'ltr';
 
-    const dir = KNOWN_RTL.has(l) ? "rtl" : "ltr";
-    return { lang: l, dir };
+    return { lang, dir };
   }, [router.asPath, activeLocales, runtimeDefault]);
 
-  return <HtmlLangSync lang={resolved.lang} dir={resolved.dir as "ltr" | "rtl"} />;
+  return <HtmlLangSync lang={resolved.lang} dir={resolved.dir as 'ltr' | 'rtl'} />;
 }

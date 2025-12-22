@@ -1,23 +1,17 @@
 // =============================================================
-// FILE: src/i18n/routing.ts
+// FILE: src/i18n/routing.ts  (DYNAMIC)
 // =============================================================
+"use client";
+
 import Link from "next/link";
 import { useRouter } from "next/router";
 import type { NextRouter } from "next/router";
-import type { SupportedLocale } from "@/types/common";
 
-import { LOCALES } from "./config";
 import { normLocaleTag } from "@/i18n/localeUtils";
 
-export const locales = LOCALES;
+export { Link };
 
-// ✅ Client tarafında DB default locale okunamayacağı için fallback:
-export const defaultLocale = ("tr" as SupportedLocale);
-
-const isLocale = (x?: string): x is SupportedLocale =>
-  !!x && (LOCALES as readonly string[]).includes(x);
-
-/** SEO-dostu path sabitleri */
+/** SEO-dostu path sabitleri (bu kısım locale ile ilgili değil) */
 export const pathnames = {
   "/": "/",
   "/about": "/about",
@@ -35,10 +29,8 @@ export const pathnames = {
   "/spare-parts": "/spare-parts",
   "/spare-parts/[slug]": "/spare-parts/[slug]",
 
-  // ✅ BLOG
   "/blog": "/blog",
   "/blog/[slug]": "/blog/[slug]",
-
 
   "/news": "/news",
   "/news/[slug]": "/news/[slug]",
@@ -46,30 +38,45 @@ export const pathnames = {
   "/search": "/search",
 } as const;
 
+function normalizeActive(activeLocales?: string[]) {
+  const list = (activeLocales || []).map(normLocaleTag).filter(Boolean);
+  return Array.from(new Set(list));
+}
+
+function pickRuntimeDefault(activeLocales?: string[], defaultLocale?: string) {
+  const active = normalizeActive(activeLocales);
+
+  const candDefault = normLocaleTag(defaultLocale);
+  if (candDefault && active.includes(candDefault)) return candDefault;
+
+  return normLocaleTag(active[0]) || normLocaleTag(defaultLocale) || "tr";
+}
+
+function isActiveLocale(locale: string | undefined, activeLocales?: string[]) {
+  const l = normLocaleTag(locale);
+  if (!l) return false;
+  const active = normalizeActive(activeLocales);
+  return active.length ? active.includes(l) : true; // active yoksa, doğrulama yapma (boot aşaması)
+}
+
 /**
  * ✅ /{locale}/... kalıbı üretir; slug varsa doldurur
  *
- * - locale verilmezse:
- *    1) activeLocales[0] (varsa)
- *    2) defaultLocale fallback
- *
- * - locale verilirse:
- *    - SupportedLocale değilse ignore edilir ve fallback’e düşer
+ * - activeLocales + defaultLocale runtime parametreleriyle çalışır.
+ * - locale verilirse: aktif listede değilse ignore edip runtime default'a düşer.
  */
 export function localePath(
   pathname: keyof typeof pathnames | string,
-  locale?: SupportedLocale,
+  locale?: string,
   params?: Record<string, string | number>,
   activeLocales?: string[],
+  defaultLocale?: string,
 ) {
   const p = typeof pathname === "string" ? pathname : pathnames[pathname];
 
-  const activeDefault =
-    Array.isArray(activeLocales) && activeLocales.length
-      ? (normLocaleTag(activeLocales[0]) as SupportedLocale)
-      : undefined;
+  const runtimeDefault = pickRuntimeDefault(activeLocales, defaultLocale);
 
-  const l = isLocale(locale) ? locale : (activeDefault || defaultLocale);
+  const l = isActiveLocale(locale, activeLocales) ? normLocaleTag(locale) : runtimeDefault;
 
   let filled = p;
   if (params) {
@@ -80,9 +87,6 @@ export function localePath(
 
   return filled === "/" ? `/${l}` : `/${l}${filled}`;
 }
-
-/** Next.js Link'i aynı isimle dışa verelim */
-export { Link };
 
 /** Kendi custom hook'un: hook içinde hook kullanımı OK */
 export function usePathname() {

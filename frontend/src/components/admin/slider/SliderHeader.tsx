@@ -3,8 +3,8 @@
 // Ensotek – Slider Header + Filtreler
 // =============================================================
 
-import React from "react";
-import type { LocaleOption } from "@/components/admin/categories/CategoriesHeader";
+import React from 'react';
+import type { LocaleOption } from '@/components/admin/categories/CategoriesHeader';
 
 export type SliderHeaderProps = {
   search: string;
@@ -40,20 +40,16 @@ export const SliderHeader: React.FC<SliderHeaderProps> = ({
 }) => {
   return (
     <div className="row mb-3">
-      {/* Sol: başlık */}
       <div className="col-12 col-lg-6 mb-2 mb-lg-0">
         <h1 className="h4 mb-1">Slider Yönetimi</h1>
         <p className="text-muted small mb-0">
-          Ana sayfa ve diğer sayfalar için slider görsellerini, linklerini ve
-          sıralamasını yönetebilirsin. Kayıtlar çok dilli ve aktif/pasif
-          durumlarına göre filtrelenebilir.
+          Ana sayfa ve diğer sayfalar için slider görsellerini, linklerini ve sıralamasını
+          yönetebilirsin. Kayıtlar çok dilli ve aktif/pasif durumlarına göre filtrelenebilir.
         </p>
       </div>
 
-      {/* Sağ: arama + filtreler */}
       <div className="col-12 col-lg-6 d-flex align-items-end justify-content-lg-end">
         <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
-          {/* Arama */}
           <div className="input-group input-group-sm">
             <span className="input-group-text">Ara</span>
             <input
@@ -65,21 +61,18 @@ export const SliderHeader: React.FC<SliderHeaderProps> = ({
             />
           </div>
 
-          {/* Dil filtre – DİĞER MODÜLLER GİBİ: sadece gerçek diller */}
           <div className="input-group input-group-sm">
             <span className="input-group-text">
               Dil
-              {localesLoading && (
-                <span className="ms-1 spinner-border spinner-border-sm" />
-              )}
+              {localesLoading && <span className="ms-1 spinner-border spinner-border-sm" />}
             </span>
             <select
               className="form-select"
-              value={locale}
-              onChange={(e) => onLocaleChange(e.target.value)}
+              value={(locale || '').toLowerCase()}
+              onChange={(e) => onLocaleChange((e.target.value || '').toLowerCase())}
             >
               {locales.map((opt) => (
-                <option key={opt.value} value={opt.value}>
+                <option key={opt.value} value={String(opt.value).toLowerCase()}>
                   {opt.label}
                 </option>
               ))}
@@ -88,7 +81,6 @@ export const SliderHeader: React.FC<SliderHeaderProps> = ({
         </div>
       </div>
 
-      {/* Alt satır: toggle + aksiyon butonları */}
       <div className="col-12 mt-2 d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-between">
         <div className="d-flex flex-wrap gap-3 small">
           <div className="form-check form-switch">
@@ -99,10 +91,7 @@ export const SliderHeader: React.FC<SliderHeaderProps> = ({
               checked={showOnlyActive}
               onChange={(e) => onShowOnlyActiveChange(e.target.checked)}
             />
-            <label
-              className="form-check-label"
-              htmlFor="slider-filter-active"
-            >
+            <label className="form-check-label" htmlFor="slider-filter-active">
               Sadece aktif sliderlar
             </label>
           </div>
@@ -117,11 +106,7 @@ export const SliderHeader: React.FC<SliderHeaderProps> = ({
           >
             Yenile
           </button>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={onCreateClick}
-          >
+          <button type="button" className="btn btn-primary btn-sm" onClick={onCreateClick}>
             + Yeni Slider
           </button>
         </div>

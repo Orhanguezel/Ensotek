@@ -38,7 +38,8 @@ export const metahubTags = [
   "Health",
   "ProductFAQs",
   "Offers",
-  "CatalogRequest"
+  "CatalogRequest",
+  "FooterSectionsBySlug"
 
 ] as const;
 

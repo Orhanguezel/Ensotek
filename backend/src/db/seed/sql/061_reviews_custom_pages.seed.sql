@@ -1,37 +1,39 @@
+
 -- =============================================================
 -- FILE: 061_reviews_custom_pages.seed.sql
--- custom_pages için örnek review seed’leri (TR / EN)
+-- custom_pages için örnek review seed’leri (TR / EN / DE)
+--  - DE: şimdilik Almanca içerik yazıldı (dile göre değişsin istedin)
 -- =============================================================
 
+SET NAMES utf8mb4;
 START TRANSACTION;
 
 -- -------------------------------------------------------------
--- VARSAYIM: 051 & 053 seed dosyalarındaki PAGE ID’LERİ
--- AYNI ID’LERLE MEVCUT.
--- Tekrar SET etmekte sakınca yok.
+-- PAGE ID’LERİ (051 & 053 ile uyumlu)
 -- -------------------------------------------------------------
-
--- ABOUT / KURUMSAL
 SET @PAGE_MISSION := '11111111-2222-3333-4444-555555555571';
 SET @PAGE_VISION  := '11111111-2222-3333-4444-555555555572';
 SET @PAGE_ABOUT   := '11111111-2222-3333-4444-555555555573';
 
--- BLOG
 SET @BLOG_MAINT_1 := '33330001-3333-4333-8333-333333330001';
 
 -- =============================================================
--- REVIEW ID’LERİ (sabit, okunabilir olsun)
+-- REVIEW ID’LERİ (sabit)
 -- =============================================================
 SET @REV_MISSION_TR := '44440001-4444-4444-8444-444444440001';
 SET @REV_MISSION_EN := '44440002-4444-4444-8444-444444440002';
+SET @REV_MISSION_DE := '44440006-4444-4444-8444-444444440006';
 
 SET @REV_ABOUT_TR   := '44440003-4444-4444-8444-444444440003';
 SET @REV_ABOUT_EN   := '44440004-4444-4444-8444-444444440004';
+SET @REV_ABOUT_DE   := '44440007-4444-4444-8444-444444440007';
 
 SET @REV_BLOG_TR    := '44440005-4444-4444-8444-444444440005';
+SET @REV_BLOG_EN    := '44440008-4444-4444-8444-444444440008';
+SET @REV_BLOG_DE    := '44440009-4444-4444-8444-444444440009';
 
 -- -------------------------------------------------------------
--- REVIEWS (parent) insert
+-- REVIEWS (parent)
 -- target_type: 'custom_page'
 -- -------------------------------------------------------------
 INSERT INTO `reviews`
@@ -42,7 +44,7 @@ INSERT INTO `reviews`
    `submitted_locale`,
    `created_at`, `updated_at`)
 VALUES
-  -- Misyonumuz için TR kullanıcı yorumu
+  -- Misyonumuz (TR)
   (
     @REV_MISSION_TR,
     'custom_page',
@@ -50,17 +52,17 @@ VALUES
     'Ahmet Yılmaz',
     'ahmet@example.com',
     5,
-    1,  -- aktif
-    1,  -- admin onaylı
-    10, -- display_order
-    3,  -- likes
-    0,  -- dislikes
-    3,  -- helpful_count (başlangıçta likes ile aynı)
+    1,
+    1,
+    10,
+    3,
+    0,
+    3,
     'tr',
     NOW(3),
     NOW(3)
   ),
-  -- Our Mission için EN kullanıcı yorumu
+  -- Our Mission (EN)
   (
     @REV_MISSION_EN,
     'custom_page',
@@ -71,14 +73,32 @@ VALUES
     1,
     1,
     20,
-    1,  -- likes
-    0,  -- dislikes
-    1,  -- helpful_count
+    1,
+    0,
+    1,
     'en',
     NOW(3),
     NOW(3)
   ),
-  -- Ensotek Hakkında TR yorumu
+  -- Unsere Mission (DE)
+  (
+    @REV_MISSION_DE,
+    'custom_page',
+    @PAGE_MISSION,
+    'Max Müller',
+    'max.mueller@example.com',
+    5,
+    1,
+    1,
+    25,
+    2,
+    0,
+    2,
+    'de',
+    NOW(3),
+    NOW(3)
+  ),
+  -- Hakkımızda (TR)
   (
     @REV_ABOUT_TR,
     'custom_page',
@@ -89,14 +109,14 @@ VALUES
     1,
     1,
     30,
-    5,  -- likes
-    0,  -- dislikes
-    5,  -- helpful_count
+    5,
+    0,
+    5,
     'tr',
     NOW(3),
     NOW(3)
   ),
-  -- Ensotek About EN yorumu
+  -- About (EN)
   (
     @REV_ABOUT_EN,
     'custom_page',
@@ -107,14 +127,32 @@ VALUES
     1,
     1,
     40,
-    2,  -- likes
-    0,  -- dislikes
-    2,  -- helpful_count
+    2,
+    0,
+    2,
     'en',
     NOW(3),
     NOW(3)
   ),
-  -- Blog bakım rehberi için TR yorumu
+  -- Über Ensotek (DE)
+  (
+    @REV_ABOUT_DE,
+    'custom_page',
+    @PAGE_ABOUT,
+    'Anna Schneider',
+    'anna.schneider@example.com',
+    5,
+    1,
+    1,
+    45,
+    1,
+    0,
+    1,
+    'de',
+    NOW(3),
+    NOW(3)
+  ),
+  -- Blog (TR)
   (
     @REV_BLOG_TR,
     'custom_page',
@@ -125,10 +163,46 @@ VALUES
     1,
     1,
     50,
-    0,  -- likes
-    0,  -- dislikes
-    0,  -- helpful_count
+    0,
+    0,
+    0,
     'tr',
+    NOW(3),
+    NOW(3)
+  ),
+  -- Blog (EN)
+  (
+    @REV_BLOG_EN,
+    'custom_page',
+    @BLOG_MAINT_1,
+    'Michael Brown',
+    'michael.brown@example.com',
+    4,
+    1,
+    1,
+    55,
+    0,
+    0,
+    0,
+    'en',
+    NOW(3),
+    NOW(3)
+  ),
+  -- Blog (DE)
+  (
+    @REV_BLOG_DE,
+    'custom_page',
+    @BLOG_MAINT_1,
+    'Paul Weber',
+    'paul.weber@example.com',
+    4,
+    1,
+    1,
+    60,
+    0,
+    0,
+    0,
+    'de',
     NOW(3),
     NOW(3)
   )
@@ -148,20 +222,17 @@ ON DUPLICATE KEY UPDATE
   `updated_at`       = VALUES(`updated_at`);
 
 -- -------------------------------------------------------------
--- REVIEW I18N INSERT
--- - Kullanıcı hangi dilde bıraktıysa o locale zorunlu.
--- - Admin isterse diğer locale’leri de doldurabilir.
+-- REVIEW I18N (dile göre içerik farklı)
+-- - Her review için sadece kendi locale kaydı var (şimdilik).
 -- -------------------------------------------------------------
-
 INSERT INTO `review_i18n`
   (`id`, `review_id`, `locale`,
    `title`, `comment`, `admin_reply`,
    `created_at`, `updated_at`)
 VALUES
   -- ============================
-  -- REV_MISSION_TR (TR + EN)
+  -- MISSION (TR / EN / DE)
   -- ============================
-  -- TR (kullanıcı orijinal yorumu)
   (
     UUID(),
     @REV_MISSION_TR,
@@ -172,22 +243,6 @@ VALUES
     NOW(3),
     NOW(3)
   ),
-  -- EN (admin çevirisi)
-  (
-    UUID(),
-    @REV_MISSION_TR,
-    'en',
-    'Clear and well-defined mission',
-    'The mission statement clearly reflects Ensotek''s customer-oriented approach and position in the market.',
-    'Translated from the original Turkish review.',
-    NOW(3),
-    NOW(3)
-  ),
-
-  -- ============================
-  -- REV_MISSION_EN (EN + TR)
-  -- ============================
-  -- EN (orijinal)
   (
     UUID(),
     @REV_MISSION_EN,
@@ -198,20 +253,19 @@ VALUES
     NOW(3),
     NOW(3)
   ),
-  -- TR (admin çevirisi)
   (
     UUID(),
-    @REV_MISSION_EN,
-    'tr',
-    'Müşteri odaklı güçlü bir misyon',
-    'Ensotek''in müşteri memnuniyeti ve verimliliği merkeze alan misyon yaklaşımını beğendim.',
-    'İngilizce yorumun Türkçe çevirisidir.',
+    @REV_MISSION_DE,
+    'de',
+    'Klare und kundenorientierte Mission',
+    'Die Mission ist verständlich formuliert und zeigt den Fokus auf Effizienz und Kundenzufriedenheit.',
+    NULL,
     NOW(3),
     NOW(3)
   ),
 
   -- ============================
-  -- REV_ABOUT_TR (TR)
+  -- ABOUT (TR / EN / DE)
   -- ============================
   (
     UUID(),
@@ -223,10 +277,6 @@ VALUES
     NOW(3),
     NOW(3)
   ),
-
-  -- ============================
-  -- REV_ABOUT_EN (EN)
-  -- ============================
   (
     UUID(),
     @REV_ABOUT_EN,
@@ -237,9 +287,19 @@ VALUES
     NOW(3),
     NOW(3)
   ),
+  (
+    UUID(),
+    @REV_ABOUT_DE,
+    'de',
+    'Sehr überzeugender Unternehmenshintergrund',
+    'Die „Über uns“-Seite vermittelt einen klaren Eindruck von Ensoteks Erfahrung und den starken Referenzprojekten.',
+    NULL,
+    NOW(3),
+    NOW(3)
+  ),
 
   -- ============================
-  -- REV_BLOG_TR (TR)
+  -- BLOG (TR / EN / DE)
   -- ============================
   (
     UUID(),
@@ -247,6 +307,26 @@ VALUES
     'tr',
     'Bakım rehberi çok faydalı',
     'Periyodik bakım yazısı, sahadaki ekibimiz için kontrol listesi gibi kullanabileceğimiz pratik bilgiler içeriyor.',
+    NULL,
+    NOW(3),
+    NOW(3)
+  ),
+  (
+    UUID(),
+    @REV_BLOG_EN,
+    'en',
+    'Very practical maintenance guide',
+    'The periodic maintenance article provides actionable tips that can be used as a checklist by field teams.',
+    NULL,
+    NOW(3),
+    NOW(3)
+  ),
+  (
+    UUID(),
+    @REV_BLOG_DE,
+    'de',
+    'Sehr hilfreicher Wartungsleitfaden',
+    'Der Artikel zur regelmäßigen Wartung enthält praxisnahe Hinweise, die sich als Checkliste für Serviceteams nutzen lassen.',
     NULL,
     NOW(3),
     NOW(3)

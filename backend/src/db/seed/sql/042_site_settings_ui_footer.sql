@@ -1,40 +1,38 @@
 -- =============================================================
--- 042_site_settings_ui_footer.sql  (Footer UI metinleri)
+-- 042_site_settings_ui_footer.sql  (Footer UI strings)
+--  - Key: ui_footer
+--  - Value: JSON (stored as TEXT)
+--  - Localized: tr / en / de
+--  - Extendable: new locales can be cloned from tr as bootstrap
+--  - FIX: collation-safe comparisons (ER_CANT_AGGREGATE_2COLLATIONS)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
-/*
-  Key: ui_footer
-  Value: JSON_OBJECT(...) – footer bileşenlerinde kullanılan sabit UI metinleri
-  NOT: Link başlıkları (About, Blog, vs.) artık menu_items / footer_sections'tan gelecek.
-*/
-
+-- -------------------------------------------------------------
+-- SEED: ui_footer (TR / EN / DE)
+-- -------------------------------------------------------------
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
   'ui_footer',
   'tr',
-  JSON_OBJECT(
-    -- Sütun başlıkları
+  CAST(JSON_OBJECT(
     'company_title',        'Şirket',
     'services',             'Hizmetlerimiz',
     'explore',              'Keşfet',
     'contact',              'İletişim',
 
-    -- Contact alanı ARIA metinleri
     'phone_aria',           'Telefon ile ara',
     'email_aria',           'E-posta gönder',
 
-    -- Menü durum metinleri (RTK / menu_items için)
     'menu_loading',         'Bağlantılar yükleniyor...',
     'menu_empty',           'Bağlantı tanımlı değil',
 
-    -- Copyright
     'copyright_prefix',     '',
     'copyright_suffix',     'Tüm hakları saklıdır.'
-  ),
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
@@ -42,41 +40,71 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_footer',
   'en',
-  JSON_OBJECT(
-    -- Column titles
+  CAST(JSON_OBJECT(
     'company_title',        'Company',
     'services',             'Services',
     'explore',              'Explore',
     'contact',              'Contact',
 
-    -- Contact ARIA texts
     'phone_aria',           'Call by phone',
     'email_aria',           'Send email',
 
-    -- Menu status texts (RTK / menu_items)
     'menu_loading',         'Loading links...',
     'menu_empty',           'No links defined',
 
-    -- Copyright
     'copyright_prefix',     '',
     'copyright_suffix',     'All rights reserved.'
-  ),
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_footer',
+  'de',
+  CAST(JSON_OBJECT(
+    'company_title',        'Unternehmen',
+    'services',             'Leistungen',
+    'explore',              'Entdecken',
+    'contact',              'Kontakt',
+
+    'phone_aria',           'Telefonisch anrufen',
+    'email_aria',           'E-Mail senden',
+
+    'menu_loading',         'Links werden geladen...',
+    'menu_empty',           'Keine Links definiert',
+
+    'copyright_prefix',     '',
+    'copyright_suffix',     'Alle Rechte vorbehalten.'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
--- TR → DE otomatik kopya (başlangıç için TR ile doldursun)
+-- -------------------------------------------------------------
+-- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE):
+-- TR → TARGET LOCALE
+-- -------------------------------------------------------------
+SET @TARGET_LOCALE := 'de';
+
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
+SELECT
+  UUID(),
+  s.`key`,
+  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
+  s.`value`,
+  NOW(3),
+  NOW(3)
 FROM site_settings s
-WHERE s.locale = 'tr'
-  AND s.`key` = 'ui_footer'
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_footer' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t
-    WHERE t.`key` = s.`key`
-      AND t.locale = 'de'
+    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
+      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
   );

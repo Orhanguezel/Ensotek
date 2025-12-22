@@ -4,10 +4,10 @@
 // CategoryFormFields pattern'ine uygun
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
-import type { LocaleOption } from "@/components/admin/categories/CategoriesHeader";
+import React, { useMemo } from 'react';
+import type { LocaleOption } from '@/components/admin/categories/CategoriesHeader';
 
 export type SliderFormValues = {
   locale: string;
@@ -24,14 +24,16 @@ export type SliderFormValues = {
 };
 
 export type SliderFormProps = {
-  mode: "create" | "edit";
+  mode: 'create' | 'edit';
   values: SliderFormValues;
 
-  onChange: <K extends keyof SliderFormValues>(
-    field: K,
-    value: SliderFormValues[K]
-  ) => void;
+  onChange: <K extends keyof SliderFormValues>(field: K, value: SliderFormValues[K]) => void;
 
+  /**
+   * Locale değişimi SliderFormPage tarafından yönetilir.
+   * - create: sadece state.locale set
+   * - edit: aynı slider id için locale ile tekrar fetch / 404 ise yeni çeviri
+   */
   onLocaleChange?: (locale: string) => void;
 
   saving: boolean;
@@ -47,27 +49,33 @@ export const SliderForm: React.FC<SliderFormProps> = ({
   localeOptions,
   localesLoading,
 }) => {
+  // UI'da gösterilecek locale (state boş/invalid olsa bile dropdown bozulmasın)
+  const effectiveLocaleValue = useMemo(() => {
+    const current = (values.locale || '').toLowerCase();
+    const valid = new Set((localeOptions ?? []).map((x) => String(x.value).toLowerCase()));
+    if (current && valid.has(current)) return current;
+    return (localeOptions?.[0]?.value || '').toLowerCase();
+  }, [values.locale, localeOptions]);
+
   return (
     <div className="row g-2">
       {/* Locale */}
       <div className="col-md-4">
         <label className="form-label small">
-          Dil{" "}
-          {localesLoading && (
-            <span className="spinner-border spinner-border-sm ms-1" />
-          )}
+          Dil {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
         </label>
+
         <select
           className="form-select form-select-sm"
-          disabled={saving}
-          value={values.locale}
+          disabled={saving || localesLoading}
+          value={effectiveLocaleValue}
           onChange={(e) => {
-            const locale = e.target.value;
-            onChange("locale", locale);
-            onLocaleChange?.(locale);
+            const next = (e.target.value || '').toLowerCase();
+            // Category/SubCategory pattern: locale değişimini ayrı handler yönetir
+            onLocaleChange?.(next);
           }}
         >
-          {localeOptions.map((opt) => (
+          {(localeOptions ?? []).map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
@@ -83,9 +91,7 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.display_order}
-          onChange={(e) =>
-            onChange("display_order", Number(e.target.value) || 0)
-          }
+          onChange={(e) => onChange('display_order', Number(e.target.value) || 0)}
         />
       </div>
 
@@ -94,23 +100,30 @@ export const SliderForm: React.FC<SliderFormProps> = ({
         <div className="d-flex gap-3 small">
           <div className="form-check form-switch">
             <input
+              id="slider-is-active"
               type="checkbox"
               className="form-check-input"
               disabled={saving}
-              checked={values.is_active}
-              onChange={(e) => onChange("is_active", e.target.checked)}
+              checked={!!values.is_active}
+              onChange={(e) => onChange('is_active', e.target.checked)}
             />
-            <label className="form-check-label">Aktif</label>
+            <label className="form-check-label" htmlFor="slider-is-active">
+              Aktif
+            </label>
           </div>
+
           <div className="form-check form-switch">
             <input
+              id="slider-featured"
               type="checkbox"
               className="form-check-input"
               disabled={saving}
-              checked={values.featured}
-              onChange={(e) => onChange("featured", e.target.checked)}
+              checked={!!values.featured}
+              onChange={(e) => onChange('featured', e.target.checked)}
             />
-            <label className="form-check-label">Öne çıkan</label>
+            <label className="form-check-label" htmlFor="slider-featured">
+              Öne çıkan
+            </label>
           </div>
         </div>
       </div>
@@ -122,7 +135,7 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.name}
-          onChange={(e) => onChange("name", e.target.value)}
+          onChange={(e) => onChange('name', e.target.value)}
         />
       </div>
 
@@ -133,8 +146,11 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.slug}
-          onChange={(e) => onChange("slug", e.target.value)}
+          onChange={(e) => onChange('slug', e.target.value)}
         />
+        <div className="form-text small">
+          Başlık alanını doldururken otomatik oluşabilir; istersen manuel değiştirebilirsin.
+        </div>
       </div>
 
       {/* description */}
@@ -145,7 +161,7 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.description}
-          onChange={(e) => onChange("description", e.target.value)}
+          onChange={(e) => onChange('description', e.target.value)}
         />
       </div>
 
@@ -156,7 +172,7 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.alt}
-          onChange={(e) => onChange("alt", e.target.value)}
+          onChange={(e) => onChange('alt', e.target.value)}
         />
       </div>
 
@@ -167,7 +183,7 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.buttonText}
-          onChange={(e) => onChange("buttonText", e.target.value)}
+          onChange={(e) => onChange('buttonText', e.target.value)}
         />
       </div>
 
@@ -178,7 +194,7 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.buttonLink}
-          onChange={(e) => onChange("buttonLink", e.target.value)}
+          onChange={(e) => onChange('buttonLink', e.target.value)}
         />
       </div>
 
@@ -189,7 +205,7 @@ export const SliderForm: React.FC<SliderFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.image_url}
-          onChange={(e) => onChange("image_url", e.target.value)}
+          onChange={(e) => onChange('image_url', e.target.value)}
         />
       </div>
     </div>

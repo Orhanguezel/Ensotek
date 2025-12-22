@@ -3,7 +3,7 @@
 // Ensotek – SubCategory Header + Filtreler
 // =============================================================
 
-import React from "react";
+import React from 'react';
 
 export type LocaleOption = {
   value: string;
@@ -57,20 +57,26 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
   loading,
   onRefresh,
   locales,
-  localesLoading,
+  localesLoading = false,
   categories,
-  categoriesLoading,
+  categoriesLoading = false,
   onCreateClick,
 }) => {
+  // “Tüm Diller” option’u her zaman tekil olsun
+  const localeList = React.useMemo(() => {
+    const list = Array.isArray(locales) ? locales : [];
+    if (list.some((x) => x.value === '')) return list;
+    return [{ value: '', label: 'Tüm Diller' }, ...list];
+  }, [locales]);
+
   return (
     <div className="row mb-3">
       {/* Sol: başlık */}
       <div className="col-12 col-lg-6 mb-2 mb-lg-0">
         <h1 className="h4 mb-1">Alt Kategoriler</h1>
         <p className="text-muted small mb-0">
-          Kategorilere bağlı çok dilli alt kategori kayıtlarını listeler,
-          sıralama (drag &amp; drop), aktif/öne çıkan durumlarını ve temel
-          bilgileri yönetebilirsin.
+          Kategorilere bağlı çok dilli alt kategori kayıtlarını listeler, sıralama (drag &amp;
+          drop), aktif/öne çıkan durumlarını ve temel bilgileri yönetebilirsin.
         </p>
       </div>
 
@@ -86,6 +92,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
               placeholder="İsim veya slug içinde ara"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -93,18 +100,16 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
           <div className="input-group input-group-sm">
             <span className="input-group-text">
               Dil
-              {localesLoading && (
-                <span className="ms-1 spinner-border spinner-border-sm" />
-              )}
+              {localesLoading && <span className="ms-1 spinner-border spinner-border-sm" />}
             </span>
             <select
               className="form-select"
               value={locale}
               onChange={(e) => onLocaleChange(e.target.value)}
+              disabled={loading || localesLoading}
             >
-              <option value="">Tüm Diller</option>
-              {locales.map((opt) => (
-                <option key={opt.value} value={opt.value}>
+              {localeList.map((opt) => (
+                <option key={opt.value || 'all-locales'} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
@@ -115,17 +120,16 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
           <div className="input-group input-group-sm">
             <span className="input-group-text">
               Kategori
-              {categoriesLoading && (
-                <span className="ms-1 spinner-border spinner-border-sm" />
-              )}
+              {categoriesLoading && <span className="ms-1 spinner-border spinner-border-sm" />}
             </span>
             <select
               className="form-select"
               value={categoryId}
               onChange={(e) => onCategoryIdChange(e.target.value)}
+              disabled={loading || categoriesLoading}
             >
               {categories.map((opt) => (
-                <option key={opt.value || "all"} value={opt.value}>
+                <option key={opt.value || 'all-categories'} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
@@ -144,6 +148,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
               type="checkbox"
               checked={showOnlyActive}
               onChange={(e) => onShowOnlyActiveChange(e.target.checked)}
+              disabled={loading}
             />
             <label className="form-check-label" htmlFor="sub-filter-active">
               Sadece aktif
@@ -157,6 +162,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
               type="checkbox"
               checked={showOnlyFeatured}
               onChange={(e) => onShowOnlyFeaturedChange(e.target.checked)}
+              disabled={loading}
             />
             <label className="form-check-label" htmlFor="sub-filter-featured">
               Sadece öne çıkan
@@ -177,6 +183,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
             type="button"
             className="btn btn-primary btn-sm"
             onClick={onCreateClick}
+            disabled={loading}
           >
             + Yeni Alt Kategori
           </button>

@@ -11,8 +11,8 @@ START TRANSACTION;
 
 /* KATEGORİ ID’LERİ (011 & 012 ile hizalı) */
 SET @CAT_NEWS_GENERAL  := 'aaaa2001-1111-4111-8111-aaaaaaaa2001'; -- GENEL HABERLER
-SET @CAT_NEWS_DUYS    := 'aaaa2003-1111-4111-8111-aaaaaaaa2003'; -- DUYURULAR
-SET @CAT_NEWS_PRESS   := 'aaaa2004-1111-4111-8111-aaaaaaaa2004'; -- BASINDA ENSOTEK
+SET @CAT_NEWS_DUYS     := 'aaaa2003-1111-4111-8111-aaaaaaaa2003'; -- DUYURULAR
+SET @CAT_NEWS_PRESS    := 'aaaa2004-1111-4111-8111-aaaaaaaa2004'; -- BASINDA ENSOTEK
 
 -- ALT KATEGORİLER (012_catalog_subcategories.sql)
 SET @SUB_NEWS_GENERAL_ANN  := 'bbbb2001-1111-4111-8111-bbbbbbbb2001'; -- Duyurular (genel)
@@ -31,7 +31,9 @@ SET @IMG_NEWS_MAINT :=
 SET @IMG_NEWS_PRESS :=
   'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80';
 
-/* PARENT INSERT */
+-- -------------------------------------------------------------
+-- PARENT INSERT
+-- -------------------------------------------------------------
 INSERT INTO `custom_pages`
   (`id`, `is_published`, `display_order`,
    `featured_image`, `featured_image_asset_id`,
@@ -82,7 +84,9 @@ ON DUPLICATE KEY UPDATE
   `featured_image`  = VALUES(`featured_image`),
   `updated_at`      = VALUES(`updated_at`);
 
-/* I18N – NEWS_ANNOUNCE_1 */
+-- =============================================================
+-- I18N – NEWS_ANNOUNCE_1
+-- =============================================================
 INSERT INTO `custom_pages_i18n`
   (`id`, `page_id`, `locale`,
    `title`, `slug`, `content`,
@@ -128,6 +132,25 @@ VALUES
   'ensotek,new project,launch,news,water cooling towers',
   NOW(3),
   NOW(3)
+),
+-- DE
+(
+  UUID(),
+  @NEWS_ANNOUNCE_1,
+  'de',
+  'Neues Projekt: Launch',
+  'neues-projekt-launch',
+  JSON_OBJECT(
+    'html',
+    '<p>Wir freuen uns, den Launch unseres neuen Wasserkühlturm-Projekts bekannt zu geben.</p>'
+  ),
+  'Kurze Ankündigung zum Launch von Ensoteks neuem Wasserkühlturm-Projekt.',
+  'Industrieanlage als Visual zum Projekt-Launch',
+  'Neues Projekt: Launch | Ensotek',
+  'Ankündigung zum neuen Wasserkühlturm-Projekt von Ensotek.',
+  'ensotek,neues projekt,launch,news,wasserkuehltuerme',
+  NOW(3),
+  NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
@@ -140,7 +163,9 @@ ON DUPLICATE KEY UPDATE
   `tags`               = VALUES(`tags`),
   `updated_at`         = VALUES(`updated_at`);
 
-/* I18N – NEWS_ANNOUNCE_2 (Bakım / Servis) */
+-- =============================================================
+-- I18N – NEWS_ANNOUNCE_2 (Bakım / Servis)
+-- =============================================================
 INSERT INTO `custom_pages_i18n`
   (`id`, `page_id`, `locale`,
    `title`, `slug`, `content`,
@@ -186,6 +211,25 @@ VALUES
   'ensotek,maintenance,service,notice,planned downtime',
   NOW(3),
   NOW(3)
+),
+-- DE
+(
+  UUID(),
+  @NEWS_ANNOUNCE_2,
+  'de',
+  'Hinweis zur Wartung',
+  'hinweis-zur-wartung',
+  JSON_OBJECT(
+    'html',
+    '<p>Aufgrund geplanter Wartungsarbeiten kann es in einigen unserer Anlagen zu kurzen Serviceunterbrechungen kommen.</p>'
+  ),
+  'Information zu möglichen kurzen Serviceunterbrechungen aufgrund geplanter Wartungsarbeiten.',
+  'Visual für Hinweis zu Wartungsarbeiten',
+  'Hinweis zur Wartung | Ensotek',
+  'Ankündigung zu geplanten Wartungsarbeiten in Ensotek-Anlagen.',
+  'ensotek,wartung,service,hinsweis,geplante unterbrechung',
+  NOW(3),
+  NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
@@ -198,7 +242,9 @@ ON DUPLICATE KEY UPDATE
   `tags`               = VALUES(`tags`),
   `updated_at`         = VALUES(`updated_at`);
 
-/* I18N – NEWS_PRESS_1 (Basında Biz) */
+-- =============================================================
+-- I18N – NEWS_PRESS_1 (Basında Biz)
+-- =============================================================
 INSERT INTO `custom_pages_i18n`
   (`id`, `page_id`, `locale`,
    `title`, `slug`, `content`,
@@ -242,6 +288,25 @@ VALUES
   'Ensotek in the Press | Ensotek',
   'Press coverage about Ensotek water cooling towers.',
   'ensotek,in the press,press coverage,sector magazine,water cooling towers',
+  NOW(3),
+  NOW(3)
+),
+-- DE
+(
+  UUID(),
+  @NEWS_PRESS_1,
+  'de',
+  'Ensotek in der Presse',
+  'ensotek-in-der-presse',
+  JSON_OBJECT(
+    'html',
+    '<p>Ensoteks Wasserkühltürme wurden in einem ausführlichen Artikel in einem Branchenmagazin vorgestellt.</p>'
+  ),
+  'Kurzer Überblick über die Presseberichterstattung zu Ensoteks Wasserkühltürmen in einem Branchenmagazin.',
+  'Presseartikel und Magazinseite als Visual',
+  'Ensotek in der Presse | Ensotek',
+  'Pressebericht über Ensotek und seine Wasserkühlturm-Lösungen.',
+  'ensotek,presse,branchenmagazin,artikel,wasserkuehltuerme',
   NOW(3),
   NOW(3)
 )

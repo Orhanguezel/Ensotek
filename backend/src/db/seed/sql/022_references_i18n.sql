@@ -128,3 +128,75 @@ WHERE s.locale = 'tr'
     WHERE t.reference_id = s.reference_id
       AND t.locale = 'en'
   );
+
+  /* ================= SEED: DE ================= */
+
+-- Toronto Agentur (DE)
+INSERT INTO `references_i18n`
+(id, reference_id, locale, title, slug, summary, content,
+ featured_image_alt, meta_title, meta_description, created_at, updated_at)
+VALUES
+(UUID(), @REF_TORONTO_ID, 'de',
+ 'Toronto Agentur', 'toronto-agentur',
+ 'Kreative Dienstleistungen und digitale Lösungen.',
+ JSON_OBJECT(
+   'html',
+   '<p>Toronto entwickelt kreative digitale Lösungen und Webprojekte für Produkte, Marken und Kampagnen.</p>'
+ ),
+ 'Titelbild',
+ 'Toronto Agentur | Referenz',
+ 'Digitale Lösungen und Webprojekte, die für die Toronto Agentur umgesetzt wurden.',
+ NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+ title              = VALUES(title),
+ slug               = VALUES(slug),
+ summary            = VALUES(summary),
+ content            = VALUES(content),
+ featured_image_alt = VALUES(featured_image_alt),
+ meta_title         = VALUES(meta_title),
+ meta_description   = VALUES(meta_description),
+ updated_at         = VALUES(updated_at);
+
+-- E-Commerce-Plattform (DE)
+INSERT INTO `references_i18n`
+(id, reference_id, locale, title, slug, summary, content,
+ featured_image_alt, meta_title, meta_description, created_at, updated_at)
+VALUES
+(UUID(), @REF_ECOM_ID, 'de',
+ 'E-Commerce-Plattform', 'e-commerce-plattform',
+ 'Moderne E-Commerce-Infrastruktur mit Produkt-, Zahlungs- und Versandintegrationen.',
+ JSON_OBJECT(
+   'html',
+   '<p>Eine skalierbare E-Commerce-Plattform auf Ensotek-Infrastruktur mit sicheren Zahlungen und flexiblem Produktmanagement.</p>'
+ ),
+ 'Produktbild',
+ 'E-Commerce-Plattform | Referenz',
+ 'Referenzprojekt einer skalierbaren und sicheren E-Commerce-Plattform.',
+ NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+ title              = VALUES(title),
+ slug               = VALUES(slug),
+ summary            = VALUES(summary),
+ content            = VALUES(content),
+ featured_image_alt = VALUES(featured_image_alt),
+ meta_title         = VALUES(meta_title),
+ meta_description   = VALUES(meta_description),
+ updated_at         = VALUES(updated_at);
+
+/* Eksik DE çevirileri için TR’den kopya (slug TR’den gelir) */
+INSERT INTO `references_i18n`
+(id, reference_id, locale, title, slug, summary, content,
+ featured_image_alt, meta_title, meta_description, created_at, updated_at)
+SELECT UUID(), s.reference_id, 'de',
+       s.title, s.slug, s.summary, s.content,
+       s.featured_image_alt, s.meta_title, s.meta_description,
+       NOW(3), NOW(3)
+FROM `references_i18n` s
+WHERE s.locale = 'tr'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `references_i18n` t
+    WHERE t.reference_id = s.reference_id
+      AND t.locale = 'de'
+  );
+

@@ -1,9 +1,12 @@
 // =============================================================
-// FILE: src/pages/admin/services/[id].tsx
+// FILE: src/pages/admin/services/[id].tsx (FIXED)
 // Ensotek – Admin Hizmet Detay (Create / Edit by id)
+// Locale source: RTK public endpoints (app-locales + default-locale)
+// URL ?locale=... sync
+// RTK imports: ONLY from "@/integrations/rtk/hooks"
 // =============================================================
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { toast } from "sonner";
@@ -17,37 +20,157 @@ import {
   useGetServiceAdminQuery,
   useCreateServiceAdminMutation,
   useUpdateServiceAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/services_admin.endpoints";
 
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+  // ✅ locale meta: public endpoints (RTK hooks barrel)
+  useGetAppLocalesPublicQuery,
+  useGetDefaultLocalePublicQuery,
+} from "@/integrations/rtk/hooks";
 
 import type {
   ServiceCreatePayload,
   ServiceUpdatePayload,
 } from "@/integrations/types/services.types";
 
-import type { LocaleOption } from "@/components/admin/custompage/CustomPageHeader";
+import type { AdminLocaleOption } from "@/components/common/AdminLocaleSelect";
+
+/* -------------------- Locale helpers -------------------- */
+
+const toShortLocale = (v: unknown): string =>
+  String(v || "")
+    .trim()
+    .toLowerCase()
+    .replace("_", "-")
+    .split("-")[0]
+    .trim();
+
+function uniqByCode(items: { code: string; label?: string }[]): { code: string; label?: string }[] {
+  const seen = new Set<string>();
+  const out: { code: string; label?: string }[] = [];
+  for (const it of items) {
+    const code = toShortLocale(it?.code);
+    if (!code) continue;
+    if (seen.has(code)) continue;
+    seen.add(code);
+    out.push({ ...it, code });
+  }
+  return out;
+}
+
+function buildLocaleLabel(item: { code: string; label?: string }): string {
+  const code = toShortLocale(item.code);
+  const label = String(item.label || "").trim();
+  if (label) return `${label} (${code})`;
+
+  let dn: Intl.DisplayNames | null = null;
+  try {
+    dn = new Intl.DisplayNames(["en"], { type: "language" });
+  } catch {
+    dn = null;
+  }
+  const name = dn?.of(code) ?? "";
+  return name ? `${name} (${code})` : `${code.toUpperCase()} (${code})`;
+}
+
+const normalizeLocale = (v: unknown): string => {
+  const s = typeof v === "string" ? v.trim().toLowerCase() : "";
+  return s;
+};
+
+/* -------------------- Page -------------------- */
 
 const AdminServiceDetailPage: NextPage = () => {
   const router = useRouter();
   const { id: idParam } = router.query;
+
   const isRouterReady = router.isReady;
 
   const id = useMemo(
-    () =>
-      isRouterReady && typeof idParam === "string" ? idParam : undefined,
+    () => (isRouterReady && typeof idParam === "string" ? idParam : undefined),
     [isRouterReady, idParam],
   );
 
   const isCreateMode = id === "new";
   const shouldSkipQuery = !isRouterReady || isCreateMode || !id;
 
-  // 🔹 Aktif locale (formdaki select ile değişecek)
-  const routerLocale =
-    (router.locale as string | undefined)?.toLowerCase() || "tr";
-  const [activeLocale, setActiveLocale] = useState<string>(routerLocale);
+  /* --------- Locales – RTK public endpoints --------- */
 
-  // 🔹 Detail query – locale ile birlikte çağır
+  const {
+    data: appLocalesMeta,
+    isLoading: isLocalesLoading1,
+    isFetching: isLocalesFetching1,
+  } = useGetAppLocalesPublicQuery();
+
+  const {
+    data: defaultLocaleMeta,
+    isLoading: isLocalesLoading2,
+    isFetching: isLocalesFetching2,
+  } = useGetDefaultLocalePublicQuery();
+
+  const { localeOptions, defaultLocale } = useMemo(() => {
+    const metasRaw = Array.isArray(appLocalesMeta) ? appLocalesMeta : [];
+
+    const active = metasRaw
+      .filter((m: any) => m && m.code)
+      .filter((m: any) => m.is_active !== false)
+      .map((m: any) => ({
+        code: toShortLocale(m.code),
+        label: typeof m.label === "string" ? m.label : undefined,
+        is_default: m.is_default === true,
+      }))
+      .filter((x: any) => !!x.code);
+
+    const uniq = uniqByCode(active);
+
+    const metaDefault = uniq.find((x: any) => x.is_default)?.code || "";
+    const defEndpoint =
+      typeof defaultLocaleMeta === "string" ? toShortLocale(defaultLocaleMeta) : "";
+
+    const effectiveDefault = (metaDefault || defEndpoint || uniq[0]?.code || "tr").toLowerCase();
+
+    const options: AdminLocaleOption[] = uniq.map((it: any) => ({
+      value: toShortLocale(it.code),
+      label: buildLocaleLabel(it),
+    }));
+
+    return { localeOptions: options, defaultLocale: effectiveDefault };
+  }, [appLocalesMeta, defaultLocaleMeta]);
+
+  const isLocalesLoading =
+    isLocalesLoading1 || isLocalesLoading2 || isLocalesFetching1 || isLocalesFetching2;
+
+  const initialActiveLocale = useMemo(() => {
+    const qLocale = toShortLocale(router.query?.locale);
+
+    if (qLocale && localeOptions.some((x) => x.value === qLocale)) return qLocale;
+    if (defaultLocale && localeOptions.some((x) => x.value === defaultLocale)) return defaultLocale;
+
+    return localeOptions?.[0]?.value || "";
+  }, [router.query?.locale, localeOptions, defaultLocale]);
+
+  const [activeLocale, setActiveLocale] = useState<string>(initialActiveLocale);
+
+  // locales/query değişince activeLocale onar
+  useEffect(() => {
+    setActiveLocale(initialActiveLocale);
+  }, [initialActiveLocale]);
+
+  // activeLocale -> URL sync
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (!activeLocale) return;
+
+    const cur = toShortLocale(router.query?.locale);
+    if (activeLocale !== cur) {
+      void router.replace(
+        { pathname: router.pathname, query: { ...router.query, locale: activeLocale } },
+        undefined,
+        { shallow: true },
+      );
+    }
+  }, [activeLocale, router]);
+
+  /* --------- Detail query – locale ile --------- */
+
   const {
     data: service,
     isLoading: isLoadingService,
@@ -55,96 +178,43 @@ const AdminServiceDetailPage: NextPage = () => {
     error: serviceError,
   } = useGetServiceAdminQuery(
     { id: id as string, locale: activeLocale },
-    { skip: shouldSkipQuery },
+    { skip: shouldSkipQuery || !activeLocale },
   );
 
-  const [createService, { isLoading: isCreating }] =
-    useCreateServiceAdminMutation();
-  const [updateService, { isLoading: isUpdating }] =
-    useUpdateServiceAdminMutation();
-
-  /* --------- Locale options – site_settings.app_locales üzerinden --------- */
-
-  const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
-
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
-
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    const uniqLower = Array.from(
-      new Set(arr.map((x) => String(x).toLowerCase())),
-    );
-    return uniqLower;
-  }, [appLocaleRows]);
-
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
+  const [createService, { isLoading: isCreating }] = useCreateServiceAdminMutation();
+  const [updateService, { isLoading: isUpdating }] = useUpdateServiceAdminMutation();
 
   const loading = isLoadingService || isFetchingService || isLocalesLoading;
   const saving = isCreating || isUpdating;
 
   const handleCancel = () => {
-    router.push("/admin/services");
+    router.push({
+      pathname: "/admin/services",
+      query: activeLocale ? { locale: activeLocale } : undefined,
+    });
   };
 
   const handleSubmit = async (values: ServiceFormValues) => {
     try {
+      const loc = normalizeLocale(values.locale || activeLocale || defaultLocale);
+      if (!loc) {
+        toast.error("Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.");
+        return;
+      }
+
       if (isCreateMode) {
         const payload: ServiceCreatePayload = {
-
           category_id: values.category_id || null,
           sub_category_id: values.sub_category_id || null,
 
           featured: values.featured,
           is_active: values.is_active,
-          display_order: values.display_order
-            ? Number(values.display_order)
-            : undefined,
+          display_order: values.display_order ? Number(values.display_order) : undefined,
 
           featured_image: values.featured_image || null,
           image_url: values.image_url || null,
           image_asset_id: values.image_asset_id || null,
 
-          // tip spesifik
           area: values.area || null,
           duration: values.duration || null,
           maintenance: values.maintenance || null,
@@ -152,8 +222,7 @@ const AdminServiceDetailPage: NextPage = () => {
           thickness: values.thickness || null,
           equipment: values.equipment || null,
 
-          // i18n
-          locale: values.locale || undefined,
+          locale: loc,
           name: values.name.trim(),
           slug: values.slug.trim(),
           description: values.description || undefined,
@@ -163,15 +232,17 @@ const AdminServiceDetailPage: NextPage = () => {
           warranty: values.warranty || undefined,
           image_alt: values.image_alt || undefined,
 
-          // multi-locale davranış
           replicate_all_locales: values.replicate_all_locales,
         };
 
         const created = await createService(payload).unwrap();
-        toast.success("Hizmet başarıyla oluşturuldu.");
+        toast.success('Hizmet oluşturuldu.');
 
         const nextId = created.id;
-        router.replace(`/admin/services/${encodeURIComponent(nextId)}`);
+        router.replace({
+          pathname: `/admin/services/${encodeURIComponent(nextId)}`,
+          query: { locale: loc },
+        });
       } else {
         if (!service) {
           toast.error("Hizmet verisi yüklenemedi.");
@@ -179,22 +250,17 @@ const AdminServiceDetailPage: NextPage = () => {
         }
 
         const payload: ServiceUpdatePayload = {
-          // parent (non-i18n)
-
           category_id: values.category_id || null,
           sub_category_id: values.sub_category_id || null,
 
           featured: values.featured,
           is_active: values.is_active,
-          display_order: values.display_order
-            ? Number(values.display_order)
-            : undefined,
+          display_order: values.display_order ? Number(values.display_order) : undefined,
 
           featured_image: values.featured_image || null,
           image_url: values.image_url || null,
           image_asset_id: values.image_asset_id || null,
 
-          // tip spesifik
           area: values.area || null,
           duration: values.duration || null,
           maintenance: values.maintenance || null,
@@ -202,8 +268,7 @@ const AdminServiceDetailPage: NextPage = () => {
           thickness: values.thickness || null,
           equipment: values.equipment || null,
 
-          // i18n
-          locale: values.locale || undefined,
+          locale: loc,
           name: values.name.trim(),
           slug: values.slug.trim(),
           description: values.description || undefined,
@@ -213,29 +278,18 @@ const AdminServiceDetailPage: NextPage = () => {
           warranty: values.warranty || undefined,
           image_alt: values.image_alt || undefined,
 
-          // multi-locale davranış
           apply_all_locales: values.apply_all_locales,
         };
 
-        const targetId = service.id;
-        await updateService({ id: targetId, patch: payload }).unwrap();
+        await updateService({ id: service.id, patch: payload }).unwrap();
         toast.success("Hizmet güncellendi.");
+
+        if (loc && loc !== activeLocale) setActiveLocale(loc);
       }
-    } catch (err: unknown) {
-      const msg =
-        (err as {
-          data?: { error?: { message?: string } };
-          message?: string;
-        })?.data?.error?.message ||
-        (err as { message?: string })?.message ||
-        "İşlem sırasında bir hata oluştu.";
-      toast.error(msg);
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message || err?.message || "İşlem sırasında hata oluştu.");
     }
   };
-
-  const pageTitle = isCreateMode
-    ? "Yeni Hizmet Oluştur"
-    : service?.name || "Hizmet Düzenle";
 
   if (!isRouterReady) {
     return (
@@ -245,33 +299,48 @@ const AdminServiceDetailPage: NextPage = () => {
     );
   }
 
+  // app_locales yoksa net uyarı
+  if (!isLocalesLoading && (!localeOptions || localeOptions.length === 0)) {
+    return (
+      <div className="container-fluid py-3">
+        <h4 className="h5 mb-2">Dil listesi bulunamadı</h4>
+        <p className="text-muted small mb-3">
+          <code>site_settings.app_locales</code> boş veya geçersiz.
+          Önce Site Settings’ten dilleri ayarla.
+        </p>
+        <button
+          type="button"
+          className="btn btn-sm btn-outline-secondary"
+          onClick={() => router.push("/admin/site-settings")}
+        >
+          Site Ayarlarına git
+        </button>
+      </div>
+    );
+  }
+
   if (!isCreateMode && serviceError && !loading && !service) {
     return (
       <div className="container-fluid py-3">
         <h4 className="h5 mb-2">Hizmet bulunamadı</h4>
         <p className="text-muted small mb-3">
-          Bu id için kayıtlı bir hizmet yok:
-          <code className="ms-1">{id}</code>
+          Bu id için kayıtlı hizmet yok: <code className="ms-1">{id}</code>
         </p>
-        <button
-          type="button"
-          className="btn btn-sm btn-outline-secondary"
-          onClick={handleCancel}
-        >
+        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCancel}>
           Listeye dön
         </button>
       </div>
     );
   }
 
+  const pageTitle = isCreateMode ? "Yeni Hizmet Oluştur" : service?.name || "Hizmet Düzenle";
+
   return (
     <div className="container-fluid py-3">
       <div className="mb-3">
         <h4 className="h5 mb-1">{pageTitle}</h4>
         <p className="text-muted small mb-0">
-          Ensotek endüstriyel soğutma kulesi hizmetlerini burada oluşturup
-          düzenleyebilirsin. Çok dilli içerik, teknik alanlar, kategori ilişkisi
-          ve storage tabanlı görseller desteklenir.
+          Hizmeti burada oluşturup düzenleyebilirsin. Dil seçimi dinamik gelir ve URL ile senkron çalışır.
         </p>
       </div>
 
@@ -282,10 +351,10 @@ const AdminServiceDetailPage: NextPage = () => {
         saving={saving}
         locales={localeOptions}
         localesLoading={isLocalesLoading}
-        defaultLocale={activeLocale}
+        defaultLocale={activeLocale || defaultLocale}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
-        onLocaleChange={setActiveLocale} // 🔹 formdaki select burayı tetikliyor
+        onLocaleChange={(loc) => setActiveLocale(toShortLocale(loc))}
       />
     </div>
   );

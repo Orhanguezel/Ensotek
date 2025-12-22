@@ -3,7 +3,7 @@
 // Ensotek – References Header (filtreler + aksiyonlar)
 // =============================================================
 
-import React from "react";
+import React from 'react';
 
 export type LocaleOption = {
   value: string;
@@ -26,12 +26,10 @@ export type ReferencesHeaderProps = {
   showOnlyFeatured: boolean;
   onShowOnlyFeaturedChange: (v: boolean) => void;
 
-  orderBy: "created_at" | "updated_at" | "display_order";
-  orderDir: "asc" | "desc";
-  onOrderByChange: (
-    v: "created_at" | "updated_at" | "display_order",
-  ) => void;
-  onOrderDirChange: (v: "asc" | "desc") => void;
+  orderBy: 'created_at' | 'updated_at' | 'display_order';
+  orderDir: 'asc' | 'desc';
+  onOrderByChange: (v: 'created_at' | 'updated_at' | 'display_order') => void;
+  onOrderDirChange: (v: 'asc' | 'desc') => void;
 
   loading: boolean;
   onRefresh: () => void;
@@ -57,12 +55,9 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
   onRefresh,
   onCreateClick,
 }) => {
-  const handleLocaleChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const raw = e.target.value;
-    // "" → tüm diller, diğerleri lower-case locale kodu
-    const nextLocale = raw ? raw.trim().toLowerCase() : "";
+    const nextLocale = raw ? raw.trim().toLowerCase() : '';
     onLocaleChange(nextLocale);
   };
 
@@ -75,9 +70,7 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
             <div className="row g-2 align-items-end">
               {/* Arama */}
               <div className="col-12 col-md-5">
-                <label className="form-label small mb-1">
-                  Ara (başlık / slug / özet)
-                </label>
+                <label className="form-label small mb-1">Ara (başlık / slug / özet)</label>
                 <input
                   type="text"
                   className="form-control form-control-sm"
@@ -90,10 +83,7 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
               {/* Dil */}
               <div className="col-6 col-md-3">
                 <label className="form-label small mb-1">
-                  Dil{" "}
-                  {localesLoading && (
-                    <span className="spinner-border spinner-border-sm ms-1" />
-                  )}
+                  Dil {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
                 </label>
                 <select
                   className="form-select form-select-sm"
@@ -112,24 +102,15 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
 
               {/* Sıralama alanı */}
               <div className="col-6 col-md-2">
-                <label className="form-label small mb-1">
-                  Sıralama alanı
-                </label>
+                <label className="form-label small mb-1">Sıralama alanı</label>
                 <select
                   className="form-select form-select-sm"
                   value={orderBy}
                   onChange={(e) =>
-                    onOrderByChange(
-                      e.target.value as
-                        | "created_at"
-                        | "updated_at"
-                        | "display_order",
-                    )
+                    onOrderByChange(e.target.value as 'created_at' | 'updated_at' | 'display_order')
                   }
                 >
-                  <option value="display_order">
-                    Sıra (display_order)
-                  </option>
+                  <option value="display_order">Sıra (display_order)</option>
                   <option value="created_at">Oluşturulma</option>
                   <option value="updated_at">Güncellenme</option>
                 </select>
@@ -141,9 +122,7 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
                 <select
                   className="form-select form-select-sm"
                   value={orderDir}
-                  onChange={(e) =>
-                    onOrderDirChange(e.target.value as "asc" | "desc")
-                  }
+                  onChange={(e) => onOrderDirChange(e.target.value as 'asc' | 'desc')}
                 >
                   <option value="asc">Artan</option>
                   <option value="desc">Azalan</option>
@@ -166,14 +145,9 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
                     type="checkbox"
                     id="ref-only-published"
                     checked={showOnlyPublished}
-                    onChange={(e) =>
-                      onShowOnlyPublishedChange(e.target.checked)
-                    }
+                    onChange={(e) => onShowOnlyPublishedChange(e.target.checked)}
                   />
-                  <label
-                    className="form-check-label"
-                    htmlFor="ref-only-published"
-                  >
+                  <label className="form-check-label" htmlFor="ref-only-published">
                     Sadece yayınlananlar
                   </label>
                 </div>
@@ -184,14 +158,9 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
                     type="checkbox"
                     id="ref-only-featured"
                     checked={showOnlyFeatured}
-                    onChange={(e) =>
-                      onShowOnlyFeaturedChange(e.target.checked)
-                    }
+                    onChange={(e) => onShowOnlyFeaturedChange(e.target.checked)}
                   />
-                  <label
-                    className="form-check-label"
-                    htmlFor="ref-only-featured"
-                  >
+                  <label className="form-check-label" htmlFor="ref-only-featured">
                     Sadece öne çıkanlar
                   </label>
                 </div>
@@ -204,7 +173,7 @@ export const ReferencesHeader: React.FC<ReferencesHeaderProps> = ({
                   onClick={onRefresh}
                   disabled={loading}
                 >
-                  {loading ? "Yenileniyor..." : "Yenile"}
+                  {loading ? 'Yenileniyor...' : 'Yenile'}
                 </button>
                 <button
                   type="button"

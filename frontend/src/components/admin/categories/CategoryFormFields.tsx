@@ -3,8 +3,8 @@
 // Kategori Form – Sol kolon (Form mode alanları)
 // =============================================================
 
-import React from "react";
-import type { LocaleOption, ModuleOption } from "./CategoriesHeader";
+import React, { useMemo } from 'react';
+import type { LocaleOption, ModuleOption } from './CategoriesHeader';
 
 export type CategoryFormStateLike = {
   locale: string;
@@ -27,10 +27,7 @@ export type CategoryFormFieldsProps = {
   isLocaleLoading: boolean;
 
   onLocaleChange: (nextLocale: string) => void;
-  onFieldChange: (
-    field: keyof CategoryFormStateLike,
-    value: string | boolean | number,
-  ) => void;
+  onFieldChange: (field: keyof CategoryFormStateLike, value: string | boolean | number) => void;
   onNameChange: (nameValue: string) => void;
   onSlugChange: (slugValue: string) => void;
 };
@@ -46,6 +43,18 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
   onNameChange,
   onSlugChange,
 }) => {
+  const safeLocaleOptions = useMemo<LocaleOption[]>(
+    () => (Array.isArray(localeOptions) ? localeOptions : []),
+    [localeOptions],
+  );
+
+  const safeModuleOptions = useMemo<ModuleOption[]>(
+    () => (Array.isArray(moduleOptions) ? moduleOptions : []),
+    [moduleOptions],
+  );
+
+  const disableLocale = disabled || isLocaleLoading || safeLocaleOptions.length === 0;
+
   return (
     <div className="row g-2">
       <div className="col-md-4">
@@ -54,10 +63,10 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
           className="form-select form-select-sm"
           value={formState.locale}
           onChange={(e) => onLocaleChange(e.target.value)}
-          disabled={disabled || isLocaleLoading}
+          disabled={disableLocale}
         >
-          {localeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+          {safeLocaleOptions.map((opt) => (
+            <option key={`${opt.value}:${opt.label}`} value={opt.value}>
               {opt.label}
             </option>
           ))}
@@ -69,11 +78,11 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
         <select
           className="form-select form-select-sm"
           value={formState.module_key}
-          onChange={(e) => onFieldChange("module_key", e.target.value)}
+          onChange={(e) => onFieldChange('module_key', e.target.value)}
           disabled={disabled}
         >
-          {moduleOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
+          {safeModuleOptions.map((opt) => (
+            <option key={opt.value || 'default'} value={opt.value}>
               {opt.label}
             </option>
           ))}
@@ -86,9 +95,7 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
           type="number"
           className="form-control form-control-sm"
           value={formState.display_order}
-          onChange={(e) =>
-            onFieldChange("display_order", Number(e.target.value) || 0)
-          }
+          onChange={(e) => onFieldChange('display_order', Number(e.target.value) || 0)}
           disabled={disabled}
         />
       </div>
@@ -114,8 +121,7 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
           disabled={disabled}
         />
         <div className="form-text small">
-          İsim alanını doldururken otomatik oluşur, istersen slug&apos;ı manuel
-          değiştirebilirsin.
+          İsim alanını doldururken otomatik oluşur, istersen slug&apos;ı manuel değiştirebilirsin.
         </div>
       </div>
 
@@ -125,13 +131,13 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
           type="text"
           className="form-control form-control-sm"
           value={formState.icon}
-          onChange={(e) => onFieldChange("icon", e.target.value)}
+          onChange={(e) => onFieldChange('icon', e.target.value)}
           disabled={disabled}
           placeholder="Örn: https://... veya /images/cat.jpg"
         />
         <div className="form-text small">
-          Şimdilik bu alan hem ikon metni hem de görsel URL için kullanılıyor.
-          Storage üzerinden yüklediğinde otomatik doldurulur.
+          Şimdilik bu alan hem ikon metni hem de görsel URL için kullanılıyor. Storage üzerinden
+          yüklediğinde otomatik doldurulur.
         </div>
       </div>
 
@@ -143,7 +149,7 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
               type="checkbox"
               id="form-active"
               checked={formState.is_active}
-              onChange={(e) => onFieldChange("is_active", e.target.checked)}
+              onChange={(e) => onFieldChange('is_active', e.target.checked)}
               disabled={disabled}
             />
             <label className="form-check-label" htmlFor="form-active">
@@ -156,9 +162,7 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
               type="checkbox"
               id="form-featured"
               checked={formState.is_featured}
-              onChange={(e) =>
-                onFieldChange("is_featured", e.target.checked)
-              }
+              onChange={(e) => onFieldChange('is_featured', e.target.checked)}
               disabled={disabled}
             />
             <label className="form-check-label" htmlFor="form-featured">
@@ -174,7 +178,7 @@ export const CategoryFormFields: React.FC<CategoryFormFieldsProps> = ({
           className="form-control form-control-sm"
           rows={4}
           value={formState.description}
-          onChange={(e) => onFieldChange("description", e.target.value)}
+          onChange={(e) => onFieldChange('description', e.target.value)}
           disabled={disabled}
         />
       </div>

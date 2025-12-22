@@ -3,10 +3,10 @@
 // Kategori Form – Header (başlık + Form/JSON toggle + badges)
 // =============================================================
 
-import React from "react";
+import React, { useMemo } from 'react';
 
-type CategoryFormMode = "create" | "edit";
-type EditMode = "form" | "json";
+type CategoryFormMode = 'create' | 'edit';
+type EditMode = 'form' | 'json';
 
 export type CategoryFormHeaderProps = {
   mode: CategoryFormMode;
@@ -29,14 +29,18 @@ export const CategoryFormHeader: React.FC<CategoryFormHeaderProps> = ({
   saving,
   isLocaleLoading,
 }) => {
+  const safeModule = useMemo(() => (moduleKey ? String(moduleKey) : 'general'), [moduleKey]);
+  const safeLocaleUpper = useMemo(() => {
+    const s = String(locale || '').trim();
+    return s ? s.toUpperCase() : '-';
+  }, [locale]);
+
   return (
     <div className="card-header py-2 d-flex justify-content-between align-items-center">
       <div>
-        <h1 className="h5 mb-0">
-          {mode === "create" ? "Yeni Kategori" : "Kategori Düzenle"}
-        </h1>
+        <h1 className="h5 mb-0">{mode === 'create' ? 'Yeni Kategori' : 'Kategori Düzenle'}</h1>
         <div className="small text-muted">
-          {moduleKey} · {locale.toUpperCase()}
+          {safeModule} · {safeLocaleUpper}
         </div>
       </div>
 
@@ -44,20 +48,16 @@ export const CategoryFormHeader: React.FC<CategoryFormHeaderProps> = ({
         <div className="btn-group btn-group-sm" role="group">
           <button
             type="button"
-            className={`btn btn-outline-secondary ${
-              editMode === "form" ? "active" : ""
-            }`}
-            onClick={() => onChangeEditMode("form")}
+            className={`btn btn-outline-secondary ${editMode === 'form' ? 'active' : ''}`}
+            onClick={() => onChangeEditMode('form')}
             disabled={saving}
           >
             Form
           </button>
           <button
             type="button"
-            className={`btn btn-outline-secondary ${
-              editMode === "json" ? "active" : ""
-            }`}
-            onClick={() => onChangeEditMode("json")}
+            className={`btn btn-outline-secondary ${editMode === 'json' ? 'active' : ''}`}
+            onClick={() => onChangeEditMode('json')}
             disabled={saving}
           >
             JSON
@@ -66,7 +66,7 @@ export const CategoryFormHeader: React.FC<CategoryFormHeaderProps> = ({
 
         {(saving || isLocaleLoading) && (
           <span className="badge bg-secondary small">
-            {isLocaleLoading ? "Dil değiştiriliyor..." : "Kaydediliyor..."}
+            {isLocaleLoading ? 'Dil değiştiriliyor...' : 'Kaydediliyor...'}
           </span>
         )}
       </div>

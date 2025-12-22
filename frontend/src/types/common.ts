@@ -1,85 +1,68 @@
-// src/types/common.ts
+// =============================================================
+// FILE: src/types/common.ts  (DYNAMIC)
+// =============================================================
 
-import LOCALES_JSON from "./locales.json";
+// Runtime’da tek kaynak DB olduğu için:
+// SupportedLocale compile-time union OLAMAZ. string olmalı.
+export type SupportedLocale = string;
 
-// 🌍 Tenant genelinde desteklenen diller — tek kaynaktan
-export const SUPPORTED_LOCALES = LOCALES_JSON as readonly string[];
-export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number];
+/** Çok dilli alan: locale -> text */
+export type TranslatedLabel = Record<string, string>;
+export type StrictTranslatedLabel = Record<string, string>;
 
-// (Aşağıdaki mevcut kodun aynen devam edebilir)
-export type TranslatedLabel = Partial<Record<SupportedLocale, string>>;
-export type StrictTranslatedLabel = Record<string, string>; // istersen koru
-
-export const LANG_LABELS: Record<SupportedLocale, string> = {
-  ar: "العربية",
-  de: "Deutsch",
-  en: "English",
-  es: "Español",
-  fr: "Français",
-  hi: "हिन्दी",
-  it: "Italiano",
-  pl: "Polski",
-  pt: "Português",
-  ru: "Русский",
+/**
+ * İsteğe bağlı: Label map (UI dil seçici gibi yerlerde “güzel isim” için)
+ * Bu tablo “karar mekanizması” değildir, sadece best-effort display'dir.
+ */
+export const LANG_LABELS: Record<string, string> = {
   tr: "Türkçe",
-  zh: "中文(简体)",
+  en: "English",
+  de: "Deutsch",
+  fr: "Français",
+  es: "Español",
+  it: "Italiano",
 };
 
-// 📅 Tarih formatları (UI gösterimleri için)
-export const DATE_FORMATS: Record<SupportedLocale, string> = {
-  ar: "dd/MM/yyyy",
-  de: "dd.MM.yyyy",
-  en: "yyyy-MM-dd",
-  es: "dd/MM/yyyy",
-  fr: "dd/MM/yyyy",
-  hi: "dd/MM/yyyy",
-  it: "dd/MM/yyyy",
-  pl: "dd.MM.yyyy",
-  pt: "dd/MM/yyyy",
-  ru: "dd.MM.yyyy",
+/** Tarih formatları: best-effort + fallback */
+export const DATE_FORMATS: Record<string, string> = {
   tr: "dd.MM.yyyy",
-  zh: "yyyy/MM/dd",
+  en: "yyyy-MM-dd",
+  de: "dd.MM.yyyy",
 };
 
-// 🌐 Intl / date-fns vb. için locale map
-export const LOCALE_MAP: Record<SupportedLocale, string> = {
-  ar: "ar-SA",
-  de: "de-DE",
-  en: "en-US",
-  es: "es-ES",
-  fr: "fr-FR",
-  hi: "hi-IN",
-  it: "it-IT",
-  pl: "pl-PL",
-  pt: "pt-PT",
-  ru: "ru-RU",
+/** Intl locale map: best-effort + fallback */
+export const LOCALE_MAP: Record<string, string> = {
   tr: "tr-TR",
-  zh: "zh-CN",
+  en: "en-US",
+  de: "de-DE",
 };
 
-// Eski adla da erişmek isteyenler için
 export function getDateLocale(locale: SupportedLocale): string {
-  return LOCALE_MAP[locale] || "en-US";
+  const l = String(locale || "").trim().toLowerCase();
+  return LOCALE_MAP[l] || LOCALE_MAP.en || "en-US";
 }
 
-// Sık kullanılan yardımcılar
 export function getLocaleStringFromLang(lang: SupportedLocale): string {
-  return LOCALE_MAP[lang] || "en-US";
+  const l = String(lang || "").trim().toLowerCase();
+  return LOCALE_MAP[l] || LOCALE_MAP.en || "en-US";
 }
 
-/** Çok dilli bir alanda (örn. title, name) dil-fallback okuma */
+/**
+ * Çok dilli alanlarda fallback okuma
+ * Fallback sırası:
+ *  1) istenen lang
+ *  2) tr
+ *  3) en
+ *  4) ilk değer
+ */
 export function getMultiLang(
-  obj?: TranslatedLabel | Record<string, string>,
-  lang?: SupportedLocale
+  obj?: Record<string, string> | null,
+  lang?: SupportedLocale | null,
 ): string {
   if (!obj) return "—";
-  if (lang && obj[lang]) return obj[lang] as string;
 
-  // Yaygın/istenen fallback sırası: tr → en → listedeki ilk değer
-  return (
-    (obj as any).tr ||
-    (obj as any).en ||
-    Object.values(obj)[0] ||
-    "—"
-  );
+  const l = String(lang || "").trim().toLowerCase();
+  if (l && obj[l]) return obj[l];
+
+  return obj.tr || obj.en || Object.values(obj)[0] || "—";
 }

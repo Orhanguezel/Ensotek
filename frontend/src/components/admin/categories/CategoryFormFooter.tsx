@@ -3,9 +3,9 @@
 // Kategori Form – Footer (İptal / Kaydet butonları)
 // =============================================================
 
-import React from "react";
+import React from 'react';
 
-type CategoryFormMode = "create" | "edit";
+type CategoryFormMode = 'create' | 'edit';
 
 export type CategoryFormFooterProps = {
   mode: CategoryFormMode;
@@ -28,12 +28,8 @@ export const CategoryFormFooter: React.FC<CategoryFormFooterProps> = ({
       >
         İptal
       </button>
-      <button
-        type="submit"
-        className="btn btn-primary btn-sm"
-        disabled={saving}
-      >
-        {saving ? "Kaydediliyor..." : mode === "create" ? "Oluştur" : "Kaydet"}
+      <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
+        {saving ? 'Kaydediliyor...' : mode === 'create' ? 'Oluştur' : 'Kaydet'}
       </button>
     </div>
   );

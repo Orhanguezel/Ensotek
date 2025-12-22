@@ -1,6 +1,9 @@
 -- =============================================================
--- 043_site_settings_ui_common.sql  (Common UI metinleri)
--- Şimdilik: ui_banner (breadcrumb) + ui_contact (iletişim formu + SEO)
+-- 043_site_settings_ui_common.sql  (Common UI strings)
+--  - ui_banner (breadcrumb)
+--  - ui_contact (contact form + SEO)
+--  - Localized: tr / en / de
+--  - Extendable: clone from tr as bootstrap (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -9,15 +12,14 @@ SET time_zone = '+00:00';
 -- =============================================================
 -- ui_banner : breadcrumb vb. ortak UI metinleri
 -- =============================================================
-
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
   'ui_banner',
   'tr',
-  JSON_OBJECT(
+  CAST(JSON_OBJECT(
     'ui_breadcrumb_home', 'Ana Sayfa'
-  ),
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
@@ -25,27 +27,35 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_banner',
   'en',
-  JSON_OBJECT(
+  CAST(JSON_OBJECT(
     'ui_breadcrumb_home', 'Home'
-  ),
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_banner',
+  'de',
+  CAST(JSON_OBJECT(
+    'ui_breadcrumb_home', 'Startseite'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- ui_contact : İletişim sayfası UI + SEO metinleri
--- UI_FALLBACK_EN.contact ile bire bir aynı key'ler
+-- ui_contact : Contact page UI + SEO strings
 -- =============================================================
-
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
   'ui_contact',
   'tr',
-  JSON_OBJECT(
+  CAST(JSON_OBJECT(
     -- UI
     'ui_contact_subprefix',                  'İletişime',
     'ui_contact_sublabel',                   'geçin',
@@ -75,7 +85,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     -- SEO
     'ui_contact_meta_title',                 'Ensotek İletişim | Bize Ulaşın',
     'ui_contact_meta_description',           'Ensotek su soğutma çözümleri hakkında bilgi almak için bizimle iletişime geçin.'
-  ),
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
@@ -83,29 +93,29 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_contact',
   'en',
-  JSON_OBJECT(
+  CAST(JSON_OBJECT(
     -- UI
     'ui_contact_subprefix',                  'Get',
     'ui_contact_sublabel',                   'in touch',
     'ui_contact_title_left',                 'Let''s Talk',
     'ui_contact_tagline',                    'We''ve been growing businesses since 2009, let us do it for you!',
-    'ui_contact_quick_email_placeholder',    'Enter Mail',
-    'ui_contact_form_title',                 'Schedule a Consultation',
+    'ui_contact_quick_email_placeholder',    'Your email address',
+    'ui_contact_form_title',                 'Request a Consultation',
     'ui_contact_first_name',                 'First Name*',
     'ui_contact_last_name',                  'Last Name',
     'ui_contact_company',                    'Company Name',
     'ui_contact_website',                    'Website',
     'ui_contact_phone',                      'Phone Number',
     'ui_contact_email',                      'Email*',
-    'ui_contact_select_label',               'Select the services',
+    'ui_contact_select_label',               'Select a service',
     'ui_contact_service_cooling_towers',     'Cooling Towers',
     'ui_contact_service_maintenance',        'Maintenance',
     'ui_contact_service_modernization',      'Modernization',
     'ui_contact_service_other',              'Other',
-    'ui_contact_terms_prefix',               'Accept Our',
+    'ui_contact_terms_prefix',               'I agree to the:',
     'ui_contact_terms',                      'Terms',
     'ui_contact_conditions',                 'Conditions',
-    'ui_contact_submit',                     'Submit Query',
+    'ui_contact_submit',                     'Send Request',
     'ui_contact_sending',                    'Sending...',
     'ui_contact_success',                    'Thanks! Your message has been sent.',
     'ui_contact_error_generic',              'Failed to send. Please try again.',
@@ -113,27 +123,74 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     -- SEO
     'ui_contact_meta_title',                 'Contact Ensotek | Get in Touch',
     'ui_contact_meta_description',           'Contact Ensotek for industrial cooling tower solutions and technical support.'
-  ),
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_contact',
+  'de',
+  CAST(JSON_OBJECT(
+    -- UI
+    'ui_contact_subprefix',                  'Kontakt',
+    'ui_contact_sublabel',                   'aufnehmen',
+    'ui_contact_title_left',                 'Lassen Sie uns sprechen',
+    'ui_contact_tagline',                    'Seit 2009 unterstützen wir Unternehmen beim Wachstum – gerne auch Ihres.',
+    'ui_contact_quick_email_placeholder',    'Ihre E-Mail-Adresse',
+    'ui_contact_form_title',                 'Beratungsanfrage senden',
+    'ui_contact_first_name',                 'Vorname*',
+    'ui_contact_last_name',                  'Nachname',
+    'ui_contact_company',                    'Firmenname',
+    'ui_contact_website',                    'Webseite',
+    'ui_contact_phone',                      'Telefonnummer',
+    'ui_contact_email',                      'E-Mail*',
+    'ui_contact_select_label',               'Wählen Sie eine Leistung',
+    'ui_contact_service_cooling_towers',     'Kühltürme',
+    'ui_contact_service_maintenance',        'Wartung',
+    'ui_contact_service_modernization',      'Modernisierung',
+    'ui_contact_service_other',              'Sonstiges',
+    'ui_contact_terms_prefix',               'Ich akzeptiere:',
+    'ui_contact_terms',                      'Bedingungen',
+    'ui_contact_conditions',                 'Konditionen',
+    'ui_contact_submit',                     'Anfrage senden',
+    'ui_contact_sending',                    'Wird gesendet...',
+    'ui_contact_success',                    'Danke! Ihre Nachricht wurde gesendet.',
+    'ui_contact_error_generic',              'Senden fehlgeschlagen. Bitte erneut versuchen.',
+
+    -- SEO
+    'ui_contact_meta_title',                 'Ensotek Kontakt | Kontaktieren Sie uns',
+    'ui_contact_meta_description',           'Kontaktieren Sie Ensotek für industrielle Kühlturmlösungen und technischen Support.'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- TR → DE otomatik kopya (placeholder amaçlı)
--- ui_banner + ui_contact için
+-- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE):
+-- TR → TARGET LOCALE (ui_banner + ui_contact)
+-- Yeni dil ekleyince sadece @TARGET_LOCALE değiştir.
 -- =============================================================
+SET @TARGET_LOCALE := 'de';
 
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
+SELECT
+  UUID(),
+  s.`key`,
+  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
+  s.`value`,
+  NOW(3),
+  NOW(3)
 FROM site_settings s
-WHERE s.locale = 'tr'
-  AND s.`key` IN ('ui_banner', 'ui_contact')
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (s.`key`  COLLATE utf8mb4_unicode_ci) IN (('ui_banner' COLLATE utf8mb4_unicode_ci), ('ui_contact' COLLATE utf8mb4_unicode_ci))
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t
-    WHERE t.`key` = s.`key`
-      AND t.locale = 'de'
+    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
+      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
   );

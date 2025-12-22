@@ -210,5 +210,5 @@ export const serviceImagesI18n = mysqlTable(
   ],
 );
 
-export type ServiceImageI18nRow = typeof serviceImagesI18n.$inferSelect;
+export type ServiceImageI18nRow = typeof servicesI18n.$inferSelect;
 export type NewServiceImageI18nRow = typeof serviceImagesI18n.$inferInsert;

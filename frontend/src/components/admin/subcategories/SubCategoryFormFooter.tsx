@@ -3,8 +3,8 @@
 // Ensotek – Alt Kategori Form Footer (Butonlar)
 // =============================================================
 
-import React from "react";
-import type { SubCategoryFormMode } from "./SubCategoryFormHeader";
+import React from 'react';
+import type { SubCategoryFormMode } from './SubCategoryFormHeader';
 
 export type SubCategoryFormFooterProps = {
   mode: SubCategoryFormMode;
@@ -12,11 +12,13 @@ export type SubCategoryFormFooterProps = {
   onCancel: () => void;
 };
 
-export const SubCategoryFormFooter: React.FC<
-  SubCategoryFormFooterProps
-> = ({ mode, saving, onCancel }) => {
+export const SubCategoryFormFooter: React.FC<SubCategoryFormFooterProps> = ({
+  mode,
+  saving,
+  onCancel,
+}) => {
   return (
-    <div className="card-footer py-2 d-flex justify-content-end gap-2">
+    <div className="card-footer py-2 d-flex justify-content-between">
       <button
         type="button"
         className="btn btn-outline-secondary btn-sm"
@@ -25,16 +27,9 @@ export const SubCategoryFormFooter: React.FC<
       >
         İptal
       </button>
-      <button
-        type="submit"
-        className="btn btn-primary btn-sm"
-        disabled={saving}
-      >
-        {saving
-          ? "Kaydediliyor..."
-          : mode === "create"
-          ? "Oluştur"
-          : "Kaydet"}
+
+      <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
+        {saving ? 'Kaydediliyor...' : mode === 'create' ? 'Oluştur' : 'Kaydet'}
       </button>
     </div>
   );

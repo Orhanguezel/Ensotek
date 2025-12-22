@@ -157,3 +157,83 @@ WHERE s.locale = 'tr'
     WHERE t.image_id = s.image_id
       AND t.locale    = 'en'
   );
+
+
+  -- ================= SEED: DE =================
+-- Toronto A (DE)
+INSERT INTO reference_images_i18n
+(id, image_id, locale, alt, caption, created_at, updated_at)
+SELECT
+  UUID(),
+  @REFIMG_TORONTO_A_ID,
+  'de',
+  'Toronto Galeriebild 1',
+  NULL,
+  NOW(3),
+  NOW(3)
+WHERE EXISTS (
+  SELECT 1 FROM reference_images WHERE id = @REFIMG_TORONTO_A_ID
+)
+ON DUPLICATE KEY UPDATE
+  alt        = VALUES(alt),
+  caption    = VALUES(caption),
+  updated_at = VALUES(updated_at);
+
+-- Toronto B (DE)
+INSERT INTO reference_images_i18n
+(id, image_id, locale, alt, caption, created_at, updated_at)
+SELECT
+  UUID(),
+  @REFIMG_TORONTO_B_ID,
+  'de',
+  'Toronto Galeriebild 2',
+  NULL,
+  NOW(3),
+  NOW(3)
+WHERE EXISTS (
+  SELECT 1 FROM reference_images WHERE id = @REFIMG_TORONTO_B_ID
+)
+ON DUPLICATE KEY UPDATE
+  alt        = VALUES(alt),
+  caption    = VALUES(caption),
+  updated_at = VALUES(updated_at);
+
+-- E-commerce A (DE)
+INSERT INTO reference_images_i18n
+(id, image_id, locale, alt, caption, created_at, updated_at)
+SELECT
+  UUID(),
+  @REFIMG_ECOM_A_ID,
+  'de',
+  'E-Commerce Galeriebild',
+  NULL,
+  NOW(3),
+  NOW(3)
+WHERE EXISTS (
+  SELECT 1 FROM reference_images WHERE id = @REFIMG_ECOM_A_ID
+)
+ON DUPLICATE KEY UPDATE
+  alt        = VALUES(alt),
+  caption    = VALUES(caption),
+  updated_at = VALUES(updated_at);
+
+-- Eksik DE kayıtları için TR’den kopya
+INSERT INTO reference_images_i18n
+(id, image_id, locale, alt, caption, created_at, updated_at)
+SELECT
+  UUID(),
+  s.image_id,
+  'de',
+  s.alt,
+  s.caption,
+  NOW(3),
+  NOW(3)
+FROM reference_images_i18n s
+WHERE s.locale = 'tr'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM reference_images_i18n t
+    WHERE t.image_id = s.image_id
+      AND t.locale    = 'de'
+  );
+

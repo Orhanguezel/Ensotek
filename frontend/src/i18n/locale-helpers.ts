@@ -1,7 +1,8 @@
 // =============================================================
-// FILE: src/i18n/locale-helpers.ts
+// FILE: src/i18n/locale-helpers.ts  (UPDATED)
 // =============================================================
-export { DEFAULT_LOCALE, isSupportedLocale, KNOWN_RTL } from "./config";
+
+export { KNOWN_RTL } from "./config";
 
 export const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || "ensotek.de").trim();
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(/\/+$/, "");

@@ -1,131 +1,166 @@
 -- =============================================================
--- 048_site_settings_ui_feedback.sql  (Feedback / Reviews UI metinleri)
+-- 048_site_settings_ui_feedback.sql  (Feedback / Reviews UI strings)
+--  - Key: ui_feedback
+--  - Value: JSON (stored as TEXT)
+--  - Localized: tr / en / de
+--  - Extendable: clone from tr as bootstrap (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-VALUES
--- -------------------------------------------------------------
--- TR
--- -------------------------------------------------------------
+INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
   'ui_feedback',
   'tr',
-  JSON_OBJECT(
-    -- Section header
-    'ui_feedback_subprefix',      'Ensotek',
-    'ui_feedback_sublabel',       'Müşteri Yorumları',
-    'ui_feedback_title',          'Müşterilerimizin bizim hakkımızda söyledikleri',
-    'ui_feedback_paragraph',      'Müşteri geri bildirimleri, mühendislik ve hizmet kalitemizi sürekli geliştirmemize yardımcı oluyor.',
+  CAST(JSON_OBJECT(
+    'ui_feedback_subprefix',        'Ensotek',
+    'ui_feedback_sublabel',         'Müşteri Yorumları',
+    'ui_feedback_title',            'Müşterilerimizin bizim hakkımızda söyledikleri',
+    'ui_feedback_paragraph',        'Müşteri geri bildirimleri, mühendislik ve hizmet kalitemizi sürekli geliştirmemize yardımcı oluyor.',
 
-    -- Role / meta
-    'ui_feedback_role_customer',  'Müşteri',
+    'ui_feedback_role_customer',    'Müşteri',
 
-    -- Navigation
-    'ui_feedback_prev',           'Önceki yorum',
-    'ui_feedback_next',           'Sonraki yorum',
+    'ui_feedback_prev',             'Önceki yorum',
+    'ui_feedback_next',             'Sonraki yorum',
 
-    -- Placeholder slide texts (backend’ten veri yoksa)
-    'ui_feedback_placeholder_1',  'B2B SaaS müşterimizin web sitesi trafiğini yalnızca 3 ayda %300''ün üzerinde artırdık.',
-    'ui_feedback_placeholder_2',  'Hedefli içerik ve teknik SEO, tüm kanallarda düzenli ve bileşik bir büyüme sağladı.',
-    'ui_feedback_placeholder_3',  'Net raporlama ve öngörülebilir teslimat — ölçeklemek için tam olarak ihtiyacımız olan şey buydu.',
+    'ui_feedback_placeholder_1',    'B2B SaaS müşterimizin web sitesi trafiğini yalnızca 3 ayda %300''ün üzerinde artırdık.',
+    'ui_feedback_placeholder_2',    'Hedefli içerik ve teknik SEO, tüm kanallarda düzenli ve bileşik bir büyüme sağladı.',
+    'ui_feedback_placeholder_3',    'Net raporlama ve öngörülebilir teslimat — ölçeklemek için tam olarak ihtiyacımız olan şey buydu.',
 
-    -- --------- Review Form (public) ---------
-    'ui_feedback_form_title',           'Yorum bırakın',
-    'ui_feedback_form_name_label',      'Adınız',
-    'ui_feedback_form_email_label',     'E-posta adresiniz',
-    'ui_feedback_form_rating_label',    'Puanınız',
-    'ui_feedback_form_comment_label',   'Yorumunuz',
-    'ui_feedback_form_submit',          'Yorumu Gönder',
-    'ui_feedback_form_submitting',      'Gönderiliyor...',
-    'ui_feedback_form_success',         'Yorumunuz alındı, teşekkürler.',
-    'ui_feedback_form_error',           'Yorum gönderilirken bir hata oluştu.',
-    'ui_feedback_form_required',        'Bu alan zorunludur.',
+    'ui_feedback_form_title',             'Yorum bırakın',
+    'ui_feedback_form_name_label',        'Adınız',
+    'ui_feedback_form_email_label',       'E-posta adresiniz',
+    'ui_feedback_form_rating_label',      'Puanınız',
+    'ui_feedback_form_comment_label',     'Yorumunuz',
+    'ui_feedback_form_submit',            'Yorumu Gönder',
+    'ui_feedback_form_submitting',        'Gönderiliyor...',
+    'ui_feedback_form_success',           'Yorumunuz alındı, teşekkürler.',
+    'ui_feedback_form_error',             'Yorum gönderilirken bir hata oluştu.',
+    'ui_feedback_form_required',          'Bu alan zorunludur.',
 
-    -- --------- Review List + Reactions (public) ---------
-    'ui_feedback_list_title',           'Müşteri Yorumları',
-    'ui_feedback_list_no_reviews',      'Bu içerik için henüz yorum yok.',
-    'ui_feedback_list_avg_rating',      'Ortalama Puan',
-    'ui_feedback_list_reviews_suffix',  'yorum',
-    'ui_feedback_list_helpful',         'Faydalı',
-    'ui_feedback_list_like',            'Faydalı buldum',
-    'ui_feedback_list_liked',           'Teşekkürler',
-    'ui_feedback_list_error',           'İşlem sırasında bir hata oluştu.',
-    'ui_feedback_list_loading',         'Yorumlar yükleniyor...'
-  ),
+    'ui_feedback_list_title',             'Müşteri Yorumları',
+    'ui_feedback_list_no_reviews',        'Bu içerik için henüz yorum yok.',
+    'ui_feedback_list_avg_rating',        'Ortalama Puan',
+    'ui_feedback_list_reviews_suffix',    'yorum',
+    'ui_feedback_list_helpful',           'Faydalı',
+    'ui_feedback_list_like',              'Faydalı buldum',
+    'ui_feedback_list_liked',             'Teşekkürler',
+    'ui_feedback_list_error',             'İşlem sırasında bir hata oluştu.',
+    'ui_feedback_list_loading',           'Yorumlar yükleniyor...'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
--- -------------------------------------------------------------
--- EN
--- -------------------------------------------------------------
 (
   UUID(),
   'ui_feedback',
   'en',
-  JSON_OBJECT(
-    -- Section header
-    'ui_feedback_subprefix',      'Ensotek',
-    'ui_feedback_sublabel',       'Customers',
-    'ui_feedback_title',          'What our customers say about us',
-    'ui_feedback_paragraph',      'Customer feedback helps us continuously improve our engineering and service quality.',
+  CAST(JSON_OBJECT(
+    'ui_feedback_subprefix',        'Ensotek',
+    'ui_feedback_sublabel',         'Customers',
+    'ui_feedback_title',            'What our customers say about us',
+    'ui_feedback_paragraph',        'Customer feedback helps us continuously improve our engineering and service quality.',
 
-    -- Role / meta
-    'ui_feedback_role_customer',  'Customer',
+    'ui_feedback_role_customer',    'Customer',
 
-    -- Navigation
-    'ui_feedback_prev',           'Previous testimonial',
-    'ui_feedback_next',           'Next testimonial',
+    'ui_feedback_prev',             'Previous testimonial',
+    'ui_feedback_next',             'Next testimonial',
 
-    -- Placeholder slide texts (used when no backend data yet)
-    'ui_feedback_placeholder_1',  'We increased our B2B SaaS client''s website traffic by over 300% in just 3 months.',
-    'ui_feedback_placeholder_2',  'Targeted content + technical SEO gave us consistent, compounding growth across all funnels.',
-    'ui_feedback_placeholder_3',  'Clear reporting and predictable delivery — exactly what we needed to scale.',
+    'ui_feedback_placeholder_1',    'We increased our B2B SaaS client''s website traffic by over 300% in just 3 months.',
+    'ui_feedback_placeholder_2',    'Targeted content + technical SEO gave us consistent, compounding growth across all funnels.',
+    'ui_feedback_placeholder_3',    'Clear reporting and predictable delivery — exactly what we needed to scale.',
 
-    -- --------- Review Form (public) ---------
-    'ui_feedback_form_title',           'Leave a review',
-    'ui_feedback_form_name_label',      'Your name',
-    'ui_feedback_form_email_label',     'Email address',
-    'ui_feedback_form_rating_label',    'Your rating',
-    'ui_feedback_form_comment_label',   'Your review',
-    'ui_feedback_form_submit',          'Submit review',
-    'ui_feedback_form_submitting',      'Submitting...',
-    'ui_feedback_form_success',         'Your review has been received. Thank you!',
-    'ui_feedback_form_error',           'An error occurred while submitting your review.',
-    'ui_feedback_form_required',        'This field is required.',
+    'ui_feedback_form_title',             'Leave a review',
+    'ui_feedback_form_name_label',        'Your name',
+    'ui_feedback_form_email_label',       'Email address',
+    'ui_feedback_form_rating_label',      'Your rating',
+    'ui_feedback_form_comment_label',     'Your review',
+    'ui_feedback_form_submit',            'Submit review',
+    'ui_feedback_form_submitting',        'Submitting...',
+    'ui_feedback_form_success',           'Your review has been received. Thank you!',
+    'ui_feedback_form_error',             'An error occurred while submitting your review.',
+    'ui_feedback_form_required',          'This field is required.',
 
-    -- --------- Review List + Reactions (public) ---------
-    'ui_feedback_list_title',           'Customer Reviews',
-    'ui_feedback_list_no_reviews',      'There are no reviews for this item yet.',
-    'ui_feedback_list_avg_rating',      'Average Rating',
-    'ui_feedback_list_reviews_suffix',  'reviews',
-    'ui_feedback_list_helpful',         'Helpful',
-    'ui_feedback_list_like',            'Mark as helpful',
-    'ui_feedback_list_liked',           'Thanks',
-    'ui_feedback_list_error',           'An error occurred while processing your request.',
-    'ui_feedback_list_loading',         'Loading reviews...'
-  ),
+    'ui_feedback_list_title',             'Customer Reviews',
+    'ui_feedback_list_no_reviews',        'There are no reviews for this item yet.',
+    'ui_feedback_list_avg_rating',        'Average Rating',
+    'ui_feedback_list_reviews_suffix',    'reviews',
+    'ui_feedback_list_helpful',           'Helpful',
+    'ui_feedback_list_like',              'Mark as helpful',
+    'ui_feedback_list_liked',             'Thanks',
+    'ui_feedback_list_error',             'An error occurred while processing your request.',
+    'ui_feedback_list_loading',           'Loading reviews...'
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_feedback',
+  'de',
+  CAST(JSON_OBJECT(
+    'ui_feedback_subprefix',        'Ensotek',
+    'ui_feedback_sublabel',         'Kundenstimmen',
+    'ui_feedback_title',            'Was unsere Kunden über uns sagen',
+    'ui_feedback_paragraph',        'Kundenfeedback hilft uns, unsere Engineering- und Servicequalität kontinuierlich zu verbessern.',
+
+    'ui_feedback_role_customer',    'Kunde',
+
+    'ui_feedback_prev',             'Vorherige Bewertung',
+    'ui_feedback_next',             'Nächste Bewertung',
+
+    'ui_feedback_placeholder_1',    'Wir haben den Website-Traffic unseres B2B-SaaS-Kunden in nur 3 Monaten um über 300% gesteigert.',
+    'ui_feedback_placeholder_2',    'Gezielter Content und technisches SEO sorgten für stetiges, kumulatives Wachstum über alle Kanäle.',
+    'ui_feedback_placeholder_3',    'Klare Reports und planbare Lieferung — genau das, was wir zum Skalieren brauchten.',
+
+    'ui_feedback_form_title',             'Bewertung abgeben',
+    'ui_feedback_form_name_label',        'Ihr Name',
+    'ui_feedback_form_email_label',       'E-Mail-Adresse',
+    'ui_feedback_form_rating_label',      'Ihre Bewertung',
+    'ui_feedback_form_comment_label',     'Ihr Kommentar',
+    'ui_feedback_form_submit',            'Bewertung senden',
+    'ui_feedback_form_submitting',        'Wird gesendet...',
+    'ui_feedback_form_success',           'Ihre Bewertung wurde empfangen. Vielen Dank!',
+    'ui_feedback_form_error',             'Beim Senden der Bewertung ist ein Fehler aufgetreten.',
+    'ui_feedback_form_required',          'Dieses Feld ist erforderlich.',
+
+    'ui_feedback_list_title',             'Kundenbewertungen',
+    'ui_feedback_list_no_reviews',        'Für diesen Inhalt gibt es noch keine Bewertungen.',
+    'ui_feedback_list_avg_rating',        'Durchschnittliche Bewertung',
+    'ui_feedback_list_reviews_suffix',    'Bewertungen',
+    'ui_feedback_list_helpful',           'Hilfreich',
+    'ui_feedback_list_like',              'Als hilfreich markieren',
+    'ui_feedback_list_liked',             'Danke',
+    'ui_feedback_list_error',             'Bei der Verarbeitung ist ein Fehler aufgetreten.',
+    'ui_feedback_list_loading',           'Bewertungen werden geladen...'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
--- -------------------------------------------------------------
--- TR → DE otomatik kopya (Almanca özel çeviri gelene kadar)
--- -------------------------------------------------------------
+-- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE): TR → TARGET
+SET @TARGET_LOCALE := 'de';
+
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
+SELECT
+  UUID(),
+  s.`key`,
+  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
+  s.`value`,
+  NOW(3),
+  NOW(3)
 FROM site_settings s
-WHERE s.locale = 'tr'
-  AND s.`key` = 'ui_feedback'
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_feedback' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t
-    WHERE t.`key` = s.`key`
-      AND t.locale = 'de'
+    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
+      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
   );

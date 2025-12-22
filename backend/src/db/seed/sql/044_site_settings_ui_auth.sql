@@ -1,5 +1,9 @@
 -- =============================================================
--- 044_site_settings_ui_auth.sql  (Auth sayfaları – login/register/logout)
+-- 044_site_settings_ui_auth.sql  (Auth pages – login/register/logout)
+--  - Key: ui_auth
+--  - Value: JSON (stored as TEXT)
+--  - Localized: tr / en / de
+--  - Extendable: clone from tr as bootstrap (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -10,7 +14,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_auth',
   'tr',
-  JSON_OBJECT(
+  CAST(JSON_OBJECT(
     /* =========================================================
        META (NEW KEYS - preferred)
        ========================================================= */
@@ -84,7 +88,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'logout_title',   'Çıkış yapılıyor...',
     'logout_lead',    'Lütfen bekleyin, birkaç saniye içinde giriş sayfasına yönlendirileceksiniz.',
     'logout_error',   'Sunucudan çıkış yapılırken bir sorun oluştu, ancak yerel oturumunuz temizlendi.'
-  ),
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
@@ -92,7 +96,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_auth',
   'en',
-  JSON_OBJECT(
+  CAST(JSON_OBJECT(
     /* =========================================================
        META (NEW KEYS - preferred)
        ========================================================= */
@@ -166,23 +170,117 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'logout_title',   'Signing out...',
     'logout_lead',    'Please wait, you will be redirected to the login page in a few seconds.',
     'logout_error',   'There was a problem signing out from the server, but your local session has been cleared.'
-  ),
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_auth',
+  'de',
+  CAST(JSON_OBJECT(
+    /* =========================================================
+       META (NEW KEYS - preferred)
+       ========================================================= */
+    'ui_auth_login_meta_title',           'Anmelden | Ensotek',
+    'ui_auth_login_meta_description',     'Melden Sie sich bei Ihrem Ensotek-Konto an.',
+    'ui_auth_register_meta_title',        'Registrieren | Ensotek',
+    'ui_auth_register_meta_description',  'Erstellen Sie Ihr Ensotek-Konto.',
+    'ui_auth_logout_meta_title',          'Abmeldung | Ensotek',
+    'ui_auth_logout_meta_description',    'Sie werden von Ihrem Ensotek-Konto abgemeldet.',
+
+    /* =========================================================
+       META (LEGACY KEYS - backward compatible)
+       ========================================================= */
+    'login_meta_title',      'Anmelden | Ensotek',
+    'login_meta_desc',       'Melden Sie sich bei Ihrem Ensotek-Konto an.',
+    'register_meta_title',   'Registrieren | Ensotek',
+    'register_meta_desc',    'Erstellen Sie Ihr Ensotek-Konto.',
+    'logout_meta_title',     'Abmeldung | Ensotek',
+    'logout_meta_desc',      'Sie werden von Ihrem Ensotek-Konto abgemeldet.',
+
+    /* =========================================================
+       LOGIN
+       ========================================================= */
+    'login_title',                   'Anmelden',
+    'login_lead',                    'Melden Sie sich an oder erstellen Sie ein neues Konto.',
+    'login_email_label',             'E-Mail',
+    'login_email_placeholder',       'beispiel@ensotek.com',
+    'login_password_label',          'Passwort',
+    'login_password_placeholder',    'Ihr Passwort',
+    'login_remember_me',             'Angemeldet bleiben',
+    'login_submit',                  'Anmelden',
+    'login_loading',                 'Anmeldung läuft...',
+    'login_or',                      'oder',
+    'login_google_button',           'Mit Google fortfahren',
+    'login_google_loading',          'Weiterleitung zu Google...',
+    'login_no_account',              'Noch kein Konto?',
+    'login_register_link',           'Konto erstellen',
+    'login_register_cta',            'Jetzt registrieren',
+    'login_error_required',          'E-Mail und Passwort sind erforderlich.',
+    'login_error_google_generic',    'Beim Start der Google-Anmeldung ist ein Fehler aufgetreten.',
+
+    /* =========================================================
+       REGISTER
+       ========================================================= */
+    'register_title',                        'Registrieren',
+    'register_lead_has_account',             'Sie haben bereits ein Konto?',
+    'register_login_link',                   'Anmelden',
+    'register_fullname_label',               'Vor- und Nachname',
+    'register_fullname_placeholder',         'Ihr Name',
+    'register_phone_label',                  'Telefon',
+    'register_phone_placeholder',            '+49 ...',
+    'register_email_label',                  'E-Mail',
+    'register_email_placeholder',            'beispiel@ensotek.com',
+    'register_password_label',               'Passwort',
+    'register_password_placeholder',         'Ihr Passwort',
+    'register_password_again_label',         'Passwort (wiederholen)',
+    'register_password_again_placeholder',   'Passwort erneut eingeben',
+    'register_submit',                       'Registrieren',
+    'register_loading',                      'Konto wird erstellt...',
+    'register_or',                           'oder',
+    'register_google_button',                'Mit Google fortfahren',
+    'register_google_loading',               'Weiterleitung zu Google...',
+    'register_error_required',               'E-Mail und Passwort sind erforderlich.',
+    'register_error_password_length',        'Das Passwort muss mindestens 6 Zeichen lang sein.',
+    'register_error_password_mismatch',      'Die Passwörter stimmen nicht überein.',
+    'register_error_google_generic',         'Beim Start der Google-Registrierung ist ein Fehler aufgetreten.',
+
+    /* =========================================================
+       LOGOUT
+       ========================================================= */
+    'logout_title',   'Abmeldung läuft...',
+    'logout_lead',    'Bitte warten Sie. Sie werden in wenigen Sekunden zur Anmeldeseite weitergeleitet.',
+    'logout_error',   'Beim Abmelden vom Server ist ein Problem aufgetreten, aber Ihre lokale Sitzung wurde entfernt.'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
--- TR → DE (opsiyonel, Almanca özel çeviri gelene kadar bire bir kopya)
+-- -------------------------------------------------------------
+-- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE): TR → TARGET
+-- (Almanca seed var; yeni dil ekleyince @TARGET_LOCALE değiştir.)
+-- -------------------------------------------------------------
+SET @TARGET_LOCALE := 'de';
+
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
+SELECT
+  UUID(),
+  s.`key`,
+  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
+  s.`value`,
+  NOW(3),
+  NOW(3)
 FROM site_settings s
-WHERE s.locale = 'tr'
-  AND s.`key` = 'ui_auth'
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_auth' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t
-    WHERE t.`key` = s.`key`
-      AND t.locale = 'de'
+    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
+      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
   );

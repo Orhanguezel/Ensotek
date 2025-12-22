@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   useListReviewsPublicQuery,
   useAddReviewReactionPublicMutation,
-} from "@/integrations/rtk/endpoints/reviews.public.endpoints";
+} from "@/integrations/rtk/hooks";
 import type { ReviewDto } from "@/integrations/types/review.types";
 
 // Yeni i18n helper'lar

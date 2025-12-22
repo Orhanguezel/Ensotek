@@ -1,33 +1,43 @@
 // =============================================================
 // FILE: src/components/admin/products/ProductsHeader.tsx
-// Ensotek – Admin Products Header (Filtreler + Özet + Aksiyonlar)
+// Ensotek – Admin Products Header (Compact)
+// Locale: parent provides options (DB)
 // =============================================================
 
-import React from "react";
+import React, { useEffect, useMemo } from 'react';
 
-export type LocaleOption = {
-  value: string;
-  label: string;
-};
+import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 
 export type ProductFilters = {
   search: string;
+
+  /**
+   * "" => all locales (do NOT send locale param)
+   * "tr" | "en" | ...
+   */
   locale: string;
+
   /** "all" = hepsi, "active" = sadece aktif, "inactive" = pasif */
-  isActiveFilter: "all" | "active" | "inactive";
+  isActiveFilter: 'all' | 'active' | 'inactive';
 };
 
 export type ProductsHeaderProps = {
   filters: ProductFilters;
   total: number;
   loading: boolean;
-  locales: LocaleOption[];
+
+  locales: AdminLocaleOption[];
   localesLoading?: boolean;
-  defaultLocale?: string;
+
+  /** DB default_locale (short); used only for “All” label */
+  defaultLocaleFromDb?: string;
+
   onFiltersChange: (next: ProductFilters) => void;
   onRefresh?: () => void;
   onCreateClick?: () => void;
 };
+
+const norm = (v: unknown) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
 
 export const ProductsHeader: React.FC<ProductsHeaderProps> = ({
   filters,
@@ -35,163 +45,150 @@ export const ProductsHeader: React.FC<ProductsHeaderProps> = ({
   loading,
   locales,
   localesLoading,
-  defaultLocale,
+  defaultLocaleFromDb,
   onFiltersChange,
   onRefresh,
   onCreateClick,
 }) => {
+  const effectiveDefault = norm(defaultLocaleFromDb);
+
+  const localeOptions: AdminLocaleOption[] = useMemo(() => {
+    const base = (locales ?? []).map((x) => ({
+      value: norm(x.value),
+      label: x.label,
+    }));
+
+    const allLabel = effectiveDefault ? `Hepsi (varsayılan: ${effectiveDefault})` : 'Hepsi';
+
+    return [{ value: '', label: allLabel }, ...base];
+  }, [locales, effectiveDefault]);
+
+  // If filters.locale is set but not in list, reset to "" (All)
+  useEffect(() => {
+    const cur = norm(filters.locale);
+    const list = new Set(localeOptions.map((x) => x.value));
+    if (cur && !list.has(cur)) {
+      onFiltersChange({ ...filters, locale: '' });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [localeOptions]);
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onFiltersChange({
-      ...filters,
-      search: e.target.value,
-    });
+    onFiltersChange({ ...filters, search: e.target.value });
   };
 
-  const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    onFiltersChange({
-      ...filters,
-      locale: e.target.value,
-    });
+  const handleLocaleChange = (nextLocale: string) => {
+    onFiltersChange({ ...filters, locale: norm(nextLocale) });
   };
 
   const handleIsActiveChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value as ProductFilters["isActiveFilter"];
-    onFiltersChange({
-      ...filters,
-      isActiveFilter: value,
-    });
+    const value = e.target.value as ProductFilters['isActiveFilter'];
+    onFiltersChange({ ...filters, isActiveFilter: value });
   };
 
-  const effectiveDefaultLocale = defaultLocale ?? "tr";
+  const localeDisabled = loading || !!localesLoading || localeOptions.length === 0;
 
   return (
     <div className="card mb-3">
-      <div className="card-body py-3">
-        <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
-          {/* Sol taraf: başlık + filtreler */}
-          <div style={{ minWidth: 0, flex: 2 }}>
-            <div className="mb-2">
+      <div className="card-body py-2">
+        {/* Header row: title + actions */}
+        <div className="d-flex align-items-start justify-content-between gap-3">
+          <div style={{ minWidth: 0 }}>
+            <div className="d-flex align-items-center gap-2 flex-wrap">
               <h5 className="mb-0 small fw-semibold">Ürün Yönetimi</h5>
-              <div className="text-muted small">
-                Ürünleri dil, durum ve arama filtrelerine göre listeleyip
-                yönetebilirsin.
-              </div>
+
+              {/* mini KPI */}
+              <span
+                className={
+                  'badge rounded-pill ' + (loading ? 'text-bg-secondary' : 'text-bg-light border')
+                }
+              >
+                <span className="text-muted me-1">Toplam:</span>
+                <strong className="ms-1">{total}</strong>
+              </span>
+
+              {loading && (
+                <span className="text-muted small d-inline-flex align-items-center gap-1">
+                  <span className="spinner-border spinner-border-sm" />
+                  Güncelleniyor
+                </span>
+              )}
             </div>
 
-            <div className="row g-2 align-items-end">
-              {/* Arama */}
-              <div className="col-md-6">
-                <label className="form-label small mb-1">
-                  Başlık / Slug / Kod arama
-                </label>
-                <input
-                  type="search"
-                  className="form-control form-control-sm"
-                  placeholder="Örn: 'kule', 'pompa', ürün kodu..."
-                  value={filters.search}
-                  onChange={handleSearchChange}
-                />
-              </div>
-
-              {/* Locale filtre */}
-              <div className="col-md-3">
-                <label className="form-label small mb-1">
-                  Dil (locale)
-                </label>
-                <select
-                  className="form-select form-select-sm"
-                  value={filters.locale}
-                  onChange={handleLocaleChange}
-                  disabled={localesLoading && !locales.length}
-                >
-                  <option value="">
-                    Hepsi
-                    {effectiveDefaultLocale
-                      ? ` (varsayılan: ${effectiveDefaultLocale})`
-                      : ""}
-                  </option>
-                  {locales.map((loc) => (
-                    <option key={loc.value} value={loc.value}>
-                      {loc.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="form-text small">
-                  Dil listesi veritabanındaki{" "}
-                  <code>site_settings.app_locales</code> kaydından gelir.
-                </div>
-              </div>
-
-              {/* Aktif / pasif filtre */}
-              <div className="col-md-3">
-                <label className="form-label small mb-1">
-                  Aktiflik durumu
-                </label>
-                <select
-                  className="form-select form-select-sm"
-                  value={filters.isActiveFilter}
-                  onChange={handleIsActiveChange}
-                >
-                  <option value="all">Hepsi</option>
-                  <option value="active">Sadece aktif</option>
-                  <option value="inactive">Pasif ürünler</option>
-                </select>
-              </div>
+            <div className="text-muted small mt-1">
+              Ürünleri arama, dil ve durum filtreleriyle yönet.
             </div>
           </div>
 
-          {/* Sağ taraf: özet + aksiyonlar */}
-          <div
-            className="border-start ps-lg-3 ms-lg-3 d-flex flex-column justify-content-between"
-            style={{ minWidth: 0, flex: 1 }}
-          >
-            <div className="d-flex align-items-center justify-content-between mb-2">
-              <div>
-                <div className="small fw-semibold">Toplam Ürün</div>
-                <div className="display-6 fs-4 fw-bold">{total}</div>
-                {loading && (
-                  <div className="text-muted small">
-                    Liste güncelleniyor...
-                  </div>
-                )}
-              </div>
-              <div className="d-flex flex-column gap-2 align-items-end">
-                {onRefresh && (
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={onRefresh}
-                    disabled={loading}
-                  >
-                    Yenile
-                  </button>
-                )}
-                {onCreateClick && (
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={onCreateClick}
-                    disabled={loading}
-                  >
-                    Yeni Ürün Oluştur
-                  </button>
-                )}
-              </div>
-            </div>
+          <div className="d-flex align-items-center gap-2 flex-shrink-0">
+            {onRefresh && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={onRefresh}
+                disabled={loading}
+              >
+                Yenile
+              </button>
+            )}
+            {onCreateClick && (
+              <button
+                type="button"
+                className="btn btn-primary btn-sm"
+                onClick={onCreateClick}
+                disabled={loading}
+              >
+                Yeni Ürün
+              </button>
+            )}
+          </div>
+        </div>
 
-            <div className="text-muted small">
-              <ul className="mb-0 ps-3">
-                <li>
-                  Liste, backend üzerindeki{" "}
-                  <code>products.locale, products.slug</code> benzersiz
-                  kombinasyonuna göre tutulur.
-                </li>
-                <li>
-                  Aktiflik ve öne çıkarma durumları ürün kartları için
-                  kullanılır.
-                </li>
-              </ul>
+        <hr className="my-2" />
+
+        {/* Filters row */}
+        <div className="row g-2 align-items-end">
+          {/* Search */}
+          <div className="col-12 col-lg-6">
+            <label className="form-label small mb-1">Arama</label>
+            <input
+              type="search"
+              className="form-control form-control-sm"
+              placeholder="Başlık, slug, kod..."
+              value={filters.search}
+              onChange={handleSearchChange}
+              disabled={loading}
+            />
+          </div>
+
+          {/* Locale */}
+          <div className="col-12 col-sm-6 col-lg-3">
+            <AdminLocaleSelect
+              value={filters.locale}
+              onChange={handleLocaleChange}
+              options={localeOptions}
+              loading={!!localesLoading}
+              disabled={localeDisabled}
+              label="Dil"
+            />
+            <div className="form-text small text-truncate">
+              Kaynak: <code>site_settings.app_locales</code>
             </div>
+          </div>
+
+          {/* Active */}
+          <div className="col-12 col-sm-6 col-lg-3">
+            <label className="form-label small mb-1">Durum</label>
+            <select
+              className="form-select form-select-sm"
+              value={filters.isActiveFilter}
+              onChange={handleIsActiveChange}
+              disabled={loading}
+            >
+              <option value="all">Hepsi</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Pasif</option>
+            </select>
           </div>
         </div>
       </div>

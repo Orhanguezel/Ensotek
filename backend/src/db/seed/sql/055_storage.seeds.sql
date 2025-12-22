@@ -1,5 +1,5 @@
 -- =============================================================
--- 020_storage_assets.sql  (storage_assets)
+-- 055_storage_assets.sql  (storage_assets)
 -- =============================================================
 
 /* ================= TABLE ================= */
@@ -153,3 +153,4 @@ ON DUPLICATE KEY UPDATE
  url=VALUES(url),
  provider_format=VALUES(provider_format),
  updated_at=VALUES(updated_at);
+

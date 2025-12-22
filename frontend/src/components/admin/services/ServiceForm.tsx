@@ -1,12 +1,11 @@
 // =============================================================
 // FILE: src/components/admin/services/ServiceForm.tsx
 // Ensotek – Admin Service Create/Edit Form
-//  - Çoklu dil desteği (locale seçimi)
+//  - Çoklu dil desteği (locale seçimi) -> AdminLocaleSelect (ortak)
 //  - Form / JSON modu
 //  - Kategori / Alt Kategori select (isimle, module_key=services)
-//  - Teknik alanlar (area, duration, maintenance, ...)
+//  - Teknik alanlar
 //  - Storage tabanlı öne çıkan görsel
-//  - i18n alanlar: name, slug, description, price, vs.
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -16,7 +15,10 @@ import type { ServiceDto } from "@/integrations/types/services.types";
 import type { CategoryDto } from "@/integrations/types/category.types";
 import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
 
-import type { LocaleOption } from "@/components/admin/custompage/CustomPageHeader";
+import {
+  AdminLocaleSelect,
+  type AdminLocaleOption,
+} from "@/components/common/AdminLocaleSelect";
 
 import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
 import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
@@ -71,9 +73,11 @@ export type ServiceFormProps = {
   initialData?: ServiceDto;
   loading: boolean;
   saving: boolean;
-  locales: LocaleOption[];
+
+  locales: AdminLocaleOption[];
   localesLoading?: boolean;
-  defaultLocale?: string;
+
+  defaultLocale?: string; // admin seçili locale (aktif seçim)
   onSubmit: (values: ServiceFormValues) => void | Promise<void>;
   onCancel?: () => void;
   onLocaleChange?: (locale: string) => void;
@@ -82,6 +86,11 @@ export type ServiceFormProps = {
 /* ------------------------------------------------------------- */
 /*  Yardımcılar                                                   */
 /* ------------------------------------------------------------- */
+
+const normalizeLocale = (v: unknown): string => {
+  const s = typeof v === "string" ? v.trim().toLowerCase() : "";
+  return s;
+};
 
 /**
  * Locale-aware slugify:
@@ -109,6 +118,7 @@ const slugify = (value: string): string => {
     ü: "u",
     Ü: "u",
   };
+
   s = s
     .split("")
     .map((ch) => trMap[ch] ?? ch)
@@ -126,14 +136,26 @@ const slugify = (value: string): string => {
     .replace(/-+/g, "-");
 };
 
+const resolveInitialLocale = (
+  initial: ServiceDto | undefined,
+  activeLocale: string | undefined,
+  fallbackLocale: string,
+): string => {
+  const candidate = normalizeLocale(initial?.locale_resolved ?? activeLocale ?? fallbackLocale ?? "");
+  return candidate || fallbackLocale;
+};
+
 const buildInitialValues = (
   initial: ServiceDto | undefined,
-  fallbackLocale: string | undefined,
+  activeLocale: string | undefined,
+  fallbackLocale: string,
 ): ServiceFormValues => {
+  const loc = resolveInitialLocale(initial, activeLocale, fallbackLocale);
+
   if (!initial) {
     return {
       id: undefined,
-      locale: fallbackLocale ?? "",
+      locale: loc,
       name: "",
       slug: "",
       description: "",
@@ -167,7 +189,8 @@ const buildInitialValues = (
 
   return {
     id: initial.id,
-    locale: initial.locale_resolved ?? fallbackLocale ?? "",
+    locale: loc,
+
     name: initial.name ?? "",
     slug: initial.slug ?? "",
     description: initial.description ?? "",
@@ -179,14 +202,14 @@ const buildInitialValues = (
 
     category_id: initial.category_id ?? "",
     sub_category_id: initial.sub_category_id ?? "",
-    is_active: initial.is_active,
-    featured: initial.featured,
+    is_active: !!initial.is_active,
+    featured: !!initial.featured,
     display_order:
       typeof initial.display_order === "number"
         ? String(initial.display_order)
         : initial.display_order
-        ? String(initial.display_order)
-        : "1",
+          ? String(initial.display_order)
+          : "1",
 
     featured_image: initial.featured_image ?? "",
     image_url: initial.image_url ?? "",
@@ -209,6 +232,9 @@ type CategoryOption = {
   label: string;
 };
 
+const normalizeLabel = (row: any, idFallback: string) =>
+  row?.name || row?.slug || row?.name_default || idFallback;
+
 /* ------------------------------------------------------------- */
 /*  Ana Form Component                                            */
 /* ------------------------------------------------------------- */
@@ -225,56 +251,66 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   onCancel,
   onLocaleChange,
 }) => {
-  const effectiveDefaultLocale = defaultLocale ?? "tr";
+  // ✅ statik "tr" yok: fallback tamamen DB kaynaklı
+  const fallbackLocale = normalizeLocale(defaultLocale || locales?.[0]?.value || "");
 
-  // 🔹 Aktif form state (seçili locale için)
   const [values, setValues] = useState<ServiceFormValues>(
-    buildInitialValues(initialData, effectiveDefaultLocale),
+    buildInitialValues(initialData, defaultLocale, fallbackLocale),
   );
 
   const [slugTouched, setSlugTouched] = useState(false);
   const [activeMode, setActiveMode] = useState<"form" | "json">("form");
 
-  // initialData veya defaultLocale değişince formu resetle
+  // initialData veya active locale değişince formu resetle
   useEffect(() => {
-    const base = buildInitialValues(initialData, effectiveDefaultLocale);
+    const base = buildInitialValues(initialData, defaultLocale, fallbackLocale);
     setValues(base);
     setSlugTouched(false);
-  }, [initialData, effectiveDefaultLocale]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialData, defaultLocale, fallbackLocale]);
 
   const disabled = loading || saving;
 
   const handleChange =
     (field: keyof ServiceFormValues) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const val = e.target.value;
-      setValues((prev) => ({ ...prev, [field]: val }));
-    };
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const val = e.target.value;
+        setValues((prev) => ({ ...prev, [field]: val }));
+      };
 
   const handleCheckboxChange =
     (field: keyof ServiceFormValues) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const checked = e.target.checked;
-      setValues((prev) => ({ ...prev, [field]: checked as never }));
-    };
+      (e: React.ChangeEvent<HTMLInputElement>) => {
+        const checked = e.target.checked;
+        setValues((prev) => ({ ...prev, [field]: checked as never }));
+      };
 
-  const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const nextLocale = e.target.value;
+  const handleLocaleChange = (nextLocaleRaw: string) => {
+    const nextLocale = normalizeLocale(nextLocaleRaw);
+
+    const resolved = nextLocale || normalizeLocale(values.locale) || fallbackLocale;
+    if (!resolved) {
+      toast.error("Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.");
+      return;
+    }
 
     setValues((prev) => ({
       ...prev,
-      locale: nextLocale || effectiveDefaultLocale,
+      locale: resolved,
     }));
 
-    const resolved = nextLocale || effectiveDefaultLocale;
-    if (resolved && onLocaleChange) {
-      onLocaleChange(resolved);
-    }
+    onLocaleChange?.(resolved);
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (disabled) return;
+
+    const loc = normalizeLocale(values.locale || fallbackLocale);
+    if (!loc) {
+      toast.error("Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.");
+      return;
+    }
 
     if (!values.name.trim() || !values.slug.trim()) {
       toast.error("İsim ve slug alanları zorunludur.");
@@ -283,6 +319,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
     void onSubmit({
       ...values,
+      locale: loc,
       name: values.name.trim(),
       slug: values.slug.trim(),
     });
@@ -290,58 +327,48 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
   /* -------------------- Kategori listesi (services modülü) -------------------- */
 
+  const effectiveLocale = normalizeLocale(values.locale || fallbackLocale);
+
   const categoryQueryParams = useMemo(
     () => ({
-      locale: values.locale || undefined,
+      locale: effectiveLocale || undefined,
       module_key: "services",
       limit: 500,
       offset: 0,
     }),
-    [values.locale],
+    [effectiveLocale],
   );
 
-  const {
-    data: categoryRows,
-    isLoading: isCategoriesLoading,
-  } = useListCategoriesAdminQuery(categoryQueryParams as any);
+  const { data: categoryRows, isLoading: isCategoriesLoading } =
+    useListCategoriesAdminQuery(categoryQueryParams as any);
 
   const categoryOptions: CategoryOption[] = useMemo(
     () =>
       (categoryRows ?? []).map((c: CategoryDto) => ({
         value: c.id,
-        label:
-          (c as any).name ||
-          (c as any).slug ||
-          (c as any).name_default ||
-          c.id,
+        label: normalizeLabel(c as any, c.id),
       })),
     [categoryRows],
   );
 
   const subCategoryQueryParams = useMemo(
     () => ({
-      locale: values.locale || undefined,
+      locale: effectiveLocale || undefined,
       category_id: values.category_id || undefined,
       limit: 500,
       offset: 0,
     }),
-    [values.locale, values.category_id],
+    [effectiveLocale, values.category_id],
   );
 
-  const {
-    data: subCategoryRows,
-    isLoading: isSubCategoriesLoading,
-  } = useListSubCategoriesAdminQuery(subCategoryQueryParams as any);
+  const { data: subCategoryRows, isLoading: isSubCategoriesLoading } =
+    useListSubCategoriesAdminQuery(subCategoryQueryParams as any);
 
   const subCategoryOptions: CategoryOption[] = useMemo(
     () =>
       (subCategoryRows ?? []).map((sc: SubCategoryDto) => ({
         value: sc.id,
-        label:
-          (sc as any).name ||
-          (sc as any).slug ||
-          (sc as any).name_default ||
-          sc.id,
+        label: normalizeLabel(sc as any, sc.id),
       })),
     [subCategoryRows],
   );
@@ -355,12 +382,14 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const imageMetadata = useMemo(
     () => ({
       module_key: "service",
-      locale: values.locale || "",
+      locale: effectiveLocale,
       service_slug: values.slug || values.name || "",
       ...(values.id ? { service_id: values.id } : {}),
     }),
-    [values.locale, values.slug, values.name, values.id],
+    [effectiveLocale, values.slug, values.name, values.id],
   );
+
+  const localeDisabled = disabled || !!localesLoading || !(locales?.length > 0);
 
   /* -------------------- Render -------------------- */
 
@@ -429,9 +458,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
             </div>
 
             {loading && (
-              <span className="badge bg-secondary small mt-1">
-                Yükleniyor...
-              </span>
+              <span className="badge bg-secondary small mt-1">Yükleniyor...</span>
             )}
           </div>
         </div>
@@ -452,33 +479,17 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 {/* Locale + durum/öne çıkarma */}
                 <div className="row g-2 mb-3">
                   <div className="col-sm-4">
-                    <label className="form-label small mb-1">
-                      Locale (Dil)
-                    </label>
-                    <select
-                      className="form-select form-select-sm"
-                      value={values.locale}
+                    <label className="form-label small mb-1">Locale (Dil)</label>
+                    <AdminLocaleSelect
+                      value={normalizeLocale(values.locale)}
                       onChange={handleLocaleChange}
-                      disabled={
-                        disabled || (localesLoading && !locales.length)
-                      }
-                    >
-                      <option value="">
-                        (Site varsayılanı
-                        {effectiveDefaultLocale
-                          ? `: ${effectiveDefaultLocale}`
-                          : ""}
-                        )
-                      </option>
-                      {locales.map((loc) => (
-                        <option key={loc.value} value={loc.value}>
-                          {loc.label}
-                        </option>
-                      ))}
-                    </select>
+                      options={locales}
+                      loading={!!localesLoading}
+                      disabled={localeDisabled}
+                    />
                     <div className="form-text small">
-                      Boş bırakırsan backend{" "}
-                      <code>req.locale</code> / varsayılan locale kullanır.
+                      Bu seçim admin ekranında aktif dili belirler ve backend’e{" "}
+                      <code>locale</code> paramı olarak gider.
                     </div>
                   </div>
 
@@ -492,10 +503,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                         onChange={handleCheckboxChange("is_active")}
                         disabled={disabled}
                       />
-                      <label
-                        htmlFor="svc_is_active"
-                        className="form-check-label small"
-                      >
+                      <label htmlFor="svc_is_active" className="form-check-label small">
                         Aktif
                       </label>
                     </div>
@@ -508,10 +516,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                         onChange={handleCheckboxChange("featured")}
                         disabled={disabled}
                       />
-                      <label
-                        htmlFor="svc_featured"
-                        className="form-check-label small"
-                      >
+                      <label htmlFor="svc_featured" className="form-check-label small">
                         Öne çıkan
                       </label>
                     </div>
@@ -520,9 +525,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
                 {/* İsim + slug */}
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Hizmet Adı
-                  </label>
+                  <label className="form-label small mb-1">Hizmet Adı</label>
                   <input
                     type="text"
                     className="form-control form-control-sm"
@@ -530,13 +533,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     onChange={(e) => {
                       const nameValue = e.target.value;
                       setValues((prev) => {
-                        const next: ServiceFormValues = {
-                          ...prev,
-                          name: nameValue,
-                        };
-                        if (!slugTouched) {
-                          next.slug = slugify(nameValue);
-                        }
+                        const next: ServiceFormValues = { ...prev, name: nameValue };
+                        if (!slugTouched) next.slug = slugify(nameValue);
                         return next;
                       });
                     }}
@@ -554,16 +552,14 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     onFocus={() => setSlugTouched(true)}
                     onChange={(e) => {
                       setSlugTouched(true);
-                      const val = e.target.value;
-                      setValues((prev) => ({ ...prev, slug: val }));
+                      setValues((prev) => ({ ...prev, slug: e.target.value }));
                     }}
                     disabled={disabled}
                     required
                   />
                   <div className="form-text small">
                     Otomatik oluşur; istersen manuel değiştirebilirsin. Küçük
-                    harf, rakam ve tire kullan:{" "}
-                    <code>bakim-ve-onarim</code>,{" "}
+                    harf, rakam ve tire kullan: <code>bakim-ve-onarim</code>,{" "}
                     <code>modernizasyon</code> gibi.
                   </div>
                 </div>
@@ -587,9 +583,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 {/* Diğer i18n alanlar */}
                 <div className="row g-2 mb-3">
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Malzeme / İçerik
-                    </label>
+                    <label className="form-label small mb-1">Malzeme / İçerik</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -599,9 +593,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     />
                   </div>
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Fiyat (serbest format)
-                    </label>
+                    <label className="form-label small mb-1">Fiyat (serbest format)</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -614,9 +606,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Dahil Olanlar (includes)
-                  </label>
+                  <label className="form-label small mb-1">Dahil Olanlar (includes)</label>
                   <textarea
                     className="form-control form-control-sm"
                     rows={2}
@@ -627,9 +617,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Garanti / Koşullar
-                  </label>
+                  <label className="form-label small mb-1">Garanti / Koşullar</label>
                   <textarea
                     className="form-control form-control-sm"
                     rows={2}
@@ -642,9 +630,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 {/* Teknik alanlar */}
                 <div className="row g-2">
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Alan / Kapasite
-                    </label>
+                    <label className="form-label small mb-1">Alan / Kapasite</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -655,9 +641,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     />
                   </div>
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Süre / Periyot
-                    </label>
+                    <label className="form-label small mb-1">Süre / Periyot</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -671,9 +655,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
                 <div className="row g-2 mt-2">
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Bakım Planı (maintenance)
-                    </label>
+                    <label className="form-label small mb-1">Bakım Planı (maintenance)</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -683,9 +665,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     />
                   </div>
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Sezon / Çalışma Koşulları
-                    </label>
+                    <label className="form-label small mb-1">Sezon / Çalışma Koşulları</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -698,9 +678,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
                 <div className="row g-2 mt-2">
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Kalınlık (thickness)
-                    </label>
+                    <label className="form-label small mb-1">Kalınlık (thickness)</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -710,9 +688,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     />
                   </div>
                   <div className="col-sm-6">
-                    <label className="form-label small mb-1">
-                      Ekipman / Donanım
-                    </label>
+                    <label className="form-label small mb-1">Ekipman / Donanım</label>
                     <input
                       type="text"
                       className="form-control form-control-sm"
@@ -728,9 +704,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
               <div className="col-lg-4">
                 {/* Görüntüleme sırası */}
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Görüntüleme Sırası
-                  </label>
+                  <label className="form-label small mb-1">Görüntüleme Sırası</label>
                   <input
                     type="number"
                     className="form-control form-control-sm"
@@ -767,21 +741,16 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     ))}
                   </select>
                   <div className="form-text small">
-                    Kategoriler, <code>module_key = `services`</code> olan
-                    Ensotek kategori modülünden gelir.
+                    Kategoriler, <code>module_key = services</code> olan kategori kayıtlarından gelir.
                   </div>
                   {isCategoriesLoading && (
-                    <div className="form-text small">
-                      Kategoriler yükleniyor...
-                    </div>
+                    <div className="form-text small">Kategoriler yükleniyor...</div>
                   )}
                 </div>
 
                 {/* Alt kategori */}
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Alt Kategori
-                  </label>
+                  <label className="form-label small mb-1">Alt Kategori</label>
                   <select
                     className="form-select form-select-sm"
                     value={values.sub_category_id}
@@ -800,15 +769,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       </option>
                     ))}
                   </select>
-                  <div className="form-text small">
-                    Alt kategoriler, seçili hizmet kategorisine göre
-                    filtrelenir. (Örn: Üretim, Bakım & Onarım, Modernizasyon
-                    vb.)
-                  </div>
                   {isSubCategoriesLoading && (
-                    <div className="form-text small">
-                      Alt kategoriler yükleniyor...
-                    </div>
+                    <div className="form-text small">Alt kategoriler yükleniyor...</div>
                   )}
                 </div>
 
@@ -819,8 +781,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     helperText={
                       <>
                         Hizmet kartlarında ve detay sayfasında kullanılacak ana
-                        görseli buradan yükleyebilirsin. Yüklenen görsel
-                        URL&apos;i aşağıdaki alana otomatik yazılır.
+                        görseli buradan yükleyebilirsin.
                       </>
                     }
                     bucket="public"
@@ -839,9 +800,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Öne Çıkan Görsel URL
-                  </label>
+                  <label className="form-label small mb-1">Öne Çıkan Görsel URL</label>
                   <input
                     type="url"
                     className="form-control form-control-sm"
@@ -853,9 +812,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Görsel Asset ID
-                  </label>
+                  <label className="form-label small mb-1">Görsel Asset ID</label>
                   <input
                     type="text"
                     className="form-control form-control-sm"
@@ -863,15 +820,10 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     onChange={handleChange("image_asset_id")}
                     disabled={disabled}
                   />
-                  <div className="form-text small">
-                    Storage modülü ile ilişkili asset ID (opsiyonel).
-                  </div>
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label small mb-1">
-                    Görsel Alt Metni
-                  </label>
+                  <label className="form-label small mb-1">Görsel Alt Metni</label>
                   <input
                     type="text"
                     className="form-control form-control-sm"
@@ -883,9 +835,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
                 {/* i18n replicate/apply */}
                 <div className="mb-0">
-                  <label className="form-label small mb-1">
-                    Çok Dilli İşlem
-                  </label>
+                  <label className="form-label small mb-1">Çok Dilli İşlem</label>
+
                   <div className="form-check">
                     <input
                       id="svc_replicate_all"
@@ -895,14 +846,11 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       onChange={handleCheckboxChange("replicate_all_locales")}
                       disabled={disabled}
                     />
-                    <label
-                      className="form-check-label small"
-                      htmlFor="svc_replicate_all"
-                    >
-                      Oluştururken tüm dillere kopyala{" "}
-                      <code>replicate_all_locales</code>
+                    <label className="form-check-label small" htmlFor="svc_replicate_all">
+                      Oluştururken tüm dillere kopyala <code>replicate_all_locales</code>
                     </label>
                   </div>
+
                   <div className="form-check mt-1">
                     <input
                       id="svc_apply_all"
@@ -912,18 +860,14 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       onChange={handleCheckboxChange("apply_all_locales")}
                       disabled={disabled}
                     />
-                    <label
-                      className="form-check-label small"
-                      htmlFor="svc_apply_all"
-                    >
-                      Güncellerken tüm dillere uygula{" "}
-                      <code>apply_all_locales</code>
+                    <label className="form-check-label small" htmlFor="svc_apply_all">
+                      Güncellerken tüm dillere uygula <code>apply_all_locales</code>
                     </label>
                   </div>
+
                   <div className="form-text small">
-                    Create isteğinde sadece{" "}
-                    <code>replicate_all_locales</code>, update isteğinde ise{" "}
-                    <code>apply_all_locales</code> backend&apos;e gönderilir.
+                    Create isteğinde sadece <code>replicate_all_locales</code>,
+                    update isteğinde ise <code>apply_all_locales</code> backend’e gönderilir.
                   </div>
                 </div>
               </div>

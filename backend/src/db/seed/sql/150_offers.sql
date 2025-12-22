@@ -1,9 +1,17 @@
+-- =============================================================
 -- 150_offers.sql
+-- offers + offer_number_counters (schema)
+-- =============================================================
+
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
+SET FOREIGN_KEY_CHECKS = 0;
+
 DROP TABLE IF EXISTS `offers`;
 DROP TABLE IF EXISTS `offer_number_counters`;
+
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- =============================================================
 -- TABLO: offer_number_counters

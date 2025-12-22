@@ -10,6 +10,7 @@ import React, { useMemo, useState, useRef, useEffect } from "react";
 import {
   useGetServiceBySlugPublicQuery,
   useListServiceImagesPublicQuery,
+  useGetSiteSettingByKeyQuery,
 } from "@/integrations/rtk/hooks";
 
 import type { ServiceImageDto } from "@/integrations/types/services.types";
@@ -21,7 +22,7 @@ import { toCdnSrc } from "@/shared/media";
 import { excerpt } from "@/shared/text";
 
 import { localizePath } from "@/i18n/url";
-import { DEFAULT_LOCALE } from "@/i18n/config";
+import { normLocaleTag } from "@/i18n/localeUtils";
 
 import Link from "next/link";
 import Image from "next/image";
@@ -71,30 +72,35 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   const { ui } = useUiSection("ui_services", locale);
   const isTr = locale === "tr";
 
+  // ✅ default_locale artık DB’den (locale='*') gelecek
+  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: "default_locale" });
+  const defaultLocale = useMemo(() => {
+    const v = normLocaleTag(defaultLocaleRow?.value);
+    return v || "tr";
+  }, [defaultLocaleRow?.value]);
+
   // Teklif formu göster / gizle + scroll
   const [showOfferForm, setShowOfferForm] = useState(false);
   const offerFormRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ RTK endpoint argümanı: { slug, locale, default_locale }
   const {
     data: service,
     isLoading,
     isError,
   } = useGetServiceBySlugPublicQuery(
-    { slug, locale, default_locale: DEFAULT_LOCALE },
+    { slug, locale, default_locale: defaultLocale },
     {
-      skip: !slug,
+      skip: !slug, // istersen: || !defaultLocaleRow?.value
     },
   );
 
-  // ✅ RTK endpoint argümanı: { serviceId, locale, default_locale }
   const {
     data: images,
     isLoading: isImagesLoading,
   } = useListServiceImagesPublicQuery(
     service?.id
-      ? { serviceId: service.id, locale, default_locale: DEFAULT_LOCALE }
-      : { serviceId: "", locale, default_locale: DEFAULT_LOCALE },
+      ? { serviceId: service.id, locale, default_locale: defaultLocale }
+      : { serviceId: "", locale, default_locale: defaultLocale },
     {
       skip: !service?.id,
     },
@@ -120,10 +126,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   const summary =
     service?.description ||
     service?.includes ||
-    ui(
-      "ui_services_placeholder_summary",
-      "Service description is coming soon.",
-    );
+    ui("ui_services_placeholder_summary", "Service description is coming soon.");
 
   const shortSummary = excerpt(String(summary), 350);
 
@@ -148,10 +151,12 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
       ? "Bu hizmet ile ilgili detaylı bilgi ve teknik destek için ekibimizle iletişime geçebilirsiniz."
       : "Contact our team for detailed information and technical support about this service.",
   );
+
   const whatsappText = ui(
     "ui_services_cta_whatsapp",
     isTr ? "WhatsApp üzerinden yazın" : "Write on WhatsApp",
   );
+
   const requestQuoteText = ui(
     "ui_services_cta_request_quote",
     isTr ? "Bu hizmet için teklif iste" : "Request a quote for this service",
@@ -164,19 +169,12 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
     ? `Merhaba, "${title}" hizmeti hakkında detaylı bilgi ve fiyat teklifi almak istiyorum.`
     : `Hello, I would like to get more information and a quotation about the "${title}" service.`;
 
-  // Form açıldıktan sonra otomatik scroll
   useEffect(() => {
     if (showOfferForm && offerFormRef.current) {
-      offerFormRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+      offerFormRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [showOfferForm]);
 
-  // ------------------------------------------------------------------
-  // LOADING / ERROR STATES
-  // ------------------------------------------------------------------
   if (isLoading) {
     return (
       <div className="service__area pt-120 pb-90">
@@ -223,17 +221,13 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
     );
   }
 
-  // ------------------------------------------------------------------
-  // NORMAL CONTENT
-  // ------------------------------------------------------------------
   return (
     <div className="service__area pt-120 pb-90">
       <div className="container">
         <div className="row">
-          {/* LEFT: main content */}
+          {/* LEFT */}
           <div className="col-xl-8 col-lg-8">
             <div className="service__details-wrapper mb-40">
-              {/* Back link */}
               <div className="mb-25">
                 <Link href={backHref} className="back-link d-inline-flex">
                   <span className="me-2">←</span>
@@ -241,25 +235,19 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                 </Link>
               </div>
 
-              {/* Title & meta */}
               <div className="service__details-title-wrapper mb-25">
                 {serviceTypeLabel && (
-                  <span className="service__details-tag">
-                    {serviceTypeLabel}
-                  </span>
+                  <span className="service__details-tag">{serviceTypeLabel}</span>
                 )}
                 <h1 className="service__details-title">{title}</h1>
                 {service.price && (
                   <p className="service__price mt-10">
-                    <strong>
-                      {ui("ui_services_price_label", "Price")}:
-                    </strong>{" "}
+                    <strong>{ui("ui_services_price_label", "Price")}:</strong>{" "}
                     {service.price}
                   </p>
                 )}
               </div>
 
-              {/* Main image */}
               <div className="service__details-thumb mb-30">
                 <Image
                   src={mainImageSrc}
@@ -270,22 +258,16 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                 />
               </div>
 
-              {/* Summary / description */}
               <div className="service__details-content">
                 <p>{shortSummary}</p>
 
-                {/* Includes / warranty / material */}
                 {(service.includes || service.material || service.warranty) && (
                   <div className="service__meta mt-25">
                     <ul>
                       {service.includes && (
                         <li>
                           <span>
-                            {ui(
-                              "ui_services_includes_label",
-                              isTr ? "Hizmet kapsamı" : "Service includes",
-                            )}
-                            :
+                            {ui("ui_services_includes_label", isTr ? "Hizmet kapsamı" : "Service includes")}:
                           </span>{" "}
                           {service.includes}
                         </li>
@@ -295,9 +277,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                           <span>
                             {ui(
                               "ui_services_material_label",
-                              isTr
-                                ? "Kullanılan ekipman / malzeme"
-                                : "Equipment / Material",
+                              isTr ? "Kullanılan ekipman / malzeme" : "Equipment / Material",
                             )}
                             :
                           </span>{" "}
@@ -307,11 +287,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                       {service.warranty && (
                         <li>
                           <span>
-                            {ui(
-                              "ui_services_warranty_label",
-                              isTr ? "Garanti süresi" : "Warranty",
-                            )}
-                            :
+                            {ui("ui_services_warranty_label", isTr ? "Garanti süresi" : "Warranty")}:
                           </span>{" "}
                           {service.warranty}
                         </li>
@@ -320,14 +296,10 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                   </div>
                 )}
 
-                {/* Type specific meta */}
                 {(hasGardeningMeta || hasSoilMeta) && (
                   <div className="service__meta-box mt-30">
                     <h4 className="service__meta-title">
-                      {ui(
-                        "ui_services_specs_title",
-                        isTr ? "Hizmet özellikleri" : "Service specifications",
-                      )}
+                      {ui("ui_services_specs_title", isTr ? "Hizmet özellikleri" : "Service specifications")}
                     </h4>
                     <div className="row">
                       {hasGardeningMeta && (
@@ -335,49 +307,25 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                           <ul className="service__spec-list">
                             {service.area && (
                               <li>
-                                <span>
-                                  {ui(
-                                    "ui_services_area_label",
-                                    isTr ? "Uygulama alanı" : "Area",
-                                  )}
-                                  :
-                                </span>{" "}
+                                <span>{ui("ui_services_area_label", isTr ? "Uygulama alanı" : "Area")}:</span>{" "}
                                 {service.area}
                               </li>
                             )}
                             {service.duration && (
                               <li>
-                                <span>
-                                  {ui(
-                                    "ui_services_duration_label",
-                                    isTr ? "Tahmini süre" : "Duration",
-                                  )}
-                                  :
-                                </span>{" "}
+                                <span>{ui("ui_services_duration_label", isTr ? "Tahmini süre" : "Duration")}:</span>{" "}
                                 {service.duration}
                               </li>
                             )}
                             {service.maintenance && (
                               <li>
-                                <span>
-                                  {ui(
-                                    "ui_services_maintenance_label",
-                                    isTr ? "Bakım periyodu" : "Maintenance",
-                                  )}
-                                  :
-                                </span>{" "}
+                                <span>{ui("ui_services_maintenance_label", isTr ? "Bakım periyodu" : "Maintenance")}:</span>{" "}
                                 {service.maintenance}
                               </li>
                             )}
                             {service.season && (
                               <li>
-                                <span>
-                                  {ui(
-                                    "ui_services_season_label",
-                                    isTr ? "Önerilen dönem" : "Season",
-                                  )}
-                                  :
-                                </span>{" "}
+                                <span>{ui("ui_services_season_label", isTr ? "Önerilen dönem" : "Season")}:</span>{" "}
                                 {service.season}
                               </li>
                             )}
@@ -390,37 +338,19 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                           <ul className="service__spec-list">
                             {service.soil_type && (
                               <li>
-                                <span>
-                                  {ui(
-                                    "ui_services_soil_type_label",
-                                    "Soil type",
-                                  )}
-                                  :
-                                </span>{" "}
+                                <span>{ui("ui_services_soil_type_label", "Soil type")}:</span>{" "}
                                 {service.soil_type}
                               </li>
                             )}
                             {service.thickness && (
                               <li>
-                                <span>
-                                  {ui(
-                                    "ui_services_thickness_label",
-                                    "Thickness",
-                                  )}
-                                  :
-                                </span>{" "}
+                                <span>{ui("ui_services_thickness_label", "Thickness")}:</span>{" "}
                                 {service.thickness}
                               </li>
                             )}
                             {service.equipment && (
                               <li>
-                                <span>
-                                  {ui(
-                                    "ui_services_equipment_label",
-                                    "Equipment",
-                                  )}
-                                  :
-                                </span>{" "}
+                                <span>{ui("ui_services_equipment_label", "Equipment")}:</span>{" "}
                                 {service.equipment}
                               </li>
                             )}
@@ -431,26 +361,18 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                   </div>
                 )}
 
-                {/* Gallery */}
                 {gallery.length > 0 && (
                   <div className="service__gallery mt-40">
                     <h4 className="service__gallery-title">
-                      {ui(
-                        "ui_services_gallery_title",
-                        isTr ? "Hizmet galerisi" : "Service gallery",
-                      )}
+                      {ui("ui_services_gallery_title", isTr ? "Hizmet galerisi" : "Service gallery")}
                     </h4>
                     <div className="row">
                       {gallery.map((img) => {
                         const base = (img.image_url || "")?.trim() || "";
-                        const src =
-                          toCdnSrc(base, 400, 280, "fill") || FALLBACK_IMG;
+                        const src = toCdnSrc(base, 400, 280, "fill") || FALLBACK_IMG;
 
                         return (
-                          <div
-                            className="col-md-6 col-lg-4 mb-20"
-                            key={img.id}
-                          >
+                          <div className="col-md-6 col-lg-4 mb-20" key={img.id}>
                             <div className="service__gallery-item">
                               <Image
                                 src={src}
@@ -461,14 +383,8 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                               />
                               {(img.title || img.caption) && (
                                 <div className="service__gallery-caption">
-                                  {img.title && (
-                                    <strong>{img.title}</strong>
-                                  )}
-                                  {img.caption && (
-                                    <p className="mb-0">
-                                      {img.caption}
-                                    </p>
-                                  )}
+                                  {img.title && <strong>{img.title}</strong>}
+                                  {img.caption && <p className="mb-0">{img.caption}</p>}
                                 </div>
                               )}
                             </div>
@@ -478,17 +394,13 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
 
                       {isImagesLoading && (
                         <div className="col-12 mt-10">
-                          <div
-                            className="skeleton-line"
-                            style={{ height: 8 }}
-                          />
+                          <div className="skeleton-line" style={{ height: 8 }} />
                         </div>
                       )}
                     </div>
                   </div>
                 )}
 
-                {/* Teklif Formu – bu hizmet için */}
                 {showOfferForm && (
                   <div className="service__offer mt-40" ref={offerFormRef}>
                     <OfferSection locale={locale} contextType="service" />
@@ -498,7 +410,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
             </div>
           </div>
 
-          {/* RIGHT: sidebar */}
+          {/* RIGHT */}
           <div className="col-xl-4 col-lg-4">
             <aside className="service__sidebar">
               <div className="service__widget mb-30">
@@ -508,17 +420,13 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                 <ul>
                   {serviceTypeLabel && (
                     <li>
-                      <span>
-                        {isTr ? "Hizmet tipi" : "Service type"}:
-                      </span>{" "}
+                      <span>{isTr ? "Hizmet tipi" : "Service type"}:</span>{" "}
                       {serviceTypeLabel}
                     </li>
                   )}
                   {categoryLabel && (
                     <li>
-                      <span>
-                        {isTr ? "Kategori" : "Category"}:
-                      </span>{" "}
+                      <span>{isTr ? "Kategori" : "Category"}:</span>{" "}
                       {categoryLabel}
                     </li>
                   )}
@@ -527,13 +435,10 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
 
               <div className="service__widget service__cta-widget">
                 <h4 className="service__widget-title">
-                  {isTr
-                    ? "Detaylı bilgi ister misiniz?"
-                    : "Would you like more details?"}
+                  {isTr ? "Detaylı bilgi ister misiniz?" : "Would you like more details?"}
                 </h4>
                 <p className="mb-3">{moreInfoText}</p>
 
-                {/* CTA butonları: iletişim, WhatsApp, teklif iste */}
                 <div className="d-grid gap-2">
                   <Link
                     href={localizePath(locale, "/contact")}

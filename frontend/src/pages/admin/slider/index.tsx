@@ -6,11 +6,11 @@
 //  - Düzenle:      /admin/slider/[id]
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import {
   useListSlidersAdminQuery,
@@ -18,92 +18,55 @@ import {
   useDeleteSliderAdminMutation,
   useReorderSlidersAdminMutation,
   useSetSliderStatusAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/sliders_admin.endpoints";
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
-import type { SliderAdminDto } from "@/integrations/types/slider.types";
-import type { LocaleOption } from "@/components/admin/categories/CategoriesHeader";
-import { SliderHeader } from "@/components/admin/slider/SliderHeader";
-import { SliderList } from "@/components/admin/slider/SliderList";
+import { useAdminLocales } from '@/components/common/useAdminLocales';
+
+import type { SliderAdminDto } from '@/integrations/types/slider.types';
+import type { LocaleOption } from '@/components/admin/categories/CategoriesHeader';
+
+import { SliderHeader } from '@/components/admin/slider/SliderHeader';
+import { SliderList } from '@/components/admin/slider/SliderList';
+
+const FALLBACK_LOCALE = 'tr';
 
 const SliderAdminPage: React.FC = () => {
   const router = useRouter();
 
-  const [search, setSearch] = useState("");
-  const [localeFilter, setLocaleFilter] = useState<string>(""); // ilk etapta boş, sonra locales'tan dolduracağız
+  const [search, setSearch] = useState('');
+  const [localeFilter, setLocaleFilter] = useState<string>(''); // kullanıcı seçimi
   const [showOnlyActive, setShowOnlyActive] = useState(false);
 
-  /* -------------------- Locale options (DB'den) --------------- */
+  // ✅ Locale options (DB’den)
+  const { localeOptions: adminLocaleOptions, loading: isLocalesLoading } = useAdminLocales();
 
-  const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
+  // Hook’tan gelen shape zaten {value,label} → UI tipiyle aynı kabul
+  const locales: LocaleOption[] = useMemo(() => {
+    return (adminLocaleOptions ?? []) as unknown as LocaleOption[];
+  }, [adminLocaleOptions]);
 
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    return Array.from(new Set(arr));
-  }, [appLocaleRows]);
-
-  // Diğer modüllerle aynı: localeFilter boşsa ilk locale'e set et
+  // Locale boşsa / listede yoksa → ilk locale’e çek
   useEffect(() => {
-    if (localeCodes.length === 0) return;
+    if (!locales.length) return;
 
-    // Henüz seçilmemişse → ilk locale
+    const values = new Set(locales.map((l) => (l.value || '').toLowerCase()).filter(Boolean));
+    const fallback = (locales[0]?.value || FALLBACK_LOCALE).toLowerCase();
+
     if (!localeFilter) {
-      setLocaleFilter(localeCodes[0]);
+      setLocaleFilter(fallback);
       return;
     }
 
-    // Seçili locale listede yoksa → ilk locale
-    if (!localeCodes.includes(localeFilter)) {
-      setLocaleFilter(localeCodes[0]);
+    if (!values.has(localeFilter.toLowerCase())) {
+      setLocaleFilter(fallback);
     }
-  }, [localeCodes, localeFilter]);
+  }, [locales, localeFilter]);
 
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
-
-  // Query'ye gidecek gerçek locale (asla undefined değil)
-  const queryLocale = localeFilter || (localeCodes[0] ?? "tr");
+  // Query için her zaman dolu locale üret
+  const queryLocale = useMemo(() => {
+    const safe = (localeFilter || locales[0]?.value || FALLBACK_LOCALE).toLowerCase();
+    return safe || FALLBACK_LOCALE;
+  }, [localeFilter, locales]);
 
   /* -------------------- Liste + filtreler -------------------- */
 
@@ -114,26 +77,24 @@ const SliderAdminPage: React.FC = () => {
     refetch,
   } = useListSlidersAdminQuery({
     q: search || undefined,
-    locale: queryLocale, // ✅ HER ZAMAN BİR LOCALE GÖNDER
+    locale: queryLocale, // ✅ HER ZAMAN LOCALE
     is_active: showOnlyActive ? true : undefined,
-    sort: "display_order",
-    order: "asc",
+    sort: 'display_order',
+    order: 'asc',
     offset: 0,
   });
 
   const [rows, setRows] = useState<SliderAdminDto[]>([]);
 
   useEffect(() => {
-    setRows(sliders || []);
+    setRows((sliders as SliderAdminDto[]) || []);
   }, [sliders]);
 
   /* -------------------- Mutations ----------------------------- */
 
   const [updateSlider] = useUpdateSliderAdminMutation();
-  const [deleteSlider, { isLoading: isDeleting }] =
-    useDeleteSliderAdminMutation();
-  const [reorderSliders, { isLoading: isReordering }] =
-    useReorderSlidersAdminMutation();
+  const [deleteSlider, { isLoading: isDeleting }] = useDeleteSliderAdminMutation();
+  const [reorderSliders, { isLoading: isReordering }] = useReorderSlidersAdminMutation();
   const [setStatus] = useSetSliderStatusAdminMutation();
 
   const loading = isLoading || isFetching;
@@ -142,83 +103,64 @@ const SliderAdminPage: React.FC = () => {
   /* -------------------- Actions (create/edit nav) ------------- */
 
   const handleCreateClick = () => {
-    router.push("/admin/slider/new");
+    router.push('/admin/slider/new');
   };
 
   const handleEdit = (item: SliderAdminDto) => {
-    // İstersen locale'i de query param olarak gönderebilirsin:
-    // router.push(`/admin/slider/${item.id}?locale=${item.locale}`);
-    router.push(`/admin/slider/${item.id}`);
+    router.push(`/admin/slider/${encodeURIComponent(String(item.id))}`);
   };
 
   /* -------------------- Delete / Toggle / Reorder ------------- */
 
   const handleDelete = async (item: SliderAdminDto) => {
     if (
-      !window.confirm(
-        `"${item.name}" slider kaydını silmek üzeresin. Devam etmek istiyor musun?`,
-      )
+      !window.confirm(`"${item.name}" slider kaydını silmek üzeresin. Devam etmek istiyor musun?`)
     ) {
       return;
     }
 
     try {
-      await deleteSlider(item.id).unwrap();
+      await deleteSlider(String(item.id)).unwrap();
       toast.success(`"${item.name}" slider kaydı silindi.`);
       await refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Slider silinirken bir hata oluştu.";
+      const msg = err?.data?.error?.message || err?.message || 'Slider silinirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const handleToggleActive = async (
-    item: SliderAdminDto,
-    value: boolean,
-  ) => {
+  const handleToggleActive = async (item: SliderAdminDto, value: boolean) => {
     try {
       await setStatus({
-        id: item.id,
+        id: String(item.id),
         payload: { is_active: value },
       }).unwrap();
 
       setRows((prev) =>
-        prev.map((r) =>
-          r.id === item.id ? { ...r, is_active: value } : r,
-        ),
+        prev.map((r) => (String(r.id) === String(item.id) ? { ...r, is_active: value } : r)),
       );
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Aktif durumu güncellenirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Aktif durumu güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const handleToggleFeatured = async (
-    item: SliderAdminDto,
-    value: boolean,
-  ) => {
+  const handleToggleFeatured = async (item: SliderAdminDto, value: boolean) => {
     try {
       await updateSlider({
-        id: item.id,
+        id: String(item.id),
         patch: { featured: value },
       }).unwrap();
 
       setRows((prev) =>
-        prev.map((r) =>
-          r.id === item.id ? { ...r, featured: value } : r,
-        ),
+        prev.map((r) => (String(r.id) === String(item.id) ? { ...r, featured: value } : r)),
       );
     } catch (err: any) {
       const msg =
         err?.data?.error?.message ||
         err?.message ||
-        "Öne çıkarma durumu güncellenirken bir hata oluştu.";
+        'Öne çıkarma durumu güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -231,20 +173,16 @@ const SliderAdminPage: React.FC = () => {
     if (!rows.length) return;
 
     try {
-      const ids = rows
-        .map((r) => Number(r.id))
-        .filter((n) => Number.isFinite(n) && n > 0);
-
+      // reorder endpoint ids bekliyor
+      const ids = rows.map((r) => Number(r.id)).filter((n) => Number.isFinite(n) && n > 0);
       if (!ids.length) return;
 
       await reorderSliders({ ids }).unwrap();
-      toast.success("Slider sıralaması kaydedildi.");
+      toast.success('Slider sıralaması kaydedildi.');
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Sıralama kaydedilirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Sıralama kaydedilirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -256,13 +194,13 @@ const SliderAdminPage: React.FC = () => {
       <SliderHeader
         search={search}
         onSearchChange={setSearch}
-        locale={queryLocale} // dropdown'da da aynı locale görünsün
+        locale={queryLocale}
         onLocaleChange={setLocaleFilter}
         showOnlyActive={showOnlyActive}
         onShowOnlyActiveChange={setShowOnlyActive}
         loading={busy}
         onRefresh={refetch}
-        locales={localeOptions}
+        locales={locales}
         localesLoading={isLocalesLoading}
         onCreateClick={handleCreateClick}
       />

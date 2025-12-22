@@ -1,5 +1,8 @@
+
 -- =============================================================
--- 021_storage_assets_i18n.sql  (storage_assets_i18n)
+-- 056_storage_assets_i18n.sql  (storage_assets_i18n)
+--  - TR + EN + DE
+--  - DE: TR kopyası (Almanca özel çeviri gelene kadar)
 -- =============================================================
 
 /* ================= TABLE ================= */
@@ -35,6 +38,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -45,6 +49,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -55,6 +60,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -65,6 +71,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -75,6 +82,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -85,6 +93,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 -- EN
@@ -96,6 +105,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -106,6 +116,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -116,6 +127,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -126,6 +138,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -136,6 +149,7 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
 INSERT INTO storage_assets_i18n
@@ -146,16 +160,19 @@ ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
   caption=VALUES(caption),
+  description=VALUES(description),
   updated_at=VALUES(updated_at);
 
-/* Eksik EN kayıtları için TR'den kopya (genelleme) */
+-- -------------------------------------------------------------
+-- TR → DE otomatik kopya (Almanca özel çeviri gelene kadar)
+-- -------------------------------------------------------------
 INSERT INTO storage_assets_i18n (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
-SELECT UUID(), s.asset_id, 'en', s.title, s.alt, s.caption, s.description, NOW(3), NOW(3)
+SELECT UUID(), s.asset_id, 'de', s.title, s.alt, s.caption, s.description, NOW(3), NOW(3)
 FROM storage_assets_i18n s
 WHERE s.locale='tr'
   AND NOT EXISTS (
     SELECT 1
     FROM storage_assets_i18n t
     WHERE t.asset_id = s.asset_id
-      AND t.locale = 'en'
+      AND t.locale = 'de'
   );

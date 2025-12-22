@@ -1,15 +1,13 @@
 // =============================================================
-// FILE: src/i18n/request.ts
+// FILE: src/i18n/request.ts  (DYNAMIC)
 // =============================================================
-
-import type { SupportedLocale } from "@/types/common";
 
 /* ----------------------- getRequestConfig SHIM ----------------------- */
 type RequestCtx = { requestLocale?: string | null };
 type RequestConfigFn<R = any> = (ctx: RequestCtx) => Promise<R>;
-function getRequestConfig<
-  R = { locale: SupportedLocale; messages: Record<string, unknown> }
->(cb: RequestConfigFn<R>): RequestConfigFn<R> {
+function getRequestConfig<R = { locale: string; messages: Record<string, unknown> }>(
+  cb: RequestConfigFn<R>,
+): RequestConfigFn<R> {
   return cb;
 }
 /* ------------------------------------------------------------------- */
@@ -68,10 +66,7 @@ function mergeDeep<T extends Record<string, unknown>>(target: T, src: T): T {
 }
 
 /** Sadece İSTENEN locale’den dener; dosya yoksa BOŞ döner. */
-async function loadNamespace(
-  locale: string,
-  ns: string,
-): Promise<Record<string, unknown>> {
+async function loadNamespace(locale: string, ns: string): Promise<Record<string, unknown>> {
   try {
     const mod = (await import(`@/i18n/messages/${locale}/${ns}.json`)) as {
       default?: Record<string, unknown>;
@@ -94,14 +89,11 @@ export default getRequestConfig(async ({ requestLocale }: RequestCtx) => {
 
   const chosen = (req && activeSet.has(req)) ? req : defaultLocale;
 
-  // SupportedLocale tipin muhtemelen sabit union; runtime string’i cast ediyoruz.
-  const locale = chosen as SupportedLocale;
-
   let messages: Record<string, unknown> = {};
   for (const ns of NAMESPACES) {
-    const tree = await loadNamespace(locale, ns);
+    const tree = await loadNamespace(chosen, ns);
     messages = mergeDeep(messages, tree);
   }
 
-  return { locale, messages };
+  return { locale: chosen, messages };
 });

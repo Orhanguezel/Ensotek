@@ -5,13 +5,7 @@ import React, { useMemo } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import {
-  useListFooterSectionsQuery,
-} from "@/integrations/rtk/hooks";
-import {
-  useListMenuItemsQuery,
-} from "@/integrations/rtk/hooks";
+import { useGetSiteSettingByKeyQuery,useListFooterSectionsQuery,useListMenuItemsQuery} from "@/integrations/rtk/hooks";
 
 import type { FooterSectionDto } from "@/integrations/types/footer_sections.types";
 import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";

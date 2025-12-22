@@ -6,8 +6,8 @@
 //  - Drag & drop reorder (parent.display_order için)
 // =============================================================
 
-import React, { useEffect, useState } from "react";
-import type { ServiceDto } from "@/integrations/types/services.types";
+import React, { useEffect, useState } from 'react';
+import type { ServiceDto } from '@/integrations/types/services.types';
 import {
   Pagination,
   PaginationContent,
@@ -16,7 +16,7 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 const PAGE_SIZE = 20;
 
@@ -28,44 +28,43 @@ export type ServicesListProps = {
   onEdit?: (service: ServiceDto) => void;
   onDelete?: (service: ServiceDto) => void;
 
-  // 🔹 Drag & drop sıralama için
   onReorder?: (next: ServiceDto[]) => void;
   onSaveOrder?: () => void;
   savingOrder?: boolean;
 };
 
 function formatDate(value: string | null | undefined): string {
-  if (!value) return "-";
+  if (!value) return '-';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleString();
 }
 
-function formatType(t: ServiceDto["type"]): string {
-  if (!t) return "Diğer";
+function formatType(t: ServiceDto['type']): string {
+  if (!t) return 'Diğer';
 
   switch (t) {
-    case "maintenance_repair":
-      return "Bakım & Onarım";
-    case "modernization":
-      return "Modernizasyon";
-    case "spare_parts_components":
-      return "Yedek Parça & Bileşenler";
-    case "applications_references":
-      return "Uygulamalar & Referanslar";
-    case "engineering_support":
-      return "Mühendislik Desteği";
-    case "production":
-      return "Üretim";
-    case "other":
-      return "Diğer";
+    case 'maintenance_repair':
+      return 'Bakım & Onarım';
+    case 'modernization':
+      return 'Modernizasyon';
+    case 'spare_parts_components':
+      return 'Yedek Parça & Bileşenler';
+    case 'applications_references':
+      return 'Uygulamalar & Referanslar';
+    case 'engineering_support':
+      return 'Mühendislik Desteği';
+    case 'production':
+      return 'Üretim';
+    case 'other':
+      return 'Diğer';
     default:
       return String(t);
   }
 }
 
 function formatPrice(price: string | null): string {
-  if (!price) return "-";
+  if (!price) return '-';
   return price;
 }
 
@@ -87,7 +86,6 @@ export const ServicesList: React.FC<ServicesListProps> = ({
   const [page, setPage] = useState(1);
   const pageCount = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
 
-  // 🔹 Dragging state
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -103,7 +101,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
   const pageRows = rows.slice(startIndex, endIndex);
 
   const buildPages = () => {
-    const pages: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
+    const pages: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
     if (pageCount <= 7) {
       for (let i = 1; i <= pageCount; i += 1) pages.push(i);
       return pages;
@@ -114,19 +112,13 @@ export const ServicesList: React.FC<ServicesListProps> = ({
     let left = Math.max(2, currentPage - siblings);
     let right = Math.min(pageCount - 1, currentPage + siblings);
 
-    if (left > 2) {
-      pages.push("ellipsis-left");
-    } else {
-      left = 2;
-    }
+    if (left > 2) pages.push('ellipsis-left');
+    else left = 2;
 
     for (let i = left; i <= right; i += 1) pages.push(i);
 
-    if (right < pageCount - 1) {
-      pages.push("ellipsis-right");
-    } else {
-      right = pageCount - 1;
-    }
+    if (right < pageCount - 1) pages.push('ellipsis-right');
+    else right = pageCount - 1;
 
     pages.push(pageCount);
     return pages;
@@ -141,13 +133,8 @@ export const ServicesList: React.FC<ServicesListProps> = ({
 
   /* -------------------- Drag & Drop -------------------- */
 
-  const handleDragStart = (id: string) => {
-    setDraggingId(id);
-  };
-
-  const handleDragEnd = () => {
-    setDraggingId(null);
-  };
+  const handleDragStart = (id: string) => setDraggingId(id);
+  const handleDragEnd = () => setDraggingId(null);
 
   const handleDropOn = (targetId: string) => {
     if (!draggingId || draggingId === targetId || !onReorder) return;
@@ -165,64 +152,58 @@ export const ServicesList: React.FC<ServicesListProps> = ({
 
   /* -------------------- Render Helpers -------------------- */
 
-  const renderStatusBadges = (s: ServiceDto) => {
-    return (
-      <div className="d-flex flex-column gap-1 small">
-        <span
-          className={
-            "badge rounded-pill " +
-            (s.is_active
-              ? "bg-success-subtle text-success"
-              : "bg-light text-muted")
-          }
-        >
-          {s.is_active ? "Aktif" : "Pasif"}
-        </span>
-        <span
-          className={
-            "badge rounded-pill " +
-            (s.featured
-              ? "bg-warning-subtle text-warning"
-              : "bg-light text-muted")
-          }
-        >
-          {s.featured ? "Öne çıkan" : "Normal"}
-        </span>
-      </div>
-    );
-  };
+  const renderStatusBadges = (s: ServiceDto) => (
+    <div className="d-flex flex-column gap-1 small">
+      <span
+        className={
+          'badge rounded-pill ' +
+          (s.is_active ? 'bg-success-subtle text-success' : 'bg-light text-muted')
+        }
+      >
+        {s.is_active ? 'Aktif' : 'Pasif'}
+      </span>
+      <span
+        className={
+          'badge rounded-pill ' +
+          (s.featured ? 'bg-warning-subtle text-warning' : 'bg-light text-muted')
+        }
+      >
+        {s.featured ? 'Öne çıkan' : 'Normal'}
+      </span>
+    </div>
+  );
 
   const renderTypeBadge = (s: ServiceDto) => {
     const t = s.type;
-    let cls = "bg-secondary";
+    let cls = 'bg-secondary';
 
     switch (t) {
-      case "maintenance_repair":
-        cls = "bg-success";
+      case 'maintenance_repair':
+        cls = 'bg-success';
         break;
-      case "modernization":
-        cls = "bg-info";
+      case 'modernization':
+        cls = 'bg-info';
         break;
-      case "spare_parts_components":
-        cls = "bg-warning";
+      case 'spare_parts_components':
+        cls = 'bg-warning';
         break;
-      case "applications_references":
-        cls = "bg-primary";
+      case 'applications_references':
+        cls = 'bg-primary';
         break;
-      case "engineering_support":
-        cls = "bg-dark";
+      case 'engineering_support':
+        cls = 'bg-dark';
         break;
-      case "production":
-        cls = "bg-secondary";
+      case 'production':
+        cls = 'bg-secondary';
         break;
-      case "other":
+      case 'other':
       default:
-        cls = "bg-secondary";
+        cls = 'bg-secondary';
         break;
     }
 
     return (
-      <span className={`badge ${cls} ms-1`} style={{ fontSize: "0.7rem" }}>
+      <span className={`badge ${cls} ms-1`} style={{ fontSize: '0.7rem' }}>
         {formatType(t)}
       </span>
     );
@@ -235,9 +216,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
       <div className="card-header py-2 d-flex align-items-center justify-content-between">
         <span className="small fw-semibold">Hizmet Listesi</span>
         <div className="d-flex align-items-center gap-2">
-          {loading && (
-            <span className="badge bg-secondary small">Yükleniyor...</span>
-          )}
+          {loading && <span className="badge bg-secondary small">Yükleniyor...</span>}
           <span className="text-muted small">
             Toplam: <strong>{totalItems}</strong>
           </span>
@@ -246,11 +225,9 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               type="button"
               className="btn btn-outline-primary btn-sm"
               onClick={onSaveOrder}
-              disabled={savingOrder || !hasData}
+              disabled={!!savingOrder || !hasData}
             >
-              {savingOrder
-                ? "Sıralama kaydediliyor..."
-                : "Sıralamayı Kaydet"}
+              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
             </button>
           )}
         </div>
@@ -263,16 +240,17 @@ export const ServicesList: React.FC<ServicesListProps> = ({
             <table className="table table-hover mb-0 align-middle table-sm">
               <thead className="table-light">
                 <tr>
-                  <th style={{ width: "5%" }} />
-                  <th style={{ width: "30%" }}>Hizmet</th>
-                  <th style={{ width: "15%" }}>Tip</th>
-                  <th style={{ width: "15%" }}>Durum</th>
-                  <th style={{ width: "20%" }}>Fiyat / Tarihler</th>
-                  <th style={{ width: "15%" }} className="text-end">
+                  <th style={{ width: '5%' }} />
+                  <th style={{ width: '30%' }}>Hizmet</th>
+                  <th style={{ width: '15%' }}>Tip</th>
+                  <th style={{ width: '15%' }}>Durum</th>
+                  <th style={{ width: '20%' }}>Fiyat / Tarihler</th>
+                  <th style={{ width: '15%' }} className="text-end">
                     İşlemler
                   </th>
                 </tr>
               </thead>
+
               <tbody>
                 {hasData ? (
                   pageRows.map((s, index) => {
@@ -285,20 +263,17 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                         onDragEnd={handleDragEnd}
                         onDragOver={(e) => e.preventDefault()}
                         onDrop={() => handleDropOn(s.id)}
-                        className={
-                          draggingId === s.id ? "table-active" : undefined
-                        }
-                        style={{ cursor: "move" }}
+                        className={draggingId === s.id ? 'table-active' : undefined}
+                        style={{ cursor: 'move' }}
                       >
                         <td className="text-muted small">
                           <span className="me-1">≡</span>
                           <span>{globalIndex + 1}</span>
                         </td>
+
                         <td>
                           <div className="fw-semibold small">
-                            {s.name || (
-                              <span className="text-muted">İsim yok</span>
-                            )}
+                            {s.name || <span className="text-muted">İsim yok</span>}
                             {renderTypeBadge(s)}
                           </div>
                           <div className="text-muted small">
@@ -324,8 +299,10 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                             </div>
                           )}
                         </td>
+
                         <td className="small">{formatType(s.type)}</td>
                         <td>{renderStatusBadges(s)}</td>
+
                         <td className="small">
                           <div>
                             <span className="text-muted me-1">Fiyat:</span>
@@ -336,46 +313,39 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                             {formatDate(s.created_at)}
                           </div>
                           <div>
-                            <span className="text-muted me-1">
-                              Güncelleme:
-                            </span>
+                            <span className="text-muted me-1">Güncelleme:</span>
                             {formatDate(s.updated_at)}
                           </div>
                         </td>
+
                         <td className="text-end">
                           <div className="btn-group btn-group-sm">
                             {onToggleFeatured && (
                               <button
                                 type="button"
                                 className={
-                                  "btn " +
-                                  (s.featured
-                                    ? "btn-outline-warning"
-                                    : "btn-outline-secondary")
+                                  'btn ' +
+                                  (s.featured ? 'btn-outline-warning' : 'btn-outline-secondary')
                                 }
-                                onClick={() =>
-                                  onToggleFeatured(s, !s.featured)
-                                }
+                                onClick={() => onToggleFeatured(s, !s.featured)}
                               >
-                                {s.featured ? "Öne çıkarma" : "Öne çıkar"}
+                                {s.featured ? 'Öne çıkarma' : 'Öne çıkar'}
                               </button>
                             )}
+
                             {onToggleActive && (
                               <button
                                 type="button"
                                 className={
-                                  "btn " +
-                                  (s.is_active
-                                    ? "btn-outline-danger"
-                                    : "btn-outline-success")
+                                  'btn ' +
+                                  (s.is_active ? 'btn-outline-danger' : 'btn-outline-success')
                                 }
-                                onClick={() =>
-                                  onToggleActive(s, !s.is_active)
-                                }
+                                onClick={() => onToggleActive(s, !s.is_active)}
                               >
-                                {s.is_active ? "Pasif yap" : "Aktif yap"}
+                                {s.is_active ? 'Pasif yap' : 'Aktif yap'}
                               </button>
                             )}
+
                             {onEdit && (
                               <button
                                 type="button"
@@ -385,6 +355,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                                 Düzenle
                               </button>
                             )}
+
                             {onDelete && (
                               <button
                                 type="button"
@@ -409,12 +380,12 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                   </tr>
                 )}
               </tbody>
+
               <caption className="px-3 py-2 text-start">
                 <span className="text-muted small">
-                  Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin.
-                  Değişiklikleri kalıcı yapmak için{" "}
-                  <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu
-                  kullanman gerekir.
+                  Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
+                  yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullanman
+                  gerekir.
                 </span>
               </caption>
             </table>
@@ -435,19 +406,16 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                   onDragEnd={handleDragEnd}
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={() => handleDropOn(s.id)}
-                  style={{ cursor: "move" }}
+                  style={{ cursor: 'move' }}
                 >
                   <div className="d-flex justify-content-between align-items-start gap-2">
                     <div>
                       <div className="fw-semibold small">
-                        <span className="text-muted me-1">
-                          #{globalIndex + 1}
-                        </span>
-                        {s.name || (
-                          <span className="text-muted">İsim yok</span>
-                        )}
+                        <span className="text-muted me-1">#{globalIndex + 1}</span>
+                        {s.name || <span className="text-muted">İsim yok</span>}
                         {renderTypeBadge(s)}
                       </div>
+
                       <div className="text-muted small">
                         {s.slug ? (
                           <>
@@ -457,17 +425,19 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                           <span className="text-muted">Slug yok</span>
                         )}
                       </div>
+
                       {s.locale_resolved && (
                         <div className="text-muted small">
                           Locale: <code>{s.locale_resolved}</code>
                         </div>
                       )}
+
                       {s.description && (
-                        <div className="text-muted small mt-1">
-                          {s.description}
-                        </div>
+                        <div className="text-muted small mt-1">{s.description}</div>
                       )}
+
                       <div className="mt-1">{renderStatusBadges(s)}</div>
+
                       <div className="text-muted small mt-1">
                         <div>
                           <span className="me-1">Fiyat:</span>
@@ -489,30 +459,28 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                         <button
                           type="button"
                           className={
-                            "btn btn-sm w-100 " +
-                            (s.featured
-                              ? "btn-outline-warning"
-                              : "btn-outline-secondary")
+                            'btn btn-sm w-100 ' +
+                            (s.featured ? 'btn-outline-warning' : 'btn-outline-secondary')
                           }
                           onClick={() => onToggleFeatured(s, !s.featured)}
                         >
-                          {s.featured ? "Öne çıkarma" : "Öne çıkar"}
+                          {s.featured ? 'Öne çıkarma' : 'Öne çıkar'}
                         </button>
                       )}
+
                       {onToggleActive && (
                         <button
                           type="button"
                           className={
-                            "btn btn-sm w-100 " +
-                            (s.is_active
-                              ? "btn-outline-danger"
-                              : "btn-outline-success")
+                            'btn btn-sm w-100 ' +
+                            (s.is_active ? 'btn-outline-danger' : 'btn-outline-success')
                           }
                           onClick={() => onToggleActive(s, !s.is_active)}
                         >
-                          {s.is_active ? "Pasif yap" : "Aktif yap"}
+                          {s.is_active ? 'Pasif yap' : 'Aktif yap'}
                         </button>
                       )}
+
                       {onEdit && (
                         <button
                           type="button"
@@ -522,6 +490,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                           Düzenle
                         </button>
                       )}
+
                       {onDelete && (
                         <button
                           type="button"
@@ -537,16 +506,13 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               );
             })
           ) : (
-            <div className="px-3 py-3 text-center text-muted small">
-              Kayıtlı hizmet bulunamadı.
-            </div>
+            <div className="px-3 py-3 text-center text-muted small">Kayıtlı hizmet bulunamadı.</div>
           )}
 
           <div className="px-3 py-2 border-top">
             <span className="text-muted small">
-              Mobil görünümde kayıtlar kart formatında listelenir. Kartları
-              sürükleyerek sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
-              yapmak için üstteki{" "}
+              Mobil görünümde kayıtlar kart formatında listelenir. Kartları sürükleyerek sıralamayı
+              değiştirebilirsin. Değişiklikleri kalıcı yapmak için üstteki{' '}
               <strong>Sıralamayı Kaydet</strong> butonunu kullan.
             </span>
           </div>
@@ -568,7 +534,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                 </PaginationItem>
 
                 {pages.map((p, idx) =>
-                  typeof p === "number" ? (
+                  typeof p === 'number' ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

@@ -1,29 +1,29 @@
 // =============================================================
 // FILE: src/i18n/switchLocale.ts
-// Ensotek – Locale switcher (URL-prefix based)
-//  - Next built-in i18n YOK
-//  - Cookie YOK (tek kaynak: URL prefix /tr /en)
+// Ensotek – Locale switcher (URL-prefix based) (DYNAMIC)
+//  - No hardcoded locales
+//  - activeLocales is OPTIONAL; pass it when you have it to strip correctly
 // =============================================================
 
 "use client";
 
 import type { NextRouter } from "next/router";
-import type { SupportedLocale } from "@/types/common";
-import { localizePath } from "@/i18n/url";
+import { localizePath, type RuntimeLocale } from "@/i18n/url";
 
 function safeAsPath(asPath?: string) {
   const v = String(asPath || "/").trim();
   return v.startsWith("/") ? v : `/${v}`;
 }
 
-export async function switchLocale(router: NextRouter, next: SupportedLocale) {
+export async function switchLocale(
+  router: NextRouter,
+  next: RuntimeLocale,
+  activeLocales?: string[],
+) {
   const asPath = safeAsPath(router.asPath);
-
-  // URL prefix bazlı hedef üret: /tr/..., /en/...
-  const target = localizePath(next, asPath);
+  const target = localizePath(next, asPath, activeLocales);
 
   if (target === asPath) return;
 
-  // i18n kapalı → normal push
   await router.push(target, target, { scroll: false });
 }

@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
-import { useDeleteCustomPageAdminMutation } from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
+import { useDeleteCustomPageAdminMutation } from "@/integrations/rtk/hooks";
 
 export type CustomPageListProps = {
   items?: CustomPageDto[];

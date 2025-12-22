@@ -1,108 +1,103 @@
 -- =============================================================
--- 049-2_site_settings_ui_references.sql  (References UI metinleri)
+-- 049-2_site_settings_ui_references.sql  (References UI strings)
 -- site_settings.key = 'ui_references'
+--  - Value: JSON (stored as TEXT)
+--  - Localized: tr / en / de
+--  - Extendable: clone from tr as bootstrap (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-VALUES
--- -------------------------------------------------------------
--- TR
--- -------------------------------------------------------------
+INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
   'ui_references',
   'tr',
-  JSON_OBJECT(
-    -- Sayfa başlığı (Banner + page title)
+  CAST(JSON_OBJECT(
     'ui_references_page_title',   'Referanslarımız',
-
-    -- Home section başlığı (slider başlığı)
     'ui_references_title',        'Referanslarımız',
-
-    -- Section subtitle (Ensotek Referanslar / Referanslarımız)
     'ui_references_subprefix',    'Ensotek',
     'ui_references_sublabel',     'Referanslar',
-
-    -- Sayfa intro metni
     'ui_references_page_intro',
       'Yurt içi ve yurt dışında tamamladığımız projelerden seçili referanslarımız.',
-
-    -- CTA / link text (home slider butonu)
     'ui_references_view_all',     'Tüm Referanslar',
-
-    -- Slider ok metinleri
     'ui_references_prev',         'Önceki',
     'ui_references_next',         'Sonraki',
-
-    -- Tab metinleri (liste sayfası)
     'ui_references_tab_all',      'Tümü',
     'ui_references_tab_other',    'Diğer Projeler',
-
-    -- Boş state (liste sayfası)
     'ui_references_empty',
       'Şu anda görüntülenecek referans bulunmamaktadır.'
-  ),
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
--- -------------------------------------------------------------
--- EN
--- -------------------------------------------------------------
 (
   UUID(),
   'ui_references',
   'en',
-  JSON_OBJECT(
-    -- Page title (Banner + page title)
+  CAST(JSON_OBJECT(
     'ui_references_page_title',   'Our References',
-
-    -- Home section title (slider title)
     'ui_references_title',        'Our References',
-
-    -- Section subtitle
     'ui_references_subprefix',    'Ensotek',
     'ui_references_sublabel',     'References',
-
-    -- Page intro text
     'ui_references_page_intro',
       'Selected references from our completed projects in Turkey and abroad.',
-
-    -- CTA / link text (home slider button)
     'ui_references_view_all',     'View all references',
-
-    -- Slider arrows
     'ui_references_prev',         'Previous',
     'ui_references_next',         'Next',
-
-    -- Tabs (list page)
     'ui_references_tab_all',      'All',
     'ui_references_tab_other',    'Other Projects',
-
-    -- Empty state (list page)
     'ui_references_empty',
       'There are no references to display at the moment.'
-  ),
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_references',
+  'de',
+  CAST(JSON_OBJECT(
+    'ui_references_page_title',   'Unsere Referenzen',
+    'ui_references_title',        'Unsere Referenzen',
+    'ui_references_subprefix',    'Ensotek',
+    'ui_references_sublabel',     'Referenzen',
+    'ui_references_page_intro',
+      'Ausgewählte Referenzen aus unseren abgeschlossenen Projekten im In- und Ausland.',
+    'ui_references_view_all',     'Alle Referenzen anzeigen',
+    'ui_references_prev',         'Zurück',
+    'ui_references_next',         'Weiter',
+    'ui_references_tab_all',      'Alle',
+    'ui_references_tab_other',    'Weitere Projekte',
+    'ui_references_empty',
+      'Derzeit sind keine Referenzen verfügbar.'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
--- -------------------------------------------------------------
--- TR → DE otomatik kopya (Almanca özel çeviri gelene kadar)
--- -------------------------------------------------------------
+-- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE): TR → TARGET
+SET @TARGET_LOCALE := 'de';
+
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
+SELECT
+  UUID(),
+  s.`key`,
+  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
+  s.`value`,
+  NOW(3),
+  NOW(3)
 FROM site_settings s
-WHERE s.locale = 'tr'
-  AND s.`key` = 'ui_references'
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_references' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t
-    WHERE t.`key` = s.`key`
-      AND t.locale = 'de'
+    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
+      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
   );

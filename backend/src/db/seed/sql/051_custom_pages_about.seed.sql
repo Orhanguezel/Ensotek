@@ -293,3 +293,138 @@ ON DUPLICATE KEY UPDATE
 COMMIT;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- -------------------------------------------------------------
+-- I18N INSERT – UNSERE MISSION (DE)
+-- -------------------------------------------------------------
+INSERT INTO `custom_pages_i18n`
+  (`id`, `page_id`, `locale`,
+   `title`, `slug`, `content`,
+   `summary`,
+   `featured_image_alt`, `meta_title`, `meta_description`,
+   `tags`,
+   `created_at`, `updated_at`)
+VALUES
+(
+  UUID(),
+  @PAGE_MISSION,
+  'de',
+  'Unsere Mission',
+  'unsere-mission',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<p>Unsere Mission ist es, Innovationen und Entwicklungen in der Branche kontinuierlich zu verfolgen und unseren Kunden effiziente sowie wirtschaftliche Lösungen anzubieten, die bestmöglich zu ihren Erwartungen und Anforderungen passen.</p>',
+      '<p>Wir möchten in der Türkei und international zu den führenden Unternehmen gehören, wenn es um Wasserkühltürme geht.</p>'
+    )
+  ),
+  'Beschreibt Ensoteks Mission, effiziente und wirtschaftliche Wasserkühlturm-Lösungen anzubieten und zu den führenden Anbietern zu zählen.',
+  'Unsere Mission – Ensotek Wasserkühltürme',
+  'Unsere Mission | Ensotek Wasserkühltürme',
+  'Ensoteks Mission: Innovationen verfolgen und kundenorientierte, effiziente sowie wirtschaftliche Wasserkühlturm-Lösungen bereitstellen.',
+  'ensotek,mission,wasserkühltürme,frp',
+  NOW(3),
+  NOW(3)
+)
+ON DUPLICATE KEY UPDATE
+  `title`               = VALUES(`title`),
+  `slug`                = VALUES(`slug`),
+  `content`             = VALUES(`content`),
+  `summary`             = VALUES(`summary`),
+  `featured_image_alt`  = VALUES(`featured_image_alt`),
+  `meta_title`          = VALUES(`meta_title`),
+  `meta_description`    = VALUES(`meta_description`),
+  `tags`                = VALUES(`tags`),
+  `updated_at`          = VALUES(`updated_at`);
+
+  -- -------------------------------------------------------------
+-- I18N INSERT – UNSERE VISION (DE)
+-- -------------------------------------------------------------
+INSERT INTO `custom_pages_i18n`
+  (`id`, `page_id`, `locale`,
+   `title`, `slug`, `content`,
+   `summary`,
+   `featured_image_alt`, `meta_title`, `meta_description`,
+   `tags`,
+   `created_at`, `updated_at`)
+VALUES
+(
+  UUID(),
+  @PAGE_VISION,
+  'de',
+  'Unsere Vision',
+  'unsere-vision',
+  JSON_OBJECT(
+    'html',
+    '<p>Unsere Vision ist es, die Kundenzufriedenheit in den Mittelpunkt zu stellen, qualitativ hochwertige, effiziente und nachhaltige Wasserkühltürme sowie Dienstleistungen anzubieten und eine bevorzugte, verlässliche und führende Marke auf nationalen und internationalen Märkten zu werden.</p>'
+  ),
+  'Ensoteks Vision: als verlässliche und führende Marke nachhaltige und qualitativ hochwertige Wasserkühlturm-Lösungen anzubieten.',
+  'Unsere Vision – Ensotek Wasserkühltürme',
+  'Unsere Vision | Ensotek Wasserkühltürme',
+  'Ensoteks Vision: kundenorientierte, effiziente und nachhaltige Wasserkühltürme liefern und eine vertrauenswürdige, führende Marke werden.',
+  'ensotek,vision,nachhaltig,wasserkühltürme',
+  NOW(3),
+  NOW(3)
+)
+ON DUPLICATE KEY UPDATE
+  `title`               = VALUES(`title`),
+  `slug`                = VALUES(`slug`),
+  `content`             = VALUES(`content`),
+  `summary`             = VALUES(`summary`),
+  `featured_image_alt`  = VALUES(`featured_image_alt`),
+  `meta_title`          = VALUES(`meta_title`),
+  `meta_description`    = VALUES(`meta_description`),
+  `tags`                = VALUES(`tags`),
+  `updated_at`          = VALUES(`updated_at`);
+
+
+  -- -------------------------------------------------------------
+-- I18N INSERT – ENSOTEK WASSERKÜHLTÜRME (DE)
+-- -------------------------------------------------------------
+INSERT INTO `custom_pages_i18n`
+  (`id`, `page_id`, `locale`,
+   `title`, `slug`, `content`,
+   `summary`,
+   `featured_image_alt`, `meta_title`, `meta_description`,
+   `tags`,
+   `created_at`, `updated_at`)
+VALUES
+(
+  UUID(),
+  @PAGE_ABOUT,
+  'de',
+  'Ensotek Wasserkühltürme',
+  'ensotek-wasserkuehltuerme',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<p>Ensotek betreut seine Kunden mit über 40 Jahren Erfahrung und einem erfahrenen Expertenteam vom Hauptsitz in Istanbul sowie dem Werk in Ankara im Bereich Wasserkühltürme. ',
+      'Unser Unternehmen verfügt über die größte Produktionsanlage für Wasserkühltürme in der Türkei.</p>',
+      '<p>Wir fertigen offene und geschlossene Wasserkühltürme aus glasfaserverstärktem Polyester (GFK/FRP) – korrosionsbeständig, unlackiert, langlebig, wartungsfreundlich und mit niedrigen Investitions- und Betriebskosten.</p>',
+      '<p>Wir haben in der Türkei und im Ausland in tausenden Projekten erfolgreiche Lösungen umgesetzt. ',
+      'Nach dem Prinzip, dass das beste Marketing das Produkt selbst ist, möchten wir, dass unsere Kunden uns immer wieder wählen und jedes Mal zufrieden sind.</p>',
+      '<p>Durch kontinuierliche F&amp;E-Aktivitäten und Kundenfeedback verbessern wir unsere Produkte fortlaufend und zählen zu den beispielgebenden Unternehmen in der Türkei und international. ',
+      'Ensotek ist Mitglied des CTI (Cooling Technology Institute) und der SOSIAD; unser Produktionssystem ist nach ISO-9001:2015 zertifiziert und unsere Produkte sind CE-gekennzeichnet.</p>'
+    )
+  ),
+  'Zusammenfassung von Ensoteks über 40 Jahren Erfahrung, der FRP/GFK-Produktion und der führenden Rolle in nationalen und internationalen Projekten.',
+  'Produktionsanlage für Ensotek Wasserkühltürme',
+  'Ensotek Wasserkühltürme | Über 40 Jahre Erfahrung',
+  'Ensotek ist Branchenführer mit der größten Produktionsanlage für Wasserkühltürme in der Türkei und liefert FRP/GFK-Kühlturm-Lösungen für Projekte weltweit.',
+  'ensotek,über uns,gfk,frp,wasserkühltürme,produktionsanlage',
+  NOW(3),
+  NOW(3)
+)
+ON DUPLICATE KEY UPDATE
+  `title`               = VALUES(`title`),
+  `slug`                = VALUES(`slug`),
+  `content`             = VALUES(`content`),
+  `summary`             = VALUES(`summary`),
+  `featured_image_alt`  = VALUES(`featured_image_alt`),
+  `meta_title`          = VALUES(`meta_title`),
+  `meta_description`    = VALUES(`meta_description`),
+  `tags`                = VALUES(`tags`),
+  `updated_at`          = VALUES(`updated_at`);
+
+
+

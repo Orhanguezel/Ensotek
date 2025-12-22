@@ -1,8 +1,7 @@
 // =============================================================
-// FILE: src/pages/admin/services/index.tsx
+// FILE: src/pages/admin/services/index.tsx (FIXED)
 // Ensotek – Admin Hizmetler (Services) Liste + Filtre + Reorder
-//  - Drag & drop sıralama (display_order parent üzerinde)
-//  - Create/Edit ayrı sayfalarda
+// Locale source: site_settings.app_locales + default_locale (same as site-settings page)
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -20,103 +19,186 @@ import {
   useListServicesAdminQuery,
   useUpdateServiceAdminMutation,
   useDeleteServiceAdminMutation,
-  useReorderServicesAdminMutation, // reorder endpoint
-} from "@/integrations/rtk/endpoints/admin/services_admin.endpoints";
-
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
-import type { LocaleOption } from "@/components/admin/custompage/CustomPageHeader";
+  useReorderServicesAdminMutation,
+  useListSiteSettingsAdminQuery
+} from "@/integrations/rtk/hooks";
 
 import type {
   ServiceListAdminQueryParams,
   ServiceDto,
 } from "@/integrations/types/services.types";
 
+import type { AdminLocaleOption } from "@/components/common/AdminLocaleSelect";
+
+/* -------------------- Helpers (same spirit as site-settings page) -------------------- */
+
+type AppLocaleItem = {
+  code: string;
+  label?: string;
+  is_active?: boolean;
+  is_default?: boolean;
+};
+
+const toShortLocale = (v: unknown): string =>
+  String(v || "")
+    .trim()
+    .toLowerCase()
+    .replace("_", "-")
+    .split("-")[0]
+    .trim();
+
+function uniqByCode(items: AppLocaleItem[]): AppLocaleItem[] {
+  const seen = new Set<string>();
+  const out: AppLocaleItem[] = [];
+  for (const it of items) {
+    const code = toShortLocale(it?.code);
+    if (!code) continue;
+    if (seen.has(code)) continue;
+    seen.add(code);
+    out.push({ ...it, code });
+  }
+  return out;
+}
+
+function buildLocaleLabel(item: AppLocaleItem): string {
+  const code = toShortLocale(item.code);
+  const label = String(item.label || "").trim();
+
+  // statik map yok: label varsa kullan, yoksa Intl ile üret (yoksa code)
+  if (label) return `${label} (${code})`;
+
+  let dn: Intl.DisplayNames | null = null;
+  try {
+    dn = new Intl.DisplayNames([code || "en"], { type: "language" });
+  } catch {
+    dn = null;
+  }
+
+  const name = dn?.of(code) ?? "";
+  return name ? `${name} (${code})` : `${code.toUpperCase()} (${code})`;
+}
+
+function parseAppLocalesValue(raw: unknown): AppLocaleItem[] {
+  if (!raw) return [];
+
+  // API value already object/array
+  if (Array.isArray(raw)) {
+    return raw
+      .map((x: any) => ({
+        code: toShortLocale(x?.code ?? x),
+        label: x?.label,
+        is_active: x?.is_active,
+        is_default: x?.is_default,
+      }))
+      .filter((x) => !!x.code);
+  }
+
+  if (typeof raw === "string") {
+    const s = raw.trim();
+    if (!s) return [];
+    try {
+      const parsed = JSON.parse(s);
+      return parseAppLocalesValue(parsed);
+    } catch {
+      return [];
+    }
+  }
+
+  if (typeof raw === "object" && raw !== null) {
+    // { locales: [...] } gibi varyant
+    const anyObj = raw as any;
+    if (Array.isArray(anyObj.locales)) return parseAppLocalesValue(anyObj.locales);
+  }
+
+  return [];
+}
+
+/* -------------------- Page -------------------- */
+
 const AdminServicesPage: NextPage = () => {
   const router = useRouter();
 
-  /* ----------------------------------------------------------- */
-  /*  Locale’ler – site_settings/app_locales                     */
-  /* ----------------------------------------------------------- */
+  /* --------- Locales – site_settings(app_locales + default_locale) --------- */
 
   const {
-    data: appLocaleRows,
+    data: settingsRows,
     isLoading: isLocalesLoading,
+    isFetching: isLocalesFetching,
   } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
+    keys: ["app_locales", "default_locale"],
   });
 
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
+  const { localeOptions, defaultLocaleFromDb } = useMemo(() => {
+    const rows = settingsRows ?? [];
+    const appRow = rows.find((r: any) => r.key === "app_locales");
+    const defRow = rows.find((r: any) => r.key === "default_locale");
 
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-    let arr: string[] = [];
+    const itemsRaw = parseAppLocalesValue(appRow?.value);
+    const active = itemsRaw.filter((x) => x && x.code && x.is_active !== false);
+    const uniq = uniqByCode(active);
 
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
+    const def = toShortLocale(defRow?.value);
 
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
+    const options: AdminLocaleOption[] = uniq.map((it) => ({
+      value: toShortLocale(it.code),
+      label: buildLocaleLabel(it),
+    }));
 
-    const uniqLower = Array.from(
-      new Set(arr.map((x) => String(x).toLowerCase())),
-    );
-    return uniqLower;
-  }, [appLocaleRows]);
+    return { localeOptions: options, defaultLocaleFromDb: def };
+  }, [settingsRows]);
 
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
+  // active locale: URL ?locale > default_locale > first
+  const initialLocale = useMemo(() => {
+    const q = router.query?.locale;
+    const qLocale = typeof q === "string" ? toShortLocale(q) : "";
 
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
+    if (qLocale && localeOptions.some((x) => x.value === qLocale)) return qLocale;
+    if (defaultLocaleFromDb && localeOptions.some((x) => x.value === defaultLocaleFromDb))
+      return defaultLocaleFromDb;
 
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
-
-  const defaultLocale =
-    (router.locale as string | undefined)?.toLowerCase() ||
-    localeOptions[0]?.value ||
-    "tr";
+    return localeOptions?.[0]?.value || "";
+  }, [router.query?.locale, localeOptions, defaultLocaleFromDb]);
 
   const [filters, setFilters] = useState<ServicesFilterState>({});
 
-  // 🔹 Sayfa açıldığında varsayılan locale’i filtreye yaz
+  // İlk load/onarım: locale hazır olunca filters.locale set et
   useEffect(() => {
     if (!router.isReady) return;
-    if (!filters.locale && defaultLocale) {
-      setFilters((prev) =>
-        prev.locale ? prev : { ...prev, locale: defaultLocale },
+    if (!localeOptions.length) return;
+
+    setFilters((prev) => {
+      if (prev.locale && localeOptions.some((x) => x.value === prev.locale)) return prev;
+      return initialLocale ? { ...prev, locale: initialLocale } : prev;
+    });
+  }, [router.isReady, localeOptions, initialLocale]);
+
+  // locale değişince URL senkron
+  useEffect(() => {
+    if (!router.isReady) return;
+    if (!filters.locale) return;
+
+    const next = toShortLocale(filters.locale);
+    const cur = typeof router.query?.locale === "string" ? toShortLocale(router.query.locale) : "";
+
+    if (next && next !== cur) {
+      void router.replace(
+        { pathname: router.pathname, query: { ...router.query, locale: next } },
+        undefined,
+        { shallow: true },
       );
     }
-  }, [router.isReady, defaultLocale, filters.locale]);
+  }, [filters.locale, router]);
 
-  /* ----------------------------------------------------------- */
-  /*  Liste + mutations                                          */
-  /* ----------------------------------------------------------- */
+  const effectiveQueryLocale = useMemo(() => {
+    const loc = toShortLocale(filters.locale) || "";
+    return loc || undefined;
+  }, [filters.locale]);
 
   const queryParams: ServiceListAdminQueryParams = {
     limit: 200,
     offset: 0,
-    ...filters, // locale dahil tüm filtreler backend'e gider
+    ...filters,
+    ...(effectiveQueryLocale ? { locale: effectiveQueryLocale } : {}),
   };
 
   const { data, isLoading, isFetching, refetch } =
@@ -130,20 +212,11 @@ const AdminServicesPage: NextPage = () => {
   const [reorderServices, { isLoading: isReordering }] =
     useReorderServicesAdminMutation();
 
-  // 🔹 API’den gelen items’i memoize et – eslint uyarısını çözer
-  const items: ServiceDto[] = useMemo(
-    () => (data?.items ? data.items : []),
-    [data],
-  );
-
+  const items: ServiceDto[] = useMemo(() => data?.items ?? [], [data]);
   const total = data?.total ?? items.length;
 
-  // 🔹 Drag & drop için lokal sıra state’i
   const [rows, setRows] = useState<ServiceDto[]>([]);
-
-  useEffect(() => {
-    setRows(items);
-  }, [items]);
+  useEffect(() => setRows(items), [items]);
 
   const loading =
     isLoading ||
@@ -151,141 +224,84 @@ const AdminServicesPage: NextPage = () => {
     isUpdating ||
     isDeleting ||
     isLocalesLoading ||
+    isLocalesFetching ||
     isReordering;
 
-  /* ----------------------------------------------------------- */
-  /*  Filter & navigation handlers                               */
-  /* ----------------------------------------------------------- */
+  /* -------------------- Handlers -------------------- */
 
   const handleFiltersChange = (patch: Partial<ServicesFilterState>) => {
     setFilters((prev) => ({ ...prev, ...patch }));
   };
 
   const handleCreateNew = () => {
-    router.push("/admin/services/new");
+    const loc = toShortLocale(filters.locale) || toShortLocale(initialLocale);
+    router.push({
+      pathname: "/admin/services/new",
+      ...(loc ? { query: { locale: loc } } : {}),
+    });
   };
-
-  /* ----------------------------------------------------------- */
-  /*  Toggle / Delete                                            */
-  /* ----------------------------------------------------------- */
 
   const handleToggleActive = async (svc: ServiceDto, value: boolean) => {
     try {
-      await updateService({
-        id: svc.id,
-        patch: { is_active: value },
-      }).unwrap();
-      toast.success(
-        `${svc.name || "Hizmet"} ${value ? "aktif" : "pasif"} yapıldı.`,
-      );
-
-      // Lokal state’i de güncel tut
-      setRows((prev) =>
-        prev.map((r) => (r.id === svc.id ? { ...r, is_active: value } : r)),
-      );
-    } catch (err: unknown) {
-      const msg =
-        (err as { data?: { error?: { message?: string } }; message?: string })
-          ?.data?.error?.message ||
-        (err as { message?: string })?.message ||
-        "Durum güncelleme sırasında hata oluştu.";
-      toast.error(msg);
+      await updateService({ id: svc.id, patch: { is_active: value } }).unwrap();
+      toast.success("Durum güncellendi.");
+      setRows((prev) => prev.map((r) => (r.id === svc.id ? { ...r, is_active: value } : r)));
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message || err?.message || "Hata.");
     }
   };
 
   const handleToggleFeatured = async (svc: ServiceDto, value: boolean) => {
     try {
-      await updateService({
-        id: svc.id,
-        patch: { featured: value },
-      }).unwrap();
-      toast.success(
-        `${svc.name || "Hizmet"} ${
-          value ? "öne çıkarıldı" : "artık öne çıkan değil"
-        }.`,
-      );
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === svc.id ? { ...r, featured: value } : r,
-        ),
-      );
-    } catch (err: unknown) {
-      const msg =
-        (err as { data?: { error?: { message?: string } }; message?: string })
-          ?.data?.error?.message ||
-        (err as { message?: string })?.message ||
-        "Öne çıkarma durumu güncellenemedi.";
-      toast.error(msg);
+      await updateService({ id: svc.id, patch: { featured: value } }).unwrap();
+      toast.success("Öne çıkan durumu güncellendi.");
+      setRows((prev) => prev.map((r) => (r.id === svc.id ? { ...r, featured: value } : r)));
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message || err?.message || "Hata.");
     }
   };
 
   const handleEdit = (svc: ServiceDto) => {
-    router.push(`/admin/services/${svc.id}`);
+    const loc = toShortLocale(filters.locale) || toShortLocale(initialLocale);
+    router.push({
+      pathname: `/admin/services/${encodeURIComponent(svc.id)}`,
+      ...(loc ? { query: { locale: loc } } : {}),
+    });
   };
 
   const handleDelete = async (svc: ServiceDto) => {
-    const ok = window.confirm(
-      `"${svc.name || "Bu hizmet"}" kaydını silmek üzeresin.\n\nDevam etmek istiyor musun?`,
-    );
+    const ok = window.confirm(`"${svc.name || "Bu hizmet"}" silinsin mi?`);
     if (!ok) return;
 
     try {
       await deleteService({ id: svc.id }).unwrap();
       toast.success("Hizmet silindi.");
       await refetch();
-    } catch (err: unknown) {
-      const msg =
-        (err as { data?: { error?: { message?: string } }; message?: string })
-          ?.data?.error?.message ||
-        (err as { message?: string })?.message ||
-        "Hizmet silinirken bir hata oluştu.";
-      toast.error(msg);
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message || err?.message || "Silinemedi.");
     }
   };
 
-  /* ----------------------------------------------------------- */
-  /*  Reorder (drag & drop)                                      */
-  /* ----------------------------------------------------------- */
-
-  const handleReorderLocal = (next: ServiceDto[]) => {
-    setRows(next);
-  };
+  const handleReorderLocal = (next: ServiceDto[]) => setRows(next);
 
   const handleSaveOrder = async () => {
     if (!rows.length) return;
-
     try {
-      const itemsPayload = rows.map((r, index) => ({
-        id: r.id,
-        display_order: index, // parent (services.display_order) için index
-      }));
-
-      await reorderServices({ items: itemsPayload }).unwrap();
-      toast.success("Hizmet sıralaması kaydedildi.");
+      await reorderServices({
+        items: rows.map((r, i) => ({ id: r.id, display_order: i })),
+      }).unwrap();
+      toast.success("Sıralama kaydedildi.");
       await refetch();
-    } catch (err: unknown) {
-      const msg =
-        (err as { data?: { error?: { message?: string } }; message?: string })
-          ?.data?.error?.message ||
-        (err as { message?: string })?.message ||
-        "Sıralama kaydedilirken bir hata oluştu.";
-      toast.error(msg);
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message || err?.message || "Sıralama kaydedilemedi.");
     }
   };
-
-  /* ----------------------------------------------------------- */
-  /*  Render                                                     */
-  /* ----------------------------------------------------------- */
 
   return (
     <div className="container-fluid py-3">
       <div className="mb-3">
         <h4 className="h5 mb-1">Hizmetler Yönetimi</h4>
-        <p className="text-muted small mb-0">
-          Ensotek&apos;in endüstriyel soğutma kulesi hizmetlerini (üretim,
-          bakım, modernizasyon, mühendislik desteği vb.) listele, filtrele,
-          sırala ve yönet.
-        </p>
+        <p className="text-muted small mb-0">Ensotek hizmet kayıtlarını yönet.</p>
       </div>
 
       <ServicesHeader
@@ -296,7 +312,7 @@ const AdminServicesPage: NextPage = () => {
         onRefresh={refetch}
         onCreateNew={handleCreateNew}
         locales={localeOptions}
-        localesLoading={isLocalesLoading}
+        localesLoading={isLocalesLoading || isLocalesFetching}
       />
 
       <ServicesList
