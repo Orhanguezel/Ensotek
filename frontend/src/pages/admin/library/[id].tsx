@@ -1,6 +1,8 @@
 // =============================================================
 // FILE: src/pages/admin/library/[id].tsx
-// Ensotek – Library Düzenleme Sayfası
+// Ensotek – Library Düzenleme Sayfası (Dynamic locale + DB default)
+// Priority: query.locale > router.locale > db default
+// - No hardcoded locale list
 // =============================================================
 
 "use client";
@@ -8,9 +10,19 @@
 import React, { useMemo } from "react";
 import { useRouter } from "next/router";
 
-import { useGetLibraryAdminQuery } from "@/integrations/rtk/endpoints/admin/library_admin.endpoints";
+import { useAdminLocales } from "@/components/common/useAdminLocales";
+import { useGetLibraryAdminQuery } from "@/integrations/rtk/hooks";
 import LibraryFormPage from "@/components/admin/library/LibraryFormPage";
 import type { LibraryDto } from "@/integrations/types/library.types";
+
+function pickFirstString(v: unknown): string | undefined {
+  if (typeof v === "string") return v;
+  if (Array.isArray(v)) {
+    const first = v.find((x) => typeof x === "string");
+    return typeof first === "string" ? first : undefined;
+  }
+  return undefined;
+}
 
 const AdminLibraryEditPage: React.FC = () => {
   const router = useRouter();
@@ -18,17 +30,24 @@ const AdminLibraryEditPage: React.FC = () => {
 
   const id = useMemo(() => {
     if (typeof rawId === "string") return rawId;
-    if (Array.isArray(rawId)) return rawId[0];
+    if (Array.isArray(rawId)) return rawId[0] ?? "";
     return "";
   }, [rawId]);
 
-  const locale =
-    (router.locale as string | undefined)?.toLowerCase() ?? "tr";
+  const { defaultLocaleFromDb, coerceLocale, loading: localesLoading } = useAdminLocales();
 
-  const shouldSkip = !router.isReady || !id;
+  // priority: query.locale > router.locale > db default
+  const effectiveLocale = useMemo(() => {
+    const q = pickFirstString(router.query.locale);
+    const r = typeof router.locale === "string" ? router.locale : undefined;
+    return coerceLocale(q ?? r, defaultLocaleFromDb);
+  }, [router.query.locale, router.locale, coerceLocale, defaultLocaleFromDb]);
+
+  // locale boş dönerse (DB'de aktif locale yoksa) query'i skip edelim
+  const shouldSkip = !router.isReady || !id || localesLoading || !effectiveLocale;
 
   const { data, isLoading, isFetching } = useGetLibraryAdminQuery(
-    { id, locale },
+    { id, locale: effectiveLocale },
     { skip: shouldSkip },
   );
 

@@ -13,7 +13,7 @@ import {
 import { SupportList } from "@/components/admin/support/SupportList";
 import {
   useListSupportTicketsAdminQuery,
-} from "@/integrations/rtk/endpoints/admin/support_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 import type {
   AdminSupportTicketDto,
   AdminSupportTicketListQueryParams,

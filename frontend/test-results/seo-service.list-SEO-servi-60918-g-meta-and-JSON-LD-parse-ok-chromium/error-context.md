@@ -1,0 +1,264 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - generic [ref=e3]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - link "Ensotek Enerji Sistemleri" [ref=e9] [cursor=pointer]:
+            - /url: /tr
+            - img "Ensotek Enerji Sistemleri" [ref=e10]
+          - button "Close" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e18]
+            - generic [ref=e21]: Language
+          - combobox "Language" [ref=e22]:
+            - option "Türkçe" [selected]
+            - option "English"
+            - option "Deutsch"
+          - generic [ref=e23]:
+            - link "Login" [ref=e24] [cursor=pointer]:
+              - /url: /tr/login
+              - img [ref=e25]
+              - text: Login
+            - link "Register" [ref=e28] [cursor=pointer]:
+              - /url: /tr/register
+              - img [ref=e29]
+              - text: Register
+        - generic [ref=e33]:
+          - textbox "Search..." [ref=e34]
+          - button "Search" [ref=e35] [cursor=pointer]:
+            - img [ref=e36]
+        - navigation [ref=e41]:
+          - list [ref=e42]:
+            - listitem [ref=e43]:
+              - link "Anasayfa" [ref=e44] [cursor=pointer]:
+                - /url: /tr
+            - listitem [ref=e45]:
+              - button "Hakkımızda" [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]: Hakkımızda
+              - list [ref=e48]:
+                - listitem [ref=e49]:
+                  - link "Hakkımızda" [ref=e50] [cursor=pointer]:
+                    - /url: /tr/about
+                - listitem [ref=e51]:
+                  - link "Ekibimiz" [ref=e52] [cursor=pointer]:
+                    - /url: /tr/team
+                - listitem [ref=e53]:
+                  - link "Sıkça Sorulan Sorular" [ref=e54] [cursor=pointer]:
+                    - /url: /tr/faqs
+            - listitem [ref=e55]:
+              - button "Hizmetler" [ref=e56] [cursor=pointer]:
+                - generic [ref=e57]: Hizmetler
+              - list [ref=e58]:
+                - listitem [ref=e59]:
+                  - link "Bakım & Servis" [ref=e60] [cursor=pointer]:
+                    - /url: /tr/service/maintenance
+                - listitem [ref=e61]:
+                  - link "Proje & Danışmanlık" [ref=e62] [cursor=pointer]:
+                    - /url: /tr/service/project-consulting
+            - listitem [ref=e63]:
+              - button "Ürünler" [ref=e64] [cursor=pointer]:
+                - generic [ref=e65]: Ürünler
+              - list [ref=e66]:
+                - listitem [ref=e67]:
+                  - link "Tüm Ürünler" [ref=e68] [cursor=pointer]:
+                    - /url: /tr/product
+                - listitem [ref=e69]:
+                  - link "Yedek Parçalar" [ref=e70] [cursor=pointer]:
+                    - /url: /tr/sparepart
+            - listitem [ref=e71]:
+              - link "Kütüphane" [ref=e72] [cursor=pointer]:
+                - /url: /tr/library
+            - listitem [ref=e73]:
+              - link "Haberler" [ref=e74] [cursor=pointer]:
+                - /url: /tr/news
+            - listitem [ref=e75]:
+              - link "İletişim" [ref=e76] [cursor=pointer]:
+                - /url: /tr/contact
+        - generic [ref=e77]:
+          - heading "Contact Info" [level=4] [ref=e78]
+          - list [ref=e79]:
+            - listitem [ref=e80]:
+              - img [ref=e82]
+              - link "ensotek.de" [ref=e86] [cursor=pointer]:
+                - /url: https://ensotek.de
+            - listitem [ref=e87]:
+              - img [ref=e89]
+              - link "Call" [ref=e92] [cursor=pointer]:
+                - /url: tel:+902120000000
+                - text: +90 212 000 00 00
+            - listitem [ref=e93]:
+              - img [ref=e95]
+              - link "Email" [ref=e99] [cursor=pointer]:
+                - /url: mailto:info@ensotek.com
+                - text: info@ensotek.com
+        - generic [ref=e100]:
+          - list
+      - banner:
+        - generic [ref=e103]:
+          - link "Ensotek Enerji Sistemleri" [ref=e106] [cursor=pointer]:
+            - /url: /
+            - img "Ensotek Enerji Sistemleri" [ref=e107]
+          - navigation [ref=e111]:
+            - list [ref=e112]:
+              - listitem [ref=e113]:
+                - link "Anasayfa" [ref=e114] [cursor=pointer]:
+                  - /url: /tr
+              - listitem [ref=e115]:
+                - link "Hakkımızda" [ref=e116] [cursor=pointer]:
+                  - /url: /tr/about
+              - listitem [ref=e117]:
+                - link "Hizmetler" [ref=e118] [cursor=pointer]:
+                  - /url: /tr/service
+              - listitem [ref=e119]:
+                - link "Ürünler" [ref=e120] [cursor=pointer]:
+                  - /url: /tr/product
+              - listitem [ref=e121]:
+                - link "Kütüphane" [ref=e122] [cursor=pointer]:
+                  - /url: /tr/library
+              - listitem [ref=e123]:
+                - link "Haberler" [ref=e124] [cursor=pointer]:
+                  - /url: /tr/news
+              - listitem [ref=e125]:
+                - link "İletişim" [ref=e126] [cursor=pointer]:
+                  - /url: /tr/contact
+          - button "Open Menu" [ref=e130] [cursor=pointer]:
+            - img [ref=e131]
+      - main [ref=e142]:
+        - generic [ref=e147]:
+          - heading "Hizmetler" [level=2] [ref=e149]
+          - navigation "Breadcrumbs" [ref=e151]:
+            - list [ref=e152]:
+              - listitem [ref=e153]:
+                - link "Ana Sayfa" [ref=e155] [cursor=pointer]:
+                  - /url: /tr
+                - text: 
+              - generic [ref=e156]: /
+              - listitem [ref=e157]: Hizmetler
+        - generic [ref=e159]:
+          - generic [ref=e162]:
+            - generic [ref=e163]: Ensotek Hizmetler
+            - heading "Neler yapıyoruz" [level=2] [ref=e164]: Neler yapıyoruz
+          - generic [ref=e166]:
+            - generic [ref=e168]:
+              - img [ref=e171]
+              - generic [ref=e174]:
+                - heading "Bakım ve Onarım" [level=3] [ref=e175]:
+                  - link "Bakım ve Onarım" [ref=e176] [cursor=pointer]:
+                    - /url: /tr/service/bakim-ve-onarim
+                - paragraph [ref=e177]: Mevcut soğutma kulelerinin verimliliğini ve sürekliliğini sağlamak için uçtan uca bakım ve onarım hizmetleri sunuyoruz. Ensotek, endüstriyel su…
+            - generic [ref=e179]:
+              - img [ref=e182]
+              - generic [ref=e186]:
+                - heading "Modernizasyon" [level=3] [ref=e187]:
+                  - link "Modernizasyon" [ref=e188] [cursor=pointer]:
+                    - /url: /tr/service/modernizasyon
+                - paragraph [ref=e189]: Mevcut soğutma kulelerinizin enerji verimliliğini artırmak, işletme maliyetlerini düşürmek ve güncel standartlara uyum sağlamak için modernizasyon…
+            - generic [ref=e191]:
+              - img [ref=e194]
+              - generic [ref=e198]:
+                - heading "Yedek Parçalar ve Bileşenler" [level=3] [ref=e199]:
+                  - link "Yedek Parçalar ve Bileşenler" [ref=e200] [cursor=pointer]:
+                    - /url: /tr/service/yedek-parcalar-ve-bilesenler
+                - paragraph [ref=e201]: Soğutma kulelerinizin duruş sürelerini en aza indirmek için, kritik bileşenlerden yapısal parçalara kadar geniş bir yedek parça portföyü sunuyoruz.…
+            - generic [ref=e203]:
+              - img [ref=e206]
+              - generic [ref=e210]:
+                - heading "Uygulamalar ve Referanslar" [level=3] [ref=e211]:
+                  - link "Uygulamalar ve Referanslar" [ref=e212] [cursor=pointer]:
+                    - /url: /tr/service/uygulamalar-ve-referanslar
+                - paragraph [ref=e213]: Ensotek, enerji, kimya, gıda, ilaç, otomotiv, çelik, HVAC ve proses suyu kullanılan pek çok sektörde su soğutma kuleleri ile çözüm üretmiş, birçok…
+            - generic [ref=e215]:
+              - img [ref=e218]
+              - generic [ref=e220]:
+                - heading "Mühendislik Desteği" [level=3] [ref=e221]:
+                  - link "Mühendislik Desteği" [ref=e222] [cursor=pointer]:
+                    - /url: /tr/service/muhendislik-destegi
+                - paragraph [ref=e223]: Ensotek, soğutma kuleleri alanında proje öncesinden işletmeye alma ve sonrası süreçlere kadar kapsamlı mühendislik desteği sağlar. Hidrolik ve termal…
+            - generic [ref=e225]:
+              - img [ref=e228]
+              - generic [ref=e230]:
+                - heading "Üretim" [level=3] [ref=e231]:
+                  - link "Üretim" [ref=e232] [cursor=pointer]:
+                    - /url: /tr/service/uretim
+                - paragraph [ref=e233]: Ensotek, açık ve kapalı devre FRP (cam elyaf takviyeli polyester) su soğutma kulelerinin tasarım ve üretiminde uzmanlaşmıştır. Üretim süreçlerimizde…
+        - generic [ref=e235]:
+          - generic [ref=e238]:
+            - generic [ref=e239]: Diğer hizmetlerimizi keşfedin
+            - heading "İlginizi çekebilecek diğer hizmetler" [level=2] [ref=e240]
+          - generic [ref=e241]:
+            - generic [ref=e245]:
+              - heading "Bakım ve Onarım" [level=3] [ref=e246]:
+                - link "Bakım ve Onarım" [ref=e247] [cursor=pointer]:
+                  - /url: /tr/service/bakim-ve-onarim
+              - paragraph [ref=e248]: Mevcut soğutma kulelerinin verimliliğini ve sürekliliğini sağlamak için uçtan uca bakım ve onarım hizmetleri sunuyoruz. Ensotek,…
+            - generic [ref=e252]:
+              - heading "Modernizasyon" [level=3] [ref=e253]:
+                - link "Modernizasyon" [ref=e254] [cursor=pointer]:
+                  - /url: /tr/service/modernizasyon
+              - paragraph [ref=e255]: Mevcut soğutma kulelerinizin enerji verimliliğini artırmak, işletme maliyetlerini düşürmek ve güncel standartlara uyum sağlamak için…
+            - generic [ref=e259]:
+              - heading "Yedek Parçalar ve Bileşenler" [level=3] [ref=e260]:
+                - link "Yedek Parçalar ve Bileşenler" [ref=e261] [cursor=pointer]:
+                  - /url: /tr/service/yedek-parcalar-ve-bilesenler
+              - paragraph [ref=e262]: Soğutma kulelerinizin duruş sürelerini en aza indirmek için, kritik bileşenlerden yapısal parçalara kadar geniş bir yedek parça portföyü…
+      - contentinfo [ref=e263]:
+        - generic [ref=e266]:
+          - generic [ref=e268]:
+            - heading "Hızlı Erişim" [level=3] [ref=e270]
+            - list [ref=e272]:
+              - listitem [ref=e273]:
+                - link "SSS" [ref=e274] [cursor=pointer]:
+                  - /url: /tr/faqs
+              - listitem [ref=e275]:
+                - link "Kampanyalar" [ref=e276] [cursor=pointer]:
+                  - /url: /tr/promotions
+              - listitem [ref=e277]:
+                - link "Nasıl Sipariş Verilir?" [ref=e278] [cursor=pointer]:
+                  - /url: /tr
+          - generic [ref=e280]:
+            - heading "Kurumsal" [level=3] [ref=e282]
+            - list [ref=e284]:
+              - listitem [ref=e285]:
+                - link "Gizlilik Politikası" [ref=e286] [cursor=pointer]:
+                  - /url: /tr/privacy-policy
+              - listitem [ref=e287]:
+                - link "KVKK" [ref=e288] [cursor=pointer]:
+                  - /url: /tr/kvkk
+              - listitem [ref=e289]:
+                - link "İade ve Değişim" [ref=e290] [cursor=pointer]:
+                  - /url: /tr/returns-exchanges
+              - listitem [ref=e291]:
+                - link "Ödeme Yöntemleri" [ref=e292] [cursor=pointer]:
+                  - /url: /tr/payment-methods
+              - listitem [ref=e293]:
+                - link "Kullanım Koşulları" [ref=e294] [cursor=pointer]:
+                  - /url: /tr/terms
+          - generic [ref=e296]:
+            - heading "Contact" [level=3] [ref=e298]
+            - list [ref=e300]:
+              - listitem [ref=e301]: Ensotek Plaza, Büyükdere Cd. No:10, Şişli / İstanbul
+              - listitem [ref=e302]: "Ofis: Musterstr. 10, 10115 Berlin, Almanya"
+              - listitem [ref=e303]:
+                - link "Phone" [ref=e304] [cursor=pointer]:
+                  - /url: tel:+902120000000
+                  - text: +90 212 000 00 00
+              - listitem [ref=e305]:
+                - link "Email" [ref=e306] [cursor=pointer]:
+                  - /url: mailto:info@ensotek.com
+                  - text: info@ensotek.com
+              - listitem [ref=e307]:
+                - link "https://ensotek.de" [ref=e308] [cursor=pointer]:
+                  - /url: https://ensotek.de
+        - generic [ref=e311]:
+          - link "Ensotek Enerji Sistemleri" [ref=e313] [cursor=pointer]:
+            - /url: /
+            - img "Ensotek Enerji Sistemleri" [ref=e314]
+          - paragraph [ref=e316]: Copyright © 2025 Ensotek Enerji Sistemleri All rights reserved.
+  - alert [ref=e317]
+```

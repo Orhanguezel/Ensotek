@@ -1,185 +1,206 @@
 // =============================================================
 // FILE: src/pages/admin/custompage/index.tsx
-// Ensotek – Admin Custom Pages Liste + Filtre + Reorder
-// FIX (Locale):
-//  - Locale source: /site_settings/app-locales + /site_settings/default-locale
-//  - Default filter: default locale (NOT all languages)
-//  - Still allows "Tüm diller" option if allowAllOption=true
+// Ensotek – Admin Custompage List
+// ID bazlı detail route: /admin/custompage/:id
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
 import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import {
-  CustomPageHeader,
-  type CustomPageFilters,
-  type LocaleOption,
-} from '@/components/admin/custompage/CustomPageHeader';
-import { CustomPageList } from '@/components/admin/custompage/CustomPageList';
+import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 import {
   useListCustomPagesAdminQuery,
   useReorderCustomPagesAdminMutation,
-  useGetAppLocalesPublicQuery,
-  useGetDefaultLocalePublicQuery,
 } from '@/integrations/rtk/hooks';
 
+import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
-import type {
-  CustomPageListAdminQueryParams,
-  BoolLike,
-  CustomPageDto,
-} from '@/integrations/types/custom_pages.types';
+import {
+  CustomPageHeader,
+  type CustomPageFilters,
+} from '@/components/admin/custompage/CustomPageHeader';
+import { CustomPageList } from '@/components/admin/custompage/CustomPageList';
 
-const mapPublishedFilterToBoolLike = (
-  f: CustomPageFilters['publishedFilter'],
-): BoolLike | undefined => {
-  if (f === 'all') return undefined;
-  if (f === 'published') return 1;
-  return 0;
-};
+const toShortLocale = (v: unknown): string =>
+  String(v || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0]
+    .trim();
 
 const AdminCustomPageIndex: NextPage = () => {
+  const router = useRouter();
+
+  const {
+    localeOptions,
+    defaultLocaleFromDb,
+    loading: localesLoading,
+    fetching: localesFetching,
+  } = useAdminLocales();
+
+  const localeSet = useMemo(
+    () => new Set((localeOptions ?? []).map((x) => toShortLocale(x.value))),
+    [localeOptions],
+  );
+
+  const initialLocale = useMemo(() => {
+    const qLocale = toShortLocale(router.query?.locale);
+    if (qLocale && localeSet.has(qLocale)) return qLocale;
+
+    const dbDef = toShortLocale(defaultLocaleFromDb);
+    if (dbDef && localeSet.has(dbDef)) return dbDef;
+
+    const first = toShortLocale(localeOptions?.[0]?.value);
+    return first || 'tr';
+  }, [router.query?.locale, defaultLocaleFromDb, localeOptions, localeSet]);
+
   const [filters, setFilters] = useState<CustomPageFilters>({
     search: '',
     moduleKey: '',
     publishedFilter: 'all',
-    locale: '', // ilk load'da default locale'e set edilecek
+    locale: '',
   });
 
-  const {
-    data: appLocalesMeta,
-    isLoading: isLocalesLoading1,
-    isFetching: isLocalesFetching1,
-  } = useGetAppLocalesPublicQuery();
-
-  const {
-    data: defaultLocaleMeta,
-    isLoading: isLocalesLoading2,
-    isFetching: isLocalesFetching2,
-  } = useGetDefaultLocalePublicQuery();
-
-  const isLocalesLoading =
-    isLocalesLoading1 || isLocalesLoading2 || isLocalesFetching1 || isLocalesFetching2;
-
-  const { localeOptions, defaultLocale } = useMemo(() => {
-    const metas = (appLocalesMeta ?? [])
-      .filter((m) => m && m.code)
-      .filter((m) => m.is_active !== false)
-      .map((m) => ({
-        code: String(m.code).trim().toLowerCase(),
-        label: typeof m.label === 'string' ? m.label.trim() : undefined,
-        is_default: m.is_default === true,
-      }))
-      .filter((m) => !!m.code);
-
-    const uniq = new Map<string, (typeof metas)[number]>();
-    for (const m of metas) uniq.set(m.code, m);
-    const active = Array.from(uniq.values());
-
-    const metaDefault = active.find((m) => m.is_default)?.code || null;
-    const defFromEndpoint =
-      typeof defaultLocaleMeta === 'string' ? defaultLocaleMeta.trim().toLowerCase() : null;
-
-    const effectiveDefault = (
-      metaDefault ||
-      defFromEndpoint ||
-      active[0]?.code ||
-      'tr'
-    ).toLowerCase();
-
-    const options: LocaleOption[] = active.map((m) => {
-      const labelBase = (m.label && m.label.length ? m.label : m.code.toUpperCase()).trim();
-      return { value: m.code, label: `${labelBase} (${m.code})` };
-    });
-
-    return { localeOptions: options, defaultLocale: effectiveDefault };
-  }, [appLocalesMeta, defaultLocaleMeta]);
-
-  // ✅ ilk açılışta "tüm diller" değil, default locale seçili gelsin
   useEffect(() => {
-    if (!defaultLocale) return;
+    if (!router.isReady) return;
+    if (!localeOptions || localeOptions.length === 0) return;
+
     setFilters((prev) => {
-      if (prev.locale) return prev; // kullanıcı seçtiyse dokunma
-      return { ...prev, locale: defaultLocale };
+      const p = toShortLocale(prev.locale);
+      if (p && localeSet.has(p)) return prev;
+      return { ...prev, locale: initialLocale };
     });
-  }, [defaultLocale]);
+  }, [router.isReady, localeOptions, localeSet, initialLocale]);
 
-  const queryParams: CustomPageListAdminQueryParams = useMemo(() => {
-    const is_published = mapPublishedFilterToBoolLike(filters.publishedFilter);
+  // URL sync
+  useEffect(() => {
+    if (!router.isReady) return;
 
-    return {
+    const cur = toShortLocale(router.query?.locale);
+    const next = toShortLocale(filters.locale);
+
+    if (!next) {
+      if (cur) {
+        const q = { ...router.query };
+        delete (q as any).locale;
+        void router.replace({ pathname: router.pathname, query: q }, undefined, { shallow: true });
+      }
+      return;
+    }
+
+    if (next === cur) return;
+
+    void router.replace(
+      { pathname: router.pathname, query: { ...router.query, locale: next } },
+      undefined,
+      { shallow: true },
+    );
+  }, [filters.locale, router]);
+
+  const apiLocale = useMemo(() => {
+    const f = toShortLocale(filters.locale);
+    if (f && localeSet.has(f)) return f;
+
+    const dbDef = toShortLocale(defaultLocaleFromDb);
+    if (dbDef && localeSet.has(dbDef)) return dbDef;
+
+    const first = toShortLocale(localeOptions?.[0]?.value);
+    return first || 'tr';
+  }, [filters.locale, defaultLocaleFromDb, localeOptions, localeSet]);
+
+  const is_published = useMemo(() => {
+    if (filters.publishedFilter === 'all') return undefined;
+    if (filters.publishedFilter === 'published') return 1;
+    return 0;
+  }, [filters.publishedFilter]);
+
+  const queryParams = useMemo(
+    () => ({
       q: filters.search || undefined,
       module_key: filters.moduleKey || undefined,
-      locale: filters.locale || undefined,
       is_published,
+      locale: apiLocale || undefined,
       limit: 200,
       offset: 0,
-    };
-  }, [filters]);
+    }),
+    [filters.search, filters.moduleKey, is_published, apiLocale],
+  );
 
-  const { data, isLoading, isFetching, refetch } = useListCustomPagesAdminQuery(queryParams);
+  const { data, isLoading, isFetching, refetch } = useListCustomPagesAdminQuery(
+    queryParams as any,
+    {
+      refetchOnMountOrArgChange: true,
+    } as any,
+  );
 
-  const items: CustomPageDto[] = useMemo(() => data?.items ?? [], [data]);
-  const total = data?.total ?? items.length;
+  const items: CustomPageDto[] = useMemo(() => (data as any)?.items ?? [], [data]);
+  const total: number = useMemo(() => (data as any)?.total ?? items.length, [data, items.length]);
 
   const [rows, setRows] = useState<CustomPageDto[]>([]);
   useEffect(() => setRows(items), [items]);
 
-  const [reorderCustomPages, { isLoading: isReordering }] = useReorderCustomPagesAdminMutation();
-
-  const loading = isLoading || isFetching || isLocalesLoading || isReordering;
-
-  const handleFiltersChange = (next: CustomPageFilters) => setFilters(next);
-
-  const handleReorderLocal = (next: CustomPageDto[]) => setRows(next);
+  const [reorder, { isLoading: isReordering }] = useReorderCustomPagesAdminMutation();
+  const busy = isLoading || isFetching || localesLoading || localesFetching || isReordering;
 
   const handleSaveOrder = async () => {
-    if (!rows.length) return;
-
     try {
-      const itemsPayload = rows.map((p, index) => ({
-        id: p.id,
-        display_order: index,
-      }));
-
-      await reorderCustomPages({ items: itemsPayload }).unwrap();
-      toast.success('Sayfa sıralaması kaydedildi.');
+      const payload = {
+        items: rows.map((p, idx) => ({ id: p.id, display_order: idx })),
+      };
+      await reorder(payload as any).unwrap();
+      toast.success('Sıralama kaydedildi.');
       await refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message || err?.message || 'Sıralama kaydedilirken bir hata oluştu.';
-      toast.error(msg);
+      toast.error(
+        err?.data?.error?.message || err?.message || 'Sıralama kaydedilirken hata oluştu.',
+      );
     }
+  };
+
+  const handleCreate = () => {
+    void router.push({
+      pathname: '/admin/custompage/new',
+      query: apiLocale ? { locale: apiLocale } : undefined,
+    });
   };
 
   return (
     <div className="container-fluid py-3">
-      <div className="mb-3">
-        <h4 className="h5 mb-1">Özel Sayfalar Yönetimi</h4>
-        <p className="text-muted small mb-0">
-          Blog, haber, hakkında ve benzeri içerik sayfalarını görüntüle, filtrele, sırala ve yönet.
-          Dil seçenekleri aktif locale listesi üzerinden dinamik gelir.
-        </p>
+      <div className="mb-3 d-flex align-items-start justify-content-between gap-2 flex-wrap">
+        <div style={{ minWidth: 0 }}>
+          <h4 className="h5 mb-1">Custom Pages</h4>
+          <p className="text-muted small mb-0">
+            Özel sayfaları listele, filtrele ve sırala. Locale DB’den gelir ve URL ile senkron
+            çalışır.
+          </p>
+        </div>
+
+        <button type="button" className="btn btn-sm btn-primary" onClick={handleCreate}>
+          Yeni Sayfa
+        </button>
       </div>
 
       <CustomPageHeader
         filters={filters}
         total={total}
-        onFiltersChange={handleFiltersChange}
+        onFiltersChange={setFilters}
         onRefresh={refetch}
-        locales={localeOptions}
-        localesLoading={isLocalesLoading}
-        allowAllOption={true}
+        locales={localeOptions as any}
+        localesLoading={localesLoading || localesFetching}
+        allowAllOption={false}
       />
 
       <CustomPageList
         items={rows}
-        loading={loading}
-        onReorder={handleReorderLocal}
+        loading={busy}
+        onReorder={setRows}
         onSaveOrder={handleSaveOrder}
         savingOrder={isReordering}
+        activeLocale={apiLocale}
       />
     </div>
   );

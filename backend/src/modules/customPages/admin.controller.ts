@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/modules/customPages/admin.controller.ts
+// FINAL — locale source: core/i18n.ts (LOCALES runtime)
 // =============================================================
 
-import type { RouteHandler } from "fastify";
-import { randomUUID } from "crypto";
+import type { RouteHandler } from 'fastify';
+import { randomUUID } from 'crypto';
 
 import {
   listCustomPages,
@@ -16,67 +17,85 @@ import {
   getCustomPageI18nRow,
   packContent,
   reorderCustomPages,
-} from "./repository";
+} from './repository';
 
 import {
   customPageListQuerySchema,
+  customPageBySlugQuerySchema,
   upsertCustomPageBodySchema,
   patchCustomPageBodySchema,
   type CustomPageListQuery,
   type UpsertCustomPageBody,
   type PatchCustomPageBody,
-} from "./validation";
+} from './validation';
 
-import { setContentRange } from "@/common/utils/contentRange";
+import { setContentRange } from '@/common/utils/contentRange';
 
-// ✅ Dinamik locale/def locale DB’den (services patern)
-import { getAppLocales, getDefaultLocale } from "@/modules/siteSettings/service";
-import { normalizeLocale } from "@/core/i18n";
+// ✅ single source of truth
+import {
+  LOCALES,
+  DEFAULT_LOCALE,
+  normalizeLocale,
+  ensureLocalesLoadedFromSettings,
+} from '@/core/i18n';
 
 type LocaleCode = string;
 type LocaleQueryLike = { locale?: string; default_locale?: string };
 
-const toBool = (v: unknown): boolean => v === true || v === 1 || v === "1" || v === "true";
+const toBool = (v: unknown): boolean => v === true || v === 1 || v === '1' || v === 'true';
 
 function normalizeLooseLocale(v: unknown): string | null {
-  if (typeof v !== "string") return null;
+  if (typeof v !== 'string') return null;
   const s = v.trim();
   if (!s) return null;
   return normalizeLocale(s) || s.toLowerCase();
 }
 
+function pickSafeDefault(): string {
+  const base = normalizeLocale(DEFAULT_LOCALE) || DEFAULT_LOCALE || 'tr';
+  if (LOCALES.includes(base)) return base;
+  return LOCALES[0] || 'tr';
+}
+
 /**
- * Admin için DİNAMİK locale çözümü (services ile aynı):
- *  - locale: query.locale > req.locale > db default_locale > ilk app_locales > "tr"
- *  - default_locale: query.default_locale > db default_locale > "tr"
+ * Admin için locale çözümü:
+ *  - ensureLocalesLoadedFromSettings() -> LOCALES güncel
+ *  - locale: query.locale > req.locale > DEFAULT_LOCALE/LOCALES[0]
+ *  - def: query.default_locale > DEFAULT_LOCALE/LOCALES[0]
  */
-async function resolveLocales(req: any, query?: LocaleQueryLike): Promise<{ locale: LocaleCode; def: LocaleCode }> {
+async function resolveLocales(
+  req: any,
+  query?: LocaleQueryLike,
+): Promise<{ locale: LocaleCode; def: LocaleCode }> {
+  await ensureLocalesLoadedFromSettings();
+
   const q = query ?? ((req.query ?? {}) as LocaleQueryLike);
 
   const reqRaw = normalizeLooseLocale(q.locale) ?? normalizeLooseLocale(req.locale);
   const defRawFromQuery = normalizeLooseLocale(q.default_locale);
 
-  const appLocales = await getAppLocales(reqRaw);
-  const dbDefault = normalizeLooseLocale(await getDefaultLocale(reqRaw)) ?? "tr";
+  const safeDefault = pickSafeDefault();
 
-  const safeDefault = appLocales.includes(dbDefault) ? dbDefault : appLocales[0] ?? "tr";
-  const safeLocale = reqRaw && appLocales.includes(reqRaw) ? reqRaw : safeDefault;
-
-  const safeDef = defRawFromQuery && appLocales.includes(defRawFromQuery) ? defRawFromQuery : safeDefault;
+  const safeLocale = reqRaw && LOCALES.includes(reqRaw) ? reqRaw : safeDefault;
+  const safeDef =
+    defRawFromQuery && LOCALES.includes(defRawFromQuery) ? defRawFromQuery : safeDefault;
 
   return { locale: safeLocale, def: safeDef };
 }
 
 /* ----------------------------- list/get ----------------------------- */
 
-/** LIST (admin) – coalesced */
-export const listPagesAdmin: RouteHandler<{ Querystring: CustomPageListQuery }> = async (req, reply) => {
+export const listPagesAdmin: RouteHandler<{ Querystring: CustomPageListQuery }> = async (
+  req,
+  reply,
+) => {
   const parsed = customPageListQuerySchema.safeParse(req.query ?? {});
   if (!parsed.success) {
     return reply.code(400).send({
-      error: { message: "invalid_query", issues: parsed.error.issues },
+      error: { message: 'invalid_query', issues: parsed.error.issues },
     });
   }
+
   const q = parsed.data;
 
   const { locale, def } = await resolveLocales(req, {
@@ -85,7 +104,7 @@ export const listPagesAdmin: RouteHandler<{ Querystring: CustomPageListQuery }> 
   });
 
   const { items, total } = await listCustomPages({
-    orderParam: typeof q.order === "string" ? q.order : undefined,
+    orderParam: typeof q.order === 'string' ? q.order : undefined,
     sort: q.sort,
     order: q.orderDir,
     limit: q.limit,
@@ -97,52 +116,58 @@ export const listPagesAdmin: RouteHandler<{ Querystring: CustomPageListQuery }> 
     sub_category_id: q.sub_category_id,
     module_key: q.module_key,
     locale,
-    defaultLocale: def, // ✅ DB’den dinamik
+    defaultLocale: def,
   });
 
   const offset = q.offset ?? 0;
   const limit = q.limit ?? items.length ?? 0;
 
   setContentRange(reply, offset, limit, total);
-  reply.header("x-total-count", String(total ?? 0));
+  reply.header('x-total-count', String(total ?? 0));
   return reply.send(items);
 };
 
-/** GET BY ID (admin) – coalesced */
-export const getPageAdmin: RouteHandler<{ Params: { id: string } }> = async (req, reply) => {
-  const { locale, def } = await resolveLocales(req);
+export const getPageAdmin: RouteHandler<{
+  Params: { id: string };
+  Querystring?: LocaleQueryLike;
+}> = async (req, reply) => {
+  const { locale, def } = await resolveLocales(req, req.query as any);
 
   const row = await getCustomPageMergedById(locale, def, req.params.id);
-  if (!row) {
-    return reply.code(404).send({ error: { message: "not_found" } });
-  }
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
+
   return reply.send(row);
 };
 
-/** GET BY SLUG (admin) – coalesced */
-export const getPageBySlugAdmin: RouteHandler<{ Params: { slug: string } }> = async (req, reply) => {
-  const { locale, def } = await resolveLocales(req);
+export const getPageBySlugAdmin: RouteHandler<{
+  Params: { slug: string };
+  Querystring?: LocaleQueryLike;
+}> = async (req, reply) => {
+  const parsedQ = customPageBySlugQuerySchema.safeParse(req.query ?? {});
+  const q = parsedQ.success ? parsedQ.data : {};
+
+  const { locale, def } = await resolveLocales(req, {
+    locale: (q as any).locale,
+    default_locale: (q as any).default_locale,
+  });
 
   const row = await getCustomPageMergedBySlug(locale, def, req.params.slug);
-  if (!row) {
-    return reply.code(404).send({ error: { message: "not_found" } });
-  }
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
+
   return reply.send(row);
 };
 
 /* ----------------------------- create/update/delete ----------------------------- */
 
-/** CREATE (admin) */
 export const createPageAdmin: RouteHandler<{ Body: UpsertCustomPageBody }> = async (req, reply) => {
   const parsed = upsertCustomPageBodySchema.safeParse(req.body ?? {});
   if (!parsed.success) {
     return reply.code(400).send({
-      error: { message: "invalid_body", issues: parsed.error.issues },
+      error: { message: 'invalid_body', issues: parsed.error.issues },
     });
   }
   const b = parsed.data;
 
-  // ✅ services patern: request locale’i dinamik çöz
   const { locale: primaryLocale, def } = await resolveLocales(req, {
     locale: (b as any).locale,
     default_locale: (b as any).default_locale,
@@ -152,38 +177,42 @@ export const createPageAdmin: RouteHandler<{ Body: UpsertCustomPageBody }> = asy
     const id = randomUUID();
     const now = new Date();
 
-    // Parent (dil bağımsız) kayıt
     await createCustomPageParent({
       id,
       is_published: toBool(b.is_published) ? 1 : 0,
 
-      featured_image: typeof b.featured_image !== "undefined" ? b.featured_image ?? null : null,
+      featured_image: typeof b.featured_image !== 'undefined' ? b.featured_image ?? null : null,
       featured_image_asset_id:
-        typeof b.featured_image_asset_id !== "undefined" ? b.featured_image_asset_id ?? null : null,
+        typeof b.featured_image_asset_id !== 'undefined' ? b.featured_image_asset_id ?? null : null,
 
-      category_id: typeof b.category_id !== "undefined" ? b.category_id ?? null : null,
-      sub_category_id: typeof b.sub_category_id !== "undefined" ? b.sub_category_id ?? null : null,
+      category_id: typeof b.category_id !== 'undefined' ? b.category_id ?? null : null,
+      sub_category_id: typeof b.sub_category_id !== 'undefined' ? b.sub_category_id ?? null : null,
 
       created_at: now as any,
       updated_at: now as any,
     });
 
-    // İlk içerik primaryLocale için yazılır
     const basePayload = {
       title: b.title.trim(),
       slug: b.slug.trim(),
       content: packContent(b.content),
 
-      summary: typeof b.summary === "string" ? b.summary.trim() : b.summary ?? null,
-      featured_image_alt: typeof b.featured_image_alt === "string" ? b.featured_image_alt.trim() : b.featured_image_alt ?? null,
-      meta_title: typeof b.meta_title === "string" ? b.meta_title.trim() : b.meta_title ?? null,
-      meta_description: typeof b.meta_description === "string" ? b.meta_description.trim() : b.meta_description ?? null,
-      tags: typeof b.tags === "string" ? b.tags.trim() : b.tags ?? null,
+      summary: typeof b.summary === 'string' ? b.summary.trim() : b.summary ?? null,
+      featured_image_alt:
+        typeof b.featured_image_alt === 'string'
+          ? b.featured_image_alt.trim()
+          : b.featured_image_alt ?? null,
+      meta_title: typeof b.meta_title === 'string' ? b.meta_title.trim() : b.meta_title ?? null,
+      meta_description:
+        typeof b.meta_description === 'string'
+          ? b.meta_description.trim()
+          : b.meta_description ?? null,
+      tags: typeof b.tags === 'string' ? b.tags.trim() : b.tags ?? null,
     };
 
     await upsertCustomPageI18n(id, primaryLocale, basePayload);
 
-    // ✅ fallback düzgün çalışsın diye: DB defaultLocale ile farklıysa defaultLocale'a da kopyala (hardcode değil)
+    // fallback düzgün çalışsın diye default locale’a kopyala
     if (primaryLocale !== def) {
       await upsertCustomPageI18n(id, def, basePayload);
     }
@@ -191,71 +220,74 @@ export const createPageAdmin: RouteHandler<{ Body: UpsertCustomPageBody }> = asy
     const row = await getCustomPageMergedById(primaryLocale, def, id);
     return reply.code(201).send(row);
   } catch (err: any) {
-    if (err?.code === "ER_DUP_ENTRY") {
-      return reply.code(409).send({ error: { message: "slug_already_exists" } });
+    if (err?.code === 'ER_DUP_ENTRY') {
+      return reply.code(409).send({ error: { message: 'slug_already_exists' } });
     }
-    req.log.error({ err }, "custom_pages_create_failed");
-    return reply.code(500).send({ error: { message: "custom_pages_create_failed" } });
+    req.log.error({ err }, 'custom_pages_create_failed');
+    return reply.code(500).send({ error: { message: 'custom_pages_create_failed' } });
   }
 };
 
-/** UPDATE (admin, partial) */
-export const updatePageAdmin: RouteHandler<{ Params: { id: string }; Body: PatchCustomPageBody }> = async (req, reply) => {
+export const updatePageAdmin: RouteHandler<{
+  Params: { id: string };
+  Body: PatchCustomPageBody;
+}> = async (req, reply) => {
   const parsed = patchCustomPageBodySchema.safeParse(req.body ?? {});
   if (!parsed.success) {
     return reply.code(400).send({
-      error: { message: "invalid_body", issues: parsed.error.issues },
+      error: { message: 'invalid_body', issues: parsed.error.issues },
     });
   }
   const b = parsed.data;
 
-  // ✅ services patern: locale/def dinamik
   const { locale, def } = await resolveLocales(req, {
     locale: (b as any).locale,
     default_locale: (b as any).default_locale,
   });
 
   try {
-    // parent patch (varsa)
     const hasParentFields =
-      typeof b.is_published !== "undefined" ||
-      typeof b.featured_image !== "undefined" ||
-      typeof b.featured_image_asset_id !== "undefined" ||
-      typeof b.category_id !== "undefined" ||
-      typeof b.sub_category_id !== "undefined";
+      typeof b.is_published !== 'undefined' ||
+      typeof b.featured_image !== 'undefined' ||
+      typeof b.featured_image_asset_id !== 'undefined' ||
+      typeof b.category_id !== 'undefined' ||
+      typeof b.sub_category_id !== 'undefined';
 
     if (hasParentFields) {
       await updateCustomPageParent(req.params.id, {
-        is_published: typeof b.is_published !== "undefined" ? (toBool(b.is_published) ? 1 : 0) : undefined,
+        is_published:
+          typeof b.is_published !== 'undefined' ? (toBool(b.is_published) ? 1 : 0) : undefined,
 
-        featured_image: typeof b.featured_image !== "undefined" ? b.featured_image ?? null : undefined,
+        featured_image:
+          typeof b.featured_image !== 'undefined' ? b.featured_image ?? null : undefined,
         featured_image_asset_id:
-          typeof b.featured_image_asset_id !== "undefined" ? b.featured_image_asset_id ?? null : undefined,
+          typeof b.featured_image_asset_id !== 'undefined'
+            ? b.featured_image_asset_id ?? null
+            : undefined,
 
-        category_id: typeof b.category_id !== "undefined" ? b.category_id ?? null : undefined,
-        sub_category_id: typeof b.sub_category_id !== "undefined" ? b.sub_category_id ?? null : undefined,
+        category_id: typeof b.category_id !== 'undefined' ? b.category_id ?? null : undefined,
+        sub_category_id:
+          typeof b.sub_category_id !== 'undefined' ? b.sub_category_id ?? null : undefined,
       } as any);
     }
 
-    // i18n patch (varsa)
     const hasI18nFields =
-      typeof b.title !== "undefined" ||
-      typeof b.slug !== "undefined" ||
-      typeof b.content !== "undefined" ||
-      typeof b.summary !== "undefined" ||
-      typeof b.featured_image_alt !== "undefined" ||
-      typeof b.meta_title !== "undefined" ||
-      typeof b.meta_description !== "undefined" ||
-      typeof b.tags !== "undefined";
+      typeof b.title !== 'undefined' ||
+      typeof b.slug !== 'undefined' ||
+      typeof b.content !== 'undefined' ||
+      typeof b.summary !== 'undefined' ||
+      typeof b.featured_image_alt !== 'undefined' ||
+      typeof b.meta_title !== 'undefined' ||
+      typeof b.meta_description !== 'undefined' ||
+      typeof b.tags !== 'undefined';
 
     if (hasI18nFields) {
       const exists = await getCustomPageI18nRow(req.params.id, locale);
 
       if (!exists) {
-        // yeni çeviri oluşturmak için zorunlu alanlar şart
         if (!b.title || !b.slug || !b.content) {
           return reply.code(400).send({
-            error: { message: "missing_required_translation_fields" },
+            error: { message: 'missing_required_translation_fields' },
           });
         }
 
@@ -264,51 +296,55 @@ export const updatePageAdmin: RouteHandler<{ Params: { id: string }; Body: Patch
           slug: b.slug.trim(),
           content: packContent(b.content),
 
-          summary: typeof b.summary === "string" ? b.summary.trim() : b.summary ?? null,
+          summary: typeof b.summary === 'string' ? b.summary.trim() : b.summary ?? null,
           featured_image_alt:
-            typeof b.featured_image_alt === "string" ? b.featured_image_alt.trim() : b.featured_image_alt ?? null,
-          meta_title: typeof b.meta_title === "string" ? b.meta_title.trim() : b.meta_title ?? null,
+            typeof b.featured_image_alt === 'string'
+              ? b.featured_image_alt.trim()
+              : b.featured_image_alt ?? null,
+          meta_title: typeof b.meta_title === 'string' ? b.meta_title.trim() : b.meta_title ?? null,
           meta_description:
-            typeof b.meta_description === "string" ? b.meta_description.trim() : b.meta_description ?? null,
-          tags: typeof b.tags === "string" ? b.tags.trim() : b.tags ?? null,
+            typeof b.meta_description === 'string'
+              ? b.meta_description.trim()
+              : b.meta_description ?? null,
+          tags: typeof b.tags === 'string' ? b.tags.trim() : b.tags ?? null,
         });
       } else {
         await upsertCustomPageI18n(req.params.id, locale, {
-          title: typeof b.title === "string" ? b.title.trim() : undefined,
-          slug: typeof b.slug === "string" ? b.slug.trim() : undefined,
-          content: typeof b.content === "string" ? packContent(b.content) : undefined,
+          title: typeof b.title === 'string' ? b.title.trim() : undefined,
+          slug: typeof b.slug === 'string' ? b.slug.trim() : undefined,
+          content: typeof b.content === 'string' ? packContent(b.content) : undefined,
 
           summary:
-            typeof b.summary !== "undefined"
-              ? typeof b.summary === "string"
+            typeof b.summary !== 'undefined'
+              ? typeof b.summary === 'string'
                 ? b.summary.trim()
                 : b.summary ?? null
               : undefined,
 
           featured_image_alt:
-            typeof b.featured_image_alt !== "undefined"
-              ? typeof b.featured_image_alt === "string"
+            typeof b.featured_image_alt !== 'undefined'
+              ? typeof b.featured_image_alt === 'string'
                 ? b.featured_image_alt.trim()
                 : b.featured_image_alt ?? null
               : undefined,
 
           meta_title:
-            typeof b.meta_title !== "undefined"
-              ? typeof b.meta_title === "string"
+            typeof b.meta_title !== 'undefined'
+              ? typeof b.meta_title === 'string'
                 ? b.meta_title.trim()
                 : b.meta_title ?? null
               : undefined,
 
           meta_description:
-            typeof b.meta_description !== "undefined"
-              ? typeof b.meta_description === "string"
+            typeof b.meta_description !== 'undefined'
+              ? typeof b.meta_description === 'string'
                 ? b.meta_description.trim()
                 : b.meta_description ?? null
               : undefined,
 
           tags:
-            typeof b.tags !== "undefined"
-              ? typeof b.tags === "string"
+            typeof b.tags !== 'undefined'
+              ? typeof b.tags === 'string'
                 ? b.tags.trim()
                 : b.tags ?? null
               : undefined,
@@ -317,29 +353,24 @@ export const updatePageAdmin: RouteHandler<{ Params: { id: string }; Body: Patch
     }
 
     const row = await getCustomPageMergedById(locale, def, req.params.id);
-    if (!row) {
-      return reply.code(404).send({ error: { message: "not_found" } });
-    }
+    if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
+
     return reply.send(row);
   } catch (err: any) {
-    if (err?.code === "ER_DUP_ENTRY") {
-      return reply.code(409).send({ error: { message: "slug_already_exists" } });
+    if (err?.code === 'ER_DUP_ENTRY') {
+      return reply.code(409).send({ error: { message: 'slug_already_exists' } });
     }
-    req.log.error({ err }, "custom_pages_update_failed");
-    return reply.code(500).send({ error: { message: "custom_pages_update_failed" } });
+    req.log.error({ err }, 'custom_pages_update_failed');
+    return reply.code(500).send({ error: { message: 'custom_pages_update_failed' } });
   }
 };
 
-/** DELETE (admin) */
 export const removePageAdmin: RouteHandler<{ Params: { id: string } }> = async (req, reply) => {
   const affected = await deleteCustomPageParent(req.params.id);
-  if (!affected) {
-    return reply.code(404).send({ error: { message: "not_found" } });
-  }
+  if (!affected) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.code(204).send();
 };
 
-/** REORDER (admin) – display_order toplu güncelle */
 export const reorderCustomPagesAdmin: RouteHandler<{
   Body: { items?: { id?: string; display_order?: number }[] };
 }> = async (req, reply) => {
@@ -347,20 +378,20 @@ export const reorderCustomPagesAdmin: RouteHandler<{
 
   if (!Array.isArray(body.items) || body.items.length === 0) {
     return reply.code(400).send({
-      error: { message: "invalid_body", detail: "items boş olamaz" },
+      error: { message: 'invalid_body', detail: 'items boş olamaz' },
     });
   }
 
   const normalized = body.items
     .map((item) => ({
-      id: String(item.id ?? "").trim(),
-      display_order: typeof item.display_order === "number" ? item.display_order : 0,
+      id: String(item.id ?? '').trim(),
+      display_order: typeof item.display_order === 'number' ? item.display_order : 0,
     }))
     .filter((x) => x.id.length > 0);
 
   if (!normalized.length) {
     return reply.code(400).send({
-      error: { message: "invalid_body", detail: "geçerli id bulunamadı" },
+      error: { message: 'invalid_body', detail: 'geçerli id bulunamadı' },
     });
   }
 

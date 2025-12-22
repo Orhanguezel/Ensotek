@@ -23,8 +23,10 @@ import {
 } from "lucide-react";
 
 import type { ActiveTab } from "@/components/layout/admin/AdminLayout";
-import { useGetDashboardSummaryAdminQuery } from "@/integrations/rtk/endpoints/admin/dashboard_admin.endpoints";
-import { useGetUnreadNotificationsCountQuery } from "@/integrations/rtk/endpoints/notifications.endpoints";
+import {
+  useGetUnreadNotificationsCountQuery,
+  useGetDashboardSummaryAdminQuery
+} from "@/integrations/rtk/hooks";
 import type { DashboardCountItemDto } from "@/integrations/types/dashboard.types";
 
 type AdminDashboardProps = {

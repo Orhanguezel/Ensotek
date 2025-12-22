@@ -1,15 +1,13 @@
 // =============================================================
 // FILE: src/components/admin/custompage/CustomPageSidebarColumn.tsx
-// Sağ kolon (kategori + görseller + SEO)
+// Responsive spacing fix:
+// - Reduce excessive vertical spacing on small screens
+// - Keep readability on lg+
 // =============================================================
 
-import React from "react";
-import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
-import type {
-  CategoryOption,
-  ContentImageSize,
-  CustomPageFormValues,
-} from "./CustomPageForm";
+import React from 'react';
+import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
+import type { CategoryOption, ContentImageSize, CustomPageFormValues } from './CustomPageForm';
 
 type Props = {
   values: CustomPageFormValues;
@@ -34,7 +32,6 @@ type Props = {
   setManualImageAlt: (v: string) => void;
   handleAddManualImage: () => void;
 
-  // Doğrudan state güncellemek için
   setValues: React.Dispatch<React.SetStateAction<CustomPageFormValues>>;
 };
 
@@ -59,10 +56,12 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
   handleAddManualImage,
   setValues,
 }) => {
+  const blockCls = 'mb-2 mb-lg-3'; // ✅ small: tight, lg+: normal
+
   return (
     <>
       {/* Kategori */}
-      <div className="mb-3">
+      <div className={blockCls}>
         <label className="form-label small mb-1">Kategori</label>
         <select
           className="form-select form-select-sm"
@@ -71,8 +70,7 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
             setValues((prev) => ({
               ...prev,
               category_id: e.target.value,
-              // kategori değişince alt kategoriyi sıfırla
-              sub_category_id: "",
+              sub_category_id: '',
             }))
           }
           disabled={categoriesDisabled}
@@ -84,13 +82,11 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
             </option>
           ))}
         </select>
-        {isCategoriesLoading && (
-          <div className="form-text small">Kategoriler yükleniyor...</div>
-        )}
+        {isCategoriesLoading && <div className="form-text small">Kategoriler yükleniyor...</div>}
       </div>
 
       {/* Alt kategori */}
-      <div className="mb-3">
+      <div className={blockCls}>
         <label className="form-label small mb-1">Alt Kategori</label>
         <select
           className="form-select form-select-sm"
@@ -111,143 +107,107 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
           ))}
         </select>
         {isSubCategoriesLoading && (
-          <div className="form-text small">
-            Alt kategoriler yükleniyor...
-          </div>
+          <div className="form-text small">Alt kategoriler yükleniyor...</div>
         )}
       </div>
 
       {/* Etiketler */}
-      <div className="mb-3">
+      <div className={blockCls}>
         <label className="form-label small mb-1">Etiketler (Tags)</label>
         <input
           type="text"
           className="form-control form-control-sm"
           placeholder="ör: ensotek,su sogutma,kule,blog"
           value={values.tags}
-          onChange={(e) =>
-            setValues((prev) => ({
-              ...prev,
-              tags: e.target.value,
-            }))
-          }
+          onChange={(e) => setValues((prev) => ({ ...prev, tags: e.target.value }))}
           disabled={disabled}
         />
       </div>
 
       {/* Öne çıkan görsel */}
-      <div className="mb-3">
+      <div className={blockCls}>
         <AdminImageUploadField
           label="Öne Çıkan Görsel"
           helperText={
             <>
-              Storage modülü üzerinden özel sayfa için bir görsel
-              yükleyebilirsin. Yüklenen görselin URL&apos;i aşağıdaki{" "}
-              <strong>Öne Çıkan Görsel URL</strong> alanına otomatik yazılır.
+              Storage modülü üzerinden özel sayfa için görsel yükleyebilirsin. URL otomatik yazılır.
             </>
           }
           bucket="public"
           folder="custom_pages"
           metadata={imageMetadata}
           value={values.featured_image}
-          onChange={(url) =>
-            setValues((prev) => ({
-              ...prev,
-              featured_image: url,
-            }))
-          }
+          onChange={(url) => setValues((prev) => ({ ...prev, featured_image: url }))}
           disabled={disabled}
           openLibraryHref="/admin/storage"
         />
       </div>
 
-      <div className="mb-3">
+      <div className={blockCls}>
         <label className="form-label small mb-1">Öne Çıkan Görsel URL</label>
         <input
           type="url"
           className="form-control form-control-sm"
           placeholder="https://..."
           value={values.featured_image}
-          onChange={(e) =>
-            setValues((prev) => ({
-              ...prev,
-              featured_image: e.target.value,
-            }))
-          }
+          onChange={(e) => setValues((prev) => ({ ...prev, featured_image: e.target.value }))}
           disabled={disabled}
         />
       </div>
 
-      <div className="mb-3">
-        <label className="form-label small mb-1">
-          Öne Çıkan Görsel Asset ID
-        </label>
+      <div className={blockCls}>
+        <label className="form-label small mb-1">Öne Çıkan Görsel Asset ID</label>
         <input
           type="text"
           className="form-control form-control-sm"
           placeholder="storage asset id (36 char)"
           value={values.featured_image_asset_id}
           onChange={(e) =>
-            setValues((prev) => ({
-              ...prev,
-              featured_image_asset_id: e.target.value,
-            }))
+            setValues((prev) => ({ ...prev, featured_image_asset_id: e.target.value }))
           }
           disabled={disabled}
         />
       </div>
 
-      <div className="mb-3">
+      <div className={blockCls}>
         <label className="form-label small mb-1">Görsel Alt Metni</label>
         <input
           type="text"
           className="form-control form-control-sm"
           value={values.featured_image_alt}
-          onChange={(e) =>
-            setValues((prev) => ({
-              ...prev,
-              featured_image_alt: e.target.value,
-            }))
-          }
+          onChange={(e) => setValues((prev) => ({ ...prev, featured_image_alt: e.target.value }))}
           disabled={disabled}
         />
       </div>
 
       {/* İçerik görsel boyutu */}
-      <div className="mb-3">
+      <div className={blockCls}>
         <label className="form-label small mb-1">İçerik Görsel Boyutu</label>
         <select
           className="form-select form-select-sm"
           value={contentImageSize}
-          onChange={(e) =>
-            setContentImageSize(e.target.value as ContentImageSize)
-          }
+          onChange={(e) => setContentImageSize(e.target.value as ContentImageSize)}
           disabled={disabled}
         >
-          <option value="sm">Küçük (yaklaşık 1/2 genişlik)</option>
-          <option value="md">Orta (yaklaşık 3/4 genişlik)</option>
+          <option value="sm">Küçük (1/2)</option>
+          <option value="md">Orta (3/4)</option>
           <option value="lg">Büyük (varsayılan)</option>
           <option value="full">Tam genişlik</option>
         </select>
       </div>
 
-      {/* İçerik görselleri (upload) */}
-      <div className="mb-3">
+      {/* İçerik görselleri */}
+      <div className={blockCls}>
         <AdminImageUploadField
           label="İçerik Görselleri (Yükle)"
-          helperText={
-            <>
-              Buradan yüklediğin her görsel, içerik alanının sonuna seçili
-              boyutta düzenli bir blok olarak eklenir.
-            </>
-          }
+          helperText={<>Yüklenen görsel içerik alanının sonuna blok olarak eklenir.</>}
           bucket="public"
           folder="custom_pages/content"
           metadata={{
-            module_key: "custom_page",
-            locale: values.locale || "",
-            page_slug: values.slug || values.title || "",
-            section: "content",
+            module_key: 'custom_page',
+            locale: values.locale || '',
+            page_slug: values.slug || values.title || '',
+            section: 'content',
             ...(values.page_id ? { page_id: values.page_id } : {}),
           }}
           multiple
@@ -258,11 +218,9 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
         />
       </div>
 
-      {/* Serbest URL ile içerik görseli */}
-      <div className="mb-3">
-        <label className="form-label small mb-1">
-          Serbest URL ile İçerik Görseli
-        </label>
+      {/* Serbest URL */}
+      <div className={blockCls}>
+        <label className="form-label small mb-1">Serbest URL ile İçerik Görseli</label>
         <input
           type="url"
           className="form-control form-control-sm mb-2"
@@ -289,34 +247,25 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
         </button>
       </div>
 
-      {/* SEO alanları */}
-      <div className="mb-3">
+      {/* SEO */}
+      <div className={blockCls}>
         <label className="form-label small mb-1">Meta Title</label>
         <input
           type="text"
           className="form-control form-control-sm"
           value={values.meta_title}
-          onChange={(e) =>
-            setValues((prev) => ({
-              ...prev,
-              meta_title: e.target.value,
-            }))
-          }
+          onChange={(e) => setValues((prev) => ({ ...prev, meta_title: e.target.value }))}
           disabled={disabled}
         />
       </div>
+
       <div className="mb-0">
         <label className="form-label small mb-1">Meta Description</label>
         <textarea
           className="form-control form-control-sm"
           rows={3}
           value={values.meta_description}
-          onChange={(e) =>
-            setValues((prev) => ({
-              ...prev,
-              meta_description: e.target.value,
-            }))
-          }
+          onChange={(e) => setValues((prev) => ({ ...prev, meta_description: e.target.value }))}
           disabled={disabled}
         />
       </div>

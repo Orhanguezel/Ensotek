@@ -1,11 +1,47 @@
 // =============================================================
 // FILE: src/components/admin/reviews/ReviewsList.tsx
-// Ensotek – Admin Reviews Table
+// Ensotek – Admin Reviews List (Responsive)
+// - < xxl: CARDS (tablet + mobile)
+// - xxl+: TABLE (scroll-free: table-layout fixed + truncation)
 // =============================================================
 
-import React from "react";
-import { useRouter } from "next/router";
-import type { AdminReviewDto } from "@/integrations/types/review_admin.types";
+'use client';
+
+import React from 'react';
+import { useRouter } from 'next/router';
+import type { AdminReviewDto } from '@/integrations/types/review_admin.types';
+
+/* ---------------- Helpers ---------------- */
+
+const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+
+const fmtDate = (value: string | null | undefined) => {
+  if (!value) return '-';
+  try {
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleString('tr-TR');
+  } catch {
+    return String(value);
+  }
+};
+
+const formatComment = (v: unknown, max = 140) => {
+  const s = safeText(v).trim();
+  if (!s) return '-';
+  if (s.length <= max) return s;
+  return s.slice(0, max - 1) + '…';
+};
+
+const normLocale = (v: unknown) =>
+  safeText(v).trim().toLowerCase().replace('_', '-').split('-')[0] || '-';
+
+const ratingText = (v: any) => {
+  if (v === null || v === undefined) return '-';
+  const n = Number(v);
+  if (Number.isFinite(n)) return n.toFixed(1);
+  return safeText(v);
+};
 
 export type ReviewsListProps = {
   items: AdminReviewDto[];
@@ -13,39 +49,23 @@ export type ReviewsListProps = {
   onDelete: (item: AdminReviewDto) => void;
 };
 
-const fmtDate = (value: string | null | undefined) => {
-  if (!value) return "-";
-  try {
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleString("tr-TR");
-  } catch {
-    return value;
-  }
-};
-
-export const ReviewsList: React.FC<ReviewsListProps> = ({
-  items,
-  loading,
-  onDelete,
-}) => {
+export const ReviewsList: React.FC<ReviewsListProps> = ({ items, loading, onDelete }) => {
   const router = useRouter();
 
-  const handleRowClick = (item: AdminReviewDto) => {
-    router.push(`/admin/reviews/${encodeURIComponent(item.id)}`);
+  const rows = items ?? [];
+  const hasData = rows.length > 0;
+  const busy = !!loading;
+
+  const goDetail = (item: AdminReviewDto) => {
+    router.push(`/admin/reviews/${encodeURIComponent(String(item.id))}`);
   };
 
-  const handleDeleteClick = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    item: AdminReviewDto,
-  ) => {
+  const onDeleteClick = (e: React.MouseEvent<HTMLButtonElement>, item: AdminReviewDto) => {
     e.stopPropagation();
-    if (!loading) {
-      onDelete(item);
-    }
+    if (!busy) onDelete(item);
   };
 
-  if (!loading && items.length === 0) {
+  if (!busy && !hasData) {
     return (
       <div className="card">
         <div className="card-body py-4 text-center text-muted small">
@@ -57,109 +77,259 @@ export const ReviewsList: React.FC<ReviewsListProps> = ({
 
   return (
     <div className="card">
-      <div className="table-responsive">
-        <table className="table table-sm align-middle mb-0">
-          <thead className="table-light">
-            <tr>
-              <th style={{ width: "24px" }} />
-              <th>İsim</th>
-              <th>E-posta</th>
-              <th>Puan</th>
-              <th>Onay</th>
-              <th>Aktif</th>
-              <th>Locale</th>
-              <th>Yorum</th>
-              <th>Oluşturulma</th>
-              <th style={{ width: "90px" }}>İşlemler</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map((r) => (
-              <tr
-                key={r.id}
-                onClick={() => handleRowClick(r)}
-                style={{ cursor: "pointer" }}
-              >
-                <td>
-                  <span className="badge bg-secondary-subtle text-muted border">
-                    {r.display_order}
-                  </span>
-                </td>
-                <td className="fw-semibold">{r.name}</td>
-                <td className="text-muted small">{r.email}</td>
-                <td>
-                  <span className="badge bg-primary-subtle text-primary">
-                    {r.rating.toFixed?.(1) ?? r.rating}
-                  </span>
-                </td>
-                <td>
-                  {r.is_approved ? (
-                    <span className="badge bg-success-subtle text-success">
-                      Onaylı
-                    </span>
-                  ) : (
-                    <span className="badge bg-warning-subtle text-warning">
-                      Bekliyor
-                    </span>
-                  )}
-                </td>
-                <td>
-                  {r.is_active ? (
-                    <span className="badge bg-success-subtle text-success">
-                      Aktif
-                    </span>
-                  ) : (
-                    <span className="badge bg-secondary-subtle text-muted">
-                      Pasif
-                    </span>
-                  )}
-                </td>
-                <td className="text-muted small">
-                  {r.locale_resolved ?? "-"}
-                </td>
-                <td className="text-muted small">
-                  {r.comment
-                    ? r.comment.length > 60
-                      ? `${r.comment.slice(0, 60)}…`
-                      : r.comment
-                    : "-"}
-                </td>
-                <td className="text-muted small">
-                  {fmtDate(r.created_at)}
-                </td>
-                <td>
-                  <div className="btn-group btn-group-sm">
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary btn-sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleRowClick(r);
-                      }}
-                    >
-                      Düzenle
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-outline-danger btn-sm"
-                      onClick={(e) => handleDeleteClick(e, r)}
-                      disabled={loading}
-                    >
-                      Sil
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {loading && (
+      {/* ===================== XXL+ TABLE ===================== */}
+      <div className="d-none d-xxl-block">
+        <div className="table-responsive">
+          <table
+            className="table table-sm align-middle mb-0"
+            style={{ tableLayout: 'fixed', width: '100%' }}
+          >
+            <colgroup>
+              <col style={{ width: '56px' }} /> {/* order */}
+              <col style={{ width: '180px' }} /> {/* name */}
+              <col style={{ width: '220px' }} /> {/* email */}
+              <col style={{ width: '90px' }} /> {/* rating */}
+              <col style={{ width: '110px' }} /> {/* approved */}
+              <col style={{ width: '90px' }} /> {/* active */}
+              <col style={{ width: '90px' }} /> {/* locale */}
+              <col style={{ width: '520px' }} /> {/* comment */}
+              <col style={{ width: '170px' }} /> {/* created */}
+              <col style={{ width: '180px' }} /> {/* actions */}
+            </colgroup>
+
+            <thead className="table-light">
               <tr>
-                <td colSpan={10} className="text-center py-3 text-muted small">
-                  Yükleniyor...
-                </td>
+                <th style={{ whiteSpace: 'nowrap' }}>#</th>
+                <th style={{ whiteSpace: 'nowrap' }}>İsim</th>
+                <th style={{ whiteSpace: 'nowrap' }}>E-posta</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Puan</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Onay</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Aktif</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Locale</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Yorum</th>
+                <th style={{ whiteSpace: 'nowrap' }}>Oluşturulma</th>
+                <th className="text-end" style={{ whiteSpace: 'nowrap' }}>
+                  İşlemler
+                </th>
               </tr>
-            )}
-          </tbody>
-        </table>
+            </thead>
+
+            <tbody>
+              {busy ? (
+                <tr>
+                  <td colSpan={10} className="text-center py-3 text-muted small">
+                    Yükleniyor...
+                  </td>
+                </tr>
+              ) : (
+                rows.map((r) => {
+                  const order = (r as any).display_order ?? '-';
+                  const name = safeText((r as any).name) || '-';
+                  const email = safeText((r as any).email) || '-';
+                  const rating = ratingText((r as any).rating);
+                  const approved = !!(r as any).is_approved;
+                  const active = !!(r as any).is_active;
+                  const locale = normLocale((r as any).locale_resolved ?? (r as any).locale);
+                  const comment = safeText((r as any).comment);
+                  const created = fmtDate((r as any).created_at);
+
+                  return (
+                    <tr
+                      key={String((r as any).id)}
+                      onClick={() => goDetail(r)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <td className="text-muted small text-nowrap">
+                        <span className="badge bg-secondary-subtle text-muted border">{order}</span>
+                      </td>
+
+                      <td
+                        className="fw-semibold small text-truncate"
+                        title={name}
+                        style={{ minWidth: 0 }}
+                      >
+                        {name}
+                      </td>
+
+                      <td
+                        className="text-muted small text-truncate"
+                        title={email}
+                        style={{ minWidth: 0 }}
+                      >
+                        {email}
+                      </td>
+
+                      <td>
+                        <span className="badge bg-primary-subtle text-primary">{rating}</span>
+                      </td>
+
+                      <td>
+                        {approved ? (
+                          <span className="badge bg-success-subtle text-success">Onaylı</span>
+                        ) : (
+                          <span className="badge bg-warning-subtle text-warning">Bekliyor</span>
+                        )}
+                      </td>
+
+                      <td>
+                        {active ? (
+                          <span className="badge bg-success-subtle text-success">Aktif</span>
+                        ) : (
+                          <span className="badge bg-secondary-subtle text-muted">Pasif</span>
+                        )}
+                      </td>
+
+                      <td className="text-muted small text-nowrap">
+                        <code>{locale}</code>
+                      </td>
+
+                      <td className="text-muted small" style={{ minWidth: 0 }}>
+                        <div className="text-truncate" title={comment || '-'}>
+                          {formatComment(comment, 120)}
+                        </div>
+                      </td>
+
+                      <td className="text-muted small text-nowrap">{created}</td>
+
+                      <td className="text-end text-nowrap">
+                        <div className="btn-group btn-group-sm">
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary btn-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              goDetail(r);
+                            }}
+                            disabled={busy}
+                          >
+                            Düzenle
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-outline-danger btn-sm"
+                            onClick={(e) => onDeleteClick(e, r)}
+                            disabled={busy}
+                          >
+                            Sil
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ===================== < XXL : CARDS ===================== */}
+      <div className="d-block d-xxl-none">
+        {busy ? (
+          <div className="card-body py-3 text-center text-muted small">Yükleniyor...</div>
+        ) : (
+          <div className="p-3">
+            <div className="row g-3">
+              {rows.map((r, index) => {
+                const id = String((r as any).id);
+                const order = (r as any).display_order ?? index + 1;
+                const name = safeText((r as any).name) || '-';
+                const email = safeText((r as any).email) || '-';
+                const rating = ratingText((r as any).rating);
+                const approved = !!(r as any).is_approved;
+                const active = !!(r as any).is_active;
+                const locale = normLocale((r as any).locale_resolved ?? (r as any).locale);
+                const comment = safeText((r as any).comment);
+                const created = fmtDate((r as any).created_at);
+
+                return (
+                  <div key={id} className="col-12 col-lg-6">
+                    <div
+                      className="border rounded-3 p-3 bg-white h-100"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => goDetail(r)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') goDetail(r);
+                      }}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <div className="d-flex align-items-start justify-content-between gap-2">
+                        <div className="d-flex flex-wrap gap-2">
+                          <span className="badge bg-light text-dark border">#{order}</span>
+                          <span className="badge bg-primary-subtle text-primary">
+                            Puan: {rating}
+                          </span>
+                          <span className="badge bg-light text-dark border small">
+                            Locale: <code>{locale}</code>
+                          </span>
+                        </div>
+
+                        <div className="d-flex flex-column align-items-end gap-1">
+                          {approved ? (
+                            <span className="badge bg-success-subtle text-success">Onaylı</span>
+                          ) : (
+                            <span className="badge bg-warning-subtle text-warning">Bekliyor</span>
+                          )}
+                          {active ? (
+                            <span className="badge bg-success-subtle text-success">Aktif</span>
+                          ) : (
+                            <span className="badge bg-secondary-subtle text-muted">Pasif</span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mt-2">
+                        <div className="fw-semibold" style={{ wordBreak: 'break-word' }}>
+                          {name}
+                        </div>
+                        <div className="text-muted small" style={{ wordBreak: 'break-word' }}>
+                          {email}
+                        </div>
+                      </div>
+
+                      <div className="mt-2">
+                        <div className="text-muted small">Yorum</div>
+                        <div className="small" style={{ wordBreak: 'break-word' }}>
+                          {formatComment(comment, 220)}
+                        </div>
+                      </div>
+
+                      <div className="mt-2 text-muted small">Oluşturulma: {created}</div>
+
+                      <div className="mt-3 d-flex gap-2 flex-wrap justify-content-end">
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            goDetail(r);
+                          }}
+                        >
+                          Düzenle
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger btn-sm"
+                          onClick={(e) => onDeleteClick(e, r)}
+                        >
+                          Sil
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-3">
+              <span className="text-muted small">
+                Kartlara tıklayarak detaya gidebilirsin. Masaüstünde tablo görünümü xxl+ ekranda
+                açılır.
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

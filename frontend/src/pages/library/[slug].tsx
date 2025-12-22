@@ -24,10 +24,10 @@ import { buildMeta } from "@/seo/meta";
 import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
 
 // data
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-// IMPORTANT: kendi library endpoint hook ismine göre düzelt
-import { useGetLibraryBySlugQuery } from "@/integrations/rtk/hooks";
-// IMPORTANT: kendi type’ına göre düzelt
+import {
+  useGetSiteSettingByKeyQuery,
+  useGetLibraryBySlugQuery
+} from "@/integrations/rtk/hooks";
 import type { LibraryDto } from "@/integrations/types/library.types";
 
 // helpers

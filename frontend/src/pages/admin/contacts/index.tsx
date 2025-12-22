@@ -12,7 +12,7 @@ import {
   useListContactsAdminQuery,
   useUpdateContactAdminMutation,
   useDeleteContactAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/contacts_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import type {
   ContactDto,

@@ -1,118 +1,71 @@
 // =============================================================
 // FILE: src/pages/admin/reviews/[slug].tsx
 // Ensotek – Admin Review Create/Edit Page (id/new)
+// - Dynamic locales: useAdminLocales() => site_settings.app_locales + default_locale
+// - Locale normalize: coerceLocale()
 // =============================================================
 
-import React, { useMemo } from "react";
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useMemo } from 'react';
+import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
-import {
-  ReviewsForm,
-  type ReviewFormValues,
-} from "@/components/admin/reviews/ReviewsForm";
-import type { LocaleOption } from "@/components/admin/reviews/ReviewsHeader";
+import { ReviewsForm, type ReviewFormValues } from '@/components/admin/reviews/ReviewsForm';
+import type { LocaleOption } from '@/components/admin/reviews/ReviewsHeader';
 
 import {
   useGetReviewAdminQuery,
   useCreateReviewAdminMutation,
   useUpdateReviewAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/reviews_admin.endpoints";
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
-/* site_settings.app_locales -> LocaleOption[] */
-const useLocaleOptions = (): {
-  locales: LocaleOption[];
-  loading: boolean;
-} => {
-  const { data, isLoading } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
-
-  const locales = useMemo<LocaleOption[]>(() => {
-    if (!data || !data.length) {
-      return [
-        { value: "tr", label: "Türkçe (tr)" },
-        { value: "en", label: "İngilizce (en)" },
-      ];
-    }
-
-    const row = data.find((r) => r.key === "app_locales");
-    const v = row?.value;
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!arr.length) {
-      arr = ["tr", "en"];
-    }
-
-    const uniq = Array.from(new Set(arr.map((x) => x.toLowerCase())));
-    return uniq.map((code) => {
-      if (code === "tr") return { value: "tr", label: "Türkçe (tr)" };
-      if (code === "en") return { value: "en", label: "İngilizce (en)" };
-      if (code === "de") return { value: "de", label: "Almanca (de)" };
-      return { value: code, label: code.toUpperCase() };
-    });
-  }, [data]);
-
-  return { locales, loading: isLoading };
-};
+import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 const AdminReviewDetailPage: NextPage = () => {
   const router = useRouter();
   const { slug: slugParam } = router.query;
   const isRouterReady = router.isReady;
 
-  const idOrSlug = useMemo(
-    () =>
-      isRouterReady && typeof slugParam === "string"
-        ? slugParam
-        : undefined,
-    [isRouterReady, slugParam],
-  );
+  const idOrSlug = useMemo(() => {
+    return isRouterReady && typeof slugParam === 'string' ? slugParam : undefined;
+  }, [isRouterReady, slugParam]);
 
-  const isCreateMode = idOrSlug === "new";
-  const shouldSkipQuery = !isRouterReady || isCreateMode || !idOrSlug;
+  const isCreateMode = idOrSlug === 'new';
+  const reviewId = !isCreateMode && idOrSlug ? idOrSlug : '';
 
-  const { locales, loading: localesLoading } = useLocaleOptions();
+  const shouldSkipQuery = !isRouterReady || isCreateMode || !reviewId;
 
-  const reviewId = !isCreateMode && idOrSlug ? idOrSlug : "";
+  const {
+    localeOptions: adminLocaleOptions,
+    defaultLocaleFromDb,
+    coerceLocale,
+    loading: localesLoading,
+  } = useAdminLocales();
+
+  const locales: LocaleOption[] = useMemo(() => {
+    return (adminLocaleOptions ?? [])
+      .map((o) => ({
+        value: String(o.value || '').toLowerCase(),
+        label: o.label,
+      }))
+      .filter((o) => !!o.value);
+  }, [adminLocaleOptions]);
 
   const {
     data: review,
     isLoading: isLoadingReview,
     isFetching: isFetchingReview,
     error: reviewError,
-  } = useGetReviewAdminQuery(
-    { id: reviewId },
-    {
-      skip: shouldSkipQuery,
-    },
-  );
+  } = useGetReviewAdminQuery({ id: reviewId }, { skip: shouldSkipQuery });
 
-  const [createReview, { isLoading: isCreating }] =
-    useCreateReviewAdminMutation();
-  const [updateReview, { isLoading: isUpdating }] =
-    useUpdateReviewAdminMutation();
+  const [createReview, { isLoading: isCreating }] = useCreateReviewAdminMutation();
+  const [updateReview, { isLoading: isUpdating }] = useUpdateReviewAdminMutation();
 
   const loading = isLoadingReview || isFetchingReview;
   const saving = isCreating || isUpdating;
 
   const handleCancel = () => {
-    router.push("/admin/reviews");
+    router.push('/admin/reviews');
   };
 
   const toIntOrUndefined = (val: string): number | undefined => {
@@ -126,8 +79,10 @@ const AdminReviewDetailPage: NextPage = () => {
       const rating = toIntOrUndefined(values.rating) ?? 5;
       const display_order = toIntOrUndefined(values.display_order) ?? 0;
 
+      const localeValue = coerceLocale(values.locale, defaultLocaleFromDb) || undefined;
+
       const basePayload = {
-        locale: values.locale || undefined,
+        locale: localeValue,
         name: values.name.trim(),
         email: values.email.trim(),
         rating,
@@ -139,34 +94,30 @@ const AdminReviewDetailPage: NextPage = () => {
 
       if (isCreateMode) {
         const created = await createReview(basePayload as any).unwrap();
-        toast.success("Yorum başarıyla oluşturuldu.");
+        toast.success('Yorum başarıyla oluşturuldu.');
 
-        const nextId = created.id;
-        router.replace(`/admin/reviews/${encodeURIComponent(nextId)}`);
+        const nextId = created?.id;
+        if (nextId) {
+          router.replace(`/admin/reviews/${encodeURIComponent(nextId)}`);
+        } else {
+          handleCancel();
+        }
       } else {
         if (!review) {
-          toast.error("Yorum verisi yüklenemedi.");
+          toast.error('Yorum verisi yüklenemedi.');
           return;
         }
 
-        await updateReview({
-          id: review.id,
-          patch: basePayload as any,
-        }).unwrap();
-        toast.success("Yorum güncellendi.");
+        await updateReview({ id: review.id, patch: basePayload as any }).unwrap();
+        toast.success('Yorum güncellendi.');
       }
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "İşlem sırasında bir hata oluştu.";
+      const msg = err?.data?.error?.message || err?.message || 'İşlem sırasında bir hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const pageTitle = isCreateMode
-    ? "Yeni Yorum Oluştur"
-    : review?.name || "Yorum Düzenle";
+  const pageTitle = isCreateMode ? 'Yeni Yorum Oluştur' : review?.name || 'Yorum Düzenle';
 
   if (!isRouterReady) {
     return (
@@ -181,14 +132,9 @@ const AdminReviewDetailPage: NextPage = () => {
       <div className="container-fluid py-3">
         <h4 className="h5 mb-2">Yorum bulunamadı</h4>
         <p className="text-muted small mb-3">
-          Bu id için kayıtlı bir yorum yok:
-          <code className="ms-1">{idOrSlug}</code>
+          Bu id için kayıtlı bir yorum yok: <code className="ms-1">{idOrSlug}</code>
         </p>
-        <button
-          type="button"
-          className="btn btn-sm btn-outline-secondary"
-          onClick={handleCancel}
-        >
+        <button type="button" className="btn btn-sm btn-outline-secondary" onClick={handleCancel}>
           Listeye dön
         </button>
       </div>
@@ -200,19 +146,18 @@ const AdminReviewDetailPage: NextPage = () => {
       <div className="mb-3">
         <h4 className="h5 mb-1">{pageTitle}</h4>
         <p className="text-muted small mb-0">
-          Müşteri yorumunun metni, puanı ve onay durumunu buradan
-          yönetebilirsin.
+          Müşteri yorumunun metni, puanı ve onay durumunu buradan yönetebilirsin.
         </p>
       </div>
 
       <ReviewsForm
-        mode={isCreateMode ? "create" : "edit"}
+        mode={isCreateMode ? 'create' : 'edit'}
         initialData={!isCreateMode && review ? review : undefined}
         loading={loading}
         saving={saving}
         locales={locales}
         localesLoading={localesLoading}
-        defaultLocale={router.locale}
+        defaultLocale={defaultLocaleFromDb}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
       />

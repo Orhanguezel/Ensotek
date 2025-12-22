@@ -30,8 +30,10 @@ import {
 } from "@/seo/pageSeo";
 
 // data
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import { useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/hooks";
+import {
+  useGetSiteSettingByKeyQuery,
+  useGetCustomPageBySlugPublicQuery
+} from "@/integrations/rtk/hooks";
 
 // helpers
 import { toCdnSrc } from "@/shared/media";

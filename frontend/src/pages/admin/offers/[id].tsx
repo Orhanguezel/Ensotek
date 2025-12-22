@@ -8,7 +8,7 @@
 import React, { useMemo } from "react";
 import { useRouter } from "next/router";
 
-import { useGetOfferAdminQuery } from "@/integrations/rtk/endpoints/admin/offers_admin.endpoints";
+import { useGetOfferAdminQuery } from "@/integrations/rtk/hooks";
 import { OfferFormPage } from "@/components/admin/offer/OfferFormPage";
 import type { OfferRow } from "@/integrations/types/offers.types";
 

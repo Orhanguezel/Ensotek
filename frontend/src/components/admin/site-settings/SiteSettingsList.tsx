@@ -2,6 +2,7 @@
 // FILE: src/components/admin/site-settings/SiteSettingsList.tsx
 // Ensotek – Site Ayarları Liste Bileşeni
 // FIXED: Hide SEO keys in global(*) list.
+// UI FIX: Mobile responsive cards (stack actions, prevent overflow)
 // =============================================================
 
 import React, { useMemo } from 'react';
@@ -10,15 +11,15 @@ import type { SiteSetting, SettingValue } from '@/integrations/types/site_settin
 function formatValuePreview(v: SettingValue): string {
   if (v === null || v === undefined) return '';
   if (typeof v === 'string') {
-    if (v.length <= 80) return v;
-    return v.slice(0, 77) + '...';
+    if (v.length <= 160) return v;
+    return v.slice(0, 157) + '...';
   }
   if (typeof v === 'number' || typeof v === 'boolean') return String(v);
 
   try {
     const s = JSON.stringify(v);
-    if (s.length <= 80) return s;
-    return s.slice(0, 77) + '...';
+    if (s.length <= 160) return s;
+    return s.slice(0, 157) + '...';
   } catch {
     return String(v as any);
   }
@@ -45,7 +46,6 @@ export type SiteSettingsListProps = {
   loading: boolean;
   onEdit?: (setting: SiteSetting) => void;
   onDelete?: (setting: SiteSetting) => void;
-
   selectedLocale: string; // 'en' | 'tr' | '*'
 };
 
@@ -82,6 +82,7 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
       </div>
 
       <div className="card-body p-0">
+        {/* ===================== DESKTOP TABLE (md+) ===================== */}
         <div className="d-none d-md-block">
           <table className="table table-hover mb-0">
             <thead>
@@ -100,10 +101,12 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
               {hasData ? (
                 filtered.map((s) => (
                   <tr key={`${s.key}_${s.locale || 'none'}`} style={{ cursor: 'default' }}>
-                    <td>{s.key}</td>
+                    <td style={{ wordBreak: 'break-word' }}>{s.key}</td>
                     <td>{s.locale || <span className="text-muted">-</span>}</td>
                     <td>
-                      <span className="text-muted small">{formatValuePreview(s.value)}</span>
+                      <span className="text-muted small" style={{ wordBreak: 'break-word' }}>
+                        {formatValuePreview(s.value)}
+                      </span>
                     </td>
                     <td>
                       <span className="text-muted small">
@@ -155,50 +158,66 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
           </table>
         </div>
 
+        {/* ===================== MOBILE CARDS (sm and down) ===================== */}
         <div className="d-block d-md-none">
           {hasData ? (
-            filtered.map((s) => (
-              <div key={`${s.key}_${s.locale || 'none'}`} className="border-bottom px-3 py-2">
-                <div className="d-flex justify-content-between align-items-start gap-2">
-                  <div>
-                    <div className="fw-semibold small">
-                      {s.key}
-                      {s.locale && (
-                        <span className="badge bg-light text-dark border ms-2">{s.locale}</span>
+            filtered.map((s) => {
+              const localeBadge = s.locale ? (
+                <span className="badge bg-light text-dark border ms-2">{s.locale}</span>
+              ) : null;
+
+              return (
+                <div key={`${s.key}_${s.locale || 'none'}`} className="border-bottom px-3 py-3">
+                  {/* Key + locale */}
+                  <div className="d-flex align-items-start justify-content-between gap-2">
+                    <div style={{ minWidth: 0 }}>
+                      <div className="fw-semibold small" style={{ wordBreak: 'break-word' }}>
+                        {s.key}
+                        {localeBadge}
+                      </div>
+
+                      {/* Value preview */}
+                      <div
+                        className="text-muted small mt-1"
+                        style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
+                      >
+                        {formatValuePreview(s.value)}
+                      </div>
+
+                      {/* Updated */}
+                      <div className="text-muted small mt-2">
+                        <span className="me-1">Güncellenme:</span>
+                        {s.updated_at ? new Date(s.updated_at).toLocaleString() : '-'}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions: stack, full width */}
+                  {(onEdit || onDelete) && (
+                    <div className="mt-3 d-flex flex-column gap-2">
+                      {onEdit && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm w-100"
+                          onClick={() => onEdit(s)}
+                        >
+                          Düzenle
+                        </button>
+                      )}
+                      {onDelete && (
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm w-100"
+                          onClick={() => onDelete(s)}
+                        >
+                          Sil
+                        </button>
                       )}
                     </div>
-
-                    <div className="text-muted small mt-1">{formatValuePreview(s.value)}</div>
-
-                    <div className="text-muted small mt-1">
-                      <span className="me-1">Güncellenme:</span>
-                      {s.updated_at ? new Date(s.updated_at).toLocaleString() : '-'}
-                    </div>
-                  </div>
-
-                  <div className="d-flex flex-column gap-1">
-                    {onEdit && (
-                      <button
-                        type="button"
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => onEdit(s)}
-                      >
-                        Düzenle
-                      </button>
-                    )}
-                    {onDelete && (
-                      <button
-                        type="button"
-                        className="btn btn-danger btn-sm"
-                        onClick={() => onDelete(s)}
-                      >
-                        Sil
-                      </button>
-                    )}
-                  </div>
+                  )}
                 </div>
-              </div>
-            ))
+              );
+            })
           ) : (
             <div className="px-3 py-3 text-center text-muted small">Kayıt bulunamadı.</div>
           )}

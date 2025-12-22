@@ -23,8 +23,10 @@ import { buildMeta } from "@/seo/meta";
 import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
 
 // data
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import { useGetProductBySlugQuery } from "@/integrations/rtk/hooks";
+import {
+  useGetSiteSettingByKeyQuery,
+  useGetProductBySlugQuery
+} from "@/integrations/rtk/hooks";
 
 // helpers
 import { toCdnSrc } from "@/shared/media";

@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 
 import HtmlLangSync from './HtmlLangSync';
 import { KNOWN_RTL } from './config';
+import { FALLBACK_LOCALE } from '@/i18n/config';
 import { normLocaleTag } from '@/i18n/localeUtils';
 import {
   useGetAppLocalesPublicQuery,
@@ -32,12 +33,9 @@ function computeActiveLocales(meta: any[] | undefined): string[] {
 
   const def = arr.find((x) => x?.is_default === true && x?.is_active !== false);
   const defCode = def ? normLocaleTag(def.code) : '';
-  if (defCode) {
-    const rest = uniq.filter((x) => x !== defCode);
-    return [defCode, ...rest];
-  }
+  const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  return uniq;
+  return out.length ? out : [normLocaleTag(FALLBACK_LOCALE) || 'tr'];
 }
 
 export default function LangBoot() {
@@ -60,14 +58,14 @@ export default function LangBoot() {
     const first = normLocaleTag(activeLocales[0]);
     if (first) return first;
 
-    // En son çare: app kırılmasın
-    return 'tr';
+    return normLocaleTag(FALLBACK_LOCALE) || 'tr';
   }, [defaultLocaleMeta, activeLocales]);
 
   const resolved = useMemo(() => {
     const fromPath = readLocaleFromPath(router.asPath);
     const activeSet = new Set(activeLocales.map(normLocaleTag));
 
+    // ✅ active değilse path’i asla lang diye basma
     const lang = fromPath && activeSet.has(fromPath) ? fromPath : runtimeDefault;
     const dir = KNOWN_RTL.has(lang) ? 'rtl' : 'ltr';
 

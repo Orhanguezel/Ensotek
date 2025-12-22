@@ -20,7 +20,7 @@ import {
   useCreateAssetAdminMutation,
   useBulkCreateAssetsAdminMutation,
   useDeleteAssetAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/storage_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 
 const PAGE_SIZE = 24;
 

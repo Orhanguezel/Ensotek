@@ -1,7 +1,14 @@
 // =============================================================
 // FILE: src/components/admin/categories/CategoriesList.tsx
 // Ensotek – Kategori Liste Bileşeni
-// (Bootstrap table + mobile cards + drag & drop reorder + pagination)
+//
+// Responsive Strategy (Bootstrap 5):
+// - < xxl: CARDS (tablet + mobile) ✅
+// - xxl+: TABLE (DnD enabled here only) ✅
+//
+// Notes:
+// - Pagination client-side
+// - DnD uses full rows (global order); table only to keep UI clean
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -16,12 +23,22 @@ import {
   PaginationEllipsis,
 } from '@/components/ui/pagination';
 
-// Küçük yardımcı – description / value özet
+/* ---------------- Helpers ---------------- */
+
+const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+
 function formatText(v: unknown, max = 80): string {
-  if (v === null || v === undefined) return '';
-  const s = String(v);
+  const s = safeText(v);
+  if (!s) return '';
   if (s.length <= max) return s;
   return s.slice(0, max - 3) + '...';
+}
+
+function formatDate(value: string | null | undefined): string {
+  if (!value) return '-';
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return String(value);
+  return d.toLocaleString();
 }
 
 export type CategoriesListProps = {
@@ -52,7 +69,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
   onSaveOrder,
   savingOrder,
 }) => {
-  const rows = useMemo(() => items || [], [items]);
+  const rows = useMemo(() => items ?? [], [items]);
   const totalItems = rows.length;
   const hasData = totalItems > 0;
 
@@ -74,20 +91,21 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
   const endIndex = startIndex + PAGE_SIZE;
   const pageRows = rows.slice(startIndex, endIndex);
 
-  const canDrag = !!onReorder && !loading;
+  const busy = loading || !!savingOrder;
+  const canReorderXxl = !!onReorder && !busy;
+
+  /* ---------------- DnD (xxl+ table) ---------------- */
 
   const handleDragStart = (id: string) => {
-    if (!canDrag) return;
+    if (!canReorderXxl) return;
     setDraggingId(id);
   };
 
-  const handleDragEnd = () => {
-    setDraggingId(null);
-  };
+  const handleDragEnd = () => setDraggingId(null);
 
   const handleDropOn = (targetId: string) => {
-    if (!canDrag) return;
-    if (!draggingId || draggingId === targetId || !onReorder) return;
+    if (!canReorderXxl || !onReorder) return;
+    if (!draggingId || draggingId === targetId) return;
 
     const currentIndex = rows.findIndex((r) => r.id === draggingId);
     const targetIndex = rows.findIndex((r) => r.id === targetId);
@@ -100,7 +118,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
     onReorder(next);
   };
 
-  /* ---------- Pagination page butonları ---------- */
+  /* ---------------- Pagination ---------------- */
 
   const pages = useMemo(() => {
     const out: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
@@ -110,6 +128,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
     }
 
     out.push(1);
+
     const siblings = 1;
     let left = Math.max(2, currentPage - siblings);
     let right = Math.min(pageCount - 1, currentPage + siblings);
@@ -131,288 +150,335 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
     setPage(nextPage);
   };
 
+  /* ---------------- UI fragments ---------------- */
+
+  const renderModuleBadge = (item: CategoryDto) => (
+    <span className="badge bg-light text-dark border small">
+      {safeText((item as any).module_key) || 'general'}
+    </span>
+  );
+
+  const renderLocaleBadge = (item: CategoryDto) => {
+    const l = safeText((item as any).locale);
+    if (!l) return null;
+    return (
+      <span className="badge bg-light text-dark border small">
+        Dil: <code>{l}</code>
+      </span>
+    );
+  };
+
+  const captionText = (
+    <span className="text-muted small">
+      Sıralama değişikliği (DnD) sadece çok büyük ekranlarda (xxl+) tabloda aktiftir. Kalıcı yapmak
+      için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullan.
+    </span>
+  );
+
   return (
     <div className="card">
-      <div className="card-header py-2 d-flex align-items-center justify-content-between">
-        <span className="small fw-semibold">Kategori Listesi</span>
-        <div className="d-flex align-items-center gap-2">
-          {loading && <span className="badge bg-secondary">Yükleniyor...</span>}
-          {onSaveOrder && (
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm"
-              onClick={onSaveOrder}
-              disabled={savingOrder || !hasData || loading}
-            >
-              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
-            </button>
-          )}
+      <div className="card-header py-2">
+        <div className="d-flex align-items-start align-items-md-center justify-content-between gap-2 flex-wrap">
+          <span className="small fw-semibold">Kategori Listesi</span>
+
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            {busy && <span className="badge bg-secondary small">İşlem yapılıyor...</span>}
+
+            {onSaveOrder && (
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm"
+                onClick={onSaveOrder}
+                disabled={!!savingOrder || !hasData || loading}
+              >
+                {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
+              </button>
+            )}
+
+            <span className="text-muted small">
+              Toplam: <strong>{totalItems}</strong>
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="card-body p-0">
-        {/* ========= Desktop / Tablet (md ve üstü) – Table görünümü ========= */}
-        <div className="d-none d-md-block">
-          <table className="table table-hover mb-0">
-            <thead>
-              <tr>
-                <th style={{ width: '5%' }} />
-                <th style={{ width: '20%' }}>Ad</th>
-                <th style={{ width: '15%' }}>Slug</th>
-                <th style={{ width: '10%' }}>Dil</th>
-                <th style={{ width: '15%' }}>Modül</th>
-                <th style={{ width: '10%' }}>Aktif</th>
-                <th style={{ width: '10%' }}>Öne Çıkan</th>
-                <th style={{ width: '15%' }}>Güncellenme</th>
-                <th style={{ width: '10%' }} className="text-end">
-                  İşlemler
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {hasData ? (
-                pageRows.map((item, index) => {
-                  const globalIndex = startIndex + index;
-
-                  return (
-                    <tr
-                      key={item.id}
-                      draggable={canDrag}
-                      onDragStart={() => handleDragStart(item.id)}
-                      onDragEnd={handleDragEnd}
-                      onDragOver={(e) => {
-                        if (!canDrag) return;
-                        e.preventDefault();
-                      }}
-                      onDrop={() => handleDropOn(item.id)}
-                      className={draggingId === item.id ? 'table-active' : undefined}
-                      style={{ cursor: canDrag ? 'move' : 'default' }}
-                    >
-                      <td className="text-muted small align-middle">
-                        <span className="me-1">≡</span>
-                        <span>{globalIndex + 1}</span>
-                      </td>
-
-                      <td className="align-middle">
-                        <div className="fw-semibold small">{item.name}</div>
-                        {item.description && (
-                          <div className="text-muted small">{formatText(item.description, 60)}</div>
-                        )}
-                      </td>
-
-                      <td className="align-middle">
-                        <code className="small">{item.slug}</code>
-                      </td>
-
-                      <td className="align-middle">
-                        {item.locale || <span className="text-muted">-</span>}
-                      </td>
-
-                      <td className="align-middle">
-                        <span className="badge bg-light text-dark border small">
-                          {item.module_key || 'general'}
-                        </span>
-                      </td>
-
-                      <td className="align-middle">
-                        <div className="form-check form-switch">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={!!item.is_active}
-                            disabled={loading}
-                            onChange={(e) =>
-                              onToggleActive && onToggleActive(item, e.target.checked)
-                            }
-                          />
-                        </div>
-                      </td>
-
-                      <td className="align-middle">
-                        <div className="form-check form-switch">
-                          <input
-                            className="form-check-input"
-                            type="checkbox"
-                            checked={!!item.is_featured}
-                            disabled={loading}
-                            onChange={(e) =>
-                              onToggleFeatured && onToggleFeatured(item, e.target.checked)
-                            }
-                          />
-                        </div>
-                      </td>
-
-                      <td className="align-middle">
-                        <span className="text-muted small">
-                          {item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}
-                        </span>
-                      </td>
-
-                      <td className="align-middle text-end">
-                        <div className="d-inline-flex gap-1">
-                          {onEdit && (
-                            <button
-                              type="button"
-                              className="btn btn-outline-secondary btn-sm"
-                              onClick={() => onEdit(item)}
-                              disabled={loading}
-                            >
-                              Düzenle
-                            </button>
-                          )}
-                          {onDelete && (
-                            <button
-                              type="button"
-                              className="btn btn-danger btn-sm"
-                              onClick={() => onDelete(item)}
-                              disabled={loading}
-                            >
-                              Sil
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
+        {/* =========================================================
+            XXL+ TABLE (DnD here)
+           ========================================================= */}
+        <div className="d-none d-xxl-block">
+          <div className="table-responsive">
+            <table className="table table-hover table-sm mb-0 align-middle">
+              <thead className="table-light">
                 <tr>
-                  <td colSpan={9}>
-                    <div className="text-center text-muted small py-3">Kayıt bulunamadı.</div>
-                  </td>
+                  <th style={{ width: 56 }} />
+                  <th style={{ width: '26%' }}>Ad</th>
+                  <th style={{ width: '18%' }}>Slug</th>
+                  <th style={{ width: '10%' }}>Dil</th>
+                  <th style={{ width: '14%' }}>Modül</th>
+                  <th style={{ width: '10%' }}>Aktif</th>
+                  <th style={{ width: '12%' }}>Öne Çıkan</th>
+                  <th style={{ width: '12%' }}>Güncellenme</th>
+                  <th style={{ width: 170 }} className="text-end text-nowrap">
+                    İşlemler
+                  </th>
                 </tr>
-              )}
-            </tbody>
+              </thead>
 
-            <caption className="px-3 py-2 text-start">
-              <span className="text-muted small">
-                Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
-                yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullanman
-                gerekir.
-              </span>
-            </caption>
-          </table>
-        </div>
-
-        {/* ========= Mobil (sm ve altı) – Card görünümü ========= */}
-        <div className="d-block d-md-none">
-          {hasData ? (
-            pageRows.map((item, index) => {
-              const globalIndex = startIndex + index;
-
-              return (
-                <div
-                  key={item.id}
-                  className="border-bottom px-3 py-2"
-                  draggable={canDrag}
-                  onDragStart={() => handleDragStart(item.id)}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={(e) => {
-                    if (!canDrag) return;
-                    e.preventDefault();
-                  }}
-                  onDrop={() => handleDropOn(item.id)}
-                  style={{ cursor: canDrag ? 'move' : 'default' }}
-                >
-                  <div className="d-flex justify-content-between align-items-start gap-2">
-                    <div>
-                      <div className="fw-semibold small">
-                        <span className="text-muted me-1">#{globalIndex + 1}</span>
-                        {item.name}
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan={9}>
+                      <div className="text-center text-muted small py-3">
+                        Kategoriler yükleniyor...
                       </div>
+                    </td>
+                  </tr>
+                ) : hasData ? (
+                  pageRows.map((item, index) => {
+                    const globalIndex = startIndex + index;
 
-                      <div className="text-muted small">
-                        <code>{item.slug}</code>
-                      </div>
+                    const name = safeText((item as any).name) || '(Ad yok)';
+                    const slug = safeText((item as any).slug) || '-';
+                    const locale = safeText((item as any).locale) || '-';
 
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">Dil:</span>
-                        {item.locale || <span className="text-muted">-</span>}
-                        <span className="ms-2 me-1">Modül:</span>
-                        <span className="badge bg-light text-dark border">
-                          {item.module_key || 'general'}
-                        </span>
-                      </div>
+                    return (
+                      <tr
+                        key={item.id}
+                        draggable={canReorderXxl}
+                        onDragStart={() => handleDragStart(item.id)}
+                        onDragEnd={canReorderXxl ? handleDragEnd : undefined}
+                        onDragOver={canReorderXxl ? (e) => e.preventDefault() : undefined}
+                        onDrop={canReorderXxl ? () => handleDropOn(item.id) : undefined}
+                        className={draggingId === item.id ? 'table-active' : undefined}
+                        style={canReorderXxl ? { cursor: 'move' } : { cursor: 'default' }}
+                      >
+                        <td className="text-muted small text-nowrap">
+                          {canReorderXxl && <span className="me-1">≡</span>}
+                          <span>{globalIndex + 1}</span>
+                        </td>
 
-                      {item.description && (
-                        <div className="text-muted small mt-1">
-                          {formatText(item.description, 80)}
-                        </div>
-                      )}
+                        <td className="align-middle" style={{ minWidth: 260 }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div className="fw-semibold small text-truncate" title={name}>
+                              {name}
+                            </div>
+                            {(item as any).description ? (
+                              <div
+                                className="text-muted small text-truncate"
+                                title={safeText((item as any).description)}
+                              >
+                                {formatText((item as any).description, 80)}
+                              </div>
+                            ) : null}
+                          </div>
+                        </td>
 
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">Güncellenme:</span>
-                        {item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}
-                      </div>
-                    </div>
+                        <td className="align-middle" style={{ minWidth: 220 }}>
+                          <div className="text-truncate" title={slug}>
+                            <code className="small">{slug}</code>
+                          </div>
+                        </td>
 
-                    <div className="d-flex flex-column align-items-end gap-1">
-                      <div className="form-check form-switch small">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={!!item.is_active}
-                          disabled={loading}
-                          onChange={(e) => onToggleActive && onToggleActive(item, e.target.checked)}
-                        />
-                        <label className="form-check-label">Aktif</label>
-                      </div>
+                        <td className="align-middle small text-nowrap">
+                          <code>{locale}</code>
+                        </td>
 
-                      <div className="form-check form-switch small">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={!!item.is_featured}
-                          disabled={loading}
-                          onChange={(e) =>
-                            onToggleFeatured && onToggleFeatured(item, e.target.checked)
-                          }
-                        />
-                        <label className="form-check-label">Öne çıkan</label>
-                      </div>
+                        <td className="align-middle">{renderModuleBadge(item)}</td>
 
-                      <div className="d-flex gap-1 mt-1">
-                        {onEdit && (
-                          <button
-                            type="button"
-                            className="btn btn-outline-secondary btn-sm"
-                            onClick={() => onEdit(item)}
-                            disabled={loading}
-                          >
-                            Düzenle
-                          </button>
-                        )}
-                        {onDelete && (
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            onClick={() => onDelete(item)}
-                            disabled={loading}
-                          >
-                            Sil
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="px-3 py-3 text-center text-muted small">Kayıt bulunamadı.</div>
-          )}
+                        <td className="align-middle">
+                          <div className="form-check form-switch m-0">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              checked={!!(item as any).is_active}
+                              disabled={busy || !onToggleActive}
+                              onChange={(e) => onToggleActive?.(item, e.target.checked)}
+                            />
+                          </div>
+                        </td>
 
-          <div className="px-3 py-2 border-top">
-            <span className="text-muted small">
-              Mobil görünümde kayıtlar kart formatında listelenir. Kartları sürükleyerek sıralamayı
-              değiştirebilirsin. Değişiklikleri kalıcı yapmak için üstteki{' '}
-              <strong>Sıralamayı Kaydet</strong> butonunu kullan.
-            </span>
+                        <td className="align-middle">
+                          <div className="form-check form-switch m-0">
+                            <input
+                              className="form-check-input"
+                              type="checkbox"
+                              checked={!!(item as any).is_featured}
+                              disabled={busy || !onToggleFeatured}
+                              onChange={(e) => onToggleFeatured?.(item, e.target.checked)}
+                            />
+                          </div>
+                        </td>
+
+                        <td className="align-middle">
+                          <span className="text-muted small">
+                            {formatDate((item as any).updated_at)}
+                          </span>
+                        </td>
+
+                        <td className="align-middle text-end text-nowrap">
+                          <div className="btn-group btn-group-sm">
+                            {onEdit && (
+                              <button
+                                type="button"
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => onEdit(item)}
+                                disabled={busy}
+                              >
+                                Düzenle
+                              </button>
+                            )}
+                            {onDelete && (
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => onDelete(item)}
+                                disabled={busy}
+                              >
+                                Sil
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={9}>
+                      <div className="text-center text-muted small py-3">Kayıt bulunamadı.</div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+
+              <caption className="px-3 py-2 text-start">{captionText}</caption>
+            </table>
           </div>
         </div>
 
-        {/* Pagination (her iki görünüm için ortak) */}
+        {/* =========================================================
+            < XXL : CARDS (tablet + mobile)
+           ========================================================= */}
+        <div className="d-block d-xxl-none">
+          {loading ? (
+            <div className="px-3 py-3 text-center text-muted small">Kategoriler yükleniyor...</div>
+          ) : hasData ? (
+            <div className="p-3">
+              <div className="row g-3">
+                {pageRows.map((item, index) => {
+                  const globalIndex = startIndex + index;
+
+                  const name = safeText((item as any).name) || '(Ad yok)';
+                  const slug = safeText((item as any).slug) || '-';
+                  const desc = safeText((item as any).description);
+                  const updatedAt = formatDate((item as any).updated_at);
+
+                  return (
+                    <div key={item.id} className="col-12 col-lg-6">
+                      <div className="border rounded-3 p-3 bg-white h-100">
+                        <div className="d-flex justify-content-between align-items-start gap-2">
+                          <div className="d-flex align-items-center gap-2 flex-wrap">
+                            <span className="badge bg-light text-dark border">
+                              #{globalIndex + 1}
+                            </span>
+                            {renderModuleBadge(item)}
+                            {renderLocaleBadge(item)}
+                          </div>
+
+                          <div className="text-end">
+                            <div className="small text-muted text-nowrap">{updatedAt}</div>
+                          </div>
+                        </div>
+
+                        <div className="mt-2">
+                          <div
+                            className="fw-semibold"
+                            style={{ wordBreak: 'break-word' }}
+                            title={name}
+                          >
+                            {name}
+                          </div>
+
+                          <div
+                            className="text-muted small mt-1"
+                            style={{ wordBreak: 'break-word' }}
+                          >
+                            Slug: <code>{slug}</code>
+                          </div>
+
+                          {desc ? (
+                            <div
+                              className="text-muted small mt-2"
+                              style={{ wordBreak: 'break-word' }}
+                            >
+                              {formatText(desc, 120)}
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                          <div className="d-flex flex-wrap gap-3">
+                            <div className="form-check form-switch m-0">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                checked={!!(item as any).is_active}
+                                disabled={busy || !onToggleActive}
+                                onChange={(e) => onToggleActive?.(item, e.target.checked)}
+                              />
+                              <label className="form-check-label small">Aktif</label>
+                            </div>
+
+                            <div className="form-check form-switch m-0">
+                              <input
+                                className="form-check-input"
+                                type="checkbox"
+                                checked={!!(item as any).is_featured}
+                                disabled={busy || !onToggleFeatured}
+                                onChange={(e) => onToggleFeatured?.(item, e.target.checked)}
+                              />
+                              <label className="form-check-label small">Öne çıkan</label>
+                            </div>
+                          </div>
+
+                          <div className="d-flex gap-2">
+                            {onEdit && (
+                              <button
+                                type="button"
+                                className="btn btn-outline-secondary btn-sm"
+                                onClick={() => onEdit(item)}
+                                disabled={busy}
+                              >
+                                Düzenle
+                              </button>
+                            )}
+                            {onDelete && (
+                              <button
+                                type="button"
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => onDelete(item)}
+                                disabled={busy}
+                              >
+                                Sil
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="pt-3">{captionText}</div>
+            </div>
+          ) : (
+            <div className="px-3 py-3 text-center text-muted small">Kayıt bulunamadı.</div>
+          )}
+        </div>
+
+        {/* Pagination (ortak) */}
         {pageCount > 1 && (
           <div className="py-2">
             <Pagination>

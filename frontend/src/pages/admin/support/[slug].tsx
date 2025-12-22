@@ -18,15 +18,12 @@ import {
   useUpdateSupportTicketAdminMutation,
   useDeleteSupportTicketAdminMutation,
   useToggleSupportTicketAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/support_admin.endpoints";
-
-import {
   useListTicketRepliesAdminQuery,
   useCreateTicketReplyAdminMutation,
   useDeleteTicketReplyAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/ticket_replies_admin.endpoints";
+  useCreateSupportTicketMutation
+} from "@/integrations/rtk/hooks";
 
-import { useCreateSupportTicketMutation } from "@/integrations/rtk/endpoints/support.endpoints";
 
 import type {
   AdminSupportTicketDto,

@@ -7,11 +7,9 @@
       "esnext"
     ],
     "jsx": "preserve",
-    // ESM output
     "module": "esnext",
     "moduleResolution": "node",
     "resolveJsonModule": true,
-    // Alias için
     "baseUrl": ".",
     "paths": {
       "@/*": [
@@ -26,12 +24,17 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "types": [
+      "node"
+    ]
   },
   "include": [
     "next-env.d.ts",
     "src/**/*",
-    "src/types/**/*.d.ts"
+    "src/types/**/*.d.ts",
+    "tests/**/*",
+    "playwright.config.ts"
   ],
   "exclude": [
     "node_modules"
