@@ -3,19 +3,8 @@
 // Public Reviews
 // =============================================================
 
-/** Backend'deki boolLike ile uyumlu tip */
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false"
-  | "yes"
-  | "no";
+export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false' | 'yes' | 'no';
 
-/** Backend ReviewView ile hizalı DTO */
 export type ReviewDto = {
   id: string;
 
@@ -34,6 +23,7 @@ export type ReviewDto = {
   dislikes_count: number;
   helpful_count: number;
 
+  /** Kaydın gönderildiği dil */
   submitted_locale: string;
 
   created_at: string;
@@ -42,9 +32,13 @@ export type ReviewDto = {
   // i18n alanları (coalesced)
   comment: string | null;
   locale_resolved: string | null;
-};
 
-/* ---------- Public list / detail query tipleri ---------- */
+  /**
+   * Geriye dönük uyumluluk (bazı eski FE kodları review.locale bekliyor olabilir).
+   * Tercih edilen: locale_resolved (display) veya submitted_locale (source).
+   */
+  locale?: string | null;
+};
 
 export type ReviewListQueryParams = {
   search?: string;
@@ -54,8 +48,8 @@ export type ReviewListQueryParams = {
   maxRating?: number;
   limit?: number;
   offset?: number;
-  orderBy?: "created_at" | "updated_at" | "display_order" | "rating" | "name";
-  order?: "asc" | "desc";
+  orderBy?: 'created_at' | 'updated_at' | 'display_order' | 'rating' | 'name';
+  order?: 'asc' | 'desc';
 
   // Listeleme locale override
   locale?: string;
@@ -65,7 +59,6 @@ export type ReviewListQueryParams = {
   target_id?: string;
 };
 
-/** Public create input (ReviewCreateInput ile hizalı) */
 export type ReviewCreatePayload = {
   target_type: string;
   target_id: string;
@@ -82,10 +75,8 @@ export type ReviewCreatePayload = {
   display_order?: number;
 };
 
-/** Update → tüm alanlar opsiyonel (ReviewUpdateInput.partial) */
 export type ReviewUpdatePayload = Partial<ReviewCreatePayload>;
 
-/** Reaction payload */
 export type ReviewReactionPayload = {
-  type: "like" | "dislike";
+  type: 'like' | 'dislike';
 };

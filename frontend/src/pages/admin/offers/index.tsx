@@ -12,7 +12,7 @@ import { toast } from "sonner";
 import {
   useListOffersAdminQuery,
   useRemoveOfferAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/offers_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import type { OfferRow, OfferStatus } from "@/integrations/types/offers.types";
 import { OfferHeader } from "@/components/admin/offer/OfferHeader";

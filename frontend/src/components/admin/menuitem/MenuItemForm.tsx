@@ -118,10 +118,6 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
             </option>
           ))}
         </select>
-
-        <div className="form-text">
-          Değerler <code>site_settings.app_locales</code> üzerinden gelir.
-        </div>
       </div>
 
       <div className="col-md-3">

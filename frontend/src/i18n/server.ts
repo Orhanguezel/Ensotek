@@ -13,11 +13,19 @@ const API = (process.env.API_BASE_URL || '').trim();
 // Hard fallback only if DB/API not reachable or empty
 export const DEFAULT_LOCALE_FALLBACK = 'tr';
 
+export type JsonLike = null | boolean | number | string | JsonLike[] | { [k: string]: JsonLike };
+
 export type AppLocaleMeta = {
   code: string;
   label?: string;
   is_default?: boolean;
   is_active?: boolean;
+};
+
+export type SiteSettingRow = {
+  key: string;
+  value: JsonLike;
+  locale?: string;
 };
 
 async function fetchJson<T>(path: string, opts?: { revalidate?: number }): Promise<T | null> {
@@ -125,3 +133,32 @@ export const getServerI18nContext = cache(async () => {
 
   return { activeLocales, defaultLocale, detectedLocale };
 });
+
+/**
+ * ✅ Single setting fetcher (key + locale) — serverMetadata.ts bunu kullanıyor.
+ * Endpoint varsayımı:
+ *   GET /site_settings/by-key?key=seo&locale=tr
+ */
+export async function fetchSetting(
+  key: string,
+  locale: string,
+  opts?: { revalidate?: number },
+): Promise<SiteSettingRow | null> {
+  const k = String(key || '').trim();
+  const l = normLocaleTag(locale);
+  if (!k) return null;
+
+  const qs = `key=${encodeURIComponent(k)}&locale=${encodeURIComponent(
+    l || DEFAULT_LOCALE_FALLBACK,
+  )}`;
+  const row = await fetchJson<SiteSettingRow | { data: SiteSettingRow }>(
+    `/site_settings/by-key?${qs}`,
+    {
+      revalidate: opts?.revalidate ?? 600,
+    },
+  );
+
+  if (!row) return null;
+  if (typeof row === 'object' && row && 'data' in (row as any)) return (row as any).data ?? null;
+  return row as SiteSettingRow;
+}

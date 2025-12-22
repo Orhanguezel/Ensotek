@@ -3,8 +3,8 @@
 // Ensotek – Storage Liste Bileşeni (tablo + mobil kart + pagination)
 // =============================================================
 
-import React from "react";
-import type { StorageAsset } from "@/integrations/types/storage";
+import React from 'react';
+import type { StorageAsset } from '@/integrations/types/storage';
 import {
   Pagination,
   PaginationContent,
@@ -13,16 +13,16 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
-import ImageNext from "next/image";
+} from '@/components/ui/pagination';
+import ImageNext from 'next/image';
 
 export type StorageListProps = {
   items?: StorageAsset[];
   loading: boolean;
 
-  page: number;           // 1-based
+  page: number; // 1-based
   pageSize: number;
-  total: number;          // backend'den gelen total (x-total-count)
+  total: number; // backend'den gelen total (x-total-count)
 
   onPageChange: (page: number) => void;
 
@@ -31,8 +31,8 @@ export type StorageListProps = {
 };
 
 function formatBytes(bytes: number | null | undefined): string {
-  if (!bytes || bytes <= 0) return "-";
-  const units = ["B", "KB", "MB", "GB", "TB"];
+  if (!bytes || bytes <= 0) return '-';
+  const units = ['B', 'KB', 'MB', 'GB', 'TB'];
   let v = bytes;
   let i = 0;
   while (v >= 1024 && i < units.length - 1) {
@@ -43,11 +43,11 @@ function formatBytes(bytes: number | null | undefined): string {
 }
 
 function isImage(mime: string | null | undefined): boolean {
-  return !!mime && mime.startsWith("image/");
+  return !!mime && mime.startsWith('image/');
 }
 
 const buildPages = (current: number, pageCount: number) => {
-  const pages: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
+  const pages: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
   if (pageCount <= 7) {
     for (let i = 1; i <= pageCount; i += 1) pages.push(i);
     return pages;
@@ -59,7 +59,7 @@ const buildPages = (current: number, pageCount: number) => {
   let right = Math.min(pageCount - 1, current + siblings);
 
   if (left > 2) {
-    pages.push("ellipsis-left");
+    pages.push('ellipsis-left');
   } else {
     left = 2;
   }
@@ -69,7 +69,7 @@ const buildPages = (current: number, pageCount: number) => {
   }
 
   if (right < pageCount - 1) {
-    pages.push("ellipsis-right");
+    pages.push('ellipsis-right');
   } else {
     right = pageCount - 1;
   }
@@ -90,10 +90,7 @@ export const StorageList: React.FC<StorageListProps> = ({
 }) => {
   const rows = items || [];
   const hasData = rows.length > 0;
-  const pageCount = Math.max(
-    1,
-    Math.ceil((total || rows.length || 0) / pageSize),
-  );
+  const pageCount = Math.max(1, Math.ceil((total || rows.length || 0) / pageSize));
   const currentPage = Math.min(Math.max(page, 1), pageCount);
   const pages = buildPages(currentPage, pageCount);
 
@@ -107,9 +104,7 @@ export const StorageList: React.FC<StorageListProps> = ({
       <div className="card-header py-2 d-flex align-items-center justify-content-between">
         <span className="small fw-semibold">Dosya Listesi</span>
         <div className="d-flex align-items-center gap-2">
-          {loading && (
-            <span className="badge bg-secondary">Yükleniyor...</span>
-          )}
+          {loading && <span className="badge bg-secondary">Yükleniyor...</span>}
           <span className="text-muted small">
             Sayfa {currentPage} / {pageCount}
           </span>
@@ -122,15 +117,15 @@ export const StorageList: React.FC<StorageListProps> = ({
           <table className="table table-hover mb-0">
             <thead>
               <tr>
-                <th style={{ width: "8%" }}>Önizleme</th>
-                <th style={{ width: "20%" }}>Ad</th>
-                <th style={{ width: "22%" }}>Path</th>
-                <th style={{ width: "10%" }}>Bucket</th>
-                <th style={{ width: "10%" }}>Klasör</th>
-                <th style={{ width: "10%" }}>Boyut</th>
-                <th style={{ width: "10%" }}>MIME</th>
-                <th style={{ width: "10%" }}>Güncellenme</th>
-                <th style={{ width: "10%" }} className="text-end">
+                <th style={{ width: '8%' }}>Önizleme</th>
+                <th style={{ width: '20%' }}>Ad</th>
+                <th style={{ width: '22%' }}>Path</th>
+                <th style={{ width: '10%' }}>Bucket</th>
+                <th style={{ width: '10%' }}>Klasör</th>
+                <th style={{ width: '10%' }}>Boyut</th>
+                <th style={{ width: '10%' }}>MIME</th>
+                <th style={{ width: '10%' }}>Güncellenme</th>
+                <th style={{ width: '10%' }} className="text-end">
                   İşlemler
                 </th>
               </tr>
@@ -138,8 +133,7 @@ export const StorageList: React.FC<StorageListProps> = ({
             <tbody>
               {hasData ? (
                 rows.map((item, index) => {
-                  const globalIndex =
-                    (currentPage - 1) * pageSize + index + 1;
+                  const globalIndex = (currentPage - 1) * pageSize + index + 1;
                   return (
                     <tr key={item.id}>
                       {/* Önizleme */}
@@ -154,13 +148,11 @@ export const StorageList: React.FC<StorageListProps> = ({
                             style={{
                               maxWidth: 64,
                               maxHeight: 40,
-                              objectFit: "cover",
+                              objectFit: 'cover',
                             }}
                           />
                         ) : (
-                          <span className="text-muted small">
-                            #{globalIndex}
-                          </span>
+                          <span className="text-muted small">#{globalIndex}</span>
                         )}
                       </td>
 
@@ -168,10 +160,7 @@ export const StorageList: React.FC<StorageListProps> = ({
                       <td className="align-middle">
                         <div className="fw-semibold small">{item.name}</div>
                         <div className="text-muted small">
-                          ID:{" "}
-                          <code className="small">
-                            {item.id.slice(0, 8)}...
-                          </code>
+                          ID: <code className="small">{item.id.slice(0, 8)}...</code>
                         </div>
                       </td>
 
@@ -182,9 +171,7 @@ export const StorageList: React.FC<StorageListProps> = ({
 
                       {/* Bucket */}
                       <td className="align-middle">
-                        <span className="badge bg-light text-dark border small">
-                          {item.bucket}
-                        </span>
+                        <span className="badge bg-light text-dark border small">{item.bucket}</span>
                       </td>
 
                       {/* Folder */}
@@ -193,9 +180,7 @@ export const StorageList: React.FC<StorageListProps> = ({
                       </td>
 
                       {/* Boyut */}
-                      <td className="align-middle small">
-                        {formatBytes(item.size)}
-                      </td>
+                      <td className="align-middle small">{formatBytes(item.size)}</td>
 
                       {/* MIME */}
                       <td className="align-middle small">
@@ -205,9 +190,7 @@ export const StorageList: React.FC<StorageListProps> = ({
                       {/* Güncellenme */}
                       <td className="align-middle">
                         <span className="text-muted small">
-                          {item.updated_at
-                            ? new Date(item.updated_at).toLocaleString()
-                            : "-"}
+                          {item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}
                         </span>
                       </td>
 
@@ -240,9 +223,7 @@ export const StorageList: React.FC<StorageListProps> = ({
               ) : (
                 <tr>
                   <td colSpan={9}>
-                    <div className="text-center text-muted small py-3">
-                      Kayıt bulunamadı.
-                    </div>
+                    <div className="text-center text-muted small py-3">Kayıt bulunamadı.</div>
                   </td>
                 </tr>
               )}
@@ -254,30 +235,24 @@ export const StorageList: React.FC<StorageListProps> = ({
         <div className="d-block d-md-none">
           {hasData ? (
             rows.map((item, index) => {
-              const globalIndex =
-                (currentPage - 1) * pageSize + index + 1;
+              const globalIndex = (currentPage - 1) * pageSize + index + 1;
               return (
-                <div
-                  key={item.id}
-                  className="border-bottom px-3 py-2 d-flex gap-2"
-                >
+                <div key={item.id} className="border-bottom px-3 py-2 d-flex gap-2">
                   {isImage(item.mime) && item.url && (
                     <div style={{ minWidth: 80 }}>
                       <ImageNext
                         src={item.url}
                         alt={item.name}
-                          width={80}
-                          height={40}
+                        width={80}
+                        height={40}
                         className="img-fluid rounded"
-                        style={{ maxHeight: 80, objectFit: "cover" }}
+                        style={{ maxHeight: 80, objectFit: 'cover' }}
                       />
                     </div>
                   )}
                   <div className="flex-grow-1">
                     <div className="fw-semibold small">
-                      <span className="text-muted me-1">
-                        #{globalIndex}
-                      </span>
+                      <span className="text-muted me-1">#{globalIndex}</span>
                       {item.name}
                     </div>
                     <div className="text-muted small">
@@ -285,9 +260,7 @@ export const StorageList: React.FC<StorageListProps> = ({
                     </div>
                     <div className="text-muted small mt-1">
                       <span className="me-1">Bucket:</span>
-                      <span className="badge bg-light text-dark border">
-                        {item.bucket}
-                      </span>
+                      <span className="badge bg-light text-dark border">{item.bucket}</span>
                     </div>
                     <div className="text-muted small mt-1">
                       <span className="me-1">Klasör:</span>
@@ -303,9 +276,7 @@ export const StorageList: React.FC<StorageListProps> = ({
                     </div>
                     <div className="text-muted small mt-1">
                       <span className="me-1">Güncellenme:</span>
-                      {item.updated_at
-                        ? new Date(item.updated_at).toLocaleString()
-                        : "-"}
+                      {item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}
                     </div>
                     <div className="d-flex gap-1 mt-2">
                       {onPreview && item.url && (
@@ -332,9 +303,7 @@ export const StorageList: React.FC<StorageListProps> = ({
               );
             })
           ) : (
-            <div className="px-3 py-3 text-center text-muted small">
-              Kayıt bulunamadı.
-            </div>
+            <div className="px-3 py-3 text-center text-muted small">Kayıt bulunamadı.</div>
           )}
         </div>
 
@@ -354,7 +323,7 @@ export const StorageList: React.FC<StorageListProps> = ({
                 </PaginationItem>
 
                 {pages.map((p, idx) =>
-                  typeof p === "number" ? (
+                  typeof p === 'number' ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

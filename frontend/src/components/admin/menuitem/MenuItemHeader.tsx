@@ -1,11 +1,11 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemHeader.tsx
-// Ensotek – Admin Menu Items Header / Filters (locale destekli)
-// - Locale normalize: short code (tr-TR -> tr)
-// - Locales listesi: site_settings.app_locales (parent'tan gelir)
+// Ensotek – Admin Menu Items Header / Filters (responsive + locale)
 // =============================================================
 
-import React from 'react';
+'use client';
+
+import React, { useMemo } from 'react';
 
 export type LocaleOption = {
   value: string; // "tr", "en"...
@@ -53,42 +53,45 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
   onRefresh,
   onCreateClick,
 }) => {
-  const handleInputChange =
-    (field: keyof MenuItemFilters) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      const value = e.target.value as any;
+  const effectiveDefaultLocale = useMemo(
+    () => toShortLocale(defaultLocale ?? 'tr'),
+    [defaultLocale],
+  );
+
+  const localeSelectDisabled = loading || (!!localesLoading && (locales?.length ?? 0) === 0);
+
+  const setField =
+    <K extends keyof MenuItemFilters>(field: K) =>
+    (value: MenuItemFilters[K]) => {
       onFiltersChange({ ...filters, [field]: value });
     };
 
-  const handleOrderToggle = () => {
-    onFiltersChange({
-      ...filters,
-      order: filters.order === 'asc' ? 'desc' : 'asc',
-    });
-  };
+  const handleInputChange =
+    (field: keyof MenuItemFilters) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      setField(field as any)(e.target.value as any);
+    };
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const raw = e.target.value;
-    const next = raw ? toShortLocale(raw) : '';
-    onFiltersChange({
-      ...filters,
-      locale: next,
-    });
+    setField('locale')(raw ? toShortLocale(raw) : '');
   };
 
-  const effectiveDefaultLocale = toShortLocale(defaultLocale ?? 'tr');
+  const handleOrderToggle = () => {
+    setField('order')(filters.order === 'asc' ? 'desc' : 'asc');
+  };
 
-  const localeSelectDisabled = loading || (!!localesLoading && locales.length === 0);
+  const totalSafe = Number.isFinite(total) ? total : 0;
 
   return (
-    <div className="row mb-3 g-2 align-items-end">
-      {/* Sol taraf */}
-      <div className="col-md-7">
+    <div className="row g-2 mb-3">
+      {/* LEFT: FILTERS */}
+      <div className="col-12 col-lg-8">
         <div className="card">
           <div className="card-body py-2">
-            <div className="row g-2 align-items-end">
-              {/* Arama */}
-              <div className="col-12 col-md-4">
+            <div className="row g-2">
+              {/* Search */}
+              <div className="col-12 col-md-6 col-xl-4">
                 <label className="form-label small mb-1">Ara (başlık / URL)</label>
                 <input
                   type="text"
@@ -100,11 +103,15 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                 />
               </div>
 
-              {/* Dil */}
-              <div className="col-6 col-md-3">
-                <label className="form-label small mb-1">
-                  Dil {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
+              {/* Locale */}
+              <div className="col-12 col-md-6 col-xl-3">
+                <label className="form-label small mb-1 d-flex align-items-center gap-2">
+                  <span>Dil</span>
+                  {localesLoading && (
+                    <span className="spinner-border spinner-border-sm" role="status" />
+                  )}
                 </label>
+
                 <select
                   className="form-select form-select-sm"
                   value={toShortLocale(filters.locale)}
@@ -122,14 +129,10 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                     </option>
                   ))}
                 </select>
-
-                <div className="form-text small">
-                  Dil listesi <code>site_settings.app_locales</code> kaydından yüklenir.
-                </div>
               </div>
 
-              {/* Konum */}
-              <div className="col-6 col-md-2">
+              {/* Location */}
+              <div className="col-6 col-md-4 col-xl-2">
                 <label className="form-label small mb-1">Konum</label>
                 <select
                   className="form-select form-select-sm"
@@ -137,14 +140,14 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                   onChange={handleInputChange('location')}
                   disabled={loading}
                 >
-                  <option value="all">Tüm konumlar</option>
+                  <option value="all">Tümü</option>
                   <option value="header">Header</option>
                   <option value="footer">Footer</option>
                 </select>
               </div>
 
-              {/* Aktif */}
-              <div className="col-6 col-md-3">
+              {/* Active */}
+              <div className="col-6 col-md-4 col-xl-2">
                 <label className="form-label small mb-1">Aktiflik</label>
                 <select
                   className="form-select form-select-sm"
@@ -153,71 +156,72 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                   disabled={loading}
                 >
                   <option value="all">Tümü</option>
-                  <option value="active">Sadece aktif</option>
-                  <option value="inactive">Sadece pasif</option>
+                  <option value="active">Aktif</option>
+                  <option value="inactive">Pasif</option>
                 </select>
               </div>
 
               {/* Sort */}
-              <div className="col-6 col-md-3">
-                <label className="form-label small mb-1">Sıralama alanı</label>
+              <div className="col-12 col-md-4 col-xl-2">
+                <label className="form-label small mb-1">Sıralama</label>
                 <select
                   className="form-select form-select-sm"
                   value={filters.sort}
                   onChange={handleInputChange('sort')}
                   disabled={loading}
                 >
-                  <option value="display_order">Sıra (display_order)</option>
+                  <option value="display_order">Sıra</option>
                   <option value="created_at">Oluşturulma</option>
                   <option value="title">Başlık</option>
                 </select>
               </div>
 
-              {/* Order desktop */}
-              <div className="col-6 col-md-3 d-none d-md-block">
+              {/* Order: always stable (mobile select, md+ button) */}
+              <div className="col-12 col-md-4 col-xl-2">
                 <label className="form-label small mb-1 d-block">Yön</label>
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm w-100"
-                  disabled={loading}
-                  onClick={handleOrderToggle}
-                >
-                  {filters.order === 'asc' ? 'Artan ↑' : 'Azalan ↓'}
-                </button>
-              </div>
 
-              {/* Order mobile */}
-              <div className="col-6 d-block d-md-none">
-                <label className="form-label small mb-1">Yön</label>
-                <select
-                  className="form-select form-select-sm"
-                  value={filters.order}
-                  onChange={handleInputChange('order')}
-                  disabled={loading}
-                >
-                  <option value="asc">Artan</option>
-                  <option value="desc">Azalan</option>
-                </select>
+                {/* md+ : button (better UX), mobile: select */}
+                <div className="d-none d-md-block">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm w-100"
+                    disabled={loading}
+                    onClick={handleOrderToggle}
+                  >
+                    {filters.order === 'asc' ? 'Artan ↑' : 'Azalan ↓'}
+                  </button>
+                </div>
+
+                <div className="d-block d-md-none">
+                  <select
+                    className="form-select form-select-sm"
+                    value={filters.order}
+                    onChange={handleInputChange('order')}
+                    disabled={loading}
+                  >
+                    <option value="asc">Artan</option>
+                    <option value="desc">Azalan</option>
+                  </select>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Sağ taraf */}
-      <div className="col-md-5">
-        <div className="card">
+      {/* RIGHT: ACTIONS / SUMMARY */}
+      <div className="col-12 col-lg-4">
+        <div className="card h-100">
           <div className="card-body py-2">
-            <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div className="d-flex flex-column flex-sm-row flex-lg-column justify-content-between align-items-start gap-2 h-100">
               <div className="small text-muted">
-                <div className="fw-semibold">Menü Öğeleri</div>
+                <div className="fw-semibold text-dark">Menü Öğeleri</div>
                 <div>
-                  Toplam <span className="fw-semibold">{Number.isFinite(total) ? total : 0}</span>{' '}
-                  kayıt görüntüleniyor.
+                  Toplam <span className="fw-semibold">{totalSafe}</span> kayıt görüntüleniyor.
                 </div>
               </div>
 
-              <div className="d-flex align-items-center gap-2">
+              <div className="d-flex gap-2 flex-wrap justify-content-start">
                 <button
                   type="button"
                   className="btn btn-outline-secondary btn-sm"

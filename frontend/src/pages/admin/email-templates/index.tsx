@@ -1,103 +1,73 @@
 // =============================================================
 // FILE: src/pages/admin/email-templates/index.tsx
 // Ensotek – Admin Email Templates Liste Sayfası
+// - Dynamic locales from DB via useAdminLocales()
+// - No hardcoded locales
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import {
   useListEmailTemplatesAdminQuery,
   useUpdateEmailTemplateAdminMutation,
   useDeleteEmailTemplateAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/email_templates_admin.endpoints";
-
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
 import type {
   EmailTemplateAdminListItemDto,
   EmailTemplateAdminListQueryParams,
-} from "@/integrations/types/email_templates.types";
+} from '@/integrations/types/email_templates.types';
 
 import {
   EmailTemplateHeader,
   type LocaleOption,
-} from "@/components/admin/email-templates/EmailTemplateHeader";
-import { EmailTemplateList } from "@/components/admin/email-templates/EmailTemplateList";
+} from '@/components/admin/email-templates/EmailTemplateHeader';
+import { EmailTemplateList } from '@/components/admin/email-templates/EmailTemplateList';
+
+import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 const EmailTemplatesAdminPage: React.FC = () => {
   const router = useRouter();
 
-  /* -------------------- Filtre state -------------------- */
-  const [search, setSearch] = useState("");
-  const [locale, setLocale] = useState(""); // "" = tüm diller
-  const [isActiveFilter, setIsActiveFilter] = useState<
-    "" | "active" | "inactive"
-  >("");
-
-  /* -------------------- Locale options (site_settings.app_locales) -------------------- */
-
   const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
+    localeOptions: adminLocaleOptions,
+    defaultLocaleFromDb,
+    coerceLocale,
+    loading: localesLoading,
+  } = useAdminLocales();
 
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
+  /* -------------------- Filtre state -------------------- */
+  const [search, setSearch] = useState('');
+  const [locale, setLocale] = useState(''); // "" = tüm diller
+  const [isActiveFilter, setIsActiveFilter] = useState<'' | 'active' | 'inactive'>('');
 
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-    let arr: string[] = [];
+  /* -------------------- Locale options (DB) -------------------- */
 
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    // uniq + lower-case
-    const uniqLower = Array.from(
-      new Set(arr.map((x) => String(x).toLowerCase())),
-    );
-    return uniqLower;
-  }, [appLocaleRows]);
-
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
+  const localeOptions: LocaleOption[] = useMemo(() => {
+    return (adminLocaleOptions ?? [])
+      .map((o) => ({
+        value: String(o.value || '').toLowerCase(),
+        label: o.label,
+      }))
+      .filter((o) => !!o.value);
+  }, [adminLocaleOptions]);
 
   const handleLocaleChange = (next: string) => {
-    const normalized = next ? next.trim().toLowerCase() : "";
-    setLocale(normalized);
+    const normalized = next ? next.trim().toLowerCase() : '';
+
+    // "" => tüm diller
+    if (!normalized) {
+      setLocale('');
+      return;
+    }
+
+    // DB'de yoksa default'a düş
+    const safe = coerceLocale(normalized, defaultLocaleFromDb);
+    setLocale(safe || '');
   };
 
   /* -------------------- Liste + filtreler -------------------- */
@@ -105,22 +75,19 @@ const EmailTemplatesAdminPage: React.FC = () => {
   const listParams = useMemo<EmailTemplateAdminListQueryParams | void>(() => {
     const params: EmailTemplateAdminListQueryParams = {};
 
-    if (search.trim()) {
-      params.q = search.trim();
-    }
+    if (search.trim()) params.q = search.trim();
 
+    // locale seçiliyse güvenli locale gönder
     if (locale.trim()) {
-      params.locale = locale.trim();
+      const safe = coerceLocale(locale.trim(), defaultLocaleFromDb);
+      if (safe) params.locale = safe;
     }
 
-    if (isActiveFilter === "active") {
-      params.is_active = 1;
-    } else if (isActiveFilter === "inactive") {
-      params.is_active = 0;
-    }
+    if (isActiveFilter === 'active') params.is_active = 1;
+    else if (isActiveFilter === 'inactive') params.is_active = 0;
 
     return Object.keys(params).length > 0 ? params : undefined;
-  }, [search, locale, isActiveFilter]);
+  }, [search, locale, isActiveFilter, coerceLocale, defaultLocaleFromDb]);
 
   const {
     data: listData,
@@ -139,22 +106,22 @@ const EmailTemplatesAdminPage: React.FC = () => {
 
   /* -------------------- Mutations ----------------------------- */
 
-  const [updateTemplate, { isLoading: isUpdating }] =
-    useUpdateEmailTemplateAdminMutation();
-  const [deleteTemplate, { isLoading: isDeleting }] =
-    useDeleteEmailTemplateAdminMutation();
+  const [updateTemplate, { isLoading: isUpdating }] = useUpdateEmailTemplateAdminMutation();
+  const [deleteTemplate, { isLoading: isDeleting }] = useDeleteEmailTemplateAdminMutation();
 
   const loading = isLoading || isFetching;
-  const busy = loading || isUpdating || isDeleting;
+  const busy = loading || isUpdating || isDeleting || localesLoading;
 
   /* -------------------- Actions ----------------------- */
 
   const handleCreateClick = () => {
-    router.push("/admin/email-templates/new");
+    router.push('/admin/email-templates/new');
   };
 
   const handleEdit = (item: EmailTemplateAdminListItemDto) => {
-    router.push(`/admin/email-templates/${item.id}`);
+    // filtre locale seçiliyse edit sayfasına query ile taşı
+    const q = locale ? `?locale=${encodeURIComponent(locale)}` : '';
+    router.push(`/admin/email-templates/${item.id}${q}`);
   };
 
   const handleDelete = async (item: EmailTemplateAdminListItemDto) => {
@@ -175,32 +142,25 @@ const EmailTemplatesAdminPage: React.FC = () => {
         err?.data?.error?.message ||
         err?.data?.error ||
         err?.message ||
-        "Şablon silinirken bir hata oluştu.";
+        'Şablon silinirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const handleToggleActive = async (
-    item: EmailTemplateAdminListItemDto,
-    value: boolean,
-  ) => {
+  const handleToggleActive = async (item: EmailTemplateAdminListItemDto, value: boolean) => {
     try {
       await updateTemplate({
         id: item.id,
         patch: { is_active: value },
       }).unwrap();
 
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === item.id ? { ...r, is_active: value } : r,
-        ),
-      );
+      setRows((prev) => prev.map((r) => (r.id === item.id ? { ...r, is_active: value } : r)));
     } catch (err: any) {
       const msg =
         err?.data?.error?.message ||
         err?.data?.error ||
         err?.message ||
-        "Aktif durumu güncellenirken bir hata oluştu.";
+        'Aktif durumu güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -215,7 +175,7 @@ const EmailTemplatesAdminPage: React.FC = () => {
         locale={locale}
         onLocaleChange={handleLocaleChange}
         locales={localeOptions}
-        localesLoading={isLocalesLoading}
+        localesLoading={localesLoading}
         isActiveFilter={isActiveFilter}
         onIsActiveFilterChange={setIsActiveFilter}
         loading={busy}

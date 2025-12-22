@@ -28,8 +28,10 @@ import {
 } from "@/seo/pageSeo";
 
 // data
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import { useListCustomPagesPublicQuery } from "@/integrations/rtk/hooks";
+import {
+  useGetSiteSettingByKeyQuery,
+  useListCustomPagesPublicQuery
+} from "@/integrations/rtk/hooks";
 import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 
 // helpers

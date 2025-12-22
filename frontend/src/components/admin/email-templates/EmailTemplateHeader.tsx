@@ -3,7 +3,7 @@
 // Admin Email Templates – Header / Filtreler / Actions
 // =============================================================
 
-import React from "react";
+import React from 'react';
 
 export type LocaleOption = {
   value: string;
@@ -20,8 +20,8 @@ interface EmailTemplateHeaderProps {
   localesLoading?: boolean;
 
   /** "" = hepsi, "active" = sadece aktif, "inactive" = sadece pasif */
-  isActiveFilter: "" | "active" | "inactive";
-  onIsActiveFilterChange: (value: "" | "active" | "inactive") => void;
+  isActiveFilter: '' | 'active' | 'inactive';
+  onIsActiveFilterChange: (value: '' | 'active' | 'inactive') => void;
 
   loading: boolean;
   total: number;
@@ -44,11 +44,9 @@ export const EmailTemplateHeader: React.FC<EmailTemplateHeaderProps> = ({
   onRefresh,
   onCreateClick,
 }) => {
-  const handleLocaleSelectChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleLocaleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const raw = e.target.value;
-    const nextLocale = raw ? raw.trim().toLowerCase() : "";
+    const nextLocale = raw ? raw.trim().toLowerCase() : '';
     onLocaleChange(nextLocale);
   };
 
@@ -61,9 +59,7 @@ export const EmailTemplateHeader: React.FC<EmailTemplateHeaderProps> = ({
             <div className="row g-2 align-items-end">
               {/* Arama */}
               <div className="col-12 col-md-5">
-                <label className="form-label small mb-1">
-                  Ara (key / isim / konu)
-                </label>
+                <label className="form-label small mb-1">Ara (key / isim / konu)</label>
                 <input
                   type="text"
                   className="form-control form-control-sm"
@@ -76,16 +72,13 @@ export const EmailTemplateHeader: React.FC<EmailTemplateHeaderProps> = ({
               {/* Dil */}
               <div className="col-6 col-md-3">
                 <label className="form-label small mb-1">
-                  Dil{" "}
-                  {localesLoading && (
-                    <span className="spinner-border spinner-border-sm ms-1" />
-                  )}
+                  Dil {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
                 </label>
                 <select
                   className="form-select form-select-sm"
                   value={locale}
                   onChange={handleLocaleSelectChange}
-                  disabled={localesLoading && !locales.length}
+                  disabled={loading || (localesLoading && !locales.length)}
                 >
                   <option value="">Tüm diller</option>
                   {locales.map((opt) => (
@@ -103,9 +96,7 @@ export const EmailTemplateHeader: React.FC<EmailTemplateHeaderProps> = ({
                   className="form-select form-select-sm"
                   value={isActiveFilter}
                   onChange={(e) =>
-                    onIsActiveFilterChange(
-                      e.target.value as "" | "active" | "inactive",
-                    )
+                    onIsActiveFilterChange(e.target.value as '' | 'active' | 'inactive')
                   }
                 >
                   <option value="">Hepsi</option>
@@ -124,10 +115,7 @@ export const EmailTemplateHeader: React.FC<EmailTemplateHeaderProps> = ({
           <div className="card-body py-2">
             <div className="d-flex flex-wrap justify-content-between align-items-center gap-2">
               <div className="small text-muted">
-                Toplam:{" "}
-                <span className="fw-semibold">
-                  {loading ? "..." : total}
-                </span>
+                Toplam: <span className="fw-semibold">{loading ? '...' : total}</span>
               </div>
 
               <div className="d-flex gap-2">
@@ -137,7 +125,7 @@ export const EmailTemplateHeader: React.FC<EmailTemplateHeaderProps> = ({
                   onClick={onRefresh}
                   disabled={loading}
                 >
-                  {loading ? "Yükleniyor..." : "Yenile"}
+                  {loading ? 'Yükleniyor...' : 'Yenile'}
                 </button>
                 <button
                   type="button"

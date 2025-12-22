@@ -5,15 +5,15 @@
 // Backend: src/modules/customPages/admin.routes.ts
 // =============================================================
 
-import { baseApi } from "../../baseApi";
+import { baseApi } from '../../baseApi';
 import type {
   ApiCustomPage,
   CustomPageDto,
   CustomPageListAdminQueryParams,
   CustomPageCreatePayload,
   CustomPageUpdatePayload,
-} from "@/integrations/types/custom_pages.types";
-import { mapApiCustomPageToDto } from "@/integrations/types/custom_pages.types";
+} from '@/integrations/types/custom_pages.types';
+import { mapApiCustomPageToDto } from '@/integrations/types/custom_pages.types';
 
 /**
  * Query paramlarından undefined / boş stringleri temizlemek için
@@ -24,20 +24,10 @@ const cleanParams = (
   if (!params) return undefined;
   const out: Record<string, string | number | boolean> = {};
   for (const [k, v] of Object.entries(params)) {
-    if (
-      v === undefined ||
-      v === null ||
-      v === "" ||
-      (typeof v === "number" && Number.isNaN(v))
-    ) {
+    if (v === undefined || v === null || v === '' || (typeof v === 'number' && Number.isNaN(v))) {
       continue;
     }
-    // boolean / number / string dışındaki tipleri string’e çevirme
-    if (
-      typeof v === "boolean" ||
-      typeof v === "number" ||
-      typeof v === "string"
-    ) {
+    if (typeof v === 'boolean' || typeof v === 'number' || typeof v === 'string') {
       out[k] = v;
     } else {
       out[k] = String(v);
@@ -54,11 +44,20 @@ const getTotalFromHeaders = (
   fallbackLength: number,
 ): number => {
   const headerValue =
-    responseHeaders?.get("x-total-count") ??
-    responseHeaders?.get("X-Total-Count");
+    responseHeaders?.get('x-total-count') ?? responseHeaders?.get('X-Total-Count');
   if (!headerValue) return fallbackLength;
   const n = Number(headerValue);
   return Number.isFinite(n) && n >= 0 ? n : fallbackLength;
+};
+
+/**
+ * Response bazen array, bazen {items: []} gelebilir – normalize et
+ */
+const normalizeList = (raw: unknown): ApiCustomPage[] => {
+  if (Array.isArray(raw)) return raw as ApiCustomPage[];
+  const anyRaw: any = raw as any;
+  if (anyRaw && Array.isArray(anyRaw.items)) return anyRaw.items as ApiCustomPage[];
+  return [];
 };
 
 export const customPagesAdminApi = baseApi.injectEndpoints({
@@ -72,97 +71,68 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       CustomPageListAdminQueryParams | void
     >({
       query: (params) => ({
-        url: "/admin/custom_pages",
-        method: "GET",
-        params: cleanParams(
-          params as Record<string, unknown> | undefined,
-        ),
+        url: '/admin/custom_pages',
+        method: 'GET',
+        params: cleanParams(params as Record<string, unknown> | undefined),
       }),
-      transformResponse: (response: ApiCustomPage[], meta) => {
-        const total = getTotalFromHeaders(
-          meta?.response?.headers,
-          response.length,
-        );
+      transformResponse: (response: unknown, meta) => {
+        const rows = normalizeList(response);
+        const total = getTotalFromHeaders(meta?.response?.headers, rows.length);
         return {
-          items: response.map((row) => mapApiCustomPageToDto(row)),
+          items: rows.map((row) => mapApiCustomPageToDto(row)),
           total,
         };
       },
       providesTags: (result) =>
-        result?.items
+        result?.items?.length
           ? [
-              ...result.items.map((p) => ({
-                type: "CustomPage" as const,
-                id: p.id,
-              })),
-              { type: "CustomPage" as const, id: "ADMIN_LIST" },
+              ...result.items.map((p) => ({ type: 'CustomPage' as const, id: p.id })),
+              { type: 'CustomPage' as const, id: 'ADMIN_LIST' },
             ]
-          : [{ type: "CustomPage" as const, id: "ADMIN_LIST" }],
+          : [{ type: 'CustomPage' as const, id: 'ADMIN_LIST' }],
     }),
 
     /* --------------------------------------------------------- */
     /* GET by id – /api/admin/custom_pages/:id                   */
-    /* (backend locale'i req.locale'den alıyor)                  */
+    /* FIX: locale query param gönder                            */
     /* --------------------------------------------------------- */
-    getCustomPageAdmin: build.query<
-      CustomPageDto,
-      { id: string; locale?: string }
-    >({
-      query: ({ id /*, locale*/ }) => ({
+    getCustomPageAdmin: build.query<CustomPageDto, { id: string; locale?: string }>({
+      query: ({ id, locale }) => ({
         url: `/admin/custom_pages/${encodeURIComponent(id)}`,
-        method: "GET",
-        // Not: backend şu an query'den locale almıyor,
-        // sadece req.locale kullanıyor. İleride gerekirse:
-        // params: cleanParams(locale ? { locale } : undefined),
+        method: 'GET',
+        // ✅ FIX: locale'i backend'e ilet
+        params: cleanParams(locale ? { locale } : undefined),
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      providesTags: (_result, _error, { id }) => [
-        { type: "CustomPage" as const, id },
-      ],
+      transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
+      providesTags: (_result, _error, { id }) => [{ type: 'CustomPage' as const, id }],
     }),
 
     /* --------------------------------------------------------- */
     /* GET by slug – /api/admin/custom_pages/by-slug/:slug       */
-    /* (backend locale'i yine req.locale'den alıyor)             */
+    /* FIX: locale query param gönder                            */
     /* --------------------------------------------------------- */
-    getCustomPageBySlugAdmin: build.query<
-      CustomPageDto,
-      { slug: string; locale?: string }
-    >({
-      query: ({ slug /*, locale*/ }) => ({
+    getCustomPageBySlugAdmin: build.query<CustomPageDto, { slug: string; locale?: string }>({
+      query: ({ slug, locale }) => ({
         url: `/admin/custom_pages/by-slug/${encodeURIComponent(slug)}`,
-        method: "GET",
-        // Backend şu an query'den locale almıyor.
-        // params: cleanParams(locale ? { locale } : undefined),
+        method: 'GET',
+        // ✅ FIX: locale'i backend'e ilet
+        params: cleanParams(locale ? { locale } : undefined),
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      providesTags: (_result, _error, { slug }) => [
-        {
-          type: "CustomPageSlug" as const,
-          id: slug,
-        },
-      ],
+      transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
+      providesTags: (_result, _error, { slug }) => [{ type: 'CustomPageSlug' as const, id: slug }],
     }),
 
     /* --------------------------------------------------------- */
     /* CREATE – POST /api/admin/custom_pages                     */
     /* --------------------------------------------------------- */
-    createCustomPageAdmin: build.mutation<
-      CustomPageDto,
-      CustomPageCreatePayload
-    >({
+    createCustomPageAdmin: build.mutation<CustomPageDto, CustomPageCreatePayload>({
       query: (body) => ({
-        url: "/admin/custom_pages",
-        method: "POST",
+        url: '/admin/custom_pages',
+        method: 'POST',
         body,
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      invalidatesTags: [
-        { type: "CustomPage" as const, id: "ADMIN_LIST" },
-      ],
+      transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
+      invalidatesTags: [{ type: 'CustomPage' as const, id: 'ADMIN_LIST' }],
     }),
 
     /* --------------------------------------------------------- */
@@ -174,14 +144,13 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
     >({
       query: ({ id, patch }) => ({
         url: `/admin/custom_pages/${encodeURIComponent(id)}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: patch,
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
+      transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
       invalidatesTags: (_result, _error, { id }) => [
-        { type: "CustomPage" as const, id },
-        { type: "CustomPage" as const, id: "ADMIN_LIST" },
+        { type: 'CustomPage' as const, id },
+        { type: 'CustomPage' as const, id: 'ADMIN_LIST' },
       ],
     }),
 
@@ -191,32 +160,30 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
     deleteCustomPageAdmin: build.mutation<void, string>({
       query: (id) => ({
         url: `/admin/custom_pages/${encodeURIComponent(id)}`,
-        method: "DELETE",
+        method: 'DELETE',
       }),
       invalidatesTags: (_result, _error, id) => [
-        { type: "CustomPage" as const, id },
-        { type: "CustomPage" as const, id: "ADMIN_LIST" },
+        { type: 'CustomPage' as const, id },
+        { type: 'CustomPage' as const, id: 'ADMIN_LIST' },
       ],
     }),
 
     /* --------------------------------------------------------- */
     /* REORDER – POST /api/admin/custom_pages/reorder            */
     /* Body: { items: [{id, display_order}, ...] }               */
-    /* Backend 204 dönüyor (body yok)                            */
+    /* Backend 204 dönebilir                                     */
     /* --------------------------------------------------------- */
     reorderCustomPagesAdmin: build.mutation<
       { ok: boolean },
       { items: { id: string; display_order: number }[] }
     >({
       query: (payload) => ({
-        url: "/admin/custom_pages/reorder",
-        method: "POST",
+        url: '/admin/custom_pages/reorder',
+        method: 'POST',
         body: payload,
       }),
       transformResponse: () => ({ ok: true }),
-      invalidatesTags: [
-        { type: "CustomPage" as const, id: "ADMIN_LIST" },
-      ],
+      invalidatesTags: [{ type: 'CustomPage' as const, id: 'ADMIN_LIST' }],
     }),
   }),
 

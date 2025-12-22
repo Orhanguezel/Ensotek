@@ -1,9 +1,15 @@
 // =============================================================
 // FILE: src/components/admin/products/ProductsList.tsx
+// Ensotek – Admin Products List
+//
+// Responsive Strategy (Bootstrap 5):
+// - < xxl: CARDS (tablet + mobile)  ✅
+// - xxl+: TABLE (DnD enabled here only, if onReorder provided) ✅
 // =============================================================
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+
 import type { ProductDto } from '@/integrations/types/product.types';
 import {
   Pagination,
@@ -24,11 +30,15 @@ export type ProductsListProps = {
   onSaveOrder?: () => void;
   savingOrder?: boolean;
 
-  // ✅ parent'ın API’ye gönderdiği efektif locale (edit link'e taşı)
+  // parent'ın API’ye gönderdiği efektif locale (edit link'e taşı)
   activeLocale?: string;
 };
 
 const PAGE_SIZE = 20;
+
+/* ---------------- Helpers ---------------- */
+
+const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 
 const formatDate = (value: string | null | undefined): string => {
   if (!value) return '-';
@@ -39,8 +49,19 @@ const formatDate = (value: string | null | undefined): string => {
 
 const formatPrice = (value: number | null | undefined): string => {
   if (value === null || value === undefined) return '-';
+  // TR para simgesi sabit kalsın istiyorsun, böyle bırakıyorum
   return `${value.toFixed(2)} ₺`;
 };
+
+const normLocale = (v: unknown): string =>
+  String(v || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0]
+    .trim();
+
+/* ---------------- Component ---------------- */
 
 export const ProductsList: React.FC<ProductsListProps> = ({
   items,
@@ -74,17 +95,26 @@ export const ProductsList: React.FC<ProductsListProps> = ({
 
   const busy = loading || !!savingOrder;
 
+  const effectiveLocale = useMemo(() => normLocale(activeLocale), [activeLocale]);
+
+  const editHref = (id: string) => ({
+    pathname: `/admin/products/${encodeURIComponent(id)}`,
+    query: effectiveLocale ? { locale: effectiveLocale } : undefined,
+  });
+
   const handleDelete = (p: ProductDto) => {
     if (!onDelete) return;
     const ok = window.confirm(
       `Bu ürünü silmek üzeresin.\n\n` +
-        `Başlık: ${p.title}\n` +
-        `Slug: ${p.slug}\n\n` +
+        `Başlık: ${safeText((p as any).title)}\n` +
+        `Slug: ${safeText((p as any).slug)}\n\n` +
         `Devam etmek istiyor musun?`,
     );
     if (!ok) return;
     onDelete(p);
   };
+
+  /* ---------------- DnD (xxl+ table) ---------------- */
 
   const handleDragStart = (id: string) => setDraggingId(id);
   const handleDragEnd = () => setDraggingId(null);
@@ -102,6 +132,8 @@ export const ProductsList: React.FC<ProductsListProps> = ({
 
     onReorder(next);
   };
+
+  /* ---------------- Pagination helpers ---------------- */
 
   const buildPages = () => {
     const pages: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
@@ -134,52 +166,85 @@ export const ProductsList: React.FC<ProductsListProps> = ({
     setPage(nextPage);
   };
 
-  const editHref = (id: string) => ({
-    pathname: `/admin/products/${encodeURIComponent(id)}`,
-    query: activeLocale ? { locale: activeLocale } : undefined,
-  });
+  /* ---------------- UI fragments ---------------- */
+
+  const renderStatus = (p: ProductDto) => (
+    <div className="d-flex flex-wrap gap-1">
+      {p.is_active ? (
+        <span className="badge bg-success-subtle text-success border border-success-subtle">
+          Aktif
+        </span>
+      ) : (
+        <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
+          Pasif
+        </span>
+      )}
+      {p.is_featured ? (
+        <span className="badge bg-warning-subtle text-warning border border-warning-subtle">
+          Öne çıkan
+        </span>
+      ) : null}
+    </div>
+  );
+
+  const captionText = (
+    <span className="text-muted small">
+      Sıralama değişikliği için satırları sürükleyip bırakabilirsin. Kalıcı yapmak için{' '}
+      <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullan.
+      <span className="ms-2">(Kart görünümü: tablet/mobil, Tablo: çok büyük ekranlar/xxl+)</span>
+    </span>
+  );
 
   return (
     <div className="card">
-      <div className="card-header py-2 d-flex align-items-center justify-content-between">
-        <span className="small fw-semibold">Ürün Listesi</span>
-        <div className="d-flex align-items-center gap-2">
-          {busy && <span className="badge bg-secondary small">İşlem yapılıyor...</span>}
-          {onSaveOrder && (
-            <button
-              type="button"
-              className="btn btn-outline-primary btn-sm"
-              onClick={onSaveOrder}
-              disabled={savingOrder || !hasData}
-            >
-              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
-            </button>
-          )}
-          <span className="text-muted small">
-            Toplam: <strong>{totalItems}</strong>
-          </span>
+      <div className="card-header py-2">
+        <div className="d-flex align-items-start align-items-md-center justify-content-between gap-2 flex-wrap">
+          <span className="small fw-semibold">Ürün Listesi</span>
+
+          <div className="d-flex align-items-center gap-2 flex-wrap">
+            {busy && <span className="badge bg-secondary small">İşlem yapılıyor...</span>}
+
+            {onSaveOrder && (
+              <button
+                type="button"
+                className="btn btn-outline-primary btn-sm"
+                onClick={onSaveOrder}
+                disabled={!!savingOrder || !hasData}
+              >
+                {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
+              </button>
+            )}
+
+            <span className="text-muted small">
+              Toplam: <strong>{totalItems}</strong>
+            </span>
+          </div>
         </div>
       </div>
 
       <div className="card-body p-0">
-        <div className="d-none d-md-block">
+        {/* =========================================================
+            XXL+ TABLE
+           ========================================================= */}
+        <div className="d-none d-xxl-block">
           <div className="table-responsive">
             <table className="table table-hover table-sm mb-0 align-middle">
               <thead className="table-light">
                 <tr>
-                  <th style={{ width: '5%' }} />
-                  <th style={{ width: '24%' }}>Başlık</th>
-                  <th style={{ width: '14%' }}>Slug</th>
+                  <th style={{ width: 56 }} />
+                  <th style={{ width: '30%' }}>Başlık</th>
+                  <th style={{ width: '18%' }}>Slug</th>
                   <th style={{ width: '10%' }}>Fiyat</th>
                   <th style={{ width: '8%' }}>Stok</th>
-                  <th style={{ width: '6%' }}>Dil</th>
-                  <th style={{ width: '10%' }}>Durum</th>
+                  <th style={{ width: '8%' }}>Dil</th>
+                  <th style={{ width: '12%' }}>Durum</th>
                   <th style={{ width: '14%' }}>Tarih</th>
-                  <th style={{ width: '9%' }} className="text-end">
+                  <th style={{ width: 170 }} className="text-end text-nowrap">
                     İşlemler
                   </th>
                 </tr>
               </thead>
+
               <tbody>
                 {loading ? (
                   <tr>
@@ -190,64 +255,65 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                 ) : hasData ? (
                   pageRows.map((p, index) => {
                     const globalIndex = startIndex + index;
+
+                    const canReorder = !!onReorder; // xxl+ tablo
+                    const title = safeText((p as any).title) || '(Başlık yok)';
+                    const slug = safeText((p as any).slug) || '-';
+
                     return (
                       <tr
                         key={p.id}
-                        draggable={!!onReorder}
-                        onDragStart={() => onReorder && handleDragStart(p.id)}
-                        onDragEnd={onReorder ? handleDragEnd : undefined}
-                        onDragOver={onReorder ? (e) => e.preventDefault() : undefined}
-                        onDrop={onReorder ? () => handleDropOn(p.id) : undefined}
+                        draggable={canReorder}
+                        onDragStart={() => canReorder && handleDragStart(p.id)}
+                        onDragEnd={canReorder ? handleDragEnd : undefined}
+                        onDragOver={canReorder ? (e) => e.preventDefault() : undefined}
+                        onDrop={canReorder ? () => handleDropOn(p.id) : undefined}
                         className={draggingId === p.id ? 'table-active' : undefined}
-                        style={onReorder ? { cursor: 'move' } : { cursor: 'default' }}
+                        style={canReorder ? { cursor: 'move' } : { cursor: 'default' }}
                       >
-                        <td className="text-muted small">
-                          {onReorder && <span className="me-1">≡</span>}
+                        <td className="text-muted small text-nowrap">
+                          {canReorder && <span className="me-1">≡</span>}
                           <span>{globalIndex + 1}</span>
                         </td>
-                        <td className="small">
-                          <div className="fw-semibold text-truncate">{p.title}</div>
-                          {p.product_code && (
-                            <div className="text-muted small">
-                              Kod: <code>{p.product_code}</code>
+
+                        <td className="small" style={{ minWidth: 320 }}>
+                          <div style={{ minWidth: 0 }}>
+                            <div className="fw-semibold text-truncate" title={title}>
+                              {title}
                             </div>
-                          )}
-                        </td>
-                        <td className="small">
-                          <div className="text-truncate" style={{ maxWidth: 200 }}>
-                            <code>{p.slug}</code>
+                            {(p as any).product_code ? (
+                              <div className="text-muted small text-truncate">
+                                Kod: <code>{safeText((p as any).product_code)}</code>
+                              </div>
+                            ) : null}
                           </div>
                         </td>
-                        <td className="small">{formatPrice(p.price)}</td>
-                        <td className="small">{p.stock_quantity}</td>
-                        <td className="small">
-                          <code>{p.locale}</code>
-                        </td>
-                        <td className="small">
-                          <div className="d-flex flex-column gap-1">
-                            {p.is_active ? (
-                              <span className="badge bg-success-subtle text-success border border-success-subtle">
-                                Aktif
-                              </span>
-                            ) : (
-                              <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle">
-                                Pasif
-                              </span>
-                            )}
-                            {p.is_featured && (
-                              <span className="badge bg-warning-subtle text-warning border border-warning-subtle">
-                                Öne çıkan
-                              </span>
-                            )}
+
+                        <td className="small" style={{ minWidth: 240 }}>
+                          <div className="text-truncate" title={slug}>
+                            <code>{slug}</code>
                           </div>
                         </td>
-                        <td className="small">
-                          <div>{formatDate(p.created_at)}</div>
+
+                        <td className="small text-nowrap">{formatPrice((p as any).price)}</td>
+                        <td className="small text-nowrap">
+                          {safeText((p as any).stock_quantity) || '-'}
+                        </td>
+
+                        <td className="small text-nowrap">
+                          <code>{safeText((p as any).locale) || '-'}</code>
+                        </td>
+
+                        <td className="small">{renderStatus(p)}</td>
+
+                        <td className="small text-nowrap">
+                          <div>{formatDate((p as any).created_at)}</div>
                           <div className="text-muted small">
-                            Güncelleme: {formatDate(p.updated_at)}
+                            Güncelleme: {formatDate((p as any).updated_at)}
                           </div>
                         </td>
-                        <td className="text-end">
+
+                        <td className="text-end text-nowrap">
                           <div className="btn-group btn-group-sm">
                             <Link href={editHref(p.id)} className="btn btn-outline-primary btn-sm">
                               Düzenle
@@ -277,121 +343,128 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                   </tr>
                 )}
               </tbody>
-              <caption className="px-3 py-2 text-start">
-                <span className="text-muted small">
-                  Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
-                  yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullanman
-                  gerekir.
-                </span>
-              </caption>
+
+              <caption className="px-3 py-2 text-start">{captionText}</caption>
             </table>
           </div>
         </div>
 
-        <div className="d-block d-md-none">
+        {/* =========================================================
+            < XXL : CARDS (tablet + mobile)
+           ========================================================= */}
+        <div className="d-block d-xxl-none">
           {loading ? (
             <div className="px-3 py-3 text-center text-muted small">Ürünler yükleniyor...</div>
           ) : hasData ? (
-            pageRows.map((p, index) => {
-              const globalIndex = startIndex + index;
-              return (
-                <div
-                  key={p.id}
-                  className="border-bottom px-3 py-2"
-                  draggable={!!onReorder}
-                  onDragStart={() => onReorder && handleDragStart(p.id)}
-                  onDragEnd={onReorder ? handleDragEnd : undefined}
-                  onDragOver={onReorder ? (e) => e.preventDefault() : undefined}
-                  onDrop={onReorder ? () => handleDropOn(p.id) : undefined}
-                  style={onReorder ? { cursor: 'move' } : { cursor: 'default' }}
-                >
-                  <div className="d-flex justify-content-between align-items-start gap-2">
-                    <div>
-                      <div className="fw-semibold small">
-                        {onReorder && <span className="text-muted me-1">≡</span>}
-                        <span className="text-muted me-1">#{globalIndex + 1}</span>
-                        {p.title}
-                      </div>
-                      <div className="text-muted small">
-                        <code>{p.slug}</code>
-                      </div>
-                      {p.product_code && (
-                        <div className="text-muted small mt-1">
-                          Kod: <code>{p.product_code}</code>
-                        </div>
-                      )}
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">Fiyat:</span>
-                        {formatPrice(p.price)}
-                        <span className="ms-2 me-1">Stok:</span>
-                        {p.stock_quantity}
-                      </div>
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">Dil:</span>
-                        <code>{p.locale}</code>
-                      </div>
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">Oluşturma:</span>
-                        {formatDate(p.created_at)}
-                      </div>
-                      <div className="text-muted small">
-                        <span className="me-1">Güncelleme:</span>
-                        {formatDate(p.updated_at)}
-                      </div>
-                    </div>
+            <div className="p-3">
+              <div className="row g-3">
+                {pageRows.map((p, index) => {
+                  const globalIndex = startIndex + index;
 
-                    <div className="d-flex flex-column align-items-end gap-1">
-                      <div className="d-flex flex-column gap-1">
-                        <span
-                          className={
-                            'badge border small ' +
-                            (p.is_active
-                              ? 'bg-success-subtle text-success border-success-subtle'
-                              : 'bg-secondary-subtle text-secondary border-secondary-subtle')
-                          }
-                        >
-                          {p.is_active ? 'Aktif' : 'Pasif'}
-                        </span>
-                        {p.is_featured && (
-                          <span className="badge bg-warning-subtle text-warning border border-warning-subtle small">
-                            Öne çıkan
-                          </span>
-                        )}
-                      </div>
-                      <div className="d-flex gap-1 mt-1">
-                        <Link href={editHref(p.id)} className="btn btn-outline-primary btn-sm">
-                          Düzenle
-                        </Link>
-                        {onDelete && (
-                          <button
-                            type="button"
-                            className="btn btn-outline-danger btn-sm"
-                            disabled={busy}
-                            onClick={() => handleDelete(p)}
+                  const title = safeText((p as any).title) || '(Başlık yok)';
+                  const slug = safeText((p as any).slug) || '-';
+                  const code = safeText((p as any).product_code);
+                  const locale = safeText((p as any).locale) || '-';
+                  const stock = safeText((p as any).stock_quantity) || '-';
+
+                  return (
+                    <div key={p.id} className="col-12 col-lg-6">
+                      <div className="border rounded-3 p-3 bg-white h-100">
+                        {/* top line */}
+                        <div className="d-flex justify-content-between align-items-start gap-2">
+                          <div className="d-flex align-items-center gap-2 flex-wrap">
+                            <span className="badge bg-light text-dark border">
+                              #{globalIndex + 1}
+                            </span>
+                            {renderStatus(p)}
+                            <span className="badge bg-light text-dark border">
+                              Dil: <code>{locale}</code>
+                            </span>
+                          </div>
+
+                          <div className="text-end">
+                            <div className="small text-muted text-nowrap">
+                              {formatDate((p as any).created_at)}
+                            </div>
+                            <div className="small text-nowrap mt-1">
+                              <span className="text-muted me-1">Fiyat:</span>
+                              <span className="fw-semibold">{formatPrice((p as any).price)}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* main content */}
+                        <div className="mt-2">
+                          <div
+                            className="fw-semibold"
+                            style={{ wordBreak: 'break-word' }}
+                            title={title}
                           >
-                            Sil
-                          </button>
-                        )}
+                            {title}
+                          </div>
+
+                          <div
+                            className="text-muted small mt-1"
+                            style={{ wordBreak: 'break-word' }}
+                          >
+                            Slug: <code>{slug}</code>
+                          </div>
+
+                          {code ? (
+                            <div
+                              className="text-muted small mt-1"
+                              style={{ wordBreak: 'break-word' }}
+                            >
+                              Kod: <code>{code}</code>
+                            </div>
+                          ) : null}
+
+                          <div className="text-muted small mt-2 d-flex flex-wrap gap-3">
+                            <div>
+                              <span className="me-1">Stok:</span>
+                              <span className="fw-semibold">{stock}</span>
+                            </div>
+                            <div className="text-muted">
+                              Güncelleme:{' '}
+                              <span className="fw-semibold">
+                                {formatDate((p as any).updated_at)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* actions */}
+                        <div className="mt-3 d-grid gap-2">
+                          <Link href={editHref(p.id)} className="btn btn-outline-primary btn-sm">
+                            Düzenle
+                          </Link>
+                          {onDelete ? (
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger btn-sm"
+                              disabled={busy}
+                              onClick={() => handleDelete(p)}
+                            >
+                              Sil
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })
+                  );
+                })}
+              </div>
+
+              <div className="pt-3">{captionText}</div>
+            </div>
           ) : (
             <div className="px-3 py-3 text-center text-muted small">
               Henüz kayıtlı ürün bulunmuyor.
             </div>
           )}
-
-          <div className="px-3 py-2 border-top">
-            <span className="text-muted small">
-              Kartları sürükleyip bırakarak sıralamayı değiştirebilirsin. Değişiklikleri kaydetmek
-              için <strong>Sıralamayı Kaydet</strong> butonunu kullan.
-            </span>
-          </div>
         </div>
 
+        {/* Pagination */}
         {pageCount > 1 && (
           <div className="py-2">
             <Pagination>

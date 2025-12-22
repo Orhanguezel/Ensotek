@@ -9,7 +9,7 @@ import {
   useCreateDbSnapshotMutation,
   useExportSqlMutation,
   useExportJsonMutation,
-} from "@/integrations/rtk/endpoints/admin/db_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 
 export type DbAdminHeaderProps = {
   onSnapshotCreated?: () => void;

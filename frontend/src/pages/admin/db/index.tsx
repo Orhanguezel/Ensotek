@@ -8,7 +8,7 @@ import type { NextPage } from "next";
 import { DbAdminHeader } from "@/components/admin/db/DbAdminHeader";
 import { DbSnapshotsTable } from "@/components/admin/db/DbSnapshotsTable";
 import { DbImportPanel } from "@/components/admin/db/DbImportPanel";
-import { useListDbSnapshotsQuery } from "@/integrations/rtk/endpoints/admin/db_admin.endpoints";
+import { useListDbSnapshotsQuery } from "@/integrations/rtk/hooks";
 
 const AdminDbPage: NextPage = () => {
   const {

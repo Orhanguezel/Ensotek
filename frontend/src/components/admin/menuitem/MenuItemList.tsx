@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemList.tsx
-// Ensotek – Admin Menu Items Table (drag & drop + responsive)
-// - Locale support: optional localeLabelMap (tr -> Türkçe (tr))
-// - Date locale: optional dateLocale (default tr-TR)
+// Ensotek – Admin Menu Items (Responsive + DnD + Pagination)
+// Fix: Desktop header wrap bug + Type label (Tür) blank issues
 // =============================================================
+
+'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import type { AdminMenuItemDto } from '@/integrations/types/menu_items.types';
@@ -17,28 +18,13 @@ import {
   PaginationEllipsis,
 } from '@/components/ui/pagination';
 
-export type MenuItemListProps = {
-  items?: AdminMenuItemDto[];
-  loading: boolean;
-
-  onEdit?: (item: AdminMenuItemDto) => void;
-  onDelete?: (item: AdminMenuItemDto) => void;
-
-  onToggleActive?: (item: AdminMenuItemDto, value: boolean) => void;
-
-  onReorder?: (next: AdminMenuItemDto[]) => void;
-
-  onSaveOrder?: () => void;
-  savingOrder?: boolean;
-
-  // ✅ optional: locale code -> label (dinamik app_locales'ten üretilebilir)
-  localeLabelMap?: Record<string, string>;
-
-  // ✅ optional: date formatting locale
-  dateLocale?: string; // e.g. "tr-TR", "en-GB"
-};
+/* ---------------- Constants ---------------- */
 
 const PAGE_SIZE = 50;
+
+/* ---------------- Helpers ---------------- */
+
+const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 
 const toShortLocale = (v: unknown): string =>
   String(v || '')
@@ -48,12 +34,12 @@ const toShortLocale = (v: unknown): string =>
     .split('-')[0]
     .trim();
 
-const fmtDate = (value: any, dateLocale: string) => {
+const fmtDate = (value: unknown, locale: string) => {
   if (!value) return '-';
   try {
-    const d = new Date(value);
+    const d = new Date(value as any);
     if (Number.isNaN(d.getTime())) return String(value);
-    return d.toLocaleString(dateLocale);
+    return d.toLocaleString(locale);
   } catch {
     return String(value ?? '-');
   }
@@ -65,15 +51,70 @@ const fmtLocation = (loc?: string | null) => {
   return loc ?? '-';
 };
 
-const formatText = (v: unknown, max = 80): string => {
-  if (v === null || v === undefined) return '';
-  const s = String(v);
-  if (s.length <= max) return s;
-  return s.slice(0, max - 3) + '...';
+const truncate = (v: unknown, max = 60) => {
+  const s = safeText(v);
+  if (!s) return '-';
+  return s.length <= max ? s : `${s.slice(0, max)}…`;
 };
 
+/** no-wrap + ellipsis style (header & cells) */
+const noWrapEllipsis: React.CSSProperties = {
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+};
+
+const getTypeLabel = (raw: unknown): string => {
+  const t = safeText(raw).trim().toLowerCase();
+
+  // Backend farklı değerler döndürebilir; burada hepsini yakalıyoruz.
+  if (!t) return '-';
+
+  // Page
+  if (t === 'page' || t === 'internal_page' || t === 'route') return 'Sayfa';
+
+  // Custom URL / Link
+  if (
+    t === 'url' ||
+    t === 'custom_url' ||
+    t === 'custom' ||
+    t === 'link' ||
+    t === 'external' ||
+    t === 'external_url'
+  ) {
+    return 'Özel URL';
+  }
+
+  // Sayısal / legacy
+  if (t === '1' || t === 'true') return 'Sayfa';
+  if (t === '0' || t === 'false') return 'Özel URL';
+
+  // Bilinmeyen
+  return 'Özel URL';
+};
+
+/* ---------------- Props ---------------- */
+
+export type MenuItemListProps = {
+  items?: AdminMenuItemDto[];
+  loading: boolean;
+
+  onEdit?: (item: AdminMenuItemDto) => void;
+  onDelete?: (item: AdminMenuItemDto) => void;
+  onToggleActive?: (item: AdminMenuItemDto, value: boolean) => void;
+
+  onReorder?: (next: AdminMenuItemDto[]) => void;
+  onSaveOrder?: () => void;
+  savingOrder?: boolean;
+
+  localeLabelMap?: Record<string, string>;
+  dateLocale?: string;
+};
+
+/* ---------------- Component ---------------- */
+
 export const MenuItemList: React.FC<MenuItemListProps> = ({
-  items,
+  items = [],
   loading,
   onEdit,
   onDelete,
@@ -84,211 +125,225 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
   localeLabelMap,
   dateLocale = 'tr-TR',
 }) => {
-  const rows = items || [];
-  const totalItems = rows.length;
-  const hasData = totalItems > 0;
+  const total = items.length;
+  const hasData = total > 0;
 
-  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const busy = loading || !!savingOrder;
+
   const [page, setPage] = useState(1);
+  const [dragId, setDragId] = useState<string | null>(null);
 
-  const pageCount = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   useEffect(() => {
-    setPage((prev) => {
-      const maxPage = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
-      return Math.min(prev, maxPage);
-    });
-  }, [totalItems]);
+    setPage((p) => Math.min(p, pageCount));
+  }, [pageCount]);
 
-  const currentPage = Math.min(page, pageCount);
-  const startIndex = (currentPage - 1) * PAGE_SIZE;
-  const endIndex = startIndex + PAGE_SIZE;
-  const pageRows = rows.slice(startIndex, endIndex);
+  const start = (page - 1) * PAGE_SIZE;
+  const pageRows = items.slice(start, start + PAGE_SIZE);
 
-  const handleDragStart = (id: string) => setDraggingId(id);
-  const handleDragEnd = () => setDraggingId(null);
-
-  const handleDropOn = (targetId: string) => {
-    if (!draggingId || draggingId === targetId || !onReorder) return;
-
-    const currentIndex = rows.findIndex((r) => r.id === draggingId);
-    const targetIndex = rows.findIndex((r) => r.id === targetId);
-    if (currentIndex === -1 || targetIndex === -1) return;
-
-    const next = [...rows];
-    const [moved] = next.splice(currentIndex, 1);
-    next.splice(targetIndex, 0, moved);
-
-    onReorder(next);
-  };
+  /* ---------- Pagination ---------- */
 
   const pages = useMemo(() => {
-    const out: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
+    const out: Array<number | 'ellipsis'> = [];
     if (pageCount <= 7) {
       for (let i = 1; i <= pageCount; i += 1) out.push(i);
       return out;
     }
-
     out.push(1);
-    const siblings = 1;
-    let left = Math.max(2, currentPage - siblings);
-    let right = Math.min(pageCount - 1, currentPage + siblings);
-
-    if (left > 2) out.push('ellipsis-left');
-    else left = 2;
-
-    for (let i = left; i <= right; i += 1) out.push(i);
-
-    if (right < pageCount - 1) out.push('ellipsis-right');
-    else right = pageCount - 1;
-
+    if (page > 3) out.push('ellipsis');
+    for (let i = Math.max(2, page - 1); i <= Math.min(pageCount - 1, page + 1); i += 1) {
+      out.push(i);
+    }
+    if (page < pageCount - 2) out.push('ellipsis');
     out.push(pageCount);
     return out;
-  }, [pageCount, currentPage]);
+  }, [page, pageCount]);
 
-  const handlePageChange = (nextPage: number) => {
-    if (nextPage < 1 || nextPage > pageCount) return;
-    setPage(nextPage);
+  /* ---------- Drag & Drop ---------- */
+
+  const handleDrop = (targetId: string) => {
+    if (!dragId || dragId === targetId || !onReorder || busy) return;
+
+    const from = items.findIndex((i) => i.id === dragId);
+    const to = items.findIndex((i) => i.id === targetId);
+    if (from < 0 || to < 0) return;
+
+    const next = [...items];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    onReorder(next);
+    setDragId(null);
   };
 
-  const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>, item: AdminMenuItemDto) => {
-    e.stopPropagation();
-    onDelete?.(item);
-  };
-
-  const renderLocale = (raw: any) => {
+  const renderLocale = (raw: unknown) => {
     const code = toShortLocale(raw);
-    if (!code) return <span className="text-muted">-</span>;
-
-    const label = localeLabelMap?.[code];
-    if (label) return label;
-
-    return code;
+    if (!code) return '-';
+    return localeLabelMap?.[code] ?? code;
   };
+
+  /* ================= RENDER ================= */
 
   return (
     <div className="card">
-      <div className="card-header py-2 d-flex align-items-center justify-content-between">
+      {/* ---------- Header ---------- */}
+      <div className="card-header py-2 d-flex justify-content-between align-items-center">
         <span className="small fw-semibold">Menü Öğeleri</span>
-        <div className="d-flex align-items-center gap-2">
-          {loading && <span className="badge bg-secondary">Yükleniyor...</span>}
+
+        <div className="d-flex gap-2 align-items-center flex-wrap">
+          {loading && <span className="badge bg-secondary">Yükleniyor</span>}
+
           {onSaveOrder && (
             <button
               type="button"
               className="btn btn-outline-primary btn-sm"
               onClick={onSaveOrder}
-              disabled={savingOrder || !hasData}
+              disabled={!hasData || savingOrder || loading}
             >
-              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
+              {savingOrder ? 'Kaydediliyor…' : 'Sıralamayı Kaydet'}
             </button>
           )}
+
+          <span className="text-muted small">
+            Toplam: <strong>{total}</strong>
+          </span>
         </div>
       </div>
 
-      <div className="card-body p-0">
-        {/* Desktop */}
-        <div className="d-none d-md-block">
-          <table className="table table-hover mb-0">
-            <thead>
+      {/* ================= DESKTOP TABLE (lg+) ================= */}
+      <div className="d-none d-lg-block">
+        <div className="table-responsive">
+          <table className="table table-hover mb-0" style={{ tableLayout: 'fixed', width: '100%' }}>
+            <thead className="table-light">
               <tr>
-                <th style={{ width: '6%' }} />
-                <th style={{ width: '20%' }}>Başlık</th>
-                <th style={{ width: '22%' }}>URL</th>
-                <th style={{ width: '10%' }}>Tür</th>
-                <th style={{ width: '10%' }}>Konum</th>
-                <th style={{ width: '8%' }}>Aktif</th>
-                <th style={{ width: '10%' }}>Locale</th>
-                <th style={{ width: '14%' }}>Oluşturulma</th>
-                <th style={{ width: '10%' }} className="text-end">
+                <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 90 }} />
+                <th
+                  className="text-nowrap"
+                  style={{ ...noWrapEllipsis, width: 240, minWidth: 200 }}
+                  title="Başlık"
+                >
+                  Başlık
+                </th>
+                <th
+                  className="text-nowrap"
+                  style={{ ...noWrapEllipsis, width: 260, minWidth: 220 }}
+                  title="URL"
+                >
+                  URL
+                </th>
+                <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 110 }}>
+                  Tür
+                </th>
+                <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 110 }}>
+                  Konum
+                </th>
+                <th className="text-nowrap text-center" style={{ ...noWrapEllipsis, width: 86 }}>
+                  Aktif
+                </th>
+                <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 130 }}>
+                  Locale
+                </th>
+                <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 190 }}>
+                  Tarih
+                </th>
+                <th className="text-nowrap text-end" style={{ ...noWrapEllipsis, width: 170 }}>
                   İşlemler
                 </th>
               </tr>
             </thead>
+
             <tbody>
               {hasData ? (
-                pageRows.map((item, index) => {
-                  const globalIndex = startIndex + index;
+                pageRows.map((item, idx) => {
+                  const globalIndex = start + idx + 1;
+                  const locale = renderLocale((item as any).locale);
+                  const created = fmtDate((item as any).created_at, dateLocale);
+                  const typeLabel = getTypeLabel((item as any).type);
 
                   return (
                     <tr
                       key={item.id}
-                      draggable={!!onReorder}
-                      onDragStart={onReorder ? () => handleDragStart(item.id) : undefined}
-                      onDragEnd={onReorder ? handleDragEnd : undefined}
-                      onDragOver={
-                        onReorder
-                          ? (e) => {
-                              e.preventDefault();
-                            }
-                          : undefined
-                      }
-                      onDrop={onReorder ? () => handleDropOn(item.id) : undefined}
-                      className={draggingId === item.id ? 'table-active' : undefined}
-                      style={{ cursor: onReorder ? 'move' : 'pointer' }}
+                      draggable={!!onReorder && !busy}
+                      onDragStart={() => !busy && setDragId(item.id)}
+                      onDragOver={(e) => !!onReorder && !busy && e.preventDefault()}
+                      onDrop={() => handleDrop(item.id)}
+                      onDragEnd={() => setDragId(null)}
+                      className={dragId === item.id ? 'table-active' : undefined}
+                      style={{
+                        cursor: onReorder && !busy ? 'move' : onEdit ? 'pointer' : 'default',
+                      }}
                       onClick={() => onEdit?.(item)}
                     >
-                      <td className="text-muted small align-middle">
-                        {onReorder && <span className="me-1">≡</span>}
-                        <span className="me-1">#{globalIndex + 1}</span>
-                        <span className="badge bg-secondary-subtle text-muted border">
-                          {item.display_order ?? 0}
-                        </span>
+                      <td className="text-muted small text-nowrap align-middle">
+                        {onReorder && !busy && <span className="me-1">≡</span>}#{globalIndex}
+                        <div className="mt-1">
+                          <span className="badge bg-secondary-subtle text-muted border">
+                            {item.display_order ?? 0}
+                          </span>
+                        </div>
                       </td>
 
-                      <td className="align-middle">
-                        <div className="fw-semibold small">{item.title || '-'}</div>
-                        {item.icon && (
-                          <div className="text-muted small">
-                            <span className="me-1">Icon:</span>
-                            <code>{item.icon}</code>
+                      <td className="align-middle" style={{ minWidth: 0 }}>
+                        <div
+                          className="fw-semibold small text-truncate"
+                          title={safeText(item.title)}
+                        >
+                          {item.title || '-'}
+                        </div>
+                        {item.icon ? (
+                          <div
+                            className="text-muted small text-truncate"
+                            title={safeText(item.icon)}
+                          >
+                            icon: <code>{truncate(item.icon, 26)}</code>
                           </div>
-                        )}
+                        ) : null}
                       </td>
 
-                      <td className="align-middle text-muted small">
-                        {item.url ? <span title={item.url}>{formatText(item.url, 40)}</span> : '-'}
+                      <td className="align-middle text-muted small" style={{ minWidth: 0 }}>
+                        <div className="text-truncate" title={safeText(item.url)}>
+                          {item.url ? safeText(item.url) : '-'}
+                        </div>
                       </td>
 
-                      <td className="align-middle">
-                        <span className="badge bg-light text-muted border small">
-                          {item.type === 'page' ? 'Sayfa' : 'Özel URL'}
+                      {/* ✅ TYPE (Tür) — fixed */}
+                      <td className="align-middle text-nowrap">
+                        <span className="badge bg-light border text-dark text-nowrap">
+                          {typeLabel}
                         </span>
                       </td>
 
-                      <td className="align-middle text-muted small">
+                      <td className="align-middle small text-nowrap">
                         {fmtLocation(item.location)}
                       </td>
 
-                      <td className="align-middle">
-                        <div className="form-check form-switch">
+                      <td className="align-middle text-center" onClick={(e) => e.stopPropagation()}>
+                        <div className="form-check form-switch d-inline-flex m-0">
                           <input
                             className="form-check-input"
                             type="checkbox"
                             checked={!!item.is_active}
+                            disabled={busy}
                             onChange={(e) => onToggleActive?.(item, e.target.checked)}
-                            onClick={(e) => e.stopPropagation()}
                           />
                         </div>
                       </td>
 
-                      <td className="align-middle text-muted small">
-                        {renderLocale((item as any).locale)}
+                      <td className="align-middle small text-nowrap">
+                        <code>{locale}</code>
                       </td>
 
-                      <td className="align-middle text-muted small">
-                        {fmtDate((item as any).created_at, dateLocale)}
-                      </td>
+                      <td className="align-middle small text-muted text-nowrap">{created}</td>
 
-                      <td className="align-middle text-end">
-                        <div className="d-inline-flex gap-1">
+                      <td className="align-middle text-end" onClick={(e) => e.stopPropagation()}>
+                        <div className="btn-group btn-group-sm">
                           {onEdit && (
                             <button
                               type="button"
                               className="btn btn-outline-secondary btn-sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onEdit(item);
-                              }}
+                              onClick={() => onEdit(item)}
+                              disabled={busy}
                             >
                               Düzenle
                             </button>
@@ -297,8 +352,8 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                             <button
                               type="button"
                               className="btn btn-outline-danger btn-sm"
-                              onClick={(e) => handleDeleteClick(e, item)}
-                              disabled={loading}
+                              onClick={() => onDelete(item)}
+                              disabled={busy}
                             >
                               Sil
                             </button>
@@ -310,194 +365,189 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                 })
               ) : (
                 <tr>
-                  <td colSpan={9}>
-                    <div className="text-center text-muted small py-3">
-                      Henüz menü öğesi oluşturulmamış.
-                    </div>
+                  <td colSpan={9} className="text-center py-3 text-muted small">
+                    Menü öğesi bulunamadı.
+                  </td>
+                </tr>
+              )}
+
+              {loading && (
+                <tr>
+                  <td colSpan={9} className="text-center py-3 text-muted small">
+                    Yükleniyor...
                   </td>
                 </tr>
               )}
             </tbody>
-
-            <caption className="px-3 py-2 text-start">
-              <span className="text-muted small">
-                Satırları sürükleyip bırakarak menü öğelerinin sırasını değiştirebilirsin.
-                Değişiklikleri kalıcı yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong>{' '}
-                butonunu kullanman gerekir.
-              </span>
-            </caption>
           </table>
         </div>
+      </div>
 
-        {/* Mobile */}
-        <div className="d-block d-md-none">
-          {hasData ? (
-            pageRows.map((item, index) => {
-              const globalIndex = startIndex + index;
+      {/* ================= MOBILE / TABLET CARDS (< lg) ================= */}
+      <div className="d-block d-lg-none">
+        {!hasData && !loading ? (
+          <div className="px-3 py-3 text-center text-muted small">Menü öğesi bulunamadı.</div>
+        ) : loading ? (
+          <div className="px-3 py-3 text-center text-muted small">Yükleniyor...</div>
+        ) : (
+          <div className="p-2">
+            <div className="row g-2">
+              {pageRows.map((item, idx) => {
+                const globalIndex = start + idx + 1;
+                const locale = renderLocale((item as any).locale);
+                const created = fmtDate((item as any).created_at, dateLocale);
+                const typeLabel = getTypeLabel((item as any).type);
 
-              return (
-                <div
-                  key={item.id}
-                  className="border-bottom px-3 py-2"
-                  draggable={!!onReorder}
-                  onDragStart={onReorder ? () => handleDragStart(item.id) : undefined}
-                  onDragEnd={onReorder ? handleDragEnd : undefined}
-                  onDragOver={
-                    onReorder
-                      ? (e) => {
-                          e.preventDefault();
-                        }
-                      : undefined
-                  }
-                  onDrop={onReorder ? () => handleDropOn(item.id) : undefined}
-                  style={{ cursor: onReorder ? 'move' : 'pointer' }}
-                  onClick={() => onEdit?.(item)}
-                >
-                  <div className="d-flex justify-content-between align-items-start gap-2">
-                    <div>
-                      <div className="fw-semibold small">
-                        <span className="text-muted me-1">#{globalIndex + 1}</span>
-                        {item.title || '-'}
-                      </div>
+                return (
+                  <div key={item.id} className="col-12">
+                    <div
+                      className="border rounded-3 p-3 bg-white"
+                      style={{ cursor: onEdit ? 'pointer' : 'default' }}
+                      onClick={() => onEdit?.(item)}
+                    >
+                      <div className="d-flex justify-content-between align-items-start gap-2">
+                        <div className="d-flex flex-wrap align-items-center gap-2">
+                          <span className="badge bg-light text-dark border">#{globalIndex}</span>
+                          <span className="badge bg-secondary-subtle text-muted border">
+                            sıra: {item.display_order ?? 0}
+                          </span>
+                          <span className="badge bg-light border text-dark">{typeLabel}</span>
+                          <span className="badge bg-light text-dark border">
+                            {fmtLocation(item.location)}
+                          </span>
+                          <span className="badge bg-light text-dark border">
+                            <code>{locale}</code>
+                          </span>
+                        </div>
 
-                      <div className="text-muted small">
-                        <span className="me-1">Tür:</span>
-                        <span className="badge bg-light text-dark border">
-                          {item.type === 'page' ? 'Sayfa' : 'Özel URL'}
-                        </span>
-                      </div>
-
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">URL:</span>
-                        {item.url ? (
-                          <code>{formatText(item.url, 40)}</code>
-                        ) : (
-                          <span className="text-muted">-</span>
-                        )}
-                      </div>
-
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">Konum:</span>
-                        {fmtLocation(item.location)}
-                        <span className="ms-2 me-1">Dil:</span>
-                        {renderLocale((item as any).locale)}
-                      </div>
-
-                      <div className="text-muted small mt-1">
-                        <span className="me-1">Oluşturulma:</span>
-                        {fmtDate((item as any).created_at, dateLocale)}
-                      </div>
-                    </div>
-
-                    <div className="d-flex flex-column align-items-end gap-1">
-                      <div className="form-check form-switch small">
-                        <input
-                          className="form-check-input"
-                          type="checkbox"
-                          checked={!!item.is_active}
-                          onChange={(e) => onToggleActive?.(item, e.target.checked)}
+                        <div
+                          className="form-check form-switch m-0"
                           onClick={(e) => e.stopPropagation()}
-                        />
-                        <label className="form-check-label">Aktif</label>
+                        >
+                          <input
+                            className="form-check-input"
+                            type="checkbox"
+                            checked={!!item.is_active}
+                            disabled={busy}
+                            onChange={(e) => onToggleActive?.(item, e.target.checked)}
+                          />
+                          <label className="form-check-label small">Aktif</label>
+                        </div>
                       </div>
 
-                      <div className="d-flex gap-1 mt-1">
-                        {onEdit && (
-                          <button
-                            type="button"
-                            className="btn btn-outline-secondary btn-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onEdit(item);
-                            }}
+                      <div className="mt-2">
+                        <div className="fw-semibold" style={{ wordBreak: 'break-word' }}>
+                          {item.title || <span className="text-muted">(başlık yok)</span>}
+                        </div>
+
+                        {item.icon ? (
+                          <div
+                            className="text-muted small mt-1"
+                            style={{ wordBreak: 'break-word' }}
                           >
-                            Düzenle
-                          </button>
-                        )}
-                        {onDelete && (
-                          <button
-                            type="button"
-                            className="btn btn-danger btn-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onDelete(item);
-                            }}
-                            disabled={loading}
-                          >
-                            Sil
-                          </button>
-                        )}
+                            icon: <code>{safeText(item.icon)}</code>
+                          </div>
+                        ) : null}
                       </div>
+
+                      <div className="mt-2 text-muted small" style={{ wordBreak: 'break-word' }}>
+                        <div className="fw-semibold text-dark small">URL</div>
+                        {item.url ? <code>{safeText(item.url)}</code> : <span>-</span>}
+                      </div>
+
+                      <div className="mt-2 text-muted small">
+                        <div className="fw-semibold text-dark small">Oluşturulma</div>
+                        <div style={{ wordBreak: 'break-word' }}>{created}</div>
+                      </div>
+
+                      {(onEdit || onDelete) && (
+                        <div className="mt-3 d-flex gap-2 flex-wrap justify-content-end">
+                          {onEdit && (
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary btn-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onEdit(item);
+                              }}
+                              disabled={busy}
+                            >
+                              Düzenle
+                            </button>
+                          )}
+                          {onDelete && (
+                            <button
+                              type="button"
+                              className="btn btn-outline-danger btn-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete(item);
+                              }}
+                              disabled={busy}
+                            >
+                              Sil
+                            </button>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="px-3 py-3 text-center text-muted small">
-              Henüz menü öğesi oluşturulmamış.
+                );
+              })}
             </div>
-          )}
-
-          <div className="px-3 py-2 border-top">
-            <span className="text-muted small">
-              Mobil görünümde kayıtlar kart formatında listelenir. Kartları sürükleyerek sıralamayı
-              değiştirebilirsin. Değişiklikleri kalıcı yapmak için üstteki{' '}
-              <strong>Sıralamayı Kaydet</strong> butonunu kullan.
-            </span>
-          </div>
-        </div>
-
-        {/* Pagination */}
-        {pageCount > 1 && (
-          <div className="py-2">
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(currentPage - 1);
-                    }}
-                  />
-                </PaginationItem>
-
-                {pages.map((p, idx) =>
-                  typeof p === 'number' ? (
-                    <PaginationItem key={p}>
-                      <PaginationLink
-                        href="#"
-                        isActive={p === currentPage}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(p);
-                        }}
-                      >
-                        {p}
-                      </PaginationLink>
-                    </PaginationItem>
-                  ) : (
-                    <PaginationItem key={`${p}-${idx}`}>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  ),
-                )}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handlePageChange(currentPage + 1);
-                    }}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
           </div>
         )}
       </div>
+
+      {/* ================= PAGINATION ================= */}
+      {pageCount > 1 && (
+        <div className="py-2">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage((p) => Math.max(1, p - 1));
+                  }}
+                />
+              </PaginationItem>
+
+              {pages.map((p, i) =>
+                p === 'ellipsis' ? (
+                  <PaginationItem key={`e-${i}`}>
+                    <PaginationEllipsis />
+                  </PaginationItem>
+                ) : (
+                  <PaginationItem key={p}>
+                    <PaginationLink
+                      href="#"
+                      isActive={p === page}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setPage(p);
+                      }}
+                    >
+                      {p}
+                    </PaginationLink>
+                  </PaginationItem>
+                ),
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  href="#"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage((p) => Math.min(pageCount, p + 1));
+                  }}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
     </div>
   );
 };

@@ -3,131 +3,93 @@
 // Ensotek – Admin Catalog Requests List Page (Bootstrap pattern)
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useMemo, useState } from "react";
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useMemo, useState } from 'react';
+import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import {
   CatalogRequestsHeader,
   type CatalogFilters,
   type LocaleOption,
-} from "@/components/admin/catalog/CatalogRequestsHeader";
-import { CatalogRequestsList } from "@/components/admin/catalog/CatalogRequestsList";
+} from '@/components/admin/catalog/CatalogRequestsHeader';
+import { CatalogRequestsList } from '@/components/admin/catalog/CatalogRequestsList';
 
 import {
   useListCatalogRequestsAdminQuery,
   useRemoveCatalogRequestAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/catalog_admin.endpoints";
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
 import type {
   CatalogRequestDto,
   CatalogRequestListQueryParams,
   CatalogRequestStatus,
-} from "@/integrations/types/catalog.types";
+} from '@/integrations/types/catalog.types';
+
+import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 /* -------------------- Status guard -------------------- */
 
-const CATALOG_STATUSES: CatalogRequestStatus[] = [
-  "new",
-  "sent",
-  "failed",
-  "archived",
-];
+const CATALOG_STATUSES: CatalogRequestStatus[] = ['new', 'sent', 'failed', 'archived'];
 
 const isCatalogStatus = (v: unknown): v is CatalogRequestStatus =>
-  typeof v === "string" && (CATALOG_STATUSES as string[]).includes(v);
+  typeof v === 'string' && (CATALOG_STATUSES as string[]).includes(v);
 
-/* -------------------- Locale options (DB'den) -------------------- */
-
-const useLocaleOptions = (): {
-  locales: LocaleOption[];
-  loading: boolean;
-} => {
-  const { data: appLocaleRows, isLoading } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
-
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
-
-    const row = appLocaleRows.find((r: any) => r.key === "app_locales");
-    const v = row?.value;
-
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!arr.length) return ["tr", "en"];
-    return Array.from(new Set(arr.map((x) => x.toLowerCase())));
-  }, [appLocaleRows]);
-
-  const locales = useMemo<LocaleOption[]>(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
-
-  return { locales, loading: isLoading };
+const pickFirstString = (v: unknown): string | undefined => {
+  if (typeof v === 'string') return v;
+  if (Array.isArray(v) && typeof v[0] === 'string') return v[0];
+  return undefined;
 };
 
 const AdminCatalogRequestsIndexPage: NextPage = () => {
   const router = useRouter();
-  const { locales, loading: localesLoading } = useLocaleOptions();
+
+  const {
+    localeOptions: adminLocaleOptions,
+    defaultLocaleFromDb,
+    coerceLocale,
+    loading: localesLoading,
+  } = useAdminLocales();
+
+  const locales: LocaleOption[] = useMemo(() => {
+    return (adminLocaleOptions ?? [])
+      .map((o) => ({
+        value: String(o.value || '').toLowerCase(),
+        label: o.label,
+      }))
+      .filter((o) => !!o.value);
+  }, [adminLocaleOptions]);
 
   const [filters, setFilters] = useState<CatalogFilters>({
-    search: "",
-    status: "",
-    locale: "",
+    search: '',
+    status: '' as any,
+    locale: '',
   });
 
   const queryParams = useMemo<CatalogRequestListQueryParams>(() => {
-    const status =
-      filters.status && isCatalogStatus(filters.status)
-        ? filters.status
-        : undefined;
+    const status = filters.status && isCatalogStatus(filters.status) ? filters.status : undefined;
+
+    const selectedLocaleRaw = pickFirstString(filters.locale);
+    const locale = selectedLocaleRaw
+      ? coerceLocale(selectedLocaleRaw, defaultLocaleFromDb) || undefined
+      : undefined;
 
     return {
       q: filters.search || undefined,
       status,
-      locale: filters.locale || undefined,
+      locale,
       limit: 50,
       offset: 0,
-      sort: "created_at",
-      orderDir: "desc",
+      sort: 'created_at',
+      orderDir: 'desc',
     };
-  }, [filters]);
+  }, [filters, coerceLocale, defaultLocaleFromDb]);
 
-  const { data, isLoading, isFetching, refetch } =
-    useListCatalogRequestsAdminQuery(queryParams);
+  const { data, isLoading, isFetching, refetch } = useListCatalogRequestsAdminQuery(queryParams);
 
-  const [removeReq, { isLoading: isDeleting }] =
-    useRemoveCatalogRequestAdminMutation();
+  const [removeReq, { isLoading: isDeleting }] = useRemoveCatalogRequestAdminMutation();
 
   const loading = isLoading || isFetching;
   const busy = loading || isDeleting;
@@ -138,13 +100,10 @@ const AdminCatalogRequestsIndexPage: NextPage = () => {
   const handleDelete = async (r: CatalogRequestDto) => {
     try {
       await removeReq({ id: r.id }).unwrap();
-      toast.success("Talep silindi.");
+      toast.success('Talep silindi.');
       await refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Silme sırasında hata oluştu.";
+      const msg = err?.data?.error?.message || err?.message || 'Silme sırasında hata oluştu.';
       toast.error(msg);
     }
   };
@@ -157,16 +116,12 @@ const AdminCatalogRequestsIndexPage: NextPage = () => {
         loading={busy}
         locales={locales}
         localesLoading={localesLoading}
-        defaultLocale={router.locale}
+        defaultLocale={defaultLocaleFromDb || router.locale || 'tr'}
         onFiltersChange={setFilters}
         onRefresh={refetch}
       />
 
-      <CatalogRequestsList
-        items={items}
-        loading={busy}
-        onDelete={handleDelete}
-      />
+      <CatalogRequestsList items={items} loading={busy} onDelete={handleDelete} />
     </div>
   );
 };

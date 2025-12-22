@@ -3,10 +3,10 @@
 // Ensotek – Yeni Library Oluşturma Sayfası
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
-import LibraryFormPage from "@/components/admin/library/LibraryFormPage";
+import React from 'react';
+import LibraryFormPage from '@/components/admin/library/LibraryFormPage';
 
 const AdminLibraryCreatePage: React.FC = () => {
   return <LibraryFormPage mode="create" />;

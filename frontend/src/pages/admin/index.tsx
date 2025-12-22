@@ -10,10 +10,13 @@ import { useRouter } from "next/router";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-import { useStatusQuery } from "@/integrations/rtk/endpoints/auth.endpoints";
-import { useGetMyProfileQuery } from "@/integrations/rtk/endpoints/profiles.endpoints";
-import { useGetDashboardSummaryAdminQuery } from "@/integrations/rtk/endpoints/admin/dashboard_admin.endpoints";
-import { useGetUnreadNotificationsCountQuery } from "@/integrations/rtk/endpoints/notifications.endpoints";
+import {
+  useStatusQuery,
+  useGetMyProfileQuery,
+  useGetDashboardSummaryAdminQuery,
+  useGetUnreadNotificationsCountQuery
+} from "@/integrations/rtk/hooks";
+
 import type { DashboardCountItemDto } from "@/integrations/types/dashboard.types";
 
 import {

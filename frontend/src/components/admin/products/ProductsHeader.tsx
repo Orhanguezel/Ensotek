@@ -171,9 +171,6 @@ export const ProductsHeader: React.FC<ProductsHeaderProps> = ({
               disabled={localeDisabled}
               label="Dil"
             />
-            <div className="form-text small text-truncate">
-              Kaynak: <code>site_settings.app_locales</code>
-            </div>
           </div>
 
           {/* Active */}

@@ -1,3 +1,5 @@
+// src/features/seotest/BreadcrumbJsonLd.tsx
+
 import React from "react";
 import { absoluteUrl, compact } from "./utils";
 

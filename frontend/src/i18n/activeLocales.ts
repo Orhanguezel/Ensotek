@@ -1,17 +1,11 @@
-// =============================================================
-// FILE: src/i18n/activeLocales.ts  (DYNAMIC via META endpoint)
-// =============================================================
+// src/i18n/activeLocales.ts
 'use client';
 
 import { useMemo } from 'react';
+import { FALLBACK_LOCALE } from '@/i18n/config';
 import { useGetAppLocalesPublicQuery } from '@/integrations/rtk/hooks';
 import { normLocaleTag } from '@/i18n/localeUtils';
 
-/**
- * Public META: /site_settings/app-locales
- * - is_default olanı başa al
- * - is_active=false olanı çıkar
- */
 export function useActiveLocales() {
   const { data, isLoading } = useGetAppLocalesPublicQuery();
 
@@ -25,15 +19,12 @@ export function useActiveLocales() {
 
     const uniq = Array.from(new Set(active));
 
-    // is_default olanı başa çek
     const def = arr.find((x) => x?.is_default === true && x?.is_active !== false);
     const defCode = def ? normLocaleTag(def.code) : '';
-    if (defCode) {
-      const rest = uniq.filter((x) => x !== defCode);
-      return [defCode, ...rest];
-    }
 
-    return uniq;
+    const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
+
+    return out.length ? out : [FALLBACK_LOCALE];
   }, [data]);
 
   return { locales, isLoading };
