@@ -5,18 +5,17 @@
 -- =============================================================
 
 SET NAMES utf8mb4;
+SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 
--- Önce i18n sonra parent'ı düşür
+-- Önce i18n sonra parent
 DROP TABLE IF EXISTS `slider_i18n`;
 DROP TABLE IF EXISTS `slider`;
 
 -- =============================================================
 -- PARENT TABLO: slider
---  - Locale'siz parent
---  - Görsel, aktiflik, sıralama gibi ortak alanlar
 -- =============================================================
-CREATE TABLE `slider` (
+CREATE TABLE IF NOT EXISTS `slider` (
   `id`                INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `uuid`              CHAR(36)     NOT NULL,
 
@@ -29,7 +28,8 @@ CREATE TABLE `slider` (
   `display_order`     INT UNSIGNED NOT NULL DEFAULT 0,
 
   `created_at`        DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  `updated_at`        DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  `updated_at`        DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+                                    ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (`id`),
 
@@ -41,10 +41,8 @@ CREATE TABLE `slider` (
 
 -- =============================================================
 -- I18N TABLO: slider_i18n
---  - slider_id + locale bazlı metin alanları
---  - name, slug, description, alt, button_text, button_link
 -- =============================================================
-CREATE TABLE `slider_i18n` (
+CREATE TABLE IF NOT EXISTS `slider_i18n` (
   `id`           INT UNSIGNED   NOT NULL AUTO_INCREMENT,
   `slider_id`    INT UNSIGNED   NOT NULL,
   `locale`       VARCHAR(8)     NOT NULL,

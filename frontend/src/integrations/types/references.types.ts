@@ -86,14 +86,17 @@ export interface ReferenceDto {
   featured_image_alt: string | null;
   meta_title: string | null;
   meta_description: string | null;
+
+  // ✅ backend’in “locale aware” sonucu
   locale_resolved: string | null;
 
-  // resolved url (doğrudan image veya storage URL)
-  featured_image_url_resolved: string | null;
+  // ✅ FE için stabilize alan (endpoints transformResponse ile setlenecek)
+  locale?: string | null;
 
-  // storage asset (varsa)
+  featured_image_url_resolved: string | null;
   featured_asset?: ReferenceAssetInfo | null;
 }
+
 
 /* -------------------------------------------------------------
  * CREATE / UPDATE gövdesi (admin)

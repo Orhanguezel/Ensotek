@@ -1,22 +1,26 @@
 // =============================================================
 // FILE: src/pages/admin/site-settings/index.tsx
-// Ensotek – Site Ayarları Sayfası (tek sayfa, tab’lı, çoklu dil uyumlu)
 // =============================================================
 
-import React, { useState, useMemo } from "react";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
+
 import {
   useListSiteSettingsAdminQuery,
   useDeleteSiteSettingAdminMutation,
   useUpdateSiteSettingAdminMutation,
-  type SiteSetting,
-} from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+  useGetAppLocalesAdminQuery,
+  useGetDefaultLocaleAdminQuery,
+} from '@/integrations/rtk/hooks';
+
 import {
   SiteSettingsHeader,
   type SettingsTab,
   type LocaleOption,
-} from "@/components/admin/site-settings/SiteSettingsHeader";
-import { SiteSettingsList } from "@/components/admin/site-settings/SiteSettingsList";
+} from '@/components/admin/site-settings/SiteSettingsHeader';
+
+import { SiteSettingsList } from '@/components/admin/site-settings/SiteSettingsList';
+
 import {
   GeneralSettingsTab,
   SeoSettingsTab,
@@ -24,18 +28,30 @@ import {
   CloudinarySettingsTab,
   ApiSettingsTab,
   FooterSettingsTab,
-} from "@/components/admin/site-settings/tabs";
-import type { SettingValue } from "@/integrations/types/site";
+} from '@/components/admin/site-settings/tabs';
 
-/* ------------------------------------------------------------- */
-/*  Küçük yardımcılar (raw edit modal için)                      */
-/* ------------------------------------------------------------- */
+import type {
+  SettingValue,
+  AppLocaleItem,
+  SiteSetting,
+} from '@/integrations/types/site_settings.types';
+
+type SettingsScope = 'localized' | 'global' | 'mixed';
+
+const TAB_SCOPE: Record<SettingsTab, SettingsScope> = {
+  list: 'mixed',
+  global_list: 'global', // ✅ NEW
+  general: 'localized',
+  seo: 'localized',
+  smtp: 'global',
+  cloudinary: 'global',
+  api: 'global',
+  footer: 'localized',
+};
 
 function stringifyValuePretty(v: SettingValue): string {
-  if (v === null || v === undefined) return "";
-  if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") {
-    return String(v);
-  }
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
   try {
     return JSON.stringify(v, null, 2);
   } catch {
@@ -43,114 +59,133 @@ function stringifyValuePretty(v: SettingValue): string {
   }
 }
 
-// ❗ Artık SettingValue döndürüyoruz (unknown değil)
 function parseRawValue(raw: string): SettingValue {
   const trimmed = raw.trim();
   if (!trimmed) return null;
-
   try {
-    // JSON.parse her şeyi dönebilir, biz bunu SettingValue olarak kullanacağız
     return JSON.parse(trimmed) as SettingValue;
   } catch {
-    // JSON değilse düz string olarak sakla
     return trimmed;
   }
 }
 
-/* ------------------------------------------------------------- */
-/*  Sayfa bileşeni                                               */
-/* ------------------------------------------------------------- */
+const toShortLocale = (v: unknown): string =>
+  String(v || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0]
+    .trim();
+
+function uniqByCode(items: AppLocaleItem[]): AppLocaleItem[] {
+  const seen = new Set<string>();
+  const out: AppLocaleItem[] = [];
+  for (const it of items) {
+    const code = toShortLocale(it?.code);
+    if (!code) continue;
+    if (seen.has(code)) continue;
+    seen.add(code);
+    out.push({ ...it, code });
+  }
+  return out;
+}
+
+function buildLocaleLabel(item: AppLocaleItem): string {
+  const code = toShortLocale(item.code);
+  const label = String(item.label || '').trim();
+  return label ? `${label} (${code})` : code.toUpperCase();
+}
 
 const SiteSettingsAdminPage: React.FC = () => {
-  const [search, setSearch] = useState("");
-  const [localeFilter, setLocaleFilter] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<SettingsTab>("list");
+  const [search, setSearch] = useState('');
+  const [activeTab, setActiveTab] = useState<SettingsTab>('list');
+  const [selectedLocale, setSelectedLocale] = useState<string>('');
 
-  // Raw edit modal state
   const [editing, setEditing] = useState<SiteSetting | null>(null);
-  const [editRaw, setEditRaw] = useState<string>("");
+  const [editRaw, setEditRaw] = useState<string>('');
 
-  // Ana liste sorgusu
   const {
-    data: settings,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useListSiteSettingsAdminQuery(
-    search || localeFilter
-      ? {
-          q: search || undefined,
-          locale: localeFilter || undefined,
-        }
-      : undefined,
-  );
-
-  // Diller için app_locales kaydını çek
-  const {
-    data: appLocaleRows,
+    data: appLocalesItems,
     isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
+    isFetching: isLocalesFetching,
+  } = useGetAppLocalesAdminQuery();
 
-  const [deleteSetting, { isLoading: isDeleting }] =
-    useDeleteSiteSettingAdminMutation();
+  const {
+    data: defaultLocaleRaw,
+    isLoading: isDefaultLoading,
+    isFetching: isDefaultFetching,
+  } = useGetDefaultLocaleAdminQuery();
 
-  const [updateSetting, { isLoading: isSaving }] =
-    useUpdateSiteSettingAdminMutation();
+  const activeLocales: AppLocaleItem[] = useMemo(() => {
+    const items = Array.isArray(appLocalesItems) ? appLocalesItems : [];
+    const active = items.filter((x) => !!x && !!x.code && x.is_active !== false);
+    return uniqByCode(active);
+  }, [appLocalesItems]);
 
-  const loading = isLoading || isFetching;
-  const busy = loading || isDeleting || isSaving;
-
-  // app_locales value → string[] normalize et
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      // Fallback – seed henüz yoksa
-      return ["tr", "en"];
-    }
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // parse edilemezse boş bırak
-      }
-    }
-
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    // uniq
-    return Array.from(new Set(arr));
-  }, [appLocaleRows]);
-
-  // string[] → LocaleOption[]
   const localeOptions: LocaleOption[] = useMemo(
     () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
+      activeLocales.map((it) => ({
+        value: toShortLocale(it.code),
+        label: buildLocaleLabel(it),
+      })),
+    [activeLocales],
   );
 
-  /* -------------------- Düzenle / Sil handler’ları -------------------- */
+  const defaultLocale = useMemo(() => toShortLocale(defaultLocaleRaw), [defaultLocaleRaw]);
+
+  useEffect(() => {
+    if (!localeOptions.length) return;
+
+    if (selectedLocale && localeOptions.some((x) => x.value === selectedLocale)) return;
+
+    if (defaultLocale && localeOptions.some((x) => x.value === defaultLocale)) {
+      setSelectedLocale(defaultLocale);
+      return;
+    }
+
+    setSelectedLocale(localeOptions[0].value);
+  }, [localeOptions, selectedLocale, defaultLocale]);
+
+  const effectiveLocaleForTab = useMemo(() => {
+    const scope = TAB_SCOPE[activeTab] ?? 'mixed';
+    if (scope === 'global') return '*';
+    return selectedLocale || undefined;
+  }, [activeTab, selectedLocale]);
+
+  // ✅ LIST query only when we are on list / global_list
+  const listArgs = useMemo(() => {
+    const isListTab = activeTab === 'list' || activeTab === 'global_list';
+    if (!isListTab) return undefined;
+
+    const q = search?.trim() || undefined;
+
+    if (!effectiveLocaleForTab) return undefined;
+
+    return {
+      q,
+      locale: effectiveLocaleForTab, // 'tr' | 'en' | ... OR '*'
+    };
+  }, [activeTab, search, effectiveLocaleForTab]);
+
+  const {
+    data: settings,
+    isLoading: isListLoading,
+    isFetching: isListFetching,
+    refetch,
+  } = useListSiteSettingsAdminQuery(listArgs, { skip: !listArgs });
+
+  const [deleteSetting, { isLoading: isDeleting }] = useDeleteSiteSettingAdminMutation();
+  const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
+
+  const busy =
+    isListLoading ||
+    isListFetching ||
+    isDeleting ||
+    isSaving ||
+    isLocalesLoading ||
+    isLocalesFetching ||
+    isDefaultLoading ||
+    isDefaultFetching;
 
   const handleEdit = (setting: SiteSetting) => {
     setEditing(setting);
@@ -159,19 +194,26 @@ const SiteSettingsAdminPage: React.FC = () => {
 
   const handleCloseEdit = () => {
     setEditing(null);
-    setEditRaw("");
+    setEditRaw('');
+  };
+
+  const resolveLocaleForWrite = (): string | undefined => {
+    const scope = TAB_SCOPE[activeTab] ?? 'mixed';
+    if (scope === 'global') return '*';
+    return selectedLocale || toShortLocale(editing?.locale) || undefined;
   };
 
   const handleSaveEdit = async () => {
     if (!editing) return;
 
     try {
-      const value = parseRawValue(editRaw); // 👉 SettingValue tipi
+      const value = parseRawValue(editRaw);
+      const locale = resolveLocaleForWrite();
 
       await updateSetting({
         key: editing.key,
-        locale: editing.locale || undefined,
-        value, // Artık SettingValue, TS2322 gitmiş olmalı
+        locale,
+        value,
       }).unwrap();
 
       toast.success(`"${editing.key}" ayarı güncellendi.`);
@@ -179,32 +221,37 @@ const SiteSettingsAdminPage: React.FC = () => {
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Ayar güncellenirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Ayar güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
   const handleDelete = async (setting: SiteSetting) => {
     const key = setting.key;
-    if (
-      !window.confirm(
-        `"${key}" anahtarı için TÜM dillerdeki kayıtlar silinecek. Emin misiniz?`,
-      )
-    ) {
-      return;
-    }
+    const delAll = window.confirm(
+      `"${key}" anahtarı için TÜM dillerdeki kayıtlar silinsin mi?\n\nOK: Tüm diller\nCancel: Sadece bu satırın dili`,
+    );
 
     try {
-      await deleteSetting(key).unwrap();
+      if (delAll) {
+        await deleteSetting({ key }).unwrap();
+      } else {
+        const scope = TAB_SCOPE[activeTab] ?? 'mixed';
+        const loc =
+          toShortLocale(setting.locale) || (scope === 'global' ? '*' : '') || selectedLocale;
+
+        if (!loc) {
+          toast.error('Tek dil silmek için locale bulunamadı.');
+          return;
+        }
+
+        await deleteSetting({ key, locale: loc }).unwrap();
+      }
+
       toast.success(`"${key}" ayarı silindi.`);
       await refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Ayar silinirken bir hata oluştu.";
+      const msg = err?.data?.error?.message || err?.message || 'Ayar silinirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -214,70 +261,61 @@ const SiteSettingsAdminPage: React.FC = () => {
       <SiteSettingsHeader
         search={search}
         onSearchChange={setSearch}
-        locale={localeFilter}
-        onLocaleChange={setLocaleFilter}
+        locale={selectedLocale}
+        onLocaleChange={setSelectedLocale}
         loading={busy}
         onRefresh={refetch}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         locales={localeOptions}
-        localesLoading={isLocalesLoading}
+        localesLoading={
+          isLocalesLoading || isLocalesFetching || isDefaultLoading || isDefaultFetching
+        }
       />
 
       <div className="row">
         <div className="col-12">
-          {activeTab === "list" && (
+          {(activeTab === 'list' || activeTab === 'global_list') && (
             <SiteSettingsList
               settings={settings}
               loading={busy}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              selectedLocale={activeTab === 'global_list' ? '*' : selectedLocale}
             />
           )}
 
-          {activeTab === "general" && (
-            <GeneralSettingsTab locale={localeFilter} />
+          {activeTab === 'general' && selectedLocale && (
+            <GeneralSettingsTab locale={selectedLocale} />
+          )}
+          {activeTab === 'seo' && selectedLocale && <SeoSettingsTab locale={selectedLocale} />}
+          {activeTab === 'footer' && selectedLocale && (
+            <FooterSettingsTab locale={selectedLocale} />
           )}
 
-          {activeTab === "seo" && <SeoSettingsTab locale={localeFilter} />}
-
-          {activeTab === "smtp" && <SmtpSettingsTab locale={localeFilter} />}
-
-          {activeTab === "cloudinary" && (
-            <CloudinarySettingsTab locale={localeFilter} />
-          )}
-
-          {activeTab === "api" && <ApiSettingsTab locale={localeFilter} />}
-          {activeTab === "footer" && (
-            <FooterSettingsTab locale={localeFilter} />
-          )}
+          {activeTab === 'smtp' && <SmtpSettingsTab locale="*" />}
+          {activeTab === 'cloudinary' && <CloudinarySettingsTab locale="*" />}
+          {activeTab === 'api' && <ApiSettingsTab locale="*" />}
         </div>
       </div>
 
-      {/* --------------------- Sabit Raw Edit Modal --------------------- */}
       {editing && (
         <>
-          {/* Backdrop */}
           <div className="modal-backdrop fade show" />
-
-          {/* Modal */}
-          <div
-            className="modal d-block"
-            tabIndex={-1}
-            role="dialog"
-            aria-modal="true"
-          >
+          <div className="modal d-block" tabIndex={-1} role="dialog" aria-modal="true">
             <div className="modal-dialog modal-lg modal-dialog-centered">
               <div className="modal-content">
                 <div className="modal-header py-2">
                   <h5 className="modal-title small mb-0">
                     Ayar Düzenle: <code>{editing.key}</code>
-                    {editing.locale && (
-                      <span className="badge bg-light text-dark border ms-2">
-                        {editing.locale}
-                      </span>
-                    )}
+                    {(() => {
+                      const shown = resolveLocaleForWrite();
+                      return shown ? (
+                        <span className="badge bg-light text-dark border ms-2">{shown}</span>
+                      ) : null;
+                    })()}
                   </h5>
+
                   <button
                     type="button"
                     className="btn-close"
@@ -289,15 +327,12 @@ const SiteSettingsAdminPage: React.FC = () => {
 
                 <div className="modal-body">
                   <p className="text-muted small">
-                    Bu modal tek bir <code>site_settings</code> kaydını hızlıca
-                    düzenlemek içindir. Geçerli JSON girersen değer JSON olarak,
-                    aksi halde düz string olarak saklanır.
+                    Bu modal tek bir <code>site_settings</code> kaydını hızlıca düzenlemek içindir.
+                    Geçerli JSON girersen değer JSON olarak, aksi halde düz string olarak saklanır.
                   </p>
 
                   <div className="mb-2">
-                    <label className="form-label small">
-                      Değer (raw / JSON)
-                    </label>
+                    <label className="form-label small">Değer (raw / JSON)</label>
                     <textarea
                       className="form-control font-monospace"
                       rows={10}
@@ -323,7 +358,7 @@ const SiteSettingsAdminPage: React.FC = () => {
                     onClick={handleSaveEdit}
                     disabled={isSaving}
                   >
-                    {isSaving ? "Kaydediliyor..." : "Kaydet"}
+                    {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
                   </button>
                 </div>
               </div>

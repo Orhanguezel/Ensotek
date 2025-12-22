@@ -4,18 +4,24 @@
 // CategoryFormImageColumn pattern’i
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
-import { useRouter } from "next/router";
-import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
+import React, { useMemo } from 'react';
+import { useRouter } from 'next/router';
+import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
+/**
+ * Storage metadata pattern:
+ * - module_key: "references"
+ * - locale
+ * - reference_slug
+ * - reference_id
+ */
 export type ReferenceImageMetadata = {
-  module_key: string; // örn: "references"
-  locale: string;
+  module_key?: string; // default: "references"
+  locale?: string;
   reference_slug?: string;
   reference_id?: string;
-  // Gerekirse ileride ek metadata alanları buraya eklenebilir
 };
 
 export type ReferencesFormImageColumnProps = {
@@ -25,31 +31,55 @@ export type ReferencesFormImageColumnProps = {
   onImageUrlChange: (url: string) => void;
 };
 
-export const ReferencesFormImageColumn: React.FC<
-  ReferencesFormImageColumnProps
-> = ({ metadata, imageUrl, disabled, onImageUrlChange }) => {
+export const ReferencesFormImageColumn: React.FC<ReferencesFormImageColumnProps> = ({
+  metadata,
+  imageUrl,
+  disabled,
+  onImageUrlChange,
+}) => {
   const router = useRouter();
+
+  // AdminImageUploadField metadata: Record<string, string | number | boolean>
+  // Biz string’e normalize ederek stabil hale getiriyoruz.
+  const effectiveMeta: Record<string, string> | undefined = useMemo(() => {
+    const base =
+      metadata && 'module_key' in (metadata as any)
+        ? (metadata as ReferenceImageMetadata)
+        : (metadata as any);
+
+    const normalized: ReferenceImageMetadata = {
+      module_key: (base as any)?.module_key ?? 'references',
+      locale: (base as any)?.locale,
+      reference_slug: (base as any)?.reference_slug,
+      reference_id: (base as any)?.reference_id,
+    };
+
+    const entries = Object.entries(normalized).filter(
+      ([, v]) => v !== undefined && v !== null && String(v).length > 0,
+    );
+    if (!entries.length) return undefined;
+
+    return Object.fromEntries(entries.map(([k, v]) => [k, String(v)]));
+  }, [metadata]);
 
   return (
     <AdminImageUploadField
       label="Referans Görseli"
       helperText={
         <>
-          Storage modülü üzerinden referans için bir{" "}
-          <strong>öne çıkan görsel</strong> yükleyebilirsin.
-          Yüklenen görselin URL&apos;i soldaki formda{" "}
-          <strong>Öne çıkan görsel URL (featured_image)</strong>{" "}
-          alanına otomatik yazılabilir (burada direkt state&apos;e yazıyoruz).
+          Storage modülü üzerinden referans için bir <strong>öne çıkan görsel</strong>{' '}
+          yükleyebilirsin. Yüklenen görselin URL&apos;i soldaki formda{' '}
+          <strong>Öne çıkan görsel URL (featured_image)</strong> alanına otomatik yazılabilir.
         </>
       }
       bucket="public"
       folder="references"
-      metadata={metadata}
+      metadata={effectiveMeta}
       value={imageUrl}
       onChange={(url) => onImageUrlChange(url)}
       disabled={disabled}
       openLibraryHref="/admin/storage"
-      onOpenLibraryClick={() => router.push("/admin/storage")}
+      onOpenLibraryClick={() => router.push('/admin/storage')}
     />
   );
 };

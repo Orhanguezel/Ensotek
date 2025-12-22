@@ -1,286 +1,216 @@
 // =============================================================
 // FILE: src/pages/admin/menuitem/index.tsx
-// Ensotek – Admin Menu Items List Page (locale aware)
+// Ensotek – Admin Menu Items List Page (locale destekli)
+// Route: /admin/menuitem
 // =============================================================
 
-import React, { useEffect, useMemo, useState } from "react";
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+'use client';
+
+import React, { useMemo, useState, useEffect } from 'react';
+import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
+
+import { MenuItemHeader, type MenuItemFilters } from '@/components/admin/menuitem/MenuItemHeader';
+import { MenuItemList } from '@/components/admin/menuitem/MenuItemList';
 
 import {
-  MenuItemHeader,
-  type MenuItemFilters,
-  type LocaleOption,
-} from "@/components/admin/menuitem/MenuItemHeader";
-import { MenuItemList } from "@/components/admin/menuitem/MenuItemList";
-
-import {
-  useListMenuItemsAdminQuery,
   useDeleteMenuItemAdminMutation,
+  useListMenuItemsAdminQuery,
   useReorderMenuItemsAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/menu_items_admin.endpoints";
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
-import type {
-  AdminMenuItemDto,
-  AdminMenuItemListQueryParams,
-} from "@/integrations/types/menu_items.types";
+} from '@/integrations/rtk/hooks';
 
-const AdminMenuItemIndexPage: NextPage = () => {
+import { useAdminLocales } from '@/components/common/useAdminLocales';
+
+import type { AdminMenuItemDto } from '@/integrations/types/menu_items.types';
+
+/* -------------------- helpers -------------------- */
+
+const toShortLocale = (v: unknown): string =>
+  String(v || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0]
+    .trim();
+
+/* ============================================================ */
+/*  Page                                                        */
+/* ============================================================ */
+
+const AdminMenuItemListPage: NextPage = () => {
   const router = useRouter();
 
-  // 🔹 Locale’leri site_settings üzerinden merkezi çekiyoruz
+  /* -------------------- Locales (dynamic) -------------------- */
   const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
+    localeOptions: adminLocaleOptions,
+    defaultLocaleFromDb,
+    coerceLocale,
+    loading: localesLoading,
+  } = useAdminLocales();
 
-  const locales: LocaleOption[] = useMemo(() => {
-    if (!appLocaleRows || !appLocaleRows.length) {
-      // fallback
-      return [
-        { value: "tr", label: "Türkçe (tr)" },
-        { value: "en", label: "İngilizce (en)" },
-      ];
-    }
-
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore parse error, fallback below
-      }
-    }
-
-    if (!arr.length) {
-      arr = ["tr", "en"];
-    }
-
-    const uniq = Array.from(new Set(arr.map((x) => x.toLowerCase())));
-    return uniq.map((code) => {
-      if (code === "tr") return { value: "tr", label: "Türkçe (tr)" };
-      if (code === "en") return { value: "en", label: "İngilizce (en)" };
-      if (code === "de") return { value: "de", label: "Almanca (de)" };
-      return { value: code, label: code.toUpperCase() };
-    });
-  }, [appLocaleRows]);
-
-  // URL'den locale paramı (örn: ?locale=en)
-  const localeFromQuery =
-    typeof router.query.locale === "string"
-      ? router.query.locale.trim().toLowerCase()
-      : "";
-
-  const routerLocale =
-    typeof router.locale === "string"
-      ? router.locale.toLowerCase()
-      : "";
-
-  // Başlangıç locale'i: önce query, yoksa router.locale, yoksa boş (Hepsi)
-  const initialLocale = localeFromQuery || routerLocale || "";
-
-  const [filters, setFilters] = useState<MenuItemFilters>({
-    search: "",
-    location: "all",
-    active: "all",
-    sort: "display_order",
-    order: "asc",
-    locale: initialLocale,
-  });
-
-  // URL'deki locale değişirse filtre ile senkron (sadece parametrede gerçekten bir değer varsa)
-  useEffect(() => {
-    if (!localeFromQuery) return;
-
-    const normalized = localeFromQuery;
-    if (normalized !== filters.locale) {
-      setFilters((prev) => ({
-        ...prev,
-        locale: normalized,
-      }));
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localeFromQuery]);
-
-  // filters.locale değişince URL'deki ?locale paramını güncelle
-  useEffect(() => {
-    const current =
-      typeof router.query.locale === "string"
-        ? router.query.locale.trim().toLowerCase()
-        : "";
-
-    const next = filters.locale || "";
-
-    if (current === next) return;
-
-    const query = { ...router.query };
-    if (next) query.locale = next;
-    else delete query.locale;
-
-    router.replace(
-      {
-        pathname: router.pathname,
-        query,
-      },
-      undefined,
-      { shallow: true },
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.locale]);
-
-  const queryParams: AdminMenuItemListQueryParams = useMemo(() => {
-    const params: AdminMenuItemListQueryParams = {
-      q: filters.search || undefined,
-      location:
-        filters.location === "all" ? undefined : filters.location,
-      sort: filters.sort,
-      order: filters.order,
-      limit: 100,
-      offset: 0,
-    };
-
-    if (filters.active === "active") {
-      params.is_active = 1;
-    } else if (filters.active === "inactive") {
-      params.is_active = 0;
-    }
-
-    if (filters.locale) {
-      params.locale = filters.locale;
-    }
-
-    return params;
-  }, [filters]);
-
-  const { data, isLoading, isFetching, refetch } =
-    useListMenuItemsAdminQuery(queryParams);
-
-  const [deleteMenuItem, { isLoading: isDeleting }] =
-    useDeleteMenuItemAdminMutation();
-
-  const [reorderMenuItems, { isLoading: isSavingOrder }] =
-    useReorderMenuItemsAdminMutation();
-
-  const loading = isLoading || isFetching;
-  const busy = loading || isDeleting || isSavingOrder;
-
-  const items: AdminMenuItemDto[] = useMemo(
-    () => data?.items ?? [],
-    [data],
+  const localeOptions = useMemo(
+    () =>
+      (adminLocaleOptions ?? []).map((x) => ({
+        value: x.value,
+        label: x.label,
+      })),
+    [adminLocaleOptions],
   );
 
-  const total = data?.total ?? items.length;
+  const localeLabelMap = useMemo(() => {
+    const m: Record<string, string> = {};
+    for (const x of localeOptions) m[x.value] = x.label;
+    return m;
+  }, [localeOptions]);
 
-  const [orderedItems, setOrderedItems] =
-    useState<AdminMenuItemDto[]>([]);
+  const defaultLocale = useMemo(() => {
+    const fromDb = defaultLocaleFromDb || '';
+    if (fromDb) return fromDb;
+
+    const routerLocale = (router.locale as string | undefined) ?? undefined;
+    const coerced = coerceLocale(routerLocale, defaultLocaleFromDb);
+    return coerced || toShortLocale(routerLocale) || 'tr';
+  }, [defaultLocaleFromDb, coerceLocale, router.locale]);
+
+  /* -------------------- Filters -------------------- */
+  const [filters, setFilters] = useState<MenuItemFilters>(() => ({
+    search: '',
+    location: 'all',
+    active: 'all',
+    sort: 'display_order',
+    order: 'asc',
+    locale: '', // "" => tüm diller
+  }));
+
+  // İstersen ilk açılışta defaultLocale'i filtreye bas
+  useEffect(() => {
+    setFilters((prev) => {
+      if (prev.locale) return prev;
+      return { ...prev, locale: '' }; // sadece tek dil göstermek istersen: defaultLocale
+    });
+  }, [defaultLocale]);
+
+  /* -------------------- Data query -------------------- */
+  const listParams = useMemo(() => {
+    const p: any = {};
+
+    if (filters.search?.trim()) p.q = filters.search.trim();
+    if (filters.location !== 'all') p.location = filters.location;
+    if (filters.active !== 'all') p.active = filters.active === 'active';
+    if (filters.sort) p.sort = filters.sort;
+    if (filters.order) p.order = filters.order;
+
+    // locale: "" => gönderme; seçilmişse gönder
+    const loc = toShortLocale(filters.locale);
+    if (loc) p.locale = loc;
+
+    return p;
+  }, [filters]);
+
+  const { data: listData, isFetching, refetch } = useListMenuItemsAdminQuery(listParams);
+
+  const items = listData?.items ?? [];
+  const total = listData?.total ?? items.length;
+
+  /* -------------------- Mutations -------------------- */
+  const [deleteItem, { isLoading: isDeleting }] = useDeleteMenuItemAdminMutation();
+  const [reorderItems, { isLoading: isReordering }] = useReorderMenuItemsAdminMutation();
+
+  /* -------------------- Reorder buffer -------------------- */
+  const [draftRows, setDraftRows] = useState<AdminMenuItemDto[] | null>(null);
 
   useEffect(() => {
-    setOrderedItems(items);
-  }, [items]);
+    setDraftRows(null);
+  }, [listData?.items]);
 
-  const handleEdit = (item: AdminMenuItemDto) => {
-    const effectiveLocale = filters.locale || localeFromQuery || "";
-    const localeParam = effectiveLocale
-      ? `?locale=${encodeURIComponent(effectiveLocale)}`
-      : "";
-    router.push(
-      `/admin/menuitem/${encodeURIComponent(item.id)}${localeParam}`,
-    );
-  };
-
-  const handleDelete = async (item: AdminMenuItemDto) => {
-    const ok = window.confirm(
-      `"${item.title}" menü öğesini silmek istediğinize emin misiniz?`,
-    );
-    if (!ok) return;
-
-    try {
-      await deleteMenuItem({ id: item.id }).unwrap();
-      toast.success("Menü öğesi silindi.");
-      await refetch();
-    } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Menü öğesi silinirken bir hata oluştu.";
-      toast.error(msg);
-    }
-  };
-
-  const handleCreateClick = () => {
-    const effectiveLocale = filters.locale || localeFromQuery || "";
-    const localeParam = effectiveLocale
-      ? `?locale=${encodeURIComponent(effectiveLocale)}`
-      : "";
-    router.push(`/admin/menuitem/new${localeParam}`);
-  };
+  const rows = draftRows ?? items;
+  const savingOrder = isReordering;
 
   const handleReorder = (next: AdminMenuItemDto[]) => {
-    setOrderedItems(next);
+    setDraftRows(next);
   };
 
   const handleSaveOrder = async () => {
-    if (!orderedItems || orderedItems.length === 0) {
-      toast.info("Sıralanacak menü öğesi bulunamadı.");
-      return;
-    }
+    if (!draftRows || draftRows.length === 0) return;
 
     try {
-      const payload = orderedItems.map((item, index) => ({
-        id: item.id,
-        display_order: index, // 0-based, istersen +1 yaparsın
-      }));
+      const payload = {
+        items: draftRows.map((x, idx) => ({
+          id: x.id,
+          display_order: idx + 1,
+        })),
+      } as any;
 
-      await reorderMenuItems({ items: payload }).unwrap();
-      toast.success("Menü öğesi sıralaması kaydedildi.");
-      await refetch();
+      await reorderItems(payload).unwrap();
+      toast.success('Sıralama kaydedildi.');
+      setDraftRows(null);
+      refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Sıralama kaydedilirken bir hata oluştu.";
-      toast.error(msg);
+      toast.error(err?.data?.error?.message || err?.message || 'Sıralama kaydedilemedi.');
     }
   };
 
+  /* -------------------- Actions -------------------- */
+
+  const goToCreate = () => {
+    router.push('/admin/menuitem/new');
+  };
+
+  const goToEdit = (item: AdminMenuItemDto) => {
+    router.push(`/admin/menuitem/${encodeURIComponent(item.id)}`);
+  };
+
+  const handleDelete = async (item: AdminMenuItemDto) => {
+    const ok = window.confirm(`"${item.title || 'Bu kayıt'}" silinsin mi?`);
+    if (!ok) return;
+
+    try {
+      await deleteItem({ id: item.id }).unwrap();
+      toast.success('Menü öğesi silindi.');
+      refetch();
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message || err?.message || 'Silme başarısız.');
+    }
+  };
+
+  const loading = isFetching || localesLoading || isDeleting;
+
+  /* -------------------- Render -------------------- */
+
   return (
-    <div className="container-fluid py-3">
+    <div className="container-fluid py-4">
       <MenuItemHeader
         filters={filters}
         total={total}
-        loading={busy}
-        locales={locales}
-        localesLoading={isLocalesLoading}
-        defaultLocale={initialLocale || (router.locale as string)}
+        loading={loading}
+        locales={localeOptions}
+        localesLoading={localesLoading}
+        defaultLocale={defaultLocale}
         onFiltersChange={setFilters}
-        onRefresh={() => {
-          void refetch();
-        }}
-        onCreateClick={handleCreateClick}
+        onRefresh={() => refetch()}
+        onCreateClick={goToCreate}
       />
 
       <MenuItemList
-        items={orderedItems.length ? orderedItems : items}
-        loading={busy}
-        onEdit={handleEdit}
+        items={rows}
+        loading={loading}
+        onEdit={goToEdit}
         onDelete={handleDelete}
         onReorder={handleReorder}
-        onSaveOrder={handleSaveOrder}
-        savingOrder={isSavingOrder}
+        onSaveOrder={draftRows ? handleSaveOrder : undefined}
+        savingOrder={savingOrder}
+        localeLabelMap={localeLabelMap}
+        dateLocale="tr-TR"
       />
+
+      {draftRows && (
+        <div className="mt-2 small text-muted">
+          Sıralama değişti. Kalıcı yapmak için <strong>Sıralamayı Kaydet</strong> butonunu kullan.
+        </div>
+      )}
     </div>
   );
 };
 
-export default AdminMenuItemIndexPage;
+export default AdminMenuItemListPage;

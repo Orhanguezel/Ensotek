@@ -1,8 +1,5 @@
 // =============================================================
-// FILE: src/lib/i18n/uiDb.ts
-// Ensotek – UI strings resolver (DB override + i18n fallback)
-//  - UI_KEYS bağımlılığını kaldırdık (TS {} hatası biter)
-//  - useUIStrings çağrısını string[] ile yaptık (never hatası biter)
+// FILE: src/lib/i18n/uiDb.ts  (DYNAMIC)
 // =============================================================
 "use client";
 
@@ -10,7 +7,7 @@ import { useMemo } from "react";
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 import type { SupportedLocale } from "@/types/common";
 import { useResolvedLocale } from "@/i18n/locale";
-import { useUIStrings } from "./ui";
+import { useUIStrings, UI_FALLBACK_EN } from "./ui";
 
 /**
  * DB tarafında kullanacağın section key'leri (site_settings.key)
@@ -76,7 +73,6 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
   ],
 
   ui_home: [
-    // istersen hero + services + news gibi genişlet
     "ui_hero_kicker_prefix",
     "ui_hero_kicker_brand",
     "ui_hero_title_fallback",
@@ -284,8 +280,6 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
     "ui_products_price_label",
     "ui_products_view_all",
     "ui_products_empty",
-    "ui_products_page_title",
-    "ui_products_detail_page_title",
   ],
 
   ui_spareparts: [
@@ -298,8 +292,6 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
     "ui_spareparts_price_label",
     "ui_spareparts_view_all",
     "ui_spareparts_empty",
-    "ui_spareparts_page_title",
-    "ui_spareparts_detail_page_title",
   ],
 
   ui_faqs: ["ui_faqs_page_title"],
@@ -312,31 +304,61 @@ type UiSectionResult = {
   ui: (key: string, hardFallback?: string) => string;
   raw: Record<string, unknown>;
   locale: SupportedLocale;
-
-  
 };
+
+function tryParseJsonObject(x: unknown): Record<string, unknown> {
+  if (!x) return {};
+  if (typeof x === "object" && !Array.isArray(x)) return x as Record<string, unknown>;
+  if (typeof x === "string") {
+    const s = x.trim();
+    if (s.startsWith("{") && s.endsWith("}")) {
+      try {
+        const j = JSON.parse(s);
+        if (j && typeof j === "object" && !Array.isArray(j)) return j as Record<string, unknown>;
+      } catch {
+        return {};
+      }
+    }
+  }
+  return {};
+}
+
 export function useUiSection(section: UiSectionKey, localeOverride?: SupportedLocale): UiSectionResult {
   const locale = useResolvedLocale(localeOverride);
 
+  // 1) section bazlı JSON override (ui_header, ui_footer, ...)
   const { data: uiSetting } = useGetSiteSettingByKeyQuery({ key: section, locale });
 
   const json = useMemo<Record<string, unknown>>(() => {
-    const v = uiSetting?.value;
-    return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {};
+    return tryParseJsonObject(uiSetting?.value);
   }, [uiSetting?.value]);
 
+  // 2) tekil key’ler (ui_header_nav_home gibi)
   const keys = SECTION_KEYS[section] ?? [];
   const { t: tInner } = useUIStrings(keys, locale);
 
   const ui = (key: string, hardFallback = ""): string => {
-    const raw = json[key];
+    const k = String(key || "").trim();
+    if (!k) return "";
 
+    // A) section JSON override
+    const raw = json[k];
     if (typeof raw === "string" && raw.trim()) return raw.trim();
 
-    const fromI18n = String(tInner(key) || "").trim();
-    if (fromI18n && fromI18n !== key) return fromI18n;
+    // B) tekil UI key DB
+    const fromDb = String(tInner(k) || "").trim();
+    if (fromDb && fromDb !== k) return fromDb;
 
-    return String(hardFallback || "").trim();
+    // C) param hard fallback
+    const hf = String(hardFallback || "").trim();
+    if (hf) return hf;
+
+    // D) constant EN fallback
+    const fromConst = (UI_FALLBACK_EN as any)[k];
+    if (typeof fromConst === "string" && fromConst.trim()) return fromConst.trim();
+
+    // E) key
+    return k;
   };
 
   return { ui, raw: json, locale };

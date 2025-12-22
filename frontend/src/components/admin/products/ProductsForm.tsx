@@ -1,88 +1,81 @@
 // =============================================================
 // FILE: src/components/admin/products/ProductsForm.tsx
 // Ensotek – Admin Product Create/Edit Form (Modüler + Tab'li)
+// RTK: from "@/integrations/rtk/hooks"
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
-import type {
-  ProductDto,
-  ProductSpecifications,
-} from "@/integrations/types/product.types";
-import type { LocaleOption } from "./ProductsHeader";
+import type { ProductDto, ProductSpecifications } from '@/integrations/types/product.types';
+
+import {
+  AdminLocaleSelect,
+  type AdminLocaleOption,
+} from '@/components/common/AdminLocaleSelect';
 
 import {
   useListProductCategoriesAdminQuery,
   useListProductSubcategoriesAdminQuery,
-} from "@/integrations/rtk/endpoints/admin/products_admin.endpoints";
-import type {
-  AdminProductCategoryDto,
-  AdminProductSubCategoryDto,
-} from "@/integrations/rtk/endpoints/admin/products_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
-import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
-import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
+import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
+import { AdminJsonEditor } from '@/components/common/AdminJsonEditor';
 
-import { ProductSpecsTab } from "./tabs/ProductSpecsTab";
-import { ProductFaqsTab } from "./tabs/ProductFaqsTab";
-import { ProductReviewsTab } from "./tabs/ProductReviewsTab";
+import { ProductSpecsTab } from './tabs/ProductSpecsTab';
+import { ProductFaqsTab } from './tabs/ProductFaqsTab';
+import { ProductReviewsTab } from './tabs/ProductReviewsTab';
 
 export type ProductFormValues = {
-  // durum / dil
   locale: string;
   is_active: boolean;
   is_featured: boolean;
 
-  // temel bilgiler
   title: string;
   slug: string;
   price: string;
   description: string;
 
-  // kategori
   category_id: string;
   sub_category_id: string;
 
-  // görsel alanları
   image_url: string;
   storage_asset_id: string;
   alt: string;
   storage_image_ids: string;
 
-  // etiketler (CSV)
   tags: string;
 
-  // sıralama
   order_num: string;
 
-  // stok / kod / rating
   product_code: string;
   stock_quantity: string;
   rating: string;
 
-  // SEO
   meta_title: string;
   meta_description: string;
 
-  // JSON specifications (tip dosyasından)
   specifications: ProductSpecifications | Record<string, any> | null;
 };
 
 export type ProductsFormProps = {
-  mode: "create" | "edit";
+  mode: 'create' | 'edit';
   initialData?: ProductDto;
   loading: boolean;
   saving: boolean;
-  locales: LocaleOption[];
+
+  locales: AdminLocaleOption[];
   localesLoading?: boolean;
   defaultLocale?: string;
+
   onSubmit: (values: ProductFormValues) => void | Promise<void>;
   onCancel?: () => void;
   onLocaleChange?: (locale: string) => void | Promise<void>;
 };
+
+const norm = (v: unknown) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
 
 const buildInitialValues = (
   initial: ProductDto | undefined,
@@ -90,86 +83,79 @@ const buildInitialValues = (
 ): ProductFormValues => {
   if (!initial) {
     return {
-      locale: fallbackLocale ?? "",
+      locale: fallbackLocale ?? '',
       is_active: true,
       is_featured: false,
 
-      title: "",
-      slug: "",
-      price: "",
-      description: "",
+      title: '',
+      slug: '',
+      price: '',
+      description: '',
 
-      category_id: "",
-      sub_category_id: "",
+      category_id: '',
+      sub_category_id: '',
 
-      image_url: "",
-      storage_asset_id: "",
-      alt: "",
-      storage_image_ids: "",
+      image_url: '',
+      storage_asset_id: '',
+      alt: '',
+      storage_image_ids: '',
 
-      tags: "",
+      tags: '',
 
-      order_num: "",
+      order_num: '',
 
-      product_code: "",
-      stock_quantity: "",
-      rating: "",
+      product_code: '',
+      stock_quantity: '',
+      rating: '',
 
-      meta_title: "",
-      meta_description: "",
+      meta_title: '',
+      meta_description: '',
 
       specifications: {},
     };
   }
 
   return {
-    locale: initial.locale ?? fallbackLocale ?? "",
+    locale: initial.locale ?? fallbackLocale ?? '',
     is_active: initial.is_active,
     is_featured: initial.is_featured,
 
-    title: initial.title ?? "",
-    slug: initial.slug ?? "",
+    title: initial.title ?? '',
+    slug: initial.slug ?? '',
     price:
-      initial.price != null && !Number.isNaN(Number(initial.price))
-        ? String(initial.price)
-        : "",
-    description: initial.description ?? "",
+      initial.price != null && !Number.isNaN(Number(initial.price)) ? String(initial.price) : '',
+    description: initial.description ?? '',
 
-    category_id: initial.category_id ?? "",
-    sub_category_id: initial.sub_category_id ?? "",
+    category_id: initial.category_id ?? '',
+    sub_category_id: initial.sub_category_id ?? '',
 
-    image_url: initial.image_url ?? "",
-    storage_asset_id: initial.storage_asset_id ?? "",
-    alt: initial.alt ?? "",
-    storage_image_ids: (initial.storage_image_ids ?? []).join(","),
+    image_url: initial.image_url ?? '',
+    storage_asset_id: (initial as any).storage_asset_id ?? '',
+    alt: initial.alt ?? '',
+    storage_image_ids:
+      ((initial as any).storage_image_ids ?? (initial as any).storage_image_ids ?? [])?.join?.(
+        ',',
+      ) ?? '',
 
-    tags: (initial.tags ?? []).join(","),
+    tags: (initial.tags ?? []).join(','),
 
     order_num:
-      typeof (initial as any).order_num === "number"
-        ? String((initial as any).order_num)
-        : "",
+      typeof (initial as any).order_num === 'number' ? String((initial as any).order_num) : '',
 
-    product_code: initial.product_code ?? "",
-    stock_quantity:
-      initial.stock_quantity != null
-        ? String(initial.stock_quantity)
-        : "",
+    product_code: initial.product_code ?? '',
+    stock_quantity: initial.stock_quantity != null ? String(initial.stock_quantity) : '',
     rating:
-      initial.rating != null && !Number.isNaN(Number(initial.rating))
-        ? String(initial.rating)
-        : "",
+      initial.rating != null && !Number.isNaN(Number(initial.rating)) ? String(initial.rating) : '',
 
-    meta_title: initial.meta_title ?? "",
-    meta_description: initial.meta_description ?? "",
+    meta_title: initial.meta_title ?? '',
+    meta_description: initial.meta_description ?? '',
 
-    specifications:
-      (initial.specifications as ProductSpecifications | null) ?? {},
+    specifications: (initial.specifications as ProductSpecifications | null) ?? {},
   };
 };
 
-type ProductFormTab = "general" | "specs" | "faqs" | "reviews";
-type GeneralViewMode = "form" | "json";
+type ProductFormTab = 'general' | 'specs' | 'faqs' | 'reviews';
+type GeneralViewMode = 'form' | 'json';
 
 export const ProductsForm: React.FC<ProductsFormProps> = ({
   mode,
@@ -186,36 +172,30 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
   const [values, setValues] = useState<ProductFormValues>(
     buildInitialValues(initialData, defaultLocale),
   );
-  const [activeTab, setActiveTab] = useState<ProductFormTab>("general");
-  const [generalViewMode, setGeneralViewMode] =
-    useState<GeneralViewMode>("form");
+  const [activeTab, setActiveTab] = useState<ProductFormTab>('general');
+  const [generalViewMode, setGeneralViewMode] = useState<GeneralViewMode>('form');
 
   const disabled = loading || saving;
-  const effectiveDefaultLocale = defaultLocale ?? "tr";
+  const effectiveDefaultLocale = norm(defaultLocale) || 'tr';
   const productId = initialData?.id;
 
-  // initialData değişince formu güncelle ama mevcut seçili locale'i koru
   useEffect(() => {
     setValues((prev) => {
       const base = buildInitialValues(initialData, defaultLocale);
       return {
         ...base,
-        locale:
-          prev.locale ||
-          base.locale ||
-          defaultLocale ||
-          "",
+        locale: norm(prev.locale) || norm(base.locale) || norm(defaultLocale) || '',
       };
     });
   }, [initialData, defaultLocale]);
 
-  /* ----------------- KATEGORİ / ALT KATEGORİ VERİLERİ ----------------- */
+  /* ----------------- Categories ----------------- */
 
   const {
     data: categoryData,
     isLoading: categoriesLoading,
     isFetching: categoriesFetching,
-  } = useListProductCategoriesAdminQuery({ is_active: 1 });
+  } = useListProductCategoriesAdminQuery({ is_active: 1 } as any);
 
   const {
     data: subCategoryData,
@@ -223,116 +203,75 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
     isFetching: subCategoriesFetching,
   } = useListProductSubcategoriesAdminQuery(
     values.category_id
-      ? { category_id: values.category_id, is_active: 1 }
-      : undefined,
-    {
-      skip: !values.category_id,
-    },
+      ? ({ category_id: values.category_id, is_active: 1 } as any)
+      : (undefined as any),
+    { skip: !values.category_id },
   );
 
   const categoryOptions = useMemo(() => {
-    const rows = (categoryData ?? []) as AdminProductCategoryDto[];
-
+    const rows = (categoryData ?? []) as any[];
     const seen = new Set<string>();
-
     return rows
-      .filter((c) => {
-        if (!c.id) return false;
-        if (seen.has(c.id)) {
-          // Aynı id için birden fazla satır varsa, ilkini tut, diğerlerini at
-          return false;
-        }
-        seen.add(c.id);
-        return true;
-      })
+      .filter((c) => c?.id && !seen.has(c.id) && (seen.add(c.id), true))
       .map((c) => ({
         id: c.id,
-        name: c.name,
+        name: c.name || c.slug || c.id,
         slug: c.slug,
         module_key: c.module_key ?? undefined,
       }));
   }, [categoryData]);
 
-
   const subCategoryOptions = useMemo(() => {
-    const rows = (subCategoryData ?? []) as AdminProductSubCategoryDto[];
-
+    const rows = (subCategoryData ?? []) as any[];
     const seen = new Set<string>();
-
     return rows
-      .filter((s) => {
-        if (!s.id) return false;
-        if (seen.has(s.id)) return false;
-        seen.add(s.id);
-        return true;
-      })
+      .filter((s) => s?.id && !seen.has(s.id) && (seen.add(s.id), true))
       .map((s) => ({
         id: s.id,
-        name: s.name,
+        name: s.name || s.slug || s.id,
         slug: s.slug,
         category_id: s.category_id,
       }));
   }, [subCategoryData]);
 
-
   const categoriesBusy = categoriesLoading || categoriesFetching;
-  const subCategoriesBusy =
-    subCategoriesLoading || subCategoriesFetching;
+  const subCategoriesBusy = subCategoriesLoading || subCategoriesFetching;
 
-  /* ----------------- HANDLERLAR ----------------- */
+  /* ----------------- Handlers ----------------- */
 
   const handleChange =
     (field: keyof ProductFormValues) =>
-      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const val = e.target.value;
-        setValues((prev) => ({ ...prev, [field]: val }));
-      };
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      setValues((prev) => ({ ...prev, [field]: e.target.value }));
+    };
 
   const handleCheckboxChange =
-    (field: keyof ProductFormValues) =>
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const checked = e.target.checked;
-        setValues((prev) => ({ ...prev, [field]: checked as never }));
-      };
+    (field: keyof ProductFormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValues((prev) => ({ ...prev, [field]: e.target.checked as never }));
+    };
 
-  const handleLocaleChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const val = e.target.value;
+  const handleLocaleChange = async (nextLocale: string) => {
+    const val = norm(nextLocale);
 
     setValues((prev) => ({ ...prev, locale: val }));
 
-    if (mode === "edit" && productId && onLocaleChange) {
+    if (mode === 'edit' && productId && onLocaleChange) {
       try {
         await onLocaleChange(val);
       } catch (err) {
-        console.error("onLocaleChange error:", err);
-        toast.error(
-          "Dil değiştirilirken bir hata oluştu. Lütfen tekrar deneyin.",
-        );
+        toast.error('Dil değiştirilirken bir hata oluştu. Lütfen tekrar deneyin.');
       }
     }
   };
 
-  const handleCategoryChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
-    setValues((prev) => ({
-      ...prev,
-      category_id: id,
-      sub_category_id: "",
-    }));
+    setValues((prev) => ({ ...prev, category_id: id, sub_category_id: '' }));
   };
 
-  const handleSubCategoryChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
+  const handleSubCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const id = e.target.value;
-    setValues((prev) => ({
-      ...prev,
-      sub_category_id: id,
-    }));
+    setValues((prev) => ({ ...prev, sub_category_id: id }));
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -342,34 +281,34 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
   };
 
   const handleGeneralJsonChange = (next: any) => {
-    if (!next || typeof next !== "object" || Array.isArray(next)) {
-      toast.error("Genel JSON formatı geçersiz. Object bekleniyor.");
+    if (!next || typeof next !== 'object' || Array.isArray(next)) {
+      toast.error('Genel JSON formatı geçersiz. Object bekleniyor.');
       return;
     }
     setValues(next as ProductFormValues);
   };
 
-  const selectedCategory = categoryOptions.find(
-    (c) => c.id === values.category_id,
-  );
-  const selectedSubCategory = subCategoryOptions.find(
-    (s) => s.id === values.sub_category_id,
-  );
-
   const storageMeta = {
-    module_key: "product",
+    module_key: 'product',
     locale: values.locale || effectiveDefaultLocale,
-    slug: values.slug || "",
+    slug: values.slug || '',
   };
 
-  const changeTab =
-    (tab: ProductFormTab) =>
-      (e: React.MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-        setActiveTab(tab);
-      };
+  const changeTab = (tab: ProductFormTab) => (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    setActiveTab(tab);
+  };
 
-  const effectiveLocale = values.locale || effectiveDefaultLocale || "tr";
+  const effectiveLocale = values.locale || effectiveDefaultLocale;
+
+  // Locale options: prepend site default as "(Site varsayılanı)" option
+  const localeSelectOptions: AdminLocaleOption[] = useMemo(() => {
+    const base = (locales ?? []).map((x) => ({ value: norm(x.value), label: x.label }));
+    const siteDefaultLabel = effectiveDefaultLocale
+      ? `(Site varsayılanı: ${effectiveDefaultLocale})`
+      : '(Site varsayılanı)';
+    return [{ value: '', label: siteDefaultLabel }, ...base];
+  }, [locales, effectiveDefaultLocale]);
 
   return (
     <form onSubmit={handleSubmit}>
@@ -377,11 +316,11 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
         <div className="card-header py-2 d-flex align-items-center justify-content-between">
           <div>
             <h5 className="mb-0 small fw-semibold">
-              {mode === "create" ? "Yeni Ürün Oluştur" : "Ürün Düzenle"}
+              {mode === 'create' ? 'Yeni Ürün Oluştur' : 'Ürün Düzenle'}
             </h5>
             <div className="text-muted small">
-              Ürün için başlık, slug, fiyat, kategori, görseller ve SEO
-              alanlarını doldur. Diğer detaylar alttaki sekmelerde.
+              Ürün için başlık, slug, fiyat, kategori, görseller ve SEO alanlarını doldur. Diğer
+              detaylar alttaki sekmelerde.
             </div>
           </div>
 
@@ -396,31 +335,26 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                 Geri
               </button>
             )}
-            <button
-              type="submit"
-              className="btn btn-primary btn-sm"
-              disabled={disabled}
-            >
+            <button type="submit" className="btn btn-primary btn-sm" disabled={disabled}>
               {saving
-                ? mode === "create"
-                  ? "Oluşturuluyor..."
-                  : "Kaydediliyor..."
-                : mode === "create"
-                  ? "Ürünü Oluştur"
-                  : "Değişiklikleri Kaydet"}
+                ? mode === 'create'
+                  ? 'Oluşturuluyor...'
+                  : 'Kaydediliyor...'
+                : mode === 'create'
+                ? 'Ürünü Oluştur'
+                : 'Değişiklikleri Kaydet'}
             </button>
           </div>
         </div>
 
         <div className="card-body">
-          {/* Sekmeler */}
+          {/* Tabs */}
           <ul className="nav nav-tabs small mb-3">
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${activeTab === "general" ? "active" : ""
-                  }`}
-                onClick={changeTab("general")}
+                className={`nav-link ${activeTab === 'general' ? 'active' : ''}`}
+                onClick={changeTab('general')}
               >
                 Genel
               </button>
@@ -428,9 +362,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${activeTab === "specs" ? "active" : ""
-                  }`}
-                onClick={changeTab("specs")}
+                className={`nav-link ${activeTab === 'specs' ? 'active' : ''}`}
+                onClick={changeTab('specs')}
                 disabled={!productId}
               >
                 Teknik Özellikler (Specs)
@@ -439,9 +372,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${activeTab === "faqs" ? "active" : ""
-                  }`}
-                onClick={changeTab("faqs")}
+                className={`nav-link ${activeTab === 'faqs' ? 'active' : ''}`}
+                onClick={changeTab('faqs')}
                 disabled={!productId}
               >
                 Sık Sorulanlar (FAQs)
@@ -450,9 +382,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
             <li className="nav-item">
               <button
                 type="button"
-                className={`nav-link ${activeTab === "reviews" ? "active" : ""
-                  }`}
-                onClick={changeTab("reviews")}
+                className={`nav-link ${activeTab === 'reviews' ? 'active' : ''}`}
+                onClick={changeTab('reviews')}
                 disabled={!productId}
               >
                 Yorumlar (Reviews)
@@ -461,36 +392,32 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
           </ul>
 
           <div className="tab-content">
-            {/* ------------ TAB: GENEL ------------ */}
-            <div
-              className={`tab-pane fade ${activeTab === "general" ? "show active" : ""
-                }`}
-            >
-              {/* Genel tab içi Form / JSON toggle */}
+            {/* GENERAL */}
+            <div className={`tab-pane fade ${activeTab === 'general' ? 'show active' : ''}`}>
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <div>
                   <h6 className="mb-0 small fw-semibold">Genel Bilgiler</h6>
                   <div className="text-muted small">
-                    Ürünün temel alanları. İstersen formdan, istersen JSON
-                    olarak düzenleyebilirsin. Dil seçimi ürüne ait ilgili
-                    çeviri kaydını getirir.
+                    Ürünün temel alanları. İstersen formdan, istersen JSON olarak düzenleyebilirsin.
                   </div>
                 </div>
                 <div className="btn-group btn-group-sm" role="group">
                   <button
                     type="button"
-                    className={`btn btn-outline-secondary ${generalViewMode === "form" ? "active" : ""
-                      }`}
-                    onClick={() => setGeneralViewMode("form")}
+                    className={`btn btn-outline-secondary ${
+                      generalViewMode === 'form' ? 'active' : ''
+                    }`}
+                    onClick={() => setGeneralViewMode('form')}
                     disabled={disabled}
                   >
                     Form
                   </button>
                   <button
                     type="button"
-                    className={`btn btn-outline-secondary ${generalViewMode === "json" ? "active" : ""
-                      }`}
-                    onClick={() => setGeneralViewMode("json")}
+                    className={`btn btn-outline-secondary ${
+                      generalViewMode === 'json' ? 'active' : ''
+                    }`}
+                    onClick={() => setGeneralViewMode('json')}
                     disabled={disabled}
                   >
                     JSON
@@ -498,45 +425,27 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                 </div>
               </div>
 
-              {generalViewMode === "form" && (
+              {generalViewMode === 'form' && (
                 <>
                   <div className="row g-4">
-                    {/* Sol kolon – Temel bilgiler */}
                     <div className="col-lg-8">
-                      {/* Locale + durumlar */}
                       <div className="row g-2 mb-3">
                         <div className="col-sm-4">
-                          <label className="form-label small mb-1">
-                            Locale (Dil)
-                          </label>
-                          <select
-                            className="form-select form-select-sm"
+                          <label className="form-label small mb-1">Dil</label>
+                          <AdminLocaleSelect
                             value={values.locale}
                             onChange={handleLocaleChange}
-                            disabled={
-                              disabled ||
-                              (localesLoading && !locales.length)
-                            }
-                          >
-                            <option value="">
-                              (Site varsayılanı
-                              {effectiveDefaultLocale
-                                ? `: ${effectiveDefaultLocale}`
-                                : ""}
-                              )
-                            </option>
-                            {locales.map((loc) => (
-                              <option key={loc.value} value={loc.value}>
-                                {loc.label}
-                              </option>
-                            ))}
-                          </select>
+                            options={localeSelectOptions}
+                            loading={!!localesLoading}
+                            disabled={disabled || (!!localesLoading && !locales.length)}
+                            label="Dil"
+                          />
                           <div className="form-text small">
-                            Bu seçim aynı zamanda Teknik Özellikler ve
-                            SSS sekmelerinde hangi dilde kayıt
+                            Seçim; aynı zamanda Specs/SSS sekmelerinde hangi dil kaydını
                             düzenleyeceğini belirler.
                           </div>
                         </div>
+
                         <div className="col-sm-4 d-flex align-items-end">
                           <div className="form-check me-3">
                             <input
@@ -544,13 +453,10 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                               type="checkbox"
                               className="form-check-input"
                               checked={values.is_active}
-                              onChange={handleCheckboxChange("is_active")}
+                              onChange={handleCheckboxChange('is_active')}
                               disabled={disabled}
                             />
-                            <label
-                              className="form-check-label small"
-                              htmlFor="is_active"
-                            >
+                            <label className="form-check-label small" htmlFor="is_active">
                               Aktif olsun
                             </label>
                           </div>
@@ -560,155 +466,122 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                               type="checkbox"
                               className="form-check-input"
                               checked={values.is_featured}
-                              onChange={handleCheckboxChange(
-                                "is_featured",
-                              )}
+                              onChange={handleCheckboxChange('is_featured')}
                               disabled={disabled}
                             />
-                            <label
-                              className="form-check-label small"
-                              htmlFor="is_featured"
-                            >
+                            <label className="form-check-label small" htmlFor="is_featured">
                               Öne çıkan
                             </label>
                           </div>
                         </div>
+
                         <div className="col-sm-4">
-                          <label className="form-label small mb-1">
-                            Sıralama (order_num)
-                          </label>
+                          <label className="form-label small mb-1">Sıralama (order_num)</label>
                           <input
                             type="number"
                             className="form-control form-control-sm"
                             value={values.order_num}
-                            onChange={handleChange("order_num")}
+                            onChange={handleChange('order_num')}
                             disabled={disabled}
                             min="0"
                           />
-                          <div className="form-text small">
-                            Liste sıralaması için kullanılır.
-                          </div>
                         </div>
                       </div>
 
-                      {/* Başlık + slug */}
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Başlık
-                        </label>
+                        <label className="form-label small mb-1">Başlık</label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
                           value={values.title}
-                          onChange={handleChange("title")}
+                          onChange={handleChange('title')}
                           disabled={disabled}
                           required
                         />
                       </div>
 
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Slug
-                        </label>
+                        <label className="form-label small mb-1">Slug</label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
                           value={values.slug}
-                          onChange={handleChange("slug")}
+                          onChange={handleChange('slug')}
                           disabled={disabled}
                           required
                         />
                         <div className="form-text small">
-                          <code>(locale, slug)</code> birlikte unique
-                          tutulur.
+                          <code>(locale, slug)</code> birlikte unique tutulur.
                         </div>
                       </div>
 
-                      {/* Fiyat + stok + ürün kodu */}
                       <div className="row g-2 mb-3">
                         <div className="col-sm-4">
-                          <label className="form-label small mb-1">
-                            Fiyat (₺)
-                          </label>
+                          <label className="form-label small mb-1">Fiyat (₺)</label>
                           <input
                             type="number"
                             step="0.01"
                             min="0"
                             className="form-control form-control-sm"
                             value={values.price}
-                            onChange={handleChange("price")}
+                            onChange={handleChange('price')}
                             disabled={disabled}
                             required
                           />
                         </div>
                         <div className="col-sm-4">
-                          <label className="form-label small mb-1">
-                            Stok Adedi
-                          </label>
+                          <label className="form-label small mb-1">Stok Adedi</label>
                           <input
                             type="number"
                             min="0"
                             className="form-control form-control-sm"
                             value={values.stock_quantity}
-                            onChange={handleChange("stock_quantity")}
+                            onChange={handleChange('stock_quantity')}
                             disabled={disabled}
                           />
                         </div>
                         <div className="col-sm-4">
-                          <label className="form-label small mb-1">
-                            Ürün Kodu
-                          </label>
+                          <label className="form-label small mb-1">Ürün Kodu</label>
                           <input
                             type="text"
                             className="form-control form-control-sm"
                             value={values.product_code}
-                            onChange={handleChange("product_code")}
+                            onChange={handleChange('product_code')}
                             disabled={disabled}
                           />
                         </div>
                       </div>
 
-                      {/* Açıklama */}
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Kısa Açıklama
-                        </label>
+                        <label className="form-label small mb-1">Kısa Açıklama</label>
                         <textarea
                           className="form-control form-control-sm"
                           rows={4}
                           value={values.description}
-                          onChange={handleChange("description")}
+                          onChange={handleChange('description')}
                           disabled={disabled}
                         />
                       </div>
 
-                      {/* Etiketler */}
                       <div className="mb-0">
-                        <label className="form-label small mb-1">
-                          Etiketler
-                        </label>
+                        <label className="form-label small mb-1">Etiketler</label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
                           placeholder="virgülle ayır: kule,sogutma,endustriyel..."
                           value={values.tags}
-                          onChange={handleChange("tags")}
+                          onChange={handleChange('tags')}
                           disabled={disabled}
                         />
                         <div className="form-text small">
-                          Virgülle ayrılmış değerler{" "}
-                          <code>string[]</code> olarak saklanır.
+                          Virgülle ayrılmış değerler <code>string[]</code> olarak saklanır.
                         </div>
                       </div>
                     </div>
 
-                    {/* Sağ kolon – Kategori + Görsel + SEO / Rating */}
                     <div className="col-lg-4">
-                      {/* Kategoriler */}
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Kategori
-                        </label>
+                        <label className="form-label small mb-1">Kategori</label>
                         <select
                           className="form-select form-select-sm"
                           value={values.category_id}
@@ -716,9 +589,7 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           disabled={disabled || categoriesBusy}
                         >
                           <option value="">
-                            {categoriesBusy
-                              ? "Kategoriler yükleniyor..."
-                              : "Kategori seç..."}
+                            {categoriesBusy ? 'Kategoriler yükleniyor...' : 'Kategori seç...'}
                           </option>
                           {categoryOptions.map((c) => (
                             <option key={c.id} value={c.id}>
@@ -726,139 +597,100 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                             </option>
                           ))}
                         </select>
-                        <div className="form-text small">
-                          Seçilen kategori ID:
-                          <code className="ms-1">
-                            {values.category_id || "-"}
-                          </code>
-                        </div>
                       </div>
 
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Alt Kategori
-                        </label>
+                        <label className="form-label small mb-1">Alt Kategori</label>
                         <select
                           className="form-select form-select-sm"
                           value={values.sub_category_id}
                           onChange={handleSubCategoryChange}
-                          disabled={
-                            disabled ||
-                            subCategoriesBusy ||
-                            !values.category_id
-                          }
+                          disabled={disabled || subCategoriesBusy || !values.category_id}
                         >
                           <option value="">
                             {!values.category_id
-                              ? "Önce kategori seç"
+                              ? 'Önce kategori seç'
                               : subCategoriesBusy
-                                ? "Alt kategoriler yükleniyor..."
-                                : "Alt kategori (opsiyonel)"}
+                              ? 'Alt kategoriler yükleniyor...'
+                              : 'Alt kategori (opsiyonel)'}
                           </option>
                           {subCategoryOptions
-                            .filter(
-                              (s) => s.category_id === values.category_id,
-                            )
+                            .filter((s) => s.category_id === values.category_id)
                             .map((s) => (
                               <option key={s.id} value={s.id}>
                                 {s.name}
                               </option>
                             ))}
                         </select>
-                        <div className="form-text small">
-                          Seçilen alt kategori ID:
-                          <code className="ms-1">
-                            {values.sub_category_id || "-"}
-                          </code>
-                        </div>
                       </div>
 
-                      {/* Görsel upload */}
                       <div className="mb-3">
                         <AdminImageUploadField
                           label="Kapak Görseli"
                           helperText={
                             <>
-                              Storage üzerinden görsel yüklemek için
-                              kullanılır. Yüklenen görselin URL&apos;i{" "}
-                              <code>image_url</code> alanına yazılır.
+                              Storage üzerinden görsel yüklemek için kullanılır. Yüklenen görselin
+                              URL&apos;i <code>image_url</code> alanına yazılır.
                             </>
                           }
                           bucket="public"
                           folder="products"
                           metadata={storageMeta}
                           value={values.image_url}
-                          onChange={(url) =>
-                            setValues((prev) => ({
-                              ...prev,
-                              image_url: url,
-                            }))
-                          }
+                          onChange={(url) => setValues((prev) => ({ ...prev, image_url: url }))}
                           disabled={disabled}
                         />
                       </div>
 
-                      {/* Görsel alanları (raw id / url) */}
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Kapak Görsel URL
-                        </label>
+                        <label className="form-label small mb-1">Kapak Görsel URL</label>
                         <input
                           type="url"
                           className="form-control form-control-sm"
                           placeholder="https://..."
                           value={values.image_url}
-                          onChange={handleChange("image_url")}
+                          onChange={handleChange('image_url')}
                           disabled={disabled}
                         />
                       </div>
 
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Kapak Görsel Asset ID
-                        </label>
+                        <label className="form-label small mb-1">Kapak Görsel Asset ID</label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
                           placeholder="storage_asset_id"
                           value={values.storage_asset_id}
-                          onChange={handleChange("storage_asset_id")}
+                          onChange={handleChange('storage_asset_id')}
                           disabled={disabled}
                         />
                       </div>
 
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Galeri Asset ID&apos;leri
-                        </label>
+                        <label className="form-label small mb-1">Galeri Asset ID&apos;leri</label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
                           placeholder="id1,id2,id3..."
                           value={values.storage_image_ids}
-                          onChange={handleChange("storage_image_ids")}
+                          onChange={handleChange('storage_image_ids')}
                           disabled={disabled}
                         />
                       </div>
 
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Görsel Alt Metni
-                        </label>
+                        <label className="form-label small mb-1">Görsel Alt Metni</label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
                           value={values.alt}
-                          onChange={handleChange("alt")}
+                          onChange={handleChange('alt')}
                           disabled={disabled}
                         />
                       </div>
 
-                      {/* Rating + SEO */}
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Ortalama Puan (0-5)
-                        </label>
+                        <label className="form-label small mb-1">Ortalama Puan (0-5)</label>
                         <input
                           type="number"
                           min="0"
@@ -866,63 +698,42 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                           step="0.1"
                           className="form-control form-control-sm"
                           value={values.rating}
-                          onChange={handleChange("rating")}
+                          onChange={handleChange('rating')}
                           disabled={disabled}
                         />
                       </div>
 
                       <div className="mb-3">
-                        <label className="form-label small mb-1">
-                          Meta Title
-                        </label>
+                        <label className="form-label small mb-1">Meta Title</label>
                         <input
                           type="text"
                           className="form-control form-control-sm"
                           value={values.meta_title}
-                          onChange={handleChange("meta_title")}
+                          onChange={handleChange('meta_title')}
                           disabled={disabled}
                         />
                       </div>
 
                       <div className="mb-0">
-                        <label className="form-label small mb-1">
-                          Meta Description
-                        </label>
+                        <label className="form-label small mb-1">Meta Description</label>
                         <textarea
                           className="form-control form-control-sm"
                           rows={3}
                           value={values.meta_description}
-                          onChange={handleChange("meta_description")}
+                          onChange={handleChange('meta_description')}
                           disabled={disabled}
                         />
                       </div>
                     </div>
                   </div>
-
-                  {selectedCategory && (
-                    <div className="mt-3 text-muted small">
-                      Seçilen kategori:{" "}
-                      <strong>{selectedCategory.name}</strong>
-                      {selectedSubCategory && (
-                        <>
-                          {" "}
-                          / alt kategori:{" "}
-                          <strong>{selectedSubCategory.name}</strong>
-                        </>
-                      )}
-                    </div>
-                  )}
                 </>
               )}
 
-              {generalViewMode === "json" && (
+              {generalViewMode === 'json' && (
                 <AdminJsonEditor
                   label={
                     <>
-                      Ürün Genel JSON{" "}
-                      <span className="text-muted">
-                        (ProductFormValues)
-                      </span>
+                      Ürün Genel JSON <span className="text-muted">(ProductFormValues)</span>
                     </>
                   }
                   value={values}
@@ -930,9 +741,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                   disabled={disabled}
                   helperText={
                     <>
-                      Bu alan formdaki tüm genel alanların JSON
-                      karşılığıdır. Buradan düzenlediğin değerler forma
-                      da yansır.
+                      Bu alan formdaki tüm genel alanların JSON karşılığıdır. Buradan düzenlediğin
+                      değerler forma da yansır.
                     </>
                   }
                   height={320}
@@ -940,11 +750,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
               )}
             </div>
 
-            {/* ------------ TAB: SPECS ------------ */}
-            <div
-              className={`tab-pane fade ${activeTab === "specs" ? "show active" : ""
-                }`}
-            >
+            {/* SPECS */}
+            <div className={`tab-pane fade ${activeTab === 'specs' ? 'show active' : ''}`}>
               <ProductSpecsTab
                 productId={productId}
                 locale={effectiveLocale}
@@ -952,11 +759,8 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
               />
             </div>
 
-            {/* ------------ TAB: FAQS ------------ */}
-            <div
-              className={`tab-pane fade ${activeTab === "faqs" ? "show active" : ""
-                }`}
-            >
+            {/* FAQS */}
+            <div className={`tab-pane fade ${activeTab === 'faqs' ? 'show active' : ''}`}>
               <ProductFaqsTab
                 productId={productId}
                 locale={effectiveLocale}
@@ -964,15 +768,9 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
               />
             </div>
 
-            {/* ------------ TAB: REVIEWS ------------ */}
-            <div
-              className={`tab-pane fade ${activeTab === "reviews" ? "show active" : ""
-                }`}
-            >
-              <ProductReviewsTab
-                productId={productId}
-                disabled={disabled || !productId}
-              />
+            {/* REVIEWS */}
+            <div className={`tab-pane fade ${activeTab === 'reviews' ? 'show active' : ''}`}>
+              <ProductReviewsTab productId={productId} disabled={disabled || !productId} />
             </div>
           </div>
         </div>

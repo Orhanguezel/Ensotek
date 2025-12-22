@@ -3,27 +3,20 @@
 // Ensotek – Yeni Kategori Oluşturma Sayfası
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
-import { useRouter } from "next/router";
-import CategoryFormPage from "@/components/admin/categories/CategoryFormPage";
+import React from 'react';
+import { useRouter } from 'next/router';
+import CategoryFormPage from '@/components/admin/categories/CategoryFormPage';
 
 const AdminCategoryCreatePage: React.FC = () => {
   const router = useRouter();
 
   const handleDone = () => {
-    router.push("/admin/categories");
+    router.push('/admin/categories');
   };
 
-  return (
-    <CategoryFormPage
-      mode="create"
-      initialData={null}
-      loading={false}
-      onDone={handleDone}
-    />
-  );
+  return <CategoryFormPage mode="create" initialData={null} loading={false} onDone={handleDone} />;
 };
 
 export default AdminCategoryCreatePage;

@@ -1,11 +1,10 @@
 // =============================================================
 // FILE: src/components/admin/products/ProductsList.tsx
-// Ensotek – Admin Products Listesi (drag & drop + pagination)
 // =============================================================
 
-import React, { useEffect, useState } from "react";
-import Link from "next/link";
-import type { ProductDto } from "@/integrations/types/product.types";
+import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
+import type { ProductDto } from '@/integrations/types/product.types';
 import {
   Pagination,
   PaginationContent,
@@ -14,30 +13,32 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 export type ProductsListProps = {
   items?: ProductDto[];
   loading: boolean;
   onDelete?: (item: ProductDto) => void;
 
-  // drag & drop reorder desteği
   onReorder?: (next: ProductDto[]) => void;
   onSaveOrder?: () => void;
   savingOrder?: boolean;
+
+  // ✅ parent'ın API’ye gönderdiği efektif locale (edit link'e taşı)
+  activeLocale?: string;
 };
 
 const PAGE_SIZE = 20;
 
 const formatDate = (value: string | null | undefined): string => {
-  if (!value) return "-";
+  if (!value) return '-';
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleString();
 };
 
 const formatPrice = (value: number | null | undefined): string => {
-  if (value === null || value === undefined) return "-";
+  if (value === null || value === undefined) return '-';
   return `${value.toFixed(2)} ₺`;
 };
 
@@ -48,6 +49,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
   onReorder,
   onSaveOrder,
   savingOrder,
+  activeLocale,
 }) => {
   const rows = items ?? [];
   const totalItems = rows.length;
@@ -58,7 +60,6 @@ export const ProductsList: React.FC<ProductsListProps> = ({
 
   const pageCount = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
 
-  // items değişince sayfa taşmasın
   useEffect(() => {
     setPage((prev) => {
       const maxPage = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
@@ -85,15 +86,8 @@ export const ProductsList: React.FC<ProductsListProps> = ({
     onDelete(p);
   };
 
-  /* ---------- Drag & Drop ---------- */
-
-  const handleDragStart = (id: string) => {
-    setDraggingId(id);
-  };
-
-  const handleDragEnd = () => {
-    setDraggingId(null);
-  };
+  const handleDragStart = (id: string) => setDraggingId(id);
+  const handleDragEnd = () => setDraggingId(null);
 
   const handleDropOn = (targetId: string) => {
     if (!draggingId || draggingId === targetId || !onReorder) return;
@@ -109,10 +103,8 @@ export const ProductsList: React.FC<ProductsListProps> = ({
     onReorder(next);
   };
 
-  /* ---------- Pagination page butonları ---------- */
-
   const buildPages = () => {
-    const pages: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
+    const pages: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
     if (pageCount <= 7) {
       for (let i = 1; i <= pageCount; i += 1) pages.push(i);
       return pages;
@@ -123,21 +115,13 @@ export const ProductsList: React.FC<ProductsListProps> = ({
     let left = Math.max(2, currentPage - siblings);
     let right = Math.min(pageCount - 1, currentPage + siblings);
 
-    if (left > 2) {
-      pages.push("ellipsis-left");
-    } else {
-      left = 2;
-    }
+    if (left > 2) pages.push('ellipsis-left');
+    else left = 2;
 
-    for (let i = left; i <= right; i += 1) {
-      pages.push(i);
-    }
+    for (let i = left; i <= right; i += 1) pages.push(i);
 
-    if (right < pageCount - 1) {
-      pages.push("ellipsis-right");
-    } else {
-      right = pageCount - 1;
-    }
+    if (right < pageCount - 1) pages.push('ellipsis-right');
+    else right = pageCount - 1;
 
     pages.push(pageCount);
     return pages;
@@ -150,16 +134,17 @@ export const ProductsList: React.FC<ProductsListProps> = ({
     setPage(nextPage);
   };
 
+  const editHref = (id: string) => ({
+    pathname: `/admin/products/${encodeURIComponent(id)}`,
+    query: activeLocale ? { locale: activeLocale } : undefined,
+  });
+
   return (
     <div className="card">
       <div className="card-header py-2 d-flex align-items-center justify-content-between">
         <span className="small fw-semibold">Ürün Listesi</span>
         <div className="d-flex align-items-center gap-2">
-          {busy && (
-            <span className="badge bg-secondary small">
-              İşlem yapılıyor...
-            </span>
-          )}
+          {busy && <span className="badge bg-secondary small">İşlem yapılıyor...</span>}
           {onSaveOrder && (
             <button
               type="button"
@@ -167,7 +152,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
               onClick={onSaveOrder}
               disabled={savingOrder || !hasData}
             >
-              {savingOrder ? "Sıralama kaydediliyor..." : "Sıralamayı Kaydet"}
+              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
             </button>
           )}
           <span className="text-muted small">
@@ -177,21 +162,20 @@ export const ProductsList: React.FC<ProductsListProps> = ({
       </div>
 
       <div className="card-body p-0">
-        {/* ========= Desktop / Tablet – Table görünümü ========= */}
         <div className="d-none d-md-block">
           <div className="table-responsive">
             <table className="table table-hover table-sm mb-0 align-middle">
               <thead className="table-light">
                 <tr>
-                  <th style={{ width: "5%" }} />
-                  <th style={{ width: "24%" }}>Başlık</th>
-                  <th style={{ width: "14%" }}>Slug</th>
-                  <th style={{ width: "10%" }}>Fiyat</th>
-                  <th style={{ width: "8%" }}>Stok</th>
-                  <th style={{ width: "6%" }}>Dil</th>
-                  <th style={{ width: "10%" }}>Durum</th>
-                  <th style={{ width: "14%" }}>Tarih</th>
-                  <th style={{ width: "9%" }} className="text-end">
+                  <th style={{ width: '5%' }} />
+                  <th style={{ width: '24%' }}>Başlık</th>
+                  <th style={{ width: '14%' }}>Slug</th>
+                  <th style={{ width: '10%' }}>Fiyat</th>
+                  <th style={{ width: '8%' }}>Stok</th>
+                  <th style={{ width: '6%' }}>Dil</th>
+                  <th style={{ width: '10%' }}>Durum</th>
+                  <th style={{ width: '14%' }}>Tarih</th>
+                  <th style={{ width: '9%' }} className="text-end">
                     İşlemler
                   </th>
                 </tr>
@@ -200,9 +184,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                 {loading ? (
                   <tr>
                     <td colSpan={9}>
-                      <div className="text-center text-muted small py-3">
-                        Ürünler yükleniyor...
-                      </div>
+                      <div className="text-center text-muted small py-3">Ürünler yükleniyor...</div>
                     </td>
                   </tr>
                 ) : hasData ? (
@@ -214,29 +196,17 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                         draggable={!!onReorder}
                         onDragStart={() => onReorder && handleDragStart(p.id)}
                         onDragEnd={onReorder ? handleDragEnd : undefined}
-                        onDragOver={
-                          onReorder
-                            ? (e) => e.preventDefault()
-                            : undefined
-                        }
-                        onDrop={
-                          onReorder ? () => handleDropOn(p.id) : undefined
-                        }
-                        className={
-                          draggingId === p.id ? "table-active" : undefined
-                        }
-                        style={
-                          onReorder ? { cursor: "move" } : { cursor: "default" }
-                        }
+                        onDragOver={onReorder ? (e) => e.preventDefault() : undefined}
+                        onDrop={onReorder ? () => handleDropOn(p.id) : undefined}
+                        className={draggingId === p.id ? 'table-active' : undefined}
+                        style={onReorder ? { cursor: 'move' } : { cursor: 'default' }}
                       >
                         <td className="text-muted small">
                           {onReorder && <span className="me-1">≡</span>}
                           <span>{globalIndex + 1}</span>
                         </td>
                         <td className="small">
-                          <div className="fw-semibold text-truncate">
-                            {p.title}
-                          </div>
+                          <div className="fw-semibold text-truncate">{p.title}</div>
                           {p.product_code && (
                             <div className="text-muted small">
                               Kod: <code>{p.product_code}</code>
@@ -244,10 +214,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                           )}
                         </td>
                         <td className="small">
-                          <div
-                            className="text-truncate"
-                            style={{ maxWidth: 200 }}
-                          >
+                          <div className="text-truncate" style={{ maxWidth: 200 }}>
                             <code>{p.slug}</code>
                           </div>
                         </td>
@@ -282,12 +249,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                         </td>
                         <td className="text-end">
                           <div className="btn-group btn-group-sm">
-                            <Link
-                              href={`/admin/products/${encodeURIComponent(
-                                p.id,
-                              )}`}
-                              className="btn btn-outline-primary btn-sm"
-                            >
+                            <Link href={editHref(p.id)} className="btn btn-outline-primary btn-sm">
                               Düzenle
                             </Link>
                             {onDelete && (
@@ -317,22 +279,18 @@ export const ProductsList: React.FC<ProductsListProps> = ({
               </tbody>
               <caption className="px-3 py-2 text-start">
                 <span className="text-muted small">
-                  Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin.
-                  Değişiklikleri kalıcı yapmak için{" "}
-                  <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu
-                  kullanman gerekir.
+                  Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
+                  yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullanman
+                  gerekir.
                 </span>
               </caption>
             </table>
           </div>
         </div>
 
-        {/* ========= Mobil – Card görünümü ========= */}
         <div className="d-block d-md-none">
           {loading ? (
-            <div className="px-3 py-3 text-center text-muted small">
-              Ürünler yükleniyor...
-            </div>
+            <div className="px-3 py-3 text-center text-muted small">Ürünler yükleniyor...</div>
           ) : hasData ? (
             pageRows.map((p, index) => {
               const globalIndex = startIndex + index;
@@ -343,23 +301,15 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                   draggable={!!onReorder}
                   onDragStart={() => onReorder && handleDragStart(p.id)}
                   onDragEnd={onReorder ? handleDragEnd : undefined}
-                  onDragOver={
-                    onReorder ? (e) => e.preventDefault() : undefined
-                  }
+                  onDragOver={onReorder ? (e) => e.preventDefault() : undefined}
                   onDrop={onReorder ? () => handleDropOn(p.id) : undefined}
-                  style={
-                    onReorder ? { cursor: "move" } : { cursor: "default" }
-                  }
+                  style={onReorder ? { cursor: 'move' } : { cursor: 'default' }}
                 >
                   <div className="d-flex justify-content-between align-items-start gap-2">
                     <div>
                       <div className="fw-semibold small">
-                        {onReorder && (
-                          <span className="text-muted me-1">≡</span>
-                        )}
-                        <span className="text-muted me-1">
-                          #{globalIndex + 1}
-                        </span>
+                        {onReorder && <span className="text-muted me-1">≡</span>}
+                        <span className="text-muted me-1">#{globalIndex + 1}</span>
                         {p.title}
                       </div>
                       <div className="text-muted small">
@@ -394,13 +344,13 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                       <div className="d-flex flex-column gap-1">
                         <span
                           className={
-                            "badge border small " +
+                            'badge border small ' +
                             (p.is_active
-                              ? "bg-success-subtle text-success border-success-subtle"
-                              : "bg-secondary-subtle text-secondary border-secondary-subtle")
+                              ? 'bg-success-subtle text-success border-success-subtle'
+                              : 'bg-secondary-subtle text-secondary border-secondary-subtle')
                           }
                         >
-                          {p.is_active ? "Aktif" : "Pasif"}
+                          {p.is_active ? 'Aktif' : 'Pasif'}
                         </span>
                         {p.is_featured && (
                           <span className="badge bg-warning-subtle text-warning border border-warning-subtle small">
@@ -409,10 +359,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                         )}
                       </div>
                       <div className="d-flex gap-1 mt-1">
-                        <Link
-                          href={`/admin/products/${encodeURIComponent(p.id)}`}
-                          className="btn btn-outline-primary btn-sm"
-                        >
+                        <Link href={editHref(p.id)} className="btn btn-outline-primary btn-sm">
                           Düzenle
                         </Link>
                         {onDelete && (
@@ -439,14 +386,12 @@ export const ProductsList: React.FC<ProductsListProps> = ({
 
           <div className="px-3 py-2 border-top">
             <span className="text-muted small">
-              Kartları sürükleyip bırakarak sıralamayı değiştirebilirsin.
-              Değişiklikleri kaydetmek için{" "}
-              <strong>Sıralamayı Kaydet</strong> butonunu kullan.
+              Kartları sürükleyip bırakarak sıralamayı değiştirebilirsin. Değişiklikleri kaydetmek
+              için <strong>Sıralamayı Kaydet</strong> butonunu kullan.
             </span>
           </div>
         </div>
 
-        {/* Pagination */}
         {pageCount > 1 && (
           <div className="py-2">
             <Pagination>
@@ -462,7 +407,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                 </PaginationItem>
 
                 {pages.map((p, idx) =>
-                  typeof p === "number" ? (
+                  typeof p === 'number' ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import {
   useListProductFaqsAdminQuery,
   useReplaceProductFaqsAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/products_admin.faqs.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import type {
   AdminProductFaqDto,

@@ -3,8 +3,8 @@
 // Admin FAQ Listesi (tablo) – Kategorisiz sade liste
 // =============================================================
 
-import React from "react";
-import type { FaqDto } from "@/integrations/types/faqs.types";
+import React from 'react';
+import type { FaqDto } from '@/integrations/types/faqs.types';
 
 interface FaqsListProps {
   items: FaqDto[];
@@ -15,9 +15,9 @@ interface FaqsListProps {
 }
 
 const formatDate = (value: string | null | undefined): string => {
-  if (!value) return "-";
+  if (!value) return '-';
   const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
+  if (Number.isNaN(d.getTime())) return String(value);
   return d.toLocaleString();
 };
 
@@ -37,16 +37,17 @@ export const FaqsList: React.FC<FaqsListProps> = ({
           <table className="table table-hover table-sm align-middle mb-0">
             <thead className="table-light">
               <tr>
-                <th style={{ width: "5%" }}>Sıra</th>
-                <th style={{ width: "35%" }}>Soru</th>
-                <th style={{ width: "25%" }}>Slug</th>
-                <th style={{ width: "10%" }}>Aktif</th>
-                <th style={{ width: "15%" }}>Tarih</th>
-                <th style={{ width: "10%" }} className="text-end">
+                <th style={{ width: '5%' }}>Sıra</th>
+                <th style={{ width: '35%' }}>Soru</th>
+                <th style={{ width: '25%' }}>Slug</th>
+                <th style={{ width: '10%' }}>Aktif</th>
+                <th style={{ width: '15%' }}>Tarih</th>
+                <th style={{ width: '10%' }} className="text-end">
                   İşlemler
                 </th>
               </tr>
             </thead>
+
             <tbody>
               {loading ? (
                 <tr>
@@ -65,17 +66,17 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                   const isActive = item.is_active === 1;
 
                   const created =
-                    typeof item.created_at === "string"
+                    typeof item.created_at === 'string'
                       ? item.created_at
-                      : item.created_at?.toString?.() ?? "";
+                      : item.created_at?.toString?.() ?? '';
 
                   const updated =
-                    typeof item.updated_at === "string"
+                    typeof item.updated_at === 'string'
                       ? item.updated_at
-                      : item.updated_at?.toString?.() ?? "";
+                      : item.updated_at?.toString?.() ?? '';
 
                   return (
-                    <tr key={item.id}>
+                    <tr key={String(item.id)}>
                       {/* sıra */}
                       <td className="text-muted small align-middle">
                         <span className="me-1">#</span>
@@ -85,27 +86,20 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                       {/* soru + locale */}
                       <td className="small">
                         <div className="fw-semibold text-truncate">
-                          {item.question || (
-                            <span className="text-muted">
-                              (soru yok)
-                            </span>
-                          )}
+                          {item.question || <span className="text-muted">(soru yok)</span>}
                         </div>
+
                         {item.locale_resolved && (
                           <div className="text-muted small">
-                            locale:{" "}
-                            <code>{item.locale_resolved}</code>
+                            locale: <code>{item.locale_resolved}</code>
                           </div>
                         )}
                       </td>
 
                       {/* slug */}
                       <td className="small">
-                        <div
-                          className="text-truncate"
-                          style={{ maxWidth: 260 }}
-                        >
-                          <code>{item.slug ?? "-"}</code>
+                        <div className="text-truncate" style={{ maxWidth: 260 }}>
+                          <code>{item.slug ?? '-'}</code>
                         </div>
                       </td>
 
@@ -116,9 +110,8 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                             className="form-check-input"
                             type="checkbox"
                             checked={isActive}
-                            onChange={(e) =>
-                              onToggleActive(item, e.target.checked)
-                            }
+                            disabled={loading}
+                            onChange={(e) => onToggleActive(item, e.target.checked)}
                           />
                         </div>
                       </td>
@@ -126,9 +119,7 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                       {/* tarihler */}
                       <td className="small">
                         <div>{formatDate(created)}</div>
-                        <div className="text-muted small">
-                          Güncelleme: {formatDate(updated)}
-                        </div>
+                        <div className="text-muted small">Güncelleme: {formatDate(updated)}</div>
                       </td>
 
                       {/* işlemler */}
@@ -138,6 +129,7 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                             type="button"
                             className="btn btn-outline-primary btn-sm"
                             onClick={() => onEdit(item)}
+                            disabled={loading}
                           >
                             Düzenle
                           </button>
@@ -145,6 +137,7 @@ export const FaqsList: React.FC<FaqsListProps> = ({
                             type="button"
                             className="btn btn-outline-danger btn-sm"
                             onClick={() => onDelete(item)}
+                            disabled={loading}
                           >
                             Sil
                           </button>

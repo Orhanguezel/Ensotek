@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/admin/products_admin.endpoints.ts
 // Admin Products (CRUD + Images + Category helpers)
+// Pattern: services_admin.endpoints.ts ile aynı (credentials include + params ?? {})
 // =============================================================
 
-import { baseApi } from "../../baseApi";
+import { baseApi } from '../../baseApi';
 import type {
   AdminProductDto,
   AdminProductListQueryParams,
@@ -12,70 +13,28 @@ import type {
   AdminProductCreatePayload,
   AdminProductUpdatePayload,
   AdminProductSetImagesPayload,
-} from "@/integrations/types/product_admin.types"; // path sende böyleyse dokunma
-import type { BoolLike } from "@/integrations/types/product.types";
-
-/* ---------- Kategori / Alt Kategori tipleri ---------- */
-
-export type AdminProductCategoryDto = {
-  id: string;
-  name: string;
-  slug: string;
-  locale: string;
-  module_key?: string | null;
-};
-
-export type AdminProductSubCategoryDto = {
-  id: string;
-  category_id: string;
-  name: string;
-  slug: string;
-  locale: string;
-};
-
-export type AdminProductCategoryListQueryParams = {
-  module_key?: string;
-  locale?: string;
-  is_active?: BoolLike;
-};
-
-export type AdminProductSubCategoryListQueryParams = {
-  category_id?: string;
-  locale?: string;
-  is_active?: BoolLike;
-};
-
-/* ---------- Reorder payload tipleri ---------- */
-
-export type AdminProductsReorderItem = {
-  id: string;
-  order_num: number;
-};
-
-export type AdminProductsReorderPayload = {
-  items: AdminProductsReorderItem[];
-};
+  AdminProductCategoryDto,
+  AdminProductSubCategoryDto,
+  AdminProductCategoryListQueryParams,
+  AdminProductSubCategoryListQueryParams,
+  AdminProductsReorderPayload,
+} from '@/integrations/types/product_admin.types';
 
 export const productsAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // -------- LIST --------
-     listProductsAdmin: build.query<
-      AdminProductListResponse,
-      AdminProductListQueryParams | void
-    >({
+    listProductsAdmin: build.query<AdminProductListResponse, AdminProductListQueryParams | void>({
       query: (params?: AdminProductListQueryParams) => ({
-        url: "/admin/products",
-        method: "GET",
-        params,
+        url: '/admin/products',
+        method: 'GET',
+        params: params ?? {}, // ✅ services pattern
+        credentials: 'include', // ✅ services pattern
       }),
-      transformResponse: (
-        response: AdminProductDto[],
-        meta,
-      ): AdminProductListResponse => {
+      transformResponse: (response: AdminProductDto[], meta): AdminProductListResponse => {
         const items = response ?? [];
         const header =
-          (meta as any)?.response?.headers?.get?.("x-total-count") ??
-          (meta as any)?.response?.headers?.get?.("X-Total-Count");
+          (meta as any)?.response?.headers?.get?.('x-total-count') ??
+          (meta as any)?.response?.headers?.get?.('X-Total-Count');
         const total = header ? Number(header) || items.length : items.length;
         return { items, total };
       },
@@ -85,21 +44,19 @@ export const productsAdminApi = baseApi.injectEndpoints({
     getProductAdmin: build.query<AdminProductDto, AdminGetProductParams>({
       query: ({ id, locale }) => ({
         url: `/admin/products/${encodeURIComponent(id)}`,
-        method: "GET",
-        // backend destekliyorsa ?locale=en
+        method: 'GET',
+        credentials: 'include', // ✅ services pattern
         params: locale ? { locale } : undefined,
       }),
     }),
 
     // -------- CREATE --------
-    createProductAdmin: build.mutation<
-      AdminProductDto,
-      AdminProductCreatePayload
-    >({
+    createProductAdmin: build.mutation<AdminProductDto, AdminProductCreatePayload>({
       query: (body) => ({
-        url: "/admin/products",
-        method: "POST",
+        url: '/admin/products',
+        method: 'POST',
         body,
+        credentials: 'include', // ✅ services pattern
       }),
     }),
 
@@ -110,17 +67,18 @@ export const productsAdminApi = baseApi.injectEndpoints({
     >({
       query: ({ id, patch }) => ({
         url: `/admin/products/${encodeURIComponent(id)}`,
-        method: "PATCH",
+        method: 'PATCH',
         body: patch,
+        credentials: 'include', // ✅ services pattern
       }),
     }),
 
-    
     // -------- DELETE --------
     deleteProductAdmin: build.mutation<{ ok?: boolean }, { id: string }>({
       query: ({ id }) => ({
         url: `/admin/products/${encodeURIComponent(id)}`,
-        method: "DELETE",
+        method: 'DELETE',
+        credentials: 'include', // ✅ services pattern
       }),
     }),
 
@@ -131,20 +89,19 @@ export const productsAdminApi = baseApi.injectEndpoints({
     >({
       query: ({ id, payload }) => ({
         url: `/admin/products/${encodeURIComponent(id)}/images`,
-        method: "PUT",
+        method: 'PUT',
         body: payload,
+        credentials: 'include', // ✅ services pattern
       }),
     }),
 
-    // -------- REORDER (drag & drop sıralama) --------
-    reorderProductsAdmin: build.mutation<
-      { ok: boolean },
-      AdminProductsReorderPayload
-    >({
+    // -------- REORDER --------
+    reorderProductsAdmin: build.mutation<{ ok: boolean }, AdminProductsReorderPayload>({
       query: (body) => ({
-        url: "/admin/products/reorder",
-        method: "POST",
+        url: '/admin/products/reorder',
+        method: 'POST',
         body,
+        credentials: 'include', // ✅ services pattern
       }),
     }),
 
@@ -154,9 +111,10 @@ export const productsAdminApi = baseApi.injectEndpoints({
       AdminProductCategoryListQueryParams | void
     >({
       query: (params?: AdminProductCategoryListQueryParams) => ({
-        url: "/admin/products/categories",
-        method: "GET",
-        params,
+        url: '/admin/products/categories',
+        method: 'GET',
+        params: params ?? {}, // ✅ services pattern
+        credentials: 'include', // ✅ services pattern
       }),
     }),
 
@@ -165,9 +123,10 @@ export const productsAdminApi = baseApi.injectEndpoints({
       AdminProductSubCategoryListQueryParams | void
     >({
       query: (params?: AdminProductSubCategoryListQueryParams) => ({
-        url: "/admin/products/subcategories",
-        method: "GET",
-        params,
+        url: '/admin/products/subcategories',
+        method: 'GET',
+        params: params ?? {}, // ✅ services pattern
+        credentials: 'include', // ✅ services pattern
       }),
     }),
   }),
@@ -183,6 +142,5 @@ export const {
   useSetProductImagesAdminMutation,
   useListProductCategoriesAdminQuery,
   useListProductSubcategoriesAdminQuery,
-  // ⬇ drag & drop sıralama kaydetmek için
   useReorderProductsAdminMutation,
 } = productsAdminApi;

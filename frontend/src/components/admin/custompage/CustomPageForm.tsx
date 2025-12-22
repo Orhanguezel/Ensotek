@@ -1,6 +1,9 @@
 // =============================================================
 // FILE: src/components/admin/custompage/CustomPageForm.tsx
 // Ensotek – Admin Custom Page Create/Edit Form (container)
+// FIX:
+//  - Locale select: AdminLocaleSelect
+//  - Ensure locale always has a concrete value in create/edit (no empty)
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -14,10 +17,10 @@ import type { LocaleOption } from "./CustomPageHeader";
 import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
 
 import {
+  useListSubCategoriesAdminQuery,
+  useListCategoriesAdminQuery,
   useLazyListCustomPagesAdminQuery,
-} from "@/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints";
-import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
-import { useListSubCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import { CustomPageMainColumn } from "./CustomPageMainColumn";
 import { CustomPageSidebarColumn } from "./CustomPageSidebarColumn";
@@ -37,22 +40,17 @@ export type CustomPageFormValues = {
   slug: string;
   content: string;
 
-  // Öne çıkan görsel
   featured_image: string;
   featured_image_asset_id: string;
   featured_image_alt: string;
 
-  // Kısa özet (summary)
   summary: string;
 
-  // SEO
   meta_title: string;
   meta_description: string;
 
-  // Tag'ler – virgülle ayrılmış string
   tags: string;
 
-  // Kategori ilişkileri
   category_id: string;
   sub_category_id: string;
 };
@@ -62,9 +60,13 @@ export type CustomPageFormProps = {
   initialData?: CustomPageDto;
   loading: boolean;
   saving: boolean;
+
   locales: LocaleOption[];
   localesLoading?: boolean;
+
+  /** MUST be a concrete locale like 'tr' */
   defaultLocale?: string;
+
   onSubmit: (values: CustomPageFormValues) => void | Promise<void>;
   onCancel?: () => void;
 };
@@ -84,12 +86,14 @@ const buildInitialValues = (
   initial: CustomPageDto | undefined,
   fallbackLocale: string | undefined,
 ): CustomPageFormValues => {
+  const safeLocale = (fallbackLocale || "tr").toLowerCase();
+
   if (!initial) {
     return {
       id: undefined,
       page_id: undefined,
 
-      locale: fallbackLocale ?? "",
+      locale: safeLocale,
       is_published: false,
       title: "",
       slug: "",
@@ -115,29 +119,24 @@ const buildInitialValues = (
       ? initial.tags.join(", ")
       : (initial as any).tags_raw ?? "";
 
-  const pageId =
-    (initial as any).page_id ??
-    (initial as any).parent_id ??
-    initial.id;
+  const pageId = (initial as any).page_id ?? (initial as any).parent_id ?? initial.id;
+
+  const resolvedLocale =
+    (initial as any).locale_resolved ??
+    (initial as any).locale ??
+    safeLocale;
 
   return {
     id: initial.id,
     page_id: pageId,
 
-    locale:
-      (initial as any).locale_resolved ??
-      (initial as any).locale ??
-      fallbackLocale ??
-      "",
+    locale: String(resolvedLocale || safeLocale).toLowerCase(),
 
     is_published: initial.is_published,
 
     title: initial.title ?? "",
     slug: initial.slug ?? "",
-    content:
-      (initial as any).content ??
-      (initial as any).content_html ??
-      "",
+    content: (initial as any).content ?? (initial as any).content_html ?? "",
 
     featured_image: initial.featured_image ?? "",
     featured_image_asset_id: initial.featured_image_asset_id ?? "",
@@ -201,19 +200,17 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const safeDefaultLocale = (defaultLocale || "tr").toLowerCase();
+
   const [values, setValues] = useState<CustomPageFormValues>(
-    buildInitialValues(initialData, defaultLocale),
+    buildInitialValues(initialData, safeDefaultLocale),
   );
 
   const [slugTouched, setSlugTouched] = useState(false);
   const [activeMode, setActiveMode] = useState<"form" | "json">("form");
 
-  const [contentImagePreview, setContentImagePreview] =
-    useState<string>("");
-
-  const [contentImageSize, setContentImageSize] =
-    useState<ContentImageSize>("lg");
-
+  const [contentImagePreview, setContentImagePreview] = useState<string>("");
+  const [contentImageSize, setContentImageSize] = useState<ContentImageSize>("lg");
   const [manualImageUrl, setManualImageUrl] = useState<string>("");
   const [manualImageAlt, setManualImageAlt] = useState<string>("");
 
@@ -221,9 +218,16 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     useLazyListCustomPagesAdminQuery();
 
   useEffect(() => {
-    setValues(buildInitialValues(initialData, defaultLocale));
+    setValues(buildInitialValues(initialData, safeDefaultLocale));
     setSlugTouched(false);
-  }, [initialData, defaultLocale]);
+  }, [initialData, safeDefaultLocale]);
+
+  // ✅ locale boş kalmasın (örn: localeOptions geç yükleniyor)
+  useEffect(() => {
+    if (!values.locale) {
+      setValues((p) => ({ ...p, locale: safeDefaultLocale }));
+    }
+  }, [values.locale, safeDefaultLocale]);
 
   const disabled = loading || saving;
 
@@ -231,24 +235,18 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     (field: keyof CustomPageFormValues) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
       const val = e.target.value;
-      setValues(
-        (prev) => ({ ...prev, [field]: val } as CustomPageFormValues),
-      );
+      setValues((prev) => ({ ...prev, [field]: val } as CustomPageFormValues));
     };
 
   const handleCheckboxChange =
     (field: keyof CustomPageFormValues) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const checked = e.target.checked;
-      setValues(
-        (prev) => ({ ...prev, [field]: checked } as CustomPageFormValues),
-      );
+      setValues((prev) => ({ ...prev, [field]: checked } as CustomPageFormValues));
     };
 
-  const handleLocaleChange = async (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const nextLocale = e.target.value;
+  const handleLocaleChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const nextLocale = String(e.target.value || safeDefaultLocale).toLowerCase();
 
     if (mode === "create" || !initialData) {
       setValues((prev) => ({ ...prev, locale: nextLocale }));
@@ -273,19 +271,15 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
         offset: 0,
       }).unwrap();
 
-      const items: CustomPageDto[] =
-        (res as any)?.items ?? (res as any) ?? [];
+      const items: CustomPageDto[] = (res as any)?.items ?? (res as any) ?? [];
 
       const match = items.find((item: any) => {
-        const itemPageId =
-          (item as any).page_id ??
-          (item as any).parent_id ??
-          item.id;
+        const itemPageId = (item as any).page_id ?? (item as any).parent_id ?? item.id;
         return itemPageId === basePageId;
       });
 
       if (match) {
-        const nextValues = buildInitialValues(match, defaultLocale);
+        const nextValues = buildInitialValues(match, safeDefaultLocale);
         nextValues.locale = nextLocale;
         setValues(nextValues);
         setSlugTouched(false);
@@ -298,19 +292,14 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     } catch (err: any) {
       const status = err?.status ?? err?.originalStatus;
       if (status === 400) {
-        console.warn(
-          "Locale change: /admin/custom_pages 400 – bu dil için liste alınamadı.",
-          err,
-        );
+        console.warn("Locale change: /admin/custom_pages 400", err);
         setValues((prev) => ({ ...prev, locale: nextLocale }));
         toast.info(
           "Seçilen dil için kayıt listesi alınamadı. Bu dilde yeni içerik oluşturabilirsin.",
         );
       } else {
         console.error("Locale change error (custom page):", err);
-        toast.error(
-          "Seçilen dil için özel sayfa yüklenirken bir hata oluştu.",
-        );
+        toast.error("Seçilen dil için özel sayfa yüklenirken bir hata oluştu.");
         setValues((prev) => ({ ...prev, locale: nextLocale }));
       }
     }
@@ -327,6 +316,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
 
     void onSubmit({
       ...values,
+      locale: (values.locale || safeDefaultLocale).toLowerCase(),
       title: values.title.trim(),
       slug: values.slug.trim(),
       summary: values.summary.trim(),
@@ -336,23 +326,21 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     });
   };
 
-  const effectiveDefaultLocale = defaultLocale ?? "tr";
+  const effectiveDefaultLocale = safeDefaultLocale;
 
   /* -------------------- Görsel metadata (storage için) -------------------- */
 
-  const imageMetadata = useMemo<
-    Record<string, string | number | boolean>
-  >(
+  const imageMetadata = useMemo<Record<string, string | number | boolean>>(
     () => ({
       module_key: "custom_page",
-      locale: values.locale || "",
+      locale: values.locale || safeDefaultLocale,
       page_slug: values.slug || values.title || "",
       ...(values.page_id ? { page_id: values.page_id } : {}),
     }),
-    [values.locale, values.slug, values.title, values.page_id],
+    [values.locale, values.slug, values.title, values.page_id, safeDefaultLocale],
   );
 
-  /* -------------------- Kategori listesi (isimle select) -------------------- */
+  /* -------------------- Kategori listesi -------------------- */
 
   const categoryQueryParams = useMemo(
     () => ({
@@ -363,23 +351,16 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     [values.locale],
   );
 
-  const {
-    data: categoryRows,
-    isLoading: isCategoriesLoading,
-  } = useListCategoriesAdminQuery(categoryQueryParams as any);
+  const { data: categoryRows, isLoading: isCategoriesLoading } =
+    useListCategoriesAdminQuery(categoryQueryParams as any);
 
   const categoryOptions: CategoryOption[] = useMemo(() => {
-    const base: CategoryOption[] = (categoryRows ?? []).map(
-      (c: CategoryDto) => ({
-        value: c.id,
-        label: (c as any).name || (c as any).slug || c.id,
-      }),
-    );
+    const base: CategoryOption[] = (categoryRows ?? []).map((c: CategoryDto) => ({
+      value: c.id,
+      label: (c as any).name || (c as any).slug || c.id,
+    }));
 
-    if (
-      values.category_id &&
-      !base.some((opt) => opt.value === values.category_id)
-    ) {
+    if (values.category_id && !base.some((opt) => opt.value === values.category_id)) {
       base.unshift({
         value: values.category_id,
         label:
@@ -402,18 +383,14 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     [values.category_id, values.locale],
   );
 
-  const {
-    data: subCategoryRows,
-    isLoading: isSubCategoriesLoading,
-  } = useListSubCategoriesAdminQuery(subCategoryQueryParams as any);
+  const { data: subCategoryRows, isLoading: isSubCategoriesLoading } =
+    useListSubCategoriesAdminQuery(subCategoryQueryParams as any);
 
   const subCategoryOptions: CategoryOption[] = useMemo(() => {
-    const base: CategoryOption[] = (subCategoryRows ?? []).map(
-      (sc: SubCategoryDto) => ({
-        value: sc.id,
-        label: (sc as any).name || (sc as any).slug || sc.id,
-      }),
-    );
+    const base: CategoryOption[] = (subCategoryRows ?? []).map((sc: SubCategoryDto) => ({
+      value: sc.id,
+      label: (sc as any).name || (sc as any).slug || sc.id,
+    }));
 
     if (
       values.sub_category_id &&
@@ -432,19 +409,14 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
   }, [subCategoryRows, values.sub_category_id, initialData]);
 
   const categoriesDisabled = disabled || isCategoriesLoading;
-  const subCategoriesDisabled =
-    disabled || isSubCategoriesLoading || !values.category_id;
+  const subCategoriesDisabled = disabled || isSubCategoriesLoading || !values.category_id;
 
-  /* -------------------- İçerik görsel ekleme handler'ı -------------------- */
+  /* -------------------- İçerik görsel ekleme -------------------- */
 
   const handleAddContentImage = (url: string, alt?: string) => {
     if (!url) return;
 
-    const htmlBlock = buildContentImageHtml(
-      url,
-      alt ?? "",
-      contentImageSize,
-    );
+    const htmlBlock = buildContentImageHtml(url, alt ?? "", contentImageSize);
 
     setContentImagePreview(url);
     setValues((prev) => ({
@@ -467,8 +439,6 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
     setManualImageAlt("");
   };
 
-  /* -------------------- Render ------------------------------------------- */
-
   return (
     <form onSubmit={handleSubmit}>
       <div className="card">
@@ -479,28 +449,22 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
             </h5>
             <div className="text-muted small">
               Başlık, slug, özet, zengin metin içerik (HTML), etiketler ve SEO
-              alanlarını doldur. Dilersen Form veya JSON modunda
-              çalışabilirsin.
+              alanlarını doldur. Dilersen Form veya JSON modunda çalışabilirsin.
             </div>
           </div>
+
           <div className="d-flex flex-column align-items-end gap-2">
             <div className="btn-group btn-group-sm">
               <button
                 type="button"
-                className={
-                  "btn btn-outline-secondary btn-sm" +
-                  (activeMode === "form" ? " active" : "")
-                }
+                className={"btn btn-outline-secondary btn-sm" + (activeMode === "form" ? " active" : "")}
                 onClick={() => setActiveMode("form")}
               >
                 Form
               </button>
               <button
                 type="button"
-                className={
-                  "btn btn-outline-secondary btn-sm" +
-                  (activeMode === "json" ? " active" : "")
-                }
+                className={"btn btn-outline-secondary btn-sm" + (activeMode === "json" ? " active" : "")}
                 onClick={() => setActiveMode("json")}
               >
                 JSON
@@ -518,11 +482,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
                   Geri
                 </button>
               )}
-              <button
-                type="submit"
-                className="btn btn-primary btn-sm"
-                disabled={disabled}
-              >
+              <button type="submit" className="btn btn-primary btn-sm" disabled={disabled}>
                 {saving
                   ? mode === "create"
                     ? "Oluşturuluyor..."
@@ -535,9 +495,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
 
             {(loading || isLocaleSwitchLoading) && (
               <span className="badge bg-secondary small mt-1">
-                {isLocaleSwitchLoading
-                  ? "Dil değiştiriliyor..."
-                  : "Yükleniyor..."}
+                {isLocaleSwitchLoading ? "Dil değiştiriliyor..." : "Yükleniyor..."}
               </span>
             )}
           </div>
@@ -548,11 +506,9 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
             <AdminJsonEditor
               value={values}
               disabled={disabled}
-              onChange={(next) =>
-                setValues(next as CustomPageFormValues)
-              }
+              onChange={(next) => setValues(next as CustomPageFormValues)}
               label="Custom Page JSON"
-              helperText="Bu JSON, formdaki tüm alanların bire bir karşılığıdır (summary, tags, kategori ilişkileri dahil). Değişiklikleri kaydetmek için üstteki 'Kaydet' butonunu kullan."
+              helperText="Bu JSON, formdaki tüm alanların bire bir karşılığıdır. Kaydetmek için üstteki 'Kaydet' butonunu kullan."
             />
           ) : (
             <div className="row g-4">
@@ -574,7 +530,6 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
               </div>
 
               <div className="col-lg-4">
-                {/* Öne çıkan görsel – CategoryFormImageColumn patterni */}
                 <CustomPageFormImageColumn
                   metadata={imageMetadata}
                   featuredImageValue={values.featured_image}
@@ -587,7 +542,6 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
                   }
                 />
 
-                {/* Diğer sidebar alanları */}
                 <div className="mt-3">
                   <CustomPageSidebarColumn
                     values={values}

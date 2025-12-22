@@ -8,7 +8,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 
 // RTK – public services
-import { useListServicesPublicQuery } from "@/integrations/rtk/hooks";
+import { useListServicesPublicQuery, useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 
 // Ortak yardımcılar
 import { excerpt } from "@/shared/text";
@@ -19,7 +19,7 @@ import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
 
 import { localizePath } from "@/i18n/url";
-import { DEFAULT_LOCALE } from "@/i18n/config";
+import { normLocaleTag } from "@/i18n/localeUtils";
 
 // Icons
 import {
@@ -57,16 +57,28 @@ function ServiceIcon({ label, size = 40 }: { label: string; size?: number }) {
 
 const Service: React.FC = () => {
   const locale = useResolvedLocale();
-
   const { ui } = useUiSection("ui_services", locale);
 
-  // ✅ Public services list – locale & default_locale gönder
-  const { data, isLoading } = useListServicesPublicQuery({
-    locale,
-    default_locale: DEFAULT_LOCALE,
-    limit: 6,
-    order: "display_order.asc",
-  });
+  // ✅ default_locale artık DB’den (locale='*') gelecek
+  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: "default_locale" });
+  const defaultLocale = useMemo(() => {
+    const v = normLocaleTag(defaultLocaleRow?.value);
+    return v || "tr";
+  }, [defaultLocaleRow?.value]);
+
+  // ✅ Public services list – locale & default_locale dinamik
+  const { data, isLoading } = useListServicesPublicQuery(
+    {
+      locale,
+      default_locale: defaultLocale,
+      limit: 6,
+      order: "display_order.asc",
+    },
+    {
+      // default_locale gelmeden istek atmak istemiyorsan açabilirsin:
+      // skip: !defaultLocaleRow?.value,
+    },
+  );
 
   const cards = useMemo(() => {
     const items = Array.isArray(data?.items) ? data!.items : [];
@@ -91,9 +103,9 @@ const Service: React.FC = () => {
         rawSummary?.trim().length
           ? excerpt(String(rawSummary), 150)
           : ui(
-            "ui_services_placeholder_summary",
-            "Service description is coming soon.",
-          );
+              "ui_services_placeholder_summary",
+              "Service description is coming soon.",
+            );
 
       return {
         id: s.id,

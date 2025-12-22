@@ -1,30 +1,22 @@
 -- =============================================================
 -- 049-8_site_settings_ui_offer.sql
 -- Ensotek – UI Offer (site_settings.ui_offer)
---   - Teklif sayfası (pages/offer/index.tsx)
---   - OfferPage container (src/components/containers/offer/OfferPage.tsx)
---   - OfferPublicForm (src/components/public/offer/OfferPublicForm.tsx)
---   - OfferSection (src/components/containers/offer/OfferSection.tsx)
---   - ServiceCta (src/components/containers/service/ServiceCta.tsx)
+--  - Value: JSON (stored as TEXT)
+--  - Localized: tr / en / de
+--  - Extendable: clone from tr as bootstrap (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
--- -------------------------------------------------------------
--- TR
--- -------------------------------------------------------------
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-VALUES
+INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
   'ui_offer',
   'tr',
-  JSON_OBJECT(
-    -- SAYFA BAŞLIĞI (src/pages/offer/index.tsx)
+  CAST(JSON_OBJECT(
     'ui_offer_page_title',           'Teklif Talep Formu',
 
-    -- OFFER PAGE CONTAINER (src/components/containers/offer/OfferPage.tsx)
     'ui_offer_heading_general',      'Teklif Talep Formu',
     'ui_offer_subtitle',
       'İhtiyacınıza özel soğutma çözümleri ve teknik danışmanlık.',
@@ -32,7 +24,6 @@ VALUES
       'Formu doldurun, satış ekibimiz en kısa sürede sizinle iletişime geçsin.',
     'ui_offer_section_label',        'Teknik Teklifler',
 
-    -- PUBLIC FORM (src/components/public/offer/OfferPublicForm.tsx)
     'ui_offer_form_heading',         'Teklif Talep Formu',
     'ui_offer_form_intro',
       'Firmanız ve talebiniz ile ilgili bilgileri paylaşın; en kısa sürede size özel teklif ile dönüş yapalım.',
@@ -61,7 +52,6 @@ VALUES
     'ui_offer_form_kvkk_alert',
       'Lütfen KVKK / şartlar onayını işaretleyin.',
 
-    -- OFFER SECTION (src/components/containers/offer/OfferSection.tsx)
     'ui_offer_heading_product',      'Bu ürün için teklif isteyin',
     'ui_offer_heading_service',      'Bu hizmet için teklif isteyin',
     'ui_offer_intro_product',
@@ -74,28 +64,22 @@ VALUES
     'ui_offer_button_service',       'Teklif sayfasına git',
     'ui_offer_button_general',       'Teklif iste',
 
-    -- SERVICE CTA (src/components/containers/service/ServiceCta.tsx)
     'ui_offer_cta_title',
       'Soğutma kuleleriniz için en uygun çözümü birlikte planlayalım.',
     'ui_offer_cta_text',
       'Sisteminizi kısaca anlatın, mühendislik ekibimiz performans ve verimlilik odaklı bir çözüm önersin.',
     'ui_offer_cta_button',           'Teklif iste'
-  ),
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
--- -------------------------------------------------------------
--- EN
--- -------------------------------------------------------------
 (
   UUID(),
   'ui_offer',
   'en',
-  JSON_OBJECT(
-    -- PAGE TITLE (src/pages/offer/index.tsx)
+  CAST(JSON_OBJECT(
     'ui_offer_page_title',           'Request an Offer',
 
-    -- OFFER PAGE CONTAINER (src/components/containers/offer/OfferPage.tsx)
     'ui_offer_heading_general',      'Request an Offer',
     'ui_offer_subtitle',
       'Tailored cooling solutions and technical consulting.',
@@ -103,7 +87,6 @@ VALUES
       'Fill in the form and our sales team will contact you as soon as possible.',
     'ui_offer_section_label',        'Technical Offers',
 
-    -- PUBLIC FORM (src/components/public/offer/OfferPublicForm.tsx)
     'ui_offer_form_heading',         'Request an Offer',
     'ui_offer_form_intro',
       'Share details about your company and request; we will get back to you with a tailored quotation.',
@@ -132,7 +115,6 @@ VALUES
     'ui_offer_form_kvkk_alert',
       'Please accept the privacy terms.',
 
-    -- OFFER SECTION (src/components/containers/offer/OfferSection.tsx)
     'ui_offer_heading_product',      'Request a quote for this product',
     'ui_offer_heading_service',      'Request a quote for this service',
     'ui_offer_intro_product',
@@ -145,31 +127,100 @@ VALUES
     'ui_offer_button_service',       'Go to offer page',
     'ui_offer_button_general',       'Request an offer',
 
-    -- SERVICE CTA (src/components/containers/service/ServiceCta.tsx)
     'ui_offer_cta_title',
       'Let’s design the most suitable cooling solution for your plant.',
     'ui_offer_cta_text',
       'Tell us briefly about your system and our engineering team will propose a performance-focused solution.',
     'ui_offer_cta_button',           'Request a quote'
-  ),
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_offer',
+  'de',
+  CAST(JSON_OBJECT(
+    'ui_offer_page_title',           'Angebot anfordern',
+
+    'ui_offer_heading_general',      'Angebot anfordern',
+    'ui_offer_subtitle',
+      'Maßgeschneiderte Kühllösungen und technische Beratung.',
+    'ui_offer_description',
+      'Füllen Sie das Formular aus – unser Vertriebsteam meldet sich schnellstmöglich bei Ihnen.',
+    'ui_offer_section_label',        'Technische Angebote',
+
+    'ui_offer_form_heading',         'Angebot anfordern',
+    'ui_offer_form_intro',
+      'Teilen Sie Informationen zu Ihrem Unternehmen und Ihrer Anfrage – wir melden uns zeitnah mit einem individuellen Angebot.',
+    'ui_offer_form_radio_general',   'Allgemeines Angebot',
+    'ui_offer_form_radio_product',   'Produkt / Ersatzteil',
+    'ui_offer_form_radio_service',   'Service (Engineering / Retrofit)',
+
+    'ui_offer_form_general_text',
+      'Bitte beschreiben Sie Ihre allgemeine Angebotsanfrage kurz.',
+    'ui_offer_form_product_text',
+      'Bitte tragen Sie die technischen Daten des benötigten Kühlturms ein.',
+    'ui_offer_form_service_text',
+      'Bitte tragen Sie die Details zur gewünschten Dienstleistung ein.',
+
+    'ui_offer_form_error',
+      'Beim Senden Ihrer Anfrage ist ein Fehler aufgetreten. Bitte versuchen Sie es später erneut.',
+    'ui_offer_form_success',
+      'Ihre Anfrage wurde erhalten. Referenznummer: ',
+    'ui_offer_form_submit',          'Angebot anfordern',
+    'ui_offer_form_submitting',      'Wird gesendet...',
+
+    'ui_offer_form_kvkk_label',
+      'Ich habe die Datenschutzrichtlinie und Nutzungsbedingungen gelesen und akzeptiere sie (erforderlich).',
+    'ui_offer_form_marketing_label',
+      'Ich möchte Aktions- und Informations-E-Mails erhalten (optional).',
+    'ui_offer_form_kvkk_alert',
+      'Bitte akzeptieren Sie die Datenschutz-/Nutzungsbedingungen.',
+
+    'ui_offer_heading_product',      'Angebot für dieses Produkt anfordern',
+    'ui_offer_heading_service',      'Angebot für diese Dienstleistung anfordern',
+    'ui_offer_intro_product',
+      'Sie können ein individuelles Angebot für dieses Produkt anfordern.',
+    'ui_offer_intro_service',
+      'Sie können ein individuelles Angebot für diese Dienstleistung anfordern.',
+    'ui_offer_intro_general',
+      'Fordern Sie ein individuelles Angebot passend zu Ihren Anforderungen an.',
+    'ui_offer_button_product',       'Zur Angebotsseite',
+    'ui_offer_button_service',       'Zur Angebotsseite',
+    'ui_offer_button_general',       'Angebot anfordern',
+
+    'ui_offer_cta_title',
+      'Lassen Sie uns gemeinsam die optimale Lösung für Ihre Kühltürme planen.',
+    'ui_offer_cta_text',
+      'Beschreiben Sie Ihr System kurz – unser Engineering-Team schlägt Ihnen eine leistungs- und effizienzorientierte Lösung vor.',
+    'ui_offer_cta_button',           'Angebot anfordern'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
--- -------------------------------------------------------------
--- TR → DE otomatik kopya (Almanca özel çeviri gelene kadar)
--- -------------------------------------------------------------
+-- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE): TR → TARGET
+SET @TARGET_LOCALE := 'de';
+
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
+SELECT
+  UUID(),
+  s.`key`,
+  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
+  s.`value`,
+  NOW(3),
+  NOW(3)
 FROM site_settings s
-WHERE s.locale = 'tr'
-  AND s.`key` = 'ui_offer'
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_offer' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t
-    WHERE t.`key` = s.`key`
-      AND t.locale = 'de'
+    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
+      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
   );

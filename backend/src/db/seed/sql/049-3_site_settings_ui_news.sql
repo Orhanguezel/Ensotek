@@ -1,107 +1,145 @@
 -- =============================================================
--- 049-3_site_settings_ui_news.sql
--- Ensotek – UI News (site_settings.ui_news)
---   - Home section, list page, detail page, more news
+-- 049-4_site_settings_ui_product.sql
+-- Ensotek – UI Products (site_settings.ui_products)
+--  - Value: JSON (stored as TEXT)
+--  - Localized: tr / en / de
+--  - Extendable: clone from tr as bootstrap (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
--- -------------------------------------------------------------
--- TR
--- -------------------------------------------------------------
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-VALUES
+INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
-  'ui_news',
+  'ui_products',
   'tr',
-  JSON_OBJECT(
-    -- HOME SECTION (src/components/containers/news/News.tsx)
-    'ui_news_subprefix',        'Ensotek',
-    'ui_news_sublabel',         'Haberler',
-    'ui_news_title_prefix',     'Güncel',
-    'ui_news_title_mark',       'Haberler',
-    'ui_news_read_more',        'Devamını oku',
-    'ui_news_read_more_aria',   'haberin detayını görüntüle',
-    'ui_news_untitled',         'Başlıksız haber',
-    'ui_news_sample_one',       'Örnek haber 1',
-    'ui_news_sample_two',       'Örnek haber 2',
-    'ui_news_view_all',         'Tüm Haberler',
+  CAST(JSON_OBJECT(
+    -- HOME SECTION
+    'ui_products_kicker_prefix',        'Ensotek',
+    'ui_products_kicker_label',         'Ürünlerimiz',
+    'ui_products_title_prefix',         'Su Soğutma',
+    'ui_products_title_mark',           'Kuleleri',
+    'ui_products_read_more',            'Detayları görüntüle',
+    'ui_products_read_more_aria',       'ürün detayını görüntüle',
+    'ui_products_price_label',          'Başlangıç fiyatı',
+    'ui_products_view_all',             'Tüm Ürünler',
+    'ui_products_empty',
+      'Şu anda görüntülenecek ürün bulunmamaktadır.',
 
-    -- LIST PAGE (src/components/containers/news/NewsPageContent.tsx)
-    'ui_news_page_title',       'Haberler',
-    'ui_news_page_intro',
-      'Ensotek ile ilgili güncel haberler, duyurular ve basın paylaşımlarımız.',
-    'ui_news_empty',
-      'Şu anda görüntülenecek haber bulunmamaktadır.',
+    -- LIST PAGE
+    'ui_products_page_title',           'Ürünlerimiz',
+    'ui_products_page_intro',
+      'Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler.',
 
-    -- DETAIL PAGE (src/components/containers/news/NewsDetail.tsx)
-    'ui_news_detail_page_title','Haber Detayı',
-    'ui_news_back_to_list',     'Tüm haberlere dön',
-    'ui_news_loading',          'Haber yükleniyor...',
-    'ui_news_not_found',        'Haber bulunamadı.',
+    -- DETAIL PAGE
+    'ui_products_detail_page_title',    'Ürün Detayı',
+    'ui_products_back_to_list',         'Tüm ürünlere dön',
+    'ui_products_loading',              'Ürün yükleniyor...',
+    'ui_products_not_found',            'Ürün bulunamadı.',
+    'ui_products_specs_title',          'Teknik Özellikler',
+    'ui_products_tags_title',           'Etiketler',
 
-    -- MORE NEWS (src/components/containers/news/NewsMore.tsx)
-    'ui_news_more_title',       'Diğer Haberler'
-  ),
+    -- MORE PRODUCTS
+    'ui_products_more_title',           'Diğer Ürünler'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 ),
--- -------------------------------------------------------------
--- EN
--- -------------------------------------------------------------
 (
   UUID(),
-  'ui_news',
+  'ui_products',
   'en',
-  JSON_OBJECT(
+  CAST(JSON_OBJECT(
     -- HOME SECTION
-    'ui_news_subprefix',        'Ensotek',
-    'ui_news_sublabel',         'News',
-    'ui_news_title_prefix',     'Latest',
-    'ui_news_title_mark',       'News',
-    'ui_news_read_more',        'Read more',
-    'ui_news_read_more_aria',   'view news details',
-    'ui_news_untitled',         'Untitled news',
-    'ui_news_sample_one',       'Sample news 1',
-    'ui_news_sample_two',       'Sample news 2',
-    'ui_news_view_all',         'All news',
+    'ui_products_kicker_prefix',        'Ensotek',
+    'ui_products_kicker_label',         'Our Products',
+    'ui_products_title_prefix',         'Cooling',
+    'ui_products_title_mark',           'Towers',
+    'ui_products_read_more',            'View details',
+    'ui_products_read_more_aria',       'view product details',
+    'ui_products_price_label',          'Starting from',
+    'ui_products_view_all',             'All products',
+    'ui_products_empty',
+      'There are no products to display at the moment.',
 
     -- LIST PAGE
-    'ui_news_page_title',       'News',
-    'ui_news_page_intro',
-      'Latest news, announcements and press releases about Ensotek.',
-    'ui_news_empty',
-      'There are no news items to display at the moment.',
+    'ui_products_page_title',           'Products',
+    'ui_products_page_intro',
+      'Selected products for industrial cooling towers and related equipment.',
 
     -- DETAIL PAGE
-    'ui_news_detail_page_title','News',
-    'ui_news_back_to_list',     'Back to all news',
-    'ui_news_loading',          'Loading news...',
-    'ui_news_not_found',        'News not found.',
+    'ui_products_detail_page_title',    'Product Detail',
+    'ui_products_back_to_list',         'Back to all products',
+    'ui_products_loading',              'Loading product...',
+    'ui_products_not_found',            'Product not found.',
+    'ui_products_specs_title',          'Technical Specifications',
+    'ui_products_tags_title',           'Tags',
 
-    -- MORE NEWS
-    'ui_news_more_title',       'More News'
-  ),
+    -- MORE PRODUCTS
+    'ui_products_more_title',           'More Products'
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'ui_products',
+  'de',
+  CAST(JSON_OBJECT(
+    -- HOME SECTION
+    'ui_products_kicker_prefix',        'Ensotek',
+    'ui_products_kicker_label',         'Unsere Produkte',
+    'ui_products_title_prefix',         'Kühl',
+    'ui_products_title_mark',           'Türme',
+    'ui_products_read_more',            'Details anzeigen',
+    'ui_products_read_more_aria',       'Produktdetails anzeigen',
+    'ui_products_price_label',          'Ab',
+    'ui_products_view_all',             'Alle Produkte',
+    'ui_products_empty',
+      'Derzeit sind keine Produkte verfügbar.',
+
+    -- LIST PAGE
+    'ui_products_page_title',           'Produkte',
+    'ui_products_page_intro',
+      'Ausgewählte Produkte für industrielle Kühltürme und zugehörige Ausrüstung.',
+
+    -- DETAIL PAGE
+    'ui_products_detail_page_title',    'Produktdetails',
+    'ui_products_back_to_list',         'Zurück zu allen Produkten',
+    'ui_products_loading',              'Produkt wird geladen...',
+    'ui_products_not_found',            'Produkt nicht gefunden.',
+    'ui_products_specs_title',          'Technische Spezifikationen',
+    'ui_products_tags_title',           'Tags',
+
+    -- MORE PRODUCTS
+    'ui_products_more_title',           'Weitere Produkte'
+  ) AS CHAR),
   NOW(3),
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `value`    = VALUES(`value`),
-  updated_at = VALUES(updated_at);
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
 
--- -------------------------------------------------------------
--- TR → DE otomatik kopya (Almanca özel çeviri gelene kadar)
--- -------------------------------------------------------------
+-- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE): TR → TARGET
+SET @TARGET_LOCALE := 'de';
+
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT UUID(), s.`key`, 'de', s.`value`, NOW(3), NOW(3)
+SELECT
+  UUID(),
+  s.`key`,
+  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
+  s.`value`,
+  NOW(3),
+  NOW(3)
 FROM site_settings s
-WHERE s.locale = 'tr'
-  AND s.`key` = 'ui_news'
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_products' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t
-    WHERE t.`key` = s.`key`
-      AND t.locale = 'de'
+    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
+      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
   );

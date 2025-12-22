@@ -1,8 +1,10 @@
+-- =============================================================
 -- 141_faqs_seed.sql
 -- Multilingual FAQs seed (faqs + faqs_i18n)
 --  - Şema 140_faqs.sql içinde tanımlı olmalı (DROP/CREATE yok)
 --  - Burada sadece INSERT / ON DUPLICATE KEY UPDATE var
---  - TR + EN örnek kayıtlar, ileride yeni locale eklenebilir
+--  - TR + EN + DE örnek kayıtlar
+-- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
@@ -26,11 +28,10 @@ ON DUPLICATE KEY UPDATE
   `display_order` = VALUES(`display_order`),
   `updated_at`    = VALUES(`updated_at`);
 
--- =============================================================
--- SEED: I18N KAYITLAR (faqs_i18n) – TR + EN
---  NOT: category string alanı yok; kategori ID bazlı parent’tan gelecek.
--- =============================================================
 
+-- =============================================================
+-- SEED: I18N KAYITLAR (faqs_i18n) – TR + EN + DE
+-- =============================================================
 INSERT INTO `faqs_i18n`
 (`id`,
  `faq_id`,
@@ -41,6 +42,7 @@ INSERT INTO `faqs_i18n`
  `created_at`,
  `updated_at`)
 VALUES
+
 -- 1) Teslimat / Delivery
 ('aaaa1111-1111-1111-1111-111111111111',
  '11111111-1111-1111-1111-111111111111',
@@ -59,6 +61,17 @@ VALUES
  'how-fast-are-products-delivered',
  '2024-01-01 00:00:00.000',
  '2024-01-01 00:00:00.000'),
+
+-- DE
+('aaaa1111-1111-1111-1111-333333333333',
+ '11111111-1111-1111-1111-111111111111',
+ 'de',
+ 'Wie schnell werden Produkte geliefert?',
+ 'Sobald Ihre Zahlung bestätigt ist, wird Ihr Produkt automatisch an Ihre E-Mail-Adresse und in Ihr Kundenkonto geliefert. Die durchschnittliche Lieferzeit beträgt 1–2 Minuten.',
+ 'wie-schnell-werden-produkte-geliefert',
+ '2024-01-01 00:00:00.000',
+ '2024-01-01 00:00:00.000'),
+
 
 -- 2) Ödeme yöntemleri / Payment methods
 ('bbbb2222-2222-2222-2222-222222222222',
@@ -79,6 +92,17 @@ VALUES
  '2024-01-01 00:00:00.000',
  '2024-01-01 00:00:00.000'),
 
+-- DE
+('bbbb2222-2222-2222-2222-444444444444',
+ '22222222-2222-2222-2222-222222222222',
+ 'de',
+ 'Welche Zahlungsmethoden akzeptieren Sie?',
+ 'Sie können per Kreditkarte, Banküberweisung, Papara, PayTR, Shopier und Kryptowährung (Coinbase Commerce) bezahlen. Alle Zahlungen sind durch SSL-Verschlüsselung geschützt.',
+ 'welche-zahlungsmethoden-akzeptieren-sie',
+ '2024-01-01 00:00:00.000',
+ '2024-01-01 00:00:00.000'),
+
+
 -- 3) Ürün çalışmazsa / Returns & warranty
 ('cccc3333-3333-3333-3333-333333333333',
  '33333333-3333-3333-3333-333333333333',
@@ -97,6 +121,17 @@ VALUES
  'what-happens-if-the-product-does-not-work',
  '2024-01-01 00:00:00.000',
  '2024-01-01 00:00:00.000'),
+
+-- DE
+('cccc3333-3333-3333-3333-555555555555',
+ '33333333-3333-3333-3333-333333333333',
+ 'de',
+ 'Was passiert, wenn das Produkt nicht funktioniert?',
+ 'Wenn das gekaufte Produkt nicht funktioniert oder fehlerhaft ist, können Sie innerhalb von 7 Tagen unser Support-Team kontaktieren und einen Austausch oder eine Rückerstattung anfordern. Alle unsere Produkte sind durch eine Garantie abgedeckt.',
+ 'was-passiert-wenn-das-produkt-nicht-funktioniert',
+ '2024-01-01 00:00:00.000',
+ '2024-01-01 00:00:00.000'),
+
 
 -- 4) Toplu alım / Bulk purchase & discounts
 ('dddd4444-4444-4444-4444-444444444444',
@@ -117,6 +152,17 @@ VALUES
  '2024-01-01 00:00:00.000',
  '2024-01-01 00:00:00.000'),
 
+-- DE
+('dddd4444-4444-4444-4444-666666666666',
+ '44444444-4444-4444-4444-444444444444',
+ 'de',
+ 'Gibt es Rabatte bei Sammelbestellungen?',
+ 'Ja! Für 5+ Produkte wird automatisch ein Rabatt von 5% und für 10+ Produkte ein Rabatt von 10% angewendet. Für größere Bestellungen kontaktieren Sie bitte unser Sales-Team.',
+ 'gibt-es-rabatte-bei-sammelbestellungen',
+ '2024-01-01 00:00:00.000',
+ '2024-01-01 00:00:00.000'),
+
+
 -- 5) Lisans kullanımı / License usage
 ('eeee5555-5555-5555-5555-555555555555',
  '55555555-5555-5555-5555-555555555555',
@@ -136,6 +182,17 @@ VALUES
  '2024-01-01 00:00:00.000',
  '2024-01-01 00:00:00.000'),
 
+-- DE
+('eeee5555-5555-5555-5555-777777777777',
+ '55555555-5555-5555-5555-555555555555',
+ 'de',
+ 'Auf wie vielen Geräten können Lizenzen genutzt werden?',
+ 'Jedes Produkt hat eigene Lizenzbedingungen. Auf der Produktdetailseite finden Sie den Lizenztyp und die Anzahl der Geräte. Wir bieten Einzellizenzen, Mehrfachlizenzen und zeitlich begrenzte Lizenzen an.',
+ 'auf-wie-vielen-geraeten-koennen-lizenzen-genutzt-werden',
+ '2024-01-01 00:00:00.000',
+ '2024-01-01 00:00:00.000'),
+
+
 -- 6) Destek kanalları / Support channels
 ('ffff6666-6666-6666-6666-666666666666',
  '66666666-6666-6666-6666-666666666666',
@@ -153,7 +210,18 @@ VALUES
  'You can reach us via 24/7 live chat, e-mail, WhatsApp or Telegram. You can also create a support ticket from your customer panel or check the FAQ section.',
  'how-can-i-get-customer-support',
  '2024-01-01 00:00:00.000',
+ '2024-01-01 00:00:00.000'),
+
+-- DE
+('ffff6666-6666-6666-6666-888888888888',
+ '66666666-6666-6666-6666-666666666666',
+ 'de',
+ 'Wie erhalte ich Kundensupport?',
+ 'Sie erreichen uns über 24/7 Live-Chat, E-Mail, WhatsApp oder Telegram. Alternativ können Sie im Kundenkonto ein Support-Ticket erstellen oder den FAQ-Bereich nutzen.',
+ 'wie-erhalte-ich-kundensupport',
+ '2024-01-01 00:00:00.000',
  '2024-01-01 00:00:00.000')
+
 ON DUPLICATE KEY UPDATE
   `question`   = VALUES(`question`),
   `answer`     = VALUES(`answer`),

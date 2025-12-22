@@ -2,10 +2,10 @@
 -- 040.1_site_meta_default.sql
 -- (Extended) Default Meta + Global SEO (NEW STANDARD)
 --
--- Adds:
---   - CREATE TABLE IF NOT EXISTS site_settings  (guard)
---   - seo      (primary)
---   - site_seo (fallback)
+-- Standard (Future-proof):
+--   - GLOBAL defaults => locale='*'  (seo, site_seo)
+--   - Localized overrides optional => locale='tr','en','de',...
+--   - site_meta_default => localized (per-locale)
 --
 -- Compatible with:
 --   - src/seo/serverMetadata.ts (fetchSeoObject/buildMetadataFromSeo)
@@ -16,7 +16,7 @@ SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
 -- -------------------------------------------------------------
--- TABLE GUARD (Seed sırası bozulsa bile 1146 olmasın)
+-- TABLE GUARD
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `site_settings` (
   `id`         CHAR(36)      NOT NULL,
@@ -33,18 +33,92 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------
--- Helper: default OG image path (relative path OK)
--- serverMetadata.ts absUrl() ile mutlak yapıyor.
+-- Helper: default OG image path (relative OK)
+-- serverMetadata.ts absUrl() ile mutlak yapar
 -- -------------------------------------------------------------
 SET @OG_DEFAULT := '/img/og-default.jpg';
 
 -- =============================================================
--- GLOBAL SEO (NEW STANDARD)
+-- GLOBAL SEO DEFAULTS (NEW STANDARD)
 -- Keys: seo (primary) + site_seo (fallback)
--- value is stored as TEXT => CAST(JSON_OBJECT(...) AS CHAR)
+-- locale='*' => tüm diller için default
 -- =============================================================
 
--- PRIMARY: seo
+-- PRIMARY: seo (GLOBAL DEFAULT)
+INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
+(
+  UUID(),
+  'seo',
+  '*',
+  CAST(JSON_OBJECT(
+    'site_name',      'Ensotek',
+    'title_default',  'Ensotek',
+    'title_template', '%s | Ensotek',
+    'description',    'Ensotek Energy Systems provides industrial solutions and energy efficiency services.',
+    'open_graph', JSON_OBJECT(
+      'type',   'website',
+      'image',  @OG_DEFAULT,
+      'images', JSON_ARRAY(@OG_DEFAULT)
+    ),
+    'twitter', JSON_OBJECT(
+      'card',    'summary_large_image',
+      'site',    '',
+      'creator', ''
+    ),
+    'robots', JSON_OBJECT(
+      'noindex', false,
+      'index',   true,
+      'follow',  true
+    )
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+)
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- FALLBACK: site_seo (GLOBAL DEFAULT)
+INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
+(
+  UUID(),
+  'site_seo',
+  '*',
+  CAST(JSON_OBJECT(
+    'site_name',      'Ensotek',
+    'title_default',  'Ensotek',
+    'title_template', '%s | Ensotek',
+    'description',    'Ensotek Energy Systems provides industrial solutions and energy efficiency services.',
+    'open_graph', JSON_OBJECT(
+      'type',   'website',
+      'image',  @OG_DEFAULT,
+      'images', JSON_ARRAY(@OG_DEFAULT)
+    ),
+    'twitter', JSON_OBJECT(
+      'card',    'summary_large_image',
+      'site',    '',
+      'creator', ''
+    ),
+    'robots', JSON_OBJECT(
+      'noindex', false,
+      'index',   true,
+      'follow',  true
+    )
+  ) AS CHAR),
+  NOW(3),
+  NOW(3)
+)
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- =============================================================
+-- OPTIONAL: LOCALE OVERRIDES (3 dil için örnek)
+-- Not: İleride yeni dil eklenirse eklemek zorunda değilsin.
+--      Yoksa locale='*' değerleri çalışır.
+-- =============================================================
+
+-- seo overrides
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
@@ -134,7 +208,7 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
--- FALLBACK: site_seo (seo yoksa bunu kullanır)
+-- site_seo overrides (fallback) – genelde seo ile aynı tutulur
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
@@ -225,11 +299,9 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- VAR OLANLARI SİLME: site_meta_default (senin mevcut içerik)
--- (Sadece JSON'u TEXT standardına uyumlu CAST ile yazıyorum)
+-- site_meta_default (localized) – 3 dil
 -- =============================================================
 
--- TR varsayılan meta
 INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
 (
   UUID(),
@@ -242,13 +314,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   ) AS CHAR),
   NOW(3),
   NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `value`      = VALUES(`value`),
-  updated_at   = VALUES(updated_at);
-
--- EN varsayılan meta
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
+),
 (
   UUID(),
   'site_meta_default',
@@ -260,13 +326,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   ) AS CHAR),
   NOW(3),
   NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `value`      = VALUES(`value`),
-  updated_at   = VALUES(updated_at);
-
--- DE varsayılan meta
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
+),
 (
   UUID(),
   'site_meta_default',
@@ -281,4 +341,4 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 )
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
-  updated_at   = VALUES(updated_at);
+  `updated_at` = VALUES(`updated_at`);

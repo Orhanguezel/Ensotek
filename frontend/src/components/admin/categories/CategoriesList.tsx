@@ -4,8 +4,8 @@
 // (Bootstrap table + mobile cards + drag & drop reorder + pagination)
 // =============================================================
 
-import React, { useEffect, useState } from "react";
-import type { CategoryDto } from "@/integrations/types/category.types";
+import React, { useEffect, useMemo, useState } from 'react';
+import type { CategoryDto } from '@/integrations/types/category.types';
 import {
   Pagination,
   PaginationContent,
@@ -14,14 +14,14 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 // Küçük yardımcı – description / value özet
 function formatText(v: unknown, max = 80): string {
-  if (v === null || v === undefined) return "";
+  if (v === null || v === undefined) return '';
   const s = String(v);
   if (s.length <= max) return s;
-  return s.slice(0, max - 3) + "...";
+  return s.slice(0, max - 3) + '...';
 }
 
 export type CategoriesListProps = {
@@ -52,7 +52,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
   onSaveOrder,
   savingOrder,
 }) => {
-  const rows = items || [];
+  const rows = useMemo(() => items || [], [items]);
   const totalItems = rows.length;
   const hasData = totalItems > 0;
 
@@ -74,7 +74,10 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
   const endIndex = startIndex + PAGE_SIZE;
   const pageRows = rows.slice(startIndex, endIndex);
 
+  const canDrag = !!onReorder && !loading;
+
   const handleDragStart = (id: string) => {
+    if (!canDrag) return;
     setDraggingId(id);
   };
 
@@ -83,6 +86,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
   };
 
   const handleDropOn = (targetId: string) => {
+    if (!canDrag) return;
     if (!draggingId || draggingId === targetId || !onReorder) return;
 
     const currentIndex = rows.findIndex((r) => r.id === draggingId);
@@ -98,39 +102,29 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
 
   /* ---------- Pagination page butonları ---------- */
 
-  const buildPages = () => {
-    const pages: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
+  const pages = useMemo(() => {
+    const out: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
     if (pageCount <= 7) {
-      for (let i = 1; i <= pageCount; i += 1) pages.push(i);
-      return pages;
+      for (let i = 1; i <= pageCount; i += 1) out.push(i);
+      return out;
     }
 
-    pages.push(1);
+    out.push(1);
     const siblings = 1;
     let left = Math.max(2, currentPage - siblings);
     let right = Math.min(pageCount - 1, currentPage + siblings);
 
-    if (left > 2) {
-      pages.push("ellipsis-left");
-    } else {
-      left = 2;
-    }
+    if (left > 2) out.push('ellipsis-left');
+    else left = 2;
 
-    for (let i = left; i <= right; i += 1) {
-      pages.push(i);
-    }
+    for (let i = left; i <= right; i += 1) out.push(i);
 
-    if (right < pageCount - 1) {
-      pages.push("ellipsis-right");
-    } else {
-      right = pageCount - 1;
-    }
+    if (right < pageCount - 1) out.push('ellipsis-right');
+    else right = pageCount - 1;
 
-    pages.push(pageCount);
-    return pages;
-  };
-
-  const pages = buildPages();
+    out.push(pageCount);
+    return out;
+  }, [pageCount, currentPage]);
 
   const handlePageChange = (nextPage: number) => {
     if (nextPage < 1 || nextPage > pageCount) return;
@@ -142,17 +136,15 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
       <div className="card-header py-2 d-flex align-items-center justify-content-between">
         <span className="small fw-semibold">Kategori Listesi</span>
         <div className="d-flex align-items-center gap-2">
-          {loading && (
-            <span className="badge bg-secondary">Yükleniyor...</span>
-          )}
+          {loading && <span className="badge bg-secondary">Yükleniyor...</span>}
           {onSaveOrder && (
             <button
               type="button"
               className="btn btn-outline-primary btn-sm"
               onClick={onSaveOrder}
-              disabled={savingOrder || !hasData}
+              disabled={savingOrder || !hasData || loading}
             >
-              {savingOrder ? "Sıralama kaydediliyor..." : "Sıralamayı Kaydet"}
+              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
             </button>
           )}
         </div>
@@ -164,93 +156,99 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
           <table className="table table-hover mb-0">
             <thead>
               <tr>
-                <th style={{ width: "5%" }} />
-                <th style={{ width: "20%" }}>Ad</th>
-                <th style={{ width: "15%" }}>Slug</th>
-                <th style={{ width: "10%" }}>Dil</th>
-                <th style={{ width: "15%" }}>Modül</th>
-                <th style={{ width: "10%" }}>Aktif</th>
-                <th style={{ width: "10%" }}>Öne Çıkan</th>
-                <th style={{ width: "15%" }}>Güncellenme</th>
-                <th style={{ width: "10%" }} className="text-end">
+                <th style={{ width: '5%' }} />
+                <th style={{ width: '20%' }}>Ad</th>
+                <th style={{ width: '15%' }}>Slug</th>
+                <th style={{ width: '10%' }}>Dil</th>
+                <th style={{ width: '15%' }}>Modül</th>
+                <th style={{ width: '10%' }}>Aktif</th>
+                <th style={{ width: '10%' }}>Öne Çıkan</th>
+                <th style={{ width: '15%' }}>Güncellenme</th>
+                <th style={{ width: '10%' }} className="text-end">
                   İşlemler
                 </th>
               </tr>
             </thead>
+
             <tbody>
               {hasData ? (
                 pageRows.map((item, index) => {
-                  const globalIndex = startIndex + index; // 0-based
+                  const globalIndex = startIndex + index;
+
                   return (
                     <tr
                       key={item.id}
-                      draggable
+                      draggable={canDrag}
                       onDragStart={() => handleDragStart(item.id)}
                       onDragEnd={handleDragEnd}
-                      onDragOver={(e) => e.preventDefault()}
+                      onDragOver={(e) => {
+                        if (!canDrag) return;
+                        e.preventDefault();
+                      }}
                       onDrop={() => handleDropOn(item.id)}
-                      className={
-                        draggingId === item.id ? "table-active" : undefined
-                      }
-                      style={{ cursor: "move" }}
+                      className={draggingId === item.id ? 'table-active' : undefined}
+                      style={{ cursor: canDrag ? 'move' : 'default' }}
                     >
                       <td className="text-muted small align-middle">
-                        {/* Drag handle + global index */}
                         <span className="me-1">≡</span>
                         <span>{globalIndex + 1}</span>
                       </td>
+
                       <td className="align-middle">
                         <div className="fw-semibold small">{item.name}</div>
                         {item.description && (
-                          <div className="text-muted small">
-                            {formatText(item.description, 60)}
-                          </div>
+                          <div className="text-muted small">{formatText(item.description, 60)}</div>
                         )}
                       </td>
+
                       <td className="align-middle">
                         <code className="small">{item.slug}</code>
                       </td>
+
                       <td className="align-middle">
                         {item.locale || <span className="text-muted">-</span>}
                       </td>
+
                       <td className="align-middle">
                         <span className="badge bg-light text-dark border small">
-                          {item.module_key || "general"}
+                          {item.module_key || 'general'}
                         </span>
                       </td>
+
                       <td className="align-middle">
                         <div className="form-check form-switch">
                           <input
                             className="form-check-input"
                             type="checkbox"
                             checked={!!item.is_active}
+                            disabled={loading}
                             onChange={(e) =>
-                              onToggleActive &&
-                              onToggleActive(item, e.target.checked)
+                              onToggleActive && onToggleActive(item, e.target.checked)
                             }
                           />
                         </div>
                       </td>
+
                       <td className="align-middle">
                         <div className="form-check form-switch">
                           <input
                             className="form-check-input"
                             type="checkbox"
                             checked={!!item.is_featured}
+                            disabled={loading}
                             onChange={(e) =>
-                              onToggleFeatured &&
-                              onToggleFeatured(item, e.target.checked)
+                              onToggleFeatured && onToggleFeatured(item, e.target.checked)
                             }
                           />
                         </div>
                       </td>
+
                       <td className="align-middle">
                         <span className="text-muted small">
-                          {item.updated_at
-                            ? new Date(item.updated_at).toLocaleString()
-                            : "-"}
+                          {item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}
                         </span>
                       </td>
+
                       <td className="align-middle text-end">
                         <div className="d-inline-flex gap-1">
                           {onEdit && (
@@ -258,6 +256,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                               type="button"
                               className="btn btn-outline-secondary btn-sm"
                               onClick={() => onEdit(item)}
+                              disabled={loading}
                             >
                               Düzenle
                             </button>
@@ -267,6 +266,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                               type="button"
                               className="btn btn-danger btn-sm"
                               onClick={() => onDelete(item)}
+                              disabled={loading}
                             >
                               Sil
                             </button>
@@ -279,19 +279,17 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
               ) : (
                 <tr>
                   <td colSpan={9}>
-                    <div className="text-center text-muted small py-3">
-                      Kayıt bulunamadı.
-                    </div>
+                    <div className="text-center text-muted small py-3">Kayıt bulunamadı.</div>
                   </td>
                 </tr>
               )}
             </tbody>
+
             <caption className="px-3 py-2 text-start">
               <span className="text-muted small">
-                Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin.
-                Değişiklikleri kalıcı yapmak için{" "}
-                <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu
-                kullanman gerekir.
+                Satırları sürükleyip bırakarak sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
+                yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullanman
+                gerekir.
               </span>
             </caption>
           </table>
@@ -302,48 +300,50 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
           {hasData ? (
             pageRows.map((item, index) => {
               const globalIndex = startIndex + index;
+
               return (
                 <div
                   key={item.id}
                   className="border-bottom px-3 py-2"
-                  draggable
+                  draggable={canDrag}
                   onDragStart={() => handleDragStart(item.id)}
                   onDragEnd={handleDragEnd}
-                  onDragOver={(e) => e.preventDefault()}
+                  onDragOver={(e) => {
+                    if (!canDrag) return;
+                    e.preventDefault();
+                  }}
                   onDrop={() => handleDropOn(item.id)}
-                  style={{ cursor: "move" }}
+                  style={{ cursor: canDrag ? 'move' : 'default' }}
                 >
                   <div className="d-flex justify-content-between align-items-start gap-2">
                     <div>
                       <div className="fw-semibold small">
-                        <span className="text-muted me-1">
-                          #{globalIndex + 1}
-                        </span>
+                        <span className="text-muted me-1">#{globalIndex + 1}</span>
                         {item.name}
                       </div>
+
                       <div className="text-muted small">
                         <code>{item.slug}</code>
                       </div>
+
                       <div className="text-muted small mt-1">
                         <span className="me-1">Dil:</span>
-                        {item.locale || (
-                          <span className="text-muted">-</span>
-                        )}
+                        {item.locale || <span className="text-muted">-</span>}
                         <span className="ms-2 me-1">Modül:</span>
                         <span className="badge bg-light text-dark border">
-                          {item.module_key || "general"}
+                          {item.module_key || 'general'}
                         </span>
                       </div>
+
                       {item.description && (
                         <div className="text-muted small mt-1">
                           {formatText(item.description, 80)}
                         </div>
                       )}
+
                       <div className="text-muted small mt-1">
                         <span className="me-1">Güncellenme:</span>
-                        {item.updated_at
-                          ? new Date(item.updated_at).toLocaleString()
-                          : "-"}
+                        {item.updated_at ? new Date(item.updated_at).toLocaleString() : '-'}
                       </div>
                     </div>
 
@@ -353,33 +353,32 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                           className="form-check-input"
                           type="checkbox"
                           checked={!!item.is_active}
-                          onChange={(e) =>
-                            onToggleActive &&
-                            onToggleActive(item, e.target.checked)
-                          }
+                          disabled={loading}
+                          onChange={(e) => onToggleActive && onToggleActive(item, e.target.checked)}
                         />
                         <label className="form-check-label">Aktif</label>
                       </div>
+
                       <div className="form-check form-switch small">
                         <input
                           className="form-check-input"
                           type="checkbox"
                           checked={!!item.is_featured}
+                          disabled={loading}
                           onChange={(e) =>
-                            onToggleFeatured &&
-                            onToggleFeatured(item, e.target.checked)
+                            onToggleFeatured && onToggleFeatured(item, e.target.checked)
                           }
                         />
-                        <label className="form-check-label">
-                          Öne çıkan
-                        </label>
+                        <label className="form-check-label">Öne çıkan</label>
                       </div>
+
                       <div className="d-flex gap-1 mt-1">
                         {onEdit && (
                           <button
                             type="button"
                             className="btn btn-outline-secondary btn-sm"
                             onClick={() => onEdit(item)}
+                            disabled={loading}
                           >
                             Düzenle
                           </button>
@@ -389,6 +388,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                             type="button"
                             className="btn btn-danger btn-sm"
                             onClick={() => onDelete(item)}
+                            disabled={loading}
                           >
                             Sil
                           </button>
@@ -400,17 +400,14 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
               );
             })
           ) : (
-            <div className="px-3 py-3 text-center text-muted small">
-              Kayıt bulunamadı.
-            </div>
+            <div className="px-3 py-3 text-center text-muted small">Kayıt bulunamadı.</div>
           )}
 
           <div className="px-3 py-2 border-top">
             <span className="text-muted small">
-              Mobil görünümde kayıtlar kart formatında listelenir. Kartları
-              sürükleyerek sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
-              yapmak için üstteki <strong>Sıralamayı Kaydet</strong> butonunu
-              kullan.
+              Mobil görünümde kayıtlar kart formatında listelenir. Kartları sürükleyerek sıralamayı
+              değiştirebilirsin. Değişiklikleri kalıcı yapmak için üstteki{' '}
+              <strong>Sıralamayı Kaydet</strong> butonunu kullan.
             </span>
           </div>
         </div>
@@ -431,7 +428,7 @@ export const CategoriesList: React.FC<CategoriesListProps> = ({
                 </PaginationItem>
 
                 {pages.map((p, idx) =>
-                  typeof p === "number" ? (
+                  typeof p === 'number' ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

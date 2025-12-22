@@ -1,5 +1,5 @@
 -- =============================================================
--- 071_services_tr.sql  (Ensotek services – parent + TR i18n)
+-- 071.1_services_tr.sql  (Ensotek services – parent + TR i18n)
 -- =============================================================
 
 SET NAMES utf8mb4;

@@ -3,16 +3,14 @@
 // Ensotek – Slider Listesi (Bootstrap table + drag & drop)
 // =============================================================
 
-import React, { useState } from "react";
-import type { SliderAdminDto } from "@/integrations/types/slider.types";
-import Image from "next/image";
+import React, { useState } from 'react';
+import type { SliderAdminDto } from '@/integrations/types/slider.types';
 
-// Küçük helper – uzun metin özet
 const formatText = (v: unknown, max = 80): string => {
-  if (v === null || v === undefined) return "";
+  if (v === null || v === undefined) return '';
   const s = String(v);
   if (s.length <= max) return s;
-  return s.slice(0, max - 3) + "...";
+  return s.slice(0, max - 3) + '...';
 };
 
 export type SliderListProps = {
@@ -42,30 +40,24 @@ export const SliderList: React.FC<SliderListProps> = ({
   savingOrder,
 }) => {
   const [dragId, setDragId] = useState<string | null>(null);
-  const hasData = items && items.length > 0;
+  const hasData = !!items?.length;
 
-  const handleDragStart = (
-    e: React.DragEvent<HTMLTableRowElement>,
-    id: string,
-  ) => {
+  const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, id: string) => {
     setDragId(id);
-    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e: React.DragEvent<HTMLTableRowElement>) => {
     e.preventDefault();
-    e.dataTransfer.dropEffect = "move";
+    e.dataTransfer.dropEffect = 'move';
   };
 
-  const handleDrop = (
-    e: React.DragEvent<HTMLTableRowElement>,
-    targetId: string,
-  ) => {
+  const handleDrop = (e: React.DragEvent<HTMLTableRowElement>, targetId: string) => {
     e.preventDefault();
     if (!dragId || dragId === targetId) return;
 
-    const currentIndex = items.findIndex((i) => i.id === dragId);
-    const targetIndex = items.findIndex((i) => i.id === targetId);
+    const currentIndex = items.findIndex((i) => String(i.id) === dragId);
+    const targetIndex = items.findIndex((i) => String(i.id) === targetId);
     if (currentIndex === -1 || targetIndex === -1) return;
 
     const next = [...items];
@@ -78,16 +70,12 @@ export const SliderList: React.FC<SliderListProps> = ({
 
   return (
     <div className="card">
-      {/* Header */}
       <div className="card-header d-flex justify-content-between align-items-center py-2">
         <div className="small fw-semibold">Slider Listesi</div>
         <div className="d-flex align-items-center gap-2">
           {loading && (
             <span className="small text-muted d-flex align-items-center gap-1">
-              <span
-                className="spinner-border spinner-border-sm"
-                role="status"
-              />
+              <span className="spinner-border spinner-border-sm" role="status" />
               <span>Yükleniyor...</span>
             </span>
           )}
@@ -97,7 +85,7 @@ export const SliderList: React.FC<SliderListProps> = ({
             onClick={onSaveOrder}
             disabled={!hasData || savingOrder}
           >
-            {savingOrder ? "Sıralama kaydediliyor..." : "Sıralamayı Kaydet"}
+            {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
           </button>
         </div>
       </div>
@@ -122,63 +110,58 @@ export const SliderList: React.FC<SliderListProps> = ({
                 </th>
               </tr>
             </thead>
+
             <tbody>
               {!hasData && (
                 <tr>
-                  <td
-                    colSpan={9}
-                    className="text-center py-4 small text-muted"
-                  >
-                    {loading
-                      ? "Slider kayıtları yükleniyor..."
-                      : "Henüz slider kaydı bulunmuyor."}
+                  <td colSpan={9} className="text-center py-4 small text-muted">
+                    {loading ? 'Slider kayıtları yükleniyor...' : 'Henüz slider kaydı bulunmuyor.'}
                   </td>
                 </tr>
               )}
 
               {items.map((item, index) => {
-                const img =
-                  item.image_effective_url ||
-                  item.image_url ||
-                  undefined;
+                const id = String(item.id);
+                const img = item.image_effective_url || item.image_url || '';
 
                 return (
                   <tr
-                    key={item.id}
+                    key={id}
                     draggable
-                    onDragStart={(e) => handleDragStart(e, item.id)}
+                    onDragStart={(e) => handleDragStart(e, id)}
                     onDragOver={handleDragOver}
-                    onDrop={(e) => handleDrop(e, item.id)}
+                    onDrop={(e) => handleDrop(e, id)}
                     style={{
-                      cursor: "move",
-                      opacity:
-                        dragId && dragId === item.id ? 0.6 : 1,
+                      cursor: 'move',
+                      opacity: dragId && dragId === id ? 0.6 : 1,
                     }}
                   >
                     <td className="text-muted small align-middle">
                       <span className="me-1">≡</span>
                       {index + 1}
                     </td>
+
                     <td className="align-middle">
                       {img ? (
-                        <Image
-                          src={img}
-                          alt={item.alt || item.name}
-                          width={80}
-                          height={48}
-                          className="img-thumbnail"
-                          style={{
-                            maxWidth: 80,
-                            maxHeight: 48,
-                            objectFit: "cover",
-                          }}
-                        />
+                        <div
+                          className="border rounded bg-light"
+                          style={{ width: 80, height: 48, overflow: 'hidden' }}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={img}
+                            alt={item.alt || item.name || 'slider'}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => {
+                              (e.currentTarget as HTMLImageElement).style.display = 'none';
+                            }}
+                          />
+                        </div>
                       ) : (
-                        <span className="badge bg-light text-muted small">
-                          Görsel yok
-                        </span>
+                        <span className="badge bg-light text-muted small">Görsel yok</span>
                       )}
                     </td>
+
                     <td className="align-middle">
                       <div className="fw-semibold small">
                         {item.name}
@@ -189,9 +172,7 @@ export const SliderList: React.FC<SliderListProps> = ({
                         )}
                       </div>
                       {item.description && (
-                        <div className="text-muted small">
-                          {formatText(item.description, 80)}
-                        </div>
+                        <div className="text-muted small">{formatText(item.description, 80)}</div>
                       )}
                       {item.buttonLink && (
                         <div className="text-muted small mt-1">
@@ -200,39 +181,37 @@ export const SliderList: React.FC<SliderListProps> = ({
                         </div>
                       )}
                     </td>
-                    <td className="align-middle small">
-                      {item.locale || "tr"}
-                    </td>
+
+                    <td className="align-middle small">{(item.locale || 'tr').toLowerCase()}</td>
+
                     <td className="align-middle small">
                       <code>{item.slug}</code>
                     </td>
+
                     <td className="align-middle text-center">
                       <div className="form-check form-switch d-inline-flex">
                         <input
                           className="form-check-input"
                           type="checkbox"
                           checked={!!item.is_active}
-                          onChange={(e) =>
-                            onToggleActive(item, e.target.checked)
-                          }
+                          onChange={(e) => onToggleActive(item, e.target.checked)}
                         />
                       </div>
                     </td>
+
                     <td className="align-middle text-center">
                       <div className="form-check form-switch d-inline-flex">
                         <input
                           className="form-check-input"
                           type="checkbox"
                           checked={!!item.featured}
-                          onChange={(e) =>
-                            onToggleFeatured(item, e.target.checked)
-                          }
+                          onChange={(e) => onToggleFeatured(item, e.target.checked)}
                         />
                       </div>
                     </td>
-                    <td className="align-middle text-center small">
-                      {item.display_order ?? 0}
-                    </td>
+
+                    <td className="align-middle text-center small">{item.display_order ?? 0}</td>
+
                     <td className="align-middle text-end">
                       <div className="btn-group btn-group-sm">
                         <button
@@ -255,12 +234,11 @@ export const SliderList: React.FC<SliderListProps> = ({
                 );
               })}
             </tbody>
+
             <caption className="px-3 py-2 text-start">
               <span className="text-muted small">
-                Satırları sürükleyip bırakarak slider sırasını
-                değiştirebilirsin. Değişiklikleri kalıcı yapmak için{" "}
-                <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonuna
-                basman gerekir.
+                Satırları sürükleyip bırakarak slider sırasını değiştirebilirsin. Değişiklikleri
+                kalıcı yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonuna bas.
               </span>
             </caption>
           </table>

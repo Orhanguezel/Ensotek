@@ -4,11 +4,11 @@
 // Create/Edit artık ayrı form sayfalarında
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import {
   useListCategoriesAdminQuery,
@@ -16,16 +16,14 @@ import {
   useReorderCategoriesAdminMutation,
   useToggleCategoryActiveAdminMutation,
   useToggleCategoryFeaturedAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
-import type { CategoryDto } from "@/integrations/types/category.types";
-import type {
-  LocaleOption,
-  ModuleOption,
-} from "@/components/admin/categories/CategoriesHeader";
-import { CategoriesHeader } from "@/components/admin/categories/CategoriesHeader";
-import { CategoriesList } from "@/components/admin/categories/CategoriesList";
+import type { CategoryDto } from '@/integrations/types/category.types';
+import type { LocaleOption, ModuleOption } from '@/components/admin/categories/CategoriesHeader';
+import { CategoriesHeader } from '@/components/admin/categories/CategoriesHeader';
+import { CategoriesList } from '@/components/admin/categories/CategoriesList';
+
+import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 /* ------------------------------------------------------------- */
 /*  Sayfa bileşeni                                               */
@@ -34,11 +32,14 @@ import { CategoriesList } from "@/components/admin/categories/CategoriesList";
 const CategoriesAdminPage: React.FC = () => {
   const router = useRouter();
 
-  const [search, setSearch] = useState("");
-  const [localeFilter, setLocaleFilter] = useState<string>("");
-  const [moduleFilter, setModuleFilter] = useState<string>("");
+  const [search, setSearch] = useState('');
+  const [localeFilter, setLocaleFilter] = useState<string>(''); // "" => all locales
+  const [moduleFilter, setModuleFilter] = useState<string>(''); // "" => all modules
   const [showOnlyActive, setShowOnlyActive] = useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
+
+  // ✅ Locales: DB single source
+  const { localeOptions: dbLocaleOptions, loading: isLocalesLoading } = useAdminLocales();
 
   // Liste + filtreler
   const {
@@ -61,19 +62,9 @@ const CategoriesAdminPage: React.FC = () => {
     setRows(categories || []);
   }, [categories]);
 
-  // app_locales kaydını (site_settings) üzerinden dilleri çek
-  const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
-
   // Mutations
-  const [deleteCategory, { isLoading: isDeleting }] =
-    useDeleteCategoryAdminMutation();
-  const [reorderCategories, { isLoading: isReordering }] =
-    useReorderCategoriesAdminMutation();
+  const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryAdminMutation();
+  const [reorderCategories, { isLoading: isReordering }] = useReorderCategoriesAdminMutation();
   const [toggleActive] = useToggleCategoryActiveAdminMutation();
   const [toggleFeatured] = useToggleCategoryFeaturedAdminMutation();
 
@@ -82,95 +73,34 @@ const CategoriesAdminPage: React.FC = () => {
 
   /* -------------------- Locale options (DB'den) -------------------- */
 
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
+  const localeOptions: LocaleOption[] = useMemo(() => {
+    // header tarafında "" seçeneği gerekiyorsa burada ekle
+    const allOption: LocaleOption = { value: '', label: 'Tüm Diller' };
 
-    let arr: string[] = [];
+    const opts: LocaleOption[] = (dbLocaleOptions ?? []).map((x) => ({
+      value: x.value,
+      label: x.label,
+    }));
 
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
+    return [allOption, ...opts];
+  }, [dbLocaleOptions]);
 
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    return Array.from(new Set(arr));
-  }, [appLocaleRows]);
-
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
-
-  /* -------------------- Module options (DB'den dinamik) -------------------- */
+  /* -------------------- Module options (dinamik) -------------------- */
 
   const moduleCodes = useMemo(() => {
     const set = new Set<string>();
 
-    // API'den gelen tüm kategorilerdeki module_key'leri topla
     (categories ?? []).forEach((c) => {
-      if (c.module_key) {
-        set.add(String(c.module_key));
-      }
+      if (c.module_key) set.add(String(c.module_key));
     });
 
-    // Hiç kayıt yoksa fallback (boş sistemde bile en azından bunlar görünsün)
-    if (!set.size) {
-      [
-        "about",
-        "product",
-        "services",
-        "sparepart",
-        "news",
-        "library",
-        "references",
-      ].forEach((m) => set.add(m));
-    }
-
-    return Array.from(set);
+    return Array.from(set).sort();
   }, [categories]);
 
   const moduleOptions: ModuleOption[] = useMemo(
     () => [
-      { value: "", label: "Tüm Modüller" },
-      ...moduleCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = code;
-
-        if (lower === "about") label = "Hakkımızda";
-        else if (lower === "product") label = "Ürünler";
-        else if (lower === "services") label = "Hizmetler";
-        else if (lower === "sparepart") label = "Yedek Parça";
-        else if (lower === "news") label = "Haberler";
-        else if (lower === "library") label = "Kütüphane";
-        else if (lower === "references") label = "Referanslar";
-
-        return { value: code, label };
-      }),
+      { value: '', label: 'Tüm Modüller' },
+      ...moduleCodes.map((code) => ({ value: code, label: code })),
     ],
     [moduleCodes],
   );
@@ -178,7 +108,7 @@ const CategoriesAdminPage: React.FC = () => {
   /* -------------------- Create/Edit navigasyonu -------------------- */
 
   const openCreatePage = () => {
-    router.push("/admin/categories/new");
+    router.push('/admin/categories/new');
   };
 
   const openEditPage = (item: CategoryDto) => {
@@ -189,9 +119,7 @@ const CategoriesAdminPage: React.FC = () => {
 
   const handleDelete = async (item: CategoryDto) => {
     if (
-      !window.confirm(
-        `"${item.name}" kategorisini silmek üzeresin. Devam etmek istiyor musun?`,
-      )
+      !window.confirm(`"${item.name}" kategorisini silmek üzeresin. Devam etmek istiyor musun?`)
     ) {
       return;
     }
@@ -202,9 +130,7 @@ const CategoriesAdminPage: React.FC = () => {
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Kategori silinirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Kategori silinirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -212,35 +138,23 @@ const CategoriesAdminPage: React.FC = () => {
   const handleToggleActive = async (item: CategoryDto, value: boolean) => {
     try {
       await toggleActive({ id: item.id, is_active: value }).unwrap();
-      // Lokal state'i de güncelle
-      setRows((prev) =>
-        prev.map((r) => (r.id === item.id ? { ...r, is_active: value } : r)),
-      );
+      setRows((prev) => prev.map((r) => (r.id === item.id ? { ...r, is_active: value } : r)));
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Aktif durumu güncellenirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Aktif durumu güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
   const handleToggleFeatured = async (item: CategoryDto, value: boolean) => {
     try {
-      await toggleFeatured({
-        id: item.id,
-        is_featured: value,
-      }).unwrap();
-      setRows((prev) =>
-        prev.map((r) =>
-          r.id === item.id ? { ...r, is_featured: value } : r,
-        ),
-      );
+      await toggleFeatured({ id: item.id, is_featured: value }).unwrap();
+      setRows((prev) => prev.map((r) => (r.id === item.id ? { ...r, is_featured: value } : r)));
     } catch (err: any) {
       const msg =
         err?.data?.error?.message ||
         err?.message ||
-        "Öne çıkarma durumu güncellenirken bir hata oluştu.";
+        'Öne çıkarma durumu güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -253,19 +167,13 @@ const CategoriesAdminPage: React.FC = () => {
     if (!rows.length) return;
 
     try {
-      const items = rows.map((r, index) => ({
-        id: r.id,
-        display_order: index,
-      }));
-
+      const items = rows.map((r, index) => ({ id: r.id, display_order: index }));
       await reorderCategories({ items }).unwrap();
-      toast.success("Sıralama kaydedildi.");
+      toast.success('Sıralama kaydedildi.');
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Sıralama kaydedilirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Sıralama kaydedilirken bir hata oluştu.';
       toast.error(msg);
     }
   };

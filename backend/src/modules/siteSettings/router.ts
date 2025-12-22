@@ -1,13 +1,18 @@
-// =============================================================
-// FILE: src/modules/siteSettings/router.ts (PUBLIC)
-// =============================================================
-import type { FastifyInstance } from "fastify";
-import { listSiteSettings, getSiteSettingByKey } from "./controller";
+import type { FastifyInstance } from 'fastify';
+import {
+  listSiteSettings,
+  getSiteSettingByKey,
+  getAppLocalesPublic,
+  getDefaultLocalePublic,
+} from './controller';
 
-const BASE = "/site_settings";
+const BASE = '/site_settings';
 
 export async function registerSiteSettings(app: FastifyInstance) {
-  // Public read-only uçlar
   app.get(`${BASE}`, { config: { public: true } }, listSiteSettings);
   app.get(`${BASE}/:key`, { config: { public: true } }, getSiteSettingByKey);
+
+  // ✅ META (public)
+  app.get(`${BASE}/app-locales`, { config: { public: true } }, getAppLocalesPublic);
+  app.get(`${BASE}/default-locale`, { config: { public: true } }, getDefaultLocalePublic);
 }

@@ -9,7 +9,7 @@
 import React, { useMemo, useState, FormEvent } from "react";
 import { toast } from "sonner";
 
-import { useCreateReviewPublicMutation } from "@/integrations/rtk/endpoints/reviews.public.endpoints";
+import { useCreateReviewPublicMutation } from "@/integrations/rtk/hooks";
 import type { ReviewDto } from "@/integrations/types/review.types";
 
 import { useResolvedLocale } from "@/i18n/locale";

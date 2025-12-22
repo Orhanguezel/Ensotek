@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import {
   useListProductSpecsAdminQuery,
   useReplaceProductSpecsAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/product_specs_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 import type {
   AdminProductSpecDto,
   AdminProductSpecCreatePayload,

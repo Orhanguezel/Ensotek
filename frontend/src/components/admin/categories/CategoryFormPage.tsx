@@ -3,38 +3,28 @@
 // Ensotek – Kategori Form Sayfası (Create/Edit + Görsel Upload)
 // =============================================================
 
-"use client";
+'use client';
 
-import React, {
-  useEffect,
-  useMemo,
-  useState,
-  FormEvent,
-} from "react";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState, FormEvent } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
-import type { CategoryDto } from "@/integrations/types/category.types";
-import type {
-  LocaleOption,
-  ModuleOption,
-} from "./CategoriesHeader";
+import type { CategoryDto } from '@/integrations/types/category.types';
+import type { LocaleOption, ModuleOption } from './CategoriesHeader';
 
 import {
   useCreateCategoryAdminMutation,
   useUpdateCategoryAdminMutation,
   useLazyGetCategoryAdminQuery,
-} from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
-import { CategoryFormHeader } from "./CategoryFormHeader";
-import {
-  CategoryFormFields,
-  type CategoryFormStateLike,
-} from "./CategoryFormFields";
-import { CategoryFormJsonSection } from "./CategoryFormJsonSection";
-import { CategoryFormImageColumn } from "./CategoryFormImageColumn";
-import { CategoryFormFooter } from "./CategoryFormFooter";
+import { useAdminLocales } from '@/components/common/useAdminLocales';
+
+import { CategoryFormHeader } from './CategoryFormHeader';
+import { CategoryFormFields, type CategoryFormStateLike } from './CategoryFormFields';
+import { CategoryFormJsonSection } from './CategoryFormJsonSection';
+import { CategoryFormImageColumn } from './CategoryFormImageColumn';
+import { CategoryFormFooter } from './CategoryFormFooter';
 
 /* ------------------------------------------------------------- */
 
@@ -42,8 +32,8 @@ type CategoryFormState = CategoryFormStateLike & {
   id?: string; // base kategori id (tüm dillerde aynı)
 };
 
-type CategoryFormMode = "create" | "edit";
-type EditMode = "form" | "json";
+type CategoryFormMode = 'create' | 'edit';
+type EditMode = 'form' | 'json';
 
 type CategoryFormPageProps = {
   mode: CategoryFormMode;
@@ -53,65 +43,54 @@ type CategoryFormPageProps = {
 };
 
 /* ------------------------------------------------------------- */
+/* Module options (şimdilik sabit; DB’ye taşınacaksa ayrıca ele alırız) */
 
 const STATIC_MODULE_OPTIONS: ModuleOption[] = [
-  { value: "about",      label: "Hakkımızda" },
-  { value: "product",    label: "Ürünler" },
-  { value: "services",   label: "Hizmetler" },
-  { value: "sparepart",  label: "Yedek Parça" },
-  { value: "news",       label: "Haberler" },
-  { value: "library",    label: "Kütüphane" },
-  { value: "references", label: "Referanslar" },
+  { value: 'about', label: 'Hakkımızda' },
+  { value: 'product', label: 'Ürünler' },
+  { value: 'services', label: 'Hizmetler' },
+  { value: 'sparepart', label: 'Yedek Parça' },
+  { value: 'news', label: 'Haberler' },
+  { value: 'library', label: 'Kütüphane' },
+  { value: 'references', label: 'Referanslar' },
 ];
 
-const mapDtoToFormState = (item: CategoryDto): CategoryFormState => ({
-  id: item.id,
-  locale: item.locale || "tr",
-  module_key: item.module_key || "about",
-  name: item.name,
-  slug: item.slug,
-  description: item.description || "",
-  icon: item.icon || "",
-  is_active: !!item.is_active,
-  is_featured: !!item.is_featured,
-  display_order: item.display_order ?? 0,
-});
-
 const slugify = (value: string): string => {
-  if (!value) return "";
+  if (!value) return '';
 
   let s = value.trim();
 
   const trMap: Record<string, string> = {
-    ç: "c",
-    Ç: "c",
-    ğ: "g",
-    Ğ: "g",
-    ı: "i",
-    I: "i",
-    İ: "i",
-    ö: "o",
-    Ö: "o",
-    ş: "s",
-    Ş: "s",
-    ü: "u",
-    Ü: "u",
+    ç: 'c',
+    Ç: 'c',
+    ğ: 'g',
+    Ğ: 'g',
+    ı: 'i',
+    I: 'i',
+    İ: 'i',
+    ö: 'o',
+    Ö: 'o',
+    ş: 's',
+    Ş: 's',
+    ü: 'u',
+    Ü: 'u',
   };
-  s = s
-    .split("")
-    .map((ch) => trMap[ch] ?? ch)
-    .join("");
 
-  s = s.replace(/ß/g, "ss").replace(/ẞ/g, "ss");
+  s = s
+    .split('')
+    .map((ch) => trMap[ch] ?? ch)
+    .join('');
+
+  s = s.replace(/ß/g, 'ss').replace(/ẞ/g, 'ss');
 
   return s
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
     .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 };
 
 const buildJsonModelFromForm = (state: CategoryFormState) => ({
@@ -119,12 +98,30 @@ const buildJsonModelFromForm = (state: CategoryFormState) => ({
   module_key: state.module_key,
   name: state.name,
   slug: state.slug,
-  description: state.description || "",
-  icon: state.icon || "",
+  description: state.description || '',
+  icon: state.icon || '',
   is_active: state.is_active,
   is_featured: state.is_featured,
   display_order: state.display_order,
 });
+
+function mapDtoToFormState(
+  item: CategoryDto,
+  defaults: { locale: string; module_key: string },
+): CategoryFormState {
+  return {
+    id: item.id,
+    locale: item.locale || defaults.locale,
+    module_key: item.module_key || defaults.module_key,
+    name: item.name,
+    slug: item.slug,
+    description: item.description || '',
+    icon: item.icon || '',
+    is_active: !!item.is_active,
+    is_featured: !!item.is_featured,
+    display_order: item.display_order ?? 0,
+  };
+}
 
 /* ------------------------------------------------------------- */
 
@@ -135,131 +132,101 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   onDone,
 }) => {
   const router = useRouter();
-  const currentLocaleFromRouter = (
-    router.locale as string | undefined
-  )?.toLowerCase();
+
+  const currentLocaleFromRouter = (router.locale as string | undefined)?.toLowerCase();
+
+  // ✅ Locales from DB
+  const {
+    localeOptions: adminLocaleOptions,
+    defaultLocaleFromDb,
+    coerceLocale,
+    hasLocale,
+    loading: isLocalesLoading,
+  } = useAdminLocales();
+
+  const localeOptions: LocaleOption[] = useMemo(
+    () =>
+      (adminLocaleOptions ?? []).map((x) => ({
+        value: x.value,
+        label: x.label,
+      })),
+    [adminLocaleOptions],
+  );
+
+  const moduleOptions: ModuleOption[] = useMemo(() => STATIC_MODULE_OPTIONS, []);
+
+  const defaultModule = useMemo(() => moduleOptions[0]?.value ?? 'about', [moduleOptions]);
+
+  const effectiveDefaultLocale = useMemo(() => {
+    // router.locale DB’de yoksa -> DB default’a düş
+    return coerceLocale(currentLocaleFromRouter, defaultLocaleFromDb) || defaultLocaleFromDb || '';
+  }, [coerceLocale, currentLocaleFromRouter, defaultLocaleFromDb]);
 
   const [formState, setFormState] = useState<CategoryFormState | null>(null);
   const [slugTouched, setSlugTouched] = useState(false);
-  const [editMode, setEditMode] = useState<EditMode>("form");
+  const [editMode, setEditMode] = useState<EditMode>('form');
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  const [createCategory, { isLoading: isCreating }] =
-    useCreateCategoryAdminMutation();
-  const [updateCategory, { isLoading: isUpdating }] =
-    useUpdateCategoryAdminMutation();
+  const [createCategory, { isLoading: isCreating }] = useCreateCategoryAdminMutation();
+  const [updateCategory, { isLoading: isUpdating }] = useUpdateCategoryAdminMutation();
 
-  const [triggerGetCategory, { isLoading: isLocaleLoading }] =
-    useLazyGetCategoryAdminQuery();
-
-  const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
+  const [triggerGetCategory, { isLoading: isLocaleChanging }] = useLazyGetCategoryAdminQuery();
 
   const saving = isCreating || isUpdating;
   const loading = !!externalLoading || isLocalesLoading;
 
-  /* -------------------- Locale options -------------------- */
-
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-
-    let arr: string[] = [];
-
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    return Array.from(new Set(arr));
-  }, [appLocaleRows]);
-
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
-
-  const moduleOptions: ModuleOption[] = useMemo(
-    () => STATIC_MODULE_OPTIONS,
-    [],
+  const defaults = useMemo(
+    () => ({
+      locale: effectiveDefaultLocale || (localeOptions[0]?.value ?? ''),
+      module_key: defaultModule,
+    }),
+    [effectiveDefaultLocale, localeOptions, defaultModule],
   );
 
   /* -------------------- Form state init -------------------- */
 
   useEffect(() => {
-    if (mode === "edit") {
+    if (loading) return; // localeOptions hazır olana kadar bekle
+
+    if (mode === 'edit') {
       if (initialData && !formState) {
-        setFormState(mapDtoToFormState(initialData));
+        const next = mapDtoToFormState(initialData, defaults);
+        // güvenlik: locale DB dışıysa coerce et
+        next.locale = coerceLocale(next.locale, defaults.locale);
+        setFormState(next);
         setSlugTouched(false);
       }
       return;
     }
 
-    if (mode === "create" && !formState && localeOptions.length > 0) {
-      const defaultLocale =
-        currentLocaleFromRouter || localeOptions[0]?.value || "tr";
-      const defaultModule = moduleOptions[0]?.value ?? "about";
+    if (mode === 'create' && !formState) {
+      const safeLocale = coerceLocale(defaults.locale, defaults.locale);
+      const safeModule = defaults.module_key;
 
       setFormState({
         id: undefined,
-        locale: defaultLocale,
-        module_key: defaultModule,
-        name: "",
-        slug: "",
-        description: "",
-        icon: "",
+        locale: safeLocale,
+        module_key: safeModule,
+        name: '',
+        slug: '',
+        description: '',
+        icon: '',
         is_active: true,
         is_featured: false,
         display_order: 0,
       });
       setSlugTouched(false);
     }
-  }, [
-    mode,
-    initialData,
-    formState,
-    localeOptions,
-    moduleOptions,
-    currentLocaleFromRouter,
-  ]);
+  }, [mode, initialData, formState, loading, defaults, coerceLocale]);
 
   /* -------------------- Görsel metadata -------------------- */
 
   const imageMetadata = useMemo(() => {
     if (!formState) return undefined;
     return {
-      module_key: formState.module_key || "",
-      locale: formState.locale || "",
-      category_slug: formState.slug || "",
+      module_key: formState.module_key || '',
+      locale: formState.locale || '',
+      category_slug: formState.slug || '',
     };
   }, [formState]);
 
@@ -272,29 +239,25 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       if (!prev) return prev;
       const next: CategoryFormState = { ...prev };
 
-      if (typeof json.locale === "string") next.locale = json.locale;
-      if (typeof json.module_key === "string") next.module_key = json.module_key;
-      if (typeof json.name === "string") next.name = json.name;
+      if (typeof json.locale === 'string') {
+        next.locale = coerceLocale(json.locale, prev.locale);
+      }
 
-      if (typeof json.slug === "string") {
+      if (typeof json.module_key === 'string') next.module_key = json.module_key;
+      if (typeof json.name === 'string') next.name = json.name;
+
+      if (typeof json.slug === 'string') {
         next.slug = json.slug;
         setSlugTouched(true);
       }
 
-      if (typeof json.description === "string")
-        next.description = json.description;
+      if (typeof json.description === 'string') next.description = json.description;
+      if (typeof json.icon === 'string') next.icon = json.icon;
 
-      if (typeof json.icon === "string") next.icon = json.icon;
+      if (typeof json.is_active === 'boolean') next.is_active = json.is_active;
+      if (typeof json.is_featured === 'boolean') next.is_featured = json.is_featured;
 
-      if (typeof json.is_active === "boolean")
-        next.is_active = json.is_active;
-      if (typeof json.is_featured === "boolean")
-        next.is_featured = json.is_featured;
-
-      if (
-        typeof json.display_order === "number" &&
-        Number.isFinite(json.display_order)
-      ) {
+      if (typeof json.display_order === 'number' && Number.isFinite(json.display_order)) {
         next.display_order = json.display_order;
       }
 
@@ -314,78 +277,68 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   const handleNameChange = (nameValue: string) => {
     setFormState((prev) => {
       if (!prev) return prev;
-      const next: CategoryFormState = {
-        ...prev,
-        name: nameValue,
-      };
-      if (!slugTouched) {
-        next.slug = slugify(nameValue);
-      }
+
+      const next: CategoryFormState = { ...prev, name: nameValue };
+      if (!slugTouched) next.slug = slugify(nameValue);
+
       return next;
     });
   };
 
   const handleSlugChange = (slugValue: string) => {
     setSlugTouched(true);
-    setFormState((prev) =>
-      prev ? { ...prev, slug: slugValue } : prev,
-    );
+    setFormState((prev) => (prev ? { ...prev, slug: slugValue } : prev));
   };
 
   /**
    * Locale değiştir:
-   *  - Create modunda sadece formState.locale güncellenir.
+   *  - Create modunda sadece formState.locale güncellenir (DB whitelist)
    *  - Edit modunda aynı kategori id'si için backend'den id+locale ile çekilir.
-   *  - 404 gelirse: aynı id korunarak, yeni dil için çeviri moduna geçilir.
+   *  - 404 gelirse: aynı id ile, seçilen dil için yeni çeviri oluşturma moduna geçilir.
    */
-  const handleLocaleChange = async (nextLocale: string) => {
+  const handleLocaleChange = async (nextLocaleRaw: string) => {
     if (!formState) return;
 
-    if (mode === "create") {
-      setFormState((prev) =>
-        prev ? { ...prev, locale: nextLocale } : prev,
-      );
+    const nextLocale = coerceLocale(nextLocaleRaw, formState.locale);
+
+    // Kullanıcı DB’de olmayan bir locale göndermişse, select zaten üretmez ama
+    // ekstra güvenlik olsun:
+    if (!nextLocale || (hasLocale && !hasLocale(nextLocale))) {
+      toast.error('Geçersiz dil seçimi.');
+      return;
+    }
+
+    if (mode === 'create') {
+      setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
       return;
     }
 
     const baseId = (initialData?.id ?? formState.id) as string | undefined;
     if (!baseId) {
-      setFormState((prev) =>
-        prev ? { ...prev, locale: nextLocale } : prev,
-      );
+      setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
       return;
     }
 
     try {
-      const row = await triggerGetCategory({
-        id: baseId,
-        locale: nextLocale,
-      }).unwrap();
-
-      setFormState(mapDtoToFormState(row));
+      const row = await triggerGetCategory({ id: baseId, locale: nextLocale }).unwrap();
+      const next = mapDtoToFormState(row, { locale: nextLocale, module_key: formState.module_key });
+      next.locale = coerceLocale(next.locale, nextLocale);
+      setFormState(next);
       setSlugTouched(false);
     } catch (err: any) {
       const status = err?.status ?? err?.originalStatus;
+
       if (status === 404) {
-        setFormState((prev) => {
-          if (!prev) return prev;
-          return {
-            ...prev,
-            locale: nextLocale,
-          };
-        });
+        setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
         setSlugTouched(false);
         toast.info(
-          "Seçilen dil için kategori kaydı bulunamadı. Kaydettiğinde bu dil için yeni bir çeviri oluşturulacak (aynı kategori id ile).",
+          'Seçilen dil için kategori kaydı bulunamadı. Kaydettiğinde bu dil için yeni bir çeviri oluşturulacak (aynı kategori id ile).',
         );
       } else {
-        console.error("Locale change error (category):", err);
-        toast.error(
-          "Seçilen dil için kategori yüklenirken bir hata oluştu.",
-        );
-        setFormState((prev) =>
-          prev ? { ...prev, locale: nextLocale } : prev,
-        );
+        // hata -> locale yine de güncellensin ama kullanıcı bilgilensin
+        console.error('Locale change error (category):', err);
+        toast.error('Seçilen dil için kategori yüklenirken bir hata oluştu.');
+        setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
       }
     }
   };
@@ -394,14 +347,14 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
     e.preventDefault();
     if (!formState) return;
 
-    if (editMode === "json" && jsonError) {
-      toast.error("JSON geçerli değil. Lütfen JSON hatasını düzeltin.");
+    if (editMode === 'json' && jsonError) {
+      toast.error('JSON geçerli değil. Lütfen JSON hatasını düzeltin.');
       return;
     }
 
     const payloadBase = {
-      locale: formState.locale || "tr",
-      module_key: formState.module_key || "about",
+      locale: coerceLocale(formState.locale, defaults.locale),
+      module_key: formState.module_key || defaults.module_key,
       name: formState.name.trim(),
       slug: formState.slug.trim(),
       description: formState.description.trim() || undefined,
@@ -411,46 +364,47 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       display_order: formState.display_order ?? 0,
     };
 
+    if (!payloadBase.locale) {
+      toast.error('Dil bilgisi alınamadı. Lütfen site ayarlarında app_locales kontrol edin.');
+      return;
+    }
+
     if (!payloadBase.name || !payloadBase.slug) {
-      toast.error("Ad ve slug alanları zorunludur.");
+      toast.error('Ad ve slug alanları zorunludur.');
       return;
     }
 
     try {
-      if (mode === "create") {
+      if (mode === 'create') {
         await createCategory(payloadBase as any).unwrap();
-        toast.success("Kategori oluşturuldu.");
-      } else if (mode === "edit" && formState.id) {
-        await updateCategory({
-          id: formState.id,
-          patch: payloadBase as any,
-        }).unwrap();
-        toast.success("Kategori güncellendi.");
+        toast.success('Kategori oluşturuldu.');
+      } else if (mode === 'edit' && formState.id) {
+        await updateCategory({ id: formState.id, patch: payloadBase as any }).unwrap();
+        toast.success('Kategori güncellendi.');
       } else {
+        // fallback
         await createCategory(payloadBase as any).unwrap();
-        toast.success("Kategori oluşturuldu.");
+        toast.success('Kategori oluşturuldu.');
       }
 
       if (onDone) onDone();
-      else router.push("/admin/categories");
+      else router.push('/admin/categories');
     } catch (err: any) {
-      console.error("Category save error:", err);
+      console.error('Category save error:', err);
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Kategori kaydedilirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Kategori kaydedilirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
   const handleCancel = () => {
     if (onDone) onDone();
-    else router.push("/admin/categories");
+    else router.push('/admin/categories');
   };
 
   /* -------------------- Loading / not found state -------------------- */
 
-  if (mode === "edit" && externalLoading && !initialData) {
+  if (mode === 'edit' && externalLoading && !initialData) {
     return (
       <div className="container-fluid py-4">
         <div className="text-center text-muted small py-5">
@@ -461,19 +415,24 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
     );
   }
 
-  if (mode === "edit" && !externalLoading && !initialData) {
+  if (mode === 'edit' && !externalLoading && !initialData) {
     return (
       <div className="container-fluid py-4">
-        <div className="alert alert-warning small">
-          Kategori bulunamadı veya silinmiş olabilir.
-        </div>
-        <button
-          type="button"
-          className="btn btn-outline-secondary btn-sm"
-          onClick={handleCancel}
-        >
+        <div className="alert alert-warning small">Kategori bulunamadı veya silinmiş olabilir.</div>
+        <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleCancel}>
           ← Listeye dön
         </button>
+      </div>
+    );
+  }
+
+  if (loading && !formState) {
+    return (
+      <div className="container-fluid py-4">
+        <div className="text-center text-muted small py-5">
+          <div className="spinner-border spinner-border-sm me-2" />
+          Form hazırlanıyor...
+        </div>
       </div>
     );
   }
@@ -481,10 +440,13 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   if (!formState) {
     return (
       <div className="container-fluid py-4">
-        <div className="text-center text-muted small py-5">
-          <div className="spinner-border spinner-border-sm me-2" />
-          Form hazırlanıyor...
+        <div className="alert alert-warning small">
+          Form state oluşturulamadı. Lütfen site ayarlarında <code>app_locales</code> ve{' '}
+          <code>default_locale</code> değerlerini kontrol edin.
         </div>
+        <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleCancel}>
+          ← Listeye dön
+        </button>
       </div>
     );
   }
@@ -496,11 +458,7 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   return (
     <div className="container-fluid py-4">
       <div className="mb-3">
-        <button
-          type="button"
-          className="btn btn-link btn-sm px-0"
-          onClick={handleCancel}
-        >
+        <button type="button" className="btn btn-link btn-sm px-0" onClick={handleCancel}>
           ← Kategori listesine dön
         </button>
       </div>
@@ -513,20 +471,20 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
           editMode={editMode}
           onChangeEditMode={setEditMode}
           saving={saving}
-          isLocaleLoading={isLocaleLoading}
+          isLocaleLoading={isLocaleChanging}
         />
 
         <form onSubmit={handleSubmit}>
           <div className="card-body">
             <div className="row g-3">
               <div className="col-md-7">
-                {editMode === "form" ? (
+                {editMode === 'form' ? (
                   <CategoryFormFields
                     formState={formState}
                     localeOptions={localeOptions}
                     moduleOptions={moduleOptions}
                     disabled={saving || loading}
-                    isLocaleLoading={isLocaleLoading}
+                    isLocaleLoading={isLocaleChanging}
                     onLocaleChange={handleLocaleChange}
                     onFieldChange={handleFieldChange}
                     onNameChange={handleNameChange}
@@ -551,20 +509,14 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
                   iconValue={formState.icon}
                   disabled={saving}
                   onIconChange={(url) =>
-                    setFormState((prev) =>
-                      prev ? { ...prev, icon: url } : prev,
-                    )
+                    setFormState((prev) => (prev ? { ...prev, icon: url } : prev))
                   }
                 />
               </div>
             </div>
           </div>
 
-          <CategoryFormFooter
-            mode={mode}
-            saving={saving}
-            onCancel={handleCancel}
-          />
+          <CategoryFormFooter mode={mode} saving={saving} onCancel={handleCancel} />
         </form>
       </div>
     </div>

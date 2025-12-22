@@ -10,21 +10,14 @@
 "use client";
 
 import React, { useState, FormEvent, useMemo } from "react";
-import { useCreateOfferPublicMutation } from "@/integrations/rtk/hooks";
-import type { OfferRequestPublic } from "@/integrations/types/offers.types";
 
-// Products – public liste
-import { useListProductsQuery } from "@/integrations/rtk/hooks";
-import type { ProductDto } from "@/integrations/types/product.types";
 
 // Services – public liste
-import { useListServicesPublicQuery } from "@/integrations/rtk/hooks";
-import type { ServiceDto } from "@/integrations/types/services.types";
+import { useCreateOfferPublicMutation,useListProductsQuery,useListServicesPublicQuery,useSubscribeNewsletterMutation, } from "@/integrations/rtk/hooks";
 
-// Newsletter – public
-import {
-    useSubscribeNewsletterMutation,
-} from "@/integrations/rtk/hooks";
+import type { ServiceDto } from "@/integrations/types/services.types";
+import type { ProductDto } from "@/integrations/types/product.types";
+import type { OfferRequestPublic } from "@/integrations/types/offers.types";
 import type { NewsletterSubscribePayload } from "@/integrations/types/newsletter.types";
 
 // UI i18n – site_settings.ui_offer

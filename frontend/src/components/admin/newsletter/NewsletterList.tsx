@@ -3,8 +3,8 @@
 // Admin Newsletter – Liste tablosu
 // =============================================================
 
-import React from "react";
-import type { NewsletterAdminDto } from "@/integrations/types/newsletter.types";
+import React from 'react';
+import type { NewsletterAdminDto } from '@/integrations/types/newsletter.types';
 
 interface NewsletterListProps {
   items: NewsletterAdminDto[];
@@ -30,6 +30,8 @@ export const NewsletterList: React.FC<NewsletterListProps> = ({
   onToggleVerified,
   onToggleSubscribed,
 }) => {
+  const rows = items ?? [];
+
   return (
     <div className="card">
       <div className="card-body p-2">
@@ -38,11 +40,11 @@ export const NewsletterList: React.FC<NewsletterListProps> = ({
             <thead>
               <tr>
                 <th>Email</th>
-                <th style={{ width: "80px" }}>Dil</th>
-                <th style={{ width: "110px" }}>Doğrulama</th>
-                <th style={{ width: "110px" }}>Abonelik</th>
-                <th style={{ width: "220px" }}>Tarih</th>
-                <th style={{ width: "160px" }} className="text-end">
+                <th style={{ width: '80px' }}>Dil</th>
+                <th style={{ width: '110px' }}>Doğrulama</th>
+                <th style={{ width: '110px' }}>Abonelik</th>
+                <th style={{ width: '220px' }}>Tarih</th>
+                <th style={{ width: '160px' }} className="text-end">
                   İşlemler
                 </th>
               </tr>
@@ -56,7 +58,7 @@ export const NewsletterList: React.FC<NewsletterListProps> = ({
                 </tr>
               )}
 
-              {!loading && items.length === 0 && (
+              {!loading && rows.length === 0 && (
                 <tr>
                   <td colSpan={6} className="text-center py-4">
                     Kayıt bulunamadı.
@@ -65,21 +67,21 @@ export const NewsletterList: React.FC<NewsletterListProps> = ({
               )}
 
               {!loading &&
-                items.map((item) => {
+                rows.map((item) => {
                   const created =
-                    typeof item.created_at === "string"
+                    typeof item.created_at === 'string'
                       ? item.created_at
-                      : item.created_at?.toISOString?.() ?? "";
+                      : item.created_at?.toISOString?.() ?? '';
                   const updated =
-                    typeof item.updated_at === "string"
+                    typeof item.updated_at === 'string'
                       ? item.updated_at
-                      : item.updated_at?.toISOString?.() ?? "";
+                      : item.updated_at?.toISOString?.() ?? '';
                   const unsubscribed =
                     item.unsubscribed_at == null
-                      ? ""
-                      : typeof item.unsubscribed_at === "string"
-                        ? item.unsubscribed_at
-                        : item.unsubscribed_at?.toISOString?.() ?? "";
+                      ? ''
+                      : typeof item.unsubscribed_at === 'string'
+                      ? item.unsubscribed_at
+                      : item.unsubscribed_at?.toISOString?.() ?? '';
 
                   const isVerified = !!item.is_verified;
                   const isSubscribed = !!item.is_subscribed;
@@ -87,38 +89,25 @@ export const NewsletterList: React.FC<NewsletterListProps> = ({
                   return (
                     <tr key={item.id}>
                       <td>
-                        <div className="fw-semibold small">
-                          {item.email}
-                        </div>
+                        <div className="fw-semibold small">{item.email}</div>
                         <div className="text-muted small">
-                          ID:{" "}
-                          <span className="text-monospace">
-                            {item.id}
-                          </span>
+                          ID: <span className="text-monospace">{item.id}</span>
                         </div>
                       </td>
 
                       <td className="small">
-                        {item.locale || (
-                          <span className="text-muted">(yok)</span>
-                        )}
+                        {item.locale ? item.locale : <span className="text-muted">(yok)</span>}
                       </td>
 
                       <td>
                         <div className="d-flex flex-column align-items-center gap-1">
-                          {boolBadge(
-                            isVerified,
-                            "Doğrulandı",
-                            "Bekliyor",
-                          )}
+                          {boolBadge(isVerified, 'Doğrulandı', 'Bekliyor')}
                           <div className="form-check form-switch small">
                             <input
                               className="form-check-input"
                               type="checkbox"
                               checked={isVerified}
-                              onChange={(e) =>
-                                onToggleVerified(item, e.target.checked)
-                              }
+                              onChange={(e) => onToggleVerified(item, e.target.checked)}
                             />
                           </div>
                         </div>
@@ -126,22 +115,13 @@ export const NewsletterList: React.FC<NewsletterListProps> = ({
 
                       <td>
                         <div className="d-flex flex-column align-items-center gap-1">
-                          {boolBadge(
-                            isSubscribed,
-                            "Aktif",
-                            "Unsubscribed",
-                          )}
+                          {boolBadge(isSubscribed, 'Aktif', 'Unsubscribed')}
                           <div className="form-check form-switch small">
                             <input
                               className="form-check-input"
                               type="checkbox"
                               checked={isSubscribed}
-                              onChange={(e) =>
-                                onToggleSubscribed(
-                                  item,
-                                  e.target.checked,
-                                )
-                              }
+                              onChange={(e) => onToggleSubscribed(item, e.target.checked)}
                             />
                           </div>
                         </div>
@@ -150,9 +130,7 @@ export const NewsletterList: React.FC<NewsletterListProps> = ({
                       <td className="small">
                         <div>Oluşturma: {created}</div>
                         <div>Güncelleme: {updated}</div>
-                        {unsubscribed && (
-                          <div>Unsub: {unsubscribed}</div>
-                        )}
+                        {unsubscribed && <div>Unsub: {unsubscribed}</div>}
                       </td>
 
                       <td className="text-end">

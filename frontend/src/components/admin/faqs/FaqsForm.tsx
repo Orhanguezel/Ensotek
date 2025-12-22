@@ -2,12 +2,15 @@
 // FILE: src/components/admin/faqs/FaqsForm.tsx
 // Ensotek – FAQ Form Fields (LEFT COLUMN ONLY)
 // RTK FaqCreate/Update payloadları ile uyumlu
+// - Locale select: AdminLocaleSelect (shared) + normalize + disabled logic
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
-import type { LocaleOption } from "@/components/admin/faqs/FaqsHeader";
+import React from 'react';
+import type { LocaleOption } from '@/components/admin/faqs/FaqsHeader';
+
+import { AdminLocaleSelect } from '@/components/common/AdminLocaleSelect';
 
 export type FaqsFormValues = {
   locale: string;
@@ -24,13 +27,10 @@ export type FaqsFormValues = {
 };
 
 export type FaqsFormProps = {
-  mode: "create" | "edit";
+  mode: 'create' | 'edit';
   values: FaqsFormValues;
 
-  onChange: <K extends keyof FaqsFormValues>(
-    field: K,
-    value: FaqsFormValues[K],
-  ) => void;
+  onChange: <K extends keyof FaqsFormValues>(field: K, value: FaqsFormValues[K]) => void;
 
   onLocaleChange?: (locale: string) => void;
 
@@ -38,6 +38,14 @@ export type FaqsFormProps = {
   localeOptions: LocaleOption[];
   localesLoading?: boolean;
 };
+
+const toShortLocale = (v: unknown): string =>
+  String(v || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0]
+    .trim();
 
 export const FaqsForm: React.FC<FaqsFormProps> = ({
   values,
@@ -47,32 +55,38 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
   localeOptions,
   localesLoading,
 }) => {
+  const options = (localeOptions ?? [])
+    .map((x) => ({
+      value: toShortLocale(x.value),
+      label: x.label,
+    }))
+    .filter((x) => !!x.value);
+
+  const hasOptions = options.length > 0;
+
+  const value = toShortLocale(values.locale);
+
+  const handleLocale = (raw: string) => {
+    const next = toShortLocale(raw);
+    if (!next) return;
+
+    onChange('locale', next);
+    onLocaleChange?.(next);
+  };
+
   return (
     <div className="row g-2">
       {/* Locale */}
       <div className="col-md-4">
-        <label className="form-label small">
-          Dil{" "}
-          {localesLoading && (
-            <span className="spinner-border spinner-border-sm ms-1" />
-          )}
-        </label>
-        <select
-          className="form-select form-select-sm"
-          disabled={saving}
-          value={values.locale}
-          onChange={(e) => {
-            const locale = e.target.value;
-            onChange("locale", locale);
-            onLocaleChange?.(locale);
-          }}
-        >
-          {localeOptions.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <AdminLocaleSelect
+          id="faq-locale"
+          label="Dil"
+          value={value}
+          onChange={handleLocale}
+          options={options}
+          loading={!!localesLoading}
+          disabled={saving || !hasOptions}
+        />
       </div>
 
       {/* display_order */}
@@ -83,9 +97,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.display_order}
-          onChange={(e) =>
-            onChange("display_order", Number(e.target.value) || 0)
-          }
+          onChange={(e) => onChange('display_order', Number(e.target.value) || 0)}
         />
       </div>
 
@@ -96,10 +108,13 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
             type="checkbox"
             className="form-check-input"
             disabled={saving}
-            checked={values.is_active}
-            onChange={(e) => onChange("is_active", e.target.checked)}
+            checked={!!values.is_active}
+            onChange={(e) => onChange('is_active', e.target.checked)}
+            id="faq-is-active"
           />
-          <label className="form-check-label">Aktif</label>
+          <label className="form-check-label" htmlFor="faq-is-active">
+            Aktif
+          </label>
         </div>
       </div>
 
@@ -110,7 +125,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.question}
-          onChange={(e) => onChange("question", e.target.value)}
+          onChange={(e) => onChange('question', e.target.value)}
         />
       </div>
 
@@ -122,7 +137,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
           rows={5}
           disabled={saving}
           value={values.answer}
-          onChange={(e) => onChange("answer", e.target.value)}
+          onChange={(e) => onChange('answer', e.target.value)}
         />
       </div>
 
@@ -133,7 +148,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.slug}
-          onChange={(e) => onChange("slug", e.target.value)}
+          onChange={(e) => onChange('slug', e.target.value)}
         />
       </div>
     </div>

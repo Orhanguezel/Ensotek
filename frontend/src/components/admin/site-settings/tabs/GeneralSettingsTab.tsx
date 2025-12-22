@@ -1,50 +1,46 @@
 // =============================================================
 // FILE: src/components/admin/site-settings/tabs/GeneralSettingsTab.tsx
-// Genel / UI Ayarları Tab (contact_info, socials, businessHours, company_profile)
+// Ensotek – Genel / UI Ayarları (localized only) + inline raw edit
+//  - Header'da seçilen locale ne ise sadece o locale'in kayıtları gösterilir.
+//  - Keys: contact_info, socials, businessHours, company_profile, ui_header
 // =============================================================
 
-import React from "react";
-import { toast } from "sonner";
+import React, { useMemo, useState } from 'react';
+import { toast } from 'sonner';
+
 import {
   useListSiteSettingsAdminQuery,
   useUpdateSiteSettingAdminMutation,
-  type SiteSetting,
-} from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
-import type { SettingValue } from "@/integrations/types/site";
-import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+  useDeleteSiteSettingAdminMutation,
+} from '@/integrations/rtk/hooks';
 
-export type GeneralSettingsTabProps = {
-  locale: string;
-};
+import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
+
+/* ----------------------------- config ----------------------------- */
 
 const GENERAL_KEYS = [
-  "contact_info",
-  "socials",
-  "businessHours",
-  "company_profile",
+  'contact_info',
+  'socials',
+  'businessHours',
+  'company_profile',
+  'ui_header',
 ] as const;
 
 type GeneralKey = (typeof GENERAL_KEYS)[number];
 
-type FormState = Record<GeneralKey, string>;
-
-const EMPTY_FORM: FormState = {
-  contact_info: "",
-  socials: "",
-  businessHours: "",
-  company_profile: "",
+const ROWS_HINT: Record<GeneralKey, number> = {
+  contact_info: 8,
+  socials: 6,
+  businessHours: 8,
+  company_profile: 8,
+  ui_header: 10,
 };
 
-function stringifyValuePretty(v: unknown): string {
-  if (v === null || v === undefined) return "";
-  if (
-    typeof v === "string" ||
-    typeof v === "number" ||
-    typeof v === "boolean"
-  ) {
-    return String(v);
-  }
+/* ----------------------------- helpers ----------------------------- */
+
+function stringifyValuePretty(v: SettingValue): string {
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
   try {
     return JSON.stringify(v, null, 2);
   } catch {
@@ -52,102 +48,116 @@ function stringifyValuePretty(v: unknown): string {
   }
 }
 
-/**
- * Ham textarea string'ini SettingValue'a çevir
- * - Boş → null
- * - Geçerli JSON → JSON.parse sonucu (string | number | boolean | null | obje | array)
- * - JSON parse hatası → düz string
- */
-function parseValue(raw: string): SettingValue {
+function parseRawValue(raw: string): SettingValue {
   const trimmed = raw.trim();
   if (!trimmed) return null;
-
   try {
-    const parsed = JSON.parse(trimmed);
-
-    // JSON.parse çıktısı zaten SettingValue union'ına uyuyor:
-    // string | number | boolean | null | object | array
-    return parsed as SettingValue;
+    return JSON.parse(trimmed) as SettingValue;
   } catch {
-    // JSON değilse düz string olarak sakla
     return trimmed;
   }
 }
 
-function toMap(settings?: SiteSetting[] | undefined) {
-  const map = new Map<string, SiteSetting>();
-  if (settings) {
-    for (const s of settings) {
-      map.set(s.key, s);
-    }
-  }
-  return map;
+function formatValuePreview(v: SettingValue): string {
+  const s = stringifyValuePretty(v);
+  if (s.length <= 140) return s;
+  return s.slice(0, 140) + '...';
 }
 
-export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({
-  locale,
-}) => {
+function sortByGeneralKeyOrder(rows: SiteSetting[]): SiteSetting[] {
+  const order = new Map<string, number>(GENERAL_KEYS.map((k, i) => [k, i]));
+  return [...rows].sort((a, b) => {
+    const ai = order.get(a.key) ?? 999;
+    const bi = order.get(b.key) ?? 999;
+    if (ai !== bi) return ai - bi;
+    return String(a.key).localeCompare(String(b.key));
+  });
+}
+
+/* ----------------------------- component ----------------------------- */
+
+export type GeneralSettingsTabProps = {
+  locale: string; // real locale (tr/en/de)
+};
+
+export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({ locale }) => {
+  const [search, setSearch] = useState('');
+
+  // Raw edit modal
+  const [editing, setEditing] = useState<SiteSetting | null>(null);
+  const [editRaw, setEditRaw] = useState<string>('');
+
+  // ✅ Only selected locale
+  const listArgs = useMemo(() => {
+    const q = search.trim() || undefined;
+    return { locale, q, keys: GENERAL_KEYS as unknown as string[] };
+  }, [locale, search]);
+
   const {
-    data: settings,
+    data: rows,
     isLoading,
     isFetching,
     refetch,
-  } = useListSiteSettingsAdminQuery({
-    keys: GENERAL_KEYS as unknown as string[],
-    locale: locale || undefined,
+  } = useListSiteSettingsAdminQuery(listArgs, {
+    skip: !locale,
   });
 
-  const [updateSetting, { isLoading: isSaving }] =
-    useUpdateSiteSettingAdminMutation();
+  const generalRows = useMemo(() => {
+    const arr = Array.isArray(rows) ? rows : [];
 
-  const [form, setForm] = React.useState<FormState>(EMPTY_FORM);
+    // keys param backende gitse bile, client-side garanti için tekrar filtreliyoruz
+    const onlyGeneral = arr.filter((r) => r && GENERAL_KEYS.includes(r.key as GeneralKey));
+    return sortByGeneralKeyOrder(onlyGeneral);
+  }, [rows]);
 
-  // Backend’ten gelen değerleri forma bas
-  React.useEffect(() => {
-    const map = toMap(settings);
-    const next: FormState = { ...EMPTY_FORM };
+  const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
+  const [deleteSetting, { isLoading: isDeleting }] = useDeleteSiteSettingAdminMutation();
 
-    GENERAL_KEYS.forEach((key) => {
-      const row = map.get(key);
-      next[key] = row ? stringifyValuePretty(row.value) : "";
-    });
+  const busy = isLoading || isFetching || isSaving || isDeleting;
 
-    setForm(next);
-  }, [settings, locale]);
-
-  const loading = isLoading || isFetching;
-
-  const handleChange = (field: GeneralKey, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const handleEdit = (s: SiteSetting) => {
+    setEditing(s);
+    setEditRaw(stringifyValuePretty(s.value));
   };
 
-  const handleSaveAll = async () => {
+  const handleClose = () => {
+    setEditing(null);
+    setEditRaw('');
+  };
+
+  const handleSave = async () => {
+    if (!editing) return;
+
     try {
-      const localeParam = locale || undefined;
+      const value = parseRawValue(editRaw);
 
-      for (const key of GENERAL_KEYS) {
-        const raw = form[key].trim();
+      await updateSetting({
+        key: editing.key,
+        locale, // ✅ write to selected locale only
+        value,
+      }).unwrap();
 
-        // Boş bıraktıysa bu key için update göndermiyoruz; istersen burada
-        // "null yaz ve kaydet" davranışına da çevirebilirsin.
-        if (!raw) continue;
-
-        const value: SettingValue = parseValue(raw);
-
-        await updateSetting({
-          key,
-          value,
-          locale: localeParam,
-        }).unwrap();
-      }
-
-      toast.success("Genel / UI ayarları kaydedildi.");
+      toast.success(`"${editing.key}" güncellendi.`);
+      handleClose();
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Genel ayarlar kaydedilirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'Genel / UI ayarı güncellenirken hata oluştu.';
+      toast.error(msg);
+    }
+  };
+
+  const handleDelete = async (s: SiteSetting) => {
+    const ok = window.confirm(`"${s.key}" (${locale}) silinsin mi?`);
+    if (!ok) return;
+
+    try {
+      await deleteSetting({ key: s.key, locale }).unwrap();
+      toast.success(`"${s.key}" silindi.`);
+      await refetch();
+    } catch (err: any) {
+      const msg =
+        err?.data?.error?.message || err?.message || 'Genel / UI ayarı silinirken hata oluştu.';
       toast.error(msg);
     }
   };
@@ -155,111 +165,175 @@ export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({
   return (
     <div className="card">
       <div className="card-header py-2 d-flex justify-content-between align-items-center">
-        <span className="small fw-semibold">Genel / UI Ayarları</span>
-        <div className="d-flex align-items-center gap-2">
-          <span className="badge bg-light text-dark border">
-            Aktif dil: {locale || "varsayılan (fallback zinciri)"}
+        <div className="d-flex flex-column">
+          <span className="small fw-semibold">Genel / UI</span>
+          <span className="text-muted small">
+            Bu tab yalnızca seçili dilin (locale bazlı) genel/UI anahtarlarını gösterir.
           </span>
-          {loading && (
-            <span className="badge bg-secondary">Yükleniyor...</span>
-          )}
+        </div>
+
+        <div className="d-flex align-items-center gap-2">
+          <span className="badge bg-light text-dark border">Aktif dil: {locale}</span>
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            onClick={refetch}
+            disabled={busy}
+          >
+            Yenile
+          </button>
         </div>
       </div>
 
       <div className="card-body">
-        <p className="text-muted small mb-3">
-          Bu bölümde, <code>contact_info</code>, <code>socials</code>,{" "}
-          <code>businessHours</code> ve <code>company_profile</code> JSON
-          yapılarını düzenleyebilirsin. Her dil için ayrı kayıt yönetebilmek
-          için üstteki dil seçicisini kullan.
-        </p>
-
-        {/* contact_info */}
-        <div className="mb-3">
-          <label className="form-label small">
-            İletişim Bilgileri (<code>contact_info</code>)
-          </label>
-          <Textarea
-            rows={6}
-            value={form.contact_info}
-            onChange={(e) => handleChange("contact_info", e.target.value)}
-            placeholder={`Örnek JSON:
-{
-  "companyName": "Ensotek Enerji Sistemleri",
-  "phones": ["+90 212 ...", "+49 152 ..."],
-  "email": "info@ensotek.com",
-  "address": "...",
-  "whatsappNumber": "+49 ..."
-}`}
+        <div className="input-group input-group-sm mb-3">
+          <span className="input-group-text">Ara</span>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Key veya değer içinde ara"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            disabled={busy}
           />
-          <div className="form-text">
-            Geçerli JSON girerseniz nesne/array olarak saklanır.
+        </div>
+
+        {busy && (
+          <div className="mb-2">
+            <span className="badge bg-secondary">Yükleniyor...</span>
           </div>
-        </div>
+        )}
 
-        {/* socials */}
-        <div className="mb-3">
-          <label className="form-label small">
-            Sosyal Medya (<code>socials</code>)
-          </label>
-          <Textarea
-            rows={4}
-            value={form.socials}
-            onChange={(e) => handleChange("socials", e.target.value)}
-            placeholder={`Örnek JSON:
-{
-  "instagram": "https://instagram.com/ensotek",
-  "facebook": "https://facebook.com/ensotek"
-}`}
-          />
-        </div>
-
-        {/* businessHours */}
-        <div className="mb-3">
-          <label className="form-label small">
-            Çalışma Saatleri (<code>businessHours</code>)
-          </label>
-          <Textarea
-            rows={6}
-            value={form.businessHours}
-            onChange={(e) => handleChange("businessHours", e.target.value)}
-            placeholder={`Örnek JSON:
-[
-  { "day": "Pazartesi", "open": "09:00", "close": "18:00", "isClosed": false },
-  { "day": "Pazar", "open": null, "close": null, "isClosed": true }
-]`}
-          />
-        </div>
-
-        {/* company_profile */}
-        <div className="mb-3">
-          <label className="form-label small">
-            Şirket Profili (<code>company_profile</code>)
-          </label>
-          <Textarea
-            rows={6}
-            value={form.company_profile}
-            onChange={(e) => handleChange("company_profile", e.target.value)}
-            placeholder={`Örnek JSON:
-{
-  "headline": "Ensotek ile Akıllı Enerji ve Otomasyon Çözümleri",
-  "subline": "Kısa alt başlık...",
-  "body": "Uzun açıklama..."
-}`}
-          />
-        </div>
-
-        <div className="d-flex justify-content-end">
-          <Button
-            type="button"
-            variant="default"
-            disabled={isSaving}
-            onClick={handleSaveAll}
-          >
-            {isSaving ? "Kaydediliyor..." : "Tümünü Kaydet"}
-          </Button>
+        <div className="table-responsive">
+          <table className="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th style={{ width: '35%' }}>Key</th>
+                <th style={{ width: '45%' }}>Değer (Özet)</th>
+                <th style={{ width: '20%' }} className="text-end">
+                  İşlemler
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {generalRows.length ? (
+                generalRows.map((s) => (
+                  <tr key={`${s.key}_${s.locale || 'none'}`}>
+                    <td className="font-monospace small">{s.key}</td>
+                    <td>
+                      <span className="text-muted small">{formatValuePreview(s.value)}</span>
+                    </td>
+                    <td className="text-end">
+                      <div className="d-inline-flex gap-1">
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary btn-sm"
+                          onClick={() => handleEdit(s)}
+                          disabled={busy}
+                        >
+                          Düzenle
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-danger btn-sm"
+                          onClick={() => handleDelete(s)}
+                          disabled={busy}
+                        >
+                          Sil
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={3}>
+                    <div className="text-center text-muted small py-3">
+                      Kayıt bulunamadı.
+                      <div className="mt-1">
+                        Not: Bu tab sadece <strong>{locale}</strong> localeini gösterir. İlgili key
+                        bu locale’de yoksa görünmez.
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+            <caption className="pt-2">
+              <span className="text-muted small">
+                Gösterilen anahtarlar:{' '}
+                {GENERAL_KEYS.map((k) => (
+                  <code key={k} className="ms-1">
+                    {k}
+                  </code>
+                ))}
+              </span>
+            </caption>
+          </table>
         </div>
       </div>
+
+      {/* --------------------- Raw Edit Modal --------------------- */}
+      {editing && (
+        <>
+          <div className="modal-backdrop fade show" />
+
+          <div className="modal d-block" tabIndex={-1} role="dialog" aria-modal="true">
+            <div className="modal-dialog modal-lg modal-dialog-centered">
+              <div className="modal-content">
+                <div className="modal-header py-2">
+                  <h5 className="modal-title small mb-0">
+                    Düzenle: <code>{editing.key}</code>
+                    <span className="badge bg-light text-dark border ms-2">{locale}</span>
+                  </h5>
+
+                  <button
+                    type="button"
+                    className="btn-close"
+                    aria-label="Kapat"
+                    onClick={handleClose}
+                    disabled={isSaving}
+                  />
+                </div>
+
+                <div className="modal-body">
+                  <p className="text-muted small mb-2">
+                    Geçerli JSON girersen değer JSON olarak, aksi halde düz string olarak saklanır.
+                  </p>
+
+                  <label className="form-label small">Değer (raw / JSON)</label>
+                  <textarea
+                    className="form-control font-monospace"
+                    rows={ROWS_HINT[(editing.key as GeneralKey) ?? 'contact_info'] ?? 10}
+                    value={editRaw}
+                    onChange={(e) => setEditRaw(e.target.value)}
+                    spellCheck={false}
+                  />
+                </div>
+
+                <div className="modal-footer py-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary btn-sm"
+                    onClick={handleClose}
+                    disabled={isSaving}
+                  >
+                    İptal
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={handleSave}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };

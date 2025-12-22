@@ -22,7 +22,9 @@ SET @TEAM_MGMT_1    := '44440001-4444-4444-8444-444444440001';
 SET @TEAM_ENG_1     := '44440002-4444-4444-8444-444444440002';
 SET @TEAM_SERVICE_1 := '44440003-4444-4444-8444-444444440003';
 
-/* PARENT INSERT – custom_pages */
+-- -------------------------------------------------------------
+-- PARENT INSERT – custom_pages
+-- -------------------------------------------------------------
 INSERT INTO `custom_pages`
   (`id`, `is_published`, `display_order`,
    `featured_image`, `featured_image_asset_id`,
@@ -70,7 +72,9 @@ ON DUPLICATE KEY UPDATE
   `featured_image`  = VALUES(`featured_image`),
   `updated_at`      = VALUES(`updated_at`);
 
-/* I18N – TEAM_MGMT_1 (Yönetim / Management) */
+-- =============================================================
+-- I18N – TEAM_MGMT_1 (Yönetim / Management)
+-- =============================================================
 INSERT INTO `custom_pages_i18n`
   (`id`, `page_id`, `locale`,
    `title`, `slug`, `content`,
@@ -116,6 +120,25 @@ VALUES
   'ensotek,team,management,co-founder,managing director,water cooling towers',
   NOW(3),
   NOW(3)
+),
+-- DE
+(
+  UUID(),
+  @TEAM_MGMT_1,
+  'de',
+  'Mitgruender & Geschaeftsfuehrer',
+  'mitgruender-geschaeftsfuehrer',
+  JSON_OBJECT(
+    'html',
+    '<p>Der Mitgruender und Geschaeftsfuehrer von Ensotek verfuegt ueber mehr als 20 Jahre Erfahrung im Bereich Wasserkuehltuerme und Prozesskuehlung. Er hat Konzeptentwicklung, Systemauswahl und Inbetriebnahme in hunderten Industrieprojekten verantwortet.</p>'
+  ),
+  'Kurzprofil des Mitgruenders und Geschaeftsfuehrers von Ensotek mit den wichtigsten Verantwortungsbereichen und Fachkompetenzen.',
+  NULL,
+  'Ensotek Mitgruender & Geschaeftsfuehrer | Unser Team',
+  'Unternehmensprofil des Mitgruenders und Geschaeftsfuehrers von Ensotek mit Expertise in Wasserkuehltuermen und Prozesskuehlungsprojekten.',
+  'ensotek,team,management,mitgruender,geschaeftsfuehrer,wasserkuehltuerme',
+  NOW(3),
+  NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
@@ -128,7 +151,9 @@ ON DUPLICATE KEY UPDATE
   `tags`               = VALUES(`tags`),
   `updated_at`         = VALUES(`updated_at`);
 
-/* I18N – TEAM_ENG_1 (Mühendislik Ekibi / Lead Engineer) */
+-- =============================================================
+-- I18N – TEAM_ENG_1 (Mühendislik Ekibi / Lead Engineer)
+-- =============================================================
 INSERT INTO `custom_pages_i18n`
   (`id`, `page_id`, `locale`,
    `title`, `slug`, `content`,
@@ -174,6 +199,25 @@ VALUES
   'ensotek,team,engineering,senior project engineer,heat transfer,frp towers',
   NOW(3),
   NOW(3)
+),
+-- DE
+(
+  UUID(),
+  @TEAM_ENG_1,
+  'de',
+  'Senior-Projektingenieur',
+  'senior-projektingenieur',
+  JSON_OBJECT(
+    'html',
+    '<p>Der Senior-Projektingenieur ist spezialisiert auf Waermeuebertragungsberechnungen, Turmauswahl und Layout-Design fuer FRP-Kuehltuerme, geschlossene Kreislaufloesungen und Hybridsysteme.</p>'
+  ),
+  'Kurzprofil des Senior-Projektingenieurs von Ensotek mit den wichtigsten technischen Aufgaben und Verantwortlichkeiten.',
+  NULL,
+  'Ensotek Senior-Projektingenieur | Unser Team',
+  'Senior-Projektingenieur fuer Engineering und Projektplanung von FRP-Kuehltuermen sowie geschlossenen Kreislauf- und Hybrid-Kuehlsystemen.',
+  'ensotek,team,engineering,senior-projektingenieur,waermeuebertragung,frp kuehltuerme',
+  NOW(3),
+  NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
@@ -186,7 +230,9 @@ ON DUPLICATE KEY UPDATE
   `tags`               = VALUES(`tags`),
   `updated_at`         = VALUES(`updated_at`);
 
-/* I18N – TEAM_SERVICE_1 (Saha & Servis Ekibi / Field Service Lead) */
+-- =============================================================
+-- I18N – TEAM_SERVICE_1 (Saha & Servis Ekibi / Field Service Lead)
+-- =============================================================
 INSERT INTO `custom_pages_i18n`
   (`id`, `page_id`, `locale`,
    `title`, `slug`, `content`,
@@ -230,6 +276,25 @@ VALUES
   'Ensotek Field & Service Supervisor | Our Team',
   'Field and service supervisor responsible for commissioning, maintenance, troubleshooting and modernization on Ensotek cooling tower projects.',
   'ensotek,team,service,field service,commissioning,maintenance,modernization',
+  NOW(3),
+  NOW(3)
+),
+-- DE
+(
+  UUID(),
+  @TEAM_SERVICE_1,
+  'de',
+  'Leiter Aussendienst & Service',
+  'leiter-aussendienst-service',
+  JSON_OBJECT(
+    'html',
+    '<p>Der Leiter fuer Aussendienst und Service ist verantwortlich fuer Vor-Ort-Begehungen, Inbetriebnahmen, regelmaessige Wartungen, Stoerungsdiagnosen sowie die Koordination von Modernisierungsarbeiten.</p>'
+  ),
+  'Kurzprofil zur Rolle des Leiters fuer Aussendienst und Service bei Inbetriebnahme, Wartung und Modernisierung.',
+  NULL,
+  'Ensotek Leiter Aussendienst & Service | Unser Team',
+  'Leiter fuer Aussendienst und Service in Ensotek-Kuehlturmprojekten, verantwortlich fuer Inbetriebnahme, Wartung, Stoerungsdiagnose und Modernisierung.',
+  'ensotek,team,service,aussendienst service,inbetriebnahme,wartung,modernisierung',
   NOW(3),
   NOW(3)
 )

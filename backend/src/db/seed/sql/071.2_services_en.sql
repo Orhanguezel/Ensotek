@@ -1,5 +1,5 @@
 -- =============================================================
--- 072_services_en.sql  (Ensotek services – EN i18n only)
+-- 071.2_services_en.sql  (Ensotek services – EN i18n only)
 -- =============================================================
 
 SET NAMES utf8mb4;

@@ -1,146 +1,97 @@
 // =============================================================
 // FILE: src/pages/admin/references/index.tsx
-// Ensotek – Admin References Sayfası (Liste + filtreler)
-// Create/Edit artık ayrı sayfalarda
+// Ensotek – Admin References (Liste + filtreler)
+// - Locales: useAdminLocales()
+// - locale: "" => all locales
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
 import {
   useListReferencesAdminQuery,
   useUpdateReferenceAdminMutation,
   useDeleteReferenceAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/references_admin.endpoints";
+} from '@/integrations/rtk/hooks';
 
-import { useListSiteSettingsAdminQuery } from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
+import { useAdminLocales } from '@/components/common/useAdminLocales';
 
-import type {
-  ReferenceDto,
-  ReferenceListQueryParams,
-} from "@/integrations/types/references.types";
+import type { ReferenceDto, ReferenceListQueryParams } from '@/integrations/types/references.types';
 
 import {
   ReferencesHeader,
   type LocaleOption,
-} from "@/components/admin/references/ReferencesHeader";
-import { ReferencesList } from "@/components/admin/references/ReferencesList";
-
-/* ------------------------------------------------------------- */
+} from '@/components/admin/references/ReferencesHeader';
+import { ReferencesList } from '@/components/admin/references/ReferencesList';
 
 const ReferencesAdminPage: React.FC = () => {
   const router = useRouter();
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [showOnlyPublished, setShowOnlyPublished] = useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
 
-  const [orderBy, setOrderBy] =
-    useState<"created_at" | "updated_at" | "display_order">(
-      "display_order",
-    );
-  const [orderDir, setOrderDir] = useState<"asc" | "desc">("asc");
+  const [orderBy, setOrderBy] = useState<'created_at' | 'updated_at' | 'display_order'>(
+    'display_order',
+  );
+  const [orderDir, setOrderDir] = useState<'asc' | 'desc'>('asc');
 
-  // Dil filtresi – "" = tüm diller
-  const [locale, setLocale] = useState<string>("");
-
-  /* -------------------- Locale options (site_settings.app_locales) -------------------- */
+  // "" => all locales
+  const [locale, setLocale] = useState<string>('');
 
   const {
-    data: appLocaleRows,
-    isLoading: isLocalesLoading,
-  } = useListSiteSettingsAdminQuery({
-    keys: ["app_locales"],
-  });
+    localeOptions: adminLocaleOptions,
+    defaultLocaleFromDb,
+    coerceLocale,
+    loading: localesLoading,
+  } = useAdminLocales();
 
-  const localeCodes = useMemo(() => {
-    if (!appLocaleRows || appLocaleRows.length === 0) {
-      return ["tr", "en"];
-    }
+  const baseLocales: LocaleOption[] = useMemo(() => {
+    const arr = adminLocaleOptions ?? [];
+    return arr.map((x) => ({
+      value: String(x.value).toLowerCase(),
+      label: x.label,
+    }));
+  }, [adminLocaleOptions]);
 
-    const row = appLocaleRows.find((r) => r.key === "app_locales");
-    const v = row?.value;
-    let arr: string[] = [];
+  const localeOptions: LocaleOption[] = useMemo(() => {
+    return [{ value: '', label: 'Tüm Diller' }, ...baseLocales];
+  }, [baseLocales]);
 
-    if (Array.isArray(v)) {
-      arr = v.map((x) => String(x)).filter(Boolean);
-    } else if (typeof v === "string") {
-      try {
-        const parsed = JSON.parse(v);
-        if (Array.isArray(parsed)) {
-          arr = parsed.map((x) => String(x)).filter(Boolean);
-        }
-      } catch {
-        // ignore
-      }
-    }
+  useEffect(() => {
+    if (!baseLocales.length) return;
+    if (!locale) return; // all ok
 
-    if (!arr.length) {
-      return ["tr", "en"];
-    }
-
-    // uniq + lower
-    const uniqLower = Array.from(
-      new Set(arr.map((x) => String(x).toLowerCase())),
-    );
-    return uniqLower;
-  }, [appLocaleRows]);
-
-  const localeOptions: LocaleOption[] = useMemo(
-    () =>
-      localeCodes.map((code) => {
-        const lower = code.toLowerCase();
-        let label = `${code.toUpperCase()} (${lower})`;
-
-        if (lower === "tr") label = "Türkçe (tr)";
-        else if (lower === "en") label = "İngilizce (en)";
-        else if (lower === "de") label = "Almanca (de)";
-
-        return { value: lower, label };
-      }),
-    [localeCodes],
-  );
+    const valid = new Set(baseLocales.map((x) => x.value));
+    if (!valid.has(locale)) setLocale('');
+  }, [baseLocales, locale]);
 
   const handleLocaleChange = (next: string) => {
-    // Header already lower-cases, ama garanti olsun:
-    const normalized = next ? next.trim().toLowerCase() : "";
-    setLocale(normalized);
+    const raw = (next ?? '').trim();
+    if (!raw) {
+      setLocale('');
+      return;
+    }
+    const coerced = coerceLocale(raw, defaultLocaleFromDb) || raw;
+    setLocale(String(coerced).toLowerCase());
   };
-
-  /* -------------------- Liste + filtreler -------------------- */
 
   const listParams = useMemo<ReferenceListQueryParams>(
     () => ({
-      // arama
       q: search || undefined,
-
-      // filtreler
-      is_published: showOnlyPublished ? "1" : undefined,
-      is_featured: showOnlyFeatured ? "1" : undefined,
-
-      // sıralama (BE shared util: sort + orderDir destekli)
+      is_published: showOnlyPublished ? '1' : undefined,
+      is_featured: showOnlyFeatured ? '1' : undefined,
       sort: orderBy,
       orderDir,
-
-      // pagination
       limit: 200,
       offset: 0,
-
-      // references modülü için module_key + locale
-      module_key: "references",
-      locale: locale || undefined,
+      module_key: 'references',
+      locale: locale || undefined, // "" => undefined => all
     }),
-    [
-      search,
-      showOnlyPublished,
-      showOnlyFeatured,
-      orderBy,
-      orderDir,
-      locale,
-    ],
+    [search, showOnlyPublished, showOnlyFeatured, orderBy, orderDir, locale],
   );
 
   const {
@@ -151,100 +102,82 @@ const ReferencesAdminPage: React.FC = () => {
   } = useListReferencesAdminQuery(listParams);
 
   const [rows, setRows] = useState<ReferenceDto[]>([]);
-
   useEffect(() => {
     setRows(listData?.items ?? []);
   }, [listData]);
 
-  const [updateReference, { isLoading: isUpdating }] =
-    useUpdateReferenceAdminMutation();
-  const [deleteReference, { isLoading: isDeleting }] =
-    useDeleteReferenceAdminMutation();
+  const [updateReference, { isLoading: isUpdating }] = useUpdateReferenceAdminMutation();
+  const [deleteReference, { isLoading: isDeleting }] = useDeleteReferenceAdminMutation();
 
   const loading = isLoading || isFetching;
   const busy = loading || isUpdating || isDeleting;
 
-  /* -------------------- Handlers ----------------------------- */
-
   const handleCreateClick = () => {
-    router.push("/admin/references/new");
+    router.push('/admin/references/new');
   };
 
   const handleEditRow = (item: ReferenceDto) => {
-    router.push(`/admin/references/${item.id}`);
+    // listte locale seçiliyse edit sayfasına da taşı
+    const qs = locale ? `?locale=${encodeURIComponent(locale)}` : '';
+    router.push(`/admin/references/${encodeURIComponent(String(item.id))}${qs}`);
   };
 
   const handleDelete = async (item: ReferenceDto) => {
-    if (
-      !window.confirm(
-        `"${item.title || item.slug || item.id}" referans kaydını silmek üzeresin. Devam etmek istiyor musun?`,
-      )
-    ) {
+    const label = item.title || item.slug || String(item.id);
+
+    if (!window.confirm(`"${label}" referans kaydını silmek üzeresin. Devam etmek istiyor musun?`))
       return;
-    }
 
     try {
-      await deleteReference(item.id).unwrap();
-      toast.success(`"${item.title || item.slug || item.id}" silindi.`);
+      await deleteReference(String(item.id)).unwrap();
+      toast.success(`"${label}" silindi.`);
       await refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Referans silinirken bir hata oluştu.";
-      toast.error(msg);
+      toast.error(
+        err?.data?.error?.message || err?.message || 'Referans silinirken bir hata oluştu.',
+      );
     }
   };
 
-  const handleTogglePublished = async (
-    item: ReferenceDto,
-    value: boolean,
-  ) => {
+  const handleTogglePublished = async (item: ReferenceDto, value: boolean) => {
     try {
       await updateReference({
-        id: item.id,
-        patch: { is_published: value ? "1" : "0" }, // BoolLike
+        id: String(item.id),
+        patch: { is_published: value ? '1' : '0' },
       }).unwrap();
 
       setRows((prev) =>
         prev.map((r) =>
-          r.id === item.id ? { ...r, is_published: value ? 1 : 0 } : r,
+          String(r.id) === String(item.id) ? { ...r, is_published: value ? 1 : 0 } : r,
         ),
       );
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "Yayın durumu güncellenirken bir hata oluştu.";
-      toast.error(msg);
+      toast.error(
+        err?.data?.error?.message || err?.message || 'Yayın durumu güncellenirken bir hata oluştu.',
+      );
     }
   };
 
-  const handleToggleFeatured = async (
-    item: ReferenceDto,
-    value: boolean,
-  ) => {
+  const handleToggleFeatured = async (item: ReferenceDto, value: boolean) => {
     try {
       await updateReference({
-        id: item.id,
-        patch: { is_featured: value ? "1" : "0" }, // BoolLike
+        id: String(item.id),
+        patch: { is_featured: value ? '1' : '0' },
       }).unwrap();
 
       setRows((prev) =>
         prev.map((r) =>
-          r.id === item.id ? { ...r, is_featured: value ? 1 : 0 } : r,
+          String(r.id) === String(item.id) ? { ...r, is_featured: value ? 1 : 0 } : r,
         ),
       );
     } catch (err: any) {
-      const msg =
+      toast.error(
         err?.data?.error?.message ||
-        err?.message ||
-        "Öne çıkarma durumu güncellenirken bir hata oluştu.";
-      toast.error(msg);
+          err?.message ||
+          'Öne çıkarma durumu güncellenirken bir hata oluştu.',
+      );
     }
   };
-
-  /* -------------------- Render -------------------- */
 
   return (
     <div className="container-fluid py-4">
@@ -254,7 +187,7 @@ const ReferencesAdminPage: React.FC = () => {
         locale={locale}
         onLocaleChange={handleLocaleChange}
         locales={localeOptions}
-        localesLoading={isLocalesLoading}
+        localesLoading={localesLoading}
         showOnlyPublished={showOnlyPublished}
         onShowOnlyPublishedChange={setShowOnlyPublished}
         showOnlyFeatured={showOnlyFeatured}

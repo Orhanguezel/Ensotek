@@ -1,10 +1,14 @@
 // =============================================================
 // FILE: src/components/admin/custompage/CustomPageHeader.tsx
 // Ensotek – Admin Custom Pages Header (Filtreler + Özet)
+// FIX:
+//  - Locale options are dynamic (active locales)
+//  - Locale change: NO immediate onRefresh() (avoid stale refetch)
 // =============================================================
 
-import React from "react";
-import Link from "next/link";
+import React from 'react';
+import Link from 'next/link';
+import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 
 export type LocaleOption = {
   value: string;
@@ -14,9 +18,8 @@ export type LocaleOption = {
 export type CustomPageFilters = {
   search: string;
   moduleKey: string;
-  /** "all" = hepsi, "published" = yayında, "draft" = taslak */
-  publishedFilter: "all" | "published" | "draft";
-  /** Boş ise tüm diller */
+  publishedFilter: 'all' | 'published' | 'draft';
+  /** "" ise tüm diller (liste sayfası) */
   locale: string;
 };
 
@@ -25,8 +28,12 @@ export type CustomPageHeaderProps = {
   total: number;
   onFiltersChange: (next: CustomPageFilters) => void;
   onRefresh?: () => void;
+
   locales: LocaleOption[];
   localesLoading?: boolean;
+
+  /** Liste ekranında "Tüm diller" göstermek için */
+  allowAllOption?: boolean;
 };
 
 export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
@@ -36,78 +43,62 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
   onRefresh,
   locales,
   localesLoading,
+  allowAllOption = true,
 }) => {
-  const handleSearchChange = (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    onFiltersChange({
-      ...filters,
-      search: e.target.value,
-    });
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onFiltersChange({ ...filters, search: e.target.value });
   };
 
-  const handleModuleChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    onFiltersChange({
-      ...filters,
-      moduleKey: e.target.value,
-    });
+  const handleModuleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    onFiltersChange({ ...filters, moduleKey: e.target.value });
   };
 
-  const handlePublishedChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const value =
-      e.target.value as CustomPageFilters["publishedFilter"];
-    onFiltersChange({
-      ...filters,
-      publishedFilter: value,
-    });
+  const handlePublishedChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value as CustomPageFilters['publishedFilter'];
+    onFiltersChange({ ...filters, publishedFilter: value });
   };
 
-  const handleLocaleChange = (
-    e: React.ChangeEvent<HTMLSelectElement>,
-  ) => {
-    const raw = e.target.value;
-    // "" → tüm diller, diğerleri lower-case locale kodu
-    const nextLocale = raw ? raw.trim().toLowerCase() : "";
+  const handleLocaleChange = (nextLocale: string) => {
+    const normalized = nextLocale ? nextLocale.trim().toLowerCase() : '';
+    onFiltersChange({ ...filters, locale: normalized });
 
-    onFiltersChange({
-      ...filters,
-      locale: nextLocale,
-    });
-
-    // RTK Query zaten args değişince refetch edeceği için
-    // burada onRefresh zorunlu değil, ama istersen kalsın:
-    if (onRefresh) {
-      onRefresh();
-    }
+    // ❗ setFilters async olduğu için burada refetch() çağırma.
+    // RTK Query args değişince otomatik fetch eder.
   };
+
+  const localeOptions: AdminLocaleOption[] = React.useMemo(() => {
+    const base = (locales || [])
+      .map((l) => ({
+        value: String(l.value || '')
+          .trim()
+          .toLowerCase(),
+        label: l.label,
+      }))
+      .filter((x) => x.value);
+
+    if (!allowAllOption) return base;
+    return [{ value: '', label: 'Tüm diller' }, ...base];
+  }, [locales, allowAllOption]);
+
+  const disabledSelect = !!localesLoading || localeOptions.length === 0;
 
   return (
     <div className="card mb-3">
       <div className="card-body py-3">
         <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
-          {/* Sol: Başlık + açıklama */}
           <div style={{ minWidth: 0, flex: 2 }}>
             <div className="mb-2">
               <h5 className="mb-0 small fw-semibold">
                 Özel Sayfalar (Blog / Haber / Hakkında vb.)
               </h5>
               <div className="text-muted small">
-                Blog, haber, hakkında ve benzeri içerik sayfalarını
-                burada kategorilere, dillere ve modüllere göre
-                yönetebilirsin.
+                İçerik sayfalarını burada modül, yayın durumu ve aktif dile göre yönetebilirsin.
               </div>
             </div>
 
             <div className="row g-2 align-items-end">
-              {/* Arama */}
               <div className="col-md-5">
-                <label className="form-label small mb-1">
-                  Başlık / Slug / Meta arama
-                </label>
+                <label className="form-label small mb-1">Başlık / Slug / Meta arama</label>
                 <input
                   type="search"
                   className="form-control form-control-sm"
@@ -117,34 +108,27 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
                 />
               </div>
 
-              {/* Dil */}
               <div className="col-md-3">
                 <label className="form-label small mb-1">Dil</label>
-                <select
-                  className="form-select form-select-sm"
+                <AdminLocaleSelect
+                  id="custompage-locale-filter"
                   value={filters.locale}
                   onChange={handleLocaleChange}
-                  disabled={localesLoading && !locales.length}
-                >
-                  <option value="">Tüm diller</option>
-                  {locales.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-                {localesLoading && (
-                  <div className="form-text small">
-                    Diller yükleniyor...
+                  options={localeOptions}
+                  loading={!!localesLoading}
+                  disabled={disabledSelect}
+                  label="Dil"
+                />
+                {localesLoading && <div className="form-text small">Diller yükleniyor...</div>}
+                {!localesLoading && localeOptions.length === 0 && (
+                  <div className="form-text small text-danger">
+                    Aktif dil listesi bulunamadı. Site ayarlarından app_locales kontrol et.
                   </div>
                 )}
               </div>
 
-              {/* Modül */}
               <div className="col-md-2">
-                <label className="form-label small mb-1">
-                  Modül
-                </label>
+                <label className="form-label small mb-1">Modül</label>
                 <select
                   className="form-select form-select-sm"
                   value={filters.moduleKey}
@@ -157,11 +141,8 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
                 </select>
               </div>
 
-              {/* Yayın durumu */}
               <div className="col-md-2">
-                <label className="form-label small mb-1">
-                  Yayın durumu
-                </label>
+                <label className="form-label small mb-1">Yayın durumu</label>
                 <select
                   className="form-select form-select-sm"
                   value={filters.publishedFilter}
@@ -175,7 +156,6 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
             </div>
           </div>
 
-          {/* Sağ: Özet + aksiyonlar */}
           <div
             className="border-start ps-lg-3 ms-lg-3 d-flex flex-column justify-content-between"
             style={{ minWidth: 0, flex: 1 }}
@@ -185,6 +165,7 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
                 <div className="small fw-semibold">Toplam Kayıt</div>
                 <div className="display-6 fs-4 fw-bold">{total}</div>
               </div>
+
               {onRefresh && (
                 <button
                   type="button"
@@ -198,24 +179,13 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
 
             <div className="text-muted small">
               <ul className="mb-0 ps-3">
-                <li>
-                  Liste backend üzerinde coalesced i18n olarak gelir
-                  (seçili dile göre title/slug/meta döner, gerekirse
-                  fallback kullanılır).
-                </li>
-                <li>
-                  Kategori / alt kategori isim ve slug&apos;ları da
-                  backend join&apos;inden gelir.
-                </li>
+                <li>Liste, seçili dile göre filtrelenir (locale paramı).</li>
+                <li>İstersen “Tüm diller” seçeneğiyle tamamını görebilirsin.</li>
               </ul>
             </div>
 
-            {/* Yeni sayfa oluşturma – route: /admin/custompage/new */}
             <div className="mt-2 d-flex justify-content-end">
-              <Link
-                href="/admin/custompage/new"
-                className="btn btn-primary btn-sm"
-              >
+              <Link href="/admin/custompage/new" className="btn btn-primary btn-sm">
                 Yeni Sayfa Oluştur
               </Link>
             </div>

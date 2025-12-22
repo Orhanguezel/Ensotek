@@ -1,10 +1,12 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemList.tsx
 // Ensotek – Admin Menu Items Table (drag & drop + responsive)
+// - Locale support: optional localeLabelMap (tr -> Türkçe (tr))
+// - Date locale: optional dateLocale (default tr-TR)
 // =============================================================
 
-import React, { useEffect, useState } from "react";
-import type { AdminMenuItemDto } from "@/integrations/types/menu_items.types";
+import React, { useEffect, useMemo, useState } from 'react';
+import type { AdminMenuItemDto } from '@/integrations/types/menu_items.types';
 import {
   Pagination,
   PaginationContent,
@@ -13,7 +15,7 @@ import {
   PaginationPrevious,
   PaginationNext,
   PaginationEllipsis,
-} from "@/components/ui/pagination";
+} from '@/components/ui/pagination';
 
 export type MenuItemListProps = {
   items?: AdminMenuItemDto[];
@@ -22,41 +24,52 @@ export type MenuItemListProps = {
   onEdit?: (item: AdminMenuItemDto) => void;
   onDelete?: (item: AdminMenuItemDto) => void;
 
-  // Aktif toggle etmek istersen opsiyonel
   onToggleActive?: (item: AdminMenuItemDto, value: boolean) => void;
 
-  // Sürükle-bırak sonrası yeni sıra
   onReorder?: (next: AdminMenuItemDto[]) => void;
 
-  // "Sıralamayı Kaydet" butonu için
   onSaveOrder?: () => void;
   savingOrder?: boolean;
+
+  // ✅ optional: locale code -> label (dinamik app_locales'ten üretilebilir)
+  localeLabelMap?: Record<string, string>;
+
+  // ✅ optional: date formatting locale
+  dateLocale?: string; // e.g. "tr-TR", "en-GB"
 };
 
 const PAGE_SIZE = 50;
 
-const fmtDate = (value?: string | null) => {
-  if (!value) return "-";
+const toShortLocale = (v: unknown): string =>
+  String(v || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0]
+    .trim();
+
+const fmtDate = (value: any, dateLocale: string) => {
+  if (!value) return '-';
   try {
     const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return value;
-    return d.toLocaleString("tr-TR");
+    if (Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleString(dateLocale);
   } catch {
-    return value ?? "-";
+    return String(value ?? '-');
   }
 };
 
 const fmtLocation = (loc?: string | null) => {
-  if (loc === "header") return "Header";
-  if (loc === "footer") return "Footer";
-  return loc ?? "-";
+  if (loc === 'header') return 'Header';
+  if (loc === 'footer') return 'Footer';
+  return loc ?? '-';
 };
 
 const formatText = (v: unknown, max = 80): string => {
-  if (v === null || v === undefined) return "";
+  if (v === null || v === undefined) return '';
   const s = String(v);
   if (s.length <= max) return s;
-  return s.slice(0, max - 3) + "...";
+  return s.slice(0, max - 3) + '...';
 };
 
 export const MenuItemList: React.FC<MenuItemListProps> = ({
@@ -68,6 +81,8 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
   onReorder,
   onSaveOrder,
   savingOrder,
+  localeLabelMap,
+  dateLocale = 'tr-TR',
 }) => {
   const rows = items || [];
   const totalItems = rows.length;
@@ -78,7 +93,6 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
 
   const pageCount = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
 
-  // items değişince sayfa taşmasın
   useEffect(() => {
     setPage((prev) => {
       const maxPage = Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
@@ -91,13 +105,8 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
   const endIndex = startIndex + PAGE_SIZE;
   const pageRows = rows.slice(startIndex, endIndex);
 
-  const handleDragStart = (id: string) => {
-    setDraggingId(id);
-  };
-
-  const handleDragEnd = () => {
-    setDraggingId(null);
-  };
+  const handleDragStart = (id: string) => setDraggingId(id);
+  const handleDragEnd = () => setDraggingId(null);
 
   const handleDropOn = (targetId: string) => {
     if (!draggingId || draggingId === targetId || !onReorder) return;
@@ -113,53 +122,48 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
     onReorder(next);
   };
 
-  /* ---------- Pagination page butonları ---------- */
-
-  const buildPages = () => {
-    const pages: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
+  const pages = useMemo(() => {
+    const out: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
     if (pageCount <= 7) {
-      for (let i = 1; i <= pageCount; i += 1) pages.push(i);
-      return pages;
+      for (let i = 1; i <= pageCount; i += 1) out.push(i);
+      return out;
     }
 
-    pages.push(1);
+    out.push(1);
     const siblings = 1;
     let left = Math.max(2, currentPage - siblings);
     let right = Math.min(pageCount - 1, currentPage + siblings);
 
-    if (left > 2) {
-      pages.push("ellipsis-left");
-    } else {
-      left = 2;
-    }
+    if (left > 2) out.push('ellipsis-left');
+    else left = 2;
 
-    for (let i = left; i <= right; i += 1) {
-      pages.push(i);
-    }
+    for (let i = left; i <= right; i += 1) out.push(i);
 
-    if (right < pageCount - 1) {
-      pages.push("ellipsis-right");
-    } else {
-      right = pageCount - 1;
-    }
+    if (right < pageCount - 1) out.push('ellipsis-right');
+    else right = pageCount - 1;
 
-    pages.push(pageCount);
-    return pages;
-  };
-
-  const pages = buildPages();
+    out.push(pageCount);
+    return out;
+  }, [pageCount, currentPage]);
 
   const handlePageChange = (nextPage: number) => {
     if (nextPage < 1 || nextPage > pageCount) return;
     setPage(nextPage);
   };
 
-  const handleDeleteClick = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    item: AdminMenuItemDto,
-  ) => {
+  const handleDeleteClick = (e: React.MouseEvent<HTMLButtonElement>, item: AdminMenuItemDto) => {
     e.stopPropagation();
     onDelete?.(item);
+  };
+
+  const renderLocale = (raw: any) => {
+    const code = toShortLocale(raw);
+    if (!code) return <span className="text-muted">-</span>;
+
+    const label = localeLabelMap?.[code];
+    if (label) return label;
+
+    return code;
   };
 
   return (
@@ -167,9 +171,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
       <div className="card-header py-2 d-flex align-items-center justify-content-between">
         <span className="small fw-semibold">Menü Öğeleri</span>
         <div className="d-flex align-items-center gap-2">
-          {loading && (
-            <span className="badge bg-secondary">Yükleniyor...</span>
-          )}
+          {loading && <span className="badge bg-secondary">Yükleniyor...</span>}
           {onSaveOrder && (
             <button
               type="button"
@@ -177,29 +179,27 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
               onClick={onSaveOrder}
               disabled={savingOrder || !hasData}
             >
-              {savingOrder
-                ? "Sıralama kaydediliyor..."
-                : "Sıralamayı Kaydet"}
+              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
             </button>
           )}
         </div>
       </div>
 
       <div className="card-body p-0">
-        {/* ========= Desktop / Tablet (md ve üstü) – Table görünümü ========= */}
+        {/* Desktop */}
         <div className="d-none d-md-block">
           <table className="table table-hover mb-0">
             <thead>
               <tr>
-                <th style={{ width: "6%" }} />
-                <th style={{ width: "20%" }}>Başlık</th>
-                <th style={{ width: "22%" }}>URL</th>
-                <th style={{ width: "10%" }}>Tür</th>
-                <th style={{ width: "10%" }}>Konum</th>
-                <th style={{ width: "8%" }}>Aktif</th>
-                <th style={{ width: "10%" }}>Locale</th>
-                <th style={{ width: "14%" }}>Oluşturulma</th>
-                <th style={{ width: "10%" }} className="text-end">
+                <th style={{ width: '6%' }} />
+                <th style={{ width: '20%' }}>Başlık</th>
+                <th style={{ width: '22%' }}>URL</th>
+                <th style={{ width: '10%' }}>Tür</th>
+                <th style={{ width: '10%' }}>Konum</th>
+                <th style={{ width: '8%' }}>Aktif</th>
+                <th style={{ width: '10%' }}>Locale</th>
+                <th style={{ width: '14%' }}>Oluşturulma</th>
+                <th style={{ width: '10%' }} className="text-end">
                   İşlemler
                 </th>
               </tr>
@@ -207,44 +207,36 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
             <tbody>
               {hasData ? (
                 pageRows.map((item, index) => {
-                  const globalIndex = startIndex + index; // 0-based
+                  const globalIndex = startIndex + index;
 
                   return (
                     <tr
                       key={item.id}
                       draggable={!!onReorder}
-                      onDragStart={
-                        onReorder ? () => handleDragStart(item.id) : undefined
-                      }
+                      onDragStart={onReorder ? () => handleDragStart(item.id) : undefined}
                       onDragEnd={onReorder ? handleDragEnd : undefined}
                       onDragOver={
                         onReorder
                           ? (e) => {
-                            e.preventDefault();
-                          }
+                              e.preventDefault();
+                            }
                           : undefined
                       }
                       onDrop={onReorder ? () => handleDropOn(item.id) : undefined}
-                      className={
-                        draggingId === item.id ? "table-active" : undefined
-                      }
-                      style={{
-                        cursor: onReorder ? "move" : "pointer",
-                      }}
+                      className={draggingId === item.id ? 'table-active' : undefined}
+                      style={{ cursor: onReorder ? 'move' : 'pointer' }}
                       onClick={() => onEdit?.(item)}
                     >
                       <td className="text-muted small align-middle">
-                        {/* Drag handle + display_order */}
                         {onReorder && <span className="me-1">≡</span>}
                         <span className="me-1">#{globalIndex + 1}</span>
                         <span className="badge bg-secondary-subtle text-muted border">
                           {item.display_order ?? 0}
                         </span>
                       </td>
+
                       <td className="align-middle">
-                        <div className="fw-semibold small">
-                          {item.title || "-"}
-                        </div>
+                        <div className="fw-semibold small">{item.title || '-'}</div>
                         {item.icon && (
                           <div className="text-muted small">
                             <span className="me-1">Icon:</span>
@@ -252,43 +244,41 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                           </div>
                         )}
                       </td>
+
                       <td className="align-middle text-muted small">
-                        {item.url ? (
-                          <span title={item.url}>
-                            {formatText(item.url, 40)}
-                          </span>
-                        ) : (
-                          "-"
-                        )}
+                        {item.url ? <span title={item.url}>{formatText(item.url, 40)}</span> : '-'}
                       </td>
+
                       <td className="align-middle">
                         <span className="badge bg-light text-muted border small">
-                          {item.type === "page" ? "Sayfa" : "Özel URL"}
+                          {item.type === 'page' ? 'Sayfa' : 'Özel URL'}
                         </span>
                       </td>
+
                       <td className="align-middle text-muted small">
                         {fmtLocation(item.location)}
                       </td>
+
                       <td className="align-middle">
                         <div className="form-check form-switch">
                           <input
                             className="form-check-input"
                             type="checkbox"
                             checked={!!item.is_active}
-                            onChange={(e) =>
-                              onToggleActive &&
-                              onToggleActive(item, e.target.checked)
-                            }
+                            onChange={(e) => onToggleActive?.(item, e.target.checked)}
                             onClick={(e) => e.stopPropagation()}
                           />
                         </div>
                       </td>
+
                       <td className="align-middle text-muted small">
-                        {item.locale || <span className="text-muted">-</span>}
+                        {renderLocale((item as any).locale)}
                       </td>
+
                       <td className="align-middle text-muted small">
-                        {fmtDate(item.created_at)}
+                        {fmtDate((item as any).created_at, dateLocale)}
                       </td>
+
                       <td className="align-middle text-end">
                         <div className="d-inline-flex gap-1">
                           {onEdit && (
@@ -328,18 +318,18 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                 </tr>
               )}
             </tbody>
+
             <caption className="px-3 py-2 text-start">
               <span className="text-muted small">
-                Satırları sürükleyip bırakarak menü öğelerinin sırasını
-                değiştirebilirsin. Değişiklikleri kalıcı yapmak için{" "}
-                <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu
-                kullanman gerekir.
+                Satırları sürükleyip bırakarak menü öğelerinin sırasını değiştirebilirsin.
+                Değişiklikleri kalıcı yapmak için <strong>&quot;Sıralamayı Kaydet&quot;</strong>{' '}
+                butonunu kullanman gerekir.
               </span>
             </caption>
           </table>
         </div>
 
-        {/* ========= Mobil (sm ve altı) – Card görünümü ========= */}
+        {/* Mobile */}
         <div className="d-block d-md-none">
           {hasData ? (
             pageRows.map((item, index) => {
@@ -350,35 +340,33 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                   key={item.id}
                   className="border-bottom px-3 py-2"
                   draggable={!!onReorder}
-                  onDragStart={
-                    onReorder ? () => handleDragStart(item.id) : undefined
-                  }
+                  onDragStart={onReorder ? () => handleDragStart(item.id) : undefined}
                   onDragEnd={onReorder ? handleDragEnd : undefined}
                   onDragOver={
                     onReorder
                       ? (e) => {
-                        e.preventDefault();
-                      }
+                          e.preventDefault();
+                        }
                       : undefined
                   }
                   onDrop={onReorder ? () => handleDropOn(item.id) : undefined}
-                  style={{ cursor: onReorder ? "move" : "pointer" }}
+                  style={{ cursor: onReorder ? 'move' : 'pointer' }}
                   onClick={() => onEdit?.(item)}
                 >
                   <div className="d-flex justify-content-between align-items-start gap-2">
                     <div>
                       <div className="fw-semibold small">
-                        <span className="text-muted me-1">
-                          #{globalIndex + 1}
-                        </span>
-                        {item.title || "-"}
+                        <span className="text-muted me-1">#{globalIndex + 1}</span>
+                        {item.title || '-'}
                       </div>
+
                       <div className="text-muted small">
                         <span className="me-1">Tür:</span>
                         <span className="badge bg-light text-dark border">
-                          {item.type === "page" ? "Sayfa" : "Özel URL"}
+                          {item.type === 'page' ? 'Sayfa' : 'Özel URL'}
                         </span>
                       </div>
+
                       <div className="text-muted small mt-1">
                         <span className="me-1">URL:</span>
                         {item.url ? (
@@ -387,17 +375,17 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                           <span className="text-muted">-</span>
                         )}
                       </div>
+
                       <div className="text-muted small mt-1">
                         <span className="me-1">Konum:</span>
                         {fmtLocation(item.location)}
                         <span className="ms-2 me-1">Dil:</span>
-                        {item.locale || (
-                          <span className="text-muted">-</span>
-                        )}
+                        {renderLocale((item as any).locale)}
                       </div>
+
                       <div className="text-muted small mt-1">
                         <span className="me-1">Oluşturulma:</span>
-                        {fmtDate(item.created_at)}
+                        {fmtDate((item as any).created_at, dateLocale)}
                       </div>
                     </div>
 
@@ -407,14 +395,12 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                           className="form-check-input"
                           type="checkbox"
                           checked={!!item.is_active}
-                          onChange={(e) =>
-                            onToggleActive &&
-                            onToggleActive(item, e.target.checked)
-                          }
+                          onChange={(e) => onToggleActive?.(item, e.target.checked)}
                           onClick={(e) => e.stopPropagation()}
                         />
                         <label className="form-check-label">Aktif</label>
                       </div>
+
                       <div className="d-flex gap-1 mt-1">
                         {onEdit && (
                           <button
@@ -455,15 +441,14 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
 
           <div className="px-3 py-2 border-top">
             <span className="text-muted small">
-              Mobil görünümde kayıtlar kart formatında listelenir. Kartları
-              sürükleyerek sıralamayı değiştirebilirsin. Değişiklikleri kalıcı
-              yapmak için üstteki{" "}
+              Mobil görünümde kayıtlar kart formatında listelenir. Kartları sürükleyerek sıralamayı
+              değiştirebilirsin. Değişiklikleri kalıcı yapmak için üstteki{' '}
               <strong>Sıralamayı Kaydet</strong> butonunu kullan.
             </span>
           </div>
         </div>
 
-        {/* Pagination (her iki görünüm için ortak) */}
+        {/* Pagination */}
         {pageCount > 1 && (
           <div className="py-2">
             <Pagination>
@@ -479,7 +464,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                 </PaginationItem>
 
                 {pages.map((p, idx) =>
-                  typeof p === "number" ? (
+                  typeof p === 'number' ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

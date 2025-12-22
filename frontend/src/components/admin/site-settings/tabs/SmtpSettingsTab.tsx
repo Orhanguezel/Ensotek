@@ -1,34 +1,32 @@
 // =============================================================
 // FILE: src/components/admin/site-settings/tabs/SmtpSettingsTab.tsx
-// SMTP / E-posta Ayarları Tab
+// SMTP / E-posta Ayarları Tab (GLOBAL) – style aligned
 // =============================================================
 
-import React from "react";
-import { toast } from "sonner";
+import React from 'react';
+import { toast } from 'sonner';
 import {
   useListSiteSettingsAdminQuery,
   useUpdateSiteSettingAdminMutation,
-  type SiteSetting,
-} from "@/integrations/rtk/endpoints/admin/site_settings_admin.endpoints";
-import type { SettingValue } from "@/integrations/types/site";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+  useSendTestMailMutation,
+} from '@/integrations/rtk/hooks';
 
-// SMTP test mail endpoint’i
-import { useSendTestMailMutation } from "@/integrations/rtk/endpoints/mail.endpoints";
+import type { SettingValue, SiteSetting } from '@/integrations/types/site_settings.types';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 export type SmtpSettingsTabProps = {
-  locale: string;
+  locale: string; // UI badge için dursun, GLOBAL tab
 };
 
 const SMTP_KEYS = [
-  "smtp_host",
-  "smtp_port",
-  "smtp_username",
-  "smtp_password",
-  "smtp_from_email",
-  "smtp_from_name",
-  "smtp_ssl",
+  'smtp_host',
+  'smtp_port',
+  'smtp_username',
+  'smtp_password',
+  'smtp_from_email',
+  'smtp_from_name',
+  'smtp_ssl',
 ] as const;
 
 type SmtpKey = (typeof SMTP_KEYS)[number];
@@ -44,24 +42,18 @@ type SmtpForm = {
 };
 
 const EMPTY_FORM: SmtpForm = {
-  smtp_host: "",
-  smtp_port: "",
-  smtp_username: "",
-  smtp_password: "",
-  smtp_from_email: "",
-  smtp_from_name: "",
+  smtp_host: '',
+  smtp_port: '',
+  smtp_username: '',
+  smtp_password: '',
+  smtp_from_email: '',
+  smtp_from_name: '',
   smtp_ssl: false,
 };
 
 function valueToString(v: unknown): string {
-  if (v === null || v === undefined) return "";
-  if (
-    typeof v === "string" ||
-    typeof v === "number" ||
-    typeof v === "boolean"
-  ) {
-    return String(v);
-  }
+  if (v === null || v === undefined) return '';
+  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
   try {
     return JSON.stringify(v);
   } catch {
@@ -72,21 +64,17 @@ function valueToString(v: unknown): string {
 function toBool(v: unknown): boolean {
   if (v === true) return true;
   if (v === false) return false;
-  if (typeof v === "number") return v === 1;
-  if (typeof v === "string") {
+  if (typeof v === 'number') return v === 1;
+  if (typeof v === 'string') {
     const t = v.trim().toLowerCase();
-    return t === "1" || t === "true" || t === "yes" || t === "on";
+    return t === '1' || t === 'true' || t === 'yes' || t === 'on';
   }
   return false;
 }
 
 function toMap(settings?: SiteSetting[] | undefined) {
   const map = new Map<string, SiteSetting>();
-  if (settings) {
-    for (const s of settings) {
-      map.set(s.key, s);
-    }
-  }
+  if (settings) for (const s of settings) map.set(s.key, s);
   return map;
 }
 
@@ -98,38 +86,34 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
     refetch,
   } = useListSiteSettingsAdminQuery({
     keys: SMTP_KEYS as unknown as string[],
-    locale: locale || undefined,
+    // GLOBAL => locale göndermiyoruz
   });
 
-  const [updateSetting, { isLoading: isSaving }] =
-    useUpdateSiteSettingAdminMutation();
-
-  // Test mail mutation
+  const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
   const [sendTestMail, { isLoading: isTesting }] = useSendTestMailMutation();
 
   const [form, setForm] = React.useState<SmtpForm>(EMPTY_FORM);
-
-  // Test mail alıcısı – sadece UI state, DB'ye yazmıyoruz
-  const [testEmail, setTestEmail] = React.useState<string>("");
+  const [testEmail, setTestEmail] = React.useState<string>('');
 
   React.useEffect(() => {
     const map = toMap(settings);
     const next: SmtpForm = { ...EMPTY_FORM };
 
-    next.smtp_host = valueToString(map.get("smtp_host")?.value);
-    next.smtp_port = valueToString(map.get("smtp_port")?.value);
-    next.smtp_username = valueToString(map.get("smtp_username")?.value);
-    next.smtp_password = valueToString(map.get("smtp_password")?.value);
-    next.smtp_from_email = valueToString(map.get("smtp_from_email")?.value);
-    next.smtp_from_name = valueToString(map.get("smtp_from_name")?.value);
-    next.smtp_ssl = toBool(map.get("smtp_ssl")?.value);
+    next.smtp_host = valueToString(map.get('smtp_host')?.value);
+    next.smtp_port = valueToString(map.get('smtp_port')?.value);
+    next.smtp_username = valueToString(map.get('smtp_username')?.value);
+    next.smtp_password = valueToString(map.get('smtp_password')?.value);
+    next.smtp_from_email = valueToString(map.get('smtp_from_email')?.value);
+    next.smtp_from_name = valueToString(map.get('smtp_from_name')?.value);
+    next.smtp_ssl = toBool(map.get('smtp_ssl')?.value);
 
     setForm(next);
-  }, [settings, locale]);
+  }, [settings]);
 
   const loading = isLoading || isFetching;
+  const busy = loading || isSaving || isTesting;
 
-  const handleChange = (field: Exclude<SmtpKey, "smtp_ssl">, value: string) => {
+  const handleChange = (field: Exclude<SmtpKey, 'smtp_ssl'>, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -139,65 +123,45 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
 
   const handleSave = async () => {
     try {
-      const localeParam = locale || undefined;
-
       const updates: { key: SmtpKey; value: SettingValue }[] = [
-        { key: "smtp_host", value: form.smtp_host.trim() },
-        { key: "smtp_port", value: form.smtp_port.trim() || "" },
-        { key: "smtp_username", value: form.smtp_username.trim() },
-        { key: "smtp_password", value: form.smtp_password },
-        { key: "smtp_from_email", value: form.smtp_from_email.trim() },
-        { key: "smtp_from_name", value: form.smtp_from_name.trim() },
-        { key: "smtp_ssl", value: form.smtp_ssl },
+        { key: 'smtp_host', value: form.smtp_host.trim() },
+        { key: 'smtp_port', value: form.smtp_port.trim() || '' },
+        { key: 'smtp_username', value: form.smtp_username.trim() },
+        { key: 'smtp_password', value: form.smtp_password },
+        { key: 'smtp_from_email', value: form.smtp_from_email.trim() },
+        { key: 'smtp_from_name', value: form.smtp_from_name.trim() },
+        { key: 'smtp_ssl', value: form.smtp_ssl },
       ];
 
       for (const u of updates) {
-        await updateSetting({
-          key: u.key,
-          value: u.value,
-          locale: localeParam,
-        }).unwrap();
+        await updateSetting({ key: u.key, value: u.value }).unwrap();
       }
 
-      toast.success("SMTP ayarları kaydedildi.");
+      toast.success('SMTP ayarları kaydedildi.');
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        "SMTP ayarları kaydedilirken bir hata oluştu.";
+        err?.data?.error?.message || err?.message || 'SMTP ayarları kaydedilirken bir hata oluştu.';
       toast.error(msg);
     }
   };
 
   const handleSendTest = async () => {
     try {
-      /**
-       * Öncelik:
-       *  1) testEmail inputu doluysa → oraya gönder
-       *  2) değilse smtp_from_email doluysa → oraya gönder
-       *  3) ikisi de boşsa → body göndermeyip backend'in req.user.email fallback’ini kullan
-       */
       const trimmedTest = testEmail.trim();
       const fromEmail = form.smtp_from_email.trim();
 
-      if (trimmedTest) {
-        await sendTestMail({ to: trimmedTest }).unwrap();
-      } else if (fromEmail) {
-        await sendTestMail({ to: fromEmail }).unwrap();
-      } else {
-        await sendTestMail().unwrap();
-      }
+      if (trimmedTest) await sendTestMail({ to: trimmedTest }).unwrap();
+      else if (fromEmail) await sendTestMail({ to: fromEmail }).unwrap();
+      else await sendTestMail().unwrap();
 
-      toast.success(
-        "Test e-postası gönderildi. Gelen kutunu (ve gerekirse spam klasörünü) kontrol et.",
-      );
+      toast.success('Test e-postası gönderildi. Gelen kutunu (ve spam) kontrol et.');
     } catch (err: any) {
       const msg =
         err?.data?.error?.details ||
         err?.data?.error?.message ||
         err?.message ||
-        "Test maili gönderilirken bir hata oluştu.";
+        'Test maili gönderilirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -205,25 +169,43 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
   return (
     <div className="card">
       <div className="card-header py-2 d-flex justify-content-between align-items-center">
-        <span className="small fw-semibold">SMTP / E-posta Ayarları</span>
+        <div className="d-flex flex-column">
+          <span className="small fw-semibold">SMTP / E-posta Ayarları</span>
+          <span className="text-muted small">
+            Bu ayarlar genellikle globaldir (locale=`*`). Seçili dil sadece arayüz bilgisidir.
+          </span>
+        </div>
+
         <div className="d-flex align-items-center gap-2">
           <span className="badge bg-light text-dark border">
-            Genellikle dil bağımsız (teknik ayar)
+            Global (locale=`*`) • Seçili dil: {locale || '—'}
           </span>
-          {loading && (
-            <span className="badge bg-secondary">Yükleniyor...</span>
-          )}
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            onClick={refetch}
+            disabled={busy}
+          >
+            Yenile
+          </button>
         </div>
       </div>
 
       <div className="card-body">
+        {busy && (
+          <div className="mb-2">
+            <span className="badge bg-secondary">Yükleniyor...</span>
+          </div>
+        )}
+
         <div className="row g-3">
           <div className="col-md-6">
             <label className="form-label small">SMTP Host</label>
             <Input
               value={form.smtp_host}
-              onChange={(e) => handleChange("smtp_host", e.target.value)}
+              onChange={(e) => handleChange('smtp_host', e.target.value)}
               placeholder="smtp.hostinger.com veya smtp.gmail.com"
+              disabled={busy}
             />
           </div>
 
@@ -231,8 +213,9 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
             <label className="form-label small">SMTP Port</label>
             <Input
               value={form.smtp_port}
-              onChange={(e) => handleChange("smtp_port", e.target.value)}
+              onChange={(e) => handleChange('smtp_port', e.target.value)}
               placeholder="465 veya 587"
+              disabled={busy}
             />
           </div>
 
@@ -244,6 +227,7 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
                 className="form-check-input"
                 checked={form.smtp_ssl}
                 onChange={handleToggleSsl}
+                disabled={busy}
               />
               <label htmlFor="smtp-ssl" className="form-check-label small">
                 SSL etkin
@@ -255,8 +239,9 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
             <label className="form-label small">Kullanıcı Adı</label>
             <Input
               value={form.smtp_username}
-              onChange={(e) => handleChange("smtp_username", e.target.value)}
+              onChange={(e) => handleChange('smtp_username', e.target.value)}
               placeholder="SMTP kullanıcı adı"
+              disabled={busy}
             />
           </div>
 
@@ -265,8 +250,9 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
             <Input
               type="password"
               value={form.smtp_password}
-              onChange={(e) => handleChange("smtp_password", e.target.value)}
+              onChange={(e) => handleChange('smtp_password', e.target.value)}
               placeholder="••••••••"
+              disabled={busy}
             />
           </div>
 
@@ -274,57 +260,48 @@ export const SmtpSettingsTab: React.FC<SmtpSettingsTabProps> = ({ locale }) => {
             <label className="form-label small">Gönderen E-posta</label>
             <Input
               value={form.smtp_from_email}
-              onChange={(e) => handleChange("smtp_from_email", e.target.value)}
+              onChange={(e) => handleChange('smtp_from_email', e.target.value)}
               placeholder="no-reply@ensotek.com"
+              disabled={busy}
             />
-            <small className="text-muted d-block mt-1">
-              Uygulamadaki e-postalar bu adresten gönderilir.
-            </small>
+            <div className="form-text small">Uygulamadaki e-postalar bu adresten gönderilir.</div>
           </div>
 
           <div className="col-md-6">
             <label className="form-label small">Gönderen İsim</label>
             <Input
               value={form.smtp_from_name}
-              onChange={(e) => handleChange("smtp_from_name", e.target.value)}
+              onChange={(e) => handleChange('smtp_from_name', e.target.value)}
               placeholder="Ensotek"
+              disabled={busy}
             />
           </div>
         </div>
 
-        {/* Test mail alıcısı + butonlar */}
-        <div className="row g-3 mt-4 align-items-end">
+        <hr className="my-4" />
+
+        <div className="row g-3 align-items-end">
           <div className="col-md-6">
             <label className="form-label small">Test mail alıcısı</label>
             <Input
               value={testEmail}
               onChange={(e) => setTestEmail(e.target.value)}
               placeholder="ornek@ornek.com"
+              disabled={busy}
             />
-            <small className="text-muted d-block mt-1">
-              Eğer dolu ise test maili bu adrese gönderilir. Boş bırakılırsa
-              önce gönderen e-posta, o da yoksa giriş yapmış kullanıcının
-              e-posta adresi kullanılır.
-            </small>
+            <div className="form-text small">
+              Dolu ise test maili buraya gider. Boşsa önce gönderen e-posta, o da yoksa giriş yapan
+              kullanıcının e-postası kullanılır.
+            </div>
           </div>
 
           <div className="col-md-6 d-flex justify-content-md-end gap-2 mt-3 mt-md-0">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={isSaving || isTesting}
-              onClick={handleSendTest}
-            >
-              {isTesting ? "Test maili gönderiliyor..." : "Test mail gönder"}
+            <Button type="button" variant="outline" disabled={busy} onClick={handleSendTest}>
+              {isTesting ? 'Test maili gönderiliyor...' : 'Test mail gönder'}
             </Button>
 
-            <Button
-              type="button"
-              variant="default"
-              disabled={isSaving}
-              onClick={handleSave}
-            >
-              {isSaving ? "Kaydediliyor..." : "Kaydet"}
+            <Button type="button" variant="default" disabled={busy} onClick={handleSave}>
+              {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
             </Button>
           </div>
         </div>

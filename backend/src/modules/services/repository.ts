@@ -15,13 +15,21 @@ import {
   type NewServiceImageI18nRow,
 } from "./schema";
 import { randomUUID } from "crypto";
-import { LOCALES, type Locale } from "@/core/i18n";
 import { storageAssets } from "@/modules/storage/schema";
 import { publicUrlOf } from "@/modules/storage/_util";
+
+// ✅ Dinamik locale listesi / default locale DB’den
+import { getAppLocales, getDefaultLocale } from "@/modules/siteSettings/service";
 
 /* ----------------------- types ----------------------- */
 
 type Sortable = "created_at" | "updated_at" | "display_order";
+
+/**
+ * Services modülünde Locale tipini statik union'a kilitleme.
+ * DB’den yönetilecek (30+ dil) olduğu için string kullanıyoruz.
+ */
+export type LocaleCode = string;
 
 export type ServiceMerged = {
   id: string;
@@ -103,13 +111,7 @@ const parseOrder = (
     const m = orderParam.match(/^([a-zA-Z0-9_]+)\.(asc|desc)$/);
     const col = m?.[1] as Sortable | undefined;
     const dir = m?.[2] as "asc" | "desc" | undefined;
-    if (
-      col &&
-      dir &&
-      (col === "created_at" ||
-        col === "updated_at" ||
-        col === "display_order")
-    ) {
+    if (col && dir && (col === "created_at" || col === "updated_at" || col === "display_order")) {
       return { col, dir };
     }
   }
@@ -137,33 +139,19 @@ function baseSelect(iReq: any, iDef: any) {
 
     slug: sql<string>`COALESCE(${iReq.slug}, ${iDef.slug})`.as("slug"),
     name: sql<string>`COALESCE(${iReq.name}, ${iDef.name})`.as("name"),
-    description: sql<string>`COALESCE(${iReq.description}, ${iDef.description})`.as(
-      "description",
-    ),
-    material: sql<string>`COALESCE(${iReq.material}, ${iDef.material})`.as(
-      "material",
-    ),
+    description: sql<string>`COALESCE(${iReq.description}, ${iDef.description})`.as("description"),
+    material: sql<string>`COALESCE(${iReq.material}, ${iDef.material})`.as("material"),
     price: sql<string>`COALESCE(${iReq.price}, ${iDef.price})`.as("price"),
-    includes: sql<string>`COALESCE(${iReq.includes}, ${iDef.includes})`.as(
-      "includes",
-    ),
-    warranty: sql<string>`COALESCE(${iReq.warranty}, ${iDef.warranty})`.as(
-      "warranty",
-    ),
-    image_alt: sql<string>`COALESCE(${iReq.image_alt}, ${iDef.image_alt})`.as(
-      "image_alt",
-    ),
+    includes: sql<string>`COALESCE(${iReq.includes}, ${iDef.includes})`.as("includes"),
+    warranty: sql<string>`COALESCE(${iReq.warranty}, ${iDef.warranty})`.as("warranty"),
+    image_alt: sql<string>`COALESCE(${iReq.image_alt}, ${iDef.image_alt})`.as("image_alt"),
 
     tags: sql<string>`COALESCE(${iReq.tags}, ${iDef.tags})`.as("tags"),
-    meta_title: sql<string>`COALESCE(${iReq.meta_title}, ${iDef.meta_title})`.as(
-      "meta_title",
-    ),
+    meta_title: sql<string>`COALESCE(${iReq.meta_title}, ${iDef.meta_title})`.as("meta_title"),
     meta_description: sql<string>`COALESCE(${iReq.meta_description}, ${iDef.meta_description})`.as(
       "meta_description",
     ),
-    meta_keywords: sql<string>`COALESCE(${iReq.meta_keywords}, ${iDef.meta_keywords})`.as(
-      "meta_keywords",
-    ),
+    meta_keywords: sql<string>`COALESCE(${iReq.meta_keywords}, ${iDef.meta_keywords})`.as("meta_keywords"),
 
     locale_resolved: sql<string>`
       CASE WHEN ${iReq.id} IS NOT NULL THEN ${iReq.locale} ELSE ${iDef.locale} END
@@ -184,9 +172,7 @@ function imgSelect(iReq: any, iDef: any, sa: any) {
 
     title: sql<string>`COALESCE(${iReq.title}, ${iDef.title})`.as("title"),
     alt: sql<string>`COALESCE(${iReq.alt}, ${iDef.alt})`.as("alt"),
-    caption: sql<string>`COALESCE(${iReq.caption}, ${iDef.caption})`.as(
-      "caption",
-    ),
+    caption: sql<string>`COALESCE(${iReq.caption}, ${iDef.caption})`.as("caption"),
     locale_resolved: sql<string>`
       CASE WHEN ${iReq.id} IS NOT NULL THEN ${iReq.locale} ELSE ${iDef.locale} END
     `.as("locale_resolved"),
@@ -200,8 +186,8 @@ function imgSelect(iReq: any, iDef: any, sa: any) {
 /* ----------------------- list / get ----------------------- */
 
 export async function listServices(params: {
-  locale: Locale;
-  defaultLocale: Locale;
+  locale: LocaleCode;
+  defaultLocale: LocaleCode;
   orderParam?: string;
   sort?: Sortable;
   order?: "asc" | "desc";
@@ -226,10 +212,8 @@ export async function listServices(params: {
   if (active !== undefined) filters.push(eq(services.is_active, active));
 
   if (params.type) filters.push(eq(services.type, params.type));
-  if (params.category_id)
-    filters.push(eq(services.category_id, params.category_id));
-  if (params.sub_category_id)
-    filters.push(eq(services.sub_category_id, params.sub_category_id));
+  if (params.category_id) filters.push(eq(services.category_id, params.category_id));
+  if (params.sub_category_id) filters.push(eq(services.sub_category_id, params.sub_category_id));
 
   if (params.q && params.q.trim()) {
     const s = `%${params.q.trim()}%`;
@@ -244,8 +228,7 @@ export async function listServices(params: {
     `);
   }
 
-  const whereExpr: SQL =
-    filters.length > 0 ? ((and(...filters) as SQL)) : sql`1=1`;
+  const whereExpr: SQL = filters.length > 0 ? (and(...filters) as SQL) : sql`1=1`;
 
   const ord = parseOrder(params.orderParam, params.sort, params.order);
   const orderBy = ord
@@ -260,17 +243,8 @@ export async function listServices(params: {
   const rows = await db
     .select(baseSelect(iReq, iDef))
     .from(services)
-    .leftJoin(
-      iReq,
-      and(eq(iReq.service_id, services.id), eq(iReq.locale, params.locale)),
-    )
-    .leftJoin(
-      iDef,
-      and(
-        eq(iDef.service_id, services.id),
-        eq(iDef.locale, params.defaultLocale),
-      ),
-    )
+    .leftJoin(iReq, and(eq(iReq.service_id, services.id), eq(iReq.locale, params.locale)))
+    .leftJoin(iDef, and(eq(iDef.service_id, services.id), eq(iDef.locale, params.defaultLocale)))
     .where(whereExpr)
     .orderBy(orderBy)
     .limit(take)
@@ -279,75 +253,44 @@ export async function listServices(params: {
   const cnt = await db
     .select({ c: sql<number>`COUNT(1)` })
     .from(services)
-    .leftJoin(
-      iReq,
-      and(eq(iReq.service_id, services.id), eq(iReq.locale, params.locale)),
-    )
-    .leftJoin(
-      iDef,
-      and(
-        eq(iDef.service_id, services.id),
-        eq(iDef.locale, params.defaultLocale),
-      ),
-    )
+    .leftJoin(iReq, and(eq(iReq.service_id, services.id), eq(iReq.locale, params.locale)))
+    .leftJoin(iDef, and(eq(iDef.service_id, services.id), eq(iDef.locale, params.defaultLocale)))
     .where(whereExpr);
 
   const total = cnt[0]?.c ?? 0;
   return { items: rows as unknown as ServiceMerged[], total };
 }
 
-export async function getServiceMergedById(
-  locale: Locale,
-  defaultLocale: Locale,
-  id: string,
-) {
+export async function getServiceMergedById(locale: LocaleCode, defaultLocale: LocaleCode, id: string) {
   const iReq = alias(servicesI18n, "si_req");
   const iDef = alias(servicesI18n, "si_def");
+
   const rows = await db
     .select(baseSelect(iReq, iDef))
     .from(services)
-    .leftJoin(
-      iReq,
-      and(eq(iReq.service_id, services.id), eq(iReq.locale, locale)),
-    )
-    .leftJoin(
-      iDef,
-      and(
-        eq(iDef.service_id, services.id),
-        eq(iDef.locale, defaultLocale),
-      ),
-    )
+    .leftJoin(iReq, and(eq(iReq.service_id, services.id), eq(iReq.locale, locale)))
+    .leftJoin(iDef, and(eq(iDef.service_id, services.id), eq(iDef.locale, defaultLocale)))
     .where(eq(services.id, id))
     .limit(1);
+
   return (rows[0] ?? null) as unknown as ServiceMerged | null;
 }
 
-export async function getServiceMergedBySlug(
-  locale: Locale,
-  defaultLocale: Locale,
-  slug: string,
-) {
+export async function getServiceMergedBySlug(locale: LocaleCode, defaultLocale: LocaleCode, slug: string) {
   const iReq = alias(servicesI18n, "si_req");
   const iDef = alias(servicesI18n, "si_def");
+
   const rows = await db
     .select(baseSelect(iReq, iDef))
     .from(services)
-    .leftJoin(
-      iReq,
-      and(eq(iReq.service_id, services.id), eq(iReq.locale, locale)),
-    )
-    .leftJoin(
-      iDef,
-      and(
-        eq(iDef.service_id, services.id),
-        eq(iDef.locale, defaultLocale),
-      ),
-    )
+    .leftJoin(iReq, and(eq(iReq.service_id, services.id), eq(iReq.locale, locale)))
+    .leftJoin(iDef, and(eq(iDef.service_id, services.id), eq(iDef.locale, defaultLocale)))
     .where(
       sql`( ${iReq.id} IS NOT NULL AND ${iReq.slug} = ${slug} )
            OR ( ${iReq.id} IS NULL AND ${iDef.slug} = ${slug} )`,
     )
     .limit(1);
+
   return (rows[0] ?? null) as unknown as ServiceMerged | null;
 }
 
@@ -360,12 +303,9 @@ export async function createServiceParent(values: NewServiceRow) {
 
 export async function upsertServiceI18n(
   serviceId: string,
-  locale: Locale,
+  locale: LocaleCode,
   data: Partial<
-    Omit<
-      NewServiceI18nRow,
-      "id" | "service_id" | "locale" | "created_at" | "updated_at"
-    >
+    Omit<NewServiceI18nRow, "id" | "service_id" | "locale" | "created_at" | "updated_at">
   > & { id?: string },
 ) {
   const insertVals: NewServiceI18nRow = {
@@ -374,31 +314,17 @@ export async function upsertServiceI18n(
     locale,
     slug: typeof data.slug === "string" ? data.slug : "",
     name: typeof data.name === "string" ? data.name : "",
-    description:
-      typeof data.description === "string"
-        ? data.description
-        : null,
-    material:
-      typeof data.material === "string" ? data.material : null,
+    description: typeof data.description === "string" ? data.description : null,
+    material: typeof data.material === "string" ? data.material : null,
     price: typeof data.price === "string" ? data.price : null,
-    includes:
-      typeof data.includes === "string" ? data.includes : null,
-    warranty:
-      typeof data.warranty === "string" ? data.warranty : null,
-    image_alt:
-      typeof data.image_alt === "string" ? data.image_alt : null,
+    includes: typeof data.includes === "string" ? data.includes : null,
+    warranty: typeof data.warranty === "string" ? data.warranty : null,
+    image_alt: typeof data.image_alt === "string" ? data.image_alt : null,
 
     tags: typeof data.tags === "string" ? data.tags : null,
-    meta_title:
-      typeof data.meta_title === "string" ? data.meta_title : null,
-    meta_description:
-      typeof data.meta_description === "string"
-        ? data.meta_description
-        : null,
-    meta_keywords:
-      typeof data.meta_keywords === "string"
-        ? data.meta_keywords
-        : null,
+    meta_title: typeof data.meta_title === "string" ? data.meta_title : null,
+    meta_description: typeof data.meta_description === "string" ? data.meta_description : null,
+    meta_keywords: typeof data.meta_keywords === "string" ? data.meta_keywords : null,
 
     created_at: new Date() as any,
     updated_at: new Date() as any,
@@ -419,36 +345,30 @@ export async function upsertServiceI18n(
     "meta_description",
     "meta_keywords",
   ] as const) {
-    if (typeof (data as any)[k] !== "undefined")
-      (setObj as any)[k] = (data as any)[k];
+    if (typeof (data as any)[k] !== "undefined") (setObj as any)[k] = (data as any)[k];
   }
   setObj.updated_at = new Date();
 
   if (Object.keys(setObj).length === 1) return;
-  await db
-    .insert(servicesI18n)
-    .values(insertVals)
-    .onDuplicateKeyUpdate({ set: setObj });
+
+  await db.insert(servicesI18n).values(insertVals).onDuplicateKeyUpdate({ set: setObj });
 }
 
-export async function upsertServiceI18nAllLocales(
-  serviceId: string,
-  data: Partial<
-    Omit<
-      NewServiceI18nRow,
-      "id" | "service_id" | "locale" | "created_at" | "updated_at"
-    >
-  >,
-) {
-  for (const L of LOCALES) {
-    await upsertServiceI18n(serviceId, L as Locale, data);
+/**
+ * ✅ Tüm dillere kopyalama artık LOCALES sabiti ile değil,
+ * site_settings.app_locales ile dinamik yapılır.
+ */
+export async function upsertServiceI18nAllLocales(serviceId: string, data: Partial<Omit<
+  NewServiceI18nRow,
+  "id" | "service_id" | "locale" | "created_at" | "updated_at"
+>>) {
+  const locales = await getAppLocales(null); // ["tr","en","de",...]
+  for (const L of locales) {
+    await upsertServiceI18n(serviceId, L, data);
   }
 }
 
-export async function updateServiceParent(
-  id: string,
-  patch: Partial<NewServiceRow>,
-) {
+export async function updateServiceParent(id: string, patch: Partial<NewServiceRow>) {
   await db
     .update(services)
     .set({ ...patch, updated_at: new Date() as any })
@@ -456,11 +376,9 @@ export async function updateServiceParent(
 }
 
 export async function deleteServiceParent(id: string) {
-  // FK'ler ON DELETE CASCADE olduğu için sadece parent silmemiz yeterli.
   const res = await db.delete(services).where(eq(services.id, id)).execute();
   const affected =
-    typeof (res as unknown as { affectedRows?: number })
-      .affectedRows === "number"
+    typeof (res as unknown as { affectedRows?: number }).affectedRows === "number"
       ? (res as unknown as { affectedRows: number }).affectedRows
       : 0;
   return affected;
@@ -470,8 +388,8 @@ export async function deleteServiceParent(id: string) {
 
 export async function listServiceImages(params: {
   serviceId: string;
-  locale: Locale;
-  defaultLocale: Locale;
+  locale: LocaleCode;
+  defaultLocale: LocaleCode;
   onlyActive?: boolean;
 }) {
   const iReq = alias(serviceImagesI18n, "simg_req");
@@ -480,35 +398,17 @@ export async function listServiceImages(params: {
 
   const where =
     params.onlyActive === true
-      ? and(
-          eq(serviceImages.service_id, params.serviceId),
-          eq(serviceImages.is_active, 1),
-        )
+      ? and(eq(serviceImages.service_id, params.serviceId), eq(serviceImages.is_active, 1))
       : and(eq(serviceImages.service_id, params.serviceId), sql`1=1`);
 
   const rows = await db
     .select(imgSelect(iReq, iDef, saImg))
     .from(serviceImages)
-    .leftJoin(
-      iReq,
-      and(
-        eq(iReq.image_id, serviceImages.id),
-        eq(iReq.locale, params.locale),
-      ),
-    )
-    .leftJoin(
-      iDef,
-      and(
-        eq(iDef.image_id, serviceImages.id),
-        eq(iDef.locale, params.defaultLocale),
-      ),
-    )
+    .leftJoin(iReq, and(eq(iReq.image_id, serviceImages.id), eq(iReq.locale, params.locale)))
+    .leftJoin(iDef, and(eq(iDef.image_id, serviceImages.id), eq(iDef.locale, params.defaultLocale)))
     .leftJoin(saImg, eq(saImg.id, serviceImages.image_asset_id))
     .where(where)
-    .orderBy(
-      asc(serviceImages.display_order),
-      asc(serviceImages.created_at),
-    );
+    .orderBy(asc(serviceImages.display_order), asc(serviceImages.created_at));
 
   return (rows as any[]).map(
     (r): ServiceImageMerged => ({
@@ -518,11 +418,7 @@ export async function listServiceImages(params: {
       image_url:
         r.image_url ||
         (r.img_bucket && r.img_path
-          ? publicUrlOf(
-              r.img_bucket as string,
-              r.img_path as string,
-              r.img_url as string | null,
-            )
+          ? publicUrlOf(r.img_bucket as string, r.img_path as string, r.img_url as string | null)
           : null),
       is_active: r.is_active,
       display_order: r.display_order,
@@ -543,59 +439,44 @@ export async function createServiceImage(values: NewServiceImageRow) {
 
 export async function upsertServiceImageI18n(
   imageId: string,
-  locale: Locale,
+  locale: LocaleCode,
   data: Partial<
-    Omit<
-      NewServiceImageI18nRow,
-      "id" | "image_id" | "locale" | "created_at" | "updated_at"
-    >
+    Omit<NewServiceImageI18nRow, "id" | "image_id" | "locale" | "created_at" | "updated_at">
   > & { id?: string },
 ) {
   const insertVals: NewServiceImageI18nRow = {
     id: data.id ?? randomUUID(),
     image_id: imageId,
     locale,
-    title:
-      typeof data.title === "string" ? data.title : (null as any),
+    title: typeof data.title === "string" ? data.title : (null as any),
     alt: typeof data.alt === "string" ? data.alt : (null as any),
-    caption:
-      typeof data.caption === "string" ? data.caption : (null as any),
+    caption: typeof data.caption === "string" ? data.caption : (null as any),
     created_at: new Date() as any,
     updated_at: new Date() as any,
   };
 
   const setObj: Record<string, any> = {};
   for (const k of ["title", "alt", "caption"] as const) {
-    if (typeof (data as any)[k] !== "undefined")
-      (setObj as any)[k] = (data as any)[k];
+    if (typeof (data as any)[k] !== "undefined") (setObj as any)[k] = (data as any)[k];
   }
   setObj.updated_at = new Date();
 
   if (Object.keys(setObj).length === 1) return;
-  await db
-    .insert(serviceImagesI18n)
-    .values(insertVals)
-    .onDuplicateKeyUpdate({ set: setObj });
+
+  await db.insert(serviceImagesI18n).values(insertVals).onDuplicateKeyUpdate({ set: setObj });
 }
 
 export async function upsertServiceImageI18nAllLocales(
   imageId: string,
-  data: Partial<
-    Omit<
-      NewServiceImageI18nRow,
-      "id" | "image_id" | "locale" | "created_at" | "updated_at"
-    >
-  >,
+  data: Partial<Omit<NewServiceImageI18nRow, "id" | "image_id" | "locale" | "created_at" | "updated_at">>,
 ) {
-  for (const L of LOCALES) {
-    await upsertServiceImageI18n(imageId, L as Locale, data);
+  const locales = await getAppLocales(null);
+  for (const L of locales) {
+    await upsertServiceImageI18n(imageId, L, data);
   }
 }
 
-export async function updateServiceImage(
-  id: string,
-  patch: Partial<NewServiceImageRow>,
-) {
+export async function updateServiceImage(id: string, patch: Partial<NewServiceImageRow>) {
   await db
     .update(serviceImages)
     .set({ ...patch, updated_at: new Date() as any })
@@ -603,21 +484,15 @@ export async function updateServiceImage(
 }
 
 export async function deleteServiceImage(id: string) {
-  const res = await db
-    .delete(serviceImages)
-    .where(eq(serviceImages.id, id))
-    .execute();
+  const res = await db.delete(serviceImages).where(eq(serviceImages.id, id)).execute();
   const affected =
-    typeof (res as unknown as { affectedRows?: number })
-      .affectedRows === "number"
+    typeof (res as unknown as { affectedRows?: number }).affectedRows === "number"
       ? (res as unknown as { affectedRows: number }).affectedRows
       : 0;
   return affected;
 }
 
-export async function reorderServices(
-  items: { id: string; display_order: number }[],
-) {
+export async function reorderServices(items: { id: string; display_order: number }[]) {
   if (!items || !items.length) return;
 
   const now = new Date() as any;
@@ -628,12 +503,8 @@ export async function reorderServices(
 
       await tx
         .update(services)
-        .set({
-          display_order: it.display_order,
-          updated_at: now,
-        })
+        .set({ display_order: it.display_order, updated_at: now })
         .where(eq(services.id, it.id));
     }
   });
 }
-

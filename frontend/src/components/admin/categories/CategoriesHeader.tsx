@@ -3,7 +3,7 @@
 // Ensotek – Kategori Header + Filtreler
 // =============================================================
 
-import React from "react";
+import React, { useMemo } from 'react';
 
 export type LocaleOption = {
   value: string;
@@ -56,18 +56,33 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({
   loading,
   onRefresh,
   locales,
-  localesLoading,
+  localesLoading = false,
   modules,
   onCreateClick,
 }) => {
+  const safeLocales = useMemo<LocaleOption[]>(() => {
+    const list = Array.isArray(locales) ? locales : [];
+    // Eğer üst katman "Tüm Diller" eklemediyse burada güvenli şekilde ekle
+    const hasAll = list.some((x) => x && x.value === '');
+    return hasAll ? list : [{ value: '', label: 'Tüm Diller' }, ...list];
+  }, [locales]);
+
+  const safeModules = useMemo<ModuleOption[]>(() => {
+    const list = Array.isArray(modules) ? modules : [];
+    const hasAll = list.some((x) => x && x.value === '');
+    return hasAll ? list : [{ value: '', label: 'Tüm Modüller' }, ...list];
+  }, [modules]);
+
+  const disableLocaleSelect = loading || localesLoading || safeLocales.length === 0;
+
   return (
     <div className="row mb-3">
       {/* Sol: başlık */}
       <div className="col-12 col-lg-6 mb-2 mb-lg-0">
         <h1 className="h4 mb-1">Kategoriler</h1>
         <p className="text-muted small mb-0">
-          Çok dilli kategori kayıtlarını listeler, sıralama (drag &amp; drop),
-          aktif/öne çıkan durumlarını ve temel bilgileri yönetebilirsin.
+          Çok dilli kategori kayıtlarını listeler, sıralama (drag &amp; drop), aktif/öne çıkan
+          durumlarını ve temel bilgileri yönetebilirsin.
         </p>
       </div>
 
@@ -83,6 +98,7 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({
               placeholder="İsim veya slug içinde ara"
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
+              disabled={loading}
             />
           </div>
 
@@ -90,18 +106,16 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({
           <div className="input-group input-group-sm">
             <span className="input-group-text">
               Dil
-              {localesLoading && (
-                <span className="ms-1 spinner-border spinner-border-sm" />
-              )}
+              {localesLoading && <span className="ms-1 spinner-border spinner-border-sm" />}
             </span>
             <select
               className="form-select"
               value={locale}
               onChange={(e) => onLocaleChange(e.target.value)}
+              disabled={disableLocaleSelect}
             >
-              <option value="">Tüm Diller</option>
-              {locales.map((opt) => (
-                <option key={opt.value} value={opt.value}>
+              {safeLocales.map((opt) => (
+                <option key={`${opt.value}:${opt.label}`} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
@@ -115,9 +129,10 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({
               className="form-select"
               value={moduleKey}
               onChange={(e) => onModuleKeyChange(e.target.value)}
+              disabled={loading}
             >
-              {modules.map((opt) => (
-                <option key={opt.value || "all"} value={opt.value}>
+              {safeModules.map((opt) => (
+                <option key={opt.value || 'all'} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
@@ -136,6 +151,7 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({
               type="checkbox"
               checked={showOnlyActive}
               onChange={(e) => onShowOnlyActiveChange(e.target.checked)}
+              disabled={loading}
             />
             <label className="form-check-label" htmlFor="filter-active">
               Sadece aktif
@@ -149,6 +165,7 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({
               type="checkbox"
               checked={showOnlyFeatured}
               onChange={(e) => onShowOnlyFeaturedChange(e.target.checked)}
+              disabled={loading}
             />
             <label className="form-check-label" htmlFor="filter-featured">
               Sadece öne çıkan
@@ -169,6 +186,7 @@ export const CategoriesHeader: React.FC<CategoriesHeaderProps> = ({
             type="button"
             className="btn btn-primary btn-sm"
             onClick={onCreateClick}
+            disabled={loading}
           >
             + Yeni Kategori
           </button>
