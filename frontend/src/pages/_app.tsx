@@ -1,6 +1,5 @@
 // src/pages/_app.tsx
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { Toaster } from 'sonner';
@@ -27,13 +26,14 @@ import AdminFooter from '@/components/layout/admin/AdminFooter';
 // Admin nav helpers
 import { isAdminPath, pathToTab, tabToPath } from '@/components/layout/admin/adminNav';
 
-/* ------------------------------- App ------------------------------- */
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
-  // asPath -> gerçek URL; query / hash atıyoruz
-  const rawPath = (router.asPath || router.pathname || '/').split(/[?#]/)[0];
-  const isAdminRoute = isAdminPath(rawPath);
+  const rawPath = useMemo(() => {
+    return (router.asPath || router.pathname || '/').split(/[?#]/)[0] || '/';
+  }, [router.asPath, router.pathname]);
+
+  const isAdminRoute = useMemo(() => isAdminPath(rawPath), [rawPath]);
 
   // NProgress + AOS
   useEffect(() => {
@@ -105,43 +105,46 @@ export default function App({ Component, pageProps }: AppProps) {
     };
   }, [router.events]);
 
-  // ---------------- Layout seçimi ----------------
-  let content = <Component {...pageProps} />;
-
-  if (isAdminRoute) {
-    const activeTab: ActiveTab = pathToTab(rawPath as string);
-
-    const handleTabChange = (next: ActiveTab) => {
-      const target = tabToPath(next);
-      const current = rawPath;
-      if (target && target !== current) {
-        void router.push(target);
-      }
-    };
-
-    content = (
-      <AdminLayoutShell
-        key={rawPath}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-        onNavigateHome={() => router.push('/')}
-        onNavigateLogin={() => router.push('/login')}
-        header={<AdminHeader onBackHome={() => router.push('/')} />}
-        footer={<AdminFooter />}
-      >
-        {content}
-      </AdminLayoutShell>
-    );
-  } else {
-    content = <Layout>{content}</Layout>;
-  }
-
   return (
     <StoreProvider>
       <LangBoot />
       <GAScripts />
       <Toaster position="top-right" richColors closeButton duration={4000} />
-      {content}
+
+      {isAdminRoute ? (
+        <AdminRouteShell rawPath={rawPath}>
+          <Component {...pageProps} />
+        </AdminRouteShell>
+      ) : (
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      )}
     </StoreProvider>
+  );
+}
+
+function AdminRouteShell(props: { rawPath: string; children: React.ReactNode }) {
+  const router = useRouter();
+  const activeTab: ActiveTab = pathToTab(props.rawPath);
+
+  const handleTabChange = (next: ActiveTab) => {
+    const target = tabToPath(next);
+    const current = props.rawPath;
+    if (target && target !== current) void router.push(target);
+  };
+
+  return (
+    <AdminLayoutShell
+      key={props.rawPath}
+      activeTab={activeTab}
+      onTabChange={handleTabChange}
+      onNavigateHome={() => router.push('/')}
+      onNavigateLogin={() => router.push('/login')}
+      header={<AdminHeader onBackHome={() => router.push('/')} />}
+      footer={<AdminFooter />}
+    >
+      {props.children}
+    </AdminLayoutShell>
   );
 }

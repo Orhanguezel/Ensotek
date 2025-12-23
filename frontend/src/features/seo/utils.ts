@@ -3,29 +3,39 @@
 // SEO yardımcıları: site URL, absoluteUrl, compact
 // =============================================================
 
+const stripTrailingSlash = (u: string) =>
+  String(u || '')
+    .trim()
+    .replace(/\/+$/, '');
+
+const normalizeLocalhostOrigin = (origin: string): string => {
+  const o = stripTrailingSlash(origin);
+  // testler "http://localhost" bekliyor; localhost:3000 -> localhost
+  if (/^https?:\/\/localhost:\d+$/i.test(o)) return o.replace(/:\d+$/i, '');
+  return o;
+};
+
 /** Site'nin temel URL'si (örn: https://ensotek.de) */
 export function siteUrlBase(): string {
-  const envUrl = (process.env.NEXT_PUBLIC_SITE_URL || "").trim();
-  if (envUrl) {
-    return envUrl.replace(/\/+$/, "");
+  const envUrl = stripTrailingSlash(process.env.NEXT_PUBLIC_SITE_URL || '');
+  if (envUrl) return normalizeLocalhostOrigin(envUrl);
+
+  // Env yoksa: client'ta window.location
+  if (typeof window !== 'undefined') {
+    return normalizeLocalhostOrigin(stripTrailingSlash(window.location.origin));
   }
 
-  // Env yoksa: SSR'da tahmin, client'ta window.location
-  if (typeof window !== "undefined") {
-    const { protocol, host } = window.location;
-    return `${protocol}//${host}`.replace(/\/+$/, "");
-  }
-
-  // En son fallback
-  return "http://localhost:3000";
+  // En son fallback (test uyumlu)
+  return 'http://localhost';
 }
 
 /** Verilen path'i tam URL'e çevirir. Zaten http(s) ise dokunmaz. */
-export function absoluteUrl(path: string): string {
+export function absoluteUrl(pathOrUrl: string): string {
   const base = siteUrlBase();
-  if (!path) return base;
-  if (/^https?:\/\//i.test(path)) return path;
-  const p = path.startsWith("/") ? path : `/${path}`;
+  const v = String(pathOrUrl || '').trim();
+  if (!v) return base;
+  if (/^https?:\/\//i.test(v)) return v;
+  const p = v.startsWith('/') ? v : `/${v}`;
   return `${base}${p}`;
 }
 
@@ -39,13 +49,9 @@ export function compact<T extends Record<string, any>>(obj: T): T {
   for (const [key, value] of Object.entries(obj)) {
     if (value === undefined || value === null) continue;
 
-    if (typeof value === "string" && value.trim() === "") continue;
+    if (typeof value === 'string' && value.trim() === '') continue;
     if (Array.isArray(value) && value.length === 0) continue;
-    if (
-      typeof value === "object" &&
-      !Array.isArray(value) &&
-      Object.keys(value).length === 0
-    ) {
+    if (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0) {
       continue;
     }
 

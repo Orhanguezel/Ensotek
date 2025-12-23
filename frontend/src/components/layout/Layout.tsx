@@ -15,9 +15,9 @@ import { localizePath } from '@/i18n/url';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 import { buildMeta, type MetaInput } from '@/seo/meta';
-import { buildCanonical, asObj } from '@/seo/pageSeo';
+import { asObj, absUrl } from '@/seo/pageSeo'; // ✅ absUrl ekle
 
-// runtime base url helpers (logo preload vs için kalsın)
+import { HreflangLinks } from '@/seo/HreflangLinks';
 import { siteUrlBase, absoluteUrl } from '@/features/seo/utils';
 
 type SimpleBrand = {
@@ -47,7 +47,6 @@ const toLocaleShort = (l: any) => {
   return v.split('-')[0] || 'tr';
 };
 
-// sadece preload vb için
 function absUrlForPreload(pathOrUrl: string): string {
   const base = siteUrlBase();
   const v = String(pathOrUrl || '').trim();
@@ -60,8 +59,67 @@ function toAbsoluteMaybe(u: string): string {
   const v = String(u || '').trim();
   if (!v) return '';
   if (/^https?:\/\//i.test(v)) return v;
-  // absoluteUrl util’in relative’i base ile birleştirdiğini varsayıyoruz
   return absoluteUrl(v);
+}
+
+function defaultDescriptionForLocale(locale: string): string {
+  if (locale === 'tr') {
+    return 'Ensotek ürünleri, hizmetleri ve endüstriyel çözümleri. Teklif ve danışmanlık için iletişime geçin.';
+  }
+  return 'Ensotek products, services and industrial solutions. Contact us for tailored support and consultation.';
+}
+
+function stripQueryHash(asPath: string): string {
+  const s = String(asPath || '/');
+  return (s.split('#')[0].split('?')[0] || '/').trim() || '/';
+}
+
+/** Head içinde kullanılacak: throw etmez, en kötü null döner */
+class HeadSafeBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(err: any) {
+    // eslint-disable-next-line no-console
+    console.error('[HeadSafeBoundary] error:', err);
+  }
+  render() {
+    if (this.state.hasError) return null;
+    return this.props.children;
+  }
+}
+
+class LayoutErrorBoundary extends React.Component<
+  { children: React.ReactNode; fallback?: React.ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(err: any) {
+    // eslint-disable-next-line no-console
+    console.error('[LayoutErrorBoundary] child render error:', err);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        this.props.fallback ?? (
+          <div className="container" style={{ padding: 24 }}>
+            <h1 style={{ marginBottom: 8 }}>Something went wrong</h1>
+            <p style={{ margin: 0 }}>
+              The page content failed to render. Please refresh or try again later.
+            </p>
+          </div>
+        )
+      );
+    }
+    return this.props.children;
+  }
 }
 
 export default function Layout({
@@ -75,61 +133,72 @@ export default function Layout({
   ogImage,
 }: LayoutProps) {
   const router = useRouter();
+  const isClient = typeof window !== 'undefined';
 
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
-  // 1) SEO kaydı (DB) — seo -> site_seo fallback
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery(
+    { key: 'seo', locale },
+    { skip: !isClient },
+  );
+  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery(
+    { key: 'site_seo', locale },
+    { skip: !isClient },
+  );
 
   const seo = useMemo(() => {
     const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  // 2) Varsayılan meta alanları (DB’den)
   const seoTitleDefault = String(seo?.title_default ?? '').trim();
   const seoDescription = String(seo?.description ?? '').trim();
   const seoSiteName = String(seo?.site_name ?? '').trim();
 
   const og = asObj(seo?.open_graph) || {};
-
   const ogImage1 =
     typeof ogImage === 'string' && ogImage.trim()
       ? ogImage.trim()
-      : typeof og?.image === 'string' && String(og.image).trim()
-      ? String(og.image).trim()
+      : typeof (og as any)?.image === 'string' && String((og as any).image).trim()
+      ? String((og as any).image).trim()
       : Array.isArray((og as any)?.images) && (og as any).images[0]
       ? String((og as any).images[0]).trim()
       : '';
 
   const tw = asObj(seo?.twitter) || {};
-  const twitterCard = String(tw?.card ?? '').trim() || 'summary_large_image';
-  const twitterSite = typeof tw?.site === 'string' ? String(tw.site).trim() : '';
-  const twitterCreator = typeof tw?.creator === 'string' ? String(tw.creator).trim() : '';
+  const twitterCard = String((tw as any)?.card ?? '').trim() || 'summary_large_image';
+  const twitterSite = typeof (tw as any)?.site === 'string' ? String((tw as any).site).trim() : '';
+  const twitterCreator =
+    typeof (tw as any)?.creator === 'string' ? String((tw as any).creator).trim() : '';
 
-  // 3) Sayfa override > DB fallback
   const finalTitle = (title && title.trim()) || seoTitleDefault || 'Ensotek';
-  const finalDescription = (description && description.trim()) || seoDescription || '';
+
+  const finalDescriptionRaw = (description && description.trim()) || seoDescription || '';
+  const safeDescription = finalDescriptionRaw || defaultDescriptionForLocale(locale);
+
   const finalKeywords = (keywords && keywords.trim()) || String(seo?.keywords ?? '').trim() || '';
 
-  // ✅ 4) Canonical (locale-aware, page standard ile aynı)
-  const canonical = useMemo(() => {
-    return buildCanonical({
-      asPath: router.asPath || '/',
-      locale,
-      fallbackPathname: '/',
-      localizePath,
-    });
+  // ✅ canonical PATH + ABS
+  const canonicalPath = useMemo(() => {
+    try {
+      const raw = stripQueryHash(router.asPath || '/');
+      return localizePath(locale, raw);
+    } catch {
+      return localizePath(locale, '/');
+    }
   }, [router.asPath, locale]);
 
-  // 5) Brand + logo (Header için)
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({ key: 'contact_info', locale });
-  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
-    key: 'company_brand',
-    locale,
-  });
+  const canonicalAbs = useMemo(() => absUrl(canonicalPath), [canonicalPath]);
+
+  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery(
+    { key: 'contact_info', locale },
+    { skip: !isClient },
+  );
+  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery(
+    { key: 'company_brand', locale },
+    { skip: !isClient },
+  );
 
   const { normalizedBrand, logoHrefFromSettings } = useMemo(() => {
     const contact = (contactInfoSetting?.value ?? {}) as any;
@@ -177,12 +246,11 @@ export default function Layout({
 
   const preloadLogoHref = typeof headerLogoSrc === 'string' ? headerLogoSrc : logoHrefFromSettings;
 
-  // 6) Head tag’lerini seo/meta.ts ile üret
   const headMetaSpecs = useMemo(() => {
     const meta: MetaInput = {
       title: finalTitle,
-      description: finalDescription,
-      canonical, // ✅ og:url canonical’dan türeyecek (meta.ts)
+      description: safeDescription,
+      canonical: canonicalAbs, // ✅ ABS
       image: ogImage1 ? toAbsoluteMaybe(ogImage1) : undefined,
       siteName: seoSiteName || effectiveBrand.name || 'Ensotek',
       noindex: !!noindex,
@@ -194,8 +262,8 @@ export default function Layout({
     return buildMeta(meta);
   }, [
     finalTitle,
-    finalDescription,
-    canonical,
+    safeDescription,
+    canonicalAbs,
     ogImage1,
     seoSiteName,
     effectiveBrand.name,
@@ -208,8 +276,15 @@ export default function Layout({
   return (
     <Fragment>
       <Head>
+        {/* ✅ MARKER: test bununla Layout render oldu mu anlayacak */}
+        <meta name="app:layout" content="public" />
+
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>{finalTitle}</title>
+
+        {/* ✅ GUARANTEE canonical/description */}
+        <link rel="canonical" href={canonicalAbs} />
+        <meta name="description" content={safeDescription} />
 
         {finalKeywords ? <meta name="keywords" content={finalKeywords} /> : null}
 
@@ -221,6 +296,10 @@ export default function Layout({
           return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
         })}
 
+        <HeadSafeBoundary>
+          <HreflangLinks />
+        </HeadSafeBoundary>
+
         {preloadLogoHref ? (
           <link rel="preload" as="image" href={absUrlForPreload(preloadLogoHref)} />
         ) : null}
@@ -228,7 +307,9 @@ export default function Layout({
 
       <div className="my-app">
         <Header brand={effectiveBrand} logoSrc={headerLogoSrc} />
-        <main>{children}</main>
+        <main>
+          <LayoutErrorBoundary>{children}</LayoutErrorBoundary>
+        </main>
         <Footer />
         <ScrollProgress />
       </div>

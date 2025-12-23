@@ -3,6 +3,17 @@
 // =============================================================
 'use client';
 
+/**
+ * Default locale prefix kuralı:
+ * - true  => default locale URL’leri prefix’siz: "/" , "/service"
+ * - false => default locale de prefix’li: "/tr", "/tr/service"
+ */
+const DEFAULT_LOCALE_PREFIXLESS = true;
+
+// Client tarafında default locale bilgisi DB’den gelmez.
+// Test/CI için env ile sabitle:
+const DEFAULT_LOCALE = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'tr').trim().toLowerCase();
+
 function stripTrailingSlash(u: string) {
   return String(u || '')
     .trim()
@@ -15,6 +26,15 @@ function normalizeLocalhostOrigin(origin: string): string {
   // https://localhost:3000 -> https://localhost
   if (/^https?:\/\/localhost:\d+$/i.test(o)) return o.replace(/:\d+$/i, '');
   return o;
+}
+
+function toLocaleShort(l: any): string {
+  return (
+    String(l || DEFAULT_LOCALE)
+      .trim()
+      .toLowerCase()
+      .split('-')[0] || DEFAULT_LOCALE
+  );
 }
 
 function getBaseUrl(): string {
@@ -59,11 +79,29 @@ export function pickFirstImageFromSeo(seo: any): string {
   return image || imagesArr || '';
 }
 
+function stripDefaultLocalePrefix(pathname: string, locale: string): string {
+  const loc = toLocaleShort(locale);
+  const def = toLocaleShort(DEFAULT_LOCALE);
+
+  if (!DEFAULT_LOCALE_PREFIXLESS) return pathname;
+  if (loc !== def) return pathname;
+
+  // "/tr" -> "/"
+  if (pathname === `/${loc}`) return '/';
+
+  // "/tr/xxx" -> "/xxx"
+  const pref = `/${loc}/`;
+  if (pathname.startsWith(pref)) return `/${pathname.slice(pref.length)}`.replace(/^\/+/, '/');
+
+  return pathname;
+}
+
 /**
- * Canonical üretimi:
+ * Canonical üretimi (CLIENT):
  * - asPath -> query/hash temizlenir
- * - sonra localizePath(locale, path) ile locale prefix kuralına uyulur
- * - ardından absUrl ile mutlak URL yapılır
+ * - localizePath(locale, path) uygulanır
+ * - default locale prefixless ise "/tr/.." -> "/.."
+ * - absUrl ile mutlak yapılır (localhost:3000 -> localhost normalize)
  */
 export function buildCanonical(args: {
   asPath?: string;
@@ -73,5 +111,6 @@ export function buildCanonical(args: {
 }): string {
   const rawPath = stripHashQuery(args.asPath || args.fallbackPathname || '/');
   const localized = args.localizePath(args.locale, rawPath);
-  return absUrl(localized);
+  const fixed = stripDefaultLocalePrefix(localized, args.locale);
+  return absUrl(fixed);
 }
