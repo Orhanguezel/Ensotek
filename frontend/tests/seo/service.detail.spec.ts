@@ -1,31 +1,45 @@
-// src/frontend/tests/seo/service.detail.spec.ts
-
+// tests/seo/service.detail.spec.ts
 import { test, expect } from '@playwright/test';
-import { readHead, readJsonLd, expectNotLocalhost, expectAbsolute } from './helpers';
+import {
+  readHead,
+  readJsonLd,
+  waitForSeoHead,
+  expectNotLocalhost,
+  expectAbsolute,
+  expectSameOriginAsBase,
+  expectMinDescription,
+  expectHreflangSet,
+} from './helpers';
 
-const slug = process.env.PLAYWRIGHT_SERVICE_SLUG || '';
+const slug = (process.env.PLAYWRIGHT_SERVICE_SLUG ?? '').trim();
 
 test.describe('SEO: /service/[slug] (detail)', () => {
   test.skip(!slug, 'Set PLAYWRIGHT_SERVICE_SLUG to run this test.');
 
-  test('has canonical/og ok and JSON-LD parse ok', async ({ page }) => {
+  test('has canonical/og/hreflang ok and JSON-LD parse ok', async ({ page }) => {
     await page.goto(`/service/${encodeURIComponent(slug)}`, { waitUntil: 'domcontentloaded' });
+
+    await waitForSeoHead(page, { waitHreflang: true });
 
     const head = await readHead(page);
 
     expect(head.title.trim().length).toBeGreaterThan(3);
-    expect(head.description && head.description.trim().length).toBeGreaterThan(20);
+    expectMinDescription(head.description, 20);
 
     expectAbsolute(head.canonical);
+    expectSameOriginAsBase(head.canonical);
     expectNotLocalhost(head.canonical);
+
+    if (head.ogUrl) {
+      expectAbsolute(head.ogUrl);
+      expectSameOriginAsBase(head.ogUrl);
+      expectNotLocalhost(head.ogUrl);
+      expect(head.ogUrl).toBe(head.canonical);
+    }
+
+    expectHreflangSet(head.hreflangs);
 
     const ld = await readJsonLd(page);
     expect(ld.some((x) => x?.__parse_error__)).toBeFalsy();
-
-    // Eğer service detail sayfasında ServiceJsonLd render ediyorsan:
-    // (render etmiyorsan bu kısmı kaldır veya "optional" yap)
-    const hasService = ld.some((x) => x?.['@type'] === 'Service');
-    // optional: var mı yok mu projene bağlı
-    // expect(hasService).toBeTruthy();
   });
 });

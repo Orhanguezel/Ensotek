@@ -1,19 +1,22 @@
 // =============================================================
-// FILE: src/i18n/locale.ts  (DYNAMIC via META endpoints)
+// FILE: src/i18n/locale.ts  (DYNAMIC via META endpoints) - PROVIDER SAFE
 // =============================================================
 'use client';
 
-import { useMemo } from 'react';
-import { useRouter } from 'next/router';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { FALLBACK_LOCALE } from '@/i18n/config';
 import { normLocaleTag } from '@/i18n/localeUtils';
-import {
-  useGetAppLocalesPublicQuery,
-  useGetDefaultLocalePublicQuery,
-} from '@/integrations/rtk/hooks';
+import { ensureLocationEventsPatched } from '@/i18n/locationEvents';
 
-function readLocaleFromPath(asPath?: string): string {
-  const p = String(asPath || '/').trim();
+type AppLocaleMeta = {
+  code?: unknown;
+  label?: unknown;
+  is_default?: unknown;
+  is_active?: unknown;
+};
+
+function readLocaleFromPathname(pathname?: string): string {
+  const p = String(pathname || '/').trim();
   const seg = p.replace(/^\/+/, '').split('/')[0] || '';
   return normLocaleTag(seg);
 }
@@ -28,62 +31,118 @@ function computeActiveLocales(meta: any[] | undefined): string[] {
   const arr = Array.isArray(meta) ? meta : [];
 
   const active = arr
-    .filter((x) => x && x.is_active !== false)
-    .map((x) => normLocaleTag(x.code))
+    .filter((x) => x && (x as any).is_active !== false)
+    .map((x) => normLocaleTag((x as any).code))
     .filter(Boolean) as string[];
 
   const uniq = Array.from(new Set(active));
 
-  // is_default olanı başa çek
-  const def = arr.find((x) => x?.is_default === true && x?.is_active !== false);
-  const defCode = def ? normLocaleTag(def.code) : '';
+  const def = arr.find((x) => (x as any)?.is_default === true && (x as any)?.is_active !== false);
+  const defCode = def ? normLocaleTag((def as any).code) : '';
   const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  // ✅ kritik: meta boş/gelmediyse bile en az fallback dön
   return out.length ? out : [normLocaleTag(FALLBACK_LOCALE) || 'tr'];
 }
 
-/**
- * ✅ Runtime locale resolver (client)
- * Priority:
- *  1) URL prefix (must be ACTIVE)
- *  2) cookie NEXT_LOCALE (must be ACTIVE)
- *  3) explicit param (must be ACTIVE)
- *  4) default-locale META (must be ACTIVE)
- *  5) app-locales META is_default / first active
- *  6) last resort: FALLBACK_LOCALE (asla path segment’i locale diye dönme)
- */
-export function useResolvedLocale(explicitLocale?: string | null): string {
-  const router = useRouter();
+function getApiBase(): string {
+  const raw =
+    (process.env.NEXT_PUBLIC_API_BASE_URL || '').trim() || (process.env.API_BASE_URL || '').trim();
+  return raw.replace(/\/+$/, '');
+}
 
-  const { data: appLocalesMeta } = useGetAppLocalesPublicQuery();
-  const { data: defaultLocaleMeta } = useGetDefaultLocalePublicQuery();
+async function fetchJson<T>(url: string): Promise<T | null> {
+  try {
+    const res = await fetch(url, { credentials: 'omit', cache: 'no-store' });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+function normalizeDefaultLocaleValue(v: any): string {
+  if (v && typeof v === 'object' && 'data' in v) return normLocaleTag((v as any).data);
+  return normLocaleTag(v);
+}
+
+function normalizeAppLocalesValue(v: any): AppLocaleMeta[] {
+  if (Array.isArray(v)) return v as AppLocaleMeta[];
+  if (v && typeof v === 'object' && 'data' in v && Array.isArray((v as any).data)) {
+    return (v as any).data as AppLocaleMeta[];
+  }
+  return [];
+}
+
+export function useResolvedLocale(explicitLocale?: string | null): string {
+  const [pathname, setPathname] = useState<string>('/');
+
+  const [appLocalesMeta, setAppLocalesMeta] = useState<AppLocaleMeta[] | null>(null);
+  const [defaultLocaleMeta, setDefaultLocaleMeta] = useState<string | null>(null);
+
+  const didFetchRef = useRef(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    ensureLocationEventsPatched();
+
+    const read = () => setPathname(window.location.pathname || '/');
+
+    // initial
+    read();
+
+    // ✅ SPA navigations
+    window.addEventListener('locationchange', read);
+    window.addEventListener('popstate', read);
+    window.addEventListener('hashchange', read);
+
+    return () => {
+      window.removeEventListener('locationchange', read);
+      window.removeEventListener('popstate', read);
+      window.removeEventListener('hashchange', read);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (didFetchRef.current) return;
+    didFetchRef.current = true;
+
+    const base = getApiBase();
+    if (!base) return;
+
+    (async () => {
+      const [appLocalesRaw, defaultLocaleRaw] = await Promise.all([
+        fetchJson<any>(`${base}/site_settings/app-locales`),
+        fetchJson<any>(`${base}/site_settings/default-locale`),
+      ]);
+
+      const appArr = normalizeAppLocalesValue(appLocalesRaw);
+      const def = normalizeDefaultLocaleValue(defaultLocaleRaw);
+
+      setAppLocalesMeta(appArr.length ? appArr : null);
+      setDefaultLocaleMeta(def || null);
+    })();
+  }, []);
 
   return useMemo(() => {
-    const activeLocales = computeActiveLocales(appLocalesMeta as any);
+    const activeLocales = computeActiveLocales((appLocalesMeta || []) as any);
     const activeSet = new Set(activeLocales.map(normLocaleTag));
 
-    // 1) URL prefix
-    const fromPath = readLocaleFromPath(router.asPath);
+    const fromPath = readLocaleFromPathname(pathname);
     if (fromPath && activeSet.has(fromPath)) return fromPath;
 
-    // 2) Cookie
     const fromCookie = readLocaleFromCookie();
     if (fromCookie && activeSet.has(fromCookie)) return fromCookie;
 
-    // 3) Explicit
     const fromExplicit = normLocaleTag(explicitLocale);
     if (fromExplicit && activeSet.has(fromExplicit)) return fromExplicit;
 
-    // 4) default-locale META
     const candDefault = normLocaleTag(defaultLocaleMeta);
     if (candDefault && activeSet.has(candDefault)) return candDefault;
 
-    // 5) app-locales first (computeActiveLocales zaten fallback içerir)
     const firstActive = normLocaleTag(activeLocales[0]);
     if (firstActive) return firstActive;
 
-    // 6) en son fallback
     return normLocaleTag(FALLBACK_LOCALE) || 'tr';
-  }, [router.asPath, explicitLocale, appLocalesMeta, defaultLocaleMeta]);
+  }, [pathname, explicitLocale, appLocalesMeta, defaultLocaleMeta]);
 }

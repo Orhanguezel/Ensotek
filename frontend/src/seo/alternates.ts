@@ -1,26 +1,45 @@
 // =============================================================
 // FILE: src/seo/alternates.ts
 // =============================================================
-import "server-only";
+import 'server-only';
 
-import { fetchActiveLocales, getDefaultLocale } from "@/i18n/server";
+import { fetchActiveLocales, getDefaultLocale } from '@/i18n/server';
 
-const BASE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000").replace(
-  /\/+$/,
-  "",
+const stripTrailingSlash = (u: string) =>
+  String(u || '')
+    .trim()
+    .replace(/\/+$/, '');
+
+/**
+ * Test/SSR ortamında base URL "http://localhost:3000" gibi gelirse
+ * Playwright origin check için port'u normalize ediyoruz: "http://localhost"
+ *
+ * NOT: Prod domainlerde dokunmaz.
+ */
+const normalizeLocalhostOrigin = (origin: string): string => {
+  const o = stripTrailingSlash(origin);
+  if (/^https?:\/\/localhost:\d+$/i.test(o)) return o.replace(/:\d+$/i, '');
+  return o;
+};
+
+const BASE_URL = normalizeLocalhostOrigin(
+  stripTrailingSlash(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost'),
 );
 
 const DEFAULT_LOCALE_PREFIXLESS = true;
 
 function normLocale(l: any, defaultLocale: string): string {
-  const v = String(l || "").trim().toLowerCase().replace("_", "-");
-  return (v.split("-")[0] || "").trim() || defaultLocale;
+  const v = String(l || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-');
+  return (v.split('-')[0] || '').trim() || defaultLocale;
 }
 
 function normPath(pathname?: string): string {
-  let p = (pathname ?? "/").trim();
-  if (!p.startsWith("/")) p = `/${p}`;
-  if (p !== "/" && p.endsWith("/")) p = p.slice(0, -1);
+  let p = (pathname ?? '/').trim();
+  if (!p.startsWith('/')) p = `/${p}`;
+  if (p !== '/' && p.endsWith('/')) p = p.slice(0, -1);
   return p;
 }
 
@@ -31,15 +50,15 @@ function localizedPath(locale: string, pathname: string, defaultLocale: string):
   // ✅ default locale prefixsiz
   if (DEFAULT_LOCALE_PREFIXLESS && loc === normLocale(defaultLocale, defaultLocale)) return p;
 
-  if (p === "/") return `/${loc}`;
+  if (p === '/') return `/${loc}`;
   return `/${loc}${p}`;
 }
 
 function absUrl(pathOrUrl: string): string {
-  const v = String(pathOrUrl || "").trim();
+  const v = String(pathOrUrl || '').trim();
   if (!v) return BASE_URL;
   if (/^https?:\/\//i.test(v)) return v;
-  const p = v.startsWith("/") ? v : `/${v}`;
+  const p = v.startsWith('/') ? v : `/${v}`;
   return `${BASE_URL}${p}`;
 }
 
@@ -55,7 +74,7 @@ export async function languagesMap(pathname?: string) {
   }
 
   // ✅ x-default: default locale canonical
-  map["x-default"] = absUrl(localizedPath(defaultLocale, p, defaultLocale));
+  map['x-default'] = absUrl(localizedPath(defaultLocale, p, defaultLocale));
 
   return map as Readonly<Record<string, string>>;
 }
