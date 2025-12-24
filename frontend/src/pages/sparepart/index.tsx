@@ -9,7 +9,6 @@
 
 import React, { useMemo } from "react";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
 import Banner from "@/components/layout/banner/Breadcrum";
 import ProductPageContent from "@/components/containers/product/ProductPageContent";
@@ -18,19 +17,15 @@ import Feedback from "@/components/containers/feedback/Feedback";
 // i18n
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
 
 // SEO
 import { buildMeta } from "@/seo/meta";
-import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
+import { asObj, absUrl, pickFirstImageFromSeo} from "@/seo/pageSeo";
 
 // data
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
 
-const SPAREPART_PATH = "/sparepart";
-
 const SparepartPage: React.FC = () => {
-  const router = useRouter();
   const locale = useResolvedLocale();
   const { ui } = useUiSection("ui_spareparts", locale);
 
@@ -49,15 +44,6 @@ const SparepartPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  // Canonical (list page)
-  const canonical = useMemo(() => {
-    return buildCanonical({
-      asPath: router.asPath,
-      locale,
-      fallbackPathname: SPAREPART_PATH,
-      localizePath,
-    });
-  }, [router.asPath, locale]);
 
   const seoSiteName = useMemo(
     () => String(seo?.site_name ?? "").trim() || "Ensotek",
@@ -98,8 +84,6 @@ const SparepartPage: React.FC = () => {
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
-      canonical,
-      url: canonical,
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
@@ -107,7 +91,7 @@ const SparepartPage: React.FC = () => {
       twitterSite: typeof tw.site === "string" ? tw.site.trim() : undefined,
       twitterCreator: typeof tw.creator === "string" ? tw.creator.trim() : undefined,
     });
-  }, [seo, pageTitle, pageDescRaw, canonical, ogImage, seoSiteName]);
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   return (
     <>

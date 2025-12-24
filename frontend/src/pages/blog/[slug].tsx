@@ -16,11 +16,10 @@ import Feedback from "@/components/containers/feedback/Feedback";
 // i18n
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
 
 // SEO
 import { buildMeta } from "@/seo/meta";
-import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
+import { asObj, absUrl, pickFirstImageFromSeo } from "@/seo/pageSeo";
 
 // data
 import { useGetSiteSettingByKeyQuery, useGetCustomPageBySlugPublicQuery } from "@/integrations/rtk/hooks";
@@ -28,8 +27,6 @@ import { useGetSiteSettingByKeyQuery, useGetCustomPageBySlugPublicQuery } from "
 // helpers
 import { toCdnSrc } from "@/shared/media";
 import { excerpt } from "@/shared/text";
-
-const BLOG_PATH = "/blog";
 
 const BlogDetailPage: React.FC = () => {
   const router = useRouter();
@@ -88,16 +85,6 @@ const BlogDetailPage: React.FC = () => {
     String(seo?.description ?? "").trim() ||
     "";
 
-  const canonical = useMemo(() => {
-    const fallbackPathname = slug ? `${BLOG_PATH}/${slug}` : BLOG_PATH;
-    return buildCanonical({
-      asPath: router.asPath,
-      locale: localeShort, // ✅
-      fallbackPathname,
-      localizePath,
-    });
-  }, [router.asPath, localeShort, slug]);
-
   const seoSiteName = String(seo?.site_name ?? "").trim() || "Ensotek";
   const titleTemplate = String(seo?.title_template ?? "").trim() || "%s | Ensotek";
 
@@ -126,8 +113,6 @@ const BlogDetailPage: React.FC = () => {
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
-      canonical,
-      url: canonical,
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
@@ -135,7 +120,7 @@ const BlogDetailPage: React.FC = () => {
       twitterSite: typeof tw.site === "string" ? tw.site.trim() : undefined,
       twitterCreator: typeof tw.creator === "string" ? tw.creator.trim() : undefined,
     });
-  }, [seo, pageTitle, pageDescRaw, canonical, ogImage, seoSiteName]);
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   return (
     <>

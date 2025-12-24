@@ -1,15 +1,14 @@
-import React from "react";
-import Layout from "@/components/layout/Layout";
-import Banner from "@/components/layout/banner/Breadcrum";
-import AnalysArea from "@/components/containers/details/AnalysArea";
+import React from 'react';
+import Banner from '@/components/layout/banner/Breadcrum';
+import AnalysArea from '@/components/containers/details/AnalysArea';
 
-const analys = () => {
+const AnalysPage = () => {
   return (
-    <Layout>
+    <>
       <Banner title="Analys & Backup Blockchain" />
       <AnalysArea />
-    </Layout>
+    </>
   );
 };
 
-export default analys;
+export default AnalysPage;

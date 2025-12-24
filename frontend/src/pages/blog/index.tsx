@@ -16,11 +16,10 @@ import Feedback from "@/components/containers/feedback/Feedback";
 
 // i18n
 import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
 
 // SEO
 import { buildMeta } from "@/seo/meta";
-import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
+import { asObj, absUrl, pickFirstImageFromSeo } from "@/seo/pageSeo";
 
 // data
 import { useGetSiteSettingByKeyQuery, useListCustomPagesPublicQuery } from "@/integrations/rtk/hooks";
@@ -29,8 +28,6 @@ import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
 // helpers
 import { toCdnSrc } from "@/shared/media";
 import { excerpt } from "@/shared/text";
-
-const BLOG_PATH = "/blog";
 
 function shortLocale(v: unknown): string {
   return String(v || "tr").trim().toLowerCase().replace("_", "-").split("-")[0] || "tr";
@@ -81,15 +78,6 @@ const BlogPage: React.FC = () => {
     String(seo?.description ?? "").trim() ||
     "";
 
-  const canonical = useMemo(() => {
-    return buildCanonical({
-      asPath: router.asPath,
-      locale,
-      fallbackPathname: BLOG_PATH,
-      localizePath,
-    });
-  }, [router.asPath, locale]);
-
   const seoSiteName = String(seo?.site_name ?? "").trim() || "Ensotek";
   const titleTemplate = String(seo?.title_template ?? "").trim() || "%s | Ensotek";
 
@@ -116,8 +104,6 @@ const BlogPage: React.FC = () => {
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
-      canonical,
-      url: canonical,
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
@@ -125,7 +111,7 @@ const BlogPage: React.FC = () => {
       twitterSite: typeof (tw as any).site === "string" ? (tw as any).site.trim() : undefined,
       twitterCreator: typeof (tw as any).creator === "string" ? (tw as any).creator.trim() : undefined,
     });
-  }, [seo, pageTitle, pageDescRaw, canonical, ogImage, seoSiteName]);
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   return (
     <>

@@ -31,28 +31,11 @@ function shortLocale(v: unknown): string {
   return String(v || "tr").trim().toLowerCase().replace("_", "-").split("-")[0] || "tr";
 }
 
-const formatDate = (value: string | null | undefined, intlLocale: string) => {
-  if (!value) return "";
-  try {
-    const d = new Date(value);
-    return new Intl.DateTimeFormat(intlLocale, {
-      year: "numeric",
-      month: "long",
-      day: "2-digit",
-    }).format(d);
-  } catch {
-    return "";
-  }
-};
-
 const BlogPageContent: React.FC = () => {
   const router = useRouter();
 
   // ✅ Hydration-safe locale
   const locale = shortLocale(router.locale || router.defaultLocale || "tr");
-
-  const intlLocale =
-    locale === "tr" ? "tr-TR" : locale === "de" ? "de-DE" : "en-US";
 
   const { ui } = useUiSection("ui_blog", locale);
 
@@ -105,11 +88,9 @@ const BlogPageContent: React.FC = () => {
       const hero =
         (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) || "";
 
-      const dateStr = formatDate(p.created_at, intlLocale);
-
-      return { id: p.id, slug, title, excerpt: textExcerpt, hero, date: dateStr };
+      return { id: p.id, slug, title, excerpt: textExcerpt, hero };
     });
-  }, [data, intlLocale, untitled]);
+  }, [data, untitled]);
 
   const blogListHref = localizePath(locale, "/blog");
 
@@ -160,13 +141,6 @@ const BlogPageContent: React.FC = () => {
                     />
                   </div>
                   <div className="news__content-3">
-                    {p.date && (
-                      <div className="news__meta">
-                        <div className="news__meta-author">
-                          <span>{p.date}</span>
-                        </div>
-                      </div>
-                    )}
                     <h3>
                       <Link href={detailHref}>{p.title}</Link>
                     </h3>

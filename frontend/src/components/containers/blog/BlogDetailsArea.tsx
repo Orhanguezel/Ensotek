@@ -63,28 +63,12 @@ function asStringArray(v: any): string[] {
   return [];
 }
 
-const formatDate = (value: string | null | undefined, locale: string) => {
-  if (!value) return "";
-  try {
-    const d = new Date(value);
-    return new Intl.DateTimeFormat(locale, {
-      year: "numeric",
-      month: "long",
-      day: "2-digit",
-    }).format(d);
-  } catch {
-    return "";
-  }
-};
-
 const BlogDetailsArea: React.FC = () => {
   const router = useRouter();
 
   // ✅ Hydration-safe locale:
   // Server & Client aynı: Next i18n router.locale
   const localeShort = shortLocale(router.locale || router.defaultLocale || "tr");
-  const intlLocale =
-    localeShort === "tr" ? "tr-TR" : localeShort === "de" ? "de-DE" : "en-US";
 
   const { ui } = useUiSection("ui_blog", localeShort);
 
@@ -117,10 +101,6 @@ const BlogDetailsArea: React.FC = () => {
   const blogListHref = localizePath(localeShort, "/blog");
 
   const title = (post?.title || "").trim();
-  const rawDate =
-    safeStr((post as any)?.published_at).trim() ||
-    safeStr(post?.created_at).trim();
-  const dateStr = rawDate ? formatDate(rawDate, intlLocale) : "";
 
   const heroSrc = useMemo(() => {
     const raw = (post?.featured_image || "").trim();
@@ -192,14 +172,6 @@ const BlogDetailsArea: React.FC = () => {
                 <article className="news__detail">
                   {/* Title + date */}
                   <header className="news__detail-header mb-30">
-                    {dateStr && (
-                      <p
-                        className="news__detail-date"
-                        style={{ fontSize: 14, opacity: 0.7, marginBottom: 8 }}
-                      >
-                        {dateStr}
-                      </p>
-                    )}
                     <h1 className="section__title-3 mb-20">
                       {title || notFoundText}
                     </h1>

@@ -2,7 +2,7 @@
 // FILE: src/pages/service/[slug].tsx
 // Public Service Detail Page (by slug) + SEO (product pattern)
 //   - Route: /service/[slug]
-//   - Data: custom_pages/by-slug (module_key="service")
+//   - Data source: services/by-slug (single source of truth)
 //   - Layout is provided by _app.tsx (do NOT wrap here)
 //   - Page-specific SEO override via next/head (title/description/og:image)
 // =============================================================
@@ -25,15 +25,19 @@ import { useUiSection } from '@/i18n/uiDb';
 // data
 import {
   useGetSiteSettingByKeyQuery,
-  useGetCustomPageBySlugPublicQuery,
+  useGetServiceBySlugPublicQuery,
 } from '@/integrations/rtk/hooks';
 
 // helpers
 import { excerpt } from '@/shared/text';
 import { asObj } from '@/seo/pageSeo';
 import { toCdnSrc } from '@/shared/media';
+import { normLocaleTag } from '@/i18n/localeUtils';
 
-const toLocaleShort = (l: any) =>
+// ui skeleton
+import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
+
+const toLocaleShort = (l: unknown) =>
   String(l || 'tr')
     .trim()
     .toLowerCase()
@@ -53,9 +57,20 @@ const ServiceDetailPage: React.FC = () => {
   const { ui } = useUiSection('ui_services', locale);
 
   const slugParam = router.query.slug;
-  const slug =
-    typeof slugParam === 'string' ? slugParam : Array.isArray(slugParam) ? slugParam[0] ?? '' : '';
-  const isSlugReady = Boolean(slug);
+  const slug = useMemo(() => {
+    if (typeof slugParam === 'string') return slugParam;
+    if (Array.isArray(slugParam)) return slugParam[0] ?? '';
+    return '';
+  }, [slugParam]);
+
+  const isSlugReady = !!slug;
+
+  // ✅ default_locale DB’den
+  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
+  const defaultLocale = useMemo(() => {
+    const v = normLocaleTag(defaultLocaleRow?.value);
+    return v || 'tr';
+  }, [defaultLocaleRow?.value]);
 
   // Global SEO settings (desc fallback)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
@@ -66,9 +81,9 @@ const ServiceDetailPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  // Page data
-  const { data: page } = useGetCustomPageBySlugPublicQuery(
-    { slug, locale },
+  // ✅ Service data (single source)
+  const { data: service } = useGetServiceBySlugPublicQuery(
+    { slug, locale, default_locale: defaultLocale },
     { skip: !isSlugReady },
   );
 
@@ -83,48 +98,46 @@ const ServiceDetailPage: React.FC = () => {
   );
 
   const bannerTitle = useMemo(() => {
-    return safeStr(page?.title) || safeStr(detailTitleFallback) || safeStr(listTitleFallback);
-  }, [page?.title, detailTitleFallback, listTitleFallback]);
+    return safeStr(service?.name) || safeStr(detailTitleFallback) || safeStr(listTitleFallback);
+  }, [service?.name, detailTitleFallback, listTitleFallback]);
 
   const pageTitle = useMemo(() => {
     if (!isSlugReady) return safeStr(listTitleFallback);
 
     return (
-      safeStr(page?.meta_title) ||
-      safeStr(page?.title) ||
+      safeStr((service as any)?.meta_title) ||
+      safeStr(service?.name) ||
       safeStr(bannerTitle) ||
       safeStr(detailTitleFallback) ||
       safeStr(listTitleFallback)
     );
-  }, [
-    isSlugReady,
-    listTitleFallback,
-    page?.meta_title,
-    page?.title,
-    bannerTitle,
-    detailTitleFallback,
-  ]);
+  }, [isSlugReady, listTitleFallback, service, bannerTitle, detailTitleFallback]);
 
   const pageDesc = useMemo(() => {
-    if (!isSlugReady) return safeStr(seo?.description) || '';
+    const globalDesc = safeStr((seo as any)?.description) || '';
 
-    return (
-      safeStr(page?.meta_description) ||
-      safeStr(page?.summary) ||
-      safeStr(excerpt(page?.content_html ?? '', 160)) ||
-      safeStr(seo?.description) ||
-      ''
-    );
-  }, [isSlugReady, page?.meta_description, page?.summary, page?.content_html, seo?.description]);
+    if (!isSlugReady) return globalDesc;
+
+    const metaDesc = safeStr((service as any)?.meta_description);
+
+    const summary =
+      safeStr((service as any)?.description) || safeStr((service as any)?.includes) || '';
+
+    return metaDesc || (summary ? excerpt(summary, 160).trim() : '') || globalDesc;
+  }, [isSlugReady, service, seo]);
 
   const ogImage = useMemo(() => {
     if (!isSlugReady) return '';
 
-    const pageImgRaw = safeStr(page?.featured_image);
-    if (!pageImgRaw) return '';
+    const imgRaw = safeStr(
+      (service as any)?.featured_image_url ||
+        (service as any)?.image_url ||
+        (service as any)?.featured_image,
+    );
 
-    return toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw;
-  }, [isSlugReady, page?.featured_image]);
+    if (!imgRaw) return '';
+    return toCdnSrc(imgRaw, 1200, 630, 'fill') || imgRaw;
+  }, [isSlugReady, service]);
 
   return (
     <>
@@ -142,9 +155,11 @@ const ServiceDetailPage: React.FC = () => {
           <div className="container">
             <div className="row">
               <div className="col-12">
-                <div className="skeleton-line" style={{ height: 24 }} />
-                <div className="skeleton-line mt-10" style={{ height: 16 }} />
-                <div className="skeleton-line mt-10" style={{ height: 16 }} />
+                <SkeletonStack>
+                  <SkeletonLine style={{ height: 24 }} />
+                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
+                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
+                </SkeletonStack>
               </div>
             </div>
           </div>

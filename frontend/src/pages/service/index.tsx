@@ -20,20 +20,16 @@ import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 
 // data
-import {
-  useGetSiteSettingByKeyQuery,
-  useListCustomPagesPublicQuery,
-} from '@/integrations/rtk/hooks';
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+import { useGetSiteSettingByKeyQuery, useListServicesPublicQuery } from '@/integrations/rtk/hooks';
+import type { ServiceDto } from '@/integrations/types/services.types';
 
 // helpers
 import { excerpt } from '@/shared/text';
 import { asObj } from '@/seo/pageSeo';
 import { toCdnSrc } from '@/shared/media';
+import { normLocaleTag } from '@/i18n/localeUtils';
 
-const SERVICE_MODULE_KEY = 'service';
-
-const toLocaleShort = (l: any) =>
+const toLocaleShort = (l: unknown) =>
   String(l || 'tr')
     .trim()
     .toLowerCase()
@@ -56,6 +52,13 @@ const ServicePage: React.FC = () => {
 
   const { ui } = useUiSection('ui_services', locale);
 
+  // ✅ default_locale DB’den
+  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
+  const defaultLocale = useMemo(() => {
+    const v = normLocaleTag(defaultLocaleRow?.value);
+    return v || 'tr';
+  }, [defaultLocaleRow?.value]);
+
   const bannerTitle = ui('ui_services_page_title', locale === 'tr' ? 'Hizmetler' : 'Services');
 
   // Global SEO settings (desc fallback)
@@ -67,36 +70,36 @@ const ServicePage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  // Services list (meta override için ilk published kayıt)
-  const { data: serviceData } = useListCustomPagesPublicQuery({
-    module_key: SERVICE_MODULE_KEY,
+  // ✅ Services list (meta override için ilk published kayıt)
+  const { data: serviceData } = useListServicesPublicQuery({
     locale,
-    limit: 10,
-    sort: 'created_at',
-    orderDir: 'asc',
+    default_locale: defaultLocale,
+    limit: 20,
+    order: 'display_order.asc,created_at.asc',
   });
 
   const primary = useMemo(() => {
-    const items: CustomPageDto[] = (serviceData?.items ?? []) as any;
-    const published = items.filter((p) => Boolean(p?.is_published));
+    const items: ServiceDto[] = (serviceData?.items ?? []) as any;
+    const published = items.filter((p) => Boolean((p as any)?.is_published ?? true));
     return published[0];
-  }, [serviceData]);
+  }, [serviceData?.items]);
 
   const pageTitle = useMemo(() => {
     return (
-      safeStr(primary?.meta_title) ||
-      safeStr(primary?.title) ||
+      safeStr((primary as any)?.meta_title) ||
+      safeStr(primary?.name) ||
       safeStr(bannerTitle) ||
       (locale === 'tr' ? 'Hizmetler' : 'Services')
     );
-  }, [primary?.meta_title, primary?.title, bannerTitle, locale]);
+  }, [primary, bannerTitle, locale]);
 
   const pageDesc = useMemo(() => {
     const fromPrimary =
-      safeStr(primary?.meta_description) ||
-      safeStr(primary?.summary) ||
-      safeStr(excerpt(primary?.content_html ?? '', 160)) ||
-      safeStr(seo?.description);
+      safeStr((primary as any)?.meta_description) ||
+      safeStr((primary as any)?.description) ||
+      safeStr((primary as any)?.includes) ||
+      safeStr(excerpt(String((primary as any)?.content_html ?? ''), 160)) ||
+      safeStr((seo as any)?.description);
 
     const uiFallback = safeStr(
       ui(
@@ -108,20 +111,17 @@ const ServicePage: React.FC = () => {
     );
 
     return ensureMinDescription(fromPrimary || uiFallback, 20);
-  }, [
-    primary?.meta_description,
-    primary?.summary,
-    primary?.content_html,
-    seo?.description,
-    ui,
-    locale,
-  ]);
+  }, [primary, seo, ui, locale]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = safeStr(primary?.featured_image);
-    if (!pageImgRaw) return '';
-    return toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw;
-  }, [primary?.featured_image]);
+    const raw = safeStr(
+      (primary as any)?.featured_image_url ||
+        (primary as any)?.image_url ||
+        (primary as any)?.featured_image,
+    );
+    if (!raw) return '';
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [primary]);
 
   return (
     <>

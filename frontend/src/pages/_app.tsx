@@ -1,6 +1,7 @@
 // src/pages/_app.tsx
 import React, { useEffect, useMemo } from 'react';
-import type { AppProps } from 'next/app';
+import type { AppContext, AppProps } from 'next/app';
+import NextApp from 'next/app';
 import { useRouter } from 'next/router';
 import { Toaster } from 'sonner';
 import GAScripts from '@/features/analytics/GAScripts';
@@ -26,7 +27,7 @@ import AdminFooter from '@/components/layout/admin/AdminFooter';
 // Admin nav helpers
 import { isAdminPath, pathToTab, tabToPath } from '@/components/layout/admin/adminNav';
 
-export default function App({ Component, pageProps }: AppProps) {
+function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   const rawPath = useMemo(() => {
@@ -123,6 +124,17 @@ export default function App({ Component, pageProps }: AppProps) {
     </StoreProvider>
   );
 }
+
+/**
+ * ✅ SSR'i zorlar: Pages Router'da rewrites + locale query senaryolarında
+ * ilk HTML üretiminde path/locale bilgisinin stabil kalması için kritik.
+ */
+App.getInitialProps = async (appCtx: AppContext) => {
+  const appProps = await NextApp.getInitialProps(appCtx);
+  return { ...appProps };
+};
+
+export default App;
 
 function AdminRouteShell(props: { rawPath: string; children: React.ReactNode }) {
   const router = useRouter();

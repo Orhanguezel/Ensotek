@@ -9,7 +9,6 @@
 
 import React, { useMemo } from "react";
 import Head from "next/head";
-import { useRouter } from "next/router";
 
 import Banner from "@/components/layout/banner/Breadcrum";
 import LibrarySection from "@/components/containers/library/Library";
@@ -18,22 +17,18 @@ import WetBulbCalculator from "@/components/containers/library/WetBulbCalculator
 // i18n
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
 
 // SEO
 import { buildMeta } from "@/seo/meta";
-import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
+import { asObj, absUrl, pickFirstImageFromSeo } from "@/seo/pageSeo";
 
 // data
 import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-
-const LIBRARY_PATH = "/library";
 
 const toLocaleShort = (l: any) =>
   String(l || "tr").trim().toLowerCase().split("-")[0] || "tr";
 
 const LibraryPage: React.FC = () => {
-  const router = useRouter();
 
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
@@ -62,15 +57,6 @@ const LibraryPage: React.FC = () => {
     return descFromUi || String(seo?.description ?? "").trim() || "";
   }, [ui, seo]);
 
-  const canonical = useMemo(() => {
-    return buildCanonical({
-      asPath: router.asPath,
-      locale,
-      fallbackPathname: LIBRARY_PATH,
-      localizePath,
-    });
-  }, [router.asPath, locale]);
-
   const seoSiteName = useMemo(() => String(seo?.site_name ?? "").trim() || "Ensotek", [seo]);
   const titleTemplate = useMemo(
     () => String(seo?.title_template ?? "").trim() || "%s | Ensotek",
@@ -98,8 +84,6 @@ const LibraryPage: React.FC = () => {
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
-      canonical,
-      url: canonical,
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
@@ -107,7 +91,7 @@ const LibraryPage: React.FC = () => {
       twitterSite: typeof tw.site === "string" ? tw.site.trim() : undefined,
       twitterCreator: typeof tw.creator === "string" ? tw.creator.trim() : undefined,
     });
-  }, [seo, pageTitle, pageDescRaw, canonical, ogImage, seoSiteName]);
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   return (
     <>

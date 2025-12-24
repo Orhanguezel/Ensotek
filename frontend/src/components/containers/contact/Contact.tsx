@@ -1,49 +1,56 @@
-"use client";
+// =============================================================
+// FILE: src/components/containers/contact/Contact.tsx
+// Ensotek – Contact Section (Public) + socials + createContact
+//   - i18n: site_settings.ui_contact
+//   - socials: site_settings.socials
+//   - POST: /contacts (public)
+// =============================================================
+'use client';
 
-import React, { useMemo, useRef, useState } from "react";
-import Link from "next/link";
+import React, { useMemo, useRef, useState } from 'react';
+import Link from 'next/link';
 
 // i18n helper’lar
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
-
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
 // Site settings (social links)
-import { useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-
-// RTK – public contact endpoint
-import { useCreateContactPublicMutation } from "@/integrations/rtk/hooks";
+import {
+  useGetSiteSettingByKeyQuery,
+  useCreateContactPublicMutation,
+} from '@/integrations/rtk/hooks';
 
 // React Icons – sosyal
-import {
-  FiFacebook,
-  FiTwitter,
-  FiYoutube,
-  FiLinkedin,
-  FiInstagram,
-} from "react-icons/fi";
+import { FiFacebook, FiTwitter, FiYoutube, FiLinkedin, FiInstagram } from 'react-icons/fi';
+
+const toLocaleShort = (l: any) =>
+  String(l || 'tr')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0] || 'tr';
 
 const Contact: React.FC = () => {
-  const locale = useResolvedLocale();
+  const resolved = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolved), [resolved]);
 
   // UI: ui_contact JSON + i18n fallback zinciri
-  const { ui } = useUiSection("ui_contact", locale);
+  const { ui } = useUiSection('ui_contact', locale);
 
   // Sol mini e-posta -> ana forma aktar
-  const [quickEmail, setQuickEmail] = useState("");
+  const [quickEmail, setQuickEmail] = useState('');
 
   // Ana form alanları
-  const [first, setFirst] = useState("");
-  const [last, setLast] = useState("");
-  const [company, setCompany] = useState("");
-  const [website, setWebsite] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [service, setService] = useState("");
+  const [first, setFirst] = useState('');
+  const [last, setLast] = useState('');
+  const [company, setCompany] = useState('');
+  const [website, setWebsite] = useState('');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
+  const [service, setService] = useState('');
   const [accepted, setAccepted] = useState(false);
-  const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(
-    null,
-  );
+  const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
 
   const emailInputRef = useRef<HTMLInputElement>(null);
 
@@ -52,27 +59,22 @@ const Contact: React.FC = () => {
 
   // Sosyal linkleri site_settings.socials üzerinden oku
   const { data: socialsSetting } = useGetSiteSettingByKeyQuery({
-    key: "socials",
+    key: 'socials',
     locale,
   });
 
   const socialLinks = useMemo(() => {
     const s = (socialsSetting?.value ?? {}) as Record<string, string>;
-    const normalize = (u?: string) =>
-      !u ? "" : /^https?:\/\//i.test(u) ? u : `https://${u}`;
+    const normalize = (u?: string) => (!u ? '' : /^https?:\/\//i.test(u) ? u : `https://${u}`);
 
     return [
-      { key: "facebook", Icon: FiFacebook, url: normalize(s.facebook || s.fb) },
-      { key: "twitter", Icon: FiTwitter, url: normalize(s.twitter || s.x) },
-      { key: "youtube", Icon: FiYoutube, url: normalize(s.youtube || s.yt) },
-      { key: "linkedin", Icon: FiLinkedin, url: normalize(s.linkedin || s.li) },
-      {
-        key: "instagram",
-        Icon: FiInstagram,
-        url: normalize(s.instagram || s.ig),
-      },
+      { key: 'facebook', Icon: FiFacebook, url: normalize(s.facebook || s.fb) },
+      { key: 'twitter', Icon: FiTwitter, url: normalize(s.twitter || s.x) },
+      { key: 'youtube', Icon: FiYoutube, url: normalize(s.youtube || s.yt) },
+      { key: 'linkedin', Icon: FiLinkedin, url: normalize(s.linkedin || s.li) },
+      { key: 'instagram', Icon: FiInstagram, url: normalize(s.instagram || s.ig) },
     ].filter((x) => x.url);
-  }, [socialsSetting]);
+  }, [socialsSetting?.value]);
 
   const onQuickSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,19 +99,17 @@ const Contact: React.FC = () => {
 
     const name = `${first} ${last}`.trim();
 
-    const subjectBase = "Consultation Request";
+    const subjectBase = 'Consultation Request';
     const subject =
-      subjectBase +
-      (service ? ` – ${service}` : "") +
-      (company ? ` (${company})` : "");
+      subjectBase + (service ? ` – ${service}` : '') + (company ? ` (${company})` : '');
 
-    const message = `Company: ${company || "-"}
-Website: ${website || "-"}
-Phone: ${phone || "-"}
-Service: ${service || "-"}
+    const message = `Company: ${company || '-'}
+Website: ${website || '-'}
+Phone: ${phone || '-'}
+Service: ${service || '-'}
 Email: ${email}
 
-Sent from homepage contact form.`;
+Sent from contact form.`;
 
     try {
       await createContact({
@@ -123,30 +123,27 @@ Sent from homepage contact form.`;
 
       setStatus({
         ok: true,
-        msg: ui(
-          "ui_contact_success",
-          "Thanks! Your message has been sent.",
-        ),
+        msg: ui('ui_contact_success', 'Thanks! Your message has been sent.'),
       });
 
-      setFirst("");
-      setLast("");
-      setCompany("");
-      setWebsite("");
-      setPhone("");
-      setService("");
-      setQuickEmail("");
-      setEmail("");
+      setFirst('');
+      setLast('');
+      setCompany('');
+      setWebsite('');
+      setPhone('');
+      setService('');
+      setQuickEmail('');
+      setEmail('');
       setAccepted(false);
     } catch (err: any) {
-      const fallbackError = ui(
-        "ui_contact_error_generic",
-        "Failed to send. Please try again.",
-      );
+      const fallbackError = ui('ui_contact_error_generic', 'Failed to send. Please try again.');
       const msg = err?.data?.message || err?.error || fallbackError;
       setStatus({ ok: false, msg });
     }
   }
+
+  const termsHref = localizePath(locale, '/terms');
+  const privacyHref = localizePath(locale, '/privacy');
 
   return (
     <section
@@ -160,37 +157,33 @@ Sent from homepage contact form.`;
             <div className="touch__left mb-60">
               <div className="section__title-wrapper">
                 <span className="section__subtitle s-2">
-                  {ui("ui_contact_subprefix", "") ? (
-                    <span>{ui("ui_contact_subprefix", "")} </span>
+                  {ui('ui_contact_subprefix', '') ? (
+                    <span>{ui('ui_contact_subprefix', '')} </span>
                   ) : null}
-                  {ui("ui_contact_sublabel", "")}
+                  {ui('ui_contact_sublabel', '')}
                 </span>
                 <h2 className="section__title s-2 mb-30">
                   {(() => {
-                    const raw = ui("ui_contact_title_left", "Let's Talk");
-                    const parts = raw.split(" ");
+                    const raw = ui('ui_contact_title_left', "Let's Talk");
+                    const parts = raw.split(' ');
                     return (
                       <>
-                        <span className="down__mark-line">
-                          {parts[0] || ""}
-                        </span>{" "}
-                        {parts.slice(1).join(" ")}
+                        <span className="down__mark-line">{parts[0] || ''}</span>{' '}
+                        {parts.slice(1).join(' ')}
                       </>
                     );
                   })()}
                 </h2>
               </div>
-              <p>{ui("ui_contact_tagline", "")}</p>
+
+              <p>{ui('ui_contact_tagline', '')}</p>
 
               {/* mini email -> ana formdaki email’e aktar */}
               <div className="touch__search">
                 <form onSubmit={onQuickSubmit}>
                   <input
                     type="email"
-                    placeholder={ui(
-                      "ui_contact_quick_email_placeholder",
-                      "Enter Mail",
-                    )}
+                    placeholder={ui('ui_contact_quick_email_placeholder', 'Enter Mail')}
                     value={quickEmail}
                     onChange={(e) => setQuickEmail(e.target.value)}
                   />
@@ -238,7 +231,7 @@ Sent from homepage contact form.`;
             <div className="touch__contact p-relative">
               <div className="touch__carcle"></div>
               <div className="touch__content-title">
-                <h3>{ui("ui_contact_form_title", "Schedule a Consultation")}</h3>
+                <h3>{ui('ui_contact_form_title', 'Schedule a Consultation')}</h3>
               </div>
 
               <form onSubmit={onSubmit}>
@@ -247,108 +240,88 @@ Sent from homepage contact form.`;
                     <div className="touch__input">
                       <input
                         type="text"
-                        placeholder={ui(
-                          "ui_contact_first_name",
-                          "First Name*",
-                        )}
+                        placeholder={ui('ui_contact_first_name', 'First Name*')}
                         value={first}
                         onChange={(e) => setFirst(e.target.value)}
                         required
                       />
                     </div>
                   </div>
+
                   <div className="col-lg-6">
                     <div className="touch__input">
                       <input
                         type="text"
-                        placeholder={ui("ui_contact_last_name", "Last Name")}
+                        placeholder={ui('ui_contact_last_name', 'Last Name')}
                         value={last}
                         onChange={(e) => setLast(e.target.value)}
                       />
                     </div>
                   </div>
+
                   <div className="col-lg-6">
                     <div className="touch__input">
                       <input
                         type="text"
-                        placeholder={ui(
-                          "ui_contact_company",
-                          "Company Name",
-                        )}
+                        placeholder={ui('ui_contact_company', 'Company Name')}
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
                       />
                     </div>
                   </div>
+
                   <div className="col-lg-6">
                     <div className="touch__input">
                       <input
                         type="url"
-                        placeholder={ui("ui_contact_website", "Website")}
+                        placeholder={ui('ui_contact_website', 'Website')}
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
                       />
                     </div>
                   </div>
+
                   <div className="col-lg-6">
                     <div className="touch__input">
                       <input
                         type="tel"
-                        placeholder={ui(
-                          "ui_contact_phone",
-                          "Phone Number",
-                        )}
+                        placeholder={ui('ui_contact_phone', 'Phone Number')}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         required
                       />
                     </div>
                   </div>
+
                   <div className="col-lg-6">
                     <div className="touch__input">
                       <input
                         ref={emailInputRef}
                         type="email"
-                        placeholder={ui("ui_contact_email", "Email*")}
+                        placeholder={ui('ui_contact_email', 'Email*')}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
                       />
                     </div>
                   </div>
+
                   <div className="col-lg-6">
                     <div className="contact__select mb-20">
-                      <select
-                        value={service}
-                        onChange={(e) => setService(e.target.value)}
-                      >
+                      <select value={service} onChange={(e) => setService(e.target.value)}>
                         <option value="">
-                          {ui(
-                            "ui_contact_select_label",
-                            "Select the services",
-                          )}
+                          {ui('ui_contact_select_label', 'Select the services')}
                         </option>
                         <option value="Cooling Towers">
-                          {ui(
-                            "ui_contact_service_cooling_towers",
-                            "Cooling Towers",
-                          )}
+                          {ui('ui_contact_service_cooling_towers', 'Cooling Towers')}
                         </option>
                         <option value="Maintenance">
-                          {ui(
-                            "ui_contact_service_maintenance",
-                            "Maintenance",
-                          )}
+                          {ui('ui_contact_service_maintenance', 'Maintenance')}
                         </option>
                         <option value="Modernization">
-                          {ui(
-                            "ui_contact_service_modernization",
-                            "Modernization",
-                          )}
+                          {ui('ui_contact_service_modernization', 'Modernization')}
                         </option>
-                        <option value="Other">
-                          {ui("ui_contact_service_other", "Other")}
-                        </option>
+                        <option value="Other">{ui('ui_contact_service_other', 'Other')}</option>
                       </select>
                     </div>
                   </div>
@@ -365,17 +338,11 @@ Sent from homepage contact form.`;
                           required
                         />
                         <label className="sign__check" htmlFor="accept-terms">
-                          {ui(
-                            "ui_contact_terms_prefix",
-                            "Accept Our",
-                          )}{" "}
+                          {ui('ui_contact_terms_prefix', 'Accept Our')}{' '}
                           <span>
-                            <Link href="/">
-                              {ui("ui_contact_terms", "Terms")}
-                            </Link>{" "}
-                            &{" "}
-                            <Link href="/">
-                              {ui("ui_contact_conditions", "Conditions")}
+                            <Link href={termsHref}>{ui('ui_contact_terms', 'Terms')}</Link> &{' '}
+                            <Link href={privacyHref}>
+                              {ui('ui_contact_conditions', 'Conditions')}
                             </Link>
                           </span>
                         </label>
@@ -389,12 +356,12 @@ Sent from homepage contact form.`;
                           disabled={!canSubmit}
                           style={{
                             opacity: canSubmit ? 1 : 0.7,
-                            cursor: canSubmit ? "pointer" : "not-allowed",
+                            cursor: canSubmit ? 'pointer' : 'not-allowed',
                           }}
                         >
                           {isLoading
-                            ? ui("ui_contact_sending", "Sending...")
-                            : ui("ui_contact_submit", "Submit Query")}
+                            ? ui('ui_contact_sending', 'Sending...')
+                            : ui('ui_contact_submit', 'Submit Query')}
                         </button>
                       </div>
                     </div>
@@ -406,8 +373,8 @@ Sent from homepage contact form.`;
                           marginTop: 12,
                           fontSize: 13,
                           color: status.ok
-                            ? "var(--tp-success, #14a44d)"
-                            : "var(--tp-danger, #dc3545)",
+                            ? 'var(--tp-success, #14a44d)'
+                            : 'var(--tp-danger, #dc3545)',
                         }}
                       >
                         {status.msg}
@@ -421,7 +388,7 @@ Sent from homepage contact form.`;
         </div>
       </div>
 
-      {/* Stil — dokunulmadı (küçük typo fix) */}
+      {/* Stil — dokunulmadı */}
       <style jsx>{`
         .contact-contrast input,
         .contact-contrast select,
@@ -470,18 +437,10 @@ Sent from homepage contact form.`;
           height: 42px;
           border-radius: 12px;
           border: 1px solid var(--ring);
-          background: linear-gradient(
-            180deg,
-            var(--bg),
-            rgba(255, 255, 255, 0.02)
-          );
+          background: linear-gradient(180deg, var(--bg), rgba(255, 255, 255, 0.02));
           color: var(--fg);
-          transition:
-            transform 0.18s ease,
-            box-shadow 0.18s ease,
-            background 0.18s ease,
-            color 0.18s ease,
-            border-color 0.18s ease;
+          transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease,
+            color 0.18s ease, border-color 0.18s ease;
           backdrop-filter: saturate(120%) blur(2px);
         }
         .social-icon svg {
@@ -514,12 +473,7 @@ Sent from homepage contact form.`;
           background: #0a66c2;
         }
         .social-icon.is-instagram:hover {
-          background: radial-gradient(
-            110% 110% at 30% 20%,
-            #f9ce34 0%,
-            #ee2a7b 55%,
-            #6228d7 100%
-          );
+          background: radial-gradient(110% 110% at 30% 20%, #f9ce34 0%, #ee2a7b 55%, #6228d7 100%);
         }
         :global(.touch__left) .social-icon {
           border-color: rgba(255, 255, 255, 0.16);

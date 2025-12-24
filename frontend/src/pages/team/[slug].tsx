@@ -16,7 +16,6 @@ import ServiceCtaTwo from "@/components/containers/cta/CatalogCta";
 // i18n
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
 
 // SEO
 import { buildMeta } from "@/seo/meta";
@@ -24,7 +23,6 @@ import {
   asObj,
   absUrl,
   pickFirstImageFromSeo,
-  buildCanonical,
 } from "@/seo/pageSeo";
 
 // data
@@ -99,17 +97,6 @@ const TeamDetailPage: React.FC = () => {
     String(seo?.description ?? "").trim() ||
     "";
 
-  const canonical = useMemo(() => {
-    // slug yokken canonical üretme; slug gelince garanti path ver.
-    const fallbackPathname = slug ? `${TEAM_PATH}/${slug}` : TEAM_PATH;
-    return buildCanonical({
-      asPath: router.asPath,
-      locale,
-      fallbackPathname,
-      localizePath,
-    });
-  }, [router.asPath, locale, slug]);
-
   const seoSiteName = String(seo?.site_name ?? "").trim() || "Ensotek";
   const titleTemplate = String(seo?.title_template ?? "").trim() || "%s | Ensotek";
 
@@ -140,8 +127,6 @@ const TeamDetailPage: React.FC = () => {
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
-      canonical,
-      url: canonical,
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
@@ -150,7 +135,7 @@ const TeamDetailPage: React.FC = () => {
       twitterSite: typeof tw.site === "string" ? tw.site.trim() : undefined,
       twitterCreator: typeof tw.creator === "string" ? tw.creator.trim() : undefined,
     });
-  }, [seo, pageTitle, pageDescRaw, canonical, ogImage, seoSiteName]);
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   // slug henüz yoksa skeleton
   if (!slug) {
@@ -204,6 +189,3 @@ const TeamDetailPage: React.FC = () => {
 };
 
 export default TeamDetailPage;
-
-// local constant at bottom to avoid hoist noise
-const TEAM_PATH = "/team";

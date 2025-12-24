@@ -8,7 +8,7 @@
       - generic [ref=e6]:
         - generic [ref=e7]:
           - link "Ensotek Enerji Sistemleri" [ref=e9] [cursor=pointer]:
-            - /url: /tr
+            - /url: /
             - img "Ensotek Enerji Sistemleri" [ref=e10]
           - button "Close" [ref=e12] [cursor=pointer]:
             - img [ref=e13]
@@ -22,11 +22,11 @@
             - option "Deutsch"
           - generic [ref=e23]:
             - link "Login" [ref=e24] [cursor=pointer]:
-              - /url: /tr/login
+              - /url: /login
               - img [ref=e25]
               - text: Login
             - link "Register" [ref=e28] [cursor=pointer]:
-              - /url: /tr/register
+              - /url: /register
               - img [ref=e29]
               - text: Register
         - generic [ref=e33]:
@@ -37,49 +37,49 @@
           - list [ref=e42]:
             - listitem [ref=e43]:
               - link "Anasayfa" [ref=e44] [cursor=pointer]:
-                - /url: /tr
+                - /url: /
             - listitem [ref=e45]:
               - button "Hakkımızda" [ref=e46] [cursor=pointer]:
                 - generic [ref=e47]: Hakkımızda
               - list [ref=e48]:
                 - listitem [ref=e49]:
                   - link "Hakkımızda" [ref=e50] [cursor=pointer]:
-                    - /url: /tr/about
+                    - /url: /about
                 - listitem [ref=e51]:
                   - link "Ekibimiz" [ref=e52] [cursor=pointer]:
-                    - /url: /tr/team
+                    - /url: /team
                 - listitem [ref=e53]:
                   - link "Sıkça Sorulan Sorular" [ref=e54] [cursor=pointer]:
-                    - /url: /tr/faqs
+                    - /url: /faqs
             - listitem [ref=e55]:
               - button "Hizmetler" [ref=e56] [cursor=pointer]:
                 - generic [ref=e57]: Hizmetler
               - list [ref=e58]:
                 - listitem [ref=e59]:
                   - link "Bakım & Servis" [ref=e60] [cursor=pointer]:
-                    - /url: /tr/service/maintenance
+                    - /url: /service/maintenance
                 - listitem [ref=e61]:
                   - link "Proje & Danışmanlık" [ref=e62] [cursor=pointer]:
-                    - /url: /tr/service/project-consulting
+                    - /url: /service/project-consulting
             - listitem [ref=e63]:
               - button "Ürünler" [ref=e64] [cursor=pointer]:
                 - generic [ref=e65]: Ürünler
               - list [ref=e66]:
                 - listitem [ref=e67]:
                   - link "Tüm Ürünler" [ref=e68] [cursor=pointer]:
-                    - /url: /tr/product
+                    - /url: /product
                 - listitem [ref=e69]:
                   - link "Yedek Parçalar" [ref=e70] [cursor=pointer]:
-                    - /url: /tr/sparepart
+                    - /url: /sparepart
             - listitem [ref=e71]:
               - link "Kütüphane" [ref=e72] [cursor=pointer]:
-                - /url: /tr/library
+                - /url: /library
             - listitem [ref=e73]:
               - link "Haberler" [ref=e74] [cursor=pointer]:
-                - /url: /tr/news
+                - /url: /news
             - listitem [ref=e75]:
               - link "İletişim" [ref=e76] [cursor=pointer]:
-                - /url: /tr/contact
+                - /url: /contact
         - generic [ref=e77]:
           - heading "Contact Info" [level=4] [ref=e78]
           - list [ref=e79]:
@@ -108,25 +108,25 @@
             - list [ref=e112]:
               - listitem [ref=e113]:
                 - link "Anasayfa" [ref=e114] [cursor=pointer]:
-                  - /url: /tr
+                  - /url: /
               - listitem [ref=e115]:
                 - link "Hakkımızda" [ref=e116] [cursor=pointer]:
-                  - /url: /tr/about
+                  - /url: /about
               - listitem [ref=e117]:
                 - link "Hizmetler" [ref=e118] [cursor=pointer]:
-                  - /url: /tr/service
+                  - /url: /service
               - listitem [ref=e119]:
                 - link "Ürünler" [ref=e120] [cursor=pointer]:
-                  - /url: /tr/product
+                  - /url: /product
               - listitem [ref=e121]:
                 - link "Kütüphane" [ref=e122] [cursor=pointer]:
-                  - /url: /tr/library
+                  - /url: /library
               - listitem [ref=e123]:
                 - link "Haberler" [ref=e124] [cursor=pointer]:
-                  - /url: /tr/news
+                  - /url: /news
               - listitem [ref=e125]:
                 - link "İletişim" [ref=e126] [cursor=pointer]:
-                  - /url: /tr/contact
+                  - /url: /contact
           - button "Open Menu" [ref=e130] [cursor=pointer]:
             - img [ref=e131]
       - main [ref=e142]:
@@ -136,7 +136,7 @@
             - list [ref=e152]:
               - listitem [ref=e153]:
                 - link "Ana Sayfa" [ref=e155] [cursor=pointer]:
-                  - /url: /tr
+                  - /url: /
                 - text: 
               - generic [ref=e156]: /
               - listitem [ref=e157]: Ürünlerimiz
@@ -151,50 +151,50 @@
               - generic [ref=e172]:
                 - heading "Kule Fan Motoru" [level=3] [ref=e173]:
                   - link "Kule Fan Motoru" [ref=e174] [cursor=pointer]:
-                    - /url: /tr/product/kule-fan-motoru
+                    - /url: /product/kule-fan-motoru
                 - paragraph [ref=e175]: Soğutma kuleleri için yüksek verimli, IP55 koruma sınıfına sahip fan motoru. Farklı güç ve devir seçenekleri mevcuttur.
                 - link "Kule Fan Motoru — ürün detayını görüntüle" [ref=e176] [cursor=pointer]:
-                  - /url: /tr/product/kule-fan-motoru
+                  - /url: /product/kule-fan-motoru
                   - text: Detayları görüntüle →
             - generic [ref=e178]:
               - img "Soğutma kulesi PVC dolgu bloğu" [ref=e180]
               - generic [ref=e181]:
                 - heading "PVC Dolgu Bloğu" [level=3] [ref=e182]:
                   - link "PVC Dolgu Bloğu" [ref=e183] [cursor=pointer]:
-                    - /url: /tr/product/pvc-dolgu-blogu
+                    - /url: /product/pvc-dolgu-blogu
                 - paragraph [ref=e184]: Soğutma kulelerinde ısı transfer yüzeyini artırmak için kullanılan, yüksek ısı ve kimyasal dayanımlı PVC dolgu bloğu. Film tip tasarım.
                 - link "PVC Dolgu Bloğu — ürün detayını görüntüle" [ref=e185] [cursor=pointer]:
-                  - /url: /tr/product/pvc-dolgu-blogu
+                  - /url: /product/pvc-dolgu-blogu
                   - text: Detayları görüntüle →
             - generic [ref=e187]:
               - img "Endüstriyel açık devre soğutma kulesi" [ref=e189]
               - generic [ref=e190]:
                 - heading "Endüstriyel Açık Devre Soğutma Kulesi" [level=3] [ref=e191]:
                   - link "Endüstriyel Açık Devre Soğutma Kulesi" [ref=e192] [cursor=pointer]:
-                    - /url: /tr/product/end%C3%BCstriyel-acik-devre-sogutma-kulesi
+                    - /url: /product/end%C3%BCstriyel-acik-devre-sogutma-kulesi
                 - paragraph [ref=e193]: Endüstriyel prosesler, HVAC ve enerji santrallerinde kullanılan, yüksek verimli açık devre soğutma kulesi. Doğrudan temaslı ısı transferi sa…
                 - link "Endüstriyel Açık Devre Soğutma Kulesi — ürün detayını görüntüle" [ref=e194] [cursor=pointer]:
-                  - /url: /tr/product/end%C3%BCstriyel-acik-devre-sogutma-kulesi
+                  - /url: /product/end%C3%BCstriyel-acik-devre-sogutma-kulesi
                   - text: Detayları görüntüle →
             - generic [ref=e196]:
               - img "Film tip kapalı devre soğutma kulesi" [ref=e198]
               - generic [ref=e199]:
                 - heading "Film Tip Kapalı Devre Soğutma Kulesi" [level=3] [ref=e200]:
                   - link "Film Tip Kapalı Devre Soğutma Kulesi" [ref=e201] [cursor=pointer]:
-                    - /url: /tr/product/film-tip-kapali-devre-sogutma-kulesi
+                    - /url: /product/film-tip-kapali-devre-sogutma-kulesi
                 - paragraph [ref=e202]: Suyun prosesle temas etmediği, film tip eşanjör yüzeyleri ile çalışan kapalı devre soğutma kulesi. Kireçlenme ve kirlenmeye karşı düşük bakı…
                 - link "Film Tip Kapalı Devre Soğutma Kulesi — ürün detayını görüntüle" [ref=e203] [cursor=pointer]:
-                  - /url: /tr/product/film-tip-kapali-devre-sogutma-kulesi
+                  - /url: /product/film-tip-kapali-devre-sogutma-kulesi
                   - text: Detayları görüntüle →
             - generic [ref=e205]:
               - img "Hibrit adyabatik soğutma sistemi" [ref=e207]
               - generic [ref=e208]:
                 - heading "Hibrit Adyabatik Soğutma Sistemi" [level=3] [ref=e209]:
                   - link "Hibrit Adyabatik Soğutma Sistemi" [ref=e210] [cursor=pointer]:
-                    - /url: /tr/product/hibrit-adyabatik-sogutma-sistemi
+                    - /url: /product/hibrit-adyabatik-sogutma-sistemi
                 - paragraph [ref=e211]: Kuru soğutucu ve adyabatik ön soğutma teknolojisini birleştiren hibrit soğutma sistemi. Su tüketiminin kritik olduğu projeler için enerji ve…
                 - link "Hibrit Adyabatik Soğutma Sistemi — ürün detayını görüntüle" [ref=e212] [cursor=pointer]:
-                  - /url: /tr/product/hibrit-adyabatik-sogutma-sistemi
+                  - /url: /product/hibrit-adyabatik-sogutma-sistemi
                   - text: Detayları görüntüle →
         - generic [ref=e215]:
           - generic [ref=e217]:
@@ -334,31 +334,31 @@
             - list [ref=e416]:
               - listitem [ref=e417]:
                 - link "SSS" [ref=e418] [cursor=pointer]:
-                  - /url: /tr/faqs
+                  - /url: /faqs
               - listitem [ref=e419]:
                 - link "Kampanyalar" [ref=e420] [cursor=pointer]:
-                  - /url: /tr/promotions
+                  - /url: /promotions
               - listitem [ref=e421]:
                 - link "Nasıl Sipariş Verilir?" [ref=e422] [cursor=pointer]:
-                  - /url: /tr
+                  - /url: /how-to-order
           - generic [ref=e424]:
             - heading "Kurumsal" [level=3] [ref=e426]
             - list [ref=e428]:
               - listitem [ref=e429]:
                 - link "Gizlilik Politikası" [ref=e430] [cursor=pointer]:
-                  - /url: /tr/privacy-policy
+                  - /url: /privacy-policy
               - listitem [ref=e431]:
                 - link "KVKK" [ref=e432] [cursor=pointer]:
-                  - /url: /tr/kvkk
+                  - /url: /kvkk
               - listitem [ref=e433]:
                 - link "İade ve Değişim" [ref=e434] [cursor=pointer]:
-                  - /url: /tr/returns-exchanges
+                  - /url: /returns-exchanges
               - listitem [ref=e435]:
                 - link "Ödeme Yöntemleri" [ref=e436] [cursor=pointer]:
-                  - /url: /tr/payment-methods
+                  - /url: /payment-methods
               - listitem [ref=e437]:
                 - link "Kullanım Koşulları" [ref=e438] [cursor=pointer]:
-                  - /url: /tr/terms
+                  - /url: /terms
           - generic [ref=e440]:
             - heading "Contact" [level=3] [ref=e442]
             - list [ref=e444]:

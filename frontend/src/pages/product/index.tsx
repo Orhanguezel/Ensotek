@@ -2,8 +2,8 @@
 // FILE: src/pages/product/index.tsx
 // Ensotek – Products Page (full list) + SEO (HOOK-SAFE)
 //   - Route: /product
-//   - Layout is provided by _app.tsx (do NOT wrap here)
 //   - Page-specific title/desc via next/head (override Layout defaults)
+//   - Canonical/og:url/hreflang: single source = _document (SSR) / Layout filtering
 // =============================================================
 
 'use client';
@@ -25,7 +25,7 @@ import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 // seo helpers
 import { asObj } from '@/seo/pageSeo';
 
-const toLocaleShort = (l: any) =>
+const toLocaleShort = (l: unknown) =>
   String(l || 'tr')
     .trim()
     .toLowerCase()
@@ -38,9 +38,12 @@ const ProductPage: React.FC = () => {
 
   const { ui } = useUiSection('ui_products', locale);
 
-  const bannerTitle = ui('ui_products_page_title', locale === 'tr' ? 'Ürünlerimiz' : 'Products');
+  const bannerTitle = useMemo(
+    () => ui('ui_products_page_title', locale === 'tr' ? 'Ürünlerimiz' : 'Products'),
+    [ui, locale],
+  );
 
-  // Global SEO settings (seo -> site_seo fallback)
+  // Global SEO settings (only fallback)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
   const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
@@ -49,18 +52,19 @@ const ProductPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
+  // ✅ LIST META = UI (static)
   const pageTitle = useMemo(() => {
-    return String(ui('ui_products_meta_title', String(bannerTitle))).trim();
+    const t = String(ui('ui_products_meta_title', '')).trim();
+    return t || String(bannerTitle).trim();
   }, [ui, bannerTitle]);
 
   const pageDesc = useMemo(() => {
-    const descFromUi = String(ui('ui_products_meta_description', '')).trim();
-    return descFromUi || String(seo?.description ?? '').trim() || '';
+    const d = String(ui('ui_products_meta_description', '')).trim();
+    return d || String((seo as any)?.description ?? '').trim() || '';
   }, [ui, seo]);
 
   return (
     <>
-      {/* ✅ Override Layout defaults (Layout still owns canonical/og/hreflang) */}
       <Head>
         <title key="title">{pageTitle}</title>
         <meta key="description" name="description" content={pageDesc} />

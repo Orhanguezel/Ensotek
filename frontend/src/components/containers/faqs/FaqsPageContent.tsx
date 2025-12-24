@@ -1,49 +1,41 @@
 // =============================================================
 // FILE: src/components/containers/faqs/FaqsPageContent.tsx
 // Ensotek – Full FAQs Page Content
-//   - Tüm SSS kayıtlarının akordeon listesi
-//   - Data: faqs (public)
-//   - i18n: site_settings.ui_faqs
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState } from 'react';
 
-// RTK – PUBLIC faqs
-import { useListFaqsQuery } from "@/integrations/rtk/hooks";
-import type { FaqDto } from "@/integrations/types/faqs.types";
-import { normalizeFaq } from "@/integrations/types/faqs.types";
+import { useListFaqsQuery } from '@/integrations/rtk/hooks';
+import type { FaqDto } from '@/integrations/types/faqs.types';
+import { normalizeFaq } from '@/integrations/types/faqs.types';
 
-// i18n helper’lar
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
 const FaqsPageContent: React.FC = () => {
-  // Haberlerdeki pattern: resolved → kısa locale
   const resolved = useResolvedLocale();
-  const locale = (resolved || "tr").split("-")[0];
+  const locale = (resolved || 'tr').split('-')[0];
 
-  const { ui } = useUiSection("ui_faqs", locale);
+  const { ui } = useUiSection('ui_faqs', locale);
 
   const [open, setOpen] = useState<string | null>(null);
 
   const emptyText = ui(
-    "ui_faqs_empty",
-    locale === "tr"
-      ? "Şu anda görüntülenecek soru bulunmamaktadır."
-      : "There are no FAQs to display at the moment.",
+    'ui_faqs_empty',
+    locale === 'tr'
+      ? 'Şu anda görüntülenecek soru bulunmamaktadır.'
+      : 'There are no FAQs to display at the moment.',
   );
 
-  // 🔥 Admin pattern’i ile uyumlu minimal param seti
-  // /faqs?is_active=1&sort=display_order&orderDir=asc&limit=200&locale=tr
   const { data = [], isLoading } = useListFaqsQuery({
     is_active: 1,
-    sort: "display_order",
-    orderDir: "asc",
+    sort: 'display_order',
+    orderDir: 'asc',
     limit: 200,
-    locale,
-  });
+    locale, // RTK type izin vermezse kaldır
+  } as any);
 
   const faqs = useMemo(() => {
     const list = (Array.isArray(data) ? data : []) as FaqDto[];
@@ -52,9 +44,7 @@ const FaqsPageContent: React.FC = () => {
       .map((dto) => normalizeFaq(dto))
       .filter((f) => f.is_active)
       .sort((a, b) => {
-        if (a.display_order !== b.display_order) {
-          return a.display_order - b.display_order;
-        }
+        if (a.display_order !== b.display_order) return a.display_order - b.display_order;
         return a.created_at.localeCompare(b.created_at);
       });
   }, [data]);
@@ -62,59 +52,47 @@ const FaqsPageContent: React.FC = () => {
   return (
     <section className="faq__area pt-120 pb-90 grey-bg-3">
       <div className="container">
-        {/* Başlık */}
         <div className="row">
           <div className="col-12">
             <div className="section__title-wrapper text-center mb-50">
               <span className="section__subtitle">
-                <span>{ui("ui_faqs_kicker_prefix", "Ensotek")}</span>{" "}
+                <span>{ui('ui_faqs_kicker_prefix', 'Ensotek')}</span>{' '}
                 {ui(
-                  "ui_faqs_kicker_label",
-                  locale === "tr"
-                    ? "Sıkça Sorulan Sorular"
-                    : "Frequently Asked Questions",
+                  'ui_faqs_kicker_label',
+                  locale === 'tr' ? 'Sıkça Sorulan Sorular' : 'Frequently Asked Questions',
                 )}
               </span>
+
               <h2 className="section__title">
-                {ui(
-                  "ui_faqs_title_prefix",
-                  locale === "tr" ? "Merak edilen" : "Common",
-                )}{" "}
+                {ui('ui_faqs_page_title_prefix', locale === 'tr' ? 'Merak edilen' : 'Common')}{' '}
                 <span className="down__mark-line">
-                  {ui(
-                    "ui_faqs_title_mark",
-                    locale === "tr" ? "sorular" : "questions",
-                  )}
+                  {ui('ui_faqs_page_title_mark', locale === 'tr' ? 'sorular' : 'questions')}
                 </span>
               </h2>
+
               <p
                 style={{
                   maxWidth: 640,
-                  marginLeft: "auto",
-                  marginRight: "auto",
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
                   marginTop: 16,
                 }}
               >
                 {ui(
-                  "ui_faqs_intro",
-                  locale === "tr"
-                    ? "Ensotek ürünleri, hizmetleri ve süreçleri hakkında sıkça sorulan soruların yanıtlarını burada bulabilirsiniz."
-                    : "Find answers to the most common questions about Ensotek products, services and processes.",
+                  'ui_faqs_intro',
+                  locale === 'tr'
+                    ? 'Ensotek ürünleri, hizmetleri ve süreçleri hakkında sıkça sorulan soruların yanıtlarını burada bulabilirsiniz.'
+                    : 'Find answers to the most common questions about Ensotek products, services and processes.',
                 )}
               </p>
             </div>
           </div>
         </div>
 
-        {/* SSS Listesi */}
         <div className="row" data-aos="fade-up" data-aos-delay="200">
           <div className="col-xl-10 col-lg-11 mx-auto">
             <div className="bd-faq__wrapper mb-10">
-              <div
-                className="bd-faq__accordion"
-                data-aos="fade-left"
-                data-aos-duration="1000"
-              >
+              <div className="bd-faq__accordion" data-aos="fade-left" data-aos-duration="1000">
                 <div className="accordion" id="faqAccordion">
                   {!isLoading && faqs.length === 0 && (
                     <div className="accordion-item">
@@ -133,47 +111,37 @@ const FaqsPageContent: React.FC = () => {
                       <div className="accordion-item" key={faq.id}>
                         <h2 className="accordion-header" id={headingId}>
                           <button
-                            className={`accordion-button no-caret d-flex align-items-center${isOpen ? "" : " collapsed"
-                              }`}
+                            className={`accordion-button no-caret d-flex align-items-center${
+                              isOpen ? '' : ' collapsed'
+                            }`}
                             aria-expanded={isOpen}
                             aria-controls={panelId}
-                            onClick={() =>
-                              setOpen(isOpen ? null : faq.id)
-                            }
+                            onClick={() => setOpen(isOpen ? null : faq.id)}
                             type="button"
                           >
                             <span className="acc-bullet" aria-hidden="true" />
                             <span className="acc-text">
-                              {faq.question ||
-                                ui(
-                                  "ui_faqs_untitled",
-                                  "Untitled question",
-                                )}
+                              {faq.question || ui('ui_faqs_untitled', 'Untitled question')}
                             </span>
                           </button>
                         </h2>
+
                         <div
                           id={panelId}
                           role="region"
                           aria-labelledby={headingId}
-                          className={`accordion-collapse collapse${isOpen ? " show" : ""
-                            }`}
+                          className={`accordion-collapse collapse${isOpen ? ' show' : ''}`}
                         >
                           <div className="accordion-body">
                             {faq.answer ? (
-                              <div
-                                // eslint-disable-next-line react/no-danger
-                                dangerouslySetInnerHTML={{
-                                  __html: faq.answer,
-                                }}
-                              />
+                              <div dangerouslySetInnerHTML={{ __html: faq.answer }} />
                             ) : (
                               <p className="text-muted small mb-0">
                                 {ui(
-                                  "ui_faqs_no_answer",
-                                  locale === "tr"
-                                    ? "Bu soru için henüz cevap girilmemiştir."
-                                    : "No answer has been provided for this question yet.",
+                                  'ui_faqs_no_answer',
+                                  locale === 'tr'
+                                    ? 'Bu soru için henüz cevap girilmemiştir.'
+                                    : 'No answer has been provided for this question yet.',
                                 )}
                               </p>
                             )}
@@ -186,14 +154,8 @@ const FaqsPageContent: React.FC = () => {
                   {isLoading && (
                     <div className="accordion-item" aria-hidden>
                       <div className="accordion-body">
-                        <div
-                          className="skeleton-line"
-                          style={{ height: 12, marginBottom: 8 }}
-                        />
-                        <div
-                          className="skeleton-line"
-                          style={{ height: 12, width: "80%" }}
-                        />
+                        <div className="skeleton-line" style={{ height: 12, marginBottom: 8 }} />
+                        <div className="skeleton-line" style={{ height: 12, width: '80%' }} />
                       </div>
                     </div>
                   )}
@@ -201,14 +163,13 @@ const FaqsPageContent: React.FC = () => {
               </div>
             </div>
 
-            {/* İsteğe bağlı ekstra bilgi */}
             <div className="text-center mt-20">
               <p className="small text-muted mb-0">
                 {ui(
-                  "ui_faqs_footer_note",
-                  locale === "tr"
-                    ? "Aradığınız cevabı bulamadıysanız lütfen bizimle iletişime geçin."
-                    : "If you cannot find the answer you are looking for, please contact us.",
+                  'ui_faqs_footer_note',
+                  locale === 'tr'
+                    ? 'Aradığınız cevabı bulamadıysanız lütfen bizimle iletişime geçin.'
+                    : 'If you cannot find the answer you are looking for, please contact us.',
                 )}
               </p>
             </div>
@@ -216,7 +177,6 @@ const FaqsPageContent: React.FC = () => {
         </div>
       </div>
 
-      {/* Accordion buton stilleri */}
       <style jsx>{`
         .accordion-button.no-caret::after {
           display: none !important;

@@ -2,8 +2,8 @@
 // FILE: src/pages/product/[slug].tsx
 // Ensotek – Product Detail Page + SEO (HOOK-SAFE)
 //   - Route: /product/[slug]
-//   - Layout is provided by _app.tsx (do NOT wrap here)
-//   - Page-specific title/desc via next/head (override Layout defaults)
+//   - Page-specific title/desc via next/head
+//   - Canonical/og:url/hreflang: single source = _document (SSR) / Layout filtering
 // =============================================================
 
 'use client';
@@ -29,7 +29,10 @@ import { useGetSiteSettingByKeyQuery, useGetProductBySlugQuery } from '@/integra
 import { excerpt } from '@/shared/text';
 import { asObj } from '@/seo/pageSeo';
 
-const toLocaleShort = (l: any) =>
+// ui skeleton
+import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
+
+const toLocaleShort = (l: unknown) =>
   String(l || 'tr')
     .trim()
     .toLowerCase()
@@ -45,18 +48,41 @@ const ProductDetailPage: React.FC = () => {
   const { ui } = useUiSection('ui_products', locale);
 
   const slugParam = router.query.slug;
-  const slug =
-    typeof slugParam === 'string' ? slugParam : Array.isArray(slugParam) ? slugParam[0] ?? '' : '';
+  const slug = useMemo(() => {
+    if (typeof slugParam === 'string') return slugParam;
+    if (Array.isArray(slugParam)) return slugParam[0] ?? '';
+    return '';
+  }, [slugParam]);
 
-  const isSlugReady = Boolean(slug);
+  const isSlugReady = !!slug;
 
-  const listTitleFallback = ui('ui_products_page_title', locale === 'tr' ? 'Ürünler' : 'Products');
-  const detailTitleFallback = ui(
-    'ui_products_detail_page_title',
-    locale === 'tr' ? 'Ürün Detayı' : 'Product',
+  const listTitleFallback = useMemo(
+    () => ui('ui_products_page_title', locale === 'tr' ? 'Ürünler' : 'Products'),
+    [ui, locale],
   );
 
-  // Global SEO settings (fallback desc)
+  const detailTitleFallback = useMemo(
+    () => ui('ui_products_detail_page_title', locale === 'tr' ? 'Ürün Detayı' : 'Product'),
+    [ui, locale],
+  );
+
+  const detailMetaTitleFallback = useMemo(
+    () => ui('ui_products_detail_meta_title', detailTitleFallback),
+    [ui, detailTitleFallback],
+  );
+
+  const detailMetaDescFallback = useMemo(
+    () =>
+      ui(
+        'ui_products_detail_meta_description',
+        locale === 'tr'
+          ? 'Ürün detayları, teknik özellikler ve teklif talebi için inceleyiniz.'
+          : 'View product details, technical specifications, and request a quote.',
+      ),
+    [ui, locale],
+  );
+
+  // Global SEO settings (final fallback desc)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
   const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
@@ -65,32 +91,55 @@ const ProductDetailPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
-  const { data: product } = useGetProductBySlugQuery({ slug, locale }, { skip: !isSlugReady });
+  const { data: product, isLoading: isProductLoading } = useGetProductBySlugQuery(
+    { slug, locale },
+    { skip: !isSlugReady },
+  );
 
   const bannerTitle = useMemo(() => {
     const t = String(product?.title ?? '').trim();
     return t || detailTitleFallback || listTitleFallback;
-  }, [product, detailTitleFallback, listTitleFallback]);
+  }, [product?.title, detailTitleFallback, listTitleFallback]);
 
   const pageTitle = useMemo(() => {
-    if (!isSlugReady) return String(listTitleFallback).trim();
+    if (!isSlugReady) return String(detailTitleFallback || listTitleFallback).trim();
 
-    const metaTitle = String(product?.meta_title ?? '').trim();
+    const metaTitle = String((product as any)?.meta_title ?? '').trim();
     const title = String(product?.title ?? '').trim();
-    return metaTitle || title || String(bannerTitle).trim();
-  }, [isSlugReady, listTitleFallback, product, bannerTitle]);
+
+    // ✅ primary: product meta/title; fallback: UI fallback
+    return (
+      metaTitle || title || String(detailMetaTitleFallback).trim() || String(bannerTitle).trim()
+    );
+  }, [
+    isSlugReady,
+    detailTitleFallback,
+    listTitleFallback,
+    product,
+    detailMetaTitleFallback,
+    bannerTitle,
+  ]);
 
   const pageDesc = useMemo(() => {
-    if (!isSlugReady) return String(seo?.description ?? '').trim() || '';
+    const globalDesc = String((seo as any)?.description ?? '').trim();
 
-    const metaDesc = String(product?.meta_description ?? '').trim();
-    const desc = String(product?.description ?? '').trim();
-    return metaDesc || excerpt(desc, 160).trim() || String(seo?.description ?? '').trim() || '';
-  }, [isSlugReady, product, seo]);
+    if (!isSlugReady) return globalDesc || '';
+
+    const metaDesc = String((product as any)?.meta_description ?? '').trim();
+    const desc = String((product as any)?.description ?? '').trim();
+
+    // ✅ primary: product meta/description excerpt; fallback: UI fallback; last: global seo
+    return (
+      metaDesc ||
+      excerpt(desc, 160).trim() ||
+      String(detailMetaDescFallback).trim() ||
+      globalDesc ||
+      ''
+    );
+  }, [isSlugReady, product, seo, detailMetaDescFallback]);
 
   return (
     <>
-      {/* ✅ Override Layout defaults (Layout still owns canonical/og/hreflang) */}
       <Head>
         <title key="title">{pageTitle}</title>
         <meta key="description" name="description" content={pageDesc} />
@@ -103,9 +152,25 @@ const ProductDetailPage: React.FC = () => {
           <div className="container">
             <div className="row">
               <div className="col-12">
-                <div className="skeleton-line" style={{ height: 24 }} />
-                <div className="skeleton-line mt-10" style={{ height: 16 }} />
-                <div className="skeleton-line mt-10" style={{ height: 16 }} />
+                <SkeletonStack>
+                  <SkeletonLine style={{ height: 24 }} />
+                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
+                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
+                </SkeletonStack>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : isProductLoading && !product ? (
+        <div className="service__area pt-120 pb-90">
+          <div className="container">
+            <div className="row">
+              <div className="col-12">
+                <SkeletonStack>
+                  <SkeletonLine style={{ height: 24 }} />
+                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
+                  <SkeletonLine className="mt-10" style={{ height: 16, width: '80%' }} />
+                </SkeletonStack>
               </div>
             </div>
           </div>

@@ -6,109 +6,130 @@
 //   - i18n: site_settings.ui_products
 //   - Locale-aware routes with localizePath
 // =============================================================
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useMemo } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { useListProductsQuery } from "@/integrations/rtk/hooks";
-import type { ProductDto } from "@/integrations/types/product.types";
+import { useListProductsQuery } from '@/integrations/rtk/hooks';
+import type { ProductDto } from '@/integrations/types/product.types';
 
-import { toCdnSrc } from "@/shared/media";
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
+import { toCdnSrc } from '@/shared/media';
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
+
+import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
 // Fallback görsel
-import FallbackCover from "public/img/blog/3/1.jpg";
+import FallbackCover from 'public/img/blog/3/1.jpg';
 
 const CARD_W = 720;
 const CARD_H = 480;
 const PAGE_LIMIT = 12;
 
+const toLocaleShort = (l: unknown) =>
+  String(l || 'tr')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0] || 'tr';
+
 // Kısa açıklama helper'ı
 function makeExcerpt(text: string, maxLength = 140): string {
-  const clean = text.replace(/\s+/g, " ").trim();
-  if (!clean) return "";
+  const clean = String(text || '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!clean) return '';
   if (clean.length <= maxLength) return clean;
   const sliced = clean.slice(0, maxLength);
-  return sliced.replace(/[,.;:\s]+$/g, "") + "…";
+  return sliced.replace(/[,.;:\s]+$/g, '') + '…';
 }
 
+type ProductListVM = {
+  id: string;
+  slug: string;
+  title: string;
+  hero: string;
+  alt: string;
+  excerpt: string;
+};
+
 const ProductPageContent: React.FC = () => {
-  const locale = useResolvedLocale();
+  const resolvedLocale = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
-  const { ui } = useUiSection("ui_products", locale);
+  const { ui } = useUiSection('ui_products', locale);
 
-  const sectionSubtitlePrefix = ui("ui_products_kicker_prefix", "Ensotek");
+  const sectionSubtitlePrefix = ui('ui_products_kicker_prefix', 'Ensotek');
   const sectionSubtitleLabel = ui(
-    "ui_products_kicker_label",
-    locale === "tr" ? "Ürünlerimiz" : "Our Products",
+    'ui_products_kicker_label',
+    locale === 'tr' ? 'Ürünlerimiz' : 'Our Products',
   );
-  const sectionTitle = ui(
-    "ui_products_page_title",
-    locale === "tr" ? "Ürünlerimiz" : "Products",
-  );
+
+  const sectionTitle = ui('ui_products_page_title', locale === 'tr' ? 'Ürünlerimiz' : 'Products');
+
   const sectionIntro = ui(
-    "ui_products_page_intro",
-    locale === "tr"
-      ? "Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler."
-      : "Selected products for industrial cooling towers and related equipment.",
+    'ui_products_page_intro',
+    locale === 'tr'
+      ? 'Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler.'
+      : 'Selected products for industrial cooling towers and related equipment.',
   );
+
   const readMore = ui(
-    "ui_products_read_more",
-    locale === "tr" ? "Detayları görüntüle" : "View details",
+    'ui_products_read_more',
+    locale === 'tr' ? 'Detayları görüntüle' : 'View details',
   );
+
   const readMoreAria = ui(
-    "ui_products_read_more_aria",
-    locale === "tr" ? "ürün detayını görüntüle" : "view product details",
+    'ui_products_read_more_aria',
+    locale === 'tr' ? 'ürün detayını görüntüle' : 'view product details',
   );
+
   const emptyText = ui(
-    "ui_products_empty",
-    locale === "tr"
-      ? "Şu anda görüntülenecek ürün bulunmamaktadır."
-      : "There are no products to display at the moment.",
+    'ui_products_empty',
+    locale === 'tr'
+      ? 'Şu anda görüntülenecek ürün bulunmamaktadır.'
+      : 'There are no products to display at the moment.',
   );
 
   // RTK: listProducts artık ProductListResponse döner (items + total)
   const { data, isLoading } = useListProductsQuery({
     is_active: 1,
-    locale,
+    locale, // ✅ short locale
     limit: PAGE_LIMIT,
   });
 
-  const items = useMemo(() => {
-    const list: ProductDto[] = data?.items ?? [];
+  const items: ProductListVM[] = useMemo(() => {
+    const list: ProductDto[] = (data?.items ?? []) as any;
 
-    return list.map((p) => {
-      const title = (p.title || "").trim();
-      const slug = (p.slug || "").trim();
+    return list
+      .filter((p) => !!p && !!p.is_active)
+      .map((p) => {
+        const title = String(p.title || '').trim();
+        const slug = String(p.slug || '').trim();
 
-      const imgRaw =
-        (p.image_url || "").trim() ||
-        ((p.images && p.images[0]) || "").trim();
+        const imgRaw =
+          String(p.image_url || '').trim() || String((p.images && p.images[0]) || '').trim();
 
-      const hero =
-        (imgRaw &&
-          (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
-        "";
+        const hero = (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '';
 
-      const description = (p.description || "").trim();
-      const excerpt = makeExcerpt(description);
+        const description = String((p as any).description || '').trim();
+        const excerpt = makeExcerpt(description);
 
-      return {
-        id: p.id,
-        slug,
-        title,
-        hero,
-        alt: p.alt || title || "product image",
-        excerpt,
-      };
-    });
-  }, [data]);
+        return {
+          id: String((p as any).id ?? ''),
+          slug,
+          title,
+          hero,
+          alt: String((p as any).alt || title || 'product image'),
+          excerpt,
+        };
+      });
+  }, [data?.items]);
 
-  const productListHref = localizePath(locale, "/product");
+  const productListHref = useMemo(() => localizePath(locale, '/product'), [locale]);
 
   return (
     <section className="product__area grey-bg-3 pt-120 pb-90">
@@ -122,20 +143,14 @@ const ProductPageContent: React.FC = () => {
                   {sectionSubtitlePrefix} {sectionSubtitleLabel}
                 </span>
               </div>
-              <div className="section__title-3 mb-20">
-                {sectionTitle}
-              </div>
-              {sectionIntro && (
-                <p
-                  style={{
-                    maxWidth: 640,
-                    marginLeft: "auto",
-                    marginRight: "auto",
-                  }}
-                >
+
+              <div className="section__title-3 mb-20">{sectionTitle}</div>
+
+              {sectionIntro ? (
+                <p style={{ maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
                   {sectionIntro}
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
@@ -150,17 +165,11 @@ const ProductPageContent: React.FC = () => {
 
           {items.map((p) => {
             const href = p.slug
-              ? localizePath(
-                locale,
-                `/product/${encodeURIComponent(p.slug)}`,
-              )
+              ? localizePath(locale, `/product/${encodeURIComponent(p.slug)}`)
               : productListHref;
 
             return (
-              <div
-                className="col-xl-4 col-lg-4 col-md-6"
-                key={p.id}
-              >
+              <div className="col-xl-4 col-lg-4 col-md-6" key={p.id || p.slug}>
                 <div className="product__item-3 mb-30">
                   <div className="product__thumb-3 w-img">
                     <Image
@@ -168,23 +177,21 @@ const ProductPageContent: React.FC = () => {
                       alt={p.alt}
                       width={CARD_W}
                       height={CARD_H}
-                      style={{ width: "100%", height: "auto" }}
+                      style={{ width: '100%', height: 'auto' }}
                       loading="lazy"
                     />
                   </div>
+
                   <div className="product__content-3">
                     <h3>
                       <Link href={href}>{p.title}</Link>
                     </h3>
 
-                    {p.excerpt && (
-                      <p
-                        className="product__meta"
-                        style={{ marginTop: 6, marginBottom: 10 }}
-                      >
+                    {p.excerpt ? (
+                      <p className="product__meta" style={{ marginTop: 6, marginBottom: 10 }}>
                         {p.excerpt}
                       </p>
-                    )}
+                    ) : null}
 
                     <Link
                       href={href}
@@ -200,12 +207,10 @@ const ProductPageContent: React.FC = () => {
           })}
 
           {isLoading && (
-            <div className="col-12">
-              <div
-                className="skeleton-line"
-                style={{ height: 16 }}
-                aria-hidden
-              />
+            <div className="col-12" aria-hidden>
+              <SkeletonStack>
+                <SkeletonLine style={{ height: 16 }} />
+              </SkeletonStack>
             </div>
           )}
         </div>
