@@ -4,41 +4,41 @@
 
 const nextConfig = {
   reactStrictMode: true,
+  trailingSlash: false,
 
   images: {
     remotePatterns: [
-      { protocol: "https", hostname: "res.cloudinary.com", pathname: "/**" },
-      { protocol: "https", hostname: "images.unsplash.com", pathname: "/**" },
-      { protocol: "http", hostname: "localhost", pathname: "/**" },
+      { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      { protocol: 'http', hostname: 'localhost', pathname: '/**' },
     ],
   },
 
   // ✅ i18n intentionally removed
 
   async rewrites() {
-    return [
-      // ✅ /tr  => /
-      {
-        source: "/:lc([a-zA-Z]{2})",
-        destination: "/?__lc=:lc",
-      },
+    // locale-like prefix: xx | xxx | xx-YY | xx-yyy
+    const localeSrc = ':lc([a-z]{2,3}(?:-[a-zA-Z]{2,4})?)';
 
-      // ✅ /tr/blog  => /blog
-      {
-        source: "/:lc([a-zA-Z]{2})/:path*",
-        destination: "/:path*?__lc=:lc",
-      },
-    ];
+    return {
+      beforeFiles: [],
+      afterFiles: [],
+      // ✅ 404'e düşmeden önce en sonda da olsa uygulanır
+      fallback: [
+        {
+          source: `/${localeSrc}/:path*`,
+          destination: '/:path*?__lc=:lc',
+        },
+        {
+          source: `/${localeSrc}`,
+          destination: '/?__lc=:lc',
+        },
+      ],
+    };
   },
 
-  // İstersen tüm site prefix'li olsun diye ana sayfayı default locale'e at:
-  // (DB default_locale dinamik olduğu için burada sabit tutmak zorundasın.)
-  // async redirects() {
-  //   return [{ source: "/", destination: "/tr", permanent: false }];
-  // },
-
   webpack: (config) => {
-    config.cache = { type: "memory" };
+    config.cache = { type: 'memory' };
     return config;
   },
 };

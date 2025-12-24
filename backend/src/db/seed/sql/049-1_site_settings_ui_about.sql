@@ -3,7 +3,8 @@
 -- site_settings.key IN ('ui_about', 'ui_about_stats')
 --  - Value: JSON (stored as TEXT)
 --  - Localized: tr / en / de
---  - Extendable: clone from tr as bootstrap (collation-safe)
+--  - Upsert: ON DUPLICATE KEY UPDATE
+--  - Optional bootstrap clone (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -17,13 +18,20 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_about',
   'tr',
-  CAST(JSON_OBJECT(
-    'ui_about_page_title',      'Hakkımızda',
-    'ui_about_subprefix',       'Ensotek',
-    'ui_about_sublabel',        'Hakkımızda',
-    'ui_about_fallback_title',  'Ensotek Su Soğutma Kuleleri Hakkında',
-    'ui_about_view_all',        'Tümünü Gör'
-  ) AS CHAR),
+  CAST(
+    JSON_OBJECT(
+      'ui_about_page_title',        'Hakkımızda',
+      'ui_about_subprefix',         'Ensotek',
+      'ui_about_sublabel',          'Hakkımızda',
+      'ui_about_fallback_title',    'Ensotek Su Soğutma Kuleleri Hakkında',
+      'ui_about_view_all',          'Tümünü Gör',
+
+      'ui_about_page_description',  'Ensotek hakkında bilgi, kurumsal yaklaşımımız ve faaliyet alanlarımız.',
+      'ui_about_meta_title',        'Hakkımızda',
+      'ui_about_meta_description',  'Ensotek hakkında bilgi, kurumsal yaklaşımımız ve faaliyet alanlarımız.'
+    )
+    AS CHAR CHARACTER SET utf8mb4
+  ),
   NOW(3),
   NOW(3)
 ),
@@ -31,13 +39,20 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_about',
   'en',
-  CAST(JSON_OBJECT(
-    'ui_about_page_title',      'About Us',
-    'ui_about_subprefix',       'Ensotek',
-    'ui_about_sublabel',        'About',
-    'ui_about_fallback_title',  'About Ensotek Water Cooling Towers',
-    'ui_about_view_all',        'View all'
-  ) AS CHAR),
+  CAST(
+    JSON_OBJECT(
+      'ui_about_page_title',        'About Us',
+      'ui_about_subprefix',         'Ensotek',
+      'ui_about_sublabel',          'About',
+      'ui_about_fallback_title',    'About Ensotek Water Cooling Towers',
+      'ui_about_view_all',          'View all',
+
+      'ui_about_page_description',  'Information about Ensotek, our company and capabilities.',
+      'ui_about_meta_title',        'About Us',
+      'ui_about_meta_description',  'Information about Ensotek, our company and capabilities.'
+    )
+    AS CHAR CHARACTER SET utf8mb4
+  ),
   NOW(3),
   NOW(3)
 ),
@@ -45,13 +60,20 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_about',
   'de',
-  CAST(JSON_OBJECT(
-    'ui_about_page_title',      'Über uns',
-    'ui_about_subprefix',       'Ensotek',
-    'ui_about_sublabel',        'Über uns',
-    'ui_about_fallback_title',  'Über Ensotek Wasserkühltürme',
-    'ui_about_view_all',        'Alle anzeigen'
-  ) AS CHAR),
+  CAST(
+    JSON_OBJECT(
+      'ui_about_page_title',        'Über uns',
+      'ui_about_subprefix',         'Ensotek',
+      'ui_about_sublabel',          'Über uns',
+      'ui_about_fallback_title',    'Über Ensotek Wasserkühltürme',
+      'ui_about_view_all',          'Alle anzeigen',
+
+      'ui_about_page_description',  'Informationen über Ensotek, unser Unternehmen und unsere Kompetenzen.',
+      'ui_about_meta_title',        'Über uns',
+      'ui_about_meta_description',  'Informationen über Ensotek, unser Unternehmen und unsere Kompetenzen.'
+    )
+    AS CHAR CHARACTER SET utf8mb4
+  ),
   NOW(3),
   NOW(3)
 )
@@ -89,22 +111,25 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_about_stats',
   'tr',
-  CAST(JSON_OBJECT(
-    'ui_about_stats_refs_value',    '120',
-    'ui_about_stats_refs_title',    'Sanayi referansımız',
-    'ui_about_stats_refs_label',    'Referans müşteri & tesis',
+  CAST(
+    JSON_OBJECT(
+      'ui_about_stats_refs_value',     '120',
+      'ui_about_stats_refs_title',     'Sanayi referansımız',
+      'ui_about_stats_refs_label',     'Referans müşteri & tesis',
 
-    'ui_about_stats_projects_value','250',
-    'ui_about_stats_projects_title','Tamamlanan proje',
-    'ui_about_stats_projects_label','Yurtiçi ve yurtdışı projeler',
+      'ui_about_stats_projects_value', '250',
+      'ui_about_stats_projects_title', 'Tamamlanan proje',
+      'ui_about_stats_projects_label', 'Yurtiçi ve yurtdışı projeler',
 
-    'ui_about_stats_years_value',   '20',
-    'ui_about_stats_years_title',   'Yıllık tecrübe',
-    'ui_about_stats_years_label',   'Su soğutma ve proses soğutma',
+      'ui_about_stats_years_value',    '20',
+      'ui_about_stats_years_title',    'Yıllık tecrübe',
+      'ui_about_stats_years_label',    'Su soğutma ve proses soğutma',
 
-    'ui_about_stats_suffix_letter', '',
-    'ui_about_stats_suffix_plus',   '+'
-  ) AS CHAR),
+      'ui_about_stats_suffix_letter',  '',
+      'ui_about_stats_suffix_plus',    '+'
+    )
+    AS CHAR CHARACTER SET utf8mb4
+  ),
   NOW(3),
   NOW(3)
 ),
@@ -112,22 +137,25 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_about_stats',
   'en',
-  CAST(JSON_OBJECT(
-    'ui_about_stats_refs_value',    '120',
-    'ui_about_stats_refs_title',    'Industrial references',
-    'ui_about_stats_refs_label',    'Reference customers & plants',
+  CAST(
+    JSON_OBJECT(
+      'ui_about_stats_refs_value',     '120',
+      'ui_about_stats_refs_title',     'Industrial references',
+      'ui_about_stats_refs_label',     'Reference customers & plants',
 
-    'ui_about_stats_projects_value','250',
-    'ui_about_stats_projects_title','Completed projects',
-    'ui_about_stats_projects_label','Domestic and international projects',
+      'ui_about_stats_projects_value', '250',
+      'ui_about_stats_projects_title', 'Completed projects',
+      'ui_about_stats_projects_label', 'Domestic and international projects',
 
-    'ui_about_stats_years_value',   '20',
-    'ui_about_stats_years_title',   'Years of experience',
-    'ui_about_stats_years_label',   'Cooling tower & process cooling',
+      'ui_about_stats_years_value',    '20',
+      'ui_about_stats_years_title',    'Years of experience',
+      'ui_about_stats_years_label',    'Cooling tower & process cooling',
 
-    'ui_about_stats_suffix_letter', '',
-    'ui_about_stats_suffix_plus',   '+'
-  ) AS CHAR),
+      'ui_about_stats_suffix_letter',  '',
+      'ui_about_stats_suffix_plus',    '+'
+    )
+    AS CHAR CHARACTER SET utf8mb4
+  ),
   NOW(3),
   NOW(3)
 ),
@@ -135,22 +163,25 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
   UUID(),
   'ui_about_stats',
   'de',
-  CAST(JSON_OBJECT(
-    'ui_about_stats_refs_value',    '120',
-    'ui_about_stats_refs_title',    'Industrie-Referenzen',
-    'ui_about_stats_refs_label',    'Referenzkunden & Anlagen',
+  CAST(
+    JSON_OBJECT(
+      'ui_about_stats_refs_value',     '120',
+      'ui_about_stats_refs_title',     'Industrie-Referenzen',
+      'ui_about_stats_refs_label',     'Referenzkunden & Anlagen',
 
-    'ui_about_stats_projects_value','250',
-    'ui_about_stats_projects_title','Abgeschlossene Projekte',
-    'ui_about_stats_projects_label','Nationale und internationale Projekte',
+      'ui_about_stats_projects_value', '250',
+      'ui_about_stats_projects_title', 'Abgeschlossene Projekte',
+      'ui_about_stats_projects_label', 'Nationale und internationale Projekte',
 
-    'ui_about_stats_years_value',   '20',
-    'ui_about_stats_years_title',   'Jahre Erfahrung',
-    'ui_about_stats_years_label',   'Kühlturm- und Prozesskühlung',
+      'ui_about_stats_years_value',    '20',
+      'ui_about_stats_years_title',    'Jahre Erfahrung',
+      'ui_about_stats_years_label',    'Kühlturm- und Prozesskühlung',
 
-    'ui_about_stats_suffix_letter', '',
-    'ui_about_stats_suffix_plus',   '+'
-  ) AS CHAR),
+      'ui_about_stats_suffix_letter',  '',
+      'ui_about_stats_suffix_plus',    '+'
+    )
+    AS CHAR CHARACTER SET utf8mb4
+  ),
   NOW(3),
   NOW(3)
 )

@@ -26,7 +26,7 @@ const formatDate = (v: unknown): string => {
   const raw = safeText(v).trim();
   if (!raw) return '-';
   const d = new Date(raw);
-  if (Number.isNaN(d.getTime())) return raw; // backend zaten string formatlı döndürüyor olabilir
+  if (Number.isNaN(d.getTime())) return raw;
   return d.toLocaleString();
 };
 
@@ -41,7 +41,6 @@ const statusBadgeClass = (statusRaw: unknown) => {
   const s = safeText(statusRaw).toLowerCase();
   if (!s) return 'bg-light text-dark border';
 
-  // İstersen kendi status enum’larına göre genişlet
   if (s.includes('new') || s.includes('yeni'))
     return 'bg-info-subtle text-info border border-info-subtle';
   if (s.includes('pending') || s.includes('bek'))
@@ -76,18 +75,6 @@ export const OfferList: React.FC<OfferListProps> = ({ items, loading, onEdit, on
       </span>
     );
   }, [loading]);
-
-  const renderEmpty = (colSpan?: number) => (
-    <>
-      {!hasData && (
-        <div className="px-3 py-3 text-center text-muted small">
-          {loading ? 'Teklif kayıtları yükleniyor...' : 'Henüz teklif kaydı bulunmuyor.'}
-        </div>
-      )}
-      {/* table body empty case handled separately */}
-      {hasData ? null : colSpan ? null : null}
-    </>
-  );
 
   return (
     <div className="card">

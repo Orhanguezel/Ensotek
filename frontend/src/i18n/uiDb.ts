@@ -40,7 +40,9 @@ export type UiSectionKey =
   | "ui_faqs"
   | "ui_team"
   | "ui_offer"
-  | "ui_catalog";
+  | "ui_catalog"
+  | "ui_errors"
+  ;
 
 /**
  * UI key listeleri:
@@ -298,6 +300,11 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
   ui_team: ["ui_team_page_title"],
   ui_offer: ["ui_offer_page_title"],
   ui_catalog: ["ui_catalog_page_title"],
+  ui_errors: [
+    "ui_404_title",
+    "ui_404_message",
+    "ui_404_home_cta",
+  ],
 };
 
 type UiSectionResult = {

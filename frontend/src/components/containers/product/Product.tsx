@@ -6,22 +6,24 @@
 //   - Category bazlı filtre için optional categoryId prop
 //   - Locale-aware routes with localizePath
 // =============================================================
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useMemo } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
-import { useListProductsQuery } from "@/integrations/rtk/hooks";
-import type { ProductDto } from "@/integrations/types/product.types";
+import { useListProductsQuery } from '@/integrations/rtk/hooks';
+import type { ProductDto } from '@/integrations/types/product.types';
 
-import { toCdnSrc } from "@/shared/media";
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
+import { toCdnSrc } from '@/shared/media';
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
+
+import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
 // Haberlerde olduğu gibi; sadece hero boş kalırsa devreye girecek
-import FallbackCover from "public/img/blog/1/blog-01.jpg";
+import FallbackCover from 'public/img/blog/1/blog-01.jpg';
 
 const CARD_W = 720;
 const CARD_H = 480;
@@ -31,87 +33,91 @@ export interface ProductSectionProps {
   categoryId?: string;
 }
 
+const toLocaleShort = (l: unknown) =>
+  String(l || 'tr')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0] || 'tr';
+
+type ProductCardVM = {
+  id: string;
+  slug: string;
+  title: string;
+  hero: string;
+  alt: string;
+  price?: any;
+};
+
 const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
-  const locale = useResolvedLocale();
+  const resolvedLocale = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
   // UI yazıları → site_settings.key = "ui_products"
-  const { ui } = useUiSection("ui_products", locale);
+  const { ui } = useUiSection('ui_products', locale);
 
-  const kickerPrefix = ui("ui_products_kicker_prefix", "Ensotek");
+  const kickerPrefix = ui('ui_products_kicker_prefix', 'Ensotek');
   const kickerLabel = ui(
-    "ui_products_kicker_label",
-    locale === "tr" ? "Ürünlerimiz" : "Our Products",
+    'ui_products_kicker_label',
+    locale === 'tr' ? 'Ürünlerimiz' : 'Our Products',
   );
 
-  const titlePrefix = ui(
-    "ui_products_title_prefix",
-    locale === "tr" ? "Su Soğutma" : "Cooling",
-  );
-  const titleMark = ui(
-    "ui_products_title_mark",
-    locale === "tr" ? "Kuleleri" : "Towers",
-  );
+  const titlePrefix = ui('ui_products_title_prefix', locale === 'tr' ? 'Su Soğutma' : 'Cooling');
+  const titleMark = ui('ui_products_title_mark', locale === 'tr' ? 'Kuleleri' : 'Towers');
 
   const readMore = ui(
-    "ui_products_read_more",
-    locale === "tr" ? "Detayları görüntüle" : "View details",
+    'ui_products_read_more',
+    locale === 'tr' ? 'Detayları görüntüle' : 'View details',
   );
   const readMoreAria = ui(
-    "ui_products_read_more_aria",
-    locale === "tr" ? "ürün detayını görüntüle" : "view product details",
+    'ui_products_read_more_aria',
+    locale === 'tr' ? 'ürün detayını görüntüle' : 'view product details',
   );
-  const viewAllText = ui(
-    "ui_products_view_all",
-    locale === "tr" ? "Tüm Ürünler" : "All products",
-  );
+
+  const viewAllText = ui('ui_products_view_all', locale === 'tr' ? 'Tüm Ürünler' : 'All products');
+
   const emptyText = ui(
-    "ui_products_empty",
-    locale === "tr"
-      ? "Şu anda görüntülenecek ürün bulunmamaktadır."
-      : "There are no products to display at the moment.",
+    'ui_products_empty',
+    locale === 'tr'
+      ? 'Şu anda görüntülenecek ürün bulunmamaktadır.'
+      : 'There are no products to display at the moment.',
   );
 
   // Ürün listesi – optional kategori filtresi
-  // NOT: BE ile sorun olmaması için sort/order paramlarını kaldırdım.
-  // ProductPageContent ile birebir aynı pattern, sadece limit ve kategori filtresi farklı.
   const { data, isLoading } = useListProductsQuery({
     is_active: 1,
-    locale,
+    locale, // ✅ short locale
     limit: 6,
     ...(categoryId ? { category_id: categoryId } : {}),
   });
 
-  const items = useMemo(() => {
-    const list: ProductDto[] = data?.items ?? [];
+  const items: ProductCardVM[] = useMemo(() => {
+    const list: ProductDto[] = (data?.items ?? []) as any;
 
     return list
-      .filter((p) => p.is_active)
+      .filter((p) => !!p && !!p.is_active)
       .slice(0, 3)
       .map((p) => {
-        const title = (p.title || "").trim();
-        const slug = (p.slug || "").trim();
+        const title = String(p.title || '').trim();
+        const slug = String(p.slug || '').trim();
 
         const imgRaw =
-          (p.image_url || "").trim() ||
-          ((p.images && p.images[0]) || "").trim();
+          String(p.image_url || '').trim() || String((p.images && p.images[0]) || '').trim();
 
-        const hero =
-          (imgRaw &&
-            (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
-          "";
+        const hero = (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '';
 
         return {
-          id: p.id,
+          id: String((p as any).id ?? ''),
           slug,
           title,
-          price: p.price,
+          price: (p as any).price,
           hero,
-          alt: p.alt || title || "product image",
+          alt: String((p as any).alt || title || 'product image'),
         };
       });
-  }, [data]);
+  }, [data?.items]);
 
-  const productListHref = localizePath(locale, "/product");
+  const productListHref = useMemo(() => localizePath(locale, '/product'), [locale]);
 
   return (
     <section className="product__area pt-120 pb-90">
@@ -124,8 +130,7 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
                 <span>{kickerPrefix}</span> {kickerLabel}
               </span>
               <h2 className="section__title">
-                {titlePrefix}{" "}
-                <span className="down__mark-line">{titleMark}</span>
+                {titlePrefix} <span className="down__mark-line">{titleMark}</span>
               </h2>
             </div>
           </div>
@@ -141,17 +146,11 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
 
           {items.map((p) => {
             const href = p.slug
-              ? localizePath(
-                locale,
-                `/product/${encodeURIComponent(p.slug)}`,
-              )
+              ? localizePath(locale, `/product/${encodeURIComponent(p.slug)}`)
               : productListHref;
 
             return (
-              <div
-                className="col-xl-4 col-lg-4 col-md-6"
-                key={p.id}
-              >
+              <div className="col-xl-4 col-lg-4 col-md-6" key={p.id || p.slug}>
                 <div className="product__item mb-30">
                   <div className="product__thumb w-img mb-20">
                     <Image
@@ -159,19 +158,18 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
                       alt={p.alt}
                       width={CARD_W}
                       height={CARD_H}
-                      style={{ width: "100%", height: "auto" }}
+                      style={{ width: '100%', height: 'auto' }}
                       loading="lazy"
                     />
                   </div>
+
                   <div className="product__content">
                     <h3 className="product__title">
                       <Link href={href}>{p.title}</Link>
                     </h3>
-                    <div
-                      className="product__meta"
-                      style={{ marginTop: 8, marginBottom: 10 }}
-                    >
-                    </div>
+
+                    <div className="product__meta" style={{ marginTop: 8, marginBottom: 10 }} />
+
                     <Link
                       href={href}
                       className="link-more"
@@ -186,12 +184,10 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
           })}
 
           {isLoading && (
-            <div className="col-12">
-              <div
-                className="skeleton-line"
-                style={{ height: 16 }}
-                aria-hidden
-              />
+            <div className="col-12" aria-hidden>
+              <SkeletonStack>
+                <SkeletonLine style={{ height: 16 }} />
+              </SkeletonStack>
             </div>
           )}
         </div>

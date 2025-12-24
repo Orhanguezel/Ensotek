@@ -1,10 +1,87 @@
-import React from "react";
+// =============================================================
+// FILE: src/components/containers/contact/ContactMap.tsx
+// Ensotek – Contact Map (Dynamic via site_settings.contact_map)
+// =============================================================
+'use client';
 
-const ContactMap = () => {
+import React, { useMemo } from 'react';
+import { useUiSection } from '@/i18n/uiDb';
+
+export type ContactMapConfig = {
+  embed_url?: string; // recommended: Google Maps embed URL
+  query?: string; // address string fallback
+  lat?: number;
+  lng?: number;
+  zoom?: number;
+  height?: number; // px
+  title?: string; // optional
+};
+
+type Props = {
+  config?: ContactMapConfig;
+  locale: string; // short locale
+};
+
+const ContactMap: React.FC<Props> = ({ config, locale }) => {
+  const { ui } = useUiSection('ui_contact', locale);
+
+  const height = useMemo(() => {
+    const h = Number((config as any)?.height);
+    return Number.isFinite(h) && h > 200 ? h : 420;
+  }, [config]);
+
+  const title = useMemo(() => {
+    return String(
+      config?.title || ui('ui_contact_map_title', locale === 'tr' ? 'Konum' : 'Location'),
+    ).trim();
+  }, [config?.title, ui, locale]);
+
+  const src = useMemo(() => {
+    const embed = String(config?.embed_url || '').trim();
+    if (embed) return embed;
+
+    const q = String(config?.query || '').trim();
+    if (q) {
+      // No-key Google maps embed fallback. If blocked, user should provide embed_url.
+      const encoded = encodeURIComponent(q);
+      return `https://www.google.com/maps?q=${encoded}&output=embed`;
+    }
+
+    // Last resort: empty
+    return '';
+  }, [config?.embed_url, config?.query]);
+
+  if (!src) return null;
+
   return (
-    <div className="google__map-area pt-120">
-      <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d30938.29203384682!2d90.41205809043723!3d23.810342878819508!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sbd!4v1668285235016!5m2!1sen!2sbd"></iframe>
-    </div>
+    <section className="map__area">
+      <div className="container">
+        <div className="row">
+          <div className="col-12">
+            <div
+              className="contact-map__frame"
+              style={{
+                width: '100%',
+                borderRadius: 18,
+                overflow: 'hidden',
+                boxShadow: '0 10px 28px rgba(0,0,0,0.12)',
+              }}
+            >
+              <iframe
+                title={title}
+                src={src}
+                width="100%"
+                height={height}
+                style={{ border: 0, display: 'block' }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   );
 };
 

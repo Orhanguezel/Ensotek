@@ -33,29 +33,9 @@ const CARD_W = 720;
 const CARD_H = 480;
 const PAGE_LIMIT = 12; // şimdilik tek seferde 12; backend offset ile büyütebiliriz
 
-const formatDate = (value: string | null | undefined, intlLocale: string) => {
-  if (!value) return "";
-  try {
-    const d = new Date(value);
-    return new Intl.DateTimeFormat(intlLocale, {
-      year: "numeric",
-      month: "long",
-      day: "2-digit",
-    }).format(d);
-  } catch {
-    return "";
-  }
-};
-
 const NewsPageContent: React.FC = () => {
   const resolved = useResolvedLocale();
   const locale = (resolved || "tr").split("-")[0];
-  const intlLocale =
-    locale === "tr"
-      ? "tr-TR"
-      : locale === "de"
-        ? "de-DE"
-        : "en-US";
 
   const { ui } = useUiSection("ui_news", locale);
 
@@ -121,18 +101,15 @@ const NewsPageContent: React.FC = () => {
           (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
         "";
 
-      const dateStr = formatDate(n.created_at, intlLocale);
-
       return {
         id: n.id,
         slug,
         title,
         excerpt: textExcerpt,
         hero,
-        date: dateStr,
       };
     });
-  }, [data, intlLocale, untitled]);
+  }, [data, untitled]);
 
   const newsListHref = localizePath(locale, "/news");
 
@@ -210,13 +187,6 @@ const NewsPageContent: React.FC = () => {
                     />
                   </div>
                   <div className="news__content-3">
-                    {n.date && (
-                      <div className="news__meta">
-                        <div className="news__meta-author">
-                          <span>{n.date}</span>
-                        </div>
-                      </div>
-                    )}
                     <h3>
                       <Link href={detailHref}>{n.title}</Link>
                     </h3>

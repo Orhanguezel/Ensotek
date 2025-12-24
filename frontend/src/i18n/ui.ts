@@ -12,7 +12,20 @@ import { useListSiteSettingsQuery } from "@/integrations/rtk/hooks";
  * (Senin uzun obje AYNEN kalır)
  */
 export const UI_FALLBACK_EN = {
-  // ... (senin mevcut obje aynen)
+  ui_header_nav_home: "Home",
+  ui_header_nav_about: "About Us",
+  ui_header_nav_services: "Services",
+  ui_header_nav_product: "Products",
+  ui_header_nav_sparepart: "Spare Parts",
+  ui_header_nav_references: "References",
+  ui_header_nav_library: "Library",
+  ui_header_nav_blog: "Blog",
+  ui_header_nav_contact: "Contact",
+  ui_home_hero_title: "Welcome to Our Website",
+  ui_home_hero_subtitle: "We provide the best solutions for your business.",
+  ui_home_hero_cta_primary: "Get Started",
+  ui_home_hero_cta_secondary: "Learn More",
+  // ... diğer UI key-value çiftleri
 } as const;
 
 export type UIKey = keyof typeof UI_FALLBACK_EN;

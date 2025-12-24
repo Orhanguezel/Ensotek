@@ -15,16 +15,20 @@ type AppLocaleMeta = {
   is_active?: unknown;
 };
 
-function readLocaleFromPathname(pathname?: string): string {
-  const p = String(pathname || '/').trim();
-  const seg = p.replace(/^\/+/, '').split('/')[0] || '';
-  return normLocaleTag(seg);
-}
-
 function readLocaleFromCookie(): string {
   if (typeof document === 'undefined') return '';
   const m = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/);
   return m ? normLocaleTag(decodeURIComponent(m[1])) : '';
+}
+
+function readLocaleFromQuery(): string {
+  if (typeof window === 'undefined') return '';
+  try {
+    const usp = new URLSearchParams(window.location.search || '');
+    return normLocaleTag(usp.get('__lc'));
+  } catch {
+    return '';
+  }
 }
 
 function computeActiveLocales(meta: any[] | undefined): string[] {
@@ -74,6 +78,7 @@ function normalizeAppLocalesValue(v: any): AppLocaleMeta[] {
 }
 
 export function useResolvedLocale(explicitLocale?: string | null): string {
+  // pathname sadece SPA değişimini tetiklemek için tutuluyor
   const [pathname, setPathname] = useState<string>('/');
 
   const [appLocalesMeta, setAppLocalesMeta] = useState<AppLocaleMeta[] | null>(null);
@@ -88,10 +93,8 @@ export function useResolvedLocale(explicitLocale?: string | null): string {
 
     const read = () => setPathname(window.location.pathname || '/');
 
-    // initial
     read();
 
-    // ✅ SPA navigations
     window.addEventListener('locationchange', read);
     window.addEventListener('popstate', read);
     window.addEventListener('hashchange', read);
@@ -128,21 +131,28 @@ export function useResolvedLocale(explicitLocale?: string | null): string {
     const activeLocales = computeActiveLocales((appLocalesMeta || []) as any);
     const activeSet = new Set(activeLocales.map(normLocaleTag));
 
-    const fromPath = readLocaleFromPathname(pathname);
-    if (fromPath && activeSet.has(fromPath)) return fromPath;
+    // ✅ 1) __lc query: rewrite’ın tek kaynağı
+    const fromQuery = readLocaleFromQuery();
+    if (fromQuery && activeSet.has(fromQuery)) return fromQuery;
 
+    // ✅ 2) cookie
     const fromCookie = readLocaleFromCookie();
     if (fromCookie && activeSet.has(fromCookie)) return fromCookie;
 
+    // ✅ 3) explicit
     const fromExplicit = normLocaleTag(explicitLocale);
     if (fromExplicit && activeSet.has(fromExplicit)) return fromExplicit;
 
+    // ✅ 4) DB default
     const candDefault = normLocaleTag(defaultLocaleMeta);
     if (candDefault && activeSet.has(candDefault)) return candDefault;
 
+    // ✅ 5) first active
     const firstActive = normLocaleTag(activeLocales[0]);
     if (firstActive) return firstActive;
 
+    // ✅ 6) fallback
     return normLocaleTag(FALLBACK_LOCALE) || 'tr';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, explicitLocale, appLocalesMeta, defaultLocaleMeta]);
 }

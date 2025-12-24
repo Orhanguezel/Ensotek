@@ -16,11 +16,10 @@ import Feedback from "@/components/containers/feedback/Feedback";
 // i18n
 import { useResolvedLocale } from "@/i18n/locale";
 import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
 
 // SEO
 import { buildMeta } from "@/seo/meta";
-import { asObj, absUrl, pickFirstImageFromSeo, buildCanonical } from "@/seo/pageSeo";
+import { asObj, absUrl, pickFirstImageFromSeo} from "@/seo/pageSeo";
 
 // data
 import {
@@ -31,8 +30,6 @@ import {
 // helpers
 import { toCdnSrc } from "@/shared/media";
 import { excerpt } from "@/shared/text";
-
-const SPAREPART_PATH = "/sparepart";
 
 const toLocaleShort = (l: any) =>
   String(l || "tr").trim().toLowerCase().split("-")[0] || "tr";
@@ -74,16 +71,6 @@ const SparepartDetailPage: React.FC = () => {
     return t || detailTitleFallback || listTitleFallback;
   }, [product, detailTitleFallback, listTitleFallback]);
 
-  const canonical = useMemo(() => {
-    const fallbackPathname = isSlugReady ? `${SPAREPART_PATH}/${slug}` : SPAREPART_PATH;
-
-    return buildCanonical({
-      asPath: router.asPath,
-      locale,
-      fallbackPathname,
-      localizePath,
-    });
-  }, [router.asPath, locale, isSlugReady, slug]);
 
   const seoSiteName = useMemo(() => String(seo?.site_name ?? "").trim() || "Ensotek", [seo]);
   const titleTemplate = useMemo(
@@ -137,8 +124,6 @@ const SparepartDetailPage: React.FC = () => {
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
-      canonical,
-      url: canonical,
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
@@ -146,7 +131,7 @@ const SparepartDetailPage: React.FC = () => {
       twitterSite: typeof tw.site === "string" ? tw.site.trim() : undefined,
       twitterCreator: typeof tw.creator === "string" ? tw.creator.trim() : undefined,
     });
-  }, [seo, pageTitle, pageDescRaw, canonical, ogImage, seoSiteName]);
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   return (
     <>

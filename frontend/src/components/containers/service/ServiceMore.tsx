@@ -3,53 +3,71 @@
 // "More services" section for Service Detail
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import Link from "next/link";
+import React, { useMemo } from 'react';
+import Link from 'next/link';
 
-import { useListServicesPublicQuery } from "@/integrations/rtk/hooks";
-import type { ServiceDto } from "@/integrations/types/services.types";
+import { useListServicesPublicQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import type { ServiceDto } from '@/integrations/types/services.types';
 
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
+import { toCdnSrc } from '@/shared/media';
+import { excerpt } from '@/shared/text';
+import { localizePath } from '@/i18n/url';
 
-import { toCdnSrc } from "@/shared/media";
-import { excerpt } from "@/shared/text";
-import { localizePath } from "@/i18n/url";
+import { normLocaleTag } from '@/i18n/localeUtils';
+import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
-import { FiArrowRight } from "react-icons/fi";
+import { FiArrowRight } from 'react-icons/fi';
 
-const FALLBACK_IMG = "/img/project/project-thumb.jpg";
+const FALLBACK_IMG = '/img/project/project-thumb.jpg';
+
+const toLocaleShort = (l: unknown) =>
+  String(l || 'tr')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0] || 'tr';
 
 interface ServiceMoreProps {
   currentSlug?: string;
 }
 
 const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
-  const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_services", locale);
+  const resolvedLocale = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
-  // ✅ locale & default_locale backend'e gönderiyoruz
+  const { ui } = useUiSection('ui_services', locale);
+
+  // ✅ default_locale DB’den
+  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
+  const defaultLocale = useMemo(() => {
+    const v = normLocaleTag(defaultLocaleRow?.value);
+    return v || 'tr';
+  }, [defaultLocaleRow?.value]);
+
   const { data, isLoading } = useListServicesPublicQuery({
     limit: 6,
-    order: "display_order.asc,created_at.desc",
+    order: 'display_order.asc,created_at.desc',
     locale,
-    default_locale: "tr",
+    default_locale: defaultLocale,
   });
 
   const items: ServiceDto[] = useMemo(() => {
-    if (!data?.items) return [];
+    const raw: ServiceDto[] = (data?.items ?? []) as any;
 
-    const filtered = data.items.filter((s) => {
-      if (!s.slug) return true;
+    const filtered = raw.filter((s) => {
+      const sSlug = String((s as any)?.slug || '').trim();
+      if (!sSlug) return true;
       if (!currentSlug) return true;
-      return s.slug !== currentSlug;
+      return sSlug !== currentSlug;
     });
 
     return filtered.slice(0, 3);
-  }, [data, currentSlug]);
+  }, [data?.items, currentSlug]);
 
   if (!items.length && !isLoading) {
     return null;
@@ -62,62 +80,42 @@ const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
           <div className="col-12">
             <div className="section__title-wrapper text-center mb-50">
               <span className="section__subtitle">
-                {ui(
-                  "ui_services_more_subtitle",
-                  "Discover our other services",
-                )}
+                {ui('ui_services_more_subtitle', 'Discover our other services')}
               </span>
               <h2 className="section__title">
-                {ui(
-                  "ui_services_more_title",
-                  "You may also be interested in",
-                )}
+                {ui('ui_services_more_title', 'You may also be interested in')}
               </h2>
             </div>
           </div>
         </div>
 
         <div className="row tik">
-          {items.map((s) => {
+          {items.map((s: any) => {
             const imgBase =
-              (s.featured_image_url ||
-                s.image_url ||
-                s.featured_image ||
-                "")?.trim() || "";
+              (s.featured_image_url || s.image_url || s.featured_image || '')?.trim() || '';
             const src =
-              toCdnSrc(imgBase, 640, 420, "fill") || FALLBACK_IMG;
+              (imgBase && (toCdnSrc(imgBase, 640, 420, 'fill') || imgBase)) || FALLBACK_IMG;
 
-            const title =
-              s.name ||
-              ui("ui_services_placeholder_title", "Our service");
+            const title = s.name || ui('ui_services_placeholder_title', 'Our service');
 
-            const summaryRaw = s.description || s.includes || "";
+            const summaryRaw = s.description || s.includes || '';
             const summary = summaryRaw
               ? excerpt(String(summaryRaw), 140)
-              : ui(
-                "ui_services_placeholder_summary",
-                "Service description is coming soon.",
-              );
+              : ui('ui_services_placeholder_summary', 'Service description is coming soon.');
 
             const href = s.slug
-              ? localizePath(
-                locale,
-                `/service/${encodeURIComponent(s.slug)}`,
-              )
-              : localizePath(locale, "/service");
+              ? localizePath(locale, `/service/${encodeURIComponent(s.slug)}`)
+              : localizePath(locale, '/service');
 
             return (
-              <div
-                className="col-xl-4 col-lg-6 col-md-6"
-                key={s.id}
-              >
+              <div className="col-xl-4 col-lg-6 col-md-6" key={String(s.id)}>
                 <div className="service__item mb-30">
                   <div
                     className="service__thumb include__bg service-two-cmn"
                     style={{
                       backgroundImage: `url('${src}')`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
                     }}
                     aria-hidden="true"
                   />
@@ -131,8 +129,8 @@ const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
                     <Link
                       href={href}
                       aria-label={`${title} — ${ui(
-                        "ui_services_details_aria",
-                        "view service details",
+                        'ui_services_details_aria',
+                        'view service details',
                       )}`}
                     >
                       <FiArrowRight />
@@ -143,15 +141,13 @@ const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
             );
           })}
 
-          {isLoading && (
-            <div className="col-12 mt-10">
-              <div
-                className="skeleton-line"
-                style={{ height: 8 }}
-                aria-hidden
-              />
+          {isLoading ? (
+            <div className="col-12 mt-10" aria-hidden>
+              <SkeletonStack>
+                <SkeletonLine style={{ height: 8 }} />
+              </SkeletonStack>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>

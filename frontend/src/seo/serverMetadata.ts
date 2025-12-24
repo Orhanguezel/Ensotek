@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/seo/serverMetadata.ts
 // Ensotek – Server Metadata Builder (DB-driven locales/default)
-//   - Active locales: site_settings.app_locales
+//   - Active locales: site_settings.app_locales (DB)
 //   - Default locale: getDefaultLocale() (DB)
 //   - Canonical + hreflang: DEFAULT_LOCALE_PREFIXLESS uygulanır
+//   - NO hardcoded locales (no "en"/"tr"/"de" unions)
 // =============================================================
 import 'server-only';
 
@@ -25,12 +26,15 @@ import {
  */
 const DEFAULT_LOCALE_PREFIXLESS = true;
 
+/* -------------------- utils -------------------- */
+
 function normLocale(l: any): string {
   const v = String(l || '')
     .trim()
     .toLowerCase()
     .replace('_', '-');
-  return v.split('-')[0] || DEFAULT_LOCALE_FALLBACK;
+  const short = (v.split('-')[0] || '').trim();
+  return short || DEFAULT_LOCALE_FALLBACK;
 }
 
 function uniq<T>(arr: T[]) {
@@ -80,35 +84,32 @@ async function getRuntimeBaseUrl(): Promise<string> {
     ?.trim();
 
   const host = xfHost || String(h.get('host') || '').trim();
-
   const proto = (xfProto || 'https').trim();
 
   if (host) return `${proto}://${host}`.replace(/\/+$/, '');
 
-  // En son fallback (test ortamı)
+  // En son fallback (test/dev)
   return 'http://localhost:3000';
 }
 
 /**
  * OpenGraph locale formatına çevir:
  * - "pt-br" -> "pt_BR"
- * - "tr"    -> "tr_TR"
+ * - "tr"    -> "tr_TR" (genel kural: region yoksa LANG_LANG)
  * - "fr"    -> "fr_FR"
- * - "en"    -> "en_US" (varsayılan)
+ *
+ * Not: Burada en_US gibi “tahmin” hardcode yapmıyoruz.
+ *  - region yoksa: `${lang}_${lang.toUpperCase()}`
  */
 function toOgLocale(l: string): string {
   const raw = String(l || '').trim();
-  if (!raw) return 'en_US';
+  if (!raw) return `${DEFAULT_LOCALE_FALLBACK}_${DEFAULT_LOCALE_FALLBACK.toUpperCase()}`;
 
   const normalized = raw.replace('_', '-').toLowerCase();
   const [langRaw, regionRaw] = normalized.split('-');
 
-  const lang = (langRaw || 'en').toLowerCase();
+  const lang = (langRaw || DEFAULT_LOCALE_FALLBACK).toLowerCase().slice(0, 2);
   const region = (regionRaw || '').toUpperCase();
-
-  if (lang === 'en' && !region) return 'en_US';
-  if (lang === 'tr' && !region) return 'tr_TR';
-  if (lang === 'de' && !region) return 'de_DE';
 
   return `${lang}_${region || lang.toUpperCase()}`;
 }
@@ -130,7 +131,7 @@ function localizedPath(locale: string, pathname: string, defaultLocale: string):
   const def = normLocale(defaultLocale);
   const p = normPath(pathname);
 
-  if (DEFAULT_LOCALE_PREFIXLESS && loc === def) return p; // "/" veya "/blog"
+  if (DEFAULT_LOCALE_PREFIXLESS && loc === def) return p;
   if (p === '/') return `/${loc}`;
   return `/${loc}${p}`;
 }
@@ -143,36 +144,7 @@ function absUrl(baseUrl: string, pathOrUrl: string): string {
   return `${baseUrl}${p}`;
 }
 
-async function fetchSeoRowWithFallback(locale: string) {
-  const loc = normLocale(locale);
-
-  // Öncelik: "seo" -> "site_seo"
-  const tryKeys = ['seo', 'site_seo'] as const;
-
-  const defaultLocale = await getDefaultLocale();
-  const tryLocales = uniq([loc, normLocale(defaultLocale), 'en'].filter(Boolean));
-
-  for (const l of tryLocales) {
-    for (const k of tryKeys) {
-      const row = await fetchSetting(k, l, { revalidate: 600 });
-      if (row?.value != null) return row;
-    }
-  }
-  return null;
-}
-
-export async function fetchSeoObject(locale: string): Promise<Record<string, any>> {
-  const row = await fetchSeoRowWithFallback(locale);
-  const v = row?.value as JsonLike;
-  const obj = asObj(v);
-  return obj ?? {};
-}
-
-type BuildMetadataArgs = {
-  locale: string;
-  pathname?: string; // locale-prefixsiz path: "/" veya "/blog"
-  activeLocales?: string[];
-};
+/* -------------------- SEO fetch fallback (NO hardcoded locales) -------------------- */
 
 async function resolveActiveLocales(provided?: string[]) {
   const list = provided && provided.length ? provided : await fetchActiveLocales();
@@ -180,6 +152,68 @@ async function resolveActiveLocales(provided?: string[]) {
   if (!normalized.length) normalized.push(DEFAULT_LOCALE_FALLBACK);
   return normalized;
 }
+
+function buildLocaleFallbackChain(args: {
+  requestedLocale: string;
+  defaultLocale: string;
+  activeLocales: string[];
+}): string[] {
+  const req = normLocale(args.requestedLocale);
+  const def = normLocale(args.defaultLocale);
+
+  // Active locales (DB) → normalize + ensure default first
+  const act = uniq((args.activeLocales || []).map(normLocale)).filter(Boolean);
+
+  // Sıra: requested → default → (actives) → fallback
+  const chain = uniq([req, def, ...act, DEFAULT_LOCALE_FALLBACK].filter(Boolean));
+
+  // İstersen istek sayısını sınırlayabilirsin (DB yoğun ise):
+  // return chain.slice(0, 5);
+  return chain;
+}
+
+async function fetchSeoRowWithFallback(locale: string, providedActiveLocales?: string[]) {
+  const loc = normLocale(locale);
+
+  // Öncelik: "seo" -> "site_seo"
+  const tryKeys = ['seo', 'site_seo'] as const;
+
+  const defaultLocale = await getDefaultLocale();
+  const activeLocales = await resolveActiveLocales(providedActiveLocales);
+
+  const tryLocales = buildLocaleFallbackChain({
+    requestedLocale: loc,
+    defaultLocale,
+    activeLocales,
+  });
+
+  for (const l of tryLocales) {
+    for (const k of tryKeys) {
+      const row = await fetchSetting(k, l, { revalidate: 600 });
+      if (row?.value != null) return row;
+    }
+  }
+
+  return null;
+}
+
+export async function fetchSeoObject(
+  locale: string,
+  providedActiveLocales?: string[],
+): Promise<Record<string, any>> {
+  const row = await fetchSeoRowWithFallback(locale, providedActiveLocales);
+  const v = row?.value as JsonLike;
+  const obj = asObj(v);
+  return obj ?? {};
+}
+
+/* -------------------- Metadata builder -------------------- */
+
+type BuildMetadataArgs = {
+  locale: string;
+  pathname?: string; // locale-prefixsiz path: "/" veya "/blog"
+  activeLocales?: string[];
+};
 
 export async function buildMetadataFromSeo(
   seo: Record<string, any>,
@@ -191,6 +225,7 @@ export async function buildMetadataFromSeo(
   const defaultLocale = await getDefaultLocale();
   const locale = normLocale(args.locale);
 
+  // Site defaults (marka adı hardcode kalabilir; locale hardcode değil)
   const titleDefault = asStr(seo.title_default) || 'Ensotek';
   const titleTemplate = asStr(seo.title_template) || '%s | Ensotek';
   const description = asStr(seo.description) || '';

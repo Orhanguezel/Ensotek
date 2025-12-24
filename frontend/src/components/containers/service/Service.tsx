@@ -2,24 +2,26 @@
 // FILE: src/components/containers/service/Service.tsx
 // Public Services List
 // =============================================================
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import Link from "next/link";
+import React, { useMemo } from 'react';
+import Link from 'next/link';
 
 // RTK – public services
-import { useListServicesPublicQuery, useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
+import { useListServicesPublicQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 // Ortak yardımcılar
-import { excerpt } from "@/shared/text";
-import { toCdnSrc } from "@/shared/media";
+import { excerpt } from '@/shared/text';
+import { toCdnSrc } from '@/shared/media';
 
 // UI / i18n – site_settings üzerinden
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
-import { localizePath } from "@/i18n/url";
-import { normLocaleTag } from "@/i18n/localeUtils";
+import { localizePath } from '@/i18n/url';
+import { normLocaleTag } from '@/i18n/localeUtils';
+
+import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
 // Icons
 import {
@@ -33,14 +35,21 @@ import {
   FiFileText,
   FiShoppingCart,
   FiArrowRight,
-} from "react-icons/fi";
-import { MdAdsClick } from "react-icons/md";
-import { GiFactory } from "react-icons/gi";
+} from 'react-icons/fi';
+import { MdAdsClick } from 'react-icons/md';
+import { GiFactory } from 'react-icons/gi';
 
-const FALLBACK_IMG = "/img/project/project-thumb.jpg";
+const FALLBACK_IMG = '/img/project/project-thumb.jpg';
+
+const toLocaleShort = (l: unknown) =>
+  String(l || 'tr')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0] || 'tr';
 
 function ServiceIcon({ label, size = 40 }: { label: string; size?: number }) {
-  const t = (label || "").toLowerCase();
+  const t = (label || '').toLowerCase();
   if (/\bppc|\bads?|\breklam|\badvert/i.test(t)) return <MdAdsClick size={size} />;
   if (/performans|content|içerik|contenido/i.test(t)) return <FiFileText size={size} />;
   if (/lead|müşteri|cliente|prospect/i.test(t)) return <FiUserPlus size={size} />;
@@ -50,87 +59,68 @@ function ServiceIcon({ label, size = 40 }: { label: string; size?: number }) {
   if (/uygulama|referans|aplicac|reference/i.test(t)) return <FiLayers size={size} />;
   if (/parça|parca|repuesto|component|komponent/i.test(t)) return <FiPackage size={size} />;
   if (/modern|upgrade|moderniz/i.test(t)) return <FiRefreshCcw size={size} />;
-  if (/bakım|onarım|mantenimiento|repar|maintenance|repair/i.test(t)) return <FiSettings size={size} />;
+  if (/bakım|onarım|mantenimiento|repar|maintenance|repair/i.test(t))
+    return <FiSettings size={size} />;
   if (/üretim|uretim|producción|production|manufact/i.test(t)) return <GiFactory size={size} />;
   return <FiLayers size={size} />;
 }
 
 const Service: React.FC = () => {
-  const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_services", locale);
+  const resolvedLocale = useResolvedLocale();
+  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
-  // ✅ default_locale artık DB’den (locale='*') gelecek
-  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: "default_locale" });
+  const { ui } = useUiSection('ui_services', locale);
+
+  // ✅ default_locale DB’den
+  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
   const defaultLocale = useMemo(() => {
     const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || "tr";
+    return v || 'tr';
   }, [defaultLocaleRow?.value]);
 
-  // ✅ Public services list – locale & default_locale dinamik
-  const { data, isLoading } = useListServicesPublicQuery(
-    {
-      locale,
-      default_locale: defaultLocale,
-      limit: 6,
-      order: "display_order.asc",
-    },
-    {
-      // default_locale gelmeden istek atmak istemiyorsan açabilirsin:
-      // skip: !defaultLocaleRow?.value,
-    },
-  );
+  const { data, isLoading } = useListServicesPublicQuery({
+    locale,
+    default_locale: defaultLocale,
+    limit: 6,
+    order: 'display_order.asc',
+  });
 
   const cards = useMemo(() => {
     const items = Array.isArray(data?.items) ? data!.items : [];
 
-    const arr = items.map((s) => {
-      const imgBase =
-        (s.featured_image_url ||
-          s.image_url ||
-          s.featured_image ||
-          "").trim();
+    const arr = items.map((s: any) => {
+      const imgBase = (s.featured_image_url || s.image_url || s.featured_image || '').trim();
 
-      const title =
-        (s.name as string | null) ??
-        ui("ui_services_placeholder_title", "Our service");
+      const title = (s.name as string | null) ?? ui('ui_services_placeholder_title', 'Our service');
 
-      const rawSummary =
-        (s.description as string | null) ??
-        (s.includes as string | null) ??
-        null;
+      const rawSummary = (s.description as string | null) ?? (s.includes as string | null) ?? null;
 
-      const summary =
-        rawSummary?.trim().length
-          ? excerpt(String(rawSummary), 150)
-          : ui(
-              "ui_services_placeholder_summary",
-              "Service description is coming soon.",
-            );
+      const summary = rawSummary?.trim().length
+        ? excerpt(String(rawSummary), 150)
+        : ui('ui_services_placeholder_summary', 'Service description is coming soon.');
 
       return {
-        id: s.id,
+        id: String(s.id ?? ''),
         title,
         summary,
-        slug: (s.slug || "").trim(),
-        src: toCdnSrc(imgBase, 640, 420, "fill") || FALLBACK_IMG,
+        slug: String(s.slug || '').trim(),
+        src: toCdnSrc(imgBase, 640, 420, 'fill') || FALLBACK_IMG,
       };
     });
 
     if (!arr.length) {
       return new Array(3).fill(0).map((_, i) => ({
         id: `ph-${i + 1}`,
-        title: ui("ui_services_placeholder_title", "Our service"),
-        summary: ui(
-          "ui_services_placeholder_summary",
-          "Service description is coming soon.",
-        ),
-        slug: "",
+        title: ui('ui_services_placeholder_title', 'Our service'),
+        summary: ui('ui_services_placeholder_summary', 'Service description is coming soon.'),
+        slug: '',
         src: FALLBACK_IMG,
       }));
     }
 
     return arr;
-  }, [data, ui]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.items, ui]);
 
   return (
     <div className="service__area service__bg z-index-1 pt-120 pb-90">
@@ -140,11 +130,11 @@ const Service: React.FC = () => {
           <div className="col-12">
             <div className="section__title-wrapper text-center mb-65">
               <span className="section__subtitle">
-                <span>{ui("ui_services_subprefix", "Ensotek")}</span>{" "}
-                {ui("ui_services_sublabel", "Services")}
+                <span>{ui('ui_services_subprefix', 'Ensotek')}</span>{' '}
+                {ui('ui_services_sublabel', 'Services')}
               </span>
               <h2 className="section__title">
-                {ui("ui_services_title", "What we do")}
+                {ui('ui_services_title', 'What we do')}
                 <span className="down__mark-middle"></span>
               </h2>
             </div>
@@ -156,7 +146,7 @@ const Service: React.FC = () => {
           {cards.map((it) => {
             const href = it.slug
               ? localizePath(locale, `/service/${encodeURIComponent(it.slug)}`)
-              : localizePath(locale, "/service");
+              : localizePath(locale, '/service');
 
             return (
               <div className="col-xl-4 col-lg-6 col-md-6" key={it.id}>
@@ -165,8 +155,8 @@ const Service: React.FC = () => {
                     className="service__thumb include__bg service-two-cmn"
                     style={{
                       backgroundImage: `url('${it.src}')`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
                     }}
                     aria-hidden="true"
                   />
@@ -185,8 +175,8 @@ const Service: React.FC = () => {
                     <Link
                       href={href}
                       aria-label={`${it.title} — ${ui(
-                        "ui_services_details_aria",
-                        "view service details",
+                        'ui_services_details_aria',
+                        'view service details',
                       )}`}
                     >
                       <FiArrowRight />
@@ -198,8 +188,10 @@ const Service: React.FC = () => {
           })}
 
           {isLoading && (
-            <div className="col-12 mt-10">
-              <div className="skeleton-line" style={{ height: 8 }} aria-hidden />
+            <div className="col-12 mt-10" aria-hidden>
+              <SkeletonStack>
+                <SkeletonLine style={{ height: 8 }} />
+              </SkeletonStack>
             </div>
           )}
         </div>

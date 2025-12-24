@@ -1,4 +1,8 @@
-// src/i18n/activeLocales.ts
+// =============================================================
+// FILE: src/i18n/activeLocales.ts
+// (DYNAMIC LOCALES) - FIXED (/api tolerant + stable normalization)
+// =============================================================
+
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -32,20 +36,24 @@ function computeLocales(meta: AppLocaleMeta[] | null | undefined): string[] {
 }
 
 function getApiBase(): string {
-  // FE tarafında public env tercih edilir
   const raw =
     (process.env.NEXT_PUBLIC_API_BASE_URL || '').trim() ||
-    (process.env.NEXT_PUBLIC_API_URL || '').trim() || // bazı projelerde böyle oluyor
+    (process.env.NEXT_PUBLIC_API_URL || '').trim() ||
     (process.env.API_BASE_URL || '').trim();
-  return raw.replace(/\/+$/, '');
+
+  const base = raw.replace(/\/+$/, '');
+
+  // ✅ Senin projede RTK çağrıları /api/... gidiyor.
+  // Env yanlışlıkla http://localhost:8086 verildiyse burada /api ekleyerek tolere ediyoruz.
+  // Env zaten .../api ise aynen kalır.
+  if (base && !/\/api$/i.test(base)) return `${base}/api`;
+
+  return base;
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
-    const res = await fetch(url, {
-      credentials: 'omit',
-      cache: 'no-store',
-    });
+    const res = await fetch(url, { credentials: 'omit', cache: 'no-store' });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
@@ -61,13 +69,9 @@ function normalizeAppLocalesValue(v: any): AppLocaleMeta[] {
   return [];
 }
 
-/**
- * ✅ Minimal in-memory cache (page lifetime)
- * - Aynı session’da tekrar fetch etmesin
- * - SEO/Head için yeterli
- */
+// ✅ Minimal in-memory cache (page lifetime)
 let __cache: { at: number; meta: AppLocaleMeta[] | null } | null = null;
-const CACHE_TTL_MS = 60_000; // 1 dk yeterli; istersen 5 dk yaparız
+const CACHE_TTL_MS = 60_000;
 
 export function useActiveLocales() {
   const [meta, setMeta] = useState<AppLocaleMeta[] | null>(() => {
@@ -82,7 +86,7 @@ export function useActiveLocales() {
     if (didFetchRef.current) return;
     didFetchRef.current = true;
 
-    // Cache geçerliyse fetch yapma
+    // cache validse fetch yok
     if (__cache && Date.now() - __cache.at < CACHE_TTL_MS) {
       setMeta(__cache.meta);
       return;
@@ -90,7 +94,6 @@ export function useActiveLocales() {
 
     const base = getApiBase();
     if (!base) {
-      // API yoksa fallback ile devam
       __cache = { at: Date.now(), meta: null };
       setMeta(null);
       return;
@@ -99,8 +102,8 @@ export function useActiveLocales() {
     setIsLoading(true);
 
     (async () => {
-      // Endpoint senin backend varsayımına göre:
-      // GET {API_BASE}/site_settings/app-locales
+      // ✅ Varsayım: GET {API_BASE}/site_settings/app-locales
+      // API_BASE burada .../api ile biter.
       const raw = await fetchJson<any>(`${base}/site_settings/app-locales`);
       const arr = normalizeAppLocalesValue(raw);
 
