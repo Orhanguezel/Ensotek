@@ -56,6 +56,49 @@ export function getBaseOrigin(): string {
   return 'http://localhost';
 }
 
+/* ----------------------------- locale helpers ----------------------------- */
+
+/**
+ * Locale list:
+ * - PLAYWRIGHT_LOCALES="tr,en,de"
+ * - or PLAYWRIGHT_LOCALE="tr"
+ * fallback: ["tr"]
+ */
+export function getPlaywrightLocales(): string[] {
+  const many = (process.env.PLAYWRIGHT_LOCALES ?? '').trim();
+  const one = (process.env.PLAYWRIGHT_LOCALE ?? '').trim();
+
+  const raw = many
+    ? many.split(',').map((x) => x.trim()).filter(Boolean)
+    : one
+      ? [one]
+      : ['tr'];
+
+  const uniqLower = Array.from(new Set(raw.map((x) => x.toLowerCase())));
+  return uniqLower.length ? uniqLower : ['tr'];
+}
+
+/**
+ * If your routing has NO locale prefix for default locale, set:
+ * - PLAYWRIGHT_DEFAULT_NO_PREFIX=1
+ * - PLAYWRIGHT_DEFAULT_LOCALE=tr (optional, default "tr")
+ */
+export function withLocalePath(path: string, locale: string): string {
+  const loc = String(locale || '').trim().toLowerCase() || 'tr';
+  const p = `/${String(path || '').replace(/^\/+/, '')}`; // ensure starts with "/"
+
+  const defaultNoPrefix = (process.env.PLAYWRIGHT_DEFAULT_NO_PREFIX ?? '').trim() === '1';
+  const defaultLocale = (process.env.PLAYWRIGHT_DEFAULT_LOCALE ?? 'tr').trim().toLowerCase();
+
+  if (defaultNoPrefix && loc === defaultLocale) {
+    return p === '/' ? '/' : p; // no prefix for default locale
+  }
+
+  // "/tr" + "/product" => "/tr/product"
+  if (p === '/') return `/${loc}`;
+  return `/${loc}${p}`;
+}
+
 /* ----------------------------- helpers ----------------------------- */
 
 async function safeEval<T>(page: Page, fn: () => T): Promise<T | null> {
@@ -341,6 +384,12 @@ export function expectSameOriginAsBase(url: string | null) {
   expect(targetOrigin, 'URL must match base origin').toBe(baseOrigin);
 }
 
+/**
+ * ✅ Locale-aware hreflang set validation
+ * - includes all locales from getPlaywrightLocales()
+ * - includes x-default
+ * - unique hreflang and unique href
+ */
 export function expectHreflangSet(hreflangs: Array<{ hreflang: string; href: string }>) {
   expect(Array.isArray(hreflangs), 'hreflang links must be an array').toBeTruthy();
   expect(hreflangs.length, 'hreflang links must exist').toBeGreaterThan(0);
@@ -349,9 +398,7 @@ export function expectHreflangSet(hreflangs: Array<{ hreflang: string; href: str
   const hrefs = new Set<string>();
 
   for (const x of hreflangs) {
-    const hreflang = String(x?.hreflang || '')
-      .trim()
-      .toLowerCase();
+    const hreflang = String(x?.hreflang || '').trim().toLowerCase();
     const href = String(x?.href || '').trim();
 
     expect(hreflang, 'hreflang must exist').toBeTruthy();
@@ -366,6 +413,11 @@ export function expectHreflangSet(hreflangs: Array<{ hreflang: string; href: str
 
     langs.add(hreflang);
     hrefs.add(href);
+  }
+
+  const expectedLocales = getPlaywrightLocales();
+  for (const l of expectedLocales) {
+    expect(langs.has(l), `hreflang must include locale: ${l}`).toBeTruthy();
   }
 
   expect(langs.has('x-default'), 'hreflang must include x-default').toBeTruthy();

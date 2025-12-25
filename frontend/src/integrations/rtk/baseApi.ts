@@ -1,22 +1,28 @@
 // =============================================================
 // FILE: src/integrations/rtk/baseApi.ts
 // Ensotek Next.js + Fastify backend (8086 /api) için RTK base
+// FIXES:
+//  - Cookie auth için credentials include
+//  - Stale Bearer header 401 üretiyorsa path bazlı bypass
+//  - Refresh concurrency (tek refresh in-flight)
+//  - MaybePromise uyumlu (no .finally())
+//  - Unused params temiz
 // =============================================================
 
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type {
   BaseQueryFn,
   FetchArgs,
   FetchBaseQueryError,
   FetchBaseQueryMeta,
-} from "@reduxjs/toolkit/query";
-import { metahubTags } from "./tags";
-import { tokenStore } from "@/integrations/core/token";
-import { BASE_URL as CONFIG_BASE_URL } from "@/integrations/rtk/constants";
+} from '@reduxjs/toolkit/query';
+import { metahubTags } from './tags';
+import { tokenStore } from '@/integrations/core/token';
+import { BASE_URL as CONFIG_BASE_URL } from '@/integrations/rtk/constants';
 
 /** ---------- Base URL resolve ---------- */
 function trimSlash(x: string) {
-  return x.replace(/\/+$/, "");
+  return String(x || '').replace(/\/+$/, '');
 }
 
 /**
@@ -26,50 +32,50 @@ function trimSlash(x: string) {
  */
 function guessDevBackend(): string {
   try {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       const loc = window.location;
-      const host = loc.hostname || "localhost";
-      const proto = loc.protocol || "http:";
-      // Fastify 8086 + /api prefix
+      const host = loc.hostname || 'localhost';
+      const proto = loc.protocol || 'http:';
       return `${proto}//${host}:8086/api`;
     }
   } catch {
     /* noop */
   }
-  return "http://localhost:8086/api";
+  return 'http://localhost:8086/api';
 }
 
 const BASE_URL = trimSlash(
-  CONFIG_BASE_URL ||
-    (process.env.NODE_ENV !== "production" ? guessDevBackend() : "/api"),
+  CONFIG_BASE_URL || (process.env.NODE_ENV !== 'production' ? guessDevBackend() : '/api'),
 );
 
 /** ---------- helpers & guards ---------- */
 function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === "object" && v !== null && !Array.isArray(v);
+  return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
+
 type AnyArgs = string | FetchArgs;
 
 function isJsonLikeBody(b: unknown): b is Record<string, unknown> {
-  if (typeof FormData !== "undefined" && b instanceof FormData) return false;
-  if (typeof Blob !== "undefined" && b instanceof Blob) return false;
-  if (typeof ArrayBuffer !== "undefined" && b instanceof ArrayBuffer) return false;
+  if (!b) return false;
+  if (typeof FormData !== 'undefined' && b instanceof FormData) return false;
+  if (typeof Blob !== 'undefined' && b instanceof Blob) return false;
+  if (typeof ArrayBuffer !== 'undefined' && b instanceof ArrayBuffer) return false;
   return isRecord(b);
 }
 
 /** İstekleri BE uyumluluğuna göre hafifçe ayarla (legacy) */
 function compatAdjustArgs(args: AnyArgs): AnyArgs {
-  if (typeof args === "string") return args;
+  if (typeof args === 'string') return args;
   const a: FetchArgs = { ...args };
 
-  const urlNoSlash = (a.url ?? "").replace(/\/+$/, "");
-  const isGet = !a.method || a.method.toUpperCase() === "GET";
+  const urlNoSlash = String(a.url ?? '').replace(/\/+$/, '');
+  const isGet = !a.method || a.method.toUpperCase() === 'GET';
 
   // Supa benzeri GET /profiles?id=..&limit=1 → /profiles/:id
-  if (urlNoSlash === "/profiles" && isGet) {
+  if (urlNoSlash === '/profiles' && isGet) {
     const params = isRecord(a.params) ? (a.params as Record<string, unknown>) : undefined;
-    const id = typeof params?.id === "string" ? params.id : null;
-    const limitIsOne = params ? String(params.limit) === "1" : false;
+    const id = typeof params?.id === 'string' ? params.id : null;
+    const limitIsOne = params ? String(params.limit) === '1' : false;
     if (id && limitIsOne) {
       a.url = `/profiles/${encodeURIComponent(id)}`;
       if (params) {
@@ -80,10 +86,10 @@ function compatAdjustArgs(args: AnyArgs): AnyArgs {
   }
 
   // admin/users mini-batch: ids[] → "a,b,c"
-  if (urlNoSlash === "/admin/users" && isGet && isRecord(a.params)) {
+  if (urlNoSlash === '/admin/users' && isGet && isRecord(a.params)) {
     const p = { ...(a.params as Record<string, unknown>) };
     if (Array.isArray(p.ids)) {
-      p.ids = (p.ids as unknown[]).map(String).join(",");
+      p.ids = (p.ids as unknown[]).map(String).join(',');
     }
     a.params = p;
   }
@@ -92,39 +98,74 @@ function compatAdjustArgs(args: AnyArgs): AnyArgs {
 }
 
 /** ---------- Base Query ---------- */
-type RBQ = BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, unknown, FetchBaseQueryMeta>;
+type RBQ = BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError,
+  unknown,
+  FetchBaseQueryMeta
+>;
 
-const DEFAULT_LOCALE =
-  (process.env.NEXT_PUBLIC_DEFAULT_LOCALE as string | undefined) || "tr";
+const DEFAULT_LOCALE = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE as string | undefined) || 'tr';
+
+/**
+ * Bu path’lerde Authorization header’ı eklemek çoğu cookie-auth backend’de sorun çıkarır.
+ * (Authorization varsa onu baz alıp cookie’yi ignore etme ihtimali yüksek)
+ */
+const AUTH_HEADER_BYPASS_PREFIXES = ['/auth/', '/status'] as const;
+
+function toPath(u: string): string {
+  const s = String(u || '');
+  if (!s) return '/';
+  if (/^https?:\/\//i.test(s)) {
+    try {
+      return new URL(s).pathname || '/';
+    } catch {
+      return s.startsWith('/') ? s : `/${s}`;
+    }
+  }
+  return s.startsWith('/') ? s : `/${s}`;
+}
+
+function normalizeCleanPath(u: string): string {
+  const p = toPath(u).replace(/\/+$/, '');
+  return p || '/';
+}
+
+function shouldBypassAuthHeader(path: string): boolean {
+  const p = normalizeCleanPath(path);
+  return AUTH_HEADER_BYPASS_PREFIXES.some((pref) => p === pref || p.startsWith(pref));
+}
 
 const rawBaseQuery: RBQ = fetchBaseQuery({
   baseUrl: BASE_URL,
-  credentials: "include",
+  credentials: 'include',
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   prepareHeaders: (headers) => {
     // `x-skip-auth` ile refresh işleminde auth'u bypass et
-    if (headers.get("x-skip-auth") === "1") {
-      headers.delete("x-skip-auth");
-      if (!headers.has("Accept")) headers.set("Accept", "application/json");
-      if (!headers.has("Accept-Language")) {
-        headers.set("Accept-Language", DEFAULT_LOCALE || "tr");
-      }
+    if (headers.get('x-skip-auth') === '1') {
+      headers.delete('x-skip-auth');
+      headers.delete('authorization');
+      headers.delete('Authorization');
+
+      if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+      if (!headers.has('Accept-Language')) headers.set('Accept-Language', DEFAULT_LOCALE);
       return headers;
     }
 
     const token = tokenStore.get();
-    if (token && !headers.has("authorization")) {
-      headers.set("authorization", `Bearer ${token}`);
+    if (token && !headers.has('authorization')) {
+      headers.set('authorization', `Bearer ${token}`);
     }
-    if (!headers.has("Accept")) headers.set("Accept", "application/json");
-    if (!headers.has("Accept-Language")) {
-      headers.set("Accept-Language", DEFAULT_LOCALE || "tr");
-    }
+
+    if (!headers.has('Accept')) headers.set('Accept', 'application/json');
+    if (!headers.has('Accept-Language')) headers.set('Accept-Language', DEFAULT_LOCALE);
     return headers;
   },
   responseHandler: async (response) => {
-    const ct = response.headers.get("content-type") || "";
-    if (ct.includes("application/json")) return response.json();
-    if (ct.includes("text/")) return response.text();
+    const ct = response.headers.get('content-type') || '';
+    if (ct.includes('application/json')) return response.json();
+    if (ct.includes('text/')) return response.text();
     try {
       const t = await response.text();
       return t || null;
@@ -140,77 +181,108 @@ type RawResult = Awaited<ReturnType<typeof rawBaseQuery>>;
 
 // Bu endpoint'lerde 401 alırsak refresh denemesi yapma
 const AUTH_SKIP_REAUTH = new Set<string>([
-  "/auth/token",
-  "/auth/signup",
-  "/auth/google",
-  "/auth/google/start",
-  "/auth/token/refresh",
-  "/auth/logout",
+  '/auth/token',
+  '/auth/signup',
+  '/auth/google',
+  '/auth/google/start',
+  '/auth/token/refresh',
+  '/auth/logout',
 ]);
 
-function extractPath(u: string): string {
-  try {
-    if (/^https?:\/\//i.test(u)) return new URL(u).pathname.replace(/\/+$/, "");
-    return u.replace(/^https?:\/\/[^/]+/i, "").replace(/\/+$/, "");
-  } catch {
-    return u.replace(/\/+$/, "");
+const ensureJson = (fa: FetchArgs) => {
+  if (typeof fa.body !== 'undefined' && isJsonLikeBody(fa.body)) {
+    fa.headers = { ...(fa.headers || {}), 'Content-Type': 'application/json' };
   }
+  return fa;
+};
+
+function stripAuthHeaderIfNeeded(req: FetchArgs, cleanPath: string): FetchArgs {
+  if (shouldBypassAuthHeader(cleanPath)) {
+    const h = { ...(req.headers || {}) } as Record<string, any>;
+    delete h.authorization;
+    delete h.Authorization;
+    req.headers = h;
+  }
+  return req;
+}
+
+// ✅ refresh concurrency (MaybePromise uyumlu)
+let refreshInFlight: Promise<RawResult> | null = null;
+
+async function runRefresh(api: any, extra: any): Promise<RawResult> {
+  // rawBaseQuery MaybePromise dönebileceği için Promise.resolve ile sarıyoruz
+  const r = await Promise.resolve(
+    rawBaseQuery(
+      {
+        url: '/auth/token/refresh',
+        method: 'POST',
+        headers: { 'x-skip-auth': '1', Accept: 'application/json' },
+      },
+      api,
+      extra,
+    ),
+  );
+  return r as RawResult;
 }
 
 const baseQueryWithReauth: RBQ = async (args, api, extra) => {
   let req: AnyArgs = compatAdjustArgs(args);
-  const path = typeof req === "string" ? req : req.url || "";
-  const cleanPath = extractPath(path);
+  const urlPath = typeof req === 'string' ? req : req.url || '';
+  const cleanPath = normalizeCleanPath(urlPath);
 
-  const ensureJson = (fa: FetchArgs) => {
-    if (isJsonLikeBody(fa.body)) {
-      fa.headers = { ...(fa.headers || {}), "Content-Type": "application/json" };
-    }
-    return fa;
-  };
-
-  if (typeof req !== "string") {
+  if (typeof req !== 'string') {
     if (AUTH_SKIP_REAUTH.has(cleanPath)) {
-      req.headers = { ...(req.headers || {}), "x-skip-auth": "1" };
+      req.headers = { ...(req.headers || {}), 'x-skip-auth': '1' };
     }
+
+    req = stripAuthHeaderIfNeeded(req, cleanPath);
     req = ensureJson(req);
   }
 
-  let result: RawResult = await rawBaseQuery(req, api, extra);
+  let result: RawResult = (await Promise.resolve(rawBaseQuery(req, api, extra))) as RawResult;
 
   if (result.error?.status === 401 && !AUTH_SKIP_REAUTH.has(cleanPath)) {
-    // Refresh dene
-    const refreshRes = await rawBaseQuery(
-      {
-        url: "/auth/token/refresh",
-        method: "POST",
-        headers: { "x-skip-auth": "1", Accept: "application/json" },
-      },
-      api,
-      extra,
-    );
+    // Refresh dene (tek sefer)
+    if (!refreshInFlight) {
+      refreshInFlight = (async () => {
+        try {
+          return await runRefresh(api, extra);
+        } finally {
+          refreshInFlight = null;
+        }
+      })();
+    }
+
+    const refreshRes = await refreshInFlight;
 
     if (!refreshRes.error) {
       const access_token = (refreshRes.data as { access_token?: string } | undefined)?.access_token;
       if (access_token) tokenStore.set(access_token);
 
+      // retry
       let retry: AnyArgs = compatAdjustArgs(args);
-      if (typeof retry !== "string") {
-        if (AUTH_SKIP_REAUTH.has(cleanPath)) {
-          retry.headers = { ...(retry.headers || {}), "x-skip-auth": "1" };
+      const retryPath = typeof retry === 'string' ? retry : retry.url || '';
+      const retryCleanPath = normalizeCleanPath(retryPath);
+
+      if (typeof retry !== 'string') {
+        if (AUTH_SKIP_REAUTH.has(retryCleanPath)) {
+          retry.headers = { ...(retry.headers || {}), 'x-skip-auth': '1' };
         }
+        retry = stripAuthHeaderIfNeeded(retry, retryCleanPath);
         retry = ensureJson(retry);
       }
-      result = await rawBaseQuery(retry, api, extra);
+
+      result = (await Promise.resolve(rawBaseQuery(retry, api, extra))) as RawResult;
     } else {
       tokenStore.set(null);
     }
   }
+
   return result;
 };
 
 export const baseApi = createApi({
-  reducerPath: "metahubApi", // İstersen "ensotekApi" yapabiliriz
+  reducerPath: 'metahubApi',
   baseQuery: baseQueryWithReauth,
   endpoints: () => ({}),
   tagTypes: metahubTags,

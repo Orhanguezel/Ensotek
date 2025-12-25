@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import AdminSidebar from './AdminSidebar';
 
 export type ActiveTab =
@@ -25,6 +25,7 @@ export type ActiveTab =
   | 'reviews'
   | 'support'
   | 'menuitem'
+  | 'footer_sections'
   | 'storage'
   | 'offers'
   | 'catalog_requests';
@@ -50,36 +51,37 @@ export default function AdminLayout({
   footer,
   children,
 }: AdminLayoutProps) {
-  // SSR-safe initial values
-  const initialIsMobile = useMemo(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia(MOBILE_MQ).matches;
-  }, []);
+  /**
+   * ✅ SSR / hydration FIX
+   * - Initial state MUST be identical on server and on the first client render.
+   * - Therefore: do NOT read matchMedia / localStorage in initializers.
+   */
+  const [hydrated, setHydrated] = useState(false);
 
-  const [isMobile, setIsMobile] = useState<boolean>(initialIsMobile);
+  // deterministik initial: desktop varsay (expanded)
+  const [isMobile, setIsMobile] = useState<boolean>(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(false);
 
-  // ✅ Mobilde otomatik collapsed, desktopta expanded
-  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(initialIsMobile);
-
-  // ✅ resize/orientation change: otomatik olarak doğru moda dön
   useEffect(() => {
+    setHydrated(true);
+
     if (typeof window === 'undefined') return;
 
     const mq = window.matchMedia(MOBILE_MQ);
 
     const apply = (matches: boolean) => {
       setIsMobile(matches);
-      // breakpoint değiştiğinde default’a dön:
+
+      // breakpoint değişince default davranış:
       // mobile -> collapsed, desktop -> expanded
       setSidebarCollapsed(matches);
     };
 
-    // ilk uygula
+    // ilk uygulama
     apply(mq.matches);
 
     const handler = (e: MediaQueryListEvent) => apply(e.matches);
 
-    // modern + fallback
     if (typeof mq.addEventListener === 'function') mq.addEventListener('change', handler);
     else mq.addListener(handler);
 
@@ -93,14 +95,17 @@ export default function AdminLayout({
     setSidebarCollapsed((p) => !p);
   }, []);
 
+  /**
+   * ✅ className hydration FIX:
+   * - İlk render’da server ile aynı class basılsın diye,
+   *   collapsed/expanded class'ını hydration sonrası ekliyoruz.
+   */
+  const shellClass =
+    'ensotek-admin-shell d-flex min-vh-100 bg-light ' +
+    (hydrated ? (sidebarCollapsed ? 'ensotek-admin--collapsed' : 'ensotek-admin--expanded') : '');
+
   return (
-    <div
-      className={
-        'ensotek-admin-shell d-flex min-vh-100 bg-light ' +
-        (sidebarCollapsed ? 'ensotek-admin--collapsed' : 'ensotek-admin--expanded')
-      }
-      data-mobile={isMobile ? '1' : '0'}
-    >
+    <div className={shellClass} data-mobile={hydrated && isMobile ? '1' : '0'}>
       <AdminSidebar
         activeTab={activeTab}
         onTabChange={onTabChange}

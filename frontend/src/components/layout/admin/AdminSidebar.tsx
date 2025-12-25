@@ -71,6 +71,7 @@ const menuGroups: MenuGroup[] = [
       { title: 'Yorumlar', value: 'reviews', icon: FileText },
       { title: 'Destek', value: 'support', icon: HelpCircle },
       { title: 'Menü Öğeleri', value: 'menuitem', icon: FolderTree },
+      { title: 'Footer Bölümleri', value: 'footer_sections', icon: FolderTree },
       { title: 'Depolama', value: 'storage', icon: ImageIcon },
     ],
   },

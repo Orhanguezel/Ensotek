@@ -23,19 +23,46 @@ function firstHeader(v: unknown): string {
     .trim();
 }
 
+/**
+ * ✅ Canonical origin resolver (proxy + Cloudflare safe)
+ * - Prefer forced canonical base via NEXT_PUBLIC_SITE_URL / SITE_URL
+ * - Otherwise infer from forwarded headers
+ * - Fallback: production => https, local => http
+ */
 function getReqOrigin(ctx: DocumentContext): string {
   const req = ctx.req;
+
+  // ✅ İstersen canonical host’u tek yerden kilitle:
+  // NEXT_PUBLIC_SITE_URL=https://www.ensotek.guezelwebdesign.com
+  const forced = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || '').trim();
+  if (forced) return stripTrailingSlash(forced);
+
   const xfProto = firstHeader(req?.headers?.['x-forwarded-proto']);
   const xfHost = firstHeader(req?.headers?.['x-forwarded-host']);
   const host = xfHost || firstHeader(req?.headers?.host);
 
-  const protoRaw = xfProto || 'http';
-  const proto =
-    host?.toLowerCase().startsWith('localhost') || host?.toLowerCase().startsWith('127.0.0.1')
-      ? 'http'
-      : protoRaw;
+  // Cloudflare bazen xf-proto yerine cf-visitor gönderir:
+  // cf-visitor: {"scheme":"https"}
+  const cfVisitor = firstHeader(req?.headers?.['cf-visitor']);
+  const cfScheme =
+    cfVisitor && cfVisitor.includes('"scheme"')
+      ? String(cfVisitor).match(/"scheme"\s*:\s*"([^"]+)"/i)?.[1] || ''
+      : '';
 
-  const origin = host ? `${proto}://${host}` : 'http://localhost';
+  const xfSsl = firstHeader(req?.headers?.['x-forwarded-ssl']); // "on" olabiliyor
+
+  const isLocal =
+    (host || '').toLowerCase().startsWith('localhost') ||
+    (host || '').toLowerCase().startsWith('127.0.0.1');
+
+  // ✅ Kritik düzeltme:
+  // - local’de http
+  // - prod’da xf-proto yoksa bile https varsay
+  const proto = isLocal
+    ? 'http'
+    : xfProto || cfScheme || (xfSsl === 'on' ? 'https' : '') || 'https';
+
+  const origin = host ? `${proto}://${host}` : 'https://localhost';
   return normalizeLocalhostOrigin(origin);
 }
 
@@ -44,7 +71,7 @@ function splitUrl(u: string): { pathname: string; search: string } {
   const [noHash] = raw.split('#');
   const idx = noHash.indexOf('?');
   if (idx >= 0) return { pathname: noHash.slice(0, idx) || '/', search: noHash.slice(idx) || '' };
-  return { pathname: noHash || '/', search: '' };
+  return { pathname: raw || '/', search: '' };
 }
 
 function normPathname(p?: string): string {
@@ -117,6 +144,12 @@ function ensureLocalePrefix(pathname: string, localeShort: string): string {
   if (p === `/${loc}`) return p;
   if (p.startsWith(`/${loc}/`)) return p;
   return `/${loc}${p}`;
+}
+
+function abs(origin: string, path: string): string {
+  const o = stripTrailingSlash(origin);
+  const p = normPathname(path);
+  return `${o}${p}`;
 }
 
 /* -------------------- DB-driven locale fetch (server) -------------------- */
@@ -234,11 +267,31 @@ async function resolveLocalesFromDb(): Promise<{ defaultLocale: string; activeLo
   return out;
 }
 
+/* -------------------- hreflang builder -------------------- */
+
+const DEFAULT_LOCALE_PREFIXLESS = true;
+
+function localizedPathFor(basePath: string, targetLocale: string, defaultLocale: string): string {
+  const p = normPathname(basePath);
+  const loc = normLocaleShort(targetLocale, '');
+  const def = normLocaleShort(defaultLocale, '');
+  if (!loc) return p;
+
+  if (DEFAULT_LOCALE_PREFIXLESS && loc === def) return p;
+  if (p === '/') return `/${loc}`;
+  return `/${loc}${p}`;
+}
+
 /* -------------------- Document -------------------- */
+
+type HreflangLink = { hrefLang: string; href: string };
 
 export default class MyDocument extends Document<{
   canonicalAbs?: string;
   htmlLang?: string;
+
+  // ✅ SSR alternates
+  hreflangLinks?: HreflangLink[];
 
   // debug (istersen kaldır)
   debugLocale?: string;
@@ -261,7 +314,10 @@ export default class MyDocument extends Document<{
       dbDefault,
       normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr',
     );
-    const activeSet = new Set((dbActives || []).map((x) => normLocaleShort(x, '')).filter(Boolean));
+
+    const activeLocalesShort = (dbActives || []).map((x) => normLocaleShort(x, '')).filter(Boolean);
+
+    const activeSet = new Set(activeLocalesShort);
 
     // ✅ Locale detection
     const lcFromQuery = readLcFromSearch(search);
@@ -270,8 +326,6 @@ export default class MyDocument extends Document<{
 
     // ✅ Base path: sadece aktif locale ise strip et
     const basePath = stripLocalePrefixStrict(pathname, activeSet);
-
-    const DEFAULT_LOCALE_PREFIXLESS = true;
 
     const effectiveLocale = normLocaleShort(
       lcFromQuery || lcFromCtx || lcFromPath || dbDefaultShort || FALLBACK_LOCALE,
@@ -288,14 +342,49 @@ export default class MyDocument extends Document<{
         ? basePath
         : ensureLocalePrefix(basePath, safeLocale);
 
-    const canonicalAbs = `${origin}${
-      canonicalPath.startsWith('/') ? canonicalPath : `/${canonicalPath}`
-    }`;
+    const canonicalAbs = normalizeLocalhostOrigin(abs(origin, canonicalPath));
+
+    // ✅ hreflang alternates (SSR)
+    const hreflangLinks: HreflangLink[] = [];
+
+    // aktif locale listesi sıralı (default ilk)
+    const activesOrdered = activeLocalesShort.length
+      ? activeLocalesShort
+      : [normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr'];
+
+    for (const l of activesOrdered) {
+      // aktif değilse skip (teorik olarak gerekmez, ama deterministik olsun)
+      if (activeSet.size > 0 && !activeSet.has(l)) continue;
+
+      const href = normalizeLocalhostOrigin(
+        abs(origin, localizedPathFor(basePath, l, dbDefaultShort)),
+      );
+      hreflangLinks.push({ hrefLang: l, href });
+    }
+
+    // x-default: default locale canonical
+    hreflangLinks.push({
+      hrefLang: 'x-default',
+      href: normalizeLocalhostOrigin(
+        abs(origin, localizedPathFor(basePath, dbDefaultShort, dbDefaultShort)),
+      ),
+    });
+
+    // uniq
+    const seen = new Set<string>();
+    const hreflangLinksUniq = hreflangLinks.filter((x) => {
+      const k = `${x.hrefLang}|${x.href}`;
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    });
 
     return {
       ...initialProps,
-      canonicalAbs: normalizeLocalhostOrigin(canonicalAbs),
+      canonicalAbs,
       htmlLang: safeLocale || dbDefaultShort || FALLBACK_LOCALE,
+
+      hreflangLinks: hreflangLinksUniq,
 
       // debug (istersen sonra kaldır)
       debugLocale: safeLocale,
@@ -306,7 +395,7 @@ export default class MyDocument extends Document<{
   }
 
   render() {
-    const { canonicalAbs, htmlLang } = this.props as any;
+    const { canonicalAbs, htmlLang, hreflangLinks } = this.props as any;
 
     return (
       <Html lang={htmlLang || FALLBACK_LOCALE}>
@@ -314,8 +403,21 @@ export default class MyDocument extends Document<{
           <link rel="preconnect" href="https://res.cloudinary.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
 
+          {/* ✅ Canonical + og:url: SSR tek kaynak */}
           {canonicalAbs ? <link rel="canonical" href={canonicalAbs} /> : null}
           {canonicalAbs ? <meta property="og:url" content={canonicalAbs} /> : null}
+
+          {/* ✅ hreflang: SSR tek kaynak */}
+          {Array.isArray(hreflangLinks) && hreflangLinks.length
+            ? hreflangLinks.map((x: HreflangLink) => (
+                <link
+                  key={`alt:${x.hrefLang}:${x.href}`}
+                  rel="alternate"
+                  hrefLang={x.hrefLang}
+                  href={x.href}
+                />
+              ))
+            : null}
         </Head>
         <body>
           <Main />

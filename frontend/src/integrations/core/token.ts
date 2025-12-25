@@ -9,11 +9,11 @@ const isBrowser = typeof window !== "undefined" && typeof window.localStorage !=
 
 export const tokenStore = {
   get(): string {
-    if (!isBrowser) return "";
+    if (!isBrowser) return '';
     try {
-      return window.localStorage.getItem(TOKEN_KEY) || "";
+      return (window.localStorage.getItem(TOKEN_KEY) || '').trim();
     } catch {
-      return "";
+      return '';
     }
   },
 

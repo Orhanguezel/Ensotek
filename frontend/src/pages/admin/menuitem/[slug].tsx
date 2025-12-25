@@ -1,9 +1,7 @@
 // =============================================================
 // FILE: src/pages/admin/menuitem/[slug].tsx
-// Ensotek – Admin Menu Item Detail (Create / Edit, Form + JSON)
-// - Dynamic locales: useAdminLocales() => site_settings.app_locales
-// - Base locale: router.locale -> coerceLocale(..., defaultLocaleFromDb)
-// - Edit modda: formState.locale (kullanıcı seçimi) istek locale’i belirler
+// Ensotek – Admin Menu Item Detail (HEADER ONLY)
+// Route: /admin/menuitem/[slug]
 // =============================================================
 
 'use client';
@@ -43,7 +41,7 @@ const toShortLocale = (v: unknown): string =>
     .split('-')[0]
     .trim();
 
-/** BE DTO -> form state (locale dışarıdan verilir) */
+/** BE DTO -> form state (HEADER ONLY: location forced) */
 const mapDtoToFormState = (item: AdminMenuItemDto, localeForForm: string): MenuItemFormState => ({
   id: item.id,
   title: item.title ?? '',
@@ -51,7 +49,8 @@ const mapDtoToFormState = (item: AdminMenuItemDto, localeForForm: string): MenuI
   type: item.type ?? 'custom',
   page_id: item.page_id ?? null,
   parent_id: item.parent_id ?? null,
-  location: item.location ?? 'header',
+  // ✅ HEADER ONLY
+  location: 'header',
   icon: item.icon ?? '',
   section_id: item.section_id ?? null,
   is_active: !!item.is_active,
@@ -66,7 +65,8 @@ const buildJsonModelFromForm = (s: MenuItemFormState) => ({
   type: s.type,
   page_id: s.page_id,
   parent_id: s.parent_id,
-  location: s.location,
+  // ✅ HEADER ONLY (gösterim amaçlı)
+  location: 'header',
   icon: s.icon,
   section_id: s.section_id,
   is_active: s.is_active,
@@ -102,7 +102,6 @@ const AdminMenuItemDetailPage: NextPage = () => {
 
   const routerLocale = (router.locale as string | undefined) ?? undefined;
 
-  // router.locale DB’de yoksa default’a, o da yoksa kısa formata düşer
   const baseLocale = useMemo(
     () =>
       coerceLocale(routerLocale, defaultLocaleFromDb) ||
@@ -127,7 +126,7 @@ const AdminMenuItemDetailPage: NextPage = () => {
   const [editMode, setEditMode] = useState<EditMode>('form');
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  // CREATE init – locale = baseLocale (veya ilk aktif locale)
+  /* -------------------- CREATE init -------------------- */
   const didInitCreateRef = useRef(false);
 
   useEffect(() => {
@@ -150,6 +149,7 @@ const AdminMenuItemDetailPage: NextPage = () => {
       type: 'custom',
       page_id: null,
       parent_id: null,
+      // ✅ HEADER ONLY
       location: 'header',
       icon: '',
       section_id: null,
@@ -168,7 +168,7 @@ const AdminMenuItemDetailPage: NextPage = () => {
     defaultLocaleFromDb,
   ]);
 
-  // EDIT init – sadece locale’i kur, DTO gelince doldur
+  /* -------------------- EDIT init -------------------- */
   const didInitEditRef = useRef(false);
 
   useEffect(() => {
@@ -192,6 +192,7 @@ const AdminMenuItemDetailPage: NextPage = () => {
       type: 'custom',
       page_id: null,
       parent_id: null,
+      // ✅ HEADER ONLY
       location: 'header',
       icon: '',
       section_id: null,
@@ -247,7 +248,6 @@ const AdminMenuItemDetailPage: NextPage = () => {
     const dto = data as AdminMenuItemDto;
 
     setFormState((prev) => {
-      // Mevcut locale’i hesapla (fetchLocale varsa onu tercih et)
       const currentLocale =
         coerceLocale(fetchLocale || prev?.locale, defaultLocaleFromDb) ||
         fetchLocale ||
@@ -256,8 +256,9 @@ const AdminMenuItemDetailPage: NextPage = () => {
         defaultLocaleFromDb ||
         '';
 
-      // Aynı id + locale için tekrar yazma (gereksiz render kaçınma)
       if (prev && prev.id === dto.id && prev.locale === currentLocale && prev.title) {
+        // yine de location'ı header’a sabitlemiş olalım (defansif)
+        if (prev.location !== 'header') return { ...prev, location: 'header' };
         return prev;
       }
 
@@ -272,6 +273,9 @@ const AdminMenuItemDetailPage: NextPage = () => {
       setFormState((prev) => {
         if (!prev) return prev;
 
+        // ✅ location UI'da yok; JSON'dan da kabul etmeyeceğiz. Yine de defansif:
+        if (field === 'location') return { ...prev, location: 'header' } as MenuItemFormState;
+
         if (field === 'locale') {
           const normalized =
             coerceLocale(value, defaultLocaleFromDb) ||
@@ -282,7 +286,6 @@ const AdminMenuItemDetailPage: NextPage = () => {
             '';
 
           if (mode === 'edit') {
-            // Locale değişince: içerik temizlenir, yeni locale için DTO beklenir
             return {
               ...prev,
               locale: normalized,
@@ -290,13 +293,14 @@ const AdminMenuItemDetailPage: NextPage = () => {
               url: '',
               type: prev.type ?? 'custom',
               icon: prev.icon ?? '',
+              location: 'header',
             } as MenuItemFormState;
           }
 
-          return { ...prev, locale: normalized } as MenuItemFormState;
+          return { ...prev, locale: normalized, location: 'header' } as MenuItemFormState;
         }
 
-        return { ...prev, [field]: value } as MenuItemFormState;
+        return { ...prev, [field]: value, location: 'header' } as MenuItemFormState;
       });
     },
     [mode, coerceLocale, defaultLocaleFromDb, baseLocale],
@@ -324,7 +328,9 @@ const AdminMenuItemDetailPage: NextPage = () => {
           next.section_id =
             json.section_id === null || json.section_id === '' ? null : String(json.section_id);
 
-        if (json.location === 'header' || json.location === 'footer') next.location = json.location;
+        // ✅ HEADER ONLY: location JSON’dan GELSE BİLE dikkate alma
+        next.location = 'header';
+
         if (typeof json.icon === 'string') next.icon = json.icon;
 
         if (typeof json.is_active === 'boolean') next.is_active = json.is_active;
@@ -371,7 +377,10 @@ const AdminMenuItemDetailPage: NextPage = () => {
       type: s.type,
       page_id: s.type === 'page' ? s.page_id ?? null : null,
       parent_id: s.parent_id ?? null,
-      location: s.location,
+
+      // ✅ HEADER ONLY: payload’da sabit
+      location: 'header',
+
       icon: s.icon ? s.icon.trim() : null,
       section_id: s.section_id ?? null,
       is_active: !!s.is_active,
@@ -413,7 +422,6 @@ const AdminMenuItemDetailPage: NextPage = () => {
   };
 
   const handleCancel = () => {
-    // Deterministik: her zaman listeye dön
     router.push('/admin/menuitem');
   };
 
@@ -438,11 +446,11 @@ const AdminMenuItemDetailPage: NextPage = () => {
         <div className="card-header d-flex justify-content-between align-items-center">
           <div>
             <h5 className="mb-0">
-              {mode === 'create' ? 'Yeni Menü Öğesi' : 'Menü Öğesini Düzenle'}
+              {mode === 'create' ? 'Yeni Header Menü Öğesi' : 'Header Menü Öğesini Düzenle'}
             </h5>
             <small className="text-muted">
-              Form modunda temel alanları, JSON modunda ise tüm payload’ı (parent_id, section_id
-              vb.) yönetebilirsin.
+              Bu modül sadece <code>location=header</code> kayıtlarını yönetir. Footer ayrı ekranda
+              yönetilecek.
             </small>
             {!isNew && (
               <div className="small text-muted mt-1">
@@ -511,8 +519,9 @@ const AdminMenuItemDetailPage: NextPage = () => {
                       düzenlenir.
                     </div>
                     <div>
-                      <strong>Not:</strong> <code>id</code> alanı sadece gösterim amaçlıdır,
-                      route&apos;taki id kullanılır.
+                      <strong>Not:</strong> Bu ekranda <code>location</code> her zaman{' '}
+                      <code>header</code> olarak sabittir. JSON&apos;da farklı değer yazsan da
+                      kayıtta uygulanmaz.
                     </div>
                   </>
                 }
@@ -524,8 +533,8 @@ const AdminMenuItemDetailPage: NextPage = () => {
           <div className="card-footer d-flex justify-content-between align-items-center">
             <div className="text-muted small">
               {mode === 'create'
-                ? 'Yeni menü öğesi ekleyeceksiniz.'
-                : 'Mevcut menü öğesini düzenliyorsunuz.'}
+                ? 'Yeni header menü öğesi ekleyeceksiniz.'
+                : 'Mevcut header menü öğesini düzenliyorsunuz.'}
             </div>
 
             <div className="d-flex gap-2">

@@ -1,5 +1,8 @@
 // =============================================================
 // FILE: src/pages/admin/site-settings/index.tsx
+// Ensotek – Site Settings Admin (LIST)
+// - Modal edit kaldırıldı
+// - Edit action artık /admin/site-settings/[id]?locale=xx sayfasına gider
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -8,7 +11,6 @@ import { toast } from 'sonner';
 import {
   useListSiteSettingsAdminQuery,
   useDeleteSiteSettingAdminMutation,
-  useUpdateSiteSettingAdminMutation,
   useGetAppLocalesAdminQuery,
   useGetDefaultLocaleAdminQuery,
 } from '@/integrations/rtk/hooks';
@@ -27,47 +29,21 @@ import {
   SmtpSettingsTab,
   CloudinarySettingsTab,
   ApiSettingsTab,
-  FooterSettingsTab,
 } from '@/components/admin/site-settings/tabs';
 
-import type {
-  SettingValue,
-  AppLocaleItem,
-  SiteSetting,
-} from '@/integrations/types/site_settings.types';
+import type { AppLocaleItem, SiteSetting } from '@/integrations/types/site_settings.types';
 
 type SettingsScope = 'localized' | 'global' | 'mixed';
 
 const TAB_SCOPE: Record<SettingsTab, SettingsScope> = {
   list: 'mixed',
-  global_list: 'global', // ✅ NEW
+  global_list: 'global',
   general: 'localized',
   seo: 'localized',
   smtp: 'global',
   cloudinary: 'global',
   api: 'global',
-  footer: 'localized',
 };
-
-function stringifyValuePretty(v: SettingValue): string {
-  if (v === null || v === undefined) return '';
-  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
-  try {
-    return JSON.stringify(v, null, 2);
-  } catch {
-    return String(v);
-  }
-}
-
-function parseRawValue(raw: string): SettingValue {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  try {
-    return JSON.parse(trimmed) as SettingValue;
-  } catch {
-    return trimmed;
-  }
-}
 
 const toShortLocale = (v: unknown): string =>
   String(v || '')
@@ -100,9 +76,6 @@ const SiteSettingsAdminPage: React.FC = () => {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<SettingsTab>('list');
   const [selectedLocale, setSelectedLocale] = useState<string>('');
-
-  const [editing, setEditing] = useState<SiteSetting | null>(null);
-  const [editRaw, setEditRaw] = useState<string>('');
 
   const {
     data: appLocalesItems,
@@ -158,72 +131,36 @@ const SiteSettingsAdminPage: React.FC = () => {
     if (!isListTab) return undefined;
 
     const q = search?.trim() || undefined;
-
     if (!effectiveLocaleForTab) return undefined;
 
-    return {
-      q,
-      locale: effectiveLocaleForTab, // 'tr' | 'en' | ... OR '*'
-    };
+    return { q, locale: effectiveLocaleForTab };
   }, [activeTab, search, effectiveLocaleForTab]);
 
   const {
     data: settings,
     isLoading: isListLoading,
     isFetching: isListFetching,
-    refetch,
+    refetch: refetchList,
   } = useListSiteSettingsAdminQuery(listArgs, { skip: !listArgs });
 
   const [deleteSetting, { isLoading: isDeleting }] = useDeleteSiteSettingAdminMutation();
-  const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
 
   const busy =
     isListLoading ||
     isListFetching ||
     isDeleting ||
-    isSaving ||
     isLocalesLoading ||
     isLocalesFetching ||
     isDefaultLoading ||
     isDefaultFetching;
 
-  const handleEdit = (setting: SiteSetting) => {
-    setEditing(setting);
-    setEditRaw(stringifyValuePretty(setting.value));
-  };
-
-  const handleCloseEdit = () => {
-    setEditing(null);
-    setEditRaw('');
-  };
-
-  const resolveLocaleForWrite = (): string | undefined => {
-    const scope = TAB_SCOPE[activeTab] ?? 'mixed';
-    if (scope === 'global') return '*';
-    return selectedLocale || toShortLocale(editing?.locale) || undefined;
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editing) return;
-
-    try {
-      const value = parseRawValue(editRaw);
-      const locale = resolveLocaleForWrite();
-
-      await updateSetting({
-        key: editing.key,
-        locale,
-        value,
-      }).unwrap();
-
-      toast.success(`"${editing.key}" ayarı güncellendi.`);
-      handleCloseEdit();
-      await refetch();
-    } catch (err: any) {
-      const msg =
-        err?.data?.error?.message || err?.message || 'Ayar güncellenirken bir hata oluştu.';
-      toast.error(msg);
+  const onRefresh = async () => {
+    if (listArgs) {
+      await refetchList();
+      return;
     }
+    // list dışındaysan, tab component’leri kendi refetch’ini yönetiyor zaten
+    toast.message('Bu tab kendi içinde yenileme yapar. Liste tabında “Yenile” listeyi günceller.');
   };
 
   const handleDelete = async (setting: SiteSetting) => {
@@ -249,11 +186,24 @@ const SiteSettingsAdminPage: React.FC = () => {
       }
 
       toast.success(`"${key}" ayarı silindi.`);
-      await refetch();
+      if (listArgs) await refetchList();
     } catch (err: any) {
       const msg = err?.data?.error?.message || err?.message || 'Ayar silinirken bir hata oluştu.';
       toast.error(msg);
     }
+  };
+
+  const getEditHref = (s: SiteSetting) => {
+    const scope = TAB_SCOPE[activeTab] ?? 'mixed';
+
+    // global tablarda locale her zaman '*'
+    if (scope === 'global') {
+      return `/admin/site-settings/${encodeURIComponent(s.key)}?locale=*`;
+    }
+
+    // mixed/localized: satırın locale’i varsa onu, yoksa seçili locale’i kullan
+    const loc = toShortLocale(s.locale) || selectedLocale || '';
+    return `/admin/site-settings/${encodeURIComponent(s.key)}?locale=${encodeURIComponent(loc)}`;
   };
 
   return (
@@ -264,7 +214,7 @@ const SiteSettingsAdminPage: React.FC = () => {
         locale={selectedLocale}
         onLocaleChange={setSelectedLocale}
         loading={busy}
-        onRefresh={refetch}
+        onRefresh={onRefresh}
         activeTab={activeTab}
         onTabChange={setActiveTab}
         locales={localeOptions}
@@ -279,8 +229,8 @@ const SiteSettingsAdminPage: React.FC = () => {
             <SiteSettingsList
               settings={settings}
               loading={busy}
-              onEdit={handleEdit}
               onDelete={handleDelete}
+              getEditHref={getEditHref}
               selectedLocale={activeTab === 'global_list' ? '*' : selectedLocale}
             />
           )}
@@ -289,83 +239,12 @@ const SiteSettingsAdminPage: React.FC = () => {
             <GeneralSettingsTab locale={selectedLocale} />
           )}
           {activeTab === 'seo' && selectedLocale && <SeoSettingsTab locale={selectedLocale} />}
-          {activeTab === 'footer' && selectedLocale && (
-            <FooterSettingsTab locale={selectedLocale} />
-          )}
 
           {activeTab === 'smtp' && <SmtpSettingsTab locale="*" />}
           {activeTab === 'cloudinary' && <CloudinarySettingsTab locale="*" />}
           {activeTab === 'api' && <ApiSettingsTab locale="*" />}
         </div>
       </div>
-
-      {editing && (
-        <>
-          <div className="modal-backdrop fade show" />
-          <div className="modal d-block" tabIndex={-1} role="dialog" aria-modal="true">
-            <div className="modal-dialog modal-lg modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header py-2">
-                  <h5 className="modal-title small mb-0">
-                    Ayar Düzenle: <code>{editing.key}</code>
-                    {(() => {
-                      const shown = resolveLocaleForWrite();
-                      return shown ? (
-                        <span className="badge bg-light text-dark border ms-2">{shown}</span>
-                      ) : null;
-                    })()}
-                  </h5>
-
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Kapat"
-                    onClick={handleCloseEdit}
-                    disabled={isSaving}
-                  />
-                </div>
-
-                <div className="modal-body">
-                  <p className="text-muted small">
-                    Bu modal tek bir <code>site_settings</code> kaydını hızlıca düzenlemek içindir.
-                    Geçerli JSON girersen değer JSON olarak, aksi halde düz string olarak saklanır.
-                  </p>
-
-                  <div className="mb-2">
-                    <label className="form-label small">Değer (raw / JSON)</label>
-                    <textarea
-                      className="form-control font-monospace"
-                      rows={10}
-                      value={editRaw}
-                      onChange={(e) => setEditRaw(e.target.value)}
-                      spellCheck={false}
-                    />
-                  </div>
-                </div>
-
-                <div className="modal-footer py-2">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={handleCloseEdit}
-                    disabled={isSaving}
-                  >
-                    İptal
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSaveEdit}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

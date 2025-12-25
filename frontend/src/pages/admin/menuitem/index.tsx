@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/pages/admin/menuitem/index.tsx
-// Ensotek – Admin Menu Items List Page (locale destekli)
+// Ensotek – Admin Menu Items List Page (HEADER ONLY)
 // Route: /admin/menuitem
 // =============================================================
 
@@ -73,21 +73,22 @@ const AdminMenuItemListPage: NextPage = () => {
     return coerced || toShortLocale(routerLocale) || 'tr';
   }, [defaultLocaleFromDb, coerceLocale, router.locale]);
 
-  /* -------------------- Filters -------------------- */
+  /* -------------------- Filters (HEADER ONLY) -------------------- */
   const [filters, setFilters] = useState<MenuItemFilters>(() => ({
     search: '',
-    location: 'all',
+    // ✅ Bu modül sadece HEADER yönetir
+    location: 'header',
     active: 'all',
     sort: 'display_order',
     order: 'asc',
     locale: '', // "" => tüm diller
   }));
 
-  // İstersen ilk açılışta defaultLocale'i filtreye bas
+  // İstersen ilk açılışta defaultLocale'i filtreye bas (şimdilik tüm diller)
   useEffect(() => {
     setFilters((prev) => {
       if (prev.locale) return prev;
-      return { ...prev, locale: '' }; // sadece tek dil göstermek istersen: defaultLocale
+      return { ...prev, locale: '' };
     });
   }, [defaultLocale]);
 
@@ -96,7 +97,10 @@ const AdminMenuItemListPage: NextPage = () => {
     const p: any = {};
 
     if (filters.search?.trim()) p.q = filters.search.trim();
-    if (filters.location !== 'all') p.location = filters.location;
+
+    // ✅ HEADER ONLY: paramı daima bas
+    p.location = 'header';
+
     if (filters.active !== 'all') p.active = filters.active === 'active';
     if (filters.sort) p.sort = filters.sort;
     if (filters.order) p.order = filters.order;
@@ -202,6 +206,8 @@ const AdminMenuItemListPage: NextPage = () => {
         savingOrder={savingOrder}
         localeLabelMap={localeLabelMap}
         dateLocale="tr-TR"
+        // ✅ HEADER ONLY: listede location kolonu gösterilmesin
+        hideLocationColumn
       />
 
       {draftRows && (

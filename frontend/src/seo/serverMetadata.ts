@@ -3,8 +3,9 @@
 // Ensotek – Server Metadata Builder (DB-driven locales/default)
 //   - Active locales: site_settings.app_locales (DB)
 //   - Default locale: getDefaultLocale() (DB)
-//   - Canonical + hreflang: DEFAULT_LOCALE_PREFIXLESS uygulanır
-//   - NO hardcoded locales (no "en"/"tr"/"de" unions)
+//   - Canonical + hreflang SSR tek kaynak (alternates)
+//   - GLOBAL defaults (locale='*') first-class
+//   - NO hardcoded locale unions
 // =============================================================
 import 'server-only';
 
@@ -52,11 +53,12 @@ function asObj(x: any): Record<string, any> | null {
 }
 function asStrArr(x: any): string[] {
   if (!x) return [];
-  if (Array.isArray(x))
+  if (Array.isArray(x)) {
     return x
       .map((v) => String(v))
       .map((s) => s.trim())
       .filter(Boolean);
+  }
   const s = asStr(x);
   return s ? [s] : [];
 }
@@ -64,7 +66,7 @@ function asStrArr(x: any): string[] {
 /**
  * ✅ Server runtime base URL (proxy-safe).
  * Öncelik:
- *  1) NEXT_PUBLIC_SITE_URL (varsa sabit olarak kullan)
+ *  1) NEXT_PUBLIC_SITE_URL (varsa sabit)
  *  2) x-forwarded-proto + x-forwarded-host
  *  3) host + https (fallback)
  */
@@ -88,18 +90,13 @@ async function getRuntimeBaseUrl(): Promise<string> {
 
   if (host) return `${proto}://${host}`.replace(/\/+$/, '');
 
-  // En son fallback (test/dev)
   return 'http://localhost:3000';
 }
 
 /**
  * OpenGraph locale formatına çevir:
  * - "pt-br" -> "pt_BR"
- * - "tr"    -> "tr_TR" (genel kural: region yoksa LANG_LANG)
- * - "fr"    -> "fr_FR"
- *
- * Not: Burada en_US gibi “tahmin” hardcode yapmıyoruz.
- *  - region yoksa: `${lang}_${lang.toUpperCase()}`
+ * - "tr"    -> "tr_TR" (region yoksa LANG_LANG)
  */
 function toOgLocale(l: string): string {
   const raw = String(l || '').trim();
@@ -144,7 +141,7 @@ function absUrl(baseUrl: string, pathOrUrl: string): string {
   return `${baseUrl}${p}`;
 }
 
-/* -------------------- SEO fetch fallback (NO hardcoded locales) -------------------- */
+/* -------------------- SEO fetch (GLOBAL '*' aware, deterministic) -------------------- */
 
 async function resolveActiveLocales(provided?: string[]) {
   const list = provided && provided.length ? provided : await fetchActiveLocales();
@@ -153,7 +150,15 @@ async function resolveActiveLocales(provided?: string[]) {
   return normalized;
 }
 
-function buildLocaleFallbackChain(args: {
+/**
+ * NEW STANDARD: seo/site_seo için fallback kuralı
+ * Öncelik:
+ *  1) requested locale
+ *  2) global '*'   (kritik: başka locale’a düşmeden önce!)
+ *  3) default locale
+ *  4) (opsiyonel) diğer active locale’ler
+ */
+function buildSeoLocaleTryOrder(args: {
   requestedLocale: string;
   defaultLocale: string;
   activeLocales: string[];
@@ -161,34 +166,30 @@ function buildLocaleFallbackChain(args: {
   const req = normLocale(args.requestedLocale);
   const def = normLocale(args.defaultLocale);
 
-  // Active locales (DB) → normalize + ensure default first
   const act = uniq((args.activeLocales || []).map(normLocale)).filter(Boolean);
 
-  // Sıra: requested → default → (actives) → fallback
-  const chain = uniq([req, def, ...act, DEFAULT_LOCALE_FALLBACK].filter(Boolean));
-
-  // İstersen istek sayısını sınırlayabilirsin (DB yoğun ise):
-  // return chain.slice(0, 5);
-  return chain;
+  // requested -> '*' -> default -> others -> fallback
+  return uniq([req, '*', def, ...act, DEFAULT_LOCALE_FALLBACK].filter(Boolean));
 }
 
 async function fetchSeoRowWithFallback(locale: string, providedActiveLocales?: string[]) {
   const loc = normLocale(locale);
 
-  // Öncelik: "seo" -> "site_seo"
+  // key priority: seo -> site_seo
   const tryKeys = ['seo', 'site_seo'] as const;
 
   const defaultLocale = await getDefaultLocale();
   const activeLocales = await resolveActiveLocales(providedActiveLocales);
 
-  const tryLocales = buildLocaleFallbackChain({
+  const tryLocales = buildSeoLocaleTryOrder({
     requestedLocale: loc,
     defaultLocale,
     activeLocales,
   });
 
-  for (const l of tryLocales) {
-    for (const k of tryKeys) {
+  // ✅ Key önce (seo > site_seo), locale sonra
+  for (const k of tryKeys) {
+    for (const l of tryLocales) {
       const row = await fetchSetting(k, l, { revalidate: 600 });
       if (row?.value != null) return row;
     }
@@ -225,17 +226,20 @@ export async function buildMetadataFromSeo(
   const defaultLocale = await getDefaultLocale();
   const locale = normLocale(args.locale);
 
-  // Site defaults (marka adı hardcode kalabilir; locale hardcode değil)
-  const titleDefault = asStr(seo.title_default) || 'Ensotek';
-  const titleTemplate = asStr(seo.title_template) || '%s | Ensotek';
-  const description = asStr(seo.description) || '';
+  // Defaults (DB-driven)
   const siteName = asStr(seo.site_name) || 'Ensotek';
+  const titleDefault = asStr(seo.title_default) || siteName;
+  const titleTemplate = asStr(seo.title_template) || `%s | ${siteName}`;
+  const description = asStr(seo.description) || '';
 
   // Open Graph
   const og = asObj(seo.open_graph) || {};
   const ogType = (asStr(og.type) || 'website') as any;
 
-  const ogImages = uniq([...asStrArr(og.image), ...asStrArr(og.images)])
+  // ✅ SINGLE SOURCE: og.images[]
+  // Legacy support: og.image varsa images[0] gibi davran
+  const legacyOne = asStr(og?.image);
+  const ogImages = uniq([...(legacyOne ? [legacyOne] : []), ...asStrArr(og?.images)])
     .map((u) => absUrl(baseUrl, u))
     .filter(Boolean);
 
@@ -253,8 +257,10 @@ export async function buildMetadataFromSeo(
 
   const pathname = normPath(args.pathname);
 
+  // ✅ canonical SSR tek kaynak
   const canonical = absUrl(baseUrl, localizedPath(locale, pathname, defaultLocale));
 
+  // ✅ hreflang SSR tek kaynak
   const languages: Record<string, string> = {};
   for (const l of active) {
     languages[l] = absUrl(baseUrl, localizedPath(l, pathname, defaultLocale));
@@ -277,15 +283,16 @@ export async function buildMetadataFromSeo(
       languages,
     },
 
+    // ✅ og:url = canonical (SSR)
     openGraph: {
       type: ogType,
       siteName,
+      url: canonical,
+      title: titleDefault,
+      ...(description ? { description } : {}),
       locale: ogLocale,
       ...(ogAltLocales.length ? { alternateLocale: ogAltLocales } : {}),
       ...(ogImages.length ? { images: ogImages.map((url) => ({ url })) } : {}),
-      ...(description ? { description } : {}),
-      url: canonical,
-      title: titleDefault,
     },
 
     twitter: {

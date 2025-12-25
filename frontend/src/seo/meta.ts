@@ -5,21 +5,34 @@ export type MetaInput = {
   title?: string;
   description?: string;
 
-  /** og:url için (canonical yoksa buna düşer) */
+  /**
+   * NEW STANDARD:
+   * - canonical + og:url SSR tek kaynak.
+   * - Client builder bu alanları üretmez.
+   */
+  canonical?: string;
   url?: string;
 
   image?: string;
+
+  /**
+   * og:locale gibi OG alanlarını da SSR’da üretmek idealdir,
+   * ama legacy sayfalarda client’ta kalabilir.
+   */
   locale?: string; // e.g., "tr_TR"
   siteName?: string;
-
-  /** link rel=canonical basmak istersen */
-  canonical?: string;
 
   noindex?: boolean;
 
   twitterCard?: string;
   twitterSite?: string;
   twitterCreator?: string;
+
+  /**
+   * Debug meta’lar PROD’da basılmamalı.
+   * Eğer ihtiyacın varsa sadece dev/test’te bu flag ile aç.
+   */
+  debug?: Record<string, string | number | boolean | null | undefined>;
 };
 
 export type TagSpec =
@@ -31,49 +44,55 @@ const trimOrEmpty = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
 const has = (v: unknown) => Boolean(trimOrEmpty(v));
 
 /**
- * ✅ NEW STANDARD (Pages Router):
- * Canonical + og:url SSR (_document) tek kaynak.
- * Client tarafında buildMeta çıktısından bu ikisini her yerde filtrele.
+ * ✅ NEW STANDARD (Pages Router / App Router):
+ * Client tarafında asla canonical / hreflang / og:url basma.
+ * (SSR tek kaynak olacak.)
  */
 export function filterClientHeadSpecs(specs: TagSpec[]): TagSpec[] {
   return specs.filter((spec) => {
     if (spec.kind === 'link' && spec.rel === 'canonical') return false;
+
+    // hreflang alternates (link rel=alternate)
+    if (spec.kind === 'link' && spec.rel === 'alternate') return false;
+
+    // og:url SSR tek kaynak
     if (spec.kind === 'meta-prop' && spec.key === 'og:url') return false;
+
     return true;
   });
 }
 
+/**
+ * Client meta builder (legacy / admin sayfaları için):
+ * - Canonical / hreflang / og:url üretmez.
+ * - SSR ile çakışmayacak, deterministik tag set üretir.
+ */
 export function buildMeta(meta: MetaInput): TagSpec[] {
   const out: TagSpec[] = [];
 
-  const canonical = trimOrEmpty(meta.canonical);
-  const url = trimOrEmpty(meta.url);
-
-  // ✅ OG url tek kaynak: canonical > url
-  const ogUrl = canonical || url;
-
-  // ✅ Canonical SADECE verilirse bas
-  if (canonical) out.push({ kind: 'link', rel: 'canonical', href: canonical });
-
+  // Description (SSR’da üretiliyorsa, burada hiç basma istemiyorsan bu bloğu kaldırabilirsin)
   if (has(meta.description)) {
-    out.push({ kind: 'meta-name', key: 'description', value: trimOrEmpty(meta.description) });
+    out.push({
+      kind: 'meta-name',
+      key: 'description',
+      value: trimOrEmpty(meta.description),
+    });
   }
 
+  // Robots
   if (meta.noindex) {
     out.push({ kind: 'meta-name', key: 'robots', value: 'noindex, nofollow' });
   }
 
-  // OpenGraph
+  // OpenGraph (og:url yok!)
   if (has(meta.title))
     out.push({ kind: 'meta-prop', key: 'og:title', value: trimOrEmpty(meta.title) });
   if (has(meta.description))
     out.push({ kind: 'meta-prop', key: 'og:description', value: trimOrEmpty(meta.description) });
-
-  if (ogUrl) out.push({ kind: 'meta-prop', key: 'og:url', value: ogUrl });
-
   if (has(meta.image))
     out.push({ kind: 'meta-prop', key: 'og:image', value: trimOrEmpty(meta.image) });
 
+  // og:type: legacy’de sabit kalsın; SSR zaten set ediyorsa kaldırılabilir
   out.push({ kind: 'meta-prop', key: 'og:type', value: 'website' });
 
   if (has(meta.siteName))
@@ -108,5 +127,13 @@ export function buildMeta(meta: MetaInput): TagSpec[] {
   if (has(meta.image))
     out.push({ kind: 'meta-name', key: 'twitter:image', value: trimOrEmpty(meta.image) });
 
-  return out;
+  // Debug meta (PROD’da basma)
+  if (meta.debug && process.env.NODE_ENV !== 'production') {
+    for (const [k, v] of Object.entries(meta.debug)) {
+      if (v === undefined || v === null) continue;
+      out.push({ kind: 'meta-name', key: `debug:${k}`, value: String(v) });
+    }
+  }
+
+  return filterClientHeadSpecs(out);
 }

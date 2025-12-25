@@ -1,7 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemList.tsx
-// Ensotek – Admin Menu Items (Responsive + DnD + Pagination)
-// Fix: Desktop header wrap bug + Type label (Tür) blank issues
+// Ensotek – Admin Menu Items (Responsive + DnD + Pagination) (HEADER ONLY friendly)
 // =============================================================
 
 'use client';
@@ -57,7 +56,6 @@ const truncate = (v: unknown, max = 60) => {
   return s.length <= max ? s : `${s.slice(0, max)}…`;
 };
 
-/** no-wrap + ellipsis style (header & cells) */
 const noWrapEllipsis: React.CSSProperties = {
   whiteSpace: 'nowrap',
   overflow: 'hidden',
@@ -66,14 +64,8 @@ const noWrapEllipsis: React.CSSProperties = {
 
 const getTypeLabel = (raw: unknown): string => {
   const t = safeText(raw).trim().toLowerCase();
-
-  // Backend farklı değerler döndürebilir; burada hepsini yakalıyoruz.
   if (!t) return '-';
-
-  // Page
   if (t === 'page' || t === 'internal_page' || t === 'route') return 'Sayfa';
-
-  // Custom URL / Link
   if (
     t === 'url' ||
     t === 'custom_url' ||
@@ -84,12 +76,8 @@ const getTypeLabel = (raw: unknown): string => {
   ) {
     return 'Özel URL';
   }
-
-  // Sayısal / legacy
   if (t === '1' || t === 'true') return 'Sayfa';
   if (t === '0' || t === 'false') return 'Özel URL';
-
-  // Bilinmeyen
   return 'Özel URL';
 };
 
@@ -109,6 +97,9 @@ export type MenuItemListProps = {
 
   localeLabelMap?: Record<string, string>;
   dateLocale?: string;
+
+  // ✅ HEADER ONLY use-case
+  hideLocationColumn?: boolean;
 };
 
 /* ---------------- Component ---------------- */
@@ -124,6 +115,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
   savingOrder,
   localeLabelMap,
   dateLocale = 'tr-TR',
+  hideLocationColumn = false,
 }) => {
   const total = items.length;
   const hasData = total > 0;
@@ -142,8 +134,6 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
   const start = (page - 1) * PAGE_SIZE;
   const pageRows = items.slice(start, start + PAGE_SIZE);
 
-  /* ---------- Pagination ---------- */
-
   const pages = useMemo(() => {
     const out: Array<number | 'ellipsis'> = [];
     if (pageCount <= 7) {
@@ -159,8 +149,6 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
     out.push(pageCount);
     return out;
   }, [page, pageCount]);
-
-  /* ---------- Drag & Drop ---------- */
 
   const handleDrop = (targetId: string) => {
     if (!dragId || dragId === targetId || !onReorder || busy) return;
@@ -183,11 +171,10 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
     return localeLabelMap?.[code] ?? code;
   };
 
-  /* ================= RENDER ================= */
+  const desktopColSpan = hideLocationColumn ? 8 : 9;
 
   return (
     <div className="card">
-      {/* ---------- Header ---------- */}
       <div className="card-header py-2 d-flex justify-content-between align-items-center">
         <span className="small fw-semibold">Menü Öğeleri</span>
 
@@ -235,9 +222,14 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                 <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 110 }}>
                   Tür
                 </th>
-                <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 110 }}>
-                  Konum
-                </th>
+
+                {/* ✅ Konum kolonunu opsiyonel gizle */}
+                {!hideLocationColumn && (
+                  <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 110 }}>
+                    Konum
+                  </th>
+                )}
+
                 <th className="text-nowrap text-center" style={{ ...noWrapEllipsis, width: 86 }}>
                   Aktif
                 </th>
@@ -307,16 +299,17 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                         </div>
                       </td>
 
-                      {/* ✅ TYPE (Tür) — fixed */}
                       <td className="align-middle text-nowrap">
                         <span className="badge bg-light border text-dark text-nowrap">
                           {typeLabel}
                         </span>
                       </td>
 
-                      <td className="align-middle small text-nowrap">
-                        {fmtLocation(item.location)}
-                      </td>
+                      {!hideLocationColumn && (
+                        <td className="align-middle small text-nowrap">
+                          {fmtLocation(item.location)}
+                        </td>
+                      )}
 
                       <td className="align-middle text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="form-check form-switch d-inline-flex m-0">
@@ -365,7 +358,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                 })
               ) : (
                 <tr>
-                  <td colSpan={9} className="text-center py-3 text-muted small">
+                  <td colSpan={desktopColSpan} className="text-center py-3 text-muted small">
                     Menü öğesi bulunamadı.
                   </td>
                 </tr>
@@ -373,7 +366,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
 
               {loading && (
                 <tr>
-                  <td colSpan={9} className="text-center py-3 text-muted small">
+                  <td colSpan={desktopColSpan} className="text-center py-3 text-muted small">
                     Yükleniyor...
                   </td>
                 </tr>
@@ -412,9 +405,13 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                             sıra: {item.display_order ?? 0}
                           </span>
                           <span className="badge bg-light border text-dark">{typeLabel}</span>
-                          <span className="badge bg-light text-dark border">
-                            {fmtLocation(item.location)}
-                          </span>
+
+                          {!hideLocationColumn && (
+                            <span className="badge bg-light text-dark border">
+                              {fmtLocation(item.location)}
+                            </span>
+                          )}
+
                           <span className="badge bg-light text-dark border">
                             <code>{locale}</code>
                           </span>

@@ -76,6 +76,18 @@ export const CatalogRequestsList: React.FC<CatalogRequestsListProps> = ({
     );
   }
 
+  // ✅ colgroup içinde whitespace/text node oluşmaması için array ile üret
+  const COL_WIDTHS = [
+    '120px',
+    '220px',
+    '260px',
+    '220px',
+    '90px',
+    '170px',
+    '190px',
+    '160px',
+  ] as const;
+
   return (
     <div className="card">
       {/* Header */}
@@ -106,14 +118,9 @@ export const CatalogRequestsList: React.FC<CatalogRequestsListProps> = ({
               style={{ tableLayout: 'fixed', width: '100%' }}
             >
               <colgroup>
-                <col style={{ width: '120px' }} /> {/* Status */}
-                <col style={{ width: '220px' }} /> {/* Customer */}
-                <col style={{ width: '260px' }} /> {/* Email */}
-                <col style={{ width: '220px' }} /> {/* Company */}
-                <col style={{ width: '90px' }} /> {/* Locale */}
-                <col style={{ width: '170px' }} /> {/* Sent */}
-                <col style={{ width: '190px' }} /> {/* Created */}
-                <col style={{ width: '160px' }} /> {/* Actions */}
+                {COL_WIDTHS.map((w, i) => (
+                  <col key={i} style={{ width: w }} />
+                ))}
               </colgroup>
 
               <thead className="table-light">

@@ -87,6 +87,17 @@ export const SupportList: React.FC<SupportListProps> = ({ items, loading }) => {
     router.push(`/admin/support/${encodeURIComponent(String((t as any).id))}`);
   };
 
+  // ✅ colgroup içinde whitespace/text node oluşmaması için array ile üret
+  const COL_WIDTHS = [
+    '56px', // #
+    '520px', // subject
+    '260px', // user
+    '150px', // status
+    '150px', // priority
+    '180px', // created
+    '180px', // updated
+  ] as const;
+
   if (!busy && !hasData) {
     return (
       <div className="card">
@@ -107,13 +118,9 @@ export const SupportList: React.FC<SupportListProps> = ({ items, loading }) => {
             style={{ tableLayout: 'fixed', width: '100%' }}
           >
             <colgroup>
-              <col style={{ width: '56px' }} /> {/* # */}
-              <col style={{ width: '520px' }} /> {/* subject */}
-              <col style={{ width: '260px' }} /> {/* user */}
-              <col style={{ width: '150px' }} /> {/* status */}
-              <col style={{ width: '150px' }} /> {/* priority */}
-              <col style={{ width: '180px' }} /> {/* created */}
-              <col style={{ width: '180px' }} /> {/* updated */}
+              {COL_WIDTHS.map((w, i) => (
+                <col key={i} style={{ width: w }} />
+              ))}
             </colgroup>
 
             <thead className="table-light">

@@ -1,23 +1,37 @@
-// src/pages/admin/index.tsx
-// Ensotek Admin Dashboard – modern özet ekranı
+// =============================================================
+// FILE: src/pages/admin/index.tsx
+// Ensotek Admin Dashboard – modern özet ekranı + Audit widgets
 // Layout: _app.tsx içindeki AdminLayoutShell ile geliyor
+// Fix:
+//  - Audit list response normalize: Array | {items: Array} | {data: Array}
+//  - Daily metrics normalize: Array | {days:Array} | {items:Array} | {data:Array}
+//  - “kart şeklindeki analiz” kaldırıldı (tekrar veriydi)
+//  - Hooks order fix: useMemo/useEffect conditional değil
+//  - Responsive düzen: audit 2 kolon, içerik dağılımı scroll
+// =============================================================
 
-"use client";
+'use client';
 
-import React, { useEffect, useMemo } from "react";
-import { useRouter } from "next/router";
+import React, { useEffect, useMemo } from 'react';
+import { useRouter } from 'next/router';
 
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import {
   useStatusQuery,
   useGetMyProfileQuery,
   useGetDashboardSummaryAdminQuery,
-  useGetUnreadNotificationsCountQuery
-} from "@/integrations/rtk/hooks";
+  useGetUnreadNotificationsCountQuery,
+  useListAuditRequestLogsAdminQuery,
+  useListAuditAuthEventsAdminQuery,
+  useGetAuditMetricsDailyAdminQuery,
+} from '@/integrations/rtk/hooks';
 
-import type { DashboardCountItemDto } from "@/integrations/types/dashboard.types";
+import type { DashboardCountItemDto } from '@/integrations/types/dashboard.types';
+import type { AuditRequestLogDto, AuditAuthEventDto } from '@/integrations/types/audit.types';
+
+import { AuditDailyChart } from '@/components/admin/audit/AuditDailyChart';
 
 import {
   BarChart3,
@@ -33,25 +47,22 @@ import {
   Database,
   MessageCircle,
   ListTree,
-} from "lucide-react";
+  Tag,
+  Activity,
+  LogIn,
+} from 'lucide-react';
 
-type NormalizedRole = "admin" | "moderator" | "user";
+type NormalizedRole = 'admin' | 'moderator' | 'user';
 
-function normalizeRole(
-  rawRole: unknown,
-  isAdminFlag: boolean | undefined,
-): NormalizedRole {
-  if (isAdminFlag) return "admin";
+function normalizeRole(rawRole: unknown, isAdminFlag: boolean | undefined): NormalizedRole {
+  if (isAdminFlag) return 'admin';
 
-  const s = String(rawRole || "").toLowerCase();
-
-  if (s === "admin" || s === "super_admin" || s === "superadmin") return "admin";
-  if (s === "moderator" || s === "editor") return "moderator";
-
-  return "user";
+  const s = String(rawRole || '').toLowerCase();
+  if (s === 'admin' || s === 'super_admin' || s === 'superadmin') return 'admin';
+  if (s === 'moderator' || s === 'editor') return 'moderator';
+  return 'user';
 }
 
-// Dashboard item → icon map (key backend ile eşleşirse ikon da anlamlı olur)
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
   dashboard: BarChart3,
   site_settings: Settings,
@@ -72,6 +83,7 @@ const ICON_MAP: Record<string, React.ComponentType<any>> = {
   menuitem: ListTree,
   users: Users,
   db: Database,
+  offers: Tag,
 };
 
 function getIconForItem(item: DashboardCountItemDto) {
@@ -79,48 +91,117 @@ function getIconForItem(item: DashboardCountItemDto) {
   return Icon;
 }
 
+function fmtTs(s?: string | null) {
+  if (!s) return '-';
+  try {
+    const d = new Date(s);
+    if (Number.isNaN(d.getTime())) return String(s);
+    return d.toLocaleString();
+  } catch {
+    return String(s);
+  }
+}
+
+function toInt(v: unknown, fallback = 0) {
+  const n = typeof v === 'number' ? v : Number(v);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** ✅ API list response normalize (Array | {items: Array} | {data: Array}) */
+function normalizeList<T = any>(input: any): T[] {
+  if (!input) return [];
+  if (Array.isArray(input)) return input as T[];
+
+  const items = (input as any).items ?? (input as any).data ?? null;
+  if (Array.isArray(items)) return items as T[];
+
+  return [];
+}
+
+/** ✅ Daily metrics normalize (Array | {days:Array} | {items:Array} | {data:Array}) */
+type DailyRow = { date: string; requests: any; unique_ips: any; errors: any };
+function normalizeDailyRows(input: any): DailyRow[] {
+  if (!input) return [];
+  if (Array.isArray(input)) return input as DailyRow[];
+
+  const days = (input as any).days ?? (input as any).items ?? (input as any).data ?? null;
+  if (Array.isArray(days)) return days as DailyRow[];
+
+  return [];
+}
+
 const AdminDashboardPage: React.FC = () => {
   const router = useRouter();
-  const { data, isLoading, isError } = useStatusQuery();
 
-  // Profilden full_name almak için (sadece görüntü amaçlı)
-  const { data: profile } = useGetMyProfileQuery(undefined, {
-    skip: !data?.authenticated,
-  });
+  // ---------------- Queries (hooks) ----------------
+  const { data: statusData, isLoading: statusLoading, isError: statusError } = useStatusQuery();
 
-  // Dashboard summary + unread notifications
+  const authed = !!statusData?.authenticated;
+  const adminSkip = statusLoading || !authed;
+
+  const { data: profile } = useGetMyProfileQuery(undefined, { skip: adminSkip });
+
   const {
     data: summary,
     isLoading: isSummaryLoading,
     isFetching: isSummaryFetching,
     error: summaryError,
     refetch: refetchSummary,
-  } = useGetDashboardSummaryAdminQuery();
+  } = useGetDashboardSummaryAdminQuery(undefined, { skip: adminSkip });
 
-  const { data: unreadData } = useGetUnreadNotificationsCountQuery();
+  const { data: unreadData } = useGetUnreadNotificationsCountQuery(undefined, { skip: adminSkip });
   const unreadCount = unreadData?.count ?? 0;
 
-  // Auth guard (sadece yönlendirme; hook sırası bozulmuyor)
+  const {
+    data: daily,
+    isLoading: isDailyLoading,
+    isFetching: isDailyFetching,
+    error: dailyError,
+    refetch: refetchDaily,
+  } = useGetAuditMetricsDailyAdminQuery({ days: 14 }, { skip: adminSkip });
+
+  const {
+    data: recentRequestsRaw,
+    isLoading: isReqLogsLoading,
+    isFetching: isReqLogsFetching,
+    error: reqLogsError,
+    refetch: refetchReqLogs,
+  } = useListAuditRequestLogsAdminQuery(
+    { limit: 20, offset: 0, orderDir: 'desc', sort: 'created_at' },
+    {
+      skip: adminSkip,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    } as any,
+  );
+
+  const {
+    data: recentLoginsRaw,
+    isLoading: isAuthLogsLoading,
+    isFetching: isAuthLogsFetching,
+    error: authLogsError,
+    refetch: refetchAuthLogs,
+  } = useListAuditAuthEventsAdminQuery(
+    { event: 'login_success', limit: 20, offset: 0, orderDir: 'desc', sort: 'created_at' },
+    {
+      skip: adminSkip,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
+    } as any,
+  );
+
+  // ---------------- Derived state (hooks) ----------------
   useEffect(() => {
-    if (isLoading) return;
+    if (statusLoading) return;
+    if (statusError || !authed) router.push('/login');
+  }, [statusLoading, statusError, authed, router]);
 
-    if (isError || !data?.authenticated) {
-      router.push("/login");
-    }
-  }, [isLoading, isError, data, router]);
-
-  // ⚠️ items için ayrı useMemo – ESLint uyarısını çözer
   const items: DashboardCountItemDto[] = useMemo(
     () => (summary?.items ?? []) as DashboardCountItemDto[],
     [summary],
   );
 
-  const loadingSummary = isSummaryLoading || isSummaryFetching;
-
-  const totalCount = useMemo(
-    () => items.reduce((sum, it) => sum + (it.count ?? 0), 0),
-    [items],
-  );
+  const totalCount = useMemo(() => items.reduce((sum, it) => sum + (it.count ?? 0), 0), [items]);
 
   const maxCount = useMemo(
     () => items.reduce((m, it) => (it.count > m ? it.count : m), 0),
@@ -128,25 +209,43 @@ const AdminDashboardPage: React.FC = () => {
   );
 
   const topItems = useMemo(
-    () => [...items].sort((a, b) => b.count - a.count).slice(0, 6),
+    () => [...items].sort((a, b) => (b.count ?? 0) - (a.count ?? 0)).slice(0, 6),
     [items],
   );
 
-  // ⬇️ Artık tüm hook'lar yukarıda çağrıldı; buradan sonra conditional return serbest
-  if (isLoading || !data) {
+  const recentRequestsSafe: AuditRequestLogDto[] = useMemo(
+    () => normalizeList<AuditRequestLogDto>(recentRequestsRaw),
+    [recentRequestsRaw],
+  );
+
+  const recentLoginsSafe: AuditAuthEventDto[] = useMemo(
+    () => normalizeList<AuditAuthEventDto>(recentLoginsRaw),
+    [recentLoginsRaw],
+  );
+
+  const dailyRows = useMemo(() => normalizeDailyRows(daily), [daily]);
+
+  const loadingSummary = isSummaryLoading || isSummaryFetching;
+  const loadingAudit =
+    isReqLogsLoading ||
+    isReqLogsFetching ||
+    isAuthLogsLoading ||
+    isAuthLogsFetching ||
+    isDailyLoading ||
+    isDailyFetching;
+
+  // ---------------- Early UI returns (AFTER hooks) ----------------
+  if (statusLoading || !statusData) {
     return (
-      <div
-        className="d-flex align-items-center justify-content-center"
-        style={{ height: "16rem" }}
-      >
+      <div className="d-flex align-items-center justify-content-center" style={{ height: '16rem' }}>
         <div className="text-center">
           <div
             className="mx-auto mb-3 rounded-circle border border-primary border-2"
             style={{
               width: 32,
               height: 32,
-              borderTopColor: "transparent",
-              animation: "spin 0.8s linear infinite",
+              borderTopColor: 'transparent',
+              animation: 'spin 0.8s linear infinite',
             }}
           />
           <p>Admin paneli yükleniyor...</p>
@@ -155,25 +254,23 @@ const AdminDashboardPage: React.FC = () => {
     );
   }
 
-  if (!data.authenticated) return null;
+  if (!authed) return null;
 
-  const role = normalizeRole(data.user?.role, data.is_admin);
-  const userName = profile?.full_name || data.user?.email || "Yönetici";
-
-  const badgeLabel =
-    role === "admin" ? "Admin" : role === "moderator" ? "Moderator" : "Kullanıcı";
+  const role = normalizeRole(statusData.user?.role, statusData.is_admin);
+  const userName = profile?.full_name || statusData.user?.email || 'Yönetici';
+  const badgeLabel = role === 'admin' ? 'Admin' : role === 'moderator' ? 'Moderator' : 'Kullanıcı';
 
   return (
-    <div className="space-y-3">
+    <div className="container-fluid py-3">
       {/* Üst başlık */}
-      <div className="d-flex flex-column gap-2 flex-md-row align-items-md-center justify-content-md-between">
+      <div className="d-flex flex-column gap-2 flex-md-row align-items-md-center justify-content-md-between mb-3">
         <div>
           <h1 className="h3 mb-1 d-flex align-items-center gap-2">
             <BarChart3 size={20} />
             <span>Ensotek Admin Panel</span>
           </h1>
           <p className="text-muted small mb-0">
-            Ensotek web sitesinin içerik ve ayarlarını buradan yönetebilirsiniz.
+            İçerik ve ayarları yönet, audit loglarını ve temel metrikleri tek ekrandan takip et.
           </p>
         </div>
         <div className="text-md-end">
@@ -185,7 +282,7 @@ const AdminDashboardPage: React.FC = () => {
       </div>
 
       {/* Üst istatistik kartları */}
-      <div className="row g-3">
+      <div className="row g-3 mb-3">
         <div className="col-12 col-md-4">
           <Card className="h-100">
             <CardHeader className="py-2">
@@ -238,9 +335,7 @@ const AdminDashboardPage: React.FC = () => {
             </CardHeader>
             <CardContent className="py-2">
               <div className="d-flex align-items-baseline justify-content-between">
-                <div className="fs-3 fw-bold">
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </div>
+                <div className="fs-3 fw-bold">{unreadCount > 99 ? '99+' : unreadCount}</div>
                 <div className="text-muted small text-end">
                   Admin hesabı için unread
                   <br />
@@ -248,36 +343,169 @@ const AdminDashboardPage: React.FC = () => {
                 </div>
               </div>
               <p className="text-muted small mb-0 mt-2">
-                Detay için üst header&apos;daki bildirim çanını kullanabilirsin.
+                Detay için üst header&apos;daki bildirim çanını kullan.
               </p>
             </CardContent>
           </Card>
         </div>
       </div>
 
-      {/* Hata mesajı (dashboard summary) */}
+      {/* Daily chart */}
+      <div className="row g-3 mb-3">
+        <div className="col-12">
+          <Card className="border-0 shadow-sm">
+            <CardHeader className="py-2 d-flex align-items-center justify-content-between">
+              <CardTitle className="text-sm mb-0">Ziyaretçi / Trafik (Günlük)</CardTitle>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => refetchDaily()}
+                disabled={isDailyLoading || isDailyFetching}
+              >
+                {isDailyLoading || isDailyFetching ? 'Yenileniyor...' : 'Grafiği yenile'}
+              </button>
+            </CardHeader>
+
+            <CardContent className="py-2">
+              <div className="text-muted small mb-2">Son 14 gün: requests / unique IP / errors</div>
+
+              {dailyError && (
+                <div className="alert alert-warning py-2 small mb-2">
+                  Günlük metrikler yüklenemedi. Endpoint:{' '}
+                  <code>/api/admin/audit/metrics/daily</code>
+                </div>
+              )}
+
+              <AuditDailyChart
+                rows={dailyRows as any}
+                loading={isDailyLoading || isDailyFetching}
+              />
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
       {summaryError && (
-        <div className="alert alert-danger py-2 small mt-2 mb-0">
-          Dashboard verileri yüklenirken bir hata oluştu. Backend&apos;de{" "}
-          <code>/admin/dashboard/summary</code> endpoint&apos;inin{" "}
-          <code>{`{ items: DashboardCountItemDto[] }`}</code> formatında yanıt
-          döndürdüğünden emin ol.
+        <div className="alert alert-danger py-2 small mb-3">
+          Dashboard verileri yüklenirken hata oluştu. Backend&apos;de{' '}
+          <code>/admin/dashboard/summary</code> endpoint&apos;inin{' '}
+          <code>{`{ items: DashboardCountItemDto[] }`}</code> formatında döndüğünden emin ol.
         </div>
       )}
 
-      {/* Modül kartları + dağılım grafiği */}
-      <div className="row g-3 mt-1">
-        {/* Sol: Top modül kartları */}
+      {/* AUDIT listeler */}
+      <div className="row g-3 mb-3">
+        <div className="col-12 col-lg-6">
+          <Card className="h-100 border-0 shadow-sm">
+            <CardHeader className="py-2 d-flex align-items-center justify-content-between">
+              <CardTitle className="text-sm d-flex align-items-center gap-2 mb-0">
+                <LogIn size={16} />
+                <span>Son Giriş Yapanlar</span>
+              </CardTitle>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => refetchAuthLogs()}
+                disabled={loadingAudit}
+              >
+                {loadingAudit ? 'Yenileniyor...' : 'Yenile'}
+              </button>
+            </CardHeader>
+            <CardContent className="py-2">
+              {authLogsError && (
+                <div className="alert alert-warning py-2 small mb-2">
+                  Auth audit verileri yüklenemedi.
+                </div>
+              )}
+
+              {recentLoginsSafe.length === 0 && !loadingAudit && (
+                <div className="text-muted small">Kayıt bulunamadı.</div>
+              )}
+
+              <div className="d-flex flex-column gap-2">
+                {recentLoginsSafe.slice(0, 10).map((e) => (
+                  <div key={String(e.id)} className="d-flex justify-content-between gap-2">
+                    <div className="small">
+                      <div className="fw-semibold">{e.email ?? e.user_id ?? '-'}</div>
+                      <div className="text-muted">
+                        {e.ip} {e.country ? `· ${e.country}` : ''} {e.city ? `· ${e.city}` : ''}
+                      </div>
+                    </div>
+                    <div className="text-muted small text-end" style={{ whiteSpace: 'nowrap' }}>
+                      {fmtTs(e.created_at)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="col-12 col-lg-6">
+          <Card className="h-100 border-0 shadow-sm">
+            <CardHeader className="py-2 d-flex align-items-center justify-content-between">
+              <CardTitle className="text-sm d-flex align-items-center gap-2 mb-0">
+                <Activity size={16} />
+                <span>Son Request’ler</span>
+              </CardTitle>
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => refetchReqLogs()}
+                disabled={loadingAudit}
+              >
+                {loadingAudit ? 'Yenileniyor...' : 'Yenile'}
+              </button>
+            </CardHeader>
+            <CardContent className="py-2">
+              {reqLogsError && (
+                <div className="alert alert-warning py-2 small mb-2">
+                  Request audit verileri yüklenemedi.
+                </div>
+              )}
+
+              {recentRequestsSafe.length === 0 && !loadingAudit && (
+                <div className="text-muted small">Kayıt bulunamadı.</div>
+              )}
+
+              <div className="d-flex flex-column gap-2">
+                {recentRequestsSafe.slice(0, 10).map((r) => {
+                  const sc = toInt(r.status_code);
+                  const isErr = sc >= 400;
+                  return (
+                    <div key={String(r.id)} className="d-flex justify-content-between gap-2">
+                      <div className="small">
+                        <div className="fw-semibold">
+                          <span className={isErr ? 'text-danger' : 'text-success'}>{sc}</span>{' '}
+                          <span className="text-muted">{r.method}</span> <span>{r.path}</span>
+                        </div>
+                        <div className="text-muted">
+                          {r.ip} · {toInt(r.response_time_ms)}ms{' '}
+                          {r.user_id ? `· uid:${r.user_id}` : ''}
+                        </div>
+                      </div>
+                      <div className="text-muted small text-end" style={{ whiteSpace: 'nowrap' }}>
+                        {fmtTs(r.created_at)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Modül kartları + dağılım */}
+      <div className="row g-3">
         <div className="col-12 col-lg-7">
           <div className="row g-3">
             {topItems.length === 0 && !loadingSummary && (
               <div className="col-12">
                 <Card>
                   <CardContent className="py-3 text-sm text-muted">
-                    Henüz özetlenecek içerik bulunamadı.{" "}
-                    <code>/admin/dashboard/summary</code> yanıtına
-                    <code> items </code> ekleyerek modül sayılarını
-                    döndürebilirsin.
+                    Henüz özetlenecek içerik bulunamadı. <code>/admin/dashboard/summary</code>{' '}
+                    yanıtına <code>items</code> ekle.
                   </CardContent>
                 </Card>
               </div>
@@ -285,8 +513,7 @@ const AdminDashboardPage: React.FC = () => {
 
             {topItems.map((item) => {
               const Icon = getIconForItem(item);
-              const percent =
-                maxCount > 0 ? Math.round((item.count / maxCount) * 100) : 0;
+              const percent = maxCount > 0 ? Math.round((item.count / maxCount) * 100) : 0;
 
               return (
                 <div key={item.key} className="col-12 col-sm-6">
@@ -301,9 +528,7 @@ const AdminDashboardPage: React.FC = () => {
                             <Icon size={16} />
                           </div>
                           <div>
-                            <div className="small fw-semibold">
-                              {item.label}
-                            </div>
+                            <div className="small fw-semibold">{item.label}</div>
                             <div className="text-muted small">{item.key}</div>
                           </div>
                         </div>
@@ -321,9 +546,7 @@ const AdminDashboardPage: React.FC = () => {
                         />
                       </div>
                       <div className="d-flex justify-content-between mt-1">
-                        <small className="text-muted">
-                          Genel toplam içindeki pay
-                        </small>
+                        <small className="text-muted">Genel toplam içindeki pay</small>
                         <small className="text-muted">{percent}%</small>
                       </div>
                     </CardContent>
@@ -334,77 +557,70 @@ const AdminDashboardPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Sağ: Dağılım listesi */}
         <div className="col-12 col-lg-5">
           <Card className="h-100 border-0 shadow-sm">
             <CardHeader className="py-2 d-flex justify-content-between align-items-center">
-              <CardTitle className="text-sm mb-0">
-                İçerik Dağılımı (Tüm Modüller)
-              </CardTitle>
+              <CardTitle className="text-sm mb-0">İçerik Dağılımı (Tüm Modüller)</CardTitle>
               <button
                 type="button"
-                className="btn btn-outline-secondary btn-xs btn-sm"
+                className="btn btn-outline-secondary btn-sm"
                 onClick={() => refetchSummary()}
                 disabled={loadingSummary}
               >
-                {loadingSummary ? "Yenileniyor..." : "Yenile"}
+                {loadingSummary ? 'Yenileniyor...' : 'Yenile'}
               </button>
             </CardHeader>
+
             <CardContent className="py-2">
               {items.length === 0 && !loadingSummary && (
-                <p className="text-muted small mb-0">
-                  Gösterilecek modül bulunamadı.
-                </p>
+                <p className="text-muted small mb-0">Gösterilecek modül bulunamadı.</p>
               )}
 
-              {items.map((item) => {
-                const Icon = getIconForItem(item);
-                const percent =
-                  maxCount > 0
-                    ? Math.max(4, Math.round((item.count / maxCount) * 100))
-                    : 0;
+              <div style={{ maxHeight: 520, overflow: 'auto', paddingRight: 4 }}>
+                {items.map((item) => {
+                  const Icon = getIconForItem(item);
+                  const percent =
+                    maxCount > 0 ? Math.max(4, Math.round((item.count / maxCount) * 100)) : 0;
 
-                return (
-                  <div
-                    key={item.key}
-                    className="mb-2 d-flex align-items-center gap-2"
-                  >
-                    <div
-                      className="rounded-circle bg-light d-flex align-items-center justify-content-center"
-                      style={{ width: 28, height: 28 }}
-                    >
-                      <Icon size={14} className="text-secondary" />
-                    </div>
-                    <div className="flex-grow-1">
-                      <div className="d-flex justify-content-between small mb-1">
-                        <span className="fw-semibold">{item.label}</span>
-                        <span className="text-muted">
-                          {item.count} kayıt
-                        </span>
+                  return (
+                    <div key={item.key} className="mb-2 d-flex align-items-center gap-2">
+                      <div
+                        className="rounded-circle bg-light d-flex align-items-center justify-content-center"
+                        style={{ width: 28, height: 28, flex: '0 0 auto' }}
+                      >
+                        <Icon size={14} className="text-secondary" />
                       </div>
-                      <div className="progress" style={{ height: 5 }}>
-                        <div
-                          className="progress-bar bg-success"
-                          role="progressbar"
-                          style={{ width: `${percent}%` }}
-                          aria-valuenow={percent}
-                          aria-valuemin={0}
-                          aria-valuemax={100}
-                        />
+                      <div className="flex-grow-1">
+                        <div className="d-flex justify-content-between small mb-1">
+                          <span className="fw-semibold">{item.label}</span>
+                          <span className="text-muted">{item.count} kayıt</span>
+                        </div>
+                        <div className="progress" style={{ height: 5 }}>
+                          <div
+                            className="progress-bar bg-success"
+                            role="progressbar"
+                            style={{ width: `${percent}%` }}
+                            aria-valuenow={percent}
+                            aria-valuemin={0}
+                            aria-valuemax={100}
+                          />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
 
               {loadingSummary && (
-                <p className="text-muted small mt-2 mb-0">
-                  Dashboard verileri yükleniyor...
-                </p>
+                <p className="text-muted small mt-2 mb-0">Dashboard verileri yükleniyor...</p>
               )}
             </CardContent>
           </Card>
         </div>
+      </div>
+
+      <div className="text-muted small mt-3">
+        Günlük metrikler: <code>/api/admin/audit/metrics/daily</code> üzerinden gelmektedir.
       </div>
     </div>
   );

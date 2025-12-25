@@ -1,10 +1,15 @@
+// =============================================================
+// FILE: src/app.ts
+// FIX: Audit module single-entry mount (registerAudit) + remove duplicate stream mount
+// =============================================================
+
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
 import authPlugin from './plugins/authPlugin';
 import mysqlPlugin from '@/plugins/mysql';
-import staticUploads from "./plugins/staticUploads";
+import staticUploads from './plugins/staticUploads';
 import { localeMiddleware } from '@/common/middleware/locale';
 
 import type { FastifyInstance } from 'fastify';
@@ -38,6 +43,9 @@ import { registerSupport } from '@/modules/support/router';
 import { registerOffer } from '@/modules/offer/router';
 import { registerCatalog } from '@/modules/catalog/router';
 
+// ✅ Audit single entry
+import { registerAudit } from '@/modules/audit/router';
+
 // Admin modüller
 import { registerCustomPagesAdmin } from '@/modules/customPages/admin.routes';
 import { registerSiteSettingsAdmin } from '@/modules/siteSettings/admin.routes';
@@ -68,23 +76,22 @@ function parseCorsOrigins(v?: string | string[]): boolean | string[] {
   if (Array.isArray(v)) return v;
   const s = String(v).trim();
   if (!s) return true;
-  const arr = s.split(',').map((x) => x.trim()).filter(Boolean);
+  const arr = s
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
   return arr.length ? arr : true;
 }
 
 export async function createApp() {
-  const { default: buildFastify } =
-    (await import('fastify')) as unknown as {
-      default: (
-        opts?: Parameters<FastifyInstance['log']['child']>[0],
-      ) => FastifyInstance;
-    };
+  const { default: buildFastify } = (await import('fastify')) as unknown as {
+    default: (opts?: Parameters<FastifyInstance['log']['child']>[0]) => FastifyInstance;
+  };
 
   const app = buildFastify({
     logger: env.NODE_ENV !== 'production',
   }) as FastifyInstance;
 
-  // --- CORS ---
   await app.register(cors, {
     origin: parseCorsOrigins(env.CORS_ORIGIN as any),
     credentials: true,
@@ -92,7 +99,7 @@ export async function createApp() {
     allowedHeaders: [
       'Content-Type',
       'Authorization',
-      "x-lang",
+      'x-lang',
       'Prefer',
       'Accept',
       'Accept-Language',
@@ -103,11 +110,8 @@ export async function createApp() {
     exposedHeaders: ['x-total-count', 'content-range', 'range'],
   });
 
-  // --- Cookie ---
   const cookieSecret =
-    (globalThis as any).Bun?.env?.COOKIE_SECRET ??
-    process.env.COOKIE_SECRET ??
-    'cookie-secret';
+    (globalThis as any).Bun?.env?.COOKIE_SECRET ?? process.env.COOKIE_SECRET ?? 'cookie-secret';
 
   await app.register(cookie, {
     secret: cookieSecret,
@@ -120,7 +124,6 @@ export async function createApp() {
     },
   });
 
-  // --- JWT ---
   await app.register(jwt, {
     secret: env.JWT_SECRET,
     cookie: { cookieName: 'access_token', signed: false },
@@ -128,15 +131,11 @@ export async function createApp() {
 
   app.addHook('onRequest', localeMiddleware);
 
-  // 🔒 Guard
   await app.register(authPlugin);
-  // 🗄️ MySQL
   await app.register(mysqlPlugin);
 
-  // Basit root health (opsiyonel, iç test için)
   app.get('/health', async () => ({ ok: true }));
 
-  // Multipart
   await app.register(multipart, {
     throwFileSizeLimit: true,
     limits: { fileSize: 20 * 1024 * 1024 },
@@ -144,87 +143,33 @@ export async function createApp() {
 
   await app.register(staticUploads);
 
-  // ==========================
-  // /api prefix'li tüm modüller
-  // ==========================
   await app.register(
     async (api) => {
-      // /api/health
       api.get('/health', async () => ({ ok: true }));
-
-      // --- Admin modüller: /api/admin/...
-      await api.register(
-        async (i) => registerCustomPagesAdmin(i),
-        { prefix: '/admin' },
-      );
-      await api.register(async (i) => registerSiteSettingsAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerUserAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerFaqsAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerServicesAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerReferencesAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerStorageAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerMenuItemsAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerSliderAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerCategoriesAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerSubCategoriesAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerContactsAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerDbAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(
-        async (i) => registerEmailTemplatesAdmin(i),
-        { prefix: '/admin' },
-      );
-      await api.register(
-        async (i) => registerFooterSectionsAdmin(i),
-        { prefix: '/admin' },
-      );
-      await api.register(async (i) => registerLibraryAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerNewsletterAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerProductsAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerReviewsAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerSupportAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerDashboardAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerOfferAdmin(i), {
-        prefix: '/admin',
-      });
-      await api.register(async (i) => registerCatalogAdmin(i), {
-        prefix: '/admin',
-      });
+      await api.register(async (i) => registerAudit(i), { prefix: '/admin' });
+      await api.register(async (i) => registerCustomPagesAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerSiteSettingsAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerUserAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerFaqsAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerServicesAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerReferencesAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerStorageAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerMenuItemsAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerSliderAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerCategoriesAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerSubCategoriesAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerContactsAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerDbAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerEmailTemplatesAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerFooterSectionsAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerLibraryAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerNewsletterAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerProductsAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerReviewsAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerSupportAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerDashboardAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerOfferAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerCatalogAdmin(i), { prefix: '/admin' });
 
       // --- Public modüller: /api/...
       await registerAuth(api);

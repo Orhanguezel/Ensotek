@@ -7,8 +7,8 @@ const RobotsTxt: NextPage = () => null;
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const { res } = ctx;
 
-  const SITE = getRequestBaseUrl(ctx); // ✅ localhost/dev/prod doğru gelir
-  const sitemapUrl = `${SITE.replace(/\/+$/, '')}/sitemap.xml`;
+  const SITE = getRequestBaseUrl(ctx).replace(/\/+$/, '');
+  const sitemapUrl = `${SITE}/sitemap.xml`;
 
   const lines = [
     'User-agent: *',
@@ -23,7 +23,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     'Disallow: /*/dashboard/',
     '',
     `Sitemap: ${sitemapUrl}`,
-    `Host: ${SITE}`,
+    // Host satırı opsiyonel. İstersen aç:
+    // `Host: ${SITE}`,
     '',
   ].join('\n');
 

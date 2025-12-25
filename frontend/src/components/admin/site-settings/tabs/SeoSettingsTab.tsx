@@ -1,11 +1,18 @@
 // =============================================================
 // FILE: src/components/admin/site-settings/tabs/SeoSettingsTab.tsx
-// Ensotek – SEO Ayarları (localized only) + inline raw edit
-//  - Header'da seçilen locale ne ise sadece o locale'in SEO kayıtları gösterilir.
-//  - "Tüm SEO maddeleri" = seo, site_seo, site_meta_default (+ varsa diğer seo_* / seo|...)
+// Ensotek – SEO Ayarları (GLOBAL '*' + Localized Override)
+// ✅ MODAL KALDIRILDI
+// - “Düzenle” artık /admin/site-settings/[id]?locale=... form sayfasına gider
+//
+// FIXES (korundu):
+// - Locale change => refetch (stale view engeli)
+// - RTK Query: refetchOnMountOrArgChange (global + locale)
+// - Deterministic preview
+// - site_meta_default GLOBAL(*) olamaz (override/create/restore guard)
 // =============================================================
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 
 import {
@@ -15,6 +22,12 @@ import {
 } from '@/integrations/rtk/hooks';
 
 import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
+
+import {
+  DEFAULT_SEO_GLOBAL,
+  DEFAULT_SITE_SEO_GLOBAL,
+  DEFAULT_SITE_META_DEFAULT_BY_LOCALE,
+} from '@/seo/seoSchema';
 
 /* ----------------------------- helpers ----------------------------- */
 
@@ -28,23 +41,6 @@ function stringifyValuePretty(v: SettingValue): string {
   }
 }
 
-function parseRawValue(raw: string): SettingValue {
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  try {
-    return JSON.parse(trimmed) as SettingValue;
-  } catch {
-    return trimmed;
-  }
-}
-
-/**
- * ✅ DB standardına göre:
- *  - seo (primary)
- *  - site_seo (fallback)
- *  - site_meta_default (per-locale meta defaults)
- * Ayrıca projede mevcut olabilecek pattern’leri de kapsar.
- */
 function isSeoKey(key: string): boolean {
   const k = String(key || '')
     .trim()
@@ -63,122 +59,260 @@ function isSeoKey(key: string): boolean {
   );
 }
 
-/**
- * ✅ "Tüm SEO maddeleri gelsin" isteği için:
- * Önce temel 3 key (seo, site_seo, site_meta_default), sonra kalan seo key’leri.
- */
 const PRIMARY_SEO_KEYS = ['seo', 'site_seo', 'site_meta_default'] as const;
 
-function orderSeoRows(rows: SiteSetting[]): SiteSetting[] {
-  const map = new Map<string, SiteSetting>();
-  for (const r of rows) map.set(r.key, r);
+function orderSeoKeys(keys: string[]): string[] {
+  const uniqKeys = Array.from(new Set(keys.filter(Boolean)));
+  const primary = PRIMARY_SEO_KEYS.filter((k) => uniqKeys.includes(k));
+  const rest = uniqKeys
+    .filter((k) => !PRIMARY_SEO_KEYS.includes(k as any))
+    .sort((a, b) => a.localeCompare(b));
+  return [...primary, ...rest];
+}
 
-  const ordered: SiteSetting[] = [];
+type RowGroup = {
+  key: string;
+  globalRow?: SiteSetting; // locale='*'
+  localeRow?: SiteSetting; // locale='{selected}'
+  effectiveValue: SettingValue | undefined;
+  effectiveSource: 'locale' | 'global' | 'none';
+};
 
-  for (const k of PRIMARY_SEO_KEYS) {
-    const row = map.get(k);
-    if (row) ordered.push(row);
+function buildGroups(rows: SiteSetting[], locale: string): RowGroup[] {
+  const seoRows = rows.filter((r) => r && isSeoKey(r.key));
+  const keys = orderSeoKeys(seoRows.map((r) => r.key));
+
+  const byKey = new Map<string, { global?: SiteSetting; local?: SiteSetting }>();
+  for (const r of seoRows) {
+    const entry = byKey.get(r.key) || {};
+    if (r.locale === '*') entry.global = r;
+    if (r.locale === locale) entry.local = r;
+    byKey.set(r.key, entry);
   }
 
-  // kalan SEO key’leri (primary olmayan)
-  const rest = rows
-    .filter((r) => !!r && isSeoKey(r.key) && !PRIMARY_SEO_KEYS.includes(r.key as any))
-    .sort((a, b) => String(a.key).localeCompare(String(b.key)));
+  return keys.map((k) => {
+    const entry = byKey.get(k) || {};
+    const effectiveSource: RowGroup['effectiveSource'] = entry.local
+      ? 'locale'
+      : entry.global
+      ? 'global'
+      : 'none';
 
-  return [...ordered, ...rest];
+    const effectiveValue =
+      effectiveSource === 'locale'
+        ? entry.local?.value
+        : effectiveSource === 'global'
+        ? entry.global?.value
+        : undefined;
+
+    return {
+      key: k,
+      globalRow: entry.global,
+      localeRow: entry.local,
+      effectiveSource,
+      effectiveValue,
+    };
+  });
+}
+
+function preview(v: SettingValue | undefined): string {
+  if (v === undefined) return '';
+  const pretty = stringifyValuePretty(v);
+  if (pretty.length <= 180) return pretty;
+  return pretty.slice(0, 180) + '...';
+}
+
+function isPrimaryKey(k: string) {
+  return k === 'seo' || k === 'site_seo' || k === 'site_meta_default';
+}
+
+function getEditHref(key: string, targetLocale: string) {
+  return `/admin/site-settings/${encodeURIComponent(key)}?locale=${encodeURIComponent(
+    targetLocale,
+  )}`;
 }
 
 /* ----------------------------- component ----------------------------- */
 
 export type SeoSettingsTabProps = {
-  locale: string; // real locale (tr/en/de)
+  locale: string; // selected locale from header
 };
 
 export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
   const [search, setSearch] = useState('');
 
-  // Raw edit modal
-  const [editing, setEditing] = useState<SiteSetting | null>(null);
-  const [editRaw, setEditRaw] = useState<string>('');
+  // ✅ Query args
+  const listArgsGlobal = useMemo(() => {
+    const q = search.trim() || undefined;
+    return { locale: '*', q };
+  }, [search]);
 
-  // ✅ IMPORTANT:
-  // Bu tab SADECE seçilen locale ile çalışır.
-  // Diğer diller / global(*) içerik burada çekilmez.
-  const listArgs = useMemo(() => {
+  const listArgsLocale = useMemo(() => {
     const q = search.trim() || undefined;
     return { locale, q };
   }, [locale, search]);
 
-  const {
-    data: rows,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useListSiteSettingsAdminQuery(listArgs, {
+  // ✅ IMPORTANT: refetchOnMountOrArgChange fixes stale locale switching in this tab
+  const qGlobal = useListSiteSettingsAdminQuery(listArgsGlobal, {
     skip: !locale,
+    refetchOnMountOrArgChange: true,
   });
 
-  const seoRows = useMemo(() => {
-    const arr = Array.isArray(rows) ? rows : [];
-    const onlySeo = arr.filter((r) => r && isSeoKey(r.key));
-    return orderSeoRows(onlySeo);
-  }, [rows]);
+  const qLocale = useListSiteSettingsAdminQuery(listArgsLocale, {
+    skip: !locale,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const rowsMerged = useMemo(() => {
+    const g = Array.isArray(qGlobal.data) ? qGlobal.data : [];
+    const l = Array.isArray(qLocale.data) ? qLocale.data : [];
+    return [...g, ...l];
+  }, [qGlobal.data, qLocale.data]);
+
+  const groups = useMemo(() => {
+    const arr = rowsMerged || [];
+    const s = search.trim().toLowerCase();
+
+    const filtered =
+      s && s.length >= 2
+        ? arr.filter((r) => {
+            const k = String(r?.key || '').toLowerCase();
+            const v = stringifyValuePretty(r?.value as any).toLowerCase();
+            return k.includes(s) || v.includes(s);
+          })
+        : arr;
+
+    return buildGroups(filtered, locale);
+  }, [rowsMerged, locale, search]);
 
   const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
   const [deleteSetting, { isLoading: isDeleting }] = useDeleteSiteSettingAdminMutation();
 
-  const busy = isLoading || isFetching || isSaving || isDeleting;
+  const busy =
+    qGlobal.isLoading ||
+    qLocale.isLoading ||
+    qGlobal.isFetching ||
+    qLocale.isFetching ||
+    isSaving ||
+    isDeleting;
 
-  const handleEdit = (s: SiteSetting) => {
-    setEditing(s);
-    setEditRaw(stringifyValuePretty(s.value));
+  const refetchAll = async () => {
+    await Promise.all([qGlobal.refetch(), qLocale.refetch()]);
   };
 
-  const handleClose = () => {
-    setEditing(null);
-    setEditRaw('');
-  };
+  // ✅ Locale changed => refetch; prevents “previous locale view”
+  useEffect(() => {
+    if (!locale) return;
+    void refetchAll();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locale]);
 
-  const handleSave = async () => {
-    if (!editing) return;
-
-    try {
-      const value = parseRawValue(editRaw);
-
-      await updateSetting({
-        key: editing.key,
-        locale, // ✅ write to selected locale only
-        value,
-      }).unwrap();
-
-      toast.success(`"${editing.key}" SEO ayarı güncellendi.`);
-      handleClose();
-      await refetch();
-    } catch (err: any) {
-      const msg =
-        err?.data?.error?.message || err?.message || 'SEO ayarı güncellenirken hata oluştu.';
-      toast.error(msg);
-    }
-  };
-
-  const handleDelete = async (s: SiteSetting) => {
-    const ok = window.confirm(`"${s.key}" (${locale}) silinsin mi?`);
+  const deleteRow = async (key: string, targetLocale: string) => {
+    const ok = window.confirm(`"${key}" (${targetLocale}) silinsin mi?`);
     if (!ok) return;
 
     try {
-      await deleteSetting({ key: s.key, locale }).unwrap();
-      toast.success(`"${s.key}" silindi.`);
-      await refetch();
+      await deleteSetting({ key, locale: targetLocale }).unwrap();
+      toast.success(`"${key}" (${targetLocale}) silindi.`);
+      await refetchAll();
     } catch (err: any) {
       const msg = err?.data?.error?.message || err?.message || 'SEO ayarı silinirken hata oluştu.';
       toast.error(msg);
     }
   };
 
-  const renderPreview = (v: SettingValue) => {
-    const pretty = stringifyValuePretty(v);
-    if (pretty.length <= 180) return pretty;
-    return pretty.slice(0, 180) + '...';
+  const createOverrideFromGlobal = async (g: RowGroup) => {
+    if (!g.globalRow) {
+      toast.error('GLOBAL (*) kayıt bulunamadı. Önce global değer oluşturmalısın.');
+      return;
+    }
+
+    // site_meta_default should not be global-copied; it must be locale based
+    if (g.key === 'site_meta_default') {
+      toast.error('site_meta_default GLOBAL(*) olamaz. Locale için seed/structured değer yaz.');
+      return;
+    }
+
+    try {
+      await updateSetting({
+        key: g.key,
+        locale,
+        value: g.globalRow.value,
+      }).unwrap();
+
+      toast.success(`"${g.key}" için ${locale} override oluşturuldu (GLOBAL kopyalandı).`);
+      await refetchAll();
+    } catch (err: any) {
+      const msg =
+        err?.data?.error?.message || err?.message || 'Override oluşturulurken hata oluştu.';
+      toast.error(msg);
+    }
+  };
+
+  const restoreDefaults = async (key: string, targetLocale: string) => {
+    try {
+      if (key === 'seo') {
+        await updateSetting({ key, locale: targetLocale, value: DEFAULT_SEO_GLOBAL }).unwrap();
+      } else if (key === 'site_seo') {
+        await updateSetting({ key, locale: targetLocale, value: DEFAULT_SITE_SEO_GLOBAL }).unwrap();
+      } else if (key === 'site_meta_default') {
+        if (targetLocale === '*') {
+          toast.error('site_meta_default global(*) olamaz. Locale seçerek restore et.');
+          return;
+        }
+        const seed =
+          DEFAULT_SITE_META_DEFAULT_BY_LOCALE[targetLocale] ||
+          DEFAULT_SITE_META_DEFAULT_BY_LOCALE[locale] ||
+          DEFAULT_SITE_META_DEFAULT_BY_LOCALE['tr'];
+        await updateSetting({ key, locale: targetLocale, value: seed }).unwrap();
+      } else {
+        toast.error('Bu key için default tanımlı değil.');
+        return;
+      }
+
+      toast.success(`"${key}" (${targetLocale}) default değerler geri yüklendi.`);
+      await refetchAll();
+    } catch (err: any) {
+      const msg = err?.data?.error?.message || err?.message || 'Default restore hata verdi.';
+      toast.error(msg);
+    }
+  };
+
+  const upsertEmptyGlobalDefaults = async () => {
+    const keys = ['seo', 'site_seo'] as const;
+
+    try {
+      for (const k of keys) {
+        const exists = groups.find((g) => g.key === k)?.globalRow;
+        if (exists) continue;
+
+        await updateSetting({
+          key: k,
+          locale: '*',
+          value: k === 'seo' ? DEFAULT_SEO_GLOBAL : DEFAULT_SITE_SEO_GLOBAL,
+        }).unwrap();
+      }
+      toast.success('Eksik GLOBAL SEO kayıtları oluşturuldu.');
+      await refetchAll();
+    } catch (err: any) {
+      const msg = err?.data?.error?.message || err?.message || 'GLOBAL bootstrap hata verdi.';
+      toast.error(msg);
+    }
+  };
+
+  const effectiveEditLocale = (g: RowGroup): string => {
+    // Öncelik: locale override varsa locale, yoksa global
+    const chosen = g.localeRow ? locale : g.globalRow ? '*' : locale;
+
+    // site_meta_default asla '*' ile düzenlenmesin (form sayfasında da guard var)
+    if (g.key === 'site_meta_default' && chosen === '*') return locale;
+    return chosen;
+  };
+
+  const globalEditLocaleForKey = (key: string): string => {
+    // site_meta_default global edit yok -> locale ile aç
+    if (key === 'site_meta_default') return locale;
+    return '*';
   };
 
   return (
@@ -187,19 +321,29 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
         <div className="d-flex flex-column">
           <span className="small fw-semibold">SEO Ayarları</span>
           <span className="text-muted small">
-            Bu tab yalnızca seçili dilin SEO kayıtlarını gösterir (locale bazlı).
+            GLOBAL (<code>*</code>) default + seçili dil (<strong>{locale}</strong>) override
+            birlikte yönetilir. “Düzenle” butonu form sayfasını açar.
           </span>
         </div>
 
         <div className="d-flex align-items-center gap-2">
-          <span className="badge bg-light text-dark border">Aktif dil: {locale}</span>
+          <span className="badge bg-light text-dark border">Dil: {locale}</span>
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm"
-            onClick={refetch}
+            onClick={refetchAll}
             disabled={busy}
           >
             Yenile
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm"
+            onClick={upsertEmptyGlobalDefaults}
+            disabled={busy}
+            title="seo / site_seo GLOBAL (*) yoksa default schema ile oluşturur"
+          >
+            Global Bootstrap
           </button>
         </div>
       </div>
@@ -227,123 +371,178 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
           <table className="table table-hover mb-0">
             <thead>
               <tr>
-                <th style={{ width: '35%' }}>Key</th>
-                <th style={{ width: '45%' }}>Değer (Özet)</th>
+                <th style={{ width: '28%' }}>Key</th>
+                <th style={{ width: '18%' }}>Kaynak</th>
+                <th style={{ width: '34%' }}>Effective (Özet)</th>
                 <th style={{ width: '20%' }} className="text-end">
                   İşlemler
                 </th>
               </tr>
             </thead>
+
             <tbody>
-              {seoRows.length ? (
-                seoRows.map((s) => (
-                  <tr key={`${s.key}_${s.locale || 'none'}`}>
-                    <td className="font-monospace small">{s.key}</td>
-                    <td>
-                      <span className="text-muted small">{renderPreview(s.value)}</span>
-                    </td>
-                    <td className="text-end">
-                      <div className="d-inline-flex gap-1">
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary btn-sm"
-                          onClick={() => handleEdit(s)}
-                          disabled={busy}
-                        >
-                          Düzenle
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDelete(s)}
-                          disabled={busy}
-                        >
-                          Sil
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+              {groups.length ? (
+                groups.map((g) => {
+                  const hasGlobal = Boolean(g.globalRow);
+                  const hasLocal = Boolean(g.localeRow);
+
+                  const editLoc = effectiveEditLocale(g);
+                  const editHref = getEditHref(g.key, editLoc);
+
+                  return (
+                    <React.Fragment key={`group_${g.key}`}>
+                      {/* Group summary row */}
+                      <tr className="table-light">
+                        <td className="font-monospace small">
+                          <strong>{g.key}</strong>
+                        </td>
+                        <td>
+                          {g.effectiveSource === 'locale' ? (
+                            <span className="badge bg-success">Override</span>
+                          ) : g.effectiveSource === 'global' ? (
+                            <span className="badge bg-primary">Global</span>
+                          ) : (
+                            <span className="badge bg-secondary">Yok</span>
+                          )}
+                        </td>
+
+                        <td>
+                          <span className="text-muted small">{preview(g.effectiveValue)}</span>
+                          {g.effectiveSource === 'global' && !hasLocal && (
+                            <div className="text-muted small mt-1">
+                              Bu key için <strong>{locale}</strong> override yok; GLOBAL (
+                              <code>*</code>) uygulanıyor.
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="text-end">
+                          <div className="d-inline-flex gap-1 flex-wrap justify-content-end">
+                            <Link href={editHref} className="btn btn-outline-secondary btn-sm">
+                              Düzenle
+                            </Link>
+
+                            {!hasLocal && hasGlobal && g.key !== 'site_meta_default' && (
+                              <button
+                                type="button"
+                                className="btn btn-outline-success btn-sm"
+                                onClick={() => createOverrideFromGlobal(g)}
+                                disabled={busy}
+                              >
+                                Override Oluştur
+                              </button>
+                            )}
+
+                            {isPrimaryKey(g.key) && (hasGlobal || hasLocal) && (
+                              <button
+                                type="button"
+                                className="btn btn-outline-primary btn-sm"
+                                onClick={() => restoreDefaults(g.key, hasLocal ? locale : '*')}
+                                disabled={busy}
+                                title="Bu satırın default değerlerini geri yükler"
+                              >
+                                Restore
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Global row */}
+                      <tr>
+                        <td className="text-muted small ps-4">GLOBAL (*)</td>
+                        <td className="text-muted small">{hasGlobal ? 'Var' : 'Yok'}</td>
+                        <td className="text-muted small">
+                          {hasGlobal ? preview(g.globalRow?.value) : '-'}
+                        </td>
+                        <td className="text-end">
+                          <div className="d-inline-flex gap-1">
+                            <Link
+                              href={getEditHref(g.key, globalEditLocaleForKey(g.key))}
+                              className={`btn btn-outline-secondary btn-sm ${
+                                !hasGlobal ? 'disabled' : ''
+                              }`}
+                              aria-disabled={!hasGlobal}
+                              tabIndex={!hasGlobal ? -1 : 0}
+                            >
+                              Düzenle
+                            </Link>
+
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              disabled={busy || !hasGlobal}
+                              onClick={() => deleteRow(g.key, '*')}
+                              title={
+                                g.key === 'site_meta_default'
+                                  ? 'Normalde GLOBAL olmaz; varsa silinebilir.'
+                                  : ''
+                              }
+                            >
+                              Sil
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+
+                      {/* Locale row */}
+                      <tr>
+                        <td className="text-muted small ps-4">LOCALE ({locale})</td>
+                        <td className="text-muted small">{hasLocal ? 'Var' : 'Yok'}</td>
+                        <td className="text-muted small">
+                          {hasLocal ? preview(g.localeRow?.value) : '-'}
+                        </td>
+                        <td className="text-end">
+                          <div className="d-inline-flex gap-1">
+                            <Link
+                              href={getEditHref(g.key, locale)}
+                              className={`btn btn-outline-secondary btn-sm ${
+                                !hasLocal ? 'disabled' : ''
+                              }`}
+                              aria-disabled={!hasLocal}
+                              tabIndex={!hasLocal ? -1 : 0}
+                            >
+                              Düzenle
+                            </Link>
+
+                            <button
+                              type="button"
+                              className="btn btn-danger btn-sm"
+                              disabled={busy || !hasLocal}
+                              onClick={() => deleteRow(g.key, locale)}
+                            >
+                              Sil
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    </React.Fragment>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={3}>
+                  <td colSpan={4}>
                     <div className="text-center text-muted small py-3">
                       SEO kaydı bulunamadı.
                       <div className="mt-1">
-                        Not: Bu tab sadece <strong>{locale}</strong> localeini gösterir. Eğer{' '}
-                        <code>seo</code> kaydın sadece <code>*</code> ise, burada görünmez; o
-                        locale’de override kaydı oluşturmalısın.
+                        Seed çalıştıysa en az <code>seo</code> ve <code>site_seo</code> GLOBAL
+                        satırı görünmelidir.
                       </div>
                     </div>
                   </td>
                 </tr>
               )}
             </tbody>
+
+            <caption className="pt-2">
+              <span className="text-muted small">
+                Not: <code>site_meta_default</code> GLOBAL(*) olamaz; edit linki her zaman locale
+                ile açılır.
+              </span>
+            </caption>
           </table>
         </div>
       </div>
-
-      {/* --------------------- Raw Edit Modal --------------------- */}
-      {editing && (
-        <>
-          <div className="modal-backdrop fade show" />
-
-          <div className="modal d-block" tabIndex={-1} role="dialog" aria-modal="true">
-            <div className="modal-dialog modal-lg modal-dialog-centered">
-              <div className="modal-content">
-                <div className="modal-header py-2">
-                  <h5 className="modal-title small mb-0">
-                    SEO Düzenle: <code>{editing.key}</code>
-                    <span className="badge bg-light text-dark border ms-2">{locale}</span>
-                  </h5>
-
-                  <button
-                    type="button"
-                    className="btn-close"
-                    aria-label="Kapat"
-                    onClick={handleClose}
-                    disabled={isSaving}
-                  />
-                </div>
-
-                <div className="modal-body">
-                  <p className="text-muted small mb-2">
-                    Geçerli JSON girersen değer JSON olarak, aksi halde düz string olarak saklanır.
-                  </p>
-
-                  <label className="form-label small">Değer (raw / JSON)</label>
-                  <textarea
-                    className="form-control font-monospace"
-                    rows={10}
-                    value={editRaw}
-                    onChange={(e) => setEditRaw(e.target.value)}
-                    spellCheck={false}
-                  />
-                </div>
-
-                <div className="modal-footer py-2">
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary btn-sm"
-                    onClick={handleClose}
-                    disabled={isSaving}
-                  >
-                    İptal
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm"
-                    onClick={handleSave}
-                    disabled={isSaving}
-                  >
-                    {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 };

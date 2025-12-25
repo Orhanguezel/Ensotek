@@ -1,20 +1,21 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemHeader.tsx
-// Ensotek – Admin Menu Items Header / Filters (responsive + locale)
+// Ensotek – Admin Menu Items Header / Filters (HEADER ONLY)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
+import type { MenuLocation } from '@/integrations/types/menu_items.types';
 
 export type LocaleOption = {
-  value: string; // "tr", "en"...
-  label: string; // "Türkçe (tr)"...
+  value: string;
+  label: string;
 };
 
 export type MenuItemFilters = {
   search: string;
-  location: 'all' | 'header' | 'footer';
+  location: MenuLocation;
   active: 'all' | 'active' | 'inactive';
   sort: 'display_order' | 'created_at' | 'title';
   order: 'asc' | 'desc';
@@ -131,21 +132,6 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                 </select>
               </div>
 
-              {/* Location */}
-              <div className="col-6 col-md-4 col-xl-2">
-                <label className="form-label small mb-1">Konum</label>
-                <select
-                  className="form-select form-select-sm"
-                  value={filters.location}
-                  onChange={handleInputChange('location')}
-                  disabled={loading}
-                >
-                  <option value="all">Tümü</option>
-                  <option value="header">Header</option>
-                  <option value="footer">Footer</option>
-                </select>
-              </div>
-
               {/* Active */}
               <div className="col-6 col-md-4 col-xl-2">
                 <label className="form-label small mb-1">Aktiflik</label>
@@ -162,7 +148,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
               </div>
 
               {/* Sort */}
-              <div className="col-12 col-md-4 col-xl-2">
+              <div className="col-6 col-md-4 col-xl-2">
                 <label className="form-label small mb-1">Sıralama</label>
                 <select
                   className="form-select form-select-sm"
@@ -176,11 +162,10 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                 </select>
               </div>
 
-              {/* Order: always stable (mobile select, md+ button) */}
-              <div className="col-12 col-md-4 col-xl-2">
+              {/* Order */}
+              <div className="col-12 col-md-4 col-xl-1">
                 <label className="form-label small mb-1 d-block">Yön</label>
 
-                {/* md+ : button (better UX), mobile: select */}
                 <div className="d-none d-md-block">
                   <button
                     type="button"
@@ -188,7 +173,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                     disabled={loading}
                     onClick={handleOrderToggle}
                   >
-                    {filters.order === 'asc' ? 'Artan ↑' : 'Azalan ↓'}
+                    {filters.order === 'asc' ? '↑' : '↓'}
                   </button>
                 </div>
 
@@ -204,6 +189,8 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                   </select>
                 </div>
               </div>
+
+              {/* ✅ Location kaldırıldı (Header-only) */}
             </div>
           </div>
         </div>
@@ -215,7 +202,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
           <div className="card-body py-2">
             <div className="d-flex flex-column flex-sm-row flex-lg-column justify-content-between align-items-start gap-2 h-100">
               <div className="small text-muted">
-                <div className="fw-semibold text-dark">Menü Öğeleri</div>
+                <div className="fw-semibold text-dark">Header Menü</div>
                 <div>
                   Toplam <span className="fw-semibold">{totalSafe}</span> kayıt görüntüleniyor.
                 </div>
@@ -236,7 +223,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                   disabled={loading}
                   onClick={onCreateClick}
                 >
-                  + Yeni Menü Öğesi
+                  + Yeni Header Menü Öğesi
                 </button>
               </div>
             </div>

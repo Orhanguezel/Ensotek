@@ -67,6 +67,19 @@ export const LibraryList: React.FC<LibraryListProps> = ({
     );
   }
 
+  // ✅ colgroup içinde whitespace/text node oluşmaması için array ile üret
+  const COL_WIDTHS = [
+    '56px',
+    '360px',
+    '420px',
+    '90px',
+    '90px',
+    '120px',
+    '120px',
+    '80px',
+    '180px',
+  ] as const;
+
   return (
     <div className="card">
       {/* Header */}
@@ -97,15 +110,9 @@ export const LibraryList: React.FC<LibraryListProps> = ({
               style={{ tableLayout: 'fixed', width: '100%' }}
             >
               <colgroup>
-                <col style={{ width: '56px' }} /> {/* # */}
-                <col style={{ width: '360px' }} /> {/* Title/Slug */}
-                <col style={{ width: '420px' }} /> {/* Summary */}
-                <col style={{ width: '90px' }} /> {/* Published */}
-                <col style={{ width: '90px' }} /> {/* Active */}
-                <col style={{ width: '120px' }} /> {/* Views */}
-                <col style={{ width: '120px' }} /> {/* Downloads */}
-                <col style={{ width: '80px' }} /> {/* Order */}
-                <col style={{ width: '180px' }} /> {/* Actions */}
+                {COL_WIDTHS.map((w, i) => (
+                  <col key={i} style={{ width: w }} />
+                ))}
               </colgroup>
 
               <thead className="table-light">
