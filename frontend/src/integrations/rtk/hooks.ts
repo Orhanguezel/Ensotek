@@ -79,3 +79,4 @@ export * from './endpoints/admin/ticket_replies_admin.endpoints';
 export * from './endpoints/admin/site_settings_admin.endpoints';
 export * from './endpoints/admin/storage_admin.endpoints';
 export * from './endpoints/admin/users_admin.endpoints';
+export * from './endpoints/admin/audit_admin.endpoints';

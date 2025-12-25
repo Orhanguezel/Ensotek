@@ -1,12 +1,12 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemForm.tsx
-// Ensotek – Admin Menu Item Create / Edit Form (locale aware)
+// Ensotek – Admin Menu Item Create / Edit Form (HEADER ONLY)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import type { MenuLocation, MenuItemType } from '@/integrations/types/menu_items.types';
+import type { MenuItemType } from '@/integrations/types/menu_items.types';
 
 export type MenuItemFormValues = {
   title: string;
@@ -14,7 +14,10 @@ export type MenuItemFormValues = {
   type: MenuItemType;
   page_id: string | null;
   parent_id: string | null;
-  location: MenuLocation;
+
+  // ✅ still in state for payload consistency, but UI does not edit it
+  location: 'header';
+
   icon: string;
   section_id: string | null;
   is_active: boolean;
@@ -55,11 +58,9 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
       value: toShortLocale(o.value),
       label: o.label,
     }));
-    // de-dupe
     return list.filter((x, idx, arr) => arr.findIndex((y) => y.value === x.value) === idx);
   }, [localeOptions]);
 
-  // value select içinde yoksa en yakın fallback ile göster (UI takılmasın)
   const localeValue = useMemo(() => {
     const cur = toShortLocale(values.locale);
     if (cur && normalizedLocaleOptions.some((o) => o.value === cur)) return cur;
@@ -86,6 +87,13 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
   return (
     <div className="row g-3">
+      <div className="col-12">
+        <div className="alert alert-light border small mb-0">
+          Bu ekran sadece <code>Header</code> menü öğelerini yönetir. <code>location</code> alanı
+          sabittir.
+        </div>
+      </div>
+
       <div className="col-md-6">
         <label className="form-label form-label-sm">
           Başlık <span className="text-danger">*</span>
@@ -111,7 +119,6 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
           disabled={disabled || !!localesLoading}
         >
           {normalizedLocaleOptions.length === 0 ? <option value="">Yükleniyor...</option> : null}
-
           {normalizedLocaleOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -147,22 +154,9 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
         </select>
       </div>
 
-      <div className="col-md-3">
-        <label className="form-label form-label-sm">
-          Konum <span className="text-danger">*</span>
-        </label>
-        <select
-          className="form-select form-select-sm"
-          value={values.location}
-          onChange={handleChange('location')}
-          disabled={disabled}
-        >
-          <option value="header">Header</option>
-          <option value="footer">Footer</option>
-        </select>
-      </div>
+      {/* ✅ Konum alanı kaldırıldı */}
 
-      <div className="col-md-6">
+      <div className="col-md-9">
         <label className="form-label form-label-sm">
           URL {values.type === 'custom' && <span className="text-danger">*</span>}
         </label>

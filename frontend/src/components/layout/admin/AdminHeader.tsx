@@ -1,8 +1,12 @@
+// src/components/layout/admin/AdminHeader.tsx
+
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { Bell, PanelLeftOpen, PanelLeftClose } from 'lucide-react';
 import { useRouter } from 'next/router';
+
+import { ClientOnly } from '@/components/common/ClientOnly';
 
 import {
   useListNotificationsQuery,
@@ -80,7 +84,7 @@ export default function AdminHeader({
     <header className="border-bottom bg-white">
       <div className="container-fluid d-flex align-items-center justify-content-between py-2 px-3">
         <div className="d-flex align-items-center gap-2" style={{ minWidth: 0 }}>
-          {/* ✅ Sidebar toggle */}
+          {/* ✅ Sidebar toggle (ClientOnly: hydration mismatch fix) */}
           <button
             type="button"
             className="btn btn-outline-dark btn-sm d-inline-flex align-items-center"
@@ -89,7 +93,9 @@ export default function AdminHeader({
             title="Menüyü aç/kapat"
             disabled={!onToggleSidebar}
           >
-            {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+            <ClientOnly fallback={<PanelLeftClose size={16} />}>
+              {sidebarCollapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+            </ClientOnly>
           </button>
         </div>
 

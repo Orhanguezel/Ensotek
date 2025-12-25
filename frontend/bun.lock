@@ -31,7 +31,7 @@
         "embla-carousel-autoplay": "^8.6.0",
         "embla-carousel-react": "^8.6.0",
         "framer-motion": "^10.11.2",
-        "lucide-react": "^0.555.0",
+        "lucide-react": "0.555.0",
         "next": "13.2.4",
         "node-fetch": "2",
         "nprogress": "^0.2.0",
@@ -67,6 +67,9 @@
         "typescript": "5.0.2",
       },
     },
+  },
+  "overrides": {
+    "lucide-react": "0.555.0",
   },
   "packages": {
     "@adobe/css-tools": ["@adobe/css-tools@4.4.4", "", {}, "sha512-Elp+iwUx5rN5+Y8xLt5/GRoG20WGoDCQ/1Fb+1LiGtvwbDavuSk0jhD/eZdckHAuzcDzccnkv+rEjyWfRx18gg=="],

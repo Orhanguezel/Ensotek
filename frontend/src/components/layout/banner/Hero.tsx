@@ -25,7 +25,7 @@ import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 // RTK – PUBLIC sliders
 import {
   useListSlidersQuery,
-} from "@/integrations/rtk/endpoints/sliders.endpoints";
+} from "@/integrations/rtk/hooks";
 import type { SliderPublicDto } from "@/integrations/types/slider.types";
 
 // Ortak helper'lar

@@ -57,3 +57,5 @@ import './ticket_replies_admin.endpoints';
 import './site_settings_admin.endpoints';
 import './storage_admin.endpoints';
 import './users_admin.endpoints';
+
+import './audit_admin.endpoints';

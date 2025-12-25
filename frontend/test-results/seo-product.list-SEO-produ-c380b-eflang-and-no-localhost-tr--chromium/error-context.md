@@ -1,0 +1,325 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - generic [ref=e3]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - link "Ensotek Enerji Sistemleri" [ref=e9] [cursor=pointer]:
+            - /url: /
+            - img "Ensotek Enerji Sistemleri" [ref=e10]
+          - button "Close" [ref=e12] [cursor=pointer]:
+            - img [ref=e13]
+        - generic [ref=e16]:
+          - generic [ref=e17]:
+            - img [ref=e18]
+            - generic [ref=e21]: Language
+          - combobox "Language" [ref=e22]:
+            - option "Türkçe" [selected]
+            - option "English"
+            - option "Deutsch"
+          - generic [ref=e23]:
+            - link "Login" [ref=e24] [cursor=pointer]:
+              - /url: /login
+              - img [ref=e25]
+              - text: Login
+            - link "Register" [ref=e28] [cursor=pointer]:
+              - /url: /register
+              - img [ref=e29]
+              - text: Register
+        - generic [ref=e33]:
+          - textbox "Search..." [ref=e34]
+          - button "Search" [ref=e35] [cursor=pointer]:
+            - img [ref=e36]
+        - navigation [ref=e41]:
+          - list [ref=e42]:
+            - listitem [ref=e43]:
+              - link "Anasayfa" [ref=e44] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e45]:
+              - button "Hakkımızda" [ref=e46] [cursor=pointer]:
+                - generic [ref=e47]: Hakkımızda
+              - list [ref=e48]:
+                - listitem [ref=e49]:
+                  - link "Hakkımızda" [ref=e50] [cursor=pointer]:
+                    - /url: /about
+                - listitem [ref=e51]:
+                  - link "Ekibimiz" [ref=e52] [cursor=pointer]:
+                    - /url: /team
+                - listitem [ref=e53]:
+                  - link "Sıkça Sorulan Sorular" [ref=e54] [cursor=pointer]:
+                    - /url: /faqs
+            - listitem [ref=e55]:
+              - button "Hizmetler" [ref=e56] [cursor=pointer]:
+                - generic [ref=e57]: Hizmetler
+              - list [ref=e58]:
+                - listitem [ref=e59]:
+                  - link "Bakım & Servis" [ref=e60] [cursor=pointer]:
+                    - /url: /service/maintenance
+                - listitem [ref=e61]:
+                  - link "Proje & Danışmanlık" [ref=e62] [cursor=pointer]:
+                    - /url: /service/project-consulting
+            - listitem [ref=e63]:
+              - button "Ürünler" [ref=e64] [cursor=pointer]:
+                - generic [ref=e65]: Ürünler
+              - list [ref=e66]:
+                - listitem [ref=e67]:
+                  - link "Tüm Ürünler" [ref=e68] [cursor=pointer]:
+                    - /url: /product
+                - listitem [ref=e69]:
+                  - link "Yedek Parçalar" [ref=e70] [cursor=pointer]:
+                    - /url: /sparepart
+            - listitem [ref=e71]:
+              - link "Kütüphane" [ref=e72] [cursor=pointer]:
+                - /url: /library
+            - listitem [ref=e73]:
+              - link "Haberler" [ref=e74] [cursor=pointer]:
+                - /url: /news
+            - listitem [ref=e75]:
+              - link "İletişim" [ref=e76] [cursor=pointer]:
+                - /url: /contact
+        - generic [ref=e77]:
+          - heading "Contact Info" [level=4] [ref=e78]
+          - list [ref=e79]:
+            - listitem [ref=e80]:
+              - img [ref=e82]
+              - link "ensotek.de" [ref=e86] [cursor=pointer]:
+                - /url: https://ensotek.de
+            - listitem [ref=e87]:
+              - img [ref=e89]
+              - link "Call" [ref=e92] [cursor=pointer]:
+                - /url: tel:+902120000000
+                - text: +90 212 000 00 00
+            - listitem [ref=e93]:
+              - img [ref=e95]
+              - link "Email" [ref=e99] [cursor=pointer]:
+                - /url: mailto:info@ensotek.com
+                - text: info@ensotek.com
+        - list [ref=e101]:
+          - listitem [ref=e102]:
+            - link "facebook" [ref=e103] [cursor=pointer]:
+              - /url: https://facebook.com/ensotek
+              - img [ref=e104]
+          - listitem [ref=e106]:
+            - link "twitter" [ref=e107] [cursor=pointer]:
+              - /url: https://x.com/ensotek
+              - img [ref=e108]
+          - listitem [ref=e110]:
+            - link "youtube" [ref=e111] [cursor=pointer]:
+              - /url: https://youtube.com/@ensotek
+              - img [ref=e112]
+          - listitem [ref=e114]:
+            - link "linkedin" [ref=e115] [cursor=pointer]:
+              - /url: https://linkedin.com/company/ensotek
+              - img [ref=e116]
+          - listitem [ref=e118]:
+            - link "instagram" [ref=e119] [cursor=pointer]:
+              - /url: https://instagram.com/ensotek
+              - img [ref=e120]
+      - banner:
+        - generic [ref=e124]:
+          - link "Ensotek Enerji Sistemleri" [ref=e127] [cursor=pointer]:
+            - /url: /
+            - img "Ensotek Enerji Sistemleri" [ref=e128]
+          - navigation [ref=e132]:
+            - list [ref=e133]:
+              - listitem [ref=e134]:
+                - link "Anasayfa" [ref=e135] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e136]:
+                - link "Hakkımızda" [ref=e137] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e138]:
+                - link "Hizmetler" [ref=e139] [cursor=pointer]:
+                  - /url: /service
+              - listitem [ref=e140]:
+                - link "Ürünler" [ref=e141] [cursor=pointer]:
+                  - /url: /product
+              - listitem [ref=e142]:
+                - link "Kütüphane" [ref=e143] [cursor=pointer]:
+                  - /url: /library
+              - listitem [ref=e144]:
+                - link "Haberler" [ref=e145] [cursor=pointer]:
+                  - /url: /news
+              - listitem [ref=e146]:
+                - link "İletişim" [ref=e147] [cursor=pointer]:
+                  - /url: /contact
+          - button "Open Menu" [ref=e151] [cursor=pointer]:
+            - img [ref=e152]
+      - main [ref=e163]:
+        - generic [ref=e168]:
+          - heading "Ürünlerimiz" [level=2] [ref=e170]
+          - navigation "Breadcrumbs" [ref=e172]:
+            - list [ref=e173]:
+              - listitem [ref=e174]:
+                - link "Ana Sayfa" [ref=e176] [cursor=pointer]:
+                  - /url: /
+                - text: 
+              - generic [ref=e177]: /
+              - listitem [ref=e178]: Ürünlerimiz
+        - generic [ref=e180]:
+          - generic [ref=e183]:
+            - generic [ref=e185]: Ensotek Ürünlerimiz
+            - generic [ref=e186]: Ürünlerimiz
+            - paragraph [ref=e187]: Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler.
+          - generic [ref=e188]:
+            - generic [ref=e190]:
+              - img "Soğutma kulesi fan motoru" [ref=e192]
+              - generic [ref=e193]:
+                - heading "Kule Fan Motoru" [level=3] [ref=e194]:
+                  - link "Kule Fan Motoru" [ref=e195] [cursor=pointer]:
+                    - /url: /product/kule-fan-motoru
+                - paragraph [ref=e196]: Soğutma kuleleri için yüksek verimli, IP55 koruma sınıfına sahip fan motoru. Farklı güç ve devir seçenekleri mevcuttur.
+                - link "Kule Fan Motoru — ürün detayını görüntüle" [ref=e197] [cursor=pointer]:
+                  - /url: /product/kule-fan-motoru
+                  - text: Detayları görüntüle →
+            - generic [ref=e199]:
+              - img "Soğutma kulesi PVC dolgu bloğu" [ref=e201]
+              - generic [ref=e202]:
+                - heading "PVC Dolgu Bloğu" [level=3] [ref=e203]:
+                  - link "PVC Dolgu Bloğu" [ref=e204] [cursor=pointer]:
+                    - /url: /product/pvc-dolgu-blogu
+                - paragraph [ref=e205]: Soğutma kulelerinde ısı transfer yüzeyini artırmak için kullanılan, yüksek ısı ve kimyasal dayanımlı PVC dolgu bloğu. Film tip tasarım.
+                - link "PVC Dolgu Bloğu — ürün detayını görüntüle" [ref=e206] [cursor=pointer]:
+                  - /url: /product/pvc-dolgu-blogu
+                  - text: Detayları görüntüle →
+            - generic [ref=e208]:
+              - img "Endüstriyel açık devre soğutma kulesi" [ref=e210]
+              - generic [ref=e211]:
+                - heading "Endüstriyel Açık Devre Soğutma Kulesi" [level=3] [ref=e212]:
+                  - link "Endüstriyel Açık Devre Soğutma Kulesi" [ref=e213] [cursor=pointer]:
+                    - /url: /product/end%C3%BCstriyel-acik-devre-sogutma-kulesi
+                - paragraph [ref=e214]: Endüstriyel prosesler, HVAC ve enerji santrallerinde kullanılan, yüksek verimli açık devre soğutma kulesi. Doğrudan temaslı ısı transferi sa…
+                - link "Endüstriyel Açık Devre Soğutma Kulesi — ürün detayını görüntüle" [ref=e215] [cursor=pointer]:
+                  - /url: /product/end%C3%BCstriyel-acik-devre-sogutma-kulesi
+                  - text: Detayları görüntüle →
+            - generic [ref=e217]:
+              - img "Film tip kapalı devre soğutma kulesi" [ref=e219]
+              - generic [ref=e220]:
+                - heading "Film Tip Kapalı Devre Soğutma Kulesi" [level=3] [ref=e221]:
+                  - link "Film Tip Kapalı Devre Soğutma Kulesi" [ref=e222] [cursor=pointer]:
+                    - /url: /product/film-tip-kapali-devre-sogutma-kulesi
+                - paragraph [ref=e223]: Suyun prosesle temas etmediği, film tip eşanjör yüzeyleri ile çalışan kapalı devre soğutma kulesi. Kireçlenme ve kirlenmeye karşı düşük bakı…
+                - link "Film Tip Kapalı Devre Soğutma Kulesi — ürün detayını görüntüle" [ref=e224] [cursor=pointer]:
+                  - /url: /product/film-tip-kapali-devre-sogutma-kulesi
+                  - text: Detayları görüntüle →
+            - generic [ref=e226]:
+              - img "Hibrit adyabatik soğutma sistemi" [ref=e228]
+              - generic [ref=e229]:
+                - heading "Hibrit Adyabatik Soğutma Sistemi" [level=3] [ref=e230]:
+                  - link "Hibrit Adyabatik Soğutma Sistemi" [ref=e231] [cursor=pointer]:
+                    - /url: /product/hibrit-adyabatik-sogutma-sistemi
+                - paragraph [ref=e232]: Kuru soğutucu ve adyabatik ön soğutma teknolojisini birleştiren hibrit soğutma sistemi. Su tüketiminin kritik olduğu projeler için enerji ve…
+                - link "Hibrit Adyabatik Soğutma Sistemi — ürün detayını görüntüle" [ref=e233] [cursor=pointer]:
+                  - /url: /product/hibrit-adyabatik-sogutma-sistemi
+                  - text: Detayları görüntüle →
+        - generic [ref=e236]:
+          - generic [ref=e238]:
+            - generic [ref=e239]:
+              - generic [ref=e240]:
+                - generic [ref=e241]: Ensotek
+                - text: Müşteri Yorumları
+              - heading "Müşterilerimizin bizim hakkımızda söyledikleri" [level=2] [ref=e242]
+            - paragraph [ref=e243]: Müşteri geri bildirimleri, mühendislik ve hizmet kalitemizi sürekli geliştirmemize yardımcı oluyor.
+            - generic [ref=e244]:
+              - button "Önceki yorum" [ref=e245] [cursor=pointer]:
+                - img [ref=e246]
+              - button "Sonraki yorum" [ref=e248] [cursor=pointer]:
+                - img [ref=e249]
+          - generic [ref=e256]:
+            - generic [ref=e258]:
+              - generic [ref=e259]:
+                - img [ref=e260]
+                - img [ref=e262]
+                - img [ref=e264]
+                - img [ref=e266]
+                - img [ref=e268]
+              - paragraph [ref=e270]: Ensotek'in misyon açıklaması, sektöre bakışını ve müşteri odaklı yaklaşımını çok net şekilde ortaya koyuyor.
+              - generic [ref=e271]:
+                - generic [ref=e272]:
+                  - heading "Ahmet Yılmaz" [level=5] [ref=e273]
+                  - text: Müşteri
+                - img "Ahmet Yılmaz avatar" [ref=e275]
+            - generic [ref=e277]:
+              - generic [ref=e278]:
+                - img [ref=e279]
+                - img [ref=e281]
+                - img [ref=e283]
+                - img [ref=e285]
+                - img [ref=e287]
+              - paragraph [ref=e289]: Hakkımızda sayfasındaki bilgiler, firmanın sektörde ne kadar köklü ve tecrübeli olduğunu çok iyi anlatıyor.
+              - generic [ref=e290]:
+                - generic [ref=e291]:
+                  - heading "Mehmet Kara" [level=5] [ref=e292]
+                  - text: Müşteri
+                - img "Mehmet Kara avatar" [ref=e294]
+            - generic [ref=e296]:
+              - generic [ref=e297]:
+                - img [ref=e298]
+                - img [ref=e300]
+                - img [ref=e302]
+                - img [ref=e304]
+                - img [ref=e306]
+              - paragraph [ref=e308]: Periyodik bakım yazısı, sahadaki ekibimiz için kontrol listesi gibi kullanabileceğimiz pratik bilgiler içeriyor.
+              - generic [ref=e309]:
+                - generic [ref=e310]:
+                  - heading "Serkan Demir" [level=5] [ref=e311]
+                  - text: Müşteri
+                - img "Serkan Demir avatar" [ref=e313]
+      - contentinfo [ref=e314]:
+        - generic [ref=e317]:
+          - generic [ref=e319]:
+            - heading "Hızlı Erişim" [level=3] [ref=e321]
+            - list [ref=e323]:
+              - listitem [ref=e324]:
+                - link "SSS" [ref=e325] [cursor=pointer]:
+                  - /url: /faqs
+              - listitem [ref=e326]:
+                - link "Kampanyalar" [ref=e327] [cursor=pointer]:
+                  - /url: /promotions
+              - listitem [ref=e328]:
+                - link "Nasıl Sipariş Verilir?" [ref=e329] [cursor=pointer]:
+                  - /url: /how-to-order
+          - generic [ref=e331]:
+            - heading "Kurumsal" [level=3] [ref=e333]
+            - list [ref=e335]:
+              - listitem [ref=e336]:
+                - link "Gizlilik Politikası" [ref=e337] [cursor=pointer]:
+                  - /url: /privacy-policy
+              - listitem [ref=e338]:
+                - link "KVKK" [ref=e339] [cursor=pointer]:
+                  - /url: /kvkk
+              - listitem [ref=e340]:
+                - link "İade ve Değişim" [ref=e341] [cursor=pointer]:
+                  - /url: /returns-exchanges
+              - listitem [ref=e342]:
+                - link "Ödeme Yöntemleri" [ref=e343] [cursor=pointer]:
+                  - /url: /payment-methods
+              - listitem [ref=e344]:
+                - link "Kullanım Koşulları" [ref=e345] [cursor=pointer]:
+                  - /url: /terms
+          - generic [ref=e347]:
+            - heading "Contact" [level=3] [ref=e349]
+            - list [ref=e351]:
+              - listitem [ref=e352]: Ensotek Plaza, Büyükdere Cd. No:10, Şişli / İstanbul
+              - listitem [ref=e353]: "Ofis: Musterstr. 10, 10115 Berlin, Almanya"
+              - listitem [ref=e354]:
+                - link "Phone" [ref=e355] [cursor=pointer]:
+                  - /url: tel:+902120000000
+                  - text: +90 212 000 00 00
+              - listitem [ref=e356]:
+                - link "Email" [ref=e357] [cursor=pointer]:
+                  - /url: mailto:info@ensotek.com
+                  - text: info@ensotek.com
+              - listitem [ref=e358]:
+                - link "https://ensotek.de" [ref=e359] [cursor=pointer]:
+                  - /url: https://ensotek.de
+        - generic [ref=e362]:
+          - link "Ensotek Enerji Sistemleri" [ref=e364] [cursor=pointer]:
+            - /url: /
+            - img "Ensotek Enerji Sistemleri" [ref=e365]
+          - paragraph [ref=e367]: Copyright © 2025 Ensotek Enerji Sistemleri All rights reserved.
+  - alert [ref=e368]
+```

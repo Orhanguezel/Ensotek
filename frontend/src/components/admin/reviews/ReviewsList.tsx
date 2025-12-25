@@ -65,6 +65,20 @@ export const ReviewsList: React.FC<ReviewsListProps> = ({ items, loading, onDele
     if (!busy) onDelete(item);
   };
 
+  // ✅ colgroup içinde whitespace/text node oluşmaması için array ile üret
+  const COL_WIDTHS = [
+    '56px', // order
+    '180px', // name
+    '220px', // email
+    '90px', // rating
+    '110px', // approved
+    '90px', // active
+    '90px', // locale
+    '520px', // comment
+    '170px', // created
+    '180px', // actions
+  ] as const;
+
   if (!busy && !hasData) {
     return (
       <div className="card">
@@ -85,16 +99,9 @@ export const ReviewsList: React.FC<ReviewsListProps> = ({ items, loading, onDele
             style={{ tableLayout: 'fixed', width: '100%' }}
           >
             <colgroup>
-              <col style={{ width: '56px' }} /> {/* order */}
-              <col style={{ width: '180px' }} /> {/* name */}
-              <col style={{ width: '220px' }} /> {/* email */}
-              <col style={{ width: '90px' }} /> {/* rating */}
-              <col style={{ width: '110px' }} /> {/* approved */}
-              <col style={{ width: '90px' }} /> {/* active */}
-              <col style={{ width: '90px' }} /> {/* locale */}
-              <col style={{ width: '520px' }} /> {/* comment */}
-              <col style={{ width: '170px' }} /> {/* created */}
-              <col style={{ width: '180px' }} /> {/* actions */}
+              {COL_WIDTHS.map((w, i) => (
+                <col key={i} style={{ width: w }} />
+              ))}
             </colgroup>
 
             <thead className="table-light">

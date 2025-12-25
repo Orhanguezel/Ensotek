@@ -22,10 +22,11 @@ import { FiX, FiSearch, FiGlobe, FiPhone, FiMail, FiLogIn, FiUserPlus } from 're
 
 import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedin, FaInstagram } from 'react-icons/fa';
 
-import { useListMenuItemsQuery } from '@/integrations/rtk/endpoints/menu_items.endpoints';
+import {
+  useListMenuItemsQuery,
+  useGetSiteSettingByKeyQuery
+} from '@/integrations/rtk/hooks';
 import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
-
-import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 import { useUiSection } from '@/i18n/uiDb';
 
 const IMG_W = 160;

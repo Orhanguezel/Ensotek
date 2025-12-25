@@ -66,6 +66,9 @@ export const EmailTemplateList: React.FC<EmailTemplateListProps> = ({
     );
   }
 
+  // ✅ colgroup içinde whitespace/text node oluşmaması için array ile üret
+  const COL_WIDTHS = ['220px', '360px', '90px', '300px', '90px', '240px', '180px'] as const;
+
   return (
     <div className="card">
       {/* Header */}
@@ -96,13 +99,9 @@ export const EmailTemplateList: React.FC<EmailTemplateListProps> = ({
               style={{ tableLayout: 'fixed', width: '100%' }}
             >
               <colgroup>
-                <col style={{ width: '220px' }} /> {/* Key */}
-                <col style={{ width: '360px' }} /> {/* Name/Subject */}
-                <col style={{ width: '90px' }} /> {/* Locale */}
-                <col style={{ width: '300px' }} /> {/* Variables */}
-                <col style={{ width: '90px' }} /> {/* Active */}
-                <col style={{ width: '240px' }} /> {/* Dates */}
-                <col style={{ width: '180px' }} /> {/* Actions */}
+                {COL_WIDTHS.map((w, i) => (
+                  <col key={i} style={{ width: w }} />
+                ))}
               </colgroup>
 
               <thead className="table-light">

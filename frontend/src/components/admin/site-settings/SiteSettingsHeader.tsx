@@ -7,13 +7,12 @@ import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/A
 
 export type SettingsTab =
   | 'list'
-  | 'global_list' // ✅ NEW: global(*) records list
+  | 'global_list'
   | 'general'
   | 'seo'
   | 'smtp'
   | 'cloudinary'
-  | 'api'
-  | 'footer';
+  | 'api';
 
 export type LocaleOption = {
   value: string;
@@ -41,13 +40,12 @@ export type SettingsScope = 'localized' | 'global' | 'mixed';
 
 const TAB_ITEMS: { id: SettingsTab; label: string; scope: SettingsScope }[] = [
   { id: 'list', label: 'Liste (Dil)', scope: 'mixed' },
-  { id: 'global_list', label: 'Liste (Global *)', scope: 'global' }, // ✅ NEW
+  { id: 'global_list', label: 'Liste (Global *)', scope: 'global' },
   { id: 'general', label: 'Genel / UI', scope: 'localized' },
   { id: 'seo', label: 'SEO', scope: 'localized' },
   { id: 'smtp', label: 'SMTP / E-posta', scope: 'global' },
   { id: 'cloudinary', label: 'Cloudinary / Storage', scope: 'global' },
   { id: 'api', label: 'API & Entegrasyon', scope: 'global' },
-  { id: 'footer', label: 'Footer Ayarları', scope: 'localized' },
 ];
 
 export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
@@ -64,13 +62,21 @@ export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
 }) => {
   const options = (locales ?? []) as AdminLocaleOption[];
 
+  const isLocaleDisabled =
+    loading ||
+    !!localesLoading ||
+    activeTab === 'global_list' ||
+    activeTab === 'smtp' ||
+    activeTab === 'cloudinary' ||
+    activeTab === 'api';
+
   return (
     <div className="row mb-3">
       <div className="col-12 col-lg-7 mb-2 mb-lg-0">
         <h1 className="h4 mb-1">Site Ayarları</h1>
         <p className="text-muted small mb-2">
-          Key-value ayarları. “Liste (Dil)” seçili locale’e göre; “Liste (Global *)” sadece
-          locale={`*`} satırlarını gösterir.
+          Key-value ayarları. “Liste (Dil)” seçili locale’e göre; “Liste (Global *)” sadece locale=
+          {<code>*</code>} satırlarını gösterir. Global tab’larda locale seçimi kullanılmaz.
         </p>
 
         <div className="btn-group btn-group-sm flex-wrap" role="group">
@@ -109,7 +115,7 @@ export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
             onChange={onLocaleChange}
             options={options}
             loading={!!localesLoading}
-            disabled={loading}
+            disabled={isLocaleDisabled}
           />
 
           <button

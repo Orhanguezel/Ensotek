@@ -4,6 +4,8 @@ import {
   readHead,
   readJsonLd,
   waitForSeoHead,
+  getPlaywrightLocales,
+  withLocalePath,
   expectAbsolute,
   expectNotLocalhost,
   expectSameOriginAsBase,
@@ -12,30 +14,34 @@ import {
 } from './helpers';
 
 test.describe('SEO: /service (list)', () => {
-  test('has valid canonical/hreflang/meta and JSON-LD parse ok', async ({ page }) => {
-    await page.goto('/service', { waitUntil: 'domcontentloaded' });
+  const locales = getPlaywrightLocales();
 
-    await waitForSeoHead(page, { waitHreflang: true });
+  for (const locale of locales) {
+    test(`has valid canonical/hreflang/meta and JSON-LD parse ok [${locale}]`, async ({ page }) => {
+      await page.goto(withLocalePath('/service', locale), { waitUntil: 'domcontentloaded' });
 
-    const head = await readHead(page);
+      await waitForSeoHead(page, { waitHreflang: true });
 
-    expect(head.title.trim().length).toBeGreaterThan(3);
-    expectMinDescription(head.description, 20);
+      const head = await readHead(page);
 
-    expectAbsolute(head.canonical);
-    expectSameOriginAsBase(head.canonical);
-    expectNotLocalhost(head.canonical);
+      expect(head.title.trim().length).toBeGreaterThan(3);
+      expectMinDescription(head.description, 20);
 
-    if (head.ogUrl) {
-      expectAbsolute(head.ogUrl);
-      expectSameOriginAsBase(head.ogUrl);
-      expectNotLocalhost(head.ogUrl);
-      expect(head.ogUrl).toBe(head.canonical);
-    }
+      expectAbsolute(head.canonical);
+      expectSameOriginAsBase(head.canonical);
+      expectNotLocalhost(head.canonical);
 
-    expectHreflangSet(head.hreflangs);
+      if (head.ogUrl) {
+        expectAbsolute(head.ogUrl);
+        expectSameOriginAsBase(head.ogUrl);
+        expectNotLocalhost(head.ogUrl);
+        expect(head.ogUrl).toBe(head.canonical);
+      }
 
-    const ld = await readJsonLd(page);
-    expect(ld.some((x) => x?.__parse_error__)).toBeFalsy();
-  });
+      expectHreflangSet(head.hreflangs);
+
+      const ld = await readJsonLd(page);
+      expect(ld.some((x) => x?.__parse_error__)).toBeFalsy();
+    });
+  }
 });

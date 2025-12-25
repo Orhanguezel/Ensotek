@@ -34,6 +34,7 @@ export const ADMIN_TAB_ROUTES: Record<ActiveTab, string> = {
   support: '/admin/support',
 
   menuitem: '/admin/menuitem',
+  footer_sections: '/admin/footer-sections',
   storage: '/admin/storage',
   offers: '/admin/offers',
   catalog_requests: '/admin/catalog-requests',

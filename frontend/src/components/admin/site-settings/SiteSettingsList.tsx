@@ -1,29 +1,18 @@
 // =============================================================
 // FILE: src/components/admin/site-settings/SiteSettingsList.tsx
 // Ensotek – Site Ayarları Liste Bileşeni
-// FIXED: Hide SEO keys in global(*) list.
-// UI FIX: Mobile responsive cards (stack actions, prevent overflow)
+// FIX: Hide SEO keys in global(*) list.
+// UI FIX: Mobile responsive cards
+// FIX: <a href> => next/link (no full reload)
+// FIX: renderEditAction double-call removed
+// NEW: Preview fallback -> if value is object/array OR string(JSON), show JSON preview
 // =============================================================
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
 import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
 
-function formatValuePreview(v: SettingValue): string {
-  if (v === null || v === undefined) return '';
-  if (typeof v === 'string') {
-    if (v.length <= 160) return v;
-    return v.slice(0, 157) + '...';
-  }
-  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
-
-  try {
-    const s = JSON.stringify(v);
-    if (s.length <= 160) return s;
-    return s.slice(0, 157) + '...';
-  } catch {
-    return String(v as any);
-  }
-}
+/* ----------------------------- helpers ----------------------------- */
 
 function isSeoKey(key: string): boolean {
   const k = String(key || '')
@@ -32,42 +21,131 @@ function isSeoKey(key: string): boolean {
   if (!k) return false;
 
   return (
+    k === 'seo' ||
+    k === 'site_seo' ||
+    k === 'site_meta_default' ||
     k.startsWith('seo_') ||
     k.startsWith('seo|') ||
-    k === 'site_seo' ||
     k.startsWith('site_seo|') ||
     k.startsWith('ui_seo') ||
     k.startsWith('ui_seo_')
   );
 }
 
+/**
+ * Some rows may store JSON as string in DB.
+ * For list preview, attempt to parse if it "looks like JSON".
+ */
+function coercePreviewValue(input: SettingValue): SettingValue {
+  if (input === null || input === undefined) return input;
+
+  // already object/array
+  if (typeof input === 'object') return input;
+
+  // string -> try json (only if it looks like json)
+  if (typeof input === 'string') {
+    const s = input.trim();
+    if (!s) return input;
+
+    const looksJson =
+      (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'));
+
+    if (!looksJson) return input;
+
+    try {
+      return JSON.parse(s) as any;
+    } catch {
+      return input;
+    }
+  }
+
+  return input;
+}
+
+function formatValuePreview(v: SettingValue): string {
+  const vv = coercePreviewValue(v);
+
+  if (vv === null || vv === undefined) return '';
+
+  if (typeof vv === 'string') {
+    const s = vv.trim();
+    if (s.length <= 160) return s;
+    return s.slice(0, 157) + '...';
+  }
+
+  if (typeof vv === 'number' || typeof vv === 'boolean') return String(vv);
+
+  // object/array: show compact JSON preview
+  try {
+    const s = JSON.stringify(vv);
+    if (s.length <= 160) return s;
+    return s.slice(0, 157) + '...';
+  } catch {
+    return String(vv as any);
+  }
+}
+
+/* ----------------------------- types ----------------------------- */
+
 export type SiteSettingsListProps = {
   settings?: SiteSetting[];
   loading: boolean;
+
   onEdit?: (setting: SiteSetting) => void;
   onDelete?: (setting: SiteSetting) => void;
+
+  /**
+   * New behavior: edit action can be a link.
+   * Example: (s) => `/admin/site-settings/${encodeURIComponent(s.key)}?locale=${selectedLocale}`
+   */
+  getEditHref?: (setting: SiteSetting) => string;
+
   selectedLocale: string; // 'en' | 'tr' | '*'
 };
+
+/* ----------------------------- component ----------------------------- */
 
 export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
   settings,
   loading,
   onEdit,
   onDelete,
+  getEditHref,
   selectedLocale,
 }) => {
   const filtered = useMemo(() => {
     const arr = Array.isArray(settings) ? settings : [];
-
-    // ✅ Global(*) list: SEO keys shown in SEO tab, so hide here
-    if (selectedLocale === '*') {
-      return arr.filter((s) => s && !isSeoKey(s.key));
-    }
-
+    if (selectedLocale === '*') return arr.filter((s) => s && !isSeoKey(s.key));
     return arr;
   }, [settings, selectedLocale]);
 
   const hasData = filtered.length > 0;
+
+  const renderEditAction = (s: SiteSetting) => {
+    const href = getEditHref?.(s);
+
+    if (href) {
+      return (
+        <Link href={href} className="btn btn-outline-secondary btn-sm">
+          Düzenle
+        </Link>
+      );
+    }
+
+    if (onEdit) {
+      return (
+        <button
+          type="button"
+          className="btn btn-outline-secondary btn-sm"
+          onClick={() => onEdit(s)}
+        >
+          Düzenle
+        </button>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <div className="card">
@@ -88,7 +166,7 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
             <thead>
               <tr>
                 <th style={{ width: '30%' }}>Key</th>
-                <th style={{ width: '10%' }}>Locale</th>
+                <th style={{ width: '10%' }}>Dil</th>
                 <th style={{ width: '35%' }}>Değer (Özet)</th>
                 <th style={{ width: '15%' }}>Güncellenme</th>
                 <th style={{ width: '10%' }} className="text-end">
@@ -115,15 +193,7 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
                     </td>
                     <td className="text-end">
                       <div className="d-inline-flex gap-1">
-                        {onEdit && (
-                          <button
-                            type="button"
-                            className="btn btn-outline-secondary btn-sm"
-                            onClick={() => onEdit(s)}
-                          >
-                            Düzenle
-                          </button>
-                        )}
+                        {renderEditAction(s)}
                         {onDelete && (
                           <button
                             type="button"
@@ -166,9 +236,10 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
                 <span className="badge bg-light text-dark border ms-2">{s.locale}</span>
               ) : null;
 
+              const editAction = renderEditAction(s);
+
               return (
                 <div key={`${s.key}_${s.locale || 'none'}`} className="border-bottom px-3 py-3">
-                  {/* Key + locale */}
                   <div className="d-flex align-items-start justify-content-between gap-2">
                     <div style={{ minWidth: 0 }}>
                       <div className="fw-semibold small" style={{ wordBreak: 'break-word' }}>
@@ -176,7 +247,6 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
                         {localeBadge}
                       </div>
 
-                      {/* Value preview */}
                       <div
                         className="text-muted small mt-1"
                         style={{ wordBreak: 'break-word', overflowWrap: 'anywhere' }}
@@ -184,7 +254,6 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
                         {formatValuePreview(s.value)}
                       </div>
 
-                      {/* Updated */}
                       <div className="text-muted small mt-2">
                         <span className="me-1">Güncellenme:</span>
                         {s.updated_at ? new Date(s.updated_at).toLocaleString() : '-'}
@@ -192,18 +261,10 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
                     </div>
                   </div>
 
-                  {/* Actions: stack, full width */}
-                  {(onEdit || onDelete) && (
+                  {(editAction || onDelete) && (
                     <div className="mt-3 d-flex flex-column gap-2">
-                      {onEdit && (
-                        <button
-                          type="button"
-                          className="btn btn-outline-secondary btn-sm w-100"
-                          onClick={() => onEdit(s)}
-                        >
-                          Düzenle
-                        </button>
-                      )}
+                      {editAction ? <div className="d-grid">{editAction}</div> : null}
+
                       {onDelete && (
                         <button
                           type="button"
@@ -233,3 +294,5 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
     </div>
   );
 };
+
+SiteSettingsList.displayName = 'SiteSettingsList';

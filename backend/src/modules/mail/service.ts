@@ -19,6 +19,7 @@ import {
 
 // email_templates → çoklu dilli template render
 import { renderEmailTemplateByKey } from "@/modules/email-templates/service";
+import { emitAppEvent } from '@/common/events/bus';
 
 // site_name fallback için site_settings
 import { db } from "@/db/client";
@@ -254,35 +255,6 @@ async function getTransporter(): Promise<Transporter> {
  *  - veya başka bir SMTP provider
  * kullanılabilir. Her şey paneldeki SMTP ayarlarına bağlı.
  */
-export async function sendMailRaw(input: SendMailInput) {
-  const data = sendMailSchema.parse(input);
-
-  const smtpCfg = await resolveSmtpConfig();
-
-  // From alanını config'ten kur
-  const fromEmail =
-    smtpCfg.fromEmail ||
-    smtpCfg.username || // yoksa username'den dene
-    "no-reply@example.com";
-
-  const from =
-    smtpCfg.fromName && fromEmail
-      ? `${smtpCfg.fromName} <${fromEmail}>`
-      : fromEmail;
-
-  const transporter = await getTransporter();
-
-  const info = await transporter.sendMail({
-    from,
-    to: data.to,
-    subject: data.subject,
-    text: data.text,
-    html: data.html,
-  });
-
-  return info;
-}
-
 /**
  * sendMailRaw için backward-compatible alias
  * (email-templates/mailer.ts gibi yerler sendMail bekliyor)
@@ -646,3 +618,61 @@ export async function sendPasswordChangedMail(
 
   return rendered;
 }
+
+
+export async function sendMailRaw(input: SendMailInput) {
+  const data = sendMailSchema.parse(input);
+
+  const smtpCfg = await resolveSmtpConfig();
+
+  const fromEmail = smtpCfg.fromEmail || smtpCfg.username || 'no-reply@example.com';
+  const from = smtpCfg.fromName && fromEmail ? `${smtpCfg.fromName} <${fromEmail}>` : fromEmail;
+
+  const transporter = await getTransporter();
+
+  try {
+    const info = await transporter.sendMail({
+      from,
+      to: data.to,
+      subject: data.subject,
+      text: data.text,
+      html: data.html,
+    });
+
+    emitAppEvent({
+      level: 'info',
+      topic: 'mail.sent',
+      message: 'mail_sent',
+      meta: {
+        to: data.to,
+        subject: data.subject,
+        smtp_host: smtpCfg.host,
+        smtp_port: smtpCfg.port,
+        secure: smtpCfg.secure,
+        messageId: (info as any)?.messageId ?? null,
+        accepted: (info as any)?.accepted ?? null,
+        rejected: (info as any)?.rejected ?? null,
+      },
+      entity: null,
+    });
+
+    return info;
+  } catch (err: any) {
+    emitAppEvent({
+      level: 'error',
+      topic: 'mail.failed',
+      message: 'mail_send_failed',
+      meta: {
+        to: data.to,
+        subject: data.subject,
+        smtp_host: smtpCfg.host,
+        smtp_port: smtpCfg.port,
+        secure: smtpCfg.secure,
+        error: String(err?.message ?? err),
+      },
+      entity: null,
+    });
+    throw err;
+  }
+}
+

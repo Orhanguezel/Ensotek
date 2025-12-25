@@ -5,12 +5,12 @@ type Props = {
 };
 
 export default function JsonLd({ data, id }: Props) {
-  const key = id ? `jsonld:${id}` : undefined;
+  const scriptId = id ? `jsonld:${id}` : undefined;
 
   return (
     <script
       type="application/ld+json"
-      {...(key ? { "data-jsonld-id": key } : {})}
+      {...(scriptId ? { id: scriptId } : {})}
       dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
     />
   );

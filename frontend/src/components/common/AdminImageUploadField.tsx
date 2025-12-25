@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/components/admin/common/AdminImageUploadField.tsx
+// FILE: src/components/common/AdminImageUploadField.tsx
 // Admin – Ortak Görsel Yükleme Alanı (Storage + Preview)
 // =============================================================
 
@@ -7,7 +7,7 @@
 
 import React, { useRef } from "react";
 import { toast } from "sonner";
-import { useCreateAssetAdminMutation } from "@/integrations/rtk/endpoints/admin/storage_admin.endpoints";
+import { useCreateAssetAdminMutation } from "@/integrations/rtk/hooks";
 
 export type AdminImageUploadFieldProps = {
   /** Kart başlığı */
@@ -16,6 +16,7 @@ export type AdminImageUploadFieldProps = {
   helperText?: React.ReactNode;
 
   /** Storage bucket (örn: "public") */
+  
   bucket?: string;
   /** Storage folder (örn: "categories", "products/cover" vs.) */
   folder?: string;

@@ -11,7 +11,6 @@ import Footer from './footer/Footer';
 import ScrollProgress from './ScrollProgress';
 
 import { useResolvedLocale } from '@/i18n/locale';
-import { localizePath } from '@/i18n/url';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 import { asObj, buildCanonical } from '@/seo/pageSeo';
@@ -33,7 +32,10 @@ type LayoutProps = {
   children: React.ReactNode;
   title?: string;
   description?: string;
-  keywords?: string;
+
+  // ✅ keywords intentionally removed from head (Google ignores; keep DB-side only if you want)
+  // keywords?: string;
+
   brand?: SimpleBrand;
   logoSrc?: StaticImageData | string;
   noindex?: boolean;
@@ -103,7 +105,6 @@ export default function Layout({
   children,
   title,
   description,
-  keywords,
   brand,
   logoSrc,
   noindex,
@@ -111,6 +112,7 @@ export default function Layout({
 }: LayoutProps) {
   const router = useRouter();
   const isClient = typeof window !== 'undefined';
+  const isProd = process.env.NODE_ENV === 'production';
 
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
@@ -118,6 +120,7 @@ export default function Layout({
   // ✅ UI errors (for 500 fallback etc.)
   const { ui: uiErrors } = useUiSection('ui_errors', locale);
 
+  // ✅ SEO settings: DB-driven (admin panel)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery(
     { key: 'seo', locale },
     { skip: !isClient },
@@ -153,33 +156,10 @@ export default function Layout({
     typeof (tw as any)?.creator === 'string' ? String((tw as any).creator).trim() : '';
 
   const finalTitle = (title && title.trim()) || seoTitleDefault || 'Ensotek';
-
   const finalDescriptionRaw = (description && description.trim()) || seoDescription || '';
   const safeDescription = finalDescriptionRaw || defaultDescriptionForLocale(locale);
 
-  const finalKeywords = (keywords && keywords.trim()) || String(seo?.keywords ?? '').trim() || '';
-
-  /**
-   * (opsiyonel) canonicalAbs client hesap:
-   * Layout canonical basmıyor; _document SSR basıyor.
-   */
-  const canonicalAbs = useMemo(() => {
-    const lcHint =
-      typeof router.query?.__lc === 'string'
-        ? router.query.__lc
-        : Array.isArray(router.query?.__lc)
-        ? router.query.__lc[0]
-        : '';
-
-    return buildCanonical({
-      asPath: router.asPath,
-      locale,
-      fallbackPathname: '/',
-      localizePath,
-      lcHint,
-    } as any);
-  }, [router.asPath, router.query?.__lc, locale]);
-
+  // og:url için absolute path (client). SSR’de _document og:url basıyor; buildMeta bunu zaten filter’layacak.
   const ogUrlAbs = useMemo(() => {
     const raw = String(router.asPath || '/');
     const [noHash] = raw.split('#');
@@ -242,6 +222,7 @@ export default function Layout({
     logoSrc || logoHrefFromSettings || undefined;
   const preloadLogoHref = typeof headerLogoSrc === 'string' ? headerLogoSrc : logoHrefFromSettings;
 
+  // ✅ Meta builder (client). Canonical + og:url SSR’den geliyor, burada filtreleniyor.
   const headMetaSpecs = useMemo(() => {
     const meta: MetaInput = {
       title: finalTitle,
@@ -309,6 +290,25 @@ export default function Layout({
     );
   }, [uiErrors, locale]);
 
+  // ✅ Debug canonical: prod’da basma (canonical SSR tek kaynak)
+  const debugCanonicalAbs = useMemo(() => {
+    if (isProd) return '';
+
+    const lcHint =
+      typeof router.query?.__lc === 'string'
+        ? router.query.__lc
+        : Array.isArray(router.query?.__lc)
+        ? router.query.__lc[0]
+        : '';
+
+    return buildCanonical({
+      asPath: router.asPath,
+      locale,
+      fallbackPathname: '/',
+      lcHint,
+    });
+  }, [isProd, router.asPath, router.query?.__lc, locale]);
+
   return (
     <Fragment>
       <Head>
@@ -316,10 +316,7 @@ export default function Layout({
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
         <title>{finalTitle}</title>
 
-        {/* ✅ Canonical link burada YOK. Tek kaynak: _document (SSR) */}
-
-        <meta name="description" content={safeDescription} />
-        {finalKeywords ? <meta name="keywords" content={finalKeywords} /> : null}
+        {/* ✅ Canonical + og:url + hreflang SSR tek kaynak: _document */}
 
         {headMetaSpecs.map((spec, idx) => {
           if (spec.kind === 'link')
@@ -333,8 +330,9 @@ export default function Layout({
           <link rel="preload" as="image" href={absUrlForPreload(preloadLogoHref)} />
         ) : null}
 
-        {/* eslint-disable-next-line react/no-unknown-property */}
-        <meta name="debug:canonicalAbs" content={canonicalAbs} />
+        {!isProd && debugCanonicalAbs ? (
+          <meta name="debug:canonicalAbs" content={debugCanonicalAbs} />
+        ) : null}
       </Head>
 
       <div className="my-app">
