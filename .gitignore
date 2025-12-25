@@ -137,3 +137,14 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Playwright browsers (DO NOT COMMIT)
+frontend/.playwright-browsers/
+**/.playwright-browsers/
+
+# node/build
+**/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+backend/dist/
