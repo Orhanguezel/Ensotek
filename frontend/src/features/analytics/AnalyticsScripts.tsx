@@ -1,6 +1,10 @@
 // =============================================================
 // FILE: src/features/analytics/AnalyticsScripts.tsx
-// Ensotek – GTM preferred, fallback to GA4 gtag.js (consent-mode)
+// Ensotek – GTM preferred, optional GA4 gtag.js (consent-mode)
+// - Pages Router: DO NOT use beforeInteractive outside pages/_document
+// - Consent Mode init via afterInteractive, with queued consent updates
+// - If GTM exists => loads GTM
+// - If GA4 exists => loads gtag.js (send_page_view:false)
 // =============================================================
 'use client';
 
@@ -13,8 +17,12 @@ declare global {
     dataLayer?: any[];
     gtag?: (...args: any[]) => void;
 
-    __setAnalyticsConsent?: (c: { analytics_storage: 'granted' | 'denied' }) => void;
+    __setAnalyticsConsent?: (c: { analytics_storage: 'granted' | 'denied' } | boolean) => void;
+
     __analyticsConsentGranted?: boolean;
+
+    // consent init gelmeden önce banner tetiklerse kuyruk
+    __pendingAnalyticsConsent?: Array<{ analytics_storage: 'granted' | 'denied' }>;
   }
 }
 
@@ -26,10 +34,18 @@ export default function AnalyticsScripts() {
   const { gtmId, ga4Id } = useAnalyticsSettings();
 
   const isProd = isProdEnv();
-  const hasGtm = useMemo(() => !!(gtmId && String(gtmId).startsWith('GTM-')), [gtmId]);
-  const hasGa = useMemo(() => !!(ga4Id && String(ga4Id).startsWith('G-')), [ga4Id]);
 
-  // noscript fallback (client-side append). Bu, “_document.tsx yoksa” pratik çözüm.
+  const hasGtm = useMemo(() => {
+    const s = String(gtmId || '').trim();
+    return !!s && s.startsWith('GTM-');
+  }, [gtmId]);
+
+  const hasGa = useMemo(() => {
+    const s = String(ga4Id || '').trim();
+    return !!s && s.startsWith('G-');
+  }, [ga4Id]);
+
+  // GTM noscript (document.tsx yoksa pratik)
   useEffect(() => {
     if (!isProd || !hasGtm || typeof document === 'undefined') return;
 
@@ -47,14 +63,10 @@ export default function AnalyticsScripts() {
     iframe.style.visibility = 'hidden';
 
     ns.appendChild(iframe);
-
-    // body'nin en başına yakın ekle
     document.body.insertBefore(ns, document.body.firstChild);
   }, [isProd, hasGtm, gtmId]);
 
   if (!isProd) return null;
-
-  // Hiçbiri yoksa: hiçbir şey basma
   if (!hasGtm && !hasGa) return null;
 
   return (
@@ -66,8 +78,11 @@ export default function AnalyticsScripts() {
           function gtag(){ window.dataLayer.push(arguments); }
           window.gtag = window.gtag || gtag;
 
+          // consent queue
+          window.__pendingAnalyticsConsent = window.__pendingAnalyticsConsent || [];
+
           // privacy by default
-          gtag('consent', 'default', {
+          window.gtag('consent', 'default', {
             ad_storage: 'denied',
             ad_user_data: 'denied',
             ad_personalization: 'denied',
@@ -77,19 +92,38 @@ export default function AnalyticsScripts() {
 
           window.__analyticsConsentGranted = false;
 
-          // cookie banner bunu çağıracak
           window.__setAnalyticsConsent = function(next){
             try {
-              var v = next && next.analytics_storage === 'granted' ? 'granted' : 'denied';
+              var granted =
+                (typeof next === 'boolean')
+                  ? next
+                  : (next && next.analytics_storage === 'granted');
+
+              var v = granted ? 'granted' : 'denied';
               window.__analyticsConsentGranted = (v === 'granted');
-              gtag('consent', 'update', { analytics_storage: v });
+
+              // Update consent
+              window.gtag('consent', 'update', { analytics_storage: v });
+
+              // GTM side optional event
+              window.dataLayer.push({ event: 'consent_update', analytics_storage: v });
             } catch (e) {}
           };
+
+          // Flush queued consent updates (if banner fired before init)
+          try {
+            var q = window.__pendingAnalyticsConsent || [];
+            for (var i=0; i<q.length; i++) {
+              var item = q[i];
+              window.__setAnalyticsConsent(item);
+            }
+            window.__pendingAnalyticsConsent = [];
+          } catch (e) {}
         `}
       </Script>
 
-      {/* 2A) GTM varsa: sadece GTM bas (GA4 tag GTM içinden yönetilecek) */}
-      {hasGtm ? (
+      {/* 2) GTM */}
+      {hasGtm && (
         <Script id="gtm-src" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){
@@ -104,9 +138,11 @@ export default function AnalyticsScripts() {
             })(window,document,'script','dataLayer','${String(gtmId)}');
           `}
         </Script>
-      ) : (
+      )}
+
+      {/* 3) GA4 gtag.js (fallback + “etiket algılama” için) */}
+      {hasGa && (
         <>
-          {/* 2B) GTM yoksa: gtag.js + GA4 config */}
           <Script
             id="ga-src"
             src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(String(ga4Id))}`}
@@ -118,8 +154,11 @@ export default function AnalyticsScripts() {
               function gtag(){ window.dataLayer.push(arguments); }
               window.gtag = window.gtag || gtag;
 
-              gtag('js', new Date());
-              gtag('config', '${String(ga4Id)}', {
+              window.gtag('js', new Date());
+
+              // IMPORTANT:
+              // send_page_view:false to avoid double PV with SPA manual tracking
+              window.gtag('config', '${String(ga4Id)}', {
                 anonymize_ip: true,
                 send_page_view: false
               });

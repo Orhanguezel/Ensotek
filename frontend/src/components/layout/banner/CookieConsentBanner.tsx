@@ -72,12 +72,19 @@ function loadConsent(): ConsentState | null {
 
 function applyAnalyticsConsent(analytics: boolean) {
   try {
+    const payload = { analytics_storage: analytics ? 'granted' : 'denied' } as const;
+
     (window as any).__analyticsConsentGranted = analytics === true;
-    (window as any).__setAnalyticsConsent?.({
-      analytics_storage: analytics ? 'granted' : 'denied',
-    });
+
+    if (typeof (window as any).__setAnalyticsConsent === 'function') {
+      (window as any).__setAnalyticsConsent(payload);
+    } else {
+      (window as any).__pendingAnalyticsConsent = (window as any).__pendingAnalyticsConsent || [];
+      (window as any).__pendingAnalyticsConsent.push(payload);
+    }
   } catch {}
 }
+
 
 
 export default function CookieConsentBanner() {

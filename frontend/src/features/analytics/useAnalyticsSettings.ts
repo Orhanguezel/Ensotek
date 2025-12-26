@@ -16,45 +16,35 @@ const toLocaleShort = (l: any) =>
     .split('-')[0] || 'tr';
 
 function coerceId(v: any): string {
-  const s = String(v ?? '').trim();
-  return s;
+  return String(v ?? '').trim();
 }
 
 export function useAnalyticsSettings() {
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
-  // GA4
-  const { data: gaPrimary } = useGetSiteSettingByKeyQuery({
+  // Tek query: backend fallback chain (requested -> default -> app_locales -> '*') ile döndürür.
+  const { data: ga } = useGetSiteSettingByKeyQuery({
     key: 'ga4_measurement_id',
     locale,
   });
 
-  const { data: gaFallback } = useGetSiteSettingByKeyQuery({
-    key: 'ga4_measurement_id',
-  } as any);
-
-  // GTM
-  const { data: gtmPrimary } = useGetSiteSettingByKeyQuery({
+  const { data: gtm } = useGetSiteSettingByKeyQuery({
     key: 'gtm_container_id',
     locale,
   });
-
-  const { data: gtmFallback } = useGetSiteSettingByKeyQuery({
-    key: 'gtm_container_id',
-  } as any);
 
   const ga4Id = useMemo(() => {
-    const db = coerceId(gaPrimary?.value ?? gaFallback?.value);
+    const db = coerceId(ga?.value);
     const env = coerceId(process.env.NEXT_PUBLIC_GA_ID);
     return db || env;
-  }, [gaPrimary?.value, gaFallback?.value]);
+  }, [ga?.value]);
 
   const gtmId = useMemo(() => {
-    const db = coerceId(gtmPrimary?.value ?? gtmFallback?.value);
+    const db = coerceId(gtm?.value);
     const env = coerceId(process.env.NEXT_PUBLIC_GTM_ID);
     return db || env;
-  }, [gtmPrimary?.value, gtmFallback?.value]);
+  }, [gtm?.value]);
 
   return { locale, ga4Id, gtmId };
 }
