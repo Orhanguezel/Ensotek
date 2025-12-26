@@ -88,7 +88,7 @@ VALUES
 (
   UUID(),
   @BLOG_MAINT_1,
-  'de',
+  'tr',
   'Su Soğutma Kulelerinde Periyodik Bakım',
   'su-sogutma-kulelerinde-periyodik-bakim',
   JSON_OBJECT(
@@ -167,7 +167,7 @@ VALUES
 (
   UUID(),
   @BLOG_DESIGN_1,
-  'de',
+  'tr',
   'Endüstriyel Tesisler için Soğutma Kulesi Yerleşimi',
   'endustriyel-tesisler-icin-sogutma-kulesi-yerlesimi',
   JSON_OBJECT(
@@ -246,7 +246,7 @@ VALUES
 (
   UUID(),
   @BLOG_TECH_1,
-  'de',
+  'tr',
   'FRP Soğutma Kulelerinde Isı Transferi Temelleri',
   'frp-sogutma-kulelerinde-isi-transferi-temelleri',
   JSON_OBJECT(

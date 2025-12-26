@@ -13,7 +13,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_home',
-  'de',
+  'tr',
   CAST(
     JSON_OBJECT(
       'ui_home_h1', 'Ensotek Su Soğutma Kuleleri ve Proses Soğutma Çözümleri'

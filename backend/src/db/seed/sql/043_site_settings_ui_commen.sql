@@ -17,7 +17,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_banner',
-  'de',
+  'tr',
   CAST(
     JSON_OBJECT(
       'ui_breadcrumb_home', 'Ana Sayfa'
@@ -64,7 +64,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_contact',
-  'de',
+  'tr',
   CAST(
     JSON_OBJECT(
       'ui_contact_subprefix',                  'İletişime',
@@ -189,7 +189,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'contact_map',
-  'de',
+  'tr',
   CAST(
     JSON_OBJECT(
       'title',     'Konum',
@@ -237,32 +237,3 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
-
--- =============================================================
--- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE):
--- TR → TARGET LOCALE (ui_banner + ui_contact + contact_map)
--- =============================================================
-SET @TARGET_LOCALE := 'de';
-
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT
-  UUID(),
-  s.`key`,
-  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
-  s.`value`,
-  NOW(3),
-  NOW(3)
-FROM site_settings s
-WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('de' COLLATE utf8mb4_unicode_ci)
-  AND (s.`key`  COLLATE utf8mb4_unicode_ci) IN (
-    ('ui_banner' COLLATE utf8mb4_unicode_ci),
-    ('ui_contact' COLLATE utf8mb4_unicode_ci),
-    ('contact_map' COLLATE utf8mb4_unicode_ci)
-  )
-  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('de' COLLATE utf8mb4_unicode_ci)
-  AND NOT EXISTS (
-    SELECT 1
-    FROM site_settings t
-    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
-      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
-  );

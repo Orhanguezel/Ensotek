@@ -115,7 +115,7 @@ VALUES
 -- KVKK
 -- =============================================================
 (
-  @I18N_KVKK_TR, @PAGE_KVKK, 'de',
+  @I18N_KVKK_TR, @PAGE_KVKK, 'tr',
   'KVKK',
   'kvkk',
   JSON_OBJECT('html', CONCAT(
@@ -292,7 +292,7 @@ VALUES
 -- Kullanım Koşulları / Terms / Nutzungsbedingungen
 -- =============================================================
 (
-  @I18N_TERMS_TR, @PAGE_TERMS, 'de',
+  @I18N_TERMS_TR, @PAGE_TERMS, 'tr',
   'Kullanım Koşulları',
   'kullanim-kosullari',
   JSON_OBJECT('html', CONCAT(
@@ -436,7 +436,7 @@ VALUES
 -- Çerez Politikası / Cookie Policy / Cookie-Richtlinie
 -- =============================================================
 (
-  @I18N_COOKIES_TR, @PAGE_COOKIES, 'de',
+  @I18N_COOKIES_TR, @PAGE_COOKIES, 'tr',
   'Çerez Politikası',
   'cerez-politikasi',
   JSON_OBJECT('html', CONCAT(
@@ -572,7 +572,7 @@ VALUES
 -- Aydınlatma Metni / Information Notice / Informationspflicht
 -- =============================================================
 (
-  @I18N_NOTICE_TR, @PAGE_NOTICE, 'de',
+  @I18N_NOTICE_TR, @PAGE_NOTICE, 'tr',
   'Aydınlatma Metni',
   'aydinlatma-metni',
   JSON_OBJECT('html', CONCAT(
@@ -710,7 +710,7 @@ VALUES
 -- Yasal Bilgilendirme / Legal Notice / Impressum
 -- =============================================================
 (
-  @I18N_LEGAL_TR, @PAGE_LEGAL, 'de',
+  @I18N_LEGAL_TR, @PAGE_LEGAL, 'tr',
   'Yasal Bilgilendirme',
   'yasal-bilgilendirme',
   JSON_OBJECT('html', CONCAT(

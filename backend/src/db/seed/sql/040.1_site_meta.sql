@@ -1,24 +1,18 @@
 -- =============================================================
 -- 040.1_site_meta.sql
--- (Extended) Default Meta + Global SEO (NEW STANDARD) [ENSOTEK - UPDATED]
+-- Ensotek – Default Meta + Global SEO (NEW STANDARD) [FIXED]
 --
--- Standard (Future-proof):
---   - GLOBAL defaults => locale='*'  (seo, site_seo)
---   - Localized overrides optional => locale='de','en','de',...
---   - site_meta_default => localized (per-locale)
---
--- Compatible with:
---   - src/seo/serverMetadata.ts (fetchSeoObject/buildMetadataFromSeo)
---   - src/seo/meta.ts (client buildMeta)
---
--- Notes:
---  - Keep keys STRICT-compatible with your seoSchema:
---    site_name, title_default, title_template, description, open_graph{type,images[]}, twitter{...}, robots{...}
+-- Rules:
+--   - seo + site_seo: global defaults => locale='*'
+--   - seo + site_seo: localized overrides => locale IN ('tr','en','de')
+--   - site_meta_default: localized only (per-locale), NO '*'
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
+
+START TRANSACTION;
 
 -- -------------------------------------------------------------
 -- TABLE GUARD
@@ -38,21 +32,15 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------
--- Helper: default OG image path (relative OK)
--- serverMetadata.ts absUrl() ile mutlak yapar
+-- Helpers
 -- -------------------------------------------------------------
 SET @OG_DEFAULT := '/img/og-default.jpg';
 
--- -------------------------------------------------------------
--- Brand helpers (text only; used inside JSON strings)
--- -------------------------------------------------------------
 SET @BRAND_SHORT_TR := 'Ensotek Su Soğutma Kuleleri';
 SET @BRAND_LEGAL_TR := 'ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti';
 
 -- =============================================================
--- GLOBAL SEO DEFAULTS (NEW STANDARD)
--- Keys: seo (primary) + site_seo (fallback)
--- locale='*' => tüm diller için default
+-- GLOBAL SEO DEFAULTS (locale='*')  --> NÖTR/GENEL DEFAULT
 -- =============================================================
 
 -- PRIMARY: seo (GLOBAL DEFAULT)
@@ -64,16 +52,10 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'site_name',      @BRAND_SHORT_TR,
-      'title_default',  @BRAND_SHORT_TR,
+      'site_name',      'Ensotek',
+      'title_default',  'Ensotek',
       'title_template', '%s | Ensotek',
-      'description',
-        CONCAT(
-          @BRAND_LEGAL_TR,
-          ' — Camelyaf Takviyeli Polyester (CTP) malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajı. ',
-          'Ayrıca mevcut su soğutma kulelerinin bakım-onarım, modernizasyon, performans testleri ve yedek parça temini. ',
-          'Kaliteli ürün ve hizmet ile uzun ömürlü çözümler Ensotek’in birinci önceliğidir.'
-        ),
+      'description',    'Ensotek — Cooling towers and industrial cooling solutions.',
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -106,15 +88,10 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'site_name',      @BRAND_SHORT_TR,
-      'title_default',  @BRAND_SHORT_TR,
+      'site_name',      'Ensotek',
+      'title_default',  'Ensotek',
       'title_template', '%s | Ensotek',
-      'description',
-        CONCAT(
-          @BRAND_LEGAL_TR,
-          ' — CTP malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri. ',
-          'Bakım-onarım, modernizasyon, performans testleri ve yedek parça hizmetleri.'
-        ),
+      'description',    'Ensotek — Cooling towers and industrial cooling solutions.',
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -139,7 +116,7 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- OPTIONAL: LOCALE OVERRIDES (TR/EN/DE)
+-- LOCALIZED SEO OVERRIDES (tr/en/de)
 -- =============================================================
 
 -- seo overrides
@@ -148,7 +125,7 @@ VALUES
 (
   UUID(),
   'seo',
-  'de',
+  'tr',
   CAST(
     JSON_OBJECT(
       'site_name',      @BRAND_SHORT_TR,
@@ -158,8 +135,8 @@ VALUES
         CONCAT(
           @BRAND_LEGAL_TR,
           ' — Camelyaf Takviyeli Polyester (CTP) malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajı. ',
-          'Mevcut kuleler için bakım-onarım, modernizasyon, performans testleri ve yedek parça temini. ',
-          'Kaliteli ürün ve hizmet ile uzun ömürlü çözümler birinci önceliğimizdir.'
+          'Ayrıca mevcut su soğutma kulelerinin bakım-onarım, modernizasyon, performans testleri ve yedek parça temini. ',
+          'Kaliteli ürün ve hizmet ile uzun ömürlü çözümler Ensotek’in birinci önceliğidir.'
         ),
       'open_graph', JSON_OBJECT(
         'type',   'website',
@@ -244,14 +221,14 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
--- site_seo overrides (fallback) – genelde seo ile aynı tutulur
+-- site_seo overrides (fallback) – seo ile aynı tutulur
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
   UUID(),
   'site_seo',
-  'de',
-  (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='de' LIMIT 1),
+  'tr',
+  (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='tr' LIMIT 1),
   NOW(3),
   NOW(3)
 ),
@@ -276,7 +253,7 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- site_meta_default (localized) – TR/EN/DE
+-- site_meta_default (localized only) – tr/en/de  (NO '*')
 -- =============================================================
 
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
@@ -284,7 +261,7 @@ VALUES
 (
   UUID(),
   'site_meta_default',
-  'de',
+  'tr',
   CAST(
     JSON_OBJECT(
       'title',       'Ensotek | Su Soğutma Kuleleri',
@@ -331,4 +308,5 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 COMMIT;
+
 SET FOREIGN_KEY_CHECKS = 1;

@@ -1,5 +1,5 @@
 -- =============================================================
--- 022_references_i18n.seeds.sql  (TR/EN/DE)  [IDEMPOTENT]  [BINARY-COLLATION-FIX]
+-- 022_references_i18n.seeds.sql  (TR/EN/DE)  [IDEMPOTENT]  [BINARY-COLLATION-FIX]  (FIXED)
 -- Requires:
 --   - 021_references_tr_companies.seeds.sql
 --   - 021.1_references_tr_domestic.reset_and_seeds.sql
@@ -34,22 +34,21 @@ INSERT INTO references_i18n
   created_at, updated_at
 )
 SELECT
-  -- id (keep existing if present, else new)
   COALESCE(
     (
       SELECT id
       FROM references_i18n t
       WHERE BINARY t.reference_id = BINARY r.id
-        AND BINARY t.locale       = BINARY 'de'
+        AND BINARY t.locale       = BINARY 'tr'
       LIMIT 1
     ),
     UUID()
   ) AS id,
 
   r.id AS reference_id,
-  'de' AS locale,
+  'tr' AS locale,
 
-  -- title: derive from domain-ish; then apply minimal beautify
+  -- title
   (
     CASE
       WHEN r.website_url LIKE '%enerjisa%'        THEN 'Enerjisa'
@@ -93,7 +92,6 @@ SELECT
       WHEN r.website_url LIKE '%socar%'           THEN 'SOCAR Turkey'
       WHEN r.website_url LIKE '%aygaz%'           THEN 'Aygaz'
       ELSE
-        -- fallback: strip protocol and www, keep first host segment upper
         UPPER(
           SUBSTRING_INDEX(
             REPLACE(REPLACE(REPLACE(r.website_url,'https://',''),'http://',''),'www.',''),
@@ -103,7 +101,7 @@ SELECT
     END
   ) AS title,
 
-  -- slug: if we have a known mapping use it; else slugify simplistic (lower, replace spaces)
+  -- slug
   (
     CASE
       WHEN r.website_url LIKE '%enerjisa%'        THEN 'enerjisa'
@@ -158,7 +156,7 @@ SELECT
     END
   ) AS slug,
 
-  -- summary by sector
+  -- summary (TR)
   (
     CASE
       WHEN r.sub_category_id = 'bbbb5201-1111-4111-8111-bbbbbbbb5201' THEN 'Enerji santrali ve üretim altyapıları için kurumsal referans.'
@@ -173,7 +171,7 @@ SELECT
     END
   ) AS summary,
 
-  -- content by sector (HTML)
+  -- content (TR, HTML)
   (
     CASE
       WHEN r.sub_category_id = 'bbbb5201-1111-4111-8111-bbbbbbbb5201' THEN
@@ -197,7 +195,7 @@ SELECT
     END
   ) AS content,
 
-  -- featured_image_alt
+  -- featured_image_alt (TR)
   (
     CASE
       WHEN r.sub_category_id = 'bbbb5201-1111-4111-8111-bbbbbbbb5201' THEN 'Enerji tesisi görseli'
@@ -212,7 +210,7 @@ SELECT
     END
   ) AS featured_image_alt,
 
-  -- meta_title
+  -- meta_title (TR)
   CONCAT(
     (
       CASE
@@ -237,7 +235,7 @@ SELECT
     ' | Referans'
   ) AS meta_title,
 
-  -- meta_description
+  -- meta_description (TR)
   (
     CASE
       WHEN r.sub_category_id = 'bbbb5201-1111-4111-8111-bbbbbbbb5201' THEN 'Enerji santralleri için endüstriyel uygulamalar kapsamında referans kaydı.'
@@ -295,7 +293,7 @@ SELECT
 FROM references_i18n s
 JOIN `references` r ON BINARY r.id = BINARY s.reference_id
 WHERE BINARY r.category_id = BINARY @CAT_DOMESTIC
-  AND BINARY s.locale      = BINARY 'de'
+  AND BINARY s.locale      = BINARY 'tr'
   AND NOT EXISTS (
     SELECT 1
     FROM references_i18n t
@@ -330,7 +328,7 @@ SELECT
 FROM references_i18n s
 JOIN `references` r ON BINARY r.id = BINARY s.reference_id
 WHERE BINARY r.category_id = BINARY @CAT_DOMESTIC
-  AND BINARY s.locale      = BINARY 'de'
+  AND BINARY s.locale      = BINARY 'tr'
   AND NOT EXISTS (
     SELECT 1
     FROM references_i18n t

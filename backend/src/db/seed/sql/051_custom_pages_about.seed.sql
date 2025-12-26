@@ -102,7 +102,7 @@ VALUES
 (
   UUID(),
   @PAGE_MISSION,
-  'de',
+  'tr',
   'Misyonumuz',
   'misyonumuz',
   JSON_OBJECT(
@@ -169,7 +169,7 @@ VALUES
 (
   UUID(),
   @PAGE_VISION,
-  'de',
+  'tr',
   'Vizyonumuz',
   'vizyonumuz',
   JSON_OBJECT(
@@ -230,7 +230,7 @@ VALUES
 (
   UUID(),
   @PAGE_ABOUT,
-  'de',
+  'tr',
   'Ensotek Su Soğutma Kuleleri',
   'ensotek-su-sogutma-kuleleri',
   JSON_OBJECT(

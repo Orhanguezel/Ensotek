@@ -42,7 +42,7 @@ SET @ASSET_FILE_GUIDE    := 'cccccccc-0000-0000-0000-cccccccc0001';
 SET @LIB_CT_BASICS_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
   WHERE i.slug = 'su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir'
   LIMIT 1
 );
@@ -59,7 +59,7 @@ VALUES
   @LIB_CT_BASICS_ID,
   1, 1, 40,
   '{
-    "de":[
+    "tr":[
       "su soğutma kulesi",
       "soğutma kulesi nedir",
       "soğutma kulesi çeşitleri",

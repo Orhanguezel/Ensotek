@@ -16,7 +16,7 @@ INSERT INTO product_i18n (
 )
 VALUES (
   'bbbb0002-2222-4222-8222-bbbbbbbb0002',
-  'de',
+  'tr',
   'Açık Tip Su Soğutma Kuleleri – Tek Hücreli (CTP Serisi)',
   'acik-tip-su-sogutma-kuleleri-tek-hucreli-ctp-serisi',
   'CTP serisi tek hücreli açık tip su soğutma kuleleri; geniş model skalası ile farklı kapasite ve debi ihtiyaçlarına uygun çözümler sunar. Kapasite değerleri 35/30/25°C ve 40/30/24°C çalışma koşullarına göre katalogda tablo halinde verilmektedir.',
@@ -43,21 +43,21 @@ ON DUPLICATE KEY UPDATE
 -- TECHNICAL SPECS (TR) – derived from p.7 table (range-style summary)
 INSERT INTO product_specs (id, product_id, locale, name, value, category, order_num)
 VALUES
-  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr01','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Seri / Hücre Tipi','CTP – Tek hücreli açık tip kuleler','custom',10),
-  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr02','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Model Aralığı','CTP-1 … CTP-35','custom',20),
-  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr03','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Kapasite Koşulları','35/30/25°C ve 40/30/24°C (katalog tablosu)','service',30),
-  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr04','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Kapasite Aralığı (35/30/25°C)','90.000 – 3.500.000 kcal/h (modele göre)','service',40),
-  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr05','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Debi Aralığı (35/30/25°C)','18 – 700 m³/h (modele göre)','service',50),
-  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr06','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Fan Çapı (Ø) Aralığı','630 – 3700 mm (modele göre)','physical',60)
+  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr01','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Seri / Hücre Tipi','CTP – Tek hücreli açık tip kuleler','custom',10),
+  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr02','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Model Aralığı','CTP-1 … CTP-35','custom',20),
+  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr03','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Kapasite Koşulları','35/30/25°C ve 40/30/24°C (katalog tablosu)','service',30),
+  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr04','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Kapasite Aralığı (35/30/25°C)','90.000 – 3.500.000 kcal/h (modele göre)','service',40),
+  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr05','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Debi Aralığı (35/30/25°C)','18 – 700 m³/h (modele göre)','service',50),
+  ('55550002-aaaa-4aaa-8aaa-bbbb0002tr06','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Fan Çapı (Ø) Aralığı','630 – 3700 mm (modele göre)','physical',60)
 ON DUPLICATE KEY UPDATE
   name=VALUES(name), value=VALUES(value), category=VALUES(category), order_num=VALUES(order_num);
 
 -- FAQS (TR)
 INSERT INTO product_faqs (id, product_id, locale, question, answer, display_order, is_active)
 VALUES
-  ('66660002-aaaa-4aaa-8aaa-bbbb0002tr01','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','CTP serisi neyi ifade eder?','CTP, tek hücreli açık tip kuleler için ürün ailesini ifade eder. Modeller CTP-1’den CTP-35’e kadar ölçeklenir.',10,1),
-  ('66660002-aaaa-4aaa-8aaa-bbbb0002tr02','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Kapasite değerleri hangi koşullarda veriliyor?','Katalog tablosunda 35/30/25°C ve 40/30/24°C koşulları için kapasite ve debi değerleri paylaşılır.',20,1),
-  ('66660002-aaaa-4aaa-8aaa-bbbb0002tr03','bbbb0002-2222-4222-8222-bbbbbbbb0002','de','Doğru model seçimi nasıl yapılır?','Hedef soğutma koşulu (örn. 35/30/25°C), ihtiyaç debisi (m³/h) ve saha yerleşimi (taban ölçüsü/yükseklik) birlikte değerlendirilerek seçilir.',30,1)
+  ('66660002-aaaa-4aaa-8aaa-bbbb0002tr01','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','CTP serisi neyi ifade eder?','CTP, tek hücreli açık tip kuleler için ürün ailesini ifade eder. Modeller CTP-1’den CTP-35’e kadar ölçeklenir.',10,1),
+  ('66660002-aaaa-4aaa-8aaa-bbbb0002tr02','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Kapasite değerleri hangi koşullarda veriliyor?','Katalog tablosunda 35/30/25°C ve 40/30/24°C koşulları için kapasite ve debi değerleri paylaşılır.',20,1),
+  ('66660002-aaaa-4aaa-8aaa-bbbb0002tr03','bbbb0002-2222-4222-8222-bbbbbbbb0002','tr','Doğru model seçimi nasıl yapılır?','Hedef soğutma koşulu (örn. 35/30/25°C), ihtiyaç debisi (m³/h) ve saha yerleşimi (taban ölçüsü/yükseklik) birlikte değerlendirilerek seçilir.',30,1)
 ON DUPLICATE KEY UPDATE
   question=VALUES(question), answer=VALUES(answer), display_order=VALUES(display_order), is_active=VALUES(is_active);
 

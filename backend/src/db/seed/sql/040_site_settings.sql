@@ -1,9 +1,8 @@
 -- =============================================================
--- 040_site_settings.sql (Ensotek) – MULTI-LOCALE (Dynamic) [SAFE]
+-- 040_site_settings.sql (Ensotek) – MULTI-LOCALE (Dynamic) [FIXED]
 --  - app_locales + default_locale => locale='*'
---  - localized settings => locale in ('de','en','de',...)
---  - TEXT value stores JSON as string
---  - Upsert everywhere: ON DUPLICATE KEY UPDATE
+--  - localized settings => locale in ('tr','en','de')
+--  - cookie_consent => LOCALIZED (tr/en/de)  ✅ (requested)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -30,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =============================================================
--- GLOBAL: app_locales (locale='*')
+-- GLOBAL: app_locales (locale='*')  ✅ FIX: tr/en/de, uniq
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
@@ -40,9 +39,9 @@ VALUES
   '*',
   CAST(
     JSON_ARRAY(
-      JSON_OBJECT('code','de','label','Türkçe','is_default', FALSE,  'is_active', TRUE),
+      JSON_OBJECT('code','tr','label','Türkçe','is_default', FALSE, 'is_active', TRUE),
       JSON_OBJECT('code','en','label','English','is_default', FALSE, 'is_active', TRUE),
-      JSON_OBJECT('code','de','label','Deutsch','is_default', TRUE, 'is_active', TRUE)
+      JSON_OBJECT('code','de','label','Deutsch','is_default', TRUE,  'is_active', TRUE)
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),
@@ -63,14 +62,14 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- LOCALIZED: TR içerik ayarları
+-- LOCALIZED: TR içerik ayarları  ✅ FIX: locale='tr'
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
   UUID(),
   'contact_info',
-  'de',
+  'tr',
   CAST(JSON_OBJECT(
     'companyName','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
     'phones',JSON_ARRAY('+90 212 613 33 01'),
@@ -85,14 +84,14 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-(UUID(), 'catalog_pdf_url',        'de', 'https://ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_pdf_filename',   'de', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_admin_email',    'de', 'info@ensotek.com.tr', NOW(3), NOW(3)),
-(UUID(), 'site_title',             'de', 'Ensotek', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'tr', 'https://ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_filename',   'tr', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_admin_email',    'tr', 'info@ensotek.com.tr', NOW(3), NOW(3)),
+(UUID(), 'site_title',             'tr', 'Ensotek', NOW(3), NOW(3)),
 (
   UUID(),
   'socials',
-  'de',
+  'tr',
   CAST(JSON_OBJECT(
     'instagram','https://instagram.com/ensotek',
     'facebook','https://facebook.com/ensotek',
@@ -107,11 +106,11 @@ VALUES
 (
   UUID(),
   'company_profile',
-  'de',
+  'tr',
   CAST(JSON_OBJECT(
     'headline','CTP Su Soğutma Kuleleri: Açık Tip ve Kapalı Tip İmalat & Montaj',
     'subline','Camelyaf Takviyeli Polyester (CTP) malzemeden su soğutma kuleleri üretiyor; bakım, onarım, modernizasyon ve performans testleriyle tesislerinize uzun ömürlü çözümler sunuyoruz.',
-    'body','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti; CTP malzemeden Açık Tip Su Soğutma Kuleleri ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajını ana faaliyet alanı olarak yürütür. Ayrıca mevcut su soğutma kulelerinin bakım ve onarımları, yeni teknolojilere göre modernize edilmesi, performans testlerinin yapılması ve yedek parça temini hizmetleri sunar. Kaliteli ürün ve hizmet ile uzun ömürlü çözümler üretmek Ensotek\'in birinci önceliğidir.'
+    'body','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti; CTP malzemeden Açık Tip Su Soğutma Kuleleri ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajını ana faaliyet alanı olarak yürütür. Ayrıca mevcut su soğutma kulelerinin bakım ve onarımları, yeni teknolojilere göre modernize edilmesi, performans testlerinin yapılması ve yedek parça temini hizmetleri sunar. Kaliteli ürün ve hizmet ile uzun ömürlü çözümler üretmek Ensotek''in birinci önceliğidir.'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -119,7 +118,7 @@ VALUES
 (
   UUID(),
   'company_brand',
-  'de',
+  'tr',
   CAST(JSON_OBJECT(
     'name','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
     'shortName','ENSOTEK',
@@ -130,10 +129,7 @@ VALUES
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT(
-        'type','logo',
-        'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp'
-      )
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -142,7 +138,7 @@ VALUES
 (
   UUID(),
   'catalog_admin_user_ids',
-  'de',
+  'tr',
   CAST(JSON_ARRAY() AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -207,10 +203,7 @@ VALUES
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT(
-        'type','logo',
-        'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp'
-      )
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -279,7 +272,7 @@ VALUES
   'company_brand',
   'de',
   CAST(JSON_OBJECT(
-    'name','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
+    'name','ENSOTEK Kühltürme & Technologien',
     'shortName','ENSOTEK',
     'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
@@ -288,10 +281,7 @@ VALUES
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT(
-        'type','logo',
-        'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp'
-      )
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -318,16 +308,16 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'storage_driver',             '*', 'cloudinary',                                        NOW(3), NOW(3)),
-(UUID(), 'storage_local_root',         '*', '/var/www/Ensotek/uploads',                          NOW(3), NOW(3)),
-(UUID(), 'storage_local_base_url',     '*', 'https://ensotek.guezelwebdesign.com/uploads',   NOW(3), NOW(3)),
-(UUID(), 'cloudinary_cloud_name',      '*', 'your_cloud_name',                                   NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_key',         '*', 'your_cloudinary_api_key',                           NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_secret',      '*', 'your_cloudinary_api_secret',                        NOW(3), NOW(3)),
-(UUID(), 'cloudinary_folder',          '*', 'uploads/ensotek',                                   NOW(3), NOW(3)),
-(UUID(), 'cloudinary_unsigned_preset', '*', 'your_unsigned_preset',                              NOW(3), NOW(3)),
-(UUID(), 'storage_cdn_public_base',    '*', 'https://res.cloudinary.com',                        NOW(3), NOW(3)),
-(UUID(), 'storage_public_api_base',    '*', 'https://ensotek.guezelwebdesign.com/api',       NOW(3), NOW(3))
+(UUID(), 'storage_driver',             '*', 'cloudinary',                                  NOW(3), NOW(3)),
+(UUID(), 'storage_local_root',         '*', '/var/www/Ensotek/uploads',                    NOW(3), NOW(3)),
+(UUID(), 'storage_local_base_url',     '*', '/uploads',                                    NOW(3), NOW(3)),
+(UUID(), 'cloudinary_cloud_name',      '*', 'your_cloud_name',                             NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_key',         '*', 'your_cloudinary_api_key',                     NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_secret',      '*', 'your_cloudinary_api_secret',                  NOW(3), NOW(3)),
+(UUID(), 'cloudinary_folder',          '*', 'uploads/ensotek',                             NOW(3), NOW(3)),
+(UUID(), 'cloudinary_unsigned_preset', '*', 'your_unsigned_preset',                        NOW(3), NOW(3)),
+(UUID(), 'storage_cdn_public_base',    '*', 'https://res.cloudinary.com',                  NOW(3), NOW(3)),
+(UUID(), 'storage_public_api_base',    '*', 'https://ensotek.guezelwebdesign.com/api',     NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -347,13 +337,13 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'smtp_host',       '*', 'smtp.example.com',      NOW(3), NOW(3)),
-(UUID(), 'smtp_port',       '*', '465',                   NOW(3), NOW(3)),
-(UUID(), 'smtp_username',   '*', 'no-reply@ensotek.com.tr',NOW(3), NOW(3)),
-(UUID(), 'smtp_password',   '*', 'change-me-in-admin',    NOW(3), NOW(3)),
-(UUID(), 'smtp_from_email', '*', 'no-reply@ensotek.com.tr',NOW(3), NOW(3)),
-(UUID(), 'smtp_from_name',  '*', 'Ensotek',               NOW(3), NOW(3)),
-(UUID(), 'smtp_ssl',        '*', 'true',                  NOW(3), NOW(3))
+(UUID(), 'smtp_host',       '*', 'smtp.example.com',        NOW(3), NOW(3)),
+(UUID(), 'smtp_port',       '*', '465',                     NOW(3), NOW(3)),
+(UUID(), 'smtp_username',   '*', 'no-reply@ensotek.com.tr', NOW(3), NOW(3)),
+(UUID(), 'smtp_password',   '*', 'change-me-in-admin',      NOW(3), NOW(3)),
+(UUID(), 'smtp_from_email', '*', 'no-reply@ensotek.com.tr', NOW(3), NOW(3)),
+(UUID(), 'smtp_from_name',  '*', 'Ensotek',                 NOW(3), NOW(3)),
+(UUID(), 'smtp_ssl',        '*', 'true',                    NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -370,55 +360,70 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- GLOBAL: Google Tag Manager (GTM) Container ID (locale='*') ✅ EKLENDİ
--- Admin panelden değiştir: "GTM-XXXXXXX"
--- Boş bırakırsan frontend GTM basmaz.
+-- GLOBAL: GTM + GA4 (locale='*')
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'gtm_container_id', '*', 'GTM-WV5FRN93', NOW(3), NOW(3))
-ON DUPLICATE KEY UPDATE
-  `value`      = VALUES(`value`),
-  `updated_at` = VALUES(`updated_at`);
-
--- =============================================================
--- GLOBAL: GA4 Measurement ID (locale='*') ✅ (opsiyonel fallback)
--- Admin panelden değiştir: "G-XXXXXXXXXX"
--- Not: GTM aktifse GA4 tag'ini GTM içinden yönetmen önerilir.
--- =============================================================
-INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
-VALUES
+(UUID(), 'gtm_container_id',   '*', 'GTM-WV5FRN93', NOW(3), NOW(3)),
 (UUID(), 'ga4_measurement_id', '*', 'G-JXG2XVVQ8C', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- GLOBAL: Cookie Consent Config (locale='*')
--- consent_version: metin/policy değişince artır -> kullanıcıdan tekrar onay al
+-- LOCALIZED: Cookie Consent Config (tr/en/de) ✅ FIX: NOT GLOBAL
+-- consent_version değişince tekrar onay al
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
   UUID(),
   'cookie_consent',
-  '*',
+  'tr',
   CAST(
     JSON_OBJECT(
       'consent_version', 1,
-      'defaults', JSON_OBJECT(
-        'necessary', TRUE,
-        'analytics', FALSE,
-        'marketing', FALSE
-      ),
-      'ui', JSON_OBJECT(
-        'enabled', TRUE,
-        'position', 'bottom',
-        'show_reject_all', TRUE
-      ),
+      'defaults', JSON_OBJECT('necessary', TRUE, 'analytics', FALSE, 'marketing', FALSE),
+      'ui', JSON_OBJECT('enabled', TRUE, 'position', 'bottom', 'show_reject_all', TRUE),
       'texts', JSON_OBJECT(
         'title', 'Çerez Tercihleri',
-        'description', 'Deneyiminizi iyileştirmek için zorunlu ve isteğe bağlı çerezler kullanıyoruz. Tercihlerinizi dilediğiniz zaman değiştirebilirsiniz.'
+        'description', 'Sitemizin doğru çalışmasını sağlamak ve isteğe bağlı analiz yapmak için çerezler kullanıyoruz. Tercihlerinizi yönetebilirsiniz.'
+      )
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'cookie_consent',
+  'en',
+  CAST(
+    JSON_OBJECT(
+      'consent_version', 1,
+      'defaults', JSON_OBJECT('necessary', TRUE, 'analytics', FALSE, 'marketing', FALSE),
+      'ui', JSON_OBJECT('enabled', TRUE, 'position', 'bottom', 'show_reject_all', TRUE),
+      'texts', JSON_OBJECT(
+        'title', 'Cookie Preferences',
+        'description', 'We use cookies to ensure the site works properly and to optionally analyze traffic. You can manage your preferences.'
+      )
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'cookie_consent',
+  'de',
+  CAST(
+    JSON_OBJECT(
+      'consent_version', 1,
+      'defaults', JSON_OBJECT('necessary', TRUE, 'analytics', FALSE, 'marketing', FALSE),
+      'ui', JSON_OBJECT('enabled', TRUE, 'position', 'bottom', 'show_reject_all', TRUE),
+      'texts', JSON_OBJECT(
+        'title', 'Cookie-Einstellungen',
+        'description', 'Wir verwenden Cookies, um die Website korrekt zu betreiben und optional den Traffic zu analysieren. Sie können Ihre Einstellungen verwalten.'
       )
     ) AS CHAR CHARACTER SET utf8mb4
   ),

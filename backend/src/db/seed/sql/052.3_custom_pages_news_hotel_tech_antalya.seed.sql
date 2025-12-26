@@ -73,7 +73,7 @@ VALUES
 (
   UUID(),
   @NEWS_HOTEL_TECH_ANTALYA,
-  'de',
+  'tr',
   'Hotel-Tech Antalya Fuarını Başarıyla Tamamladık!',
   'hotel-tech-antalya-fuarini-basarili-tamamladik',
   JSON_OBJECT(

@@ -37,7 +37,7 @@ VALUES
 
 -- 1) Public Form (TR)
 ('aaaa0000-0000-0000-0000-000000000001',
- NULL, 'new', 'de', 'TR',
+ NULL, 'new', 'tr', 'TR',
  'Ahmet Yılmaz', 'Yılmaz Soğutma Sistemleri', 'ahmet.yilmaz@example.com', '+90 532 000 00 01',
  'Endüstriyel su soğutma kulesi teklifi',
  'Mevcut tesisteki 500 m³/h debiye uygun, kapalı devre kule için teklif rica ediyoruz.',
