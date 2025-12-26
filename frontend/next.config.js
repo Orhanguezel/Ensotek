@@ -2,49 +2,60 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 /** @type {import('next').NextConfig} */
 
+const getDefaultLocaleShort = () => {
+  const raw = String(process.env.NEXT_PUBLIC_DEFAULT_LOCALE || '')
+    .trim()
+    .toLowerCase();
+  const short = raw.replace('_', '-').split('-')[0] || '';
+  return short || 'de'; // env yoksa fallback (prod’da zaten env var)
+};
+
+const getPrefixlessFlag = () => {
+  // opsiyonel: env ile kontrol et
+  // NEXT_PUBLIC_DEFAULT_LOCALE_PREFIXLESS=true/false
+  const raw = String(process.env.NEXT_PUBLIC_DEFAULT_LOCALE_PREFIXLESS || '')
+    .trim()
+    .toLowerCase();
+  if (!raw) return true; // mevcut standardın
+  return raw === '1' || raw === 'true' || raw === 'yes';
+};
+
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
 
   images: {
-    // Modern ve kontrollü allowlist
     remotePatterns: [
-      // Cloudinary
       { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' },
-
-      // Unsplash
       { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
-
-      // Dev local (Image optimizer için)
       { protocol: 'http', hostname: 'localhost', pathname: '/**' },
       { protocol: 'http', hostname: '127.0.0.1', pathname: '/**' },
-
-      // Seed placeholder (hata aldığın host)
       { protocol: 'https', hostname: 'cdn.example.com', pathname: '/**' },
 
-      // PRODUCTION: kendi domain/CDN’lerin (örnekler)
-      // Not: burada gerçekten kullandığın hostları yaz.
       { protocol: 'https', hostname: 'ensotek.guezelwebdesign.com', pathname: '/**' },
       { protocol: 'https', hostname: 'ensotek.de', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.ensotek.guezelwebdesign.com', pathname: '/**' },
       { protocol: 'https', hostname: 'your-real-cdn.com', pathname: '/**' },
-
-      // Eğer S3/R2 public endpoint kullanıyorsan (örnek)
-      // { protocol: "https", hostname: "your-bucket.s3.amazonaws.com", pathname: "/**" },
-      // { protocol: "https", hostname: "pub-xxxx.r2.dev", pathname: "/**" },
     ],
-
-    // İsteğe bağlı: performans/format
     formats: ['image/avif', 'image/webp'],
-
-    // Varsayılan olarak SVG optimize edilmez; güvenlik açısından açma
-    // dangerouslyAllowSVG: false,
-
-    // İsteğe bağlı: cache TTL
-    // minimumCacheTTL: 60,
   },
 
   // ✅ i18n intentionally removed
+
+  async redirects() {
+    const defaultLc = getDefaultLocaleShort();
+    const prefixless = getPrefixlessFlag();
+
+    // Prefixless default locale politikasında: /de ve /de/... => / ve /...
+    if (prefixless && defaultLc) {
+      return [
+        { source: `/${defaultLc}`, destination: '/', permanent: true },
+        { source: `/${defaultLc}/:path*`, destination: '/:path*', permanent: true },
+      ];
+    }
+
+    return [];
+  },
 
   async rewrites() {
     // locale-like prefix: xx | xxx | xx-YY | xx-yyy
@@ -54,6 +65,7 @@ const nextConfig = {
       beforeFiles: [],
       afterFiles: [],
       fallback: [
+        // locale prefix’i query’e çevir (SSR canonical builder __lc ile doğru locale seçsin)
         {
           source: `/${localeSrc}/:path*`,
           destination: '/:path*?__lc=:lc',
@@ -67,7 +79,6 @@ const nextConfig = {
   },
 
   webpack: (config) => {
-    // Eğer build süreni iyileştiriyorsa kalsın; fakat bazı ortamlarda disk cache daha stabil olur.
     config.cache = { type: 'memory' };
     return config;
   },

@@ -17,7 +17,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_banner',
-  'tr',
+  'de',
   CAST(
     JSON_OBJECT(
       'ui_breadcrumb_home', 'Ana Sayfa'
@@ -64,7 +64,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_contact',
-  'tr',
+  'de',
   CAST(
     JSON_OBJECT(
       'ui_contact_subprefix',                  'İletişime',
@@ -189,7 +189,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'contact_map',
-  'tr',
+  'de',
   CAST(
     JSON_OBJECT(
       'title',     'Konum',
@@ -253,13 +253,13 @@ SELECT
   NOW(3),
   NOW(3)
 FROM site_settings s
-WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('de' COLLATE utf8mb4_unicode_ci)
   AND (s.`key`  COLLATE utf8mb4_unicode_ci) IN (
     ('ui_banner' COLLATE utf8mb4_unicode_ci),
     ('ui_contact' COLLATE utf8mb4_unicode_ci),
     ('contact_map' COLLATE utf8mb4_unicode_ci)
   )
-  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('de' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t

@@ -16,7 +16,7 @@ import { useUiSection } from '@/i18n/uiDb';
 
 const FaqsPageContent: React.FC = () => {
   const resolved = useResolvedLocale();
-  const locale = (resolved || 'tr').split('-')[0];
+  const locale = (resolved || 'de').split('-')[0];
 
   const { ui } = useUiSection('ui_faqs', locale);
 
@@ -24,7 +24,7 @@ const FaqsPageContent: React.FC = () => {
 
   const emptyText = ui(
     'ui_faqs_empty',
-    locale === 'tr'
+    locale === 'de'
       ? 'Şu anda görüntülenecek soru bulunmamaktadır.'
       : 'There are no FAQs to display at the moment.',
   );
@@ -59,14 +59,14 @@ const FaqsPageContent: React.FC = () => {
                 <span>{ui('ui_faqs_kicker_prefix', 'Ensotek')}</span>{' '}
                 {ui(
                   'ui_faqs_kicker_label',
-                  locale === 'tr' ? 'Sıkça Sorulan Sorular' : 'Frequently Asked Questions',
+                  locale === 'de' ? 'Sıkça Sorulan Sorular' : 'Frequently Asked Questions',
                 )}
               </span>
 
               <h2 className="section__title">
-                {ui('ui_faqs_page_title_prefix', locale === 'tr' ? 'Merak edilen' : 'Common')}{' '}
+                {ui('ui_faqs_page_title_prefix', locale === 'de' ? 'Merak edilen' : 'Common')}{' '}
                 <span className="down__mark-line">
-                  {ui('ui_faqs_page_title_mark', locale === 'tr' ? 'sorular' : 'questions')}
+                  {ui('ui_faqs_page_title_mark', locale === 'de' ? 'sorular' : 'questions')}
                 </span>
               </h2>
 
@@ -80,7 +80,7 @@ const FaqsPageContent: React.FC = () => {
               >
                 {ui(
                   'ui_faqs_intro',
-                  locale === 'tr'
+                  locale === 'de'
                     ? 'Ensotek ürünleri, hizmetleri ve süreçleri hakkında sıkça sorulan soruların yanıtlarını burada bulabilirsiniz.'
                     : 'Find answers to the most common questions about Ensotek products, services and processes.',
                 )}
@@ -139,7 +139,7 @@ const FaqsPageContent: React.FC = () => {
                               <p className="text-muted small mb-0">
                                 {ui(
                                   'ui_faqs_no_answer',
-                                  locale === 'tr'
+                                  locale === 'de'
                                     ? 'Bu soru için henüz cevap girilmemiştir.'
                                     : 'No answer has been provided for this question yet.',
                                 )}
@@ -167,7 +167,7 @@ const FaqsPageContent: React.FC = () => {
               <p className="small text-muted mb-0">
                 {ui(
                   'ui_faqs_footer_note',
-                  locale === 'tr'
+                  locale === 'de'
                     ? 'Aradığınız cevabı bulamadıysanız lütfen bizimle iletişime geçin.'
                     : 'If you cannot find the answer you are looking for, please contact us.',
                 )}

@@ -6,22 +6,22 @@
 //   - i18n: site_settings.ui_products
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import React, { useMemo } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
-import { useListProductsQuery } from "@/integrations/rtk/hooks";
-import type { ProductDto } from "@/integrations/types/product.types";
+import { useListProductsQuery } from '@/integrations/rtk/hooks';
+import type { ProductDto } from '@/integrations/types/product.types';
 
-import { toCdnSrc } from "@/shared/media";
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
+import { toCdnSrc } from '@/shared/media';
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
-import FallbackCover from "public/img/blog/3/2.jpg";
+import FallbackCover from 'public/img/blog/3/2.jpg';
 
 const CARD_W = 480;
 const CARD_H = 320;
@@ -30,16 +30,16 @@ const ProductMore: React.FC = () => {
   const router = useRouter();
   const locale = useResolvedLocale();
 
-  const { ui } = useUiSection("ui_products", locale);
+  const { ui } = useUiSection('ui_products', locale);
 
   const moreTitle = ui(
-    "ui_products_more_title",
-    locale === "tr" ? "Diğer Ürünler" : "More Products",
+    'ui_products_more_title',
+    locale === 'de' ? 'Diğer Ürünler' : 'More Products',
   );
 
   const slugParam = router.query.slug;
   const currentSlug = useMemo(
-    () => (Array.isArray(slugParam) ? slugParam[0] : slugParam) || "",
+    () => (Array.isArray(slugParam) ? slugParam[0] : slugParam) || '',
     [slugParam],
   );
 
@@ -50,14 +50,14 @@ const ProductMore: React.FC = () => {
     limit: 8,
   });
 
-  const productListHref = localizePath(locale, "/product");
+  const productListHref = localizePath(locale, '/product');
 
   const items = useMemo(() => {
     const list: ProductDto[] = data?.items ?? [];
 
     return list
       .filter((p) => {
-        const slug = (p.slug || "").trim();
+        const slug = (p.slug || '').trim();
         if (!p.is_active) return false;
         if (!slug) return false;
         if (slug === currentSlug) return false;
@@ -65,17 +65,12 @@ const ProductMore: React.FC = () => {
       })
       .slice(0, 3)
       .map((p) => {
-        const slug = (p.slug || "").trim();
-        const title = (p.title || "").trim();
+        const slug = (p.slug || '').trim();
+        const title = (p.title || '').trim();
 
-        const imgRaw =
-          (p.image_url || "").trim() ||
-          ((p.images && p.images[0]) || "").trim();
+        const imgRaw = (p.image_url || '').trim() || ((p.images && p.images[0]) || '').trim();
 
-        const hero =
-          (imgRaw &&
-            (toCdnSrc(imgRaw, CARD_W, CARD_H, "fill") || imgRaw)) ||
-          "";
+        const hero = (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '';
 
         return {
           id: p.id,
@@ -83,7 +78,7 @@ const ProductMore: React.FC = () => {
           title,
           price: p.price,
           hero,
-          alt: p.alt || title || "product image",
+          alt: p.alt || title || 'product image',
         };
       });
   }, [data, currentSlug]);
@@ -110,17 +105,11 @@ const ProductMore: React.FC = () => {
         <div className="row" data-aos="fade-up" data-aos-delay="200">
           {items.map((p) => {
             const href = p.slug
-              ? localizePath(
-                locale,
-                `/product/${encodeURIComponent(p.slug)}`,
-              )
+              ? localizePath(locale, `/product/${encodeURIComponent(p.slug)}`)
               : productListHref;
 
             return (
-              <div
-                className="col-xl-4 col-lg-4 col-md-6"
-                key={p.id}
-              >
+              <div className="col-xl-4 col-lg-4 col-md-6" key={p.id}>
                 <div className="product__item-3 mb-30">
                   <div className="product__thumb-3 w-img">
                     <Image
@@ -128,7 +117,7 @@ const ProductMore: React.FC = () => {
                       alt={p.alt}
                       width={CARD_W}
                       height={CARD_H}
-                      style={{ width: "100%", height: "auto" }}
+                      style={{ width: '100%', height: 'auto' }}
                       loading="lazy"
                     />
                   </div>
@@ -136,13 +125,9 @@ const ProductMore: React.FC = () => {
                     <h3>
                       <Link href={href}>{p.title}</Link>
                     </h3>
-                    <p
-                      className="product__meta"
-                      style={{ marginTop: 6 }}
-                    >
-                    </p>
+                    <p className="product__meta" style={{ marginTop: 6 }}></p>
                     <Link href={href} className="link-more">
-                      {locale === "tr" ? "Ürüne git" : "View product"} →
+                      {locale === 'de' ? 'Ürüne git' : 'View product'} →
                     </Link>
                   </div>
                 </div>
@@ -152,11 +137,7 @@ const ProductMore: React.FC = () => {
 
           {isLoading && (
             <div className="col-12">
-              <div
-                className="skeleton-line"
-                style={{ height: 16 }}
-                aria-hidden
-              />
+              <div className="skeleton-line" style={{ height: 16 }} aria-hidden />
             </div>
           )}
         </div>

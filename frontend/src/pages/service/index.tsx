@@ -30,11 +30,11 @@ import { toCdnSrc } from '@/shared/media';
 import { normLocaleTag } from '@/i18n/localeUtils';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 function safeStr(x: unknown): string {
   return typeof x === 'string' ? x.trim() : '';
@@ -56,10 +56,10 @@ const ServicePage: React.FC = () => {
   const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
   const defaultLocale = useMemo(() => {
     const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'tr';
+    return v || 'de';
   }, [defaultLocaleRow?.value]);
 
-  const bannerTitle = ui('ui_services_page_title', locale === 'tr' ? 'Hizmetler' : 'Services');
+  const bannerTitle = ui('ui_services_page_title', locale === 'de' ? 'Hizmetler' : 'Services');
 
   // Global SEO settings (desc fallback)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
@@ -89,7 +89,7 @@ const ServicePage: React.FC = () => {
       safeStr((primary as any)?.meta_title) ||
       safeStr(primary?.name) ||
       safeStr(bannerTitle) ||
-      (locale === 'tr' ? 'Hizmetler' : 'Services')
+      (locale === 'de' ? 'Hizmetler' : 'Services')
     );
   }, [primary, bannerTitle, locale]);
 
@@ -104,7 +104,7 @@ const ServicePage: React.FC = () => {
     const uiFallback = safeStr(
       ui(
         'ui_services_page_description',
-        locale === 'tr'
+        locale === 'de'
           ? 'Hizmetlerimizi ve çözümlerimizi inceleyin. Size özel destek ve danışmanlık için iletişime geçin.'
           : 'Explore our services and solutions. Contact us for tailored support and consultation.',
       ),

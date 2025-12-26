@@ -46,7 +46,7 @@ VALUES
 -- 1) Teslimat / Delivery
 ('aaaa1111-1111-1111-1111-111111111111',
  '11111111-1111-1111-1111-111111111111',
- 'tr',
+ 'de',
  'Ürünler ne kadar sürede teslim edilir?',
  'Ödemeniz onaylandıktan sonra ürününüz otomatik olarak anında e-posta adresinize ve üye panelinize teslim edilir. Ortalama teslimat süresi 1-2 dakikadır.',
  'urunler-ne-kadar-surede-teslim-edilir',
@@ -76,7 +76,7 @@ VALUES
 -- 2) Ödeme yöntemleri / Payment methods
 ('bbbb2222-2222-2222-2222-222222222222',
  '22222222-2222-2222-2222-222222222222',
- 'tr',
+ 'de',
  'Hangi ödeme yöntemlerini kabul ediyorsunuz?',
  'Kredi kartı, banka havalesi, Papara, PayTR, Shopier ve kripto para (Coinbase Commerce) ile ödeme yapabilirsiniz. Tüm ödemeler SSL sertifikası ile güvence altındadır.',
  'hangi-odeme-yontemlerini-kabul-ediyorsunuz',
@@ -106,7 +106,7 @@ VALUES
 -- 3) Ürün çalışmazsa / Returns & warranty
 ('cccc3333-3333-3333-3333-333333333333',
  '33333333-3333-3333-3333-333333333333',
- 'tr',
+ 'de',
  'Ürün çalışmazsa ne olur?',
  'Satın aldığınız ürün çalışmaz veya hatalı ise 7 gün içinde destek ekibimizle iletişime geçerek değişim veya iade talebinde bulunabilirsiniz. Tüm ürünlerimiz garanti kapsamındadır.',
  'urun-calismazsa-ne-olur',
@@ -136,7 +136,7 @@ VALUES
 -- 4) Toplu alım / Bulk purchase & discounts
 ('dddd4444-4444-4444-4444-444444444444',
  '44444444-4444-4444-4444-444444444444',
- 'tr',
+ 'de',
  'Toplu alımlarda indirim var mı?',
  'Evet! 5+ ürün alımlarında %5, 10+ ürün alımlarında %10 indirim otomatik olarak uygulanır. Daha fazla bilgi için müşteri hizmetlerimizle iletişime geçebilirsiniz.',
  'toplu-alimlarda-indirim-var-mi',
@@ -166,7 +166,7 @@ VALUES
 -- 5) Lisans kullanımı / License usage
 ('eeee5555-5555-5555-5555-555555555555',
  '55555555-5555-5555-5555-555555555555',
- 'tr',
+ 'de',
  'Lisanslar kaç cihazda kullanılabilir?',
  'Her ürünün kullanım koşulları farklıdır. Ürün detay sayfasında lisans türü ve kaç cihazda kullanılabileceği belirtilmiştir. Tek kullanımlık, çoklu kullanım ve süreli lisanslar mevcuttur.',
  'lisanslar-kac-cihazda-kullanilabilir',
@@ -196,7 +196,7 @@ VALUES
 -- 6) Destek kanalları / Support channels
 ('ffff6666-6666-6666-6666-666666666666',
  '66666666-6666-6666-6666-666666666666',
- 'tr',
+ 'de',
  'Müşteri desteği nasıl alırım?',
  '7/24 canlı destek, e-posta, WhatsApp ve Telegram üzerinden bizimle iletişime geçebilirsiniz. Üye panelinizden destek talebi oluşturabilir veya SSS bölümünü inceleyebilirsiniz.',
  'musteri-destegi-nasil-alirim',

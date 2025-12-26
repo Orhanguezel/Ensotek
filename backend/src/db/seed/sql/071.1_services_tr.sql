@@ -110,7 +110,7 @@ INSERT INTO `services_i18n`
  `tags`,`meta_title`,`meta_description`,`meta_keywords`,
  `created_at`,`updated_at`)
 VALUES
-('91000001-1111-4111-8111-910000000001', @SRV_001,'tr',
+('91000001-1111-4111-8111-910000000001', @SRV_001,'de',
  'bakim-ve-onarim',
  'Bakım ve Onarım',
  'Ensotek, endüstriyel su soğutma kulelerinizin sorunsuz çalışmasını sağlamak amacıyla periyodik bakım ve profesyonel onarım hizmetleri sunar. Programlı kontroller; dolgu/nozul dağıtımı, fan-motor verimi, titreşim/ses analizi, mekanik hizalama, sızdırmazlık ve su şartlandırma kontrollerini kapsar. Arıza önleyici yaklaşım ile duruş süreleri azalır, performans kaybı önlenir ve ekipman ömrü uzar.',
@@ -125,7 +125,7 @@ VALUES
  'soğutma kulesi bakımı, kule onarım, periyodik bakım, fan motor bakım',
  NOW(3), NOW(3)),
 
-('91000002-1111-4111-8111-910000000002', @SRV_002,'tr',
+('91000002-1111-4111-8111-910000000002', @SRV_002,'de',
  'modernizasyon',
  'Modernizasyon',
  'Ensotek, mevcut su soğutma kulelerinin daha verimli ve güncel standartlara uygun çalışabilmesi için modernizasyon çözümleri sunar. Retrofit kapsamında dolgu/nozul upgrade, fan-motor optimizasyonu, VFD entegrasyonu, drift kaybı iyileştirmeleri ve su dağıtım mimarisi revizyonları uygulanabilir. Amaç; daha düşük enerji tüketimi, daha stabil proses ve daha yüksek kapasitedir.',
@@ -140,7 +140,7 @@ VALUES
  'soğutma kulesi modernizasyon, retrofit, vfd, dolgu değişimi, fan upgrade',
  NOW(3), NOW(3)),
 
-('91000003-1111-4111-8111-910000000003', @SRV_003,'tr',
+('91000003-1111-4111-8111-910000000003', @SRV_003,'de',
  'yedek-parcalar-ve-bilesenler',
  'Yedek Parçalar ve Bileşenler',
  'Ensotek, su soğutma kuleleri için geniş bir yedek parça ve bileşen portföyü sunar. Dolgu, nozul, damla tutucu, fan kanatları, motor/redüktör ve mekanik bağlantı elemanları gibi kritik parçalar uzun ömür ve güvenilir işletme için kalite odaklı seçilir.',
@@ -155,7 +155,7 @@ VALUES
  'soğutma kulesi yedek parça, dolgu, nozul, fan motor, redüktör',
  NOW(3), NOW(3)),
 
-('91000004-1111-4111-8111-910000000004', @SRV_004,'tr',
+('91000004-1111-4111-8111-910000000004', @SRV_004,'de',
  'uygulamalar-ve-referanslar',
  'Uygulamalar ve Referanslar',
  'Ensotek, endüstriyel ve ticari alanlarda çok sayıda referans projeye ve uygulamaya sahiptir. Enerji, kimya, gıda, ilaç, otomotiv ve daha birçok sektörde su soğutma kuleleriyle farklı ihtiyaçlara uygun çözümler sunar.',
@@ -170,7 +170,7 @@ VALUES
  'soğutma kulesi referanslar, uygulamalar, endüstriyel soğutma projeleri',
  NOW(3), NOW(3)),
 
-('91000005-1111-4111-8111-910000000005', @SRV_005,'tr',
+('91000005-1111-4111-8111-910000000005', @SRV_005,'de',
  'muhendislik-destegi',
  'Mühendislik Desteği',
  'Ensotek; projelendirme, danışmanlık, sistem optimizasyonu, performans analizi ve teknik eğitim dahil olmak üzere kapsamlı mühendislik destek hizmetleri sağlar. Isı yükü analizi, hidrolik dengeleme, ekipman seçimi ve devreye alma süreçleri dokümantasyon ile yürütülür.',
@@ -218,29 +218,29 @@ INSERT INTO `service_images_i18n`
 (`id`,`image_id`,`locale`,`title`,`alt`,`caption`,`created_at`,`updated_at`)
 VALUES
 -- SRV_001
-('93000001-1111-4111-8111-930000000001',@IMG_001A,'tr','Periyodik Kontroller','Periyodik bakım kontrolleri','Planlı kontrol ve raporlama ile duruşları azaltma.',NOW(3),NOW(3)),
-('93000001-1111-4111-8111-930000000002',@IMG_001B,'tr','Mekanik Bakım','Mekanik bakım çalışması','Fan-motor, hizalama ve kritik komponent kontrolleri.',NOW(3),NOW(3)),
-('93000001-1111-4111-8111-930000000003',@IMG_001C,'tr','Saha Onarım','Yerinde onarım ve doğrulama','Ölçümler, testler ve performans doğrulama.',NOW(3),NOW(3)),
+('93000001-1111-4111-8111-930000000001',@IMG_001A,'de','Periyodik Kontroller','Periyodik bakım kontrolleri','Planlı kontrol ve raporlama ile duruşları azaltma.',NOW(3),NOW(3)),
+('93000001-1111-4111-8111-930000000002',@IMG_001B,'de','Mekanik Bakım','Mekanik bakım çalışması','Fan-motor, hizalama ve kritik komponent kontrolleri.',NOW(3),NOW(3)),
+('93000001-1111-4111-8111-930000000003',@IMG_001C,'de','Saha Onarım','Yerinde onarım ve doğrulama','Ölçümler, testler ve performans doğrulama.',NOW(3),NOW(3)),
 
 -- SRV_002
-('93000002-1111-4111-8111-930000000001',@IMG_002A,'tr','Kapasite Artırımı','Modernizasyon ile kapasite artışı','Dolgu/nozul optimizasyonu ve dağıtım iyileştirme.',NOW(3),NOW(3)),
-('93000002-1111-4111-8111-930000000002',@IMG_002B,'tr','Enerji Optimizasyonu','Enerji optimizasyonu','Fan-motor upgrade ve VFD ile tüketimi düşürme.',NOW(3),NOW(3)),
-('93000002-1111-4111-8111-930000000003',@IMG_002C,'tr','Saha Uygulaması','Saha modernizasyon uygulaması','Testler ve performans doğrulama ile çalışır teslim.',NOW(3),NOW(3)),
+('93000002-1111-4111-8111-930000000001',@IMG_002A,'de','Kapasite Artırımı','Modernizasyon ile kapasite artışı','Dolgu/nozul optimizasyonu ve dağıtım iyileştirme.',NOW(3),NOW(3)),
+('93000002-1111-4111-8111-930000000002',@IMG_002B,'de','Enerji Optimizasyonu','Enerji optimizasyonu','Fan-motor upgrade ve VFD ile tüketimi düşürme.',NOW(3),NOW(3)),
+('93000002-1111-4111-8111-930000000003',@IMG_002C,'de','Saha Uygulaması','Saha modernizasyon uygulaması','Testler ve performans doğrulama ile çalışır teslim.',NOW(3),NOW(3)),
 
 -- SRV_003
-('93000003-1111-4111-8111-930000000001',@IMG_003A,'tr','Parça Seçimi','Yedek parça seçimi','Kule tipine ve kapasiteye göre doğru parça seçimi.',NOW(3),NOW(3)),
-('93000003-1111-4111-8111-930000000002',@IMG_003B,'tr','Tedarik ve Lojistik','Yedek parça tedariki','Stok ve tedarik süreçlerinin yönetimi.',NOW(3),NOW(3)),
-('93000003-1111-4111-8111-930000000003',@IMG_003C,'tr','Uygulama Desteği','Montaj ve devreye alma desteği','Opsiyonel saha desteği ile sorunsuz işletme.',NOW(3),NOW(3)),
+('93000003-1111-4111-8111-930000000001',@IMG_003A,'de','Parça Seçimi','Yedek parça seçimi','Kule tipine ve kapasiteye göre doğru parça seçimi.',NOW(3),NOW(3)),
+('93000003-1111-4111-8111-930000000002',@IMG_003B,'de','Tedarik ve Lojistik','Yedek parça tedariki','Stok ve tedarik süreçlerinin yönetimi.',NOW(3),NOW(3)),
+('93000003-1111-4111-8111-930000000003',@IMG_003C,'de','Uygulama Desteği','Montaj ve devreye alma desteği','Opsiyonel saha desteği ile sorunsuz işletme.',NOW(3),NOW(3)),
 
 -- SRV_004
-('93000004-1111-4111-8111-930000000001',@IMG_004A,'tr','Sektörel Çözümler','Sektörel uygulamalar','Farklı sektörlere uygun konfigürasyonlar.',NOW(3),NOW(3)),
-('93000004-1111-4111-8111-930000000002',@IMG_004B,'tr','Referans Projeler','Referans projeler','Gerçek sahalardan deneyim ve çıktılar.',NOW(3),NOW(3)),
-('93000004-1111-4111-8111-930000000003',@IMG_004C,'tr','Uygulama Planlama','Uygulama planlama','Keşif ve planlama ile doğru proje yönetimi.',NOW(3),NOW(3)),
+('93000004-1111-4111-8111-930000000001',@IMG_004A,'de','Sektörel Çözümler','Sektörel uygulamalar','Farklı sektörlere uygun konfigürasyonlar.',NOW(3),NOW(3)),
+('93000004-1111-4111-8111-930000000002',@IMG_004B,'de','Referans Projeler','Referans projeler','Gerçek sahalardan deneyim ve çıktılar.',NOW(3),NOW(3)),
+('93000004-1111-4111-8111-930000000003',@IMG_004C,'de','Uygulama Planlama','Uygulama planlama','Keşif ve planlama ile doğru proje yönetimi.',NOW(3),NOW(3)),
 
 -- SRV_005
-('93000005-1111-4111-8111-930000000001',@IMG_005A,'tr','Isı Yükü Analizi','Isı yükü analizi','Doğru kapasite ve kule seçimi için analiz.',NOW(3),NOW(3)),
-('93000005-1111-4111-8111-930000000002',@IMG_005B,'tr','Performans Analizi','Performans analizi','Trend ve ölçümlerle optimizasyon fırsatları.',NOW(3),NOW(3)),
-('93000005-1111-4111-8111-930000000003',@IMG_005C,'tr','Devreye Alma & Eğitim','Devreye alma ve eğitim','Saha doğrulama ve operatör eğitimleri.',NOW(3),NOW(3));
+('93000005-1111-4111-8111-930000000001',@IMG_005A,'de','Isı Yükü Analizi','Isı yükü analizi','Doğru kapasite ve kule seçimi için analiz.',NOW(3),NOW(3)),
+('93000005-1111-4111-8111-930000000002',@IMG_005B,'de','Performans Analizi','Performans analizi','Trend ve ölçümlerle optimizasyon fırsatları.',NOW(3),NOW(3)),
+('93000005-1111-4111-8111-930000000003',@IMG_005C,'de','Devreye Alma & Eğitim','Devreye alma ve eğitim','Saha doğrulama ve operatör eğitimleri.',NOW(3),NOW(3));
 
 COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;

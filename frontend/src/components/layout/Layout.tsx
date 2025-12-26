@@ -43,11 +43,11 @@ type LayoutProps = {
 };
 
 const toLocaleShort = (l: any) => {
-  const v = String(l || 'tr')
+  const v = String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-');
-  return v.split('-')[0] || 'tr';
+  return v.split('-')[0] || 'de';
 };
 
 function absUrlForPreload(pathOrUrl: string): string {
@@ -66,7 +66,7 @@ function toAbsoluteMaybe(u: string): string {
 }
 
 function defaultDescriptionForLocale(locale: string): string {
-  if (locale === 'tr') {
+  if (locale === 'de') {
     return 'Ensotek ürünleri, hizmetleri ve endüstriyel çözümleri. Teklif ve danışmanlık için iletişime geçin.';
   }
   return 'Ensotek products, services and industrial solutions. Contact us for tailored support and consultation.';
@@ -254,7 +254,7 @@ export default function Layout({
   const errorFallback = useMemo(() => {
     const titleText = uiErrors(
       'ui_500_title',
-      locale === 'tr'
+      locale === 'de'
         ? 'Bir Hata Oluştu'
         : locale === 'de'
         ? 'Ein Fehler ist aufgetreten'
@@ -263,7 +263,7 @@ export default function Layout({
 
     const subtitleText = uiErrors(
       'ui_500_subtitle',
-      locale === 'tr'
+      locale === 'de'
         ? 'Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
         : locale === 'de'
         ? 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
@@ -272,7 +272,7 @@ export default function Layout({
 
     const tryAgainText = uiErrors(
       'ui_500_try_again',
-      locale === 'tr' ? 'Tekrar Dene' : locale === 'de' ? 'Erneut versuchen' : 'Try Again',
+      locale === 'de' ? 'Tekrar Dene' : locale === 'de' ? 'Erneut versuchen' : 'Try Again',
     );
 
     return (

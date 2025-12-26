@@ -1,7 +1,7 @@
 -- =============================================================
 -- 040_site_settings.sql (Ensotek) – MULTI-LOCALE (Dynamic) [SAFE]
 --  - app_locales + default_locale => locale='*'
---  - localized settings => locale in ('tr','en','de',...)
+--  - localized settings => locale in ('de','en','de',...)
 --  - TEXT value stores JSON as string
 --  - Upsert everywhere: ON DUPLICATE KEY UPDATE
 -- =============================================================
@@ -40,7 +40,7 @@ VALUES
   '*',
   CAST(
     JSON_ARRAY(
-      JSON_OBJECT('code','tr','label','Türkçe','is_default', FALSE,  'is_active', TRUE),
+      JSON_OBJECT('code','de','label','Türkçe','is_default', FALSE,  'is_active', TRUE),
       JSON_OBJECT('code','en','label','English','is_default', FALSE, 'is_active', TRUE),
       JSON_OBJECT('code','de','label','Deutsch','is_default', TRUE, 'is_active', TRUE)
     ) AS CHAR CHARACTER SET utf8mb4
@@ -70,7 +70,7 @@ VALUES
 (
   UUID(),
   'contact_info',
-  'tr',
+  'de',
   CAST(JSON_OBJECT(
     'companyName','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
     'phones',JSON_ARRAY('+90 212 613 33 01'),
@@ -85,14 +85,14 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-(UUID(), 'catalog_pdf_url',        'tr', 'https://ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_pdf_filename',   'tr', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_admin_email',    'tr', 'info@ensotek.com.tr', NOW(3), NOW(3)),
-(UUID(), 'site_title',             'tr', 'Ensotek', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'de', 'https://ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_filename',   'de', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_admin_email',    'de', 'info@ensotek.com.tr', NOW(3), NOW(3)),
+(UUID(), 'site_title',             'de', 'Ensotek', NOW(3), NOW(3)),
 (
   UUID(),
   'socials',
-  'tr',
+  'de',
   CAST(JSON_OBJECT(
     'instagram','https://instagram.com/ensotek',
     'facebook','https://facebook.com/ensotek',
@@ -107,7 +107,7 @@ VALUES
 (
   UUID(),
   'company_profile',
-  'tr',
+  'de',
   CAST(JSON_OBJECT(
     'headline','CTP Su Soğutma Kuleleri: Açık Tip ve Kapalı Tip İmalat & Montaj',
     'subline','Camelyaf Takviyeli Polyester (CTP) malzemeden su soğutma kuleleri üretiyor; bakım, onarım, modernizasyon ve performans testleriyle tesislerinize uzun ömürlü çözümler sunuyoruz.',
@@ -119,7 +119,7 @@ VALUES
 (
   UUID(),
   'company_brand',
-  'tr',
+  'de',
   CAST(JSON_OBJECT(
     'name','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
     'shortName','ENSOTEK',
@@ -142,7 +142,7 @@ VALUES
 (
   UUID(),
   'catalog_admin_user_ids',
-  'tr',
+  'de',
   CAST(JSON_ARRAY() AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)

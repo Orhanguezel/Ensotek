@@ -45,7 +45,7 @@ function computeActiveLocales(meta: any[] | undefined): string[] {
   const defCode = def ? normLocaleTag((def as any).code) : '';
   const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  return out.length ? out : [normLocaleTag(FALLBACK_LOCALE) || 'tr'];
+  return out.length ? out : [normLocaleTag(FALLBACK_LOCALE) || 'de'];
 }
 
 function getApiBase(): string {
@@ -152,7 +152,7 @@ export function useResolvedLocale(explicitLocale?: string | null): string {
     if (firstActive) return firstActive;
 
     // ✅ 6) fallback
-    return normLocaleTag(FALLBACK_LOCALE) || 'tr';
+    return normLocaleTag(FALLBACK_LOCALE) || 'de';
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, explicitLocale, appLocalesMeta, defaultLocaleMeta]);
 }

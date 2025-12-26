@@ -9,54 +9,58 @@
 //   - IMPORTANT: locale source = router.locale (hydration-safe)
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter } from "next/router";
+import React, { useMemo } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
 
 // RTK – Custom Pages (public)
-import {
-  useGetCustomPageBySlugPublicQuery,
-} from "@/integrations/rtk/hooks";
-import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
+import { useGetCustomPageBySlugPublicQuery } from '@/integrations/rtk/hooks';
+import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
 // Ortak helper'lar
-import { toCdnSrc } from "@/shared/media";
-import { excerpt } from "@/shared/text";
+import { toCdnSrc } from '@/shared/media';
+import { excerpt } from '@/shared/text';
 
 // i18n helper'lar
-import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
+import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
 // Reviews – ortak komponentler
-import ReviewList from "@/components/common/ReviewList";
-import ReviewForm from "@/components/common/ReviewForm";
+import ReviewList from '@/components/common/ReviewList';
+import ReviewForm from '@/components/common/ReviewForm';
 
 // Fallback görsel
-import FallbackCover from "public/img/blog/3/1.jpg";
+import FallbackCover from 'public/img/blog/3/1.jpg';
 
 const HERO_W = 960;
 const HERO_H = 540;
 
 function shortLocale(v: unknown): string {
-  return String(v || "tr")
-    .trim()
-    .toLowerCase()
-    .replace("_", "-")
-    .split("-")[0] || "tr";
+  return (
+    String(v || 'de')
+      .trim()
+      .toLowerCase()
+      .replace('_', '-')
+      .split('-')[0] || 'de'
+  );
 }
 
 function safeStr(v: any): string {
-  return typeof v === "string" ? v : v == null ? "" : String(v);
+  return typeof v === 'string' ? v : v == null ? '' : String(v);
 }
 
 function asStringArray(v: any): string[] {
-  if (Array.isArray(v)) return v.map((x) => safeStr(x)).map((x) => x.trim()).filter(Boolean);
-  if (typeof v === "string") {
+  if (Array.isArray(v))
     return v
-      .split(",")
+      .map((x) => safeStr(x))
+      .map((x) => x.trim())
+      .filter(Boolean);
+  if (typeof v === 'string') {
+    return v
+      .split(',')
       .map((s) => s.trim())
       .filter(Boolean);
   }
@@ -68,26 +72,26 @@ const BlogDetailsArea: React.FC = () => {
 
   // ✅ Hydration-safe locale:
   // Server & Client aynı: Next i18n router.locale
-  const localeShort = shortLocale(router.locale || router.defaultLocale || "tr");
+  const localeShort = shortLocale(router.locale || router.defaultLocale || 'de');
 
-  const { ui } = useUiSection("ui_blog", localeShort);
+  const { ui } = useUiSection('ui_blog', localeShort);
 
   const backToListText = ui(
-    "ui_blog_back_to_list",
-    localeShort === "tr" ? "Tüm bloglara dön" : "Back to all blog posts",
+    'ui_blog_back_to_list',
+    localeShort === 'de' ? 'Tüm bloglara dön' : 'Back to all blog posts',
   );
   const loadingText = ui(
-    "ui_blog_loading",
-    localeShort === "tr" ? "Blog yükleniyor..." : "Loading blog...",
+    'ui_blog_loading',
+    localeShort === 'de' ? 'Blog yükleniyor...' : 'Loading blog...',
   );
   const notFoundText = ui(
-    "ui_blog_not_found",
-    localeShort === "tr" ? "Blog içeriği bulunamadı." : "Blog post not found.",
+    'ui_blog_not_found',
+    localeShort === 'de' ? 'Blog içeriği bulunamadı.' : 'Blog post not found.',
   );
 
   const slugParam = router.query.slug;
   const slug = useMemo(
-    () => (Array.isArray(slugParam) ? slugParam[0] : slugParam) || "",
+    () => (Array.isArray(slugParam) ? slugParam[0] : slugParam) || '',
     [slugParam],
   );
 
@@ -98,14 +102,14 @@ const BlogDetailsArea: React.FC = () => {
 
   const post = data as CustomPageDto | undefined;
 
-  const blogListHref = localizePath(localeShort, "/blog");
+  const blogListHref = localizePath(localeShort, '/blog');
 
-  const title = (post?.title || "").trim();
+  const title = (post?.title || '').trim();
 
   const heroSrc = useMemo(() => {
-    const raw = (post?.featured_image || "").trim();
-    if (!raw) return "";
-    return toCdnSrc(raw, HERO_W, HERO_H, "fill") || raw;
+    const raw = (post?.featured_image || '').trim();
+    if (!raw) return '';
+    return toCdnSrc(raw, HERO_W, HERO_H, 'fill') || raw;
   }, [post]);
 
   const contentHtml = useMemo(() => {
@@ -116,15 +120,11 @@ const BlogDetailsArea: React.FC = () => {
     if (summary) return `<p>${summary}</p>`;
 
     const txt = excerpt(safeStr((post as any)?.content_text), 800).trim();
-    return txt ? `<p>${txt}</p>` : "";
+    return txt ? `<p>${txt}</p>` : '';
   }, [post]);
 
   const tags = useMemo(() => {
-    return asStringArray(
-      (post as any)?.tags ??
-        (post as any)?.tag_list ??
-        (post as any)?.tags_csv,
-    );
+    return asStringArray((post as any)?.tags ?? (post as any)?.tag_list ?? (post as any)?.tags_csv);
   }, [post]);
 
   return (
@@ -133,11 +133,7 @@ const BlogDetailsArea: React.FC = () => {
         {/* Back link */}
         <div className="row mb-30">
           <div className="col-12">
-            <button
-              type="button"
-              className="link-more"
-              onClick={() => router.push(blogListHref)}
-            >
+            <button type="button" className="link-more" onClick={() => router.push(blogListHref)}>
               ← {backToListText}
             </button>
           </div>
@@ -149,7 +145,11 @@ const BlogDetailsArea: React.FC = () => {
             <div className="col-12">
               <p>{loadingText}</p>
               <div className="skeleton-line mt-10" style={{ height: 16 }} aria-hidden />
-              <div className="skeleton-line mt-10" style={{ height: 16, width: "80%" }} aria-hidden />
+              <div
+                className="skeleton-line mt-10"
+                style={{ height: 16, width: '80%' }}
+                aria-hidden
+              />
             </div>
           </div>
         )}
@@ -172,19 +172,17 @@ const BlogDetailsArea: React.FC = () => {
                 <article className="news__detail">
                   {/* Title + date */}
                   <header className="news__detail-header mb-30">
-                    <h1 className="section__title-3 mb-20">
-                      {title || notFoundText}
-                    </h1>
+                    <h1 className="section__title-3 mb-20">{title || notFoundText}</h1>
                   </header>
 
                   {/* Hero */}
                   <div className="news__detail-hero w-img mb-30">
                     <Image
                       src={(heroSrc as any) || (FallbackCover as any)}
-                      alt={(post as any)?.featured_image_alt || title || "blog image"}
+                      alt={(post as any)?.featured_image_alt || title || 'blog image'}
                       width={HERO_W}
                       height={HERO_H}
-                      style={{ width: "100%", height: "auto" }}
+                      style={{ width: '100%', height: 'auto' }}
                       priority
                     />
                   </div>
@@ -198,7 +196,7 @@ const BlogDetailsArea: React.FC = () => {
                   {/* Tags (deterministic) */}
                   {tags.length > 0 && (
                     <div style={{ marginTop: 22 }}>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                         {tags.map((t) => (
                           <Link
                             key={t}
@@ -235,8 +233,8 @@ const BlogDetailsArea: React.FC = () => {
                   locale={localeShort}
                   className="blog__detail-review-form"
                   toggleLabel={ui(
-                    "ui_blog_write_comment",
-                    localeShort === "tr" ? "Yorum Gönder" : "Write a review",
+                    'ui_blog_write_comment',
+                    localeShort === 'de' ? 'Yorum Gönder' : 'Write a review',
                   )}
                 />
               </div>

@@ -25,11 +25,11 @@ import {
 import { FiFacebook, FiTwitter, FiYoutube, FiLinkedin, FiInstagram } from 'react-icons/fi';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const Contact: React.FC = () => {
   const resolved = useResolvedLocale();

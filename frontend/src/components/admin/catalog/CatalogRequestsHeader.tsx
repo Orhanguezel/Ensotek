@@ -53,7 +53,7 @@ export const CatalogRequestsHeader: React.FC<CatalogRequestsHeaderProps> = ({
       onFiltersChange({ ...filters, [field]: value } as CatalogFilters);
     };
 
-  const effectiveDefaultLocale = norm(defaultLocale) || 'tr';
+  const effectiveDefaultLocale = norm(defaultLocale) || 'de';
 
   return (
     <div className="card mb-3">

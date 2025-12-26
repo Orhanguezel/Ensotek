@@ -111,11 +111,11 @@ export default function CookieConsentBanner() {
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => {
     return (
-      String(resolvedLocale || 'tr')
+      String(resolvedLocale || 'de')
         .trim()
         .toLowerCase()
         .replace('_', '-')
-        .split('-')[0] || 'tr'
+        .split('-')[0] || 'de'
     );
   }, [resolvedLocale]);
 
@@ -211,12 +211,12 @@ export default function CookieConsentBanner() {
         <div className="ccb__inner">
           <div className="ccb__text">
             <div className="ccb__title">
-              {ui('ui_cookie_title', locale === 'tr' ? 'Çerez Politikası' : 'Cookie Policy')}
+              {ui('ui_cookie_title', locale === 'de' ? 'Çerez Politikası' : 'Cookie Policy')}
             </div>
             <div className="ccb__desc">
               {ui(
                 'ui_cookie_desc',
-                locale === 'tr'
+                locale === 'de'
                   ? 'Sitemizin doğru şekilde çalışmasını sağlamak ve trafik analizi yapmak için çerezler kullanıyoruz. Tercihlerinizi yönetebilirsiniz.'
                   : 'We use cookies to ensure the site works properly and to analyze traffic. You can manage your preferences.',
               )}{' '}

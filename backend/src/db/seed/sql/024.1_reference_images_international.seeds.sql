@@ -82,14 +82,14 @@ SELECT
       SELECT ii.id
       FROM reference_images_i18n ii
       WHERE BINARY ii.reference_image_id = BINARY ri.id
-        AND BINARY ii.locale             = BINARY 'tr'
+        AND BINARY ii.locale             = BINARY 'de'
       LIMIT 1
     ),
     UUID()
   ) AS id,
 
   ri.id AS reference_image_id,
-  'tr' AS locale,
+  'de' AS locale,
 
   CONCAT(rtr.title, ' – Görsel ', ri.display_order) AS title,
 
@@ -117,7 +117,7 @@ JOIN `references` r
   ON BINARY r.id = BINARY ri.reference_id
 JOIN references_i18n rtr
   ON BINARY rtr.reference_id = BINARY r.id
- AND BINARY rtr.locale       = BINARY 'tr'
+ AND BINARY rtr.locale       = BINARY 'de'
 WHERE BINARY r.category_id = BINARY @CAT_INTL
 ON DUPLICATE KEY UPDATE
   title      = VALUES(title),

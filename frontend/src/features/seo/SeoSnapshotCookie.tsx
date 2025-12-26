@@ -14,7 +14,7 @@ type SettingDoc = { key: string; value: any };
 
 /**
  * Dynamic locale normalize:
- * - "tr-TR" -> "tr"
+ * - "tr-TR" -> "de"
  * - "EN_us" -> "en"
  * - empty -> ""
  */
@@ -90,7 +90,7 @@ function resolveApiBase(): string {
  */
 async function fetchSettingsList(locale: SupportedLocale): Promise<SettingDoc[]> {
   const apiBase = resolveApiBase(); // ".../api"
-  const l = normalizeLocaleTag(locale) || 'tr'; // son çare; API boş locale ile hata veriyorsa
+  const l = normalizeLocaleTag(locale) || 'de'; // son çare; API boş locale ile hata veriyorsa
   const url = `${apiBase}/site_settings?locale=${encodeURIComponent(l)}`;
 
   const res = await fetch(url, {

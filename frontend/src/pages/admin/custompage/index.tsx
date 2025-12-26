@@ -55,7 +55,7 @@ const AdminCustomPageIndex: NextPage = () => {
     if (dbDef && localeSet.has(dbDef)) return dbDef;
 
     const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'tr';
+    return first || 'de';
   }, [router.query?.locale, defaultLocaleFromDb, localeOptions, localeSet]);
 
   const [filters, setFilters] = useState<CustomPageFilters>({
@@ -109,7 +109,7 @@ const AdminCustomPageIndex: NextPage = () => {
     if (dbDef && localeSet.has(dbDef)) return dbDef;
 
     const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'tr';
+    return first || 'de';
   }, [filters.locale, defaultLocaleFromDb, localeOptions, localeSet]);
 
   const is_published = useMemo(() => {

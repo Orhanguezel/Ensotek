@@ -57,7 +57,7 @@ function buildLocaleLabel(item: AppLocaleItem): string {
 function parseAppLocalesValue(raw: unknown): AppLocaleItem[] {
   if (!raw) return [];
 
-  // DB array: ["tr","en"] or [{code,label,is_active,is_default}]
+  // DB array: ["de","en"] or [{code,label,is_active,is_default}]
   if (Array.isArray(raw)) {
     return raw
       .map((x: any) => ({

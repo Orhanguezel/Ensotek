@@ -15,11 +15,11 @@ import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
 const toLocaleShort = (l: string) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const News: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
@@ -28,16 +28,16 @@ const News: React.FC = () => {
   const { ui } = useUiSection('ui_news', locale);
 
   const subprefix = ui('ui_news_subprefix', 'Ensotek');
-  const sublabel = ui('ui_news_sublabel', locale === 'tr' ? 'Haberler' : 'News');
-  const titlePrefix = ui('ui_news_title_prefix', locale === 'tr' ? 'Güncel' : 'Latest');
-  const titleMark = ui('ui_news_title_mark', locale === 'tr' ? 'Haberler' : 'News');
-  const readMore = ui('ui_news_read_more', locale === 'tr' ? 'Devamını oku' : 'Read more');
+  const sublabel = ui('ui_news_sublabel', locale === 'de' ? 'Haberler' : 'News');
+  const titlePrefix = ui('ui_news_title_prefix', locale === 'de' ? 'Güncel' : 'Latest');
+  const titleMark = ui('ui_news_title_mark', locale === 'de' ? 'Haberler' : 'News');
+  const readMore = ui('ui_news_read_more', locale === 'de' ? 'Devamını oku' : 'Read more');
   const readMoreAria = ui(
     'ui_news_read_more_aria',
-    locale === 'tr' ? 'haberin detayını görüntüle' : 'view news details',
+    locale === 'de' ? 'haberin detayını görüntüle' : 'view news details',
   );
-  const untitled = ui('ui_news_untitled', locale === 'tr' ? 'Başlıksız haber' : 'Untitled news');
-  const viewAllText = ui('ui_news_view_all', locale === 'tr' ? 'Tüm Haberler' : 'All news');
+  const untitled = ui('ui_news_untitled', locale === 'de' ? 'Başlıksız haber' : 'Untitled news');
+  const viewAllText = ui('ui_news_view_all', locale === 'de' ? 'Tüm Haberler' : 'All news');
 
   const { data, isLoading } = useListCustomPagesPublicQuery({
     module_key: 'news',

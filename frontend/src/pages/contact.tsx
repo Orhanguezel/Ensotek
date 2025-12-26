@@ -28,11 +28,11 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const ContactPage: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
@@ -48,7 +48,7 @@ const ContactPage: React.FC = () => {
     const l = String(ui('ui_contact_sublabel', '') || '').trim();
     const t = `${p} ${l}`.trim();
     if (t) return t;
-    return locale === 'tr' ? 'İletişim' : locale === 'de' ? 'Kontakt' : 'Contact';
+    return locale === 'de' ? 'İletişim' : locale === 'de' ? 'Kontakt' : 'Contact';
   }, [ui, locale]);
 
   // ======================

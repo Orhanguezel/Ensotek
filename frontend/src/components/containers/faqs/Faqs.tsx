@@ -6,49 +6,45 @@
 //   - Locale-aware routes with localizePath
 //   - RTK: useListFaqsQuery (FaqDto → normalizeFaq)
 // =============================================================
-"use client";
+'use client';
 
-import React, { useMemo, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useMemo, useState } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 // RTK – PUBLIC FAQs
-import { useListFaqsQuery } from "@/integrations/rtk/hooks";
-import {
-  type FaqDto,
-  type Faq,
-  normalizeFaq,
-} from "@/integrations/types/faqs.types";
+import { useListFaqsQuery } from '@/integrations/rtk/hooks';
+import { type FaqDto, type Faq, normalizeFaq } from '@/integrations/types/faqs.types';
 
 // Pattern + fallback görseller (library ile aynı görsel pattern)
-import One from "public/img/shape/features-shape.png";
-import Two from "public/img/features/1.png";
+import One from 'public/img/shape/features-shape.png';
+import Two from 'public/img/features/1.png';
 
 // React Icons
-import { FiArrowRight, FiPlus, FiMinus } from "react-icons/fi";
+import { FiArrowRight, FiPlus, FiMinus } from 'react-icons/fi';
 
 // i18n helper’lar
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
 const FaqSection: React.FC = () => {
   const locale = useResolvedLocale();
 
   // Bu sefer UI key = "ui_faqs"
-  const { ui } = useUiSection("ui_faqs", locale);
+  const { ui } = useUiSection('ui_faqs', locale);
 
-  const listHref = localizePath(locale, "/faq");
+  const listHref = localizePath(locale, '/faq');
   const [open, setOpen] = useState<number>(0);
 
   // İlk 8 SSS, aktif olanlar, display_order’a göre
   const { data = [], isLoading } = useListFaqsQuery({
     // locale paramı FaqListQueryParams'ta yok, o yüzden göndermiyoruz.
     limit: 8,
-    order: "display_order.asc", // backend: "kolon.yön" pattern
-    sort: "display_order",
-    orderDir: "asc",
-    is_active: "1",
+    order: 'display_order.asc', // backend: "kolon.yön" pattern
+    sort: 'display_order',
+    orderDir: 'asc',
+    is_active: '1',
   });
 
   // DTO → normalizeFaq → aktifleri al
@@ -62,36 +58,30 @@ const FaqSection: React.FC = () => {
     if (!faqs.length) {
       return [
         {
-          id: "ph-1",
+          id: 'ph-1',
           question: ui(
-            "ui_faqs_sample_one_q",
-            locale === "tr"
-              ? "Örnek soru 1 nedir?"
-              : "What is sample question 1?",
+            'ui_faqs_sample_one_q',
+            locale === 'de' ? 'Örnek soru 1 nedir?' : 'What is sample question 1?',
           ),
           answer: ui(
-            "ui_faqs_sample_one_a",
-            locale === "tr"
-              ? "Bu bir örnek SSS içeriğidir."
-              : "This is a sample FAQ entry.",
+            'ui_faqs_sample_one_a',
+            locale === 'de' ? 'Bu bir örnek SSS içeriğidir.' : 'This is a sample FAQ entry.',
           ),
-          slug: "",
+          slug: '',
         },
         {
-          id: "ph-2",
+          id: 'ph-2',
           question: ui(
-            "ui_faqs_sample_two_q",
-            locale === "tr"
-              ? "Örnek soru 2 nedir?"
-              : "What is sample question 2?",
+            'ui_faqs_sample_two_q',
+            locale === 'de' ? 'Örnek soru 2 nedir?' : 'What is sample question 2?',
           ),
           answer: ui(
-            "ui_faqs_sample_two_a",
-            locale === "tr"
-              ? "İçerik girilene kadar bu alan placeholder olarak kullanılır."
-              : "Placeholder content until real FAQs are added.",
+            'ui_faqs_sample_two_a',
+            locale === 'de'
+              ? 'İçerik girilene kadar bu alan placeholder olarak kullanılır.'
+              : 'Placeholder content until real FAQs are added.',
           ),
-          slug: "",
+          slug: '',
         },
       ];
     }
@@ -110,7 +100,7 @@ const FaqSection: React.FC = () => {
 
   // SSS’lerin görseli yok; direkt statik görseli kullanıyoruz
   const leftHero = Two;
-  const leftAlt = ui("ui_faqs_cover_alt", "faq cover image");
+  const leftAlt = ui('ui_faqs_cover_alt', 'faq cover image');
 
   return (
     <section className="features__area p-relative features-bg pt-120 pb-35 cus-faq">
@@ -130,7 +120,7 @@ const FaqSection: React.FC = () => {
                   width={720}
                   height={520}
                   sizes="(max-width: 992px) 100vw, 50vw"
-                  style={{ width: "100%", height: "auto" }}
+                  style={{ width: '100%', height: 'auto' }}
                   loading="lazy"
                 />
               </div>
@@ -142,37 +132,27 @@ const FaqSection: React.FC = () => {
             <div className="features__content-wrapper">
               <div className="section__title-wrapper mb-10">
                 <span className="section__subtitle">
-                  <span>{ui("ui_faqs_subprefix", "Ensotek")}</span>{" "}
-                  {ui("ui_faqs_sublabel", "Sık Sorulan Sorular")}
+                  <span>{ui('ui_faqs_subprefix', 'Ensotek')}</span>{' '}
+                  {ui('ui_faqs_sublabel', 'Sık Sorulan Sorular')}
                 </span>
                 <h2 className="section__title">
                   {ui(
-                    "ui_faqs_title_prefix",
-                    locale === "tr" ? "Müşterilerimizden gelen" : "Frequently asked",
-                  )}{" "}
+                    'ui_faqs_title_prefix',
+                    locale === 'de' ? 'Müşterilerimizden gelen' : 'Frequently asked',
+                  )}{' '}
                   <span className="down__mark-line">
-                    {ui(
-                      "ui_faqs_title_mark",
-                      locale === "tr" ? "sorular" : "questions",
-                    )}
+                    {ui('ui_faqs_title_mark', locale === 'de' ? 'sorular' : 'questions')}
                   </span>
                 </h2>
               </div>
 
               <div className="bd-faq__wrapper mb-40">
-                <div
-                  className="bd-faq__accordion"
-                  data-aos="fade-left"
-                  data-aos-duration="1000"
-                >
+                <div className="bd-faq__accordion" data-aos="fade-left" data-aos-duration="1000">
                   <div className="accordion" id="faqAccordion">
                     {items.map((it, idx) => {
                       const isOpen = open === idx;
                       const href = it.slug
-                        ? localizePath(
-                          locale,
-                          `/faq/${encodeURIComponent(it.slug)}`,
-                        )
+                        ? localizePath(locale, `/faq/${encodeURIComponent(it.slug)}`)
                         : listHref;
 
                       const headingId = `faq-heading-${idx}`;
@@ -182,38 +162,28 @@ const FaqSection: React.FC = () => {
                         <div className="accordion-item" key={it.id}>
                           <h2 className="accordion-header" id={headingId}>
                             <button
-                              className={`accordion-button no-caret d-flex align-items-center${isOpen ? "" : " collapsed"
-                                }`}
+                              className={`accordion-button no-caret d-flex align-items-center${
+                                isOpen ? '' : ' collapsed'
+                              }`}
                               aria-expanded={isOpen}
                               aria-controls={panelId}
-                              onClick={() =>
-                                setOpen(isOpen ? -1 : idx)
-                              }
+                              onClick={() => setOpen(isOpen ? -1 : idx)}
                               type="button"
                             >
                               <span className="acc-icon" aria-hidden="true">
-                                {isOpen ? (
-                                  <FiMinus size={22} />
-                                ) : (
-                                  <FiPlus size={22} />
-                                )}
+                                {isOpen ? <FiMinus size={22} /> : <FiPlus size={22} />}
                               </span>
-                              <span className="acc-text">
-                                {it.question}
-                              </span>
+                              <span className="acc-text">{it.question}</span>
                             </button>
                           </h2>
                           <div
                             id={panelId}
                             role="region"
                             aria-labelledby={headingId}
-                            className={`accordion-collapse collapse${isOpen ? " show" : ""
-                              }`}
+                            className={`accordion-collapse collapse${isOpen ? ' show' : ''}`}
                           >
                             <div className="accordion-body">
-                              <p style={{ marginBottom: 12 }}>
-                                {it.answer}
-                              </p>
+                              <p style={{ marginBottom: 12 }}>{it.answer}</p>
 
                               {/* Detay sayfası istersen slug üzerinden gider */}
                               {it.slug && (
@@ -221,16 +191,14 @@ const FaqSection: React.FC = () => {
                                   href={href}
                                   className="link-more d-inline-flex align-items-center gap-1"
                                   aria-label={`${it.question} – ${ui(
-                                    "ui_faqs_view_detail_aria",
-                                    "view details",
+                                    'ui_faqs_view_detail_aria',
+                                    'view details',
                                   )}`}
                                 >
                                   {ui(
-                                    "ui_faqs_view_detail",
-                                    locale === "tr"
-                                      ? "Detayları görüntüle"
-                                      : "View details",
-                                  )}{" "}
+                                    'ui_faqs_view_detail',
+                                    locale === 'de' ? 'Detayları görüntüle' : 'View details',
+                                  )}{' '}
                                   <FiArrowRight />
                                 </Link>
                               )}
@@ -243,10 +211,7 @@ const FaqSection: React.FC = () => {
                     {isLoading && (
                       <div className="accordion-item" aria-hidden>
                         <div className="accordion-body">
-                          <div
-                            className="skeleton-line"
-                            style={{ height: 10 }}
-                          />
+                          <div className="skeleton-line" style={{ height: 10 }} />
                         </div>
                       </div>
                     )}
@@ -258,10 +223,8 @@ const FaqSection: React.FC = () => {
               <div className="project__view">
                 <Link href={listHref} className="solid__btn">
                   {ui(
-                    "ui_faqs_view_all",
-                    locale === "tr"
-                      ? "Tüm soruları görüntüle"
-                      : "View all questions",
+                    'ui_faqs_view_all',
+                    locale === 'de' ? 'Tüm soruları görüntüle' : 'View all questions',
                   )}
                 </Link>
               </div>

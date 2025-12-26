@@ -27,11 +27,11 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const ReferencesPage: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
@@ -42,7 +42,7 @@ const ReferencesPage: React.FC = () => {
   // Banner/UI title
   const bannerTitle = ui(
     'ui_references_page_title',
-    locale === 'tr' ? 'Referanslarımız' : 'References',
+    locale === 'de' ? 'Referanslarımız' : 'References',
   );
 
   // Global SEO settings (seo -> site_seo fallback)

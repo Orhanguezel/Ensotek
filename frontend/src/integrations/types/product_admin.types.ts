@@ -3,11 +3,7 @@
 // Admin Products (CRUD + Images)
 // =============================================================
 
-import type {
-  ProductDto,
-  ProductSpecifications,
-  BoolLike,
-} from "./product.types";
+import type { ProductDto, ProductSpecifications, BoolLike } from './product.types';
 
 export type AdminProductDto = ProductDto;
 
@@ -21,8 +17,8 @@ export type AdminProductListQueryParams = {
   is_active?: BoolLike;
   limit?: number;
   offset?: number;
-  sort?: "price" | "rating" | "created_at";
-  order?: "asc" | "desc";
+  sort?: 'price' | 'rating' | 'created_at';
+  order?: 'asc' | 'desc';
 };
 
 export type AdminProductListResponse = {
@@ -41,7 +37,7 @@ export type AdminGetProductParams = {
 export type AdminProductCreatePayload = {
   id?: string;
 
-  locale?: string; // boş ise backend "tr" ile dolduracak
+  locale?: string; // boş ise backend "de" ile dolduracak
   title: string;
   slug: string;
   price: number;
@@ -82,8 +78,6 @@ export type AdminProductSetImagesPayload = {
   image_ids: string[];
   alt?: string | null;
 };
-
-
 
 export type AdminProductCategoryDto = {
   id: string;

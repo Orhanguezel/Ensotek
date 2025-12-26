@@ -8,23 +8,20 @@
 //  - Storage tabanlı öne çıkan görsel
 // =============================================================
 
-import React, { useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
-import type { ServiceDto } from "@/integrations/types/services.types";
-import type { CategoryDto } from "@/integrations/types/category.types";
-import type { SubCategoryDto } from "@/integrations/types/subcategory.types";
+import type { ServiceDto } from '@/integrations/types/services.types';
+import type { CategoryDto } from '@/integrations/types/category.types';
+import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
 
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from "@/components/common/AdminLocaleSelect";
+import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 
-import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
-import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
+import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
+import { AdminJsonEditor } from '@/components/common/AdminJsonEditor';
 
-import { useListCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/categories_admin.endpoints";
-import { useListSubCategoriesAdminQuery } from "@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints";
+import { useListCategoriesAdminQuery } from '@/integrations/rtk/endpoints/admin/categories_admin.endpoints';
+import { useListSubCategoriesAdminQuery } from '@/integrations/rtk/endpoints/admin/subcategories_admin.endpoints';
 
 /* ------------------------------------------------------------- */
 /*  Form tipi                                                     */
@@ -69,7 +66,7 @@ export type ServiceFormValues = {
 };
 
 export type ServiceFormProps = {
-  mode: "create" | "edit";
+  mode: 'create' | 'edit';
   initialData?: ServiceDto;
   loading: boolean;
   saving: boolean;
@@ -88,7 +85,7 @@ export type ServiceFormProps = {
 /* ------------------------------------------------------------- */
 
 const normalizeLocale = (v: unknown): string => {
-  const s = typeof v === "string" ? v.trim().toLowerCase() : "";
+  const s = typeof v === 'string' ? v.trim().toLowerCase() : '';
   return s;
 };
 
@@ -99,41 +96,41 @@ const normalizeLocale = (v: unknown): string => {
  *  - harf/rakam ve tire dışında her şeyi temizle
  */
 const slugify = (value: string): string => {
-  if (!value) return "";
+  if (!value) return '';
 
   let s = value.trim();
 
   const trMap: Record<string, string> = {
-    ç: "c",
-    Ç: "c",
-    ğ: "g",
-    Ğ: "g",
-    ı: "i",
-    I: "i",
-    İ: "i",
-    ö: "o",
-    Ö: "o",
-    ş: "s",
-    Ş: "s",
-    ü: "u",
-    Ü: "u",
+    ç: 'c',
+    Ç: 'c',
+    ğ: 'g',
+    Ğ: 'g',
+    ı: 'i',
+    I: 'i',
+    İ: 'i',
+    ö: 'o',
+    Ö: 'o',
+    ş: 's',
+    Ş: 's',
+    ü: 'u',
+    Ü: 'u',
   };
 
   s = s
-    .split("")
+    .split('')
     .map((ch) => trMap[ch] ?? ch)
-    .join("");
+    .join('');
 
-  s = s.replace(/ß/g, "ss").replace(/ẞ/g, "ss");
+  s = s.replace(/ß/g, 'ss').replace(/ẞ/g, 'ss');
 
   return s
     .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9\s-]/g, "")
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s-]/g, '')
     .trim()
-    .replace(/\s+/g, "-")
-    .replace(/-+/g, "-");
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-');
 };
 
 const resolveInitialLocale = (
@@ -141,7 +138,9 @@ const resolveInitialLocale = (
   activeLocale: string | undefined,
   fallbackLocale: string,
 ): string => {
-  const candidate = normalizeLocale(initial?.locale_resolved ?? activeLocale ?? fallbackLocale ?? "");
+  const candidate = normalizeLocale(
+    initial?.locale_resolved ?? activeLocale ?? fallbackLocale ?? '',
+  );
   return candidate || fallbackLocale;
 };
 
@@ -156,31 +155,31 @@ const buildInitialValues = (
     return {
       id: undefined,
       locale: loc,
-      name: "",
-      slug: "",
-      description: "",
-      material: "",
-      price: "",
-      includes: "",
-      warranty: "",
-      image_alt: "",
+      name: '',
+      slug: '',
+      description: '',
+      material: '',
+      price: '',
+      includes: '',
+      warranty: '',
+      image_alt: '',
 
-      category_id: "",
-      sub_category_id: "",
+      category_id: '',
+      sub_category_id: '',
       is_active: true,
       featured: false,
-      display_order: "1",
+      display_order: '1',
 
-      featured_image: "",
-      image_url: "",
-      image_asset_id: "",
+      featured_image: '',
+      image_url: '',
+      image_asset_id: '',
 
-      area: "",
-      duration: "",
-      maintenance: "",
-      season: "",
-      thickness: "",
-      equipment: "",
+      area: '',
+      duration: '',
+      maintenance: '',
+      season: '',
+      thickness: '',
+      equipment: '',
 
       replicate_all_locales: true,
       apply_all_locales: false,
@@ -191,36 +190,36 @@ const buildInitialValues = (
     id: initial.id,
     locale: loc,
 
-    name: initial.name ?? "",
-    slug: initial.slug ?? "",
-    description: initial.description ?? "",
-    material: initial.material ?? "",
-    price: initial.price ?? "",
-    includes: initial.includes ?? "",
-    warranty: initial.warranty ?? "",
-    image_alt: initial.image_alt ?? "",
+    name: initial.name ?? '',
+    slug: initial.slug ?? '',
+    description: initial.description ?? '',
+    material: initial.material ?? '',
+    price: initial.price ?? '',
+    includes: initial.includes ?? '',
+    warranty: initial.warranty ?? '',
+    image_alt: initial.image_alt ?? '',
 
-    category_id: initial.category_id ?? "",
-    sub_category_id: initial.sub_category_id ?? "",
+    category_id: initial.category_id ?? '',
+    sub_category_id: initial.sub_category_id ?? '',
     is_active: !!initial.is_active,
     featured: !!initial.featured,
     display_order:
-      typeof initial.display_order === "number"
+      typeof initial.display_order === 'number'
         ? String(initial.display_order)
         : initial.display_order
-          ? String(initial.display_order)
-          : "1",
+        ? String(initial.display_order)
+        : '1',
 
-    featured_image: initial.featured_image ?? "",
-    image_url: initial.image_url ?? "",
-    image_asset_id: initial.image_asset_id ?? "",
+    featured_image: initial.featured_image ?? '',
+    image_url: initial.image_url ?? '',
+    image_asset_id: initial.image_asset_id ?? '',
 
-    area: initial.area ?? "",
-    duration: initial.duration ?? "",
-    maintenance: initial.maintenance ?? "",
-    season: initial.season ?? "",
-    thickness: initial.thickness ?? "",
-    equipment: initial.equipment ?? "",
+    area: initial.area ?? '',
+    duration: initial.duration ?? '',
+    maintenance: initial.maintenance ?? '',
+    season: initial.season ?? '',
+    thickness: initial.thickness ?? '',
+    equipment: initial.equipment ?? '',
 
     replicate_all_locales: true,
     apply_all_locales: false,
@@ -251,15 +250,15 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   onCancel,
   onLocaleChange,
 }) => {
-  // ✅ statik "tr" yok: fallback tamamen DB kaynaklı
-  const fallbackLocale = normalizeLocale(defaultLocale || locales?.[0]?.value || "");
+  // ✅ statik "de" yok: fallback tamamen DB kaynaklı
+  const fallbackLocale = normalizeLocale(defaultLocale || locales?.[0]?.value || '');
 
   const [values, setValues] = useState<ServiceFormValues>(
     buildInitialValues(initialData, defaultLocale, fallbackLocale),
   );
 
   const [slugTouched, setSlugTouched] = useState(false);
-  const [activeMode, setActiveMode] = useState<"form" | "json">("form");
+  const [activeMode, setActiveMode] = useState<'form' | 'json'>('form');
 
   // initialData veya active locale değişince formu resetle
   useEffect(() => {
@@ -273,24 +272,23 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
   const handleChange =
     (field: keyof ServiceFormValues) =>
-      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const val = e.target.value;
-        setValues((prev) => ({ ...prev, [field]: val }));
-      };
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const val = e.target.value;
+      setValues((prev) => ({ ...prev, [field]: val }));
+    };
 
   const handleCheckboxChange =
-    (field: keyof ServiceFormValues) =>
-      (e: React.ChangeEvent<HTMLInputElement>) => {
-        const checked = e.target.checked;
-        setValues((prev) => ({ ...prev, [field]: checked as never }));
-      };
+    (field: keyof ServiceFormValues) => (e: React.ChangeEvent<HTMLInputElement>) => {
+      const checked = e.target.checked;
+      setValues((prev) => ({ ...prev, [field]: checked as never }));
+    };
 
   const handleLocaleChange = (nextLocaleRaw: string) => {
     const nextLocale = normalizeLocale(nextLocaleRaw);
 
     const resolved = nextLocale || normalizeLocale(values.locale) || fallbackLocale;
     if (!resolved) {
-      toast.error("Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.");
+      toast.error('Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.');
       return;
     }
 
@@ -308,12 +306,12 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
     const loc = normalizeLocale(values.locale || fallbackLocale);
     if (!loc) {
-      toast.error("Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.");
+      toast.error('Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.');
       return;
     }
 
     if (!values.name.trim() || !values.slug.trim()) {
-      toast.error("İsim ve slug alanları zorunludur.");
+      toast.error('İsim ve slug alanları zorunludur.');
       return;
     }
 
@@ -332,15 +330,16 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const categoryQueryParams = useMemo(
     () => ({
       locale: effectiveLocale || undefined,
-      module_key: "services",
+      module_key: 'services',
       limit: 500,
       offset: 0,
     }),
     [effectiveLocale],
   );
 
-  const { data: categoryRows, isLoading: isCategoriesLoading } =
-    useListCategoriesAdminQuery(categoryQueryParams as any);
+  const { data: categoryRows, isLoading: isCategoriesLoading } = useListCategoriesAdminQuery(
+    categoryQueryParams as any,
+  );
 
   const categoryOptions: CategoryOption[] = useMemo(
     () =>
@@ -374,16 +373,15 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   );
 
   const categoriesDisabled = disabled || isCategoriesLoading;
-  const subCategoriesDisabled =
-    disabled || isSubCategoriesLoading || !values.category_id;
+  const subCategoriesDisabled = disabled || isSubCategoriesLoading || !values.category_id;
 
   /* -------------------- Image metadata -------------------- */
 
   const imageMetadata = useMemo(
     () => ({
-      module_key: "service",
+      module_key: 'service',
       locale: effectiveLocale,
-      service_slug: values.slug || values.name || "",
+      service_slug: values.slug || values.name || '',
       ...(values.id ? { service_id: values.id } : {}),
     }),
     [effectiveLocale, values.slug, values.name, values.id],
@@ -399,11 +397,11 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
         <div className="card-header py-2 d-flex align-items-center justify-content-between">
           <div>
             <h5 className="mb-0 small fw-semibold">
-              {mode === "create" ? "Yeni Hizmet Oluştur" : "Hizmet Düzenle"}
+              {mode === 'create' ? 'Yeni Hizmet Oluştur' : 'Hizmet Düzenle'}
             </h5>
             <div className="text-muted small">
-              İsim, slug, teknik alanlar ve görsel bilgilerini doldur. Dilersen
-              Form veya JSON modunda çalışabilirsin.
+              İsim, slug, teknik alanlar ve görsel bilgilerini doldur. Dilersen Form veya JSON
+              modunda çalışabilirsin.
             </div>
           </div>
 
@@ -412,20 +410,18 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
               <button
                 type="button"
                 className={
-                  "btn btn-outline-secondary btn-sm" +
-                  (activeMode === "form" ? " active" : "")
+                  'btn btn-outline-secondary btn-sm' + (activeMode === 'form' ? ' active' : '')
                 }
-                onClick={() => setActiveMode("form")}
+                onClick={() => setActiveMode('form')}
               >
                 Form
               </button>
               <button
                 type="button"
                 className={
-                  "btn btn-outline-secondary btn-sm" +
-                  (activeMode === "json" ? " active" : "")
+                  'btn btn-outline-secondary btn-sm' + (activeMode === 'json' ? ' active' : '')
                 }
-                onClick={() => setActiveMode("json")}
+                onClick={() => setActiveMode('json')}
               >
                 JSON
               </button>
@@ -442,29 +438,23 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   Geri
                 </button>
               )}
-              <button
-                type="submit"
-                className="btn btn-primary btn-sm"
-                disabled={disabled}
-              >
+              <button type="submit" className="btn btn-primary btn-sm" disabled={disabled}>
                 {saving
-                  ? mode === "create"
-                    ? "Oluşturuluyor..."
-                    : "Kaydediliyor..."
-                  : mode === "create"
-                    ? "Hizmeti Oluştur"
-                    : "Değişiklikleri Kaydet"}
+                  ? mode === 'create'
+                    ? 'Oluşturuluyor...'
+                    : 'Kaydediliyor...'
+                  : mode === 'create'
+                  ? 'Hizmeti Oluştur'
+                  : 'Değişiklikleri Kaydet'}
               </button>
             </div>
 
-            {loading && (
-              <span className="badge bg-secondary small mt-1">Yükleniyor...</span>
-            )}
+            {loading && <span className="badge bg-secondary small mt-1">Yükleniyor...</span>}
           </div>
         </div>
 
         <div className="card-body">
-          {activeMode === "json" ? (
+          {activeMode === 'json' ? (
             <AdminJsonEditor
               value={values}
               disabled={disabled}
@@ -488,8 +478,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       disabled={localeDisabled}
                     />
                     <div className="form-text small">
-                      Bu seçim admin ekranında aktif dili belirler ve backend’e{" "}
-                      <code>locale</code> paramı olarak gider.
+                      Bu seçim admin ekranında aktif dili belirler ve backend’e <code>locale</code>{' '}
+                      paramı olarak gider.
                     </div>
                   </div>
 
@@ -500,7 +490,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                         type="checkbox"
                         className="form-check-input"
                         checked={values.is_active}
-                        onChange={handleCheckboxChange("is_active")}
+                        onChange={handleCheckboxChange('is_active')}
                         disabled={disabled}
                       />
                       <label htmlFor="svc_is_active" className="form-check-label small">
@@ -513,7 +503,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                         type="checkbox"
                         className="form-check-input"
                         checked={values.featured}
-                        onChange={handleCheckboxChange("featured")}
+                        onChange={handleCheckboxChange('featured')}
                         disabled={disabled}
                       />
                       <label htmlFor="svc_featured" className="form-check-label small">
@@ -558,9 +548,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     required
                   />
                   <div className="form-text small">
-                    Otomatik oluşur; istersen manuel değiştirebilirsin. Küçük
-                    harf, rakam ve tire kullan: <code>bakim-ve-onarim</code>,{" "}
-                    <code>modernizasyon</code> gibi.
+                    Otomatik oluşur; istersen manuel değiştirebilirsin. Küçük harf, rakam ve tire
+                    kullan: <code>bakim-ve-onarim</code>, <code>modernizasyon</code> gibi.
                   </div>
                 </div>
 
@@ -571,12 +560,12 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     className="form-control form-control-sm"
                     rows={4}
                     value={values.description}
-                    onChange={handleChange("description")}
+                    onChange={handleChange('description')}
                     disabled={disabled}
                   />
                   <div className="form-text small">
-                    Hizmetin kısa/orta uzunlukta açıklaması. Public tarafta
-                    kartlarda ve detay sayfasında kullanılabilir.
+                    Hizmetin kısa/orta uzunlukta açıklaması. Public tarafta kartlarda ve detay
+                    sayfasında kullanılabilir.
                   </div>
                 </div>
 
@@ -588,7 +577,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       type="text"
                       className="form-control form-control-sm"
                       value={values.material}
-                      onChange={handleChange("material")}
+                      onChange={handleChange('material')}
                       disabled={disabled}
                     />
                   </div>
@@ -599,7 +588,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       className="form-control form-control-sm"
                       placeholder="Örn: Teklif üzerine, 1200 € + KDV"
                       value={values.price}
-                      onChange={handleChange("price")}
+                      onChange={handleChange('price')}
                       disabled={disabled}
                     />
                   </div>
@@ -611,7 +600,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     className="form-control form-control-sm"
                     rows={2}
                     value={values.includes}
-                    onChange={handleChange("includes")}
+                    onChange={handleChange('includes')}
                     disabled={disabled}
                   />
                 </div>
@@ -622,7 +611,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     className="form-control form-control-sm"
                     rows={2}
                     value={values.warranty}
-                    onChange={handleChange("warranty")}
+                    onChange={handleChange('warranty')}
                     disabled={disabled}
                   />
                 </div>
@@ -636,7 +625,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       className="form-control form-control-sm"
                       placeholder="Örn: 1000 m³/h, 3 hücre"
                       value={values.area}
-                      onChange={handleChange("area")}
+                      onChange={handleChange('area')}
                       disabled={disabled}
                     />
                   </div>
@@ -647,7 +636,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       className="form-control form-control-sm"
                       placeholder="Örn: 2 gün, yıllık bakım"
                       value={values.duration}
-                      onChange={handleChange("duration")}
+                      onChange={handleChange('duration')}
                       disabled={disabled}
                     />
                   </div>
@@ -660,7 +649,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       type="text"
                       className="form-control form-control-sm"
                       value={values.maintenance}
-                      onChange={handleChange("maintenance")}
+                      onChange={handleChange('maintenance')}
                       disabled={disabled}
                     />
                   </div>
@@ -670,7 +659,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       type="text"
                       className="form-control form-control-sm"
                       value={values.season}
-                      onChange={handleChange("season")}
+                      onChange={handleChange('season')}
                       disabled={disabled}
                     />
                   </div>
@@ -683,7 +672,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       type="text"
                       className="form-control form-control-sm"
                       value={values.thickness}
-                      onChange={handleChange("thickness")}
+                      onChange={handleChange('thickness')}
                       disabled={disabled}
                     />
                   </div>
@@ -693,7 +682,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       type="text"
                       className="form-control form-control-sm"
                       value={values.equipment}
-                      onChange={handleChange("equipment")}
+                      onChange={handleChange('equipment')}
                       disabled={disabled}
                     />
                   </div>
@@ -710,7 +699,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     className="form-control form-control-sm"
                     min={0}
                     value={values.display_order}
-                    onChange={handleChange("display_order")}
+                    onChange={handleChange('display_order')}
                     disabled={disabled}
                   />
                   <div className="form-text small">
@@ -728,7 +717,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       setValues((prev) => ({
                         ...prev,
                         category_id: e.target.value,
-                        sub_category_id: "",
+                        sub_category_id: '',
                       }))
                     }
                     disabled={categoriesDisabled}
@@ -741,7 +730,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     ))}
                   </select>
                   <div className="form-text small">
-                    Kategoriler, <code>module_key = services</code> olan kategori kayıtlarından gelir.
+                    Kategoriler, <code>module_key = services</code> olan kategori kayıtlarından
+                    gelir.
                   </div>
                   {isCategoriesLoading && (
                     <div className="form-text small">Kategoriler yükleniyor...</div>
@@ -780,8 +770,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     label="Öne Çıkan Görsel"
                     helperText={
                       <>
-                        Hizmet kartlarında ve detay sayfasında kullanılacak ana
-                        görseli buradan yükleyebilirsin.
+                        Hizmet kartlarında ve detay sayfasında kullanılacak ana görseli buradan
+                        yükleyebilirsin.
                       </>
                     }
                     bucket="public"
@@ -806,7 +796,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     className="form-control form-control-sm"
                     placeholder="https://..."
                     value={values.featured_image}
-                    onChange={handleChange("featured_image")}
+                    onChange={handleChange('featured_image')}
                     disabled={disabled}
                   />
                 </div>
@@ -817,7 +807,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     type="text"
                     className="form-control form-control-sm"
                     value={values.image_asset_id}
-                    onChange={handleChange("image_asset_id")}
+                    onChange={handleChange('image_asset_id')}
                     disabled={disabled}
                   />
                 </div>
@@ -828,7 +818,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     type="text"
                     className="form-control form-control-sm"
                     value={values.image_alt}
-                    onChange={handleChange("image_alt")}
+                    onChange={handleChange('image_alt')}
                     disabled={disabled}
                   />
                 </div>
@@ -843,7 +833,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       type="checkbox"
                       className="form-check-input"
                       checked={values.replicate_all_locales}
-                      onChange={handleCheckboxChange("replicate_all_locales")}
+                      onChange={handleCheckboxChange('replicate_all_locales')}
                       disabled={disabled}
                     />
                     <label className="form-check-label small" htmlFor="svc_replicate_all">
@@ -857,7 +847,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       type="checkbox"
                       className="form-check-input"
                       checked={values.apply_all_locales}
-                      onChange={handleCheckboxChange("apply_all_locales")}
+                      onChange={handleCheckboxChange('apply_all_locales')}
                       disabled={disabled}
                     />
                     <label className="form-check-label small" htmlFor="svc_apply_all">
@@ -866,8 +856,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   </div>
 
                   <div className="form-text small">
-                    Create isteğinde sadece <code>replicate_all_locales</code>,
-                    update isteğinde ise <code>apply_all_locales</code> backend’e gönderilir.
+                    Create isteğinde sadece <code>replicate_all_locales</code>, update isteğinde ise{' '}
+                    <code>apply_all_locales</code> backend’e gönderilir.
                   </div>
                 </div>
               </div>

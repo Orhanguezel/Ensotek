@@ -5,54 +5,46 @@
 //   - Data: custom_pages (module_key="team") => meta override
 // =============================================================
 
-import React, { useMemo } from "react";
-import Head from "next/head";
+import React, { useMemo } from 'react';
+import Head from 'next/head';
 
-import Banner from "@/components/layout/banner/Breadcrum";
-import TeamPageContent from "@/components/containers/team/TeamPageContent";
-import ServiceCtaTwo from "@/components/containers/cta/CatalogCta";
+import Banner from '@/components/layout/banner/Breadcrum';
+import TeamPageContent from '@/components/containers/team/TeamPageContent';
+import ServiceCtaTwo from '@/components/containers/cta/CatalogCta';
 
 // i18n
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
-import { buildMeta } from "@/seo/meta";
-import {
-  asObj,
-  absUrl,
-  pickFirstImageFromSeo,
-} from "@/seo/pageSeo";
+import { buildMeta } from '@/seo/meta';
+import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 
 // data
 import {
   useGetSiteSettingByKeyQuery,
-  useListCustomPagesPublicQuery
-} from "@/integrations/rtk/hooks";
-import type { CustomPageDto } from "@/integrations/types/custom_pages.types";
+  useListCustomPagesPublicQuery,
+} from '@/integrations/rtk/hooks';
+import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
 // helpers
-import { toCdnSrc } from "@/shared/media";
-import { excerpt } from "@/shared/text";
-
+import { toCdnSrc } from '@/shared/media';
+import { excerpt } from '@/shared/text';
 
 const TeamPage: React.FC = () => {
   const locale = useResolvedLocale();
-  const { ui } = useUiSection("ui_team", locale);
+  const { ui } = useUiSection('ui_team', locale);
 
   // UI title (banner)
-  const bannerTitle = ui(
-    "ui_team_page_title",
-    locale === "tr" ? "Ekibimiz" : "Our Team",
-  );
+  const bannerTitle = ui('ui_team_page_title', locale === 'de' ? 'Ekibimiz' : 'Our Team');
 
   // Global SEO settings (seo -> site_seo fallback)
   const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: "seo",
+    key: 'seo',
     locale,
   });
   const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: "site_seo",
+    key: 'site_seo',
     locale,
   });
 
@@ -63,11 +55,11 @@ const TeamPage: React.FC = () => {
 
   // Team pages (meta override için ilk published kayıt)
   const { data: teamData } = useListCustomPagesPublicQuery({
-    module_key: "team",
+    module_key: 'team',
     locale,
     limit: 10,
-    sort: "created_at",
-    orderDir: "asc",
+    sort: 'created_at',
+    orderDir: 'asc',
   });
 
   const published = useMemo(() => {
@@ -78,47 +70,45 @@ const TeamPage: React.FC = () => {
   const primary = published[0];
 
   // --- SEO: Title/Description ---
-  const titleFallback = ui("ui_team_page_title", "Team");
+  const titleFallback = ui('ui_team_page_title', 'Team');
 
   const pageTitleRaw =
-    (primary?.meta_title ?? "").trim() ||
-    (primary?.title ?? "").trim() ||
+    (primary?.meta_title ?? '').trim() ||
+    (primary?.title ?? '').trim() ||
     String(titleFallback).trim();
 
   // Google snippet: ~155-160
   const pageDescRaw =
-    (primary?.meta_description ?? "").trim() ||
-    (primary?.summary ?? "").trim() ||
-    excerpt(primary?.content_html ?? "", 160).trim() ||
-    String(seo?.description ?? "").trim() ||
-    "";
+    (primary?.meta_description ?? '').trim() ||
+    (primary?.summary ?? '').trim() ||
+    excerpt(primary?.content_html ?? '', 160).trim() ||
+    String(seo?.description ?? '').trim() ||
+    '';
 
-  const seoSiteName = String(seo?.site_name ?? "").trim() || "Ensotek";
-  const titleTemplate = String(seo?.title_template ?? "").trim() || "%s | Ensotek";
+  const seoSiteName = String(seo?.site_name ?? '').trim() || 'Ensotek';
+  const titleTemplate = String(seo?.title_template ?? '').trim() || '%s | Ensotek';
 
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes("%s")
-      ? titleTemplate.replace("%s", pageTitleRaw)
+    const t = titleTemplate.includes('%s')
+      ? titleTemplate.replace('%s', pageTitleRaw)
       : pageTitleRaw;
     return String(t).trim();
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = (primary?.featured_image ?? "").trim();
-    const pageImg = pageImgRaw
-      ? (toCdnSrc(pageImgRaw, 1200, 630, "fill") || pageImgRaw)
-      : "";
+    const pageImgRaw = (primary?.featured_image ?? '').trim();
+    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
 
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : "";
+    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl("/favicon.ico");
+    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.ico');
   }, [primary?.featured_image, seo]);
 
   const headSpecs = useMemo(() => {
     const tw = asObj(seo?.twitter) || {};
     const robots = asObj(seo?.robots) || {};
-    const noindex = typeof robots.noindex === "boolean" ? robots.noindex : false;
+    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
 
     return buildMeta({
       title: pageTitle,
@@ -127,9 +117,9 @@ const TeamPage: React.FC = () => {
       siteName: seoSiteName,
       noindex,
 
-      twitterCard: (String(tw.card ?? "").trim() || "summary_large_image"),
-      twitterSite: typeof tw.site === "string" ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === "string" ? tw.creator.trim() : undefined,
+      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
+      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
+      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
@@ -138,19 +128,13 @@ const TeamPage: React.FC = () => {
       <Head>
         <title>{pageTitle}</title>
         {headSpecs.map((spec, idx) => {
-          if (spec.kind === "link") {
-            return (
-              <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />
-            );
+          if (spec.kind === 'link') {
+            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
           }
-          if (spec.kind === "meta-name") {
-            return (
-              <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />
-            );
+          if (spec.kind === 'meta-name') {
+            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
           }
-          return (
-            <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />
-          );
+          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
         })}
       </Head>
 

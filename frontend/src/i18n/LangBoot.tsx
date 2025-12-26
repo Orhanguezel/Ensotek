@@ -35,7 +35,7 @@ function computeActiveLocales(meta: any[] | undefined): string[] {
   const defCode = def ? normLocaleTag(def.code) : '';
   const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  return out.length ? out : [normLocaleTag(FALLBACK_LOCALE) || 'tr'];
+  return out.length ? out : [normLocaleTag(FALLBACK_LOCALE) || 'de'];
 }
 
 export default function LangBoot() {
@@ -58,7 +58,7 @@ export default function LangBoot() {
     const first = normLocaleTag(activeLocales[0]);
     if (first) return first;
 
-    return normLocaleTag(FALLBACK_LOCALE) || 'tr';
+    return normLocaleTag(FALLBACK_LOCALE) || 'de';
   }, [defaultLocaleMeta, activeLocales]);
 
   const resolved = useMemo(() => {

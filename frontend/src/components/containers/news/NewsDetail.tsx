@@ -27,11 +27,11 @@ const HERO_W = 960;
 const HERO_H = 540;
 
 function toLocaleShort(l: string): string {
-  const s = String(l || 'tr')
+  const s = String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-');
-  return s.split('-')[0] || 'tr';
+  return s.split('-')[0] || 'de';
 }
 
 export interface NewsDetailProps {
@@ -46,15 +46,15 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ slug }) => {
 
   const backToListText = ui(
     'ui_news_back_to_list',
-    localeShort === 'tr' ? 'Tüm haberlere dön' : 'Back to all news',
+    localeShort === 'de' ? 'Tüm haberlere dön' : 'Back to all news',
   );
   const loadingText = ui(
     'ui_news_loading',
-    localeShort === 'tr' ? 'Haber yükleniyor...' : 'Loading news...',
+    localeShort === 'de' ? 'Haber yükleniyor...' : 'Loading news...',
   );
   const notFoundText = ui(
     'ui_news_not_found',
-    localeShort === 'tr' ? 'Haber bulunamadı.' : 'News not found.',
+    localeShort === 'de' ? 'Haber bulunamadı.' : 'News not found.',
   );
 
   const { data, isLoading, isError } = useGetCustomPageBySlugPublicQuery(
@@ -157,7 +157,7 @@ const NewsDetail: React.FC<NewsDetailProps> = ({ slug }) => {
                   className="news__detail-review-form"
                   toggleLabel={ui(
                     'ui_news_write_comment',
-                    localeShort === 'tr' ? 'Yorum Gönder' : 'Write a review',
+                    localeShort === 'de' ? 'Yorum Gönder' : 'Write a review',
                   )}
                 />
               </div>

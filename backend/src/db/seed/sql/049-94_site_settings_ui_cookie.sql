@@ -12,7 +12,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_cookie',
-  'tr',
+  'de',
   CAST(JSON_OBJECT(
     'ui_cookie_title',                 'Çerez Tercihleri',
     'ui_cookie_desc',                  'Sitemizin doğru çalışmasını sağlamak ve isteğe bağlı analiz yapmak için çerezler kullanıyoruz. Tercihlerinizi yönetebilirsiniz.',

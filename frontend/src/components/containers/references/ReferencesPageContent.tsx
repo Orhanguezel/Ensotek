@@ -55,11 +55,11 @@ const MAX_ALL_LIMIT = 5000;
 const altFromSlug = (slug?: string | null) => (slug || 'reference').replace(/[-_]+/g, ' ').trim();
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 type OptionTab = { id: string; label: string };
 
@@ -72,15 +72,15 @@ const ReferencesPageContent: React.FC = () => {
   const sectionSubtitlePrefix = ui('ui_references_subprefix', 'Ensotek');
   const sectionSubtitleLabel = ui(
     'ui_references_sublabel',
-    locale === 'tr' ? 'Referanslarımız' : 'References',
+    locale === 'de' ? 'Referanslarımız' : 'References',
   );
   const sectionTitle = ui(
     'ui_references_page_title',
-    locale === 'tr' ? 'Referanslarımız' : 'Our References',
+    locale === 'de' ? 'Referanslarımız' : 'Our References',
   );
   const sectionIntro = ui(
     'ui_references_page_intro',
-    locale === 'tr'
+    locale === 'de'
       ? 'Yurt içi ve yurt dışında tamamladığımız projelerden seçili referanslarımız.'
       : 'Selected references from our completed projects in Turkey and abroad.',
   );
@@ -115,13 +115,13 @@ const ReferencesPageContent: React.FC = () => {
 
   const categoryTabs: OptionTab[] = useMemo(() => {
     const tabs: OptionTab[] = [
-      { id: 'all', label: ui('ui_references_tab_all', locale === 'tr' ? 'Tümü' : 'All') },
+      { id: 'all', label: ui('ui_references_tab_all', locale === 'de' ? 'Tümü' : 'All') },
     ];
 
     for (const c of categories) {
       const label =
         String((c as any)?.title || (c as any)?.name || (c as any)?.label || '').trim() ||
-        (locale === 'tr' ? 'Kategori' : 'Category');
+        (locale === 'de' ? 'Kategori' : 'Category');
 
       tabs.push({ id: (c as any).id, label });
     }
@@ -152,13 +152,13 @@ const ReferencesPageContent: React.FC = () => {
   const subCategoryTabs: OptionTab[] = useMemo(() => {
     if (!shouldFetchSubs) return [];
     const tabs: OptionTab[] = [
-      { id: 'all', label: ui('ui_references_subtab_all', locale === 'tr' ? 'Tümü' : 'All') },
+      { id: 'all', label: ui('ui_references_subtab_all', locale === 'de' ? 'Tümü' : 'All') },
     ];
 
     for (const s of subCategories) {
       const label =
         String((s as any)?.title || (s as any)?.name || (s as any)?.label || '').trim() ||
-        (locale === 'tr' ? 'Alt Kategori' : 'Subcategory');
+        (locale === 'de' ? 'Alt Kategori' : 'Subcategory');
 
       tabs.push({ id: (s as any).id, label });
     }
@@ -392,7 +392,7 @@ const ReferencesPageContent: React.FC = () => {
             <div className="references__empty">
               {ui(
                 'ui_references_empty',
-                locale === 'tr'
+                locale === 'de'
                   ? 'Şu anda görüntülenecek referans bulunmamaktadır.'
                   : 'There are no references to display at the moment.',
               )}
@@ -523,7 +523,7 @@ const ReferencesPageContent: React.FC = () => {
               </Pagination>
 
               <div className="references__meta">
-                {locale === 'tr'
+                {locale === 'de'
                   ? `${totalItems} kayıt · Sayfa ${safePage} / ${pageCount}`
                   : `${totalItems} records · Page ${safePage} of ${pageCount}`}
               </div>
@@ -536,7 +536,7 @@ const ReferencesPageContent: React.FC = () => {
           <div className="row mt-18">
             <div className="col-12 d-flex justify-content-center">
               <div className="references__meta">
-                {locale === 'tr'
+                {locale === 'de'
                   ? `${totalItems} kayıt görüntüleniyor`
                   : `${totalItems} records displayed`}
               </div>

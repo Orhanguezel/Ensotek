@@ -244,11 +244,11 @@ const FooterSectionsAdminPage: React.FC = () => {
 
   const defaultLocale = useMemo(() => {
     const fromDb = defaultLocaleFromDb || '';
-    if (fromDb) return toShortLocale(fromDb) || 'tr';
+    if (fromDb) return toShortLocale(fromDb) || 'de';
 
     const routerLocale = (router.locale as string | undefined) ?? undefined;
     const coerced = coerceLocale(routerLocale, defaultLocaleFromDb);
-    return toShortLocale(coerced) || toShortLocale(routerLocale) || 'tr';
+    return toShortLocale(coerced) || toShortLocale(routerLocale) || 'de';
   }, [defaultLocaleFromDb, coerceLocale, router.locale]);
 
   // Footer link filters (MenuItemHeader + MenuItemList reuse)

@@ -8,7 +8,7 @@
 import React from 'react';
 
 export type AdminLocaleOption = {
-  value: string; // "tr"
+  value: string; // "de"
   label: string; // "Türkçe (tr)"
 };
 

@@ -33,11 +33,11 @@ import { asObj } from '@/seo/pageSeo';
 import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();
@@ -57,12 +57,12 @@ const ProductDetailPage: React.FC = () => {
   const isSlugReady = !!slug;
 
   const listTitleFallback = useMemo(
-    () => ui('ui_products_page_title', locale === 'tr' ? 'Ürünler' : 'Products'),
+    () => ui('ui_products_page_title', locale === 'de' ? 'Ürünler' : 'Products'),
     [ui, locale],
   );
 
   const detailTitleFallback = useMemo(
-    () => ui('ui_products_detail_page_title', locale === 'tr' ? 'Ürün Detayı' : 'Product'),
+    () => ui('ui_products_detail_page_title', locale === 'de' ? 'Ürün Detayı' : 'Product'),
     [ui, locale],
   );
 
@@ -75,7 +75,7 @@ const ProductDetailPage: React.FC = () => {
     () =>
       ui(
         'ui_products_detail_meta_description',
-        locale === 'tr'
+        locale === 'de'
           ? 'Ürün detayları, teknik özellikler ve teklif talebi için inceleyiniz.'
           : 'View product details, technical specifications, and request a quote.',
       ),

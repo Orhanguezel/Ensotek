@@ -69,10 +69,10 @@ const NewsDetailPage: React.FC = () => {
     { skip: !isSlugReady },
   );
 
-  const listTitleFallback = ui('ui_news_page_title', locale === 'tr' ? 'Haberler' : 'News');
+  const listTitleFallback = ui('ui_news_page_title', locale === 'de' ? 'Haberler' : 'News');
   const detailTitleFallback = ui(
     'ui_news_detail_page_title',
-    locale === 'tr' ? 'Haber Detayı' : 'News Detail',
+    locale === 'de' ? 'Haber Detayı' : 'News Detail',
   );
 
   const bannerTitle = useMemo(() => {

@@ -73,7 +73,7 @@ VALUES
 (
   UUID(),
   @NEWS_AQUATHERM_BAKU_2025,
-  'tr',
+  'de',
   'Aquatherm Bakü Fuarını Başarıyla Tamamladık!',
   'aquatherm-baku-fuarini-basarili-tamamladik',
   JSON_OBJECT(

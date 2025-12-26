@@ -13,7 +13,7 @@ export type ProductFilters = {
 
   /**
    * "" => all locales (do NOT send locale param)
-   * "tr" | "en" | ...
+   * "de" | "en" | ...
    */
   locale: string;
 

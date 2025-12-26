@@ -42,7 +42,7 @@ type SliderFormState = SliderFormValues & {
 /* map DTO → form state */
 const mapDtoToFormState = (item: SliderAdminDto): SliderFormState => ({
   id: item.id != null ? String(item.id) : undefined,
-  locale: (item.locale || 'tr').toLowerCase(),
+  locale: (item.locale || 'de').toLowerCase(),
   name: item.name || '',
   slug: item.slug || '',
   description: item.description || '',
@@ -130,7 +130,7 @@ const SliderFormPage: React.FC<SliderFormPageProps> = ({
     // CREATE: localeOptions hazırsa default state kur
     if (mode === 'create' && !formState && localeOptions.length > 0) {
       const fallbackLocale =
-        coerceLocale(undefined, defaultLocaleFromDb) || localeOptions[0]?.value || 'tr';
+        coerceLocale(undefined, defaultLocaleFromDb) || localeOptions[0]?.value || 'de';
 
       setFormState({
         id: undefined,
@@ -170,7 +170,7 @@ const SliderFormPage: React.FC<SliderFormPageProps> = ({
   const handleLocaleChange = async (nextLocaleRaw: string) => {
     if (!formState) return;
 
-    const nextLocale = coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || 'tr';
+    const nextLocale = coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || 'de';
 
     // CREATE modunda sadece locale değiştir
     if (mode === 'create') {

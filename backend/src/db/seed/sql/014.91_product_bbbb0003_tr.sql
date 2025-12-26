@@ -16,7 +16,7 @@ INSERT INTO product_i18n (
 )
 VALUES (
   'bbbb0003-2222-4222-8222-bbbbbbbb0003',
-  'tr',
+  'de',
   'Açık Tip Su Soğutma Kuleleri – İki Hücreli (DCTP Serisi)',
   'acik-tip-su-sogutma-kuleleri-iki-hucreli-dctp-serisi',
   'DCTP serisi iki hücreli açık tip su soğutma kuleleri, yüksek kapasite ve debi ihtiyaçlarında çift hücreli yapı ile çözüm sunar. Katalog tablosunda her model için ölçüler, ağırlıklar, kapasite ve debi değerleri 35/30/25°C ve 40/30/24°C koşullarında verilmiştir.',
@@ -45,14 +45,14 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO product_specs (id, product_id, locale, name, value, category, order_num)
 VALUES
-  ('dctp0003-0000-0000-0000-000000000001','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Seri / Hücre Tipi','DCTP – iki hücreli açık tip kuleler','custom',10),
-  ('dctp0003-0000-0000-0000-000000000002','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Model Aralığı','DCTP-3 … DCTP-35','custom',20),
-  ('dctp0003-0000-0000-0000-000000000003','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Fan Grubu','2×930 … 2×3150 (mm)','physical',30),
-  ('dctp0003-0000-0000-0000-000000000004','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Kapasite (35/30/25°C)','500.000 – 7.000.000 kcal/h','service',40),
-  ('dctp0003-0000-0000-0000-000000000005','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Debi (35/30/25°C)','100 – 1400 m³/h','service',50),
-  ('dctp0003-0000-0000-0000-000000000006','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Kapasite (40/30/24°C)','720.000 – 10.500.000 kcal/h','service',60),
-  ('dctp0003-0000-0000-0000-000000000007','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Debi (40/30/24°C)','72 – 1050 m³/h','service',70),
-  ('dctp0003-0000-0000-0000-000000000008','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Ağırlık (Boş/Çalışır)','780–8900 kg / 2500–45000 kg (modele göre)','physical',80)
+  ('dctp0003-0000-0000-0000-000000000001','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Seri / Hücre Tipi','DCTP – iki hücreli açık tip kuleler','custom',10),
+  ('dctp0003-0000-0000-0000-000000000002','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Model Aralığı','DCTP-3 … DCTP-35','custom',20),
+  ('dctp0003-0000-0000-0000-000000000003','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Fan Grubu','2×930 … 2×3150 (mm)','physical',30),
+  ('dctp0003-0000-0000-0000-000000000004','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Kapasite (35/30/25°C)','500.000 – 7.000.000 kcal/h','service',40),
+  ('dctp0003-0000-0000-0000-000000000005','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Debi (35/30/25°C)','100 – 1400 m³/h','service',50),
+  ('dctp0003-0000-0000-0000-000000000006','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Kapasite (40/30/24°C)','720.000 – 10.500.000 kcal/h','service',60),
+  ('dctp0003-0000-0000-0000-000000000007','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Debi (40/30/24°C)','72 – 1050 m³/h','service',70),
+  ('dctp0003-0000-0000-0000-000000000008','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Ağırlık (Boş/Çalışır)','780–8900 kg / 2500–45000 kg (modele göre)','physical',80)
 ON DUPLICATE KEY UPDATE
   name=VALUES(name),
   value=VALUES(value),
@@ -64,9 +64,9 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO product_faqs (id, product_id, locale, question, answer, display_order, is_active)
 VALUES
-  ('dctp0003-0000-0000-0000-000000010001','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','İki hücreli kule ne zaman tercih edilir?','Yüksek kapasite/debi ihtiyaçlarında ve işletme sürekliliği için çift hücreli yapı istenen projelerde tercih edilir.',10,1),
-  ('dctp0003-0000-0000-0000-000000010002','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Kapasite değerleri hangi koşullarda veriliyor?','Katalog tablosunda 35/30/25°C ve 40/30/24°C koşullarına göre kapasite (kcal/h) ve debi (m³/h) verilir.',20,1),
-  ('dctp0003-0000-0000-0000-000000010003','bbbb0003-2222-4222-8222-bbbbbbbb0003','tr','Model seçimi nasıl yapılır?','Hedef koşul, istenen debi, saha ölçüleri (taban alanı/yükseklik) ve ağırlık/kaldırma şartları birlikte değerlendirilir.',30,1)
+  ('dctp0003-0000-0000-0000-000000010001','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','İki hücreli kule ne zaman tercih edilir?','Yüksek kapasite/debi ihtiyaçlarında ve işletme sürekliliği için çift hücreli yapı istenen projelerde tercih edilir.',10,1),
+  ('dctp0003-0000-0000-0000-000000010002','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Kapasite değerleri hangi koşullarda veriliyor?','Katalog tablosunda 35/30/25°C ve 40/30/24°C koşullarına göre kapasite (kcal/h) ve debi (m³/h) verilir.',20,1),
+  ('dctp0003-0000-0000-0000-000000010003','bbbb0003-2222-4222-8222-bbbbbbbb0003','de','Model seçimi nasıl yapılır?','Hedef koşul, istenen debi, saha ölçüleri (taban alanı/yükseklik) ve ağırlık/kaldırma şartları birlikte değerlendirilir.',30,1)
 ON DUPLICATE KEY UPDATE
   question=VALUES(question),
   answer=VALUES(answer),

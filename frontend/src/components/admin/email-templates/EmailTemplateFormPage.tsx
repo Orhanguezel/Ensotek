@@ -191,7 +191,7 @@ export const EmailTemplateFormPage: React.FC<EmailTemplateFormPageProps> = ({ mo
       return;
     }
 
-    setSelectedLocale('tr');
+    setSelectedLocale('de');
   }, [effectiveLocale, localeOptions, selectedLocale]);
 
   /* ------------------ form init/sync ------------------ */

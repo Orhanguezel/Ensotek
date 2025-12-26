@@ -13,7 +13,7 @@ INSERT INTO product_i18n (
 )
 VALUES (
   'bbbb0004-2222-4222-8222-bbbbbbbb0004',
-  'tr',
+  'de',
   'Açık Tip Su Soğutma Kuleleri – Üç Hücreli (TCTP Serisi)',
   'acik-tip-su-sogutma-kuleleri-uc-hucreli-tctp-serisi',
   'TCTP serisi üç hücreli açık tip su soğutma kuleleri, çok yüksek kapasite ve debi gerektiren uygulamalarda üç hücreli yapı ile ölçeklenebilir çözüm sağlar. Katalog tablosunda her modelin ölçüleri, ağırlıkları, kapasite ve debi değerleri 35/30/25°C ve 40/30/24°C koşullarına göre verilmiştir.',
@@ -39,14 +39,14 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO product_specs (id, product_id, locale, name, value, category, order_num)
 VALUES
-  ('tctp0004tr000000000000000000000001','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Seri / Hücre Tipi','TCTP – üç hücreli açık tip kuleler','custom',10),
-  ('tctp0004tr000000000000000000000002','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Model Aralığı','TCTP-3 … TCTP-35','custom',20),
-  ('tctp0004tr000000000000000000000003','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Fan Grubu','3×930 … 3×3700 (mm)','physical',30),
-  ('tctp0004tr000000000000000000000004','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Kapasite (35/30/25°C)','700.000 – 10.400.000 kcal/h','service',40),
-  ('tctp0004tr000000000000000000000005','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Debi (35/30/25°C)','140 – 2080 m³/h','service',50),
-  ('tctp0004tr000000000000000000000006','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Kapasite (40/30/24°C)','1.100.000 – 15.300.000 kcal/h','service',60),
-  ('tctp0004tr000000000000000000000007','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Debi (40/30/24°C)','110 – 1530 m³/h','service',70),
-  ('tctp0004tr000000000000000000000008','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Ağırlık (Boş/Çalışır)','950–11500 kg / 3400–60000 kg (modele göre)','physical',80)
+  ('tctp0004tr000000000000000000000001','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Seri / Hücre Tipi','TCTP – üç hücreli açık tip kuleler','custom',10),
+  ('tctp0004tr000000000000000000000002','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Model Aralığı','TCTP-3 … TCTP-35','custom',20),
+  ('tctp0004tr000000000000000000000003','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Fan Grubu','3×930 … 3×3700 (mm)','physical',30),
+  ('tctp0004tr000000000000000000000004','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Kapasite (35/30/25°C)','700.000 – 10.400.000 kcal/h','service',40),
+  ('tctp0004tr000000000000000000000005','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Debi (35/30/25°C)','140 – 2080 m³/h','service',50),
+  ('tctp0004tr000000000000000000000006','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Kapasite (40/30/24°C)','1.100.000 – 15.300.000 kcal/h','service',60),
+  ('tctp0004tr000000000000000000000007','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Debi (40/30/24°C)','110 – 1530 m³/h','service',70),
+  ('tctp0004tr000000000000000000000008','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Ağırlık (Boş/Çalışır)','950–11500 kg / 3400–60000 kg (modele göre)','physical',80)
 ON DUPLICATE KEY UPDATE
   name=VALUES(name),
   value=VALUES(value),
@@ -55,9 +55,9 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO product_faqs (id, product_id, locale, question, answer, display_order, is_active)
 VALUES
-  ('tctp0004trfaq00000000000000000001','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Üç hücreli kule ne zaman tercih edilir?','Çok yüksek kapasite ve debi gereksinimlerinde, üç hücreli yapı ile ölçeklenebilir performans istendiğinde tercih edilir.',10,1),
-  ('tctp0004trfaq00000000000000000002','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Kapasite/debi değerleri hangi koşullarda veriliyor?','Katalog tablosunda 35/30/25°C ve 40/30/24°C koşullarına göre kapasite (kcal/h) ve debi (m³/h) verilir.',20,1),
-  ('tctp0004trfaq00000000000000000003','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Model seçerken nelere bakılmalı?','İstenen debi, hedef koşul, taban alanı/yükseklik ve sahadaki kaldırma/taşıma şartları birlikte değerlendirilmelidir.',30,1)
+  ('tctp0004trfaq00000000000000000001','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Üç hücreli kule ne zaman tercih edilir?','Çok yüksek kapasite ve debi gereksinimlerinde, üç hücreli yapı ile ölçeklenebilir performans istendiğinde tercih edilir.',10,1),
+  ('tctp0004trfaq00000000000000000002','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Kapasite/debi değerleri hangi koşullarda veriliyor?','Katalog tablosunda 35/30/25°C ve 40/30/24°C koşullarına göre kapasite (kcal/h) ve debi (m³/h) verilir.',20,1),
+  ('tctp0004trfaq00000000000000000003','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Model seçerken nelere bakılmalı?','İstenen debi, hedef koşul, taban alanı/yükseklik ve sahadaki kaldırma/taşıma şartları birlikte değerlendirilmelidir.',30,1)
 ON DUPLICATE KEY UPDATE
   question=VALUES(question),
   answer=VALUES(answer),

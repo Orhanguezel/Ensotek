@@ -37,7 +37,7 @@ VALUES
 
 -- 1) Public Form (TR)
 ('aaaa0000-0000-0000-0000-000000000001',
- NULL, 'new', 'tr', 'TR',
+ NULL, 'new', 'de', 'TR',
  'Ahmet Yılmaz', 'Yılmaz Soğutma Sistemleri', 'ahmet.yilmaz@example.com', '+90 532 000 00 01',
  'Endüstriyel su soğutma kulesi teklifi',
  'Mevcut tesisteki 500 m³/h debiye uygun, kapalı devre kule için teklif rica ediyoruz.',
@@ -65,7 +65,7 @@ VALUES
 
 -- 3) Admin – quoted (TR)
 ('cccc0000-0000-0000-0000-000000000003',
- 'ENS-2024-0001', 'quoted', 'tr', 'TR',
+ 'ENS-2024-0001', 'quoted', 'de', 'TR',
  'Mehmet Demir', 'Demir Makina', 'mehmet.demir@example.com', '+90 532 000 00 03',
  'Açık devre FRP kule teklifi',
  'Teknik detaylar alınmış, fiyat çalışması yapılmıştır.',

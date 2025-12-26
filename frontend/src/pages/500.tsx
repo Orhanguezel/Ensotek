@@ -16,11 +16,11 @@ import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const Error500: React.FC = () => {
   const router = useRouter();
@@ -31,7 +31,7 @@ const Error500: React.FC = () => {
 
   const title = ui(
     'ui_500_title',
-    locale === 'tr'
+    locale === 'de'
       ? 'Bir Hata Oluştu'
       : locale === 'de'
       ? 'Ein Fehler ist aufgetreten'
@@ -40,7 +40,7 @@ const Error500: React.FC = () => {
 
   const subtitle = ui(
     'ui_500_subtitle',
-    locale === 'tr'
+    locale === 'de'
       ? 'Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
       : locale === 'de'
       ? 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
@@ -49,12 +49,12 @@ const Error500: React.FC = () => {
 
   const tryAgain = ui(
     'ui_500_try_again',
-    locale === 'tr' ? 'Tekrar Dene' : locale === 'de' ? 'Erneut versuchen' : 'Try Again',
+    locale === 'de' ? 'Tekrar Dene' : locale === 'de' ? 'Erneut versuchen' : 'Try Again',
   );
 
   const home = ui(
     'ui_404_back_home',
-    locale === 'tr' ? 'Ana Sayfaya Dön' : locale === 'de' ? 'Zur Startseite' : 'Back To Home',
+    locale === 'de' ? 'Ana Sayfaya Dön' : locale === 'de' ? 'Zur Startseite' : 'Back To Home',
   );
 
   const homeHref = useMemo(() => localizePath(locale, '/'), [locale]);

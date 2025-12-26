@@ -9,39 +9,36 @@
 //   - ✅ site_settings locale-aware okuma (offer.locale → prefix → en → tr)
 // =============================================================
 
-import puppeteer from "puppeteer";
-import fs from "node:fs/promises";
-import fsSync from "node:fs";
-import path from "node:path";
-import { randomUUID } from "crypto";
-import { eq, and, inArray, desc } from "drizzle-orm";
+import puppeteer from 'puppeteer';
+import fs from 'node:fs/promises';
+import fsSync from 'node:fs';
+import path from 'node:path';
+import { randomUUID } from 'crypto';
+import { eq, and, inArray, desc } from 'drizzle-orm';
 
-import { db } from "@/db/client";
-import { siteSettings } from "@/modules/siteSettings/schema";
-import {
-  notifications,
-  type NotificationType,
-} from "@/modules/notifications/schema";
+import { db } from '@/db/client';
+import { siteSettings } from '@/modules/siteSettings/schema';
+import { notifications, type NotificationType } from '@/modules/notifications/schema';
 
-import { offersTable, type OfferRow } from "./schema";
-import { updateOffer } from "./repository";
-import { renderOfferPdfHtml } from "./pdfTemplate";
+import { offersTable, type OfferRow } from './schema';
+import { updateOffer } from './repository';
+import { renderOfferPdfHtml } from './pdfTemplate';
 
-import { renderEmailTemplateByKey } from "@/modules/email-templates/service";
-import { sendMail } from "@/modules/mail/service";
+import { renderEmailTemplateByKey } from '@/modules/email-templates/service';
+import { sendMail } from '@/modules/mail/service';
 
 // ✅ Product/Service schemas (i18n)
-import { products, productI18n } from "@/modules/products/schema";
-import { services, servicesI18n } from "@/modules/services/schema";
+import { products, productI18n } from '@/modules/products/schema';
+import { services, servicesI18n } from '@/modules/services/schema';
 
-import type { OfferListItem } from "./repository";
+import type { OfferListItem } from './repository';
 
 // -------------------------------------------------------------
 // Dosya yolları (FS) + local storage path
 // -------------------------------------------------------------
 
-const UPLOADS_ROOT_DIR = path.resolve(process.cwd(), "uploads");
-const OFFERS_DIR = path.join(UPLOADS_ROOT_DIR, "offers");
+const UPLOADS_ROOT_DIR = path.resolve(process.cwd(), 'uploads');
+const OFFERS_DIR = path.join(UPLOADS_ROOT_DIR, 'offers');
 
 async function ensureOffersDir() {
   await fs.mkdir(OFFERS_DIR, { recursive: true });
@@ -52,23 +49,23 @@ async function ensureOffersDir() {
 // -------------------------------------------------------------
 
 const POSSIBLE_EXECUTABLE_PATHS: string[] = [
-  process.env.PUPPETEER_EXECUTABLE_PATH || "",
-  process.env.CHROME_PATH || "",
-  "/usr/bin/chromium",
-  "/usr/bin/chromium-browser",
-  "/usr/bin/google-chrome",
-  "/usr/bin/google-chrome-stable",
+  process.env.PUPPETEER_EXECUTABLE_PATH || '',
+  process.env.CHROME_PATH || '',
+  '/usr/bin/chromium',
+  '/usr/bin/chromium-browser',
+  '/usr/bin/google-chrome',
+  '/usr/bin/google-chrome-stable',
 ].filter(Boolean);
 
 function resolvePuppeteerExecutable(): string | undefined {
   for (const p of POSSIBLE_EXECUTABLE_PATHS) {
     if (fsSync.existsSync(p)) {
-      console.log("[offer] Using puppeteer executable:", p);
+      console.log('[offer] Using puppeteer executable:', p);
       return p;
     }
   }
   console.warn(
-    "[offer] No explicit puppeteer executable found, Puppeteer will use its bundled browser (if installed).",
+    '[offer] No explicit puppeteer executable found, Puppeteer will use its bundled browser (if installed).',
   );
   return undefined;
 }
@@ -82,19 +79,16 @@ function uniq(arr: string[]) {
 }
 
 function buildLocaleCandidates(rawLocale?: string | null): string[] {
-  const lc = (rawLocale || "").trim();
-  const langPart = lc.includes("-") ? lc.split("-")[0] : lc;
-  return uniq([lc, langPart, "en", "tr"].map((x) => x?.trim()).filter(Boolean));
+  const lc = (rawLocale || '').trim();
+  const langPart = lc.includes('-') ? lc.split('-')[0] : lc;
+  return uniq([lc, langPart, 'en', 'de'].map((x) => x?.trim()).filter(Boolean));
 }
 
 // -------------------------------------------------------------
 // site_settings helpers (locale-aware + fallback)
 // -------------------------------------------------------------
 
-async function getSiteSettingValue(
-  key: string,
-  locale?: string | null,
-): Promise<unknown | null> {
+async function getSiteSettingValue(key: string, locale?: string | null): Promise<unknown | null> {
   const candidates = buildLocaleCandidates(locale);
 
   // locale zorunlu olduğu için: aynı key için candidate locale’leri çek
@@ -113,7 +107,7 @@ async function getSiteSettingValue(
 
   for (const loc of candidates) {
     const hit = rows.find((r) => r.locale === loc);
-    if (typeof hit !== "undefined") return hit.value ?? null;
+    if (typeof hit !== 'undefined') return hit.value ?? null;
   }
 
   // bulunamadıysa null
@@ -125,7 +119,7 @@ function parseToStringArray(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map((v) => String(v).trim()).filter(Boolean);
   }
-  if (typeof value === "string") {
+  if (typeof value === 'string') {
     return value
       .split(/[;,]+/)
       .map((v) => v.trim())
@@ -135,12 +129,12 @@ function parseToStringArray(value: unknown): string[] {
 }
 
 async function getOffersAdminEmails(locale?: string | null): Promise<string[]> {
-  const raw = await getSiteSettingValue("offers_admin_email", locale);
+  const raw = await getSiteSettingValue('offers_admin_email', locale);
   return parseToStringArray(raw);
 }
 
 async function getOffersAdminUserIds(locale?: string | null): Promise<string[]> {
-  const raw = await getSiteSettingValue("offers_admin_user_ids", locale);
+  const raw = await getSiteSettingValue('offers_admin_user_ids', locale);
   return parseToStringArray(raw);
 }
 
@@ -149,13 +143,13 @@ async function getOffersAdminUserIds(locale?: string | null): Promise<string[]> 
 // -------------------------------------------------------------
 
 function normalizeBaseUrl(v: string): string {
-  return v.trim().replace(/\/+$/, "");
+  return v.trim().replace(/\/+$/, '');
 }
 
 function ensureLeadingSlash(p: string): string {
-  const s = (p || "").trim();
-  if (!s) return "/";
-  return s.startsWith("/") ? s : `/${s}`;
+  const s = (p || '').trim();
+  if (!s) return '/';
+  return s.startsWith('/') ? s : `/${s}`;
 }
 
 function isAbsoluteUrl(u: string): boolean {
@@ -170,8 +164,8 @@ function joinUrl(base: string, p: string): string {
 
 async function getPublicBaseUrl(locale?: string | null): Promise<string | null> {
   // DB’den oku (seed: public_base_url)
-  const raw = await getSiteSettingValue("public_base_url", locale);
-  if (typeof raw === "string" && raw.trim()) return normalizeBaseUrl(raw);
+  const raw = await getSiteSettingValue('public_base_url', locale);
+  if (typeof raw === 'string' && raw.trim()) return normalizeBaseUrl(raw);
 
   // opsiyonel env fallback
   if (process.env.PUBLIC_BASE_URL && process.env.PUBLIC_BASE_URL.trim()) {
@@ -200,9 +194,9 @@ async function toAbsolutePublicUrl(
  * Eğer boşsa fallback: /uploads
  */
 async function getStorageLocalBaseUrl(locale?: string | null): Promise<string> {
-  const raw = await getSiteSettingValue("storage_local_base_url", locale);
-  if (typeof raw === "string" && raw.trim()) return ensureLeadingSlash(raw.trim());
-  return "/uploads";
+  const raw = await getSiteSettingValue('storage_local_base_url', locale);
+  if (typeof raw === 'string' && raw.trim()) return ensureLeadingSlash(raw.trim());
+  return '/uploads';
 }
 
 // -------------------------------------------------------------
@@ -211,11 +205,11 @@ async function getStorageLocalBaseUrl(locale?: string | null): Promise<string> {
 
 function parseJsonRecord(v: unknown): Record<string, unknown> | null {
   if (!v) return null;
-  if (typeof v === "object") return v as Record<string, unknown>;
-  if (typeof v !== "string") return null;
+  if (typeof v === 'object') return v as Record<string, unknown>;
+  if (typeof v !== 'string') return null;
   try {
     const parsed = JSON.parse(v);
-    if (typeof parsed === "object" && parsed !== null) return parsed as Record<string, unknown>;
+    if (typeof parsed === 'object' && parsed !== null) return parsed as Record<string, unknown>;
     return { raw: parsed };
   } catch {
     return null;
@@ -224,7 +218,7 @@ function parseJsonRecord(v: unknown): Record<string, unknown> | null {
 
 function pickFirstString(...vals: unknown[]): string | null {
   for (const v of vals) {
-    if (typeof v === "string" && v.trim()) return v.trim();
+    if (typeof v === 'string' && v.trim()) return v.trim();
   }
   return null;
 }
@@ -247,12 +241,7 @@ async function getProductTitleById(opts: {
         title: productI18n.title,
       })
       .from(productI18n)
-      .where(
-        and(
-          eq(productI18n.product_id, productId),
-          inArray(productI18n.locale, candidates),
-        ),
-      );
+      .where(and(eq(productI18n.product_id, productId), inArray(productI18n.locale, candidates)));
 
     for (const loc of candidates) {
       const hit = rows.find((r) => r.locale === loc);
@@ -269,7 +258,7 @@ async function getProductTitleById(opts: {
     if (!base.length) return null;
     return null;
   } catch (err) {
-    console.error("offer:getProductTitleById_failed", err);
+    console.error('offer:getProductTitleById_failed', err);
     return null;
   }
 }
@@ -288,12 +277,7 @@ async function getServiceNameById(opts: {
         name: servicesI18n.name,
       })
       .from(servicesI18n)
-      .where(
-        and(
-          eq(servicesI18n.service_id, serviceId),
-          inArray(servicesI18n.locale, candidates),
-        ),
-      );
+      .where(and(eq(servicesI18n.service_id, serviceId), inArray(servicesI18n.locale, candidates)));
 
     for (const loc of candidates) {
       const hit = rows.find((r) => r.locale === loc);
@@ -310,7 +294,7 @@ async function getServiceNameById(opts: {
     if (!base.length) return null;
     return null;
   } catch (err) {
-    console.error("offer:getServiceNameById_failed", err);
+    console.error('offer:getServiceNameById_failed', err);
     return null;
   }
 }
@@ -355,7 +339,7 @@ export async function generateOfferPdfBuffer(
   const execPath = resolvePuppeteerExecutable();
 
   const launchOptions: Parameters<typeof puppeteer.launch>[0] = {
-    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+    args: ['--no-sandbox', '--disable-setuid-sandbox'],
   };
 
   if (execPath) {
@@ -366,16 +350,16 @@ export async function generateOfferPdfBuffer(
 
   try {
     const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: "networkidle0" });
+    await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const pdfBuffer = await page.pdf({
-      format: "A4",
+      format: 'A4',
       printBackground: true,
       margin: {
-        top: "20mm",
-        right: "15mm",
-        bottom: "20mm",
-        left: "15mm",
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm',
       },
     });
 
@@ -397,14 +381,13 @@ async function saveOfferFileToLocalStorage(
 ): Promise<{ pdf_url: string; pdf_asset_id: string | null }> {
   await ensureOffersDir();
 
-  const safeName =
-    fileName.replace(/[^A-Za-z0-9_.-]/g, "-") || `offer-${Date.now()}.pdf`;
+  const safeName = fileName.replace(/[^A-Za-z0-9_.-]/g, '-') || `offer-${Date.now()}.pdf`;
   const absPath = path.join(OFFERS_DIR, safeName);
 
   await fs.writeFile(absPath, buffer);
 
   const baseUploads = await getStorageLocalBaseUrl(locale); // default: /uploads
-  const pdf_url = `${baseUploads.replace(/\/+$/, "")}/offers/${safeName}`;
+  const pdf_url = `${baseUploads.replace(/\/+$/, '')}/offers/${safeName}`;
 
   return {
     pdf_url, // ✅ RELATIVE (DB)
@@ -419,14 +402,14 @@ async function saveOfferErrorFile(
 ): Promise<{ pdf_url: string; pdf_asset_id: string | null }> {
   const text = [
     `PDF generation failed for offer ${offerId}.`,
-    "",
-    "Error:",
+    '',
+    'Error:',
     err instanceof Error ? err.message : String(err),
-    "",
-    "This file is created as a fallback placeholder.",
-  ].join("\n");
+    '',
+    'This file is created as a fallback placeholder.',
+  ].join('\n');
 
-  const buffer = Buffer.from(text, "utf8");
+  const buffer = Buffer.from(text, 'utf8');
   const fileName = `${offerId}-pdf-error.txt`;
 
   return saveOfferFileToLocalStorage(buffer, fileName, locale);
@@ -439,16 +422,12 @@ async function saveOfferErrorFile(
 export async function generateAndAttachOfferPdf(
   offer: OfferRow,
 ): Promise<{ pdf_url: string | null; pdf_asset_id: string | null }> {
-  const siteTitleRaw = await getSiteSettingValue("site_title", offer.locale ?? null);
-  const siteName = (typeof siteTitleRaw === "string" && siteTitleRaw) || "Ensotek";
+  const siteTitleRaw = await getSiteSettingValue('site_title', offer.locale ?? null);
+  const siteName = (typeof siteTitleRaw === 'string' && siteTitleRaw) || 'Ensotek';
 
   const formData = parseJsonRecord((offer as any).form_data);
   const serviceId =
-    pickFirstString(
-      (offer as any).service_id,
-      formData?.service_id,
-      formData?.serviceId,
-    ) ?? null;
+    pickFirstString((offer as any).service_id, formData?.service_id, formData?.serviceId) ?? null;
 
   const productId = offer.product_id ?? null;
 
@@ -469,7 +448,7 @@ export async function generateAndAttachOfferPdf(
       service_name,
     });
 
-    const fileName = (offer.offer_no || `offer-${offer.id}`) + ".pdf";
+    const fileName = (offer.offer_no || `offer-${offer.id}`) + '.pdf';
 
     // ✅ DB’de relative saklanacak url
     const { pdf_url, pdf_asset_id } = await saveOfferFileToLocalStorage(
@@ -482,13 +461,9 @@ export async function generateAndAttachOfferPdf(
 
     return { pdf_url, pdf_asset_id };
   } catch (err) {
-    console.error("generateAndAttachOfferPdf_failed", err);
+    console.error('generateAndAttachOfferPdf_failed', err);
 
-    const { pdf_url, pdf_asset_id } = await saveOfferErrorFile(
-      offer.id,
-      err,
-      offer.locale ?? null,
-    );
+    const { pdf_url, pdf_asset_id } = await saveOfferErrorFile(offer.id, err, offer.locale ?? null);
 
     await updateOffer(offer.id, { pdf_url, pdf_asset_id } as any);
 
@@ -509,7 +484,7 @@ type OfferEmailContext = {
 
 async function sendCustomerOfferMail(ctx: OfferEmailContext): Promise<boolean> {
   const o = ctx.offer;
-  const locale = o.locale || "en";
+  const locale = o.locale || 'en';
 
   // ✅ absolute link üret
   const pdfAbs = await toAbsolutePublicUrl(ctx.pdf_url ?? o.pdf_url ?? null, o.locale ?? null);
@@ -529,26 +504,20 @@ async function sendCustomerOfferMail(ctx: OfferEmailContext): Promise<boolean> {
     gross_total: o.gross_total,
 
     valid_until:
-      o.valid_until instanceof Date
-        ? o.valid_until.toISOString().substring(0, 10)
-        : null,
+      o.valid_until instanceof Date ? o.valid_until.toISOString().substring(0, 10) : null,
 
     pdf_url: pdfAbs,
   };
 
-  const rendered = await renderEmailTemplateByKey(
-    "offer_sent_customer",
-    params,
-    locale,
-  );
+  const rendered = await renderEmailTemplateByKey('offer_sent_customer', params, locale);
 
   if (!rendered) {
-    console.warn("offer_sent_customer template not found, skipping mail");
+    console.warn('offer_sent_customer template not found, skipping mail');
     return false;
   }
 
   if (rendered.missing_variables.length > 0) {
-    console.warn("offer_sent_customer missing variables:", rendered.missing_variables);
+    console.warn('offer_sent_customer missing variables:', rendered.missing_variables);
     return false;
   }
 
@@ -563,7 +532,7 @@ async function sendCustomerOfferMail(ctx: OfferEmailContext): Promise<boolean> {
 
 async function sendAdminOfferMail(ctx: OfferEmailContext): Promise<boolean> {
   const o = ctx.offer;
-  const locale = o.locale || "en";
+  const locale = o.locale || 'en';
 
   const adminEmails = await getOffersAdminEmails(o.locale ?? null);
   if (!adminEmails.length) return false;
@@ -586,22 +555,20 @@ async function sendAdminOfferMail(ctx: OfferEmailContext): Promise<boolean> {
     gross_total: o.gross_total,
 
     valid_until:
-      o.valid_until instanceof Date
-        ? o.valid_until.toISOString().substring(0, 10)
-        : null,
+      o.valid_until instanceof Date ? o.valid_until.toISOString().substring(0, 10) : null,
 
     pdf_url: pdfAbs,
   };
 
-  const rendered = await renderEmailTemplateByKey("offer_sent_admin", params, locale);
+  const rendered = await renderEmailTemplateByKey('offer_sent_admin', params, locale);
 
   if (!rendered) {
-    console.warn("offer_sent_admin template not found, skipping admin mail");
+    console.warn('offer_sent_admin template not found, skipping admin mail');
     return false;
   }
 
   if (rendered.missing_variables.length > 0) {
-    console.warn("offer_sent_admin missing variables:", rendered.missing_variables);
+    console.warn('offer_sent_admin missing variables:', rendered.missing_variables);
     return false;
   }
 
@@ -621,7 +588,7 @@ async function sendAdminOfferMail(ctx: OfferEmailContext): Promise<boolean> {
 // -------------------------------------------------------------
 
 export async function triggerNewOfferNotifications(offer: OfferRow) {
-  const title = "Yeni Teklif Talebi";
+  const title = 'Yeni Teklif Talebi';
   const message = `Yeni teklif talebi oluşturuldu.
 Müşteri: ${offer.customer_name}
 E-posta: ${offer.email}
@@ -630,7 +597,7 @@ Teklif ID: ${offer.id}`;
   await createNotificationForAdmins({
     title,
     message,
-    type: "offer_created" as NotificationType,
+    type: 'offer_created' as NotificationType,
     locale: offer.locale ?? null,
   });
 
@@ -648,9 +615,9 @@ Teklif ID: ${offer.id}`;
     };
 
     const rendered = await renderEmailTemplateByKey(
-      "offer_request_received_admin",
+      'offer_request_received_admin',
       params,
-      offer.locale ?? "en",
+      offer.locale ?? 'en',
     );
 
     if (!rendered || rendered.missing_variables.length > 0) return;
@@ -663,7 +630,7 @@ Teklif ID: ${offer.id}`;
       });
     }
   } catch (err) {
-    console.error("offer_request_admin_mail_failed", err);
+    console.error('offer_request_admin_mail_failed', err);
   }
 }
 
@@ -686,14 +653,14 @@ export async function sendOfferEmailsAndNotifications(
   try {
     customerSent = await sendCustomerOfferMail(ctx);
   } catch (err) {
-    console.error("sendCustomerOfferMail failed", err);
+    console.error('sendCustomerOfferMail failed', err);
     customerSent = false;
   }
 
   try {
     adminSent = await sendAdminOfferMail(ctx);
   } catch (err) {
-    console.error("sendAdminOfferMail failed", err);
+    console.error('sendAdminOfferMail failed', err);
     adminSent = false;
   }
 
@@ -701,7 +668,7 @@ export async function sendOfferEmailsAndNotifications(
     return { customerSent, adminSent };
   }
 
-  const title = "Teklif Gönderildi";
+  const title = 'Teklif Gönderildi';
   const message = `Bir teklif müşteriye gönderildi.
 Teklif No: ${offer.offer_no ?? offer.id}
 Müşteri: ${offer.customer_name}
@@ -710,7 +677,7 @@ E-posta: ${offer.email}`;
   await createNotificationForAdmins({
     title,
     message,
-    type: "offer_sent" as NotificationType,
+    type: 'offer_sent' as NotificationType,
     locale: offer.locale ?? null,
   });
 
@@ -718,7 +685,7 @@ E-posta: ${offer.email}`;
     .update(offersTable)
     .set({
       email_sent_at: new Date() as any,
-      status: offer.status === "sent" ? offer.status : ("sent" as any),
+      status: offer.status === 'sent' ? offer.status : ('sent' as any),
     })
     .where(eq(offersTable.id, offer.id));
 
@@ -744,7 +711,7 @@ export async function sendOfferEmailOnly(
   if (res.customerSent) {
     await updateOffer(offer.id, {
       email_sent_at: new Date() as any,
-      status: "sent" as any,
+      status: 'sent' as any,
     } as any);
   }
 

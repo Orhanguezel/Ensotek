@@ -96,7 +96,7 @@ async function getRuntimeBaseUrl(): Promise<string> {
 /**
  * OpenGraph locale formatına çevir:
  * - "pt-br" -> "pt_BR"
- * - "tr"    -> "tr_TR" (region yoksa LANG_LANG)
+ * - "de"    -> "tr_TR" (region yoksa LANG_LANG)
  */
 function toOgLocale(l: string): string {
   const raw = String(l || '').trim();

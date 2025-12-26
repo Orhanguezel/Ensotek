@@ -24,11 +24,11 @@ const CARD_W = 480;
 const CARD_H = 320;
 
 function toLocaleShort(l: string): string {
-  const s = String(l || 'tr')
+  const s = String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-');
-  return s.split('-')[0] || 'tr';
+  return s.split('-')[0] || 'de';
 }
 
 export interface NewsMoreProps {
@@ -41,7 +41,7 @@ const NewsMore: React.FC<NewsMoreProps> = ({ currentSlug }) => {
 
   const { ui } = useUiSection('ui_news', locale);
 
-  const moreTitle = ui('ui_news_more_title', locale === 'tr' ? 'Diğer Haberler' : 'More News');
+  const moreTitle = ui('ui_news_more_title', locale === 'de' ? 'Diğer Haberler' : 'More News');
 
   const { data, isLoading } = useListCustomPagesPublicQuery({
     module_key: 'news',
@@ -120,7 +120,7 @@ const NewsMore: React.FC<NewsMoreProps> = ({ currentSlug }) => {
                       <Link href={href}>{n.title}</Link>
                     </h3>
                     <Link href={href} className="link-more">
-                      {ui('ui_news_read_more', locale === 'tr' ? 'Devamını oku' : 'Read more')} →
+                      {ui('ui_news_read_more', locale === 'de' ? 'Devamını oku' : 'Read more')} →
                     </Link>
                   </div>
                 </div>

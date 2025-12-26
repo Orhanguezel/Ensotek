@@ -1,10 +1,10 @@
 // =============================================================
 // FILE: src/modules/categories/validation.ts
 // =============================================================
-import { z } from "zod";
+import { z } from 'zod';
 
 const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
-  z.preprocess((v) => (v === "" ? null : v), schema);
+  z.preprocess((v) => (v === '' ? null : v), schema);
 
 /**
  * FE'den gelebilecek bütün boolean varyantlarını kabul et
@@ -14,10 +14,10 @@ export const boolLike = z.union([
   z.boolean(),
   z.literal(0),
   z.literal(1),
-  z.literal("0"),
-  z.literal("1"),
-  z.literal("true"),
-  z.literal("false"),
+  z.literal('0'),
+  z.literal('1'),
+  z.literal('true'),
+  z.literal('false'),
 ]);
 
 /**
@@ -30,18 +30,10 @@ const baseCategorySchema = z
     id: z.string().uuid().optional(),
 
     /** Çoklu dil (i18n tablosu için) */
-    locale: z
-      .string()
-      .min(2)
-      .max(8)
-      .default("tr"),
+    locale: z.string().min(2).max(8).default('de'),
 
     /** Hangi modül / domain için bu kategori? */
-    module_key: z
-      .string()
-      .min(1)
-      .max(64)
-      .default("general"),
+    module_key: z.string().min(1).max(64).default('general'),
 
     /** i18n alanları */
     name: z.string().min(1).max(255),
@@ -71,18 +63,16 @@ const baseCategorySchema = z
 /**
  * CREATE şeması
  */
-export const categoryCreateSchema = baseCategorySchema.superRefine(
-  (data, ctx) => {
-    // Şu an için parent_id bu tabloda yok; ayrı alt kategori modülü var.
-    if ("parent_id" in (data as Record<string, unknown>)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "parent_id_not_supported_on_categories",
-        path: ["parent_id"],
-      });
-    }
-  },
-);
+export const categoryCreateSchema = baseCategorySchema.superRefine((data, ctx) => {
+  // Şu an için parent_id bu tabloda yok; ayrı alt kategori modülü var.
+  if ('parent_id' in (data as Record<string, unknown>)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'parent_id_not_supported_on_categories',
+      path: ['parent_id'],
+    });
+  }
+});
 
 /**
  * UPDATE şeması (PATCH / PUT)
@@ -90,17 +80,15 @@ export const categoryCreateSchema = baseCategorySchema.superRefine(
  *  - parent_id hâlâ yasak
  *  - ❌ no_fields_to_update kontrolünü kaldırdık (boş PATCH no-op olsun)
  */
-export const categoryUpdateSchema = baseCategorySchema
-  .partial()
-  .superRefine((data, ctx) => {
-    if ("parent_id" in (data as Record<string, unknown>)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "parent_id_not_supported_on_categories",
-        path: ["parent_id"],
-      });
-    }
-  });
+export const categoryUpdateSchema = baseCategorySchema.partial().superRefine((data, ctx) => {
+  if ('parent_id' in (data as Record<string, unknown>)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'parent_id_not_supported_on_categories',
+      path: ['parent_id'],
+    });
+  }
+});
 
 export type CategoryCreateInput = z.infer<typeof categoryCreateSchema>;
 export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;

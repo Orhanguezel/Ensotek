@@ -28,7 +28,7 @@ import type { LocaleOption } from '@/components/admin/categories/CategoriesHeade
 import { SliderHeader } from '@/components/admin/slider/SliderHeader';
 import { SliderList } from '@/components/admin/slider/SliderList';
 
-const FALLBACK_LOCALE = 'tr';
+const FALLBACK_LOCALE = 'de';
 
 const SliderAdminPage: React.FC = () => {
   const router = useRouter();

@@ -24,7 +24,7 @@ SET @LIB_CT_BASICS_ID := (
   SELECT l.id
   FROM library l
   JOIN library_i18n i ON i.library_id = l.id
-  WHERE i.locale = 'tr'
+  WHERE i.locale = 'de'
     AND i.slug = 'su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir'
   LIMIT 1
 );
@@ -33,7 +33,7 @@ SET @LIB_CT_FEATURES_ID := (
   SELECT l.id
   FROM library l
   JOIN library_i18n i ON i.library_id = l.id
-  WHERE i.locale = 'tr'
+  WHERE i.locale = 'de'
     AND i.slug = 'ensotek-sogutma-kulelerinin-ozellikleri'
   LIMIT 1
 );
@@ -42,7 +42,7 @@ SET @LIB_CT_OPEN_ID := (
   SELECT l.id
   FROM library l
   JOIN library_i18n i ON i.library_id = l.id
-  WHERE i.locale = 'tr'
+  WHERE i.locale = 'de'
     AND i.slug = 'acik-tip-su-sogutma-kulesi-calisma-prensibi'
   LIMIT 1
 );
@@ -51,7 +51,7 @@ SET @LIB_CT_CLOSED_ID := (
   SELECT l.id
   FROM library l
   JOIN library_i18n i ON i.library_id = l.id
-  WHERE i.locale = 'tr'
+  WHERE i.locale = 'de'
     AND i.slug = 'kapali-cevrim-su-sogutma-kulesi-calisma-prensibi'
   LIMIT 1
 );
@@ -60,7 +60,7 @@ SET @LIB_CT_SELECTION_ID := (
   SELECT l.id
   FROM library l
   JOIN library_i18n i ON i.library_id = l.id
-  WHERE i.locale = 'tr'
+  WHERE i.locale = 'de'
     AND i.slug = 'kule-secimi-icin-gerekli-bilgiler'
   LIMIT 1
 );
@@ -106,7 +106,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 SELECT
-  UUID(), li.id, 'tr',
+  UUID(), li.id, 'de',
   'Kurumsal broşür kapak görseli',
   NULL,
   NOW(3), NOW(3)
@@ -185,7 +185,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 SELECT
-  UUID(), li.id, 'tr',
+  UUID(), li.id, 'de',
   'Hizmet rehberi kapak görseli',
   NULL,
   NOW(3), NOW(3)

@@ -73,7 +73,7 @@ VALUES
 (
   UUID(),
   @PAGE_PRIVACY,
-  'tr',
+  'de',
   'Gizlilik Politikası',
   'gizlilik-politikasi',
   JSON_OBJECT(

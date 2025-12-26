@@ -6,15 +6,12 @@
 // RTK imports: ONLY from "@/integrations/rtk/hooks"
 // =============================================================
 
-import React, { useEffect, useMemo, useState } from "react";
-import type { NextPage } from "next";
-import { useRouter } from "next/router";
-import { toast } from "sonner";
+import React, { useEffect, useMemo, useState } from 'react';
+import type { NextPage } from 'next';
+import { useRouter } from 'next/router';
+import { toast } from 'sonner';
 
-import {
-  ServiceForm,
-  type ServiceFormValues,
-} from "@/components/admin/services/ServiceForm";
+import { ServiceForm, type ServiceFormValues } from '@/components/admin/services/ServiceForm';
 
 import {
   useGetServiceAdminQuery,
@@ -24,23 +21,23 @@ import {
   // ✅ locale meta: public endpoints (RTK hooks barrel)
   useGetAppLocalesPublicQuery,
   useGetDefaultLocalePublicQuery,
-} from "@/integrations/rtk/hooks";
+} from '@/integrations/rtk/hooks';
 
 import type {
   ServiceCreatePayload,
   ServiceUpdatePayload,
-} from "@/integrations/types/services.types";
+} from '@/integrations/types/services.types';
 
-import type { AdminLocaleOption } from "@/components/common/AdminLocaleSelect";
+import type { AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 
 /* -------------------- Locale helpers -------------------- */
 
 const toShortLocale = (v: unknown): string =>
-  String(v || "")
+  String(v || '')
     .trim()
     .toLowerCase()
-    .replace("_", "-")
-    .split("-")[0]
+    .replace('_', '-')
+    .split('-')[0]
     .trim();
 
 function uniqByCode(items: { code: string; label?: string }[]): { code: string; label?: string }[] {
@@ -58,21 +55,21 @@ function uniqByCode(items: { code: string; label?: string }[]): { code: string; 
 
 function buildLocaleLabel(item: { code: string; label?: string }): string {
   const code = toShortLocale(item.code);
-  const label = String(item.label || "").trim();
+  const label = String(item.label || '').trim();
   if (label) return `${label} (${code})`;
 
   let dn: Intl.DisplayNames | null = null;
   try {
-    dn = new Intl.DisplayNames(["en"], { type: "language" });
+    dn = new Intl.DisplayNames(['en'], { type: 'language' });
   } catch {
     dn = null;
   }
-  const name = dn?.of(code) ?? "";
+  const name = dn?.of(code) ?? '';
   return name ? `${name} (${code})` : `${code.toUpperCase()} (${code})`;
 }
 
 const normalizeLocale = (v: unknown): string => {
-  const s = typeof v === "string" ? v.trim().toLowerCase() : "";
+  const s = typeof v === 'string' ? v.trim().toLowerCase() : '';
   return s;
 };
 
@@ -85,11 +82,11 @@ const AdminServiceDetailPage: NextPage = () => {
   const isRouterReady = router.isReady;
 
   const id = useMemo(
-    () => (isRouterReady && typeof idParam === "string" ? idParam : undefined),
+    () => (isRouterReady && typeof idParam === 'string' ? idParam : undefined),
     [isRouterReady, idParam],
   );
 
-  const isCreateMode = id === "new";
+  const isCreateMode = id === 'new';
   const shouldSkipQuery = !isRouterReady || isCreateMode || !id;
 
   /* --------- Locales – RTK public endpoints --------- */
@@ -114,18 +111,18 @@ const AdminServiceDetailPage: NextPage = () => {
       .filter((m: any) => m.is_active !== false)
       .map((m: any) => ({
         code: toShortLocale(m.code),
-        label: typeof m.label === "string" ? m.label : undefined,
+        label: typeof m.label === 'string' ? m.label : undefined,
         is_default: m.is_default === true,
       }))
       .filter((x: any) => !!x.code);
 
     const uniq = uniqByCode(active);
 
-    const metaDefault = uniq.find((x: any) => x.is_default)?.code || "";
+    const metaDefault = uniq.find((x: any) => x.is_default)?.code || '';
     const defEndpoint =
-      typeof defaultLocaleMeta === "string" ? toShortLocale(defaultLocaleMeta) : "";
+      typeof defaultLocaleMeta === 'string' ? toShortLocale(defaultLocaleMeta) : '';
 
-    const effectiveDefault = (metaDefault || defEndpoint || uniq[0]?.code || "tr").toLowerCase();
+    const effectiveDefault = (metaDefault || defEndpoint || uniq[0]?.code || 'de').toLowerCase();
 
     const options: AdminLocaleOption[] = uniq.map((it: any) => ({
       value: toShortLocale(it.code),
@@ -144,7 +141,7 @@ const AdminServiceDetailPage: NextPage = () => {
     if (qLocale && localeOptions.some((x) => x.value === qLocale)) return qLocale;
     if (defaultLocale && localeOptions.some((x) => x.value === defaultLocale)) return defaultLocale;
 
-    return localeOptions?.[0]?.value || "";
+    return localeOptions?.[0]?.value || '';
   }, [router.query?.locale, localeOptions, defaultLocale]);
 
   const [activeLocale, setActiveLocale] = useState<string>(initialActiveLocale);
@@ -189,7 +186,7 @@ const AdminServiceDetailPage: NextPage = () => {
 
   const handleCancel = () => {
     router.push({
-      pathname: "/admin/services",
+      pathname: '/admin/services',
       query: activeLocale ? { locale: activeLocale } : undefined,
     });
   };
@@ -198,7 +195,7 @@ const AdminServiceDetailPage: NextPage = () => {
     try {
       const loc = normalizeLocale(values.locale || activeLocale || defaultLocale);
       if (!loc) {
-        toast.error("Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.");
+        toast.error('Locale seçimi zorunludur. app_locales ayarlarını kontrol edin.');
         return;
       }
 
@@ -245,7 +242,7 @@ const AdminServiceDetailPage: NextPage = () => {
         });
       } else {
         if (!service) {
-          toast.error("Hizmet verisi yüklenemedi.");
+          toast.error('Hizmet verisi yüklenemedi.');
           return;
         }
 
@@ -282,12 +279,12 @@ const AdminServiceDetailPage: NextPage = () => {
         };
 
         await updateService({ id: service.id, patch: payload }).unwrap();
-        toast.success("Hizmet güncellendi.");
+        toast.success('Hizmet güncellendi.');
 
         if (loc && loc !== activeLocale) setActiveLocale(loc);
       }
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || "İşlem sırasında hata oluştu.");
+      toast.error(err?.data?.error?.message || err?.message || 'İşlem sırasında hata oluştu.');
     }
   };
 
@@ -305,13 +302,13 @@ const AdminServiceDetailPage: NextPage = () => {
       <div className="container-fluid py-3">
         <h4 className="h5 mb-2">Dil listesi bulunamadı</h4>
         <p className="text-muted small mb-3">
-          <code>site_settings.app_locales</code> boş veya geçersiz.
-          Önce Site Settings’ten dilleri ayarla.
+          <code>site_settings.app_locales</code> boş veya geçersiz. Önce Site Settings’ten dilleri
+          ayarla.
         </p>
         <button
           type="button"
           className="btn btn-sm btn-outline-secondary"
-          onClick={() => router.push("/admin/site-settings")}
+          onClick={() => router.push('/admin/site-settings')}
         >
           Site Ayarlarına git
         </button>
@@ -333,19 +330,20 @@ const AdminServiceDetailPage: NextPage = () => {
     );
   }
 
-  const pageTitle = isCreateMode ? "Yeni Hizmet Oluştur" : service?.name || "Hizmet Düzenle";
+  const pageTitle = isCreateMode ? 'Yeni Hizmet Oluştur' : service?.name || 'Hizmet Düzenle';
 
   return (
     <div className="container-fluid py-3">
       <div className="mb-3">
         <h4 className="h5 mb-1">{pageTitle}</h4>
         <p className="text-muted small mb-0">
-          Hizmeti burada oluşturup düzenleyebilirsin. Dil seçimi dinamik gelir ve URL ile senkron çalışır.
+          Hizmeti burada oluşturup düzenleyebilirsin. Dil seçimi dinamik gelir ve URL ile senkron
+          çalışır.
         </p>
       </div>
 
       <ServiceForm
-        mode={isCreateMode ? "create" : "edit"}
+        mode={isCreateMode ? 'create' : 'edit'}
         initialData={!isCreateMode && service ? service : undefined}
         loading={loading}
         saving={saving}

@@ -63,7 +63,7 @@ CREATE TABLE IF NOT EXISTS products (
 -- =========================
 CREATE TABLE IF NOT EXISTS product_i18n (
   product_id       CHAR(36)     NOT NULL,
-  locale           VARCHAR(8)   NOT NULL DEFAULT 'tr',
+  locale           VARCHAR(8)   NOT NULL DEFAULT 'de',
 
   title            VARCHAR(255) NOT NULL,
   slug             VARCHAR(255) NOT NULL,
@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS product_specs (
   product_id  CHAR(36)     NOT NULL,
 
   -- 🌐 Locale bazlı spesifikasyon (tr, en, de ...)
-  locale      VARCHAR(8)   NOT NULL DEFAULT 'tr',
+  locale      VARCHAR(8)   NOT NULL DEFAULT 'de',
 
   name        VARCHAR(255) NOT NULL,
   value       TEXT         NOT NULL,
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS product_faqs (
   product_id    CHAR(36)     NOT NULL,
 
   -- 🌐 Locale bazlı SSS (tr, en, de ...)
-  locale        VARCHAR(8)   NOT NULL DEFAULT 'tr',
+  locale        VARCHAR(8)   NOT NULL DEFAULT 'de',
 
   question      VARCHAR(500) NOT NULL,
   answer        TEXT         NOT NULL,

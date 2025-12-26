@@ -49,7 +49,7 @@ SET @REV_CT_WATER     := '44440016-4444-4444-8444-444444440016';
 -- -------------------------------------------------------------
 -- REVIEWS (parent)
 -- target_type: 'custom_page'
--- submitted_locale: örnek olarak 'tr'
+-- submitted_locale: örnek olarak 'de'
 -- -------------------------------------------------------------
 INSERT INTO `reviews`
   (`id`, `target_type`, `target_id`,
@@ -67,7 +67,7 @@ VALUES
     'Ahmet Yılmaz', 'ahmet@example.com',
     5, 1, 1, 10,
     3, 0, 3,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
   (
@@ -75,7 +75,7 @@ VALUES
     'Mehmet Kara', 'mehmet.kara@example.com',
     5, 1, 1, 30,
     5, 0, 5,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
   (
@@ -83,7 +83,7 @@ VALUES
     'Serkan Demir', 'serkan.demir@example.com',
     4, 1, 1, 50,
     0, 0, 0,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
 
@@ -95,7 +95,7 @@ VALUES
     'Murat Akın', 'murat.akin@example.com',
     5, 1, 1, 110,
     7, 0, 6,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
   (
@@ -103,7 +103,7 @@ VALUES
     'Elif Şahin', 'elif.sahin@example.com',
     5, 1, 1, 120,
     4, 0, 4,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
   (
@@ -111,7 +111,7 @@ VALUES
     'Kemal Öz', 'kemal.oz@example.com',
     4, 1, 1, 130,
     2, 0, 2,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
   (
@@ -119,7 +119,7 @@ VALUES
     'Zeynep Kılıç', 'zeynep.kilic@example.com',
     5, 1, 1, 140,
     3, 0, 3,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
   (
@@ -127,7 +127,7 @@ VALUES
     'Tolga Demir', 'tolga.demir@example.com',
     5, 1, 1, 150,
     1, 0, 1,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   ),
   (
@@ -135,7 +135,7 @@ VALUES
     'Seda Arslan', 'seda.arslan@example.com',
     4, 1, 1, 160,
     1, 0, 1,
-    'tr',
+    'de',
     NOW(3), NOW(3)
   )
 ON DUPLICATE KEY UPDATE
@@ -164,7 +164,7 @@ VALUES
   -- ============================================================
   -- MISSION (TR / EN / DE)
   -- ============================================================
-  (UUID(), @REV_MISSION, 'tr',
+  (UUID(), @REV_MISSION, 'de',
    'Misyon metni çok net ve anlaşılır',
    'Ensotek''in misyon açıklaması, sektöre bakışını ve müşteri odaklı yaklaşımını çok net şekilde ortaya koyuyor.',
    NULL, NOW(3), NOW(3)),
@@ -180,7 +180,7 @@ VALUES
   -- ============================================================
   -- ABOUT (TR / EN / DE)
   -- ============================================================
-  (UUID(), @REV_ABOUT, 'tr',
+  (UUID(), @REV_ABOUT, 'de',
    '40 yıllık deneyimi hissettiriyor',
    'Hakkımızda sayfasındaki bilgiler, firmanın sektörde ne kadar köklü ve tecrübeli olduğunu çok iyi anlatıyor.',
    NULL, NOW(3), NOW(3)),
@@ -196,7 +196,7 @@ VALUES
   -- ============================================================
   -- BLOG (TR / EN / DE)
   -- ============================================================
-  (UUID(), @REV_BLOG, 'tr',
+  (UUID(), @REV_BLOG, 'de',
    'Bakım rehberi çok faydalı',
    'Periyodik bakım yazısı, sahadaki ekibimiz için kontrol listesi gibi kullanabileceğimiz pratik bilgiler içeriyor.',
    NULL, NOW(3), NOW(3)),
@@ -212,7 +212,7 @@ VALUES
   -- ============================================================
   -- COOLING TOWERS OVERVIEW (TR / EN / DE)
   -- ============================================================
-  (UUID(), @REV_CT_OVERVIEW, 'tr',
+  (UUID(), @REV_CT_OVERVIEW, 'de',
    'Soğutma kulesi seçimi için çok iyi bir özet',
    'Soğutma kulesi sayfasında kapasiteler, çalışma prensibi ve seçim kriterleri sade ve teknik olarak doğru anlatılmış. Proje başlangıcında doğru karar vermemize yardımcı oldu.',
    NULL, NOW(3), NOW(3)),
@@ -228,7 +228,7 @@ VALUES
   -- ============================================================
   -- TYPES (TR / EN / DE)  (açık devre / kapalı devre / hibrit vb.)
   -- ============================================================
-  (UUID(), @REV_CT_TYPES, 'tr',
+  (UUID(), @REV_CT_TYPES, 'de',
    'Açık/kapalı devre farkı netleşti',
    'Açık devre, kapalı devre ve hibrit çözümlerin avantaj/dezavantajları iyi karşılaştırılmış. Özellikle su kalitesi ve bakım ihtiyacı açısından doğru çerçeve sunuyor.',
    NULL, NOW(3), NOW(3)),
@@ -244,7 +244,7 @@ VALUES
   -- ============================================================
   -- MAINTENANCE (TR / EN / DE) (legionella, dolgu, fan, kimyasal vb.)
   -- ============================================================
-  (UUID(), @REV_CT_MAINT, 'tr',
+  (UUID(), @REV_CT_MAINT, 'de',
    'Bakım ve hijyen adımları pratik',
    'Periyodik bakım adımları (dolgu kontrolü, fan-kayış ayarı, su şartlandırma, drift eliminatör temizliği) sahada uygulanabilir şekilde yazılmış. Hijyen ve verim için önemli.',
    NULL, NOW(3), NOW(3)),
@@ -260,7 +260,7 @@ VALUES
   -- ============================================================
   -- PROJECTS / REFERENCES (TR / EN / DE)
   -- ============================================================
-  (UUID(), @REV_CT_PROJECTS, 'tr',
+  (UUID(), @REV_CT_PROJECTS, 'de',
    'Referanslar güven veriyor',
    'Soğutma kuleleri referans projeleri sektör çeşitliliği açısından güçlü. Teklif sürecinde teknik ekip için ikna edici oldu.',
    NULL, NOW(3), NOW(3)),
@@ -276,7 +276,7 @@ VALUES
   -- ============================================================
   -- NOISE / VIBRATION (TR / EN / DE)
   -- ============================================================
-  (UUID(), @REV_CT_NOISE, 'tr',
+  (UUID(), @REV_CT_NOISE, 'de',
    'Ses seviyesi için doğru yaklaşım',
    'Ses seviyesi ve titreşim konularında doğru mühendislik yaklaşımı anlatılmış. Yerleşim, fan seçimi ve izolasyon gibi detaylar karar sürecini kolaylaştırdı.',
    NULL, NOW(3), NOW(3)),
@@ -292,7 +292,7 @@ VALUES
   -- ============================================================
   -- WATER CONSUMPTION / TREATMENT (TR / EN / DE)
   -- ============================================================
-  (UUID(), @REV_CT_WATER, 'tr',
+  (UUID(), @REV_CT_WATER, 'de',
    'Su tüketimi ve şartlandırma bilgisi yerinde',
    'Buharlaşma kaybı, sürüklenme (drift) ve blöf (blowdown) gibi konuların açıklanması faydalı. Su şartlandırma önerileri net ve uygulanabilir.',
    NULL, NOW(3), NOW(3)),

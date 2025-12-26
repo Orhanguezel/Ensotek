@@ -1,10 +1,10 @@
 // =============================================================
 // FILE: src/modules/categories/admin.controller.ts
 // =============================================================
-import type { RouteHandler } from "fastify";
-import { db } from "@/db/client";
-import { categories, categoryI18n } from "./schema";
-import { and, or, like, eq, sql, asc, desc } from "drizzle-orm";
+import type { RouteHandler } from 'fastify';
+import { db } from '@/db/client';
+import { categories, categoryI18n } from './schema';
+import { and, or, like, eq, sql, asc, desc } from 'drizzle-orm';
 import {
   categoryCreateSchema,
   categoryUpdateSchema,
@@ -12,10 +12,10 @@ import {
   type CategoryCreateInput,
   type CategoryUpdateInput,
   type CategorySetImageInput,
-} from "./validation";
-import { storageAssets } from "@/modules/storage/schema";
-import { buildPublicUrl } from "@/modules/storage/_util";
-import { randomUUID } from "crypto";
+} from './validation';
+import { storageAssets } from '@/modules/storage/schema';
+import { buildPublicUrl } from '@/modules/storage/_util';
+import { randomUUID } from 'crypto';
 
 const CATEGORY_VIEW_FIELDS = {
   id: categories.id,
@@ -37,10 +37,10 @@ const CATEGORY_VIEW_FIELDS = {
 
 const toBoolQS = (v: unknown): boolean | undefined => {
   if (v === undefined) return undefined;
-  if (typeof v === "boolean") return v;
+  if (typeof v === 'boolean') return v;
   const s = String(v).toLowerCase();
-  if (s === "true" || s === "1") return true;
-  if (s === "false" || s === "0") return false;
+  if (s === 'true' || s === '1') return true;
+  if (s === 'false' || s === '0') return false;
   return undefined;
 };
 
@@ -55,20 +55,20 @@ export type AdminListCategoriesQS = {
   is_featured?: string | boolean;
   limit?: number | string;
   offset?: number | string;
-  sort?: "display_order" | "name" | "created_at" | "updated_at";
-  order?: "asc" | "desc";
+  sort?: 'display_order' | 'name' | 'created_at' | 'updated_at';
+  order?: 'asc' | 'desc';
   locale?: string;
   module_key?: string;
 };
 
 function isDup(err: any) {
   const code = err?.code ?? err?.errno;
-  return code === "ER_DUP_ENTRY" || code === 1062;
+  return code === 'ER_DUP_ENTRY' || code === 1062;
 }
 
 /* 🌍 Çoklu dil helper'ları */
 
-const FALLBACK_LOCALES = ["tr"];
+const FALLBACK_LOCALES = ['de'];
 
 function normalizeLocale(loc: unknown): string | null {
   if (!loc) return null;
@@ -80,22 +80,19 @@ function normalizeLocale(loc: unknown): string | null {
 /**
  * CREATE sırasında kullanılacak locale listesi:
  *  1) APP_LOCALES / NEXT_PUBLIC_APP_LOCALES / LOCALES (örn: "tr,en,de")
- *  2) Fallback: ["tr"]
+ *  2) Fallback: ["de"]
  *  3) Base locale yoksa başa eklenir
  */
 function getLocalesForCreate(baseLocale: string): string[] {
-  const base = normalizeLocale(baseLocale) ?? "tr";
+  const base = normalizeLocale(baseLocale) ?? 'de';
 
   const envLocalesRaw =
-    process.env.APP_LOCALES ||
-    process.env.NEXT_PUBLIC_APP_LOCALES ||
-    process.env.LOCALES ||
-    "";
+    process.env.APP_LOCALES || process.env.NEXT_PUBLIC_APP_LOCALES || process.env.LOCALES || '';
 
   let envLocales: string[] = [];
   if (envLocalesRaw) {
     envLocales = envLocalesRaw
-      .split(",")
+      .split(',')
       .map((x) => normalizeLocale(x))
       .filter((x): x is string => !!x);
   }
@@ -111,35 +108,24 @@ function getLocalesForCreate(baseLocale: string): string[] {
 }
 
 function toBoolBody(v: unknown): boolean {
-  if (typeof v === "boolean") return v;
-  if (typeof v === "number") return v !== 0;
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'number') return v !== 0;
   const s = String(v).toLowerCase();
-  return s === "1" || s === "true";
+  return s === '1' || s === 'true';
 }
 
 function nullIfEmpty(v: unknown): string | null {
-  if (v === "" || v === null || v === undefined) return null;
+  if (v === '' || v === null || v === undefined) return null;
   return String(v);
 }
 
 /** Ortak: admin tarafı için view query helper */
-async function fetchCategoryViewByIdAndLocale(
-  id: string,
-  locale: string,
-) {
+async function fetchCategoryViewByIdAndLocale(id: string, locale: string) {
   const rows = await db
     .select(CATEGORY_VIEW_FIELDS)
     .from(categories)
-    .innerJoin(
-      categoryI18n,
-      eq(categoryI18n.category_id, categories.id),
-    )
-    .where(
-      and(
-        eq(categories.id, id),
-        eq(categoryI18n.locale, locale),
-      ),
-    )
+    .innerJoin(categoryI18n, eq(categoryI18n.category_id, categories.id))
+    .where(and(eq(categories.id, id), eq(categoryI18n.locale, locale)))
     .limit(1);
 
   return rows[0] ?? null;
@@ -153,15 +139,15 @@ export const adminCreateCategory: RouteHandler<{
   if (!parsed.success) {
     req.log.warn(
       {
-        where: "adminCreateCategory",
+        where: 'adminCreateCategory',
         body: req.body,
         issues: parsed.error.flatten(),
       },
-      "category create invalid_body",
+      'category create invalid_body',
     );
     return reply.code(400).send({
       error: {
-        message: "invalid_body",
+        message: 'invalid_body',
         issues: parsed.error.flatten(),
       },
     });
@@ -170,36 +156,27 @@ export const adminCreateCategory: RouteHandler<{
   const data = parsed.data;
 
   const baseId = data.id ?? randomUUID();
-  const baseLocale = normalizeLocale(data.locale) ?? "tr";
+  const baseLocale = normalizeLocale(data.locale) ?? 'de';
   const locales = getLocalesForCreate(baseLocale);
 
-  const moduleKey = (data.module_key ?? "general").trim();
+  const moduleKey = (data.module_key ?? 'general').trim();
 
   const basePayload = {
     id: baseId,
     module_key: moduleKey,
-    image_url:
-      (nullIfEmpty(data.image_url) as string | null) ?? null,
+    image_url: (nullIfEmpty(data.image_url) as string | null) ?? null,
     storage_asset_id: null as string | null,
     alt: (nullIfEmpty(data.alt) as string | null) ?? null,
     icon: (nullIfEmpty(data.icon) as string | null) ?? null,
-    is_active:
-      data.is_active === undefined
-        ? true
-        : toBoolBody(data.is_active),
-    is_featured:
-      data.is_featured === undefined
-        ? false
-        : toBoolBody(data.is_featured),
+    is_active: data.is_active === undefined ? true : toBoolBody(data.is_active),
+    is_featured: data.is_featured === undefined ? false : toBoolBody(data.is_featured),
     display_order: data.display_order ?? 0,
   };
 
-  const baseName = String(data.name ?? "").trim();
-  const baseSlug = String(data.slug ?? "").trim();
-  const baseDescription =
-    (nullIfEmpty(data.description) as string | null) ?? null;
-  const baseAlt =
-    (nullIfEmpty(data.alt) as string | null) ?? null;
+  const baseName = String(data.name ?? '').trim();
+  const baseSlug = String(data.slug ?? '').trim();
+  const baseDescription = (nullIfEmpty(data.description) as string | null) ?? null;
+  const baseAlt = (nullIfEmpty(data.alt) as string | null) ?? null;
 
   const i18nRows = locales.map((loc) => ({
     category_id: baseId,
@@ -217,22 +194,17 @@ export const adminCreateCategory: RouteHandler<{
     });
   } catch (err: any) {
     if (isDup(err)) {
-      return reply
-        .code(409)
-        .send({ error: { message: "duplicate_slug" } });
+      return reply.code(409).send({ error: { message: 'duplicate_slug' } });
     }
     return reply.code(500).send({
       error: {
-        message: "db_error",
+        message: 'db_error',
         detail: String(err?.message ?? err),
       },
     });
   }
 
-  const created = await fetchCategoryViewByIdAndLocale(
-    baseId,
-    baseLocale,
-  );
+  const created = await fetchCategoryViewByIdAndLocale(baseId, baseLocale);
   return reply.code(201).send(created);
 };
 
@@ -247,24 +219,23 @@ export const adminPutCategory: RouteHandler<{
   if (!parsed.success) {
     req.log.warn(
       {
-        where: "adminPutCategory",
+        where: 'adminPutCategory',
         id,
         body: req.body,
         issues: parsed.error.flatten(),
       },
-      "category put invalid_body",
+      'category put invalid_body',
     );
     return reply.code(400).send({
       error: {
-        message: "invalid_body",
+        message: 'invalid_body',
         issues: parsed.error.flatten(),
       },
     });
   }
 
   const patch = parsed.data;
-  const targetLocale =
-    normalizeLocale(patch.locale) ?? "tr";
+  const targetLocale = normalizeLocale(patch.locale) ?? 'de';
 
   const baseSet: Record<string, unknown> = {
     updated_at: sql`CURRENT_TIMESTAMP(3)`,
@@ -276,9 +247,7 @@ export const adminPutCategory: RouteHandler<{
   let hasI18n = false;
 
   if (patch.module_key !== undefined) {
-    baseSet.module_key = String(patch.module_key)
-      .trim()
-      .slice(0, 64);
+    baseSet.module_key = String(patch.module_key).trim().slice(0, 64);
     hasBase = true;
   }
   if (patch.image_url !== undefined) {
@@ -334,33 +303,21 @@ export const adminPutCategory: RouteHandler<{
         await tx
           .update(categoryI18n)
           .set(i18nSet as any)
-          .where(
-            and(
-              eq(categoryI18n.category_id, id),
-              eq(categoryI18n.locale, targetLocale),
-            ),
-          );
+          .where(and(eq(categoryI18n.category_id, id), eq(categoryI18n.locale, targetLocale)));
       }
     });
   } catch (err: any) {
-    if (isDup(err))
-      return reply
-        .code(409)
-        .send({ error: { message: "duplicate_slug" } });
+    if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
     return reply.code(500).send({
       error: {
-        message: "db_error",
+        message: 'db_error',
         detail: String(err?.message ?? err),
       },
     });
   }
 
-  const row = await fetchCategoryViewByIdAndLocale(
-    id,
-    targetLocale,
-  );
-  if (!row)
-    return reply.code(404).send({ error: { message: "not_found" } });
+  const row = await fetchCategoryViewByIdAndLocale(id, targetLocale);
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
 
@@ -377,24 +334,23 @@ export const adminPatchCategory: RouteHandler<{
   if (!parsed.success) {
     req.log.warn(
       {
-        where: "adminPatchCategory",
+        where: 'adminPatchCategory',
         id,
         body: req.body,
         issues: parsed.error.flatten(),
       },
-      "category patch invalid_body",
+      'category patch invalid_body',
     );
     return reply.code(400).send({
       error: {
-        message: "invalid_body",
+        message: 'invalid_body',
         issues: parsed.error.flatten(),
       },
     });
   }
 
   const patch = parsed.data;
-  const targetLocale =
-    normalizeLocale(patch.locale) ?? "tr";
+  const targetLocale = normalizeLocale(patch.locale) ?? 'de';
 
   const baseSet: Record<string, unknown> = {
     updated_at: sql`CURRENT_TIMESTAMP(3)`,
@@ -406,9 +362,7 @@ export const adminPatchCategory: RouteHandler<{
   let hasI18n = false;
 
   if (patch.module_key !== undefined) {
-    baseSet.module_key = String(patch.module_key)
-      .trim()
-      .slice(0, 64);
+    baseSet.module_key = String(patch.module_key).trim().slice(0, 64);
     hasBase = true;
   }
   if (patch.image_url !== undefined) {
@@ -464,33 +418,21 @@ export const adminPatchCategory: RouteHandler<{
         await tx
           .update(categoryI18n)
           .set(i18nSet as any)
-          .where(
-            and(
-              eq(categoryI18n.category_id, id),
-              eq(categoryI18n.locale, targetLocale),
-            ),
-          );
+          .where(and(eq(categoryI18n.category_id, id), eq(categoryI18n.locale, targetLocale)));
       }
     });
   } catch (err: any) {
-    if (isDup(err))
-      return reply
-        .code(409)
-        .send({ error: { message: "duplicate_slug" } });
+    if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
     return reply.code(500).send({
       error: {
-        message: "db_error",
+        message: 'db_error',
         detail: String(err?.message ?? err),
       },
     });
   }
 
-  const row = await fetchCategoryViewByIdAndLocale(
-    id,
-    targetLocale,
-  );
-  if (!row)
-    return reply.code(404).send({ error: { message: "not_found" } });
+  const row = await fetchCategoryViewByIdAndLocale(id, targetLocale);
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
 
@@ -508,9 +450,7 @@ export const adminDeleteCategory: RouteHandler<{
 export const adminReorderCategories: RouteHandler<{
   Body: { items: Array<{ id: string; display_order: number }> };
 }> = async (req, reply) => {
-  const items = Array.isArray(req.body?.items)
-    ? req.body.items
-    : [];
+  const items = Array.isArray(req.body?.items) ? req.body.items : [];
   if (!items.length) return reply.send({ ok: true });
 
   for (const it of items) {
@@ -541,9 +481,8 @@ export const adminToggleActive: RouteHandler<{
     } as any)
     .where(eq(categories.id, id));
 
-  const row = await fetchCategoryViewByIdAndLocale(id, "tr");
-  if (!row)
-    return reply.code(404).send({ error: { message: "not_found" } });
+  const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
 
@@ -562,9 +501,8 @@ export const adminToggleFeatured: RouteHandler<{
     } as any)
     .where(eq(categories.id, id));
 
-  const row = await fetchCategoryViewByIdAndLocale(id, "tr");
-  if (!row)
-    return reply.code(404).send({ error: { message: "not_found" } });
+  const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
 
@@ -579,16 +517,16 @@ export const adminSetCategoryImage: RouteHandler<{
   if (!parsed.success) {
     req.log.warn(
       {
-        where: "adminSetCategoryImage",
+        where: 'adminSetCategoryImage',
         id,
         body: req.body,
         issues: parsed.error.flatten(),
       },
-      "category setImage invalid_body",
+      'category setImage invalid_body',
     );
     return reply.code(400).send({
       error: {
-        message: "invalid_body",
+        message: 'invalid_body',
         issues: parsed.error.flatten(),
       },
     });
@@ -610,9 +548,8 @@ export const adminSetCategoryImage: RouteHandler<{
       .set(patch as any)
       .where(eq(categories.id, id));
 
-    const row = await fetchCategoryViewByIdAndLocale(id, "tr");
-    if (!row)
-      return reply.code(404).send({ error: { message: "not_found" } });
+    const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+    if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
     return reply.send(row);
   }
 
@@ -628,16 +565,10 @@ export const adminSetCategoryImage: RouteHandler<{
     .limit(1);
 
   if (!asset) {
-    return reply
-      .code(404)
-      .send({ error: { message: "asset_not_found" } });
+    return reply.code(404).send({ error: { message: 'asset_not_found' } });
   }
 
-  const publicUrl = buildPublicUrl(
-    asset.bucket,
-    asset.path,
-    asset.url ?? null,
-  );
+  const publicUrl = buildPublicUrl(asset.bucket, asset.path, asset.url ?? null);
 
   const patch: Record<string, unknown> = {
     image_url: publicUrl,
@@ -651,9 +582,8 @@ export const adminSetCategoryImage: RouteHandler<{
     .set(patch as any)
     .where(eq(categories.id, id));
 
-  const row = await fetchCategoryViewByIdAndLocale(id, "tr");
-  if (!row)
-    return reply.code(404).send({ error: { message: "not_found" } });
+  const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
 
@@ -667,26 +597,20 @@ export const adminListCategories: RouteHandler<{
     is_featured,
     limit = 500,
     offset = 0,
-    sort = "display_order",
-    order = "asc",
+    sort = 'display_order',
+    order = 'asc',
     locale,
     module_key,
   } = req.query ?? {};
 
   const conds: any[] = [];
 
-  const effectiveLocale =
-    normalizeLocale(locale) ?? "tr";
+  const effectiveLocale = normalizeLocale(locale) ?? 'de';
   conds.push(eq(categoryI18n.locale, effectiveLocale));
 
   if (q && q.trim()) {
     const pattern = `%${q.trim()}%`;
-    conds.push(
-      or(
-        like(categoryI18n.name, pattern),
-        like(categoryI18n.slug, pattern),
-      ),
-    );
+    conds.push(or(like(categoryI18n.name, pattern), like(categoryI18n.slug, pattern)));
   }
 
   const a = toBoolQS(is_active);
@@ -699,27 +623,24 @@ export const adminListCategories: RouteHandler<{
   }
 
   const col =
-    sort === "name"
+    sort === 'name'
       ? categoryI18n.name
-      : sort === "created_at"
-        ? categories.created_at
-        : sort === "updated_at"
-          ? categories.updated_at
-          : categories.display_order;
+      : sort === 'created_at'
+      ? categories.created_at
+      : sort === 'updated_at'
+      ? categories.updated_at
+      : categories.display_order;
 
   let qb = db
     .select(CATEGORY_VIEW_FIELDS)
     .from(categories)
-    .innerJoin(
-      categoryI18n,
-      eq(categoryI18n.category_id, categories.id),
-    )
+    .innerJoin(categoryI18n, eq(categoryI18n.category_id, categories.id))
     .$dynamic();
 
   if (conds.length) qb = qb.where(and(...conds));
 
   const rows = await qb
-    .orderBy(order === "desc" ? desc(col) : asc(col))
+    .orderBy(order === 'desc' ? desc(col) : asc(col))
     .limit(toNum(limit, 500))
     .offset(toNum(offset, 0));
 
@@ -732,15 +653,10 @@ export const adminGetCategoryById: RouteHandler<{
   Querystring: { locale?: string };
 }> = async (req, reply) => {
   const { id } = req.params;
-  const effectiveLocale =
-    normalizeLocale(req.query?.locale) ?? "tr";
+  const effectiveLocale = normalizeLocale(req.query?.locale) ?? 'de';
 
-  const row = await fetchCategoryViewByIdAndLocale(
-    id,
-    effectiveLocale,
-  );
-  if (!row)
-    return reply.code(404).send({ error: { message: "not_found" } });
+  const row = await fetchCategoryViewByIdAndLocale(id, effectiveLocale);
+  if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
 
@@ -750,18 +666,13 @@ export const adminGetCategoryBySlug: RouteHandler<{
   Querystring: { locale?: string; module_key?: string };
 }> = async (req, reply) => {
   const { slug } = req.params;
-  const effectiveLocale =
-    normalizeLocale(req.query?.locale) ?? "tr";
+  const effectiveLocale = normalizeLocale(req.query?.locale) ?? 'de';
   const moduleKey =
-    typeof req.query?.module_key === "string" &&
-    req.query.module_key.trim()
+    typeof req.query?.module_key === 'string' && req.query.module_key.trim()
       ? req.query.module_key.trim()
       : undefined;
 
-  const conds: any[] = [
-    eq(categoryI18n.slug, slug),
-    eq(categoryI18n.locale, effectiveLocale),
-  ];
+  const conds: any[] = [eq(categoryI18n.slug, slug), eq(categoryI18n.locale, effectiveLocale)];
   if (moduleKey) {
     conds.push(eq(categories.module_key, moduleKey));
   }
@@ -769,14 +680,10 @@ export const adminGetCategoryBySlug: RouteHandler<{
   const rows = await db
     .select(CATEGORY_VIEW_FIELDS)
     .from(categories)
-    .innerJoin(
-      categoryI18n,
-      eq(categoryI18n.category_id, categories.id),
-    )
+    .innerJoin(categoryI18n, eq(categoryI18n.category_id, categories.id))
     .where(and(...conds))
     .limit(1);
 
-  if (!rows.length)
-    return reply.code(404).send({ error: { message: "not_found" } });
+  if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(rows[0]);
 };

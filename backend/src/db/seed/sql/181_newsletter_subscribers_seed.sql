@@ -16,7 +16,7 @@ VALUES
   UUID(),
   'demo.tr.user@example.com',
   1,
-  'tr',
+  'de',
   JSON_OBJECT(
     'source', 'seed',
     'tags', JSON_ARRAY('campaign', 'welcome'),

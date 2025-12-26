@@ -2,7 +2,7 @@
 'use client';
 
 const DEFAULT_LOCALE_PREFIXLESS = true;
-const DEFAULT_LOCALE = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'tr').trim().toLowerCase();
+const DEFAULT_LOCALE = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE || 'de').trim().toLowerCase();
 
 function stripTrailingSlash(u: string) {
   return String(u || '')

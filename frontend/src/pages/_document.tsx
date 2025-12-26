@@ -34,20 +34,21 @@ function pickFirstNonEmpty(...vals: Array<unknown>): string {
 function getHeader(ctx: DocumentContext, name: string): string {
   const req = ctx.req;
   if (!req?.headers) return '';
-  // node lowercases header keys
   const v = (req.headers as any)[name.toLowerCase()] ?? (req.headers as any)[name];
   return firstHeader(v);
 }
 
 /**
  * ✅ Canonical origin resolver (proxy + Cloudflare safe)
- * - Prefer forced canonical base via NEXT_PUBLIC_SITE_URL / SITE_URL
- * - Otherwise infer from forwarded headers
- * - Fallback: production => https, local => http
+ * Öncelik:
+ *  1) NEXT_PUBLIC_SITE_URL / SITE_URL (deterministik)
+ *  2) x-forwarded-proto + x-forwarded-host
+ *  3) cf-visitor scheme + host
+ *  4) host + https fallback
  */
 function getReqOrigin(ctx: DocumentContext): string {
   const forced = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || '').trim();
-  if (forced) return stripTrailingSlash(forced);
+  if (forced) return normalizeLocalhostOrigin(stripTrailingSlash(forced));
 
   const xfProto = getHeader(ctx, 'x-forwarded-proto');
   const xfHost = getHeader(ctx, 'x-forwarded-host');
@@ -67,9 +68,9 @@ function getReqOrigin(ctx: DocumentContext): string {
 
   const proto = isLocal
     ? 'http'
-    : xfProto || cfScheme || (xfSsl === 'on' ? 'https' : '') || 'https';
+    : (xfProto || cfScheme || (xfSsl === 'on' ? 'https' : '') || 'https').trim();
 
-  const origin = host ? `${proto}://${host}` : 'https://localhost';
+  const origin = host ? `${proto}://${host}` : 'http://localhost';
   return normalizeLocalhostOrigin(origin);
 }
 
@@ -92,17 +93,21 @@ function getPublicReqUrl(ctx: DocumentContext): string {
     '/',
   );
 
-  // Some proxies send full absolute URL
+  const raw = String(cand || '/').trim();
+
+  // Some proxies send absolute URL
   try {
-    if (/^https?:\/\//i.test(cand)) {
-      const u = new URL(cand);
+    if (/^https?:\/\//i.test(raw)) {
+      const u = new URL(raw);
       return `${u.pathname}${u.search}`;
     }
   } catch {
     // ignore
   }
 
-  return cand.startsWith('/') ? cand : `/${cand}`;
+  // ensure it starts with /
+  if (raw.startsWith('/')) return raw;
+  return `/${raw}`;
 }
 
 function splitUrl(u: string): { pathname: string; search: string } {
@@ -126,12 +131,12 @@ function normLocaleShort(x: any, fallback: string): string {
     .toLowerCase()
     .replace('_', '-');
   const short = (v.split('-')[0] || '').trim();
-  const out =
-    short ||
-    String(fallback || '')
-      .trim()
-      .toLowerCase();
-  return (out || '').slice(0, 2);
+  const fb = String(fallback || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0];
+  return (short || fb || '').slice(0, 2);
 }
 
 function readLcFromSearch(search: string): string {
@@ -145,12 +150,18 @@ function readLcFromSearch(search: string): string {
   }
 }
 
+/** "/en" veya "/en/..." => "en" */
 function readLocaleFromPathPrefix(pathname: string): string {
   const p = normPathname(pathname);
   const m = p.match(/^\/([a-zA-Z]{2})(\/|$)/);
   return normLocaleShort(m?.[1], '');
 }
 
+/**
+ * Strict locale strip:
+ * - Prefix bir locale ise ve activeSet içindeyse strip eder.
+ * - Değilse dokunmaz (örn: /api, /wp, /xx olmayan prefixler)
+ */
 function stripLocalePrefixStrict(pathname: string, activeSet: Set<string>): string {
   const p = normPathname(pathname);
   const m = p.match(/^\/([a-zA-Z]{2})(\/|$)/);
@@ -161,7 +172,7 @@ function stripLocalePrefixStrict(pathname: string, activeSet: Set<string>): stri
 
   if (activeSet.size > 0 && !activeSet.has(cand)) return p;
 
-  const rest = p.slice(cand.length + 1);
+  const rest = p.slice(cand.length + 1); // "/en" => "" , "/en/x" => "/x"
   return normPathname(rest || '/');
 }
 
@@ -248,7 +259,7 @@ function computeActiveLocales(meta: AppLocaleMeta[] | null | undefined): string[
 
   const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  const fb = normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr';
+  const fb = normLocaleShort(FALLBACK_LOCALE, 'de') || 'de';
   return out.length ? out : [fb];
 }
 
@@ -271,7 +282,7 @@ async function resolveLocalesFromDb(): Promise<{ defaultLocale: string; activeLo
 
   const base = getApiBaseServer();
   if (!base) {
-    const fb = normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr';
+    const fb = normLocaleShort(FALLBACK_LOCALE, 'de') || 'de';
     const out = { defaultLocale: fb, activeLocales: [fb] };
     __docLocaleCache = { at: Date.now(), ...out };
     return out;
@@ -287,7 +298,7 @@ async function resolveLocalesFromDb(): Promise<{ defaultLocale: string; activeLo
 
   const fromDefaultEndpoint = normalizeDefaultLocaleValue(defaultLocaleRaw);
   const defaultLocale =
-    fromDefaultEndpoint || activeLocales[0] || normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr';
+    fromDefaultEndpoint || activeLocales[0] || normLocaleShort(FALLBACK_LOCALE, 'de') || 'de';
 
   const out = { defaultLocale, activeLocales };
   __docLocaleCache = { at: Date.now(), ...out };
@@ -329,35 +340,39 @@ export default class MyDocument extends Document<{
 
     const origin = getReqOrigin(ctx);
 
-    // ✅ FIX: use public/original URL (rewrite/proxy safe)
+    // ✅ public/original URL (rewrite/proxy safe)
     const reqUrl = getPublicReqUrl(ctx);
-
     const { pathname: rawPathname, search } = splitUrl(reqUrl);
     const pathname = normPathname(rawPathname);
 
     const { defaultLocale: dbDefault, activeLocales: dbActives } = await resolveLocalesFromDb();
     const dbDefaultShort = normLocaleShort(
       dbDefault,
-      normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr',
+      normLocaleShort(FALLBACK_LOCALE, 'de') || 'de',
     );
 
-    const activeLocalesShort = (dbActives || []).map((x) => normLocaleShort(x, '')).filter(Boolean);
+    const activeLocalesShort = Array.from(
+      new Set((dbActives || []).map((x) => normLocaleShort(x, '')).filter(Boolean)),
+    );
     const activeSet = new Set(activeLocalesShort);
 
+    // ✅ effective locale priority
     const lcFromQuery = readLcFromSearch(search);
     const lcFromCtx = normLocaleShort((ctx as any).locale, '');
     const lcFromPath = readLocaleFromPathPrefix(pathname);
 
-    const basePath = stripLocalePrefixStrict(pathname, activeSet);
-
     const effectiveLocale = normLocaleShort(
       lcFromQuery || lcFromCtx || lcFromPath || dbDefaultShort || FALLBACK_LOCALE,
-      normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr',
+      dbDefaultShort || normLocaleShort(FALLBACK_LOCALE, 'de') || 'de',
     );
 
     const safeLocale =
       activeSet.size > 0 && activeSet.has(effectiveLocale) ? effectiveLocale : dbDefaultShort;
 
+    // basePath: locale prefix strip (strict; only known active locales)
+    const basePath = stripLocalePrefixStrict(pathname, activeSet);
+
+    // canonicalPath: default prefixless policy
     const canonicalPath =
       DEFAULT_LOCALE_PREFIXLESS && safeLocale === dbDefaultShort
         ? basePath
@@ -365,14 +380,17 @@ export default class MyDocument extends Document<{
 
     const canonicalAbs = normalizeLocalhostOrigin(abs(origin, canonicalPath));
 
+    // hreflang
     const hreflangLinks: HreflangLink[] = [];
     const activesOrdered = activeLocalesShort.length
       ? activeLocalesShort
-      : [normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr'];
+      : [dbDefaultShort || normLocaleShort(FALLBACK_LOCALE, 'de') || 'de'];
 
-    for (const l of activesOrdered) {
-      if (activeSet.size > 0 && !activeSet.has(l)) continue;
+    // default locale listede yoksa ekle
+    const activesFinal = Array.from(new Set([dbDefaultShort, ...activesOrdered].filter(Boolean)));
 
+    for (const l of activesFinal) {
+      if (activeSet.size > 0 && !activeSet.has(l) && l !== dbDefaultShort) continue;
       const href = normalizeLocalhostOrigin(
         abs(origin, localizedPathFor(basePath, l, dbDefaultShort)),
       );
@@ -386,6 +404,7 @@ export default class MyDocument extends Document<{
       ),
     });
 
+    // uniq
     const seen = new Set<string>();
     const hreflangLinksUniq = hreflangLinks.filter((x) => {
       const k = `${x.hrefLang}|${x.href}`;

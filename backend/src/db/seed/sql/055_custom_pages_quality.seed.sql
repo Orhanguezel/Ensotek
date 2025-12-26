@@ -86,7 +86,7 @@ VALUES
 (
   UUID(),
   @QUALITY_CERTS_1,
-  'tr',
+  'de',
   'Kalite Belgelerimiz & Kalite Standartlarımız',
   'kalite-belgelerimiz-kalite-standartlarimiz',
   JSON_OBJECT(

@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS `newsletter_subscribers` (
   `email`           VARCHAR(255)  NOT NULL,
 
   `is_verified`     TINYINT(1)    NOT NULL DEFAULT 0,          -- Drizzle: boolean
-  `locale`          VARCHAR(10)   DEFAULT NULL,                -- e.g. 'tr', 'en', 'de-DE'
+  `locale`          VARCHAR(10)   DEFAULT NULL,                -- e.g. 'de', 'en', 'de-DE'
 
   `meta`            LONGTEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
                     DEFAULT '{}'
