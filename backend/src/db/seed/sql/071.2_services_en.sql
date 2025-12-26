@@ -1,339 +1,152 @@
 -- =============================================================
--- 071.2_services_en.sql  (Ensotek services – EN i18n only)
+-- FILE: 071.2_services_en.sql
+-- Ensotek services – EN i18n + EN image i18n
+-- (Parent tables are inserted in 071.1 TR file)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
+SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
--- ---------------------------------------------------------
--- 1) Maintenance & Repair
--- ---------------------------------------------------------
+SET @SRV_001 := '90000001-1111-4111-8111-900000000001';
+SET @SRV_002 := '90000002-1111-4111-8111-900000000002';
+SET @SRV_003 := '90000003-1111-4111-8111-900000000003';
+SET @SRV_004 := '90000004-1111-4111-8111-900000000004';
+SET @SRV_005 := '90000005-1111-4111-8111-900000000005';
 
-SET @SRV_MAINT_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'bakim-ve-onarim'
-  LIMIT 1
-);
+SET @IMG_001A := '92000001-1111-4111-8111-920000000001';
+SET @IMG_001B := '92000001-1111-4111-8111-920000000002';
+SET @IMG_001C := '92000001-1111-4111-8111-920000000003';
 
+SET @IMG_002A := '92000002-1111-4111-8111-920000000001';
+SET @IMG_002B := '92000002-1111-4111-8111-920000000002';
+SET @IMG_002C := '92000002-1111-4111-8111-920000000003';
+
+SET @IMG_003A := '92000003-1111-4111-8111-920000000001';
+SET @IMG_003B := '92000003-1111-4111-8111-920000000002';
+SET @IMG_003C := '92000003-1111-4111-8111-920000000003';
+
+SET @IMG_004A := '92000004-1111-4111-8111-920000000001';
+SET @IMG_004B := '92000004-1111-4111-8111-920000000002';
+SET @IMG_004C := '92000004-1111-4111-8111-920000000003';
+
+SET @IMG_005A := '92000005-1111-4111-8111-920000000001';
+SET @IMG_005B := '92000005-1111-4111-8111-920000000002';
+SET @IMG_005C := '92000005-1111-4111-8111-920000000003';
+
+-- -------------------------------------------------------------------
+-- EN i18n: services_i18n
+-- Slugs aligned with 012 sub_category_i18n EN slugs
+-- -------------------------------------------------------------------
 INSERT INTO `services_i18n`
 (`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
+ `slug`,`name`,`description`,
+ `material`,`price`,`includes`,`warranty`,`image_alt`,
  `tags`,`meta_title`,`meta_description`,`meta_keywords`,
  `created_at`,`updated_at`)
 VALUES
-(
-  UUID(),
-  @SRV_MAINT_ID,
-  'en',
-  'maintenance-and-repair',
-  'Maintenance & Repair',
-  'We provide end-to-end maintenance and repair services to keep your cooling towers running reliably and efficiently. Ensotek offers periodic maintenance programs, fault diagnosis and on-site repair services for industrial cooling towers. Our teams inspect mechanical components, fillings and water distribution systems, carry out cleaning, lubrication and alignment works, and record all activities in line with our standard procedures. In this way, we help you minimize unplanned downtime, extend equipment lifetime and keep cooling performance as close as possible to the design values.',
-  'FRP body, galvanized steel frame, PVC/PVDF fills, stainless steel fasteners',
-  'Priced based on scope, tower capacity and service frequency',
-  'Periodic inspections and reporting, mechanical maintenance, cleaning and condition checks, replacement of critical spare parts',
-  'Up to 12 months workmanship warranty, plus manufacturer warranty for supplied parts',
-  'Industrial cooling tower maintenance and repair service',
-  'maintenance, repair, service, periodic maintenance, industrial cooling tower',
-  'Maintenance & Repair | Ensotek',
-  'Ensotek provides periodic maintenance and professional repair services for industrial cooling towers. Planned maintenance programs and expert interventions help reduce performance loss and unplanned downtime.',
-  'cooling tower maintenance, industrial maintenance service, periodic maintenance program',
-  '2024-01-01 00:00:00.000',
-  '2024-01-01 00:00:00.000'
-)
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
+('94000001-1111-4111-8111-940000000001', @SRV_001,'en',
+ 'maintenance-and-repair',
+ 'Maintenance & Repair',
+ 'Ensotek provides periodic maintenance and professional repair services for industrial water cooling towers. Planned inspections cover fill/nozzle distribution, fan-motor efficiency, vibration/noise checks, mechanical alignment, sealing points and water treatment controls. A preventive approach reduces downtime, preserves performance and extends equipment lifetime.',
+ 'Nozzles, fill media, drift eliminators, fan/motor/gearbox, mechanical parts (scope-dependent)',
+ 'Quoted based on maintenance scope',
+ 'Inspection & reporting, cleaning, mechanical maintenance, critical part replacement, on-site testing',
+ 'Workmanship and equipment-specific warranty',
+ 'Cooling tower maintenance and repair',
+ 'maintenance, repair, periodic inspection, efficiency, vibration analysis',
+ 'Maintenance & Repair | Ensotek',
+ 'Ensotek reduces downtime and improves efficiency with periodic maintenance and repair services for cooling towers.',
+ 'cooling tower maintenance, cooling tower repair, periodic maintenance, fan motor service',
+ NOW(3), NOW(3)),
 
+('94000002-1111-4111-8111-940000000002', @SRV_002,'en',
+ 'modernization',
+ 'Modernization',
+ 'Ensotek delivers modernization (retrofit) solutions to keep existing cooling towers efficient and aligned with current performance requirements. Typical scope includes fill/nozzle upgrades, fan-motor optimisation, VFD integration, drift-loss improvements and water distribution revisions. The goal is lower energy consumption, stable process operation and higher capacity.',
+ 'Retrofit components (fill/nozzle/fan-motor/VFD etc.) depending on the project',
+ 'Quoted based on modernization scope',
+ 'Assessment, engineering, implementation, testing and performance verification',
+ 'Workmanship and equipment-specific warranty',
+ 'Cooling tower modernization and retrofit',
+ 'modernization, retrofit, vfd, fan upgrade, fill replacement',
+ 'Modernization | Ensotek',
+ 'Ensotek improves capacity and reduces energy consumption with cooling tower modernization (retrofit) services.',
+ 'cooling tower modernization, retrofit, vfd, fill replacement, fan upgrade',
+ NOW(3), NOW(3)),
 
--- ---------------------------------------------------------
--- 2) Modernization
--- ---------------------------------------------------------
+('94000003-1111-4111-8111-940000000003', @SRV_003,'en',
+ 'spare-parts-and-components',
+ 'Spare Parts & Components',
+ 'Ensotek supplies a broad portfolio of spare parts and components for cooling towers. Critical parts such as fill media, nozzles, drift eliminators, fan blades, motors/gearboxes and mechanical fittings are selected with a quality-first approach to ensure reliable operation and long service life.',
+ 'Fill media, nozzles, drift eliminators, fans, motors, gearboxes, mechanical parts',
+ 'Quoted based on parts and lead time',
+ 'Parts selection support, supply, optional installation and commissioning support',
+ 'Product-specific warranty terms',
+ 'Cooling tower spare parts and components',
+ 'spare parts, fill media, nozzles, fan, motor, gearbox, drift eliminator',
+ 'Spare Parts | Ensotek',
+ 'Ensotek provides spare parts and components for cooling towers to reduce failure risk and maintain efficiency.',
+ 'cooling tower spare parts, fill media, nozzles, fan motor, gearbox',
+ NOW(3), NOW(3)),
 
-SET @SRV_MOD_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'modernizasyon'
-  LIMIT 1
-);
+('94000004-1111-4111-8111-940000000004', @SRV_004,'en',
+ 'applications-and-references',
+ 'Applications & References',
+ 'Ensotek has extensive applications and reference projects across industrial and commercial environments. Solutions cover energy, chemical, food, pharmaceutical, automotive and many other sectors, addressing different process requirements with the right configuration and performance targets.',
+ NULL,
+ 'Quoted based on project scope',
+ 'Application assessment, reference presentation, site survey and project planning support',
+ 'Project-dependent',
+ 'Sector applications and reference projects',
+ 'applications, references, sector solutions, project experience',
+ 'Applications & References | Ensotek',
+ 'Ensotek is a reliable partner for cooling tower solutions backed by sector applications and proven references.',
+ 'cooling tower references, applications, industrial cooling projects',
+ NOW(3), NOW(3)),
 
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
+('94000005-1111-4111-8111-940000000005', @SRV_005,'en',
+ 'engineering-support',
+ 'Engineering Support',
+ 'Ensotek provides comprehensive engineering support including design, consulting, system optimisation, performance analysis and technical training. Heat-load analysis, hydraulic balancing, equipment selection and commissioning support are delivered with structured documentation and measurable outcomes.',
+ 'Engineering calculations and site equipment depending on project needs',
+ 'Quoted based on scope',
+ 'Site survey, calculations, design, commissioning support, performance verification, training',
+ 'Scope-dependent',
+ 'Cooling tower engineering support',
+ 'engineering, optimisation, performance analysis, commissioning, training',
+ 'Engineering Support | Ensotek',
+ 'Ensotek delivers end-to-end engineering support for cooling towers, from analysis and optimisation to commissioning and training.',
+ 'cooling tower engineering, performance analysis, optimisation, commissioning',
+ NOW(3), NOW(3));
+
+-- -------------------------------------------------------------------
+-- EN image i18n: service_images_i18n
+-- -------------------------------------------------------------------
+INSERT INTO `service_images_i18n`
+(`id`,`image_id`,`locale`,`title`,`alt`,`caption`,`created_at`,`updated_at`)
 VALUES
-(
-  UUID(),
-  @SRV_MOD_ID,
-  'en',
-  'modernization',
-  'Modernization',
-  'We offer modernization solutions to upgrade your existing cooling towers to current efficiency and performance standards. Ensotek replaces outdated equipment with high–efficiency fans and motors, new generation PVC/PVDF fills, advanced water distribution systems and modern automation. Modernization projects allow you to increase cooling capacity or reduce energy consumption without investing in completely new towers. All design and implementation steps are based on performance calculations, site conditions and process requirements.',
-  'High–efficiency FRP body, energy–saving fan and motor assemblies, new generation PVC/PVDF fills',
-  'Priced after on-site assessment and performance analysis',
-  'Performance assessment, modernization design, supply of new equipment, installation and commissioning, performance verification tests',
-  '12–24 months equipment and workmanship warranty depending on the selected configuration',
-  'Main image of modernized industrial cooling towers',
-  'modernization, retrofit, energy efficiency, tower upgrade, performance improvement',
-  'Modernization | Ensotek',
-  'Ensotek provides modernization solutions for existing cooling towers with a strong focus on energy efficiency. By upgrading fans, fills, water distribution systems and automation, you can achieve higher performance with lower energy consumption.',
-  'cooling tower modernization, retrofit solutions, energy saving, performance upgrade',
-  '2024-01-01 00:00:00.000',
-  '2024-01-01 00:00:00.000'
-)
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
+('94010001-1111-4111-8111-940100000001',@IMG_001A,'en','Periodic Inspections','Periodic maintenance inspections','Planned inspections and reporting to reduce downtime.',NOW(3),NOW(3)),
+('94010001-1111-4111-8111-940100000002',@IMG_001B,'en','Mechanical Service','Mechanical service work','Fan-motor checks, alignment and critical component controls.',NOW(3),NOW(3)),
+('94010001-1111-4111-8111-940100000003',@IMG_001C,'en','On-site Repair','On-site repair and verification','Measurements, tests and performance verification.',NOW(3),NOW(3)),
 
+('94010002-1111-4111-8111-940100000001',@IMG_002A,'en','Capacity Increase','Capacity increase via modernization','Fill/nozzle optimisation and distribution improvements.',NOW(3),NOW(3)),
+('94010002-1111-4111-8111-940100000002',@IMG_002B,'en','Energy Optimisation','Energy optimisation','Fan-motor upgrade and VFD integration to reduce consumption.',NOW(3),NOW(3)),
+('94010002-1111-4111-8111-940100000003',@IMG_002C,'en','Field Implementation','Modernization on site','Testing and verification for a working delivery.',NOW(3),NOW(3)),
 
--- ---------------------------------------------------------
--- 3) Spare Parts & Components
--- ---------------------------------------------------------
+('94010003-1111-4111-8111-940100000001',@IMG_003A,'en','Parts Selection','Spare parts selection','Selecting the right parts for tower type and capacity.',NOW(3),NOW(3)),
+('94010003-1111-4111-8111-940100000002',@IMG_003B,'en','Supply & Logistics','Spare parts supply','Managing stock and lead times effectively.',NOW(3),NOW(3)),
+('94010003-1111-4111-8111-940100000003',@IMG_003C,'en','Installation Support','Installation and commissioning support','Optional field support for smooth operation.',NOW(3),NOW(3)),
 
-SET @SRV_SPARE_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'yedek-parcalar-ve-bilesenler'
-  LIMIT 1
-);
+('94010004-1111-4111-8111-940100000001',@IMG_004A,'en','Sector Solutions','Sector applications','Configurations adapted to different industries.',NOW(3),NOW(3)),
+('94010004-1111-4111-8111-940100000002',@IMG_004B,'en','Reference Projects','Reference projects','Experience and outcomes from real sites.',NOW(3),NOW(3)),
+('94010004-1111-4111-8111-940100000003',@IMG_004C,'en','Application Planning','Application planning','Site survey and planning for proper project delivery.',NOW(3),NOW(3)),
 
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-VALUES
-(
-  UUID(),
-  @SRV_SPARE_ID,
-  'en',
-  'spare-parts-and-components',
-  'Spare Parts & Components',
-  'We supply a wide range of high–quality spare parts and components to keep your cooling towers operating with minimum downtime. Ensotek provides fans, gearboxes, motors, fill packs, drift eliminators, nozzles, structural FRP and steel parts, as well as many other accessories. Our technical team supports you in selecting the right part based on tower type, operating conditions and process requirements, helping you avoid mismatches and unplanned failures.',
-  'FRP and galvanized structural components, PVC/PVDF fills, drift eliminators, nozzles, fan–motor–gearbox assemblies',
-  'Quoted based on part type, quantity and delivery conditions',
-  'Technical selection support, equivalent product alternatives, fast delivery and, upon request, on-site replacement',
-  'Manufacturer warranty applies for all supplied parts; optional installation warranty on request',
-  'Cooling tower spare parts and components',
-  'spare parts, tower components, fan, fill, drift eliminator, nozzles',
-  'Spare Parts & Components | Ensotek',
-  'Ensotek supplies a comprehensive portfolio of cooling tower spare parts such as fans, motors, gearboxes, fill packs, drift eliminators and nozzles. Proper part selection and fast delivery help reduce downtime and operating risks.',
-  'cooling tower spare parts, tower components, industrial spare part supply',
-  '2024-01-01 00:00:00.000',
-  '2024-01-01 00:00:00.000'
-)
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
-
-
--- ---------------------------------------------------------
--- 4) Applications & References
--- ---------------------------------------------------------
-
-SET @SRV_APPREF_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'uygulamalar-ve-referanslar'
-  LIMIT 1
-);
-
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-VALUES
-(
-  UUID(),
-  @SRV_APPREF_ID,
-  'en',
-  'applications-and-references',
-  'Applications & References',
-  'Ensotek has extensive reference projects and real–world applications in many industries including energy, chemicals, food & beverage, pharmaceuticals, automotive, steel and general process industries. We design and supply open– and closed–circuit FRP cooling towers for different capacities, environments with high corrosion risk and projects with limited installation space. Our reference plants demonstrate long–term stable operation, low operating costs and proven field performance. Upon request, we can share sector–specific reference lists and sample project summaries.',
-  NULL,
-  'Depends on project scope and application',
-  'Sector–specific reference lists, sample project documentation, technical solution proposals, on–site assessment and consulting',
-  NULL,
-  'Applications and reference projects of Ensotek',
-  'references, applications, projects, energy sector, process water, industrial cooling',
-  'Applications & References | Ensotek',
-  'Ensotek has a broad portfolio of reference projects with FRP cooling towers in many industries such as energy, chemicals, food, pharmaceuticals and automotive. We deliver sector–specific cooling solutions with proven performance and long service life.',
-  'cooling tower references, industrial applications, sector specific projects',
-  '2024-01-01 00:00:00.000',
-  '2024-01-01 00:00:00.000'
-)
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
-
-
--- ---------------------------------------------------------
--- 5) Engineering Support
--- ---------------------------------------------------------
-
-SET @SRV_ENGSUP_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'muhendislik-destegi'
-  LIMIT 1
-);
-
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-VALUES
-(
-  UUID(),
-  @SRV_ENGSUP_ID,
-  'en',
-  'engineering-support',
-  'Engineering Support',
-  'Ensotek provides comprehensive engineering support for cooling tower projects from pre–study to commissioning and beyond. Our engineering services include thermal and hydraulic calculations, tower sizing, material and configuration selection, layout and installation planning. We also perform on–site performance measurements, troubleshoot existing installations, propose optimization measures and deliver technical training to your operation team so that they can run the system more safely and efficiently.',
-  NULL,
-  'Priced based on scope of engineering work',
-  'Pre–study and feasibility, hydraulic/thermal calculations, on–site surveys, reporting, project meetings and technical trainings',
-  NULL,
-  'Engineering support service image description',
-  'engineering support, project consulting, tower selection, performance analysis',
-  'Engineering Support | Ensotek',
-  'Ensotek delivers comprehensive engineering support for cooling towers, including hydraulic and thermal calculations, tower selection, project consulting, performance analysis and technical trainings.',
-  'cooling tower engineering support, project consulting, performance analysis',
-  '2024-01-01 00:00:00.000',
-  '2024-01-01 00:00:00.000'
-)
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
-
-
--- ---------------------------------------------------------
--- 6) Production
--- ---------------------------------------------------------
-
-SET @SRV_PROD_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'uretim'
-  LIMIT 1
-);
-
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-VALUES
-(
-  UUID(),
-  @SRV_PROD_ID,
-  'en',
-  'production',
-  'Production',
-  'Ensotek is specialized in the design and manufacturing of open– and closed–circuit FRP cooling towers. We use corrosion–resistant materials, high–quality resins and durable metal components to ensure long service life and reliable operation. In addition to standard tower types, we design tailor–made solutions according to process requirements and site constraints such as limited footprint, special water quality or extreme ambient conditions. All manufacturing stages from design and mould production to mechanical assembly and quality control are documented and carried out in accordance with international standards.',
-  'FRP panels, galvanized steel structures, stainless fasteners, PVC/PVDF fills and drift eliminators',
-  'Project–based pricing depending on tower type, capacity and options',
-  'Standard or custom tower design, factory assembly, pre–shipment tests, on–site erection and commissioning',
-  'Extended material warranty for tower body and manufacturer warranty for all supplied equipment',
-  'Industrial FRP cooling tower production',
-  'production, FRP cooling tower, industrial tower manufacturing, open circuit, closed circuit',
-  'Production | Ensotek',
-  'Ensotek specializes in the design and manufacturing of industrial FRP cooling towers for open and closed circuit systems, offering corrosion–resistant structures, high quality components and long–term reliable operation.',
-  'FRP cooling tower production, industrial manufacturing, custom cooling tower design',
-  '2024-01-01 00:00:00.000',
-  '2024-01-01 00:00:00.000'
-)
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
+('94010005-1111-4111-8111-940100000001',@IMG_005A,'en','Heat Load Analysis','Heat load analysis','Analysis for correct capacity and tower selection.',NOW(3),NOW(3)),
+('94010005-1111-4111-8111-940100000002',@IMG_005B,'en','Performance Analysis','Performance analysis','Trends and measurements to identify optimisation opportunities.',NOW(3),NOW(3)),
+('94010005-1111-4111-8111-940100000003',@IMG_005C,'en','Commissioning & Training','Commissioning and training','On-site verification and operator training.',NOW(3),NOW(3));
 
 COMMIT;
+SET FOREIGN_KEY_CHECKS = 1;

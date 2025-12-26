@@ -18,8 +18,6 @@ const Banner: React.FC<Props> = ({ title }) => {
   // ✅ Ortak locale hook’u (router + app_locales logic içinde)
   const locale = useResolvedLocale();
 
-  // ✅ UI yazıları: DB (ui_banner JSON) + eski i18n + hard fallback
-  //   ui_banner site_setting değerinde "ui_breadcrumb_home" key'ini bekliyoruz.
   const { ui } = useUiSection("ui_banner", locale);
 
   // Ana sayfa linki – locale-aware
@@ -27,7 +25,6 @@ const Banner: React.FC<Props> = ({ title }) => {
 
   return (
     <div className="breadcrumb__area">
-      {/* Dekoratif, stil aynı; erişilebilirlik için boş alt */}
       <Image className="breadcrumb__shape-2" src={One} alt="" priority />
       <Image className="breadcrumb__shape-1" src={One} alt="" priority />
 

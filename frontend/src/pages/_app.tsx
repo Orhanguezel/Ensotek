@@ -4,7 +4,9 @@ import type { AppContext, AppProps } from 'next/app';
 import NextApp from 'next/app';
 import { useRouter } from 'next/router';
 import { Toaster } from 'sonner';
+
 import GAScripts from '@/features/analytics/GAScripts';
+import CookieConsentBanner from '@/components/layout/banner/CookieConsentBanner';
 
 // Global CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -108,8 +110,12 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <StoreProvider>
+      {/* locale + ui boot */}
       <LangBoot />
+
+      {/* GA scripts (consent default denied) */}
       <GAScripts />
+
       <Toaster position="top-right" richColors closeButton duration={4000} />
 
       {isAdminRoute ? (
@@ -121,6 +127,9 @@ function App({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </Layout>
       )}
+
+      {/* ✅ Cookie banner: admin’da göstermiyoruz */}
+      {!isAdminRoute && <CookieConsentBanner />}
     </StoreProvider>
   );
 }

@@ -1,33 +1,36 @@
 -- =============================================================
--- 020_references.schema.sql  (schema)
+-- 020_references.schema.sql  (schema)  [FIXED / IDEMPOTENT]
 -- =============================================================
 
+SET NAMES utf8mb4;
+SET time_zone = '+00:00';
+
+START TRANSACTION;
+
 -- ================= CLEANUP =================
+DROP TABLE IF EXISTS `reference_images_i18n`;
+DROP TABLE IF EXISTS `reference_images`;
 DROP TABLE IF EXISTS `references_i18n`;
 DROP TABLE IF EXISTS `references`;
 
 -- ================= TABLE: references =================
--- Drizzle şeması ile bire bir:
---  - featured_image_asset_id: CHAR(36), FK YOK, sadece INDEX
---  - category_id, sub_category_id: CHAR(36), NULL + FK -> categories / sub_categories
-
 CREATE TABLE `references` (
   id                      CHAR(36)     NOT NULL,
-  is_published            TINYINT(1)   NOT NULL DEFAULT 0,
-  is_featured             TINYINT(1)   NOT NULL DEFAULT 0,
-  display_order           INT          NOT NULL DEFAULT 0,
+  is_published            TINYINT(1)    NOT NULL DEFAULT 0,
+  is_featured             TINYINT(1)    NOT NULL DEFAULT 0,
+  display_order           INT           NOT NULL DEFAULT 0,
 
-  featured_image          VARCHAR(500) DEFAULT NULL,
-  featured_image_asset_id CHAR(36)     DEFAULT NULL,
+  featured_image          VARCHAR(500)  DEFAULT NULL,
+  featured_image_asset_id CHAR(36)      DEFAULT NULL,
 
-  website_url             VARCHAR(500) DEFAULT NULL,
+  website_url             VARCHAR(500)  DEFAULT NULL,
 
-  -- Kategori bağları (opsiyonel)
-  category_id             CHAR(36)     DEFAULT NULL,
-  sub_category_id         CHAR(36)     DEFAULT NULL,
+  -- Category ties (optional)
+  category_id             CHAR(36)      DEFAULT NULL,
+  sub_category_id         CHAR(36)      DEFAULT NULL,
 
-  created_at              DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  updated_at              DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  created_at              DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at              DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
 
@@ -51,27 +54,23 @@ CREATE TABLE `references` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ================= TABLE: references_i18n =================
--- Drizzle longtext customType ile uyumlu:
---  - summary: LONGTEXT NULL
---  - content: LONGTEXT NOT NULL
-
 CREATE TABLE `references_i18n` (
-  id                 CHAR(36)     NOT NULL,
-  reference_id       CHAR(36)     NOT NULL,
-  locale             VARCHAR(10)  NOT NULL,
+  id                 CHAR(36)      NOT NULL,
+  reference_id       CHAR(36)      NOT NULL,
+  locale             VARCHAR(10)   NOT NULL,
 
-  title              VARCHAR(255) NOT NULL,
-  slug               VARCHAR(255) NOT NULL,
+  title              VARCHAR(255)  NOT NULL,
+  slug               VARCHAR(255)  NOT NULL,
 
-  summary            LONGTEXT     DEFAULT NULL,
-  content            LONGTEXT     NOT NULL,
+  summary            LONGTEXT      DEFAULT NULL,
+  content            LONGTEXT      NOT NULL,
 
-  featured_image_alt VARCHAR(255) DEFAULT NULL,
-  meta_title         VARCHAR(255) DEFAULT NULL,
-  meta_description   VARCHAR(500) DEFAULT NULL,
+  featured_image_alt VARCHAR(255)  DEFAULT NULL,
+  meta_title         VARCHAR(255)  DEFAULT NULL,
+  meta_description   VARCHAR(500)  DEFAULT NULL,
 
-  created_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-  updated_at         DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
+  created_at         DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at         DATETIME(3)   NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
 
@@ -84,3 +83,5 @@ CREATE TABLE `references_i18n` (
     FOREIGN KEY (reference_id) REFERENCES `references`(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+COMMIT;

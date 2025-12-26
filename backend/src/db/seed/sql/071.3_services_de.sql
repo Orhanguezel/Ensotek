@@ -1,322 +1,152 @@
 -- =============================================================
--- 071.3_services_de.sql  (Ensotek services – DE i18n)
---  - Parent zaten 071 ile insert edildi (TR üzerinden service_id bulunur)
+-- FILE: 071.3_services_de.sql
+-- Ensotek services – DE i18n + DE image i18n
+-- (Parent tables are inserted in 071.1 TR file)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
+SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
--- 1) Bakım ve Onarım → DE
-SET @SRV_MAINT_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'bakim-ve-onarim'
-  LIMIT 1
-);
+SET @SRV_001 := '90000001-1111-4111-8111-900000000001';
+SET @SRV_002 := '90000002-1111-4111-8111-900000000002';
+SET @SRV_003 := '90000003-1111-4111-8111-900000000003';
+SET @SRV_004 := '90000004-1111-4111-8111-900000000004';
+SET @SRV_005 := '90000005-1111-4111-8111-900000000005';
 
+SET @IMG_001A := '92000001-1111-4111-8111-920000000001';
+SET @IMG_001B := '92000001-1111-4111-8111-920000000002';
+SET @IMG_001C := '92000001-1111-4111-8111-920000000003';
+
+SET @IMG_002A := '92000002-1111-4111-8111-920000000001';
+SET @IMG_002B := '92000002-1111-4111-8111-920000000002';
+SET @IMG_002C := '92000002-1111-4111-8111-920000000003';
+
+SET @IMG_003A := '92000003-1111-4111-8111-920000000001';
+SET @IMG_003B := '92000003-1111-4111-8111-920000000002';
+SET @IMG_003C := '92000003-1111-4111-8111-920000000003';
+
+SET @IMG_004A := '92000004-1111-4111-8111-920000000001';
+SET @IMG_004B := '92000004-1111-4111-8111-920000000002';
+SET @IMG_004C := '92000004-1111-4111-8111-920000000003';
+
+SET @IMG_005A := '92000005-1111-4111-8111-920000000001';
+SET @IMG_005B := '92000005-1111-4111-8111-920000000002';
+SET @IMG_005C := '92000005-1111-4111-8111-920000000003';
+
+-- -------------------------------------------------------------------
+-- DE i18n: services_i18n
+-- Slugs aligned with 012 sub_category_i18n DE slugs
+-- -------------------------------------------------------------------
 INSERT INTO `services_i18n`
 (`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
+ `slug`,`name`,`description`,
+ `material`,`price`,`includes`,`warranty`,`image_alt`,
  `tags`,`meta_title`,`meta_description`,`meta_keywords`,
  `created_at`,`updated_at`)
-SELECT
-  UUID(),
-  @SRV_MAINT_ID,
-  'de',
-  'wartung-und-reparatur',
-  'Wartung und Reparatur',
-  'Wir bieten umfassende Wartungs- und Reparaturleistungen, um einen effizienten und zuverlässigen Betrieb Ihrer Kühltürme sicherzustellen. Ensotek erstellt vorbeugende Wartungspläne, führt Fehlerdiagnosen durch und leistet Vor-Ort-Einsätze. Mechanik-Checks, Reinigung von Füllkörpern und Verteilern, Wartung von Ventilator–Motor–Getriebe, Korrosionskontrollen sowie Leistungsprüfungen werden nach standardisierten Prozessen dokumentiert. So werden ungeplante Ausfälle reduziert und die Kühlleistung stabil gehalten.',
-  'FRP-Gehäuse, verzinkter Stahlrahmen, PVC/PVDF-Füllkörper, Edelstahlbefestigungen',
-  'Preis nach Projektumfang und Turmkapazität',
-  'Periodische Inspektion und Reporting, mechanische Wartung, Reinigung, Prüfung der Wasser-/Chemiebedingungen, Austausch kritischer Ersatzteile',
-  'Bis zu 12 Monate auf Arbeitsleistung; Ersatzteile gemäß Herstellergarantie',
-  'Wartungs- und Reparaturservice für Industriekühltürme',
-  'wartung,reparatur,periodische wartung,service,industriekühlturm',
-  'Wartung und Reparatur | Ensotek',
-  'Ensotek bietet geplante Wartung, Fehlerdiagnose und professionelle Reparaturen für industrielle Wasserkühltürme. Periodische Wartungsprogramme minimieren Leistungsabfälle und ungeplante Stillstände.',
-  'kühlturm wartung,kühlturm reparatur,industrielle wartung,wartungsprogramm',
-  NOW(3),
-  NOW(3)
-FROM DUAL
-WHERE @SRV_MAINT_ID IS NOT NULL
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
+VALUES
+('95000001-1111-4111-8111-950000000001', @SRV_001,'de',
+ 'wartung-reparatur',
+ 'Wartung & Reparatur',
+ 'Ensotek bietet regelmäßige Wartung und professionelle Reparatur für industrielle Wasserkühltürme. Geplante Kontrollen umfassen Füllkörper-/Düsenverteilung, Ventilator-Motor-Effizienz, Schwingungs-/Geräuschanalyse, mechanische Ausrichtung, Dichtstellen sowie Wasseraufbereitungskontrollen. Ein präventiver Ansatz reduziert Stillstände, erhält die Leistung und verlängert die Lebensdauer der Anlagen.',
+ 'Düsen, Füllkörper, Tropfenabscheider, Ventilator/Motor/Getriebe, mechanische Teile (je nach Umfang)',
+ 'Angebot je nach Leistungsumfang',
+ 'Inspektion & Reporting, Reinigung, mechanische Wartung, Austausch kritischer Teile, Vor-Ort-Tests',
+ 'Gewährleistung je nach Arbeit und Komponenten',
+ 'Wartung und Reparatur von Kühltürmen',
+ 'wartung, reparatur, regelmäßige kontrolle, effizienz, schwingungsanalyse',
+ 'Wartung & Reparatur | Ensotek',
+ 'Ensotek reduziert Stillstände und steigert die Effizienz mit Wartungs- und Reparaturleistungen für Kühltürme.',
+ 'kühlturm wartung, kühlturm reparatur, regelmäßige wartung, ventilator motor service',
+ NOW(3), NOW(3)),
 
+('95000002-1111-4111-8111-950000000002', @SRV_002,'de',
+ 'modernisierung',
+ 'Modernisierung',
+ 'Ensotek bietet Modernisierungslösungen (Retrofit), um bestehende Kühltürme effizient und auf aktuelle Anforderungen abgestimmt zu betreiben. Typische Maßnahmen sind Füllkörper-/Düsen-Upgrades, Ventilator-Motor-Optimierung, VFD-Integration, Reduzierung von Drift-Verlusten und Anpassungen der Wasserverteilung. Ziel sind geringerer Energieverbrauch, stabile Prozessbedingungen und höhere Kapazität.',
+ 'Retrofit-Komponenten (Füllkörper/Düsen/Ventilator-Motor/VFD usw.) je nach Projekt',
+ 'Angebot je nach Modernisierungsumfang',
+ 'Analyse, Engineering, Umsetzung, Tests und Performance-Verifizierung',
+ 'Gewährleistung je nach Arbeit und Komponenten',
+ 'Modernisierung und Retrofit für Kühltürme',
+ 'modernisierung, retrofit, vfd, ventilator upgrade, fuellkoerper wechsel',
+ 'Modernisierung | Ensotek',
+ 'Ensotek steigert Kapazität und senkt Energieverbrauch durch Modernisierung (Retrofit) von Kühltürmen.',
+ 'kühlturm modernisierung, retrofit, vfd, fuellkoerper, ventilator upgrade',
+ NOW(3), NOW(3)),
 
--- 2) Modernizasyon → DE
-SET @SRV_MOD_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'modernizasyon'
-  LIMIT 1
-);
+('95000003-1111-4111-8111-950000000003', @SRV_003,'de',
+ 'ersatzteile-komponenten',
+ 'Ersatzteile & Komponenten',
+ 'Ensotek liefert ein breites Portfolio an Ersatzteilen und Komponenten für Kühltürme. Kritische Bauteile wie Füllkörper, Düsen, Tropfenabscheider, Ventilatorflügel, Motoren/Getriebe und mechanische Verbindungselemente werden qualitätsorientiert ausgewählt, um einen zuverlässigen Betrieb und lange Standzeiten sicherzustellen.',
+ 'Füllkörper, Düsen, Tropfenabscheider, Ventilatoren, Motoren, Getriebe, mechanische Teile',
+ 'Angebot je nach Teilen und Lieferzeit',
+ 'Unterstützung bei der Teileauswahl, Lieferung, optionale Montage- und Inbetriebnahmeunterstützung',
+ 'Produktspezifische Garantiebedingungen',
+ 'Ersatzteile und Komponenten für Kühltürme',
+ 'ersatzteile, fuellkoerper, duesen, ventilator, motor, getriebe, tropfenabscheider',
+ 'Ersatzteile | Ensotek',
+ 'Ensotek stellt Ersatzteile und Komponenten für Kühltürme bereit, um Ausfallrisiken zu senken und Effizienz zu sichern.',
+ 'kühlturm ersatzteile, fuellkoerper, duesen, ventilator motor, getriebe',
+ NOW(3), NOW(3)),
 
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-SELECT
-  UUID(),
-  @SRV_MOD_ID,
-  'de',
-  'modernisierung',
-  'Modernisierung',
-  'Wir modernisieren bestehende Kühltürme, um die Energieeffizienz zu erhöhen, Betriebskosten zu senken und aktuelle Standards zu erfüllen. Durch neue Ventilator–Motor-Kombinationen, effiziente Füllkörper, optimierte Wasserverteilung und Automatisierung kann bei geringerem Energieverbrauch die gleiche oder eine höhere Kühlleistung erreicht werden. So lassen sich Leistungs- und Sicherheitsverbesserungen häufig ohne Neubau realisieren.',
-  'Energieeffiziente Ventilatoren und Motoren, moderne PVC/PVDF-Füllkörper, korrosionsbeständige Komponenten',
-  'Preis nach Vor-Ort-Analyse und Leistungsbewertung',
-  'Leistungsanalyse, Modernisierungskonzept, Lieferung von Komponenten, Montage und Inbetriebnahme, Vor-Ort-Tests',
-  'Je nach Komponenten 12–24 Monate (Arbeitsleistung/Equipment)',
-  'Modernisierte Industriekühltürme',
-  'modernisierung,energieeffizienz,retrofit,performance,upgrade',
-  'Modernisierung | Ensotek',
-  'Ensotek bietet energieeffizienzorientierte Modernisierungen für Wasserkühltürme. Upgrades von Ventilatoren, Füllkörpern, Verteilungssystemen und Automatisierung erhöhen die Performance bei niedrigerem Energieverbrauch.',
-  'kühlturm modernisierung,retrofit,energie sparen,performance upgrade',
-  NOW(3),
-  NOW(3)
-FROM DUAL
-WHERE @SRV_MOD_ID IS NOT NULL
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
+('95000004-1111-4111-8111-950000000004', @SRV_004,'de',
+ 'anwendungen-referenzen',
+ 'Anwendungen & Referenzen',
+ 'Ensotek verfügt über zahlreiche Anwendungen und Referenzprojekte in Industrie und Gewerbe. Lösungen decken Energie, Chemie, Lebensmittel, Pharma, Automotive und viele weitere Branchen ab und erfüllen unterschiedliche Prozessanforderungen durch passende Konfigurationen und Performance-Ziele.',
+ NULL,
+ 'Angebot je nach Projektumfang',
+ 'Anwendungsanalyse, Referenzdarstellung, Vor-Ort-Termin und Projektplanungsunterstützung',
+ 'Projektabhängig',
+ 'Anwendungen und Referenzprojekte',
+ 'anwendungen, referenzen, branchenloesungen, projekterfahrung',
+ 'Anwendungen & Referenzen | Ensotek',
+ 'Ensotek ist ein zuverlässiger Partner für Kühlturmlösungen mit nachweisbaren Referenzen und Branchenerfahrung.',
+ 'kühlturm referenzen, anwendungen, industrielle kuehlprojekte',
+ NOW(3), NOW(3)),
 
+('95000005-1111-4111-8111-950000000005', @SRV_005,'de',
+ 'engineering-support',
+ 'Engineering-Support',
+ 'Ensotek bietet umfassenden Engineering-Support inklusive Auslegung, Beratung, Systemoptimierung, Performance-Analyse und technischer Schulung. Wärmelastanalyse, hydraulischer Abgleich, Komponentenauswahl und Inbetriebnahmeunterstützung werden mit strukturierter Dokumentation und messbaren Ergebnissen umgesetzt.',
+ 'Engineering-Berechnungen und Vor-Ort-Komponenten je nach Projektbedarf',
+ 'Angebot je nach Umfang',
+ 'Vor-Ort-Termin, Berechnungen, Design, Inbetriebnahmeunterstützung, Performance-Verifizierung, Schulung',
+ 'Umfangsabhängig',
+ 'Engineering-Support für Kühltürme',
+ 'engineering, optimierung, performance analyse, inbetriebnahme, schulung',
+ 'Engineering-Support | Ensotek',
+ 'Ensotek liefert Engineering-Support für Kühltürme – von Analyse und Optimierung bis Inbetriebnahme und Schulung.',
+ 'kühlturm engineering, performance analyse, optimierung, inbetriebnahme',
+ NOW(3), NOW(3));
 
--- 3) Yedek Parçalar ve Bileşenler → DE
-SET @SRV_SPARE_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'yedek-parcalar-ve-bilesenler'
-  LIMIT 1
-);
+-- -------------------------------------------------------------------
+-- DE image i18n: service_images_i18n
+-- -------------------------------------------------------------------
+INSERT INTO `service_images_i18n`
+(`id`,`image_id`,`locale`,`title`,`alt`,`caption`,`created_at`,`updated_at`)
+VALUES
+('95010001-1111-4111-8111-950100000001',@IMG_001A,'de','Regelmäßige Kontrollen','Regelmäßige Wartungskontrollen','Geplante Kontrollen und Reporting zur Reduktion von Stillständen.',NOW(3),NOW(3)),
+('95010001-1111-4111-8111-950100000002',@IMG_001B,'de','Mechanischer Service','Mechanische Servicearbeiten','Ventilator-Motor-Checks, Ausrichtung und Kontrollen kritischer Komponenten.',NOW(3),NOW(3)),
+('95010001-1111-4111-8111-950100000003',@IMG_001C,'de','Vor-Ort-Reparatur','Vor-Ort-Reparatur und Verifizierung','Messungen, Tests und Performance-Verifizierung.',NOW(3),NOW(3)),
 
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-SELECT
-  UUID(),
-  @SRV_SPARE_ID,
-  'de',
-  'ersatzteile-und-komponenten',
-  'Ersatzteile und Komponenten',
-  'Wir bieten ein breites Ersatzteilportfolio – von kritischen Antriebskomponenten bis zu strukturellen Teilen – um Stillstandszeiten zu minimieren. Ensotek liefert Ventilatoren, Motoren, Getriebe, Füllkörper, Düsen, Tropfenabscheider, Beckenkomponenten und Befestigungsteile aus Lager oder mit kurzen Lieferzeiten. Unser Team unterstützt bei der Auswahl geeigneter Teile anhand von Marke/Modell, Betriebsbedingungen und Prozessanforderungen.',
-  'FRP- und verzinkte Stahlteile, PVC/PVDF-Füllkörper, Tropfenabscheider, Düsen, Ventilator–Motor–Getriebe',
-  'Preis nach Teiletyp und Menge',
-  'Technische Auswahlunterstützung, Alternativen (kompatible Lösungen), schnelle Beschaffung, optional Vor-Ort-Montage',
-  'Herstellergarantie je Produkt; optionale Zusatzgarantie für Montage möglich',
-  'Ersatzteile und Komponenten für Kühltürme',
-  'ersatzteile,komponenten,ventilator,füllkörper,tropfenabscheider,düsen',
-  'Ersatzteile und Komponenten | Ensotek',
-  'Ensotek liefert Ersatzteile für Kühltürme – z. B. Ventilatoren, Motoren, Füllkörper, Tropfenabscheider und Düsen. Durch passende Auswahl und schnelle Beschaffung werden Stillstandszeiten reduziert.',
-  'kühlturm ersatzteile,kühlturm komponenten,industrielle ersatzteilversorgung',
-  NOW(3),
-  NOW(3)
-FROM DUAL
-WHERE @SRV_SPARE_ID IS NOT NULL
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
+('95010002-1111-4111-8111-950100000001',@IMG_002A,'de','Kapazitätssteigerung','Kapazitätssteigerung durch Modernisierung','Optimierung von Füllkörpern/Düsen und Verteilungsverbesserungen.',NOW(3),NOW(3)),
+('95010002-1111-4111-8111-950100000002',@IMG_002B,'de','Energieoptimierung','Energieoptimierung','Ventilator-Motor-Upgrade und VFD-Integration zur Verbrauchsreduktion.',NOW(3),NOW(3)),
+('95010002-1111-4111-8111-950100000003',@IMG_002C,'de','Umsetzung vor Ort','Modernisierung vor Ort','Tests und Verifizierung für eine funktionierende Übergabe.',NOW(3),NOW(3)),
 
+('95010003-1111-4111-8111-950100000001',@IMG_003A,'de','Teileauswahl','Auswahl von Ersatzteilen','Passende Teile je nach Turmtyp und Kapazität auswählen.',NOW(3),NOW(3)),
+('95010003-1111-4111-8111-950100000002',@IMG_003B,'de','Lieferung & Logistik','Ersatzteilversorgung','Bestände und Lieferzeiten effizient steuern.',NOW(3),NOW(3)),
+('95010003-1111-4111-8111-950100000003',@IMG_003C,'de','Montageunterstützung','Montage- und Inbetriebnahmeunterstützung','Optionale Unterstützung vor Ort für einen reibungslosen Betrieb.',NOW(3),NOW(3)),
 
--- 4) Uygulamalar ve Referanslar → DE
-SET @SRV_APPREF_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'uygulamalar-ve-referanslar'
-  LIMIT 1
-);
+('95010004-1111-4111-8111-950100000001',@IMG_004A,'de','Branchenspezifische Lösungen','Branchenspezifische Anwendungen','Konfigurationen für unterschiedliche Branchen.',NOW(3),NOW(3)),
+('95010004-1111-4111-8111-950100000002',@IMG_004B,'de','Referenzprojekte','Referenzprojekte','Erfahrung und Ergebnisse aus realen Standorten.',NOW(3),NOW(3)),
+('95010004-1111-4111-8111-950100000003',@IMG_004C,'de','Anwendungsplanung','Anwendungsplanung','Vor-Ort-Termin und Planung für saubere Projektabwicklung.',NOW(3),NOW(3)),
 
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-SELECT
-  UUID(),
-  @SRV_APPREF_ID,
-  'de',
-  'anwendungen-und-referenzen',
-  'Anwendungen und Referenzen',
-  'Ensotek hat in vielen Branchen – Energie, Chemie, Lebensmittel, Pharma, Automotive, Stahl, HVAC und Prozesswasser – erfolgreiche Kühlturmprojekte umgesetzt. Wir entwickeln Lösungen für offene/geschlossene FRP-Kühltürme, Meerwasseranwendungen, korrosive Umgebungen sowie Projekte mit begrenztem Platz. Unsere Referenzen stehen für langlebigen Betrieb, niedrige Betriebskosten und nachweisbare Leistungswerte. Auf Anfrage stellen wir branchenbezogene Referenzlisten und Projektbeispiele bereit.',
-  NULL,
-  'Abhängig von Projekt und Anwendung',
-  'Branchenbezogene Referenzlisten, Projektbeispiele, technische Lösungsvorschläge, Vor-Ort-Besichtigung und Beratung',
-  NULL,
-  'Anwendungs- und Referenzprojekte von Ensotek',
-  'referenzen,anwendungen,projekte,prozesswasser,industrie,kühlturm',
-  'Anwendungen und Referenzen | Ensotek',
-  'Ensotek verfügt über Referenzprojekte mit FRP-Wasserkühltürmen in zahlreichen Industrien. Wir liefern branchenspezifische Lösungen mit hoher Performance und langer Lebensdauer.',
-  'kühlturm referenzen,industrielle anwendungen,branchenprojekte',
-  NOW(3),
-  NOW(3)
-FROM DUAL
-WHERE @SRV_APPREF_ID IS NOT NULL
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
-
-
--- 5) Mühendislik Desteği → DE
-SET @SRV_ENGSUP_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'muhendislik-destegi'
-  LIMIT 1
-);
-
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-SELECT
-  UUID(),
-  @SRV_ENGSUP_ID,
-  'de',
-  'engineering-support',
-  'Engineering-Support',
-  'Ensotek bietet Engineering-Support von der Vorplanung bis zur Inbetriebnahme und in der Betriebsphase. Wir unterstützen bei hydraulischen/thermischen Berechnungen, Kapazitäts- und Typauswahl, Materialauslegung sowie Layout- und Montageplanung. Zusätzlich liefern wir Vor-Ort-Performance-Messungen, Bestandsanalysen, Optimierungsvorschläge und technische Schulungen, damit Ihr Betriebsteam das System sicher und effizient betreibt.',
-  NULL,
-  'Preis nach Umfang der Engineering-Leistungen',
-  'Vorprojekt, hydraulische/thermische Berechnungen, Vor-Ort-Aufnahme, Reporting, technische Abstimmungen und Schulungen',
-  NULL,
-  'Engineering-Support für Kühltürme',
-  'engineering,beratung,bemessung,auslegung,performance analyse',
-  'Engineering-Support | Ensotek',
-  'Ensotek bietet umfassenden Engineering-Support für Kühltürme: Berechnungen, Auslegung, Projektberatung, Performance-Analysen und technische Schulungen.',
-  'kühlturm engineering,projektberatung,performance analyse',
-  NOW(3),
-  NOW(3)
-FROM DUAL
-WHERE @SRV_ENGSUP_ID IS NOT NULL
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
-
-
--- 6) Üretim → DE
-SET @SRV_PROD_ID := (
-  SELECT s.id
-  FROM services s
-  JOIN services_i18n i ON i.service_id = s.id AND i.locale = 'tr'
-  WHERE i.slug = 'uretim'
-  LIMIT 1
-);
-
-INSERT INTO `services_i18n`
-(`id`,`service_id`,`locale`,
- `slug`,`name`,
- `description`,`material`,`price`,
- `includes`,`warranty`,`image_alt`,
- `tags`,`meta_title`,`meta_description`,`meta_keywords`,
- `created_at`,`updated_at`)
-SELECT
-  UUID(),
-  @SRV_PROD_ID,
-  'de',
-  'produktion',
-  'Produktion',
-  'Ensotek ist auf die Konstruktion und Produktion von offenen und geschlossenen FRP-Wasserkühltürmen spezialisiert. Wir verwenden korrosionsbeständige Materialien, hochwertige Harze und langlebige Metallkomponenten. Neben Standardtypen entwickeln wir auch kundenspezifische Designs gemäß Prozessanforderungen und Standortbedingungen. Alle Schritte – vom Design über Fertigung und mechanische Montage bis zu Qualitätskontrollen – werden nach internationalen Standards dokumentiert.',
-  'FRP-Paneele, verzinkte Stahlkonstruktion, Edelstahlbefestigungen, PVC/PVDF-Füllkörper und Tropfenabscheider',
-  'Projektbasierte Preisgestaltung nach Typ, Kapazität und Optionen',
-  'Standard- oder Sonderproduktion, Werksmontage, Vorabtests, Montage und Inbetriebnahme vor Ort',
-  'Material-/Gehäusegarantie je Ausführung; Komponenten gemäß Herstellergarantie',
-  'Produktion von industriellen FRP-Wasserkühltürmen',
-  'produktion,frp,kühlturm,industrie,offener kreislauf,geschlossener kreislauf',
-  'Produktion | Ensotek',
-  'Ensotek produziert offene und geschlossene FRP-Wasserkühltürme nach hohen Qualitätsstandards. Korrosionsbeständige Materialien und effiziente Konstruktionen sorgen für langlebigen und wirtschaftlichen Betrieb.',
-  'frp kühlturm produktion,industrielle produktion,sonderkonstruktion',
-  NOW(3),
-  NOW(3)
-FROM DUAL
-WHERE @SRV_PROD_ID IS NOT NULL
-ON DUPLICATE KEY UPDATE
- `slug`             = VALUES(`slug`),
- `name`             = VALUES(`name`),
- `description`      = VALUES(`description`),
- `material`         = VALUES(`material`),
- `price`            = VALUES(`price`),
- `includes`         = VALUES(`includes`),
- `warranty`         = VALUES(`warranty`),
- `image_alt`        = VALUES(`image_alt`),
- `tags`             = VALUES(`tags`),
- `meta_title`       = VALUES(`meta_title`),
- `meta_description` = VALUES(`meta_description`),
- `meta_keywords`    = VALUES(`meta_keywords`),
- `updated_at`       = VALUES(`updated_at`);
+('95010005-1111-4111-8111-950100000001',@IMG_005A,'de','Wärmelastanalyse','Wärmelastanalyse','Analyse für richtige Kapazität und Turmauswahl.',NOW(3),NOW(3)),
+('95010005-1111-4111-8111-950100000002',@IMG_005B,'de','Performance-Analyse','Performance-Analyse','Trends und Messwerte zur Identifikation von Optimierungspotenzialen.',NOW(3),NOW(3)),
+('95010005-1111-4111-8111-950100000003',@IMG_005C,'de','Inbetriebnahme & Schulung','Inbetriebnahme und Schulung','Vor-Ort-Verifizierung und Schulung der Bediener.',NOW(3),NOW(3));
 
 COMMIT;
+SET FOREIGN_KEY_CHECKS = 1;
