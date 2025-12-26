@@ -1,134 +1,121 @@
-// src/components/containers/footer/Footer.tsx
-"use client";
+// =============================================================
+// FILE: src/components/containers/footer/Footer.tsx
+// CHANGE: add socialsSetting + Social section icon-render
+// =============================================================
+'use client';
 
-import React, { useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import React, { useMemo } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 import {
   useGetSiteSettingByKeyQuery,
   useListFooterSectionsQuery,
-  useListMenuItemsQuery
-} from "@/integrations/rtk/hooks";
+  useListMenuItemsQuery,
+} from '@/integrations/rtk/hooks';
 
-import type { FooterSectionDto } from "@/integrations/types/footer_sections.types";
-import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";
-import { localizePath } from "@/i18n/url";
+import type { FooterSectionDto } from '@/integrations/types/footer_sections.types';
+import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
+import { localizePath } from '@/i18n/url';
 
-// Yeni i18n helper’lar
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
+
+import SocialLinks from '@/components/common/SocialLinks';
 
 const IMG_W = 160;
 const IMG_H = 60;
 
+const isExternalHref = (href: string) =>
+  /^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^tel:/i.test(href) || /^#/i.test(href);
+
 const Footer: React.FC = () => {
-  // ✅ Ortak locale hook’u (router + app_locales logic bunun içinde)
   const locale = useResolvedLocale();
+  const { ui } = useUiSection('ui_footer', locale);
 
-  // ✅ UI yazıları: DB (ui_footer JSON) + eski i18n + hard fallback
-  const { ui } = useUiSection("ui_footer", locale);
-
-  // 🔹 site_settings – contact_info + company_brand
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
-    key: "contact_info",
-    locale,
-  });
-
+  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({ key: 'contact_info', locale });
   const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
-    key: "company_brand",
+    key: 'company_brand',
     locale,
   });
 
-  // 🔹 site_settings → marka + logo + iletişim
-  const {
-    brandName,
-    phone,
-    email,
-    website,
-    logoUrl,
-    addrLines,
-  } = useMemo(() => {
+  // ✅ socials settings (locale-aware)
+  const { data: socialsSetting } = useGetSiteSettingByKeyQuery({ key: 'socials', locale });
+
+  const { brandName, phone, email, website, logoUrl, addrLines, socials } = useMemo(() => {
     const contact = (contactInfoSetting?.value ?? {}) as any;
     const brandVal = (companyBrandSetting?.value ?? {}) as any;
+    const socialsVal = (socialsSetting?.value ?? {}) as Record<string, string>;
 
-    const name =
-      (brandVal.name as string) ||
-      (contact.companyName as string) ||
-      "Ensotek";
-
+    const name = (brandVal.name as string) || (contact.companyName as string) || 'Ensotek';
     const site =
-      (brandVal.website as string) ||
-      (contact.website as string) ||
-      "https://ensotek.de";
+      (brandVal.website as string) || (contact.website as string) || 'https://ensotek.de';
 
     const phoneVal =
       (brandVal.phone as string | undefined) ||
-      (Array.isArray(contact.phones)
-        ? (contact.phones[0] as string | undefined)
-        : undefined) ||
+      (Array.isArray(contact.phones) ? (contact.phones[0] as string | undefined) : undefined) ||
       (contact.whatsappNumber as string | undefined) ||
-      "+90 212 000 00 00";
+      '+90 212 000 00 00';
 
     const emailVal =
       (brandVal.email as string | undefined) ||
       (contact.email as string | undefined) ||
-      "info@ensotek.com";
+      'info@ensotek.com';
 
-    const logoObj =
-      (brandVal.logo ||
-        (Array.isArray(brandVal.images) ? brandVal.images[0] : null) ||
-        {}) as { url?: string; width?: number; height?: number };
+    const mergedSocials: Record<string, string> = {
+      ...(brandVal.socials as Record<string, string> | undefined),
+      ...socialsVal,
+    };
+
+    const logoObj = (brandVal.logo ||
+      (Array.isArray(brandVal.images) ? brandVal.images[0] : null) ||
+      {}) as {
+      url?: string;
+      width?: number;
+      height?: number;
+    };
 
     const logo =
       (logoObj.url && String(logoObj.url).trim()) ||
-      // hard fallback – Cloudinary logo
-      "https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp";
+      'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 
     const addrLinesComputed: string[] = [];
     if (contact.address) addrLinesComputed.push(String(contact.address));
-    if (contact.addressSecondary)
-      addrLinesComputed.push(String(contact.addressSecondary));
+    if (contact.addressSecondary) addrLinesComputed.push(String(contact.addressSecondary));
 
     return {
       brandName: name,
-      phone: phoneVal?.trim() || "",
-      email: emailVal?.trim() || "",
-      website: site?.trim() || "",
+      phone: phoneVal?.trim() || '',
+      email: emailVal?.trim() || '',
+      website: site?.trim() || '',
       logoUrl: logo,
       addrLines: addrLinesComputed,
+      socials: mergedSocials,
     };
-  }, [contactInfoSetting, companyBrandSetting]);
+  }, [contactInfoSetting?.value, companyBrandSetting?.value, socialsSetting?.value]);
 
   const websiteHref = website
     ? /^https?:\/\//i.test(website)
       ? website
       : `https://${website}`
-    : "";
-  const telHref = phone ? `tel:${phone.replace(/\s+/g, "")}` : "";
-  const mailHref = email ? `mailto:${email}` : "";
+    : '';
+  const telHref = phone ? `tel:${phone.replace(/\s+/g, '')}` : '';
+  const mailHref = email ? `mailto:${email}` : '';
 
-  // 🔹 Footer sections (RTK – locale aware)
   const { data: footerSections } = useListFooterSectionsQuery({
     is_active: true,
-    order: "display_order.asc",
+    order: 'display_order.asc',
     locale,
   });
 
-  const sortedSections: FooterSectionDto[] = useMemo(
-    () =>
-      (footerSections ?? [])
-        .slice()
-        .sort((a, b) => a.display_order - b.display_order),
-    [footerSections],
-  );
+  const sections: FooterSectionDto[] = useMemo(() => {
+    return (footerSections ?? [])
+      .slice()
+      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
+  }, [footerSections]);
 
-  // Sıralamaya göre 2 ana kolon kullanıyoruz: 1: Company, 2: Services
-  const [companySection, servicesSection] = sortedSections;
-
-  // 🔹 Footer menu item'ları (RTK – menu_items, location: "footer", locale aware)
   const { data: footerMenuData } = useListMenuItemsQuery({
-    location: "footer",
+    location: 'footer',
     is_active: true,
     locale,
   });
@@ -138,19 +125,40 @@ const Footer: React.FC = () => {
     [footerMenuData],
   );
 
-  const itemsForSection = (section?: FooterSectionDto | null) => {
-    if (!section) return [] as PublicMenuItemDto[];
-    return footerMenuItems.filter((item) => {
-      const sid = (item as any).section_id ?? (item as any).sectionId;
-      return sid && sid === section.id;
-    });
-  };
+  const itemsBySectionId = useMemo(() => {
+    const m = new Map<string, PublicMenuItemDto[]>();
+    for (const item of footerMenuItems) {
+      const sid = ((item as any).section_id ?? (item as any).sectionId) as string | undefined;
+      if (!sid) continue;
+      const arr = m.get(sid) ?? [];
+      arr.push(item);
+      m.set(sid, arr);
+    }
+    for (const [sid, arr] of m) {
+      arr.sort((a: any, b: any) => (a.order_num ?? 0) - (b.order_num ?? 0));
+      m.set(sid, arr);
+    }
+    return m;
+  }, [footerMenuItems]);
 
-  const companyLinks = itemsForSection(companySection);
-  const servicesLinks = itemsForSection(servicesSection);
+  const renderMenuItem = (item: PublicMenuItemDto) => {
+    const rawUrl = (item.url || (item as any).href || '#') as string;
 
-  const mapLink = (item: PublicMenuItemDto) => {
-    const rawUrl = item.url || item.href || "#";
+    if (isExternalHref(rawUrl)) {
+      const external = /^https?:\/\//i.test(rawUrl);
+      return (
+        <li key={item.id}>
+          <a
+            href={rawUrl}
+            target={external ? '_blank' : undefined}
+            rel={external ? 'noopener noreferrer' : undefined}
+          >
+            {item.title || rawUrl}
+          </a>
+        </li>
+      );
+    }
+
     const href = localizePath(locale, rawUrl);
     return (
       <li key={item.id}>
@@ -159,85 +167,81 @@ const Footer: React.FC = () => {
     );
   };
 
+  // ✅ Social section detection (by slug/title) – no hard IDs
+  const isSocialSection = (sec: FooterSectionDto) => {
+    const s = `${sec.slug || ''}`.toLowerCase();
+    const t = `${sec.title || ''}`.toLowerCase();
+    return s === 'social' || s === 'sosyal' || t.includes('social') || t.includes('sosyal');
+  };
+
+  const sectionColClass =
+    sections.length >= 4
+      ? 'col-xl-2 col-lg-3 col-md-6 col-sm-6'
+      : 'col-xl-3 col-lg-3 col-md-6 col-sm-6';
+
   return (
     <footer>
       <section className="footer__border grey__bg pt-115 pb-60">
         <div className="container">
           <div className="row">
-            {/* COMPANY */}
-            <div className="col-xl-2 col-lg-3 col-md-6 col-sm-6">
-              <div className="footer__widget footer__col-1 mb-55">
-                <div className="footer__title">
-                  <h3>
-                    {companySection?.title ||
-                      ui("ui_footer_company", "Company")}
-                  </h3>
-                </div>
-                <div className="footer__link">
-                  <ul>{companyLinks.map(mapLink)}</ul>
-                </div>
-              </div>
-            </div>
+            {/* DİNAMİK: Tüm footer_sections */}
+            {sections.map((sec) => {
+              const isSocial = isSocialSection(sec);
+              const items = itemsBySectionId.get(sec.id) ?? [];
 
-            {/* Services */}
-            <div className="col-xl-4 col-lg-3 col-md-6 col-sm-6">
-              <div className="footer__widget footer__col-2 mb-55">
-                <div className="footer__title">
-                  <h3>
-                    {servicesSection?.title ||
-                      ui("ui_footer_services", "Services")}
-                  </h3>
-                </div>
-                <div className="footer__link">
-                  <ul>{servicesLinks.map(mapLink)}</ul>
-                </div>
-              </div>
-            </div>
+              return (
+                <div key={sec.id} className={sectionColClass}>
+                  <div className="footer__widget mb-55">
+                    <div className="footer__title">
+                      <h3>{sec.title || sec.slug || ui('ui_footer_section', 'Links')}</h3>
+                    </div>
 
-            {/* Contact – DİNAMİK (site_settings) */}
+                    <div className="footer__link">
+                      {isSocial ? (
+                        // ✅ Social: icons only (no text)
+                        <SocialLinks socials={socials} size="md" />
+                      ) : (
+                        <ul>{items.map(renderMenuItem)}</ul>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Contact – site_settings (her zaman en sonda) */}
             <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6">
               <div className="footer__widget mb-55">
                 <div className="footer__title">
-                  <h3>{ui("ui_footer_contact", "Contact")}</h3>
+                  <h3>{ui('ui_footer_contact', 'Contact')}</h3>
                 </div>
                 <div className="footer__link">
                   <ul>
-                    {/* Adres satırları */}
                     {addrLines.map((ln, i) => (
                       <li key={`addr-${i}`}>
                         <span>{ln}</span>
                       </li>
                     ))}
-                    {/* Telefon */}
+
                     {phone && (
                       <li>
-                        <a
-                          href={telHref}
-                          aria-label={ui("ui_footer_phone_aria", "Phone")}
-                        >
+                        <a href={telHref} aria-label={ui('ui_footer_phone_aria', 'Phone')}>
                           {phone}
                         </a>
                       </li>
                     )}
-                    {/* E-posta */}
+
                     {email && (
                       <li>
-                        <a
-                          href={mailHref}
-                          aria-label={ui("ui_footer_email_aria", "Email")}
-                        >
+                        <a href={mailHref} aria-label={ui('ui_footer_email_aria', 'Email')}>
                           {email}
                         </a>
                       </li>
                     )}
-                    {/* Website */}
+
                     {websiteHref && (
                       <li>
-                        <a
-                          href={websiteHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
+                        <a href={websiteHref} target="_blank" rel="noopener noreferrer">
                           {website}
                         </a>
                       </li>
@@ -264,22 +268,17 @@ const Footer: React.FC = () => {
                     width={IMG_W}
                     height={IMG_H}
                     sizes="(max-width: 992px) 120px, 160px"
-                    style={{
-                      width: "auto",
-                      height: "auto",
-                      maxWidth: IMG_W,
-                      maxHeight: IMG_H,
-                    }}
+                    style={{ width: 'auto', height: 'auto', maxWidth: IMG_W, maxHeight: IMG_H }}
                     loading="lazy"
                   />
                 ) : null}
               </Link>
             </div>
+
             <div className="copyright__text">
               <p>
-                {ui("ui_footer_copyright_prefix", "Copyright")} ©{" "}
-                {new Date().getFullYear()} {brandName}{" "}
-                {ui("ui_footer_copyright_suffix", "All rights reserved.")}
+                {ui('ui_footer_copyright_prefix', 'Copyright')} © {new Date().getFullYear()}{' '}
+                {brandName} {ui('ui_footer_copyright_suffix', 'All rights reserved.')}
               </p>
             </div>
           </div>

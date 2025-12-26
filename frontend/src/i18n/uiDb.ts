@@ -13,36 +13,36 @@ import { useUIStrings, UI_FALLBACK_EN } from "./ui";
  * DB tarafında kullanacağın section key'leri (site_settings.key)
  */
 export type UiSectionKey =
-  | "ui_header"
-  | "ui_home"
-  | "ui_footer"
-  | "ui_services"
-  | "ui_banner"
-  | "ui_hero"
-  | "ui_contact"
-  | "ui_about"
-  | "ui_about_stats"
-  | "ui_pricing"
-  | "ui_testimonials"
-  | "ui_faq"
-  | "ui_features"
-  | "ui_cta"
-  | "ui_blog"
-  | "ui_dashboard"
-  | "ui_auth"
-  | "ui_newsletter"
-  | "ui_library"
-  | "ui_feedback"
-  | "ui_references"
-  | "ui_news"
-  | "ui_products"
-  | "ui_spareparts"
-  | "ui_faqs"
-  | "ui_team"
-  | "ui_offer"
-  | "ui_catalog"
-  | "ui_errors"
-  ;
+  | 'ui_header'
+  | 'ui_home'
+  | 'ui_footer'
+  | 'ui_services'
+  | 'ui_banner'
+  | 'ui_hero'
+  | 'ui_contact'
+  | 'ui_about'
+  | 'ui_about_stats'
+  | 'ui_pricing'
+  | 'ui_testimonials'
+  | 'ui_faq'
+  | 'ui_features'
+  | 'ui_cta'
+  | 'ui_blog'
+  | 'ui_dashboard'
+  | 'ui_auth'
+  | 'ui_newsletter'
+  | 'ui_library'
+  | 'ui_feedback'
+  | 'ui_references'
+  | 'ui_news'
+  | 'ui_products'
+  | 'ui_spareparts'
+  | 'ui_faqs'
+  | 'ui_team'
+  | 'ui_offer'
+  | 'ui_catalog'
+  | 'ui_errors'
+  | 'ui_cookie';
 
 /**
  * UI key listeleri:
@@ -304,6 +304,16 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
     "ui_404_title",
     "ui_404_message",
     "ui_404_home_cta",
+  ],
+  ui_cookie: [
+    "ui_cookie_title",
+    "ui_cookie_description",
+    "ui_cookie_label_necessary",
+    "ui_cookie_desc_necessary",
+    "ui_cookie_label_analytics",
+    "ui_cookie_desc_analytics",
+    "ui_cookie_btn_cancel",
+    "ui_cookie_btn_save",
   ],
 };
 

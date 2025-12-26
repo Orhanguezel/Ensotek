@@ -14,13 +14,12 @@ import { useResolvedLocale } from '@/i18n/locale';
 import { switchLocale } from '@/i18n/switchLocale';
 import { normLocaleTag } from '@/i18n/localeUtils';
 import { localizePath } from '@/i18n/url';
+import SocialLinks from "@/components/common/SocialLinks";
 
 import { getLanguageLabel, type SupportedLocale } from '@/types/common';
 import { useActiveLocales } from '@/i18n/activeLocales';
 
 import { FiX, FiSearch, FiGlobe, FiPhone, FiMail, FiLogIn, FiUserPlus } from 'react-icons/fi';
-
-import { FaFacebookF, FaTwitter, FaYoutube, FaLinkedin, FaInstagram } from 'react-icons/fa';
 
 import {
   useListMenuItemsQuery,
@@ -132,17 +131,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
     return 'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
   }, [logoSrc, effectiveBrand.logo]);
 
-  const socialItems = useMemo(() => {
-    const s = (effectiveBrand.socials ?? {}) as any;
-    const normalize = (u?: string) => (!u ? '' : /^https?:\/\//i.test(u) ? u : `https://${u}`);
-    return [
-      { key: 'facebook', Icon: FaFacebookF, url: normalize(s.facebook || s.fb) },
-      { key: 'twitter', Icon: FaTwitter, url: normalize(s.twitter || s.x) },
-      { key: 'youtube', Icon: FaYoutube, url: normalize(s.youtube || s.yt) },
-      { key: 'linkedin', Icon: FaLinkedin, url: normalize(s.linkedin || s.li) },
-      { key: 'instagram', Icon: FaInstagram, url: normalize(s.instagram || s.ig) },
-    ].filter((x) => x.url);
-  }, [effectiveBrand.socials]);
 
   const webHost = useMemo(
     () => (effectiveBrand.website || 'https://ensotek.de').replace(/^https?:\/\//, ''),
@@ -282,7 +270,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </button>
               </div>
             </div>
-
             {/* Language */}
             <div className="d-flex flex-column gap-2 mb-25">
               <label
@@ -326,7 +313,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </Link>
               </div>
             </div>
-
             {/* Search */}
             <div className="offcanvas__search mb-25">
               <form action="/">
@@ -340,7 +326,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </button>
               </form>
             </div>
-
             {/* Menu */}
             <div className="mobile-menu fix mb-40 mean-container">
               <div className="mean-bar d-block">
@@ -367,7 +352,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </nav>
               </div>
             </div>
-
             {/* Contact */}
             <div className="offcanvas__contact mt-30 mb-20">
               <h4>{ui('ui_header_contact_info', 'Contact Info')}</h4>
@@ -415,26 +399,11 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </li>
               </ul>
             </div>
-
-            {/* Social */}
             <div className="offcanvas__social">
-              <ul>
-                {socialItems.map(({ key, Icon, url }) => (
-                  <li key={key}>
-                    <Link
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={key}
-                      onClick={onClose}
-                    >
-                      <Icon />
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <SocialLinks socials={effectiveBrand.socials} size="md" onClickItem={onClose} />
             </div>
           </div>
+
         </div>
       </div>
 

@@ -1,7 +1,9 @@
 -- =============================================================
 -- FILE: 052_custom_pages_news.seed.sql
--- Haber sayfaları (NEWS modülü) – custom_pages + custom_pages_i18n
+-- NEWS – custom_pages + custom_pages_i18n
 -- 011_catalog_categories.sql & 012_catalog_subcategories.sql ile uyumlu
+-- Bu seed: TEK HABER (TR/EN/DE) – “Ensotek Web Sitemiz Yenilendi!”
+-- Yeni haberler için ayrı dosya açılacak (053..., 054...).
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -14,25 +16,18 @@ SET @CAT_NEWS_GENERAL  := 'aaaa2001-1111-4111-8111-aaaaaaaa2001'; -- GENEL HABER
 SET @CAT_NEWS_DUYS     := 'aaaa2003-1111-4111-8111-aaaaaaaa2003'; -- DUYURULAR
 SET @CAT_NEWS_PRESS    := 'aaaa2004-1111-4111-8111-aaaaaaaa2004'; -- BASINDA ENSOTEK
 
--- ALT KATEGORİLER (012_catalog_subcategories.sql)
+/* ALT KATEGORİLER (012_catalog_subcategories.sql) */
 SET @SUB_NEWS_GENERAL_ANN  := 'bbbb2001-1111-4111-8111-bbbbbbbb2001'; -- Duyurular (genel)
-SET @SUB_NEWS_PRESS_ONLINE := 'bbbb2302-1111-4111-8111-bbbbbbbb2302'; -- Online Haberler
 
-/* SABİT PAGE ID’LERİ */
+/* SABİT PAGE ID (deterministik) */
 SET @NEWS_ANNOUNCE_1 := '22220001-2222-4222-8222-222222220001';
-SET @NEWS_ANNOUNCE_2 := '22220002-2222-4222-8222-222222220002';
-SET @NEWS_PRESS_1    := '22221001-2222-4222-8222-222222221001';
 
-/* ÖRNEK GÖRSELLER */
-SET @IMG_NEWS_LAUNCH :=
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80';
-SET @IMG_NEWS_MAINT :=
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80';
-SET @IMG_NEWS_PRESS :=
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80';
+/* FEATURED IMAGE (Cloudinary) */
+SET @IMG_NEWS_RENEWED :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753280071/uploads/metahub/news-images/untitled-1753280071057-80939909.webp';
 
 -- -------------------------------------------------------------
--- PARENT INSERT
+-- PARENT UPSERT (custom_pages)
 -- -------------------------------------------------------------
 INSERT INTO `custom_pages`
   (`id`, `is_published`, `display_order`,
@@ -40,39 +35,14 @@ INSERT INTO `custom_pages`
    `category_id`, `sub_category_id`,
    `created_at`, `updated_at`)
 VALUES
-  -- Genel duyuru
   (
     @NEWS_ANNOUNCE_1,
     1,
     101,
-    @IMG_NEWS_LAUNCH,
-    NULL,
-    @CAT_NEWS_GENERAL,
-    @SUB_NEWS_GENERAL_ANN,
-    NOW(3),
-    NOW(3)
-  ),
-  -- Bakım/servis duyurusu
-  (
-    @NEWS_ANNOUNCE_2,
-    1,
-    102,
-    @IMG_NEWS_MAINT,
+    @IMG_NEWS_RENEWED,
     NULL,
     @CAT_NEWS_DUYS,
-    'bbbb2202-1111-4111-8111-bbbbbbbb2202', -- Bakım / Servis Duyuruları
-    NOW(3),
-    NOW(3)
-  ),
-  -- Basında biz – online haber
-  (
-    @NEWS_PRESS_1,
-    1,
-    103,
-    @IMG_NEWS_PRESS,
-    NULL,
-    @CAT_NEWS_PRESS,
-    @SUB_NEWS_PRESS_ONLINE,
+    @SUB_NEWS_GENERAL_ANN,
     NOW(3),
     NOW(3)
   )
@@ -85,7 +55,9 @@ ON DUPLICATE KEY UPDATE
   `updated_at`      = VALUES(`updated_at`);
 
 -- =============================================================
--- I18N – NEWS_ANNOUNCE_1
+-- I18N – NEWS_ANNOUNCE_1 (TR/EN/DE)
+-- content JSON_OBJECT('html', '<...>') formatında tutulur.
+-- tags: CSV string (mevcut kolon tipine göre).
 -- =============================================================
 INSERT INTO `custom_pages_i18n`
   (`id`, `page_id`, `locale`,
@@ -95,221 +67,97 @@ INSERT INTO `custom_pages_i18n`
    `tags`,
    `created_at`, `updated_at`)
 VALUES
--- TR
-(
-  UUID(),
-  @NEWS_ANNOUNCE_1,
-  'tr',
-  'Yeni Proje Lansmanı',
-  'yeni-proje-lansmani',
-  JSON_OBJECT(
-    'html',
-    '<p>Ensotek olarak yeni su soğutma kulesi projemizin lansmanını duyurmaktan mutluluk duyuyoruz.</p>'
-  ),
-  'Ensotek''in yeni su soğutma kulesi projesinin lansmanına ilişkin kısa duyuru.',
-  'Yeni proje lansmanı için endüstriyel tesis görseli',
-  'Yeni Proje Lansmanı | Ensotek',
-  'Ensotek''in yeni su soğutma kulesi projesi hakkında duyuru.',
-  'ensotek,yeni proje,lansman,haber,su sogutma kuleleri',
-  NOW(3),
-  NOW(3)
-),
--- EN
-(
-  UUID(),
-  @NEWS_ANNOUNCE_1,
-  'en',
-  'New Project Launch',
-  'new-project-launch',
-  JSON_OBJECT(
-    'html',
-    '<p>We are pleased to announce the launch of our new water cooling tower project.</p>'
-  ),
-  'Short announcement about the launch of Ensotek''s new water cooling tower project.',
-  'Industrial facility image for new project launch',
-  'New Project Launch | Ensotek',
-  'Announcement of Ensotek''s new water cooling tower project.',
-  'ensotek,new project,launch,news,water cooling towers',
-  NOW(3),
-  NOW(3)
-),
--- DE
-(
-  UUID(),
-  @NEWS_ANNOUNCE_1,
-  'de',
-  'Neues Projekt: Launch',
-  'neues-projekt-launch',
-  JSON_OBJECT(
-    'html',
-    '<p>Wir freuen uns, den Launch unseres neuen Wasserkühlturm-Projekts bekannt zu geben.</p>'
-  ),
-  'Kurze Ankündigung zum Launch von Ensoteks neuem Wasserkühlturm-Projekt.',
-  'Industrieanlage als Visual zum Projekt-Launch',
-  'Neues Projekt: Launch | Ensotek',
-  'Ankündigung zum neuen Wasserkühlturm-Projekt von Ensotek.',
-  'ensotek,neues projekt,launch,news,wasserkuehltuerme',
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `title`              = VALUES(`title`),
-  `slug`               = VALUES(`slug`),
-  `content`            = VALUES(`content`),
-  `summary`            = VALUES(`summary`),
-  `featured_image_alt` = VALUES(`featured_image_alt`),
-  `meta_title`         = VALUES(`meta_title`),
-  `meta_description`   = VALUES(`meta_description`),
-  `tags`               = VALUES(`tags`),
-  `updated_at`         = VALUES(`updated_at`);
 
--- =============================================================
--- I18N – NEWS_ANNOUNCE_2 (Bakım / Servis)
--- =============================================================
-INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
-   `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
-   `tags`,
-   `created_at`, `updated_at`)
-VALUES
+-- -------------------------------------------------------------
 -- TR
+-- -------------------------------------------------------------
 (
   UUID(),
-  @NEWS_ANNOUNCE_2,
+  @NEWS_ANNOUNCE_1,
   'tr',
-  'Bakım Çalışması Duyurusu',
-  'bakim-calismasi-duyurusu',
+  'Ensotek Web Sitemiz Yenilendi!',
+  'ensotek-web-sitemiz-yenilendi',
   JSON_OBJECT(
     'html',
-    '<p>Planlı bakım çalışmaları nedeniyle bazı tesislerimizde kısa süreli servis kesintileri yaşanabilir.</p>'
+    CONCAT(
+      '<p>Dijital dönüşüm vizyonumuz doğrultusunda, Ensotek web sitemizi tamamen yeniledik. ',
+      'Yeni arayüzümüzle sizlere daha hızlı, modern ve etkileşimli bir kullanıcı deneyimi sunmayı hedefliyoruz.</p>',
+      '<p>Artık çok dilli altyapımızla global erişim sağlıyor, güncel haberlerimizi ve teknolojik gelişmelerimizi ',
+      'kolayca duyurabiliyoruz. Ziyaretçilerimiz; ürünlerimiz, çözümlerimiz ve sektörel haberler hakkında detaylı bilgi alabilir, ',
+      'üye olarak görüş ve önerilerini paylaşabilir.</p>',
+      '<p>Sizi Ensotek ailesine katılmaya, yeni web sitemizi keşfetmeye ve platformumuza yorum bırakmaya davet ediyoruz!</p>',
+      '<p><strong>Daha fazlası için hemen üye olun, iletişimde kalın!</strong></p>'
+    )
   ),
-  'Planlı bakım çalışmaları nedeniyle yaşanabilecek kısa süreli servis kesintileri hakkında bilgilendirme.',
-  'Endüstriyel bakım çalışması görseli',
-  'Bakım Çalışması Duyurusu | Ensotek',
-  'Ensotek tesislerinde planlı bakım çalışmaları hakkında duyuru.',
-  'ensotek,bakim,servis,duyuru,planli kesinti',
+  'Modern arayüz, çok dilli destek ve kullanıcı odaklı tasarımıyla yeni Ensotek web sitemiz yayında! Artık daha hızlı, etkileşimli ve size daha yakın bir platformdayız.',
+  'Ensotek web sitesi yenilendi – duyuru görseli',
+  'Ensotek Web Sitemiz Yenilendi! | Ensotek',
+  'Ensotek web sitesi yenilendi: modern arayüz, çok dilli altyapı, daha hızlı ve etkileşimli deneyim. Güncel haberler ve gelişmeler için bizi takip edin.',
+  'ensotek,web sitesi,yenilendi,duyuru,çok dilli,etkileşim',
   NOW(3),
   NOW(3)
 ),
--- EN
-(
-  UUID(),
-  @NEWS_ANNOUNCE_2,
-  'en',
-  'Maintenance Notice',
-  'maintenance-notice',
-  JSON_OBJECT(
-    'html',
-    '<p>Due to scheduled maintenance, some of our facilities may experience short service interruptions.</p>'
-  ),
-  'Information about possible short service interruptions due to scheduled maintenance.',
-  'Industrial maintenance notice illustration',
-  'Maintenance Notice | Ensotek',
-  'Announcement about scheduled maintenance in Ensotek facilities.',
-  'ensotek,maintenance,service,notice,planned downtime',
-  NOW(3),
-  NOW(3)
-),
--- DE
-(
-  UUID(),
-  @NEWS_ANNOUNCE_2,
-  'de',
-  'Hinweis zur Wartung',
-  'hinweis-zur-wartung',
-  JSON_OBJECT(
-    'html',
-    '<p>Aufgrund geplanter Wartungsarbeiten kann es in einigen unserer Anlagen zu kurzen Serviceunterbrechungen kommen.</p>'
-  ),
-  'Information zu möglichen kurzen Serviceunterbrechungen aufgrund geplanter Wartungsarbeiten.',
-  'Visual für Hinweis zu Wartungsarbeiten',
-  'Hinweis zur Wartung | Ensotek',
-  'Ankündigung zu geplanten Wartungsarbeiten in Ensotek-Anlagen.',
-  'ensotek,wartung,service,hinsweis,geplante unterbrechung',
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `title`              = VALUES(`title`),
-  `slug`               = VALUES(`slug`),
-  `content`            = VALUES(`content`),
-  `summary`            = VALUES(`summary`),
-  `featured_image_alt` = VALUES(`featured_image_alt`),
-  `meta_title`         = VALUES(`meta_title`),
-  `meta_description`   = VALUES(`meta_description`),
-  `tags`               = VALUES(`tags`),
-  `updated_at`         = VALUES(`updated_at`);
 
--- =============================================================
--- I18N – NEWS_PRESS_1 (Basında Biz)
--- =============================================================
-INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
-   `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
-   `tags`,
-   `created_at`, `updated_at`)
-VALUES
--- TR
-(
-  UUID(),
-  @NEWS_PRESS_1,
-  'tr',
-  'Ensotek Basında',
-  'ensotek-basinda',
-  JSON_OBJECT(
-    'html',
-    '<p>Ensotek''in su soğutma kuleleri, sektörel bir dergide detaylı bir makale ile yer aldı.</p>'
-  ),
-  'Ensotek su soğutma kulelerinin sektörel bir dergide yayımlanan makale ile basında yer almasına dair kısa özet.',
-  'Basın haberi ve dergi sayfası görseli',
-  'Ensotek Basında | Ensotek',
-  'Ensotek hakkında yayınlanan basın haberi.',
-  'ensotek,basinda biz,haber,dergi,makale,su sogutma kuleleri',
-  NOW(3),
-  NOW(3)
-),
+-- -------------------------------------------------------------
 -- EN
+-- -------------------------------------------------------------
 (
   UUID(),
-  @NEWS_PRESS_1,
+  @NEWS_ANNOUNCE_1,
   'en',
-  'Ensotek in the Press',
-  'ensotek-in-the-press',
+  'Our Ensotek Website Has Been Renewed!',
+  'ensotek-website-has-been-renewed',
   JSON_OBJECT(
     'html',
-    '<p>Ensotek''s water cooling towers were featured in an in-depth article in a sectoral magazine.</p>'
+    CONCAT(
+      '<p>In line with our digital transformation vision, we have completely renewed our Ensotek website. ',
+      'With the new interface, we aim to provide a faster, modern, and more interactive user experience.</p>',
+      '<p>Thanks to our multilingual infrastructure, we now reach a broader audience and can share our latest news ',
+      'and technological developments more effectively. Visitors can explore our products, solutions, and industry updates, ',
+      'and share feedback by registering.</p>',
+      '<p>We invite you to join the Ensotek community, discover our new website, and leave your comments on our platform.</p>',
+      '<p><strong>Register now and stay connected for more updates.</strong></p>'
+    )
   ),
-  'Short overview of the press coverage featuring Ensotek''s water cooling towers in a sectoral magazine.',
-  'Press article and magazine page image',
-  'Ensotek in the Press | Ensotek',
-  'Press coverage about Ensotek water cooling towers.',
-  'ensotek,in the press,press coverage,sector magazine,water cooling towers',
+  'Our new Ensotek website is live with a modern interface, multilingual support, and a user-focused experience. Faster, more interactive, and closer to you.',
+  'Announcement image for the renewed Ensotek website',
+  'Ensotek Website Renewed | Ensotek',
+  'Ensotek has renewed its website with a modern UI, multilingual support, and a faster, more interactive experience. Stay connected for updates and news.',
+  'ensotek,website,renewed,announcement,multilingual,interactive',
   NOW(3),
   NOW(3)
 ),
+
+-- -------------------------------------------------------------
 -- DE
+-- -------------------------------------------------------------
 (
   UUID(),
-  @NEWS_PRESS_1,
+  @NEWS_ANNOUNCE_1,
   'de',
-  'Ensotek in der Presse',
-  'ensotek-in-der-presse',
+  'Unsere Ensotek-Webseite ist erneuert!',
+  'ensotek-webseite-wurde-erneuert',
   JSON_OBJECT(
     'html',
-    '<p>Ensoteks Wasserkühltürme wurden in einem ausführlichen Artikel in einem Branchenmagazin vorgestellt.</p>'
+    CONCAT(
+      '<p>Im Rahmen unserer Digitalisierungsstrategie haben wir unsere Ensotek-Webseite vollständig erneuert. ',
+      'Mit der neuen Oberfläche möchten wir Ihnen ein schnelleres, moderneres und interaktiveres Nutzererlebnis bieten.</p>',
+      '<p>Dank unserer mehrsprachigen Infrastruktur erreichen wir nun ein breiteres Publikum und können aktuelle Neuigkeiten ',
+      'sowie technologische Entwicklungen einfacher kommunizieren. Besucher finden detaillierte Informationen zu unseren Produkten, ',
+      'Lösungen und Branchen-Updates und können nach einer Registrierung Feedback teilen.</p>',
+      '<p>Werden Sie Teil der Ensotek-Community, entdecken Sie unsere neue Webseite und hinterlassen Sie einen Kommentar.</p>',
+      '<p><strong>Registrieren Sie sich jetzt und bleiben Sie auf dem Laufenden.</strong></p>'
+    )
   ),
-  'Kurzer Überblick über die Presseberichterstattung zu Ensoteks Wasserkühltürmen in einem Branchenmagazin.',
-  'Presseartikel und Magazinseite als Visual',
-  'Ensotek in der Presse | Ensotek',
-  'Pressebericht über Ensotek und seine Wasserkühlturm-Lösungen.',
-  'ensotek,presse,branchenmagazin,artikel,wasserkuehltuerme',
+  'Unsere neue Ensotek-Webseite ist online: modernes Design, mehrsprachige Unterstützung und ein nutzerorientiertes Erlebnis. Schneller, interaktiver und näher bei Ihnen.',
+  'Ankündigungsbild zur erneuerten Ensotek-Webseite',
+  'Ensotek-Webseite erneuert | Ensotek',
+  'Ensotek hat seine Webseite erneuert: moderne Benutzeroberfläche, mehrsprachige Struktur und ein schnelleres, interaktiveres Nutzererlebnis. Bleiben Sie informiert.',
+  'ensotek,webseite,erneuert,ankündigung,mehrsprachig,interaktiv',
   NOW(3),
   NOW(3)
 )
+
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),
