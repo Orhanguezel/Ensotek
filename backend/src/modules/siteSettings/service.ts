@@ -1,11 +1,13 @@
 // =============================================================
 // FILE: src/modules/siteSettings/service.ts
-// Ensotek – SiteSettings Service (FIXED)
-// Key fixes:
+// Ensotek – SiteSettings Service (FINAL)
+// Key points:
 //  - Always include '*' in fallback chain (global settings).
-//  - Normalize locales (trim + lower + de-DE -> de).
+//  - Normalize locales (trim + lower + de-DE -> de candidates).
 //  - Unify global reads via getGlobalSettingValue().
-//  - buildLocaleFallbackChain order: requested -> prefix -> effective default -> preferred -> app_locales -> '*'
+//  - buildLocaleFallbackChain order:
+//      requested -> prefix -> effective default -> preferred -> app_locales -> '*'
+//  - Adds: getGtmContainerId()
 // =============================================================
 
 import { db } from '@/db/client';
@@ -46,16 +48,11 @@ const GOOGLE_KEYS = ['google_client_id', 'google_client_secret'] as const;
 // COMMON HELPERS
 // ---------------------------------------------------------------------------
 
-/**
- * Bu değer "global olmayan" bir locale değildir.
- * site_settings içinde global ayarlar için locale='*' kullanıyoruz.
- */
 const GLOBAL_LOCALE = '*' as const;
 
 /**
- * (Opsiyonel) Projede "preferred" locale fallback kullanmak istiyorsan.
- * Not: Ensotek default genelde 'tr' olduğu için burada 'tr' daha mantıklı.
- * Eğer özellikle Almanca öne çıksın istiyorsan 'de' bırakabilirsin.
+ * Ensotek için pratik preferred fallback.
+ * İstersen ileride 'de' yaparsın ama default akış için 'tr' mantıklı.
  */
 export const PREFERRED_FALLBACK_LOCALE = 'tr' as const;
 
@@ -71,9 +68,7 @@ const normalizeStr = (v: string | null | undefined): string | null => {
   return trimmed === '' ? null : trimmed;
 };
 
-const isNonEmptyString = (x: unknown): x is string => typeof x === 'string' && x.trim().length > 0;
-
-/** locale normalize: trim + lower; "tr-TR" -> "tr-tr" (candidates üretirken ayrıca prefix alıyoruz) */
+/** locale normalize: trim + lower */
 function normalizeLocaleLoose(v: unknown): string | null {
   if (typeof v !== 'string') return null;
   const s = v.trim().toLowerCase();
@@ -106,9 +101,8 @@ export function buildLocaleCandidates(rawLocale?: string | null): string[] {
 }
 
 /**
- * DB value alanı TEXT.
- * - JSON primitive ("string"/number/bool) ise primitive string'e indir.
- * - JSON array/object ise JSON string olarak kalır
+ * DB value TEXT; JSON primitive ise primitive string'e indir.
+ * JSON array/object ise JSON string olarak kalır.
  */
 function normalizeDbValueToString(raw: unknown): string {
   const v = String(raw ?? '');
@@ -118,13 +112,13 @@ function normalizeDbValueToString(raw: unknown): string {
       return String(parsed);
     }
   } catch {
-    // plain string
+    // ignore
   }
   return v;
 }
 
 /**
- * ✅ GLOBAL ayarları tek yerden oku.
+ * ✅ GLOBAL ayarı tek yerden oku.
  * Öncelik: locale='*' → legacy (herhangi bir locale).
  */
 async function getGlobalSettingValue(key: string): Promise<string | null> {
@@ -149,11 +143,7 @@ async function getGlobalSettingValue(key: string): Promise<string | null> {
 // LOW-LEVEL READERS (locale-aware)
 // ---------------------------------------------------------------------------
 
-type SettingRow = {
-  key: string;
-  locale: string;
-  value: string;
-};
+type SettingRow = { key: string; locale: string; value: string };
 
 async function fetchSettingsRows(opts: {
   keys: readonly string[];
@@ -214,7 +204,6 @@ async function getFirstNonEmptySetting(opts: {
     localeCandidates: opts.localeCandidates,
   });
 
-  // localeCandidates sırasına göre seç
   for (const loc of opts.localeCandidates) {
     const hit = rows.find((r) => r.locale === loc);
     const norm = normalizeStr(hit?.value ?? null);
@@ -224,57 +213,9 @@ async function getFirstNonEmptySetting(opts: {
 }
 
 // ---------------------------------------------------------------------------
-// LOCALE HELPERS (DB-driven) ✅ FIXED + META
+// APP LOCALES (META) + DEFAULT LOCALE (GLOBAL)
 // ---------------------------------------------------------------------------
 
-type AppLocaleItem = {
-  code: string;
-  label?: string;
-  is_default?: boolean;
-  is_active?: boolean;
-};
-
-function parseAppLocalesValueToCodes(v: unknown): string[] {
-  if (v == null) return [];
-
-  if (Array.isArray(v)) {
-    const items = v
-      .map((x: any) => {
-        if (!x) return null;
-
-        if (typeof x === 'string') {
-          const code = x.trim();
-          if (!code) return null;
-          return { code, is_active: true } as AppLocaleItem;
-        }
-
-        const code = String(x.code ?? x.value ?? '').trim();
-        if (!code) return null;
-
-        const is_active = x.is_active !== false;
-        return { code, is_active } as AppLocaleItem;
-      })
-      .filter(Boolean) as AppLocaleItem[];
-
-    return uniqLocales(items.filter((it) => it.is_active !== false).map((it) => String(it.code)));
-  }
-
-  if (typeof v === 'string') {
-    const s = v.trim();
-    if (!s) return [];
-
-    try {
-      const parsed = JSON.parse(s);
-      return parseAppLocalesValueToCodes(parsed);
-    } catch {
-      return uniqLocales(s.split(/[;,]+/).map((x) => x.trim()));
-    }
-  }
-
-  return [];
-}
-
-// META
 export type AppLocaleMeta = {
   code: string;
   label: string;
@@ -291,12 +232,7 @@ function parseAppLocalesValueToMeta(v: unknown): AppLocaleMeta[] {
     if (typeof x === 'string') {
       const code = normalizeLocaleLoose(x);
       if (!code) return null;
-      return {
-        code,
-        label: code.toUpperCase(),
-        is_default: false,
-        is_active: true,
-      };
+      return { code, label: code.toUpperCase(), is_default: false, is_active: true };
     }
 
     const code = normalizeLocaleLoose(String(x.code ?? x.value ?? ''));
@@ -344,9 +280,6 @@ function parseAppLocalesValueToMeta(v: unknown): AppLocaleMeta[] {
   return [];
 }
 
-/**
- * ✅ app_locales META: GLOBAL ayar
- */
 export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
   const raw = await getGlobalSettingValue('app_locales');
   if (!raw) {
@@ -372,29 +305,17 @@ export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
   ];
 }
 
-/**
- * ✅ app_locales codes: tek kaynak META
- */
 export async function getAppLocales(_locale?: string | null): Promise<string[]> {
   const metas = await getAppLocalesMeta();
   return uniqLocales(metas.filter((m) => m.is_active !== false).map((m) => m.code));
 }
 
-/**
- * ✅ default_locale: GLOBAL ayar.
- * - locale='*' öncelikli
- * - yoksa legacy herhangi bir satır
- * - yoksa "tr"
- */
 export async function getDefaultLocale(_locale?: string | null): Promise<string> {
   const raw = await getGlobalSettingValue('default_locale');
   const s = normalizeLocaleLoose(raw);
   return s || 'tr';
 }
 
-/**
- * ✅ default_locale'i app_locales meta ile doğrula.
- */
 export async function getEffectiveDefaultLocale(): Promise<string> {
   const def = (await getDefaultLocale(null)).trim().toLowerCase();
   const metas = await getAppLocalesMeta();
@@ -407,11 +328,10 @@ export async function getEffectiveDefaultLocale(): Promise<string> {
 }
 
 /**
- * ✅ Tek bir yerde locale fallback zinciri üret.
- *
+ * ✅ Locale fallback chain
  * Sıra:
- *  1) requested exact (de-de)
- *  2) requested prefix (de)
+ *  1) requested exact
+ *  2) requested prefix
  *  3) effective default_locale (global)
  *  4) preferred fallback (opsiyonel)
  *  5) app_locales (aktif)
@@ -419,7 +339,7 @@ export async function getEffectiveDefaultLocale(): Promise<string> {
  */
 export async function buildLocaleFallbackChain(opts: {
   requested?: string | null;
-  preferred?: string; // default PREFERRED_FALLBACK_LOCALE
+  preferred?: string;
 }): Promise<string[]> {
   const req = normalizeLocaleLoose(opts.requested) || '';
   const preferred = normalizeLocaleLoose(opts.preferred) || PREFERRED_FALLBACK_LOCALE;
@@ -428,18 +348,11 @@ export async function buildLocaleFallbackChain(opts: {
   const def = await getEffectiveDefaultLocale();
   const appLocales = await getAppLocales(null);
 
-  return uniqLocales([
-    candidates[0],
-    candidates[1],
-    def,
-    preferred,
-    ...appLocales,
-    GLOBAL_LOCALE, // ✅ mutlaka en sonda
-  ]);
+  return uniqLocales([candidates[0], candidates[1], def, preferred, ...appLocales, GLOBAL_LOCALE]);
 }
 
 // ---------------------------------------------------------------------------
-// SMTP SETTINGS (site_settings only)  ✅ NOTE: SMTP zaten global olabilir; '*' fallback chain ile çalışır
+// SMTP
 // ---------------------------------------------------------------------------
 
 export type SmtpSettings = {
@@ -466,7 +379,6 @@ export async function getSmtpSettings(locale?: string | null): Promise<SmtpSetti
   ]);
 
   const port = portStr ? Number(portStr) : null;
-  const secure = toBool(sslStr);
 
   return {
     host: normalizeStr(host),
@@ -475,12 +387,12 @@ export async function getSmtpSettings(locale?: string | null): Promise<SmtpSetti
     password: normalizeStr(password),
     fromEmail: normalizeStr(fromEmail),
     fromName: normalizeStr(fromName),
-    secure,
+    secure: toBool(sslStr),
   };
 }
 
 // ---------------------------------------------------------------------------
-// STORAGE SETTINGS (Cloudinary / Local) - site_settings + ENV fallback
+// STORAGE
 // ---------------------------------------------------------------------------
 
 export type StorageDriver = 'local' | 'cloudinary';
@@ -578,7 +490,7 @@ export async function getStorageSettings(locale?: string | null): Promise<Storag
 }
 
 // ---------------------------------------------------------------------------
-// GOOGLE OAUTH SETTINGS - site_settings + ENV fallback (locale-aware)
+// GOOGLE
 // ---------------------------------------------------------------------------
 
 export type GoogleSettings = {
@@ -600,20 +512,75 @@ export async function getGoogleSettings(locale?: string | null): Promise<GoogleS
 }
 
 // ---------------------------------------------------------------------------
-// PUBLIC BASE URL (locale-aware)
+// PUBLIC BASE URL
 // ---------------------------------------------------------------------------
 
 export async function getPublicBaseUrl(locale?: string | null): Promise<string | null> {
   const localeCandidates = await buildLocaleFallbackChain({ requested: locale });
 
-  const v = await getFirstNonEmptySetting({
-    key: 'public_base_url',
-    localeCandidates,
-  });
+  const v = await getFirstNonEmptySetting({ key: 'public_base_url', localeCandidates });
   if (v) return v.replace(/\/+$/, '');
 
   const envV =
     normalizeStr((env as any).PUBLIC_BASE_URL) ?? normalizeStr(process.env.PUBLIC_BASE_URL);
 
   return envV ? envV.replace(/\/+$/, '') : null;
+}
+
+// ---------------------------------------------------------------------------
+// ANALYTICS (GA4 + GTM)
+// ---------------------------------------------------------------------------
+
+export async function getGa4MeasurementId(locale?: string | null): Promise<string | null> {
+  const localeCandidates = await buildLocaleFallbackChain({ requested: locale });
+  const v = await getFirstNonEmptySetting({ key: 'ga4_measurement_id', localeCandidates });
+  return v ? v.trim() : null;
+}
+
+export async function getGtmContainerId(locale?: string | null): Promise<string | null> {
+  const localeCandidates = await buildLocaleFallbackChain({ requested: locale });
+  const v = await getFirstNonEmptySetting({ key: 'gtm_container_id', localeCandidates });
+  return v ? v.trim() : null;
+}
+
+// ---------------------------------------------------------------------------
+// COOKIE CONSENT
+// ---------------------------------------------------------------------------
+
+export type CookieConsentConfig = {
+  consent_version: number;
+  defaults: {
+    necessary: boolean;
+    analytics: boolean;
+    marketing: boolean;
+  };
+  ui?: { enabled?: boolean };
+};
+
+const defaultCookieConsentConfig: CookieConsentConfig = {
+  consent_version: 1,
+  defaults: { necessary: true, analytics: false, marketing: false },
+  ui: { enabled: true },
+};
+
+export async function getCookieConsentConfig(locale?: string | null): Promise<CookieConsentConfig> {
+  const localeCandidates = await buildLocaleFallbackChain({ requested: locale });
+  const raw = await getFirstNonEmptySetting({ key: 'cookie_consent', localeCandidates });
+
+  if (!raw) return defaultCookieConsentConfig;
+
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      consent_version: Number(parsed?.consent_version ?? 1) || 1,
+      defaults: {
+        necessary: parsed?.defaults?.necessary !== false,
+        analytics: parsed?.defaults?.analytics === true,
+        marketing: parsed?.defaults?.marketing === true,
+      },
+      ui: { enabled: parsed?.ui?.enabled !== false },
+    };
+  } catch {
+    return defaultCookieConsentConfig;
+  }
 }

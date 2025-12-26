@@ -1,14 +1,17 @@
 // =============================================================
 // FILE: src/modules/siteSettings/admin.controller.ts
 // Ensotek – SiteSettings Admin Controller
-// + SEO strict validation (Zod) for keys: seo, site_seo, site_meta_default
+// + Strict key policy via settingPolicy (coerceLocaleByKey + normalizeValueByKey)
+// + Correct locale fallback read (returns actual row locale)
 // =============================================================
 
 import type { RouteHandler } from 'fastify';
 import { randomUUID } from 'crypto';
+
 import { db } from '@/db/client';
 import { siteSettings } from './schema';
 import { and, asc, desc, eq, inArray, like, ne, or } from 'drizzle-orm';
+
 import { siteSettingUpsertSchema, siteSettingBulkUpsertSchema, type JsonLike } from './validation';
 import { normalizeLocale } from '@/core/i18n';
 
@@ -55,6 +58,7 @@ function normalizeLooseLocale(v: unknown): string | null {
   const s = v.trim();
   if (!s) return null;
   if (s === '*') return '*';
+  // normalizeLocale projenin standardı: "de-DE" -> "de", vb.
   return normalizeLocale(s) || s.toLowerCase();
 }
 
@@ -72,7 +76,7 @@ async function upsertOne(key: string, locale: LocaleCode, value: JsonLike) {
   const k = String(key || '').trim();
   const coercedLocale = (coerceLocaleByKey(k, locale) ?? locale) as LocaleCode;
 
-  // ✅ value policy (strict validate + normalize)
+  // ✅ key-specific validate + normalize
   const normalizedValue = normalizeValueByKey(k, value);
 
   const now = new Date();
@@ -111,19 +115,25 @@ function isLocaleMap(
   return keys.every((k) => allowed.has(normalizeLooseLocale(k) || k));
 }
 
-async function getFirstByFallback(key: string, fallbacks: LocaleCode[]) {
+async function getFirstRowByFallback(key: string, fallbacks: LocaleCode[]) {
+  if (!fallbacks.length) return null;
+
   const rows = await db
     .select()
     .from(siteSettings)
-    .where(and(eq(siteSettings.key, key), inArray(siteSettings.locale, fallbacks)))
-    .orderBy(asc(siteSettings.key));
+    .where(and(eq(siteSettings.key, key), inArray(siteSettings.locale, fallbacks)));
 
   const byLocale = new Map(rows.map((r) => [r.locale, r]));
   for (const l of fallbacks) {
     const r = byLocale.get(l);
-    if (r) return rowToDto(r).value;
+    if (r) return r;
   }
-  return undefined;
+  return null;
+}
+
+async function getFirstValueByFallback(key: string, fallbacks: LocaleCode[]) {
+  const r = await getFirstRowByFallback(key, fallbacks);
+  return r ? rowToDto(r).value : undefined;
 }
 
 async function buildAdminFallbacks(requested?: string | null): Promise<LocaleCode[]> {
@@ -146,7 +156,7 @@ export const adminGetSettingsAggregate: RouteHandler = async (req, reply) => {
   const keys = ['contact_info', 'socials', 'businessHours'] as const;
 
   const [contact_info, socials, businessHours] = await Promise.all(
-    keys.map((k) => getFirstByFallback(k, fallbacks)),
+    keys.map((k) => getFirstValueByFallback(k, fallbacks)),
   );
 
   return reply.send({
@@ -208,11 +218,38 @@ export const adminListSiteSettings: RouteHandler = async (req, reply) => {
   };
 
   const requested = normalizeLooseLocale(q.locale);
-
   const def = await getDefaultLocale();
   const localeToUse = requested ?? def;
 
-  const GLOBAL_KEYS = new Set<string>(['app_locales', 'default_locale']);
+  // ✅ GLOBAL key tespiti: policy + prefixes
+  // coerceLocaleByKey(k, anyLocale) global ise '*' döndürmeli.
+  const isGlobalKey = (key: string) => {
+    const k = String(key || '').trim();
+    if (!k) return false;
+
+    // 1) policy tabanlı
+    const coerced = coerceLocaleByKey(k, 'tr');
+    if (coerced === '*') return true;
+
+    // 2) explicit + prefix emniyet
+    if (k === 'app_locales' || k === 'default_locale') return true;
+
+    // analytics
+    if (k === 'gtm_container_id') return true;
+    if (k === 'ga4_measurement_id') return true;
+
+    // consent
+    if (k === 'cookie_consent') return true;
+
+    // infra
+    if (k.startsWith('smtp_')) return true;
+    if (k.startsWith('storage_')) return true;
+    if (k.startsWith('cloudinary_')) return true;
+    if (k.startsWith('google_')) return true;
+    if (k === 'public_base_url') return true;
+
+    return false;
+  };
 
   let qb = db.select().from(siteSettings).$dynamic();
   const conds: any[] = [];
@@ -229,12 +266,13 @@ export const adminListSiteSettings: RouteHandler = async (req, reply) => {
   if (q.prefix) conds.push(like(siteSettings.key, `${q.prefix}%`));
   if (q.q) conds.push(like(siteSettings.key, `%${q.q}%`));
 
+  // ✅ locale filter (GLOBAL + localized mixed safe)
   if (localeToUse === '*') {
     conds.push(eq(siteSettings.locale, '*'));
   } else {
     if (keysArr?.length) {
-      const globalRequested = keysArr.filter((k) => GLOBAL_KEYS.has(k));
-      const normalRequested = keysArr.filter((k) => !GLOBAL_KEYS.has(k));
+      const globalRequested = keysArr.filter(isGlobalKey);
+      const normalRequested = keysArr.filter((k) => !isGlobalKey(k));
 
       if (globalRequested.length && !normalRequested.length) {
         conds.push(eq(siteSettings.locale, '*'));
@@ -251,6 +289,7 @@ export const adminListSiteSettings: RouteHandler = async (req, reply) => {
         conds.push(eq(siteSettings.locale, localeToUse));
       }
     } else {
+      // keys filtresi yoksa mevcut davranış
       conds.push(eq(siteSettings.locale, localeToUse));
     }
   }
@@ -286,13 +325,14 @@ export const adminGetSiteSettingByKey: RouteHandler = async (req, reply) => {
   const qLocale = (req.query as any)?.locale as string | undefined;
 
   const fallbacks = await buildAdminFallbacks(qLocale ?? (req as any).locale);
-  const val = await getFirstByFallback(key, fallbacks);
+  const row = await getFirstRowByFallback(key, fallbacks);
 
-  if (val === undefined) {
+  if (!row) {
     return reply.code(404).send({ error: { message: 'not_found' } });
   }
 
-  return reply.send({ key, value: val, locale: fallbacks[0] });
+  const dto = rowToDto(row);
+  return reply.send({ key: dto.key, value: dto.value, locale: dto.locale });
 };
 
 export const adminCreateSiteSetting: RouteHandler = async (req, reply) => {
@@ -322,10 +362,6 @@ export const adminUpdateSiteSetting: RouteHandler = async (req, reply) => {
 
   const loc = normalizeLooseLocale(qLocale);
 
-  // locale policy:
-  // - global update if loc='*'
-  // - if loc is valid locale => write only that locale
-  // - else => write all locales
   if (loc === '*') {
     await upsertOne(key, '*', body.value as JsonLike);
     return reply.send({ ok: true });

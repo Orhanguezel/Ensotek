@@ -1,6 +1,9 @@
 // =============================================================
 // FILE: src/components/admin/site-settings/tabs/ApiSettingsTab.tsx
-// Ensotek – API & Entegrasyon Ayarları (GLOBAL) – style aligned
+// Ensotek – API & Entegrasyon Ayarları (GLOBAL)
+// Fix:
+//  - Query always requests locale='*' so GA4/GTM/cookie_consent appear.
+//  - Adds missing GA4/GTM/cookie_consent fields in UI.
 // =============================================================
 
 import React from 'react';
@@ -19,21 +22,30 @@ export type ApiSettingsTabProps = {
   locale: string; // UI badge için dursun
 };
 
-const API_KEYS = ['google_client_id', 'google_client_secret'] as const;
-type ApiKey = (typeof API_KEYS)[number];
+const API_KEYS = [
+  'google_client_id',
+  'google_client_secret',
+  'gtm_container_id',
+  'ga4_measurement_id',
+  'cookie_consent',
+] as const;
 
+type ApiKey = (typeof API_KEYS)[number];
 type ApiForm = Record<ApiKey, string>;
 
 const EMPTY_FORM: ApiForm = {
   google_client_id: '',
   google_client_secret: '',
+  gtm_container_id: '',
+  ga4_measurement_id: '',
+  cookie_consent: '',
 };
 
 function valueToString(v: unknown): string {
   if (v === null || v === undefined) return '';
   if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
   try {
-    return JSON.stringify(v);
+    return JSON.stringify(v, null, 2);
   } catch {
     return String(v);
   }
@@ -45,6 +57,16 @@ function toMap(settings?: SiteSetting[]) {
   return map;
 }
 
+function tryParseJsonOrString(input: string): SettingValue {
+  const s = String(input ?? '').trim();
+  if (!s) return '' as any; // boş => backend tarafında default/empty davranışın ne ise
+  try {
+    return JSON.parse(s) as any;
+  } catch {
+    return s as any;
+  }
+}
+
 export const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({ locale }) => {
   const {
     data: settings,
@@ -53,7 +75,7 @@ export const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({ locale }) => {
     refetch,
   } = useListSiteSettingsAdminQuery({
     keys: API_KEYS as unknown as string[],
-    // GLOBAL => locale yok
+    locale: '*', // ✅ KRİTİK: global settings'leri kesin getir
   });
 
   const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
@@ -63,7 +85,9 @@ export const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({ locale }) => {
   React.useEffect(() => {
     const map = toMap(settings);
     const next: ApiForm = { ...EMPTY_FORM };
-    API_KEYS.forEach((k) => (next[k] = valueToString(map.get(k)?.value)));
+    API_KEYS.forEach((k) => {
+      next[k] = valueToString(map.get(k)?.value);
+    });
     setForm(next);
   }, [settings]);
 
@@ -77,10 +101,14 @@ export const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({ locale }) => {
       const updates: { key: ApiKey; value: SettingValue }[] = [
         { key: 'google_client_id', value: form.google_client_id.trim() },
         { key: 'google_client_secret', value: form.google_client_secret.trim() },
+        { key: 'gtm_container_id', value: form.gtm_container_id.trim() },
+        { key: 'ga4_measurement_id', value: form.ga4_measurement_id.trim() },
+        { key: 'cookie_consent', value: tryParseJsonOrString(form.cookie_consent) },
       ];
 
       for (const u of updates) {
-        await updateSetting({ key: u.key, value: u.value }).unwrap();
+        // Not: Eğer mutation typings locale almıyorsa, locale alanını kaldır.
+        await updateSetting({ key: u.key, value: u.value, locale: '*' } as any).unwrap();
       }
 
       toast.success('API & entegrasyon ayarları kaydedildi.');
@@ -109,7 +137,7 @@ export const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({ locale }) => {
           <button
             type="button"
             className="btn btn-outline-secondary btn-sm"
-            onClick={refetch}
+            onClick={() => refetch()}
             disabled={busy}
           >
             Yenile
@@ -156,6 +184,56 @@ export const ApiSettingsTab: React.FC<ApiSettingsTabProps> = ({ locale }) => {
             />
             <div className="form-text small">
               Güvenlik nedeniyle mümkünse sadece backend ortam değişkenleriyle yönet.
+            </div>
+          </div>
+
+          <div className="col-md-6">
+            <label className="form-label small">
+              GTM Container ID (<code>gtm_container_id</code>)
+            </label>
+            <Input
+              value={form.gtm_container_id}
+              onChange={(e) => handleChange('gtm_container_id', e.target.value)}
+              placeholder="GTM-XXXXXXX"
+              disabled={busy}
+            />
+            <div className="form-text small">
+              GTM aktifse frontend sadece GTM scriptini basar; GA4 tag’i GTM içinden yönetilir.
+            </div>
+          </div>
+
+          <div className="col-md-6">
+            <label className="form-label small">
+              GA4 Measurement ID (<code>ga4_measurement_id</code>)
+            </label>
+            <Input
+              value={form.ga4_measurement_id}
+              onChange={(e) => handleChange('ga4_measurement_id', e.target.value)}
+              placeholder="G-XXXXXXXXXX"
+              disabled={busy}
+            />
+            <div className="form-text small">
+              GTM yoksa gtag.js ile fallback olarak kullanılabilir.
+            </div>
+          </div>
+
+          <div className="col-12">
+            <label className="form-label small">
+              Cookie Consent (<code>cookie_consent</code>) (JSON)
+            </label>
+            <textarea
+              className="form-control"
+              rows={10}
+              value={form.cookie_consent}
+              onChange={(e) => handleChange('cookie_consent', e.target.value)}
+              placeholder='{"consent_version":1,"defaults":{"necessary":true,"analytics":false,"marketing":false},"ui":{"enabled":true}}'
+              disabled={busy}
+              style={{
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+              }}
+            />
+            <div className="form-text small">
+              JSON girersen obje olarak saklanır. Düz metin girersen string olarak saklanır.
             </div>
           </div>
         </div>

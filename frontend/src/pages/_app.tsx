@@ -5,7 +5,8 @@ import NextApp from 'next/app';
 import { useRouter } from 'next/router';
 import { Toaster } from 'sonner';
 
-import GAScripts from '@/features/analytics/GAScripts';
+import AnalyticsScripts from '@/features/analytics/AnalyticsScripts';
+import GAViewPages from '@/features/analytics/GAViewPages';
 import CookieConsentBanner from '@/components/layout/banner/CookieConsentBanner';
 
 // Global CSS
@@ -48,17 +49,13 @@ function App({ Component, pageProps }: AppProps) {
     const start = () => {
       try {
         NProgressMod?.start?.();
-      } catch {
-        // ignore
-      }
+      } catch {}
     };
 
     const done = () => {
       try {
         NProgressMod?.done?.();
-      } catch {
-        // ignore
-      }
+      } catch {}
     };
 
     const onComplete = () => {
@@ -66,9 +63,7 @@ function App({ Component, pageProps }: AppProps) {
       setTimeout(() => {
         try {
           AOSMod?.refreshHard?.();
-        } catch {
-          // ignore
-        }
+        } catch {}
       }, 0);
     };
 
@@ -85,15 +80,11 @@ function App({ Component, pageProps }: AppProps) {
 
       try {
         AOSMod.init?.({ once: true, duration: 500, easing: 'ease-out' });
-      } catch {
-        // ignore
-      }
+      } catch {}
 
       try {
         NProgressMod.configure?.({ showSpinner: false, trickleSpeed: 120 });
-      } catch {
-        // ignore
-      }
+      } catch {}
 
       router.events.on('routeChangeStart', start);
       router.events.on('routeChangeComplete', onComplete);
@@ -113,8 +104,11 @@ function App({ Component, pageProps }: AppProps) {
       {/* locale + ui boot */}
       <LangBoot />
 
-      {/* GA scripts (consent default denied) */}
-      <GAScripts />
+      {/* ✅ Analytics scripts (GTM preferred; consent default denied) */}
+      {!isAdminRoute && <AnalyticsScripts />}
+
+      {/* ✅ Page view sender (Pages Router) */}
+      {!isAdminRoute && <GAViewPages />}
 
       <Toaster position="top-right" richColors closeButton duration={4000} />
 
