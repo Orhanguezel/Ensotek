@@ -22,9 +22,16 @@ const COOKIE_DAYS = 180;
 function setCookie(name: string, value: string, days: number) {
   try {
     const maxAge = days * 24 * 60 * 60;
+
+    const isHttps =
+      typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
+
+    // SameSite=Lax + (https prod’da) Secure
+    const secure = isHttps ? '; secure' : '';
+
     document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(
       value,
-    )}; path=/; max-age=${maxAge}; samesite=lax`;
+    )}; path=/; max-age=${maxAge}; samesite=lax${secure}`;
   } catch {}
 }
 
@@ -70,22 +77,35 @@ function loadConsent(): ConsentState | null {
   return null;
 }
 
+function queueConsent(payload: { analytics_storage: 'granted' | 'denied' } | boolean) {
+  try {
+    (window as any).__pendingAnalyticsConsent = (window as any).__pendingAnalyticsConsent || [];
+    const q = (window as any).__pendingAnalyticsConsent as any[];
+
+    // dedupe: aynı payload üst üste birikmesin
+    const last = q.length ? q[q.length - 1] : null;
+    const same =
+      JSON.stringify(last ?? null) === JSON.stringify(payload ?? null) ||
+      (typeof last === 'boolean' && typeof payload === 'boolean' && last === payload);
+
+    if (!same) q.push(payload);
+  } catch {}
+}
+
 function applyAnalyticsConsent(analytics: boolean) {
   try {
     const payload = { analytics_storage: analytics ? 'granted' : 'denied' } as const;
 
+    // UI tarafında da güncel tutalım
     (window as any).__analyticsConsentGranted = analytics === true;
 
     if (typeof (window as any).__setAnalyticsConsent === 'function') {
       (window as any).__setAnalyticsConsent(payload);
     } else {
-      (window as any).__pendingAnalyticsConsent = (window as any).__pendingAnalyticsConsent || [];
-      (window as any).__pendingAnalyticsConsent.push(payload);
+      queueConsent(payload);
     }
   } catch {}
 }
-
-
 
 export default function CookieConsentBanner() {
   const resolvedLocale = useResolvedLocale();
@@ -152,11 +172,10 @@ export default function CookieConsentBanner() {
   // SSR/hydration güvenliği
   if (!ready) return null;
 
-  // Seçim yapıldıysa banner gizli kalsın (istersen “manage cookies” linki footer’da ayrıca eklenebilir)
+  // Seçim yapıldıysa banner gizli kalsın
   if (hasChoice) {
     return (
       <>
-        {/* Settings modal yine de kullanılabilsin istersen: dışarıdan tetikleyeceğin bir event ekleyebilirsin */}
         {openSettings && (
           <CookieSettingsModal
             open={openSettings}
@@ -269,12 +288,10 @@ export default function CookieConsentBanner() {
           bottom: 0;
           z-index: 9998;
           padding: 14px;
-          /* Şerit hissini azaltıp “floating card” hissi veriyoruz */
           background: transparent;
         }
 
         .ccb__inner {
-          /* Tema rengi: varsa --tp-theme-1, yoksa fallback */
           --ccb-primary: var(--tp-theme-1, #2563eb);
           --ccb-text: rgba(17, 24, 39, 0.92);
           --ccb-muted: rgba(17, 24, 39, 0.72);
@@ -351,21 +368,18 @@ export default function CookieConsentBanner() {
           box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
         }
 
-        /* Ghost: hafif, temiz */
         .ccb__btn--ghost {
           background: rgba(255, 255, 255, 0.85);
           border-color: rgba(0, 0, 0, 0.12);
           color: var(--ccb-text);
         }
 
-        /* Outline: reject için daha belirgin ama kaba değil */
         .ccb__btn--outline {
           background: rgba(17, 24, 39, 0.04);
           border-color: rgba(17, 24, 39, 0.14);
           color: rgba(17, 24, 39, 0.9);
         }
 
-        /* Primary: sarı yok — tema rengi */
         .ccb__btn--primary {
           background: var(--ccb-primary);
           color: #fff;
@@ -373,7 +387,6 @@ export default function CookieConsentBanner() {
         }
 
         .ccb__btn--primary:hover {
-          /* küçük bir “darken” etkisi: box-shadow ile */
           box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
         }
 

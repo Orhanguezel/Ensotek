@@ -40,9 +40,9 @@ VALUES
   '*',
   CAST(
     JSON_ARRAY(
-      JSON_OBJECT('code','tr','label','Türkçe','is_default', TRUE,  'is_active', TRUE),
+      JSON_OBJECT('code','tr','label','Türkçe','is_default', FALSE,  'is_active', TRUE),
       JSON_OBJECT('code','en','label','English','is_default', FALSE, 'is_active', TRUE),
-      JSON_OBJECT('code','de','label','Deutsch','is_default', FALSE, 'is_active', TRUE)
+      JSON_OBJECT('code','de','label','Deutsch','is_default', TRUE, 'is_active', TRUE)
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),
@@ -72,22 +72,22 @@ VALUES
   'contact_info',
   'tr',
   CAST(JSON_OBJECT(
-    'companyName','Ensotek Enerji Sistemleri',
-    'phones',JSON_ARRAY('+90 212 000 00 00', '+49 152 000 0000'),
-    'email','info@ensotek.com',
-    'address','Ensotek Plaza, Büyükdere Cd. No:10, Şişli / İstanbul',
-    'addressSecondary','Ofis: Musterstr. 10, 10115 Berlin, Almanya',
-    'whatsappNumber','+49 152 000 0000',
-    'taxOffice','Şişli VD',
-    'taxNumber','1234567890',
-    'website','https://ensotek.de'
+    'companyName','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
+    'phones',JSON_ARRAY('+90 212 613 33 01'),
+    'email','ensotek@ensotek.com.tr',
+    'address','Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye',
+    'addressSecondary','Fabrika: Saray Mah. Gimat Cad. No:6A 06980 Kahramankazan / Ankara, Türkiye',
+    'whatsappNumber','',
+    'taxOffice','',
+    'taxNumber','',
+    'website','https://www.ensotek.de'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
 ),
-(UUID(), 'catalog_pdf_url',        'tr', 'https://example.com/path/to/ensotek_catalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_pdf_filename',   'tr', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_admin_email',    'tr', 'admin@ensotek.de', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'tr', 'https://www.ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_filename',   'tr', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_admin_email',    'tr', 'info@ensotek.com.tr', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'tr', 'Ensotek', NOW(3), NOW(3)),
 (
   UUID(),
@@ -109,9 +109,9 @@ VALUES
   'company_profile',
   'tr',
   CAST(JSON_OBJECT(
-    'headline','Ensotek ile Akıllı Enerji ve Otomasyon Çözümleri',
-    'subline','Endüstriyel tesisler, restoranlar ve ticari işletmeler için uçtan uca otomasyon ve enerji verimliliği çözümleri sunuyoruz.',
-    'body','Ensotek Enerji Sistemleri; proje tasarımı, saha keşfi, kurulum, devreye alma ve bakım süreçlerinin tamamını tek çatı altında toplayan entegre bir teknoloji partneridir. IoT tabanlı uzaktan izleme, enerji tüketim analizi ve özel raporlama panelleriyle işletmenizin operasyonlarını dijitalleştirmenize yardımcı olur.'
+    'headline','CTP Su Soğutma Kuleleri: Açık Tip ve Kapalı Tip İmalat & Montaj',
+    'subline','Camelyaf Takviyeli Polyester (CTP) malzemeden su soğutma kuleleri üretiyor; bakım, onarım, modernizasyon ve performans testleriyle tesislerinize uzun ömürlü çözümler sunuyoruz.',
+    'body','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti; CTP malzemeden Açık Tip Su Soğutma Kuleleri ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajını ana faaliyet alanı olarak yürütür. Ayrıca mevcut su soğutma kulelerinin bakım ve onarımları, yeni teknolojilere göre modernize edilmesi, performans testlerinin yapılması ve yedek parça temini hizmetleri sunar. Kaliteli ürün ve hizmet ile uzun ömürlü çözümler üretmek Ensotek\'in birinci önceliğidir.'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -121,9 +121,9 @@ VALUES
   'company_brand',
   'tr',
   CAST(JSON_OBJECT(
-    'name','Ensotek Enerji Sistemleri',
+    'name','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
     'shortName','ENSOTEK',
-    'website','https://ensotek.de',
+    'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
       'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp',
       'width',160,
@@ -156,24 +156,24 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'catalog_pdf_url',        'en', 'https://example.com/path/to/ensotek_catalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'en', 'https://www.ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_pdf_filename',   'en', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_admin_email',    'en', 'admin@ensotek.de', NOW(3), NOW(3)),
+(UUID(), 'catalog_admin_email',    'en', 'info@ensotek.com.tr', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'en', 'Ensotek', NOW(3), NOW(3)),
 (
   UUID(),
   'contact_info',
   'en',
   CAST(JSON_OBJECT(
-    'companyName','Ensotek Energy Systems',
-    'phones',JSON_ARRAY('+49 152 000 0000', '+90 212 000 00 00'),
-    'email','hello@ensotek.com',
-    'address','Ensotek Office, Musterstr. 10, 10115 Berlin, Germany',
-    'addressSecondary','HQ: Ensotek Plaza, Büyükdere Ave. No:10, Sisli / Istanbul',
-    'whatsappNumber','+49 152 000 0000',
-    'taxOffice','Sisli Tax Office',
-    'taxNumber','1234567890',
-    'website','https://ensotek.de'
+    'companyName','ENSOTEK Cooling Towers & Technologies Engineering Ltd.',
+    'phones',JSON_ARRAY('+90 212 613 33 01'),
+    'email','ensotek@ensotek.com.tr',
+    'address','Oruçreis District, Tekstilkent Site, A17 Block No:41, 34235 Esenler / Istanbul, Türkiye',
+    'addressSecondary','Factory: Saray District, Gimat St. No:6A, 06980 Kahramankazan / Ankara, Türkiye',
+    'whatsappNumber','',
+    'taxOffice','',
+    'taxNumber','',
+    'website','https://www.ensotek.de'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -188,7 +188,7 @@ VALUES
     'youtube','https://youtube.com/@ensotek',
     'linkedin','https://linkedin.com/company/ensotek',
     'x','https://x.com/ensotek',
-    'tiktok','https://www.tiktok.com/@ensotek'
+    'tiktok',''
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -198,9 +198,9 @@ VALUES
   'company_brand',
   'en',
   CAST(JSON_OBJECT(
-    'name','Ensotek Energy Systems',
+    'name','ENSOTEK Cooling Towers & Technologies Engineering Ltd.',
     'shortName','ENSOTEK',
-    'website','https://ensotek.de',
+    'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
       'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp',
       'width',160,
@@ -215,6 +215,18 @@ VALUES
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
+),
+(
+  UUID(),
+  'company_profile',
+  'en',
+  CAST(JSON_OBJECT(
+    'headline','FRP (CTP) Cooling Towers: Open Circuit & Closed Circuit Manufacturing',
+    'subline','We manufacture and install FRP (CTP) cooling towers and provide maintenance, retrofit, performance testing and spare parts supply.',
+    'body','ENSOTEK designs, manufactures and installs open circuit and closed circuit cooling towers manufactured from FRP (CTP). We also provide maintenance and repair services, modernization/retrofit to new technologies, performance testing and spare parts supply. Our priority is delivering long-lasting solutions with high product and service quality.'
+  ) AS CHAR CHARACTER SET utf8mb4),
+  NOW(3),
+  NOW(3)
 )
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
@@ -225,24 +237,74 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'catalog_pdf_url',        'de', 'https://example.com/path/to/ensotek_catalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_pdf_filename',   'de', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
-(UUID(), 'catalog_admin_email',    'de', 'admin@ensotek.de', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'de', 'https://www.ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_filename',   'de', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_admin_email',    'de', 'info@ensotek.com.tr', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'de', 'Ensotek', NOW(3), NOW(3)),
 (
   UUID(),
   'contact_info',
   'de',
   CAST(JSON_OBJECT(
-    'companyName','Ensotek Energiesysteme',
-    'phones',JSON_ARRAY('+49 152 000 0000'),
-    'email','hallo@ensotek.com',
-    'address','Musterstr. 10, 10115 Berlin, Deutschland',
-    'addressSecondary','Zentrale: Ensotek Plaza, Büyükdere Cd. No:10, Şişli / Istanbul',
-    'whatsappNumber','+49 152 000 0000',
-    'taxOffice','Finanzamt (Beispiel)',
-    'taxNumber','1234567890',
-    'website','https://ensotek.de'
+    'companyName','ENSOTEK Kühltürme & Technologien Engineering GmbH (Ltd.)',
+    'phones',JSON_ARRAY('+90 212 613 33 01'),
+    'email','ensotek@ensotek.com.tr',
+    'address','Oruçreis Mah., Tekstilkent Sit., A17 Blok No:41, 34235 Esenler / Istanbul, Türkei',
+    'addressSecondary','Werk: Saray Mah., Gimat Cad. No:6A, 06980 Kahramankazan / Ankara, Türkei',
+    'whatsappNumber','',
+    'taxOffice','',
+    'taxNumber','',
+    'website','https://www.ensotek.de'
+  ) AS CHAR CHARACTER SET utf8mb4),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'socials',
+  'de',
+  CAST(JSON_OBJECT(
+    'instagram','https://instagram.com/ensotek',
+    'facebook','https://facebook.com/ensotek',
+    'youtube','https://youtube.com/@ensotek',
+    'linkedin','https://linkedin.com/company/ensotek',
+    'x','https://x.com/ensotek',
+    'tiktok','https://www.tiktok.com/@ensotek'
+  ) AS CHAR CHARACTER SET utf8mb4),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'company_brand',
+  'de',
+  CAST(JSON_OBJECT(
+    'name','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
+    'shortName','ENSOTEK',
+    'website','https://www.ensotek.de',
+    'logo',JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp',
+      'width',160,
+      'height',60
+    ),
+    'images',JSON_ARRAY(
+      JSON_OBJECT(
+        'type','logo',
+        'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp'
+      )
+    )
+  ) AS CHAR CHARACTER SET utf8mb4),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'company_profile',
+  'de',
+  CAST(JSON_OBJECT(
+    'headline','GFK (CTP) Kühltürme: Offene & Geschlossene Bauart – Herstellung & Montage',
+    'subline','Herstellung und Montage von GFK (CTP) Kühltürmen sowie Wartung, Instandsetzung, Modernisierung, Leistungstests und Ersatzteilversorgung.',
+    'body','ENSOTEK stellt offene und geschlossene Kühltürme aus GFK (CTP) her und übernimmt die Montage. Zusätzlich bieten wir Wartung und Reparatur, Modernisierung nach neuen Technologien, Leistungstests sowie die Versorgung mit Ersatzteilen an. Unser Ziel sind langlebige Lösungen durch hohe Produkt- und Servicequalität.'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -256,16 +318,16 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'storage_driver',             '*', 'cloudinary',                               NOW(3), NOW(3)),
-(UUID(), 'storage_local_root',         '*', '/var/www/Ensotek/uploads',                 NOW(3), NOW(3)),
-(UUID(), 'storage_local_base_url',     '*', 'https://ensotek.guezelwebdesign.com/uploads', NOW(3), NOW(3)),
-(UUID(), 'cloudinary_cloud_name',      '*', 'your_cloud_name',                          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_key',         '*', 'your_cloudinary_api_key',                  NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_secret',      '*', 'your_cloudinary_api_secret',               NOW(3), NOW(3)),
-(UUID(), 'cloudinary_folder',          '*', 'uploads/ensotek',                          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_unsigned_preset', '*', 'your_unsigned_preset',                     NOW(3), NOW(3)),
-(UUID(), 'storage_cdn_public_base',    '*', 'https://res.cloudinary.com',               NOW(3), NOW(3)),
-(UUID(), 'storage_public_api_base',    '*', 'https://ensotek.guezelwebdesign.com/api',  NOW(3), NOW(3))
+(UUID(), 'storage_driver',             '*', 'cloudinary',                                        NOW(3), NOW(3)),
+(UUID(), 'storage_local_root',         '*', '/var/www/Ensotek/uploads',                          NOW(3), NOW(3)),
+(UUID(), 'storage_local_base_url',     '*', 'https://www.ensotek.guezelwebdesign.com/uploads',   NOW(3), NOW(3)),
+(UUID(), 'cloudinary_cloud_name',      '*', 'your_cloud_name',                                   NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_key',         '*', 'your_cloudinary_api_key',                           NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_secret',      '*', 'your_cloudinary_api_secret',                        NOW(3), NOW(3)),
+(UUID(), 'cloudinary_folder',          '*', 'uploads/ensotek',                                   NOW(3), NOW(3)),
+(UUID(), 'cloudinary_unsigned_preset', '*', 'your_unsigned_preset',                              NOW(3), NOW(3)),
+(UUID(), 'storage_cdn_public_base',    '*', 'https://res.cloudinary.com',                        NOW(3), NOW(3)),
+(UUID(), 'storage_public_api_base',    '*', 'https://www.ensotek.guezelwebdesign.com/api',       NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -275,7 +337,7 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'public_base_url', '*', 'https://ensotek.guezelwebdesign.com', NOW(3), NOW(3))
+(UUID(), 'public_base_url', '*', 'https://www.ensotek.guezelwebdesign.com', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -287,9 +349,9 @@ INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `upda
 VALUES
 (UUID(), 'smtp_host',       '*', 'smtp.example.com',      NOW(3), NOW(3)),
 (UUID(), 'smtp_port',       '*', '465',                   NOW(3), NOW(3)),
-(UUID(), 'smtp_username',   '*', 'no-reply@ensotek.de',   NOW(3), NOW(3)),
+(UUID(), 'smtp_username',   '*', 'no-reply@ensotek.com.tr',NOW(3), NOW(3)),
 (UUID(), 'smtp_password',   '*', 'change-me-in-admin',    NOW(3), NOW(3)),
-(UUID(), 'smtp_from_email', '*', 'no-reply@ensotek.de',   NOW(3), NOW(3)),
+(UUID(), 'smtp_from_email', '*', 'no-reply@ensotek.com.tr',NOW(3), NOW(3)),
 (UUID(), 'smtp_from_name',  '*', 'Ensotek',               NOW(3), NOW(3)),
 (UUID(), 'smtp_ssl',        '*', 'true',                  NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
@@ -314,7 +376,7 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'gtm_container_id', '*', 'GTM-XXXXXXX', NOW(3), NOW(3))
+(UUID(), 'gtm_container_id', '*', 'GTM-WV5FRN93', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -326,7 +388,7 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'ga4_measurement_id', '*', 'G-XXXXXXXXXX', NOW(3), NOW(3))
+(UUID(), 'ga4_measurement_id', '*', 'G-JXG2XVVQ8C', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);

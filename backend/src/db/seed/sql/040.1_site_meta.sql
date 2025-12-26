@@ -1,6 +1,6 @@
 -- =============================================================
--- 040.1_site_meta_default.sql
--- (Extended) Default Meta + Global SEO (NEW STANDARD) [FIXED]
+-- 040.1_site_meta.sql
+-- (Extended) Default Meta + Global SEO (NEW STANDARD) [ENSOTEK - UPDATED]
 --
 -- Standard (Future-proof):
 --   - GLOBAL defaults => locale='*'  (seo, site_seo)
@@ -10,6 +10,10 @@
 -- Compatible with:
 --   - src/seo/serverMetadata.ts (fetchSeoObject/buildMetadataFromSeo)
 --   - src/seo/meta.ts (client buildMeta)
+--
+-- Notes:
+--  - Keep keys STRICT-compatible with your seoSchema:
+--    site_name, title_default, title_template, description, open_graph{type,images[]}, twitter{...}, robots{...}
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -39,6 +43,12 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 -- -------------------------------------------------------------
 SET @OG_DEFAULT := '/img/og-default.jpg';
 
+-- -------------------------------------------------------------
+-- Brand helpers (text only; used inside JSON strings)
+-- -------------------------------------------------------------
+SET @BRAND_SHORT_TR := 'Ensotek Su Soğutma Kuleleri';
+SET @BRAND_LEGAL_TR := 'ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti';
+
 -- =============================================================
 -- GLOBAL SEO DEFAULTS (NEW STANDARD)
 -- Keys: seo (primary) + site_seo (fallback)
@@ -54,10 +64,16 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek',
+      'site_name',      @BRAND_SHORT_TR,
+      'title_default',  @BRAND_SHORT_TR,
       'title_template', '%s | Ensotek',
-      'description',    'Ensotek Energy Systems provides industrial solutions and energy efficiency services.',
+      'description',
+        CONCAT(
+          @BRAND_LEGAL_TR,
+          ' — Camelyaf Takviyeli Polyester (CTP) malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajı. ',
+          'Ayrıca mevcut su soğutma kulelerinin bakım-onarım, modernizasyon, performans testleri ve yedek parça temini. ',
+          'Kaliteli ürün ve hizmet ile uzun ömürlü çözümler Ensotek’in birinci önceliğidir.'
+        ),
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -90,10 +106,15 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek',
+      'site_name',      @BRAND_SHORT_TR,
+      'title_default',  @BRAND_SHORT_TR,
       'title_template', '%s | Ensotek',
-      'description',    'Ensotek Energy Systems provides industrial solutions and energy efficiency services.',
+      'description',
+        CONCAT(
+          @BRAND_LEGAL_TR,
+          ' — CTP malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri. ',
+          'Bakım-onarım, modernizasyon, performans testleri ve yedek parça hizmetleri.'
+        ),
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -118,7 +139,7 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- OPTIONAL: LOCALE OVERRIDES (3 dil için örnek)
+-- OPTIONAL: LOCALE OVERRIDES (TR/EN/DE)
 -- =============================================================
 
 -- seo overrides
@@ -130,10 +151,16 @@ VALUES
   'tr',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek | Endüstriyel Çözümler',
+      'site_name',      @BRAND_SHORT_TR,
+      'title_default',  'Ensotek | Su Soğutma Kuleleri',
       'title_template', '%s | Ensotek',
-      'description',    'Endüstriyel soğutma kuleleri, modernizasyon ve enerji verimliliği çözümleri sunan Ensotek Enerji Sistemleri.',
+      'description',
+        CONCAT(
+          @BRAND_LEGAL_TR,
+          ' — Camelyaf Takviyeli Polyester (CTP) malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajı. ',
+          'Mevcut kuleler için bakım-onarım, modernizasyon, performans testleri ve yedek parça temini. ',
+          'Kaliteli ürün ve hizmet ile uzun ömürlü çözümler birinci önceliğimizdir.'
+        ),
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -159,10 +186,11 @@ VALUES
   'en',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek | Industrial Solutions',
+      'site_name',      'Ensotek Cooling Towers',
+      'title_default',  'Ensotek | Cooling Towers & Technologies',
       'title_template', '%s | Ensotek',
-      'description',    'Ensotek Energy Systems provides industrial cooling tower engineering and energy efficiency solutions.',
+      'description',
+        'ENSOTEK Cooling Towers & Technologies — Manufacturing and installation of open-circuit and closed-circuit cooling towers made of FRP (fiber-reinforced plastic). Maintenance & repair, modernization, performance testing and spare parts supply for existing cooling towers. Quality and long-lasting solutions are our top priority.',
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -188,10 +216,11 @@ VALUES
   'de',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek | Industrielle Lösungen',
+      'site_name',      'Ensotek Kühltürme',
+      'title_default',  'Ensotek | Kühltürme & Technologien',
       'title_template', '%s | Ensotek',
-      'description',    'Ensotek Energiesysteme bietet industrielle Kühlturmtechnik und Energieeffizienzlösungen.',
+      'description',
+        'ENSOTEK — Herstellung und Montage von offenen und geschlossenen Kühltürmen aus GFK (glasfaserverstärkter Kunststoff). Wartung, Reparatur, Modernisierung, Leistungstests und Ersatzteilversorgung für bestehende Kühltürme. Qualität und langlebige Lösungen haben für uns höchste Priorität.',
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -222,28 +251,7 @@ VALUES
   UUID(),
   'site_seo',
   'tr',
-  CAST(
-    JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek | Endüstriyel Çözümler',
-      'title_template', '%s | Ensotek',
-      'description',    'Endüstriyel soğutma kuleleri, modernizasyon ve enerji verimliliği çözümleri sunan Ensotek Enerji Sistemleri.',
-      'open_graph', JSON_OBJECT(
-        'type',   'website',
-        'images', JSON_ARRAY(@OG_DEFAULT)
-      ),
-      'twitter', JSON_OBJECT(
-        'card',    'summary_large_image',
-        'site',    '',
-        'creator', ''
-      ),
-      'robots', JSON_OBJECT(
-        'noindex', false,
-        'index',   true,
-        'follow',  true
-      )
-    ) AS CHAR CHARACTER SET utf8mb4
-  ),
+  (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='tr' LIMIT 1),
   NOW(3),
   NOW(3)
 ),
@@ -251,28 +259,7 @@ VALUES
   UUID(),
   'site_seo',
   'en',
-  CAST(
-    JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek | Industrial Solutions',
-      'title_template', '%s | Ensotek',
-      'description',    'Ensotek Energy Systems provides industrial cooling tower engineering and energy efficiency solutions.',
-      'open_graph', JSON_OBJECT(
-        'type',   'website',
-        'images', JSON_ARRAY(@OG_DEFAULT)
-      ),
-      'twitter', JSON_OBJECT(
-        'card',    'summary_large_image',
-        'site',    '',
-        'creator', ''
-      ),
-      'robots', JSON_OBJECT(
-        'noindex', false,
-        'index',   true,
-        'follow',  true
-      )
-    ) AS CHAR CHARACTER SET utf8mb4
-  ),
+  (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='en' LIMIT 1),
   NOW(3),
   NOW(3)
 ),
@@ -280,28 +267,7 @@ VALUES
   UUID(),
   'site_seo',
   'de',
-  CAST(
-    JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek | Industrielle Lösungen',
-      'title_template', '%s | Ensotek',
-      'description',    'Ensotek Energiesysteme bietet industrielle Kühlturmtechnik und Energieeffizienzlösungen.',
-      'open_graph', JSON_OBJECT(
-        'type',   'website',
-        'images', JSON_ARRAY(@OG_DEFAULT)
-      ),
-      'twitter', JSON_OBJECT(
-        'card',    'summary_large_image',
-        'site',    '',
-        'creator', ''
-      ),
-      'robots', JSON_OBJECT(
-        'noindex', false,
-        'index',   true,
-        'follow',  true
-      )
-    ) AS CHAR CHARACTER SET utf8mb4
-  ),
+  (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='de' LIMIT 1),
   NOW(3),
   NOW(3)
 )
@@ -310,7 +276,7 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- site_meta_default (localized) – 3 dil
+-- site_meta_default (localized) – TR/EN/DE
 -- =============================================================
 
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
@@ -321,9 +287,12 @@ VALUES
   'tr',
   CAST(
     JSON_OBJECT(
-      'title',       'Ensotek | Endüstriyel Çözümler',
-      'description', 'Endüstriyel soğutma kuleleri, modernizasyon ve enerji verimliliği çözümleri sunan Ensotek Enerji Sistemleri.',
-      'keywords',    'ensotek, endüstriyel, soğutma kulesi, enerji verimliliği, b2b'
+      'title',       'Ensotek | Su Soğutma Kuleleri',
+      'description', CONCAT(
+        @BRAND_LEGAL_TR,
+        ' — CTP malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri. Bakım-onarım, modernizasyon, performans testleri ve yedek parça.'
+      ),
+      'keywords',    'ensotek, su soğutma kulesi, soğutma kulesi, ctp, camelyaf takviyeli polyester, açık tip, kapalı tip, modernizasyon, bakım onarım, performans testi, yedek parça'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),
@@ -335,9 +304,9 @@ VALUES
   'en',
   CAST(
     JSON_OBJECT(
-      'title',       'Ensotek | Industrial Solutions',
-      'description', 'Ensotek Energy Systems provides industrial cooling tower engineering and energy efficiency solutions.',
-      'keywords',    'ensotek, industrial, cooling towers, energy efficiency, b2b'
+      'title',       'Ensotek | Cooling Towers & Technologies',
+      'description', 'ENSOTEK — Open-circuit and closed-circuit cooling towers made of FRP. Installation, maintenance & repair, modernization, performance testing and spare parts.',
+      'keywords',    'ensotek, cooling tower, FRP, fiber reinforced plastic, open circuit, closed circuit, modernization, maintenance, repair, performance testing, spare parts'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),
@@ -349,9 +318,9 @@ VALUES
   'de',
   CAST(
     JSON_OBJECT(
-      'title',       'Ensotek | Industrielle Lösungen',
-      'description', 'Ensotek Energiesysteme bietet industrielle Kühlturmtechnik und Energieeffizienzlösungen.',
-      'keywords',    'ensotek, industriell, kühlturm, energieeffizienz, b2b'
+      'title',       'Ensotek | Kühltürme & Technologien',
+      'description', 'ENSOTEK — Offene und geschlossene Kühltürme aus GFK. Montage, Wartung, Reparatur, Modernisierung, Leistungstests und Ersatzteile.',
+      'keywords',    'ensotek, kühlturm, GFK, glasfaserverstärkter kunststoff, offen, geschlossen, modernisierung, wartung, reparatur, leistungstest, ersatzteile'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),

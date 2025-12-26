@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 type ConsentState = {
   necessary: true; // always true
@@ -46,7 +46,7 @@ export default function CookieSettingsModal({
   btnSave = 'Kaydet',
   btnCancel = 'Vazgeç',
 }: Props) {
-  const [analytics, setAnalytics] = React.useState<boolean>(!!consent.analytics);
+  const [analytics, setAnalytics] = useState<boolean>(!!consent.analytics);
 
   // modal açılınca state sync
   useEffect(() => {
@@ -71,8 +71,17 @@ export default function CookieSettingsModal({
   if (!canRender) return null;
 
   return (
-    <div className="ccm__backdrop" role="dialog" aria-modal="true" aria-label={title}>
-      <div className="ccm__modal">
+    <div
+      className="ccm__backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onMouseDown={(e) => {
+        // modal dışına tıklayınca kapat
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="ccm__modal" onMouseDown={(e) => e.stopPropagation()}>
         <div className="ccm__head">
           <div className="ccm__titles">
             <div className="ccm__title">{title}</div>
