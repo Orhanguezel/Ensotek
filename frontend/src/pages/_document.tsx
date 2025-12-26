@@ -23,6 +23,22 @@ function firstHeader(v: unknown): string {
     .trim();
 }
 
+function pickFirstNonEmpty(...vals: Array<unknown>): string {
+  for (const v of vals) {
+    const s = String(v || '').trim();
+    if (s) return s;
+  }
+  return '';
+}
+
+function getHeader(ctx: DocumentContext, name: string): string {
+  const req = ctx.req;
+  if (!req?.headers) return '';
+  // node lowercases header keys
+  const v = (req.headers as any)[name.toLowerCase()] ?? (req.headers as any)[name];
+  return firstHeader(v);
+}
+
 /**
  * ✅ Canonical origin resolver (proxy + Cloudflare safe)
  * - Prefer forced canonical base via NEXT_PUBLIC_SITE_URL / SITE_URL
@@ -30,40 +46,63 @@ function firstHeader(v: unknown): string {
  * - Fallback: production => https, local => http
  */
 function getReqOrigin(ctx: DocumentContext): string {
-  const req = ctx.req;
-
-  // ✅ İstersen canonical host’u tek yerden kilitle:
-  // NEXT_PUBLIC_SITE_URL=https://www.ensotek.guezelwebdesign.com
   const forced = (process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || '').trim();
   if (forced) return stripTrailingSlash(forced);
 
-  const xfProto = firstHeader(req?.headers?.['x-forwarded-proto']);
-  const xfHost = firstHeader(req?.headers?.['x-forwarded-host']);
-  const host = xfHost || firstHeader(req?.headers?.host);
+  const xfProto = getHeader(ctx, 'x-forwarded-proto');
+  const xfHost = getHeader(ctx, 'x-forwarded-host');
+  const host = xfHost || getHeader(ctx, 'host');
 
-  // Cloudflare bazen xf-proto yerine cf-visitor gönderir:
-  // cf-visitor: {"scheme":"https"}
-  const cfVisitor = firstHeader(req?.headers?.['cf-visitor']);
+  const cfVisitor = getHeader(ctx, 'cf-visitor');
   const cfScheme =
     cfVisitor && cfVisitor.includes('"scheme"')
       ? String(cfVisitor).match(/"scheme"\s*:\s*"([^"]+)"/i)?.[1] || ''
       : '';
 
-  const xfSsl = firstHeader(req?.headers?.['x-forwarded-ssl']); // "on" olabiliyor
+  const xfSsl = getHeader(ctx, 'x-forwarded-ssl');
 
   const isLocal =
     (host || '').toLowerCase().startsWith('localhost') ||
     (host || '').toLowerCase().startsWith('127.0.0.1');
 
-  // ✅ Kritik düzeltme:
-  // - local’de http
-  // - prod’da xf-proto yoksa bile https varsay
   const proto = isLocal
     ? 'http'
     : xfProto || cfScheme || (xfSsl === 'on' ? 'https' : '') || 'https';
 
   const origin = host ? `${proto}://${host}` : 'https://localhost';
   return normalizeLocalhostOrigin(origin);
+}
+
+/**
+ * ✅ REWRITE/PROXY SAFE: public/original request URL (path+query)
+ * - Prefer x-original-uri / x-forwarded-uri etc.
+ * - Fallback to req.url
+ * - If a full URL is provided, reduce to pathname+search
+ */
+function getPublicReqUrl(ctx: DocumentContext): string {
+  const req = ctx.req;
+
+  const cand = pickFirstNonEmpty(
+    getHeader(ctx, 'x-original-uri'),
+    getHeader(ctx, 'x-original-url'),
+    getHeader(ctx, 'x-forwarded-uri'),
+    getHeader(ctx, 'x-rewrite-url'),
+    getHeader(ctx, 'x-matched-path'),
+    req?.url,
+    '/',
+  );
+
+  // Some proxies send full absolute URL
+  try {
+    if (/^https?:\/\//i.test(cand)) {
+      const u = new URL(cand);
+      return `${u.pathname}${u.search}`;
+    }
+  } catch {
+    // ignore
+  }
+
+  return cand.startsWith('/') ? cand : `/${cand}`;
 }
 
 function splitUrl(u: string): { pathname: string; search: string } {
@@ -81,10 +120,6 @@ function normPathname(p?: string): string {
   return x || '/';
 }
 
-/**
- * URL prefix’te sadece short (2 harf) kullanıyoruz.
- * DB’de full tag gelse bile burada short’a indiriyoruz: "de-DE" -> "de".
- */
 function normLocaleShort(x: any, fallback: string): string {
   const v = String(x || '')
     .trim()
@@ -116,11 +151,6 @@ function readLocaleFromPathPrefix(pathname: string): string {
   return normLocaleShort(m?.[1], '');
 }
 
-/**
- * ✅ Strict strip:
- * - activeSet verildiyse sadece o set içindeki locale’leri strip eder
- * - aksi halde strip ETME (yanlışlıkla "/depot" gibi path’leri bozmasın)
- */
 function stripLocalePrefixStrict(pathname: string, activeSet: Set<string>): string {
   const p = normPathname(pathname);
   const m = p.match(/^\/([a-zA-Z]{2})(\/|$)/);
@@ -129,10 +159,9 @@ function stripLocalePrefixStrict(pathname: string, activeSet: Set<string>): stri
   const cand = normLocaleShort(m?.[1], '');
   if (!cand) return p;
 
-  // strict: aktif değilse dokunma
   if (activeSet.size > 0 && !activeSet.has(cand)) return p;
 
-  const rest = p.slice(cand.length + 1); // "/{xx}" length + "/"
+  const rest = p.slice(cand.length + 1);
   return normPathname(rest || '/');
 }
 
@@ -168,8 +197,6 @@ function getApiBaseServer(): string {
     (process.env.NEXT_PUBLIC_API_URL || '').trim();
 
   const base = stripTrailingSlash(raw);
-
-  // ✅ FE logların /api/... gidiyor. Document de aynı olmalı.
   if (base && !/\/api$/i.test(base)) return `${base}/api`;
   return base;
 }
@@ -289,11 +316,9 @@ type HreflangLink = { hrefLang: string; href: string };
 export default class MyDocument extends Document<{
   canonicalAbs?: string;
   htmlLang?: string;
-
-  // ✅ SSR alternates
   hreflangLinks?: HreflangLink[];
 
-  // debug (istersen kaldır)
+  // debug
   debugLocale?: string;
   debugReqUrl?: string;
   debugDefaultLocale?: string;
@@ -304,11 +329,12 @@ export default class MyDocument extends Document<{
 
     const origin = getReqOrigin(ctx);
 
-    const reqUrl = String(ctx.req?.url || '/');
+    // ✅ FIX: use public/original URL (rewrite/proxy safe)
+    const reqUrl = getPublicReqUrl(ctx);
+
     const { pathname: rawPathname, search } = splitUrl(reqUrl);
     const pathname = normPathname(rawPathname);
 
-    // DB locales (server)
     const { defaultLocale: dbDefault, activeLocales: dbActives } = await resolveLocalesFromDb();
     const dbDefaultShort = normLocaleShort(
       dbDefault,
@@ -316,15 +342,12 @@ export default class MyDocument extends Document<{
     );
 
     const activeLocalesShort = (dbActives || []).map((x) => normLocaleShort(x, '')).filter(Boolean);
-
     const activeSet = new Set(activeLocalesShort);
 
-    // ✅ Locale detection
     const lcFromQuery = readLcFromSearch(search);
     const lcFromCtx = normLocaleShort((ctx as any).locale, '');
     const lcFromPath = readLocaleFromPathPrefix(pathname);
 
-    // ✅ Base path: sadece aktif locale ise strip et
     const basePath = stripLocalePrefixStrict(pathname, activeSet);
 
     const effectiveLocale = normLocaleShort(
@@ -332,11 +355,9 @@ export default class MyDocument extends Document<{
       normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr',
     );
 
-    // ✅ Safe locale: aktif değilse DB default’a düş
     const safeLocale =
       activeSet.size > 0 && activeSet.has(effectiveLocale) ? effectiveLocale : dbDefaultShort;
 
-    // ✅ Canonical path
     const canonicalPath =
       DEFAULT_LOCALE_PREFIXLESS && safeLocale === dbDefaultShort
         ? basePath
@@ -344,16 +365,12 @@ export default class MyDocument extends Document<{
 
     const canonicalAbs = normalizeLocalhostOrigin(abs(origin, canonicalPath));
 
-    // ✅ hreflang alternates (SSR)
     const hreflangLinks: HreflangLink[] = [];
-
-    // aktif locale listesi sıralı (default ilk)
     const activesOrdered = activeLocalesShort.length
       ? activeLocalesShort
       : [normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr'];
 
     for (const l of activesOrdered) {
-      // aktif değilse skip (teorik olarak gerekmez, ama deterministik olsun)
       if (activeSet.size > 0 && !activeSet.has(l)) continue;
 
       const href = normalizeLocalhostOrigin(
@@ -362,7 +379,6 @@ export default class MyDocument extends Document<{
       hreflangLinks.push({ hrefLang: l, href });
     }
 
-    // x-default: default locale canonical
     hreflangLinks.push({
       hrefLang: 'x-default',
       href: normalizeLocalhostOrigin(
@@ -370,7 +386,6 @@ export default class MyDocument extends Document<{
       ),
     });
 
-    // uniq
     const seen = new Set<string>();
     const hreflangLinksUniq = hreflangLinks.filter((x) => {
       const k = `${x.hrefLang}|${x.href}`;
@@ -383,10 +398,9 @@ export default class MyDocument extends Document<{
       ...initialProps,
       canonicalAbs,
       htmlLang: safeLocale || dbDefaultShort || FALLBACK_LOCALE,
-
       hreflangLinks: hreflangLinksUniq,
 
-      // debug (istersen sonra kaldır)
+      // debug
       debugLocale: safeLocale,
       debugReqUrl: reqUrl,
       debugDefaultLocale: dbDefaultShort,
@@ -403,11 +417,9 @@ export default class MyDocument extends Document<{
           <link rel="preconnect" href="https://res.cloudinary.com" />
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
 
-          {/* ✅ Canonical + og:url: SSR tek kaynak */}
           {canonicalAbs ? <link rel="canonical" href={canonicalAbs} /> : null}
           {canonicalAbs ? <meta property="og:url" content={canonicalAbs} /> : null}
 
-          {/* ✅ hreflang: SSR tek kaynak */}
           {Array.isArray(hreflangLinks) && hreflangLinks.length
             ? hreflangLinks.map((x: HreflangLink) => (
                 <link

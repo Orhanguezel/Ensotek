@@ -3,8 +3,8 @@
 // Ensotek – GTM preferred, optional GA4 gtag.js (consent-mode)
 // - Pages Router: DO NOT use beforeInteractive outside pages/_document
 // - Consent Mode init via afterInteractive, with queued consent updates
-// - If GTM exists => loads GTM
-// - If GA4 exists => loads gtag.js (send_page_view:false)
+// - If GTM exists => loads GTM (GA4 should be configured in GTM)
+// - If GTM missing but GA4 exists => loads gtag.js (send_page_view:false)
 // =============================================================
 'use client';
 
@@ -18,11 +18,10 @@ declare global {
     gtag?: (...args: any[]) => void;
 
     __setAnalyticsConsent?: (c: { analytics_storage: 'granted' | 'denied' } | boolean) => void;
-
     __analyticsConsentGranted?: boolean;
 
     // consent init gelmeden önce banner tetiklerse kuyruk
-    __pendingAnalyticsConsent?: Array<{ analytics_storage: 'granted' | 'denied' }>;
+    __pendingAnalyticsConsent?: Array<{ analytics_storage: 'granted' | 'denied' } | boolean>;
   }
 }
 
@@ -31,7 +30,7 @@ function isProdEnv() {
 }
 
 export default function AnalyticsScripts() {
-  const { gtmId, ga4Id } = useAnalyticsSettings();
+  const { gtmId, ga4Id, isLoading } = useAnalyticsSettings();
 
   const isProd = isProdEnv();
 
@@ -45,7 +44,7 @@ export default function AnalyticsScripts() {
     return !!s && s.startsWith('G-');
   }, [ga4Id]);
 
-  // GTM noscript (document.tsx yoksa pratik)
+  // GTM noscript (Document kullanılmıyorsa pratik)
   useEffect(() => {
     if (!isProd || !hasGtm || typeof document === 'undefined') return;
 
@@ -67,11 +66,15 @@ export default function AnalyticsScripts() {
   }, [isProd, hasGtm, gtmId]);
 
   if (!isProd) return null;
+
+  // DB'den henüz gelmediyse: hiçbir şey basma (flicker/yanlış init olmasın)
+  if (isLoading) return null;
+
   if (!hasGtm && !hasGa) return null;
 
   return (
     <>
-      {/* 1) Consent Mode init (default denied) + external setter */}
+      {/* 1) Consent Mode init (default denied) + external setter + queue flush */}
       <Script id="analytics-consent-init" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
@@ -110,20 +113,19 @@ export default function AnalyticsScripts() {
             } catch (e) {}
           };
 
-          // Flush queued consent updates (if banner fired before init)
+          // Flush queued consent updates
           try {
             var q = window.__pendingAnalyticsConsent || [];
             for (var i=0; i<q.length; i++) {
-              var item = q[i];
-              window.__setAnalyticsConsent(item);
+              window.__setAnalyticsConsent(q[i]);
             }
             window.__pendingAnalyticsConsent = [];
           } catch (e) {}
         `}
       </Script>
 
-      {/* 2) GTM */}
-      {hasGtm && (
+      {/* 2) GTM (preferred) */}
+      {hasGtm ? (
         <Script id="gtm-src" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){
@@ -138,32 +140,35 @@ export default function AnalyticsScripts() {
             })(window,document,'script','dataLayer','${String(gtmId)}');
           `}
         </Script>
-      )}
-
-      {/* 3) GA4 gtag.js (fallback + “etiket algılama” için) */}
-      {hasGa && (
+      ) : (
+        // 3) GA4 fallback (GTM yoksa)
         <>
-          <Script
-            id="ga-src"
-            src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(String(ga4Id))}`}
-            strategy="afterInteractive"
-          />
-          <Script id="ga-config" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){ window.dataLayer.push(arguments); }
-              window.gtag = window.gtag || gtag;
+          {hasGa ? (
+            <>
+              <Script
+                id="ga-src"
+                src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(
+                  String(ga4Id),
+                )}`}
+                strategy="afterInteractive"
+              />
+              <Script id="ga-config" strategy="afterInteractive">
+                {`
+                  window.dataLayer = window.dataLayer || [];
+                  function gtag(){ window.dataLayer.push(arguments); }
+                  window.gtag = window.gtag || gtag;
 
-              window.gtag('js', new Date());
+                  window.gtag('js', new Date());
 
-              // IMPORTANT:
-              // send_page_view:false to avoid double PV with SPA manual tracking
-              window.gtag('config', '${String(ga4Id)}', {
-                anonymize_ip: true,
-                send_page_view: false
-              });
-            `}
-          </Script>
+                  // send_page_view:false => SPA page_view GAViewPages yönetir
+                  window.gtag('config', '${String(ga4Id)}', {
+                    anonymize_ip: true,
+                    send_page_view: false
+                  });
+                `}
+              </Script>
+            </>
+          ) : null}
         </>
       )}
     </>
