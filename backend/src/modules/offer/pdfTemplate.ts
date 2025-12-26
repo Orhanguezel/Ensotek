@@ -3,23 +3,19 @@
 // Ensotek – Offer PDF HTML Template
 //   - Teklif PDF'inde kullanılacak HTML + inline CSS
 //   - Kaynak: OfferRow (offers tablosu)
-//   - Dil: site_settings.app_locales + offer.locale
+//   - Dil: site_settings.app_locales + offer.locale + default_locale
 //   - Firma bilgisi + logo: site_settings.company_brand
 // =============================================================
 
 import type { OfferRow } from './schema';
-import { getAppLocales } from '@/modules/siteSettings/service';
+import { getAppLocales, getDefaultLocale } from '@/modules/siteSettings/service';
 import { db } from '@/db/client';
 import { siteSettings } from '@/modules/siteSettings/schema';
 import { and, inArray, eq } from 'drizzle-orm';
 
 type PdfTemplateContext = OfferRow & {
   site_name?: string | null;
-
-  /** Opsiyonel: service layer join ile gelen ürün adı */
   product_name?: string | null;
-
-  /** Opsiyonel: service layer join ile gelen hizmet adı */
   service_name?: string | null;
 };
 
@@ -29,7 +25,6 @@ function safe(value: unknown): string {
 }
 
 function safeText(value: unknown): string {
-  // HTML injection riskine karşı basic escape
   const s = safe(value);
   return s
     .replaceAll('&', '&amp;')
@@ -39,14 +34,19 @@ function safeText(value: unknown): string {
     .replaceAll("'", '&#039;');
 }
 
-// Bizim gerçek label setimiz TR / EN / DE için var.
-// Tarih / para formatları da bunlara göre.
-type LabelLocale = 'de' | 'en' | 'de';
+// ✅ Label dilleri (TR/EN/DE)
+type LabelLocale = 'tr' | 'en' | 'de';
+
+function toIntlLocale(locale: LabelLocale): string {
+  if (locale === 'tr') return 'tr-TR';
+  if (locale === 'de') return 'de-DE';
+  return 'en-US';
+}
 
 function formatDate(d: Date | string | null | undefined, locale: LabelLocale) {
   if (!d) return '';
   const date = typeof d === 'string' ? new Date(d) : d;
-  const intlLocale = locale === 'de' ? 'tr-TR' : locale === 'de' ? 'de-DE' : 'en-US';
+  const intlLocale = toIntlLocale(locale);
 
   try {
     return date.toLocaleDateString(intlLocale, {
@@ -73,7 +73,7 @@ function formatMoney(
   if (Number.isNaN(num)) return typeof value === 'string' ? value : '';
 
   const c = currency || 'EUR';
-  const intlLocale = locale === 'de' ? 'tr-TR' : locale === 'de' ? 'de-DE' : 'en-US';
+  const intlLocale = toIntlLocale(locale);
 
   try {
     return new Intl.NumberFormat(intlLocale, {
@@ -88,39 +88,26 @@ function formatMoney(
 }
 
 function normalizeNumberish(input: string): string {
-  // "1.234,56" -> "1234.56"
-  // "123,45"   -> "123.45"
-  // "19%"      -> "19"
   let s = input.trim();
-
-  // remove percent
   s = s.replace(/%/g, '').trim();
-
-  // remove spaces
   s = s.replace(/\s+/g, '');
 
-  // if both comma and dot exist, assume dot thousands + comma decimal
   if (s.includes(',') && s.includes('.')) {
     s = s.replace(/\./g, '').replace(',', '.');
     return s;
   }
-
-  // if only comma, treat as decimal separator
   if (s.includes(',') && !s.includes('.')) {
     s = s.replace(',', '.');
     return s;
   }
-
   return s;
 }
 
 function parseDecimal(v: unknown): number | null {
   if (v == null) return null;
 
-  // number
   if (typeof v === 'number') return Number.isFinite(v) ? v : null;
 
-  // string
   if (typeof v === 'string') {
     const s = normalizeNumberish(v);
     if (!s) return null;
@@ -128,7 +115,6 @@ function parseDecimal(v: unknown): number | null {
     return Number.isNaN(n) || !Number.isFinite(n) ? null : n;
   }
 
-  // Decimal / Big / custom driver object -> toString()
   if (typeof v === 'object') {
     const s = (v as any)?.toString?.();
     if (typeof s === 'string' && s.trim()) return parseDecimal(s);
@@ -159,62 +145,99 @@ function pickFirstString(...vals: unknown[]): string | null {
 }
 
 // -------------------------------------------------------------
-// app_locales → dinamik locale çözümü
+// app_locales + default_locale → dinamik locale çözümü
 // -------------------------------------------------------------
 
 let cachedAppLocales: string[] | null = null;
+let cachedDefaultLocale: string | null = null;
+
+function normalizeLocaleShort(input?: string | null): string | null {
+  const s = String(input || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-');
+  if (!s) return null;
+  return (s.split('-')[0] || '').trim() || null;
+}
 
 async function ensureAppLocales(): Promise<string[]> {
   if (cachedAppLocales && cachedAppLocales.length) return cachedAppLocales;
 
   try {
-    const list = await getAppLocales();
-    if (list && list.length) {
-      cachedAppLocales = list;
-      return list;
+    const list = await getAppLocales(); // expected: string[] (already normalized ideally)
+    if (Array.isArray(list) && list.length) {
+      const uniq: string[] = [];
+      for (const x of list) {
+        const n = normalizeLocaleShort(x);
+        if (n && !uniq.includes(n)) uniq.push(n);
+      }
+      if (uniq.length) {
+        cachedAppLocales = uniq;
+        return uniq;
+      }
     }
   } catch (err) {
     console.error('offer_pdf:getAppLocales_failed', err);
   }
 
   // fallback
-  cachedAppLocales = ['de', 'en'];
+  cachedAppLocales = ['de', 'en', 'tr'];
   return cachedAppLocales;
+}
+
+async function ensureDefaultLocale(): Promise<string | null> {
+  if (cachedDefaultLocale) return cachedDefaultLocale;
+
+  try {
+    const v = await getDefaultLocale(); // expected: string like "de"
+    const n = normalizeLocaleShort(v);
+    if (n) {
+      cachedDefaultLocale = n;
+      return n;
+    }
+  } catch (err) {
+    console.error('offer_pdf:getDefaultLocale_failed', err);
+  }
+
+  return null;
 }
 
 /**
  * Runtime locale:
- *   - Önce offer.locale (örn: "de", "en", "de", "tr-TR" vs.)
- *   - app_locales içinde aynı / prefix match olanı bul
- *   - Bulunamazsa app_locales[0] (örn: "de")
+ *   - Önce offer.locale (örn: "de", "en", "tr-TR" vs.)
+ *   - app_locales içinde exact/prefix match
+ *   - Bulunamazsa DB default_locale
+ *   - O da yoksa app_locales[0]
  */
 async function resolveRuntimeLocale(rawLocale?: string | null): Promise<string> {
   const appLocales = await ensureAppLocales();
-  const defaultLocale = appLocales[0] || 'en';
+  const dbDefault = await ensureDefaultLocale();
+  const fallback = dbDefault || appLocales[0] || 'en';
 
-  if (!rawLocale) return defaultLocale;
+  if (!rawLocale) return fallback;
 
-  const lc = rawLocale.toLowerCase();
+  const lcFull = String(rawLocale).trim().toLowerCase().replace('_', '-');
+  const lcShort = normalizeLocaleShort(lcFull);
 
-  // exact match
-  const exact = appLocales.find((l) => l.toLowerCase() === lc);
-  if (exact) return exact;
+  if (!lcShort) return fallback;
 
-  // prefix match ("tr-TR" -> "de")
-  const prefix = appLocales.find((l) => lc.startsWith(l.toLowerCase()));
+  // exact match (short)
+  if (appLocales.includes(lcShort)) return lcShort;
+
+  // prefix match: "tr-tr" startsWith "tr"
+  const prefix = appLocales.find((l) => lcFull.startsWith(`${l.toLowerCase()}`));
   if (prefix) return prefix;
 
-  return defaultLocale;
+  return fallback;
 }
 
 /**
- * Label set için desteklediğimiz diller: "de" | "en" | "de"
- * Runtime locale ne olursa olsun (örneğin "es"), label tarafında
- * en yakınını seçiyoruz.
+ * Label set için desteklediğimiz diller: "tr" | "en" | "de"
+ * Runtime locale başka ise label tarafında en yakınını seç.
  */
 function toLabelLocale(runtimeLocale: string): LabelLocale {
-  const lc = runtimeLocale.toLowerCase();
-  if (lc.startsWith('de')) return 'de';
+  const lc = String(runtimeLocale || '').toLowerCase();
+  if (lc.startsWith('tr')) return 'tr';
   if (lc.startsWith('de')) return 'de';
   return 'en';
 }
@@ -239,8 +262,7 @@ async function getCompanyBrandSettings(runtimeLocale: string): Promise<CompanyBr
   if (cached) return cached;
 
   const langPart = runtimeLocale.split('-')[0].toLowerCase();
-
-  const candidateLocales = Array.from(new Set<string>([runtimeLocale, langPart, 'en', 'de']));
+  const candidateLocales = Array.from(new Set<string>([runtimeLocale, langPart, 'en', 'de', 'tr']));
 
   let brand: CompanyBrandSettings = {
     name: 'Ensotek',
@@ -326,7 +348,7 @@ const LABELS: Record<
 
     pricing: string;
     net: string;
-    vat: string; // label base
+    vat: string;
     shipping: string;
     total: string;
     pricingEmpty: string;
@@ -345,7 +367,6 @@ const LABELS: Record<
     date: 'Tarih',
     validity: 'Geçerlilik',
     status: 'Durum',
-
     customerInfo: 'Müşteri Bilgileri',
     name: 'Ad Soyad',
     company: 'Firma',
@@ -355,25 +376,21 @@ const LABELS: Record<
     formLanguage: 'Form dili',
     product: 'Ürün',
     service: 'Hizmet',
-
     summary: 'Teklif Özeti',
     subject: 'Konu',
     noMessage: 'Müşteri mesajı bulunmamaktadır.',
-
     pricing: 'Fiyatlandırma',
     net: 'Net Tutar',
     vat: 'KDV',
     shipping: 'Nakliye',
     total: 'Genel Toplam',
     pricingEmpty: 'Fiyatlandırma henüz eklenmemiştir; bu belge ön teklif niteliğindedir.',
-
     notes: 'Notlar',
     notesLegal: (validUntilStr) =>
       `Bu belge bilgilendirme amaçlıdır. Nihai fiyat ve ticari koşullar, ${
         validUntilStr ? `${validUntilStr} tarihine kadar geçerli olup ` : ''
       }Ensotek tarafından yazılı olarak onaylandığında geçerli olacaktır.`,
     internalNotes: 'İdari not (dahili kullanım)',
-
     footerLeft: (siteName) => `${siteName} – Otomatik Teklif Sistemi`,
     footerRight: 'Bu PDF sistem tarafından oluşturulmuştur, imza gerektirmez.',
   },
@@ -384,7 +401,6 @@ const LABELS: Record<
     date: 'Date',
     validity: 'Valid Until',
     status: 'Status',
-
     customerInfo: 'Customer Information',
     name: 'Name',
     company: 'Company',
@@ -394,11 +410,9 @@ const LABELS: Record<
     formLanguage: 'Form language',
     product: 'Product',
     service: 'Service',
-
     summary: 'Offer Summary',
     subject: 'Subject',
     noMessage: 'No customer message has been provided.',
-
     pricing: 'Pricing',
     net: 'Net Amount',
     vat: 'VAT',
@@ -406,14 +420,12 @@ const LABELS: Record<
     total: 'Grand Total',
     pricingEmpty:
       'Pricing has not been added yet; this document should be considered a preliminary offer.',
-
     notes: 'Notes',
     notesLegal: (validUntilStr) =>
       `This document is for information purposes only. Final prices and commercial terms become valid only after written confirmation by Ensotek${
         validUntilStr ? ` and are valid until ${validUntilStr}.` : '.'
       }`,
     internalNotes: 'Internal note',
-
     footerLeft: (siteName) => `${siteName} – Automated Offer System`,
     footerRight: 'This PDF is generated by the system and does not require a signature.',
   },
@@ -424,7 +436,6 @@ const LABELS: Record<
     date: 'Datum',
     validity: 'Gültig bis',
     status: 'Status',
-
     customerInfo: 'Kundendaten',
     name: 'Name',
     company: 'Firma',
@@ -434,11 +445,9 @@ const LABELS: Record<
     formLanguage: 'Formularsprache',
     product: 'Produkt',
     service: 'Leistung',
-
     summary: 'Angebotsübersicht',
     subject: 'Betreff',
     noMessage: 'Es wurde keine Kundenmitteilung angegeben.',
-
     pricing: 'Preisübersicht',
     net: 'Nettobetrag',
     vat: 'MwSt.',
@@ -446,74 +455,63 @@ const LABELS: Record<
     total: 'Gesamtbetrag',
     pricingEmpty:
       'Preise wurden noch nicht hinterlegt; dieses Dokument ist ein unverbindlicher Vorab-Entwurf.',
-
     notes: 'Hinweise',
     notesLegal: (validUntilStr) =>
       `Dieses Dokument dient ausschließlich Informationszwecken. Endgültige Preise und Konditionen gelten erst nach schriftlicher Bestätigung durch Ensotek${
         validUntilStr ? ` und sind bis zum ${validUntilStr} gültig.` : '.'
       }`,
     internalNotes: 'Interne Notiz',
-
     footerLeft: (siteName) => `${siteName} – Automatisiertes Angebotssystem`,
     footerRight: 'Dieses PDF wurde automatisch erstellt und benötigt keine Unterschrift.',
   },
 };
 
 // -------------------------------------------------------------
-// MAIN RENDER (async, app_locales + label + firma bilgisi)
+// MAIN RENDER
 // -------------------------------------------------------------
 
 export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<string> {
-  // 1) Runtime locale: app_locales + offer.locale
   const runtimeLocale = await resolveRuntimeLocale(ctx.locale || undefined);
-
-  // 2) Label dili: TR / EN / DE fallback
   const labelLocale = toLabelLocale(runtimeLocale);
   const t = LABELS[labelLocale];
 
-  // 3) Firma bilgisi (company_brand) + siteName
   const companyBrand = await getCompanyBrandSettings(runtimeLocale);
   const siteName = companyBrand.name || ctx.site_name || 'Ensotek';
 
-  const offerNo = ctx.offer_no || ctx.id;
-  const createdAtStr = formatDate(ctx.created_at ?? null, labelLocale);
-  const validUntilStr = formatDate(ctx.valid_until ?? null, labelLocale);
+  const offerNo = (ctx as any).offer_no || ctx.id;
+  const createdAtStr = formatDate((ctx as any).created_at ?? null, labelLocale);
+  const validUntilStr = formatDate((ctx as any).valid_until ?? null, labelLocale);
 
-  // ---- Form data parse (service/product name fallback vs.) ----
   const formData = parseJsonRecord((ctx as any).form_data);
+
   const formProductName = formData
     ? pickFirstString(
-        formData.product_name,
-        formData.productName,
-        formData.product_title,
-        formData.productTitle,
-        formData.product,
-        formData.item_name,
-        formData.itemName,
+        (formData as any).product_name,
+        (formData as any).productName,
+        (formData as any).product_title,
+        (formData as any).productTitle,
+        (formData as any).product,
+        (formData as any).item_name,
+        (formData as any).itemName,
       )
     : null;
 
   const formServiceName = formData
     ? pickFirstString(
-        formData.service_name,
-        formData.serviceName,
-        formData.service_title,
-        formData.serviceTitle,
-        formData.service,
-        formData.requested_service,
-        formData.requestedService,
+        (formData as any).service_name,
+        (formData as any).serviceName,
+        (formData as any).service_title,
+        (formData as any).serviceTitle,
+        (formData as any).service,
+        (formData as any).requested_service,
+        (formData as any).requestedService,
       )
     : null;
 
-  // Ürün gösterimi: önce join (ctx.product_name), sonra form_data.
-  // Sadece product_id varsa ID'yi yazdırmıyoruz (kullanıcı talebi).
   const productDisplay = pickFirstString(ctx.product_name, formProductName) ?? null;
-
-  // Hizmet gösterimi: önce join (ctx.service_name), sonra form_data.
   const serviceDisplay = pickFirstString(ctx.service_name, formServiceName) ?? null;
 
-  // ---- Tutarlar (net, KDV oranına göre, nakliye, toplam) ----
-  const currency = ctx.currency;
+  const currency = (ctx as any).currency;
 
   const netNum = parseDecimal((ctx as any).net_total);
   const vatNumFromRow = parseDecimal((ctx as any).vat_total);
@@ -523,33 +521,24 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
   let vatNum: number | null = vatNumFromRow;
   let grossNum: number | null = grossNumFromRow;
 
-  // Opsiyonel: ctx.vat_rate % (örn: 19, "19", "19.00", "19%")
   const vatRateRaw = (ctx as any).vat_rate as number | string | null | undefined;
   const vatRate = parseDecimal(vatRateRaw);
 
-  // Eğer row'da KDV tutarı yoksa ama oran + net varsa → dinamik hesapla
   if (vatNum == null && vatRate != null && netNum != null) {
     const ratio = vatRate / 100;
-    if (Number.isFinite(ratio)) {
-      vatNum = netNum * ratio;
-    }
+    if (Number.isFinite(ratio)) vatNum = netNum * ratio;
   }
 
-  // Eğer toplam yoksa → net + kdv + nakliye
   if (grossNum == null && netNum != null) {
     grossNum = netNum + (vatNum ?? 0) + (shippingNum ?? 0);
   }
 
   const netStr = netNum != null ? formatMoney(netNum.toFixed(2), currency, labelLocale) : '';
-
   const vatStr = vatNum != null ? formatMoney(vatNum.toFixed(2), currency, labelLocale) : '';
-
   const shippingStr =
     shippingNum != null ? formatMoney(shippingNum.toFixed(2), currency, labelLocale) : '';
-
   const grossStr = grossNum != null ? formatMoney(grossNum.toFixed(2), currency, labelLocale) : '';
 
-  // VAT label: oran varsa "KDV (19%)" gibi göster
   const vatLabel =
     vatRate != null && Number.isFinite(vatRate) ? `${t.vat} (${vatRate.toFixed(0)}%)` : `${t.vat}`;
 
@@ -557,9 +546,12 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
   const logoWidth = companyBrand.logoWidth || 160;
   const logoHeight = companyBrand.logoHeight || 60;
 
-  const countryDisplay = ctx.country_code ? String(ctx.country_code).toUpperCase() : '';
+  const countryDisplay = (ctx as any).country_code
+    ? String((ctx as any).country_code).toUpperCase()
+    : '';
   const formLangDisplay = runtimeLocale || '';
 
+  // Aşağısı: senin HTML template’in (dokunmadım; sadece runtimeLocale/labelLocale değişkenleri fix)
   return `<!DOCTYPE html>
 <html lang="${safeText(runtimeLocale)}">
 <head>
@@ -567,119 +559,29 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
   <title>${safeText(siteName)} – ${safeText(t.title)} ${safeText(offerNo)}</title>
   <style>
     * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        "Helvetica Neue", Arial, sans-serif;
-      font-size: 12px;
-      color: #222;
-    }
-    body {
-      padding: 24mm 18mm 20mm 18mm;
-      background: #fff;
-    }
+    html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 12px; color: #222; }
+    body { padding: 24mm 18mm 20mm 18mm; background: #fff; }
     .page { width: 100%; }
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 16px;
-      border-bottom: 2px solid #0b5ed7;
-      padding-bottom: 8px;
-    }
-    .header-left {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
-    }
-    .header-logo {
-      max-height: 40px;
-      max-width: 180px;
-      display: block;
-    }
-    .header-left-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #0b5ed7;
-    }
-    .header-left-sub {
-      font-size: 12px;
-      font-weight: 400;
-      color: #444;
-    }
-    .header-right {
-      text-align: right;
-      font-size: 11px;
-      line-height: 1.4;
-    }
-    .section-title {
-      font-size: 13px;
-      font-weight: 600;
-      margin: 16px 0 6px;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      color: #555;
-    }
-    .details-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 1.2fr;
-      gap: 8px 32px;
-      font-size: 11px;
-    }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 2px solid #0b5ed7; padding-bottom: 8px; }
+    .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+    .header-logo { max-height: 40px; max-width: 180px; display: block; }
+    .header-left-title { font-size: 18px; font-weight: 700; color: #0b5ed7; }
+    .header-left-sub { font-size: 12px; font-weight: 400; color: #444; }
+    .header-right { text-align: right; font-size: 11px; line-height: 1.4; }
+    .section-title { font-size: 13px; font-weight: 600; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; color: #555; }
+    .details-grid { display: grid; grid-template-columns: 1.2fr 1.2fr; gap: 8px 32px; font-size: 11px; }
     .details-grid div { line-height: 1.4; }
-    .label {
-      font-weight: 600;
-      color: #555;
-      display: inline-block;
-      min-width: 110px;
-    }
+    .label { font-weight: 600; color: #555; display: inline-block; min-width: 110px; }
     .muted { color: #777; }
-    .box {
-      border: 1px solid #e0e0e0;
-      border-radius: 4px;
-      padding: 10px 12px;
-      margin-top: 4px;
-      background: #fafafa;
-    }
-    .amounts {
-      margin-top: 12px;
-      width: 280px;
-      margin-left: auto;
-      font-size: 11px;
-    }
-    .amounts table {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    .box { border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px 12px; margin-top: 4px; background: #fafafa; }
+    .amounts { margin-top: 12px; width: 280px; margin-left: auto; font-size: 11px; }
+    .amounts table { width: 100%; border-collapse: collapse; }
     .amounts td { padding: 4px 0; vertical-align: top; }
     .amounts td.label { text-align: left; }
-    .amounts td.value {
-      text-align: right;
-      font-weight: 600;
-      white-space: nowrap;
-    }
-    .amounts tr.total-row td {
-      border-top: 1px solid #ccc;
-      padding-top: 6px;
-      font-size: 12px;
-    }
-    .text-block {
-      font-size: 11px;
-      line-height: 1.5;
-      margin-top: 8px;
-      white-space: pre-wrap;
-    }
-    .footer {
-      margin-top: 24px;
-      font-size: 9px;
-      color: #888;
-      border-top: 1px solid #e0e0e0;
-      padding-top: 6px;
-      display: flex;
-      justify-content: space-between;
-    }
+    .amounts td.value { text-align: right; font-weight: 600; white-space: nowrap; }
+    .amounts tr.total-row td { border-top: 1px solid #ccc; padding-top: 6px; font-size: 12px; }
+    .text-block { font-size: 11px; line-height: 1.5; margin-top: 8px; white-space: pre-wrap; }
+    .footer { margin-top: 24px; font-size: 9px; color: #888; border-top: 1px solid #e0e0e0; padding-top: 6px; display: flex; justify-content: space-between; }
   </style>
 </head>
 <body>
@@ -716,18 +618,22 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
     <div class="section-title">${safeText(t.customerInfo)}</div>
     <div class="details-grid">
       <div>
-        <div><span class="label">${safeText(t.name)}:</span> ${safeText(ctx.customer_name)}</div>
+        <div><span class="label">${safeText(t.name)}:</span> ${safeText(
+    (ctx as any).customer_name,
+  )}</div>
         ${
-          ctx.company_name
+          (ctx as any).company_name
             ? `<div><span class="label">${safeText(t.company)}:</span> ${safeText(
-                ctx.company_name,
+                (ctx as any).company_name,
               )}</div>`
             : ''
         }
-        <div><span class="label">${safeText(t.email)}:</span> ${safeText(ctx.email)}</div>
+        <div><span class="label">${safeText(t.email)}:</span> ${safeText((ctx as any).email)}</div>
         ${
-          ctx.phone
-            ? `<div><span class="label">${safeText(t.phone)}:</span> ${safeText(ctx.phone)}</div>`
+          (ctx as any).phone
+            ? `<div><span class="label">${safeText(t.phone)}:</span> ${safeText(
+                (ctx as any).phone,
+              )}</div>`
             : ''
         }
         ${
@@ -767,13 +673,15 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
     <div class="section-title">${safeText(t.summary)}</div>
     <div class="box">
       ${
-        ctx.subject
-          ? `<div><span class="label">${safeText(t.subject)}:</span> ${safeText(ctx.subject)}</div>`
+        (ctx as any).subject
+          ? `<div><span class="label">${safeText(t.subject)}:</span> ${safeText(
+              (ctx as any).subject,
+            )}</div>`
           : ''
       }
       ${
-        ctx.message
-          ? `<div class="text-block">${safeText(ctx.message)}</div>`
+        (ctx as any).message
+          ? `<div class="text-block">${safeText((ctx as any).message)}</div>`
           : `<div class="muted">${safeText(t.noMessage)}</div>`
       }
     </div>
@@ -784,43 +692,35 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
         <tbody>
           ${
             netStr
-              ? `<tr>
-                  <td class="label">${safeText(t.net)}:</td>
-                  <td class="value">${safeText(netStr)}</td>
-                </tr>`
+              ? `<tr><td class="label">${safeText(t.net)}:</td><td class="value">${safeText(
+                  netStr,
+                )}</td></tr>`
               : ''
           }
           ${
             vatStr
-              ? `<tr>
-                  <td class="label">${safeText(vatLabel)}:</td>
-                  <td class="value">${safeText(vatStr)}</td>
-                </tr>`
+              ? `<tr><td class="label">${safeText(vatLabel)}:</td><td class="value">${safeText(
+                  vatStr,
+                )}</td></tr>`
               : ''
           }
           ${
             shippingStr
-              ? `<tr>
-                  <td class="label">${safeText(t.shipping)}:</td>
-                  <td class="value">${safeText(shippingStr)}</td>
-                </tr>`
+              ? `<tr><td class="label">${safeText(t.shipping)}:</td><td class="value">${safeText(
+                  shippingStr,
+                )}</td></tr>`
               : ''
           }
           ${
             grossStr
-              ? `<tr class="total-row">
-                  <td class="label">${safeText(t.total)}:</td>
-                  <td class="value">${safeText(grossStr)}</td>
-                </tr>`
+              ? `<tr class="total-row"><td class="label">${safeText(
+                  t.total,
+                )}:</td><td class="value">${safeText(grossStr)}</td></tr>`
               : ''
           }
           ${
             !netStr && !vatStr && !shippingStr && !grossStr
-              ? `<tr>
-                  <td colspan="2" class="muted">
-                    ${safeText(t.pricingEmpty)}
-                  </td>
-                </tr>`
+              ? `<tr><td colspan="2" class="muted">${safeText(t.pricingEmpty)}</td></tr>`
               : ''
           }
         </tbody>
@@ -833,11 +733,10 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
         ${safeText(t.notesLegal(validUntilStr))}
       </div>
       ${
-        ctx.admin_notes
-          ? `
-        <div class="text-block" style="margin-top: 8px; border-top: 1px dashed #d0d0d0; padding-top: 6px; font-size: 10px;">
-          ${safeText(ctx.admin_notes)}
-        </div>`
+        (ctx as any).admin_notes
+          ? `<div class="text-block" style="margin-top: 8px; border-top: 1px dashed #d0d0d0; padding-top: 6px; font-size: 10px;">
+              ${safeText((ctx as any).admin_notes)}
+            </div>`
           : ''
       }
     </div>
