@@ -27,14 +27,29 @@ const toLocaleShort = (l: any) =>
     .replace('_', '-')
     .split('-')[0] || 'tr';
 
+const isValidUiText = (value: string, key: string) => {
+  const v = String(value ?? '').trim();
+  if (!v) return false;
+
+  // Missing durumda bazı çeviri/DB helper’ları key’i aynen döndürür
+  if (v === key) return false;
+
+  // Bazı sistemlerde "[key]" / "{{key}}" gibi placeholder dönebilir
+  const normalized = v.replace(/\s+/g, '');
+  if (normalized === `[${key}]`) return false;
+  if (normalized === `{{${key}}}`) return false;
+
+  return true;
+};
+
 const Home: NextPage = () => {
   const resolved = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolved), [resolved]);
 
-  // İsteğe bağlı: UI override (ui_home)
+  // UI override (ui_home)
   const { ui } = useUiSection('ui_home', locale);
 
-  // DB: site_title (senin seed’de var)
+  // DB: site_title
   const { data: siteTitleSetting } = useGetSiteSettingByKeyQuery({
     key: 'site_title',
     locale,
@@ -45,9 +60,7 @@ const Home: NextPage = () => {
     return t || 'Ensotek';
   }, [siteTitleSetting?.value]);
 
-  // ✅ SEO-friendly H1 (tek kaynak)
   const h1 = useMemo(() => {
-    // Önce ui_home override, yoksa default
     const fallback =
       locale === 'tr'
         ? 'Ensotek Su Soğutma Kuleleri ve Proses Soğutma Çözümleri'
@@ -55,14 +68,22 @@ const Home: NextPage = () => {
         ? 'Ensotek Kühltürme und Prozesskühlung'
         : 'Ensotek Cooling Towers and Process Cooling Solutions';
 
-    const candidate = String(ui('ui_home_h1', '') || '').trim();
-    if (candidate) return candidate;
+    const key = 'ui_home_h1';
+    const raw = String(ui(key, '') ?? '');
+    const candidate = raw.trim();
 
-    // fallback içinde marka geçmiyorsa başa ekle
-    if (!fallback.toLowerCase().includes(siteTitle.toLowerCase())) {
-      return `${siteTitle} – ${fallback}`;
-    }
-    return fallback;
+    // ✅ 1) UI’dan gelen değer gerçekten geçerliyse onu kullan
+    if (isValidUiText(candidate, key)) return candidate;
+
+    // ✅ 2) Fallback içinde marka yoksa başa ekle (duplicate’ı engelle)
+    const st = String(siteTitle || '').trim() || 'Ensotek';
+    const fb = String(fallback || '').trim() || 'Ensotek';
+
+    const stLower = st.toLowerCase();
+    const fbLower = fb.toLowerCase();
+
+    if (!fbLower.includes(stLower)) return `${st} – ${fb}`;
+    return fb;
   }, [ui, locale, siteTitle]);
 
   return (

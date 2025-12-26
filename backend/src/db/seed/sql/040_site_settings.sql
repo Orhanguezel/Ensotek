@@ -57,7 +57,7 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'default_locale', '*', 'tr', NOW(3), NOW(3))
+(UUID(), 'default_locale', '*', 'de', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -77,7 +77,7 @@ VALUES
     'email','ensotek@ensotek.com.tr',
     'address','Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye',
     'addressSecondary','Fabrika: Saray Mah. Gimat Cad. No:6A 06980 Kahramankazan / Ankara, Türkiye',
-    'whatsappNumber','',
+    'whatsappNumber','+90 531 880 31 51',
     'taxOffice','',
     'taxNumber','',
     'website','https://www.ensotek.de'
@@ -170,7 +170,7 @@ VALUES
     'email','ensotek@ensotek.com.tr',
     'address','Oruçreis District, Tekstilkent Site, A17 Block No:41, 34235 Esenler / Istanbul, Türkiye',
     'addressSecondary','Factory: Saray District, Gimat St. No:6A, 06980 Kahramankazan / Ankara, Türkiye',
-    'whatsappNumber','',
+    'whatsappNumber','+90 531 880 31 51',
     'taxOffice','',
     'taxNumber','',
     'website','https://www.ensotek.de'
@@ -251,7 +251,7 @@ VALUES
     'email','ensotek@ensotek.com.tr',
     'address','Oruçreis Mah., Tekstilkent Sit., A17 Blok No:41, 34235 Esenler / Istanbul, Türkei',
     'addressSecondary','Werk: Saray Mah., Gimat Cad. No:6A, 06980 Kahramankazan / Ankara, Türkei',
-    'whatsappNumber','',
+    'whatsappNumber','+90 531 880 31 51',
     'taxOffice','',
     'taxNumber','',
     'website','https://www.ensotek.de'
