@@ -1,9 +1,8 @@
 -- =============================================================
--- 049-92_site_settings_ui_errors.sql
+-- 049-92_site_settings_ui_errors.sql (FIXED)
 -- Ensotek – UI Errors (site_settings.ui_errors)
 --  - Value: JSON (stored as TEXT)
 --  - Localized: tr / en / de
---  - Extendable: clone from tr as bootstrap (collation-safe)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -13,7 +12,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_errors',
-  'de',
+  'tr',
   CAST(JSON_OBJECT(
     'ui_404_title',         'Sayfa Bulunamadı',
     'ui_404_subtitle',      'Aradığınız sayfa bulunamadı veya taşınmış olabilir.',
@@ -70,26 +69,3 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
-
--- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE): TR → TARGET
--- (Yeni bir locale eklerken, önce tr'yi kopyala sonra ilgili çevirileri güncelle.)
-SET @TARGET_LOCALE := 'de';
-
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT
-  UUID(),
-  s.`key`,
-  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
-  s.`value`,
-  NOW(3),
-  NOW(3)
-FROM site_settings s
-WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('de' COLLATE utf8mb4_unicode_ci)
-  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_errors' COLLATE utf8mb4_unicode_ci)
-  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('de' COLLATE utf8mb4_unicode_ci)
-  AND NOT EXISTS (
-    SELECT 1
-    FROM site_settings t
-    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
-      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
-  );

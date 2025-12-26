@@ -717,3 +717,123 @@ export async function sendOfferEmailOnly(
 
   return res;
 }
+
+// ---------------------------------------------------------------------------
+// OFFER PDF LABELS (localized JSON) - site_settings.offer_pdf_labels
+//   - Uses THIS module's locale fallback (buildLocaleCandidates + getSiteSettingValue)
+//   - No dependency on siteSettings/service.ts internals
+// ---------------------------------------------------------------------------
+
+export type OfferPdfLabels = {
+  title?: string;
+  quoteNo?: string;
+  date?: string;
+  validity?: string;
+  status?: string;
+
+  customerInfo?: string;
+  name?: string;
+  company?: string;
+  email?: string;
+  phone?: string;
+  country?: string;
+  formLanguage?: string;
+  product?: string;
+  service?: string;
+
+  summary?: string;
+  subject?: string;
+  noMessage?: string;
+
+  pricing?: string;
+  net?: string;
+  vat?: string;
+  shipping?: string;
+  total?: string;
+  pricingEmpty?: string;
+
+  notes?: string;
+
+  notesLegalTemplate?: string;
+  validUntilPartTemplate?: string;
+  internalNotes?: string;
+
+  footerLeftTemplate?: string;
+  footerRight?: string;
+};
+
+function tryParseJsonObject(v: unknown): Record<string, unknown> | null {
+  if (!v) return null;
+
+  // DB TEXT bazı yerlerde zaten object gibi gelebilir (driver/seed farkları)
+  if (typeof v === 'object') {
+    return v as Record<string, unknown>;
+  }
+
+  if (typeof v !== 'string') return null;
+
+  const s = v.trim();
+  if (!s) return null;
+
+  try {
+    const parsed = JSON.parse(s);
+    if (parsed && typeof parsed === 'object') return parsed as Record<string, unknown>;
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function pickString(obj: Record<string, unknown>, key: string): string | undefined {
+  const v = obj[key];
+  return typeof v === 'string' && v.trim() ? v.trim() : undefined;
+}
+
+export async function getOfferPdfLabels(locale?: string | null): Promise<OfferPdfLabels | null> {
+  // ✅ localized key
+  const raw = await getSiteSettingValue('offer_pdf_labels', locale);
+  const obj = tryParseJsonObject(raw);
+
+  if (!obj) return null;
+
+  // ✅ Return only known shape (avoid leaking unexpected fields)
+  const out: OfferPdfLabels = {
+    title: pickString(obj, 'title'),
+    quoteNo: pickString(obj, 'quoteNo'),
+    date: pickString(obj, 'date'),
+    validity: pickString(obj, 'validity'),
+    status: pickString(obj, 'status'),
+
+    customerInfo: pickString(obj, 'customerInfo'),
+    name: pickString(obj, 'name'),
+    company: pickString(obj, 'company'),
+    email: pickString(obj, 'email'),
+    phone: pickString(obj, 'phone'),
+    country: pickString(obj, 'country'),
+    formLanguage: pickString(obj, 'formLanguage'),
+    product: pickString(obj, 'product'),
+    service: pickString(obj, 'service'),
+
+    summary: pickString(obj, 'summary'),
+    subject: pickString(obj, 'subject'),
+    noMessage: pickString(obj, 'noMessage'),
+
+    pricing: pickString(obj, 'pricing'),
+    net: pickString(obj, 'net'),
+    vat: pickString(obj, 'vat'),
+    shipping: pickString(obj, 'shipping'),
+    total: pickString(obj, 'total'),
+    pricingEmpty: pickString(obj, 'pricingEmpty'),
+
+    notes: pickString(obj, 'notes'),
+
+    notesLegalTemplate: pickString(obj, 'notesLegalTemplate'),
+    validUntilPartTemplate: pickString(obj, 'validUntilPartTemplate'),
+    internalNotes: pickString(obj, 'internalNotes'),
+
+    footerLeftTemplate: pickString(obj, 'footerLeftTemplate'),
+    footerRight: pickString(obj, 'footerRight'),
+  };
+
+  return out;
+}

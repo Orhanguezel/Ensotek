@@ -1,5 +1,5 @@
 -- =============================================================
--- 023.2_reference_images_i18n.en_de.sql
+-- 023.2_reference_images_i18n.en_de.sql (FIXED)
 -- Create EN/DE image i18n rows from TR if missing
 -- Requires:
 --   - 023_reference_images.schema.sql
@@ -14,18 +14,18 @@ SET @NOW := NOW(3);
 
 -- =============================================================
 -- EN copy (from TR if missing)
--- FK column name assumed: reference_image_id
 -- =============================================================
 INSERT INTO reference_images_i18n
-(id, reference_image_id, locale, alt, created_at, updated_at)
+(id, reference_image_id, locale, title, alt, created_at, updated_at)
 SELECT
   UUID(),
   tr.reference_image_id,
   'en',
+  tr.title,
   tr.alt,
   @NOW, @NOW
 FROM reference_images_i18n tr
-WHERE BINARY tr.locale = BINARY 'de'
+WHERE BINARY tr.locale = BINARY 'tr'
   AND NOT EXISTS (
     SELECT 1
     FROM reference_images_i18n en
@@ -37,15 +37,16 @@ WHERE BINARY tr.locale = BINARY 'de'
 -- DE copy (from TR if missing)
 -- =============================================================
 INSERT INTO reference_images_i18n
-(id, reference_image_id, locale, alt, created_at, updated_at)
+(id, reference_image_id, locale, title, alt, created_at, updated_at)
 SELECT
   UUID(),
   tr.reference_image_id,
   'de',
+  tr.title,
   tr.alt,
   @NOW, @NOW
 FROM reference_images_i18n tr
-WHERE BINARY tr.locale = BINARY 'de'
+WHERE BINARY tr.locale = BINARY 'tr'
   AND NOT EXISTS (
     SELECT 1
     FROM reference_images_i18n de

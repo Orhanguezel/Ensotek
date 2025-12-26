@@ -13,7 +13,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_library',
-  'de',
+  'tr',
   CAST(JSON_OBJECT(
     -- Genel Library
     'ui_library_untitled',                  'Başlıksız içerik',
@@ -160,25 +160,3 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
-
--- OPTIONAL BOOTSTRAP CLONE (COLLATION-SAFE): TR → TARGET
-SET @TARGET_LOCALE := 'de';
-
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
-SELECT
-  UUID(),
-  s.`key`,
-  CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci,
-  s.`value`,
-  NOW(3),
-  NOW(3)
-FROM site_settings s
-WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('de' COLLATE utf8mb4_unicode_ci)
-  AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_library' COLLATE utf8mb4_unicode_ci)
-  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('de' COLLATE utf8mb4_unicode_ci)
-  AND NOT EXISTS (
-    SELECT 1
-    FROM site_settings t
-    WHERE (t.`key`  COLLATE utf8mb4_unicode_ci) = (s.`key` COLLATE utf8mb4_unicode_ci)
-      AND (t.locale COLLATE utf8mb4_unicode_ci) = (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci)
-  );

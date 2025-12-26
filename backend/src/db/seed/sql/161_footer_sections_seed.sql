@@ -41,7 +41,7 @@ INSERT INTO `footer_sections_i18n`
 VALUES
 ('69583ef1-0ba1-4c7c-b806-84fd204b52b9',
  '59583ef1-0ba1-4c7c-b806-84fd204b52b9',
- 'de',
+ 'tr',
  'Hızlı Erişim',
  'hizli-erisim',
  'Kurumsal sayfalara ve sık kullanılan bağlantılara hızlı erişim.',
@@ -50,7 +50,7 @@ VALUES
 
 ('b7d2d4c0-0e2b-4d7c-8a6f-6b1d6c2f1a21',
  'a0e2b2a9-7f0d-4f30-9a64-3ed7bd1d3c10',
- 'de',
+ 'tr',
  'Hizmetler',
  'hizmetler',
  'Bakım, retrofit, mühendislik ve proje hizmetlerimiz.',
@@ -59,7 +59,7 @@ VALUES
 
 ('f942a930-6743-4ecc-b4b3-1fd6b77f9d78',
  'f942a930-6743-4ecc-b4b3-1fd6b77f9d77',
- 'de',
+ 'tr',
  'Kurumsal',
  'kurumsal',
  'Şirket ve yasal bilgilere ait bağlantılar.',
@@ -68,7 +68,7 @@ VALUES
 
 ('9c6b19d1-7f3a-4c0b-8fb6-5d0d1e0c7a11',
  'b3b7e7b2-7d75-4c5f-9b9d-8f0d3c1a0d77',
- 'de',
+ 'tr',
  'Sosyal',
  'sosyal',
  'Sosyal medya hesaplarımız.',

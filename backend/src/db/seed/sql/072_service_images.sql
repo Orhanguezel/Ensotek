@@ -20,7 +20,7 @@ SET @SRV_MAINT_ID := (
   FROM services s
   JOIN services_i18n i
     ON i.service_id = s.id
-   AND i.locale = 'de'
+   AND i.locale = 'tr'
   WHERE i.slug = 'bakim-ve-onarim'
   LIMIT 1
 );
@@ -31,7 +31,7 @@ SET @SRV_MOD_ID := (
   FROM services s
   JOIN services_i18n i
     ON i.service_id = s.id
-   AND i.locale = 'de'
+   AND i.locale = 'tr'
   WHERE i.slug = 'modernizasyon'
   LIMIT 1
 );
@@ -42,7 +42,7 @@ SET @SRV_SPARE_ID := (
   FROM services s
   JOIN services_i18n i
     ON i.service_id = s.id
-   AND i.locale = 'de'
+   AND i.locale = 'tr'
   WHERE i.slug = 'yedek-parcalar-ve-bilesenler'
   LIMIT 1
 );
@@ -53,7 +53,7 @@ SET @SRV_APPREF_ID := (
   FROM services s
   JOIN services_i18n i
     ON i.service_id = s.id
-   AND i.locale = 'de'
+   AND i.locale = 'tr'
   WHERE i.slug = 'uygulamalar-ve-referanslar'
   LIMIT 1
 );
@@ -64,7 +64,7 @@ SET @SRV_ENGSUP_ID := (
   FROM services s
   JOIN services_i18n i
     ON i.service_id = s.id
-   AND i.locale = 'de'
+   AND i.locale = 'tr'
   WHERE i.slug = 'muhendislik-destegi'
   LIMIT 1
 );
@@ -75,7 +75,7 @@ SET @SRV_PROD_ID := (
   FROM services s
   JOIN services_i18n i
     ON i.service_id = s.id
-   AND i.locale = 'de'
+   AND i.locale = 'tr'
   WHERE i.slug = 'uretim'
   LIMIT 1
 );
@@ -136,7 +136,7 @@ INSERT INTO `service_images_i18n`
 SELECT
   UUID(),
   @SRVIMG_MAINT_MAIN_ID,
-  'de',
+  'tr',
   'Bakım ve onarım hizmeti görseli',
   'Soğutma kulesi bakım ve onarım hizmeti',
   'Endüstriyel soğutma kulesi bakım sahası',
@@ -221,7 +221,7 @@ INSERT INTO `service_images_i18n`
 SELECT
   UUID(),
   @SRVIMG_MOD_MAIN_ID,
-  'de',
+  'tr',
   'Modernizasyon hizmeti görseli',
   'Modernize edilmiş soğutma kuleleri',
   'Modernizasyon sonrası yenilenmiş soğutma sistemi',
@@ -291,7 +291,7 @@ INSERT INTO `service_images_i18n`
 SELECT
   UUID(),
   @SRVIMG_SPARE_MAIN_ID,
-  'de',
+  'tr',
   'Yedek parça ve bileşen görseli',
   'Soğutma kulesi yedek parça bileşenleri',
   'Farklı soğutma kulesi yedek parça ve bileşenleri',
@@ -361,7 +361,7 @@ INSERT INTO `service_images_i18n`
 SELECT
   UUID(),
   @SRVIMG_APPREF_MAIN_ID,
-  'de',
+  'tr',
   'Uygulama ve referans görseli',
   'Ensotek uygulama ve referans projeleri',
   'Farklı endüstriyel tesislerde Ensotek soğutma kulesi uygulamaları',
@@ -431,7 +431,7 @@ INSERT INTO `service_images_i18n`
 SELECT
   UUID(),
   @SRVIMG_ENGSUP_MAIN_ID,
-  'de',
+  'tr',
   'Mühendislik desteği görseli',
   'Soğutma kuleleri için mühendislik destek ekibi',
   'Ensotek mühendislik destek ekibi ile proje planlama ve analiz',
@@ -501,7 +501,7 @@ INSERT INTO `service_images_i18n`
 SELECT
   UUID(),
   @SRVIMG_PROD_MAIN_ID,
-  'de',
+  'tr',
   'Üretim hizmeti görseli',
   'Endüstriyel FRP soğutma kulesi üretimi',
   'Ensotek tesislerinde FRP soğutma kulesi üretim hattı',

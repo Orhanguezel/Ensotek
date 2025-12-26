@@ -357,7 +357,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1001-2222-4222-8222-bbbbbbbb1001',
-    'de',
+    'tr',
     'Kule Fan Motoru',
     'kule-fan-motoru',
     'Soğutma kuleleri için yüksek verimli fan motoru. Endüstriyel çalışmaya uygun, uzun ömürlü ve düşük bakım gereksinimli yapı.',
@@ -442,7 +442,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1002-2222-4222-8222-bbbbbbbb1002',
-    'de',
+    'tr',
     'PVC Film Dolgu (Dolgu Bloğu)',
     'pvc-film-dolgu-blogu',
     'Düşük sıcaklıklı proses sularında (maks. ~55°C) ısı transfer yüzeyini artıran PVC film dolgu. Temiz veya çok temiz su uygulamalarında tercih edilir.',
@@ -524,7 +524,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1003-2222-4222-8222-bbbbbbbb1003',
-    'de',
+    'tr',
     'Motor ve Redüktör Grubu',
     'motor-ve-reduktor-grubu',
     'Kulenin çatı bölümünde fan ve fan bacası ile birlikte çalışan motor-redüktör grubu. Fan grubunun ana tahrik ekipmanıdır.',
@@ -609,7 +609,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1004-2222-4222-8222-bbbbbbbb1004',
-    'de',
+    'tr',
     'Titreşim Şalteri',
     'titresim-salteri',
     'Fan grubunda oluşan titreşimi algılayarak elektrik motorunun devreden çıkmasını sağlar. Alüminyum gövdeli; siviç kontaklı, cıva kontaklı ve manyetik tip seçenekleri bulunur.',
@@ -685,7 +685,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1005-2222-4222-8222-bbbbbbbb1005',
-    'de',
+    'tr',
     'Kule Fanı (Vantilatör)',
     'kule-fani-vantilator',
     'Soğutma kulelerinde, tahrik grubundan aldığı hareket ile kule içindeki havanın akışını sağlayan fan. Fan kanatları ayarlanabilir açıya sahiptir; uygulamaya göre malzeme seçimi yapılır.',
@@ -767,7 +767,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1006-2222-4222-8222-bbbbbbbb1006',
-    'de',
+    'tr',
     'Servis Penceresi / Dolgu Boşaltma Kapağı',
     'servis-penceresi-dolgu-bosaltma-kapagi',
     'Kule alt haznesinde dolgu malzemelerine erişim ve bakım için kullanılan servis penceresi. Dolgu bloklarının söküm/boşaltımını kolaylaştırır; gövde malzemesi FRP olup bağlantı elemanları paslanmaz seçeneklidir.',
@@ -849,7 +849,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1007-2222-4222-8222-bbbbbbbb1007',
-    'de',
+    'tr',
     'Su Dağıtım Sistemi',
     'su-dagitim-sistemi',
     'Sıcak suyun dolgu yüzeyine dengeli şekilde dağıtılmasını sağlar. Kule modeline göre PVC, PP veya CTP borulama çözümleri ile tasarlanır.',
@@ -928,7 +928,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1008-2222-4222-8222-bbbbbbbb1008',
-    'de',
+    'tr',
     'Kule Nozulu / Fıskiye (Spray Nozzle Seti)',
     'kule-nozulu-fiskiye-spray-nozzle-seti',
     'Su dağıtım hattından gelen suyu dolgu üzerine püskürterek dağıtır. Kule ihtiyacına göre farklı nozul tipleri ve debi seçenekleri kullanılır.',
@@ -1004,7 +1004,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1009-2222-4222-8222-bbbbbbbb1009',
-    'de',
+    'tr',
     'FRP Taşıyıcı Profiller (Pultrusion)',
     'frp-tasiyici-profiller-pultrusion',
     'Kule iç aksamında dolgu, damla tutucu ve dağıtım elemanlarını taşıyan, yüksek korozyon dayanımlı FRP profiller. Pultrusion üretim tekniği ile stabil kesit ve yüksek mukavemet sağlar.',
@@ -1086,7 +1086,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1010-2222-4222-8222-bbbbbbbb1010',
-    'de',
+    'tr',
     'Damla Tutucu (Drift Eliminator)',
     'damla-tutucu-drift-eliminator',
     'Kule içindeki su damlacıklarını tutarak sürüklenmeyi azaltır. Su kaybını ve çevresel etkileri düşürmeye yardımcı olur. Farklı profil seçenekleri mevcuttur.',
@@ -1162,7 +1162,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1011-2222-4222-8222-bbbbbbbb1011',
-    'de',
+    'tr',
     'PP Bigudi Dolgu (Ring Dolgu)',
     'pp-bigudi-dolgu-ring-dolgu',
     'Kirli/yağlı/kumlu su uygulamalarında tıkanmaya karşı dayanıklı PP bigudi dolgu. Yüksek sıcaklık dayanımı ile (yaklaşık 100°C’ye kadar) zorlu proseslerde tercih edilir.',
@@ -1244,7 +1244,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1012-2222-4222-8222-bbbbbbbb1012',
-    'de',
+    'tr',
     'Sıçratma Tipi Grid Dolgu',
     'sicratma-tipi-grid-dolgu',
     'Çok kirli su ve partiküllü akışkanlarda tıkanmaya karşı dayanıklı sıçratma tipi grid dolgu. Açık devre kulelerde zorlu su şartlarında tercih edilir.',
@@ -1323,7 +1323,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1013-2222-4222-8222-bbbbbbbb1013',
-    'de',
+    'tr',
     'Rashing Halkası (Scrubber Dolgusu)',
     'rashing-halkasi-scrubber-dolgusu',
     'Scrubber sistemlerinde dolgu olarak kullanılan PP rashing halkası. Gaz-sıvı temas yüzeyini artırarak yıkama verimini destekler.',
@@ -1402,7 +1402,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1014-2222-4222-8222-bbbbbbbb1014',
-    'de',
+    'tr',
     'Hava Giriş Filtresi',
     'hava-giris-filtresi',
     'Kuleye giren havadaki partikülleri azaltarak dolgu ve iç aksamı korumaya yardımcı olur. Alüminyum muhafaza, PVC destek ve sık gözenekli filtre opsiyonu ile uygulanır.',
@@ -1484,7 +1484,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1015-2222-4222-8222-bbbbbbbb1015',
-    'de',
+    'tr',
     'Kule Üstü Servis Platformu',
     'kule-ustu-servis-platformu',
     'Kule üst bölümünde servis ve bakım için güvenli çalışma alanı sağlar. FRP platform yüzeyi ve AISI 304 paslanmaz bağlantılarla opsiyonlanabilir.',
