@@ -261,7 +261,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1016-2222-4222-8222-bbbbbbbb1016',
-    'tr',
+    'de',
     'Fan Kayışı (V Kayış)',
     'fan-kayisi-v-kayis',
     'Kayış-kasnak tahrikli fan sistemlerinde kullanılan endüstriyel V-kayış. Doğru gerginlik ve hizalama ile titreşimi azaltır, güç aktarımını stabil tutar.',
@@ -340,7 +340,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1017-2222-4222-8222-bbbbbbbb1017',
-    'tr',
+    'de',
     'Fan Rulmanı / Yatak Rulman Seti',
     'fan-rulmani-yatak-rulman-seti',
     'Fan mili ve yataklama noktasında kullanılan rulman seti. Doğru yağlama ve montaj ile uzun ömür ve düşük titreşim sağlar.',
@@ -419,7 +419,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1018-2222-4222-8222-bbbbbbbb1018',
-    'tr',
+    'de',
     'FRP Fan Bacası (Fan Stack)',
     'frp-fan-bacasi-fan-stack',
     'Fan çıkışında hava akışını düzenleyen FRP fan bacası. Verimi artırmaya, geri dönüşleri azaltmaya ve fan grubunu atmosferik etkilerden korumaya yardımcı olur.',
@@ -498,7 +498,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1019-2222-4222-8222-bbbbbbbb1019',
-    'tr',
+    'de',
     'Redüktör Yağ Kiti',
     'reduktor-yag-kiti',
     'Redüktörlü tahrik sistemlerinde periyodik bakım için yağ kiti. Yağ değişimi ile ısınma ve aşınma riskleri azaltılır; servis ömrü desteklenir.',
@@ -577,7 +577,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1020-2222-4222-8222-bbbbbbbb1020',
-    'tr',
+    'de',
     'Şamandıra (Seviye Kontrol) Valfi',
     'samandira-seviye-kontrol-valfi',
     'Kule havuzunda su seviyesini otomatik kontrol eden şamandıra valfi. Şebeke/make-up su beslemesini seviyeye göre açıp kapatır.',
@@ -656,7 +656,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1021-2222-4222-8222-bbbbbbbb1021',
-    'tr',
+    'de',
     'Damla Tutucu Montaj Seti (Klips/Askı)',
     'damla-tutucu-montaj-seti-klips-aski',
     'Damla tutucu modüllerinin kule içindeki taşıyıcılara sabitlenmesi için klips ve askı seti. Hızlı montaj ve güvenli tutuş sağlar.',
@@ -735,7 +735,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1022-2222-4222-8222-bbbbbbbb1022',
-    'tr',
+    'de',
     'Paslanmaz Bağlantı Elemanları Kiti (AISI 304)',
     'paslanmaz-baglanti-elemanlari-kiti-aisi-304',
     'Kule içi montajlarda korozyon dayanımı için AISI 304 paslanmaz bağlantı elemanları kiti. Civata, somun ve pul seçenekleri ile sahada hızlı servis sağlar.',
@@ -814,7 +814,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1023-2222-4222-8222-bbbbbbbb1023',
-    'tr',
+    'de',
     'Su Dağıtım Kollektörü (Header/Manifold)',
     'su-dagitim-kollektoru-header-manifold',
     'Su dağıtım sisteminin ana kollektörü. Nozul hatlarına debiyi dengeli aktarır; kule modeline göre PVC/PP/CTP seçenekleriyle üretilir.',
@@ -893,7 +893,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1024-2222-4222-8222-bbbbbbbb1024',
-    'tr',
+    'de',
     'Nozul Yedek Memesi (Orifis/Insert)',
     'nozul-yedek-memesi-orifis-insert',
     'Nozul debi karakteristiğini belirleyen yedek meme/orifis parçası. Aşınma veya tıkanma sonrası hızlı değişim ile dağıtım performansını geri kazandırır.',
@@ -972,7 +972,7 @@ VALUES
   -- =========================================================
   (
     'bbbb1025-2222-4222-8222-bbbbbbbb1025',
-    'tr',
+    'de',
     'Titreşim Sensörü (Transmitter)',
     'titresim-sensoru-transmitter',
     'Fan/motor grubunda titreşimi sürekli izleyen titreşim sensörü. Kritik seviyelerde alarm/kapama entegrasyonuna uygundur; kestirimci bakım için veri sağlar.',

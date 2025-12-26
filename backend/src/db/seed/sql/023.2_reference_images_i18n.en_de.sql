@@ -25,7 +25,7 @@ SELECT
   tr.alt,
   @NOW, @NOW
 FROM reference_images_i18n tr
-WHERE BINARY tr.locale = BINARY 'tr'
+WHERE BINARY tr.locale = BINARY 'de'
   AND NOT EXISTS (
     SELECT 1
     FROM reference_images_i18n en
@@ -45,7 +45,7 @@ SELECT
   tr.alt,
   @NOW, @NOW
 FROM reference_images_i18n tr
-WHERE BINARY tr.locale = BINARY 'tr'
+WHERE BINARY tr.locale = BINARY 'de'
   AND NOT EXISTS (
     SELECT 1
     FROM reference_images_i18n de

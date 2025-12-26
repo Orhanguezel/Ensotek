@@ -11,7 +11,7 @@ import { normLocaleTag, pickFromAcceptLanguage, pickFromCookie } from '@/i18n/lo
 const API = (process.env.API_BASE_URL || '').trim();
 
 // Hard fallback only if DB/API not reachable or empty
-export const DEFAULT_LOCALE_FALLBACK = 'tr';
+export const DEFAULT_LOCALE_FALLBACK = 'de';
 
 export type JsonLike = null | boolean | number | string | JsonLike[] | { [k: string]: JsonLike };
 
@@ -87,7 +87,7 @@ export async function fetchActiveLocales(): Promise<string[]> {
  *  1) /site_settings/default-locale (if in activeLocales)
  *  2) /site_settings/app-locales[].is_default=true (active)
  *  3) app-locales[0]
- *  4) fallback "tr"
+ *  4) fallback "de"
  */
 export const getDefaultLocale = cache(async (): Promise<string> => {
   const def = DEFAULT_LOCALE_FALLBACK;

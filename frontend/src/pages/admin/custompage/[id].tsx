@@ -85,7 +85,7 @@ const AdminCustomPageDetailPage: NextPage = () => {
     if (dbDef && localeSet.has(dbDef)) return dbDef;
 
     const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'tr';
+    return first || 'de';
   }, [router.query?.locale, defaultLocaleFromDb, localeOptions, localeSet]);
 
   const [activeLocale, setActiveLocale] = useState<string>('');
@@ -138,7 +138,7 @@ const AdminCustomPageDetailPage: NextPage = () => {
     if (dbDef && localeSet.has(dbDef)) return dbDef;
 
     const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'tr';
+    return first || 'de';
   }, [activeLocale, defaultLocaleFromDb, localeOptions, localeSet]);
 
   const localesReady = !localesLoading && !localesFetching;

@@ -3,7 +3,7 @@
 // Ensotek – Admin Reviews Header / Filters
 // =============================================================
 
-import React from "react";
+import React from 'react';
 
 export type LocaleOption = {
   value: string;
@@ -13,8 +13,8 @@ export type LocaleOption = {
 export type ReviewFilters = {
   search: string;
   locale: string;
-  approval: "all" | "approved" | "pending";
-  active: "all" | "active" | "inactive";
+  approval: 'all' | 'approved' | 'pending';
+  active: 'all' | 'active' | 'inactive';
 };
 
 export type ReviewsHeaderProps = {
@@ -42,11 +42,7 @@ export const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
 }) => {
   const handleChange =
     (field: keyof ReviewFilters) =>
-    (
-      e:
-        | React.ChangeEvent<HTMLInputElement>
-        | React.ChangeEvent<HTMLSelectElement>,
-    ) => {
+    (e: React.ChangeEvent<HTMLInputElement> | React.ChangeEvent<HTMLSelectElement>) => {
       const value = e.target.value;
       onFiltersChange({
         ...filters,
@@ -54,7 +50,7 @@ export const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
       });
     };
 
-  const effectiveDefaultLocale = defaultLocale ?? "tr";
+  const effectiveDefaultLocale = defaultLocale ?? 'de';
 
   return (
     <div className="card mb-3">
@@ -73,7 +69,7 @@ export const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
                 className="form-control form-control-sm"
                 placeholder="İsim, e-posta veya yorum içinde ara..."
                 value={filters.search}
-                onChange={handleChange("search")}
+                onChange={handleChange('search')}
                 disabled={loading}
               />
             </div>
@@ -83,7 +79,7 @@ export const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
               <select
                 className="form-select form-select-sm"
                 value={filters.approval}
-                onChange={handleChange("approval")}
+                onChange={handleChange('approval')}
                 disabled={loading}
               >
                 <option value="all">Hepsi</option>
@@ -97,7 +93,7 @@ export const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
               <select
                 className="form-select form-select-sm"
                 value={filters.active}
-                onChange={handleChange("active")}
+                onChange={handleChange('active')}
                 disabled={loading}
               >
                 <option value="all">Hepsi</option>
@@ -111,15 +107,12 @@ export const ReviewsHeader: React.FC<ReviewsHeaderProps> = ({
               <select
                 className="form-select form-select-sm"
                 value={filters.locale}
-                onChange={handleChange("locale")}
+                onChange={handleChange('locale')}
                 disabled={loading || (localesLoading && !locales.length)}
               >
                 <option value="">
                   (Varsayılan
-                  {effectiveDefaultLocale
-                    ? `: ${effectiveDefaultLocale}`
-                    : ""}
-                  )
+                  {effectiveDefaultLocale ? `: ${effectiveDefaultLocale}` : ''})
                 </option>
                 {locales.map((loc) => (
                   <option key={loc.value} value={loc.value}>

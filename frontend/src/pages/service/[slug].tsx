@@ -38,11 +38,11 @@ import { normLocaleTag } from '@/i18n/localeUtils';
 import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 function safeStr(x: unknown): string {
   return typeof x === 'string' ? x.trim() : '';
@@ -69,7 +69,7 @@ const ServiceDetailPage: React.FC = () => {
   const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
   const defaultLocale = useMemo(() => {
     const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'tr';
+    return v || 'de';
   }, [defaultLocaleRow?.value]);
 
   // Global SEO settings (desc fallback)
@@ -90,11 +90,11 @@ const ServiceDetailPage: React.FC = () => {
   // UI fallbacks
   const listTitleFallback = ui(
     'ui_services_page_title',
-    locale === 'tr' ? 'Hizmetler' : 'Services',
+    locale === 'de' ? 'Hizmetler' : 'Services',
   );
   const detailTitleFallback = ui(
     'ui_services_detail_page_title',
-    locale === 'tr' ? 'Hizmet Detayı' : 'Service Detail',
+    locale === 'de' ? 'Hizmet Detayı' : 'Service Detail',
   );
 
   const bannerTitle = useMemo(() => {

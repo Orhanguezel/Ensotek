@@ -1,39 +1,36 @@
-"use client";
+'use client';
 
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import React from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
-import one from "public/img/svg/cta.svg";
+import one from 'public/img/svg/cta.svg';
 
 const ServiceCta = () => {
   const locale = useResolvedLocale();
-  const isTr = locale === "tr";
+  const isTr = locale === 'de';
 
-  const { ui } = useUiSection("ui_offer", locale);
+  const { ui } = useUiSection('ui_offer', locale);
 
   const offerHref = `/${locale}/offer`;
 
   const title = ui(
-    "ui_offer_cta_title",
+    'ui_offer_cta_title',
     isTr
-      ? "Soğutma kuleleriniz için en uygun çözümü birlikte planlayalım."
-      : "Let’s design the most suitable cooling solution for your plant.",
+      ? 'Soğutma kuleleriniz için en uygun çözümü birlikte planlayalım.'
+      : 'Let’s design the most suitable cooling solution for your plant.',
   );
 
   const description = ui(
-    "ui_offer_cta_text",
+    'ui_offer_cta_text',
     isTr
-      ? "Sisteminizi kısaca anlatın, mühendislik ekibimiz performans ve verimlilik odaklı bir çözüm önersin."
-      : "Tell us briefly about your system and our engineering team will propose a performance-focused solution.",
+      ? 'Sisteminizi kısaca anlatın, mühendislik ekibimiz performans ve verimlilik odaklı bir çözüm önersin.'
+      : 'Tell us briefly about your system and our engineering team will propose a performance-focused solution.',
   );
 
-  const buttonLabel = ui(
-    "ui_offer_cta_button",
-    isTr ? "Teklif iste" : "Request a quote",
-  );
+  const buttonLabel = ui('ui_offer_cta_button', isTr ? 'Teklif iste' : 'Request a quote');
 
   return (
     <div className="cta__area">

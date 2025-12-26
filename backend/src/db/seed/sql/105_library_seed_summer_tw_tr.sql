@@ -24,7 +24,7 @@ SET @LIB_SUMMER_TW := '88888888-8888-8888-8888-888888888888';
 SET @LIB_SUMMER_TW_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'yaz-kuru-yas-termometre-tasarim-degerleri'
   LIMIT 1
 );
@@ -67,7 +67,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_SUMMER_TW_ID, 'tr',
+  UUID(), @LIB_SUMMER_TW_ID, 'de',
   'Türkiye Yaz Kuru ve Yaş Termometre Tasarım Değerleri',
   'yaz-kuru-yas-termometre-tasarim-degerleri',
   'Türkiye\'deki iller için yaz tasarım dönemine ait kuru ve yaş termometre (kuru/yaş) sıcaklık değerlerinin listelendiği referans tablo. Soğutma kulesi ve iklimlendirme tasarımlarında kullanılmak üzere hazırlanmıştır.',

@@ -94,16 +94,16 @@ const norm = (v: unknown) =>
     .split('-')[0]
     .trim();
 
-const getLocaleFromDto = (dto?: CustomPageDto, fallback = 'tr') => {
+const getLocaleFromDto = (dto?: CustomPageDto, fallback = 'de') => {
   const raw = (dto as any)?.locale_resolved ?? (dto as any)?.locale ?? fallback;
-  return norm(raw) || norm(fallback) || 'tr';
+  return norm(raw) || norm(fallback) || 'de';
 };
 
 const buildInitialValues = (
   initial: CustomPageDto | undefined,
   fallbackLocale: string | undefined,
 ): CustomPageFormValues => {
-  const safeLocale = norm(fallbackLocale || 'tr') || 'tr';
+  const safeLocale = norm(fallbackLocale || 'de') || 'de';
 
   if (!initial) {
     return {
@@ -209,7 +209,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const safeDefaultLocale = norm(defaultLocale || 'tr') || 'tr';
+  const safeDefaultLocale = norm(defaultLocale || 'de') || 'de';
 
   const [values, setValues] = useState<CustomPageFormValues>(
     buildInitialValues(initialData, safeDefaultLocale),

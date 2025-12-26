@@ -52,9 +52,9 @@ const GLOBAL_LOCALE = '*' as const;
 
 /**
  * Ensotek için pratik preferred fallback.
- * İstersen ileride 'de' yaparsın ama default akış için 'tr' mantıklı.
+ * İstersen ileride 'de' yaparsın ama default akış için 'de' mantıklı.
  */
-export const PREFERRED_FALLBACK_LOCALE = 'tr' as const;
+export const PREFERRED_FALLBACK_LOCALE = 'de' as const;
 
 const toBool = (v: string | null | undefined): boolean => {
   if (!v) return false;
@@ -283,7 +283,7 @@ function parseAppLocalesValueToMeta(v: unknown): AppLocaleMeta[] {
 export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
   const raw = await getGlobalSettingValue('app_locales');
   if (!raw) {
-    return [{ code: 'tr', label: 'Türkçe', is_default: true, is_active: true }];
+    return [{ code: 'de', label: 'Türkçe', is_default: true, is_active: true }];
   }
 
   const v: unknown = (() => {
@@ -299,7 +299,7 @@ export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
 
   // minimum fallback
   return [
-    { code: 'tr', label: 'Türkçe', is_default: true, is_active: true },
+    { code: 'de', label: 'Türkçe', is_default: true, is_active: true },
     { code: 'en', label: 'English', is_default: false, is_active: true },
     { code: 'de', label: 'Deutsch', is_default: false, is_active: true },
   ];
@@ -313,7 +313,7 @@ export async function getAppLocales(_locale?: string | null): Promise<string[]> 
 export async function getDefaultLocale(_locale?: string | null): Promise<string> {
   const raw = await getGlobalSettingValue('default_locale');
   const s = normalizeLocaleLoose(raw);
-  return s || 'tr';
+  return s || 'de';
 }
 
 export async function getEffectiveDefaultLocale(): Promise<string> {
@@ -324,7 +324,7 @@ export async function getEffectiveDefaultLocale(): Promise<string> {
   if (active.some((m) => m.code === def)) return def;
 
   const fromMeta = active.find((m) => m.is_default)?.code;
-  return (fromMeta || active[0]?.code || def || 'tr').trim().toLowerCase();
+  return (fromMeta || active[0]?.code || def || 'de').trim().toLowerCase();
 }
 
 /**

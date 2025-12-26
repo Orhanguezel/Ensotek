@@ -11,12 +11,12 @@ SET time_zone = '+00:00';
 START TRANSACTION;
 
 -- SERVICE ID’leri (TR slug üzerinden)
-SET @SRV_MAINT_ID := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='tr' WHERE i.slug='bakim-ve-onarim' LIMIT 1);
-SET @SRV_MOD_ID   := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='tr' WHERE i.slug='modernizasyon' LIMIT 1);
-SET @SRV_SPARE_ID := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='tr' WHERE i.slug='yedek-parcalar-ve-bilesenler' LIMIT 1);
-SET @SRV_APPREF_ID:= (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='tr' WHERE i.slug='uygulamalar-ve-referanslar' LIMIT 1);
-SET @SRV_ENGSUP_ID:= (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='tr' WHERE i.slug='muhendislik-destegi' LIMIT 1);
-SET @SRV_PROD_ID  := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='tr' WHERE i.slug='uretim' LIMIT 1);
+SET @SRV_MAINT_ID := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='de' WHERE i.slug='bakim-ve-onarim' LIMIT 1);
+SET @SRV_MOD_ID   := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='de' WHERE i.slug='modernizasyon' LIMIT 1);
+SET @SRV_SPARE_ID := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='de' WHERE i.slug='yedek-parcalar-ve-bilesenler' LIMIT 1);
+SET @SRV_APPREF_ID:= (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='de' WHERE i.slug='uygulamalar-ve-referanslar' LIMIT 1);
+SET @SRV_ENGSUP_ID:= (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='de' WHERE i.slug='muhendislik-destegi' LIMIT 1);
+SET @SRV_PROD_ID  := (SELECT s.id FROM services s JOIN services_i18n i ON i.service_id=s.id AND i.locale='de' WHERE i.slug='uretim' LIMIT 1);
 
 -- image_id’leri (display_order=1)
 SET @IMG_MAINT_ID := (SELECT si.id FROM service_images si WHERE si.service_id=@SRV_MAINT_ID AND si.display_order=1 LIMIT 1);

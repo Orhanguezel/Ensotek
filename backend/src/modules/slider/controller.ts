@@ -1,17 +1,9 @@
 // =============================================================
 // FILE: src/modules/slider/controller.ts  (PUBLIC)
 // =============================================================
-import type { RouteHandler } from "fastify";
-import {
-  publicListQuerySchema,
-  idOrSlugParamSchema,
-  type PublicListQuery,
-} from "./validation";
-import {
-  repoListPublic,
-  repoGetBySlug,
-  type RowWithAsset,
-} from "./repository";
+import type { RouteHandler } from 'fastify';
+import { publicListQuerySchema, idOrSlugParamSchema, type PublicListQuery } from './validation';
+import { repoListPublic, repoGetBySlug, type RowWithAsset } from './repository';
 
 /** FE SlideData (public) */
 type SlideData = {
@@ -24,7 +16,7 @@ type SlideData = {
   buttonLink: string;
   isActive: boolean;
   order: number;
-  priority?: "low" | "medium" | "high";
+  priority?: 'low' | 'medium' | 'high';
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
   locale: string;
@@ -33,19 +25,19 @@ type SlideData = {
 const rowToPublic = (row: RowWithAsset): SlideData => {
   const base = row.sl;
   const t = row.i18n;
-  const url = row.asset_url ?? base.image_url ?? "";
+  const url = row.asset_url ?? base.image_url ?? '';
 
   return {
     id: String(base.id),
     title: t.name,
-    description: t.description ?? "",
+    description: t.description ?? '',
     image: url,
     alt: t.alt ?? undefined,
-    buttonText: t.buttonText ?? "İncele",
-    buttonLink: t.buttonLink ?? "",
+    buttonText: t.buttonText ?? 'İncele',
+    buttonLink: t.buttonLink ?? '',
     isActive: !!base.is_active,
     order: base.display_order ?? 0,
-    priority: base.featured ? "high" : "medium",
+    priority: base.featured ? 'high' : 'medium',
     showOnMobile: true,
     showOnDesktop: true,
     locale: t.locale,
@@ -58,7 +50,7 @@ export const listPublicSlides: RouteHandler = async (req, reply) => {
   if (!parsed.success) {
     return reply.code(400).send({
       error: {
-        message: "invalid_query",
+        message: 'invalid_query',
         issues: parsed.error.flatten(),
       },
     });
@@ -72,25 +64,21 @@ export const listPublicSlides: RouteHandler = async (req, reply) => {
 export const getPublicSlide: RouteHandler = async (req, reply) => {
   const v = idOrSlugParamSchema.safeParse(req.params);
   if (!v.success) {
-    return reply
-      .code(400)
-      .send({ error: { message: "invalid_params" } });
+    return reply.code(400).send({ error: { message: 'invalid_params' } });
   }
 
   const slug = v.data.idOrSlug;
 
-  // locale query string'den; yoksa "tr"
+  // locale query string'den; yoksa "de"
   const q = (req.query ?? {}) as Record<string, unknown>;
-  let locale = "tr";
-  if (typeof q.locale === "string" && q.locale.trim()) {
+  let locale = 'de';
+  if (typeof q.locale === 'string' && q.locale.trim()) {
     locale = q.locale.trim();
   }
 
   const row = await repoGetBySlug(slug, locale);
   if (!row || !row.sl?.is_active) {
-    return reply
-      .code(404)
-      .send({ error: { message: "not_found" } });
+    return reply.code(404).send({ error: { message: 'not_found' } });
   }
   return rowToPublic(row);
 };

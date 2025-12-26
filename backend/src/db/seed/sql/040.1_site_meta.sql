@@ -4,7 +4,7 @@
 --
 -- Standard (Future-proof):
 --   - GLOBAL defaults => locale='*'  (seo, site_seo)
---   - Localized overrides optional => locale='tr','en','de',...
+--   - Localized overrides optional => locale='de','en','de',...
 --   - site_meta_default => localized (per-locale)
 --
 -- Compatible with:
@@ -148,7 +148,7 @@ VALUES
 (
   UUID(),
   'seo',
-  'tr',
+  'de',
   CAST(
     JSON_OBJECT(
       'site_name',      @BRAND_SHORT_TR,
@@ -250,8 +250,8 @@ VALUES
 (
   UUID(),
   'site_seo',
-  'tr',
-  (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='tr' LIMIT 1),
+  'de',
+  (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='de' LIMIT 1),
   NOW(3),
   NOW(3)
 ),
@@ -284,7 +284,7 @@ VALUES
 (
   UUID(),
   'site_meta_default',
-  'tr',
+  'de',
   CAST(
     JSON_OBJECT(
       'title',       'Ensotek | Su Soğutma Kuleleri',

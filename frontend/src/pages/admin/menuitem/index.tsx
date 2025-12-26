@@ -70,7 +70,7 @@ const AdminMenuItemListPage: NextPage = () => {
 
     const routerLocale = (router.locale as string | undefined) ?? undefined;
     const coerced = coerceLocale(routerLocale, defaultLocaleFromDb);
-    return coerced || toShortLocale(routerLocale) || 'tr';
+    return coerced || toShortLocale(routerLocale) || 'de';
   }, [defaultLocaleFromDb, coerceLocale, router.locale]);
 
   /* -------------------- Filters (HEADER ONLY) -------------------- */

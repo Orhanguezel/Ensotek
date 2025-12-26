@@ -2,7 +2,7 @@
 // FILE: src/modules/slider/validation.ts
 // Slider – parent + i18n (kategori pattern'iyle uyumlu)
 // =============================================================
-import { z } from "zod";
+import { z } from 'zod';
 
 /** Ortak: id param (parent id = slider.id) */
 export const idParamSchema = z.object({
@@ -16,14 +16,12 @@ export const idOrSlugParamSchema = z.object({
 
 /** Public list (is_active dışarıdan alınmaz, hep aktifler) */
 export const publicListQuerySchema = z.object({
-  locale: z.string().trim().min(2).max(8).default("tr"),
+  locale: z.string().trim().min(2).max(8).default('de'),
   q: z.string().optional(),
   limit: z.coerce.number().int().min(0).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
-  sort: z
-    .enum(["display_order", "name", "created_at", "updated_at"])
-    .default("display_order"),
-  order: z.enum(["asc", "desc"]).default("asc"),
+  sort: z.enum(['display_order', 'name', 'created_at', 'updated_at']).default('display_order'),
+  order: z.enum(['asc', 'desc']).default('asc'),
 });
 
 /**
@@ -36,10 +34,8 @@ export const adminListQuerySchema = z.object({
   q: z.string().optional(),
   limit: z.coerce.number().int().min(0).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
-  sort: z
-    .enum(["display_order", "name", "created_at", "updated_at"])
-    .default("display_order"),
-  order: z.enum(["asc", "desc"]).default("asc"),
+  sort: z.enum(['display_order', 'name', 'created_at', 'updated_at']).default('display_order'),
+  order: z.enum(['asc', 'desc']).default('asc'),
   is_active: z.coerce.boolean().optional(),
 });
 
@@ -50,7 +46,7 @@ export const adminListQuerySchema = z.object({
  *  - image_url, image_asset_id, featured, is_active, display_order => parent
  */
 export const createSchema = z.object({
-  locale: z.string().trim().min(2).max(8).default("tr"),
+  locale: z.string().trim().min(2).max(8).default('de'),
 
   name: z.string().min(1),
   slug: z

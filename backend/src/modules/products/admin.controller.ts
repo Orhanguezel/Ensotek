@@ -498,7 +498,7 @@ export const adminSetProductImages: RouteHandler = async (req, reply) => {
     .set(patch as any)
     .where(eq(products.id, id));
 
-  // ✅ Hardcode "tr" yok: aktif locale ile merge
+  // ✅ Hardcode "de" yok: aktif locale ile merge
   const locale = getEffectiveLocale(req);
 
   const [row] = await db

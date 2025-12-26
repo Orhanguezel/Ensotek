@@ -74,7 +74,7 @@ VALUES
 (
   UUID(),
   @NEWS_ANNOUNCE_1,
-  'tr',
+  'de',
   'Ensotek Web Sitemiz Yenilendi!',
   'ensotek-web-sitemiz-yenilendi',
   JSON_OBJECT(

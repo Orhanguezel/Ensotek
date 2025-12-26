@@ -73,7 +73,7 @@ VALUES
 (
   UUID(),
   @NEWS_EGYPT_HVACR_2025,
-  'tr',
+  'de',
   'Mısır HVAC-R Fuarını Başarıyla Tamamladık!',
   'misir-hvacr-fuarini-basarili-tamamladik',
   JSON_OBJECT(

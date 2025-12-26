@@ -69,7 +69,7 @@ export function readLocalizedLabel(value: any, locale: RuntimeLocale): string {
  */
 async function fetchSettingsList(locale: RuntimeLocale): Promise<SettingDoc[]> {
   const apiBase = resolveApiBase();
-  const l = toShortLocale(locale) || 'tr'; // son çare: "tr" (istersen FALLBACK_LOCALE kullan)
+  const l = toShortLocale(locale) || 'de'; // son çare: "de" (istersen FALLBACK_LOCALE kullan)
   const url = `${apiBase}/site_settings?locale=${encodeURIComponent(l)}`;
 
   const res = await fetch(url, {

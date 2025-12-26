@@ -17,7 +17,7 @@ INSERT INTO `slider_i18n`
 VALUES
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990001-1111-4111-8111-999999990001'),
-  'tr',
+  'de',
   'Endüstriyel Su Soğutma Kulelerinde Uzman Çözüm Ortağınız',
   'endustriyel-su-sogutma-kulelerinde-uzman-cozum-ortaginiz',
   'Enerji santralleri, endüstriyel tesisler ve ticari binalar için yüksek verimli su soğutma kulesi çözümleri sunuyoruz.',
@@ -27,7 +27,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990002-1111-4111-8111-999999990002'),
-  'tr',
+  'de',
   'Açık ve Kapalı Devre Su Soğutma Kuleleri',
   'acik-ve-kapali-devre-su-sogutma-kuleleri',
   'FRP, galvanizli çelik ve betonarme gövdeli su soğutma kuleleri ile prosesinize en uygun çözümü tasarlıyoruz.',
@@ -37,7 +37,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990003-1111-4111-8111-999999990003'),
-  'tr',
+  'de',
   'Keşif, Projelendirme ve Anahtar Teslim Montaj',
   'kesif-projelendirme-ve-anahtar-teslim-montaj',
   'Saha keşfi, ısı yükü hesapları, mekanik tasarım ve devreye alma süreçlerinin tamamını Ensotek mühendisliği ile yönetiyoruz.',
@@ -47,7 +47,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990004-1111-4111-8111-999999990004'),
-  'tr',
+  'de',
   'Periyodik Bakım ve Revizyon Hizmetleri',
   'periyodik-bakim-ve-revizyon-hizmetleri',
   'Mevcut su soğutma kuleleriniz için nozül, dolgu, fan ve mekanik aksam yenileme ile kapasite ve verimlilik iyileştirmeleri sağlıyoruz.',
@@ -57,7 +57,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990005-1111-4111-8111-999999990005'),
-  'tr',
+  'de',
   'Otomasyon, SCADA ve Uzaktan İzleme Çözümleri',
   'otomasyon-scada-ve-uzaktan-izleme-cozumleri',
   'Su soğutma kulelerinizi enerji tüketimi, debi, sıcaklık ve arıza durumlarına göre gerçek zamanlı izleyebileceğiniz otomasyon altyapısı kuruyoruz.',
@@ -71,7 +71,7 @@ VALUES
 -- =============================================================
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990006-1111-4111-8111-999999990006'),
-  'tr',
+  'de',
   'Yeni Hizmet: Yedek Parçalar ve Kritik Bileşen Tedariği',
   'yeni-hizmet-yedek-parcalar-ve-kritik-bilesen-tedarigi',
   'Nozül, dolgu, fan kanadı, motor, şanzıman, drift eliminator ve mekanik aksamlar için hızlı tedarik ve doğru parça eşleştirme hizmeti sunuyoruz.',
@@ -81,7 +81,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990007-1111-4111-8111-999999990007'),
-  'tr',
+  'de',
   'Yeni Hizmet: Modernizasyon ve Verimlilik Odaklı Retrofit',
   'yeni-hizmet-modernizasyon-ve-verimlilik-odakli-retrofit',
   'Mevcut kulelerinizi daha düşük enerji tüketimi ve daha yüksek performans için revize ediyoruz: dolgu optimizasyonu, fan grubu yükseltme, hidrolik iyileştirmeler ve kapasite artışı.',
@@ -91,7 +91,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990008-1111-4111-8111-999999990008'),
-  'tr',
+  'de',
   'Yeni Hizmet: Proje Danışmanlığı ve Mühendislik Desteği',
   'yeni-hizmet-proje-danismanligi-ve-muhendislik-destegi',
   'Isı yükü analizi, seçim / boyutlandırma, malzeme seçimi, saha koşulları ve devreye alma süreçlerinde uçtan uca mühendislik desteği sağlıyoruz.',
@@ -101,7 +101,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990009-1111-4111-8111-999999990009'),
-  'tr',
+  'de',
   'Yeni Hizmet: Otomasyon, SCADA ve Uzaktan İzleme',
   'yeni-hizmet-otomasyon-scada-ve-uzaktan-izleme',
   'Debi, sıcaklık, iletkenlik, seviye ve enerji tüketimi gibi kritik parametreleri gerçek zamanlı izleyerek arızaları erken yakalayan izleme altyapıları kuruyoruz.',
@@ -111,7 +111,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990010-1111-4111-8111-999999990010'),
-  'tr',
+  'de',
   'Yeni Hizmet: Performans Optimizasyonu ve Enerji Verimliliği',
   'yeni-hizmet-performans-optimizasyonu-ve-enerji-verimliligi',
   'Yerinde ölçümler ve raporlama ile yaklaşım sıcaklığı, kapasite, fan verimi ve su kimyası parametrelerini iyileştirerek enerji maliyetlerini düşürüyoruz.',
@@ -121,7 +121,7 @@ VALUES
 ),
 (
   (SELECT `id` FROM `slider` WHERE `uuid` = '99990011-1111-4111-8111-999999990011'),
-  'tr',
+  'de',
   'Yeni Hizmet: Acil Servis ve Arıza Müdahale',
   'yeni-hizmet-acil-servis-ve-ariza-mudahale',
   'Kritik duruşlara karşı hızlı müdahale, parça değişimi, devreye alma ve güvenli yeniden çalıştırma süreçlerinde uzman saha ekibi ile yanınızdayız.',

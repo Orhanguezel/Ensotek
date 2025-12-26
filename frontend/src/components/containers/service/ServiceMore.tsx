@@ -26,11 +26,11 @@ import { FiArrowRight } from 'react-icons/fi';
 const FALLBACK_IMG = '/img/project/project-thumb.jpg';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 interface ServiceMoreProps {
   currentSlug?: string;
@@ -46,7 +46,7 @@ const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
   const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
   const defaultLocale = useMemo(() => {
     const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'tr';
+    return v || 'de';
   }, [defaultLocaleRow?.value]);
 
   const { data, isLoading } = useListServicesPublicQuery({

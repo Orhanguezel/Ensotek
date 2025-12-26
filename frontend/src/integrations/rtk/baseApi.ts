@@ -106,7 +106,7 @@ type RBQ = BaseQueryFn<
   FetchBaseQueryMeta
 >;
 
-const DEFAULT_LOCALE = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE as string | undefined) || 'tr';
+const DEFAULT_LOCALE = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE as string | undefined) || 'de';
 
 /**
  * Bu path’lerde Authorization header’ı eklemek çoğu cookie-auth backend’de sorun çıkarır.

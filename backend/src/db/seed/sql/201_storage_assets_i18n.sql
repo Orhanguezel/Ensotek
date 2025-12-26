@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `storage_assets_i18n` (
 INSERT INTO storage_assets_i18n
 (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
 VALUES
-(UUID(), @ASSET_HERO_ID, 'tr', 'Hero', 'Hero', 'Featured image', NULL, NOW(3), NOW(3))
+(UUID(), @ASSET_HERO_ID, 'de', 'Hero', 'Hero', 'Featured image', NULL, NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
@@ -44,7 +44,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO storage_assets_i18n
 (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
 VALUES
-(UUID(), @ASSET_REF1_ID, 'tr', 'Ref1', 'Ref1', 'Featured image', NULL, NOW(3), NOW(3))
+(UUID(), @ASSET_REF1_ID, 'de', 'Ref1', 'Ref1', 'Featured image', NULL, NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
@@ -55,7 +55,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO storage_assets_i18n
 (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
 VALUES
-(UUID(), @ASSET_REF2_ID, 'tr', 'Ref2', 'Ref2', 'Featured image', NULL, NOW(3), NOW(3))
+(UUID(), @ASSET_REF2_ID, 'de', 'Ref2', 'Ref2', 'Featured image', NULL, NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
@@ -66,7 +66,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO storage_assets_i18n
 (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
 VALUES
-(UUID(), @ASSET_G1A_ID, 'tr', 'Galeri1A', 'Galeri 1A', 'Gallery image', NULL, NOW(3), NOW(3))
+(UUID(), @ASSET_G1A_ID, 'de', 'Galeri1A', 'Galeri 1A', 'Gallery image', NULL, NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
@@ -77,7 +77,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO storage_assets_i18n
 (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
 VALUES
-(UUID(), @ASSET_G1B_ID, 'tr', 'Galeri1B', 'Galeri 1B', 'Gallery image', NULL, NOW(3), NOW(3))
+(UUID(), @ASSET_G1B_ID, 'de', 'Galeri1B', 'Galeri 1B', 'Gallery image', NULL, NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
@@ -88,7 +88,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO storage_assets_i18n
 (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
 VALUES
-(UUID(), @ASSET_G2A_ID, 'tr', 'Galeri2A', 'Galeri 2A', 'Gallery image', NULL, NOW(3), NOW(3))
+(UUID(), @ASSET_G2A_ID, 'de', 'Galeri2A', 'Galeri 2A', 'Gallery image', NULL, NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title=VALUES(title),
   alt=VALUES(alt),
@@ -169,7 +169,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO storage_assets_i18n (id, asset_id, locale, title, alt, caption, description, created_at, updated_at)
 SELECT UUID(), s.asset_id, 'de', s.title, s.alt, s.caption, s.description, NOW(3), NOW(3)
 FROM storage_assets_i18n s
-WHERE s.locale='tr'
+WHERE s.locale='de'
   AND NOT EXISTS (
     SELECT 1
     FROM storage_assets_i18n t

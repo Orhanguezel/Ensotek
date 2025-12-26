@@ -51,7 +51,7 @@ const AdminFooterSectionEditPage: React.FC = () => {
     const q = pickFirstString(router.query.locale);
     const r = typeof router.locale === 'string' ? router.locale : '';
     const resolved = coerceLocale(q || r, defaultLocaleFromDb) || q || r || defaultLocaleFromDb;
-    return toShortLocale(resolved) || 'tr';
+    return toShortLocale(resolved) || 'de';
   }, [router.query.locale, router.locale, coerceLocale, defaultLocaleFromDb]);
 
   const shouldSkip = !router.isReady || localesLoading || !id || !effectiveLocale;

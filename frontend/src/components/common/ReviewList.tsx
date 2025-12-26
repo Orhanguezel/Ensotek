@@ -4,20 +4,20 @@
 // i18n: site_settings.ui_feedback (list_* ve reaction_* key'leri)
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useMemo, useState } from "react";
-import { toast } from "sonner";
+import React, { useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import {
   useListReviewsPublicQuery,
   useAddReviewReactionPublicMutation,
-} from "@/integrations/rtk/hooks";
-import type { ReviewDto } from "@/integrations/types/review.types";
+} from '@/integrations/rtk/hooks';
+import type { ReviewDto } from '@/integrations/types/review.types';
 
 // Yeni i18n helper'lar
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
 type ReviewListProps = {
   targetType: string;
@@ -32,7 +32,7 @@ function renderStars(rating: number) {
   return (
     <span>
       {Array.from({ length: 5 }).map((_, idx) => (
-        <span key={idx} style={{ color: idx < full ? "#f5c518" : "#ddd" }}>
+        <span key={idx} style={{ color: idx < full ? '#f5c518' : '#ddd' }}>
           ★
         </span>
       ))}
@@ -49,73 +49,61 @@ const ReviewList: React.FC<ReviewListProps> = ({
 }) => {
   // FE locale (prop öncelikli)
   const resolvedLocale = useResolvedLocale();
-  const locale = (localeProp || resolvedLocale) ?? "en";
+  const locale = (localeProp || resolvedLocale) ?? 'en';
 
-  const { ui } = useUiSection("ui_feedback", locale);
+  const { ui } = useUiSection('ui_feedback', locale);
 
   const title = ui(
-    "ui_feedback_list_title",
-    locale === "tr"
-      ? "Müşteri Yorumları"
-      : locale === "de"
-        ? "Kundenbewertungen"
-        : "Customer Reviews",
+    'ui_feedback_list_title',
+    locale === 'de'
+      ? 'Müşteri Yorumları'
+      : locale === 'de'
+      ? 'Kundenbewertungen'
+      : 'Customer Reviews',
   );
   const noReviewsText = ui(
-    "ui_feedback_list_no_reviews",
-    locale === "tr"
-      ? "Bu içerik için henüz yorum yok."
-      : locale === "de"
-        ? "Für diesen Inhalt gibt es noch keine Bewertungen."
-        : "There are no reviews for this item yet.",
+    'ui_feedback_list_no_reviews',
+    locale === 'de'
+      ? 'Bu içerik için henüz yorum yok.'
+      : locale === 'de'
+      ? 'Für diesen Inhalt gibt es noch keine Bewertungen.'
+      : 'There are no reviews for this item yet.',
   );
   const avgRatingLabel = ui(
-    "ui_feedback_list_avg_rating",
-    locale === "tr"
-      ? "Ortalama Puan"
-      : locale === "de"
-        ? "Durchschnittliche Bewertung"
-        : "Average Rating",
+    'ui_feedback_list_avg_rating',
+    locale === 'de'
+      ? 'Ortalama Puan'
+      : locale === 'de'
+      ? 'Durchschnittliche Bewertung'
+      : 'Average Rating',
   );
   const reviewsSuffix = ui(
-    "ui_feedback_list_reviews_suffix",
-    locale === "tr"
-      ? "yorum"
-      : locale === "de"
-        ? "Bewertungen"
-        : "reviews",
+    'ui_feedback_list_reviews_suffix',
+    locale === 'de' ? 'yorum' : locale === 'de' ? 'Bewertungen' : 'reviews',
   );
   const helpfulLabel = ui(
-    "ui_feedback_list_helpful",
-    locale === "tr"
-      ? "Faydalı"
-      : locale === "de"
-        ? "Hilfreich"
-        : "Helpful",
+    'ui_feedback_list_helpful',
+    locale === 'de' ? 'Faydalı' : locale === 'de' ? 'Hilfreich' : 'Helpful',
   );
   const likedLabel = ui(
-    "ui_feedback_list_liked",
-    locale === "tr"
-      ? "Teşekkürler"
-      : locale === "de"
-        ? "Danke"
-        : "Thanks",
+    'ui_feedback_list_liked',
+    locale === 'de' ? 'Teşekkürler' : locale === 'de' ? 'Danke' : 'Thanks',
   );
   const errorText = ui(
-    "ui_feedback_list_error",
-    locale === "tr"
-      ? "İşlem sırasında bir hata oluştu."
-      : locale === "de"
-        ? "Beim Vorgang ist ein Fehler aufgetreten."
-        : "An error occurred while processing your request.",
+    'ui_feedback_list_error',
+    locale === 'de'
+      ? 'İşlem sırasında bir hata oluştu.'
+      : locale === 'de'
+      ? 'Beim Vorgang ist ein Fehler aufgetreten.'
+      : 'An error occurred while processing your request.',
   );
   const loadingText = ui(
-    "ui_feedback_list_loading",
-    locale === "tr"
-      ? "Yorumlar yükleniyor..."
-      : locale === "de"
-        ? "Bewertungen werden geladen..."
-        : "Loading reviews...",
+    'ui_feedback_list_loading',
+    locale === 'de'
+      ? 'Yorumlar yükleniyor...'
+      : locale === 'de'
+      ? 'Bewertungen werden geladen...'
+      : 'Loading reviews...',
   );
 
   const { data, isLoading, isError } = useListReviewsPublicQuery({
@@ -124,22 +112,16 @@ const ReviewList: React.FC<ReviewListProps> = ({
     locale,
     approved: true,
     active: true,
-    orderBy: "created_at",
-    order: "desc",
+    orderBy: 'created_at',
+    order: 'desc',
     limit: 100,
   });
 
-  const [addReaction, { isLoading: isReacting }] =
-    useAddReviewReactionPublicMutation();
-  const [reactionReviewId, setReactionReviewId] = useState<string | null>(
-    null,
-  );
+  const [addReaction, { isLoading: isReacting }] = useAddReviewReactionPublicMutation();
+  const [reactionReviewId, setReactionReviewId] = useState<string | null>(null);
 
   // data ?? [] işlemini de useMemo içine alıyoruz (eslint uyarısını çözmek için)
-  const reviews: ReviewDto[] = useMemo(
-    () => data ?? [],
-    [data],
-  );
+  const reviews: ReviewDto[] = useMemo(() => data ?? [], [data]);
 
   const stats = useMemo(() => {
     if (!reviews.length) {
@@ -159,7 +141,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
       // RTK invalidate sonrası liste yeniden gelecek, count güncellenir
       toast.success(likedLabel);
     } catch (err) {
-      console.error("addReaction error", err);
+      console.error('addReaction error', err);
       toast.error(errorText);
     } finally {
       setReactionReviewId(null);
@@ -193,11 +175,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
 
       <div className="list-group">
         {reviews.map((r) => (
-          <div
-            key={r.id}
-            className="list-group-item mb-2"
-            style={{ borderRadius: 4 }}
-          >
+          <div key={r.id} className="list-group-item mb-2" style={{ borderRadius: 4 }}>
             <div className="d-flex justify-content-between align-items-start mb-1">
               <div>
                 <strong>{r.name}</strong>
@@ -211,7 +189,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
             </div>
 
             {r.comment && (
-              <p className="mb-2" style={{ whiteSpace: "pre-line" }}>
+              <p className="mb-2" style={{ whiteSpace: 'pre-line' }}>
                 {r.comment}
               </p>
             )}

@@ -15,7 +15,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 (
   UUID(),
   'ui_products',
-  'tr',
+  'de',
   CAST(
     JSON_OBJECT(
       'ui_products_kicker_prefix',        'Ensotek',
@@ -164,9 +164,9 @@ SELECT
   NOW(3),
   NOW(3)
 FROM site_settings s
-WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('tr' COLLATE utf8mb4_unicode_ci)
+WHERE (s.locale COLLATE utf8mb4_unicode_ci) = ('de' COLLATE utf8mb4_unicode_ci)
   AND (s.`key`  COLLATE utf8mb4_unicode_ci) = ('ui_products' COLLATE utf8mb4_unicode_ci)
-  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('tr' COLLATE utf8mb4_unicode_ci)
+  AND (CONVERT(@TARGET_LOCALE USING utf8mb4) COLLATE utf8mb4_unicode_ci) <> ('de' COLLATE utf8mb4_unicode_ci)
   AND NOT EXISTS (
     SELECT 1
     FROM site_settings t

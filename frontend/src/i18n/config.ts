@@ -4,7 +4,7 @@
 //  - Only constants that are truly static (rtl list etc.)
 // =============================================================
 
-export const FALLBACK_LOCALE = "tr";
+export const FALLBACK_LOCALE = "de";
 
 /** RTL set sabit olabilir (bu bir “dil listesi yönetimi” değil, yazım yönü bilgisidir) */
 export const KNOWN_RTL = new Set([

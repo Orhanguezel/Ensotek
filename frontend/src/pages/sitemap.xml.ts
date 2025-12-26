@@ -64,7 +64,7 @@ function computeActiveLocales(meta: AppLocaleMeta[] | null | undefined): string[
 
   const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  const fb = normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr';
+  const fb = normLocaleShort(FALLBACK_LOCALE, 'de') || 'de';
   return out.length ? out : [fb];
 }
 
@@ -227,7 +227,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 
   const fromDefaultEndpoint = normalizeDefaultLocaleValue(defaultLocaleRaw);
   const defaultLocale =
-    fromDefaultEndpoint || activeLocales[0] || normLocaleShort(FALLBACK_LOCALE, 'tr') || 'tr';
+    fromDefaultEndpoint || activeLocales[0] || normLocaleShort(FALLBACK_LOCALE, 'de') || 'de';
 
   // hreflang map helper (SITE closure)
   function langAlt(basePath: string) {

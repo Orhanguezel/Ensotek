@@ -30,11 +30,11 @@ const CARD_H = 480;
 const PAGE_LIMIT = 12;
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 // Kısa açıklama helper'ı
 function makeExcerpt(text: string, maxLength = 140): string {
@@ -65,31 +65,31 @@ const ProductPageContent: React.FC = () => {
   const sectionSubtitlePrefix = ui('ui_products_kicker_prefix', 'Ensotek');
   const sectionSubtitleLabel = ui(
     'ui_products_kicker_label',
-    locale === 'tr' ? 'Ürünlerimiz' : 'Our Products',
+    locale === 'de' ? 'Ürünlerimiz' : 'Our Products',
   );
 
-  const sectionTitle = ui('ui_products_page_title', locale === 'tr' ? 'Ürünlerimiz' : 'Products');
+  const sectionTitle = ui('ui_products_page_title', locale === 'de' ? 'Ürünlerimiz' : 'Products');
 
   const sectionIntro = ui(
     'ui_products_page_intro',
-    locale === 'tr'
+    locale === 'de'
       ? 'Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler.'
       : 'Selected products for industrial cooling towers and related equipment.',
   );
 
   const readMore = ui(
     'ui_products_read_more',
-    locale === 'tr' ? 'Detayları görüntüle' : 'View details',
+    locale === 'de' ? 'Detayları görüntüle' : 'View details',
   );
 
   const readMoreAria = ui(
     'ui_products_read_more_aria',
-    locale === 'tr' ? 'ürün detayını görüntüle' : 'view product details',
+    locale === 'de' ? 'ürün detayını görüntüle' : 'view product details',
   );
 
   const emptyText = ui(
     'ui_products_empty',
-    locale === 'tr'
+    locale === 'de'
       ? 'Şu anda görüntülenecek ürün bulunmamaktadır.'
       : 'There are no products to display at the moment.',
   );

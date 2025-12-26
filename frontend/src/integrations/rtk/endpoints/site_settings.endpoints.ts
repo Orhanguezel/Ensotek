@@ -162,7 +162,7 @@ export const siteSettingsApi = baseApi.injectEndpoints({
         if (typeof res === 'string') return res.trim().toLowerCase() || null;
         if (res == null) return null;
 
-        // toleranslı: { value: "tr" }
+        // toleranslı: { value: "de" }
         if (typeof res === 'object' && (res as any).value) {
           const v = (res as any).value;
           if (typeof v === 'string') return v.trim().toLowerCase() || null;

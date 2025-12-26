@@ -54,7 +54,7 @@ type ReferencesFormState = ReferencesFormValues & {
 /* map DTO → form state */
 const mapDtoToFormState = (item: ReferenceDto): ReferencesFormState => ({
   id: String((item as any).id ?? ''),
-  locale: String((item as any).locale ?? 'tr').toLowerCase(),
+  locale: String((item as any).locale ?? 'de').toLowerCase(),
 
   is_published: isTruthyBoolLike((item as any).is_published),
   is_featured: isTruthyBoolLike((item as any).is_featured),
@@ -150,7 +150,7 @@ const ReferencesFormPage: React.FC<ReferencesFormPageProps> = ({
     if (!formState && !localesLoading && localeOptions.length > 0) {
       setFormState({
         id: undefined,
-        locale: effectiveLocale || String(localeOptions[0]?.value || 'tr').toLowerCase(),
+        locale: effectiveLocale || String(localeOptions[0]?.value || 'de').toLowerCase(),
 
         is_published: true,
         is_featured: false,
@@ -196,7 +196,7 @@ const ReferencesFormPage: React.FC<ReferencesFormPageProps> = ({
   const handleLocaleChange = async (nextLocaleRaw: string) => {
     if (!formState) return;
 
-    const nextLocale = (coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || 'tr').toLowerCase();
+    const nextLocale = (coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || 'de').toLowerCase();
 
     // UI anında güncellensin (header/form)
     setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
@@ -291,7 +291,7 @@ const ReferencesFormPage: React.FC<ReferencesFormPageProps> = ({
     const normalizedLocale = (
       coerceLocale(formState.locale, defaultLocaleFromDb) ||
       formState.locale ||
-      'tr'
+      'de'
     ).toLowerCase();
 
     const payload = {

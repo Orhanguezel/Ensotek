@@ -263,7 +263,7 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
         const seed =
           DEFAULT_SITE_META_DEFAULT_BY_LOCALE[targetLocale] ||
           DEFAULT_SITE_META_DEFAULT_BY_LOCALE[locale] ||
-          DEFAULT_SITE_META_DEFAULT_BY_LOCALE['tr'];
+          DEFAULT_SITE_META_DEFAULT_BY_LOCALE['de'];
         await updateSetting({ key, locale: targetLocale, value: seed }).unwrap();
       } else {
         toast.error('Bu key için default tanımlı değil.');

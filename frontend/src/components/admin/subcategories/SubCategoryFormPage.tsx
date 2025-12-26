@@ -133,8 +133,11 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   /* -------------------- i18n locales (DB) -------------------- */
-  const { localeOptions, defaultLocaleFromDb: defaultLocale, loading: isLocalesLoading } =
-    useAdminLocales();
+  const {
+    localeOptions,
+    defaultLocaleFromDb: defaultLocale,
+    loading: isLocalesLoading,
+  } = useAdminLocales();
 
   /* -------------------- Categories (for category_id select) -------------------- */
   // NOT: locale filtrelemiyoruz; çünkü edit modunda mevcut category_id farklı locale satırında olabilir.
@@ -181,7 +184,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
       if (!categoryOptions.length) return;
 
       const routerLocale = (router.locale as string | undefined)?.toLowerCase();
-      const nextLocale = routerLocale || defaultLocale || localeOptions[0]?.value || 'tr';
+      const nextLocale = routerLocale || defaultLocale || localeOptions[0]?.value || 'de';
       const nextCategoryId = categoryOptions[0]?.value || '';
 
       setFormState({
@@ -318,7 +321,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
 
     const payloadBase = {
       category_id: formState.category_id,
-      locale: (formState.locale || defaultLocale || 'tr').toLowerCase(),
+      locale: (formState.locale || defaultLocale || 'de').toLowerCase(),
       name: formState.name.trim(),
       slug: formState.slug.trim(),
       description: formState.description.trim() || undefined,

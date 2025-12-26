@@ -4,16 +4,16 @@
 // i18n: site_settings.ui_feedback (form_* key'leri)
 // =============================================================
 
-"use client";
+'use client';
 
-import React, { useMemo, useState, FormEvent } from "react";
-import { toast } from "sonner";
+import React, { useMemo, useState, FormEvent } from 'react';
+import { toast } from 'sonner';
 
-import { useCreateReviewPublicMutation } from "@/integrations/rtk/hooks";
-import type { ReviewDto } from "@/integrations/types/review.types";
+import { useCreateReviewPublicMutation } from '@/integrations/rtk/hooks';
+import type { ReviewDto } from '@/integrations/types/review.types';
 
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
 type ReviewFormProps = {
   targetType: string;
@@ -44,149 +44,112 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   // FE locale (prop öncelikli, yoksa resolvedLocale)
   const resolvedLocale = useResolvedLocale();
-  const locale = (localeProp || resolvedLocale || "en").split("-")[0];
+  const locale = (localeProp || resolvedLocale || 'en').split('-')[0];
 
   // ui_feedback section'ından metinler
-  const { ui } = useUiSection("ui_feedback", locale);
+  const { ui } = useUiSection('ui_feedback', locale);
 
   const title = ui(
-    "ui_feedback_form_title",
-    locale === "tr"
-      ? "Yorum bırakın"
-      : locale === "de"
-        ? "Bewertung abgeben"
-        : "Leave a review",
+    'ui_feedback_form_title',
+    locale === 'de' ? 'Yorum bırakın' : locale === 'de' ? 'Bewertung abgeben' : 'Leave a review',
   );
 
   const openButtonText = useMemo(() => {
     if (toggleLabel && toggleLabel.trim()) return toggleLabel.trim();
     return ui(
-      "ui_feedback_form_open",
-      locale === "tr"
-        ? "Yorum Gönder"
-        : locale === "de"
-          ? "Bewertung senden"
-          : "Write a review",
+      'ui_feedback_form_open',
+      locale === 'de' ? 'Yorum Gönder' : locale === 'de' ? 'Bewertung senden' : 'Write a review',
     );
   }, [toggleLabel, ui, locale]);
 
   const closeButtonText = ui(
-    "ui_feedback_form_close",
-    locale === "tr"
-      ? "Kapat"
-      : locale === "de"
-        ? "Schließen"
-        : "Close",
+    'ui_feedback_form_close',
+    locale === 'de' ? 'Kapat' : locale === 'de' ? 'Schließen' : 'Close',
   );
 
   const nameLabel = ui(
-    "ui_feedback_form_name_label",
-    locale === "tr"
-      ? "Adınız"
-      : locale === "de"
-        ? "Ihr Name"
-        : "Your name",
+    'ui_feedback_form_name_label',
+    locale === 'de' ? 'Adınız' : locale === 'de' ? 'Ihr Name' : 'Your name',
   );
 
   const emailLabel = ui(
-    "ui_feedback_form_email_label",
-    locale === "tr"
-      ? "E-posta adresiniz"
-      : locale === "de"
-        ? "E-Mail-Adresse"
-        : "Email address",
+    'ui_feedback_form_email_label',
+    locale === 'de' ? 'E-posta adresiniz' : locale === 'de' ? 'E-Mail-Adresse' : 'Email address',
   );
 
   const ratingLabel = ui(
-    "ui_feedback_form_rating_label",
-    locale === "tr"
-      ? "Puanınız"
-      : locale === "de"
-        ? "Ihre Bewertung"
-        : "Your rating",
+    'ui_feedback_form_rating_label',
+    locale === 'de' ? 'Puanınız' : locale === 'de' ? 'Ihre Bewertung' : 'Your rating',
   );
 
   const commentLabel = ui(
-    "ui_feedback_form_comment_label",
-    locale === "tr"
-      ? "Yorumunuz"
-      : locale === "de"
-        ? "Ihre Bewertung"
-        : "Your review",
+    'ui_feedback_form_comment_label',
+    locale === 'de' ? 'Yorumunuz' : locale === 'de' ? 'Ihre Bewertung' : 'Your review',
   );
 
   const submitText = ui(
-    "ui_feedback_form_submit",
-    locale === "tr"
-      ? "Yorumu Gönder"
-      : locale === "de"
-        ? "Bewertung senden"
-        : "Submit review",
+    'ui_feedback_form_submit',
+    locale === 'de' ? 'Yorumu Gönder' : locale === 'de' ? 'Bewertung senden' : 'Submit review',
   );
 
   const submittingText = ui(
-    "ui_feedback_form_submitting",
-    locale === "tr"
-      ? "Gönderiliyor..."
-      : locale === "de"
-        ? "Wird gesendet..."
-        : "Submitting...",
+    'ui_feedback_form_submitting',
+    locale === 'de' ? 'Gönderiliyor...' : locale === 'de' ? 'Wird gesendet...' : 'Submitting...',
   );
 
   const successText = ui(
-    "ui_feedback_form_success",
-    locale === "tr"
-      ? "Yorumunuz alındı, teşekkürler."
-      : locale === "de"
-        ? "Ihre Bewertung wurde gespeichert. Vielen Dank!"
-        : "Your review has been received. Thank you!",
+    'ui_feedback_form_success',
+    locale === 'de'
+      ? 'Yorumunuz alındı, teşekkürler.'
+      : locale === 'de'
+      ? 'Ihre Bewertung wurde gespeichert. Vielen Dank!'
+      : 'Your review has been received. Thank you!',
   );
 
   const errorText = ui(
-    "ui_feedback_form_error",
-    locale === "tr"
-      ? "Yorum gönderilirken bir hata oluştu."
-      : locale === "de"
-        ? "Beim Senden der Bewertung ist ein Fehler aufgetreten."
-        : "An error occurred while submitting your review.",
+    'ui_feedback_form_error',
+    locale === 'de'
+      ? 'Yorum gönderilirken bir hata oluştu.'
+      : locale === 'de'
+      ? 'Beim Senden der Bewertung ist ein Fehler aufgetreten.'
+      : 'An error occurred while submitting your review.',
   );
 
   const requiredText = ui(
-    "ui_feedback_form_required",
-    locale === "tr"
-      ? "Bu alan zorunludur."
-      : locale === "de"
-        ? "Dieses Feld ist erforderlich."
-        : "This field is required.",
+    'ui_feedback_form_required',
+    locale === 'de'
+      ? 'Bu alan zorunludur.'
+      : locale === 'de'
+      ? 'Dieses Feld ist erforderlich.'
+      : 'This field is required.',
   );
 
   const [createReview, { isLoading }] = useCreateReviewPublicMutation();
 
   const [isOpen, setIsOpen] = useState<boolean>(!!initialOpen);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [rating, setRating] = useState<number>(5);
-  const [comment, setComment] = useState("");
+  const [comment, setComment] = useState('');
 
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
-  const onBlurField = (field: string) =>
-    setTouched((prev) => ({ ...prev, [field]: true }));
+  const onBlurField = (field: string) => setTouched((prev) => ({ ...prev, [field]: true }));
 
-  const hasError = (field: "name" | "email" | "comment") => {
+  const hasError = (field: 'name' | 'email' | 'comment') => {
     if (!touched[field]) return false;
-    if (field === "name") return name.trim().length < 2;
-    if (field === "email") return !email.includes("@");
-    if (field === "comment") return comment.trim().length < 5;
+    if (field === 'name') return name.trim().length < 2;
+    if (field === 'email') return !email.includes('@');
+    if (field === 'comment') return comment.trim().length < 5;
     return false;
   };
 
   const resetForm = () => {
-    setName("");
-    setEmail("");
+    setName('');
+    setEmail('');
     setRating(5);
-    setComment("");
+    setComment('');
     setTouched({});
   };
 
@@ -194,13 +157,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     e.preventDefault();
 
     setTouched({ name: true, email: true, comment: true });
-    if (
-      hasError("name") ||
-      hasError("email") ||
-      hasError("comment") ||
-      rating < 1 ||
-      rating > 5
-    ) {
+    if (hasError('name') || hasError('email') || hasError('comment') || rating < 1 || rating > 5) {
       return;
     }
 
@@ -225,7 +182,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
       onSubmitted?.(result);
     } catch (err) {
-      console.error("createReview error", err);
+      console.error('createReview error', err);
       toast.error(errorText);
     }
   };
@@ -259,12 +216,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             <label className="form-label">{nameLabel} *</label>
             <input
               type="text"
-              className={`form-control ${hasError("name") ? "is-invalid" : ""}`}
+              className={`form-control ${hasError('name') ? 'is-invalid' : ''}`}
               value={name}
               onChange={(e) => setName(e.target.value)}
-              onBlur={() => onBlurField("name")}
+              onBlur={() => onBlurField('name')}
             />
-            {hasError("name") && <div className="invalid-feedback">{requiredText}</div>}
+            {hasError('name') && <div className="invalid-feedback">{requiredText}</div>}
           </div>
 
           {/* Email */}
@@ -272,12 +229,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             <label className="form-label">{emailLabel} *</label>
             <input
               type="email"
-              className={`form-control ${hasError("email") ? "is-invalid" : ""}`}
+              className={`form-control ${hasError('email') ? 'is-invalid' : ''}`}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onBlur={() => onBlurField("email")}
+              onBlur={() => onBlurField('email')}
             />
-            {hasError("email") && <div className="invalid-feedback">{requiredText}</div>}
+            {hasError('email') && <div className="invalid-feedback">{requiredText}</div>}
           </div>
 
           {/* Rating */}
@@ -300,13 +257,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           <div className="mb-3">
             <label className="form-label">{commentLabel} *</label>
             <textarea
-              className={`form-control ${hasError("comment") ? "is-invalid" : ""}`}
+              className={`form-control ${hasError('comment') ? 'is-invalid' : ''}`}
               rows={4}
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              onBlur={() => onBlurField("comment")}
+              onBlur={() => onBlurField('comment')}
             />
-            {hasError("comment") && <div className="invalid-feedback">{requiredText}</div>}
+            {hasError('comment') && <div className="invalid-feedback">{requiredText}</div>}
           </div>
 
           <div className="d-flex align-items-center gap-2">

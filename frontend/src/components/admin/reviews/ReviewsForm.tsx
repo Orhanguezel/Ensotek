@@ -36,7 +36,7 @@ const normalizeLocale = (v: unknown) =>
     .toLowerCase();
 
 const pickInitialLocale = (initial: AdminReviewDto | undefined, fallback: string | undefined) => {
-  const fb = normalizeLocale(fallback) || 'tr';
+  const fb = normalizeLocale(fallback) || 'de';
   if (!initial) return fb;
 
   // Admin dto’da tipik alanlar: locale_resolved (coalesced), submitted_locale (orijinal)
@@ -92,7 +92,7 @@ export const ReviewsForm: React.FC<ReviewsFormProps> = ({
   onCancel,
 }) => {
   const disabled = loading || saving;
-  const effectiveDefaultLocale = normalizeLocale(defaultLocale) || 'tr';
+  const effectiveDefaultLocale = normalizeLocale(defaultLocale) || 'de';
 
   const [values, setValues] = useState<ReviewFormValues>(
     buildInitialValues(initialData, effectiveDefaultLocale),

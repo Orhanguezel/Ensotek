@@ -100,7 +100,7 @@ export type SiteSettingsListProps = {
    */
   getEditHref?: (setting: SiteSetting) => string;
 
-  selectedLocale: string; // 'en' | 'tr' | '*'
+  selectedLocale: string; // 'en' | 'de' | '*'
 };
 
 /* ----------------------------- component ----------------------------- */

@@ -42,7 +42,7 @@ SET @ASSET_FILE_GUIDE    := 'cccccccc-0000-0000-0000-cccccccc0001';
 SET @LIB_CT_BASICS_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir'
   LIMIT 1
 );
@@ -59,7 +59,7 @@ VALUES
   @LIB_CT_BASICS_ID,
   1, 1, 40,
   '{
-    "tr":[
+    "de":[
       "su soğutma kulesi",
       "soğutma kulesi nedir",
       "soğutma kulesi çeşitleri",
@@ -91,7 +91,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_BASICS_ID, 'tr',
+  UUID(), @LIB_CT_BASICS_ID, 'de',
   'Su Soğutma Kulesi Nedir, Çeşitleri Nelerdir, Nasıl Çalışır?',
   'su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir',
   'Su soğutma kulesinin ne olduğu, çeşitleri ve çalışma prensipleri ile buharlaşma kaybı hesaplamasına dair özet teknik doküman.',
@@ -258,7 +258,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_FEATURES_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'ensotek-sogutma-kulelerinin-ozellikleri'
   LIMIT 1
 );
@@ -275,7 +275,7 @@ VALUES
   @LIB_CT_FEATURES_ID,
   1, 1, 50,
   '{
-    "tr":[
+    "de":[
       "ensotek soğutma kulesi",
       "soğutma kulesi özellikleri",
       "camelyaf takviyeli polyester",
@@ -306,7 +306,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_FEATURES_ID, 'tr',
+  UUID(), @LIB_CT_FEATURES_ID, 'de',
   'Ensotek Soğutma Kulelerimizin Özellikleri',
   'ensotek-sogutma-kulelerinin-ozellikleri',
   'Ensotek su soğutma kulelerinin malzeme yapısı, dolgu tipleri, enerji verimliliği ve işletme avantajlarını özetleyen teknik doküman.',
@@ -423,7 +423,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_OPEN_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'acik-tip-su-sogutma-kulesi-calisma-prensibi'
   LIMIT 1
 );
@@ -440,7 +440,7 @@ VALUES
   @LIB_CT_OPEN_ID,
   1, 1, 60,
   '{
-    "tr":[
+    "de":[
       "açık tip soğutma kulesi",
       "su soğutma kulesi çalışma prensibi",
       "karşı akışlı kule",
@@ -469,7 +469,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_OPEN_ID, 'tr',
+  UUID(), @LIB_CT_OPEN_ID, 'de',
   'Açık Tip Su Soğutma Kulesi Çalışma Prensibi',
   'acik-tip-su-sogutma-kulesi-calisma-prensibi',
   'Açık tip (açık devre) su soğutma kulelerinde suyun soğutulma prensibi, karşı akışlı cebri çekişli kulelerde çalışma adımları ve buharlaşma kaybı hesabını özetleyen teknik doküman.',
@@ -574,7 +574,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_CLOSED_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'kapali-cevrim-su-sogutma-kulesi-calisma-prensibi'
   LIMIT 1
 );
@@ -591,7 +591,7 @@ VALUES
   @LIB_CT_CLOSED_ID,
   1, 1, 70,
   '{
-    "tr":[
+    "de":[
       "kapalı çevrim soğutma kulesi",
       "kapalı tip soğutma kulesi",
       "serpantinli kule",
@@ -621,7 +621,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_CLOSED_ID, 'tr',
+  UUID(), @LIB_CT_CLOSED_ID, 'de',
   'Kapalı Çevrim Su Soğutma Kulesi Çalışma Prensibi',
   'kapali-cevrim-su-sogutma-kulesi-calisma-prensibi',
   'Kapalı tip su soğutma kulelerinin çalışma prensibi, buharlaşma kaybı, kuru soğutucu (free cooling) modu ve eşanjör donma riskine karşı alınabilecek önlemleri özetleyen teknik doküman.',
@@ -711,7 +711,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_SELECTION_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'kule-secimi-icin-gerekli-bilgiler'
   LIMIT 1
 );
@@ -728,7 +728,7 @@ VALUES
   @LIB_CT_SELECTION_ID,
   1, 1, 80,
   '{
-    "tr":[
+    "de":[
       "kule seçimi",
       "soğutma kulesi tasarımı",
       "kule kapasitesi",
@@ -758,7 +758,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_SELECTION_ID, 'tr',
+  UUID(), @LIB_CT_SELECTION_ID, 'de',
   'Kule Seçimi İçin Gerekli Bilgiler',
   'kule-secimi-icin-gerekli-bilgiler',
   'Su soğutma kulesi seçimi ve tasarımı için gereken temel kapasite ve iklim bilgilerinin, yaş/kuru termometre değerlerinin ve dikkat edilmesi gereken hususların özetlendiği teknik doküman.',
@@ -853,7 +853,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_BROCHURE_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'ensotek-kurumsal-brosur'
   LIMIT 1
 );
@@ -870,7 +870,7 @@ VALUES
   @LIB_BROCHURE_ID,
   1, 1, 90,
   '{
-    "tr":["kurumsal broşür","ensotek broşür","pdf","katalog"]
+    "de":["kurumsal broşür","ensotek broşür","pdf","katalog"]
   }',
   @LIB_CATEGORY_ID, @LIB_SUBCATEGORY_PDF,
   'Ensotek', 0, 0,
@@ -892,7 +892,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_BROCHURE_ID, 'tr',
+  UUID(), @LIB_BROCHURE_ID, 'de',
   'Kurumsal Broşür (PDF)',
   'ensotek-kurumsal-brosur',
   'Ensotek kurumsal broşür PDF dosyası.',
@@ -913,7 +913,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_SERVICE_GUIDE_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
   WHERE i.slug = 'ensotek-hizmet-rehberi'
   LIMIT 1
 );
@@ -930,7 +930,7 @@ VALUES
   @LIB_SERVICE_GUIDE_ID,
   1, 1, 100,
   '{
-    "tr":["hizmet rehberi","ensotek hizmet","pdf","rehber"]
+    "de":["hizmet rehberi","ensotek hizmet","pdf","rehber"]
   }',
   @LIB_CATEGORY_ID, @LIB_SUBCATEGORY_PDF,
   'Ensotek', 0, 0,
@@ -952,7 +952,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_SERVICE_GUIDE_ID, 'tr',
+  UUID(), @LIB_SERVICE_GUIDE_ID, 'de',
   'Hizmet Rehberi (PDF)',
   'ensotek-hizmet-rehberi',
   'Ensotek hizmet rehberi PDF dosyası.',
@@ -992,7 +992,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 VALUES
-  (UUID(), @IMG_CT, 'tr', 'Soğutma kulesi çalışma prensibi görseli', 'Soğutma kulesi temelleri', NOW(3), NOW(3))
+  (UUID(), @IMG_CT, 'de', 'Soğutma kulesi çalışma prensibi görseli', 'Soğutma kulesi temelleri', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   alt        = VALUES(alt),
   caption    = VALUES(caption),
@@ -1022,8 +1022,8 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO library_files_i18n (id, file_id, locale, title, description, created_at, updated_at)
 VALUES
-  (UUID(), @FILE_BROCHURE, 'tr', 'Kurumsal Broşür (PDF)', 'Ensotek kurumsal broşür PDF dosyası.', NOW(3), NOW(3)),
-  (UUID(), @FILE_GUIDE,    'tr', 'Hizmet Rehberi (PDF)', 'Ensotek hizmet rehberi PDF dosyası.', NOW(3), NOW(3))
+  (UUID(), @FILE_BROCHURE, 'de', 'Kurumsal Broşür (PDF)', 'Ensotek kurumsal broşür PDF dosyası.', NOW(3), NOW(3)),
+  (UUID(), @FILE_GUIDE,    'de', 'Hizmet Rehberi (PDF)', 'Ensotek hizmet rehberi PDF dosyası.', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title       = VALUES(title),
   description = VALUES(description),

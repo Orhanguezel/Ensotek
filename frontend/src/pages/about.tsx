@@ -39,11 +39,11 @@ import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const AboutPage: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
@@ -54,7 +54,7 @@ const AboutPage: React.FC = () => {
   // Banner title (UI)
   const bannerTitle = ui(
     'ui_about_page_title',
-    locale === 'tr' ? 'Hakkımızda' : locale === 'de' ? 'Über uns' : 'About Us',
+    locale === 'de' ? 'Hakkımızda' : locale === 'de' ? 'Über uns' : 'About Us',
   );
 
   // Global SEO settings (seo -> site_seo fallback)
@@ -90,7 +90,7 @@ const AboutPage: React.FC = () => {
   // --- SEO: Title/Description (UI meta overrides + custom_page meta) ---
   const titleFallback = ui(
     'ui_about_fallback_title',
-    locale === 'tr'
+    locale === 'de'
       ? 'Ensotek Su Soğutma Kuleleri Hakkında'
       : locale === 'de'
       ? 'Über Ensotek Wasserkühltürme'
@@ -104,7 +104,7 @@ const AboutPage: React.FC = () => {
     String(titleFallback).trim();
 
   const descFallback =
-    locale === 'tr'
+    locale === 'de'
       ? 'Ensotek hakkında bilgi, kurumsal yaklaşımımız ve faaliyet alanlarımız.'
       : locale === 'de'
       ? 'Informationen über Ensotek, unser Unternehmen und unsere Kompetenzen.'

@@ -24,7 +24,7 @@ export type ListParams = {
   offset?: number;
   sort?: 'key' | 'updated_at' | 'created_at';
   order?: 'asc' | 'desc';
-  locale?: string; // 'tr' | 'en' | '*' | undefined
+  locale?: string; // 'de' | 'en' | '*' | undefined
 };
 
 export type UpsertSettingBody = {

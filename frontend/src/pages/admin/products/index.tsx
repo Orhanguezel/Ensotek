@@ -142,7 +142,7 @@ const AdminProductsIndexPage: NextPage = () => {
     const d = toShortLocale(defaultLocaleFromDb);
     if (d && localeOptions.some((x) => x.value === d)) return d;
 
-    return localeOptions?.[0]?.value || 'tr';
+    return localeOptions?.[0]?.value || 'de';
   }, [filters.locale, uiLocale, defaultLocaleFromDb, localeOptions]);
 
   // ------------------------------

@@ -15,11 +15,11 @@ import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const Error404: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
@@ -29,7 +29,7 @@ const Error404: React.FC = () => {
 
   const title = ui(
     'ui_404_title',
-    locale === 'tr'
+    locale === 'de'
       ? 'Sayfa Bulunamadı'
       : locale === 'de'
       ? 'Seite nicht gefunden'
@@ -38,7 +38,7 @@ const Error404: React.FC = () => {
 
   const subtitle = ui(
     'ui_404_subtitle',
-    locale === 'tr'
+    locale === 'de'
       ? 'Aradığınız sayfa bulunamadı veya taşınmış olabilir.'
       : locale === 'de'
       ? 'Die gesuchte Seite wurde möglicherweise verschoben oder existiert nicht.'
@@ -47,7 +47,7 @@ const Error404: React.FC = () => {
 
   const cta = ui(
     'ui_404_back_home',
-    locale === 'tr' ? 'Ana Sayfaya Dön' : locale === 'de' ? 'Zur Startseite' : 'Back To Home',
+    locale === 'de' ? 'Ana Sayfaya Dön' : locale === 'de' ? 'Zur Startseite' : 'Back To Home',
   );
 
   const homeHref = useMemo(() => localizePath(locale, '/'), [locale]);

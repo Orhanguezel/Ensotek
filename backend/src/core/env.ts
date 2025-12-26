@@ -89,7 +89,7 @@ export const env = {
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? "",
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ?? "",
 
-  PUBLIC_URL: process.env.PUBLIC_URL || "http://localhost:8083",
+  PUBLIC_URL: process.env.PUBLIC_URL || "http://localhost:8086",
   FRONTEND_URL: FRONTEND_URL,
 
   // ✅ SMTP / Mail (sadece fallback; asıl değerler site_settings.smtp_* ile gelebilir)

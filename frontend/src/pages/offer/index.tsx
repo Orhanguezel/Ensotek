@@ -28,11 +28,11 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const OfferPage: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
@@ -42,7 +42,7 @@ const OfferPage: React.FC = () => {
 
   // Banner/UI title
   const bannerTitle = useMemo(
-    () => ui('ui_offer_page_title', locale === 'tr' ? 'Teklif Talep Formu' : 'Request an Offer'),
+    () => ui('ui_offer_page_title', locale === 'de' ? 'Teklif Talep Formu' : 'Request an Offer'),
     [ui, locale],
   );
 

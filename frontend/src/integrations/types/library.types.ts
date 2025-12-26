@@ -6,14 +6,7 @@
 /**
  * Backend'deki boolLike ile uyumlu tip
  */
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false";
+export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
 
 /**
  * Backend'deki LibraryView ile bire bir DTO
@@ -29,7 +22,7 @@ export interface LibraryDto {
   /**
    * Backend'deki LibraryView.tags
    * - library.tags_json kolonundan çözümlenmiş dizi
-   * - Çok dilli yapı ({"tr":[...],"en":[...]}) backend içinde
+   * - Çok dilli yapı ({"de":[...],"en":[...]}) backend içinde
    *   locale-aware şekilde string[]'e indirgeniyor.
    * - FE tarafında her zaman string[] veya null gelir.
    */
@@ -83,13 +76,13 @@ export interface LibraryListQueryParams {
   /** "created_at.asc" gibi birleşik order paramı (opsiyonel) */
   order?: string;
   sort?:
-  | "created_at"
-  | "updated_at"
-  | "published_at"
-  | "display_order"
-  | "views"
-  | "download_count";
-  orderDir?: "asc" | "desc";
+    | 'created_at'
+    | 'updated_at'
+    | 'published_at'
+    | 'display_order'
+    | 'views'
+    | 'download_count';
+  orderDir?: 'asc' | 'desc';
 
   limit?: number;
   offset?: number;
@@ -231,16 +224,14 @@ export interface LibraryImageDto {
   created_at: string | Date;
   updated_at: string | Date;
 
-  asset?:
-  | {
+  asset?: {
     bucket: string;
     path: string;
     url: string | null;
     width: number | null;
     height: number | null;
     mime: string | null;
-  }
-  | null;
+  } | null;
 }
 
 /**
@@ -320,14 +311,12 @@ export interface LibraryFileDto {
   created_at: string | Date;
   updated_at: string | Date;
 
-  asset?:
-  | {
+  asset?: {
     bucket: string;
     path: string;
     url: string | null;
     mime: string | null;
-  }
-  | null;
+  } | null;
 }
 
 /**

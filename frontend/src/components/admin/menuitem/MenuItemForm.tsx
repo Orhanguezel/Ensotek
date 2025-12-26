@@ -22,7 +22,7 @@ export type MenuItemFormValues = {
   section_id: string | null;
   is_active: boolean;
   display_order: number;
-  locale: string; // short: "tr" | "en" ...
+  locale: string; // short: "de" | "en" ...
 };
 
 export type MenuItemFormProps = {

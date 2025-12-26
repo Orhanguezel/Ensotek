@@ -42,11 +42,11 @@ import { GiFactory } from 'react-icons/gi';
 const FALLBACK_IMG = '/img/project/project-thumb.jpg';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 function ServiceIcon({ label, size = 40 }: { label: string; size?: number }) {
   const t = (label || '').toLowerCase();
@@ -75,7 +75,7 @@ const Service: React.FC = () => {
   const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
   const defaultLocale = useMemo(() => {
     const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'tr';
+    return v || 'de';
   }, [defaultLocaleRow?.value]);
 
   const { data, isLoading } = useListServicesPublicQuery({

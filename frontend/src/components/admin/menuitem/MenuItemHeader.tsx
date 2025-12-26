@@ -19,7 +19,7 @@ export type MenuItemFilters = {
   active: 'all' | 'active' | 'inactive';
   sort: 'display_order' | 'created_at' | 'title';
   order: 'asc' | 'desc';
-  locale: string; // "" => tüm diller, aksi => "tr"/"en"...
+  locale: string; // "" => tüm diller, aksi => "de"/"en"...
 };
 
 export type MenuItemHeaderProps = {
@@ -55,7 +55,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
   onCreateClick,
 }) => {
   const effectiveDefaultLocale = useMemo(
-    () => toShortLocale(defaultLocale ?? 'tr'),
+    () => toShortLocale(defaultLocale ?? 'de'),
     [defaultLocale],
   );
 

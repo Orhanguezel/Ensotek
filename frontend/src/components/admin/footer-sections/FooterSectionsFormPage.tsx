@@ -69,7 +69,7 @@ type FooterSectionsFormState = FooterSectionsFormValues & {
 
 const mapDtoToFormState = (item: FooterSectionDto): FooterSectionsFormState => ({
   id: String((item as any).id ?? ''),
-  locale: toShortLocale((item as any).locale_resolved ?? (item as any).locale ?? 'tr'),
+  locale: toShortLocale((item as any).locale_resolved ?? (item as any).locale ?? 'de'),
 
   is_active: toBool((item as any).is_active),
   display_order: (item as any).display_order ?? 0,
@@ -140,7 +140,7 @@ const FooterSectionsFormPage: React.FC<FooterSectionsFormPageProps> = ({
     const q = pickFirstString(router.query.locale);
     const r = typeof router.locale === 'string' ? router.locale : undefined;
     const resolved = coerceLocale(q ?? r, defaultLocaleFromDb) || q || r || defaultLocaleFromDb;
-    return toShortLocale(resolved) || 'tr';
+    return toShortLocale(resolved) || 'de';
   }, [router.query.locale, router.locale, coerceLocale, defaultLocaleFromDb]);
 
   const saving = isCreating || isUpdating;
@@ -179,7 +179,7 @@ const FooterSectionsFormPage: React.FC<FooterSectionsFormPageProps> = ({
       }
 
       // initialData gelmemişse boş state kur (query fetch ile dolacak diye)
-      const initLocale = effectiveLocale || localeOptions[0]?.value || 'tr';
+      const initLocale = effectiveLocale || localeOptions[0]?.value || 'de';
       setFormState({
         id: String(router.query.id ?? ''),
         locale: toShortLocale(initLocale),
@@ -201,7 +201,7 @@ const FooterSectionsFormPage: React.FC<FooterSectionsFormPageProps> = ({
 
       didInitCreateRef.current = true;
 
-      const initLocale = toShortLocale(effectiveLocale || localeOptions[0]?.value || 'tr') || 'tr';
+      const initLocale = toShortLocale(effectiveLocale || localeOptions[0]?.value || 'de') || 'de';
 
       setFormState({
         id: undefined,
@@ -233,7 +233,7 @@ const FooterSectionsFormPage: React.FC<FooterSectionsFormPageProps> = ({
   const menuListParams = useMemo(() => {
     if (!sectionId) return null;
 
-    const loc = toShortLocale(formState?.locale || effectiveLocale || defaultLocaleFromDb || 'tr');
+    const loc = toShortLocale(formState?.locale || effectiveLocale || defaultLocaleFromDb || 'de');
 
     return {
       location: 'footer',
@@ -272,7 +272,7 @@ const FooterSectionsFormPage: React.FC<FooterSectionsFormPageProps> = ({
     if (!formState) return;
 
     const nextLocale =
-      toShortLocale(coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || nextLocaleRaw) || 'tr';
+      toShortLocale(coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || nextLocaleRaw) || 'de';
 
     setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
     setUrlLocale(nextLocale);
@@ -358,7 +358,7 @@ const FooterSectionsFormPage: React.FC<FooterSectionsFormPageProps> = ({
 
     const normalizedLocale =
       toShortLocale(coerceLocale(formState.locale, defaultLocaleFromDb) || formState.locale) ||
-      'tr';
+      'de';
 
     const payload = {
       title,

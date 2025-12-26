@@ -6,11 +6,11 @@
 // =============================================================
 
 export type SiteI18nConfig = {
-  defaultLocale?: string; // e.g. "tr"
-  appLocales?: string[]; // e.g. ["tr","en","de"]
+  defaultLocale?: string; // e.g. "de"
+  appLocales?: string[]; // e.g. ["de","en","de"]
 };
 
-const FALLBACK_DEFAULT = 'tr';
+const FALLBACK_DEFAULT = 'de';
 
 export function normalizeLocale(raw: unknown): string | null {
   if (raw === null || raw === undefined) return null;

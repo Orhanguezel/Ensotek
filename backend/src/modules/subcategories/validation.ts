@@ -1,10 +1,10 @@
 // =============================================================
 // FILE: src/modules/subcategories/validation.ts
 // =============================================================
-import { z } from "zod";
+import { z } from 'zod';
 
 const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
-  z.preprocess((v) => (v === "" ? null : v), schema);
+  z.preprocess((v) => (v === '' ? null : v), schema);
 
 /**
  * FE'den gelebilecek bütün boolean varyantlarını kabul et
@@ -14,10 +14,10 @@ export const boolLike = z.union([
   z.boolean(),
   z.literal(0),
   z.literal(1),
-  z.literal("0"),
-  z.literal("1"),
-  z.literal("true"),
-  z.literal("false"),
+  z.literal('0'),
+  z.literal('1'),
+  z.literal('true'),
+  z.literal('false'),
 ]);
 
 const baseSubCategorySchema = z
@@ -25,12 +25,8 @@ const baseSubCategorySchema = z
     id: z.string().uuid().optional(),
     category_id: z.string().uuid(),
 
-    // 🌍 Çok dilli – yoksa "tr"
-    locale: z
-      .string()
-      .min(2)
-      .max(8)
-      .default("tr"),
+    // 🌍 Çok dilli – yoksa "de"
+    locale: z.string().min(2).max(8).default('de'),
 
     name: z.string().min(1).max(255),
     slug: z.string().min(1).max(255),
@@ -75,6 +71,4 @@ export const subCategorySetImageSchema = z
   })
   .strict();
 
-export type SubCategorySetImageInput = z.infer<
-  typeof subCategorySetImageSchema
->;
+export type SubCategorySetImageInput = z.infer<typeof subCategorySetImageSchema>;

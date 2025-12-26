@@ -209,7 +209,7 @@ export const SliderList: React.FC<SliderListProps> = ({
                     const desc = safeText((item as any).description);
                     const btnText = safeText((item as any).buttonText);
                     const btnLink = safeText((item as any).buttonLink);
-                    const locale = normLocale((item as any).locale || 'tr') || 'tr';
+                    const locale = normLocale((item as any).locale || 'de') || 'de';
 
                     return (
                       <tr
@@ -362,7 +362,7 @@ export const SliderList: React.FC<SliderListProps> = ({
                   const desc = safeText((item as any).description);
                   const btnText = safeText((item as any).buttonText);
                   const btnLink = safeText((item as any).buttonLink);
-                  const locale = normLocale((item as any).locale || 'tr') || 'tr';
+                  const locale = normLocale((item as any).locale || 'de') || 'de';
 
                   return (
                     <div key={id} className="col-12 col-lg-6">

@@ -18,12 +18,12 @@ import { and, eq } from 'drizzle-orm';
 // - LOCALES artık string[] (union değil) → Locale = string
 // - Liste başlangıçta ENV'den gelir; runtime'da siteSettings ile override edilir
 // - SiteSettings key'i: "app_locales"
-//   ör: ["tr","en","de"] veya [{code,label,is_active,is_default}, ...]
+//   ör: ["de","en","de"] veya [{code,label,is_active,is_default}, ...]
 // ---------------------------------------------------------------------------
 
 export const APP_LOCALES_SETTING_KEY = 'app_locales';
 
-/** "tr-TR" → "tr" normalize */
+/** "tr-TR" → "de" normalize */
 export function normalizeLocale(input?: string | null): string | undefined {
   if (!input) return undefined;
   const s = String(input).trim().toLowerCase().replace('_', '-');
@@ -33,7 +33,7 @@ export function normalizeLocale(input?: string | null): string | undefined {
 }
 
 // Başlangıç locale listesi: ENV'den ya da varsayılan "tr,en"
-const initialLocaleCodes = (process.env.APP_LOCALES || 'tr,en')
+const initialLocaleCodes = (process.env.APP_LOCALES || 'tr,en,de')
   .split(',')
   .map((s) => normalizeLocale(s) || '')
   .filter(Boolean);
@@ -45,17 +45,17 @@ for (const l of initialLocaleCodes) {
 }
 
 // Runtime'da mutasyona açık dizi
-export const LOCALES: string[] = uniqueInitial.length ? uniqueInitial : ['tr'];
+export const LOCALES: string[] = uniqueInitial.length ? uniqueInitial : ['de'];
 
 // Artık Locale = string (union değil)
 export type Locale = (typeof LOCALES)[number];
 
-// Default locale: ENV’de varsa onu, yoksa ilk locale, o da yoksa "tr"
+// Default locale: ENV’de varsa onu, yoksa ilk locale, o da yoksa "de"
 // (NOT: runtime'da LOCALES değişse bile DEFAULT_LOCALE sabit kalır)
 export const DEFAULT_LOCALE: Locale =
   (normalizeLocale(process.env.DEFAULT_LOCALE) as Locale) ||
   (LOCALES[0] as Locale) ||
-  ('tr' as Locale);
+  ('de' as Locale);
 
 export function isSupported(l?: string | null): l is Locale {
   if (!l) return false;
@@ -159,17 +159,17 @@ type AppLocaleObjLike = {
   is_active?: unknown;
 };
 
-/** [{code,is_active}, "tr", ...] -> "tr" */
+/** [{code,is_active}, "de", ...] -> "de" */
 function extractLocaleCode(v: unknown): string | null {
   if (v == null) return null;
 
-  // "tr"
+  // "de"
   if (typeof v === 'string') {
     const n = normalizeLocale(v);
     return n ?? null;
   }
 
-  // {code:"tr"} | {locale:"tr"} | {value:"tr"}
+  // {code:"de"} | {locale:"de"} | {value:"de"}
   if (typeof v === 'object') {
     const o = v as AppLocaleObjLike;
 

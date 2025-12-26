@@ -31,7 +31,7 @@ function computeLocales(meta: AppLocaleMeta[] | null | undefined): string[] {
 
   const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  const fb = normLocaleTag(FALLBACK_LOCALE) || 'tr';
+  const fb = normLocaleTag(FALLBACK_LOCALE) || 'de';
   return out.length ? out : [fb];
 }
 

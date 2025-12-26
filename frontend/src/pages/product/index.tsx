@@ -26,11 +26,11 @@ import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 import { asObj } from '@/seo/pageSeo';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const ProductPage: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
@@ -39,7 +39,7 @@ const ProductPage: React.FC = () => {
   const { ui } = useUiSection('ui_products', locale);
 
   const bannerTitle = useMemo(
-    () => ui('ui_products_page_title', locale === 'tr' ? 'Ürünlerimiz' : 'Products'),
+    () => ui('ui_products_page_title', locale === 'de' ? 'Ürünlerimiz' : 'Products'),
     [ui, locale],
   );
 

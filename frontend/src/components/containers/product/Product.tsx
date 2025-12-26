@@ -34,11 +34,11 @@ export interface ProductSectionProps {
 }
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 type ProductCardVM = {
   id: string;
@@ -59,26 +59,26 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
   const kickerPrefix = ui('ui_products_kicker_prefix', 'Ensotek');
   const kickerLabel = ui(
     'ui_products_kicker_label',
-    locale === 'tr' ? 'Ürünlerimiz' : 'Our Products',
+    locale === 'de' ? 'Ürünlerimiz' : 'Our Products',
   );
 
-  const titlePrefix = ui('ui_products_title_prefix', locale === 'tr' ? 'Su Soğutma' : 'Cooling');
-  const titleMark = ui('ui_products_title_mark', locale === 'tr' ? 'Kuleleri' : 'Towers');
+  const titlePrefix = ui('ui_products_title_prefix', locale === 'de' ? 'Su Soğutma' : 'Cooling');
+  const titleMark = ui('ui_products_title_mark', locale === 'de' ? 'Kuleleri' : 'Towers');
 
   const readMore = ui(
     'ui_products_read_more',
-    locale === 'tr' ? 'Detayları görüntüle' : 'View details',
+    locale === 'de' ? 'Detayları görüntüle' : 'View details',
   );
   const readMoreAria = ui(
     'ui_products_read_more_aria',
-    locale === 'tr' ? 'ürün detayını görüntüle' : 'view product details',
+    locale === 'de' ? 'ürün detayını görüntüle' : 'view product details',
   );
 
-  const viewAllText = ui('ui_products_view_all', locale === 'tr' ? 'Tüm Ürünler' : 'All products');
+  const viewAllText = ui('ui_products_view_all', locale === 'de' ? 'Tüm Ürünler' : 'All products');
 
   const emptyText = ui(
     'ui_products_empty',
-    locale === 'tr'
+    locale === 'de'
       ? 'Şu anda görüntülenecek ürün bulunmamaktadır.'
       : 'There are no products to display at the moment.',
   );

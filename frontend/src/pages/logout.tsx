@@ -7,10 +7,10 @@ import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const LogoutPage: React.FC = () => {
   const resolvedLocale = useResolvedLocale();

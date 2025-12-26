@@ -64,12 +64,12 @@ function normalizeLooseLocale(v: unknown): string | null {
 
 async function getAppLocales(): Promise<LocaleCode[]> {
   const list = await getAppLocalesFromService(null);
-  return list?.length ? list : ['tr'];
+  return list?.length ? list : ['de'];
 }
 
 async function getDefaultLocale(): Promise<LocaleCode> {
   const v = normalizeLooseLocale(await getDefaultLocaleFromService(null));
-  return v && v !== '*' ? v : 'tr';
+  return v && v !== '*' ? v : 'de';
 }
 
 async function upsertOne(key: string, locale: LocaleCode, value: JsonLike) {
@@ -228,7 +228,7 @@ export const adminListSiteSettings: RouteHandler = async (req, reply) => {
     if (!k) return false;
 
     // 1) policy tabanlı
-    const coerced = coerceLocaleByKey(k, 'tr');
+    const coerced = coerceLocaleByKey(k, 'de');
     if (coerced === '*') return true;
 
     // 2) explicit + prefix emniyet

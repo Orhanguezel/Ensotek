@@ -35,11 +35,11 @@ import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 const FALLBACK_IMG = '/img/project/project-thumb.jpg';
 
 const toLocaleShort = (l: unknown) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 interface ServiceDetailProps {
   slug: string;
@@ -47,7 +47,7 @@ interface ServiceDetailProps {
 
 // Hizmet tip kodlarını, kullanıcıya gösterilecek label’a çevirir
 const resolveServiceTypeLabel = (type: string | null | undefined, locale: string): string => {
-  const isTr = locale === 'tr';
+  const isTr = locale === 'de';
   const key = (type || '').toString();
 
   const mapTr: Record<string, string> = {
@@ -78,13 +78,13 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
   const { ui } = useUiSection('ui_services', locale);
-  const isTr = locale === 'tr';
+  const isTr = locale === 'de';
 
   // ✅ default_locale DB’den
   const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
   const defaultLocale = useMemo(() => {
     const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'tr';
+    return v || 'de';
   }, [defaultLocaleRow?.value]);
 
   // Teklif formu göster / gizle + scroll

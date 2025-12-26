@@ -9,11 +9,11 @@ import { useResolvedLocale } from '@/i18n/locale';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 function coerceId(v: any): string {
   return String(v ?? '').trim();

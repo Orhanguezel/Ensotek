@@ -27,7 +27,7 @@ INSERT INTO `catalog_requests` (
 (
   '2a0e9d9a-3a3a-4c8e-9af3-2d6f86b0a901',
   'new',
-  'tr',
+  'de',
   'TR',
   'Ahmet Yılmaz',
   'Yılmaz Makina',
@@ -78,7 +78,7 @@ INSERT INTO `catalog_requests` (
 (
   'c6e1e9d4-2b7a-4b25-9a67-7a4d9e1b0d44',
   'archived',
-  'tr',
+  'de',
   'TR',
   'Ayşe Demir',
   NULL,

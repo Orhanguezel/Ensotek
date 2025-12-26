@@ -21,11 +21,11 @@ import { useUiSection } from '@/i18n/uiDb';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 const toLocaleShort = (l: any) =>
-  String(l || 'tr')
+  String(l || 'de')
     .trim()
     .toLowerCase()
     .replace('_', '-')
-    .split('-')[0] || 'tr';
+    .split('-')[0] || 'de';
 
 const isValidUiText = (value: string, key: string) => {
   const v = String(value ?? '').trim();
@@ -62,7 +62,7 @@ const Home: NextPage = () => {
 
   const h1 = useMemo(() => {
     const fallback =
-      locale === 'tr'
+      locale === 'de'
         ? 'Ensotek Su Soğutma Kuleleri ve Proses Soğutma Çözümleri'
         : locale === 'de'
         ? 'Ensotek Kühltürme und Prozesskühlung'

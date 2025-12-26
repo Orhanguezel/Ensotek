@@ -116,7 +116,7 @@ const AdminCatalogRequestsIndexPage: NextPage = () => {
         loading={busy}
         locales={locales}
         localesLoading={localesLoading}
-        defaultLocale={defaultLocaleFromDb || router.locale || 'tr'}
+        defaultLocale={defaultLocaleFromDb || router.locale || 'de'}
         onFiltersChange={setFilters}
         onRefresh={refetch}
       />

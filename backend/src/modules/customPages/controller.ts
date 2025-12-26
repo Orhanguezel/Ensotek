@@ -26,9 +26,9 @@ function normalizeLooseLocale(v: unknown): string | null {
 }
 
 function pickSafeDefault(): string {
-  const base = normalizeLocale(DEFAULT_LOCALE) || DEFAULT_LOCALE || 'tr';
+  const base = normalizeLocale(DEFAULT_LOCALE) || DEFAULT_LOCALE || 'de';
   if (LOCALES.includes(base)) return base;
-  return LOCALES[0] || 'tr';
+  return LOCALES[0] || 'de';
 }
 
 async function resolveLocales(

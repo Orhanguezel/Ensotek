@@ -75,7 +75,7 @@ VALUES
 (
   UUID(),
   @NEWS_ALUEXPO_2025,
-  'tr',
+  'de',
   'ALUEXPO 2025 – Uluslararası Alüminyum Fuarına Katılıyoruz!',
   'aluexpo-2025-uluslararasi-aluminyum-fuarina-katiliyoruz',
   JSON_OBJECT(

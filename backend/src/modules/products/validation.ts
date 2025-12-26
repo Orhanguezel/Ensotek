@@ -1,20 +1,20 @@
 // =============================================================
 // FILE: src/modules/products/validation.ts  (LOCALE DESTEKLİ DTO)
 // =============================================================
-import { z } from "zod";
+import { z } from 'zod';
 
 /* ----------------- helpers ----------------- */
 export const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
-  z.preprocess((v) => (v === "" ? null : v), schema);
+  z.preprocess((v) => (v === '' ? null : v), schema);
 
 export const boolLike = z.union([
   z.boolean(),
   z.literal(0),
   z.literal(1),
-  z.literal("0"),
-  z.literal("1"),
-  z.literal("true"),
-  z.literal("false"),
+  z.literal('0'),
+  z.literal('1'),
+  z.literal('true'),
+  z.literal('false'),
 ]);
 
 // ❗ Storage asset ID'leri için (uuid'e zorlamıyoruz)
@@ -22,13 +22,10 @@ const assetId = z.string().min(1).max(64);
 
 // ❗ Admin tarafında client'tan gelen id alanları için (FAQ, SPEC vs.)
 //    Eski verilerde "1", "2" gibi değerler olabildiği için uuid zorlamıyoruz.
-const entityId = z.preprocess(
-  (v) => {
-    if (v == null || v === "") return undefined;
-    return String(v);
-  },
-  z.string().max(64),
-);
+const entityId = z.preprocess((v) => {
+  if (v == null || v === '') return undefined;
+  return String(v);
+}, z.string().max(64));
 
 /* ----------------- PRODUCT ----------------- */
 /**
@@ -44,7 +41,7 @@ export const productCreateSchema = z.object({
   id: z.string().uuid().optional(),
 
   // 🌍 Çok dilli – ürün bazında locale (product_i18n.locale)
-  locale: z.string().min(2).max(8).optional(), // yoksa backend "tr" ile dolduracak
+  locale: z.string().min(2).max(8).optional(), // yoksa backend "de" ile dolduracak
 
   // I18N alanlar
   title: z.string().min(1).max(255),
@@ -96,7 +93,7 @@ export const productFaqCreateSchema = z.object({
   // ❗ uuid zorlamıyoruz; eski kayıtlar "1", "2" vb. olabilir
   id: entityId.optional(),
   product_id: z.string().uuid(),
-  locale: z.string().min(2).max(8).optional(), // default backend'de "tr"
+  locale: z.string().min(2).max(8).optional(), // default backend'de "de"
   question: z.string().min(1).max(500),
   answer: z.string().min(1),
   display_order: z.coerce.number().int().min(0).optional().default(0),
@@ -111,12 +108,10 @@ export const productSpecCreateSchema = z.object({
   // ❗ uuid zorlamıyoruz; FE'den boş veya string gelebilir
   id: entityId.optional(),
   product_id: z.string().uuid(),
-  locale: z.string().min(2).max(8).optional(), // default backend'de "tr"
+  locale: z.string().min(2).max(8).optional(), // default backend'de "de"
   name: z.string().min(1).max(255),
   value: z.string().min(1),
-  category: z
-    .enum(["physical", "material", "service", "custom"])
-    .default("custom"),
+  category: z.enum(['physical', 'material', 'service', 'custom']).default('custom'),
   order_num: z.coerce.number().int().min(0).optional().default(0),
 });
 export const productSpecUpdateSchema = productSpecCreateSchema.partial();
@@ -135,9 +130,5 @@ export const productReviewCreateSchema = z.object({
   review_date: emptyToNull(z.string().datetime().optional().nullable()),
 });
 export const productReviewUpdateSchema = productReviewCreateSchema.partial();
-export type ProductReviewCreateInput = z.infer<
-  typeof productReviewCreateSchema
->;
-export type ProductReviewUpdateInput = z.infer<
-  typeof productReviewUpdateSchema
->;
+export type ProductReviewCreateInput = z.infer<typeof productReviewCreateSchema>;
+export type ProductReviewUpdateInput = z.infer<typeof productReviewUpdateSchema>;

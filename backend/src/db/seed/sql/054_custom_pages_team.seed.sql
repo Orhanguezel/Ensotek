@@ -126,7 +126,7 @@ VALUES
 -- TEAM_MGMT_1 – İbrahim YAĞAR
 -- =============================================================
 (
-  UUID(), @TEAM_MGMT_1, 'tr',
+  UUID(), @TEAM_MGMT_1, 'de',
   'İbrahim YAĞAR – Kurucu & Genel Müdür',
   'ibrahim-yagar-kurucu-genel-mudur',
   JSON_OBJECT('html', CONCAT(
@@ -199,7 +199,7 @@ VALUES
 -- TEAM_MGMT_2 – Hamdi YAĞAR
 -- =============================================================
 (
-  UUID(), @TEAM_MGMT_2, 'tr',
+  UUID(), @TEAM_MGMT_2, 'de',
   'Hamdi YAĞAR – Genel Müdür Yardımcısı',
   'hamdi-yagar-genel-mudur-yardimcisi',
   JSON_OBJECT('html', CONCAT(
@@ -272,7 +272,7 @@ VALUES
 -- TEAM_MGMT_3 – Ahmet Gökhan YAĞAR
 -- =============================================================
 (
-  UUID(), @TEAM_MGMT_3, 'tr',
+  UUID(), @TEAM_MGMT_3, 'de',
   'Ahmet Gökhan YAĞAR – Yönetim Kurulu Üyesi & Üretim Müdürü',
   'ahmet-gokhan-yagar-yonetim-kurulu-uyesi-uretim-muduru',
   JSON_OBJECT('html', CONCAT(
@@ -345,7 +345,7 @@ VALUES
 -- TEAM_ENG_1 – Mühendislik Ekibi (örnek profil)
 -- =============================================================
 (
-  UUID(), @TEAM_ENG_1, 'tr',
+  UUID(), @TEAM_ENG_1, 'de',
   'Kıdemli Proje Mühendisi',
   'kidemli-proje-muhendisi',
   JSON_OBJECT('html', CONCAT(
@@ -415,7 +415,7 @@ VALUES
 -- TEAM_SERVICE_1 – Saha & Servis Ekibi (örnek profil)
 -- =============================================================
 (
-  UUID(), @TEAM_SERVICE_1, 'tr',
+  UUID(), @TEAM_SERVICE_1, 'de',
   'Saha ve Servis Sorumlusu',
   'saha-ve-servis-sorumlusu',
   JSON_OBJECT('html', CONCAT(
@@ -482,7 +482,7 @@ VALUES
 -- TEAM_FT_1 – Can Zemheri (Dış Ticaret)
 -- =============================================================
 (
-  UUID(), @TEAM_FT_1, 'tr',
+  UUID(), @TEAM_FT_1, 'de',
   'Can Zemheri – Dış Ticaret Uzmanı',
   'can-zemheri-dis-ticaret-uzmani',
   JSON_OBJECT('html', CONCAT(

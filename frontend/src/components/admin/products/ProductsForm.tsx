@@ -11,10 +11,7 @@ import { toast } from 'sonner';
 
 import type { ProductDto, ProductSpecifications } from '@/integrations/types/product.types';
 
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/components/common/AdminLocaleSelect';
+import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 
 import {
   useListProductCategoriesAdminQuery,
@@ -176,7 +173,7 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
   const [generalViewMode, setGeneralViewMode] = useState<GeneralViewMode>('form');
 
   const disabled = loading || saving;
-  const effectiveDefaultLocale = norm(defaultLocale) || 'tr';
+  const effectiveDefaultLocale = norm(defaultLocale) || 'de';
   const productId = initialData?.id;
 
   useEffect(() => {

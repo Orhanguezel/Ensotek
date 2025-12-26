@@ -59,7 +59,7 @@ type FaqsFormState = FaqsFormValues & {
 /* map DTO → form state */
 const mapDtoToFormState = (item: FaqDto): FaqsFormState => ({
   id: String((item as any).id ?? ''),
-  locale: toShortLocale((item as any).locale_resolved ?? (item as any).locale ?? 'tr'),
+  locale: toShortLocale((item as any).locale_resolved ?? (item as any).locale ?? 'de'),
 
   is_active: (item as any).is_active === 1,
   display_order: (item as any).display_order ?? 0,
@@ -152,8 +152,8 @@ const FaqsFormPage: React.FC<FaqsFormPageProps> = ({
 
     // create mode
     if (!formState && !localesLoading && localeOptions.length > 0) {
-      const first = toShortLocale(localeOptions[0]?.value || 'tr');
-      const initLocale = toShortLocale(effectiveLocale || first || 'tr');
+      const first = toShortLocale(localeOptions[0]?.value || 'de');
+      const initLocale = toShortLocale(effectiveLocale || first || 'de');
 
       setFormState({
         id: undefined,
@@ -181,7 +181,7 @@ const FaqsFormPage: React.FC<FaqsFormPageProps> = ({
   const handleLocaleChange = async (nextLocaleRaw: string) => {
     if (!formState) return;
 
-    const nextLocale = toShortLocale(coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || 'tr');
+    const nextLocale = toShortLocale(coerceLocale(nextLocaleRaw, defaultLocaleFromDb) || 'de');
 
     // UI anında güncellensin
     setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
@@ -269,7 +269,7 @@ const FaqsFormPage: React.FC<FaqsFormPageProps> = ({
     }
 
     const normalizedLocale = toShortLocale(
-      coerceLocale(formState.locale, defaultLocaleFromDb) || formState.locale || 'tr',
+      coerceLocale(formState.locale, defaultLocaleFromDb) || formState.locale || 'de',
     );
 
     try {

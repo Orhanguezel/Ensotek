@@ -188,7 +188,7 @@ VALUES
 
 ('7290e3d9-d5b8-4423-aab2-1cbc85bee59b',
  '4290e3d9-d5b8-4423-aab2-1cbc85bee59b',
- 'tr',
+ 'de',
  'Ticket Replied',
  'Destek Talebiniz Yanıtlandı - {{site_name}}',
  '<h1 class="ql-align-center">Destek Talebiniz Yanıtlandı</h1><p>Merhaba <strong>{{user_name}}</strong>,</p><p>Destek talebiniz yanıtlandı.</p><p><br></p><p>Detayları görüntülemek için kullanıcı paneline giriş yapabilirsiniz.</p><p>Saygılarımızla,</p><p>{{site_name}} Ekibi</p>',
@@ -216,7 +216,7 @@ VALUES
 
 ('fa91f94a-bfe1-46b7-83fc-b4152e27c65e',
  'da91f94a-bfe1-46b7-83fc-b4152e27c65e',
- 'tr',
+ 'de',
  'Password Reset',
  'Şifre Sıfırlama Talebi - {{site_name}}',
  '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -274,7 +274,7 @@ VALUES
 
 ('d0bb0c00-1a2b-4c5d-9e8f-554433221100',
  'c0bb0c00-1a2b-4c5d-9e8f-001122334455',
- 'tr',
+ 'de',
  'Password Changed',
  'Şifreniz Güncellendi - {{site_name}}',
  '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -323,7 +323,7 @@ VALUES
 
 ('21112222-3333-4444-5555-666677778888',
  '11112222-3333-4444-5555-666677778888',
- 'tr',
+ 'de',
  'Contact Admin Notification',
  'Yeni İletişim Mesajı - {{subject}}',
  '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;">
@@ -384,7 +384,7 @@ VALUES
 
 ('99990000-bbbb-cccc-dddd-eeeeffff0000',
  '99990000-aaaa-bbbb-cccc-ddddeeee0000',
- 'tr',
+ 'de',
  'Contact User Autoreply',
  'Mesajınızı Aldık - {{subject}}',
  '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;">
@@ -430,7 +430,7 @@ VALUES
 
 ('f7fae474-c1cf-4600-8466-2f915146cfb9',
  'e7fae474-c1cf-4600-8466-2f915146cfb9',
- 'tr',
+ 'de',
  'Welcome',
  'Hesabiniz Oluşturuldu - {{site_name}}',
  '<h1 class="ql-align-center">Hesabınız Oluşturuldu</h1><p>Merhaba <strong>{{user_name}}</strong>,</p><p>{{site_name}} ailesine hoş geldiniz! Hesabınız başarıyla oluşturuldu.</p><p><br></p><p>E-posta: <strong>{{user_email}}</strong></p><p>Herhangi bir sorunuz olursa bizimle iletişime geçmekten çekinmeyin.</p><p>Saygılarımızla,</p><p>{{site_name}} Ekibi</p>',
@@ -458,7 +458,7 @@ VALUES
 
 ('1111aaaa-2222-3333-4444-aaaabbbb0001',
  '1111aaaa-2222-3333-4444-555566667777',
- 'tr',
+ 'de',
  'Offer Sent (Customer)',
  'Teklifiniz Hazır - Teklif No: {{offer_no}}',
  '<div style="font-family:system-ui,-apple-system,BlinkMacSystemFont,''Segoe UI'',sans-serif;font-size:14px;line-height:1.5;color:#111827;max-width:640px;margin:0 auto;">

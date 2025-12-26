@@ -4,130 +4,112 @@
 //   - Yorum yoksa ve loading değilse hiç render edilmez
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Navigation } from "swiper";
-import "swiper/css";
+import React from 'react';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation } from 'swiper';
+import 'swiper/css';
 
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
-import type { ProductReviewDto } from "@/integrations/types/product.types";
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import type { ProductReviewDto } from '@/integrations/types/product.types';
 
 interface ProductReviewsBlockProps {
-    title: string;
-    reviews: ProductReviewDto[];
-    averageRating: number | null;
-    isLoading: boolean;
-    emptyText: string; // Şu an kullanılmıyor ama API uyumu için duruyor
-    locale: string;
+  title: string;
+  reviews: ProductReviewDto[];
+  averageRating: number | null;
+  isLoading: boolean;
+  emptyText: string; // Şu an kullanılmıyor ama API uyumu için duruyor
+  locale: string;
 }
 
 const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
-    title,
-    reviews,
-    averageRating,
-    isLoading,
-    locale,
+  title,
+  reviews,
+  averageRating,
+  isLoading,
+  locale,
 }) => {
-    const hasReviews = reviews.length > 0;
+  const hasReviews = reviews.length > 0;
 
-    // Ne yükleniyor ne de yorum var → hiç render etme
-    if (!isLoading && !hasReviews) {
-        return null;
-    }
+  // Ne yükleniyor ne de yorum var → hiç render etme
+  if (!isLoading && !hasReviews) {
+    return null;
+  }
 
-    return (
-        <div className="product__detail-reviews card p-3 position-relative">
-            <div className="d-flex justify-content-between align-items-center mb-10">
-                <h3 className="product__detail-subtitle mb-0">{title}</h3>
-                {averageRating !== null && hasReviews && (
-                    <div className="product__review-summary small text-muted">
-                        {averageRating.toFixed(1)} / 5 · {reviews.length}{" "}
-                        {locale === "tr" ? "yorum" : "reviews"}
+  return (
+    <div className="product__detail-reviews card p-3 position-relative">
+      <div className="d-flex justify-content-between align-items-center mb-10">
+        <h3 className="product__detail-subtitle mb-0">{title}</h3>
+        {averageRating !== null && hasReviews && (
+          <div className="product__review-summary small text-muted">
+            {averageRating.toFixed(1)} / 5 · {reviews.length}{' '}
+            {locale === 'de' ? 'yorum' : 'reviews'}
+          </div>
+        )}
+      </div>
+
+      {isLoading && !hasReviews && <div className="skeleton-line" aria-hidden />}
+
+      {hasReviews && (
+        <div className="product-review-slider-wrapper">
+          {/* Slider */}
+          <Swiper
+            slidesPerView={1}
+            spaceBetween={24}
+            loop={reviews.length > 1}
+            roundLengths
+            modules={[Autoplay, Navigation]}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            navigation={{
+              nextEl: '.product-review-button-next',
+              prevEl: '.product-review-button-prev',
+            }}
+            className="product-review-swiper"
+          >
+            {reviews.map((r) => (
+              <SwiperSlide key={r.id}>
+                <div className="product-review-slide small">
+                  <div className="d-flex justify-content-between mb-1">
+                    <strong>{r.customer_name || (locale === 'de' ? 'Müşteri' : 'Customer')}</strong>
+                    <span className="text-muted">{r.rating} / 5</span>
+                  </div>
+
+                  {r.comment && (
+                    <p className="mb-1" style={{ fontSize: 14 }}>
+                      {r.comment}
+                    </p>
+                  )}
+
+                  {r.review_date && (
+                    <div className="text-muted" style={{ fontSize: 12 }}>
+                      {new Date(r.review_date).toLocaleDateString(locale)}
                     </div>
-                )}
-            </div>
-
-            {isLoading && !hasReviews && (
-                <div className="skeleton-line" aria-hidden />
-            )}
-
-            {hasReviews && (
-                <div className="product-review-slider-wrapper">
-                    {/* Slider */}
-                    <Swiper
-                        slidesPerView={1}
-                        spaceBetween={24}
-                        loop={reviews.length > 1}
-                        roundLengths
-                        modules={[Autoplay, Navigation]}
-                        autoplay={{ delay: 5000, disableOnInteraction: false }}
-                        navigation={{
-                            nextEl: ".product-review-button-next",
-                            prevEl: ".product-review-button-prev",
-                        }}
-                        className="product-review-swiper"
-                    >
-                        {reviews.map((r) => (
-                            <SwiperSlide key={r.id}>
-                                <div className="product-review-slide small">
-                                    <div className="d-flex justify-content-between mb-1">
-                                        <strong>
-                                            {r.customer_name ||
-                                                (locale === "tr" ? "Müşteri" : "Customer")}
-                                        </strong>
-                                        <span className="text-muted">
-                                            {r.rating} / 5
-                                        </span>
-                                    </div>
-
-                                    {r.comment && (
-                                        <p className="mb-1" style={{ fontSize: 14 }}>
-                                            {r.comment}
-                                        </p>
-                                    )}
-
-                                    {r.review_date && (
-                                        <div
-                                            className="text-muted"
-                                            style={{ fontSize: 12 }}
-                                        >
-                                            {new Date(r.review_date).toLocaleDateString(locale)}
-                                        </div>
-                                    )}
-                                </div>
-                            </SwiperSlide>
-                        ))}
-                    </Swiper>
-
-                    {/* Ok butonları */}
-                    <div className="product-review-navigation">
-                        <button
-                            className="product-review-button-prev"
-                            aria-label={
-                                locale === "tr"
-                                    ? "Önceki yorum"
-                                    : "Previous testimonial"
-                            }
-                        >
-                            <FiChevronLeft />
-                        </button>
-                        <button
-                            className="product-review-button-next"
-                            aria-label={
-                                locale === "tr"
-                                    ? "Sonraki yorum"
-                                    : "Next testimonial"
-                            }
-                        >
-                            <FiChevronRight />
-                        </button>
-                    </div>
+                  )}
                 </div>
-            )}
+              </SwiperSlide>
+            ))}
+          </Swiper>
 
-            <style jsx>{`
+          {/* Ok butonları */}
+          <div className="product-review-navigation">
+            <button
+              className="product-review-button-prev"
+              aria-label={locale === 'de' ? 'Önceki yorum' : 'Previous testimonial'}
+            >
+              <FiChevronLeft />
+            </button>
+            <button
+              className="product-review-button-next"
+              aria-label={locale === 'de' ? 'Sonraki yorum' : 'Next testimonial'}
+            >
+              <FiChevronRight />
+            </button>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
         .product-review-slider-wrapper {
           position: relative;
         }
@@ -180,8 +162,8 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
           }
         }
       `}</style>
-        </div>
-    );
+    </div>
+  );
 };
 
 export default ProductReviewsBlock;

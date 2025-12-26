@@ -24,7 +24,7 @@ type CompanyDoc = {
 
 /**
  * Dynamic locale normalize:
- * - "tr-TR" -> "tr"
+ * - "tr-TR" -> "de"
  * - "EN_us" -> "en"
  */
 function normalizeLocaleTag(input: unknown): string {
@@ -98,7 +98,7 @@ async function fetchJSON<T>(path: string, locale: SupportedLocale): Promise<T> {
   const cleanPath = String(path || '').replace(/^\/+/, '');
   const url = `${apiBase}/${cleanPath}`;
 
-  const l = normalizeLocaleTag(locale) || 'tr';
+  const l = normalizeLocaleTag(locale) || 'de';
 
   const r = await fetch(url, {
     headers: {
@@ -116,7 +116,7 @@ async function fetchJSON<T>(path: string, locale: SupportedLocale): Promise<T> {
 /* ---------- component ---------- */
 export default async function SiteJsonLd({ locale }: { locale: SupportedLocale }) {
   const base = siteUrlBase();
-  const l = normalizeLocaleTag(locale) || 'tr';
+  const l = normalizeLocaleTag(locale) || 'de';
 
   // SETTINGS + COMPANY
   let settings: SettingDoc[] = [];

@@ -3,20 +3,25 @@
 // Ensotek – Public Services Controller
 // =============================================================
 
-import type { RouteHandler } from "fastify";
+import type { RouteHandler } from 'fastify';
 
-import { serviceListQuerySchema, type ServiceListQuery } from "./validation";
-import { listServices, getServiceMergedById, getServiceMergedBySlug, listServiceImages } from "./repository";
+import { serviceListQuerySchema, type ServiceListQuery } from './validation';
+import {
+  listServices,
+  getServiceMergedById,
+  getServiceMergedBySlug,
+  listServiceImages,
+} from './repository';
 
 // ✅ Dinamik locale/def locale DB’den
-import { getAppLocales, getDefaultLocale } from "@/modules/siteSettings/service";
-import { normalizeLocale } from "@/core/i18n"; // sadece normalize için kullanıyoruz
+import { getAppLocales, getDefaultLocale } from '@/modules/siteSettings/service';
+import { normalizeLocale } from '@/core/i18n'; // sadece normalize için kullanıyoruz
 
 type LocaleCode = string;
 type LocaleQueryLike = { locale?: string; default_locale?: string };
 
 function normalizeLooseLocale(v: unknown): string | null {
-  if (typeof v !== "string") return null;
+  if (typeof v !== 'string') return null;
   const s = v.trim();
   if (!s) return null;
   return normalizeLocale(s) || s.toLowerCase();
@@ -24,21 +29,24 @@ function normalizeLooseLocale(v: unknown): string | null {
 
 /**
  * Public endpoint'ler için DİNAMİK locale çözümü:
- *  - locale: query.locale > req.locale > db default_locale > ilk app_locales > "tr"
- *  - default_locale: query.default_locale > db default_locale > "tr"
+ *  - locale: query.locale > req.locale > db default_locale > ilk app_locales > "de"
+ *  - default_locale: query.default_locale > db default_locale > "de"
  *
  * Ayrıca: locale app_locales içinde değilse default’a düşer.
  */
-async function resolveLocalesPublic(req: any, query?: LocaleQueryLike): Promise<{ locale: LocaleCode; def: LocaleCode }> {
+async function resolveLocalesPublic(
+  req: any,
+  query?: LocaleQueryLike,
+): Promise<{ locale: LocaleCode; def: LocaleCode }> {
   const q = query ?? ((req.query ?? {}) as LocaleQueryLike);
 
   const reqRaw = normalizeLooseLocale(q.locale) ?? normalizeLooseLocale(req.locale);
   const defRawFromQuery = normalizeLooseLocale(q.default_locale);
 
   const appLocales = await getAppLocales(reqRaw);
-  const dbDefault = normalizeLooseLocale(await getDefaultLocale(reqRaw)) ?? "tr";
+  const dbDefault = normalizeLooseLocale(await getDefaultLocale(reqRaw)) ?? 'de';
 
-  const safeDefault: string = appLocales.includes(dbDefault) ? dbDefault : appLocales[0] ?? "tr";
+  const safeDefault: string = appLocales.includes(dbDefault) ? dbDefault : appLocales[0] ?? 'de';
   const safeLocale: string = reqRaw && appLocales.includes(reqRaw) ? reqRaw : safeDefault;
 
   const safeDef: string =
@@ -49,11 +57,14 @@ async function resolveLocalesPublic(req: any, query?: LocaleQueryLike): Promise<
 
 /* ----------------------------- LIST (PUBLIC) ----------------------------- */
 
-export const listServicesPublic: RouteHandler<{ Querystring: ServiceListQuery }> = async (req, reply) => {
+export const listServicesPublic: RouteHandler<{ Querystring: ServiceListQuery }> = async (
+  req,
+  reply,
+) => {
   const parsed = serviceListQuerySchema.safeParse(req.query ?? {});
   if (!parsed.success) {
     return reply.code(400).send({
-      error: { message: "invalid_query", issues: parsed.error.issues },
+      error: { message: 'invalid_query', issues: parsed.error.issues },
     });
   }
 
@@ -65,12 +76,12 @@ export const listServicesPublic: RouteHandler<{ Querystring: ServiceListQuery }>
   });
 
   // Public tarafta default: sadece aktif kayıtlar
-  const isActive = typeof q.is_active === "undefined" ? true : q.is_active;
+  const isActive = typeof q.is_active === 'undefined' ? true : q.is_active;
 
   const { items, total } = await listServices({
     locale,
     defaultLocale: def,
-    orderParam: typeof q.order === "string" ? q.order : undefined,
+    orderParam: typeof q.order === 'string' ? q.order : undefined,
     sort: q.sort,
     order: q.orderDir,
     limit: q.limit,
@@ -83,7 +94,7 @@ export const listServicesPublic: RouteHandler<{ Querystring: ServiceListQuery }>
     is_active: isActive,
   });
 
-  reply.header("x-total-count", String(total ?? 0));
+  reply.header('x-total-count', String(total ?? 0));
   return reply.send(items);
 };
 
@@ -94,7 +105,7 @@ export const getServicePublic: RouteHandler<{ Params: { id: string } }> = async 
 
   const row = await getServiceMergedById(locale, def, req.params.id);
   if (!row || row.is_active !== 1) {
-    return reply.code(404).send({ error: { message: "not_found" } });
+    return reply.code(404).send({ error: { message: 'not_found' } });
   }
 
   return reply.send(row);
@@ -102,12 +113,15 @@ export const getServicePublic: RouteHandler<{ Params: { id: string } }> = async 
 
 /* ----------------------------- GET BY SLUG (PUBLIC) ----------------------------- */
 
-export const getServiceBySlugPublic: RouteHandler<{ Params: { slug: string } }> = async (req, reply) => {
+export const getServiceBySlugPublic: RouteHandler<{ Params: { slug: string } }> = async (
+  req,
+  reply,
+) => {
   const { locale, def } = await resolveLocalesPublic(req);
 
   const row = await getServiceMergedBySlug(locale, def, req.params.slug);
   if (!row || row.is_active !== 1) {
-    return reply.code(404).send({ error: { message: "not_found" } });
+    return reply.code(404).send({ error: { message: 'not_found' } });
   }
 
   return reply.send(row);
@@ -115,7 +129,10 @@ export const getServiceBySlugPublic: RouteHandler<{ Params: { slug: string } }> 
 
 /* ----------------------------- IMAGES (PUBLIC) ----------------------------- */
 
-export const listServiceImagesPublic: RouteHandler<{ Params: { id: string } }> = async (req, reply) => {
+export const listServiceImagesPublic: RouteHandler<{ Params: { id: string } }> = async (
+  req,
+  reply,
+) => {
   const { locale, def } = await resolveLocalesPublic(req);
 
   const rows = await listServiceImages({

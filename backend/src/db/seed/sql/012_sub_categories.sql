@@ -279,10 +279,10 @@ VALUES
   -- ==========================================================
   -- PRODUCT: SOĞUTMA KULELERİ (aaaa0001)
   -- ==========================================================
-  ('bbbb0001-1111-4111-8111-bbbbbbbb0001','tr','Endüstriyel Soğutma Kuleleri','endustriyel-sogutma-kuleleri',NULL,NULL),
-  ('bbbb0002-1111-4111-8111-bbbbbbbb0002','tr','HVAC Soğutma Kuleleri','hvac-sogutma-kuleleri',NULL,NULL),
-  ('bbbb0003-1111-4111-8111-bbbbbbbb0003','tr','Proses Soğutma Uygulamaları','proses-sogutma-uygulamalari',NULL,NULL),
-  ('bbbb0004-1111-4111-8111-bbbbbbbb0004','tr','Yüksek Kapasiteli Kuleler','yuksek-kapasiteli-kuleler',NULL,NULL),
+  ('bbbb0001-1111-4111-8111-bbbbbbbb0001','de','Endüstriyel Soğutma Kuleleri','endustriyel-sogutma-kuleleri',NULL,NULL),
+  ('bbbb0002-1111-4111-8111-bbbbbbbb0002','de','HVAC Soğutma Kuleleri','hvac-sogutma-kuleleri',NULL,NULL),
+  ('bbbb0003-1111-4111-8111-bbbbbbbb0003','de','Proses Soğutma Uygulamaları','proses-sogutma-uygulamalari',NULL,NULL),
+  ('bbbb0004-1111-4111-8111-bbbbbbbb0004','de','Yüksek Kapasiteli Kuleler','yuksek-kapasiteli-kuleler',NULL,NULL),
 
   ('bbbb0001-1111-4111-8111-bbbbbbbb0001','en','Industrial Cooling Towers','industrial-cooling-towers',NULL,NULL),
   ('bbbb0002-1111-4111-8111-bbbbbbbb0002','en','HVAC Cooling Towers','hvac-cooling-towers',NULL,NULL),
@@ -297,9 +297,9 @@ VALUES
   -- ==========================================================
   -- PRODUCT: AÇIK DEVRE SOĞUTMA KULELERİ (aaaa0002)
   -- ==========================================================
-  ('bbbb0101-1111-4111-8111-bbbbbbbb0101','tr','Doğrudan Temaslı Açık Devre Kuleler','dogrudan-temasli-acik-devre-kuleler',NULL,NULL),
-  ('bbbb0102-1111-4111-8111-bbbbbbbb0102','tr','Mekanik Çekişli Açık Devre Kuleler','mekanik-cekisli-acik-devre-kuleler',NULL,NULL),
-  ('bbbb0103-1111-4111-8111-bbbbbbbb0103','tr','Doğal Çekişli Açık Devre Kuleler','dogal-cekisli-acik-devre-kuleler',NULL,NULL),
+  ('bbbb0101-1111-4111-8111-bbbbbbbb0101','de','Doğrudan Temaslı Açık Devre Kuleler','dogrudan-temasli-acik-devre-kuleler',NULL,NULL),
+  ('bbbb0102-1111-4111-8111-bbbbbbbb0102','de','Mekanik Çekişli Açık Devre Kuleler','mekanik-cekisli-acik-devre-kuleler',NULL,NULL),
+  ('bbbb0103-1111-4111-8111-bbbbbbbb0103','de','Doğal Çekişli Açık Devre Kuleler','dogal-cekisli-acik-devre-kuleler',NULL,NULL),
 
   ('bbbb0101-1111-4111-8111-bbbbbbbb0101','en','Direct Contact Open Circuit Towers','direct-contact-open-circuit-towers',NULL,NULL),
   ('bbbb0102-1111-4111-8111-bbbbbbbb0102','en','Mechanical Draft Open Circuit Towers','mechanical-draft-open-circuit-towers',NULL,NULL),
@@ -312,9 +312,9 @@ VALUES
   -- ==========================================================
   -- PRODUCT: KAPALI DEVRE SOĞUTMA KULELERİ (aaaa0003)
   -- ==========================================================
-  ('bbbb0201-1111-4111-8111-bbbbbbbb0201','tr','Sıçratmalı Kapalı Devre Kuleler','sicratmali-kapali-devre-kuleler',NULL,NULL),
-  ('bbbb0202-1111-4111-8111-bbbbbbbb0202','tr','Film Tip Kapalı Devre Kuleler','film-tip-kapali-devre-kuleler',NULL,NULL),
-  ('bbbb0203-1111-4111-8111-bbbbbbbb0203','tr','Adyabatik Kapalı Devre Çözümler','adyabatik-kapali-devre-cozumler',NULL,NULL),
+  ('bbbb0201-1111-4111-8111-bbbbbbbb0201','de','Sıçratmalı Kapalı Devre Kuleler','sicratmali-kapali-devre-kuleler',NULL,NULL),
+  ('bbbb0202-1111-4111-8111-bbbbbbbb0202','de','Film Tip Kapalı Devre Kuleler','film-tip-kapali-devre-kuleler',NULL,NULL),
+  ('bbbb0203-1111-4111-8111-bbbbbbbb0203','de','Adyabatik Kapalı Devre Çözümler','adyabatik-kapali-devre-cozumler',NULL,NULL),
 
   ('bbbb0201-1111-4111-8111-bbbbbbbb0201','en','Spray Type Closed Circuit Towers','spray-type-closed-circuit-towers',NULL,NULL),
   ('bbbb0202-1111-4111-8111-bbbbbbbb0202','en','Film Type Closed Circuit Towers','film-type-closed-circuit-cooling-towers',NULL,NULL),
@@ -327,9 +327,9 @@ VALUES
   -- ==========================================================
   -- PRODUCT: HİBRİT SOĞUTMA SİSTEMLERİ (aaaa0004)
   -- ==========================================================
-  ('bbbb0301-1111-4111-8111-bbbbbbbb0301','tr','Hibrit Adyabatik Sistemler','hibrit-adyabatik-sistemler',NULL,NULL),
-  ('bbbb0302-1111-4111-8111-bbbbbbbb0302','tr','Hibrit Kule + Kuru Soğutucu','hibrit-kule-kuru-sogutucu',NULL,NULL),
-  ('bbbb0303-1111-4111-8111-bbbbbbbb0303','tr','Mevsimsel Hibrit Çözümler','mevsimsel-hibrit-cozumler',NULL,NULL),
+  ('bbbb0301-1111-4111-8111-bbbbbbbb0301','de','Hibrit Adyabatik Sistemler','hibrit-adyabatik-sistemler',NULL,NULL),
+  ('bbbb0302-1111-4111-8111-bbbbbbbb0302','de','Hibrit Kule + Kuru Soğutucu','hibrit-kule-kuru-sogutucu',NULL,NULL),
+  ('bbbb0303-1111-4111-8111-bbbbbbbb0303','de','Mevsimsel Hibrit Çözümler','mevsimsel-hibrit-cozumler',NULL,NULL),
 
   ('bbbb0301-1111-4111-8111-bbbbbbbb0301','en','Hybrid Adiabatic Systems','hybrid-adiabatic-systems',NULL,NULL),
   ('bbbb0302-1111-4111-8111-bbbbbbbb0302','en','Hybrid Tower + Dry Cooler','hybrid-tower-dry-cooler',NULL,NULL),
@@ -342,9 +342,9 @@ VALUES
   -- ==========================================================
   -- PRODUCT: ISI TRANSFER ÇÖZÜMLERİ (aaaa0005)  (ADDED / FIX)
   -- ==========================================================
-  ('bbbb0401-1111-4111-8111-bbbbbbbb0401','tr','Eşanjör Çözümleri','esanjor-cozumleri',NULL,NULL),
-  ('bbbb0402-1111-4111-8111-bbbbbbbb0402','tr','Kuru Soğutucular (Dry Cooler)','kuru-sogutucular-dry-cooler',NULL,NULL),
-  ('bbbb0403-1111-4111-8111-bbbbbbbb0403','tr','Özel Isı Transfer Uygulamaları','ozel-isi-transfer-uygulamalari',NULL,NULL),
+  ('bbbb0401-1111-4111-8111-bbbbbbbb0401','de','Eşanjör Çözümleri','esanjor-cozumleri',NULL,NULL),
+  ('bbbb0402-1111-4111-8111-bbbbbbbb0402','de','Kuru Soğutucular (Dry Cooler)','kuru-sogutucular-dry-cooler',NULL,NULL),
+  ('bbbb0403-1111-4111-8111-bbbbbbbb0403','de','Özel Isı Transfer Uygulamaları','ozel-isi-transfer-uygulamalari',NULL,NULL),
 
   ('bbbb0401-1111-4111-8111-bbbbbbbb0401','en','Heat Exchanger Solutions','heat-exchanger-solutions',NULL,NULL),
   ('bbbb0402-1111-4111-8111-bbbbbbbb0402','en','Dry Coolers','dry-coolers',NULL,NULL),
@@ -357,12 +357,12 @@ VALUES
   -- ==========================================================
   -- SPAREPART (aaaa1001)
   -- ==========================================================
-  ('bbbb1001-1111-4111-8111-bbbbbbbb1001','tr','Kule Ana Bileşenleri','kule-ana-bilesenleri',NULL,NULL),
-  ('bbbb1002-1111-4111-8111-bbbbbbbb1002','tr','Yedek Parçalar ve Aksesuarlar','yedek-parcalar-ve-aksesuarlar',NULL,NULL),
-  ('bbbb1003-1111-4111-8111-bbbbbbbb1003','tr','Dolgu Malzemeleri','dolgu-malzemeleri',NULL,NULL),
-  ('bbbb1004-1111-4111-8111-bbbbbbbb1004','tr','Fan ve Motor Grubu','fan-ve-motor-grubu',NULL,NULL),
-  ('bbbb1005-1111-4111-8111-bbbbbbbb1005','tr','Isı Transfer ve Eşanjör','isi-transfer-ve-esanjor',NULL,NULL),
-  ('bbbb1006-1111-4111-8111-bbbbbbbb1006','tr','Pompa ve Sirkülasyon','pompa-ve-sirkulasyon',NULL,NULL),
+  ('bbbb1001-1111-4111-8111-bbbbbbbb1001','de','Kule Ana Bileşenleri','kule-ana-bilesenleri',NULL,NULL),
+  ('bbbb1002-1111-4111-8111-bbbbbbbb1002','de','Yedek Parçalar ve Aksesuarlar','yedek-parcalar-ve-aksesuarlar',NULL,NULL),
+  ('bbbb1003-1111-4111-8111-bbbbbbbb1003','de','Dolgu Malzemeleri','dolgu-malzemeleri',NULL,NULL),
+  ('bbbb1004-1111-4111-8111-bbbbbbbb1004','de','Fan ve Motor Grubu','fan-ve-motor-grubu',NULL,NULL),
+  ('bbbb1005-1111-4111-8111-bbbbbbbb1005','de','Isı Transfer ve Eşanjör','isi-transfer-ve-esanjor',NULL,NULL),
+  ('bbbb1006-1111-4111-8111-bbbbbbbb1006','de','Pompa ve Sirkülasyon','pompa-ve-sirkulasyon',NULL,NULL),
 
   ('bbbb1001-1111-4111-8111-bbbbbbbb1001','en','Tower Main Components','tower-main-components',NULL,NULL),
   ('bbbb1002-1111-4111-8111-bbbbbbbb1002','en','Spare Parts & Accessories','spare-parts-accessories',NULL,NULL),
@@ -381,15 +381,15 @@ VALUES
   -- ==========================================================
   -- REFERENCES – DOMESTIC (aaaa5002)
   -- ==========================================================
-  ('bbbb5201-1111-4111-8111-bbbbbbbb5201','tr','Enerji Santralleri','enerji-santralleri',NULL,NULL),
-  ('bbbb5202-1111-4111-8111-bbbbbbbb5202','tr','Petrokimya & Kimya Tesisleri','petrokimya-kimya-tesisleri',NULL,NULL),
-  ('bbbb5203-1111-4111-8111-bbbbbbbb5203','tr','Çimento & Madencilik','cimento-madencilik',NULL,NULL),
-  ('bbbb5204-1111-4111-8111-bbbbbbbb5204','tr','Gıda & İçecek Tesisleri','gida-icecek-tesisleri',NULL,NULL),
-  ('bbbb5205-1111-4111-8111-bbbbbbbb5205','tr','Çelik & Metal Sanayi','celik-metal-sanayi',NULL,NULL),
-  ('bbbb5206-1111-4111-8111-bbbbbbbb5206','tr','Otomotiv & Yan Sanayi','otomotiv-yan-sanayi',NULL,NULL),
-  ('bbbb5207-1111-4111-8111-bbbbbbbb5207','tr','AVM & Ticari Binalar','avm-ticari-binalar',NULL,NULL),
-  ('bbbb5208-1111-4111-8111-bbbbbbbb5208','tr','Veri Merkezi & Hastane','veri-merkezi-hastane',NULL,NULL),
-  ('bbbb5209-1111-4111-8111-bbbbbbbb5209','tr','Diğer Projeler','diger-projeler',NULL,NULL),
+  ('bbbb5201-1111-4111-8111-bbbbbbbb5201','de','Enerji Santralleri','enerji-santralleri',NULL,NULL),
+  ('bbbb5202-1111-4111-8111-bbbbbbbb5202','de','Petrokimya & Kimya Tesisleri','petrokimya-kimya-tesisleri',NULL,NULL),
+  ('bbbb5203-1111-4111-8111-bbbbbbbb5203','de','Çimento & Madencilik','cimento-madencilik',NULL,NULL),
+  ('bbbb5204-1111-4111-8111-bbbbbbbb5204','de','Gıda & İçecek Tesisleri','gida-icecek-tesisleri',NULL,NULL),
+  ('bbbb5205-1111-4111-8111-bbbbbbbb5205','de','Çelik & Metal Sanayi','celik-metal-sanayi',NULL,NULL),
+  ('bbbb5206-1111-4111-8111-bbbbbbbb5206','de','Otomotiv & Yan Sanayi','otomotiv-yan-sanayi',NULL,NULL),
+  ('bbbb5207-1111-4111-8111-bbbbbbbb5207','de','AVM & Ticari Binalar','avm-ticari-binalar',NULL,NULL),
+  ('bbbb5208-1111-4111-8111-bbbbbbbb5208','de','Veri Merkezi & Hastane','veri-merkezi-hastane',NULL,NULL),
+  ('bbbb5209-1111-4111-8111-bbbbbbbb5209','de','Diğer Projeler','diger-projeler',NULL,NULL),
 
   ('bbbb5201-1111-4111-8111-bbbbbbbb5201','en','Power Plants','power-plants',NULL,NULL),
   ('bbbb5202-1111-4111-8111-bbbbbbbb5202','en','Petrochemical & Chemical Plants','petrochemical-chemical-plants',NULL,NULL),
@@ -414,15 +414,15 @@ VALUES
   -- ==========================================================
   -- REFERENCES – INTERNATIONAL (aaaa5003)
   -- ==========================================================
-  ('bbbb5301-1111-4111-8111-bbbbbbbb5301','tr','Enerji Santralleri','enerji-santralleri-yurtdisi',NULL,NULL),
-  ('bbbb5302-1111-4111-8111-bbbbbbbb5302','tr','Petrokimya & Kimya Tesisleri','petrokimya-kimya-tesisleri-yurtdisi',NULL,NULL),
-  ('bbbb5303-1111-4111-8111-bbbbbbbb5303','tr','Çimento & Madencilik','cimento-madencilik-yurtdisi',NULL,NULL),
-  ('bbbb5304-1111-4111-8111-bbbbbbbb5304','tr','Gıda & İçecek Tesisleri','gida-icecek-tesisleri-yurtdisi',NULL,NULL),
-  ('bbbb5305-1111-4111-8111-bbbbbbbb5305','tr','Çelik & Metal Sanayi','celik-metal-sanayi-yurtdisi',NULL,NULL),
-  ('bbbb5306-1111-4111-8111-bbbbbbbb5306','tr','Otomotiv & Yan Sanayi','otomotiv-yan-sanayi-yurtdisi',NULL,NULL),
-  ('bbbb5307-1111-4111-8111-bbbbbbbb5307','tr','AVM & Ticari Binalar','avm-ticari-binalar-yurtdisi',NULL,NULL),
-  ('bbbb5308-1111-4111-8111-bbbbbbbb5308','tr','Veri Merkezi & Hastane','veri-merkezi-hastane-yurtdisi',NULL,NULL),
-  ('bbbb5309-1111-4111-8111-bbbbbbbb5309','tr','Diğer Projeler','diger-projeler-yurtdisi',NULL,NULL),
+  ('bbbb5301-1111-4111-8111-bbbbbbbb5301','de','Enerji Santralleri','enerji-santralleri-yurtdisi',NULL,NULL),
+  ('bbbb5302-1111-4111-8111-bbbbbbbb5302','de','Petrokimya & Kimya Tesisleri','petrokimya-kimya-tesisleri-yurtdisi',NULL,NULL),
+  ('bbbb5303-1111-4111-8111-bbbbbbbb5303','de','Çimento & Madencilik','cimento-madencilik-yurtdisi',NULL,NULL),
+  ('bbbb5304-1111-4111-8111-bbbbbbbb5304','de','Gıda & İçecek Tesisleri','gida-icecek-tesisleri-yurtdisi',NULL,NULL),
+  ('bbbb5305-1111-4111-8111-bbbbbbbb5305','de','Çelik & Metal Sanayi','celik-metal-sanayi-yurtdisi',NULL,NULL),
+  ('bbbb5306-1111-4111-8111-bbbbbbbb5306','de','Otomotiv & Yan Sanayi','otomotiv-yan-sanayi-yurtdisi',NULL,NULL),
+  ('bbbb5307-1111-4111-8111-bbbbbbbb5307','de','AVM & Ticari Binalar','avm-ticari-binalar-yurtdisi',NULL,NULL),
+  ('bbbb5308-1111-4111-8111-bbbbbbbb5308','de','Veri Merkezi & Hastane','veri-merkezi-hastane-yurtdisi',NULL,NULL),
+  ('bbbb5309-1111-4111-8111-bbbbbbbb5309','de','Diğer Projeler','diger-projeler-yurtdisi',NULL,NULL),
 
   ('bbbb5301-1111-4111-8111-bbbbbbbb5301','en','Power Plants','power-plants-international',NULL,NULL),
   ('bbbb5302-1111-4111-8111-bbbbbbbb5302','en','Petrochemical & Chemical Plants','petrochemical-chemical-plants-international',NULL,NULL),
@@ -448,9 +448,9 @@ VALUES
   -- REST OF MODULES (UNCHANGED)  (NEWS/BLOG/SLIDER/LIBRARY/ABOUT/SERVICES/FAQ/TEAM)
   -- ==========================================================
   -- NEWS (aaaa2001)
-  ('bbbb2001-1111-4111-8111-bbbbbbbb2001','tr','Duyurular','duyurular',NULL,NULL),
-  ('bbbb2002-1111-4111-8111-bbbbbbbb2002','tr','Basın Bültenleri','basin-bultenleri',NULL,NULL),
-  ('bbbb2003-1111-4111-8111-bbbbbbbb2003','tr','Sektör Haberleri','sektor-haberleri',NULL,NULL),
+  ('bbbb2001-1111-4111-8111-bbbbbbbb2001','de','Duyurular','duyurular',NULL,NULL),
+  ('bbbb2002-1111-4111-8111-bbbbbbbb2002','de','Basın Bültenleri','basin-bultenleri',NULL,NULL),
+  ('bbbb2003-1111-4111-8111-bbbbbbbb2003','de','Sektör Haberleri','sektor-haberleri',NULL,NULL),
 
   ('bbbb2001-1111-4111-8111-bbbbbbbb2001','en','Announcements','announcements',NULL,NULL),
   ('bbbb2002-1111-4111-8111-bbbbbbbb2002','en','Press Releases','press-releases',NULL,NULL),
@@ -461,8 +461,8 @@ VALUES
   ('bbbb2003-1111-4111-8111-bbbbbbbb2003','de','Branchennachrichten','branchennachrichten',NULL,NULL),
 
   -- NEWS (aaaa2002)
-  ('bbbb2101-1111-4111-8111-bbbbbbbb2101','tr','Yeni Projeler','yeni-projeler',NULL,NULL),
-  ('bbbb2102-1111-4111-8111-bbbbbbbb2102','tr','Ödül ve Başarılar','odul-ve-basarilar',NULL,NULL),
+  ('bbbb2101-1111-4111-8111-bbbbbbbb2101','de','Yeni Projeler','yeni-projeler',NULL,NULL),
+  ('bbbb2102-1111-4111-8111-bbbbbbbb2102','de','Ödül ve Başarılar','odul-ve-basarilar',NULL,NULL),
 
   ('bbbb2101-1111-4111-8111-bbbbbbbb2101','en','New Projects','new-projects',NULL,NULL),
   ('bbbb2102-1111-4111-8111-bbbbbbbb2102','en','Awards & Achievements','awards-and-achievements',NULL,NULL),
@@ -471,8 +471,8 @@ VALUES
   ('bbbb2102-1111-4111-8111-bbbbbbbb2102','de','Auszeichnungen & Erfolge','auszeichnungen-erfolge',NULL,NULL),
 
   -- NEWS (aaaa2003)
-  ('bbbb2201-1111-4111-8111-bbbbbbbb2201','tr','Genel Duyurular','genel-duyurular',NULL,NULL),
-  ('bbbb2202-1111-4111-8111-bbbbbbbb2202','tr','Bakım / Servis Duyuruları','bakim-servis-duyurulari',NULL,NULL),
+  ('bbbb2201-1111-4111-8111-bbbbbbbb2201','de','Genel Duyurular','genel-duyurular',NULL,NULL),
+  ('bbbb2202-1111-4111-8111-bbbbbbbb2202','de','Bakım / Servis Duyuruları','bakim-servis-duyurulari',NULL,NULL),
 
   ('bbbb2201-1111-4111-8111-bbbbbbbb2201','en','General Announcements','general-announcements',NULL,NULL),
   ('bbbb2202-1111-4111-8111-bbbbbbbb2202','en','Maintenance / Service Announcements','maintenance-service-announcements',NULL,NULL),
@@ -481,8 +481,8 @@ VALUES
   ('bbbb2202-1111-4111-8111-bbbbbbbb2202','de','Wartung / Service Hinweise','wartung-service-hinweise',NULL,NULL),
 
   -- NEWS (aaaa2004)
-  ('bbbb2301-1111-4111-8111-bbbbbbbb2301','tr','Gazete & Dergi','gazete-dergi',NULL,NULL),
-  ('bbbb2302-1111-4111-8111-bbbbbbbb2302','tr','Online Haberler','online-haberler',NULL,NULL),
+  ('bbbb2301-1111-4111-8111-bbbbbbbb2301','de','Gazete & Dergi','gazete-dergi',NULL,NULL),
+  ('bbbb2302-1111-4111-8111-bbbbbbbb2302','de','Online Haberler','online-haberler',NULL,NULL),
 
   ('bbbb2301-1111-4111-8111-bbbbbbbb2301','en','Newspaper & Magazine','newspaper-and-magazine',NULL,NULL),
   ('bbbb2302-1111-4111-8111-bbbbbbbb2302','en','Online News','online-news',NULL,NULL),
@@ -491,9 +491,9 @@ VALUES
   ('bbbb2302-1111-4111-8111-bbbbbbbb2302','de','Online-News','online-news',NULL,NULL),
 
   -- BLOG (aaaa3001)
-  ('bbbb3001-1111-4111-8111-bbbbbbbb3001','tr','Bakım Rehberleri','bakim-rehberleri',NULL,NULL),
-  ('bbbb3002-1111-4111-8111-bbbbbbbb3002','tr','Tasarım Önerileri','tasarim-onerileri',NULL,NULL),
-  ('bbbb3003-1111-4111-8111-bbbbbbbb3003','tr','Sık Sorulan Sorular','sik-sorulan-sorular-blog',NULL,NULL),
+  ('bbbb3001-1111-4111-8111-bbbbbbbb3001','de','Bakım Rehberleri','bakim-rehberleri',NULL,NULL),
+  ('bbbb3002-1111-4111-8111-bbbbbbbb3002','de','Tasarım Önerileri','tasarim-onerileri',NULL,NULL),
+  ('bbbb3003-1111-4111-8111-bbbbbbbb3003','de','Sık Sorulan Sorular','sik-sorulan-sorular-blog',NULL,NULL),
 
   ('bbbb3001-1111-4111-8111-bbbbbbbb3001','en','Maintenance Guides','maintenance-guides',NULL,NULL),
   ('bbbb3002-1111-4111-8111-bbbbbbbb3002','en','Design Tips','design-tips',NULL,NULL),
@@ -504,8 +504,8 @@ VALUES
   ('bbbb3003-1111-4111-8111-bbbbbbbb3003','de','Häufige Fragen','haeufige-fragen-blog',NULL,NULL),
 
   -- BLOG (aaaa3002)
-  ('bbbb3101-1111-4111-8111-bbbbbbbb3101','tr','Teknik Rehberler','teknik-rehberler',NULL,NULL),
-  ('bbbb3102-1111-4111-8111-bbbbbbbb3102','tr','Arıza Çözümleri','ariza-cozumleri',NULL,NULL),
+  ('bbbb3101-1111-4111-8111-bbbbbbbb3101','de','Teknik Rehberler','teknik-rehberler',NULL,NULL),
+  ('bbbb3102-1111-4111-8111-bbbbbbbb3102','de','Arıza Çözümleri','ariza-cozumleri',NULL,NULL),
 
   ('bbbb3101-1111-4111-8111-bbbbbbbb3101','en','Technical Guides','technical-guides',NULL,NULL),
   ('bbbb3102-1111-4111-8111-bbbbbbbb3102','en','Troubleshooting','troubleshooting',NULL,NULL),
@@ -514,8 +514,8 @@ VALUES
   ('bbbb3102-1111-4111-8111-bbbbbbbb3102','de','Fehlersuche','fehlersuche',NULL,NULL),
 
   -- BLOG (aaaa3003)
-  ('bbbb3201-1111-4111-8111-bbbbbbbb3201','tr','Pazar Analizi','pazar-analizi',NULL,NULL),
-  ('bbbb3202-1111-4111-8111-bbbbbbbb3202','tr','Trendler & Gelişmeler','trendler-gelismeler',NULL,NULL),
+  ('bbbb3201-1111-4111-8111-bbbbbbbb3201','de','Pazar Analizi','pazar-analizi',NULL,NULL),
+  ('bbbb3202-1111-4111-8111-bbbbbbbb3202','de','Trendler & Gelişmeler','trendler-gelismeler',NULL,NULL),
 
   ('bbbb3201-1111-4111-8111-bbbbbbbb3201','en','Market Analysis','market-analysis',NULL,NULL),
   ('bbbb3202-1111-4111-8111-bbbbbbbb3202','en','Trends & Developments','trends-and-developments',NULL,NULL),
@@ -524,8 +524,8 @@ VALUES
   ('bbbb3202-1111-4111-8111-bbbbbbbb3202','de','Trends & Entwicklungen','trends-entwicklungen',NULL,NULL),
 
   -- BLOG (aaaa3004)
-  ('bbbb3301-1111-4111-8111-bbbbbbbb3301','tr','Genel Rehberler','genel-rehberler',NULL,NULL),
-  ('bbbb3302-1111-4111-8111-bbbbbbbb3302','tr','İlham Veren Hikayeler','ilham-veren-hikayeler',NULL,NULL),
+  ('bbbb3301-1111-4111-8111-bbbbbbbb3301','de','Genel Rehberler','genel-rehberler',NULL,NULL),
+  ('bbbb3302-1111-4111-8111-bbbbbbbb3302','de','İlham Veren Hikayeler','ilham-veren-hikayeler',NULL,NULL),
 
   ('bbbb3301-1111-4111-8111-bbbbbbbb3301','en','General Guides','general-guides',NULL,NULL),
   ('bbbb3302-1111-4111-8111-bbbbbbbb3302','en','Inspiring Stories','inspiring-stories',NULL,NULL),
@@ -534,8 +534,8 @@ VALUES
   ('bbbb3302-1111-4111-8111-bbbbbbbb3302','de','Inspirierende Geschichten','inspirierende-geschichten',NULL,NULL),
 
   -- SLIDER (aaaa4001)
-  ('bbbb4001-1111-4111-8111-bbbbbbbb4001','tr','Ana Sayfa Sliderı','ana-sayfa-slideri',NULL,NULL),
-  ('bbbb4002-1111-4111-8111-bbbbbbbb4002','tr','Kampanya Sliderı','kampanya-slideri',NULL,NULL),
+  ('bbbb4001-1111-4111-8111-bbbbbbbb4001','de','Ana Sayfa Sliderı','ana-sayfa-slideri',NULL,NULL),
+  ('bbbb4002-1111-4111-8111-bbbbbbbb4002','de','Kampanya Sliderı','kampanya-slideri',NULL,NULL),
 
   ('bbbb4001-1111-4111-8111-bbbbbbbb4001','en','Homepage Slider','homepage-slider',NULL,NULL),
   ('bbbb4002-1111-4111-8111-bbbbbbbb4002','en','Campaign Slider','campaign-slider',NULL,NULL),
@@ -544,9 +544,9 @@ VALUES
   ('bbbb4002-1111-4111-8111-bbbbbbbb4002','de','Kampagnen-Slider','kampagnen-slider',NULL,NULL),
 
   -- LIBRARY (aaaa6001)
-  ('bbbb6001-1111-4111-8111-bbbbbbbb6001','tr','PDF Dokümanlar','pdf-dokumanlar',NULL,NULL),
-  ('bbbb6002-1111-4111-8111-bbbbbbbb6002','tr','Görsel Galeri','gorsel-galeri',NULL,NULL),
-  ('bbbb6003-1111-4111-8111-bbbbbbbb6003','tr','Video İçerikler','video-icerikler',NULL,NULL),
+  ('bbbb6001-1111-4111-8111-bbbbbbbb6001','de','PDF Dokümanlar','pdf-dokumanlar',NULL,NULL),
+  ('bbbb6002-1111-4111-8111-bbbbbbbb6002','de','Görsel Galeri','gorsel-galeri',NULL,NULL),
+  ('bbbb6003-1111-4111-8111-bbbbbbbb6003','de','Video İçerikler','video-icerikler',NULL,NULL),
 
   ('bbbb6001-1111-4111-8111-bbbbbbbb6001','en','PDF Documents','pdf-documents',NULL,NULL),
   ('bbbb6002-1111-4111-8111-bbbbbbbb6002','en','Image Gallery','image-gallery',NULL,NULL),
@@ -557,9 +557,9 @@ VALUES
   ('bbbb6003-1111-4111-8111-bbbbbbbb6003','de','Videoinhalte','videoinhalte',NULL,NULL),
 
   -- ABOUT (aaaa7001)
-  ('bbbb7001-1111-4111-8111-bbbbbbbb7001','tr','Hakkımızda','hakkimizda',NULL,NULL),
-  ('bbbb7002-1111-4111-8111-bbbbbbbb7002','tr','Misyon & Vizyon','misyon-vizyon',NULL,NULL),
-  ('bbbb7003-1111-4111-8111-bbbbbbbb7003','tr','İnsan Kaynakları','insan-kaynaklari',NULL,NULL),
+  ('bbbb7001-1111-4111-8111-bbbbbbbb7001','de','Hakkımızda','hakkimizda',NULL,NULL),
+  ('bbbb7002-1111-4111-8111-bbbbbbbb7002','de','Misyon & Vizyon','misyon-vizyon',NULL,NULL),
+  ('bbbb7003-1111-4111-8111-bbbbbbbb7003','de','İnsan Kaynakları','insan-kaynaklari',NULL,NULL),
 
   ('bbbb7001-1111-4111-8111-bbbbbbbb7001','en','About Us','about-us-page',NULL,NULL),
   ('bbbb7002-1111-4111-8111-bbbbbbbb7002','en','Mission & Vision','mission-and-vision',NULL,NULL),
@@ -570,42 +570,42 @@ VALUES
   ('bbbb7003-1111-4111-8111-bbbbbbbb7003','de','Personal / Karriere','karriere',NULL,NULL),
 
   -- ABOUT (QUALITY)
-  ('bbbb7004-1111-4111-8111-bbbbbbbb7004','tr','Kalite & Sertifikalar','kalite-sertifikalar','Ensotek kalite yönetim yaklaşımı ve uluslararası sertifikalarımız.',NULL),
+  ('bbbb7004-1111-4111-8111-bbbbbbbb7004','de','Kalite & Sertifikalar','kalite-sertifikalar','Ensotek kalite yönetim yaklaşımı ve uluslararası sertifikalarımız.',NULL),
   ('bbbb7004-1111-4111-8111-bbbbbbbb7004','en','Quality & Certificates','quality-certificates','Ensotek quality management approach and internationally recognised certificates.',NULL),
   ('bbbb7004-1111-4111-8111-bbbbbbbb7004','de','Qualität & Zertifikate','qualitaet-zertifikate','Ensotek Qualitätsmanagement-Ansatz und international anerkannte Zertifikate.',NULL),
 
   -- ABOUT (LEGAL)
-  ('bbbb7005-1111-4111-8111-bbbbbbbb7005','tr','Gizlilik Politikası','gizlilik-politikasi','Ensotek gizlilik politikası ve kişisel verilerin korunmasına ilişkin yaklaşım.',NULL),
+  ('bbbb7005-1111-4111-8111-bbbbbbbb7005','de','Gizlilik Politikası','gizlilik-politikasi','Ensotek gizlilik politikası ve kişisel verilerin korunmasına ilişkin yaklaşım.',NULL),
   ('bbbb7005-1111-4111-8111-bbbbbbbb7005','en','Privacy Policy','privacy-policy','Ensotek privacy policy and approach to protecting personal data.',NULL),
   ('bbbb7005-1111-4111-8111-bbbbbbbb7005','de','Datenschutzerklärung','datenschutzerklaerung','Ensotek Datenschutzerklärung und Ansatz zum Schutz personenbezogener Daten.',NULL),
 
-  ('bbbb7006-1111-4111-8111-bbbbbbbb7006','tr','KVKK','kvkk','6698 sayılı KVKK kapsamında kişisel verilerin işlenmesine ilişkin bilgilendirme.',NULL),
+  ('bbbb7006-1111-4111-8111-bbbbbbbb7006','de','KVKK','kvkk','6698 sayılı KVKK kapsamında kişisel verilerin işlenmesine ilişkin bilgilendirme.',NULL),
   ('bbbb7006-1111-4111-8111-bbbbbbbb7006','en','PDPL (KVKK)','pdpl-kvkk','Information regarding processing of personal data under Turkish PDPL (KVKK No. 6698).',NULL),
   ('bbbb7006-1111-4111-8111-bbbbbbbb7006','de','DSGVO / KVKK','dsgvo-kvkk','Information zur Verarbeitung personenbezogener Daten (DSGVO/KVKK-Kontext).',NULL),
 
-  ('bbbb7007-1111-4111-8111-bbbbbbbb7007','tr','Kullanım Koşulları','kullanim-kosullari','Web sitesi kullanım koşulları ve sorumluluk sınırları.',NULL),
+  ('bbbb7007-1111-4111-8111-bbbbbbbb7007','de','Kullanım Koşulları','kullanim-kosullari','Web sitesi kullanım koşulları ve sorumluluk sınırları.',NULL),
   ('bbbb7007-1111-4111-8111-bbbbbbbb7007','en','Terms of Use','terms-of-use','Website terms of use and limitation of liability.',NULL),
   ('bbbb7007-1111-4111-8111-bbbbbbbb7007','de','Nutzungsbedingungen','nutzungsbedingungen','Nutzungsbedingungen der Website und Haftungsbeschränkung.',NULL),
 
-  ('bbbb7008-1111-4111-8111-bbbbbbbb7008','tr','Çerez Politikası','cerez-politikasi','Çerezlerin kullanımı ve tercih yönetimi.',NULL),
+  ('bbbb7008-1111-4111-8111-bbbbbbbb7008','de','Çerez Politikası','cerez-politikasi','Çerezlerin kullanımı ve tercih yönetimi.',NULL),
   ('bbbb7008-1111-4111-8111-bbbbbbbb7008','en','Cookie Policy','cookie-policy','Use of cookies and preference management.',NULL),
   ('bbbb7008-1111-4111-8111-bbbbbbbb7008','de','Cookie-Richtlinie','cookie-richtlinie','Verwendung von Cookies und Verwaltung der Einstellungen.',NULL),
 
-  ('bbbb7009-1111-4111-8111-bbbbbbbb7009','tr','Aydınlatma Metni','aydinlatma-metni','Kişisel verilerin işlenmesine dair aydınlatma metni.',NULL),
+  ('bbbb7009-1111-4111-8111-bbbbbbbb7009','de','Aydınlatma Metni','aydinlatma-metni','Kişisel verilerin işlenmesine dair aydınlatma metni.',NULL),
   ('bbbb7009-1111-4111-8111-bbbbbbbb7009','en','Information Notice','information-notice','Information notice regarding processing of personal data.',NULL),
   ('bbbb7009-1111-4111-8111-bbbbbbbb7009','de','Informationspflicht','informationspflicht','Informationspflichten zur Verarbeitung personenbezogener Daten.',NULL),
 
-  ('bbbb7010-1111-4111-8111-bbbbbbbb7010','tr','Yasal Bilgilendirme','yasal-bilgilendirme','Şirket bilgileri, yasal uyarılar ve sorumluluk reddi.',NULL),
+  ('bbbb7010-1111-4111-8111-bbbbbbbb7010','de','Yasal Bilgilendirme','yasal-bilgilendirme','Şirket bilgileri, yasal uyarılar ve sorumluluk reddi.',NULL),
   ('bbbb7010-1111-4111-8111-bbbbbbbb7010','en','Legal Notice','legal-notice','Company information, legal notices and disclaimers.',NULL),
   ('bbbb7010-1111-4111-8111-bbbbbbbb7010','de','Impressum / Rechtliche Hinweise','impressum-rechtliche-hinweise','Unternehmensangaben, rechtliche Hinweise und Haftungsausschluss.',NULL),
 
   -- SERVICES (aaaa8001) long descriptions (kept)
-  ('bbbb8001-1111-4111-8111-bbbbbbbb8001','tr','Üretim','uretim','Ensotek, endüstriyel su soğutma kuleleri üretiminde uzmandır. Açık ve kapalı devre FRP (cam elyaf takviyeli polyester) malzemeden, dayanıklı, uzun ömürlü ve yüksek kaliteli soğutma kuleleri üretir.',NULL),
-  ('bbbb8002-1111-4111-8111-bbbbbbbb8002','tr','Bakım ve Onarım','bakim-ve-onarim','Ensotek, endüstriyel su soğutma kulelerinizin sorunsuz çalışmasını sağlamak amacıyla periyodik bakım ve profesyonel onarım hizmetleri sunar. Deneyimli ekibimiz ile sistemlerinizin ömrünü uzatır ve performans kaybını önleriz. Mevcut soğutma kulelerinin verimliliğini sağlamak için düzenli bakım ve onarım hizmetleri sunuyoruz.',NULL),
-  ('bbbb8003-1111-4111-8111-bbbbbbbb8003','tr','Modernizasyon','modernizasyon','Ensotek, mevcut su soğutma kulelerinin daha verimli ve güncel standartlara uygun çalışabilmesi için modernizasyon çözümleri sunar. Eskiyen sistemlerinizi daha düşük maliyetle yenilemek ve enerji verimliliğini artırmak mümkündür. Eski soğutma kulelerinin performansını artırmak için modernizasyon hizmetleri sunuyoruz.',NULL),
-  ('bbbb8004-1111-4111-8111-bbbbbbbb8004','tr','Yedek Parçalar ve Bileşenler','yedek-parcalar-ve-bilesenler','Ensotek, su soğutma kuleleri için geniş bir yedek parça ve bileşen portföyü sunar. Tüm yedek parçalarımız, kulelerinizin uzun ömürlü ve verimli çalışması için kaliteli ve güvenilirdir. Soğutma kulelerinin sorunsuz çalışmasını sağlamak için geniş yedek parça ve bileşen seçenekleri sunuyoruz.',NULL),
-  ('bbbb8005-1111-4111-8111-bbbbbbbb8005','tr','Uygulamalar ve Referanslar','uygulamalar-ve-referanslar','Ensotek, endüstriyel ve ticari alanlarda çok sayıda referans projeye ve uygulamaya sahiptir. Enerji, kimya, gıda, ilaç, otomotiv ve daha birçok sektörde su soğutma kuleleriyle yerli ve yabancı yüzlerce projeye çözüm sunmuştur. Deneyimimiz ve uzman ekibimiz sayesinde müşterilerimizin farklı ihtiyaçlarına uygun, uzun ömürlü ve verimli soğutma sistemleri sağlıyoruz. Referanslarımız ve uygulama örneklerimiz, yüksek kalite ve güvenin göstergesidir.',NULL),
-  ('bbbb8006-1111-4111-8111-bbbbbbbb8006','tr','Mühendislik Desteği','muhendislik-destegi','Ensotek, projelendirme, danışmanlık, sistem optimizasyonu, performans analizi ve teknik eğitim dahil olmak üzere kapsamlı mühendislik destek hizmetleri sağlar. Uzman mühendislerimiz, projelerin tasarımından devreye alınmasına kadar her aşamada müşterilerimizin yanında olur. En iyi verim, düşük maliyet ve uzun ömürlü çözümler için profesyonel destek sunuyoruz. Ensotek, müşterilerine soğutma kuleleri alanında uzman mühendislik desteği sunar.',NULL),
+  ('bbbb8001-1111-4111-8111-bbbbbbbb8001','de','Üretim','uretim','Ensotek, endüstriyel su soğutma kuleleri üretiminde uzmandır. Açık ve kapalı devre FRP (cam elyaf takviyeli polyester) malzemeden, dayanıklı, uzun ömürlü ve yüksek kaliteli soğutma kuleleri üretir.',NULL),
+  ('bbbb8002-1111-4111-8111-bbbbbbbb8002','de','Bakım ve Onarım','bakim-ve-onarim','Ensotek, endüstriyel su soğutma kulelerinizin sorunsuz çalışmasını sağlamak amacıyla periyodik bakım ve profesyonel onarım hizmetleri sunar. Deneyimli ekibimiz ile sistemlerinizin ömrünü uzatır ve performans kaybını önleriz. Mevcut soğutma kulelerinin verimliliğini sağlamak için düzenli bakım ve onarım hizmetleri sunuyoruz.',NULL),
+  ('bbbb8003-1111-4111-8111-bbbbbbbb8003','de','Modernizasyon','modernizasyon','Ensotek, mevcut su soğutma kulelerinin daha verimli ve güncel standartlara uygun çalışabilmesi için modernizasyon çözümleri sunar. Eskiyen sistemlerinizi daha düşük maliyetle yenilemek ve enerji verimliliğini artırmak mümkündür. Eski soğutma kulelerinin performansını artırmak için modernizasyon hizmetleri sunuyoruz.',NULL),
+  ('bbbb8004-1111-4111-8111-bbbbbbbb8004','de','Yedek Parçalar ve Bileşenler','yedek-parcalar-ve-bilesenler','Ensotek, su soğutma kuleleri için geniş bir yedek parça ve bileşen portföyü sunar. Tüm yedek parçalarımız, kulelerinizin uzun ömürlü ve verimli çalışması için kaliteli ve güvenilirdir. Soğutma kulelerinin sorunsuz çalışmasını sağlamak için geniş yedek parça ve bileşen seçenekleri sunuyoruz.',NULL),
+  ('bbbb8005-1111-4111-8111-bbbbbbbb8005','de','Uygulamalar ve Referanslar','uygulamalar-ve-referanslar','Ensotek, endüstriyel ve ticari alanlarda çok sayıda referans projeye ve uygulamaya sahiptir. Enerji, kimya, gıda, ilaç, otomotiv ve daha birçok sektörde su soğutma kuleleriyle yerli ve yabancı yüzlerce projeye çözüm sunmuştur. Deneyimimiz ve uzman ekibimiz sayesinde müşterilerimizin farklı ihtiyaçlarına uygun, uzun ömürlü ve verimli soğutma sistemleri sağlıyoruz. Referanslarımız ve uygulama örneklerimiz, yüksek kalite ve güvenin göstergesidir.',NULL),
+  ('bbbb8006-1111-4111-8111-bbbbbbbb8006','de','Mühendislik Desteği','muhendislik-destegi','Ensotek, projelendirme, danışmanlık, sistem optimizasyonu, performans analizi ve teknik eğitim dahil olmak üzere kapsamlı mühendislik destek hizmetleri sağlar. Uzman mühendislerimiz, projelerin tasarımından devreye alınmasına kadar her aşamada müşterilerimizin yanında olur. En iyi verim, düşük maliyet ve uzun ömürlü çözümler için profesyonel destek sunuyoruz. Ensotek, müşterilerine soğutma kuleleri alanında uzman mühendislik desteği sunar.',NULL),
 
   ('bbbb8001-1111-4111-8111-bbbbbbbb8001','en','Production','production','Ensotek is specialized in manufacturing industrial water cooling towers. The production covers durable, long life open and closed circuit FRP cooling towers with high quality standards.',NULL),
   ('bbbb8002-1111-4111-8111-bbbbbbbb8002','en','Maintenance & Repair','maintenance-and-repair','Ensotek provides periodic maintenance and professional repair services for industrial water cooling towers, extending system lifetime and preserving performance and efficiency.',NULL),
@@ -622,10 +622,10 @@ VALUES
   ('bbbb8006-1111-4111-8111-bbbbbbbb8006','de','Engineering-Support','engineering-support','Ensotek bietet umfassenden Engineering-Support für Kühlturmprojekte – von Auslegung und Beratung über Systemoptimierung und Performance-Analyse bis hin zu Schulungen und Inbetriebnahme.',NULL),
 
   -- FAQ (aaaa9001)
-  ('bbbb9001-1111-4111-8111-bbbbbbbb9001','tr','Genel Sorular','genel-sorular',NULL,NULL),
-  ('bbbb9002-1111-4111-8111-bbbbbbbb9002','tr','Ürünler Hakkında','urunler-hakkinda',NULL,NULL),
-  ('bbbb9003-1111-4111-8111-bbbbbbbb9003','tr','Teknik Destek','teknik-destek',NULL,NULL),
-  ('bbbb9004-1111-4111-8111-bbbbbbbb9004','tr','Bakım ve Servis','bakim-ve-servis',NULL,NULL),
+  ('bbbb9001-1111-4111-8111-bbbbbbbb9001','de','Genel Sorular','genel-sorular',NULL,NULL),
+  ('bbbb9002-1111-4111-8111-bbbbbbbb9002','de','Ürünler Hakkında','urunler-hakkinda',NULL,NULL),
+  ('bbbb9003-1111-4111-8111-bbbbbbbb9003','de','Teknik Destek','teknik-destek',NULL,NULL),
+  ('bbbb9004-1111-4111-8111-bbbbbbbb9004','de','Bakım ve Servis','bakim-ve-servis',NULL,NULL),
 
   ('bbbb9001-1111-4111-8111-bbbbbbbb9001','en','General Questions','general-questions',NULL,NULL),
   ('bbbb9002-1111-4111-8111-bbbbbbbb9002','en','About Products','about-products',NULL,NULL),
@@ -638,9 +638,9 @@ VALUES
   ('bbbb9004-1111-4111-8111-bbbbbbbb9004','de','Wartung & Service','wartung-service',NULL,NULL),
 
   -- TEAM (aaaa9101)
-  ('bbbb9101-1111-4111-8111-bbbbbbbb9101','tr','Yönetim ve Kurucu Ortaklar','yonetim-ve-kurucu-ortaklar',NULL,NULL),
-  ('bbbb9102-1111-4111-8111-bbbbbbbb9102','tr','Mühendislik Ekibi','muhendislik-ekibi',NULL,NULL),
-  ('bbbb9103-1111-4111-8111-bbbbbbbb9103','tr','Saha ve Servis Ekibi','saha-ve-servis-ekibi',NULL,NULL),
+  ('bbbb9101-1111-4111-8111-bbbbbbbb9101','de','Yönetim ve Kurucu Ortaklar','yonetim-ve-kurucu-ortaklar',NULL,NULL),
+  ('bbbb9102-1111-4111-8111-bbbbbbbb9102','de','Mühendislik Ekibi','muhendislik-ekibi',NULL,NULL),
+  ('bbbb9103-1111-4111-8111-bbbbbbbb9103','de','Saha ve Servis Ekibi','saha-ve-servis-ekibi',NULL,NULL),
 
   ('bbbb9101-1111-4111-8111-bbbbbbbb9101','en','Management & Founders','management-and-founders',NULL,NULL),
   ('bbbb9102-1111-4111-8111-bbbbbbbb9102','en','Engineering Team','engineering-team',NULL,NULL),
