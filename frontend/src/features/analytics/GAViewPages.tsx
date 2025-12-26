@@ -20,9 +20,7 @@ export default function GAViewPages() {
   const { locale, ga4Id, gtmId } = useAnalyticsSettings();
 
   const hasAnyAnalytics = useMemo(() => {
-    // GTM varsa da page_view event’i dataLayer/gtag ile push edebiliriz
-    // (GTM tarafında GA4 event tag "page_view" dinleyebilir)
-    return !!(gtmId || ga4Id);
+    return !!(String(gtmId || '').trim() || String(ga4Id || '').trim());
   }, [gtmId, ga4Id]);
 
   const lastUrlRef = useRef<string>('');
@@ -30,22 +28,22 @@ export default function GAViewPages() {
   useEffect(() => {
     if (!hasAnyAnalytics) return;
 
-    const send = (url: string) => {
+    const send = (nextUrl: string) => {
       try {
         if (typeof window === 'undefined') return;
         if (!window.gtag) return;
         if (window.__analyticsConsentGranted !== true) return;
 
-        const abs = window.location.origin + (url.startsWith('/') ? url : `/${url}`);
+        const path = (nextUrl || '/').split(/[?#]/)[0] || '/';
+        const abs = window.location.origin + path;
 
-        // spam guard
         if (lastUrlRef.current === abs) return;
         lastUrlRef.current = abs;
 
         window.gtag('event', 'page_view', {
           page_title: document.title,
           page_location: abs,
-          page_path: url.split(/[?#]/)[0] || '/',
+          page_path: path,
           language: locale,
         });
       } catch {
@@ -53,12 +51,11 @@ export default function GAViewPages() {
       }
     };
 
-    // first paint (route hazır olunca)
     if (router.isReady) {
       send(router.asPath || router.pathname || '/');
     }
 
-    const onRouteChangeComplete = (nextUrl: string) => send(nextUrl);
+    const onRouteChangeComplete = (url: string) => send(url);
 
     router.events.on('routeChangeComplete', onRouteChangeComplete);
     return () => {
