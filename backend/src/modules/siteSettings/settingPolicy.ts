@@ -14,12 +14,32 @@ import { STRICT_SEO_KEYS, validateSeoSettingValue, assertSeoLocaleRule } from '.
  *    - seo/site_seo: locale yoksa '*' (global default); locale varsa override
  *    - site_meta_default: locale '*' yasak (per-locale zorunlu)
  * - default: mevcut davranış (locale yoksa all-locales)
+ *
+ * Not: Ensotek analytics yaklaşımı:
+ *  - gtm_container_id: global
+ *  - ga4_measurement_id: global (GTM yoksa fallback)
+ *  - cookie_consent: global config
  */
 
+const normKey = (key: unknown) =>
+  String(key ?? '')
+    .trim()
+    .toLowerCase();
+
 export const GLOBAL_ONLY_KEYS = new Set<string>([
+  // locales
   'app_locales',
   'default_locale',
+
+  // base
   'public_base_url',
+
+  // analytics
+  'gtm_container_id',
+  'ga4_measurement_id',
+
+  // consent
+  'cookie_consent',
 
   // smtp
   'smtp_host',
@@ -30,7 +50,7 @@ export const GLOBAL_ONLY_KEYS = new Set<string>([
   'smtp_from_name',
   'smtp_ssl',
 
-  // google
+  // google oauth
   'google_client_id',
   'google_client_secret',
 
@@ -47,13 +67,16 @@ export const GLOBAL_ONLY_KEYS = new Set<string>([
   'storage_public_api_base',
 ]);
 
+/**
+ * Value normalization/validation by key.
+ * - SEO keys: strict Zod validation (single source: seo.validation.ts)
+ * - Others: pass-through (or later: add analytics id format validators if desired)
+ */
 export function normalizeValueByKey(key: string, value: JsonLike): JsonLike {
-  const k = String(key || '')
-    .trim()
-    .toLowerCase();
+  const k = normKey(key);
 
   if (STRICT_SEO_KEYS.has(k)) {
-    // validateSeoSettingValue throws with ZodError; upstream should map to 400
+    // validateSeoSettingValue throws (ZodError or custom error)
     return validateSeoSettingValue(k, value) as unknown as JsonLike;
   }
 
@@ -62,20 +85,20 @@ export function normalizeValueByKey(key: string, value: JsonLike): JsonLike {
 
 /**
  * Admin update/create esnasında locale deterministik hale getir.
+ * - GLOBAL_ONLY_KEYS => always '*'
+ * - SEO strict locale rules enforced (site_meta_default cannot be '*')
+ * - Otherwise: keep caller's locale (or null)
  */
 export function coerceLocaleByKey(key: string, locale: string | null): string | null {
-  const k = String(key || '')
-    .trim()
-    .toLowerCase();
+  const k = normKey(key);
 
   if (GLOBAL_ONLY_KEYS.has(k)) return '*';
 
   if (STRICT_SEO_KEYS.has(k)) {
     const effective = locale ?? '*';
-    // locale rule: site_meta_default cannot be '*'
     assertSeoLocaleRule(k, effective);
     return effective;
   }
 
-  return locale; // normal davranış
+  return locale;
 }

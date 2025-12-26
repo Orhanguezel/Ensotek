@@ -72,13 +72,13 @@ function loadConsent(): ConsentState | null {
 
 function applyAnalyticsConsent(analytics: boolean) {
   try {
-    (window as any).__gaConsentGranted = analytics === true;
-    // GA Consent Mode update (GAScripts içinde window.__setGaConsent tanımlı olmalı)
-    (window as any).__setGaConsent?.({
+    (window as any).__analyticsConsentGranted = analytics === true;
+    (window as any).__setAnalyticsConsent?.({
       analytics_storage: analytics ? 'granted' : 'denied',
     });
   } catch {}
 }
+
 
 export default function CookieConsentBanner() {
   const resolvedLocale = useResolvedLocale();
@@ -261,41 +261,58 @@ export default function CookieConsentBanner() {
           right: 0;
           bottom: 0;
           z-index: 9998;
-          padding: 14px 14px 18px;
-          background: rgba(255, 255, 255, 0.92);
-          backdrop-filter: blur(10px);
-          border-top: 1px solid rgba(0, 0, 0, 0.08);
+          padding: 14px;
+          /* Şerit hissini azaltıp “floating card” hissi veriyoruz */
+          background: transparent;
         }
 
         .ccb__inner {
+          /* Tema rengi: varsa --tp-theme-1, yoksa fallback */
+          --ccb-primary: var(--tp-theme-1, #2563eb);
+          --ccb-text: rgba(17, 24, 39, 0.92);
+          --ccb-muted: rgba(17, 24, 39, 0.72);
+          --ccb-border: rgba(0, 0, 0, 0.08);
+
           max-width: 1180px;
           margin: 0 auto;
+
           display: grid;
           grid-template-columns: 1fr auto;
           gap: 14px 18px;
           align-items: center;
           position: relative;
+
+          background: rgba(255, 255, 255, 0.92);
+          backdrop-filter: blur(12px);
+          border: 1px solid var(--ccb-border);
+          border-radius: 18px;
+          box-shadow: 0 18px 46px rgba(0, 0, 0, 0.14);
+          padding: 14px 14px;
         }
 
         .ccb__text {
           min-width: 0;
+          padding-right: 10px;
         }
 
         .ccb__title {
-          font-weight: 800;
+          color: var(--ccb-text);
+          font-weight: 900;
           font-size: 14px;
           line-height: 1.2;
+          letter-spacing: -0.01em;
         }
 
         .ccb__desc {
+          color: var(--ccb-muted);
           margin-top: 6px;
           font-size: 13px;
           line-height: 1.45;
-          opacity: 0.8;
         }
 
         .ccb__link {
-          font-weight: 700;
+          color: var(--ccb-primary);
+          font-weight: 800;
           text-decoration: underline;
           text-underline-offset: 2px;
         }
@@ -305,6 +322,7 @@ export default function CookieConsentBanner() {
           gap: 10px;
           flex-wrap: wrap;
           justify-content: flex-end;
+          align-items: center;
         }
 
         .ccb__btn {
@@ -313,58 +331,85 @@ export default function CookieConsentBanner() {
           font-weight: 800;
           font-size: 13px;
           cursor: pointer;
-          transition: 0.15s ease;
+          transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease,
+            border-color 0.12s ease, color 0.12s ease;
           border: 1px solid transparent;
           user-select: none;
-        }
-
-        .ccb__btn--ghost {
-          background: #fff;
-          border-color: rgba(0, 0, 0, 0.14);
-        }
-
-        .ccb__btn--outline {
-          background: rgba(255, 255, 255, 0.65);
-          border-color: rgba(0, 0, 0, 0.14);
-        }
-
-        .ccb__btn--primary {
-          background: #f6b700; /* ekrandaki örneğe benzer sarı */
-          color: #111;
-          border-color: rgba(0, 0, 0, 0.08);
+          line-height: 1;
+          white-space: nowrap;
         }
 
         .ccb__btn:hover {
           transform: translateY(-1px);
-          box-shadow: 0 12px 22px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Ghost: hafif, temiz */
+        .ccb__btn--ghost {
+          background: rgba(255, 255, 255, 0.85);
+          border-color: rgba(0, 0, 0, 0.12);
+          color: var(--ccb-text);
+        }
+
+        /* Outline: reject için daha belirgin ama kaba değil */
+        .ccb__btn--outline {
+          background: rgba(17, 24, 39, 0.04);
+          border-color: rgba(17, 24, 39, 0.14);
+          color: rgba(17, 24, 39, 0.9);
+        }
+
+        /* Primary: sarı yok — tema rengi */
+        .ccb__btn--primary {
+          background: var(--ccb-primary);
+          color: #fff;
+          border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        .ccb__btn--primary:hover {
+          /* küçük bir “darken” etkisi: box-shadow ile */
+          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
         }
 
         .ccb__close {
           position: absolute;
-          right: -2px;
-          top: -6px;
-          border: 0;
-          background: transparent;
-          font-size: 26px;
+          right: 10px;
+          top: 8px;
+
+          width: 34px;
+          height: 34px;
+          border-radius: 12px;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          background: rgba(255, 255, 255, 0.75);
+
+          display: grid;
+          place-items: center;
+
+          font-size: 20px;
           line-height: 1;
           cursor: pointer;
-          opacity: 0.55;
-          padding: 2px 8px;
+          opacity: 0.75;
+          transition: 0.12s ease;
         }
+
         .ccb__close:hover {
           opacity: 1;
+          transform: translateY(-1px);
+          box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
         }
 
         @media (max-width: 900px) {
           .ccb__inner {
             grid-template-columns: 1fr;
+            padding: 14px 12px 12px;
           }
+
           .ccb__actions {
             justify-content: flex-start;
           }
+
           .ccb__close {
-            right: -6px;
-            top: -10px;
+            right: 8px;
+            top: 8px;
           }
         }
       `}</style>

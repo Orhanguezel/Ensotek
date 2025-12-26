@@ -361,4 +361,5 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
+COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;

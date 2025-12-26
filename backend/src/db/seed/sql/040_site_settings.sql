@@ -63,47 +63,6 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- GLOBAL: GA4 Measurement ID (locale='*')  ✅ EKLENDİ
--- Admin panelden doldur: "G-XXXXXXXXXX"
--- =============================================================
-INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
-VALUES
-(UUID(), 'ga4_measurement_id', '*', '', NOW(3), NOW(3))
-ON DUPLICATE KEY UPDATE
-  `value`      = VALUES(`value`),
-  `updated_at` = VALUES(`updated_at`);
-
--- =============================================================
--- GLOBAL: Cookie Consent Config (locale='*')  ✅ EKLENDİ (hazır dursun)
--- consent_version: metin değişince artırırsın -> kullanıcıdan tekrar onay alırsın
--- =============================================================
-INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
-VALUES
-(
-  UUID(),
-  'cookie_consent',
-  '*',
-  CAST(
-    JSON_OBJECT(
-      'consent_version', 1,
-      'defaults', JSON_OBJECT(
-        'necessary', TRUE,
-        'analytics', FALSE,
-        'marketing', FALSE
-      ),
-      'ui', JSON_OBJECT(
-        'enabled', TRUE
-      )
-    ) AS CHAR CHARACTER SET utf8mb4
-  ),
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `value`      = VALUES(`value`),
-  `updated_at` = VALUES(`updated_at`);
-
--- =============================================================
 -- LOCALIZED: TR içerik ayarları
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
@@ -130,7 +89,6 @@ VALUES
 (UUID(), 'catalog_pdf_filename',   'tr', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_admin_email',    'tr', 'admin@ensotek.de', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'tr', 'Ensotek', NOW(3), NOW(3)),
-
 (
   UUID(),
   'socials',
@@ -146,7 +104,6 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-
 (
   UUID(),
   'company_profile',
@@ -159,7 +116,6 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-
 (
   UUID(),
   'company_brand',
@@ -183,7 +139,6 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-
 (
   UUID(),
   'catalog_admin_user_ids',
@@ -205,7 +160,6 @@ VALUES
 (UUID(), 'catalog_pdf_filename',   'en', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_admin_email',    'en', 'admin@ensotek.de', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'en', 'Ensotek', NOW(3), NOW(3)),
-
 (
   UUID(),
   'contact_info',
@@ -224,7 +178,6 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-
 (
   UUID(),
   'socials',
@@ -240,7 +193,6 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-
 (
   UUID(),
   'company_brand',
@@ -277,7 +229,6 @@ VALUES
 (UUID(), 'catalog_pdf_filename',   'de', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_admin_email',    'de', 'admin@ensotek.de', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'de', 'Ensotek', NOW(3), NOW(3)),
-
 (
   UUID(),
   'contact_info',
@@ -305,16 +256,16 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'storage_driver',             '*', 'cloudinary', NOW(3), NOW(3)),
-(UUID(), 'storage_local_root',         '*', '',          NOW(3), NOW(3)),
-(UUID(), 'storage_local_base_url',     '*', '/uploads',  NOW(3), NOW(3)),
-(UUID(), 'cloudinary_cloud_name',      '*', '',          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_key',         '*', '',          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_secret',      '*', '',          NOW(3), NOW(3)),
-(UUID(), 'cloudinary_folder',          '*', 'uploads',   NOW(3), NOW(3)),
-(UUID(), 'cloudinary_unsigned_preset', '*', '',          NOW(3), NOW(3)),
-(UUID(), 'storage_cdn_public_base',    '*', '',          NOW(3), NOW(3)),
-(UUID(), 'storage_public_api_base',    '*', '',          NOW(3), NOW(3))
+(UUID(), 'storage_driver',             '*', 'cloudinary',                               NOW(3), NOW(3)),
+(UUID(), 'storage_local_root',         '*', '/var/www/Ensotek/uploads',                 NOW(3), NOW(3)),
+(UUID(), 'storage_local_base_url',     '*', 'https://ensotek.guezelwebdesign.com/uploads', NOW(3), NOW(3)),
+(UUID(), 'cloudinary_cloud_name',      '*', 'your_cloud_name',                          NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_key',         '*', 'your_cloudinary_api_key',                  NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_secret',      '*', 'your_cloudinary_api_secret',               NOW(3), NOW(3)),
+(UUID(), 'cloudinary_folder',          '*', 'uploads/ensotek',                          NOW(3), NOW(3)),
+(UUID(), 'cloudinary_unsigned_preset', '*', 'your_unsigned_preset',                     NOW(3), NOW(3)),
+(UUID(), 'storage_cdn_public_base',    '*', 'https://res.cloudinary.com',               NOW(3), NOW(3)),
+(UUID(), 'storage_public_api_base',    '*', 'https://ensotek.guezelwebdesign.com/api',  NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -334,13 +285,13 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'smtp_host',       '*', '',        NOW(3), NOW(3)),
-(UUID(), 'smtp_port',       '*', '465',     NOW(3), NOW(3)),
-(UUID(), 'smtp_username',   '*', '',        NOW(3), NOW(3)),
-(UUID(), 'smtp_password',   '*', '',        NOW(3), NOW(3)),
-(UUID(), 'smtp_from_email', '*', '',        NOW(3), NOW(3)),
-(UUID(), 'smtp_from_name',  '*', 'Ensotek', NOW(3), NOW(3)),
-(UUID(), 'smtp_ssl',        '*', 'true',    NOW(3), NOW(3))
+(UUID(), 'smtp_host',       '*', 'smtp.example.com',      NOW(3), NOW(3)),
+(UUID(), 'smtp_port',       '*', '465',                   NOW(3), NOW(3)),
+(UUID(), 'smtp_username',   '*', 'no-reply@ensotek.de',   NOW(3), NOW(3)),
+(UUID(), 'smtp_password',   '*', 'change-me-in-admin',    NOW(3), NOW(3)),
+(UUID(), 'smtp_from_email', '*', 'no-reply@ensotek.de',   NOW(3), NOW(3)),
+(UUID(), 'smtp_from_name',  '*', 'Ensotek',               NOW(3), NOW(3)),
+(UUID(), 'smtp_ssl',        '*', 'true',                  NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -350,8 +301,68 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'google_client_id',     '*', '', NOW(3), NOW(3)),
-(UUID(), 'google_client_secret', '*', '', NOW(3), NOW(3))
+(UUID(), 'google_client_id',     '*', 'your-google-client-id.apps.googleusercontent.com', NOW(3), NOW(3)),
+(UUID(), 'google_client_secret', '*', 'change-me-in-admin',                               NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- =============================================================
+-- GLOBAL: Google Tag Manager (GTM) Container ID (locale='*') ✅ EKLENDİ
+-- Admin panelden değiştir: "GTM-XXXXXXX"
+-- Boş bırakırsan frontend GTM basmaz.
+-- =============================================================
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(UUID(), 'gtm_container_id', '*', 'GTM-XXXXXXX', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- =============================================================
+-- GLOBAL: GA4 Measurement ID (locale='*') ✅ (opsiyonel fallback)
+-- Admin panelden değiştir: "G-XXXXXXXXXX"
+-- Not: GTM aktifse GA4 tag'ini GTM içinden yönetmen önerilir.
+-- =============================================================
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(UUID(), 'ga4_measurement_id', '*', 'G-XXXXXXXXXX', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- =============================================================
+-- GLOBAL: Cookie Consent Config (locale='*')
+-- consent_version: metin/policy değişince artır -> kullanıcıdan tekrar onay al
+-- =============================================================
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(
+  UUID(),
+  'cookie_consent',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'consent_version', 1,
+      'defaults', JSON_OBJECT(
+        'necessary', TRUE,
+        'analytics', FALSE,
+        'marketing', FALSE
+      ),
+      'ui', JSON_OBJECT(
+        'enabled', TRUE,
+        'position', 'bottom',
+        'show_reject_all', TRUE
+      ),
+      'texts', JSON_OBJECT(
+        'title', 'Çerez Tercihleri',
+        'description', 'Deneyiminizi iyileştirmek için zorunlu ve isteğe bağlı çerezler kullanıyoruz. Tercihlerinizi dilediğiniz zaman değiştirebilirsiniz.'
+      )
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+)
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
