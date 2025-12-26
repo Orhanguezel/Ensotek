@@ -2,13 +2,15 @@
 -- 040_site_settings.sql (Ensotek) – MULTI-LOCALE (Dynamic) [SAFE]
 --  - app_locales + default_locale => locale='*'
 --  - localized settings => locale in ('tr','en','de',...)
---  - TEXT value stores JSON as string (CAST to CHAR utf8mb4)
+--  - TEXT value stores JSON as string
 --  - Upsert everywhere: ON DUPLICATE KEY UPDATE
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
+
 SET FOREIGN_KEY_CHECKS = 0;
+START TRANSACTION;
 
 -- =============================================================
 -- TABLE
@@ -56,6 +58,47 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (UUID(), 'default_locale', '*', 'tr', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- =============================================================
+-- GLOBAL: GA4 Measurement ID (locale='*')  ✅ EKLENDİ
+-- Admin panelden doldur: "G-XXXXXXXXXX"
+-- =============================================================
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(UUID(), 'ga4_measurement_id', '*', '', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- =============================================================
+-- GLOBAL: Cookie Consent Config (locale='*')  ✅ EKLENDİ (hazır dursun)
+-- consent_version: metin değişince artırırsın -> kullanıcıdan tekrar onay alırsın
+-- =============================================================
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(
+  UUID(),
+  'cookie_consent',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'consent_version', 1,
+      'defaults', JSON_OBJECT(
+        'necessary', TRUE,
+        'analytics', FALSE,
+        'marketing', FALSE
+      ),
+      'ui', JSON_OBJECT(
+        'enabled', TRUE
+      )
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+)
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -313,4 +356,5 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
+COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
