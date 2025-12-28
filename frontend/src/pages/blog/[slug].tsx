@@ -3,7 +3,12 @@
 // Ensotek – Blog Detail Page (by slug) + SEO
 //   - Route: /blog/[slug]
 //   - Data: custom_pages/by-slug (module_key="blog")
+//   - i18n: useLocaleShort() + site_settings.ui_blog
+//   - SEO: seo -> site_seo fallback + page.meta_* override (NO canonical here)
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
+
+'use client';
 
 import React, { useMemo } from 'react';
 import Head from 'next/head';
@@ -14,7 +19,7 @@ import BlogDetailsArea from '@/components/containers/blog/BlogDetailsArea';
 import Feedback from '@/components/containers/feedback/Feedback';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -33,58 +38,87 @@ import { excerpt } from '@/shared/text';
 
 const BlogDetailPage: React.FC = () => {
   const router = useRouter();
+  const locale = useLocaleShort();
 
-  const resolved = useResolvedLocale();
-  const localeShort = (resolved || 'de').split('-')[0]; // ✅ kritik
-  const { ui } = useUiSection('ui_blog', localeShort);
+  const { ui } = useUiSection('ui_blog', locale as any);
 
-  const slugParam = router.query.slug;
-  const slug =
-    typeof slugParam === 'string' ? slugParam : Array.isArray(slugParam) ? slugParam[0] : '';
+  const slug = useMemo(() => {
+    const q = router.query.slug;
+    if (typeof q === 'string') return q.trim();
+    if (Array.isArray(q)) return String(q[0] ?? '').trim();
+    return '';
+  }, [router.query.slug]);
+
+  const isSlugReady = !!slug;
 
   // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: 'seo',
-    locale: localeShort,
-  });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: 'site_seo',
-    locale: localeShort,
-  });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
-  // Blog item by slug
+  // Blog item data (for SEO + banner)
   const { data: page } = useGetCustomPageBySlugPublicQuery(
-    { slug, locale: localeShort }, // ✅ kritik
-    { skip: !slug },
+    { slug, locale },
+    { skip: !isSlugReady },
   );
 
   const listTitleFallback = ui('ui_blog_page_title', 'Blog');
-  const detailTitleFallback = ui(
-    'ui_blog_detail_page_title',
-    localeShort === 'de' ? 'Blog Detayı' : 'Blog Detail',
-  );
+  const detailTitleFallback = ui('ui_blog_detail_page_title', 'Blog Detail');
 
-  const bannerTitle = (page?.title || '').trim() || detailTitleFallback || listTitleFallback;
+  const bannerTitle = useMemo(() => {
+    const t = String(page?.title ?? '').trim();
+    if (t) return t;
 
-  const pageTitleRaw =
-    (page?.meta_title ?? '').trim() ||
-    (page?.title ?? '').trim() ||
-    String(bannerTitle || 'Blog').trim();
+    const d = String(detailTitleFallback ?? '').trim();
+    if (d) return d;
 
-  const pageDescRaw =
-    (page?.meta_description ?? '').trim() ||
-    (page?.summary ?? '').trim() ||
-    excerpt(page?.content_html ?? '', 160).trim() ||
-    String(seo?.description ?? '').trim() ||
-    '';
+    const l = String(listTitleFallback ?? '').trim();
+    return l || 'Blog';
+  }, [page?.title, detailTitleFallback, listTitleFallback]);
 
-  const seoSiteName = String(seo?.site_name ?? '').trim() || 'Ensotek';
-  const titleTemplate = String(seo?.title_template ?? '').trim() || '%s | Ensotek';
+  // --- SEO fields ---
+  const pageTitleRaw = useMemo(() => {
+    const mt = String(page?.meta_title ?? '').trim();
+    if (mt) return mt;
+
+    const t = String(page?.title ?? '').trim();
+    if (t) return t;
+
+    const b = String(bannerTitle ?? '').trim();
+    if (b) return b;
+
+    const l = String(listTitleFallback ?? '').trim();
+    return l || 'Blog';
+  }, [page?.meta_title, page?.title, bannerTitle, listTitleFallback]);
+
+  const pageDescRaw = useMemo(() => {
+    const globalDesc = String((seo as any)?.description ?? '').trim();
+
+    if (!isSlugReady) return globalDesc || '';
+
+    const md = String(page?.meta_description ?? '').trim();
+    if (md) return md;
+
+    const s = String(page?.summary ?? '').trim();
+    if (s) return s;
+
+    const ex = excerpt(String(page?.content_html ?? ''), 160).trim();
+    if (ex) return ex;
+
+    return globalDesc || '';
+  }, [isSlugReady, page?.meta_description, page?.summary, page?.content_html, seo]);
+
+  const seoSiteName = useMemo(() => {
+    return String((seo as any)?.site_name ?? '').trim() || 'Ensotek';
+  }, [seo]);
+
+  const titleTemplate = useMemo(() => {
+    return String((seo as any)?.title_template ?? '').trim() || '%s | Ensotek';
+  }, [seo]);
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
@@ -94,19 +128,19 @@ const BlogDetailPage: React.FC = () => {
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = (page?.featured_image ?? '').trim();
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
-
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.ico');
+    const pageImgRaw = String(page?.featured_image ?? '').trim();
+    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
+
+    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
   }, [page?.featured_image, seo]);
 
   const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
 
     return buildMeta({
       title: pageTitle,
@@ -114,9 +148,11 @@ const BlogDetailPage: React.FC = () => {
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
+
+      twitterCard: String((tw as any).card ?? '').trim() || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
@@ -124,18 +160,38 @@ const BlogDetailPage: React.FC = () => {
     <>
       <Head>
         <title>{pageTitle}</title>
+
         {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link')
+          if (spec.kind === 'link') {
             return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          if (spec.kind === 'meta-name')
+          }
+          if (spec.kind === 'meta-name') {
             return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+          }
           return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
         })}
       </Head>
 
       <Banner title={bannerTitle} />
-      <BlogDetailsArea />
-      <Feedback />
+
+      {!isSlugReady ? (
+        <div className="news__area grey-bg-3 pt-120 pb-90">
+          <div className="container">
+            <div className="row">
+              <div className="col-12">
+                <div className="skeleton-line" style={{ height: 24 }} />
+                <div className="skeleton-line mt-10" style={{ height: 16 }} />
+                <div className="skeleton-line mt-10" style={{ height: 16 }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <>
+          <BlogDetailsArea />
+          <Feedback />
+        </>
+      )}
     </>
   );
 };

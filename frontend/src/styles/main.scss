@@ -13,6 +13,7 @@
 @forward 'layout/hero';
 @forward 'layout/about';
 @forward 'layout/service';
+@forward 'layout/servicedetail';
 @forward 'layout/approach';
 @forward 'layout/project';
 @forward 'layout/seo';
@@ -22,9 +23,11 @@
 @forward 'layout/feedback';
 @forward 'layout/brand';
 @forward 'layout/blog';
+@forward 'layout/blogdetail';
 @forward 'layout/cta';
 @forward 'layout/touch';
 @forward 'layout/partner';
+@forward 'layout/product';
 @forward 'layout/boost';
 @forward 'layout/choose';
 @forward 'layout/development';
@@ -32,6 +35,8 @@
 @forward 'layout/technical';
 @forward 'layout/fact';
 @forward 'layout/footer';
+@forward 'layout/quality';
+@forward 'layout/cookie-consent';
 @import "./components/spacing";
 @import "./components/back-to-top";
 @import "./utils/my-custom";

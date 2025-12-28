@@ -1,9 +1,15 @@
-// src/pages/index.tsx
+// =============================================================
+// FILE: src/pages/index.tsx
+// Ensotek – Home Page (SEO H1 dynamic)
+// - Locale: useResolvedLocale() single source of truth
+// - H1: site_settings.ui_home.ui_home_h1 -> fallback (brand-safe)
+// =============================================================
+
 import type { NextPage } from 'next';
 import React, { useMemo } from 'react';
 
 import Hero from '@/components/layout/banner/Hero';
-import About from '@/components/containers/about/About';
+import About from '@/components/containers/about/AboutSection';
 import Product from '@/components/containers/product/Product';
 import Service from '@/components/containers/service/Service';
 import Newsletter from '@/components/containers/newsletter/Newsletter';
@@ -13,43 +19,19 @@ import References from '@/components/containers/references/References';
 import News from '@/components/containers/news/News';
 import Contact from '@/components/containers/contact/Contact';
 
-// i18n + UI
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
+import { normLocaleTag } from '@/i18n/localeUtils';
+import { isValidUiText } from '@/i18n/uiText';
 
-// data
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
-
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
-
-const isValidUiText = (value: string, key: string) => {
-  const v = String(value ?? '').trim();
-  if (!v) return false;
-
-  // Missing durumda bazı çeviri/DB helper’ları key’i aynen döndürür
-  if (v === key) return false;
-
-  // Bazı sistemlerde "[key]" / "{{key}}" gibi placeholder dönebilir
-  const normalized = v.replace(/\s+/g, '');
-  if (normalized === `[${key}]`) return false;
-  if (normalized === `{{${key}}}`) return false;
-
-  return true;
-};
 
 const Home: NextPage = () => {
   const resolved = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolved), [resolved]);
+  const locale = useMemo(() => normLocaleTag(resolved) || 'de', [resolved]);
 
-  // UI override (ui_home)
   const { ui } = useUiSection('ui_home', locale);
 
-  // DB: site_title
   const { data: siteTitleSetting } = useGetSiteSettingByKeyQuery({
     key: 'site_title',
     locale,
@@ -61,34 +43,23 @@ const Home: NextPage = () => {
   }, [siteTitleSetting?.value]);
 
   const h1 = useMemo(() => {
-    const fallback =
-      locale === 'de'
-        ? 'Ensotek Su Soğutma Kuleleri ve Proses Soğutma Çözümleri'
-        : locale === 'de'
-        ? 'Ensotek Kühltürme und Prozesskühlung'
-        : 'Ensotek Cooling Towers and Process Cooling Solutions';
-
     const key = 'ui_home_h1';
-    const raw = String(ui(key, '') ?? '');
-    const candidate = raw.trim();
 
-    // ✅ 1) UI’dan gelen değer gerçekten geçerliyse onu kullan
-    if (isValidUiText(candidate, key)) return candidate;
+    const v = ui(key, '');
+    if (isValidUiText(v, key)) return v;
 
-    // ✅ 2) Fallback içinde marka yoksa başa ekle (duplicate’ı engelle)
+    // locale bazlı if-else yok (30 dil için stabil)
     const st = String(siteTitle || '').trim() || 'Ensotek';
-    const fb = String(fallback || '').trim() || 'Ensotek';
+    const generic = 'Cooling Towers and Process Cooling Solutions';
 
     const stLower = st.toLowerCase();
-    const fbLower = fb.toLowerCase();
+    const genericLower = generic.toLowerCase();
 
-    if (!fbLower.includes(stLower)) return `${st} – ${fb}`;
-    return fb;
-  }, [ui, locale, siteTitle]);
+    return genericLower.includes(stLower) ? generic : `${st} – ${generic}`;
+  }, [ui, siteTitle]);
 
   return (
     <>
-      {/* ✅ H1: tasarım bozulmasın diye sr-only */}
       <h1 className="sr-only">{h1}</h1>
 
       <Hero />
@@ -102,7 +73,6 @@ const Home: NextPage = () => {
       <News />
       <Contact />
 
-      {/* sr-only utility */}
       <style jsx global>{`
         .sr-only {
           position: absolute !important;

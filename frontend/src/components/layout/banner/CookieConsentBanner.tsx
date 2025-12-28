@@ -1,19 +1,14 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Link from 'next/link';
 
-import CookieSettingsModal from './CookieSettingsModal';
+import CookieSettingsModal, { type ConsentState } from './CookieSettingsModal';
 
-// i18n (senin patternin)
-import { useResolvedLocale } from '@/i18n/locale';
+// i18n PATTERN
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
-
-type ConsentState = {
-  necessary: true;
-  analytics: boolean;
-};
 
 const CONSENT_COOKIE = 'ensotek_cookie_consent_v1';
 const CONSENT_LS = 'ensotek_cookie_consent_v1';
@@ -108,19 +103,11 @@ function applyAnalyticsConsent(analytics: boolean) {
 }
 
 export default function CookieConsentBanner() {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => {
-    return (
-      String(resolvedLocale || 'de')
-        .trim()
-        .toLowerCase()
-        .replace('_', '-')
-        .split('-')[0] || 'de'
-    );
-  }, [resolvedLocale]);
+  const locale = useLocaleShort();
 
-  // UI metinleri (DB’den)
-  const { ui } = useUiSection('ui_cookie', locale);
+  // UI metinleri (DB-driven)
+  const { ui } = useUiSection('ui_cookie', locale as any);
+  const t = useCallback((key: string, fb: string) => ui(key, fb), [ui]);
 
   const [ready, setReady] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
@@ -143,85 +130,73 @@ export default function CookieConsentBanner() {
 
   const policyHref = useMemo(() => localizePath(locale, '/cookie-policy'), [locale]);
 
-  const onRejectAll = () => {
+  const onRejectAll = useCallback(() => {
     const next: ConsentState = { necessary: true, analytics: false };
     setConsent(next);
     persistConsent(next);
     applyAnalyticsConsent(false);
     setHasChoice(true);
     setOpenSettings(false);
-  };
+  }, []);
 
-  const onAcceptAll = () => {
+  const onAcceptAll = useCallback(() => {
     const next: ConsentState = { necessary: true, analytics: true };
     setConsent(next);
     persistConsent(next);
     applyAnalyticsConsent(true);
     setHasChoice(true);
     setOpenSettings(false);
-  };
+  }, []);
 
-  const onSaveSettings = (next: ConsentState) => {
+  const onSaveSettings = useCallback((next: ConsentState) => {
     setConsent(next);
     persistConsent(next);
     applyAnalyticsConsent(!!next.analytics);
     setHasChoice(true);
     setOpenSettings(false);
-  };
+  }, []);
 
   // SSR/hydration güvenliği
   if (!ready) return null;
 
-  // Seçim yapıldıysa banner gizli kalsın
+  // Seçim yapıldıysa banner gizli kalsın, ama ayarlar modalı (footer link vb.) yine açılabilir.
   if (hasChoice) {
     return (
-      <>
-        {openSettings && (
-          <CookieSettingsModal
-            open={openSettings}
-            consent={consent}
-            onClose={() => setOpenSettings(false)}
-            onSave={onSaveSettings}
-            title={ui('ui_cookie_settings_title', 'Çerez Ayarları')}
-            description={ui(
-              'ui_cookie_settings_desc',
-              'Hangi çerez kategorilerine izin verdiğinizi seçebilirsiniz. Gerekli çerezler her zaman açıktır.',
-            )}
-            labelNecessary={ui('ui_cookie_cat_necessary', 'Gerekli')}
-            descNecessary={ui(
-              'ui_cookie_cat_necessary_desc',
-              'Sitenin temel işlevleri için zorunludur.',
-            )}
-            labelAnalytics={ui('ui_cookie_cat_analytics', 'Analitik')}
-            descAnalytics={ui(
-              'ui_cookie_cat_analytics_desc',
-              'Site trafiğini ve performansı anlamamıza yardımcı olur.',
-            )}
-            btnCancel={ui('ui_cookie_btn_cancel', 'Vazgeç')}
-            btnSave={ui('ui_cookie_btn_save', 'Kaydet')}
-          />
-        )}
-      </>
+      <CookieSettingsModal
+        open={openSettings}
+        consent={consent}
+        onClose={() => setOpenSettings(false)}
+        onSave={onSaveSettings}
+      />
     );
   }
+
+  // DB key seti: CookieSettingsModal zaten ui_cookie okuyor.
+  // Banner sadece kendi metinlerini okur.
+  const titleText = t('cc_banner_title', 'Cookie Policy');
+  const descText = t(
+    'cc_banner_desc',
+    'We use cookies to ensure the site works properly and to analyze traffic. You can manage your preferences.',
+  );
+  const policyLabel = t('cc_banner_link_policy', 'Cookie Policy');
+
+  const btnSettings = t('cc_banner_btn_settings', 'Cookie Settings');
+  const btnReject = t('cc_banner_btn_reject', 'Reject All');
+  const btnAccept = t('cc_banner_btn_accept', 'Accept All');
+
+  const ariaClose = t('cc_banner_aria_close', 'Close');
 
   return (
     <>
       <div className="ccb__wrap" role="region" aria-label="Cookie consent">
         <div className="ccb__inner">
           <div className="ccb__text">
-            <div className="ccb__title">
-              {ui('ui_cookie_title', locale === 'de' ? 'Çerez Politikası' : 'Cookie Policy')}
-            </div>
+            <div className="ccb__title">{titleText}</div>
+
             <div className="ccb__desc">
-              {ui(
-                'ui_cookie_desc',
-                locale === 'de'
-                  ? 'Sitemizin doğru şekilde çalışmasını sağlamak ve trafik analizi yapmak için çerezler kullanıyoruz. Tercihlerinizi yönetebilirsiniz.'
-                  : 'We use cookies to ensure the site works properly and to analyze traffic. You can manage your preferences.',
-              )}{' '}
+              {descText}{' '}
               <Link className="ccb__link" href={policyHref}>
-                {ui('ui_cookie_link_policy', 'Cookie Policy')}
+                {policyLabel}
               </Link>
             </div>
           </div>
@@ -232,15 +207,15 @@ export default function CookieConsentBanner() {
               className="ccb__btn ccb__btn--ghost"
               onClick={() => setOpenSettings(true)}
             >
-              {ui('ui_cookie_btn_settings', 'Çerez Ayarları')}
+              {btnSettings}
             </button>
 
             <button type="button" className="ccb__btn ccb__btn--outline" onClick={onRejectAll}>
-              {ui('ui_cookie_btn_reject', 'Tümünü Reddet')}
+              {btnReject}
             </button>
 
             <button type="button" className="ccb__btn ccb__btn--primary" onClick={onAcceptAll}>
-              {ui('ui_cookie_btn_accept', 'Tümünü Kabul Et')}
+              {btnAccept}
             </button>
           </div>
 
@@ -248,8 +223,8 @@ export default function CookieConsentBanner() {
             type="button"
             className="ccb__close"
             onClick={onRejectAll}
-            aria-label="Close"
-            title="Close"
+            aria-label={ariaClose}
+            title={ariaClose}
           >
             ×
           </button>
@@ -261,178 +236,7 @@ export default function CookieConsentBanner() {
         consent={consent}
         onClose={() => setOpenSettings(false)}
         onSave={onSaveSettings}
-        title={ui('ui_cookie_settings_title', 'Çerez Ayarları')}
-        description={ui(
-          'ui_cookie_settings_desc',
-          'Hangi çerez kategorilerine izin verdiğinizi seçebilirsiniz. Gerekli çerezler her zaman açıktır.',
-        )}
-        labelNecessary={ui('ui_cookie_cat_necessary', 'Gerekli')}
-        descNecessary={ui(
-          'ui_cookie_cat_necessary_desc',
-          'Sitenin temel işlevleri için zorunludur.',
-        )}
-        labelAnalytics={ui('ui_cookie_cat_analytics', 'Analitik')}
-        descAnalytics={ui(
-          'ui_cookie_cat_analytics_desc',
-          'Site trafiğini ve performansı anlamamıza yardımcı olur.',
-        )}
-        btnCancel={ui('ui_cookie_btn_cancel', 'Vazgeç')}
-        btnSave={ui('ui_cookie_btn_save', 'Kaydet')}
       />
-
-      <style jsx>{`
-        .ccb__wrap {
-          position: fixed;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          z-index: 9998;
-          padding: 14px;
-          background: transparent;
-        }
-
-        .ccb__inner {
-          --ccb-primary: var(--tp-theme-1, #2563eb);
-          --ccb-text: rgba(17, 24, 39, 0.92);
-          --ccb-muted: rgba(17, 24, 39, 0.72);
-          --ccb-border: rgba(0, 0, 0, 0.08);
-
-          max-width: 1180px;
-          margin: 0 auto;
-
-          display: grid;
-          grid-template-columns: 1fr auto;
-          gap: 14px 18px;
-          align-items: center;
-          position: relative;
-
-          background: rgba(255, 255, 255, 0.92);
-          backdrop-filter: blur(12px);
-          border: 1px solid var(--ccb-border);
-          border-radius: 18px;
-          box-shadow: 0 18px 46px rgba(0, 0, 0, 0.14);
-          padding: 14px 14px;
-        }
-
-        .ccb__text {
-          min-width: 0;
-          padding-right: 10px;
-        }
-
-        .ccb__title {
-          color: var(--ccb-text);
-          font-weight: 900;
-          font-size: 14px;
-          line-height: 1.2;
-          letter-spacing: -0.01em;
-        }
-
-        .ccb__desc {
-          color: var(--ccb-muted);
-          margin-top: 6px;
-          font-size: 13px;
-          line-height: 1.45;
-        }
-
-        .ccb__link {
-          color: var(--ccb-primary);
-          font-weight: 800;
-          text-decoration: underline;
-          text-underline-offset: 2px;
-        }
-
-        .ccb__actions {
-          display: flex;
-          gap: 10px;
-          flex-wrap: wrap;
-          justify-content: flex-end;
-          align-items: center;
-        }
-
-        .ccb__btn {
-          border-radius: 12px;
-          padding: 10px 14px;
-          font-weight: 800;
-          font-size: 13px;
-          cursor: pointer;
-          transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.12s ease,
-            border-color 0.12s ease, color 0.12s ease;
-          border: 1px solid transparent;
-          user-select: none;
-          line-height: 1;
-          white-space: nowrap;
-        }
-
-        .ccb__btn:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .ccb__btn--ghost {
-          background: rgba(255, 255, 255, 0.85);
-          border-color: rgba(0, 0, 0, 0.12);
-          color: var(--ccb-text);
-        }
-
-        .ccb__btn--outline {
-          background: rgba(17, 24, 39, 0.04);
-          border-color: rgba(17, 24, 39, 0.14);
-          color: rgba(17, 24, 39, 0.9);
-        }
-
-        .ccb__btn--primary {
-          background: var(--ccb-primary);
-          color: #fff;
-          border-color: rgba(0, 0, 0, 0.08);
-        }
-
-        .ccb__btn--primary:hover {
-          box-shadow: 0 14px 30px rgba(0, 0, 0, 0.16);
-        }
-
-        .ccb__close {
-          position: absolute;
-          right: 10px;
-          top: 8px;
-
-          width: 34px;
-          height: 34px;
-          border-radius: 12px;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          background: rgba(255, 255, 255, 0.75);
-
-          display: grid;
-          place-items: center;
-
-          font-size: 20px;
-          line-height: 1;
-          cursor: pointer;
-          opacity: 0.75;
-          transition: 0.12s ease;
-        }
-
-        .ccb__close:hover {
-          opacity: 1;
-          transform: translateY(-1px);
-          box-shadow: 0 10px 18px rgba(0, 0, 0, 0.12);
-        }
-
-        @media (max-width: 900px) {
-          .ccb__inner {
-            grid-template-columns: 1fr;
-            padding: 14px 12px 12px;
-          }
-
-          .ccb__actions {
-            justify-content: flex-start;
-          }
-
-          .ccb__close {
-            right: 8px;
-            top: 8px;
-          }
-        }
-      `}</style>
     </>
   );
 }

@@ -1,17 +1,25 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-type ConsentState = {
+// i18n PATTERN
+import { useLocaleShort } from '@/i18n/useLocaleShort';
+import { useUiSection } from '@/i18n/uiDb';
+
+export type ConsentState = {
   necessary: true; // always true
   analytics: boolean;
 };
 
 type Props = {
   open: boolean;
+
+  // locale prop artık opsiyonel ama kullanılmıyor (PATTERN: locale hook)
   locale?: string;
+
   consent: ConsentState;
 
+  // optional overrides (prop > ui_cookie > fallback)
   title?: string;
   description?: string;
 
@@ -24,9 +32,19 @@ type Props = {
   btnSave?: string;
   btnCancel?: string;
 
+  ariaClose?: string;
+
   onClose: () => void;
   onSave: (next: ConsentState) => void;
 };
+
+function pickText(primary?: string, secondary?: string, fallback?: string) {
+  const p = (primary ?? '').trim();
+  if (p) return p;
+  const s = (secondary ?? '').trim();
+  if (s) return s;
+  return (fallback ?? '').trim();
+}
 
 export default function CookieSettingsModal({
   open,
@@ -34,18 +52,24 @@ export default function CookieSettingsModal({
   onClose,
   onSave,
 
-  title = 'Çerez Ayarları',
-  description = 'Hangi çerez kategorilerine izin verdiğinizi seçebilirsiniz. Gerekli çerezler her zaman açıktır.',
+  title,
+  description,
 
-  labelNecessary = 'Gerekli',
-  descNecessary = 'Sitenin temel işlevleri (oturum, güvenlik, dil tercihi gibi) için zorunludur.',
+  labelNecessary,
+  descNecessary,
 
-  labelAnalytics = 'Analitik',
-  descAnalytics = 'Site trafiğini ve performansı anlamamıza yardımcı olur (ör. sayfa görüntüleme).',
+  labelAnalytics,
+  descAnalytics,
 
-  btnSave = 'Kaydet',
-  btnCancel = 'Vazgeç',
+  btnSave,
+  btnCancel,
+
+  ariaClose,
 }: Props) {
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_cookie', locale as any);
+  const t = useCallback((key: string, fb: string) => ui(key, fb), [ui]);
+
   const [analytics, setAnalytics] = useState<boolean>(!!consent.analytics);
 
   // modal açılınca state sync
@@ -65,17 +89,48 @@ export default function CookieSettingsModal({
     return () => window.removeEventListener('keydown', onKey);
   }, [open, onClose]);
 
-  const canRender = open;
   const nextState: ConsentState = useMemo(() => ({ necessary: true, analytics }), [analytics]);
 
-  if (!canRender) return null;
+  const uiTitle = t('cc_title', 'Cookie Settings');
+  const uiDesc = t(
+    'cc_description',
+    'You can choose which cookie categories you allow. Necessary cookies are always enabled.',
+  );
+
+  const uiLabelNecessary = t('cc_label_necessary', 'Necessary');
+  const uiDescNecessary = t(
+    'cc_desc_necessary',
+    'Required for core functions (session, security, language preference, etc.).',
+  );
+
+  const uiLabelAnalytics = t('cc_label_analytics', 'Analytics');
+  const uiDescAnalytics = t(
+    'cc_desc_analytics',
+    'Helps us understand traffic and performance (e.g., page views).',
+  );
+
+  const uiBtnSave = t('cc_btn_save', 'Save');
+  const uiBtnCancel = t('cc_btn_cancel', 'Cancel');
+  const uiAriaClose = t('cc_aria_close', 'Close');
+
+  const finalTitle = pickText(title, uiTitle, 'Cookie Settings');
+  const finalDesc = pickText(description, uiDesc, '');
+  const finalLabelNecessary = pickText(labelNecessary, uiLabelNecessary, 'Necessary');
+  const finalDescNecessary = pickText(descNecessary, uiDescNecessary, '');
+  const finalLabelAnalytics = pickText(labelAnalytics, uiLabelAnalytics, 'Analytics');
+  const finalDescAnalytics = pickText(descAnalytics, uiDescAnalytics, '');
+  const finalBtnSave = pickText(btnSave, uiBtnSave, 'Save');
+  const finalBtnCancel = pickText(btnCancel, uiBtnCancel, 'Cancel');
+  const finalAriaClose = pickText(ariaClose, uiAriaClose, 'Close');
+
+  if (!open) return null;
 
   return (
     <div
       className="ccm__backdrop"
       role="dialog"
       aria-modal="true"
-      aria-label={title}
+      aria-label={finalTitle}
       onMouseDown={(e) => {
         // modal dışına tıklayınca kapat
         if (e.target === e.currentTarget) onClose();
@@ -84,11 +139,16 @@ export default function CookieSettingsModal({
       <div className="ccm__modal" onMouseDown={(e) => e.stopPropagation()}>
         <div className="ccm__head">
           <div className="ccm__titles">
-            <div className="ccm__title">{title}</div>
-            <div className="ccm__desc">{description}</div>
+            <div className="ccm__title">{finalTitle}</div>
+            <div className="ccm__desc">{finalDesc}</div>
           </div>
 
-          <button type="button" className="ccm__close" onClick={onClose} aria-label="Close">
+          <button
+            type="button"
+            className="ccm__close"
+            onClick={onClose}
+            aria-label={finalAriaClose}
+          >
             ×
           </button>
         </div>
@@ -97,8 +157,8 @@ export default function CookieSettingsModal({
           {/* Necessary */}
           <div className="ccm__row">
             <div className="ccm__rowText">
-              <div className="ccm__rowTitle">{labelNecessary}</div>
-              <div className="ccm__rowDesc">{descNecessary}</div>
+              <div className="ccm__rowTitle">{finalLabelNecessary}</div>
+              <div className="ccm__rowDesc">{finalDescNecessary}</div>
             </div>
 
             <div className="ccm__rowCtrl">
@@ -111,12 +171,12 @@ export default function CookieSettingsModal({
           {/* Analytics */}
           <div className="ccm__row">
             <div className="ccm__rowText">
-              <div className="ccm__rowTitle">{labelAnalytics}</div>
-              <div className="ccm__rowDesc">{descAnalytics}</div>
+              <div className="ccm__rowTitle">{finalLabelAnalytics}</div>
+              <div className="ccm__rowDesc">{finalDescAnalytics}</div>
             </div>
 
             <div className="ccm__rowCtrl">
-              <label className="ccm__switch" aria-label={labelAnalytics}>
+              <label className="ccm__switch" aria-label={finalLabelAnalytics}>
                 <input
                   type="checkbox"
                   checked={analytics}
@@ -130,7 +190,7 @@ export default function CookieSettingsModal({
 
         <div className="ccm__actions">
           <button type="button" className="ccm__btn ccm__btn--ghost" onClick={onClose}>
-            {btnCancel}
+            {finalBtnCancel}
           </button>
 
           <button
@@ -138,207 +198,10 @@ export default function CookieSettingsModal({
             className="ccm__btn ccm__btn--primary"
             onClick={() => onSave(nextState)}
           >
-            {btnSave}
+            {finalBtnSave}
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        .ccm__backdrop {
-          position: fixed;
-          inset: 0;
-          background: rgba(0, 0, 0, 0.45);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 16px;
-          z-index: 9999;
-        }
-
-        .ccm__modal {
-          width: min(720px, 100%);
-          background: #fff;
-          border-radius: 16px;
-          box-shadow: 0 22px 60px rgba(0, 0, 0, 0.25);
-          overflow: hidden;
-        }
-
-        .ccm__head {
-          display: flex;
-          align-items: flex-start;
-          justify-content: space-between;
-          gap: 12px;
-          padding: 18px 18px 12px;
-          border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        }
-
-        .ccm__titles {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .ccm__title {
-          font-size: 18px;
-          font-weight: 800;
-          line-height: 1.2;
-        }
-
-        .ccm__desc {
-          margin-top: 6px;
-          font-size: 13px;
-          opacity: 0.75;
-          line-height: 1.45;
-        }
-
-        .ccm__close {
-          border: 0;
-          background: transparent;
-          font-size: 26px;
-          line-height: 1;
-          cursor: pointer;
-          opacity: 0.65;
-          padding: 2px 8px;
-        }
-        .ccm__close:hover {
-          opacity: 1;
-        }
-
-        .ccm__content {
-          padding: 14px 18px;
-        }
-
-        .ccm__row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-          padding: 12px 0;
-        }
-
-        .ccm__rowText {
-          flex: 1;
-          min-width: 0;
-        }
-
-        .ccm__rowTitle {
-          font-weight: 700;
-          font-size: 14px;
-        }
-
-        .ccm__rowDesc {
-          margin-top: 4px;
-          font-size: 13px;
-          opacity: 0.75;
-          line-height: 1.45;
-        }
-
-        .ccm__rowCtrl {
-          display: flex;
-          align-items: center;
-          justify-content: flex-end;
-          min-width: 90px;
-        }
-
-        .ccm__divider {
-          height: 1px;
-          background: rgba(0, 0, 0, 0.08);
-        }
-
-        .ccm__pill {
-          font-size: 12px;
-          font-weight: 700;
-          padding: 6px 10px;
-          border-radius: 999px;
-          background: rgba(0, 0, 0, 0.06);
-          color: rgba(0, 0, 0, 0.75);
-          user-select: none;
-        }
-
-        .ccm__pill--on {
-          background: rgba(90, 87, 255, 0.12);
-          color: rgba(90, 87, 255, 0.95);
-        }
-
-        /* Switch */
-        .ccm__switch {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          width: 46px;
-          height: 26px;
-        }
-
-        .ccm__switch input {
-          opacity: 0;
-          width: 0;
-          height: 0;
-        }
-
-        .ccm__slider {
-          position: absolute;
-          inset: 0;
-          border-radius: 999px;
-          background: rgba(0, 0, 0, 0.18);
-          transition: 0.15s ease;
-          cursor: pointer;
-        }
-
-        .ccm__slider:before {
-          content: '';
-          position: absolute;
-          width: 20px;
-          height: 20px;
-          left: 3px;
-          top: 3px;
-          border-radius: 999px;
-          background: #fff;
-          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
-          transition: 0.15s ease;
-        }
-
-        .ccm__switch input:checked + .ccm__slider {
-          background: var(--tp-theme-1, #5a57ff);
-        }
-        .ccm__switch input:checked + .ccm__slider:before {
-          transform: translateX(20px);
-        }
-
-        .ccm__actions {
-          display: flex;
-          justify-content: flex-end;
-          gap: 10px;
-          padding: 14px 18px 18px;
-          border-top: 1px solid rgba(0, 0, 0, 0.08);
-        }
-
-        .ccm__btn {
-          border-radius: 12px;
-          padding: 10px 14px;
-          font-weight: 700;
-          font-size: 13px;
-          cursor: pointer;
-          border: 1px solid transparent;
-          transition: 0.15s ease;
-        }
-
-        .ccm__btn--ghost {
-          background: #fff;
-          border-color: rgba(0, 0, 0, 0.14);
-        }
-        .ccm__btn--ghost:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 10px 18px rgba(0, 0, 0, 0.08);
-        }
-
-        .ccm__btn--primary {
-          background: var(--tp-theme-1, #5a57ff);
-          color: #fff;
-        }
-        .ccm__btn--primary:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 12px 22px rgba(0, 0, 0, 0.14);
-        }
-      `}</style>
     </div>
   );
 }

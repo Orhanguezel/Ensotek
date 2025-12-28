@@ -14,17 +14,14 @@ import { useResolvedLocale } from '@/i18n/locale';
 import { switchLocale } from '@/i18n/switchLocale';
 import { normLocaleTag } from '@/i18n/localeUtils';
 import { localizePath } from '@/i18n/url';
-import SocialLinks from "@/components/common/SocialLinks";
+import SocialLinks from '@/components/common/public/SocialLinks';
 
 import { getLanguageLabel, type SupportedLocale } from '@/types/common';
 import { useActiveLocales } from '@/i18n/activeLocales';
 
 import { FiX, FiSearch, FiGlobe, FiPhone, FiMail, FiLogIn, FiUserPlus } from 'react-icons/fi';
 
-import {
-  useListMenuItemsQuery,
-  useGetSiteSettingByKeyQuery
-} from '@/integrations/rtk/hooks';
+import { useListMenuItemsQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
 import { useUiSection } from '@/i18n/uiDb';
 
@@ -130,7 +127,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
 
     return 'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
   }, [logoSrc, effectiveBrand.logo]);
-
 
   const webHost = useMemo(
     () => (effectiveBrand.website || 'https://ensotek.de').replace(/^https?:\/\//, ''),
@@ -403,7 +399,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
               <SocialLinks socials={effectiveBrand.socials} size="md" onClickItem={onClose} />
             </div>
           </div>
-
         </div>
       </div>
 

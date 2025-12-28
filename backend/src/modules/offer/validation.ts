@@ -3,32 +3,38 @@
 // Ensotek – Offer Module Validation (Zod schemas)
 // =============================================================
 
-import { z } from "zod";
+import { z } from 'zod';
 
 export const boolLike = z.union([
   z.boolean(),
   z.literal(0),
   z.literal(1),
-  z.literal("0"),
-  z.literal("1"),
-  z.literal("true"),
-  z.literal("false"),
+  z.literal('0'),
+  z.literal('1'),
+  z.literal('true'),
+  z.literal('false'),
 ]);
 
 // Teklif durumları – hem DB hem API için ortak enum
 export const OFFER_STATUSES = [
-  "new",        // yeni geldi, incelenmedi
-  "in_review",  // teknik ekip inceliyor
-  "quoted",     // fiyat tekliflendirildi (taslak)
-  "sent",       // teklif müşteriye gönderildi
-  "accepted",   // müşteri teklifi kabul etti
-  "rejected",   // müşteri reddetti
-  "cancelled",  // iptal (iç süreç)
+  'new', // yeni geldi, incelenmedi
+  'in_review', // teknik ekip inceliyor
+  'quoted', // fiyat tekliflendirildi (taslak)
+  'sent', // teklif müşteriye gönderildi
+  'accepted', // müşteri teklifi kabul etti
+  'rejected', // müşteri reddetti
+  'cancelled', // iptal (iç süreç)
 ] as const;
 
 export type OfferStatus = (typeof OFFER_STATUSES)[number];
 
 export const OFFER_STATUS_ENUM = z.enum(OFFER_STATUSES);
+
+// ✅ country_code artık "ülke serbest metin" gibi:
+// - "Almanya", "Deutschland", "Germany", "DE", "Türkiye", "United States" vs.
+// - Sadece trim + uzunluk kontrolü yapıyoruz.
+// - Büyük/küçük harf değiştirmiyoruz; kullanıcı girişi olduğu gibi kalsın.
+const countryFreeTextSchema = z.string().trim().min(2).max(80);
 
 /* -------------------------------------------------------------
  * PUBLIC – Offer Request Body
@@ -36,12 +42,9 @@ export const OFFER_STATUS_ENUM = z.enum(OFFER_STATUSES);
 
 export const offerRequestBodySchema = z.object({
   locale: z.string().max(10).optional(),
-  country_code: z
-    .string()
-    .min(2)
-    .max(2)
-    .transform((v) => v.toUpperCase())
-    .optional(),
+
+  // ✅ Serbest metin (kısıt yok, sadece uzunluk)
+  country_code: countryFreeTextSchema.optional(),
 
   customer_name: z.string().min(1).max(255).trim(),
   company_name: z.string().max(255).trim().optional().nullable(),
@@ -68,14 +71,16 @@ export type OfferRequestBody = z.infer<typeof offerRequestBodySchema>;
 
 export const offerListQuerySchema = z.object({
   order: z.string().optional(),
-  sort: z.enum(["created_at", "updated_at"]).optional(),
-  orderDir: z.enum(["asc", "desc"]).optional(),
+  sort: z.enum(['created_at', 'updated_at']).optional(),
+  orderDir: z.enum(['asc', 'desc']).optional(),
   limit: z.coerce.number().int().min(1).max(200).optional(),
   offset: z.coerce.number().int().min(0).optional(),
 
   status: OFFER_STATUS_ENUM.optional(),
   locale: z.string().max(10).optional(),
-  country_code: z.string().max(2).optional(),
+
+  // ✅ Admin filtrede de serbest metin
+  country_code: z.string().trim().min(2).max(80).optional(),
 
   q: z.string().optional(),
   email: z.string().optional(),
@@ -92,13 +97,13 @@ export type OfferListQuery = z.infer<typeof offerListQuerySchema>;
  * ------------------------------------------------------------- */
 
 export const upsertOfferAdminBodySchema = offerRequestBodySchema.extend({
-  status: OFFER_STATUS_ENUM.optional().default("new"),
+  status: OFFER_STATUS_ENUM.optional().default('new'),
 
-  currency: z.string().max(10).default("EUR"),
+  currency: z.string().max(10).default('EUR'),
   net_total: z.coerce.number().min(0).optional(),
-  vat_rate: z.coerce.number().min(0).max(100).optional(),  // YENİ
+  vat_rate: z.coerce.number().min(0).max(100).optional(), // YENİ
   vat_total: z.coerce.number().min(0).optional(),
-  shipping_total: z.coerce.number().min(0).optional(),     // YENİ
+  shipping_total: z.coerce.number().min(0).optional(), // YENİ
   gross_total: z.coerce.number().min(0).optional(),
 
   // Teklif numarası (örn: ENS-2025-0001)
@@ -118,17 +123,11 @@ export const upsertOfferAdminBodySchema = offerRequestBodySchema.extend({
   email_sent_at: z.string().optional().nullable(),
 });
 
+export type UpsertOfferAdminBody = z.infer<typeof upsertOfferAdminBodySchema>;
 
-export type UpsertOfferAdminBody = z.infer<
-  typeof upsertOfferAdminBodySchema
->;
+export const patchOfferAdminBodySchema = upsertOfferAdminBodySchema.partial();
 
-export const patchOfferAdminBodySchema =
-  upsertOfferAdminBodySchema.partial();
-
-export type PatchOfferAdminBody = z.infer<
-  typeof patchOfferAdminBodySchema
->;
+export type PatchOfferAdminBody = z.infer<typeof patchOfferAdminBodySchema>;
 
 /* -------------------------------------------------------------
  * PARAMS

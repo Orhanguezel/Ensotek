@@ -1,6 +1,7 @@
 // =============================================================
 // FILE: src/modules/customPages/admin.controller.ts
-// FINAL — locale source: core/i18n.ts (LOCALES runtime)
+// FINAL — module_key parent + LONGTEXT JSON-string arrays (images/storage_image_ids)
+// - Parent array fields are always written as string[] (or omitted for DB default)
 // =============================================================
 
 import type { RouteHandler } from 'fastify';
@@ -31,7 +32,6 @@ import {
 
 import { setContentRange } from '@/common/utils/contentRange';
 
-// ✅ single source of truth
 import {
   LOCALES,
   DEFAULT_LOCALE,
@@ -57,12 +57,6 @@ function pickSafeDefault(): string {
   return LOCALES[0] || 'de';
 }
 
-/**
- * Admin için locale çözümü:
- *  - ensureLocalesLoadedFromSettings() -> LOCALES güncel
- *  - locale: query.locale > req.locale > DEFAULT_LOCALE/LOCALES[0]
- *  - def: query.default_locale > DEFAULT_LOCALE/LOCALES[0]
- */
 async function resolveLocales(
   req: any,
   query?: LocaleQueryLike,
@@ -75,13 +69,23 @@ async function resolveLocales(
   const defRawFromQuery = normalizeLooseLocale(q.default_locale);
 
   const safeDefault = pickSafeDefault();
-
   const safeLocale = reqRaw && LOCALES.includes(reqRaw) ? reqRaw : safeDefault;
   const safeDef =
     defRawFromQuery && LOCALES.includes(defRawFromQuery) ? defRawFromQuery : safeDefault;
 
   return { locale: safeLocale, def: safeDef };
 }
+
+const normalizeArrayPatch = (v: unknown): string[] | undefined => {
+  // undefined => do not touch
+  if (typeof v === 'undefined') return undefined;
+  // null => clear
+  if (v === null) return [];
+  // array => keep
+  if (Array.isArray(v)) return v.map((x) => String(x ?? '')).filter(Boolean);
+  // otherwise ignore
+  return undefined;
+};
 
 /* ----------------------------- list/get ----------------------------- */
 
@@ -99,8 +103,8 @@ export const listPagesAdmin: RouteHandler<{ Querystring: CustomPageListQuery }> 
   const q = parsed.data;
 
   const { locale, def } = await resolveLocales(req, {
-    locale: q.locale as any,
-    default_locale: (q as any).default_locale,
+    locale: q.locale,
+    default_locale: q.default_locale,
   });
 
   const { items, total } = await listCustomPages({
@@ -147,8 +151,8 @@ export const getPageBySlugAdmin: RouteHandler<{
   const q = parsedQ.success ? parsedQ.data : {};
 
   const { locale, def } = await resolveLocales(req, {
-    locale: (q as any).locale,
-    default_locale: (q as any).default_locale,
+    locale: q.locale,
+    default_locale: q.default_locale,
   });
 
   const row = await getCustomPageMergedBySlug(locale, def, req.params.slug);
@@ -177,20 +181,39 @@ export const createPageAdmin: RouteHandler<{ Body: UpsertCustomPageBody }> = asy
     const id = randomUUID();
     const now = new Date();
 
-    await createCustomPageParent({
+    // ✅ Parent insert: only include fields intentionally (avoid undefined leakage)
+    const parentValues: Record<string, any> = {
       id,
+
+      module_key: typeof (b as any).module_key === 'string' ? (b as any).module_key.trim() : '',
+
       is_published: toBool(b.is_published) ? 1 : 0,
 
-      featured_image: typeof b.featured_image !== 'undefined' ? b.featured_image ?? null : null,
-      featured_image_asset_id:
-        typeof b.featured_image_asset_id !== 'undefined' ? b.featured_image_asset_id ?? null : null,
+      display_order: typeof b.display_order !== 'undefined' ? (b.display_order as number) : 0,
+      order_num: typeof b.order_num !== 'undefined' ? (b.order_num as number) : 0,
 
       category_id: typeof b.category_id !== 'undefined' ? b.category_id ?? null : null,
       sub_category_id: typeof b.sub_category_id !== 'undefined' ? b.sub_category_id ?? null : null,
 
       created_at: now as any,
       updated_at: now as any,
-    });
+    };
+
+    if (typeof b.featured_image !== 'undefined')
+      parentValues.featured_image = b.featured_image ?? null;
+    if (typeof b.featured_image_asset_id !== 'undefined')
+      parentValues.featured_image_asset_id = b.featured_image_asset_id ?? null;
+
+    if (typeof b.image_url !== 'undefined') parentValues.image_url = b.image_url ?? null;
+    if (typeof b.storage_asset_id !== 'undefined')
+      parentValues.storage_asset_id = b.storage_asset_id ?? null;
+
+    // ✅ arrays (LONGTEXT JSON-string columns): schema expects string[]
+    if (typeof (b as any).images !== 'undefined') parentValues.images = (b as any).images ?? [];
+    if (typeof (b as any).storage_image_ids !== 'undefined')
+      parentValues.storage_image_ids = (b as any).storage_image_ids ?? [];
+
+    await createCustomPageParent(parentValues as any);
 
     const basePayload = {
       title: b.title.trim(),
@@ -246,29 +269,43 @@ export const updatePageAdmin: RouteHandler<{
   });
 
   try {
-    const hasParentFields =
-      typeof b.is_published !== 'undefined' ||
-      typeof b.featured_image !== 'undefined' ||
-      typeof b.featured_image_asset_id !== 'undefined' ||
-      typeof b.category_id !== 'undefined' ||
-      typeof b.sub_category_id !== 'undefined';
+    const parentPatch: Record<string, any> = {};
 
-    if (hasParentFields) {
-      await updateCustomPageParent(req.params.id, {
-        is_published:
-          typeof b.is_published !== 'undefined' ? (toBool(b.is_published) ? 1 : 0) : undefined,
+    // ✅ module_key patch
+    if (typeof (b as any).module_key !== 'undefined') {
+      const mk = typeof (b as any).module_key === 'string' ? (b as any).module_key.trim() : '';
+      parentPatch.module_key = mk;
+    }
 
-        featured_image:
-          typeof b.featured_image !== 'undefined' ? b.featured_image ?? null : undefined,
-        featured_image_asset_id:
-          typeof b.featured_image_asset_id !== 'undefined'
-            ? b.featured_image_asset_id ?? null
-            : undefined,
+    if (typeof b.is_published !== 'undefined')
+      parentPatch.is_published = toBool(b.is_published) ? 1 : 0;
 
-        category_id: typeof b.category_id !== 'undefined' ? b.category_id ?? null : undefined,
-        sub_category_id:
-          typeof b.sub_category_id !== 'undefined' ? b.sub_category_id ?? null : undefined,
-      } as any);
+    if (typeof b.featured_image !== 'undefined')
+      parentPatch.featured_image = b.featured_image ?? null;
+    if (typeof b.featured_image_asset_id !== 'undefined')
+      parentPatch.featured_image_asset_id = b.featured_image_asset_id ?? null;
+
+    if (typeof b.category_id !== 'undefined') parentPatch.category_id = b.category_id ?? null;
+    if (typeof b.sub_category_id !== 'undefined')
+      parentPatch.sub_category_id = b.sub_category_id ?? null;
+
+    if (typeof b.display_order !== 'undefined')
+      parentPatch.display_order = b.display_order as number;
+    if (typeof b.order_num !== 'undefined') parentPatch.order_num = b.order_num as number;
+
+    if (typeof b.image_url !== 'undefined') parentPatch.image_url = b.image_url ?? null;
+    if (typeof b.storage_asset_id !== 'undefined')
+      parentPatch.storage_asset_id = b.storage_asset_id ?? null;
+
+    // ✅ arrays
+    const imagesPatch = normalizeArrayPatch((b as any).images);
+    if (typeof imagesPatch !== 'undefined') parentPatch.images = imagesPatch;
+
+    const storageIdsPatch = normalizeArrayPatch((b as any).storage_image_ids);
+    if (typeof storageIdsPatch !== 'undefined') parentPatch.storage_image_ids = storageIdsPatch;
+
+    if (Object.keys(parentPatch).length > 0) {
+      await updateCustomPageParent(req.params.id, parentPatch as any);
     }
 
     const hasI18nFields =
@@ -282,13 +319,13 @@ export const updatePageAdmin: RouteHandler<{
       typeof b.tags !== 'undefined';
 
     if (hasI18nFields) {
-      const exists = await getCustomPageI18nRow(req.params.id, locale);
+      const existing = await getCustomPageI18nRow(req.params.id, locale);
 
-      if (!exists) {
+      if (!existing) {
         if (!b.title || !b.slug || !b.content) {
-          return reply.code(400).send({
-            error: { message: 'missing_required_translation_fields' },
-          });
+          return reply
+            .code(400)
+            .send({ error: { message: 'missing_required_translation_fields' } });
         }
 
         await upsertCustomPageI18n(req.params.id, locale, {

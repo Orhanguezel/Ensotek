@@ -1,7 +1,7 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/admin/custom_pages_admin.endpoints.ts
 // Ensotek – Admin Custom Pages RTK Endpoints
-// Base URL: /api/admin (baseApi üzerinden)
+// Base URL: /api (baseApi üzerinden)
 // Backend: src/modules/customPages/admin.routes.ts
 // =============================================================
 
@@ -15,9 +15,6 @@ import type {
 } from '@/integrations/types/custom_pages.types';
 import { mapApiCustomPageToDto } from '@/integrations/types/custom_pages.types';
 
-/**
- * Query paramlarından undefined / boş stringleri temizlemek için
- */
 const cleanParams = (
   params?: Record<string, unknown>,
 ): Record<string, string | number | boolean> | undefined => {
@@ -36,23 +33,13 @@ const cleanParams = (
   return Object.keys(out).length ? out : undefined;
 };
 
-/**
- * x-total-count header'ından total çekmek için helper
- */
-const getTotalFromHeaders = (
-  responseHeaders: Headers | undefined,
-  fallbackLength: number,
-): number => {
-  const headerValue =
-    responseHeaders?.get('x-total-count') ?? responseHeaders?.get('X-Total-Count');
+const getTotalFromHeaders = (headers: Headers | undefined, fallbackLength: number): number => {
+  const headerValue = headers?.get('x-total-count') ?? headers?.get('X-Total-Count');
   if (!headerValue) return fallbackLength;
   const n = Number(headerValue);
   return Number.isFinite(n) && n >= 0 ? n : fallbackLength;
 };
 
-/**
- * Response bazen array, bazen {items: []} gelebilir – normalize et
- */
 const normalizeList = (raw: unknown): ApiCustomPage[] => {
   if (Array.isArray(raw)) return raw as ApiCustomPage[];
   const anyRaw: any = raw as any;
@@ -62,10 +49,6 @@ const normalizeList = (raw: unknown): ApiCustomPage[] => {
 
 export const customPagesAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    /* --------------------------------------------------------- */
-    /* LIST (ADMIN)                                              */
-    /* GET /api/admin/custom_pages                               */
-    /* --------------------------------------------------------- */
     listCustomPagesAdmin: build.query<
       { items: CustomPageDto[]; total: number },
       CustomPageListAdminQueryParams | void
@@ -78,10 +61,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       transformResponse: (response: unknown, meta) => {
         const rows = normalizeList(response);
         const total = getTotalFromHeaders(meta?.response?.headers, rows.length);
-        return {
-          items: rows.map((row) => mapApiCustomPageToDto(row)),
-          total,
-        };
+        return { items: rows.map(mapApiCustomPageToDto), total };
       },
       providesTags: (result) =>
         result?.items?.length
@@ -92,39 +72,32 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
           : [{ type: 'CustomPage' as const, id: 'ADMIN_LIST' }],
     }),
 
-    /* --------------------------------------------------------- */
-    /* GET by id – /api/admin/custom_pages/:id                   */
-    /* FIX: locale query param gönder                            */
-    /* --------------------------------------------------------- */
-    getCustomPageAdmin: build.query<CustomPageDto, { id: string; locale?: string }>({
-      query: ({ id, locale }) => ({
+    getCustomPageAdmin: build.query<
+      CustomPageDto,
+      { id: string; locale?: string; default_locale?: string }
+    >({
+      query: ({ id, locale, default_locale }) => ({
         url: `/admin/custom_pages/${encodeURIComponent(id)}`,
         method: 'GET',
-        // ✅ FIX: locale'i backend'e ilet
-        params: cleanParams(locale ? { locale } : undefined),
+        params: cleanParams({ locale, default_locale }),
       }),
       transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
       providesTags: (_result, _error, { id }) => [{ type: 'CustomPage' as const, id }],
     }),
 
-    /* --------------------------------------------------------- */
-    /* GET by slug – /api/admin/custom_pages/by-slug/:slug       */
-    /* FIX: locale query param gönder                            */
-    /* --------------------------------------------------------- */
-    getCustomPageBySlugAdmin: build.query<CustomPageDto, { slug: string; locale?: string }>({
-      query: ({ slug, locale }) => ({
+    getCustomPageBySlugAdmin: build.query<
+      CustomPageDto,
+      { slug: string; locale?: string; default_locale?: string }
+    >({
+      query: ({ slug, locale, default_locale }) => ({
         url: `/admin/custom_pages/by-slug/${encodeURIComponent(slug)}`,
         method: 'GET',
-        // ✅ FIX: locale'i backend'e ilet
-        params: cleanParams(locale ? { locale } : undefined),
+        params: cleanParams({ locale, default_locale }),
       }),
       transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
       providesTags: (_result, _error, { slug }) => [{ type: 'CustomPageSlug' as const, id: slug }],
     }),
 
-    /* --------------------------------------------------------- */
-    /* CREATE – POST /api/admin/custom_pages                     */
-    /* --------------------------------------------------------- */
     createCustomPageAdmin: build.mutation<CustomPageDto, CustomPageCreatePayload>({
       query: (body) => ({
         url: '/admin/custom_pages',
@@ -135,9 +108,6 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'CustomPage' as const, id: 'ADMIN_LIST' }],
     }),
 
-    /* --------------------------------------------------------- */
-    /* UPDATE (partial) – PATCH /api/admin/custom_pages/:id      */
-    /* --------------------------------------------------------- */
     updateCustomPageAdmin: build.mutation<
       CustomPageDto,
       { id: string; patch: CustomPageUpdatePayload }
@@ -154,9 +124,6 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       ],
     }),
 
-    /* --------------------------------------------------------- */
-    /* DELETE – DELETE /api/admin/custom_pages/:id               */
-    /* --------------------------------------------------------- */
     deleteCustomPageAdmin: build.mutation<void, string>({
       query: (id) => ({
         url: `/admin/custom_pages/${encodeURIComponent(id)}`,
@@ -168,11 +135,6 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       ],
     }),
 
-    /* --------------------------------------------------------- */
-    /* REORDER – POST /api/admin/custom_pages/reorder            */
-    /* Body: { items: [{id, display_order}, ...] }               */
-    /* Backend 204 dönebilir                                     */
-    /* --------------------------------------------------------- */
     reorderCustomPagesAdmin: build.mutation<
       { ok: boolean },
       { items: { id: string; display_order: number }[] }
@@ -186,7 +148,6 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'CustomPage' as const, id: 'ADMIN_LIST' }],
     }),
   }),
-
   overrideExisting: false,
 });
 

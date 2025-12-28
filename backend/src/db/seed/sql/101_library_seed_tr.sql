@@ -1,9 +1,9 @@
 -- =============================================================
--- FILE: src/db/seed/sql/101_library_seed_tr.sql
+-- FILE: src/db/seed/sql/101_library_seed_tr.sql   (FINAL - FIXED)
 -- Ensotek - Library seed (TR) - base + i18n + images + files
 --   - TR içerikler: Kullanıcının paylaştığı içerikler BİREBİR
 --   - Idempotent: slug üzerinden id bul / yoksa deterministik ID kullan
---   - NOT: Bu dosya SADECE TR içerir (tags_json içinde EN yok)
+--   - NOT: Bu dosya SADECE TR içerir (tags_json içinde EN/DE yok)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -91,7 +91,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_BASICS_ID, 'de',
+  UUID(), @LIB_CT_BASICS_ID, 'tr',
   'Su Soğutma Kulesi Nedir, Çeşitleri Nelerdir, Nasıl Çalışır?',
   'su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir',
   'Su soğutma kulesinin ne olduğu, çeşitleri ve çalışma prensipleri ile buharlaşma kaybı hesaplamasına dair özet teknik doküman.',
@@ -258,7 +258,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_FEATURES_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
   WHERE i.slug = 'ensotek-sogutma-kulelerinin-ozellikleri'
   LIMIT 1
 );
@@ -275,7 +275,7 @@ VALUES
   @LIB_CT_FEATURES_ID,
   1, 1, 50,
   '{
-    "de":[
+    "tr":[
       "ensotek soğutma kulesi",
       "soğutma kulesi özellikleri",
       "camelyaf takviyeli polyester",
@@ -306,7 +306,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_FEATURES_ID, 'de',
+  UUID(), @LIB_CT_FEATURES_ID, 'tr',
   'Ensotek Soğutma Kulelerimizin Özellikleri',
   'ensotek-sogutma-kulelerinin-ozellikleri',
   'Ensotek su soğutma kulelerinin malzeme yapısı, dolgu tipleri, enerji verimliliği ve işletme avantajlarını özetleyen teknik doküman.',
@@ -423,7 +423,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_OPEN_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
   WHERE i.slug = 'acik-tip-su-sogutma-kulesi-calisma-prensibi'
   LIMIT 1
 );
@@ -440,7 +440,7 @@ VALUES
   @LIB_CT_OPEN_ID,
   1, 1, 60,
   '{
-    "de":[
+    "tr":[
       "açık tip soğutma kulesi",
       "su soğutma kulesi çalışma prensibi",
       "karşı akışlı kule",
@@ -469,7 +469,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_OPEN_ID, 'de',
+  UUID(), @LIB_CT_OPEN_ID, 'tr',
   'Açık Tip Su Soğutma Kulesi Çalışma Prensibi',
   'acik-tip-su-sogutma-kulesi-calisma-prensibi',
   'Açık tip (açık devre) su soğutma kulelerinde suyun soğutulma prensibi, karşı akışlı cebri çekişli kulelerde çalışma adımları ve buharlaşma kaybı hesabını özetleyen teknik doküman.',
@@ -484,14 +484,12 @@ VALUES
       'hava akımı suya göre yatay veya çapraz yöndedir. Son yıllarda, verimlilik ve kompakt tasarım avantajları ',
       'sebebiyle karşı akışlı kuleler daha çok tercih edilmektedir.',
     '</p>',
-
     '<p>',
       '<strong>Cebri çekişli karşı akışlı tip su soğutma kulelerinde</strong>, işletmeden ısınıp gelen sıcak su, ',
       'özel olarak imal edilmiş su dağıtım sistemi ve fıskiyeler yardımıyla kulenin tüm kesitine yukarıdan aşağıya ',
       'doğru homojen bir şekilde püskürtülür. Püskürtülen su kütleleri, kule dolguları arasından süzülerek ',
       'küçük damlacıklara ve ince filmlere ayrılır, böylece ısı transfer yüzeyi artar.',
     '</p>',
-
     '<p>',
       'Dış ortamın nemine sahip hava, kulenin üst kısmında bulunan motor–fan grubu yardımıyla, ',
       'dolgular üzerinden aşağıdan yukarıya doğru emilir. Dolgu soğutma yüzeyinde hava ile temas eden su, ',
@@ -499,7 +497,6 @@ VALUES
       'pompa vasıtasıyla tekrar işletmeye gönderilir. Suyun buharlaşması sonucu nemi artan ve doyma oranına yaklaşan hava, ',
       'kule üstündeki fan bacasından atmosfere atılır.',
     '</p>',
-
     '<h3>Açık Tip (Açık Devre) Kulelerde Isı Uzaklaştırma</h3>',
     '<p>',
       'Açık tip su soğutma kulelerinde proses suyu, kule içerisinde hava ile doğrudan temas halindedir. ',
@@ -513,7 +510,6 @@ VALUES
       'Bu iki etki birlikte, su soğutma kulelerinin yüksek verimle çalışmasını sağlar. Soğutmanın büyük kısmı, ',
       'buharlaşma ile gizli ısı taşınımından kaynaklanır.',
     '</p>',
-
     '<h3>Buharlaşma Kaybı ve Termodinamik Yaklaşım</h3>',
     '<p>',
       'Termodinamik esaslara göre; buharlaşan her bir gram suyun faz (hal) değişimini gerçekleştirebilmesi için ',
@@ -526,7 +522,6 @@ VALUES
       '<strong>%0,9</strong>&apos;unun buharlaşması gerektiği kabul edilir. ',
       'Bu miktara <strong>su soğutma kulesi buharlaşma kaybı</strong> denir.',
     '</p>',
-
     '<p>Buharlaşma miktarı, aşağıdaki bağıntı ile yaklaşık olarak hesaplanabilir:</p>',
     '<p>',
       '<code>',
@@ -535,16 +530,13 @@ VALUES
         '<sub>ç</sub>)',
       '</code>',
     '</p>',
-
     '<p>Burada:</p>',
     '<ul>',
       '<li><strong>Debi (m³/h)</strong>: Kulede sirküle edilen su debisi,</li>',
       '<li><strong>T<sub>g</sub></strong>: Giriş suyu sıcaklığı (°C),</li>',
       '<li><strong>T<sub>ç</sub></strong>: Çıkış (soğutulmuş) su sıcaklığı (°C).</li>',
     '</ul>',
-
     '<p>Bu formül, ön boyutlandırma ve kaba tasarım hesaplarında yaygın olarak kullanılır.</p>',
-
     '<h3>Özet</h3>',
     '<p>',
       'Açık tip su soğutma kulelerinde, sıcak su doğrudan hava ile temas ederek soğutulur. ',
@@ -574,7 +566,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_CLOSED_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
   WHERE i.slug = 'kapali-cevrim-su-sogutma-kulesi-calisma-prensibi'
   LIMIT 1
 );
@@ -591,7 +583,7 @@ VALUES
   @LIB_CT_CLOSED_ID,
   1, 1, 70,
   '{
-    "de":[
+    "tr":[
       "kapalı çevrim soğutma kulesi",
       "kapalı tip soğutma kulesi",
       "serpantinli kule",
@@ -621,7 +613,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_CLOSED_ID, 'de',
+  UUID(), @LIB_CT_CLOSED_ID, 'tr',
   'Kapalı Çevrim Su Soğutma Kulesi Çalışma Prensibi',
   'kapali-cevrim-su-sogutma-kulesi-calisma-prensibi',
   'Kapalı tip su soğutma kulelerinin çalışma prensibi, buharlaşma kaybı, kuru soğutucu (free cooling) modu ve eşanjör donma riskine karşı alınabilecek önlemleri özetleyen teknik doküman.',
@@ -633,7 +625,6 @@ VALUES
       'Temiz kalması istenen su, kapalı tip kule içindeki metal serpantinlerden (eşanjör) geçerken soğutulur. ',
       'Bu sayede proses suyunun hava ile doğrudan teması önlenir ve su kalitesi korunur.',
     '</p>',
-
     '<p>',
       'Kapalı tip bir su soğutma kulesinde; sıcak su metal boru içerisinden (eşanjör serpantini) geçerken, ',
       'kule üzerindeki fan yardımıyla ortam havası emilerek eşanjör üzerinden geçirilir. Aynı zamanda, ',
@@ -641,51 +632,34 @@ VALUES
       'üzerine püskürtülür. Emilen ortam havası ve püskürtülen su, serpantin dış yüzeyinden ısı alarak ',
       'eşanjör içindeki suyu soğutur.',
     '</p>',
-
     '<h3>Kapalı Tip Soğutma Kulelerinde Buharlaşma Kaybı Olur mu?</h3>',
     '<p>',
       'Kapalı tip soğutma kulelerinde proses suyu kapalı boru devresi içinde dolaşır; ancak serpantin üzerine ',
-      'püskürtülen sprey suyu, açık tip kulelerde olduğu gibi hava ile doğrudan temastadır. ',
-      'Dolayısıyla, <strong>sprey suyu devresinde</strong> belirli oranda buharlaşma kaybı oluşur. ',
-      'Bu kayıp miktarı, kule yükü, su sıcaklıkları ve iklim koşullarına bağlıdır.',
+      'püskürtülen sprey suyu devresi hava ile doğrudan temastadır. Dolayısıyla, <strong>sprey suyu devresinde</strong> ',
+      'belirli oranda buharlaşma kaybı oluşur.',
     '</p>',
-
     '<h3>Kapalı Çevrim Soğutma Kulesi Kuru Soğutucu Gibi Çalışır mı?</h3>',
     '<p>',
       'Kapalı tip kuleler, soğuk mevsimlerde sprey suyu devresi kapatılarak sadece hava emişi ile ',
       '<strong>kuru soğutucu (dry cooler)</strong> gibi çalıştırılabilir. Bu işletme moduna genellikle ',
-      '<strong>free cooling</strong> de denir. Bu durumda su kaybı neredeyse sıfıra iner, su tüketimi ve ',
-      'kimyasal tüketimi önemli ölçüde azalır.',
+      '<strong>free cooling</strong> de denir.',
     '</p>',
-
-    '<p>',
-      'Kuru soğutucu modu ile verimli free cooling yapılabilmesi için, kule içerisindeki eşanjörün ',
-      'kule hava emiş menfezlerinin üzerinde ve hava akışının içine yerleştirilmiş olması gerekir. ',
-      'Piyasadaki bazı modellerde soğutma eşanjörü hava emiş menfezlerinin altına monte edilmekte, ',
-      'bu durumda kuru çalışma modu yeterince etkin olamamaktadır.',
-    '</p>',
-
     '<h3>Kapalı Çevrim Soğutma Kulesinde Eşanjör Donması Nasıl Engellenir?</h3>',
     '<p>',
       'Kış mevsiminde, soğutma kulesi durdurulduğunda eşanjör içerisindeki akışkanın donma riski vardır. ',
-      'Özellikle bayram tatilleri, hafta sonu tatilleri ve planlı bakım dönemleri gibi kulelerin uzun süre ',
-      'kapalı kaldığı zaman aralıkları risklidir. Donma sebebiyle serpantin boruları çatlayabilir ve ciddi ',
-      'hasarlar oluşabilir.',
+      'Donma sebebiyle serpantin boruları çatlayabilir ve ciddi hasarlar oluşabilir.',
     '</p>',
-
     '<p>Donma riskini azaltmak için uygulanabilecek başlıca yöntemler şunlardır:</p>',
     '<ul>',
-      '<li><strong>Eşanjörün boşaltılması:</strong> Soğutma prosesi uzun süreli durdurulacaksa, eşanjördeki su boşaltılarak tahliye edilebilir.</li>',
-      '<li><strong>Düşük debide sirkülasyon:</strong> Akışkan düşük debide sirküle edilerek hareketli tutulabilir.</li>',
-      '<li><strong>Antifriz kullanımı:</strong> Etilen glikol vb. eklenerek donma noktası düşürülebilir.</li>',
+      '<li><strong>Eşanjörün boşaltılması</strong></li>',
+      '<li><strong>Düşük debide sirkülasyon</strong></li>',
+      '<li><strong>Antifriz kullanımı</strong></li>',
     '</ul>',
-
     '<h3>Kapalı Devre Soğutma Kulesinde Elektrik Tüketimi</h3>',
     '<p>',
       'Kapalı devre soğutma kulelerinde; fan motoru ve kule sirkülasyon pompası elektrik tüketimi oluşturur. ',
       'Ensotek tarafından tasarlanan kulelerde, fan ve pompa seçimi düşük elektrik tüketimi hedeflenerek yapılır.',
     '</p>',
-
     '<p>',
       'Kapalı çevrim su soğutma kuleleri, benzer kapasitedeki chiller gruplarına kıyasla birçok koşulda ',
       'yaklaşık <strong>8–10 kat daha düşük elektrik tüketimiyle</strong> çalışabilmektedir.',
@@ -711,7 +685,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_CT_SELECTION_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
   WHERE i.slug = 'kule-secimi-icin-gerekli-bilgiler'
   LIMIT 1
 );
@@ -728,7 +702,7 @@ VALUES
   @LIB_CT_SELECTION_ID,
   1, 1, 80,
   '{
-    "de":[
+    "tr":[
       "kule seçimi",
       "soğutma kulesi tasarımı",
       "kule kapasitesi",
@@ -758,7 +732,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_CT_SELECTION_ID, 'de',
+  UUID(), @LIB_CT_SELECTION_ID, 'tr',
   'Kule Seçimi İçin Gerekli Bilgiler',
   'kule-secimi-icin-gerekli-bilgiler',
   'Su soğutma kulesi seçimi ve tasarımı için gereken temel kapasite ve iklim bilgilerinin, yaş/kuru termometre değerlerinin ve dikkat edilmesi gereken hususların özetlendiği teknik doküman.',
@@ -769,7 +743,6 @@ VALUES
       'tasarım şartlarına</strong> göre seçilir. Doğru kule seçimi; kapasite, iklim verisi ve proses tarafı ',
       'şartlarının birlikte değerlendirilmesini gerektirir.',
     '</p>',
-
     '<h3>Temel Girdiler – Zorunlu Bilgiler</h3>',
     '<p>Bir su soğutma kulesi seçimi veya tasarımı için aşağıdaki temel bilgilerin net olarak verilmesi gerekir:</p>',
     '<ul>',
@@ -777,61 +750,7 @@ VALUES
       '<li><strong>Kuleye girecek suyun sıcaklığı</strong> (sıcak su sıcaklığı, °C)</li>',
       '<li><strong>Kuleden çıkacak soğutulmuş su sıcaklığı</strong> (soğuk su sıcaklığı, °C)</li>',
       '<li><strong>Bulunulan ile ait yaş termometre (wet-bulb) değeri</strong> (°C)</li>',
-    '</ul>',
-
-    '<p>',
-      'Bu dört parametre; kule kapasitesinin, kule yaklaşım değerinin (approach) ve kule tipinin belirlenmesi için ',
-      'ana girdi olarak kullanılır. Yaş termometre sıcaklığı, özellikle evaporatif soğutma yapan kuleler için ',
-      'en kritik iklim verisidir.',
-    '</p>',
-
-    '<h3>Yardımcı Bilgiler (Tasarımı İyileştiren Ek Veriler)</h3>',
-    '<p>',
-      'Aşağıdaki veriler, kule tasarımını optimize etmek ve doğru ekipman seçimini kolaylaştırmak için önemli ',
-      'yardımcı bilgilerdir:',
-    '</p>',
-    '<ul>',
-      '<li><strong>Soğutma suyunun kullanıldığı tesis</strong> (proses tipi, sektör, HVAC vb.)</li>',
-      '<li><strong>Sirkülasyon suyunun kalitesi</strong> (kirlilik miktarı, yağ, tufal, kireçlenme eğilimi, partikül)</li>',
-      '<li><strong>Bölgeye ait kuru termometre (dry-bulb) değeri</strong> (°C)</li>',
-      '<li><strong>Deniz seviyesine göre yükseklik</strong> (rakım, m)</li>',
-    '</ul>',
-
-    '<p>',
-      'Tesis tipi ve su kalitesi; kule tipinin (açık/kapalı devre), dolgu tipinin (PVC petek, PP bigudi, grid dolgu vb.) ',
-      've malzeme seçiminin (CTP, galvaniz, paslanmaz vb.) belirlenmesinde doğrudan etkilidir. ',
-      'Kuru termometre ve rakım bilgisi ise, bölgesel iklim kondisyonunun daha doğru modellenmesini sağlar.',
-    '</p>',
-
-    '<h3>Su Soğutma Kulesi Talebinde Dikkat Edilecek Hususlar</h3>',
-    '<p>',
-      'Kule teklif ve talep aşamasında sık yapılan hata, sadece kapasite değeri (örneğin sadece kW veya kcal/h) ',
-      'bildirilmesidir. Bu yaklaşım, sağlıklı bir kule seçimi için yetersizdir.',
-    '</p>',
-
-    '<ul>',
-      '<li>',
-        '<strong>Kule talebi yalnızca kapasite bildirilerek yapılmamalıdır.</strong> ',
-        'Kapasite ile birlikte mutlaka su debisi ve sıcaklıklar verilmelidir.',
-      '</li>',
-      '<li>',
-        '<strong>Kulede dolaşacak su debisi</strong> (m³/h) ile ',
-        '<strong>kuleye giren ve çıkan su sıcaklıkları</strong> (sıcak/soğuk su sıcaklıkları) açıkça belirtilmelidir.',
-      '</li>',
-      '<li>',
-        '<strong>En kritik husus</strong>; soğutulmuş su sıcaklığının, ortam yaş termometre sıcaklığına ',
-        'yaklaşım değeridir (approach). Aynı kule gövdesi ile; ',
-        'su debisi, su giriş-çıkış sıcaklık farkı ve yaklaşım değeri değiştirilerek çok farklı kapasitelere ',
-        'ulaşmak mümkündür.',
-      '</li>',
-    '</ul>',
-
-    '<p>',
-      'Bu nedenle, doğru tasarım için; debi, sıcak su sıcaklığı, soğuk su sıcaklığı ve ',
-      'yaş termometre sıcaklığı dörtlüsü, proje veya teklif talebinde mutlaka netleştirilmelidir. ',
-      'İlgili ile/şehir için <strong>yaz kuru ve yaş termometre tasarım değerleri tablosu</strong> de ',
-      'kule seçim çalışmasına eklenmelidir.',
-    '</p>'
+    '</ul>'
   ),
   'Kule seçimi için gerekli bilgiler',
   'Su soğutma kulesi seçimi için gerekli debi, sıcaklıklar, yaş/kuru termometre ve diğer tasarım parametrelerini açıklayan teknik doküman.',
@@ -847,13 +766,13 @@ ON DUPLICATE KEY UPDATE
  updated_at       = VALUES(updated_at);
 
 -- =============================================================
--- 2) PARENT: library (BROCHURE + SERVICE GUIDE)  [FK FIX]
+-- 2) PARENT: library (BROCHURE + SERVICE GUIDE)
 -- =============================================================
 
 SET @LIB_BROCHURE_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
   WHERE i.slug = 'ensotek-kurumsal-brosur'
   LIMIT 1
 );
@@ -869,9 +788,7 @@ VALUES
 (
   @LIB_BROCHURE_ID,
   1, 1, 90,
-  '{
-    "de":["kurumsal broşür","ensotek broşür","pdf","katalog"]
-  }',
+  '{ "tr":["kurumsal broşür","ensotek broşür","pdf","katalog"] }',
   @LIB_CATEGORY_ID, @LIB_SUBCATEGORY_PDF,
   'Ensotek', 0, 0,
   NOW(3), NOW(3), NOW(3)
@@ -892,7 +809,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_BROCHURE_ID, 'de',
+  UUID(), @LIB_BROCHURE_ID, 'tr',
   'Kurumsal Broşür (PDF)',
   'ensotek-kurumsal-brosur',
   'Ensotek kurumsal broşür PDF dosyası.',
@@ -913,7 +830,7 @@ ON DUPLICATE KEY UPDATE
 SET @LIB_SERVICE_GUIDE_ID := (
   SELECT l.id
   FROM library l
-  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'de'
+  JOIN library_i18n i ON i.library_id = l.id AND i.locale = 'tr'
   WHERE i.slug = 'ensotek-hizmet-rehberi'
   LIMIT 1
 );
@@ -929,9 +846,7 @@ VALUES
 (
   @LIB_SERVICE_GUIDE_ID,
   1, 1, 100,
-  '{
-    "de":["hizmet rehberi","ensotek hizmet","pdf","rehber"]
-  }',
+  '{ "tr":["hizmet rehberi","ensotek hizmet","pdf","rehber"] }',
   @LIB_CATEGORY_ID, @LIB_SUBCATEGORY_PDF,
   'Ensotek', 0, 0,
   NOW(3), NOW(3), NOW(3)
@@ -952,7 +867,7 @@ INSERT INTO library_i18n
  meta_title, meta_description, created_at, updated_at)
 VALUES
 (
-  UUID(), @LIB_SERVICE_GUIDE_ID, 'de',
+  UUID(), @LIB_SERVICE_GUIDE_ID, 'tr',
   'Hizmet Rehberi (PDF)',
   'ensotek-hizmet-rehberi',
   'Ensotek hizmet rehberi PDF dosyası.',
@@ -979,7 +894,6 @@ INSERT INTO library_images
 (id, library_id, asset_id, image_url, thumb_url, webp_url, display_order, is_active, created_at, updated_at)
 VALUES
   (@IMG_CT, @LIB_CT_BASICS_ID, @ASSET_IMG_CT, NULL, NULL, NULL, 10, 1, NOW(3), NOW(3))
-
 ON DUPLICATE KEY UPDATE
   asset_id      = VALUES(asset_id),
   image_url     = VALUES(image_url),
@@ -992,14 +906,14 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO library_images_i18n
 (id, image_id, locale, alt, caption, created_at, updated_at)
 VALUES
-  (UUID(), @IMG_CT, 'de', 'Soğutma kulesi çalışma prensibi görseli', 'Soğutma kulesi temelleri', NOW(3), NOW(3))
+  (UUID(), @IMG_CT, 'tr', 'Soğutma kulesi çalışma prensibi görseli', 'Soğutma kulesi temelleri', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   alt        = VALUES(alt),
   caption    = VALUES(caption),
   updated_at = VALUES(updated_at);
 
 -- =============================================================
--- 4) files  [FK FIX: library_id parent ID kullanır]
+-- 4) files
 -- =============================================================
 SET @FILE_BROCHURE := 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb';
 SET @FILE_GUIDE    := 'cccccccc-cccc-cccc-cccc-cccccccccccc';
@@ -1022,8 +936,8 @@ ON DUPLICATE KEY UPDATE
 
 INSERT INTO library_files_i18n (id, file_id, locale, title, description, created_at, updated_at)
 VALUES
-  (UUID(), @FILE_BROCHURE, 'de', 'Kurumsal Broşür (PDF)', 'Ensotek kurumsal broşür PDF dosyası.', NOW(3), NOW(3)),
-  (UUID(), @FILE_GUIDE,    'de', 'Hizmet Rehberi (PDF)', 'Ensotek hizmet rehberi PDF dosyası.', NOW(3), NOW(3))
+  (UUID(), @FILE_BROCHURE, 'tr', 'Kurumsal Broşür (PDF)', 'Ensotek kurumsal broşür PDF dosyası.', NOW(3), NOW(3)),
+  (UUID(), @FILE_GUIDE,    'tr', 'Hizmet Rehberi (PDF)', 'Ensotek hizmet rehberi PDF dosyası.', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   title       = VALUES(title),
   description = VALUES(description),

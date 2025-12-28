@@ -4,106 +4,98 @@
 // Backend: src/modules/customPages/router.ts
 // =============================================================
 
-import { baseApi } from "../baseApi";
+import { baseApi } from '../baseApi';
 import type {
   ApiCustomPage,
   CustomPageDto,
   CustomPageListPublicQueryParams,
-} from "@/integrations/types/custom_pages.types";
-import { mapApiCustomPageToDto } from "@/integrations/types/custom_pages.types";
+} from '@/integrations/types/custom_pages.types';
+import { mapApiCustomPageToDto } from '@/integrations/types/custom_pages.types';
 
-const getTotalFromHeaders = (
-  responseHeaders: Headers | undefined,
-  fallbackLength: number,
-): number => {
-  const headerValue =
-    responseHeaders?.get("x-total-count") ??
-    responseHeaders?.get("X-Total-Count");
+const cleanParams = (
+  params?: Record<string, unknown>,
+): Record<string, string | number | boolean> | undefined => {
+  if (!params) return undefined;
+  const out: Record<string, string | number | boolean> = {};
+  for (const [k, v] of Object.entries(params)) {
+    if (v === undefined || v === null || v === '' || (typeof v === 'number' && Number.isNaN(v))) {
+      continue;
+    }
+    if (typeof v === 'boolean' || typeof v === 'number' || typeof v === 'string') {
+      out[k] = v;
+    } else {
+      out[k] = String(v);
+    }
+  }
+  return Object.keys(out).length ? out : undefined;
+};
+
+const getTotalFromHeaders = (headers: Headers | undefined, fallbackLength: number): number => {
+  const headerValue = headers?.get('x-total-count') ?? headers?.get('X-Total-Count');
   if (!headerValue) return fallbackLength;
   const n = Number(headerValue);
   return Number.isFinite(n) && n >= 0 ? n : fallbackLength;
 };
 
-// Slug ile tekil sayfa çekerken kullanacağımız arg tipi
-type CustomPageBySlugArgs = {
+const normalizeList = (raw: unknown): ApiCustomPage[] => {
+  if (Array.isArray(raw)) return raw as ApiCustomPage[];
+  const anyRaw: any = raw as any;
+  if (anyRaw && Array.isArray(anyRaw.items)) return anyRaw.items as ApiCustomPage[];
+  return [];
+};
+
+export type CustomPageBySlugArgs = {
   slug: string;
   locale?: string;
+  default_locale?: string;
 };
 
 export const customPagesPublicApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
-    /**
-     * GET /custom_pages
-     * Public listeleme (blog, news, about vs.)
-     */
     listCustomPagesPublic: build.query<
       { items: CustomPageDto[]; total: number },
       CustomPageListPublicQueryParams | void
     >({
-      query: (params?: CustomPageListPublicQueryParams) => ({
-        url: "/custom_pages",
-        method: "GET",
-        params,
+      query: (params) => ({
+        url: '/custom_pages',
+        method: 'GET',
+        params: cleanParams(params as Record<string, unknown> | undefined),
       }),
-      transformResponse: (response: ApiCustomPage[], meta) => {
-        const total = getTotalFromHeaders(
-          meta?.response?.headers,
-          response.length,
-        );
-        return {
-          items: response.map((row) => mapApiCustomPageToDto(row)),
-          total,
-        };
+      transformResponse: (response: unknown, meta) => {
+        const rows = normalizeList(response);
+        const total = getTotalFromHeaders(meta?.response?.headers, rows.length);
+        return { items: rows.map(mapApiCustomPageToDto), total };
       },
       providesTags: (result) =>
-        result?.items
+        result?.items?.length
           ? [
-              ...result.items.map((p) => ({
-                type: "CustomPage" as const,
-                id: p.id,
-              })),
-              { type: "CustomPage" as const, id: "PUBLIC_LIST" },
+              ...result.items.map((p) => ({ type: 'CustomPage' as const, id: p.id })),
+              { type: 'CustomPage' as const, id: 'PUBLIC_LIST' },
             ]
-          : [{ type: "CustomPage" as const, id: "PUBLIC_LIST" }],
+          : [{ type: 'CustomPage' as const, id: 'PUBLIC_LIST' }],
     }),
 
-    /**
-     * GET /custom_pages/:id
-     * Public tekil sayfa (id ile)
-     */
-    getCustomPagePublic: build.query<CustomPageDto, string>({
-      query: (id) => ({
-        url: `/custom_pages/${encodeURIComponent(id)}`,
-        method: "GET",
-      }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      providesTags: (_result, _error, id) => [
-        { type: "CustomPage" as const, id },
-      ],
-    }),
-
-    /**
-     * GET /custom_pages/by-slug/:slug
-     * Public tekil sayfa (slug + optional locale ile)
-     */
-    getCustomPageBySlugPublic: build.query<
+    getCustomPagePublic: build.query<
       CustomPageDto,
-      CustomPageBySlugArgs
+      { id: string; locale?: string; default_locale?: string }
     >({
-      query: ({ slug, locale }) => ({
-        url: `/custom_pages/by-slug/${encodeURIComponent(slug)}`,
-        method: "GET",
-        params: locale ? { locale } : undefined,
+      query: ({ id, locale, default_locale }) => ({
+        url: `/custom_pages/${encodeURIComponent(id)}`,
+        method: 'GET',
+        params: cleanParams({ locale, default_locale }),
       }),
-      transformResponse: (response: ApiCustomPage) =>
-        mapApiCustomPageToDto(response),
-      providesTags: (_result, _error, args) => [
-        {
-          type: "CustomPageSlug" as const,
-          id: args.slug,
-        },
-      ],
+      transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
+      providesTags: (_result, _error, { id }) => [{ type: 'CustomPage' as const, id }],
+    }),
+
+    getCustomPageBySlugPublic: build.query<CustomPageDto, CustomPageBySlugArgs>({
+      query: ({ slug, locale, default_locale }) => ({
+        url: `/custom_pages/by-slug/${encodeURIComponent(slug)}`,
+        method: 'GET',
+        params: cleanParams({ locale, default_locale }),
+      }),
+      transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
+      providesTags: (_result, _error, args) => [{ type: 'CustomPageSlug' as const, id: args.slug }],
     }),
   }),
   overrideExisting: false,

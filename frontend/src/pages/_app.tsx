@@ -15,6 +15,8 @@ import '@/styles/index-four.scss';
 import '@/styles/main.scss';
 import 'aos/dist/aos.css';
 import 'nprogress/nprogress.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+
 
 import '@/integrations/rtk/endpoints/_register';
 

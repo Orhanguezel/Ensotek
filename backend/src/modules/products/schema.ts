@@ -1,5 +1,7 @@
 // =============================================================
-// FILE: src/modules/products/schema.ts  (LOCALE DESTEKLİ)
+// FILE: src/modules/products/schema.ts  (LOCALE DESTEKLİ)  ✅ FIXED
+// - products.item_type eklendi: product | sparepart
+// - index eklendi: products_item_type_idx
 // =============================================================
 import {
   mysqlTable,
@@ -22,6 +24,8 @@ import { sql } from 'drizzle-orm';
 import { categories } from '../categories/schema';
 import { subCategories } from '../subcategories/schema';
 
+export type ProductItemType = 'product' | 'sparepart';
+
 /* =========================
  * PRODUCTS (BASE TABLO – DİL BAĞIMSIZ)
  * ========================= */
@@ -29,6 +33,9 @@ export const products = mysqlTable(
   'products',
   {
     id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    // ✅ Ürün tipi: product / sparepart (karışmayı bitirir)
+    item_type: mysqlEnum('item_type', ['product', 'sparepart']).notNull().default('product'),
 
     // Dilden bağımsız alanlar
     category_id: char('category_id', { length: 36 }).notNull(),
@@ -68,6 +75,7 @@ export const products = mysqlTable(
   (t) => [
     uniqueIndex('products_code_uq').on(t.product_code),
 
+    index('products_item_type_idx').on(t.item_type), // ✅ yeni index
     index('products_category_id_idx').on(t.category_id),
     index('products_sub_category_id_idx').on(t.sub_category_id),
     index('products_active_idx').on(t.is_active),
@@ -144,11 +152,6 @@ export const productI18n = mysqlTable(
 
 // ========== SPECS / FAQS / REVIEWS / OPTIONS / STOCK ==========
 
-/**
- * PRODUCT SPECS – LOCALE DESTEKLİ
- *   - tablo: product_specs (id PK)
- *   - TR / EN için ayrı satır, id farklı, locale alanı ile filtrelenecek
- */
 export const productSpecs = mysqlTable(
   'product_specs',
   {
@@ -185,11 +188,6 @@ export const productSpecs = mysqlTable(
   ],
 );
 
-/**
- * PRODUCT FAQS – LOCALE DESTEKLİ
- *   - tablo: product_faqs (id PK)
- *   - TR / EN için ayrı satır, id farklı, locale alanı ile filtrelenecek
- */
 export const productFaqs = mysqlTable(
   'product_faqs',
   {
@@ -225,9 +223,6 @@ export const productFaqs = mysqlTable(
   ],
 );
 
-/**
- * PRODUCT REVIEWS – şimdilik locale YOK (TR yorumlar)
- */
 export const productReviews = mysqlTable(
   'product_reviews',
   {
@@ -269,7 +264,6 @@ export const productOptions = mysqlTable(
     id: char('id', { length: 36 }).primaryKey().notNull(),
     product_id: char('product_id', { length: 36 }).notNull(),
     option_name: varchar('option_name', { length: 100 }).notNull(),
-    // NOT: JSON içinde aslında {code,label} objeleri var;
     option_values: json('option_values').$type<any[]>().notNull(),
     created_at: datetime('created_at', { fsp: 3 })
       .notNull()

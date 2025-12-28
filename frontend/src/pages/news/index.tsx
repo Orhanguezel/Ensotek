@@ -1,9 +1,15 @@
 // =============================================================
 // FILE: src/pages/news/index.tsx
-// Ensotek – News Page (full list) + SEO
-//   - Route: /news
-//   - Data: custom_pages (module_key="news") => meta override
+// Ensotek – News Page (full list) + SEO (EN fallback only)
+// - Route: /news
+// - Data: custom_pages (module_key="news") for meta override (first published)
+// - i18n: useLocaleShort() + site_settings.ui_news (EN fallback only)
+// - SEO: seo -> site_seo fallback + custom_page meta override
+// - ✅ Canonical + og:url single source: _document (SSR)
+// - NO Tailwind, NO inline styles
 // =============================================================
+
+'use client';
 
 import React, { useMemo } from 'react';
 import Head from 'next/head';
@@ -13,7 +19,7 @@ import NewsPageContent from '@/components/containers/news/NewsPageContent';
 import Feedback from '@/components/containers/feedback/Feedback';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -31,83 +37,94 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
+}
+
 const NewsPage: React.FC = () => {
-  const locale = useResolvedLocale();
-  const { ui } = useUiSection('ui_news', locale);
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_news', locale as any);
 
   // Banner title (UI)
-  const bannerTitle = ui('ui_news_page_title', locale === 'de' ? 'Haberler' : 'News');
+  const bannerTitle = ui('ui_news_page_title', 'News'); // EN fallback only
 
   // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: 'seo',
-    locale,
-  });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: 'site_seo',
-    locale,
-  });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale } as any);
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary as any)?.value ?? (seoFallback as any)?.value;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [(seoPrimary as any)?.value, (seoFallback as any)?.value]);
 
-  // News list (meta override için ilk published kayıt)
-  const { data: newsData } = useListCustomPagesPublicQuery({
-    module_key: 'news',
-    locale,
-    limit: 10,
-    sort: 'created_at',
-    orderDir: 'asc',
-  });
+  // News list for meta override (first published)
+  const { data: newsData } = useListCustomPagesPublicQuery(
+    {
+      module_key: 'news',
+      locale,
+      limit: 10,
+      sort: 'created_at',
+      order: 'asc',
+      orderDir: 'asc',
+      is_published: 1,
+    } as any,
+    { skip: !locale },
+  );
 
-  const published = useMemo(() => {
-    const items: CustomPageDto[] = (newsData?.items ?? []) as any;
-    return items.filter((p) => p.is_published);
+  const primary = useMemo(() => {
+    const items: CustomPageDto[] = ((newsData as any)?.items ??
+      (newsData as any)?.data ??
+      (newsData as any)?.rows ??
+      []) as any;
+    const published = Array.isArray(items) ? items.filter((p) => !!(p as any)?.is_published) : [];
+    return published[0] as any;
   }, [newsData]);
 
-  const primary = published[0];
-
   // --- SEO: Title/Description ---
-  const titleFallback = ui('ui_news_page_title', locale === 'de' ? 'Haberler' : 'News');
+  const pageTitleRaw = useMemo(() => {
+    const titleFallback = safeStr(bannerTitle) || 'News';
+    return (
+      safeStr((primary as any)?.meta_title) || safeStr((primary as any)?.title) || titleFallback
+    );
+  }, [primary, bannerTitle]);
 
-  const pageTitleRaw =
-    (primary?.meta_title ?? '').trim() ||
-    (primary?.title ?? '').trim() ||
-    String(titleFallback).trim();
+  const pageDescRaw = useMemo(() => {
+    const metaDesc = safeStr((primary as any)?.meta_description);
+    const summary = safeStr((primary as any)?.summary);
+    const html = safeStr((primary as any)?.content_html);
+    return (
+      metaDesc || summary || safeStr(excerpt(html, 160)) || safeStr((seo as any)?.description) || ''
+    );
+  }, [primary, seo]);
 
-  const pageDescRaw =
-    (primary?.meta_description ?? '').trim() ||
-    (primary?.summary ?? '').trim() ||
-    excerpt(primary?.content_html ?? '', 160).trim() ||
-    String(seo?.description ?? '').trim() ||
-    '';
-
-  const seoSiteName = String(seo?.site_name ?? '').trim() || 'Ensotek';
-  const titleTemplate = String(seo?.title_template ?? '').trim() || '%s | Ensotek';
+  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(
+    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
+    [seo],
+  );
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
       ? titleTemplate.replace('%s', pageTitleRaw)
       : pageTitleRaw;
-    return String(t).trim();
+    return safeStr(t);
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = (primary?.featured_image ?? '').trim();
+    const pageImgRaw = safeStr((primary as any)?.featured_image);
     const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
 
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.ico');
-  }, [primary?.featured_image, seo]);
+    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
+  }, [primary, seo]);
 
   const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
 
     return buildMeta({
       title: pageTitle,
@@ -116,9 +133,10 @@ const NewsPage: React.FC = () => {
       siteName: seoSiteName,
       noindex,
 
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
@@ -126,6 +144,7 @@ const NewsPage: React.FC = () => {
     <>
       <Head>
         <title>{pageTitle}</title>
+
         {headSpecs.map((spec, idx) => {
           if (spec.kind === 'link') {
             return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;

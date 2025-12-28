@@ -1,11 +1,12 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductPageContent.tsx
-// Ensotek – Full Products Page Content
-//   - Tüm ürünlerin grid listesi
-//   - Data: products
-//   - i18n: site_settings.ui_products
-//   - Locale-aware routes with localizePath
+// Ensotek – Full Products Page Content (IMAGE + TITLE ONLY) — FINAL
+// - Shared container for /product and /sparepart
+// - item_type is driven by props (product | sparepart)
+// - UI section key + route base path are driven by props
+// - Next/Image src never empty (fallback cover used)
 // =============================================================
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -22,11 +23,10 @@ import { localizePath } from '@/i18n/url';
 
 import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
-// Fallback görsel
 import FallbackCover from 'public/img/blog/3/1.jpg';
 
-const CARD_W = 720;
-const CARD_H = 480;
+const CARD_W = 1200;
+const CARD_H = 900;
 const PAGE_LIMIT = 12;
 
 const toLocaleShort = (l: unknown) =>
@@ -36,105 +36,128 @@ const toLocaleShort = (l: unknown) =>
     .replace('_', '-')
     .split('-')[0] || 'de';
 
-// Kısa açıklama helper'ı
-function makeExcerpt(text: string, maxLength = 140): string {
-  const clean = String(text || '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  if (!clean) return '';
-  if (clean.length <= maxLength) return clean;
-  const sliced = clean.slice(0, maxLength);
-  return sliced.replace(/[,.;:\s]+$/g, '') + '…';
-}
-
 type ProductListVM = {
   id: string;
   slug: string;
   title: string;
-  hero: string;
+  hero: string; // may be empty -> fallback used at render
   alt: string;
-  excerpt: string;
 };
 
-const ProductPageContent: React.FC = () => {
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
+
+export type ProductPageContentProps = {
+  itemType: 'product' | 'sparepart';
+  uiSectionKey: 'ui_products' | 'ui_spareparts';
+  basePath: '/product' | '/sparepart';
+};
+
+const ProductPageContent: React.FC<ProductPageContentProps> = ({
+  itemType,
+  uiSectionKey,
+  basePath,
+}) => {
   const resolvedLocale = useResolvedLocale();
   const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
-  const { ui } = useUiSection('ui_products', locale);
+  const { ui } = useUiSection(uiSectionKey, locale);
 
-  const sectionSubtitlePrefix = ui('ui_products_kicker_prefix', 'Ensotek');
-  const sectionSubtitleLabel = ui(
-    'ui_products_kicker_label',
-    locale === 'de' ? 'Ürünlerimiz' : 'Our Products',
+  // ---- UI keys are derived from section ----
+  const isProducts = uiSectionKey === 'ui_products';
+
+  const sectionSubtitlePrefix = ui(
+    isProducts ? 'ui_products_kicker_prefix' : 'ui_spareparts_kicker_prefix',
+    'Ensotek',
   );
 
-  const sectionTitle = ui('ui_products_page_title', locale === 'de' ? 'Ürünlerimiz' : 'Products');
+  const sectionSubtitleLabel = ui(
+    isProducts ? 'ui_products_kicker_label' : 'ui_spareparts_kicker_label',
+    locale === 'de'
+      ? isProducts
+        ? 'Ürünlerimiz'
+        : 'Yedek Parçalar'
+      : isProducts
+      ? 'Our Products'
+      : 'Spare Parts',
+  );
+
+  const sectionTitle = ui(
+    isProducts ? 'ui_products_page_title' : 'ui_spareparts_page_title',
+    locale === 'de'
+      ? isProducts
+        ? 'Ürünlerimiz'
+        : 'Yedek Parçalar'
+      : isProducts
+      ? 'Products'
+      : 'Spare Parts',
+  );
 
   const sectionIntro = ui(
-    'ui_products_page_intro',
+    isProducts ? 'ui_products_page_intro' : 'ui_spareparts_page_intro',
     locale === 'de'
-      ? 'Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler.'
-      : 'Selected products for industrial cooling towers and related equipment.',
-  );
-
-  const readMore = ui(
-    'ui_products_read_more',
-    locale === 'de' ? 'Detayları görüntüle' : 'View details',
-  );
-
-  const readMoreAria = ui(
-    'ui_products_read_more_aria',
-    locale === 'de' ? 'ürün detayını görüntüle' : 'view product details',
+      ? isProducts
+        ? 'Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler.'
+        : 'Soğutma kuleleri için seçili yedek parça ve bakım bileşenleri.'
+      : isProducts
+      ? 'Selected products for industrial cooling towers and related equipment.'
+      : 'Selected spare parts and maintenance components for cooling towers.',
   );
 
   const emptyText = ui(
-    'ui_products_empty',
+    isProducts ? 'ui_products_empty' : 'ui_spareparts_empty',
     locale === 'de'
-      ? 'Şu anda görüntülenecek ürün bulunmamaktadır.'
-      : 'There are no products to display at the moment.',
+      ? 'Şu anda görüntülenecek içerik bulunmamaktadır.'
+      : 'There are no items to display at the moment.',
   );
 
-  // RTK: listProducts artık ProductListResponse döner (items + total)
+  // ---- Data (single source) ----
   const { data, isLoading } = useListProductsQuery({
     is_active: 1,
-    locale, // ✅ short locale
+    locale,
     limit: PAGE_LIMIT,
+    item_type: itemType,
   });
 
   const items: ProductListVM[] = useMemo(() => {
     const list: ProductDto[] = (data?.items ?? []) as any;
 
     return list
-      .filter((p) => !!p && !!p.is_active)
+      .filter((p) => !!p && !!(p as any).is_active)
       .map((p) => {
-        const title = String(p.title || '').trim();
-        const slug = String(p.slug || '').trim();
+        const id = safeStr((p as any).id) || safeStr((p as any).slug);
+        const title = safeStr((p as any).title) || 'Untitled';
+        const slug = safeStr((p as any).slug);
 
         const imgRaw =
-          String(p.image_url || '').trim() || String((p.images && p.images[0]) || '').trim();
+          safeStr((p as any).image_url) ||
+          safeStr(((p as any).images && (p as any).images[0]) || '');
 
-        const hero = (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '';
-
-        const description = String((p as any).description || '').trim();
-        const excerpt = makeExcerpt(description);
+        const hero = imgRaw ? toCdnSrc(imgRaw, CARD_W, CARD_H, 'fit') || imgRaw : '';
 
         return {
-          id: String((p as any).id ?? ''),
+          id,
           slug,
           title,
           hero,
-          alt: String((p as any).alt || title || 'product image'),
-          excerpt,
+          alt: safeStr((p as any).alt) || title || 'product image',
         };
-      });
+      })
+      .filter((x) => !!x.slug && !!x.id);
   }, [data?.items]);
 
-  const productListHref = useMemo(() => localizePath(locale, '/product'), [locale]);
+  const listHref = useMemo(() => localizePath(locale, basePath), [locale, basePath]);
+
+  // Senin önceki davranışın: items yok + loading değil => null (sayfada sadece banner/feedback kalsın)
+  if (!items.length && !isLoading) return null;
 
   return (
     <section className="product__area grey-bg-3 pt-120 pb-90">
       <div className="container">
-        {/* Başlık */}
+        {/* Head */}
         <div className="row">
           <div className="col-12">
             <div className="section__title-wrapper text-center mb-70">
@@ -146,16 +169,12 @@ const ProductPageContent: React.FC = () => {
 
               <div className="section__title-3 mb-20">{sectionTitle}</div>
 
-              {sectionIntro ? (
-                <p style={{ maxWidth: 640, marginLeft: 'auto', marginRight: 'auto' }}>
-                  {sectionIntro}
-                </p>
-              ) : null}
+              {sectionIntro ? <p className="ens-products__intro">{sectionIntro}</p> : null}
             </div>
           </div>
         </div>
 
-        {/* Liste */}
+        {/* Grid */}
         <div className="row" data-aos="fade-up" data-aos-delay="300">
           {!isLoading && items.length === 0 && (
             <div className="col-12">
@@ -163,56 +182,54 @@ const ProductPageContent: React.FC = () => {
             </div>
           )}
 
-          {items.map((p) => {
-            const href = p.slug
-              ? localizePath(locale, `/product/${encodeURIComponent(p.slug)}`)
-              : productListHref;
+          <div className="col-12">
+            <div className="work__item-grid ens-productsGrid">
+              {items.map((p) => {
+                const href = p.slug
+                  ? localizePath(locale, `${basePath}/${encodeURIComponent(p.slug)}`)
+                  : listHref;
 
-            return (
-              <div className="col-xl-4 col-lg-4 col-md-6" key={p.id || p.slug}>
-                <div className="product__item-3 mb-30">
-                  <div className="product__thumb-3 w-img">
-                    <Image
-                      src={(p.hero as any) || (FallbackCover as any)}
-                      alt={p.alt}
-                      width={CARD_W}
-                      height={CARD_H}
-                      style={{ width: '100%', height: 'auto' }}
-                      loading="lazy"
-                    />
-                  </div>
+                // IMPORTANT: Next/Image src must not be empty
+                const imgSrc = p.hero ? (p.hero as any) : (FallbackCover as any);
 
-                  <div className="product__content-3">
-                    <h3>
-                      <Link href={href}>{p.title}</Link>
-                    </h3>
+                return (
+                  <article
+                    className="project__item ens-projectCard ens-projectCard--compact"
+                    key={p.id}
+                  >
+                    <Link href={href} className="ens-projectCard__cardLink" aria-label={p.title}>
+                      <div className="project__thumb">
+                        <span className="ens-projectCard__frame" aria-hidden="true">
+                          <Image
+                            src={imgSrc}
+                            alt={p.alt}
+                            fill
+                            sizes="(max-width: 768px) 92vw, (max-width: 1200px) 45vw, 360px"
+                            className="ens-projectCard__img"
+                            loading="lazy"
+                          />
+                        </span>
+                      </div>
 
-                    {p.excerpt ? (
-                      <p className="product__meta" style={{ marginTop: 6, marginBottom: 10 }}>
-                        {p.excerpt}
-                      </p>
-                    ) : null}
-
-                    <Link
-                      href={href}
-                      className="link-more"
-                      aria-label={`${p.title} — ${readMoreAria}`}
-                    >
-                      {readMore} →
+                      <div className="ens-projectCard__name">
+                        <h3 className="ens-projectCard__title">{p.title}</h3>
+                      </div>
                     </Link>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+                  </article>
+                );
+              })}
 
-          {isLoading && (
-            <div className="col-12" aria-hidden>
-              <SkeletonStack>
-                <SkeletonLine style={{ height: 16 }} />
-              </SkeletonStack>
+              {isLoading && (
+                <div className="ens-products__loading" aria-hidden>
+                  <SkeletonStack>
+                    <SkeletonLine className="ens-products__skel" />
+                    <SkeletonLine className="ens-products__skel" />
+                    <SkeletonLine className="ens-products__skel" />
+                  </SkeletonStack>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </div>
     </section>

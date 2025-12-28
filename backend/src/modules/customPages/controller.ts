@@ -1,10 +1,10 @@
 // =============================================================
 // FILE: src/modules/customPages/controller.ts
-// FINAL — locale source: core/i18n.ts (LOCALES runtime)
+// FINAL — query parse safe + locale resolution unchanged
+// - module_key filter handled in repository
 // =============================================================
 
 import type { RouteHandler } from 'fastify';
-
 import { listCustomPages, getCustomPageMergedById, getCustomPageMergedBySlug } from './repository';
 import { customPageBySlugParamsSchema, customPageBySlugQuerySchema } from './validation';
 
@@ -52,7 +52,7 @@ async function resolveLocales(
 
 type ListQuery = {
   order?: string;
-  sort?: 'created_at' | 'updated_at' | 'display_order';
+  sort?: 'created_at' | 'updated_at' | 'display_order' | 'order_num';
   orderDir?: 'asc' | 'desc';
   limit?: string | number;
   offset?: string | number;
@@ -117,7 +117,8 @@ export const getPageBySlug: RouteHandler<{
   Querystring?: { locale?: string; default_locale?: string };
 }> = async (req, reply) => {
   const { slug } = customPageBySlugParamsSchema.parse(req.params ?? {});
-  const q = customPageBySlugQuerySchema.parse(req.query ?? {});
+  const parsedQ = customPageBySlugQuerySchema.safeParse(req.query ?? {});
+  const q = parsedQ.success ? parsedQ.data : {};
 
   const { locale, def } = await resolveLocales(req, {
     locale: q.locale,

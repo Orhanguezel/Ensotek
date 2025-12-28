@@ -1,8 +1,8 @@
 // =============================================================
 // FILE: src/pages/404.tsx
 // Ensotek – 404 Page (i18n + dynamic locales)
-//  - UI keys: site_settings.ui_errors
-//  - Canonical/og:url: _document tek kaynak
+//  - UI keys: site_settings.ui_errors (JSON)
+//  - Locale resolution: useResolvedLocale() single source of truth
 // =============================================================
 
 'use client';
@@ -13,42 +13,34 @@ import Link from 'next/link';
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
-
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+import { normLocaleTag } from '@/i18n/localeUtils';
+import { isValidUiText } from '@/i18n/uiText';
 
 const Error404: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const resolved = useResolvedLocale();
+  const locale = useMemo(() => normLocaleTag(resolved) || 'de', [resolved]);
 
   const { ui } = useUiSection('ui_errors', locale);
 
-  const title = ui(
-    'ui_404_title',
-    locale === 'de'
-      ? 'Sayfa Bulunamadı'
-      : locale === 'de'
-      ? 'Seite nicht gefunden'
-      : 'Page Not Found',
-  );
+  const title = useMemo(() => {
+    const key = 'ui_404_title';
+    const v = ui(key, '');
+    return isValidUiText(v, key) ? v : 'Page Not Found';
+  }, [ui]);
 
-  const subtitle = ui(
-    'ui_404_subtitle',
-    locale === 'de'
-      ? 'Aradığınız sayfa bulunamadı veya taşınmış olabilir.'
-      : locale === 'de'
-      ? 'Die gesuchte Seite wurde möglicherweise verschoben oder existiert nicht.'
-      : 'The page you are looking for may have been moved or does not exist.',
-  );
+  const subtitle = useMemo(() => {
+    const key = 'ui_404_subtitle';
+    const v = ui(key, '');
+    return isValidUiText(v, key)
+      ? v
+      : 'The page you are looking for may have been moved or does not exist.';
+  }, [ui]);
 
-  const cta = ui(
-    'ui_404_back_home',
-    locale === 'de' ? 'Ana Sayfaya Dön' : locale === 'de' ? 'Zur Startseite' : 'Back To Home',
-  );
+  const cta = useMemo(() => {
+    const key = 'ui_404_back_home';
+    const v = ui(key, '');
+    return isValidUiText(v, key) ? v : 'Back To Home';
+  }, [ui]);
 
   const homeHref = useMemo(() => localizePath(locale, '/'), [locale]);
 

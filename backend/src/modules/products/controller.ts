@@ -10,6 +10,30 @@ import { products, productFaqs, productSpecs, product_reviews, productI18n } fro
 import { categories, categoryI18n } from '@/modules/categories/schema';
 import { subCategories, subCategoryI18n } from '@/modules/subcategories/schema';
 
+/* ----------------- types ----------------- */
+type ItemType = 'product' | 'sparepart';
+
+type ListProductsQuery = {
+  category_id?: string;
+  sub_category_id?: string;
+  is_active?: string;
+  q?: string;
+  limit?: string;
+  offset?: string;
+  sort?: 'price' | 'rating' | 'created_at';
+  order?: 'asc' | 'desc' | string;
+  slug?: string;
+  min_price?: string;
+  max_price?: string;
+  locale?: string;
+  item_type?: ItemType;
+};
+
+type DetailQuery = {
+  locale?: string;
+  item_type?: ItemType;
+};
+
 /* ----------------- helpers ----------------- */
 const toNum = (x: any) =>
   x === null || x === undefined ? x : Number.isNaN(Number(x)) ? x : Number(x);
@@ -71,10 +95,12 @@ const toBool = (v: unknown, def = false): boolean => {
   if (['0', 'false', 'no', 'n', 'off'].includes(s)) return false;
   return def;
 };
+
 const toInt = (v: unknown, def = 0): number => {
   const n = Number(v);
   return Number.isFinite(n) ? Math.trunc(n) : def;
 };
+
 const safeLimit = (v: unknown, def = 100, max = 500): number => {
   const n = toInt(v, def);
   return n > 0 ? Math.min(n, max) : def;
@@ -91,32 +117,32 @@ const normalizeLocaleFromString = (raw?: string | null, fallback = 'de') => {
   return norm || fallback;
 };
 
+const normalizeItemType = (raw?: unknown, fallback: ItemType = 'product'): ItemType => {
+  if (raw === 'sparepart') return 'sparepart';
+  if (raw === 'product') return 'product';
+  return fallback;
+};
+
 /* ----------------- LIST / GET (PUBLIC) ----------------- */
 
-/** GET /products?category_id=&sub_category_id=&is_active=&q=&limit=&offset=&sort=&order=&slug=&locale= */
+/**
+ * GET /products
+ * ?category_id=&sub_category_id=&is_active=&q=&limit=&offset=&sort=&order=&slug=&locale=&item_type=
+ *
+ * ✅ default item_type=product
+ */
 export const listProducts: RouteHandler = async (req, reply) => {
-  const q = (req.query || {}) as {
-    category_id?: string;
-    sub_category_id?: string;
-    is_active?: string;
-    q?: string;
-    limit?: string;
-    offset?: string;
-    sort?: 'price' | 'rating' | 'created_at';
-    order?: 'asc' | 'desc' | string;
-    slug?: string;
-    min_price?: string;
-    max_price?: string;
-    locale?: string;
-  };
+  const q = (req.query || {}) as ListProductsQuery;
 
   const locale = normalizeLocaleFromString(q.locale, 'de');
+  const itemType = normalizeItemType(q.item_type, 'product');
 
-  // shortcut: by slug (+ locale)
+  // shortcut: by slug (+ locale + item_type)
   if (q.slug) {
     const conds: any[] = [
       eq(productI18n.slug, q.slug),
       eq(productI18n.locale, locale),
+      eq(products.item_type, itemType as any), // ✅ FIX
       eq(products.is_active, 1 as any),
     ];
 
@@ -172,7 +198,9 @@ export const listProducts: RouteHandler = async (req, reply) => {
     if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
 
     const r = rows[0];
-    const merged = { ...r.i, ...r.p }; // i18n alanları + base
+    // ✅ FIX: base + i18n (i18n override)
+    const merged = { ...r.p, ...r.i };
+
     return reply.send({
       ...normalizeProduct(merged),
       category: r.c,
@@ -180,18 +208,27 @@ export const listProducts: RouteHandler = async (req, reply) => {
     });
   }
 
-  const conds: any[] = [eq(productI18n.locale, locale)];
+  const conds: any[] = [
+    eq(productI18n.locale, locale),
+    eq(products.item_type, itemType as any), // ✅ FIX
+  ];
+
   if (q.category_id) conds.push(eq(products.category_id, q.category_id));
   if (q.sub_category_id) conds.push(eq(products.sub_category_id, q.sub_category_id));
+
   if (q.is_active !== undefined) {
     const v = q.is_active === '1' || q.is_active === 'true' ? 1 : 0;
     conds.push(eq(products.is_active, v as any));
+  } else {
+    // public list default: active
+    conds.push(eq(products.is_active, 1 as any));
   }
+
   if (q.q) conds.push(like(productI18n.title, `%${q.q}%`));
   if (q.min_price) conds.push(sql`${products.price} >= ${q.min_price}`);
   if (q.max_price) conds.push(sql`${products.price} <= ${q.max_price}`);
 
-  const whereExpr = conds.length ? and(...conds) : undefined;
+  const whereExpr = and(...conds);
 
   const limit = q.limit ? Math.min(parseInt(q.limit, 10) || 50, 100) : 50;
   const offset = q.offset ? Math.max(parseInt(q.offset, 10) || 0, 0) : 0;
@@ -217,12 +254,14 @@ export const listProducts: RouteHandler = async (req, reply) => {
   }
   const orderExpr = dir === 'asc' ? asc(colMap[sortKey]) : desc(colMap[sortKey]);
 
+  // ✅ COUNT includes item_type + locale
   const countBase = db
     .select({ total: sql<number>`COUNT(*)` })
     .from(products)
-    .innerJoin(productI18n, eq(productI18n.product_id, products.id));
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id))
+    .where(whereExpr as any);
 
-  const [{ total }] = await (whereExpr ? countBase.where(whereExpr as any) : countBase);
+  const [{ total }] = await countBase;
 
   const dataBase = db
     .select({
@@ -269,15 +308,14 @@ export const listProducts: RouteHandler = async (req, reply) => {
         eq(subCategoryI18n.sub_category_id, subCategories.id),
         eq(subCategoryI18n.locale, locale),
       ),
-    );
+    )
+    .where(whereExpr as any);
 
-  const rows = await (whereExpr ? dataBase.where(whereExpr as any) : dataBase)
-    .orderBy(orderExpr)
-    .limit(limit)
-    .offset(offset);
+  const rows = await dataBase.orderBy(orderExpr).limit(limit).offset(offset);
 
   const out = rows.map((r) => {
-    const merged = { ...r.i, ...r.p };
+    // ✅ FIX: base + i18n (i18n override)
+    const merged = { ...r.p, ...r.i };
     return {
       ...normalizeProduct(merged),
       category: r.c,
@@ -292,14 +330,23 @@ export const listProducts: RouteHandler = async (req, reply) => {
   return reply.send(out);
 };
 
-/** GET /products/:idOrSlug?locale= */
+/**
+ * GET /products/:idOrSlug?locale=&item_type=
+ * ✅ default item_type=product
+ */
 export const getProductByIdOrSlug: RouteHandler = async (req, reply) => {
   const { idOrSlug } = req.params as { idOrSlug: string };
-  const { locale: localeParam } = (req.query || {}) as { locale?: string };
+  const { locale: localeParam, item_type } = (req.query || {}) as DetailQuery;
+
   const locale = normalizeLocaleFromString(localeParam, 'de');
+  const itemType = normalizeItemType(item_type, 'product');
   const isUuid = UUID_RE.test(idOrSlug);
 
-  const conds: any[] = [eq(productI18n.locale, locale)];
+  const conds: any[] = [
+    eq(productI18n.locale, locale),
+    eq(products.item_type, itemType as any), // ✅ FIX
+  ];
+
   if (isUuid) {
     conds.push(eq(products.id, idOrSlug));
   } else {
@@ -357,8 +404,11 @@ export const getProductByIdOrSlug: RouteHandler = async (req, reply) => {
     .limit(1);
 
   if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
+
   const r = rows[0];
-  const merged = { ...r.i, ...r.p };
+  // ✅ FIX: base + i18n
+  const merged = { ...r.p, ...r.i };
+
   return reply.send({
     ...normalizeProduct(merged),
     category: r.c,
@@ -366,11 +416,16 @@ export const getProductByIdOrSlug: RouteHandler = async (req, reply) => {
   });
 };
 
-/** GET /products/id/:id?locale= */
+/**
+ * GET /products/id/:id?locale=&item_type=
+ * ✅ default item_type=product
+ */
 export const getProductById: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
-  const { locale: localeParam } = (req.query || {}) as { locale?: string };
+  const { locale: localeParam, item_type } = (req.query || {}) as DetailQuery;
+
   const locale = normalizeLocaleFromString(localeParam, 'de');
+  const itemType = normalizeItemType(item_type, 'product');
 
   const rows = await db
     .select({
@@ -418,12 +473,19 @@ export const getProductById: RouteHandler = async (req, reply) => {
         eq(subCategoryI18n.locale, locale),
       ),
     )
-    .where(and(eq(products.id, id), eq(productI18n.locale, locale)))
+    .where(
+      and(
+        eq(products.id, id),
+        eq(productI18n.locale, locale),
+        eq(products.item_type, itemType as any), // ✅ FIX
+      ),
+    )
     .limit(1);
 
   if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
+
   const r = rows[0];
-  const merged = { ...r.i, ...r.p };
+  const merged = { ...r.p, ...r.i }; // ✅ FIX
   return reply.send({
     ...normalizeProduct(merged),
     category: r.c,
@@ -431,17 +493,22 @@ export const getProductById: RouteHandler = async (req, reply) => {
   });
 };
 
-/** GET /products/by-slug/:slug?locale= */
+/**
+ * GET /products/by-slug/:slug?locale=&item_type=
+ * ✅ default item_type=product
+ */
 export const getProductBySlug: RouteHandler<{
   Params: { slug: string };
-  Querystring: { locale?: string };
+  Querystring: { locale?: string; item_type?: ItemType };
 }> = async (req, reply) => {
   const { slug } = req.params;
   const locale = normalizeLocaleFromString(req.query?.locale, 'de');
+  const itemType = normalizeItemType(req.query?.item_type, 'product');
 
   const conds: any[] = [
     eq(productI18n.slug, slug),
     eq(productI18n.locale, locale),
+    eq(products.item_type, itemType as any), // ✅ FIX
     eq(products.is_active, 1 as any),
   ];
 
@@ -495,8 +562,9 @@ export const getProductBySlug: RouteHandler<{
     .limit(1);
 
   if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
+
   const r = rows[0];
-  const merged = { ...r.i, ...r.p };
+  const merged = { ...r.p, ...r.i }; // ✅ FIX
   return reply.send({
     ...normalizeProduct(merged),
     category: r.c,
@@ -569,7 +637,6 @@ export async function listProductReviews(req: FastifyRequest, reply: FastifyRepl
 
     const filters = [eq(product_reviews.product_id, q.product_id)];
     if (toBool(q.only_active, true)) {
-      // tinyint(1) uyumu
       // @ts-expect-error drizzle tinyint boolean union
       filters.push(eq(product_reviews.is_active, 1));
     }

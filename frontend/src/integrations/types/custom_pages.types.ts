@@ -7,24 +7,16 @@
 /**
  * Backend'deki boolLike ile uyumlu
  */
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false";
+export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
 
-/** Sıralama alanları */
-export type CustomPageSortField = "created_at" | "updated_at";
-export type SortDirection = "asc" | "desc";
+/** Sıralama alanları – backend customPageListQuerySchema ile uyumlu */
+export type CustomPageSortField = 'created_at' | 'updated_at' | 'display_order' | 'order_num';
+export type SortDirection = 'asc' | 'desc';
 
 /* ------------------------------------------------------------------
  * LIST QUERY PARAMS (public + admin)
  * Backend: customPageListQuerySchema
  * ------------------------------------------------------------------ */
-
 export interface CustomPageListQueryParams {
   order?: string;
   sort?: CustomPageSortField;
@@ -42,38 +34,50 @@ export interface CustomPageListQueryParams {
 
   module_key?: string;
 
-  /** Liste locale override */
+  /** Liste locale override (örn. "de") */
   locale?: string;
+  /** Backend default_locale override (örn. "tr") */
+  default_locale?: string;
 }
 
 export type CustomPageListAdminQueryParams = CustomPageListQueryParams;
-
-/**
- * Public list – is_published backend’de zaten filtreleniyor ama
- * ayrı bir alias ile semantik ayrımı koruyoruz.
- */
 export type CustomPageListPublicQueryParams = CustomPageListQueryParams;
 
 /* ------------------------------------------------------------------
- * API DTO – Backend CustomPageMerged ile birebir
+ * API DTO – Backend CustomPageMerged ile uyumlu
  * ------------------------------------------------------------------ */
-
 export interface ApiCustomPage {
   id: string;
+
   is_published: 0 | 1;
+
   featured_image: string | null;
   featured_image_asset_id: string | null;
-  created_at: string;
+
+  // ✅ parent sıralama + görseller (backend CustomPageMerged)
+  display_order: number;
+  order_num: number;
+
+  image_url: string | null;
+  storage_asset_id: string | null;
+
+  /**
+   * Not: Backend bazı ortamlarda JSON kolonu string döndürebilir.
+   * O yüzden normalizeStringArray hem array hem JSON-string destekler.
+   */
+  images: string[] | string | null;
+
+  storage_image_ids: string[] | string | null;
+
+  created_at: string; // Fastify Date -> string
   updated_at: string;
 
   category_id: string | null;
   sub_category_id: string | null;
 
-  /** categories join’inden gelen alanlar (opsiyonel) */
   category_name: string | null;
   category_slug: string | null;
 
-  /** sub_categories join’inden gelen alanlar (opsiyonel) */
   sub_category_name: string | null;
   sub_category_slug: string | null;
 
@@ -86,14 +90,12 @@ export interface ApiCustomPage {
    */
   content: string | null;
 
-  /** Kısa özet */
   summary: string | null;
 
   featured_image_alt: string | null;
   meta_title: string | null;
   meta_description: string | null;
 
-  /** Virgülle ayrılmış tag listesi (örn: "ensotek,su sogutma kuleleri") */
   tags: string | null;
 
   locale_resolved: string | null;
@@ -101,18 +103,23 @@ export interface ApiCustomPage {
 
 /* ------------------------------------------------------------------
  * FE DTO – Normalize edilmiş CustomPage
- *  - is_published → boolean
- *  - content_raw: backend JSON-string
- *  - content_html / content: düz HTML
- *  - tags_raw: backend string
- *  - tags: string[]
  * ------------------------------------------------------------------ */
-
 export interface CustomPageDto {
   id: string;
   is_published: boolean;
+
   featured_image: string | null;
   featured_image_asset_id: string | null;
+
+  // ✅ parent sıralama + görseller
+  display_order: number;
+  order_num: number;
+
+  image_url: string | null;
+  storage_asset_id: string | null;
+  images: string[];
+  storage_image_ids: string[];
+
   created_at: string;
   updated_at: string;
 
@@ -121,38 +128,24 @@ export interface CustomPageDto {
 
   category_name: string | null;
   category_slug: string | null;
+
   sub_category_name: string | null;
   sub_category_slug: string | null;
 
   title: string | null;
   slug: string | null;
 
-  /**
-   * Backend’ten gelen JSON-string ("{\"html\":\"...\"}")
-   */
   content_raw: string | null;
-
-  /**
-   * Parse edilmiş düz HTML – render ve form için kullanılacak
-   */
   content_html: string;
-
-  /**
-   * Form komponentleri için kısa alias.
-   * CustomPageForm bu alanı okuyor.
-   */
   content: string;
 
-  /** Liste kartları ve meta için kısa özet */
   summary: string | null;
 
   featured_image_alt: string | null;
   meta_title: string | null;
   meta_description: string | null;
 
-  /** Backend’ten gelen virgüllü tag string’i */
   tags_raw: string | null;
-  /** FE tarafında normalize edilmiş tag listesi */
   tags: string[];
 
   locale_resolved: string | null;
@@ -164,21 +157,16 @@ export interface CustomPageDto {
 
 type ContentJson = {
   html?: string;
-  // Diğer key'ler önemli değil, sadece html'i kullanıyoruz.
   [key: string]: unknown;
 };
 
 const unpackContent = (raw: string | null): string => {
-  if (!raw) return "";
+  if (!raw) return '';
   try {
     const parsed = JSON.parse(raw) as ContentJson;
-    if (typeof parsed.html === "string") {
-      return parsed.html;
-    }
-    // html anahtarı yoksa, direkt string’i dön
+    if (typeof parsed.html === 'string') return parsed.html;
     return raw;
   } catch {
-    // düzgün JSON değilse olduğu gibi kullan
     return raw;
   }
 };
@@ -196,16 +184,51 @@ const parseTags = (raw: string | null): string[] => {
 /**
  * API içinden ham content string'ini seç:
  * - Öncelik sırası: content → content_raw → content_html
- * - Tip güvenli kalsın diye any cast ile opsiyonel alanları da yokluyoruz
  */
 const pickApiContentRaw = (api: ApiCustomPage): string | null => {
   const anyApi = api as any;
-  return (
-    api.content ??           // beklenen alan
-    anyApi.content_raw ??    // backend farklı isimle göndermiş olabilir
-    anyApi.content_html ??   // direkt html alanı
-    null
-  );
+  return (api.content ?? anyApi.content_raw ?? anyApi.content_html ?? null) as string | null;
+};
+
+// =============================================================
+// PATCH: normalizeStringArray JSON string desteği
+// =============================================================
+const normalizeStringArray = (v: unknown): string[] => {
+  // 1) Array ise direkt
+  if (Array.isArray(v)) {
+    return v.map((x) => String(x ?? '').trim()).filter((s) => s.length > 0);
+  }
+
+  // 2) JSON string ise parse et
+  if (typeof v === 'string') {
+    const s = v.trim();
+    if (!s) return [];
+
+    // JSON array string
+    if (s.startsWith('[') && s.endsWith(']')) {
+      try {
+        const parsed = JSON.parse(s);
+        if (Array.isArray(parsed)) {
+          return parsed.map((x) => String(x ?? '').trim()).filter((t) => t.length > 0);
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    // CSV fallback (çok nadir)
+    if (s.includes(',') || s.includes(';')) {
+      return s
+        .split(/[;,]/)
+        .map((x) => x.trim())
+        .filter((t) => t.length > 0);
+    }
+
+    // tek url string
+    return [s];
+  }
+
+  return [];
 };
 
 /**
@@ -214,13 +237,27 @@ const pickApiContentRaw = (api: ApiCustomPage): string | null => {
 export const normalizeCustomPage = (api: ApiCustomPage): CustomPageDto => {
   const rawContent = pickApiContentRaw(api);
   const html = unpackContent(rawContent);
+
+  const images = normalizeStringArray(api.images);
+  const storageImageIds = normalizeStringArray(api.storage_image_ids);
+
   const tagsArray = parseTags(api.tags);
 
   return {
     id: api.id,
     is_published: toBoolFrom01(api.is_published),
+
     featured_image: api.featured_image ?? null,
     featured_image_asset_id: api.featured_image_asset_id ?? null,
+
+    display_order: Number.isFinite(Number(api.display_order)) ? Number(api.display_order) : 0,
+    order_num: Number.isFinite(Number(api.order_num)) ? Number(api.order_num) : 0,
+
+    image_url: api.image_url ?? null,
+    storage_asset_id: api.storage_asset_id ?? null,
+    images,
+    storage_image_ids: storageImageIds,
+
     created_at: String(api.created_at),
     updated_at: String(api.updated_at),
 
@@ -229,13 +266,13 @@ export const normalizeCustomPage = (api: ApiCustomPage): CustomPageDto => {
 
     category_name: api.category_name ?? null,
     category_slug: api.category_slug ?? null,
+
     sub_category_name: api.sub_category_name ?? null,
     sub_category_slug: api.sub_category_slug ?? null,
 
     title: api.title ?? null,
     slug: api.slug ?? null,
 
-    // 🔽 content tek merkezden yönetiliyor
     content_raw: rawContent,
     content_html: html,
     content: html,
@@ -253,10 +290,6 @@ export const normalizeCustomPage = (api: ApiCustomPage): CustomPageDto => {
   };
 };
 
-/**
- * Eski isimlendirme ile uyum için alias.
- * Endpoint’ler mapApiCustomPageToDto ismini kullanıyor.
- */
 export const mapApiCustomPageToDto = normalizeCustomPage;
 
 /* ------------------------------------------------------------------
@@ -264,35 +297,39 @@ export const mapApiCustomPageToDto = normalizeCustomPage;
  * Backend: UpsertCustomPageBody, PatchCustomPageBody
  * ------------------------------------------------------------------ */
 
-/** POST /admin/custom_pages */
 export interface CustomPageCreatePayload {
   // i18n zorunlu alanlar
   locale?: string;
   title: string;
   slug: string;
-  /** düz HTML – backend packContent ile {"html":"..."} yapar */
-  content: string;
+  content: string; // düz HTML – backend packContent ile {"html":"..."} yapar
 
-  /** Kısa özet */
   summary?: string | null;
 
   featured_image_alt?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
 
-  /** Virgülle ayrılmış tag listesi (örn: "ensotek,blog,yazi-1") */
   tags?: string | null;
 
   // parent alanları
   is_published?: BoolLike;
+
   featured_image?: string | null;
   featured_image_asset_id?: string | null;
 
   category_id?: string | null;
   sub_category_id?: string | null;
+
+  display_order?: number;
+  order_num?: number;
+
+  image_url?: string | null;
+  storage_asset_id?: string | null;
+  images?: string[] | null;
+  storage_image_ids?: string[] | null;
 }
 
-/** PATCH /admin/custom_pages/:id */
 export interface CustomPageUpdatePayload {
   locale?: string;
 
@@ -303,18 +340,24 @@ export interface CustomPageUpdatePayload {
   category_id?: string | null;
   sub_category_id?: string | null;
 
-  // i18n (hepsi opsiyonel)
+  // i18n
   title?: string;
   slug?: string;
   content?: string;
 
-  /** Kısa özet */
   summary?: string | null;
 
   featured_image_alt?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
 
-  /** Virgülle ayrılmış tag listesi (örn: "ensotek,blog,yazi-1") */
   tags?: string | null;
+
+  display_order?: number;
+  order_num?: number;
+
+  image_url?: string | null;
+  storage_asset_id?: string | null;
+  images?: string[] | null;
+  storage_image_ids?: string[] | null;
 }

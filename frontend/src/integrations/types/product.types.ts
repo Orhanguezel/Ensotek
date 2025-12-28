@@ -15,6 +15,8 @@ export type BoolLike =
   | "yes"
   | "no";
 
+export type ProductItemType = 'product' | 'sparepart';
+
 export type ProductSpecifications = {
   dimensions?: string;
   weight?: string;
@@ -40,6 +42,7 @@ export type ProductSubCategoryRef = {
 export type ProductDto = {
   id: string;
   locale: string;
+  item_type?: ProductItemType;
 
   title: string;
   slug: string;
@@ -83,14 +86,15 @@ export type ProductDto = {
 /* ---------- Public list / detail query tipleri ---------- */
 
 export type ProductListQueryParams = {
+  item_type?: ProductItemType;
   category_id?: string;
   sub_category_id?: string;
   is_active?: BoolLike;
   q?: string;
   limit?: number;
   offset?: number;
-  sort?: "price" | "rating" | "created_at" | "order_num";
-  order?: "asc" | "desc";
+  sort?: 'price' | 'rating' | 'created_at' | 'order_num';
+  order?: 'asc' | 'desc';
   min_price?: number;
   max_price?: number;
   locale?: string;

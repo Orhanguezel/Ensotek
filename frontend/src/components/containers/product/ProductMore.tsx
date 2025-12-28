@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductMore.tsx
-// Ensotek – More Products Section (detail page altı)
-//   - Data: products
-//   - Mevcut slug haricindeki ürünler
-//   - i18n: site_settings.ui_products
+// Ensotek – More Products Carousel (detail page altı)
+// PATTERN: NewsMore (Swiper + teamThumbHover + nameBelow)
+// - Inline style YOK
+// - i18n: useLocaleShort() + site_settings ui_products/ui_spareparts (DB) + EN fallback
+// - Route'a göre item_type: product | sparepart
 // =============================================================
 
 'use client';
@@ -13,82 +14,111 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 
+// RTK
 import { useListProductsQuery } from '@/integrations/rtk/hooks';
 import type { ProductDto } from '@/integrations/types/product.types';
 
+// helpers
 import { toCdnSrc } from '@/shared/media';
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
+// Swiper
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation } from 'swiper';
+import 'swiper/css';
+
 import FallbackCover from 'public/img/blog/3/2.jpg';
 
-const CARD_W = 480;
-const CARD_H = 320;
+const CARD_W = 640;
+const CARD_H = 420;
+
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
 
 const ProductMore: React.FC = () => {
   const router = useRouter();
-  const locale = useResolvedLocale();
+  const locale = useLocaleShort();
 
-  const { ui } = useUiSection('ui_products', locale);
+  // ✅ product vs sparepart
+  const itemType = useMemo<'product' | 'sparepart'>(() => {
+    const p = safeStr(router.pathname);
+    const a = safeStr(router.asPath);
+    if (p.startsWith('/sparepart') || a.startsWith('/sparepart')) return 'sparepart';
+    return 'product';
+  }, [router.pathname, router.asPath]);
+
+  const basePath = itemType === 'sparepart' ? '/sparepart' : '/product';
+  const uiSectionKey = itemType === 'sparepart' ? 'ui_spareparts' : 'ui_products';
+
+  const { ui } = useUiSection(uiSectionKey as any, locale as any);
 
   const moreTitle = ui(
-    'ui_products_more_title',
-    locale === 'de' ? 'Diğer Ürünler' : 'More Products',
+    itemType === 'sparepart' ? 'ui_spareparts_more_title' : 'ui_products_more_title',
+    itemType === 'sparepart' ? 'More Spare Parts' : 'More Products',
+  );
+
+  const goToItemText = ui(
+    itemType === 'sparepart' ? 'ui_spareparts_go_to_item' : 'ui_products_go_to_item',
+    itemType === 'sparepart' ? 'View spare part' : 'View product',
   );
 
   const slugParam = router.query.slug;
   const currentSlug = useMemo(
-    () => (Array.isArray(slugParam) ? slugParam[0] : slugParam) || '',
+    () => safeStr(Array.isArray(slugParam) ? slugParam[0] : slugParam),
     [slugParam],
   );
 
-  // RTK: listProducts → ProductListResponse (items + total)
   const { data, isLoading } = useListProductsQuery({
     is_active: 1,
     locale,
-    limit: 8,
-  });
+    limit: 12,
+    item_type: itemType,
+  } as any);
 
-  const productListHref = localizePath(locale, '/product');
+  const listHref = useMemo(() => localizePath(locale, basePath), [locale, basePath]);
 
   const items = useMemo(() => {
-    const list: ProductDto[] = data?.items ?? [];
+    const list: ProductDto[] = (data as any)?.items ?? [];
 
     return list
       .filter((p) => {
-        const slug = (p.slug || '').trim();
-        if (!p.is_active) return false;
+        const slug = safeStr((p as any)?.slug);
+        if (!(p as any)?.is_active) return false;
         if (!slug) return false;
         if (slug === currentSlug) return false;
         return true;
       })
-      .slice(0, 3)
+      .slice(0, 9)
       .map((p) => {
-        const slug = (p.slug || '').trim();
-        const title = (p.title || '').trim();
+        const slug = safeStr((p as any)?.slug);
+        const title = safeStr((p as any)?.title);
+        const summary = safeStr((p as any)?.summary || (p as any)?.short_description || '');
 
-        const imgRaw = (p.image_url || '').trim() || ((p.images && p.images[0]) || '').trim();
-
-        const hero = (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '';
+        const imgRaw =
+          safeStr((p as any)?.image_url) ||
+          safeStr(((p as any)?.images && (p as any)?.images[0]) || '');
 
         return {
-          id: p.id,
+          id: safeStr((p as any)?.id) || slug,
           slug,
-          title,
-          price: p.price,
-          hero,
-          alt: p.alt || title || 'product image',
+          title: title || 'Untitled',
+          summary,
+          hero: (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '',
+          alt: safeStr((p as any)?.alt) || title || 'product image',
         };
       });
   }, [data, currentSlug]);
 
-  if (!items.length && !isLoading) {
-    return null;
-  }
+  // ✅ NewsMore ile aynı davranış
+  if (!items.length && !isLoading) return null;
 
   return (
-    <section className="product__more-area pt-60 pb-90">
+    <section className="news__area pt-60 pb-90">
       <div className="container">
         {/* Başlık */}
         <div className="row mb-40">
@@ -101,46 +131,68 @@ const ProductMore: React.FC = () => {
           </div>
         </div>
 
-        {/* Liste */}
-        <div className="row" data-aos="fade-up" data-aos-delay="200">
+        {/* Carousel */}
+        <Swiper
+          modules={[Autoplay, Navigation]}
+          spaceBetween={24}
+          slidesPerView={3}
+          autoplay={{ delay: 4500, disableOnInteraction: false }}
+          navigation
+          breakpoints={{
+            0: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1200: { slidesPerView: 3 },
+          }}
+        >
           {items.map((p) => {
             const href = p.slug
-              ? localizePath(locale, `/product/${encodeURIComponent(p.slug)}`)
-              : productListHref;
+              ? localizePath(locale, `${basePath}/${encodeURIComponent(p.slug)}`)
+              : listHref;
 
             return (
-              <div className="col-xl-4 col-lg-4 col-md-6" key={p.id}>
-                <div className="product__item-3 mb-30">
-                  <div className="product__thumb-3 w-img">
-                    <Image
-                      src={(p.hero as any) || (FallbackCover as any)}
-                      alt={p.alt}
-                      width={CARD_W}
-                      height={CARD_H}
-                      style={{ width: '100%', height: 'auto' }}
-                      loading="lazy"
-                    />
+              <SwiperSlide key={p.id}>
+                <div className="team__item teamItem--nameBelow">
+                  <div className="team__thumb teamThumbHover">
+                    <Link href={href}>
+                      <Image
+                        src={(p.hero as any) || (FallbackCover as any)}
+                        alt={p.alt}
+                        width={CARD_W}
+                        height={CARD_H}
+                        loading="lazy"
+                      />
+                    </Link>
+
+                    <div className="teamThumbHover__overlay">
+                      <div className="teamThumbHover__box">
+                        <div className="teamThumbHover__role">{p.title}</div>
+                        {p.summary ? <div className="teamThumbHover__note">{p.summary}</div> : null}
+                      </div>
+                    </div>
                   </div>
-                  <div className="product__content-3">
-                    <h3>
+
+                  <div className="team__content teamContent--nameOnly">
+                    <h3 className="teamNameOnly">
                       <Link href={href}>{p.title}</Link>
                     </h3>
-                    <p className="product__meta" style={{ marginTop: 6 }}></p>
+
                     <Link href={href} className="link-more">
-                      {locale === 'de' ? 'Ürüne git' : 'View product'} →
+                      {goToItemText} →
                     </Link>
                   </div>
                 </div>
-              </div>
+              </SwiperSlide>
             );
           })}
+        </Swiper>
 
-          {isLoading && (
+        {isLoading ? (
+          <div className="row mt-20">
             <div className="col-12">
-              <div className="skeleton-line" style={{ height: 16 }} aria-hidden />
+              <div className="skeleton-line ens-skel-16" aria-hidden />
             </div>
-          )}
-        </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );

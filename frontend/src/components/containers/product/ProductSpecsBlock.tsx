@@ -1,66 +1,77 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductSpecsBlock.tsx
-// Ensotek – Product Specs Block (Teknik Özellikler)
-//   - İçerik yoksa ve loading değilse hiç render edilmez
+// Ensotek – Product Specs Block (Technical Specifications)
+// - FAQ ile aynı wrapper/başlık/spacing (bd-faq__wrapper-2 + product__detail-subtitle)
+// - Inline style YOK
+// - İçerik yoksa ve loading değilse render YOK
+// - Liste görünümü: FAQ accordion item'larının border/padding ritmine benzer
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
+import React, { useMemo } from 'react';
 
 export interface ProductSpecEntry {
-    key: string;
-    label: string;
-    value: string;
+  key: string;
+  label: string;
+  value: string;
 }
 
 interface ProductSpecsBlockProps {
-    title: string;
-    entries: ProductSpecEntry[];
-    isLoading: boolean;
+  title: string;
+  entries: ProductSpecEntry[];
+  isLoading: boolean;
 }
 
-const ProductSpecsBlock: React.FC<ProductSpecsBlockProps> = ({
-    title,
-    entries,
-    isLoading,
-}) => {
-    const hasEntries = entries.length > 0;
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
 
-    // Ne yükleniyor ne de spesifikasyon var → hiç render etme
-    if (!isLoading && !hasEntries) {
-        return null;
-    }
+const ProductSpecsBlock: React.FC<ProductSpecsBlockProps> = ({ title, entries, isLoading }) => {
+  // ✅ Hook her render’da çağrılır (koşul yok)
+  const list = useMemo(() => {
+    const normalized = (entries ?? [])
+      .map((e) => {
+        const label = safeStr(e?.label);
+        const value = safeStr(e?.value);
+        const key = safeStr(e?.key) || `${label}-${value}`;
+        return { key, label, value };
+      })
+      .filter((x) => x.key && (x.label || x.value));
 
-    return (
-        <div
-            className="product__detail-specs card p-3 h-100"
-            style={{ overflow: "hidden" }}
-        >
-            <h3 className="product__detail-subtitle mb-10">{title}</h3>
+    // label boş ama value doluysa label yerine key gösterme; boş label’ı gizleyeceğiz
+    return normalized;
+  }, [entries]);
 
-            {isLoading && !hasEntries && (
-                <div className="skeleton-line" aria-hidden />
-            )}
+  const hasEntries = list.length > 0;
 
-            {hasEntries && (
-                <ul
-                    className="product__spec-list"
-                    style={{
-                        paddingLeft: "1.2rem",
-                        marginBottom: 0,
-                        overflowWrap: "break-word",
-                    }}
-                >
-                    {entries.map((s) => (
-                        <li key={s.key}>
-                            <strong>{s.label}:</strong> {s.value}
-                        </li>
-                    ))}
-                </ul>
-            )}
+  // ✅ İçerik yoksa ve loading değilse: render yok
+  if (!isLoading && !hasEntries) return null;
+
+  return (
+    <div className="product__detail-specs bd-faq__wrapper-2 ens-specs h-100">
+      <h3 className="product__detail-subtitle mb-10">{title}</h3>
+
+      {isLoading && !hasEntries ? <div className="skeleton-line" aria-hidden /> : null}
+
+      {hasEntries ? (
+        <div className="ens-specs__list" role="list">
+          {list.map((s, idx) => (
+            <div
+              key={s.key || idx}
+              className={`ens-specs__row ${idx === list.length - 1 ? 'is-last' : ''}`}
+              role="listitem"
+            >
+              <div className="ens-specs__label">{s.label || '—'}</div>
+              <div className="ens-specs__value">{s.value || '—'}</div>
+            </div>
+          ))}
         </div>
-    );
+      ) : null}
+    </div>
+  );
 };
 
 export default ProductSpecsBlock;

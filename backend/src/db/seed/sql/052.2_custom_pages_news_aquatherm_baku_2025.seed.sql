@@ -1,77 +1,148 @@
 -- =============================================================
--- FILE: 052.2_custom_pages_news_aquatherm_baku_2025.seed.sql
--- NEWS – custom_pages + custom_pages_i18n
--- Yeni haber: “Aquatherm Bakü Fuarını Başarıyla Tamamladık!”
--- Diller: TR / EN / DE
+-- FILE: 052.2_custom_pages_news_aquatherm_baku_2025.seed.sql  (FINAL / SCHEMA-OK)
+-- Ensotek – NEWS Custom Page Seed (TR/EN/DE)
+-- Haber: “Aquatherm Bakü Fuarını Başarıyla Tamamladık!”
+-- ✅ module_key artık PARENT: custom_pages.module_key = 'news'
+-- ✅ i18n içinde module_key YOK
+-- ✅ multi-image gallery (images JSON_ARRAY)
+-- ✅ deterministic i18n IDs
+-- ✅ NO block comments
 -- =============================================================
 
 SET NAMES utf8mb4;
+SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
-/* KATEGORİ ID’LERİ (011 & 012 ile hizalı) */
-SET @CAT_NEWS_GENERAL  := 'aaaa2001-1111-4111-8111-aaaaaaaa2001'; -- GENEL HABERLER
-SET @CAT_NEWS_DUYS     := 'aaaa2003-1111-4111-8111-aaaaaaaa2003'; -- DUYURULAR
-SET @CAT_NEWS_PRESS    := 'aaaa2004-1111-4111-8111-aaaaaaaa2004'; -- BASINDA ENSOTEK
+-- -------------------------------------------------------------
+-- CATEGORY / SUB CATEGORY
+-- -------------------------------------------------------------
+SET @CAT_NEWS_GENERAL  := 'aaaa2001-1111-4111-8111-aaaaaaaa2001';
+SET @CAT_NEWS_DUYS     := 'aaaa2003-1111-4111-8111-aaaaaaaa2003';
+SET @CAT_NEWS_PRESS    := 'aaaa2004-1111-4111-8111-aaaaaaaa2004';
+SET @SUB_NEWS_GENERAL_ANN := 'bbbb2001-1111-4111-8111-bbbbbbbb2001';
 
-/* ALT KATEGORİLER (012_catalog_subcategories.sql) */
-SET @SUB_NEWS_GENERAL_ANN  := 'bbbb2001-1111-4111-8111-bbbbbbbb2001'; -- Duyurular (genel)
-
-/* SABİT PAGE ID (deterministik) */
+-- -------------------------------------------------------------
+-- PAGE ID (deterministik)
+-- -------------------------------------------------------------
 SET @NEWS_AQUATHERM_BAKU_2025 := '22220004-2222-4222-8222-222222220004';
 
-/* FEATURED IMAGE (Cloudinary) – ilk görseli featured yaptık */
+-- -------------------------------------------------------------
+-- MODULE KEY (PARENT)
+-- -------------------------------------------------------------
+SET @MODULE_KEY_NEWS := 'news';
+
+-- -------------------------------------------------------------
+-- FEATURED + GALLERY IMAGES (random)
+-- -------------------------------------------------------------
 SET @IMG_NEWS_AQUATHERM_BAKU_2025 :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/img-20241017-wa0040-1752958289686-74069766.webp';
 
+SET @IMG_NEWS_AQUATHERM_BAKU_2025_2 :=
+  'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1400&q=80';
+SET @IMG_NEWS_AQUATHERM_BAKU_2025_3 :=
+  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80';
+SET @IMG_NEWS_AQUATHERM_BAKU_2025_4 :=
+  'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1400&q=80';
+SET @IMG_NEWS_AQUATHERM_BAKU_2025_5 :=
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80';
+
+-- -------------------------------------------------------------
+-- I18N IDS (deterministik)
+-- -------------------------------------------------------------
+SET @I18N_NEWS_AQUATHERM_BAKU_2025_TR := '66662004-0001-4001-8001-666666662004';
+SET @I18N_NEWS_AQUATHERM_BAKU_2025_EN := '66662004-0002-4002-8002-666666662004';
+SET @I18N_NEWS_AQUATHERM_BAKU_2025_DE := '66662004-0003-4003-8003-666666662004';
+
+-- -------------------------------------------------------------
+-- TIMESTAMPS
+-- -------------------------------------------------------------
+SET @DT_CREATED := '2025-07-19 17:20:06.428';
+SET @DT_UPDATED := '2025-07-19 20:51:33.294';
+
 -- -------------------------------------------------------------
 -- PARENT UPSERT (custom_pages)
+-- ✅ module_key BURADA
 -- -------------------------------------------------------------
 INSERT INTO `custom_pages`
-  (`id`, `is_published`, `display_order`,
-   `featured_image`, `featured_image_asset_id`,
-   `category_id`, `sub_category_id`,
-   `created_at`, `updated_at`)
+  (`id`,
+   `module_key`,
+   `is_published`,
+   `display_order`,
+   `order_num`,
+   `featured_image`,
+   `featured_image_asset_id`,
+   `image_url`,
+   `storage_asset_id`,
+   `images`,
+   `storage_image_ids`,
+   `category_id`,
+   `sub_category_id`,
+   `created_at`,
+   `updated_at`)
 VALUES
   (
     @NEWS_AQUATHERM_BAKU_2025,
+    @MODULE_KEY_NEWS,
     1,
+    103,
     103,
     @IMG_NEWS_AQUATHERM_BAKU_2025,
     NULL,
+    @IMG_NEWS_AQUATHERM_BAKU_2025,
+    NULL,
+    JSON_ARRAY(
+      @IMG_NEWS_AQUATHERM_BAKU_2025,
+      @IMG_NEWS_AQUATHERM_BAKU_2025_2,
+      @IMG_NEWS_AQUATHERM_BAKU_2025_3,
+      @IMG_NEWS_AQUATHERM_BAKU_2025_4,
+      @IMG_NEWS_AQUATHERM_BAKU_2025_5
+    ),
+    JSON_ARRAY(),
     @CAT_NEWS_DUYS,
     @SUB_NEWS_GENERAL_ANN,
-    '2025-07-19 17:20:06.428',
-    '2025-07-19 20:51:33.294'
+    @DT_CREATED,
+    @DT_UPDATED
   )
 ON DUPLICATE KEY UPDATE
-  `is_published`    = VALUES(`is_published`),
-  `display_order`   = VALUES(`display_order`),
-  `category_id`     = VALUES(`category_id`),
-  `sub_category_id` = VALUES(`sub_category_id`),
-  `featured_image`  = VALUES(`featured_image`),
-  `updated_at`      = VALUES(`updated_at`);
+  `module_key`              = VALUES(`module_key`),
+  `is_published`            = VALUES(`is_published`),
+  `display_order`           = VALUES(`display_order`),
+  `order_num`               = VALUES(`order_num`),
+  `category_id`             = VALUES(`category_id`),
+  `sub_category_id`         = VALUES(`sub_category_id`),
+  `featured_image`          = VALUES(`featured_image`),
+  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
+  `image_url`               = VALUES(`image_url`),
+  `storage_asset_id`        = VALUES(`storage_asset_id`),
+  `images`                  = VALUES(`images`),
+  `storage_image_ids`       = VALUES(`storage_image_ids`),
+  `updated_at`              = VALUES(`updated_at`);
 
--- =============================================================
--- I18N – @NEWS_AQUATHERM_BAKU_2025 (TR/EN/DE)
--- content: JSON_OBJECT('html', '...') formatı
--- tags: CSV string
--- =============================================================
+-- -------------------------------------------------------------
+-- I18N UPSERT (custom_pages_i18n)
+-- ✅ module_key yok
+-- -------------------------------------------------------------
 INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
+  (`id`,
+   `page_id`,
+   `locale`,
+   `title`,
+   `slug`,
+   `content`,
    `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
+   `featured_image_alt`,
+   `meta_title`,
+   `meta_description`,
    `tags`,
-   `created_at`, `updated_at`)
+   `created_at`,
+   `updated_at`)
 VALUES
 
--- -------------------------------------------------------------
 -- TR
--- -------------------------------------------------------------
 (
-  UUID(),
+  @I18N_NEWS_AQUATHERM_BAKU_2025_TR,
   @NEWS_AQUATHERM_BAKU_2025,
   'tr',
   'Aquatherm Bakü Fuarını Başarıyla Tamamladık!',
@@ -79,31 +150,66 @@ VALUES
   JSON_OBJECT(
     'html',
     CONCAT(
-      '<p>Aquatherm Bakü 2025 Fuarı’nı başarıyla tamamlamanın mutluluğunu yaşıyoruz! ',
-      'Fuarda, sektöre sunduğumuz yenilikçi ürün ve çözümlerimiz büyük ilgi gördü. ',
-      'Bakü''de ülkemizi ve şirketimizi temsil ederek, hem yeni iş bağlantıları kurduk hem de mevcut müşterilerimizle ',
-      'bir araya gelme fırsatı yakaladık.</p>',
-      '<p>Fuarda standımızı ziyaret eden tüm misafirlerimize, değerli müşterilerimize ve Bakü’deki temsilcilerimize teşekkür ediyoruz. ',
-      'ENSOTEK olarak, uluslararası platformlarda sektörümüzü ve ülkemizi en iyi şekilde temsil etmeye devam edeceğiz.</p>',
-      '<p>Daha fazla bilgi için ',
-      '<a href="https://www.aquatherm.az/" target="_blank" rel="noopener noreferrer">Aquatherm Bakü Fuarı web sitesi</a> ',
-      'adresini ziyaret edebilirsiniz.</p>'
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="max-w-4xl mx-auto">',
+          '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">Aquatherm Bakü Fuarını Başarıyla Tamamladık!</h1>',
+          '<p class="text-slate-700 mb-5">',
+            'ENSOTEK olarak Aquatherm Bakü 2025 Fuarı’nı başarıyla tamamladık. ',
+            'Fuarda yenilikçi çözümlerimiz yoğun ilgi gördü; teknik toplantılar gerçekleştirdik ve farklı sektörlerden profesyonellerle bir araya geldik.',
+          '</p>',
+          '<p class="text-slate-700 mb-5">',
+            'Bakü’de hem yeni iş bağlantıları kurduk hem de mevcut müşterilerimizle proje süreçlerine ilişkin değerlendirmeler yapma fırsatı yakaladık. ',
+            'Bölgesel ihtiyaçlara uygun çözümlerimizi sahada anlatmak, bizim için önemli bir kazanım oldu.',
+          '</p>',
+
+          '<div class="grid md:grid-cols-2 gap-6 mb-6">',
+            '<div class="bg-white border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Fuar Notları</h2>',
+              '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
+                '<li>Yeni potansiyel proje görüşmeleri ve keşif planlamaları</li>',
+                '<li>Ürün performansı ve verimlilik odağında teknik anlatımlar</li>',
+                '<li>Çözüm odaklı yaklaşım: tasarım, üretim ve servis süreçleri</li>',
+                '<li>Bölgesel partnerlikler için stratejik adımlar</li>',
+              '</ul>',
+            '</div>',
+            '<div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Sonraki Adımlar</h2>',
+              '<p class="text-slate-700">',
+                'Fuar sonrası, görüşmelerimizi teknik doküman paylaşımı ve teklif sürecine taşıyoruz. ',
+                'Hedefimiz; sahaya uygun, ölçülebilir performans çıktıları sağlayan sistemleri hızlıca devreye almak.',
+              '</p>',
+            '</div>',
+          '</div>',
+
+          '<div class="bg-slate-900 text-white rounded-2xl p-6 mb-6">',
+            '<h2 class="text-xl font-semibold mb-2">Teşekkürler</h2>',
+            '<p class="text-white/90">',
+              'Standımızı ziyaret eden tüm misafirlerimize, değerli müşterilerimize ve Bakü’deki temsilcilerimize teşekkür ederiz. ',
+              'ENSOTEK olarak uluslararası platformlarda ülkemizi ve sektörümüzü en iyi şekilde temsil etmeye devam edeceğiz.',
+            '</p>',
+          '</div>',
+
+          '<p class="text-slate-700">',
+            'Daha fazla bilgi için ',
+            '<a class="text-slate-900 underline" href="https://www.aquatherm.az/" target="_blank" rel="noopener noreferrer">Aquatherm Bakü Fuarı web sitesi</a>',
+            ' adresini ziyaret edebilirsiniz.',
+          '</p>',
+        '</div>',
+      '</section>'
     )
   ),
-  'Aquatherm Bakü 2025 Fuarı''nda büyük ilgiyle karşılandık. Standımızı ziyaret eden değerli müşterilerimize ve Bakü''deki temsilcilerimize teşekkür ederiz.',
+  'Aquatherm Bakü 2025 Fuarı’nda büyük ilgiyle karşılandık. Standımızı ziyaret eden değerli müşterilerimize ve Bakü’deki temsilcilerimize teşekkür ederiz.',
   'Aquatherm Bakü 2025 fuarında ENSOTEK standı ve ziyaretçiler',
   'Aquatherm Bakü 2025 Fuarını Başarıyla Tamamladık! | Ensotek',
-  'ENSOTEK, Aquatherm Bakü 2025 Fuarı’ndaki başarılı katılımını tamamladı. Standımızda yenilikçi ürün ve çözümlerimizi tanıttık; yeni iş bağlantıları kurduk ve mevcut müşterilerimizle buluştuk.',
+  'ENSOTEK, Aquatherm Bakü 2025 Fuarı’ndaki başarılı katılımını tamamladı. Yenilikçi çözümlerimizi tanıttık; yeni bağlantılar kurduk ve mevcut müşterilerimizle buluştuk.',
   'ensotek,fuar,aquatherm,baku,bakü,etkinlik,uluslararasi,duyuru',
-  '2025-07-19 17:20:06.428',
-  '2025-07-19 20:51:33.294'
+  @DT_CREATED,
+  @DT_UPDATED
 ),
 
--- -------------------------------------------------------------
 -- EN
--- -------------------------------------------------------------
 (
-  UUID(),
+  @I18N_NEWS_AQUATHERM_BAKU_2025_EN,
   @NEWS_AQUATHERM_BAKU_2025,
   'en',
   'We Successfully Completed the Aquatherm Baku Fair!',
@@ -111,30 +217,65 @@ VALUES
   JSON_OBJECT(
     'html',
     CONCAT(
-      '<p>We are pleased to announce the successful completion of the Aquatherm Baku 2025 Fair! ',
-      'Our stand attracted significant attention with our innovative products and solutions. ',
-      'Representing our country and company in Baku, we established new business connections and had the opportunity ',
-      'to meet our existing clients.</p>',
-      '<p>We would like to thank all our guests, valued customers, and our representatives in Baku who visited our stand. ',
-      'As ENSOTEK, we will continue to represent our industry and country on international platforms in the best way possible.</p>',
-      '<p>For more information, please visit the ',
-      '<a href="https://www.aquatherm.az/" target="_blank" rel="noopener noreferrer">Aquatherm Baku Fair website</a>.</p>'
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="max-w-4xl mx-auto">',
+          '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">We Successfully Completed the Aquatherm Baku Fair!</h1>',
+          '<p class="text-slate-700 mb-5">',
+            'We are pleased to announce the successful completion of the Aquatherm Baku 2025 Fair. ',
+            'Our innovative solutions attracted strong interest, and we held technical meetings with industry professionals throughout the event.',
+          '</p>',
+          '<p class="text-slate-700 mb-5">',
+            'In Baku, we built new business connections and also had the opportunity to meet existing clients to review ongoing and upcoming projects. ',
+            'Sharing our solutions on the ground and discussing regional requirements was a valuable outcome for our team.',
+          '</p>',
+
+          '<div class="grid md:grid-cols-2 gap-6 mb-6">',
+            '<div class="bg-white border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Key Takeaways</h2>',
+              '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
+                '<li>New project discussions and site-assessment planning</li>',
+                '<li>Technical briefings on performance and efficiency</li>',
+                '<li>End-to-end approach: design, manufacturing, and service</li>',
+                '<li>Strategic steps for regional partnerships</li>',
+              '</ul>',
+            '</div>',
+            '<div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Next Steps</h2>',
+              '<p class="text-slate-700">',
+                'After the fair, we are moving discussions into technical document sharing and quotation phases. ',
+                'Our goal is to deliver site-ready systems with measurable performance outcomes—quickly and reliably.',
+              '</p>',
+            '</div>',
+          '</div>',
+
+          '<div class="bg-slate-900 text-white rounded-2xl p-6 mb-6">',
+            '<h2 class="text-xl font-semibold mb-2">Thank You</h2>',
+            '<p class="text-white/90">',
+              'We would like to thank all guests, valued customers, and our representatives in Baku for visiting our stand. ',
+              'ENSOTEK will continue representing our industry on international platforms in the best possible way.',
+            '</p>',
+          '</div>',
+
+          '<p class="text-slate-700">',
+            'For more information, please visit the ',
+            '<a class="text-slate-900 underline" href="https://www.aquatherm.az/" target="_blank" rel="noopener noreferrer">Aquatherm Baku Fair website</a>.',
+          '</p>',
+        '</div>',
+      '</section>'
     )
   ),
   'We received great interest at the Aquatherm Baku 2025 Fair. We thank our valued customers and representatives in Baku who visited our stand.',
   'ENSOTEK stand at Aquatherm Baku 2025 with visitors',
   'Aquatherm Baku 2025: Successfully Completed | Ensotek',
-  'ENSOTEK successfully completed the Aquatherm Baku 2025 Fair, presenting innovative products and solutions, building new business connections, and meeting with existing clients. Visit the official fair website for details.',
+  'ENSOTEK successfully completed the Aquatherm Baku 2025 Fair—presenting innovative solutions, building new connections, and meeting with existing clients to review projects and regional needs.',
   'ensotek,fair,aquatherm,baku,event,international,announcement',
-  '2025-07-19 17:20:06.428',
-  '2025-07-19 20:51:33.294'
+  @DT_CREATED,
+  @DT_UPDATED
 ),
 
--- -------------------------------------------------------------
 -- DE
--- -------------------------------------------------------------
 (
-  UUID(),
+  @I18N_NEWS_AQUATHERM_BAKU_2025_DE,
   @NEWS_AQUATHERM_BAKU_2025,
   'de',
   'Wir haben die Aquatherm Baku Messe erfolgreich abgeschlossen!',
@@ -142,25 +283,61 @@ VALUES
   JSON_OBJECT(
     'html',
     CONCAT(
-      '<p>Wir freuen uns, die erfolgreiche Teilnahme an der Aquatherm Baku 2025 Messe bekannt zu geben! ',
-      'Unser Stand erregte mit unseren innovativen Produkten und Lösungen großes Interesse. ',
-      'In Baku haben wir unser Land und unser Unternehmen vertreten, neue Geschäftskontakte geknüpft und ',
-      'bestehende Kunden getroffen.</p>',
-      '<p>Wir danken allen Gästen, unseren geschätzten Kunden und unseren Vertretern in Baku für ihren Besuch an unserem Stand. ',
-      'Als ENSOTEK werden wir unsere Branche und unser Land weiterhin bestmöglich auf internationalen Plattformen repräsentieren.</p>',
-      '<p>Weitere Informationen finden Sie auf der ',
-      '<a href="https://www.aquatherm.az/" target="_blank" rel="noopener noreferrer">Aquatherm Baku Messe-Website</a>.</p>'
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="max-w-4xl mx-auto">',
+          '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">Wir haben die Aquatherm Baku Messe erfolgreich abgeschlossen!</h1>',
+          '<p class="text-slate-700 mb-5">',
+            'Wir freuen uns, die erfolgreiche Teilnahme an der Aquatherm Baku 2025 Messe bekannt zu geben. ',
+            'Unsere innovativen Lösungen stießen auf großes Interesse, und wir führten während der Veranstaltung zahlreiche technische Gespräche.',
+          '</p>',
+          '<p class="text-slate-700 mb-5">',
+            'In Baku knüpften wir neue Geschäftskontakte und trafen bestehende Kunden, um laufende und geplante Projekte zu besprechen. ',
+            'Der Austausch zu regionalen Anforderungen und die Vorstellung unserer Lösungen vor Ort waren ein wichtiger Mehrwert.',
+          '</p>',
+
+          '<div class="grid md:grid-cols-2 gap-6 mb-6">',
+            '<div class="bg-white border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Wichtige Erkenntnisse</h2>',
+              '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
+                '<li>Neue Projektgespräche und Terminplanung für Standortanalysen</li>',
+                '<li>Technische Briefings zu Leistung und Effizienz</li>',
+                '<li>End-to-End Ansatz: Auslegung, Produktion und Service</li>',
+                '<li>Strategische Schritte für regionale Partnerschaften</li>',
+              '</ul>',
+            '</div>',
+            '<div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Nächste Schritte</h2>',
+              '<p class="text-slate-700">',
+                'Nach der Messe überführen wir die Gespräche in den Austausch technischer Unterlagen und Angebotsphasen. ',
+                'Ziel ist die schnelle Bereitstellung standortgerechter Systeme mit messbaren Leistungskennzahlen.',
+              '</p>',
+            '</div>',
+          '</div>',
+
+          '<div class="bg-slate-900 text-white rounded-2xl p-6 mb-6">',
+            '<h2 class="text-xl font-semibold mb-2">Danke</h2>',
+            '<p class="text-white/90">',
+              'Wir danken allen Gästen, unseren Kunden und unseren Vertretern in Baku für ihren Besuch. ',
+              'Als ENSOTEK werden wir unsere Branche weiterhin bestmöglich auf internationalen Plattformen repräsentieren.',
+            '</p>',
+          '</div>',
+
+          '<p class="text-slate-700">',
+            'Weitere Informationen finden Sie auf der ',
+            '<a class="text-slate-900 underline" href="https://www.aquatherm.az/" target="_blank" rel="noopener noreferrer">Aquatherm Baku Messe-Website</a>.',
+          '</p>',
+        '</div>',
+      '</section>'
     )
   ),
-  'Wir wurden auf der Aquatherm Baku 2025 Messe mit großem Interesse empfangen. Wir danken unseren geschätzten Kunden und Vertretern in Baku, die unseren Stand besucht haben.',
+  'Wir wurden auf der Aquatherm Baku 2025 Messe mit großem Interesse empfangen. Wir danken allen, die unseren Stand besucht haben.',
   'ENSOTEK Messestand auf der Aquatherm Baku 2025',
   'Aquatherm Baku 2025: Erfolgreich abgeschlossen | Ensotek',
-  'ENSOTEK hat die Aquatherm Baku 2025 Messe erfolgreich abgeschlossen. Wir präsentierten innovative Produkte und Lösungen, knüpften neue Kontakte und trafen bestehende Kunden. Weitere Informationen auf der offiziellen Website.',
-  'ensotek,messe,aquatherm,baku,veranstaltung,international,ankündigung',
-  '2025-07-19 17:20:06.428',
-  '2025-07-19 20:51:33.294'
+  'ENSOTEK hat die Aquatherm Baku 2025 Messe erfolgreich abgeschlossen. Wir präsentierten innovative Lösungen, knüpften Kontakte und trafen bestehende Kunden zur Projektabstimmung.',
+  'ensotek,messe,aquatherm,baku,veranstaltung,international,ankuendigung',
+  @DT_CREATED,
+  @DT_UPDATED
 )
-
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),

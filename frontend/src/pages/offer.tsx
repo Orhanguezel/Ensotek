@@ -1,7 +1,8 @@
 // =============================================================
-// FILE: src/pages/offer/index.tsx
-// Ensotek – Offer Page (Public) + SEO (HOOK-SAFE)
+// FILE: src/pages/offer.tsx
+// Ensotek – Offer Page (Public) + SEO (HOOK-SAFE) [FINAL]
 //   - Route: /offer
+//   - i18n: useLocaleShort() + site_settings.ui_offer
 //   - SEO: site_settings seo|site_seo fallback + ui_offer overrides
 //   - Map: site_settings.contact_map (config JSON)
 //   - ✅ Canonical + og:url tek kaynak: _document (SSR)
@@ -17,7 +18,7 @@ import OfferPageContainer from '@/components/containers/offer/OfferPage';
 import ContactMap from '@/components/containers/contact/ContactMap';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -27,98 +28,81 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 // data
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
+}
 
 const OfferPage: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_offer', locale as any);
 
-  const { ui } = useUiSection('ui_offer', locale);
+  const t = useMemo(
+    () => (key: string, fallback: string) => safeStr(ui(key, fallback)) || fallback,
+    [ui],
+  );
 
   // Banner/UI title
-  const bannerTitle = useMemo(
-    () => ui('ui_offer_page_title', locale === 'de' ? 'Teklif Talep Formu' : 'Request an Offer'),
-    [ui, locale],
-  );
+  const bannerTitle = useMemo(() => t('ui_offer_page_title', 'Request an Offer'), [t]);
 
   // ======================
   // Map config (site_settings.contact_map)
   // ======================
-  const { data: mapSetting } = useGetSiteSettingByKeyQuery({
-    key: 'contact_map',
-    locale,
-  });
+  const { data: mapSetting } = useGetSiteSettingByKeyQuery({ key: 'contact_map', locale } as any);
 
   const mapConfig = useMemo(() => {
-    // Beklenen örnek:
-    // { provider:'google'|'osm', query:'Musterstr. 10, 10115 Berlin', lat:52.52, lng:13.405,
-    //   zoom:14, embedUrl:'...', height:420, title:'Ensotek Office' }
-    const raw = (mapSetting?.value ?? null) as any;
-    const cfg = asObj(raw) ?? {};
-
-    // minimum güvenli fallback (config yoksa ContactMap kendi fallback’ını kullanabilir)
-    return cfg;
-  }, [mapSetting?.value]);
+    const raw = (mapSetting as any)?.value ?? mapSetting ?? null;
+    return asObj(raw) ?? {};
+  }, [mapSetting]);
 
   // ======================
   // Global SEO settings (seo -> site_seo fallback)
   // ======================
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: 'seo',
-    locale,
-  });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: 'site_seo',
-    locale,
-  });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale } as any);
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw =
+      (seoPrimary as any)?.value ?? (seoFallback as any)?.value ?? seoPrimary ?? seoFallback;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary, seoFallback]);
 
   // ======================
   // SEO fields (page-level)
   // ======================
   const pageTitleRaw = useMemo(() => {
-    // ui_offer_meta_title / ui_offer_meta_description opsiyonel
-    return String(ui('ui_offer_meta_title', String(bannerTitle))).trim();
-  }, [ui, bannerTitle]);
+    const uiTitle = t('ui_offer_meta_title', '');
+    return uiTitle || bannerTitle || 'Request an Offer';
+  }, [t, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
-    const descFromUi = String(ui('ui_offer_meta_description', '')).trim();
-    return descFromUi || String(seo?.description ?? '').trim() || '';
-  }, [ui, seo]);
+    const uiDesc = t('ui_offer_meta_description', '');
+    const seoDesc = safeStr((seo as any)?.description);
+    return uiDesc || seoDesc || '';
+  }, [t, seo]);
 
-  const seoSiteName = useMemo(() => String(seo?.site_name ?? '').trim() || 'Ensotek', [seo]);
-
+  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
   const titleTemplate = useMemo(
-    () => String(seo?.title_template ?? '').trim() || '%s | Ensotek',
+    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
     [seo],
   );
 
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
+    const composed = titleTemplate.includes('%s')
       ? titleTemplate.replace('%s', pageTitleRaw)
       : pageTitleRaw;
-    return String(t).trim();
+    return safeStr(composed);
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-    return fallback || absUrl('/favicon.ico');
+    return fallback || absUrl('/favicon.svg');
   }, [seo]);
 
   const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
 
     // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
     return buildMeta({
@@ -127,9 +111,10 @@ const OfferPage: React.FC = () => {
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
+
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: safeStr((tw as any).site) || undefined,
+      twitterCreator: safeStr((tw as any).creator) || undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
@@ -150,8 +135,8 @@ const OfferPage: React.FC = () => {
       </Head>
 
       <Banner title={bannerTitle} />
-      <OfferPageContainer locale={locale} />
-      <ContactMap config={mapConfig} locale={locale} />
+      <OfferPageContainer locale={String(locale || '')} />
+      <ContactMap config={mapConfig} locale={String(locale || '')} />
     </>
   );
 };

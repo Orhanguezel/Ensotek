@@ -20,8 +20,29 @@ import { buildPublicUrl } from '@/modules/storage/_util';
 // ✅ single source locale helpers
 import { getEffectiveLocale, getLocalesForCreate, normalizeLocale } from './i18n';
 
-/* ----------------- helpers ----------------- */
+/* ----------------- types ----------------- */
+type ItemType = 'product' | 'sparepart';
 
+type AdminListQuery = {
+  q?: string;
+  category_id?: string;
+  sub_category_id?: string;
+  locale?: string;
+  is_active?: string | number | boolean;
+  item_type?: ItemType;
+  limit?: string | number;
+  offset?: string | number;
+  sort?: 'order_num' | 'price' | 'rating' | 'created_at';
+  order?: 'asc' | 'desc';
+};
+
+const normalizeItemType = (raw?: unknown, fallback: ItemType = 'product'): ItemType => {
+  if (raw === 'sparepart') return 'sparepart';
+  if (raw === 'product') return 'product';
+  return fallback;
+};
+
+/* ----------------- helpers ----------------- */
 const toNum = (x: any) =>
   x === null || x === undefined ? x : Number.isNaN(Number(x)) ? x : Number(x);
 
@@ -29,49 +50,37 @@ function normalizeProduct(row: any) {
   if (!row) return row;
   const p: any = { ...row };
 
-  // sayısal
   p.price = toNum(p.price);
   p.rating = toNum(p.rating);
   p.review_count = toNum(p.review_count) ?? 0;
   p.stock_quantity = toNum(p.stock_quantity) ?? 0;
 
-  // JSON kolonları string geliyorsa parse et
   if (typeof p.images === 'string') {
     try {
       p.images = JSON.parse(p.images);
-    } catch {
-      /* noop */
-    }
+    } catch {}
   }
   if (!Array.isArray(p.images)) p.images = [];
 
   if (typeof p.tags === 'string') {
     try {
       p.tags = JSON.parse(p.tags);
-    } catch {
-      /* noop */
-    }
+    } catch {}
   }
   if (!Array.isArray(p.tags)) p.tags = [];
 
   if (typeof p.specifications === 'string') {
     try {
       p.specifications = JSON.parse(p.specifications);
-    } catch {
-      /* noop */
-    }
+    } catch {}
   }
 
   if (typeof p.storage_image_ids === 'string') {
     try {
       p.storage_image_ids = JSON.parse(p.storage_image_ids);
-    } catch {
-      /* noop */
-    }
+    } catch {}
   }
-  if (!Array.isArray(p.storage_image_ids)) {
-    p.storage_image_ids = [];
-  }
+  if (!Array.isArray(p.storage_image_ids)) p.storage_image_ids = [];
 
   return p;
 }
@@ -99,27 +108,18 @@ async function urlsForAssets(ids: string[]) {
 
 /**
  * GET /admin/products
- *  ?q=&category_id=&sub_category_id=&locale=&is_active=&limit=&offset=&sort=&order=
- *
- * products + product_i18n join (locale bazlı)
+ *  ?q=&category_id=&sub_category_id=&locale=&is_active=&item_type=&limit=&offset=&sort=&order=
  */
 export const adminListProducts: RouteHandler = async (req, reply) => {
-  const q = (req.query || {}) as {
-    q?: string;
-    category_id?: string;
-    sub_category_id?: string;
-    locale?: string;
-    is_active?: string | number | boolean;
-    limit?: string | number;
-    offset?: string | number;
-    sort?: 'order_num' | 'price' | 'rating' | 'created_at';
-    order?: 'asc' | 'desc';
-  };
+  const q = (req.query || {}) as AdminListQuery;
 
-  // ✅ locale artık DB default_locale fallback ile çözülür
   const locale = getEffectiveLocale(req);
+  const itemType = normalizeItemType(q.item_type, 'product'); // ✅ default product
 
-  const conds: any[] = [eq(productI18n.locale, locale)];
+  const conds: any[] = [
+    eq(productI18n.locale, locale),
+    eq(products.item_type, itemType as any), // ✅ FIX
+  ];
 
   if (q.q) conds.push(like(productI18n.title, `%${q.q}%`));
   if (q.category_id) conds.push(eq(products.category_id, q.category_id));
@@ -130,7 +130,7 @@ export const adminListProducts: RouteHandler = async (req, reply) => {
     conds.push(eq(products.is_active, (v === '1' || v === 'true') as any));
   }
 
-  const whereExpr = conds.length ? and(...conds) : undefined;
+  const whereExpr = and(...conds);
 
   const limit = Math.min(Number(q.limit ?? 50) || 50, 100);
   const offset = Math.max(Number(q.offset ?? 0) || 0, 0);
@@ -146,19 +146,17 @@ export const adminListProducts: RouteHandler = async (req, reply) => {
   const dir = q.order === 'asc' ? 'asc' : 'desc';
   const orderExpr = dir === 'asc' ? asc(colMap[sortKey]) : desc(colMap[sortKey]);
 
-  const countBase = db
+  const [{ total }] = await db
     .select({ total: sql<number>`COUNT(*)` })
     .from(products)
-    .innerJoin(productI18n, eq(productI18n.product_id, products.id));
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id))
+    .where(whereExpr as any);
 
-  const [{ total }] = await (whereExpr ? countBase.where(whereExpr as any) : countBase);
-
-  const dataBase = db
+  const rows = await db
     .select({ p: products, i: productI18n })
     .from(products)
-    .innerJoin(productI18n, eq(productI18n.product_id, products.id));
-
-  const rows = await (whereExpr ? dataBase.where(whereExpr as any) : dataBase)
+    .innerJoin(productI18n, eq(productI18n.product_id, products.id))
+    .where(whereExpr as any)
     .orderBy(orderExpr)
     .limit(limit)
     .offset(offset);
@@ -167,19 +165,22 @@ export const adminListProducts: RouteHandler = async (req, reply) => {
   reply.header('content-range', `*/${Number(total || 0)}`);
   reply.header('access-control-expose-headers', 'x-total-count, content-range');
 
-  // ✅ FIX: base + i18n merge order (i18n overrides)
+  // ✅ FIX: base + i18n (i18n overrides)
   const out = rows.map(({ p, i }) => normalizeProduct({ ...p, ...(i ?? {}) }));
   return reply.send(out);
 };
 
 /**
- * GET /admin/products/:id?locale=
- * Base ürün + product_i18n merge
+ * GET /admin/products/:id?locale=&item_type=
+ * Admin detail: item_type zorunlu değil ama karışmayı önlemek için destekliyoruz.
+ * Default: product
  */
 export const adminGetProduct: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
+  const q = (req.query || {}) as { item_type?: ItemType };
 
   const locale = getEffectiveLocale(req);
+  const itemType = normalizeItemType(q.item_type, 'product');
 
   const rows = await db
     .select({ p: products, i: productI18n })
@@ -188,7 +189,7 @@ export const adminGetProduct: RouteHandler = async (req, reply) => {
       productI18n,
       and(eq(productI18n.product_id, products.id), eq(productI18n.locale, locale)),
     )
-    .where(eq(products.id, id))
+    .where(and(eq(products.id, id), eq(products.item_type, itemType as any))) // ✅ FIX
     .limit(1);
 
   if (!rows.length || !rows[0].p) {
@@ -196,74 +197,72 @@ export const adminGetProduct: RouteHandler = async (req, reply) => {
   }
 
   const { p, i } = rows[0];
-
-  // ✅ FIX: base + i18n merge order
-  const merged = normalizeProduct({ ...p, ...(i ?? {}) });
+  const merged = normalizeProduct({ ...p, ...(i ?? {}) }); // ✅ FIX merge order
   return reply.send(merged);
 };
 
 /* ----------------- CREATE / UPDATE / DELETE ----------------- */
 
-/**
- * CREATE (çoklu dil)
- *
- * - Base ürün tek ID
- * - DB’den gelen app_locales listesine göre product_i18n kayıtları açılır
- * - Response: baseLocale için merge edilmiş ürün
- */
 export const adminCreateProduct: RouteHandler = async (req, reply) => {
   try {
-    const input = productCreateSchema.parse(req.body ?? {});
+    const input = productCreateSchema.parse(req.body ?? {}) as any;
 
-    const baseLocale = normalizeLocale((input as any).locale) ?? getEffectiveLocale(req);
+    const baseLocale = normalizeLocale(input.locale) ?? getEffectiveLocale(req);
     const targetLocales = getLocalesForCreate(req, baseLocale);
 
-    const productId = (input as any).id ?? randomUUID();
+    const productId: string = input.id ?? randomUUID();
 
-    const coverId = (input as any).storage_asset_id ?? null;
-    const galleryIds = (input as any).storage_image_ids ?? [];
+    const itemType: ItemType = normalizeItemType(input.item_type, 'product'); // ✅ FIX
+
+    const coverId = input.storage_asset_id ?? null;
+    const galleryIds: string[] = input.storage_image_ids ?? [];
     const urlMap = await urlsForAssets([...(coverId ? [coverId] : []), ...galleryIds]);
 
     const image_url = coverId
-      ? urlMap[coverId] ?? (input as any).image_url ?? null
-      : (input as any).image_url ?? null;
-
-    const images = galleryIds.map((aid: string) => urlMap[aid]).filter(Boolean) as string[];
+      ? urlMap[coverId] ?? input.image_url ?? null
+      : input.image_url ?? null;
+    const images = galleryIds.map((aid) => urlMap[aid]).filter(Boolean) as string[];
 
     const now = new Date();
 
     const baseRow: any = {
       id: productId,
-      category_id: (input as any).category_id,
-      sub_category_id: (input as any).sub_category_id ?? null,
-      price: (input as any).price,
+      item_type: itemType, // ✅ FIX (DB’ye yaz)
+      category_id: input.category_id,
+      sub_category_id: input.sub_category_id ?? null,
+      price: input.price,
+
       image_url,
       storage_asset_id: coverId,
       images,
       storage_image_ids: galleryIds,
+
       is_active:
-        (input as any).is_active === undefined
+        input.is_active === undefined
           ? true
           : !!(
-              (input as any).is_active === true ||
-              (input as any).is_active === 1 ||
-              (input as any).is_active === '1' ||
-              (input as any).is_active === 'true'
+              input.is_active === true ||
+              input.is_active === 1 ||
+              input.is_active === '1' ||
+              input.is_active === 'true'
             ),
+
       is_featured:
-        (input as any).is_featured === undefined
+        input.is_featured === undefined
           ? false
           : !!(
-              (input as any).is_featured === true ||
-              (input as any).is_featured === 1 ||
-              (input as any).is_featured === '1' ||
-              (input as any).is_featured === 'true'
+              input.is_featured === true ||
+              input.is_featured === 1 ||
+              input.is_featured === '1' ||
+              input.is_featured === 'true'
             ),
-      order_num: (input as any).order_num ?? 0,
-      product_code: (input as any).product_code ?? null,
-      stock_quantity: (input as any).stock_quantity ?? 0,
-      rating: (input as any).rating ?? 5,
-      review_count: (input as any).review_count ?? 0,
+
+      order_num: input.order_num ?? 0,
+      product_code: input.product_code ?? null,
+      stock_quantity: input.stock_quantity ?? 0,
+      rating: input.rating ?? 5,
+      review_count: input.review_count ?? 0,
+
       created_at: now,
       updated_at: now,
     };
@@ -273,14 +272,14 @@ export const adminCreateProduct: RouteHandler = async (req, reply) => {
     const i18nRows = targetLocales.map((loc) => ({
       product_id: productId,
       locale: loc,
-      title: (input as any).title,
-      slug: (input as any).slug,
-      description: (input as any).description ?? null,
-      alt: (input as any).alt ?? null,
-      tags: (input as any).tags ?? [],
-      specifications: (input as any).specifications ?? null,
-      meta_title: (input as any).meta_title ?? null,
-      meta_description: (input as any).meta_description ?? null,
+      title: input.title,
+      slug: input.slug,
+      description: input.description ?? null,
+      alt: input.alt ?? null,
+      tags: input.tags ?? [],
+      specifications: input.specifications ?? null,
+      meta_title: input.meta_title ?? null,
+      meta_description: input.meta_description ?? null,
       created_at: now,
       updated_at: now,
     }));
@@ -297,18 +296,11 @@ export const adminCreateProduct: RouteHandler = async (req, reply) => {
       .where(eq(products.id, productId))
       .limit(1);
 
-    // ✅ FIX merge order
-    const merged = normalizeProduct({
-      ...(row?.p ?? {}),
-      ...(row?.i ?? {}),
-    });
-
+    const merged = normalizeProduct({ ...(row?.p ?? {}), ...(row?.i ?? {}) });
     return reply.code(201).send(merged);
   } catch (e: any) {
     if (e?.name === 'ZodError') {
-      return reply.code(422).send({
-        error: { message: 'validation_error', details: e.issues },
-      });
+      return reply.code(422).send({ error: { message: 'validation_error', details: e.issues } });
     }
     req.log.error(e);
     return reply.code(500).send({ error: { message: 'internal_error' } });
@@ -319,9 +311,10 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
 
   try {
-    const patch = productUpdateSchema.parse(req.body ?? {});
+    const patch = productUpdateSchema.parse(req.body ?? {}) as any;
+
     const baseLocale =
-      normalizeLocale((patch as any).locale) ??
+      normalizeLocale(patch.locale) ??
       normalizeLocale((req.query as any)?.locale) ??
       getEffectiveLocale(req);
 
@@ -339,15 +332,12 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
       return reply.code(404).send({ error: { message: 'not_found' } });
     }
 
-    // ✅ FIX merge order
-    const curMerged = normalizeProduct({
-      ...curRow.p,
-      ...(curRow.i ?? {}),
-    });
+    const curMerged = normalizeProduct({ ...curRow.p, ...(curRow.i ?? {}) });
 
     const {
       id: _ignoreId,
       locale: _ignoreLocale,
+      item_type, // ✅ allow patch
       title,
       slug,
       description,
@@ -357,23 +347,22 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
       meta_title,
       meta_description,
       ...basePatch
-    } = patch as any;
+    } = patch;
 
-    const coverId = (patch as any).storage_asset_id ?? curMerged.storage_asset_id ?? null;
-    const galleryIds =
-      (patch as any).storage_image_ids ?? (curMerged.storage_image_ids as string[]) ?? [];
+    const coverId = patch.storage_asset_id ?? curMerged.storage_asset_id ?? null;
+    const galleryIds = patch.storage_image_ids ?? (curMerged.storage_image_ids as string[]) ?? [];
 
     const urlMap = await urlsForAssets([...(coverId ? [coverId] : []), ...galleryIds]);
 
     const image_url =
-      (patch as any).storage_asset_id !== undefined || (patch as any).image_url !== undefined
+      patch.storage_asset_id !== undefined || patch.image_url !== undefined
         ? coverId
-          ? urlMap[coverId] ?? (patch as any).image_url ?? null
-          : (patch as any).image_url ?? null
+          ? urlMap[coverId] ?? patch.image_url ?? null
+          : patch.image_url ?? null
         : curMerged.image_url;
 
     const images =
-      (patch as any).storage_image_ids !== undefined || (patch as any).images !== undefined
+      patch.storage_image_ids !== undefined || patch.images !== undefined
         ? (galleryIds.map((aid: string) => urlMap[aid]).filter(Boolean) as string[])
         : (curMerged.images as string[]);
 
@@ -387,6 +376,11 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
       images,
       updated_at: now,
     };
+
+    // ✅ FIX: item_type update (if provided)
+    if (item_type !== undefined) {
+      baseUpdate.item_type = normalizeItemType(item_type, curMerged.item_type ?? 'product');
+    }
 
     await db.update(products).set(baseUpdate).where(eq(products.id, id));
 
@@ -434,18 +428,11 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
       .where(eq(products.id, id))
       .limit(1);
 
-    // ✅ FIX merge order
-    const merged = normalizeProduct({
-      ...(row?.p ?? {}),
-      ...(row?.i ?? {}),
-    });
-
+    const merged = normalizeProduct({ ...(row?.p ?? {}), ...(row?.i ?? {}) });
     return reply.send(merged);
   } catch (e: any) {
     if (e?.name === 'ZodError') {
-      return reply.code(422).send({
-        error: { message: 'validation_error', details: e.issues },
-      });
+      return reply.code(422).send({ error: { message: 'validation_error', details: e.issues } });
     }
     req.log.error(e);
     return reply.code(500).send({ error: { message: 'internal_error' } });
@@ -458,7 +445,7 @@ export const adminDeleteProduct: RouteHandler = async (req, reply) => {
   return reply.code(204).send();
 };
 
-/* ----------------- IMAGES: REPLACE (storage uyumlu) ----------------- */
+/* ----------------- IMAGES: REPLACE ----------------- */
 
 export const adminSetProductImages: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
@@ -487,8 +474,6 @@ export const adminSetProductImages: RouteHandler = async (req, reply) => {
     updated_at: new Date(),
   };
 
-  // ⚠️ alt i18n kolonu ise productI18n’de olmalı; sende base’de de var gibi duruyor.
-  // Mevcut davranışı bozmamak için patch’e dokunmuyorum.
   if (body.alt !== undefined) {
     patch.alt = body.alt as string | null;
   }
@@ -498,7 +483,6 @@ export const adminSetProductImages: RouteHandler = async (req, reply) => {
     .set(patch as any)
     .where(eq(products.id, id));
 
-  // ✅ Hardcode "de" yok: aktif locale ile merge
   const locale = getEffectiveLocale(req);
 
   const [row] = await db
@@ -513,12 +497,7 @@ export const adminSetProductImages: RouteHandler = async (req, reply) => {
 
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
 
-  // ✅ FIX merge order
-  const merged = normalizeProduct({
-    ...row.p,
-    ...(row.i ?? {}),
-  });
-
+  const merged = normalizeProduct({ ...row.p, ...(row.i ?? {}) });
   return reply.send(merged);
 };
 

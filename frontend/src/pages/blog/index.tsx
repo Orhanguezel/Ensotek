@@ -1,20 +1,24 @@
 // =============================================================
 // FILE: src/pages/blog/index.tsx
-// Ensotek – Blog Page (full list) + SEO (News pattern)
+// Ensotek – Blog Page (full list) + SEO
 //   - Route: /blog
-//   - Data: custom_pages (module_key="blog") => meta override
-//   - IMPORTANT: locale source = router.locale (hydration-safe)
+//   - Data: custom_pages (module_key="blog") => meta override (first published)
+//   - i18n: useLocaleShort() + site_settings.ui_blog
+//   - SEO: seo -> site_seo fallback + OG/Twitter (NO canonical here)
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
+
+'use client';
 
 import React, { useMemo } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import BlogPageContent from '@/components/containers/blog/BlogPageContent';
 import Feedback from '@/components/containers/feedback/Feedback';
 
 // i18n
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -32,34 +36,30 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-function shortLocale(v: unknown): string {
-  return (
-    String(v || 'de')
-      .trim()
-      .toLowerCase()
-      .replace('_', '-')
-      .split('-')[0] || 'de'
-  );
-}
-
 const BlogPage: React.FC = () => {
-  const router = useRouter();
+  const locale = useLocaleShort();
 
-  // ✅ Hydration-safe: Next i18n kaynağı
-  const locale = shortLocale(router.locale || router.defaultLocale || 'de');
+  const { ui } = useUiSection('ui_blog', locale as any);
 
-  const { ui } = useUiSection('ui_blog', locale);
+  // ======================
+  // Banner title (UI)
+  // ======================
+  const bannerTitle = ui('ui_blog_page_title', 'Blog');
 
-  const bannerTitle = ui('ui_blog_page_title', locale === 'de' ? 'Blog' : 'Blog');
-
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  // ======================
+  // Global SEO settings (seo -> site_seo fallback)
+  // ======================
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
+  // ======================
+  // Blog custom pages (meta override için: ilk published kayıt)
+  // ======================
   const { data: blogData } = useListCustomPagesPublicQuery({
     module_key: 'blog',
     locale,
@@ -68,27 +68,49 @@ const BlogPage: React.FC = () => {
     orderDir: 'asc',
   });
 
-  const published = useMemo(() => {
+  const primary = useMemo<CustomPageDto | undefined>(() => {
     const items: CustomPageDto[] = (blogData?.items ?? []) as any;
-    return items.filter((p) => !!p?.is_published);
+    const published = items.filter((p) => !!p?.is_published);
+    return published[0];
   }, [blogData]);
 
-  const primary = published[0];
+  // ======================
+  // SEO fields (page-level)
+  // ======================
+  const pageTitleRaw = useMemo(() => {
+    const uiMeta = String(ui('ui_blog_meta_title', '') || '').trim();
+    if (uiMeta) return uiMeta;
 
-  const pageTitleRaw =
-    (primary?.meta_title ?? '').trim() ||
-    (primary?.title ?? '').trim() ||
-    String(bannerTitle).trim();
+    const meta = String(primary?.meta_title ?? '').trim();
+    if (meta) return meta;
 
-  const pageDescRaw =
-    (primary?.meta_description ?? '').trim() ||
-    (primary?.summary ?? '').trim() ||
-    excerpt(primary?.content_html ?? '', 160).trim() ||
-    String(seo?.description ?? '').trim() ||
-    '';
+    const title = String(primary?.title ?? '').trim();
+    if (title) return title;
 
-  const seoSiteName = String(seo?.site_name ?? '').trim() || 'Ensotek';
-  const titleTemplate = String(seo?.title_template ?? '').trim() || '%s | Ensotek';
+    return String(bannerTitle || '').trim() || 'Blog';
+  }, [ui, primary?.meta_title, primary?.title, bannerTitle]);
+
+  const pageDescRaw = useMemo(() => {
+    const uiMeta = String(ui('ui_blog_meta_description', '') || '').trim();
+    if (uiMeta) return uiMeta;
+
+    const meta = String(primary?.meta_description ?? '').trim();
+    if (meta) return meta;
+
+    const sum = String(primary?.summary ?? '').trim();
+    if (sum) return sum;
+
+    const ex = excerpt(primary?.content_html ?? '', 160).trim();
+    if (ex) return ex;
+
+    return String(seo?.description ?? '').trim() || '';
+  }, [ui, primary?.meta_description, primary?.summary, primary?.content_html, seo?.description]);
+
+  const seoSiteName = useMemo(() => String(seo?.site_name ?? '').trim() || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(
+    () => String(seo?.title_template ?? '').trim() || '%s | Ensotek',
+    [seo],
+  );
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
@@ -98,19 +120,19 @@ const BlogPage: React.FC = () => {
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = (primary?.featured_image ?? '').trim();
+    const pageImgRaw = String(primary?.featured_image ?? '').trim();
     const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
 
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.ico');
+    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
   }, [primary?.featured_image, seo]);
 
   const headSpecs = useMemo(() => {
     const tw = asObj(seo?.twitter) || {};
     const robots = asObj(seo?.robots) || {};
-    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
 
     return buildMeta({
       title: pageTitle,
@@ -118,10 +140,10 @@ const BlogPage: React.FC = () => {
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
-      twitterCard: String((tw as any).card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
+
+      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
+      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
+      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
@@ -129,11 +151,14 @@ const BlogPage: React.FC = () => {
     <>
       <Head>
         <title>{pageTitle}</title>
+
         {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link')
+          if (spec.kind === 'link') {
             return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          if (spec.kind === 'meta-name')
+          }
+          if (spec.kind === 'meta-name') {
             return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+          }
           return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
         })}
       </Head>
