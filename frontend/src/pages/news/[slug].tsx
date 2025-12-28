@@ -3,6 +3,9 @@
 // Ensotek – News Detail Page (by slug) + SEO
 //   - Route: /news/[slug]
 //   - Data: custom_pages/by-slug (module_key="news")
+//   - i18n: useLocaleShort() + site_settings.ui_news
+//   - SEO: seo -> site_seo fallback + page.meta_* override (NO canonical here)
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
 
 'use client';
@@ -16,7 +19,7 @@ import NewsDetail from '@/components/containers/news/NewsDetail';
 import NewsMore from '@/components/containers/news/NewsMore';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -33,35 +36,33 @@ import {
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
+function readSlug(q: unknown): string {
+  if (typeof q === 'string') return q;
+  if (Array.isArray(q)) return String(q[0] ?? '');
+  return '';
+}
+
 function safeStr(x: unknown): string {
   return typeof x === 'string' ? x.trim() : '';
 }
 
 const NewsDetailPage: React.FC = () => {
   const router = useRouter();
-  const locale = useResolvedLocale();
-  const { ui } = useUiSection('ui_news', locale);
+  const locale = useLocaleShort();
 
-  const slugParam = router.query.slug;
-  const slug =
-    typeof slugParam === 'string' ? slugParam : Array.isArray(slugParam) ? slugParam[0] ?? '' : '';
+  const { ui } = useUiSection('ui_news', locale as any);
 
-  const isSlugReady = Boolean(slug);
+  const slug = useMemo(() => readSlug(router.query.slug).trim(), [router.query.slug]);
+  const isSlugReady = !!slug;
 
   // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: 'seo',
-    locale,
-  });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: 'site_seo',
-    locale,
-  });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
   // News item data (for SEO + banner)
   const { data: page } = useGetCustomPageBySlugPublicQuery(
@@ -69,30 +70,43 @@ const NewsDetailPage: React.FC = () => {
     { skip: !isSlugReady },
   );
 
-  const listTitleFallback = ui('ui_news_page_title', locale === 'de' ? 'Haberler' : 'News');
-  const detailTitleFallback = ui(
-    'ui_news_detail_page_title',
-    locale === 'de' ? 'Haber Detayı' : 'News Detail',
-  );
+  const listTitleFallback = ui('ui_news_page_title', 'News');
+  const detailTitleFallback = ui('ui_news_detail_page_title', 'News Detail');
 
   const bannerTitle = useMemo(() => {
     return safeStr(page?.title) || safeStr(detailTitleFallback) || safeStr(listTitleFallback);
   }, [page?.title, detailTitleFallback, listTitleFallback]);
 
   // --- SEO fields ---
-  const titleFallback = bannerTitle || 'News';
+  const pageTitleRaw = useMemo(() => {
+    const t =
+      safeStr(page?.meta_title) ||
+      safeStr(page?.title) ||
+      safeStr(bannerTitle) ||
+      safeStr(listTitleFallback) ||
+      'News';
+    return t;
+  }, [page?.meta_title, page?.title, bannerTitle, listTitleFallback]);
 
-  const pageTitleRaw = safeStr(page?.meta_title) || safeStr(page?.title) || safeStr(titleFallback);
+  const pageDescRaw = useMemo(() => {
+    const globalDesc = safeStr(seo?.description) || '';
 
-  const pageDescRaw =
-    safeStr(page?.meta_description) ||
-    safeStr(page?.summary) ||
-    safeStr(excerpt(page?.content_html ?? '', 160)) ||
-    safeStr(seo?.description) ||
-    '';
+    if (!isSlugReady) return globalDesc;
 
-  const seoSiteName = safeStr(seo?.site_name) || 'Ensotek';
-  const titleTemplate = safeStr(seo?.title_template) || '%s | Ensotek';
+    return (
+      safeStr(page?.meta_description) ||
+      safeStr(page?.summary) ||
+      safeStr(excerpt(page?.content_html ?? '', 160)) ||
+      globalDesc ||
+      ''
+    );
+  }, [isSlugReady, page?.meta_description, page?.summary, page?.content_html, seo?.description]);
+
+  const seoSiteName = useMemo(() => safeStr(seo?.site_name) || 'Ensotek', [seo?.site_name]);
+  const titleTemplate = useMemo(
+    () => safeStr(seo?.title_template) || '%s | Ensotek',
+    [seo?.title_template],
+  );
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
@@ -102,19 +116,19 @@ const NewsDetailPage: React.FC = () => {
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = safeStr(page?.featured_image);
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
-
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.ico');
+    const pageImgRaw = safeStr(page?.featured_image);
+    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
+
+    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
   }, [page?.featured_image, seo]);
 
   const headSpecs = useMemo(() => {
     const tw = asObj(seo?.twitter) || {};
     const robots = asObj(seo?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
 
     return buildMeta({
       title: pageTitle,
@@ -122,9 +136,11 @@ const NewsDetailPage: React.FC = () => {
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
-      twitterCard: safeStr(tw.card) || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
+
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
@@ -159,8 +175,8 @@ const NewsDetailPage: React.FC = () => {
         </div>
       ) : (
         <>
-          <NewsDetail slug={slug} />
-          <NewsMore currentSlug={slug} />
+            <NewsDetail slug={slug} />
+            <NewsMore currentSlug={slug} />
         </>
       )}
     </>

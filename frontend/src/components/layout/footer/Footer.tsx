@@ -21,7 +21,7 @@ import { localizePath } from '@/i18n/url';
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 
-import SocialLinks from '@/components/common/SocialLinks';
+import SocialLinks from '@/components/common/public/SocialLinks';
 
 const IMG_W = 160;
 const IMG_H = 60;

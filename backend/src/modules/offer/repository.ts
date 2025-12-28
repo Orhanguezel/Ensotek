@@ -3,38 +3,26 @@
 // Ensotek – Offer Module Repository
 // =============================================================
 
-import { db } from "@/db/client";
-import {
-  and,
-  asc,
-  desc,
-  eq,
-  like,
-  or,
-  sql,
-  type SQL,
-  gte,
-  lte,
-} from "drizzle-orm";
-import { randomUUID } from "crypto";
-import {
-  offersTable,
-  offerNumberCountersTable,
-  type OfferRow,
-  type NewOfferRow,
-} from "./schema";
-import type { OfferStatus } from "./validation";
+import { db } from '@/db/client';
+import { and, asc, desc, eq, like, or, sql, type SQL, gte, lte } from 'drizzle-orm';
+import { randomUUID } from 'crypto';
+import { offersTable, offerNumberCountersTable, type OfferRow, type NewOfferRow } from './schema';
+import type { OfferStatus } from './validation';
 
 export type OfferListParams = {
   orderParam?: string;
-  sort?: "created_at" | "updated_at";
-  order?: "asc" | "desc";
+  sort?: 'created_at' | 'updated_at';
+  order?: 'asc' | 'desc';
   limit?: number;
   offset?: number;
 
   status?: OfferStatus;
   locale?: string;
+
+  // ✅ artık serbest metin ülke alanı (Almanya/Deutschland/Germany/DE)
+  // filtrelemede LIKE ile kullanılacak
   country_code?: string;
+
   q?: string;
   email?: string;
   product_id?: string;
@@ -45,14 +33,14 @@ export type OfferListParams = {
 
 const parseOrder = (
   orderParam?: string,
-  sort?: OfferListParams["sort"],
-  ord?: OfferListParams["order"],
-): { col: "created_at" | "updated_at"; dir: "asc" | "desc" } | null => {
+  sort?: OfferListParams['sort'],
+  ord?: OfferListParams['order'],
+): { col: 'created_at' | 'updated_at'; dir: 'asc' | 'desc' } | null => {
   if (orderParam) {
     const m = orderParam.match(/^([a-zA-Z0-9_]+)\.(asc|desc)$/);
-    const col = m?.[1] as "created_at" | "updated_at" | undefined;
-    const dir = m?.[2] as "asc" | "desc" | undefined;
-    if (col && dir && (col === "created_at" || col === "updated_at")) {
+    const col = m?.[1] as 'created_at' | 'updated_at' | undefined;
+    const dir = m?.[2] as 'asc' | 'desc' | undefined;
+    if (col && dir && (col === 'created_at' || col === 'updated_at')) {
       return { col, dir };
     }
   }
@@ -60,8 +48,7 @@ const parseOrder = (
   return null;
 };
 
-const isRecord = (v: unknown): v is Record<string, unknown> =>
-  typeof v === "object" && v !== null;
+const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null;
 
 /* -------------------------------------------------------------
  * JSON pack/unpack helpers (form_data)
@@ -69,7 +56,7 @@ const isRecord = (v: unknown): v is Record<string, unknown> =>
 
 export const packFormData = (v: unknown): string | null => {
   if (v == null) return null;
-  if (typeof v === "string") {
+  if (typeof v === 'string') {
     try {
       const parsed = JSON.parse(v);
       if (isRecord(parsed)) {
@@ -87,9 +74,7 @@ export const packFormData = (v: unknown): string | null => {
   }
 };
 
-export const unpackFormData = (
-  v: string | null | undefined,
-): Record<string, unknown> | null => {
+export const unpackFormData = (v: string | null | undefined): Record<string, unknown> | null => {
   if (!v) return null;
   try {
     const parsed = JSON.parse(v);
@@ -114,11 +99,15 @@ export async function listOffers(
 
   if (params.status) conds.push(eq(offersTable.status, params.status));
   if (params.locale) conds.push(eq(offersTable.locale, params.locale));
-  if (params.country_code)
-    conds.push(eq(offersTable.country_code, params.country_code));
+
+  // ✅ country_code: serbest metin -> exact yerine LIKE (kısmi arama)
+  if (params.country_code && params.country_code.trim()) {
+    const c = `%${params.country_code.trim()}%`;
+    conds.push(like(offersTable.country_code, c));
+  }
+
   if (params.email) conds.push(eq(offersTable.email, params.email));
-  if (params.product_id)
-    conds.push(eq(offersTable.product_id, params.product_id));
+  if (params.product_id) conds.push(eq(offersTable.product_id, params.product_id));
 
   if (params.q && params.q.trim()) {
     const s = `%${params.q.trim()}%`;
@@ -129,25 +118,18 @@ export async function listOffers(
         like(offersTable.email, s),
         like(offersTable.subject, s),
         like(offersTable.offer_no, s),
+
+        // ✅ pratik: genel aramaya ülke alanını da dahil et
+        like(offersTable.country_code, s),
       ),
     );
   }
 
   if (params.created_from) {
-    conds.push(
-      gte(
-        offersTable.created_at,
-        sql`CAST(${params.created_from} AS DATETIME(3))`,
-      ),
-    );
+    conds.push(gte(offersTable.created_at, sql`CAST(${params.created_from} AS DATETIME(3))`));
   }
   if (params.created_to) {
-    conds.push(
-      lte(
-        offersTable.created_at,
-        sql`CAST(${params.created_to} AS DATETIME(3))`,
-      ),
-    );
+    conds.push(lte(offersTable.created_at, sql`CAST(${params.created_to} AS DATETIME(3))`));
   }
 
   const ord = parseOrder(params.orderParam, params.sort, params.order);
@@ -155,17 +137,9 @@ export async function listOffers(
   let orderExpr: SQL;
   if (ord) {
     orderExpr =
-      ord.dir === "asc"
-        ? asc(
-          ord.col === "created_at"
-            ? offersTable.created_at
-            : offersTable.updated_at,
-        )
-        : desc(
-          ord.col === "created_at"
-            ? offersTable.created_at
-            : offersTable.updated_at,
-        );
+      ord.dir === 'asc'
+        ? asc(ord.col === 'created_at' ? offersTable.created_at : offersTable.updated_at)
+        : desc(ord.col === 'created_at' ? offersTable.created_at : offersTable.updated_at);
   } else {
     orderExpr = desc(offersTable.created_at);
   }
@@ -174,26 +148,15 @@ export async function listOffers(
   const skip = params.offset && params.offset >= 0 ? params.offset : 0;
 
   const whereCond =
-    conds.length > 0
-      ? (and(...(conds.filter(Boolean) as SQL[])) as SQL)
-      : undefined;
+    conds.length > 0 ? (and(...(conds.filter(Boolean) as SQL[])) as SQL) : undefined;
 
   const baseQuery = db.select().from(offersTable);
-  const rowsQuery = whereCond
-    ? baseQuery.where(whereCond as SQL)
-    : baseQuery;
+  const rowsQuery = whereCond ? baseQuery.where(whereCond as SQL) : baseQuery;
 
-  const rows = await rowsQuery
-    .orderBy(orderExpr, desc(offersTable.id))
-    .limit(take)
-    .offset(skip);
+  const rows = await rowsQuery.orderBy(orderExpr, desc(offersTable.id)).limit(take).offset(skip);
 
-  const countBase = db
-    .select({ c: sql<number>`COUNT(*)` })
-    .from(offersTable);
-  const countQuery = whereCond
-    ? countBase.where(whereCond as SQL)
-    : countBase;
+  const countBase = db.select({ c: sql<number>`COUNT(*)` }).from(offersTable);
+  const countQuery = whereCond ? countBase.where(whereCond as SQL) : countBase;
 
   const cnt = await countQuery;
   const total = cnt[0]?.c ?? 0;
@@ -210,14 +173,8 @@ export async function listOffers(
  * GET BY ID
  * ------------------------------------------------------------- */
 
-export async function getOfferById(
-  id: string,
-): Promise<OfferListItem | null> {
-  const rows = await db
-    .select()
-    .from(offersTable)
-    .where(eq(offersTable.id, id))
-    .limit(1);
+export async function getOfferById(id: string): Promise<OfferListItem | null> {
+  const rows = await db.select().from(offersTable).where(eq(offersTable.id, id)).limit(1);
 
   const row = rows[0] as OfferRow | undefined;
   if (!row) return null;
@@ -233,11 +190,9 @@ export async function getOfferById(
  *   - year bazlı sayaç tablosu: offer_number_counters
  * ------------------------------------------------------------- */
 
-export async function generateOfferNo(
-  now: Date = new Date(),
-): Promise<string> {
+export async function generateOfferNo(now: Date = new Date()): Promise<string> {
   const year = now.getFullYear();
-  const prefix = "ENS";
+  const prefix = 'ENS';
 
   const nextSeq = await db.transaction(async (trx) => {
     const existing = await trx
@@ -266,7 +221,7 @@ export async function generateOfferNo(
     return next;
   });
 
-  const seqStr = String(nextSeq).padStart(4, "0");
+  const seqStr = String(nextSeq).padStart(4, '0');
   return `${prefix}-${year}-${seqStr}`;
 }
 
@@ -275,100 +230,60 @@ export async function generateOfferNo(
  * ------------------------------------------------------------- */
 
 export async function createOffer(
-  values: Omit<NewOfferRow, "id" | "created_at" | "updated_at"> & {
+  values: Omit<NewOfferRow, 'id' | 'created_at' | 'updated_at'> & {
     id?: string;
   },
 ): Promise<string> {
   const id = values.id ?? randomUUID();
 
-  // Eğer dışarıdan offer_no verilmediyse → ENS-YYYY-0001 formatında üret
   const offer_no = values.offer_no ?? (await generateOfferNo());
+
+  // ✅ country_code serbest metin olduğu için trim ile normalize ediyoruz
+  const normalizedCountry =
+    typeof values.country_code === 'string' && values.country_code.trim()
+      ? values.country_code.trim()
+      : null;
 
   const insertVals: NewOfferRow = {
     id,
     offer_no,
-    status: values.status ?? ("new" as any),
+    status: values.status ?? ('new' as any),
     locale: values.locale ?? null,
-    country_code: values.country_code ?? null,
-    customer_name: values.customer_name,
-    company_name:
-      typeof values.company_name === "undefined"
-        ? null
-        : values.company_name,
-    email: values.email,
-    phone:
-      typeof values.phone === "undefined" ? null : values.phone,
-    subject:
-      typeof values.subject === "undefined" ? null : values.subject,
-    message:
-      typeof values.message === "undefined" ? null : values.message,
-    product_id:
-      typeof values.product_id === "undefined"
-        ? null
-        : values.product_id,
+    country_code: normalizedCountry,
 
-    // form_data zaten controller tarafında packFormData ile string'e çevriliyor
-    form_data:
-      typeof values.form_data === "undefined"
-        ? null
-        : values.form_data,
+    customer_name: values.customer_name,
+    company_name: typeof values.company_name === 'undefined' ? null : values.company_name,
+    email: values.email,
+    phone: typeof values.phone === 'undefined' ? null : values.phone,
+    subject: typeof values.subject === 'undefined' ? null : values.subject,
+    message: typeof values.message === 'undefined' ? null : values.message,
+    product_id: typeof values.product_id === 'undefined' ? null : values.product_id,
+
+    form_data: typeof values.form_data === 'undefined' ? null : values.form_data,
 
     consent_marketing:
-      typeof values.consent_marketing === "undefined"
-        ? (0 as any)
-        : values.consent_marketing,
-    consent_terms:
-      typeof values.consent_terms === "undefined"
-        ? (0 as any)
-        : values.consent_terms,
+      typeof values.consent_marketing === 'undefined' ? (0 as any) : values.consent_marketing,
+    consent_terms: typeof values.consent_terms === 'undefined' ? (0 as any) : values.consent_terms,
 
-    currency: values.currency ?? "EUR",
-    net_total:
-      typeof values.net_total === "undefined"
-        ? null
-        : values.net_total,
+    currency: values.currency ?? 'EUR',
+    net_total: typeof values.net_total === 'undefined' ? null : values.net_total,
 
-    vat_rate:                                            // YENİ
-      typeof values.vat_rate === "undefined"
-        ? null
-        : values.vat_rate,
+    vat_rate: typeof values.vat_rate === 'undefined' ? null : values.vat_rate,
 
-    vat_total:
-      typeof values.vat_total === "undefined"
-        ? null
-        : values.vat_total,
+    vat_total: typeof values.vat_total === 'undefined' ? null : values.vat_total,
 
-    shipping_total:                                      // YENİ
-      typeof values.shipping_total === "undefined"
-        ? null
-        : values.shipping_total,
+    shipping_total: typeof values.shipping_total === 'undefined' ? null : values.shipping_total,
 
-    gross_total:
-      typeof values.gross_total === "undefined"
-        ? null
-        : values.gross_total,
+    gross_total: typeof values.gross_total === 'undefined' ? null : values.gross_total,
 
-    valid_until:
-      typeof values.valid_until === "undefined"
-        ? null
-        : values.valid_until,
+    valid_until: typeof values.valid_until === 'undefined' ? null : values.valid_until,
 
-    admin_notes:
-      typeof values.admin_notes === "undefined"
-        ? null
-        : values.admin_notes,
+    admin_notes: typeof values.admin_notes === 'undefined' ? null : values.admin_notes,
 
-    pdf_url:
-      typeof values.pdf_url === "undefined" ? null : values.pdf_url,
-    pdf_asset_id:
-      typeof values.pdf_asset_id === "undefined"
-        ? null
-        : values.pdf_asset_id,
+    pdf_url: typeof values.pdf_url === 'undefined' ? null : values.pdf_url,
+    pdf_asset_id: typeof values.pdf_asset_id === 'undefined' ? null : values.pdf_asset_id,
 
-    email_sent_at:
-      typeof values.email_sent_at === "undefined"
-        ? null
-        : values.email_sent_at,
+    email_sent_at: typeof values.email_sent_at === 'undefined' ? null : values.email_sent_at,
 
     created_at: new Date() as any,
     updated_at: new Date() as any,
@@ -378,12 +293,14 @@ export async function createOffer(
   return id;
 }
 
-
-export async function updateOffer(
-  id: string,
-  patch: Partial<NewOfferRow>,
-) {
+export async function updateOffer(id: string, patch: Partial<NewOfferRow>) {
   if (!Object.keys(patch).length) return;
+
+  // ✅ patch içinde country_code varsa trimle
+  if (typeof (patch as any).country_code === 'string') {
+    const s = String((patch as any).country_code).trim();
+    (patch as any).country_code = s ? s : null;
+  }
 
   await db
     .update(offersTable)
@@ -392,15 +309,9 @@ export async function updateOffer(
 }
 
 export async function deleteOffer(id: string): Promise<number> {
-  const res = await db
-    .delete(offersTable)
-    .where(eq(offersTable.id, id))
-    .execute();
+  const res = await db.delete(offersTable).where(eq(offersTable.id, id)).execute();
 
-  const affected =
-    typeof (res as any)?.affectedRows === "number"
-      ? (res as any).affectedRows
-      : 0;
+  const affected = typeof (res as any)?.affectedRows === 'number' ? (res as any).affectedRows : 0;
 
   return affected;
 }

@@ -1,22 +1,15 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import Logout from '@/components/containers/auth/Logout';
 
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
-const toLocaleShort = (l: unknown) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .split('-')[0] || 'de';
-
 const LogoutPage: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const locale = useLocaleShort();
 
-  const { ui } = useUiSection('ui_auth', locale);
+  const { ui } = useUiSection('ui_auth', locale as any);
 
   // Layout kaldırıldığı için şimdilik sadece hesaplanıyor (istersen next/head ile basarız)
   void ui('ui_auth_logout_meta_title', 'Signing out | Ensotek');

@@ -1,5 +1,6 @@
 // =============================================================
-// FILE: src/modules/products/validation.ts  (LOCALE DESTEKLİ DTO)
+// FILE: src/modules/products/validation.ts  ✅ FIXED
+// - productCreateSchema / updateSchema içine item_type eklendi
 // =============================================================
 import { z } from 'zod';
 
@@ -17,28 +18,24 @@ export const boolLike = z.union([
   z.literal('false'),
 ]);
 
+export const productItemType = z.enum(['product', 'sparepart']);
+export type ProductItemTypeInput = z.infer<typeof productItemType>;
+
 // ❗ Storage asset ID'leri için (uuid'e zorlamıyoruz)
 const assetId = z.string().min(1).max(64);
 
 // ❗ Admin tarafında client'tan gelen id alanları için (FAQ, SPEC vs.)
-//    Eski verilerde "1", "2" gibi değerler olabildiği için uuid zorlamıyoruz.
 const entityId = z.preprocess((v) => {
   if (v == null || v === '') return undefined;
   return String(v);
 }, z.string().max(64));
 
 /* ----------------- PRODUCT ----------------- */
-/**
- * NOT:
- * - Base tablo: products
- *   - category_id, sub_category_id, price, images, storage_asset_id, stock, vs.
- * - I18N tablo: product_i18n
- *   - locale, title, slug, description, alt, tags, specifications, meta_title, meta_description
- *
- * Admin create/update payload'ı ikisini birlikte taşımaya devam ediyor.
- */
 export const productCreateSchema = z.object({
   id: z.string().uuid().optional(),
+
+  // ✅ type: base products.item_type
+  item_type: productItemType.optional().default('product'),
 
   // 🌍 Çok dilli – ürün bazında locale (product_i18n.locale)
   locale: z.string().min(2).max(8).optional(), // yoksa backend "de" ile dolduracak
@@ -50,7 +47,7 @@ export const productCreateSchema = z.object({
   alt: emptyToNull(z.string().max(255).optional().nullable()),
   tags: z.array(z.string()).optional().default([]),
 
-  // Teknik özellikler: serbest key/value (capacity, fanType, warranty, vs.)
+  // Teknik özellikler: serbest key/value
   specifications: z.record(z.string(), z.string()).optional(),
 
   // Base alanlar
@@ -61,7 +58,6 @@ export const productCreateSchema = z.object({
   image_url: emptyToNull(z.string().url().optional().nullable()),
   images: z.array(z.string().url()).optional().default([]),
 
-  // ❗ Artık uuid yerine assetId (ör. storage_assets.id gibi)
   storage_asset_id: emptyToNull(assetId.optional().nullable()),
   storage_image_ids: z.array(assetId).optional().default([]),
 
@@ -81,7 +77,6 @@ export const productUpdateSchema = productCreateSchema.partial();
 
 /* ------------ Images ------------ */
 export const productSetImagesSchema = z.object({
-  // ❗ uuid değil; storage asset id formatı neyse ona izin veriyoruz
   cover_id: emptyToNull(assetId.optional().nullable()),
   image_ids: z.array(assetId).min(0),
   alt: emptyToNull(z.string().max(255).optional().nullable()),
@@ -90,10 +85,9 @@ export type ProductSetImagesInput = z.infer<typeof productSetImagesSchema>;
 
 /* ----------------- FAQ ----------------- */
 export const productFaqCreateSchema = z.object({
-  // ❗ uuid zorlamıyoruz; eski kayıtlar "1", "2" vb. olabilir
   id: entityId.optional(),
   product_id: z.string().uuid(),
-  locale: z.string().min(2).max(8).optional(), // default backend'de "de"
+  locale: z.string().min(2).max(8).optional(),
   question: z.string().min(1).max(500),
   answer: z.string().min(1),
   display_order: z.coerce.number().int().min(0).optional().default(0),
@@ -105,10 +99,9 @@ export type ProductFaqUpdateInput = z.infer<typeof productFaqUpdateSchema>;
 
 /* ----------------- SPEC ----------------- */
 export const productSpecCreateSchema = z.object({
-  // ❗ uuid zorlamıyoruz; FE'den boş veya string gelebilir
   id: entityId.optional(),
   product_id: z.string().uuid(),
-  locale: z.string().min(2).max(8).optional(), // default backend'de "de"
+  locale: z.string().min(2).max(8).optional(),
   name: z.string().min(1).max(255),
   value: z.string().min(1),
   category: z.enum(['physical', 'material', 'service', 'custom']).default('custom'),
@@ -118,7 +111,7 @@ export const productSpecUpdateSchema = productSpecCreateSchema.partial();
 export type ProductSpecCreateInput = z.infer<typeof productSpecCreateSchema>;
 export type ProductSpecUpdateInput = z.infer<typeof productSpecUpdateSchema>;
 
-/* ----------------- REVIEW (YENİ) ----------------- */
+/* ----------------- REVIEW ----------------- */
 export const productReviewCreateSchema = z.object({
   id: z.string().uuid().optional(),
   product_id: z.string().uuid(),

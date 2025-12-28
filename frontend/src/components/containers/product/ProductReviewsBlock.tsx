@@ -1,7 +1,9 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductReviewsBlock.tsx
 // Ensotek – Product Reviews Block (Müşteri Yorumları)
-//   - Yorum yoksa ve loading değilse hiç render edilmez
+// - Hook-safe: useMemo YOK
+// - Önceki beyaz slide tasarımı korunur
+// - Inline style YOK (class ile)
 // =============================================================
 
 'use client';
@@ -19,8 +21,26 @@ interface ProductReviewsBlockProps {
   reviews: ProductReviewDto[];
   averageRating: number | null;
   isLoading: boolean;
-  emptyText: string; // Şu an kullanılmıyor ama API uyumu için duruyor
+  emptyText: string; // API uyumu için duruyor (bu blokta gösterilmiyor)
   locale: string;
+}
+
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
+
+function safeDate(locale: string, raw: unknown): string {
+  const s = safeStr(raw);
+  if (!s) return '';
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return s;
+  try {
+    return d.toLocaleDateString(locale);
+  } catch {
+    return d.toLocaleDateString('en');
+  }
 }
 
 const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
@@ -30,34 +50,32 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
   isLoading,
   locale,
 }) => {
-  const hasReviews = reviews.length > 0;
+  const list = reviews ?? [];
+  const hasReviews = list.length > 0;
 
   // Ne yükleniyor ne de yorum var → hiç render etme
-  if (!isLoading && !hasReviews) {
-    return null;
-  }
+  if (!isLoading && !hasReviews) return null;
 
   return (
     <div className="product__detail-reviews card p-3 position-relative">
       <div className="d-flex justify-content-between align-items-center mb-10">
         <h3 className="product__detail-subtitle mb-0">{title}</h3>
+
         {averageRating !== null && hasReviews && (
           <div className="product__review-summary small text-muted">
-            {averageRating.toFixed(1)} / 5 · {reviews.length}{' '}
-            {locale === 'de' ? 'yorum' : 'reviews'}
+            {averageRating.toFixed(1)} / 5 · {list.length} {locale === 'de' ? 'yorum' : 'reviews'}
           </div>
         )}
       </div>
 
-      {isLoading && !hasReviews && <div className="skeleton-line" aria-hidden />}
+      {isLoading && !hasReviews ? <div className="skeleton-line" aria-hidden /> : null}
 
-      {hasReviews && (
+      {hasReviews ? (
         <div className="product-review-slider-wrapper">
-          {/* Slider */}
           <Swiper
             slidesPerView={1}
             spaceBetween={24}
-            loop={reviews.length > 1}
+            loop={list.length > 1}
             roundLengths
             modules={[Autoplay, Navigation]}
             autoplay={{ delay: 5000, disableOnInteraction: false }}
@@ -67,48 +85,53 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
             }}
             className="product-review-swiper"
           >
-            {reviews.map((r) => (
-              <SwiperSlide key={r.id}>
-                <div className="product-review-slide small">
-                  <div className="d-flex justify-content-between mb-1">
-                    <strong>{r.customer_name || (locale === 'de' ? 'Müşteri' : 'Customer')}</strong>
-                    <span className="text-muted">{r.rating} / 5</span>
-                  </div>
+            {list.map((r) => {
+              const name = safeStr(r.customer_name) || (locale === 'de' ? 'Müşteri' : 'Customer');
+              const rating = Number(r.rating ?? 0) || 0;
+              const comment = safeStr(r.comment);
+              const dateText = safeDate(locale, r.review_date);
 
-                  {r.comment && (
-                    <p className="mb-1" style={{ fontSize: 14 }}>
-                      {r.comment}
-                    </p>
-                  )}
-
-                  {r.review_date && (
-                    <div className="text-muted" style={{ fontSize: 12 }}>
-                      {new Date(r.review_date).toLocaleDateString(locale)}
+              return (
+                <SwiperSlide key={r.id}>
+                  <div className="product-review-slide small">
+                    <div className="d-flex justify-content-between mb-1">
+                      <strong>{name}</strong>
+                      <span className="text-muted">{rating} / 5</span>
                     </div>
-                  )}
-                </div>
-              </SwiperSlide>
-            ))}
+
+                    {comment ? <p className="mb-1 product-review-comment">{comment}</p> : null}
+
+                    {dateText ? (
+                      <div className="text-muted product-review-date">{dateText}</div>
+                    ) : null}
+                  </div>
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
 
-          {/* Ok butonları */}
           <div className="product-review-navigation">
             <button
+              type="button"
               className="product-review-button-prev"
               aria-label={locale === 'de' ? 'Önceki yorum' : 'Previous testimonial'}
+              disabled={list.length <= 1}
             >
               <FiChevronLeft />
             </button>
             <button
+              type="button"
               className="product-review-button-next"
               aria-label={locale === 'de' ? 'Sonraki yorum' : 'Next testimonial'}
+              disabled={list.length <= 1}
             >
               <FiChevronRight />
             </button>
           </div>
         </div>
-      )}
+      ) : null}
 
+      {/* Eski görünümü koru; sadece inline style'ları class'a taşıdık */}
       <style jsx>{`
         .product-review-slider-wrapper {
           position: relative;
@@ -123,6 +146,14 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
           display: flex;
           flex-direction: column;
           justify-content: space-between;
+        }
+
+        .product-review-comment {
+          font-size: 14px;
+        }
+
+        .product-review-date {
+          font-size: 12px;
         }
 
         .product-review-navigation {
@@ -150,6 +181,7 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
           height: 18px;
         }
 
+        /* Dark mode override (eski davranış kalsın) */
         @media (prefers-color-scheme: dark) {
           .product-review-slide {
             background: #020617;

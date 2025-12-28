@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/pages/product/[slug].tsx
-// Ensotek – Product Detail Page + SEO (HOOK-SAFE)
+// Ensotek – Product Detail Page (by slug) + SEO
 //   - Route: /product/[slug]
-//   - Page-specific title/desc via next/head
-//   - Canonical/og:url/hreflang: single source = _document (SSR) / Layout filtering
+//   - i18n: useLocaleShort() + site_settings.ui_products
+//   - SEO: seo -> site_seo fallback + product.meta_* override (NO canonical here)
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
 
 'use client';
@@ -15,153 +16,171 @@ import { useRouter } from 'next/router';
 import Banner from '@/components/layout/banner/Breadcrum';
 import ProductDetail from '@/components/containers/product/ProductDetail';
 import ProductMore from '@/components/containers/product/ProductMore';
-import Feedback from '@/components/containers/feedback/Feedback';
 import ServiceCta from '@/components/containers/cta/ServiceCta';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+
+// SEO
+import { buildMeta } from '@/seo/meta';
+import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 
 // data
 import { useGetSiteSettingByKeyQuery, useGetProductBySlugQuery } from '@/integrations/rtk/hooks';
 
 // helpers
 import { excerpt } from '@/shared/text';
-import { asObj } from '@/seo/pageSeo';
+import { toCdnSrc } from '@/shared/media';
 
 // ui skeleton
 import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
-const toLocaleShort = (l: unknown) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+function readSlug(q: unknown): string {
+  if (typeof q === 'string') return q;
+  if (Array.isArray(q)) return String(q[0] ?? '');
+  return '';
+}
+
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
+}
 
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();
+  const locale = useLocaleShort();
 
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const { ui } = useUiSection('ui_products', locale as any);
 
-  const { ui } = useUiSection('ui_products', locale);
-
-  const slugParam = router.query.slug;
-  const slug = useMemo(() => {
-    if (typeof slugParam === 'string') return slugParam;
-    if (Array.isArray(slugParam)) return slugParam[0] ?? '';
-    return '';
-  }, [slugParam]);
-
+  const slug = useMemo(() => readSlug(router.query.slug).trim(), [router.query.slug]);
   const isSlugReady = !!slug;
 
-  const listTitleFallback = useMemo(
-    () => ui('ui_products_page_title', locale === 'de' ? 'Ürünler' : 'Products'),
-    [ui, locale],
-  );
+  // UI fallbacks (minimum; DB/UI overrides should win)
+  const listTitleFallback = ui('ui_products_page_title', 'Products');
+  const detailTitleFallback = ui('ui_products_detail_page_title', 'Product');
 
-  const detailTitleFallback = useMemo(
-    () => ui('ui_products_detail_page_title', locale === 'de' ? 'Ürün Detayı' : 'Product'),
-    [ui, locale],
-  );
-
-  const detailMetaTitleFallback = useMemo(
-    () => ui('ui_products_detail_meta_title', detailTitleFallback),
-    [ui, detailTitleFallback],
-  );
-
-  const detailMetaDescFallback = useMemo(
-    () =>
-      ui(
-        'ui_products_detail_meta_description',
-        locale === 'de'
-          ? 'Ürün detayları, teknik özellikler ve teklif talebi için inceleyiniz.'
-          : 'View product details, technical specifications, and request a quote.',
-      ),
-    [ui, locale],
-  );
-
-  // Global SEO settings (final fallback desc)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  // Global SEO settings (seo -> site_seo fallback)
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
+  // Product data
   const { data: product, isLoading: isProductLoading } = useGetProductBySlugQuery(
     { slug, locale },
     { skip: !isSlugReady },
   );
 
   const bannerTitle = useMemo(() => {
-    const t = String(product?.title ?? '').trim();
-    return t || detailTitleFallback || listTitleFallback;
-  }, [product?.title, detailTitleFallback, listTitleFallback]);
+    return (
+      safeStr((product as any)?.title) ||
+      safeStr(detailTitleFallback) ||
+      safeStr(listTitleFallback) ||
+      'Product'
+    );
+  }, [product, detailTitleFallback, listTitleFallback]);
+
+  // --- SEO fields ---
+  const pageTitleRaw = useMemo(() => {
+    const globalFallback = safeStr(detailTitleFallback) || safeStr(listTitleFallback) || 'Product';
+
+    if (!isSlugReady) return globalFallback;
+
+    return (
+      safeStr((product as any)?.meta_title) ||
+      safeStr((product as any)?.title) ||
+      safeStr(bannerTitle) ||
+      globalFallback
+    );
+  }, [isSlugReady, product, bannerTitle, detailTitleFallback, listTitleFallback]);
+
+  const pageDescRaw = useMemo(() => {
+    const globalDesc = safeStr((seo as any)?.description) || '';
+
+    if (!isSlugReady) return globalDesc;
+
+    const metaDesc = safeStr((product as any)?.meta_description);
+    const desc = safeStr((product as any)?.description);
+
+    // UI fallback (optional)
+    const uiFallback = safeStr(
+      ui(
+        'ui_products_detail_meta_description',
+        'View product details, technical specifications, and request a quote.',
+      ),
+    );
+
+    return metaDesc || (desc ? excerpt(desc, 160).trim() : '') || uiFallback || globalDesc || '';
+  }, [isSlugReady, product, seo, ui]);
+
+  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(
+    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
+    [seo],
+  );
 
   const pageTitle = useMemo(() => {
-    if (!isSlugReady) return String(detailTitleFallback || listTitleFallback).trim();
+    const t = titleTemplate.includes('%s')
+      ? titleTemplate.replace('%s', pageTitleRaw)
+      : pageTitleRaw;
+    return safeStr(t);
+  }, [titleTemplate, pageTitleRaw]);
 
-    const metaTitle = String((product as any)?.meta_title ?? '').trim();
-    const title = String(product?.title ?? '').trim();
+  const ogImage = useMemo(() => {
+    const fallbackSeoImg = pickFirstImageFromSeo(seo);
+    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    // ✅ primary: product meta/title; fallback: UI fallback
-    return (
-      metaTitle || title || String(detailMetaTitleFallback).trim() || String(bannerTitle).trim()
-    );
-  }, [
-    isSlugReady,
-    detailTitleFallback,
-    listTitleFallback,
-    product,
-    detailMetaTitleFallback,
-    bannerTitle,
-  ]);
+    // Sende alan adı farklı olabilir: featured_image / image_url / cover...
+    const rawImg = safeStr((product as any)?.featured_image || (product as any)?.image_url);
+    const cdnImg = rawImg ? toCdnSrc(rawImg, 1200, 630, 'fill') || rawImg : '';
 
-  const pageDesc = useMemo(() => {
-    const globalDesc = String((seo as any)?.description ?? '').trim();
+    return (cdnImg && absUrl(cdnImg)) || fallback || absUrl('/favicon.svg');
+  }, [product, seo]);
 
-    if (!isSlugReady) return globalDesc || '';
+  const headSpecs = useMemo(() => {
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
 
-    const metaDesc = String((product as any)?.meta_description ?? '').trim();
-    const desc = String((product as any)?.description ?? '').trim();
+    // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
+    return buildMeta({
+      title: pageTitle,
+      description: pageDescRaw,
+      image: ogImage || undefined,
+      siteName: seoSiteName,
+      noindex,
 
-    // ✅ primary: product meta/description excerpt; fallback: UI fallback; last: global seo
-    return (
-      metaDesc ||
-      excerpt(desc, 160).trim() ||
-      String(detailMetaDescFallback).trim() ||
-      globalDesc ||
-      ''
-    );
-  }, [isSlugReady, product, seo, detailMetaDescFallback]);
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
+    });
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+
+  const isLoadingState = !isSlugReady || (isProductLoading && !product);
 
   return (
     <>
       <Head>
-        <title key="title">{pageTitle}</title>
-        <meta key="description" name="description" content={pageDesc} />
+        <title>{pageTitle}</title>
+
+        {headSpecs.map((spec, idx) => {
+          if (spec.kind === 'link') {
+            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+          }
+          if (spec.kind === 'meta-name') {
+            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+          }
+          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
+        })}
       </Head>
 
       <Banner title={bannerTitle} />
 
-      {!isSlugReady ? (
-        <div className="service__area pt-120 pb-90">
-          <div className="container">
-            <div className="row">
-              <div className="col-12">
-                <SkeletonStack>
-                  <SkeletonLine style={{ height: 24 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
-                </SkeletonStack>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : isProductLoading && !product ? (
+      {isLoadingState ? (
         <div className="service__area pt-120 pb-90">
           <div className="container">
             <div className="row">
@@ -179,7 +198,6 @@ const ProductDetailPage: React.FC = () => {
         <>
           <ProductDetail />
           <ProductMore />
-          <Feedback />
           <ServiceCta />
         </>
       )}

@@ -1,5 +1,5 @@
 -- =============================================================
--- 150_offers.sql
+-- 150_offers.sql  (FINAL)
 -- offers + offer_number_counters (schema)
 -- =============================================================
 
@@ -8,6 +8,7 @@ SET time_zone = '+00:00';
 
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- FK nedeniyle önce offers drop etmek daha güvenli
 DROP TABLE IF EXISTS `offers`;
 DROP TABLE IF EXISTS `offer_number_counters`;
 
@@ -34,7 +35,9 @@ CREATE TABLE IF NOT EXISTS `offers` (
   `status`           VARCHAR(32)   NOT NULL DEFAULT 'new',
 
   `locale`           VARCHAR(10)   DEFAULT NULL,
-  `country_code`     VARCHAR(2)    DEFAULT NULL,
+
+  -- ✅ Serbest ülke metni: Almanya / Deutschland / Germany / DE vb.
+  `country_code`     VARCHAR(80)   DEFAULT NULL,
 
   `customer_name`    VARCHAR(255)  NOT NULL,
   `company_name`     VARCHAR(255)  DEFAULT NULL,

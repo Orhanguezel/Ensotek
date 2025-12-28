@@ -1,11 +1,15 @@
 -- =============================================================
--- 040.1_site_meta.sql
--- Ensotek – Default Meta + Global SEO (NEW STANDARD) [FIXED]
+-- 040.1_site_meta.sql  (FINAL)
+-- Ensotek – Default Meta + Global SEO (NEW STANDARD)
 --
--- Rules:
---   - seo + site_seo: global defaults => locale='*'
---   - seo + site_seo: localized overrides => locale IN ('tr','en','de')
---   - site_meta_default: localized only (per-locale), NO '*'
+-- Goals:
+--   - Fix SEO tool warnings:
+--       * Meta title: remove disallowed characters (avoid: | & etc.)
+--       * Meta description: keep <= ~160 chars
+--   - Future-proof:
+--       * seo + site_seo: global fallback => locale='*'
+--       * seo + site_seo: localized overrides => locale IN ('tr','en','de')
+--       * site_meta_default: add '*' fallback + per-locale overrides
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -36,8 +40,18 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 -- -------------------------------------------------------------
 SET @OG_DEFAULT := '/img/og-default.jpg';
 
-SET @BRAND_SHORT_TR := 'Ensotek Su Soğutma Kuleleri';
-SET @BRAND_LEGAL_TR := 'ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti';
+-- Title policies:
+-- - Avoid: | & " ' < > etc. (some SEO tools flag these)
+-- - Use: "–" as separator, and "and/und/ve" instead of "&"
+
+SET @BRAND_TR := 'Ensotek Su Sogutma Kuleleri ve Teknolojileri';
+SET @BRAND_EN := 'Ensotek Cooling Towers and Technologies';
+SET @BRAND_DE := 'Ensotek Kuehltuerme und Technologien';
+
+-- Concise descriptions (target: ~150-160 chars)
+SET @DESC_TR := 'CTP malzemeden acik ve kapali tip su sogutma kuleleri. Imaalat ve montaj. Bakim, onarim, modernizasyon, test ve yedek parca.';
+SET @DESC_EN := 'Open and closed-circuit FRP cooling towers. Manufacturing and installation. Maintenance, repair, modernization, performance testing and spare parts.';
+SET @DESC_DE := 'Offene und geschlossene GFK Kuehltuerme. Herstellung und Montage. Wartung, Reparatur, Modernisierung, Leistungstests und Ersatzteile.';
 
 -- =============================================================
 -- GLOBAL SEO DEFAULTS (locale='*')  --> NÖTR/GENEL DEFAULT
@@ -47,15 +61,18 @@ SET @BRAND_LEGAL_TR := 'ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendisl
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
-  UUID(),
+  COALESCE(
+    (SELECT `id` FROM `site_settings` WHERE `key`='seo' AND `locale`='*' LIMIT 1),
+    UUID()
+  ),
   'seo',
   '*',
   CAST(
     JSON_OBJECT(
       'site_name',      'Ensotek',
       'title_default',  'Ensotek',
-      'title_template', '%s | Ensotek',
-      'description',    'Ensotek — Cooling towers and industrial cooling solutions.',
+      'title_template', '%s – Ensotek',
+      'description',    'Industrial cooling solutions and cooling towers.',
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -83,15 +100,18 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
-  UUID(),
+  COALESCE(
+    (SELECT `id` FROM `site_settings` WHERE `key`='site_seo' AND `locale`='*' LIMIT 1),
+    UUID()
+  ),
   'site_seo',
   '*',
   CAST(
     JSON_OBJECT(
       'site_name',      'Ensotek',
       'title_default',  'Ensotek',
-      'title_template', '%s | Ensotek',
-      'description',    'Ensotek — Cooling towers and industrial cooling solutions.',
+      'title_template', '%s – Ensotek',
+      'description',    'Industrial cooling solutions and cooling towers.',
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -123,21 +143,15 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='seo' AND `locale`='tr' LIMIT 1), UUID()),
   'seo',
   'tr',
   CAST(
     JSON_OBJECT(
-      'site_name',      @BRAND_SHORT_TR,
-      'title_default',  'Ensotek | Su Soğutma Kuleleri',
-      'title_template', '%s | Ensotek',
-      'description',
-        CONCAT(
-          @BRAND_LEGAL_TR,
-          ' — Camelyaf Takviyeli Polyester (CTP) malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri imalatı ve montajı. ',
-          'Ayrıca mevcut su soğutma kulelerinin bakım-onarım, modernizasyon, performans testleri ve yedek parça temini. ',
-          'Kaliteli ürün ve hizmet ile uzun ömürlü çözümler Ensotek’in birinci önceliğidir.'
-        ),
+      'site_name',      @BRAND_TR,
+      'title_default',  @BRAND_TR,
+      'title_template', '%s – Ensotek',
+      'description',    @DESC_TR,
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -158,16 +172,15 @@ VALUES
   NOW(3)
 ),
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='seo' AND `locale`='en' LIMIT 1), UUID()),
   'seo',
   'en',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek Cooling Towers',
-      'title_default',  'Ensotek | Cooling Towers & Technologies',
-      'title_template', '%s | Ensotek',
-      'description',
-        'ENSOTEK Cooling Towers & Technologies — Manufacturing and installation of open-circuit and closed-circuit cooling towers made of FRP (fiber-reinforced plastic). Maintenance & repair, modernization, performance testing and spare parts supply for existing cooling towers. Quality and long-lasting solutions are our top priority.',
+      'site_name',      @BRAND_EN,
+      'title_default',  @BRAND_EN,
+      'title_template', '%s – Ensotek',
+      'description',    @DESC_EN,
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -188,16 +201,15 @@ VALUES
   NOW(3)
 ),
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='seo' AND `locale`='de' LIMIT 1), UUID()),
   'seo',
   'de',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek Kühltürme',
-      'title_default',  'Ensotek | Kühltürme & Technologien',
-      'title_template', '%s | Ensotek',
-      'description',
-        'ENSOTEK — Herstellung und Montage von offenen und geschlossenen Kühltürmen aus GFK (glasfaserverstärkter Kunststoff). Wartung, Reparatur, Modernisierung, Leistungstests und Ersatzteilversorgung für bestehende Kühltürme. Qualität und langlebige Lösungen haben für uns höchste Priorität.',
+      'site_name',      @BRAND_DE,
+      'title_default',  @BRAND_DE,
+      'title_template', '%s – Ensotek',
+      'description',    @DESC_DE,
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -221,11 +233,11 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
--- site_seo overrides (fallback) – seo ile aynı tutulur
+-- site_seo overrides (fallback) – seo ile aynı tutulur (kopya)
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='site_seo' AND `locale`='tr' LIMIT 1), UUID()),
   'site_seo',
   'tr',
   (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='tr' LIMIT 1),
@@ -233,7 +245,7 @@ VALUES
   NOW(3)
 ),
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='site_seo' AND `locale`='en' LIMIT 1), UUID()),
   'site_seo',
   'en',
   (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='en' LIMIT 1),
@@ -241,7 +253,7 @@ VALUES
   NOW(3)
 ),
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='site_seo' AND `locale`='de' LIMIT 1), UUID()),
   'site_seo',
   'de',
   (SELECT `value` FROM `site_settings` WHERE `key`='seo' AND `locale`='de' LIMIT 1),
@@ -253,36 +265,57 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 -- =============================================================
--- site_meta_default (localized only) – tr/en/de  (NO '*')
+-- site_meta_default
+-- - Add '*' fallback so new locales won't break
+-- - Keep per-locale overrides for tr/en/de
 -- =============================================================
 
+-- '*' fallback (neutral EN)
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='site_meta_default' AND `locale`='*' LIMIT 1), UUID()),
+  'site_meta_default',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'title',       'Ensotek',
+      'description', 'Industrial cooling solutions and cooling towers.',
+      'keywords',    'ensotek, cooling tower, industrial cooling, FRP'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+)
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+-- tr/en/de overrides
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='site_meta_default' AND `locale`='tr' LIMIT 1), UUID()),
   'site_meta_default',
   'tr',
   CAST(
     JSON_OBJECT(
-      'title',       'Ensotek | Su Soğutma Kuleleri',
-      'description', CONCAT(
-        @BRAND_LEGAL_TR,
-        ' — CTP malzemeden Açık Tip ve Kapalı Tip Su Soğutma Kuleleri. Bakım-onarım, modernizasyon, performans testleri ve yedek parça.'
-      ),
-      'keywords',    'ensotek, su soğutma kulesi, soğutma kulesi, ctp, camelyaf takviyeli polyester, açık tip, kapalı tip, modernizasyon, bakım onarım, performans testi, yedek parça'
+      'title',       @BRAND_TR,
+      'description', @DESC_TR,
+      'keywords',    'ensotek, su sogutma kulesi, sogutma kulesi, ctp, camelyaf takviyeli polyester, acik tip, kapali tip, modernizasyon, bakim onarim, test, yedek parca'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),
   NOW(3)
 ),
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='site_meta_default' AND `locale`='en' LIMIT 1), UUID()),
   'site_meta_default',
   'en',
   CAST(
     JSON_OBJECT(
-      'title',       'Ensotek | Cooling Towers & Technologies',
-      'description', 'ENSOTEK — Open-circuit and closed-circuit cooling towers made of FRP. Installation, maintenance & repair, modernization, performance testing and spare parts.',
+      'title',       @BRAND_EN,
+      'description', @DESC_EN,
       'keywords',    'ensotek, cooling tower, FRP, fiber reinforced plastic, open circuit, closed circuit, modernization, maintenance, repair, performance testing, spare parts'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
@@ -290,14 +323,14 @@ VALUES
   NOW(3)
 ),
 (
-  UUID(),
+  COALESCE((SELECT `id` FROM `site_settings` WHERE `key`='site_meta_default' AND `locale`='de' LIMIT 1), UUID()),
   'site_meta_default',
   'de',
   CAST(
     JSON_OBJECT(
-      'title',       'Ensotek | Kühltürme & Technologien',
-      'description', 'ENSOTEK — Offene und geschlossene Kühltürme aus GFK. Montage, Wartung, Reparatur, Modernisierung, Leistungstests und Ersatzteile.',
-      'keywords',    'ensotek, kühlturm, GFK, glasfaserverstärkter kunststoff, offen, geschlossen, modernisierung, wartung, reparatur, leistungstest, ersatzteile'
+      'title',       @BRAND_DE,
+      'description', @DESC_DE,
+      'keywords',    'ensotek, kuehlturm, GFK, glasfaserverstaerkter kunststoff, offen, geschlossen, modernisierung, wartung, reparatur, leistungstest, ersatzteile'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),

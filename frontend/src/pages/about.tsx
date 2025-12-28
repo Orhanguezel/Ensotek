@@ -13,15 +13,14 @@ import React, { useMemo } from 'react';
 import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
-import AboutCounter from '@/components/containers/counter/AboutCounter';
 import AboutPageContent from '@/components/containers/about/AboutPageContent';
-import TeamPageContent from '@/components/containers/team/TeamPageContent';
+import AboutCounter from '@/components/containers/counter/AboutCounter';
 import Sponsor from '@/components/containers/references/References';
-import Feedback from '@/components/containers/feedback/Feedback';
 
-// i18n
-import { useResolvedLocale } from '@/i18n/locale';
+// i18n + UI
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { isValidUiText } from '@/i18n/uiText';
 
 // SEO
 import { buildMeta } from '@/seo/meta';
@@ -38,41 +37,34 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
-
 const AboutPage: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const locale = useLocaleShort(); // ✅ tek ve temiz: short locale
 
-  const { ui } = useUiSection('ui_about', locale);
+  const { ui } = useUiSection('ui_about', locale as any);
 
-  // Banner title (UI)
-  const bannerTitle = ui(
-    'ui_about_page_title',
-    locale === 'de' ? 'Hakkımızda' : locale === 'de' ? 'Über uns' : 'About Us',
-  );
+  // -----------------------------
+  // UI (Banner Title)
+  // -----------------------------
+  const bannerTitle = useMemo(() => {
+    const key = 'ui_about_page_title';
+    const v = String(ui(key, '') || '').trim();
+    return isValidUiText(v, key) ? v : 'About Us';
+  }, [ui]);
 
+  // -----------------------------
   // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: 'seo',
-    locale,
-  });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: 'site_seo',
-    locale,
-  });
+  // -----------------------------
+  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
     const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
     return asObj(raw) ?? {};
   }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
 
+  // -----------------------------
   // About custom pages (meta override için: ilk published kayıt)
+  // -----------------------------
   const { data: aboutData } = useListCustomPagesPublicQuery({
     module_key: 'about',
     locale,
@@ -83,44 +75,63 @@ const AboutPage: React.FC = () => {
 
   const primary = useMemo(() => {
     const items: CustomPageDto[] = (aboutData?.items ?? []) as any;
-    const published = items.filter((p) => p.is_published);
-    return published[0];
-  }, [aboutData]);
+    const published = items.filter((p) => p?.is_published);
+    return published[0] ?? null;
+  }, [aboutData?.items]);
 
-  // --- SEO: Title/Description (UI meta overrides + custom_page meta) ---
-  const titleFallback = ui(
-    'ui_about_fallback_title',
-    locale === 'de'
-      ? 'Ensotek Su Soğutma Kuleleri Hakkında'
-      : locale === 'de'
-      ? 'Über Ensotek Wasserkühltürme'
-      : 'About Ensotek Water Cooling Towers',
+  // -----------------------------
+  // SEO: title/description sources (UI -> custom_page -> seo)
+  // -----------------------------
+  const pageTitleRaw = useMemo(() => {
+    const key = 'ui_about_meta_title';
+
+    const fromUi = String(ui(key, '') || '').trim();
+    if (isValidUiText(fromUi, key)) return fromUi;
+
+    const fromPageMeta = String(primary?.meta_title ?? '').trim();
+    if (fromPageMeta) return fromPageMeta;
+
+    const fromPageTitle = String(primary?.title ?? '').trim();
+    if (fromPageTitle) return fromPageTitle;
+
+    // ✅ tek fallback (dile göre ternary yok)
+    return 'About Ensotek';
+  }, [ui, primary?.meta_title, primary?.title]);
+
+  const pageDescRaw = useMemo(() => {
+    const key = 'ui_about_meta_description';
+
+    const fromUi = String(ui(key, '') || '').trim();
+    if (isValidUiText(fromUi, key)) return fromUi;
+
+    const fromPageMeta = String(primary?.meta_description ?? '').trim();
+    if (fromPageMeta) return fromPageMeta;
+
+    const fromSummary = String(primary?.summary ?? '').trim();
+    if (fromSummary) return fromSummary;
+
+    const fromExcerpt = excerpt(primary?.content_html ?? '', 160).trim();
+    if (fromExcerpt) return fromExcerpt;
+
+    const fromUiDesc = String(ui('ui_about_page_description', '') || '').trim();
+    if (fromUiDesc && isValidUiText(fromUiDesc, 'ui_about_page_description')) return fromUiDesc;
+
+    const fromSeo = String((seo as any)?.description ?? '').trim();
+    if (fromSeo) return fromSeo;
+
+    // ✅ tek fallback (dile göre ternary yok)
+    return 'Information about Ensotek, our company and capabilities.';
+  }, [ui, primary?.meta_description, primary?.summary, primary?.content_html, seo]);
+
+  const seoSiteName = useMemo(
+    () => String((seo as any)?.site_name ?? '').trim() || 'Ensotek',
+    [seo],
   );
 
-  const pageTitleRaw =
-    String(ui('ui_about_meta_title', '') || '').trim() ||
-    (primary?.meta_title ?? '').trim() ||
-    (primary?.title ?? '').trim() ||
-    String(titleFallback).trim();
-
-  const descFallback =
-    locale === 'de'
-      ? 'Ensotek hakkında bilgi, kurumsal yaklaşımımız ve faaliyet alanlarımız.'
-      : locale === 'de'
-      ? 'Informationen über Ensotek, unser Unternehmen und unsere Kompetenzen.'
-      : 'Information about Ensotek, our company and capabilities.';
-
-  const pageDescRaw =
-    String(ui('ui_about_meta_description', '') || '').trim() ||
-    (primary?.meta_description ?? '').trim() ||
-    (primary?.summary ?? '').trim() ||
-    excerpt(primary?.content_html ?? '', 160).trim() ||
-    String(ui('ui_about_page_description', descFallback) || '').trim() ||
-    String(seo?.description ?? '').trim() ||
-    '';
-
-  const seoSiteName = String(seo?.site_name ?? '').trim() || 'Ensotek';
-  const titleTemplate = String(seo?.title_template ?? '').trim() || '%s | Ensotek';
+  const titleTemplate = useMemo(
+    () => String((seo as any)?.title_template ?? '').trim() || '%s | Ensotek',
+    [seo],
+  );
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
@@ -130,18 +141,18 @@ const AboutPage: React.FC = () => {
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = (primary?.featured_image ?? '').trim();
+    const pageImgRaw = String(primary?.featured_image ?? '').trim();
     const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
 
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.ico');
+    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
   }, [primary?.featured_image, seo]);
 
   const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
     const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
 
     // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
@@ -176,9 +187,7 @@ const AboutPage: React.FC = () => {
       <Banner title={bannerTitle} />
       <AboutPageContent />
       <AboutCounter />
-      <TeamPageContent />
       <Sponsor />
-      <Feedback />
     </>
   );
 };

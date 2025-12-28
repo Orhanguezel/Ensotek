@@ -1,77 +1,148 @@
 -- =============================================================
--- FILE: 052.3_custom_pages_news_hotel_tech_antalya.seed.sql
--- NEWS – custom_pages + custom_pages_i18n
--- Yeni haber: “Hotel-Tech Antalya Fuarını Başarıyla Tamamladık!”
--- Diller: TR / EN / DE
+-- FILE: 052.3_custom_pages_news_hotel_tech_antalya.seed.sql  (FINAL / SCHEMA-OK)
+-- Ensotek – NEWS Custom Page Seed (TR/EN/DE)
+-- Haber: “Hotel-Tech Antalya Fuarını Başarıyla Tamamladık!”
+-- ✅ module_key artık PARENT: custom_pages.module_key = 'news'
+-- ✅ i18n içinde module_key YOK
+-- ✅ multi-image gallery (images JSON_ARRAY)
+-- ✅ deterministic i18n IDs
+-- ✅ NO block comments
 -- =============================================================
 
 SET NAMES utf8mb4;
+SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
-/* KATEGORİ ID’LERİ (011 & 012 ile hizalı) */
-SET @CAT_NEWS_GENERAL  := 'aaaa2001-1111-4111-8111-aaaaaaaa2001'; -- GENEL HABERLER
-SET @CAT_NEWS_DUYS     := 'aaaa2003-1111-4111-8111-aaaaaaaa2003'; -- DUYURULAR
-SET @CAT_NEWS_PRESS    := 'aaaa2004-1111-4111-8111-aaaaaaaa2004'; -- BASINDA ENSOTEK
+-- -------------------------------------------------------------
+-- CATEGORY / SUB CATEGORY
+-- -------------------------------------------------------------
+SET @CAT_NEWS_GENERAL  := 'aaaa2001-1111-4111-8111-aaaaaaaa2001';
+SET @CAT_NEWS_DUYS     := 'aaaa2003-1111-4111-8111-aaaaaaaa2003';
+SET @CAT_NEWS_PRESS    := 'aaaa2004-1111-4111-8111-aaaaaaaa2004';
+SET @SUB_NEWS_GENERAL_ANN := 'bbbb2001-1111-4111-8111-bbbbbbbb2001';
 
-/* ALT KATEGORİLER (012_catalog_subcategories.sql) */
-SET @SUB_NEWS_GENERAL_ANN  := 'bbbb2001-1111-4111-8111-bbbbbbbb2001'; -- Duyurular (genel)
-
-/* SABİT PAGE ID (deterministik) */
+-- -------------------------------------------------------------
+-- PAGE ID (deterministik)
+-- -------------------------------------------------------------
 SET @NEWS_HOTEL_TECH_ANTALYA := '22220005-2222-4222-8222-222222220005';
 
-/* FEATURED IMAGE (Cloudinary) – ilk görseli featured yaptık */
+-- -------------------------------------------------------------
+-- MODULE KEY (PARENT)
+-- -------------------------------------------------------------
+SET @MODULE_KEY_NEWS := 'news';
+
+-- -------------------------------------------------------------
+-- FEATURED + GALLERY IMAGES (random)
+-- -------------------------------------------------------------
 SET @IMG_NEWS_HOTEL_TECH_ANTALYA :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958400/uploads/metahub/news-images/img-20250618-wa0022-1752958399182-621396987.webp';
 
+SET @IMG_NEWS_HOTEL_TECH_ANTALYA_2 :=
+  'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=80';
+SET @IMG_NEWS_HOTEL_TECH_ANTALYA_3 :=
+  'https://images.unsplash.com/photo-1520256862855-398228c41684?auto=format&fit=crop&w=1400&q=80';
+SET @IMG_NEWS_HOTEL_TECH_ANTALYA_4 :=
+  'https://images.unsplash.com/photo-1551887373-6f2a29b90a0a?auto=format&fit=crop&w=1400&q=80';
+SET @IMG_NEWS_HOTEL_TECH_ANTALYA_5 :=
+  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80';
+
+-- -------------------------------------------------------------
+-- I18N IDS (deterministik)
+-- -------------------------------------------------------------
+SET @I18N_NEWS_HOTEL_TECH_ANTALYA_TR := '66662005-0001-4001-8001-666666662005';
+SET @I18N_NEWS_HOTEL_TECH_ANTALYA_EN := '66662005-0002-4002-8002-666666662005';
+SET @I18N_NEWS_HOTEL_TECH_ANTALYA_DE := '66662005-0003-4003-8003-666666662005';
+
+-- -------------------------------------------------------------
+-- TIMESTAMPS
+-- -------------------------------------------------------------
+SET @DT_CREATED := '2025-07-19 17:20:06.428';
+SET @DT_UPDATED := '2025-07-19 20:53:23.466';
+
 -- -------------------------------------------------------------
 -- PARENT UPSERT (custom_pages)
+-- ✅ module_key BURADA
 -- -------------------------------------------------------------
 INSERT INTO `custom_pages`
-  (`id`, `is_published`, `display_order`,
-   `featured_image`, `featured_image_asset_id`,
-   `category_id`, `sub_category_id`,
-   `created_at`, `updated_at`)
+  (`id`,
+   `module_key`,
+   `is_published`,
+   `display_order`,
+   `order_num`,
+   `featured_image`,
+   `featured_image_asset_id`,
+   `image_url`,
+   `storage_asset_id`,
+   `images`,
+   `storage_image_ids`,
+   `category_id`,
+   `sub_category_id`,
+   `created_at`,
+   `updated_at`)
 VALUES
   (
     @NEWS_HOTEL_TECH_ANTALYA,
+    @MODULE_KEY_NEWS,
     1,
+    104,
     104,
     @IMG_NEWS_HOTEL_TECH_ANTALYA,
     NULL,
+    @IMG_NEWS_HOTEL_TECH_ANTALYA,
+    NULL,
+    JSON_ARRAY(
+      @IMG_NEWS_HOTEL_TECH_ANTALYA,
+      @IMG_NEWS_HOTEL_TECH_ANTALYA_2,
+      @IMG_NEWS_HOTEL_TECH_ANTALYA_3,
+      @IMG_NEWS_HOTEL_TECH_ANTALYA_4,
+      @IMG_NEWS_HOTEL_TECH_ANTALYA_5
+    ),
+    JSON_ARRAY(),
     @CAT_NEWS_DUYS,
     @SUB_NEWS_GENERAL_ANN,
-    '2025-07-19 17:20:06.428',
-    '2025-07-19 20:53:23.466'
+    @DT_CREATED,
+    @DT_UPDATED
   )
 ON DUPLICATE KEY UPDATE
-  `is_published`    = VALUES(`is_published`),
-  `display_order`   = VALUES(`display_order`),
-  `category_id`     = VALUES(`category_id`),
-  `sub_category_id` = VALUES(`sub_category_id`),
-  `featured_image`  = VALUES(`featured_image`),
-  `updated_at`      = VALUES(`updated_at`);
+  `module_key`              = VALUES(`module_key`),
+  `is_published`            = VALUES(`is_published`),
+  `display_order`           = VALUES(`display_order`),
+  `order_num`               = VALUES(`order_num`),
+  `category_id`             = VALUES(`category_id`),
+  `sub_category_id`         = VALUES(`sub_category_id`),
+  `featured_image`          = VALUES(`featured_image`),
+  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
+  `image_url`               = VALUES(`image_url`),
+  `storage_asset_id`        = VALUES(`storage_asset_id`),
+  `images`                  = VALUES(`images`),
+  `storage_image_ids`       = VALUES(`storage_image_ids`),
+  `updated_at`              = VALUES(`updated_at`);
 
--- =============================================================
--- I18N – @NEWS_HOTEL_TECH_ANTALYA (TR/EN/DE)
--- content: JSON_OBJECT('html', '...') formatı
--- tags: CSV string
--- =============================================================
+-- -------------------------------------------------------------
+-- I18N UPSERT (custom_pages_i18n)
+-- ✅ module_key yok
+-- -------------------------------------------------------------
 INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
+  (`id`,
+   `page_id`,
+   `locale`,
+   `title`,
+   `slug`,
+   `content`,
    `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
+   `featured_image_alt`,
+   `meta_title`,
+   `meta_description`,
    `tags`,
-   `created_at`, `updated_at`)
+   `created_at`,
+   `updated_at`)
 VALUES
 
--- -------------------------------------------------------------
 -- TR
--- -------------------------------------------------------------
 (
-  UUID(),
+  @I18N_NEWS_HOTEL_TECH_ANTALYA_TR,
   @NEWS_HOTEL_TECH_ANTALYA,
   'tr',
   'Hotel-Tech Antalya Fuarını Başarıyla Tamamladık!',
@@ -79,30 +150,69 @@ VALUES
   JSON_OBJECT(
     'html',
     CONCAT(
-      '<p><strong>Hotel-Tech Antalya</strong> fuarı; yeni inşa edeceğiniz ya da mevcut otelinizin tüm teknik ihtiyaçlarını bir arada görebileceğiniz dünyadaki tek fuardır. ',
-      'Katılımcı profili itibarıyla otel ve tatil köyleri, inşaat firmaları, toplu konutlar, hastaneler, okul ve yurtlar için gerekli altyapı malzemelerini “Dünya Markaları” ile bir arada bulabileceksiniz. ',
-      'Aynı zamanda B2B görüşmelerin yapıldığı bu fuarda, yeni teknolojiler ve ürünlerin anlatıldığı eğitim seminerleriyle son gelişmeleri yakalayabilirsiniz.</p>',
-      '<p>Otel yöneticileri, makina, elektrik, inşaat, çevre ve kimya mühendisleri ile sektör profesyonellerini katılımcılarımızla buluşturuyoruz. ',
-      'Hotel-Tech Antalya olarak yılların deneyimine sahip bir ekip olarak, katılımcı ve ziyaretçilerimizin beklentilerini biliyor ve karşılıyoruz. ',
-      'Katılımcı firma ve kuruluşlarımızın çeşitliliği, kalitesi ve başarısı bunun en güzel göstergesidir.</p>',
-      '<p>Fuar web sitesi için ',
-      '<a href="https://www.hoteltechantalya.com/" target="_blank" rel="noopener noreferrer">tıklayınız</a>.</p>'
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="max-w-4xl mx-auto">',
+          '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">Hotel-Tech Antalya Fuarını Başarıyla Tamamladık!</h1>',
+
+          '<p class="text-slate-700 mb-5">',
+            '<strong>Hotel-Tech Antalya</strong> fuarı kapsamında; otel, resort ve konaklama tesislerinin ',
+            'teknik altyapı ihtiyaçlarına yönelik çözümlerimizi ziyaretçilerimizle buluşturduk. ',
+            'Saha ihtiyaçlarını dinleyerek, farklı tesis tiplerine göre uygulanabilir senaryoları değerlendirdik.',
+          '</p>',
+
+          '<p class="text-slate-700 mb-5">',
+            'Fuar boyunca gerçekleştirdiğimiz <strong>B2B görüşmeler</strong> ile yeni iş bağlantıları kurduk; ',
+            'mevcut iş ortaklarımızla da proje süreçlerini ve teknik gereksinimleri detaylandıran verimli toplantılar yaptık. ',
+            'Çözüm yaklaşımımızı “tasarım + üretim + devreye alma + servis” ekseninde anlattık.',
+          '</p>',
+
+          '<div class="grid md:grid-cols-2 gap-6 mb-6">',
+            '<div class="bg-white border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Öne Çıkanlar</h2>',
+              '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
+                '<li>Otel teknik altyapıları için uçtan uca çözüm yaklaşımı</li>',
+                '<li>İşletme verimliliğini artıran mühendislik odaklı öneriler</li>',
+                '<li>B2B toplantılar: ihtiyaç analizi ve proje ön değerlendirme</li>',
+                '<li>Yeni teknoloji ve ürün tanıtımları</li>',
+              '</ul>',
+            '</div>',
+            '<div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Sonraki Adımlar</h2>',
+              '<p class="text-slate-700">',
+                'Fuar sonrası süreçte, görüşmelerimizi teknik doküman paylaşımı ve teklif çalışmalarına taşıyoruz. ',
+                'Hedefimiz; tesisin ihtiyacına uygun, ölçülebilir performans çıktıları sunan sistemleri doğru mühendislikle konumlandırmak.',
+              '</p>',
+            '</div>',
+          '</div>',
+
+          '<div class="bg-slate-900 text-white rounded-2xl p-6 mb-6">',
+            '<h2 class="text-xl font-semibold mb-2">Teşekkürler</h2>',
+            '<p class="text-white/90">',
+              'Standımızı ziyaret eden tüm misafirlerimize ve iş ortaklarımıza teşekkür ederiz. ',
+              'ENSOTEK olarak sektörde sürdürülebilir çözümler sunmaya ve uluslararası iş birliklerimizi güçlendirmeye devam edeceğiz.',
+            '</p>',
+          '</div>',
+
+          '<p class="text-slate-700">',
+            'Fuar web sitesi için ',
+            '<a class="text-slate-900 underline" href="https://www.hoteltechantalya.com/" target="_blank" rel="noopener noreferrer">buraya tıklayınız</a>.',
+          '</p>',
+        '</div>',
+      '</section>'
     )
   ),
-  'Hotel-Tech Antalya Fuarı''nı başarıyla tamamladık. Standımızı ziyaret eden tüm müşterilerimize teşekkür ederiz.',
+  'Hotel-Tech Antalya Fuarı’nı başarıyla tamamladık. Standımızı ziyaret eden tüm müşterilerimize ve iş ortaklarımıza teşekkür ederiz.',
   'Hotel-Tech Antalya fuarında ENSOTEK standı ve ziyaretçiler',
   'Hotel-Tech Antalya Fuarını Başarıyla Tamamladık! | Ensotek',
-  'ENSOTEK, Hotel-Tech Antalya fuar katılımını başarıyla tamamladı. Fuarda otel ve tesislerin teknik ihtiyaçlarına yönelik çözümler, B2B görüşmeler ve yeni teknolojilere dair seminerler öne çıktı. Detaylar için fuarın resmi web sitesini ziyaret edin.',
-  'ensotek,fuar,hotel-tech,antalya,etkinlik,teknoloji,duyuru,b2b',
-  '2025-07-19 17:20:06.428',
-  '2025-07-19 20:53:23.466'
+  'ENSOTEK, Hotel-Tech Antalya fuar katılımını başarıyla tamamladı. Otel ve tesislerin teknik ihtiyaçlarına yönelik çözümler, B2B görüşmeler ve yeni teknolojiler öne çıktı.',
+  'ensotek,fuar,hotel-tech,antalya,etkinlik,teknoloji,duyuru,b2b,otel',
+  @DT_CREATED,
+  @DT_UPDATED
 ),
 
--- -------------------------------------------------------------
 -- EN
--- -------------------------------------------------------------
 (
-  UUID(),
+  @I18N_NEWS_HOTEL_TECH_ANTALYA_EN,
   @NEWS_HOTEL_TECH_ANTALYA,
   'en',
   'We Successfully Completed the Hotel-Tech Antalya Fair!',
@@ -110,29 +220,67 @@ VALUES
   JSON_OBJECT(
     'html',
     CONCAT(
-      '<p><strong>Hotel-Tech Antalya</strong> is the only fair in the world where you can find all the technical needs of your new or existing hotel in one place. ',
-      'With its participant profile, you will find infrastructure materials required for hotels, holiday resorts, construction companies, mass housing, hospitals, schools, and dormitories together with “World Brands”. ',
-      'At this fair, where B2B meetings take place, educational seminars on new technologies and products will keep you updated with the latest developments.</p>',
-      '<p>We bring together hotel managers, mechanical, electrical, civil, environmental and chemical engineers, and sector professionals with our participants. ',
-      'As Hotel-Tech Antalya, our experienced team understands the expectations of both participants and visitors. ',
-      'The diversity, quality, capabilities, and success of our participant companies and institutions are the best proof of this.</p>',
-      '<p><a href="https://www.hoteltechantalya.com/" target="_blank" rel="noopener noreferrer">Click here</a> for the fair website.</p>'
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="max-w-4xl mx-auto">',
+          '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">We Successfully Completed the Hotel-Tech Antalya Fair!</h1>',
+
+          '<p class="text-slate-700 mb-5">',
+            'At <strong>Hotel-Tech Antalya</strong>, we showcased our solutions designed for the technical infrastructure needs ',
+            'of hotels, resorts, and hospitality facilities. We listened to real operational requirements and evaluated practical implementation scenarios.',
+          '</p>',
+
+          '<p class="text-slate-700 mb-5">',
+            'Through <strong>B2B meetings</strong>, we established new business connections and held productive discussions with existing partners. ',
+            'We shared our end-to-end approach covering design, manufacturing, commissioning, and after-sales support—tailored to facility requirements.',
+          '</p>',
+
+          '<div class="grid md:grid-cols-2 gap-6 mb-6">',
+            '<div class="bg-white border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Highlights</h2>',
+              '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
+                '<li>End-to-end solutions for hospitality technical infrastructure</li>',
+                '<li>Engineering-driven recommendations to improve efficiency</li>',
+                '<li>B2B sessions: needs analysis and project pre-evaluation</li>',
+                '<li>Presentations on new technologies and products</li>',
+              '</ul>',
+            '</div>',
+            '<div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">What’s Next?</h2>',
+              '<p class="text-slate-700">',
+                'After the fair, we are moving forward with technical documentation sharing and quotation work. ',
+                'Our goal is to position the right system with measurable performance outcomes—supported by sound engineering.',
+              '</p>',
+            '</div>',
+          '</div>',
+
+          '<div class="bg-slate-900 text-white rounded-2xl p-6 mb-6">',
+            '<h2 class="text-xl font-semibold mb-2">Thank You</h2>',
+            '<p class="text-white/90">',
+              'We thank all visitors and partners who stopped by our stand. ',
+              'ENSOTEK will continue delivering sustainable solutions and strengthening international collaborations.',
+            '</p>',
+          '</div>',
+
+          '<p class="text-slate-700">',
+            '<a class="text-slate-900 underline" href="https://www.hoteltechantalya.com/" target="_blank" rel="noopener noreferrer">Click here</a> ',
+            'for the fair website.',
+          '</p>',
+        '</div>',
+      '</section>'
     )
   ),
-  'We successfully completed the Hotel-Tech Antalya Fair. We thank all our customers who visited our stand.',
+  'We successfully completed the Hotel-Tech Antalya Fair. We thank all visitors and partners who visited our stand.',
   'ENSOTEK stand at Hotel-Tech Antalya with visitors',
   'Hotel-Tech Antalya: Successfully Completed | Ensotek',
-  'ENSOTEK successfully completed its participation at Hotel-Tech Antalya. The event brings together hotel decision-makers and engineering professionals for B2B meetings, infrastructure solutions, and seminars on new technologies. Visit the official fair website for details.',
-  'ensotek,fair,hotel-tech,antalya,event,technology,announcement,b2b',
-  '2025-07-19 17:20:06.428',
-  '2025-07-19 20:53:23.466'
+  'ENSOTEK successfully completed its participation at Hotel-Tech Antalya, connecting with hospitality decision-makers and engineering professionals through B2B meetings and solution presentations.',
+  'ensotek,fair,hotel-tech,antalya,event,technology,announcement,b2b,hospitality',
+  @DT_CREATED,
+  @DT_UPDATED
 ),
 
--- -------------------------------------------------------------
 -- DE
--- -------------------------------------------------------------
 (
-  UUID(),
+  @I18N_NEWS_HOTEL_TECH_ANTALYA_DE,
   @NEWS_HOTEL_TECH_ANTALYA,
   'de',
   'Wir haben die Hotel-Tech Antalya Messe erfolgreich abgeschlossen!',
@@ -140,25 +288,63 @@ VALUES
   JSON_OBJECT(
     'html',
     CONCAT(
-      '<p>Die <strong>Hotel-Tech Antalya</strong> Messe ist die einzige Messe weltweit, auf der Sie alle technischen Anforderungen für Ihr neues oder bestehendes Hotel an einem Ort finden können. ',
-      'Das Teilnehmerprofil umfasst Hotels und Resorts, Bauunternehmen, Wohnanlagen, Krankenhäuser, Schulen und Wohnheime, die alle notwendigen Infrastrukturmaterialien zusammen mit „Weltmarken“ entdecken können. ',
-      'Auf dieser Messe, bei der auch B2B-Meetings stattfinden, halten Sie Seminare zu neuen Technologien und Produkten auf dem neuesten Stand.</p>',
-      '<p>Wir bringen Hotelmanager, Maschinenbau-, Elektro-, Bau-, Umwelt- und Chemieingenieure sowie Branchenprofis mit unseren Teilnehmern zusammen. ',
-      'Als Hotel-Tech Antalya verfügen wir über jahrelange Erfahrung und kennen die Erwartungen der Teilnehmer und Besucher. ',
-      'Die Vielfalt, Qualität und der Erfolg unserer Teilnehmer sind der beste Beweis dafür.</p>',
-      '<p>Für die Messe-Website ',
-      '<a href="https://www.hoteltechantalya.com/" target="_blank" rel="noopener noreferrer">hier klicken</a>.</p>'
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="max-w-4xl mx-auto">',
+          '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">Wir haben die Hotel-Tech Antalya Messe erfolgreich abgeschlossen!</h1>',
+
+          '<p class="text-slate-700 mb-5">',
+            'Auf der <strong>Hotel-Tech Antalya</strong> präsentierten wir Lösungen für die technische Infrastruktur von Hotels, Resorts und Hospitality-Anlagen. ',
+            'Wir analysierten reale Betriebsanforderungen und bewerteten praxisnahe Umsetzungsszenarien.',
+          '</p>',
+
+          '<p class="text-slate-700 mb-5">',
+            'Durch <strong>B2B-Gespräche</strong> knüpften wir neue Geschäftskontakte und führten produktive Meetings mit bestehenden Partnern. ',
+            'Wir stellten unseren End-to-End Ansatz vor—von Auslegung und Produktion bis Inbetriebnahme und After-Sales Support.',
+          '</p>',
+
+          '<div class="grid md:grid-cols-2 gap-6 mb-6">',
+            '<div class="bg-white border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Highlights</h2>',
+              '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
+                '<li>End-to-End-Lösungen für Hotel-Infrastruktur</li>',
+                '<li>Engineering-Ansatz zur Effizienzsteigerung</li>',
+                '<li>B2B-Meetings: Bedarfserhebung und Projektvorprüfung</li>',
+                '<li>Vorstellungen neuer Technologien und Produkte</li>',
+              '</ul>',
+            '</div>',
+            '<div class="bg-gradient-to-br from-slate-50 to-blue-50 border border-slate-200 rounded-2xl p-6">',
+              '<h2 class="text-xl font-semibold text-slate-900 mb-3">Nächste Schritte</h2>',
+              '<p class="text-slate-700">',
+                'Nach der Messe führen wir den Austausch mit technischen Unterlagen und Angebotsphasen fort. ',
+                'Ziel sind standortgerechte Systeme mit messbaren Leistungskennzahlen—getragen von sauberer Ingenieursarbeit.',
+              '</p>',
+            '</div>',
+          '</div>',
+
+          '<div class="bg-slate-900 text-white rounded-2xl p-6 mb-6">',
+            '<h2 class="text-xl font-semibold mb-2">Danke</h2>',
+            '<p class="text-white/90">',
+              'Wir danken allen Besuchern und Partnern für ihr Interesse. ',
+              'ENSOTEK wird weiterhin nachhaltige Lösungen anbieten und internationale Kooperationen stärken.',
+            '</p>',
+          '</div>',
+
+          '<p class="text-slate-700">',
+            'Zur Messe-Website ',
+            '<a class="text-slate-900 underline" href="https://www.hoteltechantalya.com/" target="_blank" rel="noopener noreferrer">hier klicken</a>.',
+          '</p>',
+        '</div>',
+      '</section>'
     )
   ),
-  'Wir haben die Hotel-Tech Antalya Messe erfolgreich abgeschlossen. Wir danken allen Kunden, die unseren Stand besucht haben.',
+  'Wir haben die Hotel-Tech Antalya Messe erfolgreich abgeschlossen. Wir danken allen Besuchern und Partnern, die unseren Stand besucht haben.',
   'ENSOTEK Messestand auf der Hotel-Tech Antalya mit Besuchern',
   'Hotel-Tech Antalya: Erfolgreich abgeschlossen | Ensotek',
-  'ENSOTEK hat die Teilnahme an der Hotel-Tech Antalya erfolgreich abgeschlossen. Die Messe vereint Entscheider aus der Hotellerie und Ingenieurwesen für B2B-Gespräche, Infrastruktur-Lösungen sowie Seminare zu neuen Technologien und Produkten. Weitere Informationen auf der offiziellen Website.',
-  'ensotek,messe,hotel-tech,antalya,veranstaltung,technologie,ankündigung,b2b',
-  '2025-07-19 17:20:06.428',
-  '2025-07-19 20:53:23.466'
+  'ENSOTEK hat die Teilnahme an der Hotel-Tech Antalya erfolgreich abgeschlossen. Im Fokus standen B2B-Gespräche, Infrastruktur-Lösungen für die Hotellerie und Präsentationen neuer Technologien.',
+  'ensotek,messe,hotel-tech,antalya,veranstaltung,technologie,ankuendigung,b2b,hotel',
+  @DT_CREATED,
+  @DT_UPDATED
 )
-
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),

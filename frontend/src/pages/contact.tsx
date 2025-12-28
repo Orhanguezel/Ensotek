@@ -16,9 +16,10 @@ import Banner from '@/components/layout/banner/Breadcrum';
 import Contact from '@/components/containers/contact/Contact';
 import ContactMap from '@/components/containers/contact/ContactMap';
 
-// i18n
-import { useResolvedLocale } from '@/i18n/locale';
+// i18n + UI
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { isValidUiText } from '@/i18n/uiText';
 
 // SEO helpers
 import { buildMeta } from '@/seo/meta';
@@ -27,29 +28,30 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 // data
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
-
 const ContactPage: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const locale = useLocaleShort();
 
-  const { ui } = useUiSection('ui_contact', locale);
+  const { ui } = useUiSection('ui_contact', locale as any);
 
   // ======================
   // UI / Banner title
   // ======================
   const bannerTitle = useMemo(() => {
+    // Tercih sırası:
+    // 1) ui_contact_page_title (tek alan, en temiz)
+    // 2) ui_contact_subprefix + ui_contact_sublabel (senin mevcut tasarımın)
+    // 3) fallback
+    const keyPage = 'ui_contact_page_title';
+    const fromPage = String(ui(keyPage, '') || '').trim();
+    if (isValidUiText(fromPage, keyPage)) return fromPage;
+
     const p = String(ui('ui_contact_subprefix', '') || '').trim();
     const l = String(ui('ui_contact_sublabel', '') || '').trim();
     const t = `${p} ${l}`.trim();
     if (t) return t;
-    return locale === 'de' ? 'İletişim' : locale === 'de' ? 'Kontakt' : 'Contact';
-  }, [ui, locale]);
+
+    return 'Contact';
+  }, [ui]);
 
   // ======================
   // Global SEO settings
@@ -79,19 +81,33 @@ const ContactPage: React.FC = () => {
   // SEO fields (page-level)
   // ======================
   const pageTitleRaw = useMemo(() => {
-    // ui_contact üzerinden meta override
-    const t = String(ui('ui_contact_meta_title', '') || '').trim();
-    return t || bannerTitle;
+    const key = 'ui_contact_meta_title';
+
+    const fromUi = String(ui(key, '') || '').trim();
+    if (isValidUiText(fromUi, key)) return fromUi;
+
+    return bannerTitle;
   }, [ui, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
-    const uiDesc = String(ui('ui_contact_meta_description', '') || '').trim();
-    return uiDesc || String(seo?.description ?? '').trim() || '';
+    const key = 'ui_contact_meta_description';
+
+    const fromUi = String(ui(key, '') || '').trim();
+    if (isValidUiText(fromUi, key)) return fromUi;
+
+    const fromSeo = String((seo as any)?.description ?? '').trim();
+    if (fromSeo) return fromSeo;
+
+    return '';
   }, [ui, seo]);
 
-  const seoSiteName = useMemo(() => String(seo?.site_name ?? '').trim() || 'Ensotek', [seo]);
+  const seoSiteName = useMemo(
+    () => String((seo as any)?.site_name ?? '').trim() || 'Ensotek',
+    [seo],
+  );
+
   const titleTemplate = useMemo(
-    () => String(seo?.title_template ?? '').trim() || '%s | Ensotek',
+    () => String((seo as any)?.title_template ?? '').trim() || '%s | Ensotek',
     [seo],
   );
 
@@ -105,12 +121,12 @@ const ContactPage: React.FC = () => {
   const ogImage = useMemo(() => {
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-    return fallback || absUrl('/favicon.ico');
+    return fallback || absUrl('/favicon.svg');
   }, [seo]);
 
   const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
     const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
 
     // ✅ canonical + og:url YOK (tek kaynak: _document SSR)

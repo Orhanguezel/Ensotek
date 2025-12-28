@@ -1,9 +1,7 @@
 // =============================================================
 // FILE: src/pages/product/index.tsx
-// Ensotek – Products Page (full list) + SEO (HOOK-SAFE)
-//   - Route: /product
-//   - Page-specific title/desc via next/head (override Layout defaults)
-//   - Canonical/og:url/hreflang: single source = _document (SSR) / Layout filtering
+// Ensotek – Products Page (full list) + SEO — FINAL
+// - Uses shared ProductPageContent with itemType="product"
 // =============================================================
 
 'use client';
@@ -16,62 +14,97 @@ import ProductPageContent from '@/components/containers/product/ProductPageConte
 import Feedback from '@/components/containers/feedback/Feedback';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+
+// SEO
+import { buildMeta } from '@/seo/meta';
+import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 
 // data
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
-// seo helpers
-import { asObj } from '@/seo/pageSeo';
-
-const toLocaleShort = (l: unknown) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
+}
 
 const ProductPage: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_products', locale as any);
 
-  const { ui } = useUiSection('ui_products', locale);
+  const bannerTitle = useMemo(() => ui('ui_products_page_title', 'Products'), [ui]);
 
-  const bannerTitle = useMemo(
-    () => ui('ui_products_page_title', locale === 'de' ? 'Ürünlerimiz' : 'Products'),
-    [ui, locale],
-  );
-
-  // Global SEO settings (only fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
-  // ✅ LIST META = UI (static)
-  const pageTitle = useMemo(() => {
-    const t = String(ui('ui_products_meta_title', '')).trim();
-    return t || String(bannerTitle).trim();
+  const pageTitleRaw = useMemo(() => {
+    const t = safeStr(ui('ui_products_meta_title', ''));
+    return t || safeStr(bannerTitle) || 'Products';
   }, [ui, bannerTitle]);
 
-  const pageDesc = useMemo(() => {
-    const d = String(ui('ui_products_meta_description', '')).trim();
-    return d || String((seo as any)?.description ?? '').trim() || '';
+  const pageDescRaw = useMemo(() => {
+    const d = safeStr(ui('ui_products_meta_description', ''));
+    return d || safeStr((seo as any)?.description) || '';
   }, [ui, seo]);
+
+  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(
+    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
+    [seo],
+  );
+
+  const pageTitle = useMemo(() => {
+    const t = titleTemplate.includes('%s')
+      ? titleTemplate.replace('%s', pageTitleRaw)
+      : pageTitleRaw;
+    return safeStr(t);
+  }, [titleTemplate, pageTitleRaw]);
+
+  const ogImage = useMemo(() => {
+    const fallbackSeoImg = pickFirstImageFromSeo(seo);
+    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    return fallback || absUrl('/favicon.svg');
+  }, [seo]);
+
+  const headSpecs = useMemo(() => {
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+
+    return buildMeta({
+      title: pageTitle,
+      description: pageDescRaw,
+      image: ogImage || undefined,
+      siteName: seoSiteName,
+      noindex,
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
+    });
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   return (
     <>
       <Head>
-        <title key="title">{pageTitle}</title>
-        <meta key="description" name="description" content={pageDesc} />
+        <title>{pageTitle}</title>
+
+        {headSpecs.map((spec, idx) => {
+          if (spec.kind === 'link')
+            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+          if (spec.kind === 'meta-name')
+            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
+        })}
       </Head>
 
       <Banner title={bannerTitle} />
-      <ProductPageContent />
+      <ProductPageContent itemType="product" uiSectionKey="ui_products" basePath="/product" />
       <Feedback />
     </>
   );

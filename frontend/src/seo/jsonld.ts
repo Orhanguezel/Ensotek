@@ -1,6 +1,33 @@
 // src/seo/jsonld.ts
 export type Thing = Record<string, unknown>;
 
+export function graph(items: Thing[]): Thing {
+  // Google, @graph formatını sever; çoklu schema objesini tek scriptte basmak için idealdir.
+  return {
+    '@context': 'https://schema.org',
+    '@graph': Array.isArray(items) ? items : [],
+  };
+}
+
+export function sameAsFromSocials(socials?: Record<string, unknown> | null): string[] {
+  const s = socials && typeof socials === 'object' ? socials : {};
+  const urls: string[] = [];
+
+  for (const key of Object.keys(s)) {
+    const raw = (s as any)[key];
+    const v = typeof raw === 'string' ? raw.trim() : String(raw ?? '').trim();
+    if (!v) continue;
+
+    // Sadece http(s) olanları al
+    if (!/^https?:\/\//i.test(v)) continue;
+
+    urls.push(v);
+  }
+
+  // uniq
+  return Array.from(new Set(urls));
+}
+
 export function org(input: {
   id?: string; // e.g. "https://site.com/#org"
   name: string;
@@ -9,7 +36,6 @@ export function org(input: {
   sameAs?: string[];
 }): Thing {
   return {
-    '@context': 'https://schema.org',
     '@type': 'Organization',
     ...(input.id ? { '@id': input.id } : {}),
     name: input.name,
@@ -27,7 +53,6 @@ export function website(input: {
   searchUrlTemplate?: string;
 }): Thing {
   const base: Thing = {
-    '@context': 'https://schema.org',
     '@type': 'WebSite',
     ...(input.id ? { '@id': input.id } : {}),
     name: input.name,

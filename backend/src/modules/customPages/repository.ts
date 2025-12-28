@@ -1,6 +1,10 @@
 // =============================================================
 // FILE: src/modules/customPages/repository.ts
-// FINAL — slug matching fixed (OR), runtime locales ok
+// FINAL — parent module_key support + LONGTEXT JSON-string arrays normalized
+// - module_key is custom_pages.module_key
+// - images/storage_image_ids are LONGTEXT JSON-string in DB,
+//   but schema transformer exposes them as string[] (most of the time).
+//   Still: normalize defensively (string | string[] | null).
 // =============================================================
 
 import { db } from '@/db/client';
@@ -14,11 +18,11 @@ import { and, asc, desc, eq, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/mysql-core';
 import { randomUUID } from 'crypto';
 
-import { categories, categoryI18n } from '@/modules/categories/schema';
+import { categoryI18n } from '@/modules/categories/schema';
 import { subCategoryI18n } from '@/modules/subcategories/schema';
 
 /** Güvenilir sıralama kolonları */
-type Sortable = 'created_at' | 'updated_at' | 'display_order';
+type Sortable = 'created_at' | 'updated_at' | 'display_order' | 'order_num';
 
 export type ListParams = {
   orderParam?: string;
@@ -34,6 +38,7 @@ export type ListParams = {
   category_id?: string;
   sub_category_id?: string;
 
+  /** ✅ parent module_key filter */
   module_key?: string;
 
   locale: string;
@@ -55,7 +60,14 @@ const parseOrder = (
     const m = orderParam.match(/^([a-zA-Z0-9_]+)\.(asc|desc)$/);
     const col = m?.[1] as Sortable | undefined;
     const dir = m?.[2] as 'asc' | 'desc' | undefined;
-    if (col && dir && (col === 'created_at' || col === 'updated_at' || col === 'display_order')) {
+    if (
+      col &&
+      dir &&
+      (col === 'created_at' ||
+        col === 'updated_at' ||
+        col === 'display_order' ||
+        col === 'order_num')
+    ) {
       return { col, dir };
     }
   }
@@ -69,8 +81,8 @@ const isRec = (v: unknown): v is Record<string, unknown> => typeof v === 'object
 export const packContent = (htmlOrJson: string): string => {
   try {
     const parsed = JSON.parse(htmlOrJson) as unknown;
-    if (isRec(parsed) && typeof parsed.html === 'string') {
-      return JSON.stringify({ html: parsed.html });
+    if (isRec(parsed) && typeof (parsed as any).html === 'string') {
+      return JSON.stringify({ html: (parsed as any).html });
     }
   } catch {
     // düz HTML ise no-op
@@ -78,11 +90,49 @@ export const packContent = (htmlOrJson: string): string => {
   return JSON.stringify({ html: htmlOrJson });
 };
 
+const parseJsonStringArray = (s: string): string[] => {
+  const raw = String(s ?? '').trim();
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((x) => String(x ?? '').trim()).filter(Boolean);
+  } catch {
+    return [];
+  }
+};
+
+/**
+ * DB LONGTEXT JSON-string kolonlar için güvenli normalize:
+ * - string[] => ok
+ * - string(JSON) => parse
+ * - null/undefined => []
+ */
+const asStringArray = (v: unknown): string[] => {
+  if (!v) return [];
+  if (Array.isArray(v)) return v.map((x) => String(x ?? '').trim()).filter(Boolean);
+  if (typeof v === 'string') return parseJsonStringArray(v);
+  return [];
+};
+
 export type CustomPageMerged = {
   id: string;
+
+  /** ✅ parent module_key included */
+  module_key: string;
+
   is_published: 0 | 1;
   featured_image: string | null;
   featured_image_asset_id: string | null;
+
+  display_order: number;
+  order_num: number;
+
+  image_url: string | null;
+  storage_asset_id: string | null;
+  images: string[];
+  storage_image_ids: string[];
+
   created_at: Date;
   updated_at: Date;
 
@@ -115,9 +165,29 @@ function baseSelect(
 ) {
   return {
     id: customPages.id,
+
+    /** ✅ module_key comes from parent */
+    module_key: customPages.module_key,
+
     is_published: customPages.is_published,
     featured_image: customPages.featured_image,
     featured_image_asset_id: customPages.featured_image_asset_id,
+
+    display_order: customPages.display_order,
+    order_num: customPages.order_num,
+
+    image_url: customPages.image_url,
+    storage_asset_id: customPages.storage_asset_id,
+
+    /**
+     * ✅ IMPORTANT:
+     * - DB type LONGTEXT, NOT JSON.
+     * - Selecting raw column keeps schema transformer behavior when possible.
+     * - Still normalized in normalizeMerged() as fallback.
+     */
+    images: customPages.images,
+    storage_image_ids: customPages.storage_image_ids,
+
     created_at: customPages.created_at,
     updated_at: customPages.updated_at,
 
@@ -150,6 +220,7 @@ function baseSelect(
         'meta_description',
       ),
     tags: sql<string>`COALESCE(${i18nReq.tags}, ${i18nDef.tags})`.as('tags'),
+
     locale_resolved: sql<string>`
       CASE WHEN ${i18nReq.id} IS NOT NULL
            THEN ${i18nReq.locale}
@@ -157,6 +228,14 @@ function baseSelect(
       END
     `.as('locale_resolved'),
   };
+}
+
+function normalizeMerged(row: any): CustomPageMerged {
+  return {
+    ...row,
+    images: asStringArray(row?.images),
+    storage_image_ids: asStringArray(row?.storage_image_ids),
+  } as CustomPageMerged;
 }
 
 /** LIST (coalesced) */
@@ -178,7 +257,7 @@ export async function listCustomPages(params: ListParams) {
   const pub = to01(params.is_published);
   if (pub !== undefined) filters.push(eq(customPages.is_published, pub));
 
-  // ✅ FIX: slug matching must be OR (not COALESCE)
+  // ✅ slug OR matching
   if (params.slug && params.slug.trim()) {
     const v = params.slug.trim();
     filters.push(sql`(${i18nReq.slug} = ${v} OR ${i18nDef.slug} = ${v})`);
@@ -199,16 +278,9 @@ export async function listCustomPages(params: ListParams) {
   if (params.category_id) filters.push(eq(customPages.category_id, params.category_id));
   if (params.sub_category_id) filters.push(eq(customPages.sub_category_id, params.sub_category_id));
 
-  if (params.module_key) {
-    const mk = params.module_key;
-    filters.push(sql`
-      EXISTS (
-        SELECT 1
-        FROM ${categories} c
-        WHERE c.id = ${customPages.category_id}
-          AND c.module_key = ${mk}
-      )
-    `);
+  /** ✅ module_key filter is on parent */
+  if (params.module_key && params.module_key.trim()) {
+    filters.push(eq(customPages.module_key, params.module_key.trim()));
   }
 
   const whereExpr = filters.length ? (and(...filters) as SQL) : undefined;
@@ -223,6 +295,8 @@ export async function listCustomPages(params: ListParams) {
               return ord.dir === 'asc' ? asc(customPages.created_at) : desc(customPages.created_at);
             case 'updated_at':
               return ord.dir === 'asc' ? asc(customPages.updated_at) : desc(customPages.updated_at);
+            case 'order_num':
+              return ord.dir === 'asc' ? asc(customPages.order_num) : desc(customPages.order_num);
             case 'display_order':
             default:
               return ord.dir === 'asc'
@@ -261,7 +335,8 @@ export async function listCustomPages(params: ListParams) {
     );
 
   const rowsQuery = whereExpr ? baseQuery.where(whereExpr) : baseQuery;
-  const rows = await rowsQuery.orderBy(orderBy).limit(take).offset(skip);
+  const rowsRaw = await rowsQuery.orderBy(orderBy).limit(take).offset(skip);
+  const rows = (rowsRaw as any[]).map(normalizeMerged);
 
   const baseCountQuery = db
     .select({ c: sql<number>`COUNT(1)` })
@@ -310,7 +385,7 @@ export async function getCustomPageMergedById(locale: string, defaultLocale: str
     .where(eq(customPages.id, id))
     .limit(1);
 
-  return (rows[0] ?? null) as unknown as CustomPageMerged | null;
+  return rows[0] ? normalizeMerged(rows[0]) : null;
 }
 
 /** GET by slug (coalesced) */
@@ -349,11 +424,10 @@ export async function getCustomPageMergedBySlug(
       subCatDef,
       and(eq(subCatDef.sub_category_id, customPages.sub_category_id), eq(subCatDef.locale, defLoc)),
     )
-    // ✅ FIX: OR matching (not COALESCE)
     .where(sql`(${i18nReq.slug} = ${slugTrimmed} OR ${i18nDef.slug} = ${slugTrimmed})`)
     .limit(1);
 
-  return (rows[0] ?? null) as unknown as CustomPageMerged | null;
+  return rows[0] ? normalizeMerged(rows[0]) : null;
 }
 
 /* ----------------- Admin write helpers ----------------- */
@@ -413,10 +487,10 @@ export async function upsertCustomPageI18n(
   if (typeof data.meta_description !== 'undefined')
     setObj.meta_description = data.meta_description ?? null;
   if (typeof data.tags !== 'undefined') setObj.tags = data.tags ?? null;
+
+  if (Object.keys(setObj).length === 0) return;
+
   setObj.updated_at = new Date();
-
-  if (Object.keys(setObj).length === 1) return;
-
   await db.insert(customPagesI18n).values(insertVals).onDuplicateKeyUpdate({ set: setObj });
 }
 

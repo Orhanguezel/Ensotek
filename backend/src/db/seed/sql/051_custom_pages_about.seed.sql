@@ -1,230 +1,116 @@
 -- =============================================================
--- FILE: 051_custom_pages_about.seed.sql
--- Ensotek Kurumsal Sayfaları (Misyon / Vizyon / Hakkımızda)
+-- FILE: 051_custom_pages_about.seed.sql (FINAL)
+-- Ensotek Kurumsal Sayfaları – Hakkımızda
+-- ✅ module_key artık PARENT: custom_pages.module_key = 'about'
 -- categories + sub_categories ile ilişkili
--- 011_catalog_categories.sql & 012_catalog_subcategories.sql ile uyumlu
 -- =============================================================
 
 SET NAMES utf8mb4;
+SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
 -- -------------------------------------------------------------
--- SABİT ID’LER (parent)
+-- SABİT SAYFA ID (custom_pages.id)
 -- -------------------------------------------------------------
-
--- 1) Misyonumuz / Our Mission
-SET @PAGE_MISSION := '11111111-2222-3333-4444-555555555571';
-
--- 2) Vizyonumuz / Our Vision
-SET @PAGE_VISION  := '11111111-2222-3333-4444-555555555572';
-
--- 3) Ensotek Su Soğutma Kuleleri / Ensotek Water Cooling Towers
-SET @PAGE_ABOUT   := '11111111-2222-3333-4444-555555555573';
+SET @PAGE_ABOUT := '11111111-2222-3333-4444-555555555573';
 
 -- -------------------------------------------------------------
--- SABİT KATEGORİ ID’LERİ (011 & 012 ile uyumlu)
+-- PARENT MODULE KEY
 -- -------------------------------------------------------------
-
--- ABOUT ana kategori: KURUMSAL
-SET @CAT_ABOUT_ROOT   := 'aaaa7001-1111-4111-8111-aaaaaaaa7001';
-
--- ALT KATEGORİLER (012_catalog_subcategories.sql)
-SET @SUB_ABOUT_PAGE   := 'bbbb7001-1111-4111-8111-bbbbbbbb7001'; -- Hakkımızda
-SET @SUB_MISSION_VIZ  := 'bbbb7002-1111-4111-8111-bbbbbbbb7002'; -- Misyon & Vizyon
+SET @MODULE_KEY := 'about';
 
 -- -------------------------------------------------------------
--- PARENT INSERT (custom_pages) – kategori bağlarıyla
+-- KATEGORİ & ALT KATEGORİ
 -- -------------------------------------------------------------
+SET @CAT_ABOUT_ROOT := 'aaaa7001-1111-4111-8111-aaaaaaaa7001';
+SET @SUB_ABOUT_PAGE := 'bbbb7001-1111-4111-8111-bbbbbbbb7001'; -- Hakkımızda
 
+-- -------------------------------------------------------------
+-- GÖRSEL URL’LERİ
+-- -------------------------------------------------------------
+SET @IMG_ABOUT_MAIN :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752786288/uploads/metahub/about-images/closed-circuit-water-cooling-towers1-1752786287184-840184158.webp';
+SET @IMG_ABOUT_2 :=
+  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=80';
+SET @IMG_ABOUT_3 :=
+  'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80';
+
+-- -------------------------------------------------------------
+-- PARENT UPSERT (custom_pages)
+-- -------------------------------------------------------------
 INSERT INTO `custom_pages`
-  (`id`, `is_published`, `display_order`,
-   `featured_image`, `featured_image_asset_id`,
-   `category_id`, `sub_category_id`,
-   `created_at`, `updated_at`)
+  (`id`,
+   `module_key`,
+   `is_published`,
+   `display_order`,
+   `order_num`,
+   `featured_image`,
+   `featured_image_asset_id`,
+   `image_url`,
+   `storage_asset_id`,
+   `images`,
+   `storage_image_ids`,
+   `category_id`,
+   `sub_category_id`,
+   `created_at`,
+   `updated_at`)
 VALUES
   (
-    @PAGE_MISSION,
-    1,
-    10,
-    'https://res.cloudinary.com/dbozv7wqd/image/upload/v1757875082/uploads/ensotek/about-images/russia-cooling-tower-1757875080869-645546842.webp',
-    NULL,
-    @CAT_ABOUT_ROOT,
-    @SUB_MISSION_VIZ,
-    NOW(3),
-    NOW(3)
-  ),
-  (
-    @PAGE_VISION,
-    1,
-    20,
-    'https://res.cloudinary.com/dbozv7wqd/image/upload/v1757875102/uploads/ensotek/about-images/sogutma-kuleleri-cerkezkoy-1757875101328-515216727.webp',
-    NULL,
-    @CAT_ABOUT_ROOT,
-    @SUB_MISSION_VIZ,
-    NOW(3),
-    NOW(3)
-  ),
-  (
     @PAGE_ABOUT,
+    @MODULE_KEY,
     1,
     30,
-    'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752786288/uploads/metahub/about-images/closed-circuit-water-cooling-towers1-1752786287184-840184158.webp',
+    30,
+    @IMG_ABOUT_MAIN,
     NULL,
+    @IMG_ABOUT_MAIN,
+    NULL,
+    JSON_ARRAY(
+      @IMG_ABOUT_MAIN,
+      @IMG_ABOUT_2,
+      @IMG_ABOUT_3
+    ),
+    JSON_ARRAY(),
     @CAT_ABOUT_ROOT,
     @SUB_ABOUT_PAGE,
     NOW(3),
     NOW(3)
   )
 ON DUPLICATE KEY UPDATE
-  `is_published`            = VALUES(`is_published`),
-  `display_order`           = VALUES(`display_order`),
-  `featured_image`          = VALUES(`featured_image`),
-  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
-  `category_id`             = VALUES(`category_id`),
-  `sub_category_id`         = VALUES(`sub_category_id`),
-  `updated_at`              = VALUES(`updated_at`);
+  `module_key`               = VALUES(`module_key`),
+  `is_published`             = VALUES(`is_published`),
+  `display_order`            = VALUES(`display_order`),
+  `order_num`                = VALUES(`order_num`),
+  `featured_image`           = VALUES(`featured_image`),
+  `featured_image_asset_id`  = VALUES(`featured_image_asset_id`),
+  `image_url`                = VALUES(`image_url`),
+  `storage_asset_id`         = VALUES(`storage_asset_id`),
+  `images`                   = VALUES(`images`),
+  `storage_image_ids`        = VALUES(`storage_image_ids`),
+  `category_id`              = VALUES(`category_id`),
+  `sub_category_id`          = VALUES(`sub_category_id`),
+  `updated_at`               = VALUES(`updated_at`);
 
 -- -------------------------------------------------------------
--- I18N INSERT – MİSYONUMUZ / OUR MISSION
+-- I18N UPSERT – TR / EN / DE
+-- ✅ module_key kolonu YOK
 -- -------------------------------------------------------------
-
 INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
+  (`id`,
+   `page_id`,
+   `locale`,
+   `title`,
+   `slug`,
+   `content`,
    `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
+   `featured_image_alt`,
+   `meta_title`,
+   `meta_description`,
    `tags`,
-   `created_at`, `updated_at`)
-VALUES
--- TR
-(
-  UUID(),
-  @PAGE_MISSION,
-  'tr',
-  'Misyonumuz',
-  'misyonumuz',
-  JSON_OBJECT(
-    'html',
-    CONCAT(
-      '<p>Sektördeki yenilikleri ve gelişmeleri yakından takip ederek, müşterilerimizin beklentilerine ve ihtiyaçlarına en uygun, verimli ve ekonomik çözümleri sunmayı amaçlıyoruz.</p>',
-      '<p>Hem Türkiye''de hem de dünyada, su soğutma kuleleri denince akla gelen lider firmalardan biri olmayı hedefliyoruz.</p>'
-    )
-  ),
-  'Ensotek''in sektörde yenilikçi, verimli ve ekonomik su soğutma kuleleri çözümleri sunma hedefini tanımlar.',
-  'Misyonumuz - Ensotek Su Soğutma Kuleleri',
-  'Misyonumuz | Ensotek Su Soğutma Kuleleri',
-  'Sektördeki yenilikleri takip ederek su soğutma kulelerinde en iyi çözümleri sunmayı hedefleyen Ensotek''in misyonu.',
-  'ensotek,misyon,su sogutma kuleleri,frp',
-  NOW(3),
-  NOW(3)
-),
--- EN
-(
-  UUID(),
-  @PAGE_MISSION,
-  'en',
-  'Our Mission',
-  'our-mission',
-  JSON_OBJECT(
-    'html',
-    CONCAT(
-      '<p>Our mission is to closely follow innovations and developments in the sector, providing our customers with efficient and economical solutions that best suit their needs and expectations.</p>',
-      '<p>We aim to be one of the leading companies in Turkey and worldwide when it comes to water cooling towers.</p>'
-    )
-  ),
-  'Describes Ensotek''s mission to provide efficient and economical water cooling tower solutions worldwide.',
-  'Our Mission - Ensotek Water Cooling Towers',
-  'Our Mission | Ensotek Water Cooling Towers',
-  'Ensotek''s mission is to follow innovations and provide efficient, economical water cooling tower solutions tailored to customer needs.',
-  'ensotek,mission,water cooling towers,frp',
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `title`               = VALUES(`title`),
-  `slug`                = VALUES(`slug`),
-  `content`             = VALUES(`content`),
-  `summary`             = VALUES(`summary`),
-  `featured_image_alt`  = VALUES(`featured_image_alt`),
-  `meta_title`          = VALUES(`meta_title`),
-  `meta_description`    = VALUES(`meta_description`),
-  `tags`                = VALUES(`tags`),
-  `updated_at`          = VALUES(`updated_at`);
-
--- -------------------------------------------------------------
--- I18N INSERT – VİZYONUMUZ / OUR VISION
--- -------------------------------------------------------------
-
-INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
-   `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
-   `tags`,
-   `created_at`, `updated_at`)
-VALUES
--- TR
-(
-  UUID(),
-  @PAGE_VISION,
-  'tr',
-  'Vizyonumuz',
-  'vizyonumuz',
-  JSON_OBJECT(
-    'html',
-    '<p>Vizyonumuz, müşteri memnuniyetini ön planda tutarak, kaliteli, verimli ve sürdürülebilir su soğutma kuleleri ve hizmetleri sunmak; ulusal ve uluslararası pazarda tercih edilen, güvenilir ve öncü bir marka olmaktır.</p>'
-  ),
-  'Ensotek''in vizyonu, sürdürülebilir ve kaliteli su soğutma kuleleri ile güvenilir ve öncü bir marka olmaktır.',
-  'Vizyonumuz - Ensotek Su Soğutma Kuleleri',
-  'Vizyonumuz | Ensotek Su Soğutma Kuleleri',
-  'Müşteri memnuniyetini merkeze alarak, kaliteli ve sürdürülebilir su soğutma kuleleri sunmayı hedefleyen Ensotek''in vizyonu.',
-  'ensotek,vizyon,surdurulebilir,su sogutma kuleleri',
-  NOW(3),
-  NOW(3)
-),
--- EN
-(
-  UUID(),
-  @PAGE_VISION,
-  'en',
-  'Our Vision',
-  'our-vision',
-  JSON_OBJECT(
-    'html',
-    '<p>Our vision is to prioritize customer satisfaction by providing high quality, efficient and sustainable water cooling towers and services; and to become a reliable and leading brand in both national and international markets.</p>'
-  ),
-  'Ensotek''s vision is to be a reliable, leading brand with high quality and sustainable water cooling tower solutions.',
-  'Our Vision - Ensotek Water Cooling Towers',
-  'Our Vision | Ensotek Water Cooling Towers',
-  'Ensotek''s vision is to provide high quality, efficient and sustainable water cooling towers and become a trusted global brand.',
-  'ensotek,vision,sustainable,water cooling towers',
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `title`               = VALUES(`title`),
-  `slug`                = VALUES(`slug`),
-  `content`             = VALUES(`content`),
-  `summary`             = VALUES(`summary`),
-  `featured_image_alt`  = VALUES(`featured_image_alt`),
-  `meta_title`          = VALUES(`meta_title`),
-  `meta_description`    = VALUES(`meta_description`),
-  `tags`                = VALUES(`tags`),
-  `updated_at`          = VALUES(`updated_at`);
-
--- -------------------------------------------------------------
--- I18N INSERT – ENSOTEK SU SOĞUTMA KULELERİ / ABOUT ENSOTEK
--- -------------------------------------------------------------
-
-INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
-   `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
-   `tags`,
-   `created_at`, `updated_at`)
+   `created_at`,
+   `updated_at`)
 VALUES
 -- TR
 (
@@ -278,117 +164,8 @@ VALUES
   'ensotek,about us,frp,water cooling towers,production facility',
   NOW(3),
   NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `title`               = VALUES(`title`),
-  `slug`                = VALUES(`slug`),
-  `content`             = VALUES(`content`),
-  `summary`             = VALUES(`summary`),
-  `featured_image_alt`  = VALUES(`featured_image_alt`),
-  `meta_title`          = VALUES(`meta_title`),
-  `meta_description`    = VALUES(`meta_description`),
-  `tags`                = VALUES(`tags`),
-  `updated_at`          = VALUES(`updated_at`);
-
-COMMIT;
-
-SET FOREIGN_KEY_CHECKS = 1;
-
--- -------------------------------------------------------------
--- I18N INSERT – UNSERE MISSION (DE)
--- -------------------------------------------------------------
-INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
-   `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
-   `tags`,
-   `created_at`, `updated_at`)
-VALUES
-(
-  UUID(),
-  @PAGE_MISSION,
-  'de',
-  'Unsere Mission',
-  'unsere-mission',
-  JSON_OBJECT(
-    'html',
-    CONCAT(
-      '<p>Unsere Mission ist es, Innovationen und Entwicklungen in der Branche kontinuierlich zu verfolgen und unseren Kunden effiziente sowie wirtschaftliche Lösungen anzubieten, die bestmöglich zu ihren Erwartungen und Anforderungen passen.</p>',
-      '<p>Wir möchten in der Türkei und international zu den führenden Unternehmen gehören, wenn es um Wasserkühltürme geht.</p>'
-    )
-  ),
-  'Beschreibt Ensoteks Mission, effiziente und wirtschaftliche Wasserkühlturm-Lösungen anzubieten und zu den führenden Anbietern zu zählen.',
-  'Unsere Mission – Ensotek Wasserkühltürme',
-  'Unsere Mission | Ensotek Wasserkühltürme',
-  'Ensoteks Mission: Innovationen verfolgen und kundenorientierte, effiziente sowie wirtschaftliche Wasserkühlturm-Lösungen bereitstellen.',
-  'ensotek,mission,wasserkühltürme,frp',
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `title`               = VALUES(`title`),
-  `slug`                = VALUES(`slug`),
-  `content`             = VALUES(`content`),
-  `summary`             = VALUES(`summary`),
-  `featured_image_alt`  = VALUES(`featured_image_alt`),
-  `meta_title`          = VALUES(`meta_title`),
-  `meta_description`    = VALUES(`meta_description`),
-  `tags`                = VALUES(`tags`),
-  `updated_at`          = VALUES(`updated_at`);
-
-  -- -------------------------------------------------------------
--- I18N INSERT – UNSERE VISION (DE)
--- -------------------------------------------------------------
-INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
-   `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
-   `tags`,
-   `created_at`, `updated_at`)
-VALUES
-(
-  UUID(),
-  @PAGE_VISION,
-  'de',
-  'Unsere Vision',
-  'unsere-vision',
-  JSON_OBJECT(
-    'html',
-    '<p>Unsere Vision ist es, die Kundenzufriedenheit in den Mittelpunkt zu stellen, qualitativ hochwertige, effiziente und nachhaltige Wasserkühltürme sowie Dienstleistungen anzubieten und eine bevorzugte, verlässliche und führende Marke auf nationalen und internationalen Märkten zu werden.</p>'
-  ),
-  'Ensoteks Vision: als verlässliche und führende Marke nachhaltige und qualitativ hochwertige Wasserkühlturm-Lösungen anzubieten.',
-  'Unsere Vision – Ensotek Wasserkühltürme',
-  'Unsere Vision | Ensotek Wasserkühltürme',
-  'Ensoteks Vision: kundenorientierte, effiziente und nachhaltige Wasserkühltürme liefern und eine vertrauenswürdige, führende Marke werden.',
-  'ensotek,vision,nachhaltig,wasserkühltürme',
-  NOW(3),
-  NOW(3)
-)
-ON DUPLICATE KEY UPDATE
-  `title`               = VALUES(`title`),
-  `slug`                = VALUES(`slug`),
-  `content`             = VALUES(`content`),
-  `summary`             = VALUES(`summary`),
-  `featured_image_alt`  = VALUES(`featured_image_alt`),
-  `meta_title`          = VALUES(`meta_title`),
-  `meta_description`    = VALUES(`meta_description`),
-  `tags`                = VALUES(`tags`),
-  `updated_at`          = VALUES(`updated_at`);
-
-
-  -- -------------------------------------------------------------
--- I18N INSERT – ENSOTEK WASSERKÜHLTÜRME (DE)
--- -------------------------------------------------------------
-INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
-   `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
-   `tags`,
-   `created_at`, `updated_at`)
-VALUES
+),
+-- DE
 (
   UUID(),
   @PAGE_ABOUT,
@@ -416,15 +193,16 @@ VALUES
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
-  `title`               = VALUES(`title`),
-  `slug`                = VALUES(`slug`),
-  `content`             = VALUES(`content`),
-  `summary`             = VALUES(`summary`),
-  `featured_image_alt`  = VALUES(`featured_image_alt`),
-  `meta_title`          = VALUES(`meta_title`),
-  `meta_description`    = VALUES(`meta_description`),
-  `tags`                = VALUES(`tags`),
-  `updated_at`          = VALUES(`updated_at`);
+  `title`              = VALUES(`title`),
+  `slug`               = VALUES(`slug`),
+  `content`            = VALUES(`content`),
+  `summary`            = VALUES(`summary`),
+  `featured_image_alt` = VALUES(`featured_image_alt`),
+  `meta_title`         = VALUES(`meta_title`),
+  `meta_description`   = VALUES(`meta_description`),
+  `tags`               = VALUES(`tags`),
+  `updated_at`         = VALUES(`updated_at`);
 
+COMMIT;
 
-
+SET FOREIGN_KEY_CHECKS = 1;

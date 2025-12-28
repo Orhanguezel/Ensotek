@@ -1,7 +1,8 @@
 // =============================================================
 // FILE: src/pages/references.tsx
-// Ensotek – References Page (full list) + SEO
+// Ensotek – References Page (full list) + SEO (HOOK-SAFE)
 //   - Route: /references
+//   - i18n: useLocaleShort() + site_settings.ui_references
 //   - SEO: seo -> site_seo fallback + OG/Twitter (NO canonical here)
 //   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
@@ -16,7 +17,7 @@ import ReferencesPageContent from '@/components/containers/references/References
 import Feedback from '@/components/containers/feedback/Feedback';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -26,55 +27,50 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 // data (global SEO settings)
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
-
 const ReferencesPage: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const locale = useLocaleShort();
 
-  const { ui } = useUiSection('ui_references', locale);
+  const { ui } = useUiSection('ui_references', locale as any);
 
-  // Banner/UI title
-  const bannerTitle = ui(
-    'ui_references_page_title',
-    locale === 'de' ? 'Referanslarımız' : 'References',
-  );
+  // ======================
+  // Banner title (UI)
+  // ======================
+  const bannerTitle = ui('ui_references_page_title', 'References');
 
+  // ======================
   // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: 'seo',
-    locale,
-  });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: 'site_seo',
-    locale,
-  });
+  // ======================
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
-  // --- SEO: Title/Description ---
-  const pageTitleRaw = String(bannerTitle || '').trim() || 'References';
+  // ======================
+  // SEO fields (page-level)
+  // ======================
+  const pageTitleRaw = useMemo(() => {
+    const t = String(ui('ui_references_meta_title', '') || '').trim();
+    return t || String(bannerTitle || '').trim() || 'References';
+  }, [ui, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
-    const uiDesc = String(ui('ui_references_page_description', '') || '').trim();
+    const uiDesc = String(ui('ui_references_meta_description', '') || '').trim();
     if (uiDesc) return uiDesc;
 
-    const globalDesc = String(seo?.description ?? '').trim();
-    if (globalDesc) return globalDesc;
+    const uiPageDesc = String(ui('ui_references_page_description', '') || '').trim();
+    if (uiPageDesc) return uiPageDesc;
 
-    return '';
+    return String(seo?.description ?? '').trim() || '';
   }, [ui, seo?.description]);
 
-  const seoSiteName = String(seo?.site_name ?? '').trim() || 'Ensotek';
-  const titleTemplate = String(seo?.title_template ?? '').trim() || '%s | Ensotek';
+  const seoSiteName = useMemo(() => String(seo?.site_name ?? '').trim() || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(
+    () => String(seo?.title_template ?? '').trim() || '%s | Ensotek',
+    [seo],
+  );
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
@@ -86,7 +82,7 @@ const ReferencesPage: React.FC = () => {
   const ogImage = useMemo(() => {
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-    return fallback || absUrl('/favicon.ico');
+    return fallback || absUrl('/favicon.svg');
   }, [seo]);
 
   const headSpecs = useMemo(() => {

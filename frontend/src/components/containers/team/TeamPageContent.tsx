@@ -1,10 +1,11 @@
 // =============================================================
 // FILE: src/components/containers/team/TeamPageContent.tsx
-// Ensotek – Team Page Content
-//   - Data: custom_pages (module_key = "team")
-//   - UI i18n: site_settings.ui_team
-//   - Locale-aware routes with localizePath
-//   - Slider: Swiper (Autoplay + Navigation)
+// Ensotek – Team Page Content (Grouped Carousels by sub_category_id)
+//   - Output: 4 sections, each its own Swiper carousel
+//   - ✅ Carousel bozulmaz: Swiper DOM + class'lar korunur
+//   - ✅ Resim altı: sadece isim (title) -> CSS ile resim DIŞINA alınır
+//   - ✅ Hover: kısa görev bilgisi (clamp)
+//   - ✅ display_order sort: order param
 // =============================================================
 
 'use client';
@@ -17,207 +18,281 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import { Autoplay, Navigation } from 'swiper';
 import 'swiper/css';
 
-// RTK – Custom Pages (public)
 import { useListCustomPagesPublicQuery } from '@/integrations/rtk/hooks';
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
-
-// Ortak helper’lar
 import { toCdnSrc } from '@/shared/media';
 
-// i18n helper’lar
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
-// Fallback görseller
 import FallbackOne from 'public/img/team/01.jpg';
+
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
+}
+
+// title: "İbrahim YAĞAR – Kurucu & Genel Müdür" -> "İbrahim YAĞAR"
+function normalizeNameFromTitle(raw: string): string {
+  const t = safeStr(raw);
+  if (!t) return '';
+  // sadece " boşluk + (– veya -) + boşluk " varsa böl (soyad tireli olursa bozulmasın)
+  const parts = t.split(/\s[–-]\s/);
+  return safeStr(parts[0]) || t;
+}
+
+// ---- Seed’deki sub_category_id’ler (TEAM) ----
+const SUB_TEAM_MGMT = 'bbbb9101-1111-4111-8111-bbbbbbbb9101';
+const SUB_TEAM_ENG = 'bbbb9102-1111-4111-8111-bbbbbbbb9102';
+const SUB_TEAM_SERVICE = 'bbbb9103-1111-4111-8111-bbbbbbbb9103';
+const SUB_TEAM_FT = 'bbbb9104-1111-4111-8111-bbbbbbbb9104';
 
 const CARD_W = 480;
 const CARD_H = 520;
-const PAGE_LIMIT = 24; // ekip üyeleri için yeterli
+const PAGE_LIMIT = 80;
 
-const TeamPageContent: React.FC = () => {
-  // Artık locale'yi split etmeden, sistemin çözdüğü haliyle kullanıyoruz
-  const locale = useResolvedLocale() || 'de';
+type GroupKey = 'mgmt' | 'eng' | 'service' | 'ft';
 
-  const { ui } = useUiSection('ui_team', locale);
+type TeamCardVM = {
+  id: string;
+  slug: string;
+  name: string;
+  roleShort: string;
+  noteShort?: string;
+  imgSrc: any;
+};
 
-  const sectionSubtitlePrefix = ui('ui_team_subprefix', 'Ensotek');
-  const sectionSubtitleLabel = ui('ui_team_sublabel', 'Our expert team');
-  const sectionTitle = ui('ui_team_title', 'Meet our engineering team');
-  const readMore = ui('ui_team_read_more', 'View details');
-  const readMoreAria = ui('ui_team_read_more_aria', 'view team member details');
-  const emptyText = ui('ui_team_empty', 'There are no team members to display at the moment.');
-  const untitled = ui('ui_team_untitled', 'Unnamed team member');
-  const roleFallback = ui('ui_team_role_fallback', 'Expert engineer');
+type TeamGroupVM = {
+  key: GroupKey;
+  title: string;
+  prevClass: string;
+  nextClass: string;
+  items: TeamCardVM[];
+};
 
-  // Liste: module_key = "team"
-  const { data, isLoading } = useListCustomPagesPublicQuery({
-    module_key: 'team',
-    sort: 'created_at',
-    orderDir: 'desc',
-    limit: PAGE_LIMIT,
-    is_published: 1,
-    locale,
-  });
+function pickRoleShort(row: any, roleFallback: string): string {
+  const s1 = safeStr(row?.summary);
+  const s2 = safeStr(row?.meta_description);
+  const raw = s1 || s2 || safeStr(roleFallback) || '';
+  if (!raw) return '';
+  const firstSentence = raw.split(/(?<=[.!?])\s+/)[0] ?? raw;
+  return safeStr(firstSentence) || raw;
+}
 
-  const items = useMemo(() => {
-    const list: CustomPageDto[] = data?.items ?? [];
+function pickNoteShort(row: any, roleShort: string): string {
+  const md = safeStr(row?.meta_description);
+  if (!md) return '';
+  if (md === roleShort) return '';
+  return md;
+}
 
-    return list.map((row, index) => {
-      const name = (row.title || '').trim() || untitled;
-      const slug = (row.slug || '').trim();
+function buildCardVm(row: any, untitled: string, roleFallback: string): TeamCardVM | null {
+  const slug = safeStr(row?.slug);
+  if (!slug) return null;
 
-      // Rol / pozisyon: summary > meta_description > fallback
-      const role =
-        (row.summary || '').trim() || (row.meta_description || '').trim() || roleFallback;
+  const rawTitle = safeStr(row?.title) || untitled;
+  const name = normalizeNameFromTitle(rawTitle) || untitled;
 
-      const imgRaw = (row.featured_image || '').trim();
-      const hero = (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '';
+  const roleShort = pickRoleShort(row, roleFallback);
+  const noteShort = pickNoteShort(row, roleShort);
 
-      // Rating: şimdilik statik 5 – istersen tags içinden okuyabilirsin
-      const rating = 5;
+  const imgRaw = safeStr(row?.featured_image);
+  const hero = imgRaw ? toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw : '';
+  const imgSrc = (hero as any) || (FallbackOne as any);
 
-      return {
-        id: row.id ?? `team-${index}`,
-        name,
-        role,
-        slug,
-        hero,
-        rating,
-      };
-    });
-  }, [data, untitled, roleFallback]);
+  return {
+    id: safeStr(row?.id) || slug,
+    slug,
+    name,
+    roleShort,
+    noteShort: noteShort || undefined,
+    imgSrc,
+  };
+}
 
-  const teamListHref = localizePath(locale, '/team');
+function renderTeamCarousel(group: TeamGroupVM, locale: string) {
+  if (!group.items.length) return null;
 
   return (
-    <section className="team__area p-relative z-index-11 pt-120 pb-120 overflow-hidden">
+    <section
+      className="team__area p-relative z-index-11 pt-60 pb-60 overflow-hidden"
+      key={group.key}
+    >
       <div className="container">
-        {/* Başlık + Navigation */}
+        {/* Header + navigation (ESKİ HALİ KORUNUR) */}
         <div className="row align-items-center">
-          <div className="col-xl-6 col-lg-6">
-            <div className="section__title-wrapper mb-60">
-              <span className="section__subtitle-2">
-                <span>{sectionSubtitlePrefix}</span> {sectionSubtitleLabel}
-              </span>
-              <h2 className="section__title-2">{sectionTitle}</h2>
+          <div className="col-xl-8 col-lg-8">
+            <div className="section__title-wrapper mb-40">
+              <h2 className="section__title-2">{group.title}</h2>
             </div>
           </div>
-          <div className="col-xl-6 col-lg-6">
-            <div className="team__navigation">
-              <button className="team__button-prev" aria-label="Previous" type="button">
+          <div className="col-xl-4 col-lg-4">
+            <div className="team__navigation text-lg-end">
+              <button className={group.prevClass} aria-label="Previous" type="button">
                 <i className="fa-solid fa-arrow-left-long" />
               </button>
-              <button className="team__button-next" aria-label="Next" type="button">
+              <button className={group.nextClass} aria-label="Next" type="button">
                 <i className="fa-solid fa-arrow-right-long" />
               </button>
             </div>
           </div>
         </div>
 
-        {/* Slider */}
-        <div className="row" data-aos="fade-up" data-aos-delay="300">
+        {/* Swiper */}
+        <div className="row" data-aos="fade-up" data-aos-delay="200">
           <div className="col-12">
-            {items.length === 0 && !isLoading && <p className="text-center mb-0">{emptyText}</p>}
+            <Swiper
+              slidesPerView={1}
+              spaceBetween={30}
+              loop
+              roundLengths
+              modules={[Autoplay, Navigation]}
+              autoplay={{ delay: 3500, disableOnInteraction: false }}
+              navigation={{
+                nextEl: `.${group.nextClass}`,
+                prevEl: `.${group.prevClass}`,
+              }}
+              className="team__active"
+              breakpoints={{
+                576: { slidesPerView: 2 },
+                992: { slidesPerView: 3 },
+              }}
+            >
+              {group.items.map((t) => {
+                const detailHref = localizePath(
+                  locale as any,
+                  `/team/${encodeURIComponent(t.slug)}`,
+                );
 
-            {items.length > 0 && (
-              <div className="swiper">
-                <div className="swiper-wrapper">
-                  <Swiper
-                    slidesPerView={1}
-                    spaceBetween={30}
-                    loop
-                    roundLengths
-                    modules={[Autoplay, Navigation]}
-                    autoplay={{
-                      delay: 3000,
-                      disableOnInteraction: false,
-                    }}
-                    navigation={{
-                      nextEl: '.team__button-next',
-                      prevEl: '.team__button-prev',
-                    }}
-                    className="team__active"
-                    breakpoints={{
-                      576: {
-                        slidesPerView: 2,
-                      },
-                      992: {
-                        slidesPerView: 3,
-                      },
-                    }}
-                  >
-                    {items.map((t) => {
-                      const detailHref = t.slug
-                        ? localizePath(locale, `/team/${encodeURIComponent(t.slug)}`)
-                        : teamListHref;
+                return (
+                  <SwiperSlide key={t.id}>
+                    <div className="team__item teamItem--nameBelow">
+                      {/* Image */}
+                      <div className="team__thumb teamThumbHover">
+                        <Link href={detailHref} aria-label={t.name}>
+                          <Image
+                            src={t.imgSrc}
+                            alt={t.name || 'team member'}
+                            width={CARD_W}
+                            height={CARD_H}
+                            style={{ width: '100%', height: 'auto' }}
+                            loading="lazy"
+                          />
+                        </Link>
 
-                      const imgSrc = (t.hero as any) || (FallbackOne as any);
-
-                      return (
-                        <SwiperSlide key={t.id}>
-                          <div className="swiper-slide">
-                            <div className="team__item">
-                              <div className="team__thumb">
-                                <Image
-                                  src={imgSrc}
-                                  alt={t.name || 'team member'}
-                                  width={CARD_W}
-                                  height={CARD_H}
-                                  style={{
-                                    width: '100%',
-                                    height: 'auto',
-                                  }}
-                                  loading="lazy"
-                                />
-                              </div>
-                              <div className="team__content">
-                                <h3>
-                                  {/* Detay sayfası varsa link, yoksa plain text */}
-                                  {t.slug ? <Link href={detailHref}>{t.name}</Link> : t.name}
-                                </h3>
-                                <p>{t.role}</p>
-                                <div className="team__reating">
-                                  <span>{t.rating}</span>
-                                  <span>
-                                    <i className="fa-solid fa-star" />
-                                  </span>
-                                </div>
-                                {t.slug && (
-                                  <div style={{ marginTop: 8 }}>
-                                    <Link
-                                      href={detailHref}
-                                      className="link-more"
-                                      aria-label={`${t.name} — ${readMoreAria}`}
-                                    >
-                                      {readMore} →
-                                    </Link>
-                                  </div>
-                                )}
-                              </div>
-                            </div>
+                        {/* Hover overlay */}
+                        <div className="teamThumbHover__overlay" aria-hidden>
+                          <div className="teamThumbHover__box">
+                            {t.roleShort ? (
+                              <div className="teamThumbHover__role">{t.roleShort}</div>
+                            ) : null}
+                            {t.noteShort ? (
+                              <div className="teamThumbHover__note">{t.noteShort}</div>
+                            ) : null}
                           </div>
-                        </SwiperSlide>
-                      );
-                    })}
-                  </Swiper>
-                </div>
-              </div>
-            )}
+                        </div>
+                      </div>
 
-            {isLoading && (
-              <div className="accordion-item" aria-hidden>
-                <div className="accordion-body">
-                  <div className="skeleton-line" style={{ height: 16, marginBottom: 8 }} />
-                  <div className="skeleton-line" style={{ height: 16, width: '80%' }} />
-                </div>
-              </div>
-            )}
+                      {/* Name below image */}
+                      <div className="team__content teamContent--nameOnly">
+                        <h3 className="teamNameOnly">
+                          <Link href={detailHref}>{t.name}</Link>
+                        </h3>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+const TeamPageContent: React.FC = () => {
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_team', locale as any);
+
+  const emptyText = ui('ui_team_empty', 'There are no team members to display at the moment.');
+  const untitled = ui('ui_team_untitled', 'Unnamed team member');
+  const roleFallback = ui('ui_team_role_fallback', 'Expert engineer');
+
+  const titleMgmt = ui('ui_team_group_mgmt_title', 'Yönetim ve Kurucu Ortaklar');
+  const titleEng = ui('ui_team_group_eng_title', 'Mühendislik Ekibi');
+  const titleService = ui('ui_team_group_service_title', 'Saha ve Servis Ekibi');
+  const titleFt = ui('ui_team_group_ft_title', 'Dış Ticaret');
+
+  const { data, isLoading } = useListCustomPagesPublicQuery({
+    module_key: 'team',
+    order: 'display_order.asc,created_at.asc',
+    limit: PAGE_LIMIT,
+    is_published: 1,
+    locale,
+  });
+
+  const grouped = useMemo(() => {
+    const rows: any[] = (data?.items ?? []) as any[];
+
+    const mgmt: TeamCardVM[] = [];
+    const eng: TeamCardVM[] = [];
+    const service: TeamCardVM[] = [];
+    const ft: TeamCardVM[] = [];
+
+    for (const r of rows) {
+      const vm = buildCardVm(r, untitled, roleFallback);
+      if (!vm) continue;
+
+      const subId = safeStr(r?.sub_category_id);
+      if (subId === SUB_TEAM_MGMT) mgmt.push(vm);
+      else if (subId === SUB_TEAM_ENG) eng.push(vm);
+      else if (subId === SUB_TEAM_SERVICE) service.push(vm);
+      else if (subId === SUB_TEAM_FT) ft.push(vm);
+      else mgmt.push(vm);
+    }
+
+    const makeGroup = (key: GroupKey, title: string, items: TeamCardVM[]): TeamGroupVM => ({
+      key,
+      title,
+      prevClass: `team__button-prev--${key}`,
+      nextClass: `team__button-next--${key}`,
+      items,
+    });
+
+    return [
+      makeGroup('mgmt', titleMgmt, mgmt),
+      makeGroup('eng', titleEng, eng),
+      makeGroup('service', titleService, service),
+      makeGroup('ft', titleFt, ft),
+    ].filter((g) => g.items.length > 0);
+  }, [data?.items, untitled, roleFallback, titleMgmt, titleEng, titleService, titleFt]);
+
+  if (!isLoading && grouped.length === 0) {
+    return (
+      <section className="team__area p-relative z-index-11 pt-120 pb-120 overflow-hidden">
+        <div className="container">
+          <p className="text-center mb-0">{emptyText}</p>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <>
+      {isLoading ? (
+        <section
+          className="team__area p-relative z-index-11 pt-120 pb-120 overflow-hidden"
+          aria-hidden
+        >
+          <div className="container">
+            <div className="skeleton-line" style={{ height: 28, width: '50%', marginBottom: 16 }} />
+            <div className="skeleton-line" style={{ height: 16, width: '80%' }} />
+          </div>
+        </section>
+      ) : null}
+
+      {!isLoading && grouped.map((g) => renderTeamCarousel(g, String(locale || 'de')))}
+    </>
   );
 };
 

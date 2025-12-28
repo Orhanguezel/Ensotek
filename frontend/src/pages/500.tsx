@@ -1,7 +1,8 @@
 // =============================================================
 // FILE: src/pages/500.tsx
 // Ensotek – 500 Page (i18n + dynamic locales)
-//  - UI keys: site_settings.ui_errors
+//  - UI keys: site_settings.ui_errors (JSON)
+//  - Locale: useResolvedLocale() single source of truth
 //  - Canonical/og:url: _document tek kaynak
 // =============================================================
 
@@ -14,48 +15,40 @@ import { useRouter } from 'next/router';
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
-
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+import { normLocaleTag } from '@/i18n/localeUtils';
+import { isValidUiText } from '@/i18n/uiText';
 
 const Error500: React.FC = () => {
   const router = useRouter();
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+
+  const resolved = useResolvedLocale();
+  const locale = useMemo(() => normLocaleTag(resolved) || 'de', [resolved]);
 
   const { ui } = useUiSection('ui_errors', locale);
 
-  const title = ui(
-    'ui_500_title',
-    locale === 'de'
-      ? 'Bir Hata Oluştu'
-      : locale === 'de'
-      ? 'Ein Fehler ist aufgetreten'
-      : 'Something Went Wrong',
-  );
+  const title = useMemo(() => {
+    const key = 'ui_500_title';
+    const v = ui(key, '');
+    return isValidUiText(v, key) ? v : 'Something Went Wrong';
+  }, [ui]);
 
-  const subtitle = ui(
-    'ui_500_subtitle',
-    locale === 'de'
-      ? 'Beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
-      : locale === 'de'
-      ? 'Ein unerwarteter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.'
-      : 'An unexpected error occurred. Please try again later.',
-  );
+  const subtitle = useMemo(() => {
+    const key = 'ui_500_subtitle';
+    const v = ui(key, '');
+    return isValidUiText(v, key) ? v : 'An unexpected error occurred. Please try again later.';
+  }, [ui]);
 
-  const tryAgain = ui(
-    'ui_500_try_again',
-    locale === 'de' ? 'Tekrar Dene' : locale === 'de' ? 'Erneut versuchen' : 'Try Again',
-  );
+  const tryAgain = useMemo(() => {
+    const key = 'ui_500_try_again';
+    const v = ui(key, '');
+    return isValidUiText(v, key) ? v : 'Try Again';
+  }, [ui]);
 
-  const home = ui(
-    'ui_404_back_home',
-    locale === 'de' ? 'Ana Sayfaya Dön' : locale === 'de' ? 'Zur Startseite' : 'Back To Home',
-  );
+  const homeLabel = useMemo(() => {
+    const key = 'ui_404_back_home';
+    const v = ui(key, '');
+    return isValidUiText(v, key) ? v : 'Back To Home';
+  }, [ui]);
 
   const homeHref = useMemo(() => localizePath(locale, '/'), [locale]);
 
@@ -80,7 +73,7 @@ const Error500: React.FC = () => {
                 href={homeHref}
                 className="border-btn text-dark bg-warning border border-dark text-center borderc-btn d-inline-flex"
               >
-                {home}
+                {homeLabel}
               </Link>
             </div>
           </div>

@@ -6,7 +6,7 @@
 //   - Email templates + notifications
 //   - ✅ PDF için product/service isimlerini i18n tablolardan çeker (locale fallback)
 //   - ✅ pdf_url DB'de RELATIVE saklanır, e-mail/template için ABSOLUTE üretilir
-//   - ✅ site_settings locale-aware okuma (offer.locale → prefix → en → tr)
+//   - ✅ site_settings locale-aware okuma (offer.locale → prefix → de → en → tr)
 // =============================================================
 
 import puppeteer from 'puppeteer';
@@ -71,7 +71,7 @@ function resolvePuppeteerExecutable(): string | undefined {
 }
 
 // -------------------------------------------------------------
-// Locale helpers (offer.locale → prefix → en → tr)
+// Locale helpers (offer.locale → prefix → de → en → tr)
 // -------------------------------------------------------------
 
 function uniq(arr: string[]) {
@@ -81,7 +81,12 @@ function uniq(arr: string[]) {
 function buildLocaleCandidates(rawLocale?: string | null): string[] {
   const lc = (rawLocale || '').trim();
   const langPart = lc.includes('-') ? lc.split('-')[0] : lc;
-  return uniq([lc, langPart, 'en', 'de'].map((x) => x?.trim()).filter(Boolean));
+
+  // ✅ yorumla uyumlu + pratik sıra:
+  // - offer locale (de-DE)
+  // - prefix (de)
+  // - de → en → tr fallback
+  return uniq([lc, langPart, 'de', 'en', 'tr'].map((x) => x?.trim()).filter(Boolean));
 }
 
 // -------------------------------------------------------------
@@ -99,7 +104,6 @@ async function getSiteSettingValue(key: string, locale?: string | null): Promise
     })
     .from(siteSettings)
     .where(and(eq(siteSettings.key, key), inArray(siteSettings.locale, candidates)))
-    // deterministik olması için: locale bazlı sıralamak yerine candidate önceliği ile seçiyoruz
     .orderBy(desc(siteSettings.updated_at))
     .limit(50);
 
@@ -110,7 +114,6 @@ async function getSiteSettingValue(key: string, locale?: string | null): Promise
     if (typeof hit !== 'undefined') return hit.value ?? null;
   }
 
-  // bulunamadıysa null
   return null;
 }
 
@@ -248,7 +251,6 @@ async function getProductTitleById(opts: {
       if (hit?.title) return hit.title;
     }
 
-    // base var mı kontrol (debug için)
     const base = await db
       .select({ id: products.id })
       .from(products)
@@ -284,7 +286,6 @@ async function getServiceNameById(opts: {
       if (hit?.name) return hit.name;
     }
 
-    // base var mı kontrol
     const base = await db
       .select({ id: services.id })
       .from(services)
@@ -450,7 +451,6 @@ export async function generateAndAttachOfferPdf(
 
     const fileName = (offer.offer_no || `offer-${offer.id}`) + '.pdf';
 
-    // ✅ DB’de relative saklanacak url
     const { pdf_url, pdf_asset_id } = await saveOfferFileToLocalStorage(
       buffer,
       fileName,
@@ -486,7 +486,6 @@ async function sendCustomerOfferMail(ctx: OfferEmailContext): Promise<boolean> {
   const o = ctx.offer;
   const locale = o.locale || 'en';
 
-  // ✅ absolute link üret
   const pdfAbs = await toAbsolutePublicUrl(ctx.pdf_url ?? o.pdf_url ?? null, o.locale ?? null);
 
   const params: Record<string, unknown> = {
@@ -537,7 +536,6 @@ async function sendAdminOfferMail(ctx: OfferEmailContext): Promise<boolean> {
   const adminEmails = await getOffersAdminEmails(o.locale ?? null);
   if (!adminEmails.length) return false;
 
-  // ✅ absolute link üret
   const pdfAbs = await toAbsolutePublicUrl(ctx.pdf_url ?? o.pdf_url ?? null, o.locale ?? null);
 
   const params: Record<string, unknown> = {
@@ -612,6 +610,7 @@ Teklif ID: ${offer.id}`;
       phone: offer.phone,
       offer_id: offer.id,
       message: offer.message,
+      country_code: (offer as any).country_code ?? null,
     };
 
     const rendered = await renderEmailTemplateByKey(
@@ -765,7 +764,6 @@ export type OfferPdfLabels = {
 function tryParseJsonObject(v: unknown): Record<string, unknown> | null {
   if (!v) return null;
 
-  // DB TEXT bazı yerlerde zaten object gibi gelebilir (driver/seed farkları)
   if (typeof v === 'object') {
     return v as Record<string, unknown>;
   }
@@ -790,13 +788,11 @@ function pickString(obj: Record<string, unknown>, key: string): string | undefin
 }
 
 export async function getOfferPdfLabels(locale?: string | null): Promise<OfferPdfLabels | null> {
-  // ✅ localized key
   const raw = await getSiteSettingValue('offer_pdf_labels', locale);
   const obj = tryParseJsonObject(raw);
 
   if (!obj) return null;
 
-  // ✅ Return only known shape (avoid leaking unexpected fields)
   const out: OfferPdfLabels = {
     title: pickString(obj, 'title'),
     quoteNo: pickString(obj, 'quoteNo'),

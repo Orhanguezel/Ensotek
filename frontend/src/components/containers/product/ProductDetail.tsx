@@ -19,7 +19,9 @@ import type {
 } from '@/integrations/types/product.types';
 
 import { toCdnSrc } from '@/shared/media';
-import { useResolvedLocale } from '@/i18n/locale';
+
+// ✅ Pattern: useLocaleShort + useUiSection(sectionKey, locale as any)
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
@@ -36,61 +38,80 @@ import FallbackCover from 'public/img/blog/3/1.jpg';
 const HERO_W = 960;
 const HERO_H = 540;
 
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .split('-')[0] || 'de';
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
 
 const ProductDetail: React.FC = () => {
   const router = useRouter();
 
-  // ✅ API + UI için kısa locale
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  // ✅ API + UI için kısa locale (tek kaynak)
+  const locale = useLocaleShort();
 
-  const { ui } = useUiSection('ui_products', locale);
+  // ✅ Route'a göre tip tespiti (product vs sparepart)
+  const itemType = useMemo<'product' | 'sparepart'>(() => {
+    const p = safeStr(router.pathname);
+    const a = safeStr(router.asPath);
+    if (p.startsWith('/sparepart') || a.startsWith('/sparepart')) return 'sparepart';
+    return 'product';
+  }, [router.pathname, router.asPath]);
 
+  const basePath = itemType === 'sparepart' ? '/sparepart' : '/product';
+  const uiSectionKey = itemType === 'sparepart' ? 'ui_spareparts' : 'ui_products';
+
+  const { ui } = useUiSection(uiSectionKey as any, locale as any);
+
+  // ✅ Static strings: DB -> fallback EN only
   const backToListText = ui(
-    'ui_products_back_to_list',
-    locale === 'de' ? 'Tüm ürünlere dön' : 'Back to all products',
+    itemType === 'sparepart' ? 'ui_spareparts_back_to_list' : 'ui_products_back_to_list',
+    itemType === 'sparepart' ? 'Back to all spare parts' : 'Back to all products',
   );
+
   const loadingText = ui(
-    'ui_products_loading',
-    locale === 'de' ? 'Ürün yükleniyor...' : 'Loading product...',
+    itemType === 'sparepart' ? 'ui_spareparts_loading' : 'ui_products_loading',
+    itemType === 'sparepart' ? 'Loading spare part...' : 'Loading product...',
   );
+
   const notFoundText = ui(
-    'ui_products_not_found',
-    locale === 'de' ? 'Ürün bulunamadı.' : 'Product not found.',
+    itemType === 'sparepart' ? 'ui_spareparts_not_found' : 'ui_products_not_found',
+    itemType === 'sparepart' ? 'Spare part not found.' : 'Product not found.',
   );
+
   const specsTitle = ui(
-    'ui_products_specs_title',
-    locale === 'de' ? 'Teknik Özellikler' : 'Technical Specifications',
+    itemType === 'sparepart' ? 'ui_spareparts_specs_title' : 'ui_products_specs_title',
+    'Technical Specifications',
   );
-  const tagsTitle = ui('ui_products_tags_title', locale === 'de' ? 'Etiketler' : 'Tags');
+
+  const tagsTitle = ui(
+    itemType === 'sparepart' ? 'ui_spareparts_tags_title' : 'ui_products_tags_title',
+    'Tags',
+  );
+
   const faqsTitle = ui(
-    'ui_products_faqs_title',
-    locale === 'de' ? 'Sık Sorulan Sorular' : 'Frequently Asked Questions',
+    itemType === 'sparepart' ? 'ui_spareparts_faqs_title' : 'ui_products_faqs_title',
+    'Frequently Asked Questions',
   );
+
   const reviewsTitle = ui(
-    'ui_products_reviews_title',
-    locale === 'de' ? 'Müşteri Yorumları' : 'Customer Reviews',
+    itemType === 'sparepart' ? 'ui_spareparts_reviews_title' : 'ui_products_reviews_title',
+    'Customer Reviews',
   );
+
   const noFaqsText = ui(
-    'ui_products_faqs_empty',
-    locale === 'de'
-      ? 'Bu ürün için kayıtlı SSS bulunmamaktadır.'
-      : 'There are no FAQs for this product yet.',
+    itemType === 'sparepart' ? 'ui_spareparts_faqs_empty' : 'ui_products_faqs_empty',
+    'There are no FAQs for this item yet.',
   );
+
   const noReviewsText = ui(
-    'ui_products_reviews_empty',
-    locale === 'de'
-      ? 'Bu ürün için henüz yorum yapılmamıştır.'
-      : 'There are no reviews for this product yet.',
+    itemType === 'sparepart' ? 'ui_spareparts_reviews_empty' : 'ui_products_reviews_empty',
+    'There are no reviews for this item yet.',
   );
+
   const requestQuoteText = ui(
-    'ui_products_request_quote',
-    locale === 'de' ? 'Teklif isteyiniz' : 'Request a quote',
+    itemType === 'sparepart' ? 'ui_spareparts_request_quote' : 'ui_products_request_quote',
+    'Request a quote',
   );
 
   const [showOfferForm, setShowOfferForm] = useState(false);
@@ -98,83 +119,73 @@ const ProductDetail: React.FC = () => {
 
   const slugParam = router.query.slug;
   const slug = useMemo(
-    () => (Array.isArray(slugParam) ? slugParam[0] : slugParam) || '',
+    () => safeStr(Array.isArray(slugParam) ? slugParam[0] : slugParam),
     [slugParam],
   );
 
-  // ✅ PRODUCT (locale short)
+  // ✅ PRODUCT/SPAREPART (locale short)
   const {
     data: product,
     isLoading: isProductLoading,
     isError: isProductError,
-  } = useGetProductBySlugQuery({ slug, locale }, { skip: !slug });
+  } = useGetProductBySlugQuery({ slug, locale, item_type: itemType } as any, { skip: !slug });
 
-  const productId = product?.id ?? '';
-  const productListHref = localizePath(locale, '/product');
+  const productId = safeStr(product?.id);
+  const listHref = useMemo(() => localizePath(locale, basePath), [locale, basePath]);
 
-  const title = (product?.title || '').trim();
-  const description = (product?.description || '').trim();
+  const title = safeStr((product as any)?.title);
+  const description = safeStr((product as any)?.description);
 
   const heroSrc = useMemo(() => {
     if (!product) return '';
     const raw =
-      (product.image_url || '').trim() || ((product.images && product.images[0]) || '').trim();
+      safeStr((product as any).image_url) ||
+      safeStr(((product as any).images && (product as any).images[0]) || '');
     if (!raw) return '';
     return toCdnSrc(raw, HERO_W, HERO_H, 'fill') || raw;
   }, [product]);
 
-  const tags = useMemo(
-    () => (product?.tags ?? []).map((t) => (t || '').trim()).filter((t) => t.length > 0),
-    [product],
-  );
+  const tags = useMemo(() => {
+    const arr = ((product as any)?.tags ?? []) as any[];
+    return arr.map((t) => safeStr(t)).filter((t) => t.length > 0);
+  }, [product]);
 
   // ✅ FAQ (locale short)
   const { data: faqsData, isLoading: isFaqsLoading } = useListProductFaqsQuery(
-    { product_id: productId, only_active: 1, locale },
+    { product_id: productId, only_active: 1, locale, item_type: itemType } as any,
     { skip: !productId },
   );
-  const faqs: ProductFaqDto[] = faqsData ?? [];
+  const faqs: ProductFaqDto[] = (faqsData ?? []) as any;
 
   // ✅ SPECS (locale short)
   const { data: specsData, isLoading: isSpecsLoading } = useListProductSpecsQuery(
-    { product_id: productId, locale },
+    { product_id: productId, locale, item_type: itemType } as any,
     { skip: !productId },
   );
 
   const specsEntries: ProductSpecEntry[] = useMemo(() => {
     const entries: ProductSpecEntry[] = [];
-    const specsList: ProductSpecDto[] = specsData ?? [];
+    const specsList: ProductSpecDto[] = (specsData ?? []) as any;
 
     if (specsList.length) {
       specsList
         .slice()
-        .sort((a, b) => a.order_num - b.order_num)
-        .forEach((s) => {
-          entries.push({ key: s.id, label: s.name, value: s.value });
-        });
+        .sort((a, b) => (a.order_num ?? 0) - (b.order_num ?? 0))
+        .forEach((s) => entries.push({ key: s.id, label: s.name, value: s.value }));
     }
 
-    if (!entries.length && product?.specifications) {
-      const labels: Record<string, string> =
-        locale === 'de'
-          ? {
-              dimensions: 'Ölçüler',
-              weight: 'Ağırlık',
-              thickness: 'Kalınlık',
-              surfaceFinish: 'Yüzey',
-              warranty: 'Garanti',
-              installationTime: 'Montaj süresi',
-            }
-          : {
-              dimensions: 'Dimensions',
-              weight: 'Weight',
-              thickness: 'Thickness',
-              surfaceFinish: 'Surface finish',
-              warranty: 'Warranty',
-              installationTime: 'Installation time',
-            };
+    // ✅ Fallback specs labels: EN only (DB yoksa)
+    if (!entries.length && (product as any)?.specifications) {
+      const labels: Record<string, string> = {
+        dimensions: 'Dimensions',
+        weight: 'Weight',
+        thickness: 'Thickness',
+        surfaceFinish: 'Surface finish',
+        warranty: 'Warranty',
+        installationTime: 'Installation time',
+      };
 
-      Object.entries(product.specifications as ProductSpecifications)
+      Object.entries((product as any).specifications as ProductSpecifications)
         .filter(([, value]) => !!value)
         .forEach(([key, value]) => {
           entries.push({
@@ -186,18 +197,15 @@ const ProductDetail: React.FC = () => {
     }
 
     return entries;
-  }, [specsData, product, locale]);
+  }, [specsData, product]);
 
-  // REVIEWS (locale-aware değil)
+  // REVIEWS (mevcut endpoint locale-aware değil)
   const { data: reviewsRaw, isLoading: isReviewsLoading } = useListProductReviewsQuery(
-    { product_id: productId, only_active: 1, limit: 10, offset: 0 },
+    { product_id: productId, only_active: 1, limit: 10, offset: 0 } as any,
     { skip: !productId },
   );
 
-  const reviews: ProductReviewDto[] = useMemo(
-    () => (reviewsRaw ?? []) as ProductReviewDto[],
-    [reviewsRaw],
-  );
+  const reviews: ProductReviewDto[] = useMemo(() => (reviewsRaw ?? []) as any, [reviewsRaw]);
 
   const averageRating = useMemo(() => {
     if (!reviews.length) return null;
@@ -211,7 +219,7 @@ const ProductDetail: React.FC = () => {
     }
   }, [showOfferForm]);
 
-  const showSkeleton = isProductLoading || (!product && !isProductError && !slug);
+  const showSkeleton = isProductLoading || (!slug && !product && !isProductError);
 
   const hasSpecs = specsEntries.length > 0;
   const hasFaqs = faqs.length > 0;
@@ -228,11 +236,7 @@ const ProductDetail: React.FC = () => {
       <div className="container">
         <div className="row mb-30">
           <div className="col-12">
-            <button
-              type="button"
-              className="link-more"
-              onClick={() => router.push(productListHref)}
-            >
+            <button type="button" className="link-more" onClick={() => router.push(listHref)}>
               ← {backToListText}
             </button>
           </div>
@@ -242,8 +246,8 @@ const ProductDetail: React.FC = () => {
           <div className="row">
             <div className="col-12">
               <p>{loadingText}</p>
-              <div className="skeleton-line mt-10" style={{ height: 16 }} />
-              <div className="skeleton-line mt-10" style={{ height: 16, width: '80%' }} />
+              <div className="skeleton-line mt-10 product__detail-skel-line" />
+              <div className="skeleton-line mt-10 product__detail-skel-line product__detail-skel-line--w80" />
             </div>
           </div>
         )}
@@ -260,14 +264,15 @@ const ProductDetail: React.FC = () => {
           <>
             <div className="row" data-aos="fade-up" data-aos-delay="200">
               <div className="col-lg-6 mb-30">
-                <div className="product__detail-hero w-img">
+                <div className="product__detail-hero w-img project__thumb">
                   <Image
                     src={(heroSrc as any) || (FallbackCover as any)}
-                    alt={product.alt || title || 'product image'}
+                    alt={safeStr((product as any).alt) || title || 'product image'}
                     width={HERO_W}
                     height={HERO_H}
-                    style={{ width: '100%', height: 'auto' }}
                     priority
+                    className="product__detail-heroImg"
+                    sizes="(max-width: 992px) 92vw, 50vw"
                   />
                 </div>
               </div>
@@ -298,7 +303,7 @@ const ProductDetail: React.FC = () => {
                     <div className="product__detail-tags mb-20">
                       <h4 className="product__detail-subtitle mb-10">{tagsTitle}</h4>
                       <div className="product__tag-list d-flex flex-wrap">
-                        {tags.map((t) => (
+                        {tags.map((t: string) => (
                           <span
                             key={t}
                             className="badge bg-light text-dark border rounded-pill me-2 mb-2"
@@ -347,7 +352,7 @@ const ProductDetail: React.FC = () => {
                     averageRating={averageRating}
                     isLoading={isReviewsLoading}
                     emptyText={noReviewsText}
-                    locale={locale}
+                    locale={locale as any}
                   />
                 </div>
               </div>
@@ -357,9 +362,9 @@ const ProductDetail: React.FC = () => {
               <div className="row mt-40" ref={offerFormRef}>
                 <div className="col-12">
                   <OfferSection
-                    locale={locale}
+                    locale={locale as any}
                     productId={productId}
-                    productName={title || product.slug || ''}
+                    productName={title || safeStr((product as any).slug) || ''}
                   />
                 </div>
               </div>

@@ -1,548 +1,933 @@
 -- =============================================================
--- FILE: 054_custom_pages_team.seed.sql
--- TEAM – custom_pages + custom_pages_i18n
--- Bu seed:
---  - Yönetim ve Kurucu Ortaklar (3 kişi) – TR/EN/DE
---  - Mühendislik Ekibi (örnek 1 kişi) – TR/EN/DE
---  - Saha & Servis Ekibi (örnek 1 kişi) – TR/EN/DE
---  - Dış Ticaret (Can Zemheri) (örnek 1 kişi) – TR/EN/DE
--- NOT: Bu dosyada BLOK YORUM (/* */) YOKTUR. Sadece "--" kullanılır.
+-- FILE: 054_custom_pages_team.seed.sql  (FINAL / SCHEMA-OK)
+-- TEAM – custom_pages + custom_pages_i18n (UI-READY)
+-- Kurallar:
+--  - Sadece "--" yorum
+--  - module_key='team' (SADECE custom_pages parent)
+--  - Çoklu görsel (images JSON_ARRAY) + featured_image
+--  - Deterministik i18n id (UUID() YOK)
+--  - time_zone='+00:00'
 -- =============================================================
 
 SET NAMES utf8mb4;
+SET time_zone = '+00:00';
 SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
--- KATEGORİ ID (TEAM)
-SET @CAT_TEAM_MAIN := 'aaaa9101-1111-4111-8111-aaaaaaaa9101'; -- EKİBİMİZ
+-- -------------------------------------------------------------
+-- KATEGORİ / ALT KATEGORİLER (011 & 012 ile hizalı)
+-- -------------------------------------------------------------
+SET @CAT_TEAM_MAIN := 'aaaa9101-1111-4111-8111-aaaaaaaa9101';
 
--- ALT KATEGORİLER (TEAM)
-SET @SUB_TEAM_MGMT    := 'bbbb9101-1111-4111-8111-bbbbbbbb9101'; -- Yönetim ve Kurucu Ortaklar
-SET @SUB_TEAM_ENG     := 'bbbb9102-1111-4111-8111-bbbbbbbb9102'; -- Mühendislik Ekibi
-SET @SUB_TEAM_SERVICE := 'bbbb9103-1111-4111-8111-bbbbbbbb9103'; -- Saha ve Servis Ekibi
-SET @SUB_TEAM_FT      := 'bbbb9104-1111-4111-8111-bbbbbbbb9104'; -- Dış Ticaret (Yeni ekip)
+SET @SUB_TEAM_MGMT    := 'bbbb9101-1111-4111-8111-bbbbbbbb9101';
+SET @SUB_TEAM_ENG     := 'bbbb9102-1111-4111-8111-bbbbbbbb9102';
+SET @SUB_TEAM_SERVICE := 'bbbb9103-1111-4111-8111-bbbbbbbb9103';
+SET @SUB_TEAM_FT      := 'bbbb9104-1111-4111-8111-bbbbbbbb9104';
 
--- =============================================================
+-- -------------------------------------------------------------
+-- MODULE KEY (PARENT)
+-- -------------------------------------------------------------
+SET @MODULE_KEY_TEAM := 'team';
+
+-- -------------------------------------------------------------
 -- SABİT PAGE ID’LERİ (deterministik)
--- =============================================================
+-- -------------------------------------------------------------
+SET @TEAM_MGMT_1    := '44440001-4444-4444-8444-444444440001';
+SET @TEAM_ENG_1     := '44440002-4444-4444-8444-444444440002';
+SET @TEAM_SERVICE_1 := '44440003-4444-4444-8444-444444440003';
+SET @TEAM_MGMT_2    := '44440004-4444-4444-8444-444444440004';
+SET @TEAM_MGMT_3    := '44440005-4444-4444-8444-444444440005';
+SET @TEAM_FT_1      := '44440006-4444-4444-8444-444444440006';
 
--- Yönetim / Kurucu Ortaklar (3 kişi)
-SET @TEAM_MGMT_1 := '44440001-4444-4444-8444-444444440001'; -- İbrahim YAĞAR
-SET @TEAM_MGMT_2 := '44440004-4444-4444-8444-444444440004'; -- Hamdi YAĞAR
-SET @TEAM_MGMT_3 := '44440005-4444-4444-8444-444444440005'; -- Ahmet Gökhan YAĞAR
-
--- Mühendislik (örnek)
-SET @TEAM_ENG_1 := '44440002-4444-4444-8444-444444440002'; -- Senior Project Engineer (örnek)
-
--- Saha & Servis (örnek)
-SET @TEAM_SERVICE_1 := '44440003-4444-4444-8444-444444440003'; -- Field & Service Supervisor (örnek)
-
--- Dış Ticaret (yeni)
-SET @TEAM_FT_1 := '44440006-4444-4444-8444-444444440006'; -- Can Zemheri
-
--- =============================================================
--- FEATURED IMAGES (random / sonradan değiştirirsin)
--- =============================================================
-
--- Yönetim
+-- -------------------------------------------------------------
+-- FEATURED IMAGES (primary) + random gallery extras
+-- -------------------------------------------------------------
 SET @IMG_TEAM_MGMT_1 :=
-  'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?auto=format&fit=crop&w=1200&h=800&q=80';
+  'https://images.unsplash.com/photo-1551836022-deb4988cc6c0?auto=format&fit=crop&w=1400&h=900&q=80';
 SET @IMG_TEAM_MGMT_2 :=
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1200&h=800&q=80';
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&h=900&q=80';
 SET @IMG_TEAM_MGMT_3 :=
-  'https://images.unsplash.com/photo-1522071901873-411886a10004?auto=format&fit=crop&w=1200&h=800&q=80';
+  'https://images.unsplash.com/photo-1522071901873-411886a10004?auto=format&fit=crop&w=1400&h=900&q=80';
 
--- Mühendislik
 SET @IMG_TEAM_ENG_1 :=
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=800&q=80';
+  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1400&h=900&q=80';
 
--- Saha & Servis
 SET @IMG_TEAM_SERVICE_1 :=
-  'https://images.unsplash.com/photo-1581091215367-59ab6c7f3b4b?auto=format&fit=crop&w=1200&h=800&q=80';
+  'https://images.unsplash.com/photo-1581091215367-59ab6c7f3b4b?auto=format&fit=crop&w=1400&h=900&q=80';
 
--- Dış Ticaret
 SET @IMG_TEAM_FT_1 :=
-  'https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1200&h=800&q=80';
+  'https://images.unsplash.com/photo-1521791055366-0d553872125f?auto=format&fit=crop&w=1400&h=900&q=80';
 
--- =============================================================
--- PARENT UPSERT (custom_pages)
--- =============================================================
+SET @IMG_TEAM_COMMON_1 :=
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&h=900&q=80';
+SET @IMG_TEAM_COMMON_2 :=
+  'https://images.unsplash.com/photo-1522071901873-411886a10004?auto=format&fit=crop&w=1400&h=900&q=80';
+SET @IMG_TEAM_COMMON_3 :=
+  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&h=900&q=80';
+SET @IMG_TEAM_COMMON_4 :=
+  'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&h=900&q=80';
+
+-- -------------------------------------------------------------
+-- I18N IDS (deterministik) – TR/EN/DE (6 kişi x 3 locale)
+-- -------------------------------------------------------------
+SET @I18N_TEAM_MGMT_1_TR := '88440001-0001-4001-8001-888888884401';
+SET @I18N_TEAM_MGMT_1_EN := '88440001-0002-4002-8002-888888884401';
+SET @I18N_TEAM_MGMT_1_DE := '88440001-0003-4003-8003-888888884401';
+
+SET @I18N_TEAM_ENG_1_TR := '88440002-0001-4001-8001-888888884402';
+SET @I18N_TEAM_ENG_1_EN := '88440002-0002-4002-8002-888888884402';
+SET @I18N_TEAM_ENG_1_DE := '88440002-0003-4003-8003-888888884402';
+
+SET @I18N_TEAM_SERVICE_1_TR := '88440003-0001-4001-8001-888888884403';
+SET @I18N_TEAM_SERVICE_1_EN := '88440003-0002-4002-8002-888888884403';
+SET @I18N_TEAM_SERVICE_1_DE := '88440003-0003-4003-8003-888888884403';
+
+SET @I18N_TEAM_MGMT_2_TR := '88440004-0001-4001-8001-888888884404';
+SET @I18N_TEAM_MGMT_2_EN := '88440004-0002-4002-8002-888888884404';
+SET @I18N_TEAM_MGMT_2_DE := '88440004-0003-4003-8003-888888884404';
+
+SET @I18N_TEAM_MGMT_3_TR := '88440005-0001-4001-8001-888888884405';
+SET @I18N_TEAM_MGMT_3_EN := '88440005-0002-4002-8002-888888884405';
+SET @I18N_TEAM_MGMT_3_DE := '88440005-0003-4003-8003-888888884405';
+
+SET @I18N_TEAM_FT_1_TR := '88440006-0001-4001-8001-888888884406';
+SET @I18N_TEAM_FT_1_EN := '88440006-0002-4002-8002-888888884406';
+SET @I18N_TEAM_FT_1_DE := '88440006-0003-4003-8003-888888884406';
+
+-- -------------------------------------------------------------
+-- TIMESTAMP
+-- -------------------------------------------------------------
+SET @DT_NOW := NOW(3);
+
+-- -------------------------------------------------------------
+-- PARENT UPSERT (custom_pages) – TEAM members as custom pages
+-- -------------------------------------------------------------
 INSERT INTO `custom_pages`
-  (`id`, `is_published`, `display_order`,
-   `featured_image`, `featured_image_asset_id`,
-   `category_id`, `sub_category_id`,
-   `created_at`, `updated_at`)
+  (`id`,
+   `module_key`,
+   `is_published`,
+   `display_order`,
+   `order_num`,
+   `featured_image`,
+   `featured_image_asset_id`,
+   `image_url`,
+   `storage_asset_id`,
+   `images`,
+   `storage_image_ids`,
+   `category_id`,
+   `sub_category_id`,
+   `created_at`,
+   `updated_at`)
 VALUES
-  -- Yönetim / Kurucu Ortaklar
   (
-    @TEAM_MGMT_1, 1, 101, @IMG_TEAM_MGMT_1, NULL, @CAT_TEAM_MAIN, @SUB_TEAM_MGMT, NOW(3), NOW(3)
+    @TEAM_MGMT_1,
+    @MODULE_KEY_TEAM,
+    1,
+    801,
+    801,
+    @IMG_TEAM_MGMT_1,
+    NULL,
+    @IMG_TEAM_MGMT_1,
+    NULL,
+    JSON_ARRAY(@IMG_TEAM_MGMT_1, @IMG_TEAM_COMMON_3, @IMG_TEAM_COMMON_4),
+    JSON_ARRAY(),
+    @CAT_TEAM_MAIN,
+    @SUB_TEAM_MGMT,
+    @DT_NOW,
+    @DT_NOW
   ),
   (
-    @TEAM_MGMT_2, 1, 102, @IMG_TEAM_MGMT_2, NULL, @CAT_TEAM_MAIN, @SUB_TEAM_MGMT, NOW(3), NOW(3)
+    @TEAM_MGMT_2,
+    @MODULE_KEY_TEAM,
+    1,
+    802,
+    802,
+    @IMG_TEAM_MGMT_2,
+    NULL,
+    @IMG_TEAM_MGMT_2,
+    NULL,
+    JSON_ARRAY(@IMG_TEAM_MGMT_2, @IMG_TEAM_COMMON_1, @IMG_TEAM_COMMON_3),
+    JSON_ARRAY(),
+    @CAT_TEAM_MAIN,
+    @SUB_TEAM_MGMT,
+    @DT_NOW,
+    @DT_NOW
   ),
   (
-    @TEAM_MGMT_3, 1, 103, @IMG_TEAM_MGMT_3, NULL, @CAT_TEAM_MAIN, @SUB_TEAM_MGMT, NOW(3), NOW(3)
+    @TEAM_MGMT_3,
+    @MODULE_KEY_TEAM,
+    1,
+    803,
+    803,
+    @IMG_TEAM_MGMT_3,
+    NULL,
+    @IMG_TEAM_MGMT_3,
+    NULL,
+    JSON_ARRAY(@IMG_TEAM_MGMT_3, @IMG_TEAM_COMMON_2, @IMG_TEAM_COMMON_4),
+    JSON_ARRAY(),
+    @CAT_TEAM_MAIN,
+    @SUB_TEAM_MGMT,
+    @DT_NOW,
+    @DT_NOW
   ),
-
-  -- Mühendislik
   (
-    @TEAM_ENG_1, 1, 201, @IMG_TEAM_ENG_1, NULL, @CAT_TEAM_MAIN, @SUB_TEAM_ENG, NOW(3), NOW(3)
+    @TEAM_ENG_1,
+    @MODULE_KEY_TEAM,
+    1,
+    811,
+    811,
+    @IMG_TEAM_ENG_1,
+    NULL,
+    @IMG_TEAM_ENG_1,
+    NULL,
+    JSON_ARRAY(@IMG_TEAM_ENG_1, @IMG_TEAM_COMMON_3, @IMG_TEAM_COMMON_2),
+    JSON_ARRAY(),
+    @CAT_TEAM_MAIN,
+    @SUB_TEAM_ENG,
+    @DT_NOW,
+    @DT_NOW
   ),
-
-  -- Saha & Servis
   (
-    @TEAM_SERVICE_1, 1, 301, @IMG_TEAM_SERVICE_1, NULL, @CAT_TEAM_MAIN, @SUB_TEAM_SERVICE, NOW(3), NOW(3)
+    @TEAM_SERVICE_1,
+    @MODULE_KEY_TEAM,
+    1,
+    821,
+    821,
+    @IMG_TEAM_SERVICE_1,
+    NULL,
+    @IMG_TEAM_SERVICE_1,
+    NULL,
+    JSON_ARRAY(@IMG_TEAM_SERVICE_1, @IMG_TEAM_COMMON_4, @IMG_TEAM_COMMON_1),
+    JSON_ARRAY(),
+    @CAT_TEAM_MAIN,
+    @SUB_TEAM_SERVICE,
+    @DT_NOW,
+    @DT_NOW
   ),
-
-  -- Dış Ticaret
   (
-    @TEAM_FT_1, 1, 401, @IMG_TEAM_FT_1, NULL, @CAT_TEAM_MAIN, @SUB_TEAM_FT, NOW(3), NOW(3)
+    @TEAM_FT_1,
+    @MODULE_KEY_TEAM,
+    1,
+    831,
+    831,
+    @IMG_TEAM_FT_1,
+    NULL,
+    @IMG_TEAM_FT_1,
+    NULL,
+    JSON_ARRAY(@IMG_TEAM_FT_1, @IMG_TEAM_COMMON_2, @IMG_TEAM_COMMON_3),
+    JSON_ARRAY(),
+    @CAT_TEAM_MAIN,
+    @SUB_TEAM_FT,
+    @DT_NOW,
+    @DT_NOW
   )
-
 ON DUPLICATE KEY UPDATE
-  `is_published`    = VALUES(`is_published`),
-  `display_order`   = VALUES(`display_order`),
-  `category_id`     = VALUES(`category_id`),
-  `sub_category_id` = VALUES(`sub_category_id`),
-  `featured_image`  = VALUES(`featured_image`),
-  `updated_at`      = VALUES(`updated_at`);
+  `module_key`              = VALUES(`module_key`),
+  `is_published`            = VALUES(`is_published`),
+  `display_order`           = VALUES(`display_order`),
+  `order_num`               = VALUES(`order_num`),
+  `category_id`             = VALUES(`category_id`),
+  `sub_category_id`         = VALUES(`sub_category_id`),
+  `featured_image`          = VALUES(`featured_image`),
+  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
+  `image_url`               = VALUES(`image_url`),
+  `storage_asset_id`        = VALUES(`storage_asset_id`),
+  `images`                  = VALUES(`images`),
+  `storage_image_ids`       = VALUES(`storage_image_ids`),
+  `updated_at`              = VALUES(`updated_at`);
 
 -- =============================================================
--- I18N – TEAM (tüm sayfalar) – TR/EN/DE
--- content JSON_OBJECT('html', CONCAT(...)) formatında tutulur.
--- tags: CSV string.
+-- I18N UPSERT (custom_pages_i18n) – TEAM members
+-- ✅ module_key i18n’de YOK (schema uyumlu)
 -- =============================================================
 INSERT INTO `custom_pages_i18n`
-  (`id`, `page_id`, `locale`,
-   `title`, `slug`, `content`,
+  (`id`,
+   `page_id`,
+   `locale`,
+   `title`,
+   `slug`,
+   `content`,
    `summary`,
-   `featured_image_alt`, `meta_title`, `meta_description`,
+   `featured_image_alt`,
+   `meta_title`,
+   `meta_description`,
    `tags`,
-   `created_at`, `updated_at`)
+   `created_at`,
+   `updated_at`)
 VALUES
-
--- =============================================================
--- TEAM_MGMT_1 – İbrahim YAĞAR
--- =============================================================
 (
-  UUID(), @TEAM_MGMT_1, 'tr',
-  'İbrahim YAĞAR – Kurucu & Genel Müdür',
+  @I18N_TEAM_MGMT_1_TR, @TEAM_MGMT_1, 'tr',
+  'İbrahim YAĞAR',
   'ibrahim-yagar-kurucu-genel-mudur',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Kurucu Liderlik</h2>',
-    '<p><strong>İbrahim YAĞAR</strong>, Ensotek Su Soğutma Kuleleri’nin kurucusu ve genel müdürüdür. ',
-    'Yaklaşık <strong>36 yıl önce</strong> şirketi kurarak Ensotek’i yerel bir girişimden, global ölçekte bilinen bir marka ve üretim gücüne dönüştürmüştür.</p>',
-    '<h3>Odak Alanları</h3>',
-    '<ul>',
-    '<li><strong>Strateji ve büyüme:</strong> Pazarlara açılım, hedef segmentler ve uzun vadeli büyüme planı</li>',
-    '<li><strong>İnovasyon:</strong> Verimlilik, dayanıklılık ve sürdürülebilirlik odaklı ürün yaklaşımı</li>',
-    '<li><strong>Kurumsal yönetim:</strong> Kalite kültürü, müşteri memnuniyeti ve marka standardı</li>',
-    '</ul>',
-    '<p>Ensotek’in rekabetçi konumunu güçlendiren yaklaşımı; mühendislik disiplinini, sahadan gelen deneyimi ve uzun vadeli müşteri ilişkilerini birlikte yönetmektir.</p>'
-  )),
-  'İbrahim YAĞAR; Ensotek’in kurucusu ve genel müdürü. 36 yıllık liderlik ve inovasyon odağıyla markayı global ölçekte konumlandırmıştır.',
-  'Ensotek yönetim ekibi – İbrahim YAĞAR (kurucu ve genel müdür)',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>İbrahim YAĞAR</h1>',
+          '<p><strong>Kurucu &amp; Genel Müdür</strong></p>',
+          '<p><strong>İbrahim YAĞAR</strong>, Ensotek Su Soğutma Kuleleri’nin kurucusu ve genel müdürüdür. ',
+          'Şirketi yaklaşık <strong>36 yıl önce</strong> kurarak Ensotek’i yerel bir girişimden global ölçekte bilinen bir markaya dönüştürmüştür.</p>',
+          '<h2>Odak Alanları</h2>',
+          '<ul>',
+            '<li><strong>Strateji ve büyüme:</strong> Pazarlara açılım ve uzun vadeli büyüme planı</li>',
+            '<li><strong>İnovasyon:</strong> Verimlilik, dayanıklılık ve sürdürülebilirlik</li>',
+            '<li><strong>Kurumsal yönetim:</strong> Kalite kültürü ve marka standardı</li>',
+          '</ul>',
+          '<h2>Yaklaşım</h2>',
+          '<p>Ensotek’te müşteri memnuniyetini, sürdürülebilir üretimi ve ölçülebilir kalite standartlarını önceliklendirir. ',
+          'Ar-Ge ve saha geri bildirimlerini ürün geliştirme döngüsüne entegre eden liderlik anlayışıyla hareket eder.</p>',
+          '<hr/>',
+          '<h2>İletişim &amp; Sosyal</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/in/ibrahim-yagar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="https://x.com/ensotek" target="_blank" rel="noopener noreferrer" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-posta"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Kurucu & Genel Müdür',
+  'Ensotek yönetim ekibi – İbrahim YAĞAR',
   'İbrahim YAĞAR | Kurucu & Genel Müdür – Ensotek',
-  'İbrahim YAĞAR; Ensotek’in kurucusu ve genel müdürü. Strateji, inovasyon ve kurumsal yönetimi 36 yıllık deneyimiyle yönetir.',
+  'İbrahim YAĞAR; Ensotek’in kurucusu ve genel müdürü. Strateji, inovasyon ve kurumsal yönetimi uzun yıllara dayanan deneyimiyle yönetir.',
   'ensotek,ekibimiz,yönetim,kurucu,genel müdür,ibrahim yagar,su soğutma kuleleri',
-  NOW(3), NOW(3)
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_MGMT_1, 'en',
-  'İbrahim YAĞAR – Founder & Managing Director',
+  @I18N_TEAM_MGMT_1_EN, @TEAM_MGMT_1, 'en',
+  'İbrahim YAĞAR',
   'ibrahim-yagar-founder-managing-director',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Founding Leadership</h2>',
-    '<p><strong>İbrahim YAĞAR</strong> is the founder and managing director of Ensotek Cooling Towers. ',
-    'He established the company around <strong>36 years ago</strong> and grew Ensotek from a local venture into a globally recognised brand.</p>',
-    '<h3>Key Focus Areas</h3>',
-    '<ul>',
-    '<li><strong>Strategy & growth:</strong> Market expansion, target industries and long-term direction</li>',
-    '<li><strong>Innovation:</strong> Efficiency, durability and sustainability-driven product mindset</li>',
-    '<li><strong>Corporate leadership:</strong> Quality culture, customer success and brand standards</li>',
-    '</ul>',
-    '<p>His leadership combines engineering discipline, field experience and long-term customer relationships to deliver consistent value.</p>'
-  )),
-  'Founder and managing director of Ensotek. With 36 years of leadership, he shaped the brand through strategy, innovation and quality culture.',
-  'Ensotek leadership team – İbrahim YAĞAR (Founder & Managing Director)',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>İbrahim YAĞAR</h1>',
+          '<p><strong>Founder &amp; Managing Director</strong></p>',
+          '<p><strong>İbrahim YAĞAR</strong> is the founder and managing director of Ensotek Cooling Towers. ',
+          'He established the company around <strong>36 years ago</strong> and scaled it into a globally recognized brand.</p>',
+          '<h2>Key Focus Areas</h2>',
+          '<ul>',
+            '<li><strong>Strategy &amp; growth:</strong> Market expansion and long-term direction</li>',
+            '<li><strong>Innovation:</strong> Efficiency, durability and sustainability</li>',
+            '<li><strong>Corporate leadership:</strong> Quality culture and brand standards</li>',
+          '</ul>',
+          '<h2>Approach</h2>',
+          '<p>He prioritizes customer satisfaction, sustainable manufacturing, and measurable quality standards. ',
+          'His leadership integrates R&amp;D with real-world field feedback into continuous product improvement.</p>',
+          '<hr/>',
+          '<h2>Contact &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/in/ibrahim-yagar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="https://x.com/ensotek" target="_blank" rel="noopener noreferrer" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Phone"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Founder & Managing Director',
+  'Ensotek leadership team – İbrahim YAĞAR',
   'İbrahim YAĞAR | Founder & Managing Director – Ensotek',
-  'İbrahim YAĞAR is the founder and managing director of Ensotek Cooling Towers. He leads strategy, innovation and corporate governance with 36 years of experience.',
+  'İbrahim YAĞAR is the founder and managing director of Ensotek Cooling Towers. He leads strategy, innovation and corporate governance with decades of experience.',
   'ensotek,our team,management,founder,managing director,ibrahim yagar,cooling towers',
-  NOW(3), NOW(3)
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_MGMT_1, 'de',
-  'İbrahim YAĞAR – Geschäftsführer und Gründer',
+  @I18N_TEAM_MGMT_1_DE, @TEAM_MGMT_1, 'de',
+  'İbrahim YAĞAR',
   'ibrahim-yagar-geschaeftsfuehrer-und-gruender',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Gründung und Führung</h2>',
-    '<p><strong>İbrahim YAĞAR</strong> ist Geschäftsführer und Gründer von Ensotek Su Soğutma Kuleleri. ',
-    'Er gründete das Unternehmen vor rund <strong>36 Jahren</strong> und entwickelte Ensotek zu einer international anerkannten Marke im Kühlturmsektor.</p>',
-    '<h3>Schwerpunkte</h3>',
-    '<ul>',
-    '<li><strong>Strategie & Wachstum:</strong> Marktentwicklung, Zielbranchen und langfristige Ausrichtung</li>',
-    '<li><strong>Innovation:</strong> Fokus auf Effizienz, Langlebigkeit und Nachhaltigkeit</li>',
-    '<li><strong>Unternehmensführung:</strong> Qualitätskultur, Kundenzufriedenheit und Markenstandards</li>',
-    '</ul>',
-    '<p>Sein Führungsstil verbindet ingenieurtechnische Präzision, praxisnahe Erfahrung und langfristige Kundenbeziehungen – mit dem Ziel, verlässliche Lösungen zu liefern.</p>'
-  )),
-  'Geschäftsführer und Gründer von Ensotek. Seit rund 36 Jahren prägt er Strategie, Innovation und Qualitätskultur und positioniert Ensotek international.',
-  'Ensotek Management – İbrahim YAĞAR (Geschäftsführer und Gründer)',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>İbrahim YAĞAR</h1>',
+          '<p><strong>Geschäftsführer &amp; Gründer</strong></p>',
+          '<p><strong>İbrahim YAĞAR</strong> ist Geschäftsführer und Gründer von Ensotek. ',
+          'Er gründete das Unternehmen vor rund <strong>36 Jahren</strong> und entwickelte Ensotek zu einer international anerkannten Marke.</p>',
+          '<h2>Schwerpunkte</h2>',
+          '<ul>',
+            '<li><strong>Strategie &amp; Wachstum:</strong> Marktentwicklung und langfristige Ausrichtung</li>',
+            '<li><strong>Innovation:</strong> Effizienz, Langlebigkeit und Nachhaltigkeit</li>',
+            '<li><strong>Unternehmensführung:</strong> Qualitätskultur und Markenstandards</li>',
+          '</ul>',
+          '<h2>Ansatz</h2>',
+          '<p>Im Mittelpunkt stehen Kundenzufriedenheit, nachhaltige Produktion und messbare Qualitätsstandards. ',
+          'Feld-Feedback wird systematisch in die Produktentwicklung integriert.</p>',
+          '<hr/>',
+          '<h2>Kontakt &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/in/ibrahim-yagar" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="https://x.com/ensotek" target="_blank" rel="noopener noreferrer" aria-label="X"><i class="fa-brands fa-x-twitter"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-Mail"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Geschäftsführer & Gründer',
+  'Ensotek Management – İbrahim YAĞAR',
   'İbrahim YAĞAR | Geschäftsführer & Gründer – Ensotek',
-  'İbrahim YAĞAR ist Geschäftsführer und Gründer von Ensotek. Mit rund 36 Jahren Erfahrung verantwortet er Strategie, Innovation und Unternehmensführung im Kühlturmsektor.',
+  'İbrahim YAĞAR ist Geschäftsführer und Gründer von Ensotek. Er verantwortet Strategie, Innovation und Unternehmensführung mit jahrzehntelanger Erfahrung.',
   'ensotek,unser team,management,gruender,geschaeftsfuehrer,ibrahim yagar,kuehltuerme',
-  NOW(3), NOW(3)
-),
-
--- =============================================================
--- TEAM_MGMT_2 – Hamdi YAĞAR
--- =============================================================
-(
-  UUID(), @TEAM_MGMT_2, 'tr',
-  'Hamdi YAĞAR – Genel Müdür Yardımcısı',
-  'hamdi-yagar-genel-mudur-yardimcisi',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Operasyon ve Süreç Yönetimi</h2>',
-    '<p><strong>Hamdi YAĞAR</strong>, Ensotek’te <strong>Genel Müdür Yardımcısı</strong> olarak görev yapmaktadır. ',
-    'Aile şirketlerinin yönetimi alanında <strong>18 yıllık</strong> deneyime sahiptir ve operasyonel süreçlerin verimli şekilde yürütülmesine odaklanır.</p>',
-    '<h3>Sorumluluk Alanları</h3>',
-    '<ul>',
-    '<li><strong>Operasyon yönetimi:</strong> Günlük işleyiş, planlama ve kaynak koordinasyonu</li>',
-    '<li><strong>Süreç iyileştirme:</strong> Verimlilik, zaman ve maliyet optimizasyonu</li>',
-    '<li><strong>Koordinasyon:</strong> Üretim, satış ve servis ekipleri arasında uyum</li>',
-    '</ul>',
-    '<p>Ensotek’in sürdürülebilir büyüme hedeflerini destekleyen yönetim yaklaşımı; ölçülebilir performans, düzenli takip ve sürekli iyileştirmedir.</p>'
-  )),
-  'Hamdi YAĞAR; Ensotek genel müdür yardımcısı. 18 yıllık deneyimiyle operasyon, süreç iyileştirme ve ekip koordinasyonuna odaklanır.',
-  'Ensotek yönetim ekibi – Hamdi YAĞAR (genel müdür yardımcısı)',
-  'Hamdi YAĞAR | Genel Müdür Yardımcısı – Ensotek',
-  'Hamdi YAĞAR; Ensotek’te genel müdür yardımcısıdır. Operasyon yönetimi, süreç iyileştirme ve koordinasyon alanlarında 18 yıllık deneyime sahiptir.',
-  'ensotek,ekibimiz,yönetim,genel müdür yardımcısı,operasyon,süreç yönetimi,hamdi yagar',
-  NOW(3), NOW(3)
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_MGMT_2, 'en',
-  'Hamdi YAĞAR – Deputy Managing Director',
-  'hamdi-yagar-deputy-managing-director',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Operations & Process Management</h2>',
-    '<p><strong>Hamdi YAĞAR</strong> serves as the <strong>Deputy Managing Director</strong> at Ensotek. ',
-    'He has <strong>18 years</strong> of experience in managing family-run businesses and focuses on efficient operational execution.</p>',
-    '<h3>Responsibilities</h3>',
-    '<ul>',
-    '<li><strong>Operational leadership:</strong> Day-to-day planning and resource coordination</li>',
-    '<li><strong>Process improvement:</strong> Efficiency, time and cost optimisation</li>',
-    '<li><strong>Cross-team alignment:</strong> Synchronising production, sales and service</li>',
-    '</ul>',
-    '<p>He supports Ensotek’s sustainable growth through structured execution, measurable performance and continuous improvement.</p>'
-  )),
-  'Deputy managing director of Ensotek with 18 years of experience, focusing on operations, process improvement and cross-team coordination.',
-  'Ensotek leadership team – Hamdi YAĞAR (Deputy Managing Director)',
-  'Hamdi YAĞAR | Deputy Managing Director – Ensotek',
-  'Hamdi YAĞAR is the deputy managing director at Ensotek. With 18 years of experience, he leads operations, process improvement and organisational coordination.',
-  'ensotek,our team,management,deputy managing director,operations,process management,hamdi yagar',
-  NOW(3), NOW(3)
+  @I18N_TEAM_MGMT_2_TR, @TEAM_MGMT_2, 'tr',
+  'Hamdi YAĞAR',
+  'hamdi-yagar-yonetim-operasyon',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Hamdi YAĞAR</h1>',
+          '<p><strong>Yönetim &amp; Operasyon</strong></p>',
+          '<p><strong>Hamdi YAĞAR</strong>, Ensotek’te operasyonel mükemmellik, üretim koordinasyonu ve süreç iyileştirme alanlarında görev alır. ',
+          'Tedarik, planlama ve kalite süreçlerinin uçtan uca takibini sağlayarak teslimat performansını güçlendirir.</p>',
+          '<h2>Odak Alanları</h2>',
+          '<ul>',
+            '<li><strong>Operasyon yönetimi:</strong> Üretim planlama, kapasite ve termin yönetimi</li>',
+            '<li><strong>Süreç iyileştirme:</strong> Verimlilik, standardizasyon ve yalın yaklaşım</li>',
+            '<li><strong>Kalite &amp; teslimat:</strong> Süreç kontrol, izlenebilirlik ve müşteri memnuniyeti</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>İletişim &amp; Sosyal</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-posta"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Yönetim & Operasyon',
+  'Ensotek yönetim ekibi – Hamdi YAĞAR',
+  'Hamdi YAĞAR | Yönetim & Operasyon – Ensotek',
+  'Hamdi YAĞAR; Ensotek’te operasyon, üretim koordinasyonu ve süreç iyileştirmeden sorumludur. Üretim planlama ve kalite süreçlerinde uçtan uca yönetim yaklaşımıyla çalışır.',
+  'ensotek,ekibimiz,yönetim,operasyon,hamdi yagar,üretim,kalite',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_MGMT_2, 'de',
-  'Hamdi YAĞAR – Stellvertretender Geschäftsführer',
-  'hamdi-yagar-stellvertretender-geschaeftsfuehrer',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Operatives Management</h2>',
-    '<p><strong>Hamdi YAĞAR</strong> ist <strong>stellvertretender Geschäftsführer</strong> bei Ensotek. ',
-    'Er verfügt über <strong>18 Jahre</strong> Erfahrung in der Führung von Familienunternehmen und ist auf die effiziente Steuerung betrieblicher Abläufe spezialisiert.</p>',
-    '<h3>Verantwortungsbereiche</h3>',
-    '<ul>',
-    '<li><strong>Operative Leitung:</strong> Tagesgeschäft, Planung und Ressourcenkoordination</li>',
-    '<li><strong>Prozessoptimierung:</strong> Effizienzsteigerung sowie Zeit- und Kostenoptimierung</li>',
-    '<li><strong>Koordination:</strong> Abstimmung zwischen Produktion, Vertrieb und Service</li>',
-    '</ul>',
-    '<p>Sein Fokus liegt auf klaren Prozessen, Transparenz in der Umsetzung und einer leistungsorientierten Organisation – als Basis für nachhaltiges Wachstum.</p>'
-  )),
-  'Stellvertretender Geschäftsführer bei Ensotek. Mit 18 Jahren Erfahrung verantwortet er operative Abläufe, Prozessoptimierung und die Koordination der Teams.',
-  'Ensotek Management – Hamdi YAĞAR (stellvertretender Geschäftsführer)',
-  'Hamdi YAĞAR | Stellvertretender Geschäftsführer – Ensotek',
-  'Hamdi YAĞAR ist stellvertretender Geschäftsführer bei Ensotek. Mit 18 Jahren Erfahrung steuert er operative Prozesse, Optimierung und Teamkoordination.',
-  'ensotek,unser team,management,stellvertretender geschaeftsfuehrer,operativ,prozessmanagement,hamdi yagar',
-  NOW(3), NOW(3)
-),
-
--- =============================================================
--- TEAM_MGMT_3 – Ahmet Gökhan YAĞAR
--- =============================================================
-(
-  UUID(), @TEAM_MGMT_3, 'tr',
-  'Ahmet Gökhan YAĞAR – Yönetim Kurulu Üyesi & Üretim Müdürü',
-  'ahmet-gokhan-yagar-yonetim-kurulu-uyesi-uretim-muduru',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Üretim ve Kalite Yönetimi</h2>',
-    '<p><strong>Ahmet Gökhan YAĞAR</strong>, Ensotek’te <strong>Yönetim Kurulu Üyesi</strong> ve <strong>Üretim Müdürü</strong> olarak görev yapmaktadır. ',
-    'Üretim süreçlerinin tüm aşamalarını uçtan uca planlar, izler ve kalite standartlarının sürekliliğini sağlar.</p>',
-    '<h3>Sorumluluk Alanları</h3>',
-    '<ul>',
-    '<li><strong>Üretim planlama:</strong> Kapasite, termin ve kaynak yönetimi</li>',
-    '<li><strong>Süreç kontrol:</strong> Üretim hattı standartları ve operasyonel disiplin</li>',
-    '<li><strong>Kalite güvence:</strong> Ürün kalitesi, izlenebilirlik ve sürekli iyileştirme</li>',
-    '</ul>',
-    '<p>Hedefi; Ensotek’in sahada güven veren, uzun ömürlü ve yüksek performanslı ürünlerini istikrarlı şekilde üretmek ve geliştirmektir.</p>'
-  )),
-  'Ahmet Gökhan YAĞAR; yönetim kurulu üyesi ve üretim müdürü. Üretim planlama, süreç kontrol ve kalite güvence süreçlerini yönetir.',
-  'Ensotek yönetim ekibi – Ahmet Gökhan YAĞAR (üretim müdürü)',
-  'Ahmet Gökhan YAĞAR | Üretim Müdürü – Ensotek',
-  'Ahmet Gökhan YAĞAR; Ensotek’te yönetim kurulu üyesi ve üretim müdürüdür. Üretim süreçleri, kalite standartları ve sürekli iyileştirmeyi yönetir.',
-  'ensotek,ekibimiz,yönetim,üretim müdürü,kalite,üretim süreçleri,ahmet gokhan yagar',
-  NOW(3), NOW(3)
+  @I18N_TEAM_MGMT_2_EN, @TEAM_MGMT_2, 'en',
+  'Hamdi YAĞAR',
+  'hamdi-yagar-operations-management',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Hamdi YAĞAR</h1>',
+          '<p><strong>Operations Management</strong></p>',
+          '<p><strong>Hamdi YAĞAR</strong> focuses on operational excellence, production coordination, and continuous process improvement at Ensotek. ',
+          'He strengthens delivery performance by ensuring end-to-end control of planning, supply, and quality workflows.</p>',
+          '<h2>Key Focus Areas</h2>',
+          '<ul>',
+            '<li><strong>Operations:</strong> Production planning, capacity and lead-time management</li>',
+            '<li><strong>Process improvement:</strong> Efficiency, standardization, and lean practices</li>',
+            '<li><strong>Quality &amp; delivery:</strong> Process control, traceability, and customer satisfaction</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Contact &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Phone"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Operations Management',
+  'Ensotek leadership team – Hamdi YAĞAR',
+  'Hamdi YAĞAR | Operations Management – Ensotek',
+  'Hamdi YAĞAR leads operations, production coordination, and process improvement at Ensotek. He drives planning discipline, traceability, and delivery performance across workflows.',
+  'ensotek,our team,management,operations,hamdi yagar,production,quality',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_MGMT_3, 'en',
-  'Ahmet Gökhan YAĞAR – Board Member & Production Manager',
-  'ahmet-gokhan-yagar-board-member-production-manager',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Production & Quality Management</h2>',
-    '<p><strong>Ahmet Gökhan YAĞAR</strong> serves as a <strong>Board Member</strong> and <strong>Production Manager</strong> at Ensotek. ',
-    'He oversees all phases of production, ensuring stable output quality and continuous improvement across manufacturing operations.</p>',
-    '<h3>Responsibilities</h3>',
-    '<ul>',
-    '<li><strong>Production planning:</strong> Capacity, lead times and resource allocation</li>',
-    '<li><strong>Process control:</strong> Manufacturing standards and operational discipline</li>',
-    '<li><strong>Quality assurance:</strong> Product quality, traceability and continuous improvement</li>',
-    '</ul>',
-    '<p>His focus is to ensure Ensotek consistently delivers high-performance, long-lasting products that customers can trust in the field.</p>'
-  )),
-  'Board member and production manager at Ensotek. He leads production planning, process control and quality assurance to deliver consistent product quality.',
-  'Ensotek leadership team – Ahmet Gökhan YAĞAR (Production Manager)',
-  'Ahmet Gökhan YAĞAR | Production Manager – Ensotek',
-  'Ahmet Gökhan YAĞAR is a board member and production manager at Ensotek. He manages production operations, quality standards and continuous improvement.',
-  'ensotek,our team,management,production manager,quality,manufacturing,ahmet gokhan yagar',
-  NOW(3), NOW(3)
+  @I18N_TEAM_MGMT_2_DE, @TEAM_MGMT_2, 'de',
+  'Hamdi YAĞAR',
+  'hamdi-yagar-operations-management',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Hamdi YAĞAR</h1>',
+          '<p><strong>Operations &amp; Prozessmanagement</strong></p>',
+          '<p><strong>Hamdi YAĞAR</strong> verantwortet operative Exzellenz, Produktionskoordination und kontinuierliche Prozessverbesserung bei Ensotek. ',
+          'Durch die End-to-End-Steuerung von Planung, Supply und Qualität stärkt er Termin- und Lieferperformance.</p>',
+          '<h2>Schwerpunkte</h2>',
+          '<ul>',
+            '<li><strong>Operatives Management:</strong> Produktionsplanung, Kapazität und Durchlaufzeiten</li>',
+            '<li><strong>Prozessverbesserung:</strong> Effizienz, Standardisierung und Lean</li>',
+            '<li><strong>Qualität &amp; Lieferung:</strong> Prozesskontrolle, Rückverfolgbarkeit und Kundenzufriedenheit</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Kontakt &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-Mail"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Operations & Prozessmanagement',
+  'Ensotek Management – Hamdi YAĞAR',
+  'Hamdi YAĞAR | Operations & Prozessmanagement – Ensotek',
+  'Hamdi YAĞAR verantwortet Operations, Produktionskoordination und Prozessverbesserung bei Ensotek. Er stärkt Planung, Rückverfolgbarkeit und Lieferperformance entlang der Prozesse.',
+  'ensotek,unser team,management,operations,hamdi yagar,produktion,qualitaet',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_MGMT_3, 'de',
-  'Ahmet Gökhan YAĞAR – Vorstandsmitglied und Produktionsleiter',
-  'ahmet-gokhan-yagar-vorstandsmitglied-produktionsleiter',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Produktion und Qualitätsmanagement</h2>',
-    '<p><strong>Ahmet Gökhan YAĞAR</strong> ist bei Ensotek als <strong>Vorstandsmitglied</strong> und <strong>Produktionsleiter</strong> tätig. ',
-    'In dieser Funktion überwacht er alle Phasen des Produktionsprozesses und stellt sicher, dass Ensotek konstant hochwertige Produkte fertigt.</p>',
-    '<h3>Verantwortungsbereiche</h3>',
-    '<ul>',
-    '<li><strong>Produktionsplanung:</strong> Kapazität, Termine und Ressourceneinsatz</li>',
-    '<li><strong>Prozesssteuerung:</strong> Standards in der Fertigung und operative Disziplin</li>',
-    '<li><strong>Qualitätssicherung:</strong> Produktqualität, Rückverfolgbarkeit und kontinuierliche Verbesserung</li>',
-    '</ul>',
-    '<p>Sein Ziel ist eine stabile, zuverlässige Produktion – für langlebige und leistungsstarke Lösungen, die im Einsatz überzeugen.</p>'
-  )),
-  'Vorstandsmitglied und Produktionsleiter bei Ensotek. Verantwortlich für Produktionsplanung, Prozesssteuerung und Qualitätssicherung zur Sicherstellung konstant hoher Produktqualität.',
-  'Ensotek Management – Ahmet Gökhan YAĞAR (Vorstandsmitglied und Produktionsleiter)',
-  'Ahmet Gökhan YAĞAR | Produktionsleiter – Ensotek',
-  'Ahmet Gökhan YAĞAR ist Vorstandsmitglied und Produktionsleiter bei Ensotek. Er verantwortet Produktionsprozesse, Qualitätsstandards und kontinuierliche Verbesserungen.',
-  'ensotek,unser team,management,vorstandsmitglied,produktionsleiter,qualitaet,fertigung,ahmet gokhan yagar',
-  NOW(3), NOW(3)
+  @I18N_TEAM_MGMT_3_TR, @TEAM_MGMT_3, 'tr',
+  'Ahmet Gökhan YAĞAR',
+  'ahmet-gokhan-yagar-is-gelistirme',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Ahmet Gökhan YAĞAR</h1>',
+          '<p><strong>İş Geliştirme &amp; Proje Yönetimi</strong></p>',
+          '<p><strong>Ahmet Gökhan YAĞAR</strong>, Ensotek’te iş geliştirme, teklif/proje koordinasyonu ve müşteri ilişkileri süreçlerinde görev alır. ',
+          'Proje gereksinimlerinin doğru anlaşılması, teknik-ticari uyum ve teslimat sonrası memnuniyetin sürdürülebilirliği üzerine çalışır.</p>',
+          '<h2>Odak Alanları</h2>',
+          '<ul>',
+            '<li><strong>İş geliştirme:</strong> Yeni pazarlar, müşteri kazanımı ve iş ortaklıkları</li>',
+            '<li><strong>Proje yönetimi:</strong> Keşif, teklif, planlama ve uygulama koordinasyonu</li>',
+            '<li><strong>Müşteri deneyimi:</strong> İletişim, beklenti yönetimi ve uzun vadeli ilişki</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>İletişim &amp; Sosyal</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-posta"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'İş Geliştirme & Proje Yönetimi',
+  'Ensotek yönetim ekibi – Ahmet Gökhan YAĞAR',
+  'Ahmet Gökhan YAĞAR | İş Geliştirme – Ensotek',
+  'Ahmet Gökhan YAĞAR; Ensotek’te iş geliştirme ve proje koordinasyonundan sorumludur. Keşif, teklif ve uygulama süreçlerinde teknik-ticari uyumu ve müşteri deneyimini yönetir.',
+  'ensotek,ekibimiz,yönetim,is gelistirme,proje yönetimi,ahmet gokhan yagar',
+  @DT_NOW, @DT_NOW
 ),
-
--- =============================================================
--- TEAM_ENG_1 – Mühendislik Ekibi (örnek profil)
--- =============================================================
 (
-  UUID(), @TEAM_ENG_1, 'tr',
+  @I18N_TEAM_MGMT_3_EN, @TEAM_MGMT_3, 'en',
+  'Ahmet Gökhan YAĞAR',
+  'ahmet-gokhan-yagar-business-development',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Ahmet Gökhan YAĞAR</h1>',
+          '<p><strong>Business Development &amp; Project Coordination</strong></p>',
+          '<p><strong>Ahmet Gökhan YAĞAR</strong> works on business development, proposal/project coordination, and customer relationship processes at Ensotek. ',
+          'He focuses on clear requirement definition, technical-commercial alignment, and sustainable customer satisfaction.</p>',
+          '<h2>Key Focus Areas</h2>',
+          '<ul>',
+            '<li><strong>Business development:</strong> New markets, customer acquisition, and partnerships</li>',
+            '<li><strong>Project coordination:</strong> Survey, proposal, planning and delivery coordination</li>',
+            '<li><strong>Customer experience:</strong> Communication, expectation management, and long-term relationships</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Contact &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Phone"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Business Development & Project Coordination',
+  'Ensotek leadership team – Ahmet Gökhan YAĞAR',
+  'Ahmet Gökhan YAĞAR | Business Development – Ensotek',
+  'Ahmet Gökhan YAĞAR leads business development and project coordination at Ensotek. He manages requirement definition, technical-commercial alignment, and customer experience across project phases.',
+  'ensotek,our team,management,business development,project coordination,ahmet gokhan yagar',
+  @DT_NOW, @DT_NOW
+),
+(
+  @I18N_TEAM_MGMT_3_DE, @TEAM_MGMT_3, 'de',
+  'Ahmet Gökhan YAĞAR',
+  'ahmet-gokhan-yagar-business-development',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Ahmet Gökhan YAĞAR</h1>',
+          '<p><strong>Business Development &amp; Projektkoordination</strong></p>',
+          '<p><strong>Ahmet Gökhan YAĞAR</strong> verantwortet Business Development, Angebots-/Projektkoordination und Kundenbeziehungen bei Ensotek. ',
+          'Im Fokus stehen klare Anforderungen, technisch-kaufmaennische Abstimmung und nachhaltige Kundenzufriedenheit.</p>',
+          '<h2>Schwerpunkte</h2>',
+          '<ul>',
+            '<li><strong>Business Development:</strong> Neue Maerkte, Kundengewinnung und Partnerschaften</li>',
+            '<li><strong>Projektkoordination:</strong> Analyse, Angebot, Planung und Umsetzung</li>',
+            '<li><strong>Kundenerlebnis:</strong> Kommunikation, Erwartungsmanagement und langfristige Beziehungen</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Kontakt &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-Mail"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Business Development & Projektkoordination',
+  'Ensotek Management – Ahmet Gökhan YAĞAR',
+  'Ahmet Gökhan YAĞAR | Business Development – Ensotek',
+  'Ahmet Gökhan YAĞAR verantwortet Business Development und Projektkoordination bei Ensotek. Er steuert Anforderungen, technisch-kaufmaennische Abstimmung und Kundenerlebnis in allen Projektphasen.',
+  'ensotek,unser team,management,business development,projektkoordination,ahmet gokhan yagar',
+  @DT_NOW, @DT_NOW
+),
+(
+  @I18N_TEAM_ENG_1_TR, @TEAM_ENG_1, 'tr',
+  'Mehmet KAYA',
+  'mehmet-kaya-kidemli-proje-muhendisi',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Mehmet KAYA</h1>',
+          '<p><strong>Kıdemli Proje Mühendisi</strong></p>',
+          '<p><strong>Mehmet KAYA</strong>, su soğutma kulesi projelerinde keşif, teknik çözümleme, boyutlandırma ve uygulama koordinasyonunda görev alır. ',
+          'Saha koşulları ve proses gereksinimlerine göre optimum çözümü belirleyerek performans ve enerji verimliliği hedeflerini destekler.</p>',
+          '<h2>Uzmanlık Alanları</h2>',
+          '<ul>',
+            '<li><strong>Proje mühendisliği:</strong> Keşif, teknik ek, planlama</li>',
+            '<li><strong>Performans:</strong> Approach/Range, debi, fan ve dolgu seçimi</li>',
+            '<li><strong>Uygulama:</strong> Montaj koordinasyonu, devreye alma, saha testleri</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>İletişim &amp; Sosyal</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-posta"><i class="fa-solid fa-envelope"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
   'Kıdemli Proje Mühendisi',
-  'kidemli-proje-muhendisi',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Mühendislik ve Proje Tasarımı</h2>',
-    '<p>Kıdemli proje mühendisi; FRP soğutma kuleleri, kapalı devre çözümler ve hibrit sistemler için ',
-    'ısı transferi hesapları, kule seçimi ve layout tasarımı konularında uzmanlaşmıştır.</p>',
-    '<h3>Çalışma Alanları</h3>',
-    '<ul>',
-    '<li>Kule seçimi, kapasite ve performans hesapları</li>',
-    '<li>Yerleşim (layout) ve proje entegrasyonu</li>',
-    '<li>Saha verileriyle optimizasyon ve revizyon</li>',
-    '</ul>'
-  )),
-  'Ensotek mühendislik ekibinde görev yapan kıdemli proje mühendisinin teknik uzmanlık alanlarını özetleyen profil.',
-  'Mühendislik ekibi – proje tasarım ve hesaplama',
-  'Ensotek Kıdemli Proje Mühendisi | Ekibimiz',
-  'FRP soğutma kuleleri, kapalı devre ve hibrit soğutma sistemleri için mühendislik ve proje tasarımı alanında görev yapan kıdemli proje mühendisi.',
-  'ensotek,ekibimiz,mühendislik,proje mühendisi,ısı transferi,frp soğutma kulesi',
-  NOW(3), NOW(3)
+  'Ensotek mühendislik ekibi – Mehmet KAYA',
+  'Mehmet KAYA | Kıdemli Proje Mühendisi – Ensotek',
+  'Mehmet KAYA; su soğutma kulesi projelerinde boyutlandırma, teknik çözüm ve devreye alma süreçlerine liderlik eder. Performans ve enerji verimliliği odaklı yaklaşım benimser.',
+  'ensotek,ekibimiz,mühendislik,proje mühendisliği,kıdemli mühendis,mehmet kaya',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_ENG_1, 'en',
+  @I18N_TEAM_ENG_1_EN, @TEAM_ENG_1, 'en',
+  'Mehmet KAYA',
+  'mehmet-kaya-senior-project-engineer',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Mehmet KAYA</h1>',
+          '<p><strong>Senior Project Engineer</strong></p>',
+          '<p><strong>Mehmet KAYA</strong> works on site surveys, technical sizing, solution design and implementation coordination for cooling tower projects. ',
+          'He helps ensure performance and energy efficiency targets by selecting optimal solutions based on process requirements and site conditions.</p>',
+          '<h2>Areas of Expertise</h2>',
+          '<ul>',
+            '<li><strong>Project engineering:</strong> Survey, technical annex, planning</li>',
+            '<li><strong>Performance:</strong> Approach/Range, flow rate, fan/fill selection</li>',
+            '<li><strong>Execution:</strong> Installation coordination, commissioning, field tests</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Contact &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
   'Senior Project Engineer',
-  'senior-project-engineer',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Engineering & Project Design</h2>',
-    '<p>The senior project engineer is specialised in heat transfer calculations, tower selection and layout design for ',
-    'FRP cooling towers, closed circuit solutions and hybrid systems.</p>',
-    '<h3>Focus Areas</h3>',
-    '<ul>',
-    '<li>Tower selection, capacity and performance calculations</li>',
-    '<li>Layout planning and project integration</li>',
-    '<li>Optimisation and revisions based on field data</li>',
-    '</ul>'
-  )),
-  'Profile of Ensotek’s senior project engineer and key engineering responsibilities.',
-  'Engineering team – project design and calculations',
-  'Ensotek Senior Project Engineer | Our Team',
-  'Senior project engineer responsible for engineering and design of FRP cooling towers, closed circuit and hybrid cooling systems.',
-  'ensotek,our team,engineering,senior project engineer,heat transfer,frp towers',
-  NOW(3), NOW(3)
+  'Ensotek engineering team – Mehmet KAYA',
+  'Mehmet KAYA | Senior Project Engineer – Ensotek',
+  'Mehmet KAYA supports cooling tower projects through sizing, technical solution design and commissioning coordination, focusing on performance and energy efficiency.',
+  'ensotek,our team,engineering,project engineering,senior engineer,mehmet kaya',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_ENG_1, 'de',
-  'Senior-Projektingenieur',
-  'senior-projektingenieur',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Engineering und Projektplanung</h2>',
-    '<p>Der Senior-Projektingenieur ist spezialisiert auf Wärmeübertragungsberechnungen, Turmauswahl und Layout-Design für ',
-    'FRP-Kühltürme, geschlossene Kreislauflösungen und Hybridsysteme.</p>',
-    '<h3>Schwerpunkte</h3>',
-    '<ul>',
-    '<li>Turmauswahl sowie Kapazitäts- und Leistungsberechnungen</li>',
-    '<li>Layout-Planung und Projektintegration</li>',
-    '<li>Optimierung und Anpassungen anhand von Felddaten</li>',
-    '</ul>'
-  )),
-  'Kurzprofil des Senior-Projektingenieurs von Ensotek mit den wichtigsten technischen Aufgaben und Verantwortlichkeiten.',
-  'Engineering-Team – Projektplanung und Berechnungen',
-  'Ensotek Senior-Projektingenieur | Unser Team',
-  'Senior-Projektingenieur für Engineering und Projektplanung von FRP-Kühltürmen sowie geschlossenen Kreislauf- und Hybrid-Kühlsystemen.',
-  'ensotek,unser team,engineering,senior-projektingenieur,waermeuebertragung,frp kuehltuerme',
-  NOW(3), NOW(3)
-),
-
--- =============================================================
--- TEAM_SERVICE_1 – Saha & Servis Ekibi (örnek profil)
--- =============================================================
-(
-  UUID(), @TEAM_SERVICE_1, 'tr',
-  'Saha ve Servis Sorumlusu',
-  'saha-ve-servis-sorumlusu',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Saha Operasyonları ve Servis</h2>',
-    '<p>Saha ve servis sorumlusu; yerinde keşif, devreye alma, periyodik bakım, arıza tespiti ve modernizasyon uygulamalarının koordinasyonundan sorumludur.</p>',
-    '<h3>Görevler</h3>',
-    '<ul>',
-    '<li>Devreye alma ve performans kontrolü</li>',
-    '<li>Bakım planlama ve saha koordinasyonu</li>',
-    '<li>Arıza tespiti ve modernizasyon uygulamaları</li>',
-    '</ul>'
-  )),
-  'Ensotek saha ve servis ekibinin devreye alma, bakım ve modernizasyon süreçlerindeki rolünü özetleyen profil.',
-  'Saha ve servis – devreye alma, bakım ve modernizasyon',
-  'Ensotek Saha ve Servis Sorumlusu | Ekibimiz',
-  'Ensotek soğutma kulesi projelerinde devreye alma, bakım, arıza tespiti ve modernizasyon süreçlerinden sorumlu saha ve servis sorumlusu.',
-  'ensotek,ekibimiz,servis,saha,devreye alma,bakım,modernizasyon',
-  NOW(3), NOW(3)
+  @I18N_TEAM_ENG_1_DE, @TEAM_ENG_1, 'de',
+  'Mehmet KAYA',
+  'mehmet-kaya-senior-projektingenieur',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Mehmet KAYA</h1>',
+          '<p><strong>Senior Projektingenieur</strong></p>',
+          '<p><strong>Mehmet KAYA</strong> arbeitet an Begehungen, technischer Auslegung, Loesungsdesign und Umsetzungskoordination fuer Kuehlturmprojekte. ',
+          'Er definiert optimale Loesungen basierend auf Prozessanforderungen und Standortbedingungen.</p>',
+          '<h2>Expertise</h2>',
+          '<ul>',
+            '<li><strong>Projektengineering:</strong> Analyse, technischer Anhang, Planung</li>',
+            '<li><strong>Performance:</strong> Approach/Range, Volumenstrom, Ventilator/Fuellkoerper</li>',
+            '<li><strong>Umsetzung:</strong> Montagekoordination, Inbetriebnahme, Feldtests</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Kontakt &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:info@ensotek.com" aria-label="E-Mail"><i class="fa-solid fa-envelope"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Senior Projektingenieur',
+  'Ensotek Engineering-Team – Mehmet KAYA',
+  'Mehmet KAYA | Senior Projektingenieur – Ensotek',
+  'Mehmet KAYA unterstuetzt Kuehlturmprojekte durch Auslegung, Loesungsdesign und Inbetriebnahmekoordination – mit Fokus auf Performance und Energieeffizienz.',
+  'ensotek,unser team,engineering,projektengineering,senior ingenieur,mehmet kaya',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_SERVICE_1, 'en',
+  @I18N_TEAM_SERVICE_1_TR, @TEAM_SERVICE_1, 'tr',
+  'Ali DEMİR',
+  'ali-demir-saha-servis-sorumlusu',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Ali DEMİR</h1>',
+          '<p><strong>Saha &amp; Servis Sorumlusu</strong></p>',
+          '<p><strong>Ali DEMİR</strong>, montaj, devreye alma ve periyodik bakım süreçlerinde saha ekibini koordine eder. ',
+          'Arıza tespiti, hızlı müdahale ve planlı bakım organizasyonu ile sistemlerin sürekliliğini destekler.</p>',
+          '<h2>Uzmanlık Alanları</h2>',
+          '<ul>',
+            '<li><strong>Devreye alma:</strong> Test, ayar ve performans doğrulama</li>',
+            '<li><strong>Servis operasyonu:</strong> Arıza analizi, yedek parça ve müdahale planı</li>',
+            '<li><strong>Bakım:</strong> Periyodik plan, raporlama ve iyileştirme</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>İletişim</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="mailto:service@ensotek.com" aria-label="E-posta"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Saha & Servis Sorumlusu',
+  'Ensotek saha ve servis ekibi – Ali DEMİR',
+  'Ali DEMİR | Saha & Servis – Ensotek',
+  'Ali DEMİR; devreye alma, bakım ve servis süreçlerinde saha ekiplerini koordine eder. Hızlı müdahale ve planlı bakım yaklaşımıyla sistem sürekliliğine odaklanır.',
+  'ensotek,ekibimiz,servis,saha,devreye alma,bakım,ali demir',
+  @DT_NOW, @DT_NOW
+),
+(
+  @I18N_TEAM_SERVICE_1_EN, @TEAM_SERVICE_1, 'en',
+  'Ali DEMİR',
+  'ali-demir-field-service-supervisor',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Ali DEMİR</h1>',
+          '<p><strong>Field &amp; Service Supervisor</strong></p>',
+          '<p><strong>Ali DEMİR</strong> coordinates field teams for installation, commissioning and preventive maintenance. ',
+          'He supports continuity through troubleshooting, rapid response and planned maintenance execution.</p>',
+          '<h2>Areas of Expertise</h2>',
+          '<ul>',
+            '<li><strong>Commissioning:</strong> Testing, tuning and verification</li>',
+            '<li><strong>Service operations:</strong> Fault analysis, spare parts, intervention planning</li>',
+            '<li><strong>Maintenance:</strong> Preventive schedules, reporting and improvement</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Contact</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="mailto:service@ensotek.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Phone"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
   'Field & Service Supervisor',
-  'field-and-service-supervisor',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Field Operations & Service</h2>',
-    '<p>The field and service supervisor is responsible for site surveys, commissioning, periodic maintenance, troubleshooting and coordination of modernization works.</p>',
-    '<h3>Responsibilities</h3>',
-    '<ul>',
-    '<li>Commissioning and performance verification</li>',
-    '<li>Maintenance planning and on-site coordination</li>',
-    '<li>Troubleshooting and modernization works</li>',
-    '</ul>'
-  )),
-  'Profile summarising the role of the field and service supervisor in commissioning, maintenance and modernization projects.',
-  'Field service – commissioning, maintenance and modernization',
-  'Ensotek Field & Service Supervisor | Our Team',
-  'Field and service supervisor responsible for commissioning, maintenance, troubleshooting and modernization on Ensotek cooling tower projects.',
-  'ensotek,our team,service,field service,commissioning,maintenance,modernization',
-  NOW(3), NOW(3)
+  'Ensotek field & service team – Ali DEMİR',
+  'Ali DEMİR | Field & Service – Ensotek',
+  'Ali DEMİR supervises commissioning, maintenance and service operations, focusing on rapid response and preventive maintenance to ensure continuity and reliability.',
+  'ensotek,our team,service,field,commissioning,maintenance,ali demir',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_SERVICE_1, 'de',
-  'Leiter Außendienst & Service',
-  'leiter-aussendienst-service',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Außendienst und Service</h2>',
-    '<p>Der Leiter für Außendienst und Service ist verantwortlich für Vor-Ort-Begehungen, Inbetriebnahmen, regelmäßige Wartungen, Störungsdiagnosen sowie die Koordination von Modernisierungsarbeiten.</p>',
-    '<h3>Aufgaben</h3>',
-    '<ul>',
-    '<li>Inbetriebnahme und Leistungsprüfung</li>',
-    '<li>Wartungsplanung und Vor-Ort-Koordination</li>',
-    '<li>Störungsdiagnose und Modernisierungsmaßnahmen</li>',
-    '</ul>'
-  )),
-  'Kurzprofil zur Rolle des Leiters für Außendienst und Service bei Inbetriebnahme, Wartung und Modernisierung.',
-  'Außendienst & Service – Inbetriebnahme, Wartung, Modernisierung',
-  'Ensotek Leiter Außendienst & Service | Unser Team',
-  'Leiter für Außendienst und Service in Ensotek-Kühlturmprojekten, verantwortlich für Inbetriebnahme, Wartung, Störungsdiagnose und Modernisierung.',
-  'ensotek,unser team,service,aussendienst,service,inbetriebnahme,wartung,modernisierung',
-  NOW(3), NOW(3)
-),
-
--- =============================================================
--- TEAM_FT_1 – Can Zemheri (Dış Ticaret)
--- =============================================================
-(
-  UUID(), @TEAM_FT_1, 'tr',
-  'Can Zemheri – Dış Ticaret Uzmanı',
-  'can-zemheri-dis-ticaret-uzmani',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Küresel Ticaret ve Müşteri İlişkileri</h2>',
-    '<p><strong>Can Zemheri</strong>, Ensotek’te dış ticaret süreçlerinin sorunsuz ilerlemesi için çalışır. ',
-    'İthalat/ihracat operasyonları ve uluslararası müşteri ilişkileri konusunda uzmanlaşmıştır.</p>',
-    '<h3>Sorumluluklar</h3>',
-    '<ul>',
-    '<li><strong>İthalat/İhracat:</strong> Süreç yönetimi, dokümantasyon ve koordinasyon</li>',
-    '<li><strong>Müşteri ilişkileri:</strong> Uluslararası iletişim, takip ve memnuniyet yönetimi</li>',
-    '<li><strong>Küresel ağ geliştirme:</strong> Yeni pazarlar ve iş ortaklıkları</li>',
-    '</ul>',
-    '<p>Can, Ensotek’in global ticaret ağının gelişiminde kilit rol oynar.</p>'
-  )),
-  'Can Zemheri; Ensotek’te dış ticaret uzmanı. İthalat/ihracat süreçleri ve uluslararası müşteri ilişkileriyle global ağın gelişiminde kilit rol oynar.',
-  'Ensotek dış ticaret ekibi – Can Zemheri',
-  'Can Zemheri | Dış Ticaret Uzmanı – Ensotek',
-  'Can Zemheri, Ensotek’in dış ticaret süreçlerini ve uluslararası müşteri ilişkilerini yönetir; global ticaret ağının gelişimini destekler.',
-  'ensotek,ekibimiz,dış ticaret,ihracat,ithalat,uluslararası,can zemheri',
-  NOW(3), NOW(3)
+  @I18N_TEAM_SERVICE_1_DE, @TEAM_SERVICE_1, 'de',
+  'Ali DEMİR',
+  'ali-demir-field-service-supervisor',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Ali DEMİR</h1>',
+          '<p><strong>Field &amp; Service Supervisor</strong></p>',
+          '<p><strong>Ali DEMİR</strong> koordiniert Teams fuer Installation, Inbetriebnahme und planmaessige Wartung. ',
+          'Er sichert Verfuegbarkeit durch Stoerungsanalyse, schnelle Einsaetze und strukturierte Wartungsplaene.</p>',
+          '<h2>Expertise</h2>',
+          '<ul>',
+            '<li><strong>Inbetriebnahme:</strong> Tests, Einstellungen und Verifikation</li>',
+            '<li><strong>Service:</strong> Stoerungsanalyse, Ersatzteile, Einsatzplanung</li>',
+            '<li><strong>Wartung:</strong> Praeventive Plaene, Reporting und Verbesserung</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Kontakt</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="mailto:service@ensotek.com" aria-label="E-Mail"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Field & Service Supervisor',
+  'Ensotek Service-Team – Ali DEMİR',
+  'Ali DEMİR | Service & Feld – Ensotek',
+  'Ali DEMİR koordiniert Inbetriebnahme, Wartung und Serviceeinsaetze mit Fokus auf schnelle Reaktion und praeventive Wartung.',
+  'ensotek,unser team,service,feld,inbetriebnahme,wartung,ali demir',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_FT_1, 'en',
-  'Can Zemheri – Foreign Trade Specialist',
-  'can-zemheri-foreign-trade-specialist',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Global Trade & Customer Relations</h2>',
-    '<p><strong>Can Zemheri</strong> works to ensure smooth international trade operations at Ensotek. ',
-    'As a specialist for foreign business, import/export processes and customer relationships, he plays a key role in expanding Ensotek’s global trade network.</p>',
-    '<h3>Responsibilities</h3>',
-    '<ul>',
-    '<li><strong>Import/Export:</strong> Process management, documentation and coordination</li>',
-    '<li><strong>Customer relations:</strong> International communication, follow-up and satisfaction</li>',
-    '<li><strong>Global network:</strong> New markets and partnerships</li>',
-    '</ul>'
-  )),
-  'Can Zemheri is a foreign trade specialist at Ensotek, focusing on import/export processes and international customer relationships to grow the global trade network.',
-  'Ensotek foreign trade team – Can Zemheri',
-  'Can Zemheri | Foreign Trade Specialist – Ensotek',
-  'Can Zemheri supports Ensotek’s international trade operations by managing import/export processes and global customer relationships.',
-  'ensotek,our team,foreign trade,import,export,international,can zemheri',
-  NOW(3), NOW(3)
+  @I18N_TEAM_FT_1_TR, @TEAM_FT_1, 'tr',
+  'Can Zemheri',
+  'can-zemheri-dis-ticaret',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Can Zemheri</h1>',
+          '<p><strong>Dış Ticaret</strong></p>',
+          '<p><strong>Can Zemheri</strong>, Ensotek’in uluslararası satış ve dış ticaret süreçlerinde görev alır. ',
+          'İhracat operasyonu, teklif süreçleri, lojistik koordinasyon ve müşteri iletişimini uçtan uca takip eder.</p>',
+          '<h2>Odak Alanları</h2>',
+          '<ul>',
+            '<li><strong>İhracat operasyonu:</strong> Evrak, gümrük ve sevkiyat koordinasyonu</li>',
+            '<li><strong>Teklif &amp; müşteri yönetimi:</strong> Dokümantasyon ve termin takibi</li>',
+            '<li><strong>Pazar gelişimi:</strong> Yeni ülke/kanal çalışmaları ve iş ortaklıkları</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>İletişim &amp; Sosyal</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:export@ensotek.com" aria-label="E-posta"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Dış Ticaret Uzmanı',
+  'Ensotek dış ticaret – Can Zemheri',
+  'Can Zemheri | Dış Ticaret – Ensotek',
+  'Can Zemheri; Ensotek’in ihracat ve dış ticaret süreçlerini yönetir. Lojistik koordinasyon, teklif takibi ve uluslararası müşteri iletişiminde uçtan uca sorumluluk alır.',
+  'ensotek,ekibimiz,dis ticaret,ihracat,lojistik,can zemheri',
+  @DT_NOW, @DT_NOW
 ),
 (
-  UUID(), @TEAM_FT_1, 'de',
-  'Can Zemheri – Außenhandelsexperte',
-  'can-zemheri-aussenhandelsexperte',
-  JSON_OBJECT('html', CONCAT(
-    '<h2>Internationaler Handel</h2>',
-    '<p><strong>Can Zemheri</strong> arbeitet daran, die internationalen Handelsprozesse reibungslos zu gestalten. ',
-    'Als Experte für die Auslandsgeschäfte des Unternehmens, Import-/Exportprozesse und Kundenbeziehungen spielt Can eine Schlüsselrolle bei der Entwicklung des globalen Handelsnetzwerks von Ensotek.</p>'
-  )),
-  'Can Zemheri ist Außenhandelsexperte bei Ensotek und gestaltet internationale Handelsprozesse, Import/Export und Kundenbeziehungen maßgeblich mit.',
+  @I18N_TEAM_FT_1_EN, @TEAM_FT_1, 'en',
+  'Can Zemheri',
+  'can-zemheri-foreign-trade',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Can Zemheri</h1>',
+          '<p><strong>Foreign Trade</strong></p>',
+          '<p><strong>Can Zemheri</strong> supports Ensotek’s international sales and foreign trade operations. ',
+          'He ensures end-to-end execution across export documentation, logistics coordination, proposals and customer communication.</p>',
+          '<h2>Key Focus Areas</h2>',
+          '<ul>',
+            '<li><strong>Export operations:</strong> Documentation, customs and shipment coordination</li>',
+            '<li><strong>Proposals &amp; customer management:</strong> Documentation and lead-time tracking</li>',
+            '<li><strong>Market development:</strong> New countries/channels and partnerships</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Contact &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:export@ensotek.com" aria-label="Email"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Phone"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Foreign Trade Specialist',
+  'Ensotek foreign trade – Can Zemheri',
+  'Can Zemheri | Foreign Trade – Ensotek',
+  'Can Zemheri manages export workflows and foreign trade operations at Ensotek, coordinating logistics, proposal tracking and international customer communication end-to-end.',
+  'ensotek,our team,foreign trade,export,logistics,can zemheri',
+  @DT_NOW, @DT_NOW
+),
+(
+  @I18N_TEAM_FT_1_DE, @TEAM_FT_1, 'de',
+  'Can Zemheri',
+  'can-zemheri-aussenhandel',
+  JSON_OBJECT(
+    'html',
+    CONCAT(
+      '<section class="container mx-auto px-4 py-10">',
+        '<div class="prose max-w-none">',
+          '<h1>Can Zemheri</h1>',
+          '<p><strong>Außenhandel</strong></p>',
+          '<p><strong>Can Zemheri</strong> unterstuetzt den internationalen Vertrieb sowie Außenhandelsprozesse bei Ensotek. ',
+          'Er verantwortet die End-to-End-Abwicklung von Exportdokumenten, Logistikkoordination, Angeboten und Kundenkommunikation.</p>',
+          '<h2>Schwerpunkte</h2>',
+          '<ul>',
+            '<li><strong>Exportabwicklung:</strong> Dokumente, Zoll und Versandkoordination</li>',
+            '<li><strong>Angebote &amp; Kundenmanagement:</strong> Dokumentation und Terminverfolgung</li>',
+            '<li><strong>Marktentwicklung:</strong> Neue Laender/Kanaele und Partnerschaften</li>',
+          '</ul>',
+          '<hr/>',
+          '<h2>Kontakt &amp; Social</h2>',
+          '<div class="team-social flex gap-3 items-center">',
+            '<a href="https://www.linkedin.com/company/ensotek/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>',
+            '<a href="mailto:export@ensotek.com" aria-label="E-Mail"><i class="fa-solid fa-envelope"></i></a>',
+            '<a href="tel:+905555555555" aria-label="Telefon"><i class="fa-solid fa-phone"></i></a>',
+          '</div>',
+        '</div>',
+      '</section>'
+    )
+  ),
+  'Außenhandel',
   'Ensotek Außenhandel – Can Zemheri',
-  'Can Zemheri | Außenhandelsexperte – Ensotek',
-  'Can Zemheri unterstützt Ensotek im internationalen Geschäft: Import-/Exportprozesse, Kundenbeziehungen und Ausbau des globalen Handelsnetzwerks.',
-  'ensotek,unser team,aussenhandel,import,export,international,can zemheri',
-  NOW(3), NOW(3)
+  'Can Zemheri | Außenhandel – Ensotek',
+  'Can Zemheri verantwortet Export- und Außenhandelsprozesse bei Ensotek: Logistikkoordination, Angebots-Tracking und internationale Kundenkommunikation – Ende-zu-Ende.',
+  'ensotek,unser team,aussenhandel,export,logistik,can zemheri',
+  @DT_NOW, @DT_NOW
 )
-
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),

@@ -1,6 +1,8 @@
 // =============================================================
 // FILE: src/components/containers/news/NewsMore.tsx
-// Ensotek – More News Section (detail page altı)
+// Ensotek – More News Carousel (detail page altı)
+// FIX: accepts currentSlug as prop (avoids IntrinsicAttributes error)
+// PATTERN: useLocaleShort + useUiSection + localizePath
 // =============================================================
 
 'use client';
@@ -14,78 +16,92 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
 import { toCdnSrc } from '@/shared/media';
 
-import { useResolvedLocale } from '@/i18n/locale';
+// i18n PATTERN
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
+// Swiper
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Navigation } from 'swiper';
+import 'swiper/css';
+
 import FallbackCover from 'public/img/blog/3/2.jpg';
 
-const CARD_W = 480;
-const CARD_H = 320;
+const CARD_W = 640;
+const CARD_H = 420;
 
-function toLocaleShort(l: string): string {
-  const s = String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-');
-  return s.split('-')[0] || 'de';
-}
-
-export interface NewsMoreProps {
+type Props = {
   currentSlug?: string;
+};
+
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
 }
 
-const NewsMore: React.FC<NewsMoreProps> = ({ currentSlug }) => {
-  const resolved = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolved), [resolved]);
+const NewsMore: React.FC<Props> = ({ currentSlug }) => {
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_news', locale as any);
 
-  const { ui } = useUiSection('ui_news', locale);
+  const current = useMemo(() => safeStr(currentSlug), [currentSlug]);
 
-  const moreTitle = ui('ui_news_more_title', locale === 'de' ? 'Diğer Haberler' : 'More News');
+  const moreTitle = useMemo(() => ui('ui_news_more_title', 'More News'), [ui]);
+
+  const readMoreLabel = useMemo(() => ui('ui_news_more_read_more', 'Read more'), [ui]);
+
+  const newsListHref = useMemo(() => localizePath(locale, '/news'), [locale]);
 
   const { data, isLoading } = useListCustomPagesPublicQuery({
     module_key: 'news',
+    is_published: 1,
     sort: 'created_at',
     orderDir: 'desc',
-    limit: 6,
-    is_published: 1,
+    limit: 12,
     locale,
   });
 
-  const newsListHref = localizePath(locale, '/news');
-
   const items = useMemo(() => {
-    const list: CustomPageDto[] = data?.items ?? [];
+    const list: CustomPageDto[] = ((data as any)?.items ?? []) as any;
 
     return list
       .filter((n) => {
-        const s = (n.slug || '').trim();
-        if (!n.is_published) return false;
-        if (!s) return false;
-        if (currentSlug && s === currentSlug) return false;
+        if (!n || !n.is_published) return false;
+
+        const slug = safeStr((n as any).slug);
+        if (!slug) return false;
+
+        // currentSlug varsa onu çıkar
+        if (current && slug === current) return false;
+
         return true;
       })
-      .slice(0, 3)
+      .slice(0, 9)
       .map((n) => {
-        const s = (n.slug || '').trim();
-        const title = (n.title || '').trim();
-        const imgRaw = (n.featured_image || '').trim();
-        const hero = (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '';
+        const slug = safeStr((n as any).slug);
+        const title = safeStr((n as any).title);
+        const summary = safeStr((n as any).summary);
+        const imgRaw = safeStr((n as any).featured_image);
 
         return {
-          id: n.id,
-          slug: s,
+          id: safeStr((n as any).id) || slug,
+          slug,
           title,
-          hero,
+          summary,
+          hero: (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw)) || '',
+          alt: title || ui('ui_news_more_image_alt', 'news image'),
         };
       });
-  }, [data, currentSlug]);
+  }, [data, current, ui]);
 
+  // ✅ empty state: hiç item yok ve loading değilse render etme
   if (!items.length && !isLoading) return null;
 
   return (
     <section className="news__area pt-60 pb-90">
       <div className="container">
+        {/* Title */}
         <div className="row mb-40">
           <div className="col-12">
             <div className="section__title-wrapper text-center">
@@ -96,44 +112,68 @@ const NewsMore: React.FC<NewsMoreProps> = ({ currentSlug }) => {
           </div>
         </div>
 
-        <div className="row" data-aos="fade-up" data-aos-delay="200">
+        {/* Carousel */}
+        <Swiper
+          modules={[Autoplay, Navigation]}
+          spaceBetween={24}
+          slidesPerView={3}
+          autoplay={{ delay: 4500, disableOnInteraction: false }}
+          navigation
+          breakpoints={{
+            0: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1200: { slidesPerView: 3 },
+          }}
+        >
           {items.map((n) => {
             const href = n.slug
               ? localizePath(locale, `/news/${encodeURIComponent(n.slug)}`)
               : newsListHref;
 
             return (
-              <div className="col-xl-4 col-lg-4 col-md-6" key={n.id}>
-                <div className="news__item-3 mb-30">
-                  <div className="news__thumb-3 w-img">
-                    <Image
-                      src={(n.hero as any) || (FallbackCover as any)}
-                      alt={n.title || 'news image'}
-                      width={CARD_W}
-                      height={CARD_H}
-                      style={{ width: '100%', height: 'auto' }}
-                      loading="lazy"
-                    />
+              <SwiperSlide key={n.id}>
+                <div className="team__item teamItem--nameBelow">
+                  <div className="team__thumb teamThumbHover">
+                    <Link href={href}>
+                      <Image
+                        src={(n.hero as any) || (FallbackCover as any)}
+                        alt={n.alt}
+                        width={CARD_W}
+                        height={CARD_H}
+                        loading="lazy"
+                      />
+                    </Link>
+
+                    <div className="teamThumbHover__overlay">
+                      <div className="teamThumbHover__box">
+                        <div className="teamThumbHover__role">{n.title}</div>
+                        {n.summary ? <div className="teamThumbHover__note">{n.summary}</div> : null}
+                      </div>
+                    </div>
                   </div>
-                  <div className="news__content-3">
-                    <h3>
+
+                  <div className="team__content teamContent--nameOnly">
+                    <h3 className="teamNameOnly">
                       <Link href={href}>{n.title}</Link>
                     </h3>
+
                     <Link href={href} className="link-more">
-                      {ui('ui_news_read_more', locale === 'de' ? 'Devamını oku' : 'Read more')} →
+                      {readMoreLabel} →
                     </Link>
                   </div>
                 </div>
-              </div>
+              </SwiperSlide>
             );
           })}
+        </Swiper>
 
-          {isLoading && (
+        {isLoading ? (
+          <div className="row mt-20">
             <div className="col-12">
               <div className="skeleton-line" style={{ height: 16 }} aria-hidden />
             </div>
-          )}
-        </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );

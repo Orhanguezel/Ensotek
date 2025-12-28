@@ -1,10 +1,10 @@
 // =============================================================
 // FILE: src/components/containers/team/TeamDetail.tsx
-// Ensotek – Team Detail Content
-//   - Data: custom_pages (module_key = "team")
-//   - Query: getCustomPageBySlugPublic (slug + locale)
+// Ensotek – Team Detail Content (DB seed compatible)
+//   - Data: custom_pages/by-slug (module_key="team")
+//   - Locale: useLocaleShort() (single source)
 //   - UI i18n: site_settings.ui_team
-//   - Locale-aware routes with localizePath
+//   - Content: prefers content_html; fallback: content.html (JSON/string)
 // =============================================================
 
 'use client';
@@ -18,11 +18,10 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
 import { toCdnSrc } from '@/shared/media';
 
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
-// Fallback görsel
 import FallbackOne from 'public/img/team/01.jpg';
 
 const HERO_W = 560;
@@ -32,76 +31,81 @@ export interface TeamDetailProps {
   slug: string;
 }
 
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
+}
+
+function contentToHtml(row: any): string {
+  const html1 = safeStr(row?.content_html);
+  if (html1) return html1;
+
+  const c = row?.content;
+
+  // content object { html: "..." }
+  if (c && typeof c === 'object' && safeStr((c as any).html)) return safeStr((c as any).html);
+
+  // content string: JSON veya direkt HTML
+  if (typeof c === 'string') {
+    const s = c.trim();
+    if (!s) return '';
+    try {
+      const parsed = JSON.parse(s);
+      if (parsed && typeof parsed === 'object' && safeStr((parsed as any).html)) {
+        return safeStr((parsed as any).html);
+      }
+      return s;
+    } catch {
+      return s;
+    }
+  }
+
+  return '';
+}
+
 const TeamDetail: React.FC<TeamDetailProps> = ({ slug }) => {
-  const locale = useResolvedLocale() || 'de';
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_team', locale as any);
 
-  const { ui } = useUiSection('ui_team', locale);
-
-  const backLabel = ui('ui_team_detail_back', locale === 'de' ? 'Ekibe geri dön' : 'Back to team');
-  const backAria = ui(
-    'ui_team_detail_back_aria',
-    locale === 'de' ? 'ekip listesine geri dön' : 'back to team list',
-  );
-  const emptyText = ui(
-    'ui_team_detail_empty',
-    locale === 'de' ? 'Ekip üyesi bulunamadı.' : 'Team member could not be found.',
-  );
-  const untitled = ui(
-    'ui_team_untitled',
-    locale === 'de' ? 'İsimsiz ekip üyesi' : 'Unnamed team member',
-  );
-  const roleFallback = ui(
-    'ui_team_role_fallback',
-    locale === 'de' ? 'Uzman mühendis' : 'Expert engineer',
-  );
+  const backLabel = ui('ui_team_detail_back', 'Back to team');
+  const backAria = ui('ui_team_detail_back_aria', 'back to team list');
+  const emptyText = ui('ui_team_detail_empty', 'Team member could not be found.');
+  const untitled = ui('ui_team_untitled', 'Unnamed team member');
+  const roleFallback = ui('ui_team_role_fallback', 'Expert engineer');
 
   const kickerPrefix = ui('ui_team_detail_subprefix', 'Ensotek');
-  const kickerLabel = ui(
-    'ui_team_detail_sublabel',
-    locale === 'de' ? 'Yönetim ekibimiz' : 'Management team',
-  );
+  const kickerLabel = ui('ui_team_detail_sublabel', 'Team');
 
   const noContentText = ui(
     'ui_team_detail_no_content',
-    locale === 'de'
-      ? 'Bu ekip üyesi için henüz ek bilgi girilmemiştir.'
-      : 'No additional information has been provided yet.',
+    'No additional information has been provided yet.',
   );
 
-  const { data, isLoading } = useGetCustomPageBySlugPublicQuery(
-    { slug, locale },
-    {
-      skip: !slug,
-    },
-  );
+  const { data, isLoading } = useGetCustomPageBySlugPublicQuery({ slug, locale }, { skip: !slug });
 
-  const backHref = localizePath(locale, '/team');
+  const backHref = localizePath(locale as any, '/team');
 
   const viewModel = useMemo(() => {
     if (!data) return null;
 
-    const row: CustomPageDto = data;
+    const row: CustomPageDto = data as any;
 
-    const name = (row.title || '').trim() || untitled;
+    // ✅ name: seed’de title’ı “İbrahim YAĞAR” gibi sade tutacağız
+    const name = safeStr((row as any)?.title) || untitled;
 
-    // Rol / pozisyon:
-    //  1) summary (örn: kısa profil cümlesi)
-    //  2) meta_description
-    //  3) fallback
-    const role = (row.summary || '').trim() || (row.meta_description || '').trim() || roleFallback;
+    // ✅ role: kısa görev
+    const role =
+      safeStr((row as any)?.summary) ||
+      safeStr((row as any)?.meta_description) ||
+      safeStr(roleFallback) ||
+      '';
 
-    const imgRaw = (row.featured_image || '').trim();
-    const hero = (imgRaw && (toCdnSrc(imgRaw, HERO_W, HERO_H, 'fill') || imgRaw)) || '';
+    const imgRaw = safeStr((row as any)?.featured_image);
+    const hero = imgRaw ? toCdnSrc(imgRaw, HERO_W, HERO_H, 'fill') || imgRaw : '';
     const imgSrc = (hero as any) || (FallbackOne as any);
 
-    const html = (row.content_html || '').trim();
+    const html = contentToHtml(row as any);
 
-    return {
-      name,
-      role,
-      imgSrc,
-      html,
-    };
+    return { name, role, imgSrc, html };
   }, [data, untitled, roleFallback]);
 
   return (
@@ -119,13 +123,12 @@ const TeamDetail: React.FC<TeamDetailProps> = ({ slug }) => {
         </div>
 
         <div className="row align-items-start" data-aos="fade-up" data-aos-delay="300">
-          {/* Görsel */}
+          {/* Image */}
           <div className="col-xl-5 col-lg-5">
             <div className="team__thumb mb-40">
-              {isLoading && (
+              {isLoading ? (
                 <div className="skeleton-line" style={{ width: '100%', paddingBottom: '120%' }} />
-              )}
-              {!isLoading && viewModel && (
+              ) : viewModel ? (
                 <Image
                   src={viewModel.imgSrc}
                   alt={viewModel.name || 'team member'}
@@ -134,13 +137,13 @@ const TeamDetail: React.FC<TeamDetailProps> = ({ slug }) => {
                   style={{ width: '100%', height: 'auto' }}
                   loading="lazy"
                 />
-              )}
+              ) : null}
             </div>
           </div>
 
-          {/* Metin / içerik */}
+          {/* Content */}
           <div className="col-xl-7 col-lg-7">
-            {isLoading && (
+            {isLoading ? (
               <div aria-hidden>
                 <div className="skeleton-line" style={{ height: 32, marginBottom: 16 }} />
                 <div
@@ -154,29 +157,24 @@ const TeamDetail: React.FC<TeamDetailProps> = ({ slug }) => {
                 />
                 <div className="skeleton-line" style={{ height: 16, width: '80%' }} />
               </div>
-            )}
-
-            {!isLoading && !viewModel && <p className="mb-0">{emptyText}</p>}
-
-            {!isLoading && viewModel && (
+            ) : !viewModel ? (
+              <p className="mb-0">{emptyText}</p>
+            ) : (
               <div className="team__detail-content">
                 <div className="section__title-wrapper mb-30">
                   <span className="section__subtitle-2">
                     <span>{kickerPrefix}</span> {kickerLabel}
                   </span>
+
                   <h2 className="section__title-2">{viewModel.name}</h2>
 
-                  {/* Rol / kısa profil */}
-                  {viewModel.role && <p className="team__detail-role">{viewModel.role}</p>}
+                  {viewModel.role ? <p className="team__detail-role">{viewModel.role}</p> : null}
                 </div>
 
-                {/* Direkt içerik – ekstra "About this team member" başlığı yok */}
                 {viewModel.html ? (
                   <div
                     className="prose-content"
-                    dangerouslySetInnerHTML={{
-                      __html: viewModel.html,
-                    }}
+                    dangerouslySetInnerHTML={{ __html: viewModel.html }}
                   />
                 ) : (
                   <p className="mb-0">{noContentText}</p>

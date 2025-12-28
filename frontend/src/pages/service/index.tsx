@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/pages/service/index.tsx
-// Public Services Page (list) + SEO (product pattern)
+// Public Services Page (list) + SEO (NEWS/PRODUCT pattern)
 //   - Route: /service
-//   - Layout is provided by _app.tsx (do NOT wrap here)
-//   - Page-specific SEO override via next/head (title/description/og:image)
+//   - i18n: useLocaleShort() + site_settings.ui_services
+//   - SEO: seo -> site_seo fallback + UI overrides (NO canonical here)
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
 
 'use client';
@@ -16,120 +17,99 @@ import Service from '@/components/containers/service/Service';
 import ServiceMore from '@/components/containers/service/ServiceMore';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
+// SEO
+import { buildMeta } from '@/seo/meta';
+import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+
 // data
-import { useGetSiteSettingByKeyQuery, useListServicesPublicQuery } from '@/integrations/rtk/hooks';
-import type { ServiceDto } from '@/integrations/types/services.types';
-
-// helpers
-import { excerpt } from '@/shared/text';
-import { asObj } from '@/seo/pageSeo';
-import { toCdnSrc } from '@/shared/media';
-import { normLocaleTag } from '@/i18n/localeUtils';
-
-const toLocaleShort = (l: unknown) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 function safeStr(x: unknown): string {
   return typeof x === 'string' ? x.trim() : '';
 }
 
-function ensureMinDescription(desc: string, minLen = 20): string {
-  const d = safeStr(desc);
-  if (d.length >= minLen) return d;
-  return 'Explore our services and solutions. Contact us for tailored support and consultation.';
-}
-
 const ServicePage: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_services', locale as any);
 
-  const { ui } = useUiSection('ui_services', locale);
+  const bannerTitle = ui('ui_services_page_title', 'Services');
 
-  // ✅ default_locale DB’den
-  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
-  const defaultLocale = useMemo(() => {
-    const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'de';
-  }, [defaultLocaleRow?.value]);
-
-  const bannerTitle = ui('ui_services_page_title', locale === 'de' ? 'Hizmetler' : 'Services');
-
-  // Global SEO settings (desc fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  // Global SEO settings (seo -> site_seo fallback)
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
-  // ✅ Services list (meta override için ilk published kayıt)
-  const { data: serviceData } = useListServicesPublicQuery({
-    locale,
-    default_locale: defaultLocale,
-    limit: 20,
-    order: 'display_order.asc,created_at.asc',
-  });
+  // --- SEO: Title/Description (UI overrides) ---
+  const pageTitleRaw = useMemo(() => {
+    const t = safeStr(ui('ui_services_meta_title', ''));
+    return t || safeStr(bannerTitle) || 'Services';
+  }, [ui, bannerTitle]);
 
-  const primary = useMemo(() => {
-    const items: ServiceDto[] = (serviceData?.items ?? []) as any;
-    const published = items.filter((p) => Boolean((p as any)?.is_published ?? true));
-    return published[0];
-  }, [serviceData?.items]);
+  const pageDescRaw = useMemo(() => {
+    const d = safeStr(ui('ui_services_meta_description', ''));
+    const globalDesc = safeStr((seo as any)?.description) || '';
+    return d || globalDesc || '';
+  }, [ui, seo]);
+
+  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(
+    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
+    [seo],
+  );
 
   const pageTitle = useMemo(() => {
-    return (
-      safeStr((primary as any)?.meta_title) ||
-      safeStr(primary?.name) ||
-      safeStr(bannerTitle) ||
-      (locale === 'de' ? 'Hizmetler' : 'Services')
-    );
-  }, [primary, bannerTitle, locale]);
-
-  const pageDesc = useMemo(() => {
-    const fromPrimary =
-      safeStr((primary as any)?.meta_description) ||
-      safeStr((primary as any)?.description) ||
-      safeStr((primary as any)?.includes) ||
-      safeStr(excerpt(String((primary as any)?.content_html ?? ''), 160)) ||
-      safeStr((seo as any)?.description);
-
-    const uiFallback = safeStr(
-      ui(
-        'ui_services_page_description',
-        locale === 'de'
-          ? 'Hizmetlerimizi ve çözümlerimizi inceleyin. Size özel destek ve danışmanlık için iletişime geçin.'
-          : 'Explore our services and solutions. Contact us for tailored support and consultation.',
-      ),
-    );
-
-    return ensureMinDescription(fromPrimary || uiFallback, 20);
-  }, [primary, seo, ui, locale]);
+    const t = titleTemplate.includes('%s')
+      ? titleTemplate.replace('%s', pageTitleRaw)
+      : pageTitleRaw;
+    return safeStr(t);
+  }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const raw = safeStr(
-      (primary as any)?.featured_image_url ||
-        (primary as any)?.image_url ||
-        (primary as any)?.featured_image,
-    );
-    if (!raw) return '';
-    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
-  }, [primary]);
+    const fallbackSeoImg = pickFirstImageFromSeo(seo);
+    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    return fallback || absUrl('/favicon.svg');
+  }, [seo]);
+
+  const headSpecs = useMemo(() => {
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+
+    // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
+    return buildMeta({
+      title: pageTitle,
+      description: pageDescRaw,
+      image: ogImage || undefined,
+      siteName: seoSiteName,
+      noindex,
+
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
+    });
+  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
   return (
     <>
-      {/* ✅ Override Layout defaults (Layout still owns canonical/hreflang/og:url) */}
       <Head>
-        <title key="title">{pageTitle}</title>
-        <meta key="description" name="description" content={pageDesc} />
-        {ogImage ? <meta key="og:image" property="og:image" content={ogImage} /> : null}
+        <title>{pageTitle}</title>
+        {headSpecs.map((spec, idx) => {
+          if (spec.kind === 'link') {
+            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+          }
+          if (spec.kind === 'meta-name') {
+            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+          }
+          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
+        })}
       </Head>
 
       <Banner title={bannerTitle} />

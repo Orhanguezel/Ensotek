@@ -1,4 +1,10 @@
-// src/modules/customPages/schema.ts
+// =============================================================
+// FILE: src/modules/customPages/schema.ts
+// FINAL — MariaDB/MySQL compatible (LONGTEXT JSON-string columns)
+// - module_key on parent table
+// - images/storage_image_ids are LONGTEXT in DB, but exposed as string[] in app
+// =============================================================
+
 import {
   mysqlTable,
   char,
@@ -9,126 +15,166 @@ import {
   index,
   customType,
   foreignKey,
-  int,       
-} from "drizzle-orm/mysql-core";
-import { sql } from "drizzle-orm";
-import { categories } from "@/modules/categories/schema";
-import { subCategories } from "@/modules/subcategories/schema";
+  int,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
 
-/** LONGTEXT JSON-string: {"html":"..."} */
+import { categories } from '@/modules/categories/schema';
+import { subCategories } from '@/modules/subcategories/schema';
+
+/** LONGTEXT */
 const longtext = customType<{ data: string; driverData: string }>({
   dataType() {
-    return "longtext";
+    return 'longtext';
+  },
+});
+
+/**
+ * LONGTEXT that stores JSON-string for string[] (e.g. '[]', '["a","b"]')
+ * App tarafında: string[]
+ */
+const longtextJsonStringArray = customType<{ data: string[]; driverData: string }>({
+  dataType() {
+    return 'longtext';
+  },
+  toDriver(value) {
+    // value app tarafında string[] bekliyoruz
+    if (!value) return '[]';
+    if (Array.isArray(value)) return JSON.stringify(value);
+    // güvenlik
+    return '[]';
+  },
+  fromDriver(value) {
+    const s = String(value ?? '').trim();
+    if (!s) return [];
+    try {
+      const parsed = JSON.parse(s);
+      return Array.isArray(parsed) ? parsed.map((x) => String(x ?? '').trim()).filter(Boolean) : [];
+    } catch {
+      return [];
+    }
   },
 });
 
 export const customPages = mysqlTable(
-  "custom_pages",
+  'custom_pages',
   {
-    id: char("id", { length: 36 }).primaryKey().notNull(),
+    id: char('id', { length: 36 }).primaryKey().notNull(),
 
-    // dil-bağımsız alanlar
-    is_published: tinyint("is_published").notNull().default(0),
+    /** module_key parent'ta */
+    module_key: varchar('module_key', { length: 100 }).notNull().default(''),
 
-    /** Sıralama */
-    display_order: int("display_order").notNull().default(0),  // 👈 YENİ
+    // dil bağımsız
+    is_published: tinyint('is_published').notNull().default(0),
 
-    /** Eski/serbest URL (opsiyonel) */
-    featured_image: varchar("featured_image", { length: 500 }),
-    /** Storage bağı: asset id (opsiyonel) */
-    featured_image_asset_id: char("featured_image_asset_id", {
-      length: 36,
-    }),
+    /** sıralama */
+    display_order: int('display_order').notNull().default(0),
+    order_num: int('order_num').notNull().default(0),
 
-    // 🔗 Kategori bağları (news/blog/articles için)
-    category_id: char("category_id", { length: 36 }),
-    sub_category_id: char("sub_category_id", { length: 36 }),
+    /** kapak */
+    featured_image: varchar('featured_image', { length: 500 }),
+    featured_image_asset_id: char('featured_image_asset_id', { length: 36 }),
 
-    created_at: datetime("created_at", { fsp: 3 })
+    /** legacy / serbest URL */
+    image_url: longtext('image_url'),
+    storage_asset_id: char('storage_asset_id', { length: 36 }),
+
+    /**
+     * ✅ DB: LONGTEXT DEFAULT '[]'
+     * ✅ App: string[]
+     */
+    images: longtextJsonStringArray('images').notNull().default([]),
+    storage_image_ids: longtextJsonStringArray('storage_image_ids').notNull().default([]),
+
+    /** kategori bağları */
+    category_id: char('category_id', { length: 36 }),
+    sub_category_id: char('sub_category_id', { length: 36 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),
-    updated_at: datetime("updated_at", { fsp: 3 })
+
+    updated_at: datetime('updated_at', { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`)
       .$onUpdateFn(() => new Date()),
   },
   (t) => [
-    index("custom_pages_created_idx").on(t.created_at),
-    index("custom_pages_updated_idx").on(t.updated_at),
-    index("custom_pages_is_published_idx").on(t.is_published),
-    index("custom_pages_featured_asset_idx").on(t.featured_image_asset_id),
+    index('custom_pages_created_idx').on(t.created_at),
+    index('custom_pages_updated_idx').on(t.updated_at),
+    index('custom_pages_is_published_idx').on(t.is_published),
 
-    index("custom_pages_category_id_idx").on(t.category_id),
-    index("custom_pages_sub_category_id_idx").on(t.sub_category_id),
+    index('custom_pages_module_key_idx').on(t.module_key),
 
-    index("custom_pages_display_order_idx").on(t.display_order), // 👈 opsiyonel ama güzel
+    index('custom_pages_featured_asset_idx').on(t.featured_image_asset_id),
+    index('custom_pages_storage_asset_idx').on(t.storage_asset_id),
+
+    index('custom_pages_category_id_idx').on(t.category_id),
+    index('custom_pages_sub_category_id_idx').on(t.sub_category_id),
+
+    index('custom_pages_display_order_idx').on(t.display_order),
+    index('custom_pages_order_num_idx').on(t.order_num),
 
     foreignKey({
       columns: [t.category_id],
       foreignColumns: [categories.id],
-      name: "fk_custom_pages_category",
+      name: 'fk_custom_pages_category',
     })
-      .onDelete("set null")
-      .onUpdate("cascade"),
+      .onDelete('set null')
+      .onUpdate('cascade'),
 
     foreignKey({
       columns: [t.sub_category_id],
       foreignColumns: [subCategories.id],
-      name: "fk_custom_pages_sub_category",
+      name: 'fk_custom_pages_sub_category',
     })
-      .onDelete("set null")
-      .onUpdate("cascade"),
+      .onDelete('set null')
+      .onUpdate('cascade'),
   ],
 );
 
 export const customPagesI18n = mysqlTable(
-  "custom_pages_i18n",
+  'custom_pages_i18n',
   {
-    id: char("id", { length: 36 }).primaryKey().notNull(),
-    page_id: char("page_id", { length: 36 })
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    page_id: char('page_id', { length: 36 })
       .notNull()
       .references(() => customPages.id, {
-        onDelete: "cascade",
-        onUpdate: "cascade",
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
       }),
-    locale: varchar("locale", { length: 10 }).notNull(),
 
-    // çeviri alanları
-    title: varchar("title", { length: 255 }).notNull(),
-    slug: varchar("slug", { length: 255 }).notNull(),
-    content: longtext("content").notNull(),
+    locale: varchar('locale', { length: 10 }).notNull(),
 
-    /** Kısa özet (body’den ayrı, liste ve SEO için) */
-    summary: varchar("summary", { length: 1000 }),
+    title: varchar('title', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
 
-    /** Görsel alt metni (çeviri) */
-    featured_image_alt: varchar("featured_image_alt", { length: 255 }),
+    /** DB: LONGTEXT JSON-string {"html":"..."} */
+    content: longtext('content').notNull(),
 
-    meta_title: varchar("meta_title", { length: 255 }),
-    meta_description: varchar("meta_description", { length: 500 }),
+    summary: varchar('summary', { length: 1000 }),
+    featured_image_alt: varchar('featured_image_alt', { length: 255 }),
 
-    /** Virgülle ayrılmış tag listesi */
-    tags: varchar("tags", { length: 1000 }),
+    meta_title: varchar('meta_title', { length: 255 }),
+    meta_description: varchar('meta_description', { length: 500 }),
 
-    created_at: datetime("created_at", { fsp: 3 })
+    tags: varchar('tags', { length: 1000 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),
-    updated_at: datetime("updated_at", { fsp: 3 })
+    updated_at: datetime('updated_at', { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`)
       .$onUpdateFn(() => new Date()),
   },
   (t) => [
-    uniqueIndex("ux_custom_pages_i18n_parent_locale").on(
-      t.page_id,
-      t.locale,
-    ),
-    uniqueIndex("ux_custom_pages_i18n_locale_slug").on(
-      t.locale,
-      t.slug,
-    ),
-    index("custom_pages_i18n_locale_idx").on(t.locale),
-    index("custom_pages_i18n_slug_idx").on(t.slug),
+    uniqueIndex('ux_custom_pages_i18n_parent_locale').on(t.page_id, t.locale),
+    uniqueIndex('ux_custom_pages_i18n_locale_slug').on(t.locale, t.slug),
+    index('custom_pages_i18n_page_idx').on(t.page_id),
+    index('custom_pages_i18n_locale_idx').on(t.locale),
+    index('custom_pages_i18n_slug_idx').on(t.slug),
   ],
 );
 

@@ -1,13 +1,14 @@
 -- =============================================================
--- FILE: 011_categories.sql  (FIXED / RE-RUNNABLE)
+-- FILE: 011_categories.sql  (FIXED / RE-RUNNABLE / FINAL)
 -- Ensotek – Categories seed + category_i18n (TR/EN/DE)
 --
--- Goals (per request):
---  - Diğer kategorileri SİLMEDEN çalışsın (idempotent / upsert-safe)
---  - Product + Sparepart kategorileri düzenli kalsın
---  - References tarafında: "Yurt İçi / Yurt Dışı" category olarak eklendi
---  - Eski "sektör" reference category kayıtları (aaaa5004..aaaa5010) silinmedi;
---    sadece references altında aktifliği kapatıldı (sub_category olarak taşımaya uygun)
+-- Özellikler:
+--  - Diğer kategorileri SİLMEDEN çalışır (idempotent / upsert-safe)
+--  - Product + Sparepart kategorileri düzenli
+--  - References tarafında: "Yurt İçi / Yurt Dışı" category olarak
+--  - Legal sayfalar için ayrı module_key: 'legal'
+--    * Quality ABOUT içinde kalır
+--    * KVKK, Gizlilik, Çerez, Aydınlatma, Yasal Bilgi vb. LEGAL altında
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -82,9 +83,11 @@ VALUES
   -- ABOUT
   -- ==========================================================
   ('aaaa7001-1111-4111-8111-aaaaaaaa7001', 'about',     NULL, NULL, NULL, NULL, 1, 0, 36),
-  ('aaaa7002-1111-4111-8111-aaaaaaaa7002', 'about',     NULL, NULL, NULL, NULL, 1, 0, 37),
-  ('aaaa7003-1111-4111-8111-aaaaaaaa7003', 'about',     NULL, NULL, NULL, NULL, 1, 0, 38),
-  ('aaaa7004-1111-4111-8111-aaaaaaaa7004', 'about',     NULL, NULL, NULL, NULL, 1, 0, 39),
+
+  -- ==========================================================
+  -- LEGAL (Yasal & KVKK – ayrı module_key)
+  -- ==========================================================
+  ('aaaa7101-1111-4111-8111-aaaaaaaa7101', 'legal',     NULL, NULL, NULL, NULL, 1, 0, 44),
 
   -- ==========================================================
   -- SERVICES
@@ -132,17 +135,19 @@ VALUES
   ('cati0003-1111-4111-8111-cati00000003','aaaa0003-1111-4111-8111-aaaaaaaa0003','tr','KAPALI DEVRE SOĞUTMA KULELERİ','kapali-devre-sogutma-kuleleri',NULL,NULL),
   ('cati0004-1111-4111-8111-cati00000004','aaaa0004-1111-4111-8111-aaaaaaaa0004','tr','HİBRİT SOĞUTMA SİSTEMLERİ','hibrit-sogutma-sistemleri',NULL,NULL),
   ('cati0005-1111-4111-8111-cati00000005','aaaa0005-1111-4111-8111-aaaaaaaa0005','tr','ISI TRANSFER ÇÖZÜMLERİ','isi-transfer-cozumleri',NULL,NULL),
+
   ('cati0011-1111-4111-8111-cati00000011','aaaa0001-1111-4111-8111-aaaaaaaa0001','en','Cooling Towers','cooling-towers',NULL,NULL),
   ('cati0012-1111-4111-8111-cati00000012','aaaa0002-1111-4111-8111-aaaaaaaa0002','en','Open Circuit Cooling Towers','open-circuit-cooling-towers',NULL,NULL),
   ('cati0013-1111-4111-8111-cati00000013','aaaa0003-1111-4111-8111-aaaaaaaa0003','en','Closed Circuit Cooling Towers','closed-circuit-cooling-towers',NULL,NULL),
   ('cati0014-1111-4111-8111-cati00000014','aaaa0004-1111-4111-8111-aaaaaaaa0004','en','Hybrid Cooling Systems','hybrid-cooling-systems',NULL,NULL),
   ('cati0015-1111-4111-8111-cati00000015','aaaa0005-1111-4111-8111-aaaaaaaa0005','en','Heat Transfer Solutions','heat-transfer-solutions',NULL,NULL),
 
-  ('cati0021-1111-4111-8111-cati00000021','aaaa0001-1111-4111-8111-aaaaaaaa0001','tr','KÜHLTÜRME','kuehltuerme',NULL,NULL),
-  ('cati0022-1111-4111-8111-cati00000022','aaaa0002-1111-4111-8111-aaaaaaaa0002','tr','OFFENE KREISLAUF-KÜHLTÜRME','offene-kreislauf-kuehltuerme',NULL,NULL),
-  ('cati0023-1111-4111-8111-cati00000023','aaaa0003-1111-4111-8111-aaaaaaaa0003','tr','GESCHLOSSENE KREISLAUF-KÜHLTÜRME','geschlossene-kreislauf-kuehltuerme',NULL,NULL),
-  ('cati0024-1111-4111-8111-cati00000024','aaaa0004-1111-4111-8111-aaaaaaaa0004','tr','HYBRID-KÜHLSYSTEME','hybrid-kuehlsysteme',NULL,NULL),
-  ('cati0025-1111-4111-8111-cati00000025','aaaa0005-1111-4111-8111-aaaaaaaa0005','tr','WÄRMEÜBERTRAGUNGS-LÖSUNGEN','waermeuebertragungs-loesungen',NULL,NULL),
+  -- (FIX) DE locale gerçekten 'de' olmalıydı
+  ('cati0021-1111-4111-8111-cati00000021','aaaa0001-1111-4111-8111-aaaaaaaa0001','de','KÜHLTÜRME','kuehltuerme',NULL,NULL),
+  ('cati0022-1111-4111-8111-cati00000022','aaaa0002-1111-4111-8111-aaaaaaaa0002','de','OFFENE KREISLAUF-KÜHLTÜRME','offene-kreislauf-kuehltuerme',NULL,NULL),
+  ('cati0023-1111-4111-8111-cati00000023','aaaa0003-1111-4111-8111-aaaaaaaa0003','de','GESCHLOSSENE KREISLAUF-KÜHLTÜRME','geschlossene-kreislauf-kuehltuerme',NULL,NULL),
+  ('cati0024-1111-4111-8111-cati00000024','aaaa0004-1111-4111-8111-aaaaaaaa0004','de','HYBRID-KÜHLSYSTEME','hybrid-kuehlsysteme',NULL,NULL),
+  ('cati0025-1111-4111-8111-cati00000025','aaaa0005-1111-4111-8111-aaaaaaaa0005','de','WÄRMEÜBERTRAGUNGS-LÖSUNGEN','waermeuebertragungs-loesungen',NULL,NULL),
 
   -- ==========================================================
   -- SPAREPART
@@ -217,19 +222,18 @@ VALUES
   -- ABOUT
   -- ==========================================================
   ('cati0701-1111-4111-8111-cati00000701','aaaa7001-1111-4111-8111-aaaaaaaa7001','tr','KURUMSAL','kurumsal',NULL,NULL),
-  ('cati0702-1111-4111-8111-cati00000702','aaaa7002-1111-4111-8111-aaaaaaaa7002','tr','HAKKIMIZDA','hakkimizda',NULL,NULL),
-  ('cati0703-1111-4111-8111-cati00000703','aaaa7003-1111-4111-8111-aaaaaaaa7003','tr','MİSYONUMUZ','misyonumuz',NULL,NULL),
-  ('cati0704-1111-4111-8111-cati00000704','aaaa7004-1111-4111-8111-aaaaaaaa7004','tr','VİZYONUMUZ','vizyonumuz',NULL,NULL),
+
 
   ('cati0711-1111-4111-8111-cati00000711','aaaa7001-1111-4111-8111-aaaaaaaa7001','en','Corporate','corporate',NULL,NULL),
-  ('cati0712-1111-4111-8111-cati00000712','aaaa7002-1111-4111-8111-aaaaaaaa7002','en','About Us','about-us',NULL,NULL),
-  ('cati0713-1111-4111-8111-cati00000713','aaaa7003-1111-4111-8111-aaaaaaaa7003','en','Our Mission','our-mission',NULL,NULL),
-  ('cati0714-1111-4111-8111-cati00000714','aaaa7004-1111-4111-8111-aaaaaaaa7004','en','Our Vision','our-vision',NULL,NULL),
 
   ('cati0721-1111-4111-8111-cati00000721','aaaa7001-1111-4111-8111-aaaaaaaa7001','de','UNTERNEHMEN','unternehmen',NULL,NULL),
-  ('cati0722-1111-4111-8111-cati00000722','aaaa7002-1111-4111-8111-aaaaaaaa7002','de','ÜBER UNS','ueber-uns',NULL,NULL),
-  ('cati0723-1111-4111-8111-cati00000723','aaaa7003-1111-4111-8111-aaaaaaaa7003','de','UNSERE MISSION','unsere-mission',NULL,NULL),
-  ('cati0724-1111-4111-8111-cati00000724','aaaa7004-1111-4111-8111-aaaaaaaa7004','de','UNSERE VISION','unsere-vision',NULL,NULL),
+
+  -- ==========================================================
+  -- LEGAL (Yeni module_key = 'legal')
+  -- ==========================================================
+  ('cati0731-1111-4111-8111-cati00000731','aaaa7101-1111-4111-8111-aaaaaaaa7101','tr','YASAL & KVKK','yasal-ve-kvkk',NULL,NULL),
+  ('cati0732-1111-4111-8111-cati00000732','aaaa7101-1111-4111-8111-aaaaaaaa7101','en','Legal & Compliance','legal-and-compliance',NULL,NULL),
+  ('cati0733-1111-4111-8111-cati00000733','aaaa7101-1111-4111-8111-aaaaaaaa7101','de','RECHTLICHES & DATENSCHUTZ','rechtliches-und-datenschutz',NULL,NULL),
 
   -- ==========================================================
   -- SERVICES

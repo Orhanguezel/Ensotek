@@ -1,9 +1,14 @@
 // =============================================================
 // FILE: src/pages/team/index.tsx
-// Ensotek – Team Page (full list) + SEO
+// Ensotek – Team Page (full list) + SEO (NEWS/PRODUCT pattern)
 //   - Route: /team
+//   - i18n: useLocaleShort() + site_settings.ui_team
 //   - Data: custom_pages (module_key="team") => meta override
+//   - SEO: seo -> site_seo fallback + custom_page meta override (NO canonical here)
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
+
+'use client';
 
 import React, { useMemo } from 'react';
 import Head from 'next/head';
@@ -13,7 +18,7 @@ import TeamPageContent from '@/components/containers/team/TeamPageContent';
 import ServiceCtaTwo from '@/components/containers/cta/CatalogCta';
 
 // i18n
-import { useResolvedLocale } from '@/i18n/locale';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -31,27 +36,25 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-const TeamPage: React.FC = () => {
-  const locale = useResolvedLocale();
-  const { ui } = useUiSection('ui_team', locale);
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
+}
 
-  // UI title (banner)
-  const bannerTitle = ui('ui_team_page_title', locale === 'de' ? 'Ekibimiz' : 'Our Team');
+const TeamPage: React.FC = () => {
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_team', locale as any);
+
+  // Banner title (UI)
+  const bannerTitle = ui('ui_team_page_title', 'Team');
 
   // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({
-    key: 'seo',
-    locale,
-  });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
-    key: 'site_seo',
-    locale,
-  });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary?.value, seoFallback?.value]);
 
   // Team pages (meta override için ilk published kayıt)
   const { data: teamData } = useListCustomPagesPublicQuery({
@@ -62,54 +65,57 @@ const TeamPage: React.FC = () => {
     orderDir: 'asc',
   });
 
-  const published = useMemo(() => {
+  const primary = useMemo(() => {
     const items: CustomPageDto[] = (teamData?.items ?? []) as any;
-    return items.filter((p) => p.is_published);
-  }, [teamData]);
-
-  const primary = published[0];
+    const published = items.filter((p) => !!(p as any)?.is_published);
+    return published[0];
+  }, [teamData?.items]);
 
   // --- SEO: Title/Description ---
-  const titleFallback = ui('ui_team_page_title', 'Team');
+  const pageTitleRaw = useMemo(() => {
+    const fallback = safeStr(bannerTitle) || 'Team';
+    return safeStr(primary?.meta_title) || safeStr(primary?.title) || fallback;
+  }, [primary?.meta_title, primary?.title, bannerTitle]);
 
-  const pageTitleRaw =
-    (primary?.meta_title ?? '').trim() ||
-    (primary?.title ?? '').trim() ||
-    String(titleFallback).trim();
+  const pageDescRaw = useMemo(() => {
+    return (
+      safeStr(primary?.meta_description) ||
+      safeStr(primary?.summary) ||
+      safeStr(excerpt((primary as any)?.content_html ?? '', 160)) ||
+      safeStr((seo as any)?.description) ||
+      ''
+    );
+  }, [primary, seo]);
 
-  // Google snippet: ~155-160
-  const pageDescRaw =
-    (primary?.meta_description ?? '').trim() ||
-    (primary?.summary ?? '').trim() ||
-    excerpt(primary?.content_html ?? '', 160).trim() ||
-    String(seo?.description ?? '').trim() ||
-    '';
-
-  const seoSiteName = String(seo?.site_name ?? '').trim() || 'Ensotek';
-  const titleTemplate = String(seo?.title_template ?? '').trim() || '%s | Ensotek';
+  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(
+    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
+    [seo],
+  );
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
       ? titleTemplate.replace('%s', pageTitleRaw)
       : pageTitleRaw;
-    return String(t).trim();
+    return safeStr(t);
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
-    const pageImgRaw = (primary?.featured_image ?? '').trim();
+    const pageImgRaw = safeStr((primary as any)?.featured_image);
     const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
 
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.ico');
-  }, [primary?.featured_image, seo]);
+    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
+  }, [primary, seo]);
 
   const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
+    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
 
+    // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
@@ -117,9 +123,10 @@ const TeamPage: React.FC = () => {
       siteName: seoSiteName,
       noindex,
 
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
