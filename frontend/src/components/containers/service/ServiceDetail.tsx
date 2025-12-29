@@ -35,7 +35,7 @@ import { normLocaleTag } from '@/i18n/localeUtils';
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-import { OfferSection } from '@/components/containers/offer/OfferSection';
+import  OfferSection  from '@/components/containers/offer/OfferSection';
 import InfoContactCard from '@/components/common/public/InfoContactCard';
 
 import ImageLightboxModal, {
@@ -615,7 +615,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
 
                 {showOfferForm ? (
                   <div className="ens-service__offer mt-40" ref={offerFormRef}>
-                    <OfferSection locale={locale} contextType="service" />
+                    <OfferSection contextType="service" />
                   </div>
                 ) : null}
               </div>
