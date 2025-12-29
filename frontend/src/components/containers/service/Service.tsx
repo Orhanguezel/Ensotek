@@ -1,25 +1,29 @@
 // =============================================================
 // FILE: src/components/containers/service/Service.tsx
-// Public Services List
+// Public Services List (PATTERN: useLocaleShort + useUiSection)
+// Fixes:
+// - ❌ toLocaleShort helper removed
+// - ✅ locale source: useLocaleShort()
+// - ✅ no inline styles (hero image uses next/image instead of backgroundImage)
+// - ✅ removed default_locale site_settings dependency (backend fallback should handle)
 // =============================================================
 'use client';
 
 import React, { useMemo } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 // RTK – public services
-import { useListServicesPublicQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { useListServicesPublicQuery } from '@/integrations/rtk/hooks';
 
-// Ortak yardımcılar
+// Helpers
 import { excerpt } from '@/shared/text';
 import { toCdnSrc } from '@/shared/media';
 
-// UI / i18n – site_settings üzerinden
-import { useResolvedLocale } from '@/i18n/locale';
+// i18n (PATTERN)
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
-
 import { localizePath } from '@/i18n/url';
-import { normLocaleTag } from '@/i18n/localeUtils';
 
 import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
@@ -41,12 +45,11 @@ import { GiFactory } from 'react-icons/gi';
 
 const FALLBACK_IMG = '/img/project/project-thumb.jpg';
 
-const toLocaleShort = (l: unknown) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
 
 function ServiceIcon({ label, size = 40 }: { label: string; size?: number }) {
   const t = (label || '').toLowerCase();
@@ -65,50 +68,51 @@ function ServiceIcon({ label, size = 40 }: { label: string; size?: number }) {
   return <FiLayers size={size} />;
 }
 
+type ServiceCardVM = {
+  id: string;
+  title: string;
+  summary: string;
+  slug: string;
+  src: string;
+};
+
 const Service: React.FC = () => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
-
-  const { ui } = useUiSection('ui_services', locale);
-
-  // ✅ default_locale DB’den
-  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
-  const defaultLocale = useMemo(() => {
-    const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'de';
-  }, [defaultLocaleRow?.value]);
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_services', locale as any);
 
   const { data, isLoading } = useListServicesPublicQuery({
     locale,
-    default_locale: defaultLocale,
     limit: 6,
     order: 'display_order.asc',
-  });
+  } as any);
 
-  const cards = useMemo(() => {
-    const items = Array.isArray(data?.items) ? data!.items : [];
+  const cards = useMemo<ServiceCardVM[]>(() => {
+    const items = Array.isArray((data as any)?.items) ? ((data as any).items as any[]) : [];
 
-    const arr = items.map((s: any) => {
-      const imgBase = (s.featured_image_url || s.image_url || s.featured_image || '').trim();
+    const mapped = items.map((s: any) => {
+      const imgBase =
+        safeStr(s?.featured_image_url) || safeStr(s?.image_url) || safeStr(s?.featured_image);
 
-      const title = (s.name as string | null) ?? ui('ui_services_placeholder_title', 'Our service');
+      const title = safeStr(s?.name) || ui('ui_services_placeholder_title', 'Our service');
 
-      const rawSummary = (s.description as string | null) ?? (s.includes as string | null) ?? null;
+      const rawSummary = safeStr(s?.description) || safeStr(s?.includes);
 
-      const summary = rawSummary?.trim().length
-        ? excerpt(String(rawSummary), 150)
+      const summary = rawSummary
+        ? excerpt(rawSummary, 150)
         : ui('ui_services_placeholder_summary', 'Service description is coming soon.');
 
+      const src = (imgBase && (toCdnSrc(imgBase, 640, 420, 'fill') || imgBase)) || FALLBACK_IMG;
+
       return {
-        id: String(s.id ?? ''),
+        id: safeStr(s?.id) || safeStr(s?.slug) || cryptoRandomId(),
         title,
         summary,
-        slug: String(s.slug || '').trim(),
-        src: toCdnSrc(imgBase, 640, 420, 'fill') || FALLBACK_IMG,
+        slug: safeStr(s?.slug),
+        src,
       };
     });
 
-    if (!arr.length) {
+    if (!mapped.length) {
       return new Array(3).fill(0).map((_, i) => ({
         id: `ph-${i + 1}`,
         title: ui('ui_services_placeholder_title', 'Our service'),
@@ -118,9 +122,9 @@ const Service: React.FC = () => {
       }));
     }
 
-    return arr;
+    return mapped;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [data?.items, ui]);
+  }, [data, ui]);
 
   return (
     <div className="service__area service__bg z-index-1 pt-120 pb-90">
@@ -133,9 +137,10 @@ const Service: React.FC = () => {
                 <span>{ui('ui_services_subprefix', 'Ensotek')}</span>{' '}
                 {ui('ui_services_sublabel', 'Services')}
               </span>
+
               <h2 className="section__title">
                 {ui('ui_services_title', 'What we do')}
-                <span className="down__mark-middle"></span>
+                <span className="down__mark-middle" />
               </h2>
             </div>
           </div>
@@ -151,15 +156,17 @@ const Service: React.FC = () => {
             return (
               <div className="col-xl-4 col-lg-6 col-md-6" key={it.id}>
                 <div className="service__item mb-30">
-                  <div
-                    className="service__thumb include__bg service-two-cmn"
-                    style={{
-                      backgroundImage: `url('${it.src}')`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
-                    aria-hidden="true"
-                  />
+                  {/* NO inline style: use Image */}
+                  <div className="service__thumb include__bg service-two-cmn" aria-hidden="true">
+                    <Image
+                      src={it.src || FALLBACK_IMG}
+                      alt=""
+                      width={640}
+                      height={420}
+                      loading="lazy"
+                    />
+                  </div>
+
                   <div className="service__icon transition-3" aria-hidden="true">
                     <ServiceIcon label={it.title} />
                   </div>
@@ -187,13 +194,13 @@ const Service: React.FC = () => {
             );
           })}
 
-          {isLoading && (
+          {isLoading ? (
             <div className="col-12 mt-10" aria-hidden>
               <SkeletonStack>
                 <SkeletonLine style={{ height: 8 }} />
               </SkeletonStack>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </div>
@@ -201,3 +208,16 @@ const Service: React.FC = () => {
 };
 
 export default Service;
+
+// -------------------------------------------------------------
+// local helper: stable id when DB id missing
+// -------------------------------------------------------------
+function cryptoRandomId(): string {
+  try {
+    // browser-safe
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+  } catch {}
+  return `id-${Math.random().toString(16).slice(2)}-${Date.now()}`;
+}

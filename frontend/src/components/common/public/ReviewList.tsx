@@ -55,55 +55,28 @@ const ReviewList: React.FC<ReviewListProps> = ({
 
   const title = ui(
     'ui_feedback_list_title',
-    locale === 'de'
-      ? 'Müşteri Yorumları'
-      : locale === 'de'
-      ? 'Kundenbewertungen'
-      : 'Customer Reviews',
+     'Customer Reviews',
   );
   const noReviewsText = ui(
-    'ui_feedback_list_no_reviews',
-    locale === 'de'
-      ? 'Bu içerik için henüz yorum yok.'
-      : locale === 'de'
-      ? 'Für diesen Inhalt gibt es noch keine Bewertungen.'
-      : 'There are no reviews for this item yet.',
+    'ui_feedback_list_no_reviews','There are no reviews for this item yet.',
   );
   const avgRatingLabel = ui(
-    'ui_feedback_list_avg_rating',
-    locale === 'de'
-      ? 'Ortalama Puan'
-      : locale === 'de'
-      ? 'Durchschnittliche Bewertung'
-      : 'Average Rating',
+    'ui_feedback_list_avg_rating','Average Rating',
   );
   const reviewsSuffix = ui(
-    'ui_feedback_list_reviews_suffix',
-    locale === 'de' ? 'yorum' : locale === 'de' ? 'Bewertungen' : 'reviews',
+    'ui_feedback_list_reviews_suffix', 'reviews',
   );
   const helpfulLabel = ui(
-    'ui_feedback_list_helpful',
-    locale === 'de' ? 'Faydalı' : locale === 'de' ? 'Hilfreich' : 'Helpful',
+    'ui_feedback_list_helpful', 'Helpful',
   );
   const likedLabel = ui(
-    'ui_feedback_list_liked',
-    locale === 'de' ? 'Teşekkürler' : locale === 'de' ? 'Danke' : 'Thanks',
+    'ui_feedback_list_liked', 'Thanks',
   );
   const errorText = ui(
-    'ui_feedback_list_error',
-    locale === 'de'
-      ? 'İşlem sırasında bir hata oluştu.'
-      : locale === 'de'
-      ? 'Beim Vorgang ist ein Fehler aufgetreten.'
-      : 'An error occurred while processing your request.',
+    'ui_feedback_list_error','An error occurred while processing your request.',
   );
   const loadingText = ui(
-    'ui_feedback_list_loading',
-    locale === 'de'
-      ? 'Yorumlar yükleniyor...'
-      : locale === 'de'
-      ? 'Bewertungen werden geladen...'
-      : 'Loading reviews...',
+    'ui_feedback_list_loading', 'Loading reviews...',
   );
 
   const { data, isLoading, isError } = useListReviewsPublicQuery({

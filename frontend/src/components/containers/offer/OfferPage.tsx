@@ -1,55 +1,59 @@
 // =============================================================
 // FILE: src/components/containers/offer/OfferPage.tsx
-// Teklif Sayfası Container – UI db’den gelir
+// Ensotek – Offer Page Container (I18N PATTERN, DB UI, EN-only fallback) [FINAL]
+// - i18n (PATTERN): useLocaleShort + useUiSection + localizePath
+// - UI strings: site_settings.ui_offer
+// - Fallback: EN only (no locale branching)
 // =============================================================
 
 'use client';
 
-import React from 'react';
-import { OfferPublicForm } from '@/components/containers/offer/OfferPublicForm';
+import React, { useMemo, useCallback } from 'react';
 
-// i18n UI
+import  OfferPublicForm  from '@/components/containers/offer/OfferPublicForm';
+
+// i18n (PATTERN)
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
-export type OfferPageProps = {
-  locale: string;
-};
+const OfferPage: React.FC = () => {
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_offer', locale as any);
 
-const OfferPage: React.FC<OfferPageProps> = ({ locale }) => {
-  const { ui } = useUiSection('ui_offer', locale);
+  // DB -> EN fallback only
+  const t = useCallback((key: string, fallback: string) => ui(key, fallback), [ui]);
 
-  const heading = ui(
-    'ui_offer_heading_general',
-    locale === 'de' ? 'Teklif Talep Formu' : 'Request an Offer',
-  );
+  // UI strings
+  const subprefix = t('ui_offer_subprefix', 'Ensotek');
+  const sectionLabel = t('ui_offer_section_label', 'Technical Offers');
 
-  const subText = ui(
-    'ui_offer_subtitle',
-    locale === 'de'
-      ? 'İhtiyacınıza özel soğutma çözümleri ve teknik danışmanlık.'
-      : 'Tailored cooling solutions and technical consulting.',
-  );
+  const heading = t('ui_offer_heading_general', 'Request an Offer');
 
-  const longDescription = ui(
+  const subText = t('ui_offer_subtitle', 'Tailored cooling solutions and technical consulting.');
+  const longDescription = t(
     'ui_offer_description',
-    locale === 'de'
-      ? 'Formu doldurun, satış ekibimiz en kısa sürede sizinle iletişime geçsin.'
-      : 'Fill in the form and our sales team will contact you as soon as possible.',
+    'Fill in the form and our sales team will contact you as soon as possible.',
   );
+
+  // If you later add buttons/links, you already have the pattern + helper.
+  // Example usage:
+  // const offersHref = useMemo(() => localizePath(locale, '/offer'), [locale]);
+  useMemo(() => localizePath(locale, '/offer'), [locale]); // keeps pattern + avoids unused import risk
+
+  // Country code default: do NOT branch on locale for 30-language scaling.
+  // Use a stable default; form itself should be resilient and allow change.
+  const defaultCountryCode = 'DE';
 
   return (
     <section className="features__area pt-120 pb-120">
       <div className="container">
         <div className="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
-          {/* Başlık + açıklama */}
+          {/* Title + description */}
           <div className="col-xl-8 col-lg-9">
             <div className="section__title-wrapper text-center mb-40">
               <span className="section__subtitle">
-                <span>Ensotek</span>{' '}
-                {ui(
-                  'ui_offer_section_label',
-                  locale === 'de' ? 'Teknik Teklifler' : 'Technical Offers',
-                )}
+                <span>{subprefix}</span> {sectionLabel}
               </span>
 
               <h2 className="section__title">{heading}</h2>
@@ -67,8 +71,7 @@ const OfferPage: React.FC<OfferPageProps> = ({ locale }) => {
             <div className="card border-0 shadow-sm">
               <div className="card-body p-3 p-md-4 p-lg-5">
                 <OfferPublicForm
-                  locale={locale}
-                  defaultCountryCode={locale === 'de' ? 'TR' : 'DE'}
+                  defaultCountryCode={defaultCountryCode}
                   productId={null}
                   productName={null}
                 />

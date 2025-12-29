@@ -177,7 +177,7 @@ const QualityPageContent: React.FC<Props> = ({ pageData, isLoading = false }) =>
         desc: String(ui('ui_quality_metric_experience_desc', 'Sektör tecrübesi') || '')
           .trim()
           .replace(/\s+/g, ' '),
-        value: `25+ ${String(ui('ui_year', 'Yıl') || 'Yıl').trim()}`,
+        value: String(ui('ui_year', '40+Yıl') || '40+Yıl').trim(),
       },
     ],
     [ui],

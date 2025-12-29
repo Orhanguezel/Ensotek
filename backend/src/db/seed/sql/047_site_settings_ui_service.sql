@@ -4,13 +4,26 @@
 --  - Key: ui_services
 --  - Value: JSON (stored as TEXT)
 --  - Localized: tr / en / de
---  - Extendable: clone from tr as bootstrap (collation-safe)
+--  - Upsert-safe: requires UNIQUE(`key`,`locale`)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
-INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) VALUES
+START TRANSACTION;
+
+-- =============================================================
+-- Ensure uniqueness for ON DUPLICATE KEY UPDATE
+-- (If already exists, MySQL will error on duplicate name; adjust name if needed)
+-- =============================================================
+ALTER TABLE site_settings
+  ADD UNIQUE KEY uq_site_settings_key_locale (`key`, `locale`);
+
+-- =============================================================
+-- UPSERT: ui_services (TR/EN/DE)
+-- =============================================================
+INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at)
+VALUES
 (
   UUID(),
   'ui_services',
@@ -64,9 +77,18 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_services_equipment_label',         'Ekipman',
 
     -- Gallery
-    'ui_services_gallery_title',           'Hizmet galerisi',
+    'ui_services_gallery_title',           'Hizmet Galerisi',
+    'ui_services_gallery_open',            'Görseli büyüt',
+    'ui_services_gallery_thumbs',          'Galeri küçük resimleri',
 
-    -- Sidebar
+    -- Sidebar / Contact (used by InfoContactCard)
+    'ui_services_contact_title',           'İletişim',
+    'ui_services_contact_desc',            'Detaylı bilgi ve teknik destek için bize ulaşın.',
+    'ui_services_contact_phone',           'Telefon',
+    'ui_services_contact_whatsapp',        'WhatsApp',
+    'ui_services_contact_form',            'İletişim Formu',
+
+    -- Sidebar (legacy keys)
     'ui_services_sidebar_info_title',      'Hizmet bilgileri',
     'ui_services_sidebar_type',            'Hizmet tipi',
     'ui_services_sidebar_category',        'Kategori',
@@ -81,7 +103,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_services_sidebar_cta_desc',        'Bu hizmet hakkında detaylı bilgi veya özel teklif almak için bizimle iletişime geçin.',
     'ui_services_sidebar_cta_button',      'İletişime geçin',
 
-    -- Detail CTA (newer keys used in code)
+    -- Detail CTA (keys used in code)
     'ui_services_cta_more_info',           'Bu hizmet ile ilgili detaylı bilgi ve teknik destek için ekibimizle iletişime geçebilirsiniz.',
     'ui_services_cta_whatsapp',            'WhatsApp üzerinden yazın',
     'ui_services_cta_request_quote',       'Bu hizmet için teklif iste'
@@ -142,9 +164,18 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_services_equipment_label',         'Equipment',
 
     -- Gallery
-    'ui_services_gallery_title',           'Service gallery',
+    'ui_services_gallery_title',           'Service Gallery',
+    'ui_services_gallery_open',            'Open image',
+    'ui_services_gallery_thumbs',          'Gallery thumbnails',
 
-    -- Sidebar
+    -- Sidebar / Contact (used by InfoContactCard)
+    'ui_services_contact_title',           'Contact',
+    'ui_services_contact_desc',            'Reach out to us for detailed information and technical support.',
+    'ui_services_contact_phone',           'Phone',
+    'ui_services_contact_whatsapp',        'WhatsApp',
+    'ui_services_contact_form',            'Contact Form',
+
+    -- Sidebar (legacy keys)
     'ui_services_sidebar_info_title',      'Service info',
     'ui_services_sidebar_type',            'Service type',
     'ui_services_sidebar_category',        'Category',
@@ -159,7 +190,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_services_sidebar_cta_desc',        'Contact us to get a custom offer or detailed information about this service.',
     'ui_services_sidebar_cta_button',      'Contact us',
 
-    -- Detail CTA (newer keys used in code)
+    -- Detail CTA (keys used in code)
     'ui_services_cta_more_info',           'Contact our team for detailed information and technical support about this service.',
     'ui_services_cta_whatsapp',            'Write on WhatsApp',
     'ui_services_cta_request_quote',       'Request a quote for this service'
@@ -221,8 +252,17 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 
     -- Gallery
     'ui_services_gallery_title',           'Leistungsgalerie',
+    'ui_services_gallery_open',            'Bild öffnen',
+    'ui_services_gallery_thumbs',          'Galerie-Miniaturen',
 
-    -- Sidebar
+    -- Sidebar / Contact (used by InfoContactCard)
+    'ui_services_contact_title',           'Kontakt',
+    'ui_services_contact_desc',            'Kontaktieren Sie uns für detaillierte Informationen und technischen Support.',
+    'ui_services_contact_phone',           'Telefon',
+    'ui_services_contact_whatsapp',        'WhatsApp',
+    'ui_services_contact_form',            'Kontaktformular',
+
+    -- Sidebar (legacy keys)
     'ui_services_sidebar_info_title',      'Leistungsinfo',
     'ui_services_sidebar_type',            'Leistungstyp',
     'ui_services_sidebar_category',        'Kategorie',
@@ -237,7 +277,7 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_services_sidebar_cta_desc',        'Kontaktieren Sie uns, um ein individuelles Angebot oder weitere Details zu dieser Leistung zu erhalten.',
     'ui_services_sidebar_cta_button',      'Kontakt aufnehmen',
 
-    -- Detail CTA (newer keys used in code)
+    -- Detail CTA (keys used in code)
     'ui_services_cta_more_info',           'Kontaktieren Sie unser Team für detaillierte Informationen und technischen Support zu dieser Leistung.',
     'ui_services_cta_whatsapp',            'Per WhatsApp schreiben',
     'ui_services_cta_request_quote',       'Angebot für diese Leistung anfordern'
@@ -248,3 +288,5 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
+
+COMMIT;

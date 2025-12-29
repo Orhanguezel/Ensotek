@@ -31,7 +31,7 @@ import ProductSpecsBlock, {
 import ProductFaqBlock from '@/components/containers/product/ProductFaqBlock';
 import ProductReviewsBlock from '@/components/containers/product/ProductReviewsBlock';
 
-import { OfferSection } from '@/components/containers/offer/OfferSection';
+import  OfferSection  from '@/components/containers/offer/OfferSection';
 
 import FallbackCover from 'public/img/blog/3/1.jpg';
 
@@ -362,7 +362,6 @@ const ProductDetail: React.FC = () => {
               <div className="row mt-40" ref={offerFormRef}>
                 <div className="col-12">
                   <OfferSection
-                    locale={locale as any}
                     productId={productId}
                     productName={title || safeStr((product as any).slug) || ''}
                   />
