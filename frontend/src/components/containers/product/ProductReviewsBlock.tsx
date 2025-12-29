@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductReviewsBlock.tsx
-// Ensotek – Product Reviews Block (Müşteri Yorumları)
+// Ensotek – Product Reviews Block (I18N PATTERN)
 // - Hook-safe: useMemo YOK
-// - Önceki beyaz slide tasarımı korunur
-// - Inline style YOK (class ile)
+// - UI: DB (site_settings) + EN fallback only (no locale branching)
+// - Inline style YOK (class ile)  ✅
+// - NOTE: styled-jsx kullanıyor (projede yasaksa SCSS'e taşı)
 // =============================================================
 
 'use client';
@@ -16,13 +17,17 @@ import 'swiper/css';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import type { ProductReviewDto } from '@/integrations/types/product.types';
 
+// i18n (PATTERN)
+import { useUiSection } from '@/i18n/uiDb';
+
 interface ProductReviewsBlockProps {
   title: string;
   reviews: ProductReviewDto[];
   averageRating: number | null;
   isLoading: boolean;
   emptyText: string; // API uyumu için duruyor (bu blokta gösterilmiyor)
-  locale: string;
+  locale: string; // useLocaleShort() ile uyumlu: tr | en | de
+  uiSectionKey?: 'ui_products' | 'ui_spareparts'; // default: ui_products
 }
 
 function safeStr(v: unknown): string {
@@ -49,23 +54,47 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
   averageRating,
   isLoading,
   locale,
+  uiSectionKey = 'ui_products',
 }) => {
+  const { ui } = useUiSection(uiSectionKey, locale as any);
+
+  // EN-only fallback helper (no locale branching)
+  const t = (key: string, fallbackEn: string) => {
+    const v = safeStr(ui(key, fallbackEn));
+    return v || fallbackEn;
+  };
+
   const list = reviews ?? [];
   const hasReviews = list.length > 0;
 
   // Ne yükleniyor ne de yorum var → hiç render etme
   if (!isLoading && !hasReviews) return null;
 
+  // UI strings
+  const reviewsWord = t('ui_product_reviews_word', 'reviews'); // "yorum" / "reviews" / "Bewertungen"
+  const customerFallback = t('ui_product_review_customer_fallback', 'Customer');
+  const prevAria = t('ui_product_review_prev_aria', 'Previous review');
+  const nextAria = t('ui_product_review_next_aria', 'Next review');
+
+  // summary template: "{avg} / 5 · {count} reviews"
+  const summaryTpl = t('ui_product_review_summary_tpl', '{avg} / 5 · {count} reviews');
+
+  const summaryText =
+    averageRating !== null && hasReviews
+      ? summaryTpl
+          .replaceAll('{avg}', averageRating.toFixed(1))
+          .replaceAll('{count}', String(list.length))
+          .replaceAll('{word}', reviewsWord)
+      : '';
+
   return (
     <div className="product__detail-reviews card p-3 position-relative">
       <div className="d-flex justify-content-between align-items-center mb-10">
         <h3 className="product__detail-subtitle mb-0">{title}</h3>
 
-        {averageRating !== null && hasReviews && (
-          <div className="product__review-summary small text-muted">
-            {averageRating.toFixed(1)} / 5 · {list.length} {locale === 'de' ? 'yorum' : 'reviews'}
-          </div>
-        )}
+        {summaryText ? (
+          <div className="product__review-summary small text-muted">{summaryText}</div>
+        ) : null}
       </div>
 
       {isLoading && !hasReviews ? <div className="skeleton-line" aria-hidden /> : null}
@@ -86,13 +115,13 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
             className="product-review-swiper"
           >
             {list.map((r) => {
-              const name = safeStr(r.customer_name) || (locale === 'de' ? 'Müşteri' : 'Customer');
-              const rating = Number(r.rating ?? 0) || 0;
-              const comment = safeStr(r.comment);
-              const dateText = safeDate(locale, r.review_date);
+              const name = safeStr((r as any).customer_name) || customerFallback;
+              const rating = Number((r as any).rating ?? 0) || 0;
+              const comment = safeStr((r as any).comment);
+              const dateText = safeDate(locale, (r as any).review_date);
 
               return (
-                <SwiperSlide key={r.id}>
+                <SwiperSlide key={(r as any).id}>
                   <div className="product-review-slide small">
                     <div className="d-flex justify-content-between mb-1">
                       <strong>{name}</strong>
@@ -114,7 +143,7 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
             <button
               type="button"
               className="product-review-button-prev"
-              aria-label={locale === 'de' ? 'Önceki yorum' : 'Previous testimonial'}
+              aria-label={prevAria}
               disabled={list.length <= 1}
             >
               <FiChevronLeft />
@@ -122,7 +151,7 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
             <button
               type="button"
               className="product-review-button-next"
-              aria-label={locale === 'de' ? 'Sonraki yorum' : 'Next testimonial'}
+              aria-label={nextAria}
               disabled={list.length <= 1}
             >
               <FiChevronRight />
@@ -131,7 +160,6 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
         </div>
       ) : null}
 
-      {/* Eski görünümü koru; sadece inline style'ları class'a taşıdık */}
       <style jsx>{`
         .product-review-slider-wrapper {
           position: relative;
@@ -181,7 +209,6 @@ const ProductReviewsBlock: React.FC<ProductReviewsBlockProps> = ({
           height: 18px;
         }
 
-        /* Dark mode override (eski davranış kalsın) */
         @media (prefers-color-scheme: dark) {
           .product-review-slide {
             background: #020617;

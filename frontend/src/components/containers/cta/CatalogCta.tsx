@@ -1,6 +1,15 @@
 'use client';
 
-// src/components/containers/cta/CatalogCta.tsx
+// =============================================================
+// FILE: src/components/containers/cta/CatalogCta.tsx
+// Ensotek – Catalog CTA (Public) (I18N + SAFE) [FINAL]
+// - i18n: site_settings.ui_catalog
+// - POST: /catalog-requests (public)
+// - Locale: useResolvedLocale()
+// - Country code: optional, flexible, auto-uppercase, max 4 chars (TR/DE/US/EU etc.)
+// - Types: aligns with CreateCatalogRequestPublicBody (NO null for optional string fields)
+// - NO inline styles / keep SCSS/bootstrap classes only
+// =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
@@ -17,78 +26,59 @@ import { useCreateCatalogRequestPublicMutation } from '@/integrations/rtk/hooks'
 import type { CreateCatalogRequestPublicBody } from '@/integrations/types/catalog_public.types';
 
 const isEmailValid = (email: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim().toLowerCase());
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+    String(email || '')
+      .trim()
+      .toLowerCase(),
+  );
 
 type StatusState =
   | { type: 'idle' }
   | { type: 'success'; id: string }
   | { type: 'error'; message: string };
 
-const CatalogCta = () => {
-  const locale = useResolvedLocale();
-  const isTr = locale === 'de';
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
 
+function normalizeCountryCode(v: unknown): string {
+  const s = safeStr(v).toUpperCase();
+  // Esnek: TR/DE/US/EU vb. - sadece alfanumerik
+  // Maks 4 karakter
+  return s.replace(/[^A-Z0-9]/g, '').slice(0, 4);
+}
+
+const CatalogCta: React.FC = () => {
+  const locale = useResolvedLocale();
   const { ui } = useUiSection('ui_catalog', locale);
 
   const [isOpen, setIsOpen] = useState(false);
-
   const [createCatalogRequest, { isLoading }] = useCreateCatalogRequestPublicMutation();
 
-  const title = ui('ui_catalog_cta_title', isTr ? 'Katalog Talep Formu' : 'Catalog Request');
+  // NOT: CreateCatalogRequestPublicBody ile birebir uyumlu: optional string alanlarda null yok.
+  const [form, setForm] = useState<CreateCatalogRequestPublicBody>(() => {
+    const defCc = normalizeCountryCode(ui('ui_catalog_default_country_code', ''));
+    return {
+      locale,
+      country_code: defCc ? defCc : undefined,
+      customer_name: '',
+      company_name: '',
 
-  const description = ui(
-    'ui_catalog_cta_text',
-    isTr
-      ? 'Ürün kataloğunu talep edin. Talebiniz yöneticilere iletilecektir. (Müşteriye mail, admin panelden gönderilir.)'
-      : 'Request the product catalog. Your request will be forwarded to admins. (Customer email is sent from the admin panel.)',
-  );
+      email: '',
+      phone: '',
 
-  const openButtonLabel = ui(
-    'ui_catalog_cta_button',
-    isTr ? 'Katalog Talep Et' : 'Request Catalog',
-  );
+      message: '',
 
-  const modalTitle = ui('ui_catalog_modal_title', isTr ? 'Katalog Talebi' : 'Catalog Request');
-
-  const submitLabel = ui('ui_catalog_submit_button', isTr ? 'Talebi Gönder' : 'Submit Request');
-
-  const closeLabel = ui('ui_common_close', isTr ? 'Kapat' : 'Close');
-
-  const labels = {
-    customer_name: ui('ui_catalog_field_name', isTr ? 'Ad Soyad *' : 'Full Name *'),
-    company_name: ui('ui_catalog_field_company', isTr ? 'Firma (opsiyonel)' : 'Company (optional)'),
-    email: ui('ui_catalog_field_email', isTr ? 'E-posta *' : 'Email *'),
-    phone: ui('ui_catalog_field_phone', isTr ? 'Telefon (opsiyonel)' : 'Phone (optional)'),
-    country_code: ui(
-      'ui_catalog_field_country',
-      isTr ? 'Ülke Kodu (TR/DE vb.)' : 'Country Code (TR/DE etc.)',
-    ),
-    message: ui('ui_catalog_field_message', isTr ? 'Mesaj (opsiyonel)' : 'Message (optional)'),
-    consent_terms: ui(
-      'ui_catalog_consent_terms',
-      isTr ? 'KVKK / Şartlar’ı kabul ediyorum. *' : 'I accept the terms/privacy policy. *',
-    ),
-    consent_marketing: ui(
-      'ui_catalog_consent_marketing',
-      isTr ? 'Kampanya e-postaları almak istiyorum.' : 'I want to receive marketing emails.',
-    ),
-  };
-
-  const [form, setForm] = useState<CreateCatalogRequestPublicBody>({
-    locale,
-    country_code: 'DE',
-    customer_name: '',
-    company_name: '',
-    email: '',
-    phone: '',
-    message: '',
-    consent_marketing: false,
-    consent_terms: false,
+      consent_marketing: false,
+      consent_terms: false,
+    };
   });
 
   const [status, setStatus] = useState<StatusState>({ type: 'idle' });
 
-  // locale değişince form locale’ini güncelle
+  // locale değişince sadece locale alanını güncelle
   useEffect(() => {
     setForm((p) => ({ ...p, locale }));
   }, [locale]);
@@ -96,9 +86,11 @@ const CatalogCta = () => {
   // ESC ile modal kapat
   useEffect(() => {
     if (!isOpen) return;
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsOpen(false);
     };
+
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [isOpen]);
@@ -113,18 +105,101 @@ const CatalogCta = () => {
     };
   }, [isOpen]);
 
+  const t = useMemo(
+    () => ({
+      title: safeStr(ui('ui_catalog_cta_title', 'Catalog Request')) || 'Catalog Request',
+      desc:
+        safeStr(
+          ui(
+            'ui_catalog_cta_text',
+            'Request the product catalog. Your request will be forwarded to admins.',
+          ),
+        ) || 'Request the product catalog. Your request will be forwarded to admins.',
+      openBtn: safeStr(ui('ui_catalog_cta_button', 'Request Catalog')) || 'Request Catalog',
+
+      modalTitle: safeStr(ui('ui_catalog_modal_title', 'Catalog Request')) || 'Catalog Request',
+      submitBtn: safeStr(ui('ui_catalog_submit_button', 'Submit Request')) || 'Submit Request',
+      sending: safeStr(ui('ui_catalog_sending', 'Sending...')) || 'Sending...',
+
+      closeBtn: safeStr(ui('ui_common_close', 'Close')) || 'Close',
+
+      // fields
+      fName: safeStr(ui('ui_catalog_field_name', 'Full Name *')) || 'Full Name *',
+      fCompany:
+        safeStr(ui('ui_catalog_field_company', 'Company (optional)')) || 'Company (optional)',
+      fEmail: safeStr(ui('ui_catalog_field_email', 'Email *')) || 'Email *',
+      fPhone: safeStr(ui('ui_catalog_field_phone', 'Phone (optional)')) || 'Phone (optional)',
+      fCountry:
+        safeStr(ui('ui_catalog_field_country', 'Country Code (optional)')) ||
+        'Country Code (optional)',
+      fMessage:
+        safeStr(ui('ui_catalog_field_message', 'Message (optional)')) || 'Message (optional)',
+
+      cTerms:
+        safeStr(ui('ui_catalog_consent_terms', 'I accept the terms/privacy policy. *')) ||
+        'I accept the terms/privacy policy. *',
+      cMarketing:
+        safeStr(ui('ui_catalog_consent_marketing', 'I want to receive marketing emails.')) ||
+        'I want to receive marketing emails.',
+
+      // validations / messages
+      errName:
+        safeStr(ui('ui_catalog_error_name_required', 'Full name is required.')) ||
+        'Full name is required.',
+      errEmail:
+        safeStr(ui('ui_catalog_error_email_invalid', 'Please enter a valid email.')) ||
+        'Please enter a valid email.',
+      errTerms:
+        safeStr(ui('ui_catalog_error_terms_required', 'You must accept the terms to continue.')) ||
+        'You must accept the terms to continue.',
+      errGeneric:
+        safeStr(ui('ui_catalog_error_generic', 'Request failed. Please try again.')) ||
+        'Request failed. Please try again.',
+
+      okReceived:
+        safeStr(ui('ui_catalog_success_received', 'Your request has been received.')) ||
+        'Your request has been received.',
+      okIdPrefix: safeStr(ui('ui_catalog_success_id', 'Request ID:')) || 'Request ID:',
+
+      // aria
+      iconAlt: safeStr(ui('ui_catalog_icon_alt', 'Catalog request')) || 'Catalog request',
+      closeAria: safeStr(ui('ui_catalog_close_aria', 'Close')) || 'Close',
+    }),
+    [ui],
+  );
+
+  const labels = useMemo(
+    () => ({
+      customer_name: t.fName,
+      company_name: t.fCompany,
+      email: t.fEmail,
+      phone: t.fPhone,
+      country_code: t.fCountry,
+      message: t.fMessage,
+      consent_terms: t.cTerms,
+      consent_marketing: t.cMarketing,
+    }),
+    [t],
+  );
+
   const canSubmit = useMemo(() => {
-    const nameOk = (form.customer_name ?? '').trim().length > 0;
-    const emailOk = isEmailValid(form.email ?? '');
+    const nameOk = safeStr(form.customer_name).length > 0;
+    const emailOk = isEmailValid(safeStr(form.email));
     const termsOk = !!form.consent_terms;
     return nameOk && emailOk && termsOk && !isLoading;
-  }, [form, isLoading]);
+  }, [form.customer_name, form.email, form.consent_terms, isLoading]);
 
   const onChange =
     (key: keyof CreateCatalogRequestPublicBody) =>
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
-      const value =
-        e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value;
+      const target = e.target as HTMLInputElement;
+      const value = target.type === 'checkbox' ? target.checked : target.value;
+
+      if (key === 'country_code') {
+        const cc = normalizeCountryCode(value);
+        setForm((p) => ({ ...p, country_code: cc ? cc : undefined }));
+        return;
+      }
 
       setForm((p) => ({ ...p, [key]: value as any }));
     };
@@ -143,54 +218,49 @@ const CatalogCta = () => {
     e.preventDefault();
     setStatus({ type: 'idle' });
 
+    const customer_name = safeStr(form.customer_name);
+    const email = safeStr(form.email).toLowerCase();
+
+    if (!customer_name) {
+      setStatus({ type: 'error', message: t.errName });
+      return;
+    }
+    if (!isEmailValid(email)) {
+      setStatus({ type: 'error', message: t.errEmail });
+      return;
+    }
+    if (!form.consent_terms) {
+      setStatus({ type: 'error', message: t.errTerms });
+      return;
+    }
+
+    const cc = normalizeCountryCode(form.country_code);
+
+    // IMPORTANT:
+    // - optional alanlarda null göndermiyoruz (type uyumu)
+    // - boşsa undefined => request body'de property oluşmaz
     const payload: CreateCatalogRequestPublicBody = {
-      locale: (form.locale ?? locale)?.toString(),
-      country_code: (form.country_code ?? undefined)?.toString(),
+      locale: safeStr(form.locale || locale) || locale,
+      country_code: cc ? cc : undefined,
 
-      customer_name: (form.customer_name ?? '').trim(),
-      company_name:
-        typeof form.company_name === 'string' && form.company_name.trim()
-          ? form.company_name.trim()
-          : null,
+      customer_name,
+      company_name: safeStr(form.company_name) ? safeStr(form.company_name) : null,
 
-      email: (form.email ?? '').trim().toLowerCase(),
-      phone: typeof form.phone === 'string' && form.phone.trim() ? form.phone.trim() : null,
-
-      message: typeof form.message === 'string' && form.message.trim() ? form.message.trim() : null,
+      email,
+      phone: safeStr(form.phone) ? safeStr(form.phone) : null,
+      message: safeStr(form.message) ? safeStr(form.message) : null,
 
       consent_marketing: !!form.consent_marketing,
       consent_terms: !!form.consent_terms,
     };
 
-    if (!payload.customer_name) {
-      setStatus({
-        type: 'error',
-        message: isTr ? 'Ad Soyad zorunludur.' : 'Full name is required.',
-      });
-      return;
-    }
-    if (!isEmailValid(payload.email)) {
-      setStatus({
-        type: 'error',
-        message: isTr ? 'Geçerli bir e-posta girin.' : 'Please enter a valid email.',
-      });
-      return;
-    }
-    if (!payload.consent_terms) {
-      setStatus({
-        type: 'error',
-        message: isTr
-          ? 'Devam etmek için KVKK/Şartlar onayı zorunludur.'
-          : 'You must accept the terms to continue.',
-      });
-      return;
-    }
-
     try {
       const res = await createCatalogRequest(payload).unwrap();
-      const id = (res as any)?.id ? String((res as any).id) : '';
+      const id = safeStr((res as any)?.id);
+
       setStatus({ type: 'success', id });
 
+      // form reset: optional string alanları '' yap (null değil)
       setForm((p) => ({
         ...p,
         customer_name: '',
@@ -200,16 +270,12 @@ const CatalogCta = () => {
         message: '',
         consent_marketing: false,
         consent_terms: false,
+        // country_code resetleme: default'u koru
+        country_code: p.country_code,
       }));
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.data?.message ||
-        err?.error ||
-        (isTr
-          ? 'Talep gönderilemedi. Lütfen tekrar deneyin.'
-          : 'Request failed. Please try again.');
-      setStatus({ type: 'error', message: String(msg) });
+      const msg = err?.data?.error?.message || err?.data?.message || err?.error || t.errGeneric;
+      setStatus({ type: 'error', message: safeStr(msg) || t.errGeneric });
     }
   };
 
@@ -221,15 +287,15 @@ const CatalogCta = () => {
             <div className="col-xl-12">
               <div className="cta__content-box text-center">
                 <div className="cta__icon mb-20">
-                  <Image src={one} alt="Catalog request" />
+                  <Image src={one} alt={t.iconAlt} />
                 </div>
 
-                <div className="cta__title mb-20">{title}</div>
-                <p className="mb-30">{description}</p>
+                <div className="cta__title mb-20">{t.title}</div>
+                <p className="mb-30">{t.desc}</p>
 
                 <div className="cta__btn-wrap">
                   <button type="button" className="btn btn-primary" onClick={openModal}>
-                    {openButtonLabel}
+                    {t.openBtn}
                   </button>
                 </div>
               </div>
@@ -242,61 +308,29 @@ const CatalogCta = () => {
               className="modal-backdrop-custom"
               role="dialog"
               aria-modal="true"
-              aria-label={modalTitle}
+              aria-label={t.modalTitle}
               onMouseDown={(e) => {
                 if (e.target === e.currentTarget) closeModal();
               }}
-              style={{
-                position: 'fixed',
-                inset: 0,
-                background: 'rgba(0,0,0,0.55)',
-                zIndex: 9999,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: 16,
-              }}
             >
-              <div
-                className="modal-card-custom"
-                style={{
-                  width: 'min(760px, 100%)',
-                  background: '#fff',
-                  borderRadius: 12,
-                  boxShadow: '0 20px 60px rgba(0,0,0,0.25)',
-                  overflow: 'hidden',
-                }}
-              >
+              <div className="modal-card-custom">
                 {/* Header */}
-                <div
-                  className="modal-head-custom"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '14px 16px',
-                    borderBottom: '1px solid rgba(0,0,0,0.08)',
-                  }}
-                >
-                  <div style={{ fontWeight: 700 }}>{modalTitle}</div>
+                <div className="modal-head-custom">
+                  <div className="modal-title-custom">{t.modalTitle}</div>
+
                   <button
                     type="button"
-                    className="btn btn-link"
+                    className="btn btn-link modal-close-custom"
                     onClick={closeModal}
-                    aria-label={closeLabel}
-                    title={closeLabel}
-                    style={{
-                      padding: '4px 10px',
-                      textDecoration: 'none',
-                      lineHeight: 1,
-                    }}
+                    aria-label={t.closeAria}
+                    title={t.closeBtn}
                   >
                     ×
                   </button>
                 </div>
 
                 {/* Body */}
-                <div style={{ padding: 16 }}>
+                <div className="modal-body-custom">
                   <form onSubmit={onSubmit}>
                     <div className="row g-3">
                       <div className="col-12">
@@ -343,9 +377,11 @@ const CatalogCta = () => {
                         <Label>{labels.country_code}</Label>
                         <Input
                           type="text"
-                          value={(form.country_code as any) ?? ''}
+                          value={safeStr(form.country_code)}
                           onChange={onChange('country_code')}
-                          maxLength={2}
+                          maxLength={4}
+                          inputMode="text"
+                          autoComplete="country"
                         />
                       </div>
 
@@ -360,7 +396,7 @@ const CatalogCta = () => {
                       </div>
 
                       <div className="col-12">
-                        <div className="d-flex flex-wrap gap-4" style={{ fontSize: 14 }}>
+                        <div className="d-flex flex-wrap gap-4 ens-catalog-consents">
                           <div className="form-check">
                             <input
                               id="catalog-consent-terms"
@@ -392,11 +428,11 @@ const CatalogCta = () => {
                       <div className="col-12">
                         <div className="d-flex gap-2 justify-content-end">
                           <button type="button" className="btn btn-secondary" onClick={closeModal}>
-                            {closeLabel}
+                            {t.closeBtn}
                           </button>
 
                           <button type="submit" className="btn btn-primary" disabled={!canSubmit}>
-                            {isLoading ? (isTr ? 'Gönderiliyor...' : 'Sending...') : submitLabel}
+                            {isLoading ? t.sending : t.submitBtn}
                           </button>
                         </div>
                       </div>
@@ -404,10 +440,10 @@ const CatalogCta = () => {
                       {status.type === 'success' && (
                         <div className="col-12">
                           <div className="alert alert-success mb-0">
-                            {isTr ? 'Talebiniz alındı.' : 'Your request has been received.'}{' '}
+                            {t.okReceived}{' '}
                             {status.id ? (
                               <>
-                                {isTr ? 'Talep ID:' : 'Request ID:'} <strong>{status.id}</strong>
+                                {t.okIdPrefix} <strong>{status.id}</strong>
                               </>
                             ) : null}
                           </div>

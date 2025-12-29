@@ -68,13 +68,13 @@ const safeUiText = (
 
 const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   // ✅ DB-driven locale
-  const locale = useLocaleShort() || 'tr';
+  const locale = useLocaleShort() || 'de';
   const { ui } = useUiSection('ui_services', locale as any);
 
   // ✅ default_locale DB’den (fallback arama için)
   const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
   const defaultLocale = useMemo(
-    () => normLocaleTag(defaultLocaleRow?.value) || 'tr',
+    () => normLocaleTag(defaultLocaleRow?.value) || 'de',
     [defaultLocaleRow?.value],
   );
 

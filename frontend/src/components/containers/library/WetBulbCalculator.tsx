@@ -1,6 +1,8 @@
 // =============================================================
 // FILE: src/components/containers/library/WetBulbCalculator.tsx
 // Ensotek – Wet-Bulb Temperature Calculator (Hava sıcaklığı + RH)
+// - SCSS aligned: no styled-jsx, no inline styles
+// - i18n: site_settings.ui_library
 // =============================================================
 
 'use client';
@@ -17,7 +19,7 @@ const WetBulbCalculator: React.FC = () => {
 
   const [temperature, setTemperature] = useState<string>('');
   const [humidity, setHumidity] = useState<string>('');
-  const [result, setResult] = useState<string>(''); // sadece "xx.xx °C"
+  const [result, setResult] = useState<string>(''); // "xx.xx °C"
   const [error, setError] = useState<string>('');
 
   const tLabel = ui(
@@ -29,24 +31,29 @@ const WetBulbCalculator: React.FC = () => {
     locale === 'de' ? 'Nem Oranı (%)' : 'Relative Humidity (%)',
   );
   const btnLabel = ui('ui_library_wb_calculate_button', locale === 'de' ? 'Hesapla' : 'Calculate');
+
   const heading = ui(
     'ui_library_wb_title',
     locale === 'de' ? 'Yaş Termometre Sıcaklığı Hesaplayıcı' : 'Wet-Bulb Temperature Calculator',
   );
+
   const subTitle = ui(
     'ui_library_wb_subtitle',
     locale === 'de'
       ? 'Hava sıcaklığı ve bağıl nemi girerek yaklaşık yaş termometre sıcaklığını hesaplayın.'
       : 'Enter air temperature and relative humidity to estimate wet-bulb temperature.',
   );
+
   const resultPrefix = ui(
     'ui_library_wb_result_label',
     locale === 'de' ? 'Yaş termometre sıcaklığı:' : 'Wet-bulb temperature:',
   );
+
   const placeholderT = ui(
     'ui_library_wb_temperature_placeholder',
     locale === 'de' ? 'Hava Sıcaklığı (°C)' : 'Air temperature (°C)',
   );
+
   const placeholderH = ui(
     'ui_library_wb_humidity_placeholder',
     locale === 'de' ? 'Nem Oranı (%)' : 'Relative humidity (%)',
@@ -59,13 +66,18 @@ const WetBulbCalculator: React.FC = () => {
 
   const subLabel = ui('ui_library_wb_sublabel', 'Psychrometric Tools');
 
+  const emptyResultText = ui(
+    'ui_library_wb_result_placeholder',
+    locale === 'de' ? 'Sonuç burada görünecektir.' : 'Result will be shown here.',
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     const t = parseFloat(temperature.replace(',', '.'));
     const rh = parseFloat(humidity.replace(',', '.'));
 
-    if (isNaN(t) || isNaN(rh) || rh < 0 || rh > 100) {
+    if (Number.isNaN(t) || Number.isNaN(rh) || rh < 0 || rh > 100) {
       setError(errorText);
       setResult('');
       return;
@@ -73,7 +85,7 @@ const WetBulbCalculator: React.FC = () => {
 
     setError('');
 
-    // Feuchtkugel ampirik aproximasyon
+    // Ampirik aproximasyon
     const wb =
       t * Math.atan(0.151977 * Math.sqrt(rh + 8.313659)) +
       Math.atan(t + rh) -
@@ -94,10 +106,10 @@ const WetBulbCalculator: React.FC = () => {
               <span className="section__subtitle">
                 <span>{ui('ui_library_subprefix', 'Ensotek')}</span> {subLabel}
               </span>
+
               <h2 className="section__title">{heading}</h2>
-              <p className="mt-10" style={{ fontSize: 15, opacity: 0.85 }}>
-                {subTitle}
-              </p>
+
+              <p className="wetbulb__subtitle mt-10">{subTitle}</p>
             </div>
           </div>
         </div>
@@ -115,6 +127,7 @@ const WetBulbCalculator: React.FC = () => {
                     value={temperature}
                     onChange={(e) => setTemperature(e.target.value)}
                     placeholder={placeholderT}
+                    inputMode="decimal"
                   />
                 </div>
 
@@ -127,6 +140,7 @@ const WetBulbCalculator: React.FC = () => {
                     value={humidity}
                     onChange={(e) => setHumidity(e.target.value)}
                     placeholder={placeholderH}
+                    inputMode="decimal"
                   />
                 </div>
 
@@ -138,7 +152,7 @@ const WetBulbCalculator: React.FC = () => {
               </form>
             </div>
 
-            <div className="wetbulb__result">
+            <div className="wetbulb__result" aria-live="polite">
               {error && <span className="wetbulb__result-error">{error}</span>}
 
               {!error && result && (
@@ -149,103 +163,12 @@ const WetBulbCalculator: React.FC = () => {
               )}
 
               {!error && !result && (
-                <span className="wetbulb__result-placeholder">
-                  {locale === 'de' ? 'Sonuç burada görünecektir.' : 'Result will be shown here.'}
-                </span>
+                <span className="wetbulb__result-placeholder">{emptyResultText}</span>
               )}
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .wetbulb__box {
-          background: #ffffff;
-          border-radius: 18px;
-          padding: 24px 26px;
-          box-shadow: 0 18px 45px rgba(3, 4, 28, 0.06);
-        }
-
-        .wetbulb__label {
-          display: block;
-          font-size: 13px;
-          font-weight: 500;
-          margin-bottom: 6px;
-          opacity: 0.8;
-        }
-
-        .wetbulb__input {
-          width: 100%;
-          border-radius: 10px;
-          border: 1px solid rgba(15, 24, 40, 0.1);
-          padding: 10px 12px;
-          font-size: 14px;
-          outline: none;
-          transition: border-color 0.15s ease, box-shadow 0.15s ease;
-          background: #fff;
-        }
-
-        .wetbulb__input:focus {
-          border-color: #5a57ff;
-          box-shadow: 0 0 0 1px rgba(90, 87, 255, 0.25);
-        }
-
-        .wetbulb__btn {
-          margin-top: 22px;
-          justify-content: center;
-          width: 100%;
-        }
-
-        .wetbulb__result {
-          margin-top: 12px;
-          border-radius: 18px;
-          background: #234361;
-          color: #ffffff;
-          padding: 14px 22px;
-          text-align: center;
-          font-size: 15px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 52px;
-        }
-
-        .wetbulb__result-label {
-          opacity: 0.9;
-          margin-right: 6px;
-        }
-
-        .wetbulb__result-value {
-          font-weight: 600;
-        }
-
-        .wetbulb__result-placeholder {
-          opacity: 0.8;
-        }
-
-        .wetbulb__result-error {
-          color: #ffd5d5;
-          font-weight: 500;
-        }
-
-        @media (prefers-color-scheme: dark) {
-          .wetbulb__box {
-            background: #111827;
-            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.6);
-          }
-          .wetbulb__input {
-            background: #020617;
-            border-color: rgba(148, 163, 184, 0.35);
-            color: #e5e7eb;
-          }
-          .wetbulb__input::placeholder {
-            color: rgba(148, 163, 184, 0.7);
-          }
-          .wetbulb__result {
-            background: linear-gradient(135deg, #1f2937, #020617);
-          }
-        }
-      `}</style>
     </section>
   );
 };

@@ -1,15 +1,17 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductPageContent.tsx
-// Ensotek – Full Products Page Content (IMAGE + TITLE ONLY) — FINAL
+// Ensotek – Full Products Page Content (IMAGE + TITLE ONLY) — FINAL (I18N PATTERN FIXED)
 // - Shared container for /product and /sparepart
 // - item_type is driven by props (product | sparepart)
 // - UI section key + route base path are driven by props
+// - Locale: useLocaleShort() (single source, PATTERN)
+// - UI: DB (site_settings) + EN fallback only (no locale branching)
 // - Next/Image src never empty (fallback cover used)
 // =============================================================
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -17,7 +19,9 @@ import { useListProductsQuery } from '@/integrations/rtk/hooks';
 import type { ProductDto } from '@/integrations/types/product.types';
 
 import { toCdnSrc } from '@/shared/media';
-import { useResolvedLocale } from '@/i18n/locale';
+
+// i18n (PATTERN)
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
@@ -28,13 +32,6 @@ import FallbackCover from 'public/img/blog/3/1.jpg';
 const CARD_W = 1200;
 const CARD_H = 900;
 const PAGE_LIMIT = 12;
-
-const toLocaleShort = (l: unknown) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
 
 type ProductListVM = {
   id: string;
@@ -61,57 +58,64 @@ const ProductPageContent: React.FC<ProductPageContentProps> = ({
   uiSectionKey,
   basePath,
 }) => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
+  // ✅ PATTERN: single source locale
+  const locale = useLocaleShort();
 
-  const { ui } = useUiSection(uiSectionKey, locale);
+  const { ui } = useUiSection(uiSectionKey, locale as any);
 
-  // ---- UI keys are derived from section ----
+  // ✅ DB -> EN fallback only (no locale branching)
+  const t = useCallback(
+    (key: string, fallbackEn: string) => {
+      const v = safeStr(ui(key, fallbackEn));
+      return v || fallbackEn;
+    },
+    [ui],
+  );
+
   const isProducts = uiSectionKey === 'ui_products';
 
-  const sectionSubtitlePrefix = ui(
-    isProducts ? 'ui_products_kicker_prefix' : 'ui_spareparts_kicker_prefix',
-    'Ensotek',
+  // ---- UI (derived keys) ----
+  const sectionSubtitlePrefix = useMemo(
+    () => t(isProducts ? 'ui_products_kicker_prefix' : 'ui_spareparts_kicker_prefix', 'Ensotek'),
+    [t, isProducts],
   );
 
-  const sectionSubtitleLabel = ui(
-    isProducts ? 'ui_products_kicker_label' : 'ui_spareparts_kicker_label',
-    locale === 'de'
-      ? isProducts
-        ? 'Ürünlerimiz'
-        : 'Yedek Parçalar'
-      : isProducts
-      ? 'Our Products'
-      : 'Spare Parts',
+  const sectionSubtitleLabel = useMemo(
+    () =>
+      t(
+        isProducts ? 'ui_products_kicker_label' : 'ui_spareparts_kicker_label',
+        isProducts ? 'Our Products' : 'Spare Parts',
+      ),
+    [t, isProducts],
   );
 
-  const sectionTitle = ui(
-    isProducts ? 'ui_products_page_title' : 'ui_spareparts_page_title',
-    locale === 'de'
-      ? isProducts
-        ? 'Ürünlerimiz'
-        : 'Yedek Parçalar'
-      : isProducts
-      ? 'Products'
-      : 'Spare Parts',
+  const sectionTitle = useMemo(
+    () =>
+      t(
+        isProducts ? 'ui_products_page_title' : 'ui_spareparts_page_title',
+        isProducts ? 'Products' : 'Spare Parts',
+      ),
+    [t, isProducts],
   );
 
-  const sectionIntro = ui(
-    isProducts ? 'ui_products_page_intro' : 'ui_spareparts_page_intro',
-    locale === 'de'
-      ? isProducts
-        ? 'Endüstriyel su soğutma kuleleri ve tamamlayıcı ekipmanlara ait seçili ürünler.'
-        : 'Soğutma kuleleri için seçili yedek parça ve bakım bileşenleri.'
-      : isProducts
-      ? 'Selected products for industrial cooling towers and related equipment.'
-      : 'Selected spare parts and maintenance components for cooling towers.',
+  const sectionIntro = useMemo(
+    () =>
+      t(
+        isProducts ? 'ui_products_page_intro' : 'ui_spareparts_page_intro',
+        isProducts
+          ? 'Selected products for industrial cooling towers and related equipment.'
+          : 'Selected spare parts and maintenance components for cooling towers.',
+      ),
+    [t, isProducts],
   );
 
-  const emptyText = ui(
-    isProducts ? 'ui_products_empty' : 'ui_spareparts_empty',
-    locale === 'de'
-      ? 'Şu anda görüntülenecek içerik bulunmamaktadır.'
-      : 'There are no items to display at the moment.',
+  const emptyText = useMemo(
+    () =>
+      t(
+        isProducts ? 'ui_products_empty' : 'ui_spareparts_empty',
+        'There are no items to display at the moment.',
+      ),
+    [t, isProducts],
   );
 
   // ---- Data (single source) ----
@@ -120,13 +124,13 @@ const ProductPageContent: React.FC<ProductPageContentProps> = ({
     locale,
     limit: PAGE_LIMIT,
     item_type: itemType,
-  });
+  } as any);
 
   const items: ProductListVM[] = useMemo(() => {
     const list: ProductDto[] = (data?.items ?? []) as any;
 
     return list
-      .filter((p) => !!p && !!(p as any).is_active)
+      .filter((p) => !!p && Number((p as any).is_active) === 1)
       .map((p) => {
         const id = safeStr((p as any).id) || safeStr((p as any).slug);
         const title = safeStr((p as any).title) || 'Untitled';
@@ -149,9 +153,9 @@ const ProductPageContent: React.FC<ProductPageContentProps> = ({
       .filter((x) => !!x.slug && !!x.id);
   }, [data?.items]);
 
-  const listHref = useMemo(() => localizePath(locale, basePath), [locale, basePath]);
+  const listHref = useMemo(() => localizePath(locale as any, basePath), [locale, basePath]);
 
-  // Senin önceki davranışın: items yok + loading değil => null (sayfada sadece banner/feedback kalsın)
+  // ✅ Keep your previous behavior: if nothing to show and not loading => render nothing
   if (!items.length && !isLoading) return null;
 
   return (
@@ -186,7 +190,7 @@ const ProductPageContent: React.FC<ProductPageContentProps> = ({
             <div className="work__item-grid ens-productsGrid">
               {items.map((p) => {
                 const href = p.slug
-                  ? localizePath(locale, `${basePath}/${encodeURIComponent(p.slug)}`)
+                  ? localizePath(locale as any, `${basePath}/${encodeURIComponent(p.slug)}`)
                   : listHref;
 
                 // IMPORTANT: Next/Image src must not be empty

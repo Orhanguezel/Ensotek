@@ -135,7 +135,7 @@ const OfferPage: React.FC = () => {
       </Head>
 
       <Banner title={bannerTitle} />
-      <OfferPageContainer locale={String(locale || '')} />
+      <OfferPageContainer />
       <ContactMap config={mapConfig} locale={String(locale || '')} />
     </>
   );

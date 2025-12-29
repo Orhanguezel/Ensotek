@@ -1,5 +1,5 @@
 -- =============================================================
--- 049-94_site_settings_ui_cookie.sql
+-- 049-1.8_site_settings_ui_cookie.sql
 -- Ensotek – UI Cookie + Cookie Policy (site_settings)
 --  - Value: JSON (stored as TEXT)
 --  - Localized: tr / en / de

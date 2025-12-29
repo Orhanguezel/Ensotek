@@ -1,12 +1,14 @@
 // =============================================================
 // FILE: src/components/public/offer/OfferPublicForm.tsx
 // Ensotek – Public Teklif Talep Formu [FINAL+]
+//  - i18n PATTERN: useLocaleShort + useUiSection
+//  - UI: DB (site_settings.ui_offer) + EN-only fallback
 //  - country_code esnek: backend-safe normalize + raw değeri form_data’da sakla
 // =============================================================
 
 'use client';
 
-import React, { useMemo, useState, type FormEvent } from 'react';
+import React, { useMemo, useState, useCallback, type FormEvent } from 'react';
 
 import {
   useCreateOfferPublicMutation,
@@ -20,10 +22,11 @@ import type { ProductDto } from '@/integrations/types/product.types';
 import type { OfferRequestPublic } from '@/integrations/types/offers.types';
 import type { NewsletterSubscribePayload } from '@/integrations/types/newsletter.types';
 
+// i18n (PATTERN)
+import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
 export type OfferPublicFormProps = {
-  locale: string;
   defaultCountryCode?: string;
   productId?: string | null;
   productName?: string | null;
@@ -50,7 +53,6 @@ function normalizeCountryCodeStrictISO2(raw: string): string | undefined {
     .trim()
     .toUpperCase();
   if (!s) return undefined;
-  // sadece 2 harf ise "country_code" olarak güvenle gönder
   if (/^[A-Z]{2}$/.test(s)) return s;
   return undefined;
 }
@@ -59,17 +61,21 @@ function normalizeCountryRawForStorage(raw: string): string {
   return String(raw || '').trim();
 }
 
-export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
-  locale,
-  defaultCountryCode = 'TR',
+const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
+  defaultCountryCode = 'DE',
   productId = null,
   productName = null,
   onSuccess,
 }) => {
+  const locale = useLocaleShort();
   const { ui } = useUiSection('ui_offer', locale as any);
 
-  const t = useMemo(
-    () => (key: string, fallback: string) => safeStr(ui(key, fallback)) || fallback,
+  // EN-only fallback helper
+  const t = useCallback(
+    (key: string, fallbackEn: string) => {
+      const v = safeStr(ui(key, fallbackEn));
+      return v || fallbackEn;
+    },
     [ui],
   );
 
@@ -82,7 +88,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
 
-  // countryCode: kullanıcı serbest yazacak (opsiyonel)
+  // kullanıcı serbest yazacak (opsiyonel)
   const [countryCode, setCountryCode] = useState(defaultCountryCode);
 
   // -----------------------------
@@ -120,7 +126,6 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
   const [relatedType, setRelatedType] = useState<RelatedType>(
     isLockedToProduct ? 'product' : 'general',
   );
-
   const [selectedProductId, setSelectedProductId] = useState<string>(productId ?? '');
   const [selectedServiceId, setSelectedServiceId] = useState<string>('');
 
@@ -144,10 +149,9 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
   );
 
   // -----------------------------
-  // UI – DB’den gelen metinler (fallback tek dil)
+  // UI strings (DB -> EN fallback only)
   // -----------------------------
   const formHeading = useMemo(() => t('ui_offer_form_heading', 'Request an Offer'), [t]);
-
   const formIntro = useMemo(
     () =>
       t(
@@ -268,6 +272,31 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
     [t],
   );
 
+  const productsLoadingText = useMemo(() => t('ui_offer_products_loading', 'Loading...'), [t]);
+  const productsErrorText = useMemo(
+    () => t('ui_offer_products_error', 'Failed to load product list.'),
+    [t],
+  );
+  const servicesLoadingText = useMemo(() => t('ui_offer_services_loading', 'Loading...'), [t]);
+  const servicesErrorText = useMemo(
+    () => t('ui_offer_services_error', 'Failed to load service list.'),
+    [t],
+  );
+
+  // -----------------------------
+  // Radio change (reset dependent selections)
+  // -----------------------------
+  const handleRelatedTypeChange = useCallback(
+    (next: RelatedType) => {
+      setRelatedType(next);
+      setSubmittedId(null);
+
+      if (next !== 'product' && !isLockedToProduct) setSelectedProductId('');
+      if (next !== 'service') setSelectedServiceId('');
+    },
+    [isLockedToProduct],
+  );
+
   // -----------------------------
   // Submit
   // -----------------------------
@@ -276,6 +305,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
     if (createState.isLoading) return;
 
     if (!consentTerms) {
+      // mevcut pattern: basit uyarı
       alert(kvkkAlertText);
       return;
     }
@@ -292,6 +322,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
 
     const payload: OfferRequestPublic = {
       locale,
+
       // ✅ backend-safe: yalnızca ISO-2 ise gönder
       country_code: iso2Country,
 
@@ -299,6 +330,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
       company_name: trimmedCompany || null,
       email: trimmedEmail,
       phone: phone.trim() || null,
+
       subject: t('ui_offer_default_subject', 'Quotation request'),
       message: extraNotes.trim() || null,
 
@@ -356,8 +388,8 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
       const res = (await createOffer(payload).unwrap()) as any;
 
       if (res?.id) {
-        setSubmittedId(res.id);
-        onSuccess?.(res.id);
+        setSubmittedId(String(res.id));
+        onSuccess?.(String(res.id));
       }
 
       if (consentMarketing && trimmedEmail) {
@@ -403,15 +435,14 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
       if (!isLockedToProduct) {
         setRelatedType('general');
         setSelectedProductId('');
-        setSelectedServiceId('');
       }
+      setSelectedServiceId('');
     } catch (err) {
       console.error('offer_public_submit_failed', err);
     }
   };
 
   const canShowRadio = !isLockedToProduct;
-
   const showProductSelect = relatedType === 'product' && !isLockedToProduct;
   const showServiceSelect = relatedType === 'service';
 
@@ -500,7 +531,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
               className="form-control form-control-sm"
               disabled={createState.isLoading}
               value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)} // serbest, uppercase şart değil
+              onChange={(e) => setCountryCode(e.target.value)}
               placeholder={ph.country}
               maxLength={32}
             />
@@ -544,7 +575,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
                 value="general"
                 disabled={createState.isLoading}
                 checked={relatedType === 'general'}
-                onChange={() => setRelatedType('general')}
+                onChange={() => handleRelatedTypeChange('general')}
               />
               <label className="form-check-label" htmlFor="offer-related-general">
                 {radioGeneralLabel}
@@ -560,7 +591,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
                 value="product"
                 disabled={createState.isLoading}
                 checked={relatedType === 'product'}
-                onChange={() => setRelatedType('product')}
+                onChange={() => handleRelatedTypeChange('product')}
               />
               <label className="form-check-label" htmlFor="offer-related-product">
                 {radioProductLabel}
@@ -576,7 +607,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
                 value="service"
                 disabled={createState.isLoading}
                 checked={relatedType === 'service'}
-                onChange={() => setRelatedType('service')}
+                onChange={() => handleRelatedTypeChange('service')}
               />
               <label className="form-check-label" htmlFor="offer-related-service">
                 {radioServiceLabel}
@@ -603,13 +634,11 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
             </select>
 
             {productsQ.isLoading ? (
-              <div className="form-text small">{t('ui_offer_products_loading', 'Loading...')}</div>
+              <div className="form-text small">{productsLoadingText}</div>
             ) : null}
 
             {productsQ.isError ? (
-              <div className="form-text small text-danger">
-                {t('ui_offer_products_error', 'Failed to load product list.')}
-              </div>
+              <div className="form-text small text-danger">{productsErrorText}</div>
             ) : null}
           </div>
         ) : null}
@@ -632,19 +661,17 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
             </select>
 
             {servicesQ.isLoading ? (
-              <div className="form-text small">{t('ui_offer_services_loading', 'Loading...')}</div>
+              <div className="form-text small">{servicesLoadingText}</div>
             ) : null}
 
             {servicesQ.isError ? (
-              <div className="form-text small text-danger">
-                {t('ui_offer_services_error', 'Failed to load service list.')}
-              </div>
+              <div className="form-text small text-danger">{servicesErrorText}</div>
             ) : null}
           </div>
         ) : null}
       </div>
 
-      {/* Dynamic content blocks (aynı şekilde devam) */}
+      {/* Dynamic content blocks */}
       {showGeneral ? (
         <div className="col-12">
           <p className="small mb-2">{generalIntroText}</p>
@@ -662,14 +689,203 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
       {showProduct ? (
         <div className="col-12">
           <p className="small mb-2">{productIntroText}</p>
-          {/* ... product fields aynı şekilde ... */}
+
+          <div className="row g-2">
+            <div className="col-md-6">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={towerProcess}
+                onChange={(e) => setTowerProcess(e.target.value)}
+                placeholder={ph.towerProcess}
+              />
+            </div>
+
+            <div className="col-md-3">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={towerCity}
+                onChange={(e) => setTowerCity(e.target.value)}
+                placeholder={ph.city}
+              />
+            </div>
+
+            <div className="col-md-3">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={towerDistrict}
+                onChange={(e) => setTowerDistrict(e.target.value)}
+                placeholder={ph.district}
+              />
+            </div>
+
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={waterFlowM3h}
+                onChange={(e) => setWaterFlowM3h(e.target.value)}
+                placeholder={ph.waterFlow}
+              />
+            </div>
+
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={inletTemp}
+                onChange={(e) => setInletTemp(e.target.value)}
+                placeholder={ph.inlet}
+              />
+            </div>
+
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={outletTemp}
+                onChange={(e) => setOutletTemp(e.target.value)}
+                placeholder={ph.outlet}
+              />
+            </div>
+
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={wetBulbTemp}
+                onChange={(e) => setWetBulbTemp(e.target.value)}
+                placeholder={ph.wetBulb}
+              />
+            </div>
+
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={capacity}
+                onChange={(e) => setCapacity(e.target.value)}
+                placeholder={ph.capacity}
+              />
+            </div>
+
+            <div className="col-md-4">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={waterQuality}
+                onChange={(e) => setWaterQuality(e.target.value)}
+                placeholder={ph.waterQuality}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={poolType}
+                onChange={(e) => setPoolType(e.target.value)}
+                placeholder={ph.poolType}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={towerLocation}
+                onChange={(e) => setTowerLocation(e.target.value)}
+                placeholder={ph.towerLocation}
+              />
+            </div>
+
+            <div className="col-12">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={existingTowerInfo}
+                onChange={(e) => setExistingTowerInfo(e.target.value)}
+                placeholder={ph.existing}
+              />
+            </div>
+
+            <div className="col-12">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={referralSource}
+                onChange={(e) => setReferralSource(e.target.value)}
+                placeholder={ph.referral}
+              />
+            </div>
+
+            <div className="col-12">
+              <textarea
+                className="form-control form-control-sm"
+                rows={4}
+                disabled={createState.isLoading}
+                value={extraNotes}
+                onChange={(e) => setExtraNotes(e.target.value)}
+                placeholder={ph.extraNotes}
+              />
+            </div>
+          </div>
         </div>
       ) : null}
 
       {showService ? (
         <div className="col-12">
           <p className="small mb-2">{serviceIntroText}</p>
-          {/* ... service fields aynı şekilde ... */}
+
+          <div className="row g-2">
+            <div className="col-md-6">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={towerCity}
+                onChange={(e) => setTowerCity(e.target.value)}
+                placeholder={ph.city}
+              />
+            </div>
+
+            <div className="col-md-6">
+              <input
+                type="text"
+                className="form-control form-control-sm"
+                disabled={createState.isLoading}
+                value={towerDistrict}
+                onChange={(e) => setTowerDistrict(e.target.value)}
+                placeholder={ph.district}
+              />
+            </div>
+
+            <div className="col-12">
+              <textarea
+                className="form-control form-control-sm"
+                rows={4}
+                disabled={createState.isLoading}
+                value={extraNotes}
+                onChange={(e) => setExtraNotes(e.target.value)}
+                placeholder={ph.serviceExpectations}
+              />
+            </div>
+          </div>
         </div>
       ) : null}
 
@@ -705,7 +921,7 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
       </div>
 
       {/* Status */}
-      <div className="col-12">
+      <div className="col-12" aria-live="polite">
         {createState.isError ? (
           <div className="alert alert-danger py-2 small mb-2">{errorText}</div>
         ) : null}
@@ -726,3 +942,5 @@ export const OfferPublicForm: React.FC<OfferPublicFormProps> = ({
     </form>
   );
 };
+
+export default OfferPublicForm;

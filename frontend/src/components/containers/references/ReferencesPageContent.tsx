@@ -1,23 +1,26 @@
 // =============================================================
 // FILE: src/components/containers/references/ReferencesPageContent.tsx
-// Ensotek – Full References Page Content (UI IMPROVED + PAGINATION RESTORED)
+// Ensotek – Full References Page Content (I18N PATTERN + PAGINATION RESTORED) [FINAL]
+//   - ✅ i18n PATTERN: useResolvedLocale + useUiSection
+//   - ✅ NO toLocaleShort helper (removed)
+//   - ✅ UI: DB (site_settings.ui_references) + EN-only fallback (no locale branching)
 //   - ✅ “Önce tamamı gelsin” modu: total uygunsa tek request ile tüm kayıtlar
-//   - ✅ Category + SubCategory filtre UI (tabs) – daha iyi spacing + hit-area
+//   - ✅ Category + SubCategory filtre UI (tabs)
 //   - ✅ Backend filtrelemezse bile client-side filtre (garanti)
 //   - ✅ Total çok büyükse server-side pagination fallback
-//   - ✅ Grid spacing + card styling iyileştirildi
-//   - ✅ Pagination geri eklendi:
+//   - ✅ Grid + card styling iyileştirildi
+//   - ✅ Pagination:
 //       - canFetchAll=true  => client-side pagination (slice)
 //       - canFetchAll=false => server-side pagination (limit/offset)
 // =============================================================
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import Image from 'next/image';
 
 import { toCdnSrc } from '@/shared/media';
 
-// i18n
+// i18n (PATTERN)
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 
@@ -52,38 +55,77 @@ const CARD_H = 100;
 const PAGE_SIZE = 24;
 const MAX_ALL_LIMIT = 5000;
 
-const altFromSlug = (slug?: string | null) => (slug || 'reference').replace(/[-_]+/g, ' ').trim();
-
-const toLocaleShort = (l: any) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
-
 type OptionTab = { id: string; label: string };
+
+function safeStr(v: unknown): string {
+  return typeof v === 'string' ? v.trim() : '';
+}
+
+const altFromSlug = (slug?: string | null) =>
+  String(slug || 'reference')
+    .replace(/[-_]+/g, ' ')
+    .trim();
 
 const ReferencesPageContent: React.FC = () => {
   const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
 
-  const { ui } = useUiSection('ui_references', locale);
+  // ✅ dil konsepti: tek kaynak resolvedLocale (toLocaleShort YOK)
+  const locale = useMemo(() => safeStr(resolvedLocale), [resolvedLocale]);
 
-  const sectionSubtitlePrefix = ui('ui_references_subprefix', 'Ensotek');
-  const sectionSubtitleLabel = ui(
-    'ui_references_sublabel',
-    locale === 'de' ? 'Referanslarımız' : 'References',
+  const { ui } = useUiSection('ui_references', locale as any);
+
+  // ✅ DB -> EN fallback only (no locale branching)
+  const t = useCallback(
+    (key: string, fallbackEn: string) => {
+      const v = safeStr(ui(key, fallbackEn));
+      return v || fallbackEn;
+    },
+    [ui],
   );
-  const sectionTitle = ui(
-    'ui_references_page_title',
-    locale === 'de' ? 'Referanslarımız' : 'Our References',
+
+  // -------------------- SECTION TEXTS --------------------
+  const sectionSubtitlePrefix = useMemo(() => t('ui_references_subprefix', 'Ensotek'), [t]);
+  const sectionSubtitleLabel = useMemo(() => t('ui_references_sublabel', 'References'), [t]);
+  const sectionTitle = useMemo(() => t('ui_references_page_title', 'Our References'), [t]);
+  const sectionIntro = useMemo(
+    () =>
+      t(
+        'ui_references_page_intro',
+        'Selected references from our completed projects in Turkey and abroad.',
+      ),
+    [t],
   );
-  const sectionIntro = ui(
-    'ui_references_page_intro',
-    locale === 'de'
-      ? 'Yurt içi ve yurt dışında tamamladığımız projelerden seçili referanslarımız.'
-      : 'Selected references from our completed projects in Turkey and abroad.',
+
+  const emptyText = useMemo(
+    () => t('ui_references_empty', 'There are no references to display at the moment.'),
+    [t],
   );
+
+  const tabAllLabel = useMemo(() => t('ui_references_tab_all', 'All'), [t]);
+  const subTabAllLabel = useMemo(() => t('ui_references_subtab_all', 'All'), [t]);
+
+  const fallbackCategoryLabel = useMemo(() => t('ui_references_tab_fallback', 'Category'), [t]);
+  const fallbackSubCategoryLabel = useMemo(
+    () => t('ui_references_subtab_fallback', 'Subcategory'),
+    [t],
+  );
+
+  const metaLineTemplate = useMemo(
+    () => t('ui_references_meta_line', '{total} records · Page {page} of {pages}'),
+    [t],
+  );
+  const metaSingleTemplate = useMemo(
+    () => t('ui_references_meta_single', '{total} records displayed'),
+    [t],
+  );
+
+  const formatMeta = useCallback((tpl: string, vars: Record<string, string | number>) => {
+    let out = String(tpl || '');
+    for (const [k, v] of Object.entries(vars)) {
+      out = out.replaceAll(`{${k}}`, String(v));
+    }
+    return out;
+  }, []);
 
   // -------------------- FILTER STATE --------------------
   const [activeCategoryId, setActiveCategoryId] = useState<string>('all');
@@ -109,24 +151,25 @@ const ReferencesPageContent: React.FC = () => {
   } as any);
 
   const categories: CategoryDto[] = useMemo(
-    () => (Array.isArray(categoriesRaw) ? categoriesRaw : []),
+    () => (Array.isArray(categoriesRaw) ? (categoriesRaw as any) : []),
     [categoriesRaw],
   );
 
   const categoryTabs: OptionTab[] = useMemo(() => {
-    const tabs: OptionTab[] = [
-      { id: 'all', label: ui('ui_references_tab_all', locale === 'de' ? 'Tümü' : 'All') },
-    ];
+    const tabs: OptionTab[] = [{ id: 'all', label: tabAllLabel }];
 
     for (const c of categories) {
       const label =
-        String((c as any)?.title || (c as any)?.name || (c as any)?.label || '').trim() ||
-        (locale === 'de' ? 'Kategori' : 'Category');
+        safeStr((c as any)?.title) ||
+        safeStr((c as any)?.name) ||
+        safeStr((c as any)?.label) ||
+        fallbackCategoryLabel;
 
-      tabs.push({ id: (c as any).id, label });
+      const id = safeStr((c as any)?.id);
+      if (id) tabs.push({ id, label });
     }
     return tabs;
-  }, [categories, ui, locale]);
+  }, [categories, tabAllLabel, fallbackCategoryLabel]);
 
   // -------------------- DATA: SUBCATEGORIES --------------------
   const shouldFetchSubs = activeCategoryId !== 'all';
@@ -145,25 +188,26 @@ const ReferencesPageContent: React.FC = () => {
   );
 
   const subCategories: SubCategoryDto[] = useMemo(
-    () => (Array.isArray(subCatsRaw) ? subCatsRaw : []),
+    () => (Array.isArray(subCatsRaw) ? (subCatsRaw as any) : []),
     [subCatsRaw],
   );
 
   const subCategoryTabs: OptionTab[] = useMemo(() => {
     if (!shouldFetchSubs) return [];
-    const tabs: OptionTab[] = [
-      { id: 'all', label: ui('ui_references_subtab_all', locale === 'de' ? 'Tümü' : 'All') },
-    ];
+    const tabs: OptionTab[] = [{ id: 'all', label: subTabAllLabel }];
 
     for (const s of subCategories) {
       const label =
-        String((s as any)?.title || (s as any)?.name || (s as any)?.label || '').trim() ||
-        (locale === 'de' ? 'Alt Kategori' : 'Subcategory');
+        safeStr((s as any)?.title) ||
+        safeStr((s as any)?.name) ||
+        safeStr((s as any)?.label) ||
+        fallbackSubCategoryLabel;
 
-      tabs.push({ id: (s as any).id, label });
+      const id = safeStr((s as any)?.id);
+      if (id) tabs.push({ id, label });
     }
     return tabs;
-  }, [subCategories, shouldFetchSubs, ui, locale]);
+  }, [subCategories, shouldFetchSubs, subTabAllLabel, fallbackSubCategoryLabel]);
 
   // -------------------- REFERENCES QUERY STRATEGY --------------------
   const baseFilterArgs = useMemo(() => {
@@ -188,7 +232,7 @@ const ReferencesPageContent: React.FC = () => {
     offset: 0,
   } as any);
 
-  const totalFromServer = Number(probeRes?.total ?? 0) || 0;
+  const totalFromServer = Number((probeRes as any)?.total ?? 0) || 0;
   const canFetchAll = totalFromServer > 0 && totalFromServer <= MAX_ALL_LIMIT;
 
   // fetch all (single request)
@@ -228,36 +272,31 @@ const ReferencesPageContent: React.FC = () => {
   const activeRes = canFetchAll ? allRes : pagedRes;
 
   // -------------------- ITEMS (GUARANTEED CLIENT FILTER) --------------------
-  // Not: canFetchAll=true iken burada "tüm liste" var. false iken "o sayfanın listesi" var.
   const filteredItems: ReferenceDto[] = useMemo(() => {
-    const list: ReferenceDto[] = (activeRes?.items ?? []) as any;
+    const list: ReferenceDto[] = ((activeRes as any)?.items ?? []) as any;
 
     const published = list.filter((r) => Number((r as any).is_published) === 1);
 
     const byCat =
       activeCategoryId === 'all'
         ? published
-        : published.filter((r) => String((r as any).category_id || '') === activeCategoryId);
+        : published.filter((r) => safeStr((r as any).category_id) === activeCategoryId);
 
     const bySub =
       activeSubCategoryId === 'all'
         ? byCat
-        : byCat.filter((r) => String((r as any).sub_category_id || '') === activeSubCategoryId);
+        : byCat.filter((r) => safeStr((r as any).sub_category_id) === activeSubCategoryId);
 
     return bySub;
   }, [activeRes, activeCategoryId, activeSubCategoryId]);
 
   // -------------------- PAGINATION MODEL (CLIENT OR SERVER) --------------------
-  // - canFetchAll=true  => client pagination: filteredItems üzerinden slice
-  // - canFetchAll=false => server pagination: filteredItems zaten sayfa datası (PAGE_SIZE), total server'dan
   const totalItems = useMemo(() => {
     if (canFetchAll) return filteredItems.length;
-    return Number(activeRes?.total ?? totalFromServer ?? 0) || 0;
-  }, [canFetchAll, filteredItems.length, activeRes?.total, totalFromServer]);
+    return Number((activeRes as any)?.total ?? totalFromServer ?? 0) || 0;
+  }, [canFetchAll, filteredItems.length, activeRes, totalFromServer]);
 
-  const pageCount = useMemo(() => {
-    return Math.max(1, Math.ceil(totalItems / PAGE_SIZE));
-  }, [totalItems]);
+  const pageCount = useMemo(() => Math.max(1, Math.ceil(totalItems / PAGE_SIZE)), [totalItems]);
 
   const safePage = Math.min(page, pageCount);
 
@@ -267,11 +306,7 @@ const ReferencesPageContent: React.FC = () => {
   }, [safePage]);
 
   const pagedItems: ReferenceDto[] = useMemo(() => {
-    if (!canFetchAll) {
-      // server mode: zaten o sayfanın items'ı geliyor
-      return filteredItems;
-    }
-    // client mode: slice
+    if (!canFetchAll) return filteredItems;
     const start = (safePage - 1) * PAGE_SIZE;
     const end = start + PAGE_SIZE;
     return filteredItems.slice(start, end);
@@ -313,6 +348,14 @@ const ReferencesPageContent: React.FC = () => {
 
   const showPagination = pageCount > 1;
 
+  const metaLine = useMemo(() => {
+    return formatMeta(metaLineTemplate, { total: totalItems, page: safePage, pages: pageCount });
+  }, [formatMeta, metaLineTemplate, totalItems, safePage, pageCount]);
+
+  const metaSingle = useMemo(() => {
+    return formatMeta(metaSingleTemplate, { total: totalItems });
+  }, [formatMeta, metaSingleTemplate, totalItems]);
+
   // -------------------- RENDER --------------------
   return (
     <section className="brand__area grey-bg pt-120 pb-80">
@@ -325,7 +368,7 @@ const ReferencesPageContent: React.FC = () => {
                 <span>{sectionSubtitlePrefix}</span> {sectionSubtitleLabel}
               </span>
               <h2 className="section__title-2">{sectionTitle}</h2>
-              {sectionIntro && <p className="references__intro">{sectionIntro}</p>}
+              {sectionIntro ? <p className="references__intro">{sectionIntro}</p> : null}
             </div>
           </div>
         </div>
@@ -388,16 +431,7 @@ const ReferencesPageContent: React.FC = () => {
 
         {/* Grid */}
         <div className="references__gridWrap" data-aos="fade-up" data-aos-delay="200">
-          {totalItems === 0 && !isBusy && (
-            <div className="references__empty">
-              {ui(
-                'ui_references_empty',
-                locale === 'de'
-                  ? 'Şu anda görüntülenecek referans bulunmamaktadır.'
-                  : 'There are no references to display at the moment.',
-              )}
-            </div>
-          )}
+          {totalItems === 0 && !isBusy && <div className="references__empty">{emptyText}</div>}
 
           <div className="references__grid">
             {pagedItems.map((ref, idx) => {
@@ -410,13 +444,14 @@ const ReferencesPageContent: React.FC = () => {
               const imgSrc =
                 (imgRaw && (toCdnSrc(imgRaw, CARD_W, CARD_H, 'fit') || imgRaw)) || (One as any);
 
-              const name = String((ref as any).title ?? '').trim() || '—';
-              const alt = (ref as any).featured_image_alt || name || altFromSlug((ref as any).slug);
+              const name = safeStr((ref as any).title) || '—';
+              const alt =
+                safeStr((ref as any).featured_image_alt) || name || altFromSlug((ref as any).slug);
 
-              const website = String((ref as any).website_url ?? '').trim();
+              const website = safeStr((ref as any).website_url);
 
               return (
-                <div className="references__cell" key={(ref as any).id}>
+                <div className="references__cell" key={safeStr((ref as any).id) || `${idx}`}>
                   {website ? (
                     <a
                       href={website}
@@ -464,7 +499,7 @@ const ReferencesPageContent: React.FC = () => {
           </div>
         </div>
 
-        {/* Pagination (CLIENT + SERVER) */}
+        {/* Pagination */}
         {showPagination && (
           <div className="row mt-30">
             <div className="col-12 d-flex flex-column align-items-center gap-2">
@@ -522,30 +557,22 @@ const ReferencesPageContent: React.FC = () => {
                 </PaginationContent>
               </Pagination>
 
-              <div className="references__meta">
-                {locale === 'de'
-                  ? `${totalItems} kayıt · Sayfa ${safePage} / ${pageCount}`
-                  : `${totalItems} records · Page ${safePage} of ${pageCount}`}
-              </div>
+              <div className="references__meta">{metaLine}</div>
             </div>
           </div>
         )}
 
-        {/* Tek sayfaysa küçük info */}
         {!showPagination && totalItems > 0 && (
           <div className="row mt-18">
             <div className="col-12 d-flex justify-content-center">
-              <div className="references__meta">
-                {locale === 'de'
-                  ? `${totalItems} kayıt görüntüleniyor`
-                  : `${totalItems} records displayed`}
-              </div>
+              <div className="references__meta">{metaSingle}</div>
             </div>
           </div>
         )}
       </div>
 
-      {/* UI improvements */}
+      {/* NOTE: Existing file had styled-jsx. If your project disallows styled-jsx,
+          move these classes into the existing SCSS theme files instead. */}
       <style jsx>{`
         .references__intro {
           margin-top: 12px;

@@ -1,0 +1,158 @@
+
+
+
+/* =========================================================
+   TEAM – Hover overlay + Name below image + Navigation buttons
+   File: src/styles/components/_carousel.scss
+   ========================================================= */
+
+/* 1) Hover overlay (image üstü) */
+.teamThumbHover {
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+}
+
+.teamThumbHover__overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 18px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 180ms ease, transform 180ms ease;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0.62) 100%);
+  pointer-events: none;
+}
+
+.teamThumbHover:hover .teamThumbHover__overlay {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.teamThumbHover__box {
+  width: 100%;
+  color: #fff;
+}
+
+.teamThumbHover__role,
+.teamThumbHover__note {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.teamThumbHover__role {
+  font-weight: 700;
+  font-size: 15px;
+  line-height: 1.35;
+  -webkit-line-clamp: 2;
+}
+
+.teamThumbHover__note {
+  margin-top: 6px;
+  font-size: 13px;
+  line-height: 1.35;
+  opacity: 0.92;
+  -webkit-line-clamp: 2;
+}
+
+/* 2) Name below image – tema overlay/absolute'ını kır */
+.team__item.teamItem--nameBelow {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  overflow: visible !important;
+}
+
+.team__item.teamItem--nameBelow .team__thumb {
+  position: relative !important;
+}
+
+.team__active .swiper-slide {
+  height: auto !important;
+}
+
+.team__item.teamItem--nameBelow .team__content.teamContent--nameOnly {
+  position: static !important;
+  inset: auto !important;
+  transform: none !important;
+
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+
+  margin-top: 14px !important;
+  padding: 0 !important;
+
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+
+  /* tema default içerikler */
+  p,
+  .team__reating,
+  .link-more,
+  .team__social {
+    display: none !important;
+  }
+}
+
+.team__item.teamItem--nameBelow .teamNameOnly {
+  margin: 0 !important;
+  font-size: 20px;
+  line-height: 1.25;
+  font-weight: 700;
+}
+
+.team__item.teamItem--nameBelow .teamNameOnly a {
+  display: inline-block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.team__item.teamItem--nameBelow .teamNameOnly a:hover {
+  color: var(--clr-theme-1);
+}
+
+/* 3) Navigation – güzel yuvarlak butonlar (FA yok, SVG var) */
+.team__navigation {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+@media (max-width: 991.98px) {
+  .team__navigation {
+    justify-content: flex-start;
+    margin-bottom: 60px;
+  }
+}
+
+.team__navigation button {
+  width: 50px;
+  height: 50px;
+  border-radius: 999px;
+
+  background: transparent;
+  border: 1px solid #e2e2e2;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #727272;
+  transition: background-color 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+
+.team__navigation button svg {
+  display: block;
+}
+
+.team__navigation button:hover {
+  background-color: var(--clr-theme-1);
+  color: var(--clr-common-white);
+  border-color: transparent;
+}

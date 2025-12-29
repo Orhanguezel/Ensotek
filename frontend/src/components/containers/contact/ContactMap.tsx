@@ -32,9 +32,9 @@ const ContactMap: React.FC<Props> = ({ config, locale }) => {
 
   const title = useMemo(() => {
     return String(
-      config?.title || ui('ui_contact_map_title', locale === 'de' ? 'Konum' : 'Location'),
+      config?.title || ui('ui_contact_map_title','Location'),
     ).trim();
-  }, [config?.title, ui, locale]);
+  }, [config?.title, ui]);
 
   const src = useMemo(() => {
     const embed = String(config?.embed_url || '').trim();

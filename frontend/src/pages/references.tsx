@@ -2,14 +2,14 @@
 // FILE: src/pages/references.tsx
 // Ensotek – References Page (full list) + SEO (HOOK-SAFE)
 //   - Route: /references
-//   - i18n: useLocaleShort() + site_settings.ui_references
+//   - i18n: useResolvedLocale + site_settings.ui_references
 //   - SEO: seo -> site_seo fallback + OG/Twitter (NO canonical here)
-//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
+//   - Canonical + og:url single source: _document (SSR)
+//   - EN-only fallback (no locale branching)
 // =============================================================
-
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
@@ -17,7 +17,7 @@ import ReferencesPageContent from '@/components/containers/references/References
 import Feedback from '@/components/containers/feedback/Feedback';
 
 // i18n
-import { useLocaleShort } from '@/i18n/useLocaleShort';
+import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 
 // SEO
@@ -27,56 +27,61 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 // data (global SEO settings)
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
-const ReferencesPage: React.FC = () => {
-  const locale = useLocaleShort();
+function safeStr(v: unknown): string {
+  return typeof v === 'string' ? v.trim() : '';
+}
 
+const ReferencesPage: React.FC = () => {
+  const locale = useResolvedLocale();
   const { ui } = useUiSection('ui_references', locale as any);
 
-  // ======================
-  // Banner title (UI)
-  // ======================
-  const bannerTitle = ui('ui_references_page_title', 'References');
+  const t = useCallback(
+    (key: string, fallbackEn: string) => {
+      const v = safeStr(ui(key, fallbackEn));
+      return v || fallbackEn;
+    },
+    [ui],
+  );
 
-  // ======================
+  // Banner title
+  const bannerTitle = useMemo(() => t('ui_references_page_title', 'References'), [t]);
+
   // Global SEO settings (seo -> site_seo fallback)
-  // ======================
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale } as any);
 
   const seo = useMemo(() => {
     const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
     return asObj(raw) ?? {};
   }, [seoPrimary?.value, seoFallback?.value]);
 
-  // ======================
-  // SEO fields (page-level)
-  // ======================
+  // Page-level SEO fields from ui_references (fallback EN only)
   const pageTitleRaw = useMemo(() => {
-    const t = String(ui('ui_references_meta_title', '') || '').trim();
-    return t || String(bannerTitle || '').trim() || 'References';
+    const uiTitle = safeStr(ui('ui_references_meta_title', ''));
+    return uiTitle || safeStr(bannerTitle) || 'References';
   }, [ui, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
-    const uiDesc = String(ui('ui_references_meta_description', '') || '').trim();
+    const uiDesc = safeStr(ui('ui_references_meta_description', ''));
     if (uiDesc) return uiDesc;
 
-    const uiPageDesc = String(ui('ui_references_page_description', '') || '').trim();
+    const uiPageDesc = safeStr(ui('ui_references_page_description', ''));
     if (uiPageDesc) return uiPageDesc;
 
-    return String(seo?.description ?? '').trim() || '';
-  }, [ui, seo?.description]);
+    return safeStr((seo as any)?.description) || '';
+  }, [ui, seo]);
 
-  const seoSiteName = useMemo(() => String(seo?.site_name ?? '').trim() || 'Ensotek', [seo]);
+  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
   const titleTemplate = useMemo(
-    () => String(seo?.title_template ?? '').trim() || '%s | Ensotek',
+    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
     [seo],
   );
 
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
+    const out = titleTemplate.includes('%s')
       ? titleTemplate.replace('%s', pageTitleRaw)
       : pageTitleRaw;
-    return String(t).trim();
+    return safeStr(out);
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
@@ -86,21 +91,21 @@ const ReferencesPage: React.FC = () => {
   }, [seo]);
 
   const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
+    const tw = asObj((seo as any)?.twitter) || {};
+    const robots = asObj((seo as any)?.robots) || {};
     const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
 
-    // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
+    // canonical + og:url yok (SSR _document tek kaynak)
     return buildMeta({
       title: pageTitle,
       description: pageDescRaw,
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
-
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
+      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterSite: typeof (tw as any).site === 'string' ? safeStr((tw as any).site) : undefined,
+      twitterCreator:
+        typeof (tw as any).creator === 'string' ? safeStr((tw as any).creator) : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 

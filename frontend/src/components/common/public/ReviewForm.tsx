@@ -50,78 +50,60 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const { ui } = useUiSection('ui_feedback', locale);
 
   const title = ui(
-    'ui_feedback_form_title',
-    locale === 'de' ? 'Yorum bırakın' : locale === 'de' ? 'Bewertung abgeben' : 'Leave a review',
+    'ui_feedback_form_title', 'Leave a review',
   );
 
   const openButtonText = useMemo(() => {
     if (toggleLabel && toggleLabel.trim()) return toggleLabel.trim();
     return ui(
-      'ui_feedback_form_open',
-      locale === 'de' ? 'Yorum Gönder' : locale === 'de' ? 'Bewertung senden' : 'Write a review',
+      'ui_feedback_form_open','Write a review',
     );
-  }, [toggleLabel, ui, locale]);
+  }, [toggleLabel, ui]);
 
   const closeButtonText = ui(
-    'ui_feedback_form_close',
-    locale === 'de' ? 'Kapat' : locale === 'de' ? 'Schließen' : 'Close',
+    'ui_feedback_form_close', 'Close',
   );
 
   const nameLabel = ui(
-    'ui_feedback_form_name_label',
-    locale === 'de' ? 'Adınız' : locale === 'de' ? 'Ihr Name' : 'Your name',
+    'ui_feedback_form_name_label','Your name',
   );
 
   const emailLabel = ui(
-    'ui_feedback_form_email_label',
-    locale === 'de' ? 'E-posta adresiniz' : locale === 'de' ? 'E-Mail-Adresse' : 'Email address',
+    'ui_feedback_form_email_label', 'Email address',
   );
 
   const ratingLabel = ui(
     'ui_feedback_form_rating_label',
-    locale === 'de' ? 'Puanınız' : locale === 'de' ? 'Ihre Bewertung' : 'Your rating',
+    'Your rating',
   );
 
   const commentLabel = ui(
     'ui_feedback_form_comment_label',
-    locale === 'de' ? 'Yorumunuz' : locale === 'de' ? 'Ihre Bewertung' : 'Your review',
+    'Your review',
   );
 
   const submitText = ui(
     'ui_feedback_form_submit',
-    locale === 'de' ? 'Yorumu Gönder' : locale === 'de' ? 'Bewertung senden' : 'Submit review',
+    'Submit review',
   );
 
   const submittingText = ui(
     'ui_feedback_form_submitting',
-    locale === 'de' ? 'Gönderiliyor...' : locale === 'de' ? 'Wird gesendet...' : 'Submitting...',
+    'Submitting...',
   );
 
   const successText = ui(
     'ui_feedback_form_success',
-    locale === 'de'
-      ? 'Yorumunuz alındı, teşekkürler.'
-      : locale === 'de'
-      ? 'Ihre Bewertung wurde gespeichert. Vielen Dank!'
-      : 'Your review has been received. Thank you!',
+    'Your review has been received. Thank you!',
   );
 
   const errorText = ui(
-    'ui_feedback_form_error',
-    locale === 'de'
-      ? 'Yorum gönderilirken bir hata oluştu.'
-      : locale === 'de'
-      ? 'Beim Senden der Bewertung ist ein Fehler aufgetreten.'
-      : 'An error occurred while submitting your review.',
+    'ui_feedback_form_error','An error occurred while submitting your review.',
   );
 
   const requiredText = ui(
     'ui_feedback_form_required',
-    locale === 'de'
-      ? 'Bu alan zorunludur.'
-      : locale === 'de'
-      ? 'Dieses Feld ist erforderlich.'
-      : 'This field is required.',
+       'This field is required.',
   );
 
   const [createReview, { isLoading }] = useCreateReviewPublicMutation();

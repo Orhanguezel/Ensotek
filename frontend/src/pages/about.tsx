@@ -14,7 +14,7 @@ import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import AboutPageContent from '@/components/containers/about/AboutPageContent';
-import AboutCounter from '@/components/containers/counter/AboutCounter';
+import AboutCounter from '@/components/containers/about/AboutCounter';
 import Sponsor from '@/components/containers/references/References';
 
 // i18n + UI

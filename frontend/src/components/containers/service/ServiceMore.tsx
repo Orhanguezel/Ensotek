@@ -1,77 +1,78 @@
 // =============================================================
 // FILE: src/components/containers/service/ServiceMore.tsx
 // "More services" section for Service Detail
+// Fixes:
+// - ❌ toLocaleShort removed
+// - ✅ locale source: useLocaleShort()
+// - ✅ no default_locale dependency (backend fallback assumed)
+// - ✅ no inline styles (uses next/image instead of backgroundImage)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
 
-import { useListServicesPublicQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { useListServicesPublicQuery } from '@/integrations/rtk/hooks';
 import type { ServiceDto } from '@/integrations/types/services.types';
 
-import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
+import { useLocaleShort } from '@/i18n/useLocaleShort';
+import { localizePath } from '@/i18n/url';
 
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
-import { localizePath } from '@/i18n/url';
 
-import { normLocaleTag } from '@/i18n/localeUtils';
 import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
-
 import { FiArrowRight } from 'react-icons/fi';
 
 const FALLBACK_IMG = '/img/project/project-thumb.jpg';
 
-const toLocaleShort = (l: unknown) =>
-  String(l || 'de')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0] || 'de';
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
 
-interface ServiceMoreProps {
+function cryptoRandomId(): string {
+  try {
+    if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+      return crypto.randomUUID();
+    }
+  } catch {}
+  return `id-${Math.random().toString(16).slice(2)}-${Date.now()}`;
+}
+
+export interface ServiceMoreProps {
   currentSlug?: string;
 }
 
 const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
-  const resolvedLocale = useResolvedLocale();
-  const locale = useMemo(() => toLocaleShort(resolvedLocale), [resolvedLocale]);
-
-  const { ui } = useUiSection('ui_services', locale);
-
-  // ✅ default_locale DB’den
-  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
-  const defaultLocale = useMemo(() => {
-    const v = normLocaleTag(defaultLocaleRow?.value);
-    return v || 'de';
-  }, [defaultLocaleRow?.value]);
+  const locale = useLocaleShort();
+  const { ui } = useUiSection('ui_services', locale as any);
 
   const { data, isLoading } = useListServicesPublicQuery({
     limit: 6,
     order: 'display_order.asc,created_at.desc',
     locale,
-    default_locale: defaultLocale,
-  });
+  } as any);
 
-  const items: ServiceDto[] = useMemo(() => {
-    const raw: ServiceDto[] = (data?.items ?? []) as any;
+  const items = useMemo<ServiceDto[]>(() => {
+    const raw: ServiceDto[] = ((data as any)?.items ?? []) as any;
 
-    const filtered = raw.filter((s) => {
-      const sSlug = String((s as any)?.slug || '').trim();
+    const curr = safeStr(currentSlug);
+    const filtered = raw.filter((s: any) => {
+      const sSlug = safeStr(s?.slug);
       if (!sSlug) return true;
-      if (!currentSlug) return true;
-      return sSlug !== currentSlug;
+      if (!curr) return true;
+      return sSlug !== curr;
     });
 
     return filtered.slice(0, 3);
-  }, [data?.items, currentSlug]);
+  }, [data, currentSlug]);
 
-  if (!items.length && !isLoading) {
-    return null;
-  }
+  if (!items.length && !isLoading) return null;
 
   return (
     <div className="service__area pt-60 pb-90 service__bg-2">
@@ -90,41 +91,41 @@ const ServiceMore: React.FC<ServiceMoreProps> = ({ currentSlug }) => {
         </div>
 
         <div className="row tik">
-          {items.map((s: any) => {
+          {items.map((s: any, idx: number) => {
+            const id = safeStr(s?.id) || safeStr(s?.slug) || `more-${idx}-${cryptoRandomId()}`;
+
             const imgBase =
-              (s.featured_image_url || s.image_url || s.featured_image || '')?.trim() || '';
+              safeStr(s?.featured_image_url) || safeStr(s?.image_url) || safeStr(s?.featured_image);
+
             const src =
               (imgBase && (toCdnSrc(imgBase, 640, 420, 'fill') || imgBase)) || FALLBACK_IMG;
 
-            const title = s.name || ui('ui_services_placeholder_title', 'Our service');
+            const title = safeStr(s?.name) || ui('ui_services_placeholder_title', 'Our service');
 
-            const summaryRaw = s.description || s.includes || '';
+            const summaryRaw = safeStr(s?.description) || safeStr(s?.includes);
             const summary = summaryRaw
-              ? excerpt(String(summaryRaw), 140)
+              ? excerpt(summaryRaw, 140)
               : ui('ui_services_placeholder_summary', 'Service description is coming soon.');
 
-            const href = s.slug
-              ? localizePath(locale, `/service/${encodeURIComponent(s.slug)}`)
+            const href = safeStr(s?.slug)
+              ? localizePath(locale, `/service/${encodeURIComponent(safeStr(s.slug))}`)
               : localizePath(locale, '/service');
 
             return (
-              <div className="col-xl-4 col-lg-6 col-md-6" key={String(s.id)}>
+              <div className="col-xl-4 col-lg-6 col-md-6" key={id}>
                 <div className="service__item mb-30">
-                  <div
-                    className="service__thumb include__bg service-two-cmn"
-                    style={{
-                      backgroundImage: `url('${src}')`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
-                    aria-hidden="true"
-                  />
+                  {/* NO inline style: use Image */}
+                  <div className="service__thumb include__bg service-two-cmn" aria-hidden="true">
+                    <Image src={src} alt="" width={640} height={420} loading="lazy" />
+                  </div>
+
                   <div className="service__content">
                     <h3>
                       <Link href={href}>{title}</Link>
                     </h3>
                     <p>{summary}</p>
                   </div>
+
                   <div className="service__link">
                     <Link
                       href={href}
