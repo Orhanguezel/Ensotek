@@ -164,6 +164,10 @@ const MODULES: Array<{
   { key: 'about', path: 'about', api: 'about', priority: 0.7, changefreq: 'weekly' },
   { key: 'products', path: 'products', api: 'products', priority: 0.7, changefreq: 'weekly' },
   { key: 'spareparts', path: 'spareparts', api: 'sparepart', priority: 0.7, changefreq: 'weekly' },
+  { key: 'contact', path: 'contact', api: 'contact', priority: 0.5, changefreq: 'monthly' },
+  { key: 'services', path: 'services', api: 'services', priority: 0.6, changefreq: 'monthly' },
+  { key: 'blog', path: 'blog', api: 'blog', priority: 0.6, changefreq: 'weekly' },
+  { key: 'solutions', path: 'solutions', api: 'solutions', priority: 0.6, changefreq: 'monthly' },
   {
     key: 'references',
     path: 'references',
@@ -264,6 +268,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     'library',
     'news',
     'contact',
+    'services',
+    'blog',
+    'solutions',
   ];
   for (const seg of staticSections) {
     const p = `/${seg}`;

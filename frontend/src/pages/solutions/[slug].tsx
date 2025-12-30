@@ -1,9 +1,9 @@
 // =============================================================
-// FILE: src/pages/service/[slug].tsx
-// Public Service Detail Page (by slug) + SEO (NEWS/PRODUCT pattern)
-//   - Route: /service/[slug]
-//   - i18n: useLocaleShort() + site_settings.ui_services
-//   - SEO: seo -> site_seo fallback + service(meta_*) override (NO canonical here)
+// FILE: src/pages/solutions/[slug].tsx
+// Ensotek – Solutions Detail Page (by slug) + SEO
+//   - Route: /solutions/[slug]
+//   - Uses: <SolutionsPage forcedSlug />
+//   - SEO: seo -> site_seo fallback + custom_page(meta_*) override (NO canonical here)
 //   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
 
@@ -14,9 +14,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import Banner from '@/components/layout/banner/Breadcrum';
-import ServiceDetail from '@/components/containers/service/ServiceDetail';
-import ServiceMore from '@/components/containers/service/ServiceMore';
-import CatalogCta from '@/components/containers/cta/CatalogCta';
+import SolutionsPage from '@/components/containers/solutions/SolutionsPage';
 
 // i18n
 import { useLocaleShort } from '@/i18n/useLocaleShort';
@@ -29,7 +27,7 @@ import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
 // data
 import {
   useGetSiteSettingByKeyQuery,
-  useGetServiceBySlugPublicQuery,
+  useListCustomPagesPublicQuery,
 } from '@/integrations/rtk/hooks';
 
 // helpers
@@ -45,36 +43,30 @@ function readSlug(q: unknown): string {
   return '';
 }
 
-function safeStr(x: unknown): string {
-  return typeof x === 'string' ? x.trim() : '';
+function s(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
 }
 
-function pickServiceImage(service: any): string {
-  return (
-    safeStr(service?.featured_image_url) ||
-    safeStr(service?.image_url) ||
-    safeStr(service?.featured_image) ||
-    ''
-  );
+function pickPageImage(page: any): string {
+  return s(page?.featured_image) || s(page?.image_url) || '';
 }
 
-const ServiceDetailPage: React.FC = () => {
+const SolutionsDetailPage: React.FC = () => {
   const router = useRouter();
   const locale = useLocaleShort();
-
-  const { ui } = useUiSection('ui_services', locale as any);
+  const { ui } = useUiSection('ui_solutions', locale as any);
 
   const slug = useMemo(() => readSlug(router.query.slug).trim(), [router.query.slug]);
   const isSlugReady = !!slug;
 
   // ✅ default_locale DB’den (locale bağımsız)
   const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
-
-  const defaultLocale = useMemo(() => {
-    // useLocaleShort zaten normalize ediyor; burada sadece string trim + fallback yeterli
-    const v = safeStr(defaultLocaleRow?.value);
-    return v || 'de';
-  }, [defaultLocaleRow?.value]);
+  const defaultLocale = useMemo(
+    () => s(defaultLocaleRow?.value) || 'de',
+    [defaultLocaleRow?.value],
+  );
 
   // Global SEO settings (seo -> site_seo fallback)
   const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
@@ -85,88 +77,82 @@ const ServiceDetailPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoPrimary?.value, seoFallback?.value]);
 
-  // ✅ Service data (single source)
-  const { data: service, isLoading: isServiceLoading } = useGetServiceBySlugPublicQuery(
-    { slug, locale, default_locale: defaultLocale },
+  // ✅ Solutions pages list; slug detail meta için içinden bulacağız
+  const { data: listData, isLoading: isListLoading } = useListCustomPagesPublicQuery(
+    {
+      module_key: 'solutions',
+      locale,
+      default_locale: defaultLocale,
+      limit: 100,
+      offset: 0,
+      sort: 'created_at',
+      orderDir: 'asc',
+      is_published: 1,
+    } as any,
     { skip: !isSlugReady },
   );
 
-  // UI fallbacks
-  const listTitleFallback = ui('ui_services_page_title', 'Services');
-  const detailTitleFallback = ui('ui_services_detail_page_title', 'Service Detail');
+  const items = useMemo<any[]>(() => ((listData as any)?.items ?? []) as any, [listData]);
 
+  const page = useMemo(() => {
+    if (!isSlugReady) return null;
+    const target = slug.toLowerCase();
+    return items.find((x) => s(x?.slug).toLowerCase() === target) ?? null;
+  }, [items, isSlugReady, slug]);
+
+  // Banner title
+  const listTitleFallback = s(ui('ui_solutions_page_title', 'Solutions')) || 'Solutions';
   const bannerTitle = useMemo(() => {
-    return (
-      safeStr((service as any)?.name) ||
-      safeStr((service as any)?.title) || // bazı projelerde name/title olabiliyor
-      safeStr(detailTitleFallback) ||
-      safeStr(listTitleFallback) ||
-      'Service'
-    );
-  }, [service, detailTitleFallback, listTitleFallback]);
+    return s(page?.title) || listTitleFallback || 'Solutions';
+  }, [page, listTitleFallback]);
 
   // --- SEO fields ---
   const pageTitleRaw = useMemo(() => {
-    const fallback = safeStr(detailTitleFallback) || safeStr(listTitleFallback) || 'Service';
-
+    const fallback = bannerTitle || 'Solutions';
     if (!isSlugReady) return fallback;
 
-    return (
-      safeStr((service as any)?.meta_title) ||
-      safeStr((service as any)?.name) ||
-      safeStr((service as any)?.title) ||
-      safeStr(bannerTitle) ||
-      fallback
-    );
-  }, [isSlugReady, service, bannerTitle, detailTitleFallback, listTitleFallback]);
+    return s(page?.meta_title) || s(page?.title) || fallback;
+  }, [isSlugReady, page, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
-    const globalDesc = safeStr((seo as any)?.description) || '';
-
+    const globalDesc = s((seo as any)?.description) || '';
     if (!isSlugReady) return globalDesc;
 
-    const metaDesc = safeStr((service as any)?.meta_description);
+    const metaDesc = s(page?.meta_description);
+    const summary = s(page?.summary) || '';
 
-    const summary =
-      safeStr((service as any)?.description) ||
-      safeStr((service as any)?.includes) ||
-      safeStr((service as any)?.summary) ||
-      '';
-
-    const uiFallback = safeStr(
-      ui(
-        'ui_services_detail_meta_description',
-        'Explore the service details and contact us for tailored support and consultation.',
-      ),
-    );
+    const uiFallback =
+      s(
+        ui(
+          'ui_solutions_detail_meta_description',
+          'Explore the solution details and contact us for tailored support and consultation.',
+        ),
+      ) || '';
 
     return (
       metaDesc || (summary ? excerpt(summary, 160).trim() : '') || uiFallback || globalDesc || ''
     );
-  }, [isSlugReady, service, seo, ui]);
+  }, [isSlugReady, page, seo, ui]);
 
-  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
-    [seo],
-  );
+  const seoSiteName = useMemo(() => s((seo as any)?.site_name) || 'Ensotek', [seo]);
+  const titleTemplate = useMemo(() => s((seo as any)?.title_template) || '%s | Ensotek', [seo]);
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
       ? titleTemplate.replace('%s', pageTitleRaw)
       : pageTitleRaw;
-    return safeStr(t);
+    return s(t);
   }, [titleTemplate, pageTitleRaw]);
 
   const ogImage = useMemo(() => {
     const fallbackSeoImg = pickFirstImageFromSeo(seo);
     const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
 
-    const rawImg = pickServiceImage(service as any);
+    const rawImg = pickPageImage(page);
     const img = rawImg ? toCdnSrc(rawImg, 1200, 630, 'fill') || rawImg : '';
 
     return (img && absUrl(img)) || fallback || absUrl('/favicon.svg');
-  }, [service, seo]);
+  }, [page, seo]);
 
   const headSpecs = useMemo(() => {
     const tw = asObj((seo as any)?.twitter) || {};
@@ -180,15 +166,14 @@ const ServiceDetailPage: React.FC = () => {
       image: ogImage || undefined,
       siteName: seoSiteName,
       noindex,
-
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
+      twitterCard: s((tw as any).card) || 'summary_large_image',
       twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
       twitterCreator:
         typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
     });
   }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
 
-  const isLoadingState = !isSlugReady || (isServiceLoading && !service);
+  const isLoadingState = !isSlugReady || (isListLoading && !page);
 
   return (
     <>
@@ -208,7 +193,7 @@ const ServiceDetailPage: React.FC = () => {
       <Banner title={bannerTitle} />
 
       {isLoadingState ? (
-        <div className="service__area pt-120 pb-90">
+        <div className="technical__area pt-120 pb-60 cus-faq">
           <div className="container">
             <div className="row">
               <div className="col-12">
@@ -222,14 +207,10 @@ const ServiceDetailPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <>
-          <ServiceDetail slug={slug} />
-          <ServiceMore currentSlug={slug} />
-          <CatalogCta />
-        </>
+        <SolutionsPage forcedSlug={slug} />
       )}
     </>
   );
 };
 
-export default ServiceDetailPage;
+export default SolutionsDetailPage;

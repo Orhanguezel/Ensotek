@@ -3,7 +3,9 @@
 -- Ensotek – UI Products (site_settings.ui_products) [FINAL]
 --  - Value: JSON (stored as TEXT)
 --  - Localized: tr / en / de
---  - Extendable: clone from tr as bootstrap (collation-safe)
+--  - ✅ Added missing keys used in ProductDetail.tsx:
+--    ui_products_share_title, ui_products_write_comment, ui_products_other_title,
+--    ui_products_sidebar_contact_title, ui_products_gallery_title
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -52,6 +54,13 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
       'ui_products_faqs_empty',                 'Bu ürün için kayıtlı SSS bulunmamaktadır.',
       'ui_products_reviews_empty',              'Bu ürün için henüz yorum yapılmamıştır.',
       'ui_products_request_quote',              'Teklif isteyiniz',
+
+      -- ✅ Missing (ProductDetail.tsx)
+      'ui_products_gallery_title',              'Galeri',
+      'ui_products_share_title',                'Paylaş',
+      'ui_products_write_comment',              'Yorum yaz',
+      'ui_products_other_title',                'Diğer Ürünler',
+      'ui_products_sidebar_contact_title',      'İletişim Bilgileri',
 
       -- Detail SEO overrides (ProductDetailPage uses *_detail_meta_description)
       'ui_products_detail_meta_title',          'Ürün Detayı',
@@ -116,6 +125,13 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
       'ui_products_reviews_empty',              'There are no reviews for this product yet.',
       'ui_products_request_quote',              'Request a quote',
 
+      -- ✅ Missing (ProductDetail.tsx)
+      'ui_products_gallery_title',              'Gallery',
+      'ui_products_share_title',                'Share',
+      'ui_products_write_comment',              'Write a review',
+      'ui_products_other_title',                'Other products',
+      'ui_products_sidebar_contact_title',      'Contact Info',
+
       -- Detail SEO overrides
       'ui_products_detail_meta_title',          'Product Detail',
       'ui_products_detail_meta_description',    'View product details, technical specifications, and request a quote.',
@@ -178,6 +194,13 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
       'ui_products_faqs_empty',                 'Für dieses Produkt sind noch keine FAQs vorhanden.',
       'ui_products_reviews_empty',              'Für dieses Produkt gibt es noch keine Bewertungen.',
       'ui_products_request_quote',              'Angebot anfordern',
+
+      -- ✅ Missing (ProductDetail.tsx)
+      'ui_products_gallery_title',              'Galerie',
+      'ui_products_share_title',                'Teilen',
+      'ui_products_write_comment',              'Bewertung schreiben',
+      'ui_products_other_title',                'Weitere Produkte',
+      'ui_products_sidebar_contact_title',      'Kontaktinfo',
 
       -- Detail SEO overrides
       'ui_products_detail_meta_title',          'Produktdetails',

@@ -1,3 +1,5 @@
+// src/components/layout/banner/CookieConsentBanner.tsx
+
 'use client';
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -5,7 +7,7 @@ import Link from 'next/link';
 
 import CookieSettingsModal, { type ConsentState } from './CookieSettingsModal';
 
-// i18n PATTERN
+// i18n + UI (STANDARD)
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
@@ -104,10 +106,9 @@ function applyAnalyticsConsent(analytics: boolean) {
 
 export default function CookieConsentBanner() {
   const locale = useLocaleShort();
-
-  // UI metinleri (DB-driven)
   const { ui } = useUiSection('ui_cookie', locale as any);
-  const t = useCallback((key: string, fb: string) => ui(key, fb), [ui]);
+
+
 
   const [ready, setReady] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
@@ -128,7 +129,7 @@ export default function CookieConsentBanner() {
     setReady(true);
   }, []);
 
-  const policyHref = useMemo(() => localizePath(locale, '/cookie-policy'), [locale]);
+  const policyHref = useMemo(() => localizePath(locale as any, '/cookie-policy'), [locale]);
 
   const onRejectAll = useCallback(() => {
     const next: ConsentState = { necessary: true, analytics: false };
@@ -159,7 +160,7 @@ export default function CookieConsentBanner() {
   // SSR/hydration güvenliği
   if (!ready) return null;
 
-  // Seçim yapıldıysa banner gizli kalsın, ama ayarlar modalı (footer link vb.) yine açılabilir.
+  // Seçim yapıldıysa banner gizli kalsın; ayar modalı yine açılabilir.
   if (hasChoice) {
     return (
       <CookieSettingsModal
@@ -171,24 +172,27 @@ export default function CookieConsentBanner() {
     );
   }
 
-  // DB key seti: CookieSettingsModal zaten ui_cookie okuyor.
-  // Banner sadece kendi metinlerini okur.
-  const titleText = t('cc_banner_title', 'Cookie Policy');
-  const descText = t(
+  // Banner metinleri (ui_cookie)
+  const titleText = ui('cc_banner_title', 'Cookie Policy');
+  const descText = ui(
     'cc_banner_desc',
     'We use cookies to ensure the site works properly and to analyze traffic. You can manage your preferences.',
   );
-  const policyLabel = t('cc_banner_link_policy', 'Cookie Policy');
+  const policyLabel = ui('cc_banner_link_policy', 'Cookie Policy');
 
-  const btnSettings = t('cc_banner_btn_settings', 'Cookie Settings');
-  const btnReject = t('cc_banner_btn_reject', 'Reject All');
-  const btnAccept = t('cc_banner_btn_accept', 'Accept All');
+  const btnSettings = ui('cc_banner_btn_settings', 'Cookie Settings');
+  const btnReject = ui('cc_banner_btn_reject', 'Reject All');
+  const btnAccept = ui('cc_banner_btn_accept', 'Accept All');
 
-  const ariaClose = t('cc_banner_aria_close', 'Close');
+  const ariaClose = ui('cc_banner_aria_close', 'Close');
 
   return (
     <>
-      <div className="ccb__wrap" role="region" aria-label="Cookie consent">
+      <div
+        className="ccb__wrap"
+        role="region"
+        aria-label={ui('cc_banner_aria_region', 'Cookie consent')}
+      >
         <div className="ccb__inner">
           <div className="ccb__text">
             <div className="ccb__title">{titleText}</div>

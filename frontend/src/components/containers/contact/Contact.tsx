@@ -4,6 +4,7 @@
 //   - i18n: site_settings.ui_contact
 //   - socials: site_settings.socials (JSON or JSON-string)
 //   - POST: /contacts (public)
+//   - ✅ Accessibility: label added for inputs/select (Lighthouse fix)
 //   - NO styled-jsx / NO inline styles
 // =============================================================
 
@@ -26,7 +27,6 @@ import {
 import { FiFacebook, FiTwitter, FiYoutube, FiLinkedin, FiInstagram } from 'react-icons/fi';
 
 type StatusState = { ok: boolean; msg: string } | null;
-
 type SocialsValue = Record<string, string>;
 
 function safeStr(v: unknown): string {
@@ -193,12 +193,25 @@ const Contact: React.FC = () => {
   }
 
   const termsHref = withLocale(locale, '/terms');
-  const privacyHref = withLocale(locale, '/privacy');
+  const privacyHref = withLocale(locale, '/privacy-notice');
 
   const leftTitleRaw = safeStr(ui('ui_contact_title_left', "Let's Talk")) || "Let's Talk";
   const leftTitleParts = leftTitleRaw.split(' ').filter(Boolean);
   const leftTitleFirst = leftTitleParts[0] ?? '';
   const leftTitleRest = leftTitleParts.slice(1).join(' ');
+
+  // ✅ IDs for a11y labels (Lighthouse)
+  const ids = {
+    quickEmail: 'contact-quick-email',
+    first: 'contact-first-name',
+    last: 'contact-last-name',
+    company: 'contact-company',
+    website: 'contact-website',
+    phone: 'contact-phone',
+    email: 'contact-email',
+    service: 'contact-service',
+    accept: 'accept-terms',
+  } as const;
 
   return (
     <section
@@ -230,7 +243,13 @@ const Contact: React.FC = () => {
               {/* QUICK EMAIL */}
               <div className="touch__search">
                 <form onSubmit={onQuickSubmit}>
+                  {/* ✅ Label for accessibility */}
+                  <label className="visually-hidden" htmlFor={ids.quickEmail}>
+                    {safeStr(ui('ui_contact_quick_email_label', 'Email')) || 'Email'}
+                  </label>
+
                   <input
+                    id={ids.quickEmail}
                     type="email"
                     placeholder={
                       safeStr(ui('ui_contact_quick_email_placeholder', 'Enter Mail')) ||
@@ -238,7 +257,9 @@ const Contact: React.FC = () => {
                     }
                     value={quickEmail}
                     onChange={(e) => setQuickEmail(e.target.value)}
+                    autoComplete="email"
                   />
+
                   <button
                     type="submit"
                     aria-label={
@@ -300,7 +321,11 @@ const Contact: React.FC = () => {
                 <div className="row">
                   <div className="col-lg-6">
                     <div className="touch__input">
+                      <label className="visually-hidden" htmlFor={ids.first}>
+                        {safeStr(ui('ui_contact_first_name', 'First Name*')) || 'First Name*'}
+                      </label>
                       <input
+                        id={ids.first}
                         type="text"
                         placeholder={
                           safeStr(ui('ui_contact_first_name', 'First Name*')) || 'First Name*'
@@ -308,50 +333,70 @@ const Contact: React.FC = () => {
                         value={first}
                         onChange={(e) => setFirst(e.target.value)}
                         required
+                        autoComplete="given-name"
                       />
                     </div>
                   </div>
 
                   <div className="col-lg-6">
                     <div className="touch__input">
+                      <label className="visually-hidden" htmlFor={ids.last}>
+                        {safeStr(ui('ui_contact_last_name', 'Last Name')) || 'Last Name'}
+                      </label>
                       <input
+                        id={ids.last}
                         type="text"
                         placeholder={
                           safeStr(ui('ui_contact_last_name', 'Last Name')) || 'Last Name'
                         }
                         value={last}
                         onChange={(e) => setLast(e.target.value)}
+                        autoComplete="family-name"
                       />
                     </div>
                   </div>
 
                   <div className="col-lg-6">
                     <div className="touch__input">
+                      <label className="visually-hidden" htmlFor={ids.company}>
+                        {safeStr(ui('ui_contact_company', 'Company Name')) || 'Company Name'}
+                      </label>
                       <input
+                        id={ids.company}
                         type="text"
                         placeholder={
                           safeStr(ui('ui_contact_company', 'Company Name')) || 'Company Name'
                         }
                         value={company}
                         onChange={(e) => setCompany(e.target.value)}
+                        autoComplete="organization"
                       />
                     </div>
                   </div>
 
                   <div className="col-lg-6">
                     <div className="touch__input">
+                      <label className="visually-hidden" htmlFor={ids.website}>
+                        {safeStr(ui('ui_contact_website', 'Website')) || 'Website'}
+                      </label>
                       <input
+                        id={ids.website}
                         type="url"
                         placeholder={safeStr(ui('ui_contact_website', 'Website')) || 'Website'}
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
+                        autoComplete="url"
                       />
                     </div>
                   </div>
 
                   <div className="col-lg-6">
                     <div className="touch__input">
+                      <label className="visually-hidden" htmlFor={ids.phone}>
+                        {safeStr(ui('ui_contact_phone', 'Phone Number*')) || 'Phone Number*'}
+                      </label>
                       <input
+                        id={ids.phone}
                         type="tel"
                         placeholder={
                           safeStr(ui('ui_contact_phone', 'Phone Number*')) || 'Phone Number*'
@@ -359,26 +404,46 @@ const Contact: React.FC = () => {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         required
+                        autoComplete="tel"
                       />
                     </div>
                   </div>
 
                   <div className="col-lg-6">
                     <div className="touch__input">
+                      <label className="visually-hidden" htmlFor={ids.email}>
+                        {safeStr(ui('ui_contact_email', 'Email*')) || 'Email*'}
+                      </label>
                       <input
+                        id={ids.email}
                         ref={emailInputRef}
                         type="email"
                         placeholder={safeStr(ui('ui_contact_email', 'Email*')) || 'Email*'}
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        autoComplete="email"
                       />
                     </div>
                   </div>
 
+                  {/* ✅ SELECT FIX: add label + id */}
                   <div className="col-lg-6">
                     <div className="contact__select mb-20">
-                      <select value={service} onChange={(e) => setService(e.target.value)}>
+                      <label className="visually-hidden" htmlFor={ids.service}>
+                        {safeStr(ui('ui_contact_select_label', 'Select the services')) ||
+                          'Select the services'}
+                      </label>
+
+                      <select
+                        id={ids.service}
+                        value={service}
+                        onChange={(e) => setService(e.target.value)}
+                        aria-label={
+                          safeStr(ui('ui_contact_select_label', 'Select the services')) ||
+                          'Select the services'
+                        }
+                      >
                         <option value="">
                           {safeStr(ui('ui_contact_select_label', 'Select the services')) ||
                             'Select the services'}
@@ -408,12 +473,12 @@ const Contact: React.FC = () => {
                         <input
                           className="e-check-input"
                           type="checkbox"
-                          id="accept-terms"
+                          id={ids.accept}
                           checked={accepted}
                           onChange={(e) => setAccepted(e.target.checked)}
                           required
                         />
-                        <label className="sign__check" htmlFor="accept-terms">
+                        <label className="sign__check" htmlFor={ids.accept}>
                           {safeStr(ui('ui_contact_terms_prefix', 'Accept Our')) || 'Accept Our'}{' '}
                           <span>
                             <Link href={termsHref}>

@@ -44,7 +44,7 @@ function safeDate(locale: string, raw: unknown): string {
   try {
     return d.toLocaleDateString(locale);
   } catch {
-    return d.toLocaleDateString('en');
+    return d.toLocaleDateString('de');
   }
 }
 

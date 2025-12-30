@@ -100,7 +100,7 @@ function buildLocaleLabel(item: AppLocaleItem): string {
 
   let dn: Intl.DisplayNames | null = null;
   try {
-    dn = new Intl.DisplayNames([code || 'en'], { type: 'language' });
+    dn = new Intl.DisplayNames([code || 'de'], { type: 'language' });
   } catch {
     dn = null;
   }

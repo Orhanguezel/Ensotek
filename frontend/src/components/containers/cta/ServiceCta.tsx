@@ -10,27 +10,20 @@ import one from 'public/img/svg/cta.svg';
 
 const ServiceCta = () => {
   const locale = useResolvedLocale();
-  const isTr = locale === 'de';
-
   const { ui } = useUiSection('ui_offer', locale);
 
   const offerHref = `/${locale}/offer`;
 
   const title = ui(
-    'ui_offer_cta_title',
-    isTr
-      ? 'Soğutma kuleleriniz için en uygun çözümü birlikte planlayalım.'
-      : 'Let’s design the most suitable cooling solution for your plant.',
+    'ui_offer_cta_title','Let’s design the most suitable cooling solution for your plant.'
   );
 
   const description = ui(
     'ui_offer_cta_text',
-    isTr
-      ? 'Sisteminizi kısaca anlatın, mühendislik ekibimiz performans ve verimlilik odaklı bir çözüm önersin.'
-      : 'Tell us briefly about your system and our engineering team will propose a performance-focused solution.',
+    'Tell us briefly about your system and our engineering team will propose a performance-focused solution.',
   );
 
-  const buttonLabel = ui('ui_offer_cta_button', isTr ? 'Teklif iste' : 'Request a quote');
+  const buttonLabel = ui('ui_offer_cta_button', 'Request a quote');
 
   return (
     <div className="cta__area">

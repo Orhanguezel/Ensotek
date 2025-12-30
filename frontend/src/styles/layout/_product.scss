@@ -1,3 +1,5 @@
+@use '../utils' as *;
+
 /* =========================================================
    Products list – Project/Work card tweaks (no inline style)
    ========================================================= */
@@ -171,5 +173,36 @@
 .product__detail-skel-line--w80 {
   width: 80%;
 }
+
+/* Product.tsx — remove inline style & styled-jsx replacements */
+.section__title.ens-titleNoMb {
+  margin-bottom: 0;
+}
+
+/* References/Feedback navigation button look (circle arrows) */
+.feedback__navigation.ens-navRound button {
+  display: inline-flex;
+  width: 50px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  color: #111;
+  transition: all 0.2s ease;
+}
+
+.feedback__navigation.ens-navRound button + button {
+  margin-left: 6px;
+}
+
+.feedback__navigation.ens-navRound button:hover {
+  background: var(--clr-theme-1);
+  color: #fff;
+  border-color: transparent;
+  transform: translateY(-1px);
+}
+
 
 

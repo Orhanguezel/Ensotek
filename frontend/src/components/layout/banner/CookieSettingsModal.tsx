@@ -1,8 +1,10 @@
+// src/components/layout/banner/CookieSettingsModal.tsx
+
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
-// i18n PATTERN
+// i18n + UI (STANDARD)
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
@@ -68,7 +70,7 @@ export default function CookieSettingsModal({
 }: Props) {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_cookie', locale as any);
-  const t = useCallback((key: string, fb: string) => ui(key, fb), [ui]);
+
 
   const [analytics, setAnalytics] = useState<boolean>(!!consent.analytics);
 
@@ -91,34 +93,39 @@ export default function CookieSettingsModal({
 
   const nextState: ConsentState = useMemo(() => ({ necessary: true, analytics }), [analytics]);
 
-  const uiTitle = t('cc_title', 'Cookie Settings');
-  const uiDesc = t(
+  // UI defaults (ui_cookie)
+  const uiTitle = ui('cc_title', 'Cookie Settings');
+  const uiDesc = ui(
     'cc_description',
     'You can choose which cookie categories you allow. Necessary cookies are always enabled.',
   );
 
-  const uiLabelNecessary = t('cc_label_necessary', 'Necessary');
-  const uiDescNecessary = t(
+  const uiLabelNecessary = ui('cc_label_necessary', 'Necessary');
+  const uiDescNecessary = ui(
     'cc_desc_necessary',
     'Required for core functions (session, security, language preference, etc.).',
   );
 
-  const uiLabelAnalytics = t('cc_label_analytics', 'Analytics');
-  const uiDescAnalytics = t(
+  const uiLabelAnalytics = ui('cc_label_analytics', 'Analytics');
+  const uiDescAnalytics = ui(
     'cc_desc_analytics',
     'Helps us understand traffic and performance (e.g., page views).',
   );
 
-  const uiBtnSave = t('cc_btn_save', 'Save');
-  const uiBtnCancel = t('cc_btn_cancel', 'Cancel');
-  const uiAriaClose = t('cc_aria_close', 'Close');
+  const uiBtnSave = ui('cc_btn_save', 'Save');
+  const uiBtnCancel = ui('cc_btn_cancel', 'Cancel');
+  const uiAriaClose = ui('cc_aria_close', 'Close');
 
+  // final: prop override > ui_cookie > fallback
   const finalTitle = pickText(title, uiTitle, 'Cookie Settings');
   const finalDesc = pickText(description, uiDesc, '');
+
   const finalLabelNecessary = pickText(labelNecessary, uiLabelNecessary, 'Necessary');
   const finalDescNecessary = pickText(descNecessary, uiDescNecessary, '');
+
   const finalLabelAnalytics = pickText(labelAnalytics, uiLabelAnalytics, 'Analytics');
   const finalDescAnalytics = pickText(descAnalytics, uiDescAnalytics, '');
+
   const finalBtnSave = pickText(btnSave, uiBtnSave, 'Save');
   const finalBtnCancel = pickText(btnCancel, uiBtnCancel, 'Cancel');
   const finalAriaClose = pickText(ariaClose, uiAriaClose, 'Close');
@@ -148,6 +155,7 @@ export default function CookieSettingsModal({
             className="ccm__close"
             onClick={onClose}
             aria-label={finalAriaClose}
+            title={finalAriaClose}
           >
             ×
           </button>
@@ -162,7 +170,7 @@ export default function CookieSettingsModal({
             </div>
 
             <div className="ccm__rowCtrl">
-              <span className="ccm__pill ccm__pill--on">On</span>
+              <span className="ccm__pill ccm__pill--on">{ui('cc_pill_on', 'On')}</span>
             </div>
           </div>
 

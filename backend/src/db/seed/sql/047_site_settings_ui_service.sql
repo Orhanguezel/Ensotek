@@ -106,7 +106,9 @@ VALUES
     -- Detail CTA (keys used in code)
     'ui_services_cta_more_info',           'Bu hizmet ile ilgili detaylı bilgi ve teknik destek için ekibimizle iletişime geçebilirsiniz.',
     'ui_services_cta_whatsapp',            'WhatsApp üzerinden yazın',
-    'ui_services_cta_request_quote',       'Bu hizmet için teklif iste'
+    'ui_services_cta_request_quote',       'Bu hizmet için teklif iste',
+    'ui_services_other_title',         'Diğer Hizmetlerimiz'
+
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -193,7 +195,8 @@ VALUES
     -- Detail CTA (keys used in code)
     'ui_services_cta_more_info',           'Contact our team for detailed information and technical support about this service.',
     'ui_services_cta_whatsapp',            'Write on WhatsApp',
-    'ui_services_cta_request_quote',       'Request a quote for this service'
+    'ui_services_cta_request_quote',       'Request a quote for this service',
+    'ui_services_other_title',              'Other services'
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -280,7 +283,8 @@ VALUES
     -- Detail CTA (keys used in code)
     'ui_services_cta_more_info',           'Kontaktieren Sie unser Team für detaillierte Informationen und technischen Support zu dieser Leistung.',
     'ui_services_cta_whatsapp',            'Per WhatsApp schreiben',
-    'ui_services_cta_request_quote',       'Angebot für diese Leistung anfordern'
+    'ui_services_cta_request_quote',       'Angebot für diese Leistung anfordern',
+    'ui_services_other_title',              'Weitere Leistungen'
   ) AS CHAR),
   NOW(3),
   NOW(3)
