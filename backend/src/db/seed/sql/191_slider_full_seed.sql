@@ -81,35 +81,35 @@ INSERT INTO `slider`
 VALUES
 (
   '99990001-1111-4111-8111-999999990001',
-  'https://images.unsplash.com/photo-1504917595217-d4dc5ebe6122?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771273/uploads/metahub/gallery/1-1752771270894-986291286.webp',
   NULL,
   1, 1, 1,
   '2024-01-20 00:00:00.000','2024-01-20 00:00:00.000'
 ),
 (
   '99990002-1111-4111-8111-999999990002',
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771255/uploads/metahub/gallery/2-1752771253118-97352961.webp',
   NULL,
   0, 1, 2,
   '2024-01-21 00:00:00.000','2024-01-21 00:00:00.000'
 ),
 (
   '99990003-1111-4111-8111-999999990003',
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771220/uploads/metahub/gallery/3-1752771216789-111437706.webp',
   NULL,
   0, 1, 3,
   '2024-01-22 00:00:00.000','2024-01-22 00:00:00.000'
 ),
 (
   '99990004-1111-4111-8111-999999990004',
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771195/uploads/metahub/gallery/4-1752771191653-812677165.webp',
   NULL,
   0, 1, 4,
   '2024-01-23 00:00:00.000','2024-01-23 00:00:00.000'
 ),
 (
   '99990005-1111-4111-8111-999999990005',
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771156/uploads/metahub/gallery/5-1752771151250-964450161.webp',
   NULL,
   0, 1, 5,
   '2024-01-24 00:00:00.000','2024-01-24 00:00:00.000'
@@ -118,49 +118,49 @@ VALUES
 -- NEW: SERVICES EXPANSION (6 new + 1 extra => total 12 slides)
 (
   '99990006-1111-4111-8111-999999990006',
-  'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771124/uploads/metahub/gallery/6-1752771119350-50918009.webp',
   NULL,
   0, 1, 6,
   '2024-01-25 00:00:00.000','2024-01-25 00:00:00.000'
 ),
 (
   '99990007-1111-4111-8111-999999990007',
-  'https://images.unsplash.com/photo-1581092919535-7146a3d16a5a?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771102/uploads/metahub/gallery/7-1752771097801-678897496.webp',
   NULL,
   0, 1, 7,
   '2024-01-26 00:00:00.000','2024-01-26 00:00:00.000'
 ),
 (
   '99990008-1111-4111-8111-999999990008',
-  'https://images.unsplash.com/photo-1581093458791-9b6e9d3a4b2a?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771064/uploads/metahub/gallery/8-1752771062653-586545826.webp',
   NULL,
   0, 1, 8,
   '2024-01-27 00:00:00.000','2024-01-27 00:00:00.000'
 ),
 (
   '99990009-1111-4111-8111-999999990009',
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771032/uploads/metahub/gallery/9-1752771029999-123456789.webp',
   NULL,
   0, 1, 9,
   '2024-01-28 00:00:00.000','2024-01-28 00:00:00.000'
 ),
 (
   '99990010-1111-4111-8111-999999990010',
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771000/uploads/metahub/gallery/10-1752770999876-123456789.webp',
   NULL,
   0, 1, 10,
   '2024-01-29 00:00:00.000','2024-01-29 00:00:00.000'
 ),
 (
   '99990011-1111-4111-8111-999999990011',
-  'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752770975/uploads/metahub/gallery/11-1752770975123-123456789.webp',
   NULL,
   0, 1, 11,
   '2024-01-30 00:00:00.000','2024-01-30 00:00:00.000'
 ),
 (
   '99990012-1111-4111-8111-999999990012',
-  'https://images.unsplash.com/photo-1558002038-1055907df827?auto=format&fit=crop&w=1200&h=600&q=80',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752770940/uploads/metahub/gallery/12-1752770939876-123456789.webp',
   NULL,
   0, 1, 12,
   '2024-01-31 00:00:00.000','2024-01-31 00:00:00.000'

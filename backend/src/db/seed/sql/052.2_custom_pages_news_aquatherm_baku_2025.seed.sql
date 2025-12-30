@@ -40,13 +40,13 @@ SET @IMG_NEWS_AQUATHERM_BAKU_2025 :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/img-20241017-wa0040-1752958289686-74069766.webp';
 
 SET @IMG_NEWS_AQUATHERM_BAKU_2025_2 :=
-  'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/baku-fuar-1-1752958289688-847911396.webp';
 SET @IMG_NEWS_AQUATHERM_BAKU_2025_3 :=
-  'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/img-20241017-wa0033-1752958290248-519948162.webp';
 SET @IMG_NEWS_AQUATHERM_BAKU_2025_4 :=
-  'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/img-20241017-wa0042-1752958290250-566260910.webp';
 SET @IMG_NEWS_AQUATHERM_BAKU_2025_5 :=
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958292/uploads/metahub/news-images/img-20241127-wa0007-1752958291068-704255418.webp';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)

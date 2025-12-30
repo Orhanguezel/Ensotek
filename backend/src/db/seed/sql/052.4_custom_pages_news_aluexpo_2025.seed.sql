@@ -40,13 +40,13 @@ SET @IMG_NEWS_ALUEXPO_2025 :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752945605/uploads/metahub/news-images/ensotek-email-imza-1752945605003-245572109.webp';
 
 SET @IMG_NEWS_ALUEXPO_2025_2 :=
-  'https://images.unsplash.com/photo-1581090700394-0c4c0bef0c89?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752945605/uploads/metahub/news-images/ensotek-email-imza-1752945605003-245572109.webp';
 SET @IMG_NEWS_ALUEXPO_2025_3 :=
-  'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752945605/uploads/metahub/news-images/ensotek-email-imza-1752945605003-245572109.webp';
 SET @IMG_NEWS_ALUEXPO_2025_4 :=
-  'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752945605/uploads/metahub/news-images/ensotek-email-imza-1752945605003-245572109.webp';
 SET @IMG_NEWS_ALUEXPO_2025_5 :=
-  'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752945605/uploads/metahub/news-images/ensotek-email-imza-1752945605003-245572109.webp';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)

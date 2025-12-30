@@ -12,12 +12,12 @@ import Hero from '@/components/layout/banner/Hero';
 import AboutCounter from '@/components/containers/about/AboutCounter';
 import About from '@/components/containers/about/AboutSection';
 import Product from '@/components/containers/product/Product';
-import Service from '@/components/containers/service/Service';
+import ServiceSection from '@/components/containers/service/ServiceSection';
 import Newsletter from '@/components/containers/newsletter/Newsletter';
 import LibrarySection from '@/components/containers/library/LibrarySection';
 import Feedback from '@/components/containers/feedback/Feedback';
 import References from '@/components/containers/references/References';
-import News from '@/components/containers/news/News';
+import NewsSection from '@/components/containers/news/NewsSection';
 import Contact from '@/components/containers/contact/Contact';
 
 import { useResolvedLocale } from '@/i18n/locale';
@@ -64,7 +64,7 @@ const Home: NextPage = () => {
       <h1 className="sr-only">{h1}</h1>
 
       <Hero />
-      <Service />
+      <ServiceSection />
       <AboutCounter />
       <About />
       <Product />
@@ -72,7 +72,7 @@ const Home: NextPage = () => {
       <LibrarySection />
       <Feedback />
       <References />
-      <News />
+      <NewsSection />
       <Contact />
 
       <style jsx global>{`

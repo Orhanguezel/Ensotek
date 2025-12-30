@@ -37,16 +37,16 @@ SET @MODULE_KEY_NEWS := 'news';
 -- FEATURED + GALLERY IMAGES (random)
 -- -------------------------------------------------------------
 SET @IMG_NEWS_HOTEL_TECH_ANTALYA :=
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958400/uploads/metahub/news-images/img-20250618-wa0022-1752958399182-621396987.webp';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958402/uploads/metahub/news-images/img-20250618-wa0024-1752958401251-408905732.webp';
 
 SET @IMG_NEWS_HOTEL_TECH_ANTALYA_2 :=
-  'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958400/uploads/metahub/news-images/img-20250618-wa0021-1752958399183-255418708.webp';
 SET @IMG_NEWS_HOTEL_TECH_ANTALYA_3 :=
-  'https://images.unsplash.com/photo-1520256862855-398228c41684?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958402/uploads/metahub/news-images/img-20250618-wa0012-1752958400227-284317921.webp';
 SET @IMG_NEWS_HOTEL_TECH_ANTALYA_4 :=
-  'https://images.unsplash.com/photo-1551887373-6f2a29b90a0a?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958401/uploads/metahub/news-images/img-20250618-wa0023-1752958401249-770223355.webp';
 SET @IMG_NEWS_HOTEL_TECH_ANTALYA_5 :=
-  'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958402/uploads/metahub/news-images/img-20250618-wa0024-1752958401251-408905732.webp';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)

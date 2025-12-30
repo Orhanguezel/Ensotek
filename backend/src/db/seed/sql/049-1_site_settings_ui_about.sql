@@ -1,14 +1,15 @@
 -- =============================================================
--- 049-1_site_settings_ui_about.sql  (About + UI strings) [FINAL]
+-- FILE: 049-1_site_settings_ui_about.sql  (About + UI strings) [FINAL / FIXED]
 -- site_settings.key IN ('ui_about')
 --  - Value: JSON (stored as TEXT)
 --  - Localized: tr / en / de
---  - Upsert: ON DUPLICATE KEY UPDATE (assumes UNIQUE(key, locale) already exists)
+--  - Upsert: ON DUPLICATE KEY UPDATE (assumes UNIQUE(key, locale))
 --  - NO ALTER / NO PATCH
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
+SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
@@ -99,12 +100,12 @@ VALUES
       'ui_about_page_lead',
         'With experience, manufacturing strength, and quality standards, we deliver reliable solutions for your projects.',
 
-      -- SEO (pages/about.tsx uses these first)
+      -- SEO
       'ui_about_page_description',
-        'Information about Ensotek, our company and capabilities.',
+        'Information about Ensotek, our corporate approach and capabilities.',
       'ui_about_meta_title',        'About Us | Ensotek',
       'ui_about_meta_description',
-        'Information about Ensotek, our company and capabilities.',
+        'Information about Ensotek, our corporate approach and capabilities.',
 
       -- Content fallbacks / states
       'ui_about_fallback_title',    'Ensotek',
@@ -166,12 +167,12 @@ VALUES
       'ui_about_page_lead',
         'Mit Erfahrung, Fertigungsstärke und Qualitätsstandards liefern wir zuverlässige Lösungen für Ihre Projekte.',
 
-      -- SEO (pages/about.tsx uses these first)
+      -- SEO
       'ui_about_page_description',
-        'Informationen über Ensotek, unser Unternehmen und unsere Kompetenzen.',
+        'Informationen über Ensotek, unseren Unternehmensansatz und unsere Kompetenzen.',
       'ui_about_meta_title',        'Über uns | Ensotek',
       'ui_about_meta_description',
-        'Informationen über Ensotek, unser Unternehmen und unsere Kompetenzen.',
+        'Informationen über Ensotek, unseren Unternehmensansatz und unsere Kompetenzen.',
 
       -- Content fallbacks / states
       'ui_about_fallback_title',    'Ensotek',
@@ -220,6 +221,8 @@ VALUES
 )
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
-  `updated_at` = VALUES(`updated_at`);
+  `updated_at` = CURRENT_TIMESTAMP(3);
 
 COMMIT;
+
+SET FOREIGN_KEY_CHECKS = 1;
