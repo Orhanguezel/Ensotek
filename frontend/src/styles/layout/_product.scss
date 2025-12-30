@@ -204,5 +204,42 @@
   transform: translateY(-1px);
 }
 
+/* =========================================================
+   ENS TAGS – chips + wrap (no bootstrap)
+   ========================================================= */
+.ens-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 10px;
+  align-items: center;
+}
+
+.ens-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 7px 12px;
+  border-radius: 999px;
+
+  border: 1px solid #e2e2e2;
+  background: transparent;
+
+  font-size: 13px;
+  line-height: 1;
+  font-weight: 500;
+
+  color: var(--clr-text-1, #666);
+
+  user-select: none;
+}
+
+.ens-tag:hover {
+  background-color: var(--clr-theme-1);
+  border-color: transparent;
+  color: var(--clr-common-white);
+}
+
+
 
 

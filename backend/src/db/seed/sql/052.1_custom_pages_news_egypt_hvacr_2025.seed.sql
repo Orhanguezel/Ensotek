@@ -37,16 +37,16 @@ SET @MODULE_KEY_NEWS := 'news';
 -- FEATURED + GALLERY IMAGES (random)
 -- -------------------------------------------------------------
 SET @IMG_NEWS_EGYPT_HVACR_2025 :=
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958173/uploads/metahub/news-images/img-20240515-wa0024-1752958172130-54632362.webp';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958173/uploads/metahub/news-images/img-20240520-wa0183-1752958172132-879111355.webp';
 
 SET @IMG_NEWS_EGYPT_HVACR_2025_2 :=
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958173/uploads/metahub/news-images/img-20240520-wa0183-1752958172132-879111355.webp';
 SET @IMG_NEWS_EGYPT_HVACR_2025_3 :=
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958174/uploads/metahub/news-images/img-20240520-wa0185-1752958173126-9783021.webp';
 SET @IMG_NEWS_EGYPT_HVACR_2025_4 :=
-  'https://images.unsplash.com/photo-1504274066651-8d31a536b11a?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958175/uploads/metahub/news-images/img-20240515-wa0016-1752958173920-597814699.webp';
 SET @IMG_NEWS_EGYPT_HVACR_2025_5 :=
-  'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958175/uploads/metahub/news-images/img-20240515-wa0016-1752958173920-597814699.webp';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)

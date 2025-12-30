@@ -54,7 +54,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
       'ui_news_write_comment',            'Yorum Gönder',
 
       'ui_news_meta_title',               'Haberler',
-      'ui_news_meta_description',         'Ensotek ile ilgili haberler, duyurular ve basın paylaşımları.'
+      'ui_news_meta_description',         'Ensotek ile ilgili haberler, duyurular ve basın paylaşımları.',
+      'ui_news_filter_all',              'Tümü'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),
@@ -102,7 +103,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
       'ui_news_write_comment',            'Write a review',
 
       'ui_news_meta_title',               'News',
-      'ui_news_meta_description',         'News, announcements and press releases about Ensotek.'
+      'ui_news_meta_description',         'News, announcements and press releases about Ensotek.',
+      'ui_news_filter_all',              'All'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),
@@ -150,7 +152,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
       'ui_news_write_comment',            'Bewertung schreiben',
 
       'ui_news_meta_title',               'Neuigkeiten',
-      'ui_news_meta_description',         'Neuigkeiten, Ankündigungen und Pressemitteilungen über Ensotek.'
+      'ui_news_meta_description',         'Neuigkeiten, Ankündigungen und Pressemitteilungen über Ensotek.',
+      'ui_news_filter_all',              'Alle'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),

@@ -1,14 +1,16 @@
 // =============================================================
 // FILE: src/components/containers/about/AboutPageContent.tsx
-// Ensotek – About Page Content (SINGLE PAGE) (I18N + SAFE)
+// Ensotek – About Page Content (SINGLE PAGE) (I18N + SAFE) [FINAL]
 // - NO inline styles / NO styled-jsx
 // - H1 forbidden: CMS html <h1> -> <h2>
 // - Modern lists (SCSS: ens-about__list* helpers) + span override safe
+// - ✅ FIX: UI fallbacks are locale-aware (no TR-only fallback leaking to EN/DE)
+// - ✅ Pattern: t(key, fb) wrapper (same idea as other pages)
 // =============================================================
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import Image from 'next/image';
 
 // Shape / fallback image (local)
@@ -114,6 +116,98 @@ const AboutPageContent: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_about', locale as any);
 
+  // ✅ Standard helper: same usage as other pages (t(key, fallback))
+  const t = useCallback((key: string, fallback: any) => ui(key, fallback), [ui]);
+
+  // ✅ Locale-aware fallbacks (TR fallback EN/DE’ye sızmasın)
+  const fallbacks = useMemo(() => {
+    const loc = String(locale || '').toLowerCase();
+
+    const TR = {
+      headerSubtitleLabel: 'Hakkımızda',
+      headerTitle: 'Hakkımızda',
+      headerLead:
+        'Deneyim, üretim gücü ve kalite standartlarımızla projelerinize güvenilir çözümler sunuyoruz.',
+      whatTitle: 'Ne Yapıyoruz?',
+      whyTitle: 'Neden Ensotek?',
+      goalTitle: 'Hedefimiz',
+      emptyText: 'Hakkımızda içeriği bulunamadı.',
+      emptyBody: "Ensotek'in kurumsal yaklaşımı ve üretim gücü burada yayınlanacaktır.",
+      whatItems: [
+        'Proje analizi ve doğru ürün seçimi',
+        'Üretim, sevkiyat ve montaj koordinasyonu',
+        'Devreye alma ve performans takibi',
+        'Satış sonrası bakım ve teknik destek',
+      ],
+      whyItems: [
+        '40+ yıllık deneyim ve kurumsal üretim altyapısı',
+        'Kalite standartları ve dokümantasyon disiplini',
+        'Hızlı geri dönüş ve süreç şeffaflığı',
+        'Uzun vadeli iş ortaklığı yaklaşımı',
+      ],
+      goalText:
+        'Müşterilerimiz için verimli, sürdürülebilir ve güvenilir soğutma çözümleri sunarken; kaliteyi ölçülebilir hale getirip süreçleri sürekli iyileştirmektir.',
+    };
+
+    const EN = {
+      headerSubtitleLabel: 'About',
+      headerTitle: 'About Us',
+      headerLead:
+        'With experience, manufacturing strength, and quality standards, we deliver reliable solutions for your projects.',
+      whatTitle: 'What do we do?',
+      whyTitle: 'Why Ensotek?',
+      goalTitle: 'Our Goal',
+      emptyText: 'About content not found.',
+      emptyBody:
+        'Ensotek’s corporate approach and manufacturing capabilities will be published here.',
+      whatItems: [
+        'Project analysis and correct product selection',
+        'Production, shipment and installation coordination',
+        'Commissioning and performance monitoring',
+        'After-sales maintenance and technical support',
+      ],
+      whyItems: [
+        '40+ years of experience and robust manufacturing infrastructure',
+        'Quality standards and disciplined documentation',
+        'Fast response and transparent processes',
+        'Long-term partnership approach',
+      ],
+      goalText:
+        'To deliver efficient, sustainable and reliable cooling solutions; while making quality measurable and continuously improving processes.',
+    };
+
+    const DE = {
+      headerSubtitleLabel: 'Über uns',
+      headerTitle: 'Über uns',
+      headerLead:
+        'Mit Erfahrung, Fertigungsstärke und Qualitätsstandards liefern wir zuverlässige Lösungen für Ihre Projekte.',
+      whatTitle: 'Was machen wir?',
+      whyTitle: 'Warum Ensotek?',
+      goalTitle: 'Unser Ziel',
+      emptyText: 'Über-uns-Inhalt nicht gefunden.',
+      emptyBody:
+        'Der Unternehmensansatz und die Fertigungskompetenz von Ensotek werden hier veröffentlicht.',
+      whatItems: [
+        'Projektanalyse und passende Produktauswahl',
+        'Koordination von Produktion, Versand und Montage',
+        'Inbetriebnahme und Performance-Überwachung',
+        'After-Sales-Wartung und technischer Support',
+      ],
+      whyItems: [
+        '40+ Jahre Erfahrung und starke Fertigungsinfrastruktur',
+        'Qualitätsstandards und konsequente Dokumentation',
+        'Schnelle Rückmeldung und transparente Prozesse',
+        'Langfristiger Partnerschaftsansatz',
+      ],
+      goalText:
+        'Effiziente, nachhaltige und zuverlässige Kühllösungen zu liefern; Qualität messbar zu machen und Prozesse kontinuierlich zu verbessern.',
+    };
+
+    if (loc === 'de') return DE;
+    if (loc === 'en') return EN;
+    return TR;
+  }, [locale]);
+
   const { data, isLoading, isError } = useListCustomPagesPublicQuery({
     module_key: 'about',
     locale,
@@ -127,38 +221,35 @@ const AboutPageContent: React.FC = () => {
     [data],
   );
 
-  // Header strings
+  // Header strings (✅ locale-aware fallbacks)
   const headerSubtitlePrefix = useMemo(
-    () => String(ui('ui_about_subprefix', 'Ensotek') || '').trim() || 'Ensotek',
-    [ui],
+    () => String(t('ui_about_subprefix', 'Ensotek') || '').trim() || 'Ensotek',
+    [t],
   );
 
   const headerSubtitleLabel = useMemo(
-    () => String(ui('ui_about_sublabel', 'Hakkımızda') || '').trim() || 'Hakkımızda',
-    [ui],
+    () =>
+      String(t('ui_about_sublabel', fallbacks.headerSubtitleLabel) || '').trim() ||
+      fallbacks.headerSubtitleLabel,
+    [t, fallbacks.headerSubtitleLabel],
   );
 
   const headerTitle = useMemo(
-    () => String(ui('ui_about_page_title', 'Hakkımızda') || '').trim() || 'Hakkımızda',
-    [ui],
+    () =>
+      String(t('ui_about_page_title', fallbacks.headerTitle) || '').trim() || fallbacks.headerTitle,
+    [t, fallbacks.headerTitle],
   );
 
   const headerLead = useMemo(
-    () =>
-      String(
-        ui(
-          'ui_about_page_lead',
-          'Deneyim, üretim gücü ve kalite standartlarımızla projelerinize güvenilir çözümler sunuyoruz.',
-        ) || '',
-      ).trim(),
-    [ui],
+    () => String(t('ui_about_page_lead', fallbacks.headerLead) || '').trim(),
+    [t, fallbacks.headerLead],
   );
 
   // Main content title
   const title = useMemo(() => {
-    const t = String(page?.title ?? '').trim();
-    return t || String(ui('ui_about_fallback_title', 'Ensotek') || '').trim() || 'Ensotek';
-  }, [page?.title, ui]);
+    const tt = String(page?.title ?? '').trim();
+    return tt || String(t('ui_about_fallback_title', 'Ensotek') || '').trim() || 'Ensotek';
+  }, [page?.title, t]);
 
   // CMS html
   const html = useMemo(() => {
@@ -184,58 +275,36 @@ const AboutPageContent: React.FC = () => {
     return alt || title || 'about image';
   }, [page, title]);
 
-  // Info blocks
+  // Info blocks (✅ locale-aware fallbacks)
   const whatTitle = useMemo(
-    () => String(ui('ui_about_what_title', 'Ne Yapıyoruz?') || '').trim() || 'Ne Yapıyoruz?',
-    [ui],
-  );
-  const whyTitle = useMemo(
-    () => String(ui('ui_about_why_title', 'Neden Ensotek?') || '').trim() || 'Neden Ensotek?',
-    [ui],
-  );
-  const goalTitle = useMemo(
-    () => String(ui('ui_about_goal_title', 'Hedefimiz') || '').trim() || 'Hedefimiz',
-    [ui],
+    () => String(t('ui_about_what_title', fallbacks.whatTitle) || '').trim() || fallbacks.whatTitle,
+    [t, fallbacks.whatTitle],
   );
 
+  const whyTitle = useMemo(
+    () => String(t('ui_about_why_title', fallbacks.whyTitle) || '').trim() || fallbacks.whyTitle,
+    [t, fallbacks.whyTitle],
+  );
+
+  const goalTitle = useMemo(
+    () => String(t('ui_about_goal_title', fallbacks.goalTitle) || '').trim() || fallbacks.goalTitle,
+    [t, fallbacks.goalTitle],
+  );
+
+  // ✅ The main fix: items fallback is locale-aware (not TR-only)
   const whatItems = useMemo(() => {
-    const v =
-      ui(
-        'ui_about_what_items',
-        JSON.stringify([
-          'Proje analizi ve doğru ürün seçimi',
-          'Üretim, sevkiyat ve montaj koordinasyonu',
-          'Devreye alma ve performans takibi',
-          'Satış sonrası bakım ve teknik destek',
-        ]),
-      ) ?? '';
+    const v = t('ui_about_what_items', JSON.stringify(fallbacks.whatItems)) ?? '';
     return normalizeStringArray(v);
-  }, [ui]);
+  }, [t, fallbacks.whatItems]);
 
   const whyItems = useMemo(() => {
-    const v =
-      ui(
-        'ui_about_why_items',
-        JSON.stringify([
-          '40+ yıllık deneyim ve kurumsal üretim altyapısı',
-          'Kalite standartları ve dokümantasyon disiplini',
-          'Hızlı geri dönüş ve süreç şeffaflığı',
-          'Uzun vadeli iş ortaklığı yaklaşımı',
-        ]),
-      ) ?? '';
+    const v = t('ui_about_why_items', JSON.stringify(fallbacks.whyItems)) ?? '';
     return normalizeStringArray(v);
-  }, [ui]);
+  }, [t, fallbacks.whyItems]);
 
   const goalText = useMemo(() => {
-    return (
-      String(
-        ui(
-          'ui_about_goal_text',
-          'Müşterilerimiz için verimli, sürdürülebilir ve güvenilir soğutma çözümleri sunarken; kaliteyi ölçülebilir hale getirip süreçleri sürekli iyileştirmektir.',
-        ) || '',
-      ).trim() || ''
-    );
-  }, [ui]);
+    return String(t('ui_about_goal_text', fallbacks.goalText) || '').trim() || '';
+  }, [t, fallbacks.goalText]);
 
   const contentHref = useMemo(() => localizePath(locale as any, '/about#content'), [locale]);
 
@@ -276,9 +345,7 @@ const AboutPageContent: React.FC = () => {
         {!isLoading && (!page || isError) && (
           <div className="row">
             <div className="col-12">
-              <div className="alert alert-warning">
-                {ui('ui_about_empty', 'About content not found.')}
-              </div>
+              <div className="alert alert-warning">{t('ui_about_empty', fallbacks.emptyText)}</div>
             </div>
           </div>
         )}
@@ -318,12 +385,7 @@ const AboutPageContent: React.FC = () => {
                       />
                     ) : (
                       <div className="postbox__text">
-                        <p className="mb-0">
-                          {ui(
-                            'ui_about_empty_text',
-                            "Ensotek'in kurumsal yaklaşımı ve üretim gücü burada yayınlanacaktır.",
-                          )}
-                        </p>
+                        <p className="mb-0">{t('ui_about_empty_text', fallbacks.emptyBody)}</p>
                       </div>
                     )}
                   </div>
@@ -342,10 +404,10 @@ const AboutPageContent: React.FC = () => {
                     </h3>
 
                     <ul className="ens-about__list" aria-label={whatTitle}>
-                      {whatItems.map((t, i) => (
+                      {whatItems.map((tt, i) => (
                         <li className="ens-about__listItem" key={i}>
                           <i className="ens-about__dot" aria-hidden />
-                          <div className="ens-about__listText">{t}</div>
+                          <div className="ens-about__listText">{tt}</div>
                         </li>
                       ))}
                     </ul>
@@ -362,10 +424,10 @@ const AboutPageContent: React.FC = () => {
                     </h3>
 
                     <ul className="ens-about__list" aria-label={whyTitle}>
-                      {whyItems.map((t, i) => (
+                      {whyItems.map((tt, i) => (
                         <li className="ens-about__listItem" key={i}>
                           <i className="ens-about__dot" aria-hidden />
-                          <div className="ens-about__listText">{t}</div>
+                          <div className="ens-about__listText">{tt}</div>
                         </li>
                       ))}
                     </ul>

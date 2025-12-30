@@ -1,3 +1,12 @@
+// =============================================================
+// FILE: src/components/containers/news/NewsSection.tsx
+// Ensotek – News Section (Home) – RTK + i18n (PATTERN)
+// - 2 latest news (custom_pages module_key='news')
+// - Desktop: left list + right thumbs
+// - Mobile: stacked content + image
+// - No inline styles / uses existing theme classes
+// =============================================================
+
 'use client';
 
 import React, { useMemo, useCallback } from 'react';
@@ -10,9 +19,10 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-// i18n (PATTERN)
+// i18n + UI (STANDARD PATTERN)
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { isValidUiText } from '@/i18n/uiText';
 import { localizePath } from '@/i18n/url';
 
 import FallbackCover from 'public/img/blog/1/blog-01.jpg';
@@ -35,12 +45,19 @@ function safeStr(v: unknown): string {
   return String(v).trim();
 }
 
-const News: React.FC = () => {
+function safeUi(ui: (k: string, f?: any) => any, key: string, fallback: string): string {
+  const raw = ui(key, fallback);
+  if (!isValidUiText(raw, key)) return fallback;
+  const s = String(raw ?? '').trim();
+  return s || fallback;
+}
+
+export default function NewsSection() {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_news', locale as any);
-  const t = useCallback((key: string, fallback: string) => ui(key, fallback), [ui]);
+  const t = useCallback((key: string, fb: string) => safeUi(ui as any, key, fb), [ui]);
 
-  // UI strings (DB -> EN fallback only)
+  // UI strings
   const subprefix = t('ui_news_subprefix', 'Ensotek');
   const sublabel = t('ui_news_sublabel', 'News');
 
@@ -53,35 +70,50 @@ const News: React.FC = () => {
   const untitled = t('ui_news_untitled', 'Untitled news');
   const viewAllText = t('ui_news_view_all', 'All news');
 
-  const { data, isLoading } = useListCustomPagesPublicQuery({
-    module_key: 'news',
-    sort: 'created_at',
-    orderDir: 'desc',
-    limit: 4,
-    is_published: 1,
-    locale,
-  });
+  const { data, isLoading } = useListCustomPagesPublicQuery(
+    {
+      module_key: 'news',
+      sort: 'created_at',
+      orderDir: 'desc',
+      limit: 4,
+      is_published: 1,
+      locale,
+    } as any,
+    { skip: !locale },
+  );
 
-  const newsListHref = useMemo(() => localizePath(locale, '/news'), [locale]);
+  const newsListHref = useMemo(() => localizePath(locale as any, '/news'), [locale]);
 
   const items: NewsCardVM[] = useMemo(() => {
-    const list: CustomPageDto[] = ((data as any)?.items ?? []) as any;
+    const list: CustomPageDto[] = ((data as any)?.items ??
+      (data as any)?.data ??
+      (data as any)?.rows ??
+      data ??
+      []) as any;
 
-    const mapped = list
-      .filter((n) => !!n && !!(n as any).is_published)
+    const arr = Array.isArray(list) ? list : [];
+
+    const mapped = arr
+      .filter((n: any) => !!n && !!(n as any).is_published)
       .slice(0, 2)
-      .map((n) => {
-        const id = safeStr((n as any).id) || safeStr((n as any).slug) || 'news-item';
-        const slug = safeStr((n as any).slug);
+      .map((n: any) => {
+        const id = safeStr(n?.id) || safeStr(n?.slug) || `news-${Math.random()}`;
+        const slug = safeStr(n?.slug);
 
-        const title = safeStr((n as any).title) || untitled;
+        const title = safeStr(n?.title) || untitled;
 
-        const baseText = safeStr((n as any).meta_description) || safeStr((n as any).content_html);
+        const baseText =
+          safeStr(n?.summary) ||
+          safeStr(n?.meta_description) ||
+          safeStr(n?.content_text) ||
+          safeStr(n?.content_html);
 
         const textExcerpt = excerpt(baseText, 180);
 
-        const imgRaw = safeStr((n as any).featured_image);
+        const imgRaw = safeStr(n?.featured_image);
         const hero = imgRaw ? toCdnSrc(imgRaw, IMG_W, IMG_H, 'fill') || imgRaw : '';
+
+        const alt = safeStr(n?.featured_image_alt) || title || 'news image';
 
         return {
           id,
@@ -89,18 +121,40 @@ const News: React.FC = () => {
           title,
           excerpt: textExcerpt,
           hero,
-          alt: title || 'news image',
+          alt,
         };
       });
 
-    // 1 item geldiyse mobilde ikinci kart boş kalmasın
+    // Tek kayıt geldiyse tasarım bozulmasın diye kopyala
     if (mapped.length === 1) mapped.push({ ...mapped[0], id: `${mapped[0].id}-dup` });
 
+    // Hiç yoksa placeholder’a düş (UI boş kalmasın)
+    if (!mapped.length) {
+      return [
+        {
+          id: 'placeholder-1',
+          slug: '',
+          title: untitled,
+          excerpt: t('ui_news_empty_desc', 'News will be published soon.'),
+          hero: '',
+          alt: untitled,
+        },
+        {
+          id: 'placeholder-2',
+          slug: '',
+          title: untitled,
+          excerpt: t('ui_news_empty_desc', 'News will be published soon.'),
+          hero: '',
+          alt: untitled,
+        },
+      ];
+    }
+
     return mapped.slice(0, 2);
-  }, [data, untitled]);
+  }, [data, untitled, t]);
 
   return (
-    <div className="news__area pt-120 pb-90">
+    <div className="blog__area pt-120 pb-90 ens-newsSection">
       <div className="container">
         {/* Title */}
         <div className="row" data-aos="fade-up" data-aos-delay="300">
@@ -116,24 +170,28 @@ const News: React.FC = () => {
           </div>
         </div>
 
-        {/* MOBILE: each news = (title+excerpt) then image, sequential */}
-        <div className="ens-news__mobile d-block d-lg-none" data-aos="fade-up" data-aos-delay="300">
+        {/* MOBILE */}
+        <div
+          className="ens-newsSection__mobile d-block d-lg-none"
+          data-aos="fade-up"
+          data-aos-delay="300"
+        >
           {items.map((n, idx) => {
             const href = n.slug
-              ? localizePath(locale, `/news/${encodeURIComponent(n.slug)}`)
+              ? localizePath(locale as any, `/news/${encodeURIComponent(n.slug)}`)
               : newsListHref;
 
             const imgSrc = (n.hero as any) || (FallbackCover as any);
 
             return (
-              <div className="ens-news__mobileItem" key={n.id}>
-                <div className="blog__content-wrapper ens-news__contentWrapper">
+              <div className="ens-newsSection__mobileItem" key={n.id}>
+                <div className="blog__content-wrapper ens-newsSection__contentWrapper">
                   <div className="blog__content">
-                    <h3 className="ens-news__title">
+                    <h3 className="ens-newsSection__title">
                       <Link href={href}>{n.title}</Link>
                     </h3>
 
-                    <p className="ens-news__excerpt">{n.excerpt}</p>
+                    <p className="ens-newsSection__excerpt">{n.excerpt}</p>
 
                     <Link
                       href={href}
@@ -147,7 +205,7 @@ const News: React.FC = () => {
 
                 <Link
                   href={href}
-                  className="blog__thumb w-img ens-news__thumbCard"
+                  className="blog__thumb w-img ens-newsSection__thumbCard"
                   aria-label={n.title}
                 >
                   <Image
@@ -156,12 +214,12 @@ const News: React.FC = () => {
                     width={IMG_W}
                     height={IMG_H}
                     loading={idx === 0 ? 'eager' : 'lazy'}
-                    className="ens-news__thumbImg"
+                    className="ens-newsSection__thumbImg"
                   />
                 </Link>
 
                 {idx !== items.length - 1 ? (
-                  <div className="ens-news__mobileDivider" aria-hidden />
+                  <div className="ens-newsSection__mobileDivider" aria-hidden />
                 ) : null}
               </div>
             );
@@ -172,30 +230,30 @@ const News: React.FC = () => {
           ) : null}
         </div>
 
-        {/* DESKTOP: left list + right thumbs (original concept) */}
+        {/* DESKTOP */}
         <div
           className="row align-items-stretch d-none d-lg-flex"
           data-aos="fade-up"
           data-aos-delay="300"
         >
           {/* Left */}
-          <div className="col-lg-6">
-            <div className="blog__content-wrapper ens-news__contentWrapper mb-30">
+          <div className="col-xl-6 col-lg-6">
+            <div className="blog__content-wrapper ens-newsSection__contentWrapper mb-30">
               {items.map((n, idx) => {
                 const href = n.slug
-                  ? localizePath(locale, `/news/${encodeURIComponent(n.slug)}`)
+                  ? localizePath(locale as any, `/news/${encodeURIComponent(n.slug)}`)
                   : newsListHref;
 
                 const isLast = idx === items.length - 1;
 
                 return (
-                  <div className="blog__content-item ens-news__contentItem" key={n.id}>
+                  <div className="blog__content-item ens-newsSection__contentItem" key={n.id}>
                     <div className="blog__content">
-                      <h3 className="ens-news__title">
+                      <h3 className="ens-newsSection__title">
                         <Link href={href}>{n.title}</Link>
                       </h3>
 
-                      <p className="ens-news__excerpt">{n.excerpt}</p>
+                      <p className="ens-newsSection__excerpt">{n.excerpt}</p>
 
                       <Link
                         href={href}
@@ -206,7 +264,7 @@ const News: React.FC = () => {
                       </Link>
                     </div>
 
-                    {!isLast ? <div className="ens-news__divider" aria-hidden /> : null}
+                    {!isLast ? <div className="ens-newsSection__divider" aria-hidden /> : null}
                   </div>
                 );
               })}
@@ -218,11 +276,11 @@ const News: React.FC = () => {
           </div>
 
           {/* Right */}
-          <div className="col-lg-6">
-            <div className="blog__thumb-wrapper ens-news__thumbWrapper mb-30">
+          <div className="col-xl-6 col-lg-6">
+            <div className="blog__thumb-wrapper ens-newsSection__thumbWrapper mb-30">
               {items.map((n, idx) => {
                 const href = n.slug
-                  ? localizePath(locale, `/news/${encodeURIComponent(n.slug)}`)
+                  ? localizePath(locale as any, `/news/${encodeURIComponent(n.slug)}`)
                   : newsListHref;
 
                 const imgSrc = (n.hero as any) || (FallbackCover as any);
@@ -230,7 +288,7 @@ const News: React.FC = () => {
                 return (
                   <Link
                     href={href}
-                    className="blog__thumb w-img ens-news__thumbCard"
+                    className="blog__thumb w-img ens-newsSection__thumbCard"
                     aria-label={n.title}
                     key={`thumb-${n.id}`}
                   >
@@ -240,7 +298,7 @@ const News: React.FC = () => {
                       width={IMG_W}
                       height={IMG_H}
                       loading={idx === 0 ? 'eager' : 'lazy'}
-                      className="ens-news__thumbImg"
+                      className="ens-newsSection__thumbImg"
                     />
                   </Link>
                 );
@@ -250,7 +308,7 @@ const News: React.FC = () => {
         </div>
 
         {/* CTA */}
-        <div className="row ens-news__ctaRow">
+        <div className="row ens-newsSection__ctaRow">
           <div className="col-12">
             <div className="project__view text-lg-end">
               <Link className="solid__btn" href={newsListHref}>
@@ -262,6 +320,4 @@ const News: React.FC = () => {
       </div>
     </div>
   );
-};
-
-export default News;
+}

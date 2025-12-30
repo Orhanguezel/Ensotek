@@ -1,27 +1,24 @@
-// src/components/containers/banner/Banner.tsx (ya da senin yolun neyse)
-"use client";
+// src/components/containers/banner/Banner.tsx
+'use client';
 
-import React from "react";
-import Link from "next/link";
-import Image from "next/image";
+import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
 
-import One from "public/img/shape/breadcrum-1.png.png"; // tasarım dosyası; aynı bırakıldı
+import One from 'public/img/shape/breadcrum-1.png.png';
 
 // Yeni i18n helper’lar
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
-import { localizePath } from "@/i18n/url";
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
 type Props = { title: string };
 
 const Banner: React.FC<Props> = ({ title }) => {
-  // ✅ Ortak locale hook’u (router + app_locales logic içinde)
   const locale = useResolvedLocale();
+  const { ui } = useUiSection('ui_banner', locale);
 
-  const { ui } = useUiSection("ui_banner", locale);
-
-  // Ana sayfa linki – locale-aware
-  const homeHref = localizePath(locale, "/");
+  const homeHref = localizePath(locale, '/');
 
   return (
     <div className="breadcrumb__area">
@@ -37,21 +34,23 @@ const Banner: React.FC<Props> = ({ title }) => {
               </div>
 
               <div className="breadcrumb__menu">
-                <nav
-                  aria-label="Breadcrumbs"
-                  className="breadcrumb-trail breadcrumbs"
-                >
+                <nav aria-label="Breadcrumbs" className="breadcrumb-trail breadcrumbs">
                   <ul className="trail-items">
+                    {/* Home */}
                     <li className="trail-item trail-begin">
                       <span>
-                        <Link href={homeHref}>
-                          {ui("ui_breadcrumb_home", "Home")}
-                        </Link>
+                        <Link href={homeHref}>{ui('ui_breadcrumb_home', 'Home')}</Link>
                       </span>
                     </li>
-                    <span className="trail-separator">/</span>
+
+                    {/* Separator (ARTIK li içinde) */}
+                    <li className="trail-item trail-separator" aria-hidden="true">
+                      <span>›</span>
+                    </li>
+
+                    {/* Current page */}
                     <li className="trail-item trail-end">
-                      <span>{title}</span>
+                      <span aria-current="page">{title}</span>
                     </li>
                   </ul>
                 </nav>

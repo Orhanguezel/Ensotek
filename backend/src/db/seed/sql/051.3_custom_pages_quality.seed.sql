@@ -1,8 +1,10 @@
 -- =============================================================
 -- FILE: 051.3_custom_pages_quality.seed.sql (FINAL / STATIC CONTENT)
 -- Ensotek Kurumsal Sayfaları – Kalite & Sertifikalar
--- - content_html artık kullanılmıyor (sayfa statik içerik + ui ile)
+-- - content_html kullanılmıyor (sayfa statik içerik + ui ile)
 -- - sertifika görselleri: custom_pages.images (gallery)
+-- - ✅ FIX: Sertifika URL'leri ezilmiyor
+-- - ✅ FIX: Gallery: main + 6 sertifika (toplam 7)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -17,14 +19,39 @@ SET @MODULE_KEY := 'quality';
 SET @CAT_ABOUT_ROOT := 'aaaa7001-1111-4111-8111-aaaaaaaa7001';
 SET @SUB_QUALITY    := 'bbbb7004-1111-4111-8111-bbbbbbbb7004';
 
+-- MAIN hero / featured image (Cloudinary)
 SET @IMG_QUALITY_MAIN :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1757875082/uploads/ensotek/about-images/russia-cooling-tower-1757875080869-645546842.webp';
 
-SET @IMG_QUALITY_2 := CONCAT(@IMG_QUALITY_MAIN, '?v=2');
-SET @IMG_QUALITY_3 := CONCAT(@IMG_QUALITY_MAIN, '?v=3');
+-- 6 Sertifika görselleri (LOCAL örnek)  ✅ (değiştirme / CDN yap)
+SET @IMG_CERT_1 := 'http://localhost:8086/uploads/zertifika/14001_1.jpg';
+SET @IMG_CERT_2 := 'http://localhost:8086/uploads/zertifika/45001_1.jpg';
+SET @IMG_CERT_3 := 'http://localhost:8086/uploads/zertifika/ce-belgesi-ce-declaration.jpg';
+SET @IMG_CERT_4 := 'http://localhost:8086/uploads/zertifika/eac-ensotek.jpg';
+SET @IMG_CERT_5 := 'http://localhost:8086/uploads/zertifika/iso-9001.jpg';
+SET @IMG_CERT_6 := 'http://localhost:8086/uploads/zertifika/iso-10002.jpg';
+
+-- Cache-bust (deterministik)
+SET @IMG_QUALITY_MAIN := CONCAT(@IMG_QUALITY_MAIN, '?v=1');
+SET @IMG_CERT_1 := CONCAT(@IMG_CERT_1, '?v=1');
+SET @IMG_CERT_2 := CONCAT(@IMG_CERT_2, '?v=1');
+SET @IMG_CERT_3 := CONCAT(@IMG_CERT_3, '?v=1');
+SET @IMG_CERT_4 := CONCAT(@IMG_CERT_4, '?v=1');
+SET @IMG_CERT_5 := CONCAT(@IMG_CERT_5, '?v=1');
+SET @IMG_CERT_6 := CONCAT(@IMG_CERT_6, '?v=1');
 
 -- LONGTEXT JSON-string alanlarına güvenli şekilde yaz
-SET @IMAGES_JSON := JSON_ARRAY(@IMG_QUALITY_MAIN, @IMG_QUALITY_2, @IMG_QUALITY_3);
+-- ✅ Gallery: main + 6 sertifika (toplam 7)
+SET @IMAGES_JSON := JSON_ARRAY(
+  @IMG_QUALITY_MAIN,
+  @IMG_CERT_1,
+  @IMG_CERT_2,
+  @IMG_CERT_3,
+  @IMG_CERT_4,
+  @IMG_CERT_5,
+  @IMG_CERT_6
+);
+
 SET @STORAGE_IMAGE_IDS_JSON := JSON_ARRAY();
 
 INSERT INTO `custom_pages`

@@ -1,18 +1,19 @@
 // =============================================================
-// FILE: src/components/containers/blog/BlogPageContent.tsx
-// UPDATED — SCSS-driven (NO Tailwind, NO inline styles)
-// - Uses BLOG SCSS classes: blog__item-3, blog__thumb, blog__content-3, postbox__text
-// - Data: custom_pages (module_key="blog")
-// - UI i18n: site_settings.ui_blog
-// - Locale: useLocaleShort() (hydration-safe)
-// - URL: no localizePath -> "/{locale}/blog" or "/blog"
+// FILE: src/components/containers/blog/BlogProjectGallery.tsx
+// Uses ProjectGallery SCSS (project__area / project__item ...)
+// Data: custom_pages (module_key="blog") via RTK
+// UI i18n: site_settings.ui_blog (PATTERN)
+// Locale: useLocaleShort() (hydration-safe)
+// URL: "/{locale}/blog" + "/{locale}/blog/[slug]" (NO localizePath)
+// NO Tailwind, NO inline styles
 // =============================================================
-
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+
+import { motion } from 'framer-motion';
 
 // RTK – Custom Pages Public
 import { useListCustomPagesPublicQuery } from '@/integrations/rtk/hooks';
@@ -22,7 +23,7 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-// i18n
+// i18n (PATTERN)
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 
@@ -65,10 +66,7 @@ function extractHtmlFromAny(page: any): string {
   const c = page?.content ?? page?.content_json ?? page?.contentJson;
   if (!c) return '';
 
-  if (typeof c === 'object') {
-    const html = (c as any)?.html;
-    return safeStr(html);
-  }
+  if (typeof c === 'object') return safeStr((c as any)?.html);
 
   if (typeof c === 'string') {
     const s = c.trim();
@@ -94,150 +92,226 @@ function withLocale(locale: string, path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`;
   if (!loc) return p;
 
-  // çift slash önle
   if (p === `/${loc}` || p.startsWith(`/${loc}/`)) return p;
   return `/${loc}${p}`;
 }
 
-const BlogPageContent: React.FC = () => {
+type BlogCardVM = {
+  id: string;
+  title: string;
+  excerpt: string;
+  slug: string;
+  hero: string;
+  // ProjectGallery filter için:
+  area: string; // category label
+  links: string[]; // chips
+};
+
+function normalizeTags(page: any): string[] {
+  // custom_pages içinde tags alanı varsa:
+  const raw = (page as any)?.tags ?? (page as any)?.tag ?? (page as any)?.keywords;
+  if (!raw) return [];
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map((x) => safeStr(x))
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+
+  if (typeof raw === 'string') {
+    const s = raw.trim();
+    if (!s) return [];
+    // json array olabilir
+    if (s.startsWith('[')) {
+      const arr = safeJson<any[]>(s, []);
+      return (arr || [])
+        .map((x) => safeStr(x))
+        .filter(Boolean)
+        .slice(0, 3);
+    }
+    // csv olabilir
+    return s
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+
+  return [];
+}
+
+function normalizeArea(page: any, fallback: string): string {
+  // custom_pages içinde category / sub_category / type vb. varsa kullan
+  const a =
+    safeStr((page as any)?.category) ||
+    safeStr((page as any)?.category_name) ||
+    safeStr((page as any)?.sub_category) ||
+    safeStr((page as any)?.type);
+
+  return a || fallback;
+}
+
+const BlogProjectGallery: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_blog', locale as any);
-
-  const sectionSubtitlePrefix = ui('ui_blog_subprefix', 'Ensotek');
-  const sectionSubtitleLabel = ui('ui_blog_sublabel', 'Blog');
-  const sectionTitle = ui('ui_blog_page_title', 'Blog');
-
-  const sectionIntro = ui(
-    'ui_blog_page_intro',
-    'Ensotek blog posts, technical content and updates.',
-  );
-
-  const readMore = ui('ui_blog_read_more', 'Read more');
-  const readMoreAria = ui('ui_blog_read_more_aria', 'view blog details');
-
-  const untitled = ui('ui_blog_untitled', 'Untitled post');
-  const emptyText = ui('ui_blog_empty', 'There are no blog posts to display at the moment.');
+  const t = useCallback((key: string, fb: string) => ui(key, fb), [ui]);
 
   const { data, isLoading } = useListCustomPagesPublicQuery({
     module_key: 'blog',
     sort: 'created_at',
-    order: 'desc', // ✅ backend pattern
-    orderDir: 'desc', // ✅ some endpoints still use this
+    order: 'desc',
+    orderDir: 'desc',
     limit: PAGE_LIMIT,
     is_published: 1,
     locale,
   } as any);
 
-  const blogItems = useMemo(() => {
+  const untitled = t('ui_blog_untitled', 'Untitled post');
+  const allLabel = t('ui_blog_filter_all', 'All');
+  const readMoreAria = t('ui_blog_read_more_aria', 'view blog details');
+
+  const listHref = withLocale(locale, '/blog');
+
+  const allItems = useMemo<BlogCardVM[]>(() => {
     const items: CustomPageDto[] = ((data as any)?.items ?? []) as any;
 
-    return items.map((p) => {
-      const title = safeStr((p as any)?.title) || safeStr(untitled) || 'Untitled';
-      const slug = safeStr((p as any)?.slug);
+    return items
+      .filter((p: any) => !!p && !!(p as any)?.is_published)
+      .map((p: any) => {
+        const id =
+          safeStr(p?.id) || safeStr(p?.slug) || `blog-${Math.random().toString(16).slice(2)}`;
+        const title = safeStr(p?.title) || untitled;
 
-      const metaDesc = safeStr((p as any)?.meta_description);
-      const sum = safeStr((p as any)?.summary);
-      const html = extractHtmlFromAny(p);
+        const metaDesc = safeStr(p?.meta_description);
+        const sum = safeStr(p?.summary);
+        const html = extractHtmlFromAny(p);
+        const baseText = metaDesc || sum || html;
 
-      const baseText = metaDesc || sum || html;
-      const textExcerpt = excerpt(baseText, 220).trim();
+        const textExcerpt = excerpt(baseText, 140).trim();
 
-      const imgRaw = safeStr((p as any)?.featured_image);
-      const hero = imgRaw ? toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw : '';
+        const imgRaw = safeStr(p?.featured_image);
+        const hero = imgRaw ? toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw : '';
 
-      return { id: safeStr((p as any)?.id), slug, title, excerpt: textExcerpt, hero };
-    });
-  }, [data, untitled]);
+        const links = normalizeTags(p);
+        const area = normalizeArea(p, t('ui_blog_filter_default', 'Blog'));
 
-  const blogListHref = withLocale(locale, '/blog');
+        return {
+          id,
+          title,
+          excerpt: textExcerpt,
+          slug: safeStr(p?.slug),
+          hero,
+          area,
+          links,
+        };
+      });
+  }, [data, untitled, t]);
+
+  // Filter buttons: "All" + unique areas
+  const filterButtons = useMemo<string[]>(() => {
+    const unique = Array.from(new Set(allItems.map((x) => x.area).filter(Boolean)));
+    // area yoksa sadece All
+    if (!unique.length) return [allLabel];
+    return [allLabel, ...unique];
+  }, [allItems, allLabel]);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const selectedKey = filterButtons[selectedIndex] || allLabel;
+
+  const visibleItems = useMemo(() => {
+    if (selectedKey === allLabel) return allItems;
+    return allItems.filter((x) => x.area === selectedKey);
+  }, [allItems, selectedKey, allLabel]);
 
   return (
-    <section className="news__area grey-bg-3 pt-120 pb-90">
+    <section className="project__area pt-115 pb-90">
       <div className="container">
-        {/* HEADER */}
+        {/* Header (ProjectGallery style) */}
         <div className="row">
           <div className="col-12">
-            <div className="section__title-wrapper text-center mb-70">
-              <div className="section__subtitle-3">
-                <span>
-                  {sectionSubtitlePrefix} {sectionSubtitleLabel}
-                </span>
-              </div>
-
-              <div className="section__title-3 mb-20">{sectionTitle}</div>
-
-              {safeStr(sectionIntro) && <p>{sectionIntro}</p>}
+            <div className="project__filter-button text-center p-relative mb-55">
+              {filterButtons.map((cat, index) => (
+                <button
+                  type="button"
+                  key={`${cat}-${index}`}
+                  onClick={() => setSelectedIndex(index)}
+                  className={'filter-btn' + (selectedIndex === index ? ' active' : '')}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        {/* LIST */}
-        <div className="row" data-aos="fade-up" data-aos-delay="300">
-          {blogItems.length === 0 && !isLoading && (
-            <div className="col-12">
-              <p className="text-center">{emptyText}</p>
-            </div>
-          )}
-
-          {blogItems.map((p, idx) => {
-            const detailHref = p.slug
-              ? withLocale(locale, `/blog/${encodeURIComponent(p.slug)}`)
-              : blogListHref;
-
-            const key = p.id || p.slug || String(idx);
+        <div className="row grid portfolio-grid-items" data-aos="fade-up" data-aos-delay="300">
+          {visibleItems.map((it, index) => {
+            const href = it.slug
+              ? withLocale(locale, `/blog/${encodeURIComponent(it.slug)}`)
+              : listHref;
 
             return (
-              <div className="col-xl-4 col-lg-6 col-md-6" key={key}>
-                {/* ✅ Use BLOG SCSS card */}
-                <div className="blog__item-3 mb-30">
-                  <div className="blog__thumb w-img">
-                    <Link href={detailHref} aria-label={p.title}>
+              <motion.div
+                layout
+                animate={{ opacity: 1 }}
+                initial={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="col-xl-6 col-lg-6 col-md-6 grid-item c-3 c-2"
+                key={it.id || index}
+              >
+                <div className="project__item mb-30">
+                  <div className="project__thumb">
+                    <Link href={href} aria-label={it.title || readMoreAria}>
                       <Image
-                        src={(p.hero as any) || (FallbackCover as any)}
-                        alt={p.title || 'blog image'}
+                        src={(it.hero as any) || (FallbackCover as any)}
+                        alt={it.title || 'blog image'}
                         width={CARD_W}
                         height={CARD_H}
-                        className="img-fluid"
-                        loading="lazy"
+                        loading={index === 0 ? 'eager' : 'lazy'}
                       />
                     </Link>
                   </div>
 
-                  <div className="blog__content-3">
+                  <div className="project__content">
                     <h3>
-                      <Link href={detailHref}>{p.title}</Link>
+                      <Link href={href}>{it.title}</Link>
                     </h3>
 
-                    {!!safeStr(p.excerpt) && (
-                      <div className="postbox__text">
-                        <p>{p.excerpt}</p>
-                      </div>
-                    )}
+                    {!!safeStr(it.excerpt) ? <p>{it.excerpt}</p> : null}
 
-                    <Link
-                      href={detailHref}
-                      className="link-more"
-                      aria-label={`${p.title} — ${readMoreAria}`}
-                    >
-                      {readMore} →
-                    </Link>
+                    <div className="project__tag">
+                      {(it.links?.length ? it.links : [t('ui_blog_tag_default', 'Blog')])
+                        .slice(0, 3)
+                        .map((tag) => (
+                          <Link
+                            key={`${it.id}-${tag}`}
+                            href={href}
+                            aria-label={`${it.title} — ${tag}`}
+                          >
+                            {tag}
+                          </Link>
+                        ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
 
-          {/* LOADING */}
-          {isLoading && (
+          {/* Loading */}
+          {isLoading ? (
             <div className="col-12">
               <div className="ens-skel ens-skel--md" />
               <div className="ens-skel ens-skel--md ens-skel--w80 mt-10" />
             </div>
-          )}
+          ) : null}
         </div>
       </div>
     </section>
   );
 };
 
-export default BlogPageContent;
+export default BlogProjectGallery;

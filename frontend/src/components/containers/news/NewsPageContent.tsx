@@ -1,19 +1,22 @@
 // =============================================================
-// FILE: src/components/containers/news/NewsPageContent.tsx
-// Ensotek – News Listing Page (All news + pagination)
-//  - Style: same pattern as Home News section (mobile sequential)
-//  - Desktop: blog grid cards
-//  - Pagination: offset/limit + Load more
-//  - Inline style: NONE
+// FILE: src/components/containers/news/NewsProjectGallery.tsx
+// Uses ProjectGallery SCSS (project__area / project__item ...)
+// Data: custom_pages (module_key="news") via RTK (public)
+// UI i18n: site_settings.ui_news (PATTERN)
+// Locale: useLocaleShort() (hydration-safe)
+// URL: "/{locale}/news" + "/{locale}/news/[slug]" (NO localizePath)
+// Pagination: offset/limit + Load more
+// NO Tailwind, NO inline styles
 // =============================================================
-
 'use client';
 
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-// RTK – Custom Pages (public)
+import { motion } from 'framer-motion';
+
+// RTK – Custom Pages Public
 import { useListCustomPagesPublicQuery } from '@/integrations/rtk/hooks';
 import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
@@ -24,20 +27,16 @@ import { excerpt } from '@/shared/text';
 // i18n (PATTERN)
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
-import { localizePath } from '@/i18n/url';
 
-// Fallback image
 import FallbackCover from 'public/img/blog/1/blog-01.jpg';
 
-const IMG_W = 720;
-const IMG_H = 480;
+const CARD_W = 720;
+const CARD_H = 480;
 
 const PAGE_LIMIT = 12;
 
-function safeStr(v: unknown): string {
-  if (typeof v === 'string') return v.trim();
-  if (v == null) return '';
-  return String(v).trim();
+function safeStr(x: unknown): string {
+  return typeof x === 'string' ? x.trim() : '';
 }
 
 function safeJson<T>(v: unknown, fallback: T): T {
@@ -55,6 +54,13 @@ function safeJson<T>(v: unknown, fallback: T): T {
   }
 }
 
+/**
+ * DB content uyumu:
+ * - content_html (string)
+ * - content (object: { html })
+ * - content (json-string: {"html":"..."})
+ * - content (raw html string)
+ */
 function extractHtmlFromAny(page: any): string {
   const ch = safeStr(page?.content_html);
   if (ch) return ch;
@@ -78,42 +84,86 @@ function extractHtmlFromAny(page: any): string {
   return '';
 }
 
+/**
+ * localizePath kullanmıyoruz.
+ * - locale varsa: "/de/news" "/tr/news"
+ * - locale yoksa: "/news"
+ */
+function withLocale(locale: string, path: string): string {
+  const loc = safeStr(locale);
+  const p = path.startsWith('/') ? path : `/${path}`;
+  if (!loc) return p;
+
+  if (p === `/${loc}` || p.startsWith(`/${loc}/`)) return p;
+  return `/${loc}${p}`;
+}
+
 type NewsCardVM = {
   id: string;
-  slug: string;
   title: string;
   excerpt: string;
+  slug: string;
   hero: string;
-  alt: string;
+  area: string; // filter label
+  links: string[]; // chips
 };
 
-const NewsPageContent: React.FC = () => {
+function normalizeTags(page: any): string[] {
+  const raw = (page as any)?.tags ?? (page as any)?.tag ?? (page as any)?.keywords;
+  if (!raw) return [];
+
+  if (Array.isArray(raw)) {
+    return raw
+      .map((x) => safeStr(x))
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+
+  if (typeof raw === 'string') {
+    const s = raw.trim();
+    if (!s) return [];
+    if (s.startsWith('[')) {
+      const arr = safeJson<any[]>(s, []);
+      return (arr || [])
+        .map((x) => safeStr(x))
+        .filter(Boolean)
+        .slice(0, 3);
+    }
+    return s
+      .split(',')
+      .map((x) => x.trim())
+      .filter(Boolean)
+      .slice(0, 3);
+  }
+
+  return [];
+}
+
+function normalizeArea(page: any, fallback: string): string {
+  const a =
+    safeStr((page as any)?.category) ||
+    safeStr((page as any)?.category_name) ||
+    safeStr((page as any)?.sub_category) ||
+    safeStr((page as any)?.type);
+
+  return a || fallback;
+}
+
+const NewsProjectGallery: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_news', locale as any);
-  const t = useCallback((key: string, fallback: string) => ui(key, fallback), [ui]);
+  const t = useCallback((key: string, fb: string) => ui(key, fb), [ui]);
 
-  // Header strings
-  const sectionSubtitlePrefix = t('ui_news_subprefix', 'Ensotek');
-  const sectionSubtitleLabel = t('ui_news_sublabel', 'News');
-  const sectionTitle = t('ui_news_page_title', 'News');
-
-  const sectionIntro = t(
-    'ui_news_page_intro',
-    'Latest news, announcements and press releases about Ensotek.',
-  );
-
-  const readMore = t('ui_news_read_more', 'Read more');
-  const readMoreAria = t('ui_news_read_more_aria', 'view news details');
-
+  const allLabel = t('ui_news_filter_all', 'All');
+  const defaultArea = t('ui_news_filter_default', 'News');
   const untitled = t('ui_news_untitled', 'Untitled news');
   const emptyText = t('ui_news_empty', 'There are no news items to display at the moment.');
-
   const loadMoreText = t('ui_news_load_more', 'Load more');
+  const readMoreAria = t('ui_news_read_more_aria', 'view news details');
 
-  // Pagination
+  // pagination
   const [page, setPage] = useState(1);
 
-  // locale değişince resetle
   useEffect(() => {
     setPage(1);
   }, [locale]);
@@ -122,6 +172,7 @@ const NewsPageContent: React.FC = () => {
     () => ({
       module_key: 'news',
       sort: 'created_at',
+      order: 'desc',
       orderDir: 'desc',
       limit: PAGE_LIMIT,
       offset: (page - 1) * PAGE_LIMIT,
@@ -131,49 +182,64 @@ const NewsPageContent: React.FC = () => {
     [locale, page],
   );
 
-  const { data, isLoading, isFetching } = useListCustomPagesPublicQuery(
-    queryArgs as any,
-    {
-      skip: !locale,
-    } as any,
-  );
+  const { data, isLoading, isFetching } = useListCustomPagesPublicQuery(queryArgs as any);
 
-  const newsListHref = useMemo(() => localizePath(locale, '/news'), [locale]);
+  const listHref = withLocale(locale, '/news');
 
-  const items: NewsCardVM[] = useMemo(() => {
-    const raw: CustomPageDto[] = ((data as any)?.items ?? []) as any;
+  const allItems = useMemo<NewsCardVM[]>(() => {
+    const items: CustomPageDto[] = ((data as any)?.items ?? []) as any;
 
-    return raw
-      .filter((n) => !!n && !!(n as any).is_published)
-      .map((n, idx) => {
-        const id = safeStr((n as any)?.id) || safeStr((n as any)?.slug) || `news-${idx}`;
-        const slug = safeStr((n as any)?.slug);
-        const title = safeStr((n as any)?.title) || untitled || 'Untitled';
+    return items
+      .filter((p: any) => !!p && !!(p as any)?.is_published)
+      .map((p: any, idx: number) => {
+        const id =
+          safeStr(p?.id) ||
+          safeStr(p?.slug) ||
+          `news-${idx}-${Math.random().toString(16).slice(2)}`;
+        const title = safeStr(p?.title) || untitled;
 
-        const metaDesc = safeStr((n as any)?.meta_description);
-        const sum = safeStr((n as any)?.summary);
-        const html = extractHtmlFromAny(n);
+        const metaDesc = safeStr(p?.meta_description);
+        const sum = safeStr(p?.summary);
+        const html = extractHtmlFromAny(p);
 
         const baseText = metaDesc || sum || html;
-        const textExcerpt = excerpt(baseText, 220).trim();
+        const textExcerpt = excerpt(baseText, 140).trim();
 
-        const imgRaw = safeStr((n as any)?.featured_image);
-        const hero = imgRaw ? toCdnSrc(imgRaw, IMG_W, IMG_H, 'fill') || imgRaw : '';
+        const imgRaw = safeStr(p?.featured_image);
+        const hero = imgRaw ? toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw : '';
+
+        const links = normalizeTags(p);
+        const area = normalizeArea(p, defaultArea);
 
         return {
           id,
-          slug,
           title,
           excerpt: textExcerpt,
+          slug: safeStr(p?.slug),
           hero,
-          alt: title || 'news image',
+          area,
+          links,
         };
       });
-  }, [data, untitled]);
+  }, [data, untitled, defaultArea]);
 
-  // total (RTK response total varsa)
+  // Filter buttons (same concept as BlogProjectGallery)
+  const filterButtons = useMemo<string[]>(() => {
+    const unique = Array.from(new Set(allItems.map((x) => x.area).filter(Boolean)));
+    if (!unique.length) return [allLabel];
+    return [allLabel, ...unique];
+  }, [allItems, allLabel]);
+
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedKey = filterButtons[selectedIndex] || allLabel;
+
+  const visibleItems = useMemo(() => {
+    if (selectedKey === allLabel) return allItems;
+    return allItems.filter((x) => x.area === selectedKey);
+  }, [allItems, selectedKey, allLabel]);
+
   const total = Number((data as any)?.total ?? 0) || 0;
-  const canLoadMore = total ? page * PAGE_LIMIT < total : items.length === PAGE_LIMIT;
+  const canLoadMore = total ? page * PAGE_LIMIT < total : allItems.length === PAGE_LIMIT;
 
   const onLoadMore = useCallback(() => {
     if (isFetching) return;
@@ -181,27 +247,28 @@ const NewsPageContent: React.FC = () => {
   }, [isFetching]);
 
   return (
-    <section className="news__area grey-bg-3 pt-120 pb-90">
+    <section className="project__area pt-115 pb-90">
       <div className="container">
-        {/* HEADER */}
+        {/* FILTER */}
         <div className="row">
           <div className="col-12">
-            <div className="section__title-wrapper text-center mb-70">
-              <div className="section__subtitle-3">
-                <span>
-                  {sectionSubtitlePrefix} {sectionSubtitleLabel}
-                </span>
-              </div>
-
-              <div className="section__title-3 mb-20">{sectionTitle}</div>
-
-              {safeStr(sectionIntro) ? <p>{sectionIntro}</p> : null}
+            <div className="project__filter-button text-center p-relative mb-55">
+              {filterButtons.map((cat, index) => (
+                <button
+                  type="button"
+                  key={`${cat}-${index}`}
+                  onClick={() => setSelectedIndex(index)}
+                  className={'filter-btn' + (selectedIndex === index ? ' active' : '')}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         {/* EMPTY */}
-        {items.length === 0 && !isLoading ? (
+        {!isLoading && visibleItems.length === 0 ? (
           <div className="row">
             <div className="col-12">
               <p className="text-center">{emptyText}</p>
@@ -209,118 +276,73 @@ const NewsPageContent: React.FC = () => {
           </div>
         ) : null}
 
-        {/* MOBILE: sequential (content then image for each) */}
-        <div className="ens-news__mobile d-block d-lg-none" data-aos="fade-up" data-aos-delay="300">
-          {items.map((n, idx) => {
-            const href = n.slug
-              ? localizePath(locale, `/news/${encodeURIComponent(n.slug)}`)
-              : newsListHref;
-
-            const imgSrc = (n.hero as any) || (FallbackCover as any);
+        {/* GRID */}
+        <div className="row grid portfolio-grid-items" data-aos="fade-up" data-aos-delay="300">
+          {visibleItems.map((it, index) => {
+            const href = it.slug
+              ? withLocale(locale, `/news/${encodeURIComponent(it.slug)}`)
+              : listHref;
 
             return (
-              <div className="ens-news__mobileItem" key={n.id}>
-                <div className="blog__content-wrapper ens-news__contentWrapper">
-                  <div className="blog__content">
-                    <h3 className="ens-news__title">
-                      <Link href={href}>{n.title}</Link>
-                    </h3>
-
-                    {safeStr(n.excerpt) ? <p className="ens-news__excerpt">{n.excerpt}</p> : null}
-
-                    <Link
-                      href={href}
-                      className="link-more"
-                      aria-label={`${n.title} — ${readMoreAria}`}
-                    >
-                      {readMore} →
-                    </Link>
-                  </div>
-                </div>
-
-                <Link
-                  href={href}
-                  className="blog__thumb w-img ens-news__thumbCard"
-                  aria-label={n.title}
-                >
-                  <Image
-                    src={imgSrc}
-                    alt={n.alt}
-                    width={IMG_W}
-                    height={IMG_H}
-                    loading={idx < 2 ? 'eager' : 'lazy'}
-                    className="ens-news__thumbImg"
-                  />
-                </Link>
-
-                {idx !== items.length - 1 ? (
-                  <div className="ens-news__mobileDivider" aria-hidden />
-                ) : null}
-              </div>
-            );
-          })}
-
-          {isLoading ? (
-            <div className="skeleton-line mt-10 ens-skel ens-skel--md" aria-hidden />
-          ) : null}
-        </div>
-
-        {/* DESKTOP: grid cards (blog__item-3) */}
-        <div className="row d-none d-lg-flex" data-aos="fade-up" data-aos-delay="300">
-          {items.map((n) => {
-            const href = n.slug
-              ? localizePath(locale, `/news/${encodeURIComponent(n.slug)}`)
-              : newsListHref;
-
-            return (
-              <div className="col-xl-4 col-lg-6 col-md-6" key={n.id}>
-                <div className="blog__item-3 mb-30">
-                  <div className="blog__thumb w-img">
-                    <Link href={href} aria-label={n.title}>
+              <motion.div
+                layout
+                animate={{ opacity: 1 }}
+                initial={{ opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.5 }}
+                className="col-xl-6 col-lg-6 col-md-6 grid-item c-3 c-2"
+                key={it.id || index}
+              >
+                <div className="project__item mb-30">
+                  <div className="project__thumb">
+                    <Link href={href} aria-label={it.title || readMoreAria}>
                       <Image
-                        src={(n.hero as any) || (FallbackCover as any)}
-                        alt={n.alt}
-                        width={IMG_W}
-                        height={IMG_H}
-                        loading="lazy"
+                        src={(it.hero as any) || (FallbackCover as any)}
+                        alt={it.title || 'news image'}
+                        width={CARD_W}
+                        height={CARD_H}
+                        loading={index === 0 ? 'eager' : 'lazy'}
                       />
                     </Link>
                   </div>
 
-                  <div className="blog__content-3">
+                  <div className="project__content">
                     <h3>
-                      <Link href={href}>{n.title}</Link>
+                      <Link href={href}>{it.title}</Link>
                     </h3>
 
-                    {safeStr(n.excerpt) ? (
-                      <div className="postbox__text">
-                        <p>{n.excerpt}</p>
-                      </div>
-                    ) : null}
+                    {safeStr(it.excerpt) ? <p>{it.excerpt}</p> : null}
 
-                    <Link
-                      href={href}
-                      className="link-more"
-                      aria-label={`${n.title} — ${readMoreAria}`}
-                    >
-                      {readMore} →
-                    </Link>
+                    <div className="project__tag">
+                      {(it.links?.length ? it.links : [t('ui_news_tag_default', 'News')])
+                        .slice(0, 3)
+                        .map((tag) => (
+                          <Link
+                            key={`${it.id}-${tag}`}
+                            href={href}
+                            aria-label={`${it.title} — ${tag}`}
+                          >
+                            {tag}
+                          </Link>
+                        ))}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
 
+          {/* Loading */}
           {isLoading ? (
             <div className="col-12">
-              <div className="ens-skel ens-skel--md" aria-hidden />
-              <div className="ens-skel ens-skel--md ens-skel--w80 mt-10" aria-hidden />
+              <div className="ens-skel ens-skel--md" />
+              <div className="ens-skel ens-skel--md ens-skel--w80 mt-10" />
             </div>
           ) : null}
         </div>
 
         {/* LOAD MORE */}
-        {!isLoading && items.length > 0 ? (
+        {!isLoading && allItems.length > 0 ? (
           <div className="row mt-30">
             <div className="col-12 d-flex justify-content-center">
               {canLoadMore ? (
@@ -351,4 +373,4 @@ const NewsPageContent: React.FC = () => {
   );
 };
 
-export default NewsPageContent;
+export default NewsProjectGallery;

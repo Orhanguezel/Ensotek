@@ -35,7 +35,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_blog_comment_placeholder',      'Yazmaya başlayın...',
     'ui_blog_comment_name_placeholder', 'adınız',
     'ui_blog_comment_email_placeholder','e-posta adresiniz',
-    'ui_blog_comment_submit',           'Yorum Gönder'
+    'ui_blog_comment_submit',           'Yorum Gönder',
+    'ui_blog_filter_all',               'Tümü'
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -65,7 +66,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_blog_comment_placeholder',      'Start type...',
     'ui_blog_comment_name_placeholder', 'your name',
     'ui_blog_comment_email_placeholder','your email',
-    'ui_blog_comment_submit',           'Post Comment'
+    'ui_blog_comment_submit',           'Post Comment',
+    'ui_blog_filter_all',               'All'
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -95,7 +97,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_blog_comment_placeholder',      'Beginnen Sie zu schreiben...',
     'ui_blog_comment_name_placeholder', 'Ihr Name',
     'ui_blog_comment_email_placeholder','Ihre E-Mail',
-    'ui_blog_comment_submit',           'Kommentar senden'
+    'ui_blog_comment_submit',           'Kommentar senden',
+    'ui_blog_filter_all',               'Alle'
   ) AS CHAR),
   NOW(3),
   NOW(3)

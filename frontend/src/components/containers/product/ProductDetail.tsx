@@ -1,21 +1,23 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductDetail.tsx
-// FINAL — NewsDetail pattern applied + FIXES (Reviews visible + no-unused-vars fixed)
+// FINAL — NewsDetail pattern applied + FIXES
 // - NO inline styles
 // - Hero + thumbs under hero
 // - Click hero/thumb => opens ImageLightboxModal
 // - Sidebar pattern: Other items / Share / Reviews / Contact / Sidebar image
 // - Works for BOTH: /product/[slug] and /sparepart/[slug] (itemType auto)
 // - Locale-safe: useLocaleShort + useUiSection(sectionKey, locale as any)
-// - ✅ FIX: Specs & FAQs stacked (alt alta)
+// - ✅ FIX: Specs & FAQs stacked
 // - ✅ FIX: Tags style (chips + wrap) without bootstrap
-// - ✅ FIX: Tags parsing supports array OR json-string OR plain string
-// - ✅ FIX: Reviews block now rendered + reviews variable used (no lint error)
+// - ✅ FIX: Tags parsing supports array OR json-string OR hash-delimited OR plain string
+// - ✅ FIX: Reviews block rendered + reviews variable used (no lint error)
+// - ✅ FIX: TS errors (useState, ReactNode) fixed
+// - ✅ FIX: Request quote click scrolls + focuses Offer form
 // =============================================================
 
 'use client';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -168,9 +170,10 @@ function buildProductGalleryImages(product: any, title: string): LightboxImage[]
 
   // minimum 1 fallback
   if (!gallery.length) {
+    const fb = FallbackCover as any as string;
     gallery.push({
-      raw: FallbackCover as any as string,
-      thumb: FallbackCover as any as string,
+      raw: fb,
+      thumb: fb,
       alt: safeStr(title) || 'image',
     });
   }
@@ -182,26 +185,39 @@ function buildProductGalleryImages(product: any, title: string): LightboxImage[]
  * Tags normalize:
  * - array
  * - json-string array
- * - plain string ("a b #c, d")
+ * - hash-delimited string "#a#b#c"
+ * - plain string ("a b, c; d")
  */
 function normalizeTags(raw: unknown): string[] {
+  const clean = (x: unknown) => safeStr(x).replace(/^#+/, '').trim();
+
+  // 1) Array
   if (Array.isArray(raw)) {
-    return raw.map((x) => safeStr(x).replace(/^#+/, '')).filter(Boolean);
+    return raw.map(clean).filter(Boolean);
   }
 
-  const s = safeStr(raw);
-  if (!s) return [];
+  const s0 = safeStr(raw);
+  if (!s0) return [];
 
-  const parsed = tryParseJson<any>(s);
+  // 2) JSON array string
+  const parsed = tryParseJson<any>(s0);
   if (Array.isArray(parsed)) {
-    return parsed.map((x) => safeStr(x).replace(/^#+/, '')).filter(Boolean);
+    return parsed.map(clean).filter(Boolean);
   }
 
-  // fallback: split by space/comma/semicolon
-  return s
+  // 3) Hash-delimited: "#a#b#c" veya "a#b#c"
+  if (s0.includes('#')) {
+    return s0
+      .split('#')
+      .map((x) => clean(x))
+      .filter(Boolean);
+  }
+
+  // 4) comma/semicolon/whitespace split
+  return s0
     .replace(/[,;]+/g, ' ')
     .split(/\s+/)
-    .map((x) => safeStr(x).replace(/^#+/, ''))
+    .map((x) => clean(x))
     .filter(Boolean);
 }
 
@@ -334,7 +350,7 @@ const ProductDetail: React.FC = () => {
     return toCdnSrc(raw, HERO_W, HERO_H, 'fill') || raw;
   }, [activeImage?.raw]);
 
-  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState<boolean>(false);
 
   const openLightboxAt = useCallback((idx: number) => {
     setActiveIdx(idx);
@@ -393,7 +409,7 @@ const ProductDetail: React.FC = () => {
     return entries;
   }, [specsData, product]);
 
-  // ✅ REVIEWS (used in ProductReviewsBlock)
+  // ✅ REVIEWS
   const { data: reviewsRaw, isLoading: isReviewsLoading } = useListProductReviewsQuery(
     {
       product_id: productId,
@@ -458,7 +474,42 @@ const ProductDetail: React.FC = () => {
       .slice(0, 8);
   }, [otherData, slug, productId]);
 
-  const [offerOpen, setOfferOpen] = useState(false);
+  // ✅ Offer open state + target ref (scroll/focus)
+  const [offerOpen, setOfferOpen] = useState<boolean>(false);
+  const offerRef = useRef<HTMLDivElement | null>(null);
+
+  const focusOfferForm = useCallback(() => {
+    const node = offerRef.current;
+    if (!node) return;
+
+    node.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // İlk focusable alanı bul ve focusla
+    const focusable = node.querySelector<HTMLElement>(
+      'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+    );
+
+    // scroll sonrası focus daha stabil
+    window.setTimeout(() => {
+      focusable?.focus();
+    }, 150);
+  }, []);
+
+  // İlk kez açıldığında otomatik scroll/focus
+  useEffect(() => {
+    if (!offerOpen) return;
+    window.setTimeout(() => focusOfferForm(), 0);
+  }, [offerOpen, focusOfferForm]);
+
+  const handleRequestQuote = useCallback(() => {
+    // Aç
+    setOfferOpen(true);
+
+    // Zaten açıksa yine scroll/focus
+    if (offerOpen) {
+      window.setTimeout(() => focusOfferForm(), 0);
+    }
+  }, [offerOpen, focusOfferForm]);
 
   const showSkeleton = isProductLoading || (!isSlugReady && !product && !isProductError);
 
@@ -601,7 +652,7 @@ const ProductDetail: React.FC = () => {
                         <button
                           type="button"
                           className="solid__btn"
-                          onClick={() => setOfferOpen(true)}
+                          onClick={handleRequestQuote}
                           aria-label={t.requestQuote}
                         >
                           {t.requestQuote}
@@ -616,7 +667,7 @@ const ProductDetail: React.FC = () => {
                           <h3>{t.tagsTitle}</h3>
                         </div>
 
-                        <div className="ens-tags">
+                        <div className="ens-tags" aria-label={t.tagsTitle}>
                           {tags.map((tg) => (
                             <span key={tg} className="ens-tag">
                               #{tg}
@@ -652,7 +703,7 @@ const ProductDetail: React.FC = () => {
                       </div>
                     )}
 
-                    {/* ✅ REVIEWS SLIDER BLOCK (now visible) */}
+                    {/* ✅ REVIEWS SLIDER BLOCK */}
                     <div className="technical__content mt-20">
                       <ProductReviewsBlock
                         title={t.reviewsTitle}
@@ -665,9 +716,9 @@ const ProductDetail: React.FC = () => {
                       />
                     </div>
 
-                    {/* OFFER */}
+                    {/* OFFER (scroll target) */}
                     {offerOpen && !!productId && (
-                      <div className="technical__content mt-20">
+                      <div className="technical__content mt-20" ref={offerRef} id="offer-form">
                         <OfferSection
                           productId={productId}
                           productName={title || safeStr((product as any)?.slug) || ''}
@@ -779,9 +830,9 @@ const ProductDetail: React.FC = () => {
         open={lightboxOpen}
         images={galleryImages}
         index={safeActiveIdx}
-        title={title}
+        title={safeStr(title)}
         onClose={closeLightbox}
-        onIndexChange={(i) => setActiveIdx(i)}
+        onIndexChange={(i: number) => setActiveIdx(i)}
         showThumbs={true}
       />
     </>

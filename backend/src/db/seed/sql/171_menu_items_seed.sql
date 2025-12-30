@@ -1,5 +1,5 @@
 -- ============================================================
--- FILE: 171_menu_items_seed.sql (FINAL / STANDARD)  ✅ UPDATED
+-- FILE: 171_menu_items_seed.sql (FINAL / STANDARD)  ✅ FULL
 -- menu_items (parent) + menu_items_i18n (tr, en, de)
 -- Ensotek – Header + Footer (FINAL, no inactive)
 -- Standard:
@@ -44,7 +44,7 @@ VALUES
 ('aaaa1111-2222-3333-4444-999999999999', '25740da6-c0f2-4c1d-b131-998018699bfd', 'header', NULL, 'custom', NULL, NULL, 4, 1), -- FAQs
 
 -- ------------------------
--- SERVICES SUBMENUS (9 items)  ✅ stable ids, NO vars
+-- SERVICES SUBMENUS (9 items)
 -- ------------------------
 ('5a000001-1111-4111-8111-5a0000000001', 'c47a1c3f-cea1-4780-9381-77336bc8ac59', 'header', NULL, 'custom', NULL, NULL, 0, 1),
 ('5a000002-1111-4111-8111-5a0000000002', 'c47a1c3f-cea1-4780-9381-77336bc8ac59', 'header', NULL, 'custom', NULL, NULL, 1, 1),
@@ -63,7 +63,7 @@ VALUES
 ('88888888-1111-2222-3333-555555555555', 'f2570596-db46-4028-902c-d6fe2c9a8312', 'header', NULL, 'custom', NULL, NULL, 1, 1),
 
 -- ------------------------
--- LIBRARY SUBMENUS (4 items) ✅ NEW
+-- LIBRARY SUBMENUS (4 items) ✅ FIX: parent 4. item eklendi
 -- ------------------------
 ('7b000001-1111-4111-8111-7b0000000001', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 0, 1),
 ('7b000002-1111-4111-8111-7b0000000002', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 1, 1),
@@ -147,14 +147,16 @@ VALUES
 (UUID(),'5a000008-1111-4111-8111-5a0000000008','tr','Kurulum & Devreye Alma','/service/commissioning-startup','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000009-1111-4111-8111-5a0000000009','tr','Acil Servis','/service/emergency-response','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
--- ✅ Library submenu (TR) under /library/{slug}
+-- Library submenu (TR) under /library/{slug}
 (UUID(),'7b000001-1111-4111-8111-7b0000000001','tr','Su Soğutma Kulesi','/library/su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000002-1111-4111-8111-7b0000000002','tr','Kule Özellikleri','/library/ensotek-sogutma-kulelerinin-ozellikleri','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000003-1111-4111-8111-7b0000000003','tr','Kule Seçimi','/library/kule-secimi-icin-gerekli-bilgiler','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- Products submenu
 (UUID(),'88888888-1111-2222-3333-444444444444','tr','Tüm Ürünler','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','tr','Yedek Parçalar','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- FOOTER: QUICK ACCESS (TR)
 (UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','tr','SSS','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','tr','Hakkımızda','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','tr','Hizmetler','/service','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -164,9 +166,11 @@ VALUES
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1116','tr','Blog','/blog','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117','tr','İletişim','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- FOOTER: SERVICES (TR)
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','tr','Periyodik Bakım ve Onarım','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','tr','Modernizasyon ve Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- FOOTER: CORPORATE / LEGAL (TR)
 (UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','tr','Gizlilik Politikası','/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','tr','KVKK','/kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','tr','Kullanım Koşulları','/terms','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -174,6 +178,7 @@ VALUES
 (UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','tr','Aydınlatma Metni','/privacy-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','tr','Yasal Bilgilendirme','/legal-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- FOOTER: SOCIAL (TR)
 (UUID(),'a9b1c2d3-e4f5-4a66-8b11-111111111111','tr','LinkedIn','https://www.linkedin.com/company/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'a9b1c2d3-e4f5-4a66-8b11-222222222222','tr','Instagram','https://www.instagram.com/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'a9b1c2d3-e4f5-4a66-8b11-333333333333','tr','YouTube','https://www.youtube.com/@ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -184,7 +189,7 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = CURRENT_TIMESTAMP(3);
 
 -- ============================================================
--- 3) I18N (en)
+-- 3) I18N (en)  ✅ FIX: footer dahil (eksiksiz)
 -- ============================================================
 INSERT INTO `menu_items_i18n`
 (`id`, `menu_item_id`, `locale`, `title`, `url`, `created_at`, `updated_at`)
@@ -214,20 +219,48 @@ VALUES
 (UUID(),'5a000008-1111-4111-8111-5a0000000008','en','Commissioning','/service/commissioning-startup','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000009-1111-4111-8111-5a0000000009','en','Emergency','/service/emergency-response','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
--- ✅ Library submenu (EN) under /library/{slug}
+-- Library submenu (EN) under /library/{slug}
 (UUID(),'7b000001-1111-4111-8111-7b0000000001','en','Cooling Tower','/library/what-is-a-water-cooling-tower-types-and-working-principle','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000002-1111-4111-8111-7b0000000002','en','Tower Features','/library/features-of-ensotek-cooling-towers','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000003-1111-4111-8111-7b0000000003','en','Selection Info','/library/information-required-for-cooling-tower-selection','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 (UUID(),'88888888-1111-2222-3333-444444444444','en','All Products','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'88888888-1111-2222-3333-555555555555','en','Spare Parts','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000')
+(UUID(),'88888888-1111-2222-3333-555555555555','en','Spare Parts','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: QUICK ACCESS (EN)
+(UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','en','FAQs','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','en','About','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','en','Services','/service','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113','en','Products','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114','en','Library','/library','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115','en','News','/news','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1116','en','Blog','/blog','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117','en','Contact','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: SERVICES (EN)
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','en','Periodic Maintenance','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','en','Modernization & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: CORPORATE / LEGAL (EN)
+(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','en','Privacy Policy','/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','en','Data Protection (KVKK)','/kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','en','Terms of Use','/terms','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','en','Cookie Policy','/cookie-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','en','Privacy Notice','/privacy-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','en','Legal Notice','/legal-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: SOCIAL (EN)
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-111111111111','en','LinkedIn','https://www.linkedin.com/company/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-222222222222','en','Instagram','https://www.instagram.com/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-333333333333','en','YouTube','https://www.youtube.com/@ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-444444444444','en','X','https://x.com/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000')
 ON DUPLICATE KEY UPDATE
   `title`      = VALUES(`title`),
   `url`        = VALUES(`url`),
   `updated_at` = CURRENT_TIMESTAMP(3);
 
 -- ============================================================
--- 4) I18N (de)
+-- 4) I18N (de)  ✅ FIX: footer dahil (eksiksiz)
 -- ============================================================
 INSERT INTO `menu_items_i18n`
 (`id`, `menu_item_id`, `locale`, `title`, `url`, `created_at`, `updated_at`)
@@ -257,14 +290,41 @@ VALUES
 (UUID(),'5a000008-1111-4111-8111-5a0000000008','de','Inbetriebnahme','/service/commissioning-startup','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000009-1111-4111-8111-5a0000000009','de','Notfallservice','/service/emergency-response','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
--- ✅ Library submenu (DE) under /library/{slug}
+-- Library submenu (DE) under /library/{slug}
 (UUID(),'7b000001-1111-4111-8111-7b0000000001','de','Wasserkühlturm','/library/was-ist-ein-wasser-kuehlturm-arten-und-funktionsprinzip','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000002-1111-4111-8111-7b0000000002','de','Eigenschaften','/library/eigenschaften-der-ensotek-kuehltuerme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000003-1111-4111-8111-7b0000000003','de','Auswahl Infos','/library/erforderliche-informationen-zur-kuehlturm-auswahl','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'7b000004-1111-4111-8111-7b0000000004','de','Montage','/library/kuehlturm-montage-und-betrieb','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 (UUID(),'88888888-1111-2222-3333-444444444444','de','Alle Produkte','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'88888888-1111-2222-3333-555555555555','de','Ersatzteile','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000')
+(UUID(),'88888888-1111-2222-3333-555555555555','de','Ersatzteile','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: QUICK ACCESS (DE)
+(UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','de','FAQ','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','de','Über uns','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','de','Leistungen','/service','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113','de','Produkte','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114','de','Bibliothek','/library','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115','de','Nachrichten','/news','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1116','de','Blog','/blog','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117','de','Kontakt','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: SERVICES (DE)
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','de','Wartung & Instandsetzung','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','de','Modernisierung & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: CORPORATE / LEGAL (DE)
+(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','de','Datenschutzerklärung','/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','de','Datenschutz (KVKK)','/kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','de','Nutzungsbedingungen','/terms','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','de','Cookie-Richtlinie','/cookie-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','de','Hinweis zum Datenschutz','/privacy-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','de','Impressum','/legal-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
+-- FOOTER: SOCIAL (DE)
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-111111111111','de','LinkedIn','https://www.linkedin.com/company/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-222222222222','de','Instagram','https://www.instagram.com/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-333333333333','de','YouTube','https://www.youtube.com/@ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'a9b1c2d3-e4f5-4a66-8b11-444444444444','de','X','https://x.com/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000')
 ON DUPLICATE KEY UPDATE
   `title`      = VALUES(`title`),
   `url`        = VALUES(`url`),
