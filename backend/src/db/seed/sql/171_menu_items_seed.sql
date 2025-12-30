@@ -68,7 +68,6 @@ VALUES
 ('7b000001-1111-4111-8111-7b0000000001', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 0, 1),
 ('7b000002-1111-4111-8111-7b0000000002', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 1, 1),
 ('7b000003-1111-4111-8111-7b0000000003', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 2, 1),
-('7b000004-1111-4111-8111-7b0000000004', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 3, 1),
 
 -- ------------------------
 -- FOOTER: QUICK ACCESS
@@ -152,7 +151,6 @@ VALUES
 (UUID(),'7b000001-1111-4111-8111-7b0000000001','tr','Su Soğutma Kulesi','/library/su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000002-1111-4111-8111-7b0000000002','tr','Kule Özellikleri','/library/ensotek-sogutma-kulelerinin-ozellikleri','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000003-1111-4111-8111-7b0000000003','tr','Kule Seçimi','/library/kule-secimi-icin-gerekli-bilgiler','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'7b000004-1111-4111-8111-7b0000000004','tr','Kurulum & İşletme','/library/kule-kurulum-ve-isletme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 (UUID(),'88888888-1111-2222-3333-444444444444','tr','Tüm Ürünler','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','tr','Yedek Parçalar','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -220,7 +218,6 @@ VALUES
 (UUID(),'7b000001-1111-4111-8111-7b0000000001','en','Cooling Tower','/library/what-is-a-water-cooling-tower-types-and-working-principle','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000002-1111-4111-8111-7b0000000002','en','Tower Features','/library/features-of-ensotek-cooling-towers','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000003-1111-4111-8111-7b0000000003','en','Selection Info','/library/information-required-for-cooling-tower-selection','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'7b000004-1111-4111-8111-7b0000000004','en','Installation','/library/cooling-tower-installation-and-operation','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 (UUID(),'88888888-1111-2222-3333-444444444444','en','All Products','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','en','Spare Parts','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000')
