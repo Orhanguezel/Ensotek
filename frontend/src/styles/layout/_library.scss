@@ -1,0 +1,49 @@
+@use '../utils' as *;
+
+/* Fluid image helper (inline style yerine) */
+.ens-media--fluid {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Accordion caret kapat (styled-jsx yerine) */
+.accordion-button.ens-acc-btn::after {
+  display: none !important;
+}
+
+/* Icon kutusu */
+.ens-acc-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  margin-right: 10px;
+  flex: 0 0 auto;
+}
+
+.ens-acc-text {
+  line-height: 1.2;
+}
+
+/* Summary margin (inline style yerine) */
+.ens-acc-summary {
+  margin-bottom: 12px;
+}
+
+/* Skeleton height hook */
+.ens-skel--h10 {
+  height: 10px;
+}
+.ens-skel--h12 {
+  height: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ens-acc-icon {
+    border-color: rgba(255, 255, 255, 0.25);
+  }
+}

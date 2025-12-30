@@ -53,6 +53,7 @@ export type UiSectionKey =
   | 'ui_privacy_policy'
   | 'ui_terms'
   | 'ui_common'
+  | 'ui_solutions'
   ;
 
 /**
@@ -381,6 +382,11 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
     'ui_common_read_less',
     'ui_common_loading',
     'ui_common_error_generic',
+  ],
+  ui_solutions: [
+    'ui_solutions_page_title',
+    'ui_solutions_meta_title',
+    'ui_solutions_meta_description',
   ],
 };
 

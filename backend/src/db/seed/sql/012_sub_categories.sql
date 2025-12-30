@@ -133,6 +133,13 @@ VALUES
   ('bbbb1006-1111-4111-8111-bbbbbbbb1006', 'aaaa1001-1111-4111-8111-aaaaaaaa1001', NULL, NULL, NULL, NULL, 1, 0, 60),
 
   -- ==========================================================
+  -- SOLUTIONS (aaaa1501)
+  -- ==========================================================
+  ('bbbb1501-1111-4111-8111-bbbbbbbb1501', 'aaaa1501-1111-4111-8111-aaaaaaaa1501', NULL, NULL, NULL, NULL, 1, 0, 10),
+  ('bbbb1502-1111-4111-8111-bbbbbbbb1502', 'aaaa1501-1111-4111-8111-aaaaaaaa1501', NULL, NULL, NULL, NULL, 1, 0, 20),
+  ('bbbb1503-1111-4111-8111-bbbbbbbb1503', 'aaaa1501-1111-4111-8111-aaaaaaaa1501', NULL, NULL, NULL, NULL, 1, 0, 30),
+
+  -- ==========================================================
   -- NEWS (aaaa2001..2004)
   -- ==========================================================
   ('bbbb2001-1111-4111-8111-bbbbbbbb2001', 'aaaa2001-1111-4111-8111-aaaaaaaa2001', NULL, NULL, NULL, NULL, 1, 0, 10),
@@ -440,9 +447,23 @@ VALUES
   ('bbbb5309-1111-4111-8111-bbbbbbbb5309','de','SONSTIGE PROJEKTE','sonstige-projekte-ausland',NULL,NULL),
 
   -- ==========================================================
-  -- NEWS/BLOG/SLIDER/LIBRARY (diğer modüller – değişmedi)
+  -- SOLUTIONS/NEWS/BLOG/SLIDER/LIBRARY (diğer modüller – değişmedi)
   -- ==========================================================
-  -- (buradan itibaren senin mevcut bloklarınla aynı; kısaltmadan tam kopyaladım)
+
+  --SOLUTIONS (aaaa2001)
+  ('bbbb2001-1111-4111-8111-bbbbbbbb2001','tr','Endüstriyel Soğutma Çözümleri','endustriyel-sogutma-cozumleri',NULL,NULL),
+  ('bbbb2002-1111-4111-8111-bbbbbbbb2002','tr','HVAC Soğutma Çözümleri','hvac-sogutma-cozumleri',NULL,NULL),
+  ('bbbb2003-1111-4111-8111-bbbbbbbb2003','tr','Proses Soğutma Çözümleri','proses-sogutma-cozumleri',NULL,NULL),
+
+  ('bbbb2001-1111-4111-8111-bbbbbbbb2001','en','Industrial Cooling Solutions','industrial-cooling-solutions',NULL,NULL),
+  ('bbbb2002-1111-4111-8111-bbbbbbbb2002','en','HVAC Cooling Solutions','hvac-cooling-solutions',NULL,NULL),
+  ('bbbb2003-1111-4111-8111-bbbbbbbb2003','en','Process Cooling Solutions','process-cooling-solutions',NULL,NULL),
+
+  ('bbbb2001-1111-4111-8111-bbbbbbbb2001','de','Industrielle Kühllösungen','industrielle-kuelloesungen',NULL,NULL),
+  ('bbbb2002-1111-4111-8111-bbbbbbbb2002','de','HVAC-Kühllösungen','hvac-kuelloesungen',NULL,NULL),
+  ('bbbb2003-1111-4111-8111-bbbbbbbb2003','de','Prozesskühllösungen','prozesskuelloesungen',NULL,NULL),
+
+
   -- NEWS (aaaa2001)
   ('bbbb2001-1111-4111-8111-bbbbbbbb2001','tr','Duyurular','duyurular',NULL,NULL),
   ('bbbb2002-1111-4111-8111-bbbbbbbb2002','tr','Basın Bültenleri','basin-bultenleri',NULL,NULL),
@@ -455,6 +476,8 @@ VALUES
   ('bbbb2001-1111-4111-8111-bbbbbbbb2001','de','Ankündigungen','ankuendigungen',NULL,NULL),
   ('bbbb2002-1111-4111-8111-bbbbbbbb2002','de','Pressemitteilungen','pressemitteilungen',NULL,NULL),
   ('bbbb2003-1111-4111-8111-bbbbbbbb2003','de','Branchennachrichten','branchennachrichten',NULL,NULL),
+
+
 
   -- NEWS (aaaa2002)
   ('bbbb2101-1111-4111-8111-bbbbbbbb2101','tr','Yeni Projeler','yeni-projeler',NULL,NULL),

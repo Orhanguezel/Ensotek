@@ -68,7 +68,13 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_library_wb_temperature_placeholder',  'Hava Sıcaklığı (°C)',
     'ui_library_wb_humidity_placeholder',     'Nem Oranı (%)',
     'ui_library_wb_error_invalid_input',      'Lütfen geçerli değerler girin.',
-    'ui_library_wb_sublabel',                 'Psikrometrik Araçlar'
+    'ui_library_wb_sublabel',                 'Psikrometrik Araçlar',
+    'ui_library_wb_subtitle',                 'Hava sıcaklığı ve bağıl nemi girerek yaklaşık yaş termometre sıcaklığını hesaplayın.',
+    'ui_library_gallery_title',               'Resim Galerisi',
+    'ui_library_share_title',                  'Dokümanı Paylaş',
+    'ui_library_write_comment',               'Yorum Yazın',
+    'ui_library_sidebar_contact_title',        'Bizimle İletişime Geçin',
+    'ui_library_file_unnamed',        'İlgili Dokümanlar'
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -126,7 +132,13 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_library_wb_temperature_placeholder',  'Air temperature (°C)',
     'ui_library_wb_humidity_placeholder',     'Relative humidity (%)',
     'ui_library_wb_error_invalid_input',      'Please enter valid values.',
-    'ui_library_wb_sublabel',                 'Psychrometric Tools'
+    'ui_library_wb_sublabel',                 'Psychrometric Tools',
+    'ui_library_wb_subtitle',                 'Enter air temperature and relative humidity to estimate wet-bulb temperature.',
+    'ui_library_gallery_title',               'Image Gallery',
+    'ui_library_share_title',                  'Share Document',
+    'ui_library_write_comment',               'Write a Comment',
+    'ui_library_sidebar_contact_title',        'Contact Us',
+    'ui_library_file_unnamed',        'Related Documents'
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -184,7 +196,13 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_library_wb_temperature_placeholder',  'Lufttemperatur (°C)',
     'ui_library_wb_humidity_placeholder',     'Relative Luftfeuchte (%)',
     'ui_library_wb_error_invalid_input',      'Bitte gültige Werte eingeben.',
-    'ui_library_wb_sublabel',                 'Psychrometrische Tools'
+    'ui_library_wb_sublabel',                 'Psychrometrische Tools',
+    'ui_library_wb_subtitle',                 'Geben Sie Lufttemperatur und relative Luftfeuchte ein, um die Feuchtkugeltemperatur näherungsweise zu berechnen.',
+    'ui_library_gallery_title',               'Bildergalerie',
+    'ui_library_share_title',                  'Dokument teilen',
+    'ui_library_write_comment',               'Einen Kommentar schreiben',
+    'ui_library_sidebar_contact_title',        'Kontaktieren Sie uns',
+    'ui_library_file_unnamed',        'Verwandte Dokumente'
   ) AS CHAR),
   NOW(3),
   NOW(3)

@@ -107,7 +107,7 @@ const InfoContactCard: React.FC<InfoContactCardProps> = ({
 
   contactHref,
 
-  fallbackLocale = 'en',
+  fallbackLocale = 'de',
   className,
   forceShow = false,
 

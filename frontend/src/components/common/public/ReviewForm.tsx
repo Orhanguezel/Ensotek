@@ -44,7 +44,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 }) => {
   // FE locale (prop öncelikli, yoksa resolvedLocale)
   const resolvedLocale = useResolvedLocale();
-  const locale = (localeProp || resolvedLocale || 'en').split('-')[0];
+  const locale = (localeProp || resolvedLocale || 'de').split('-')[0];
 
   // ui_feedback section'ından metinler
   const { ui } = useUiSection('ui_feedback', locale);

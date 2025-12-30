@@ -1,10 +1,11 @@
 // =============================================================
 // FILE: src/components/containers/product/Product.tsx
-// Ensotek – Products section (Home / Landing) — CAROUSEL VERSION
+// Ensotek – Products section (Home / Landing) — CAROUSEL VERSION [FINAL]
 //   - Pattern: References.tsx (Swiper + Navigation buttons)
 //   - i18n: useLocaleShort + ui_products (DB) + EN fallback
 //   - Optional categoryId filter
-//   - Inline style YOK
+//   - ✅ NO inline styles
+//   - ✅ NO styled-jsx
 //   - Fix: remote images görünmüyorsa => Image unoptimized
 // =============================================================
 
@@ -76,7 +77,7 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
   const subprefix = t('ui_products_kicker_prefix', 'Ensotek');
   const sublabel = t('ui_products_kicker_label', 'Our Products');
 
-  const title = t('ui_products_section_title', 'Our Products'); // istersen DB key’i netleştir
+  const title = t('ui_products_section_title', 'Our Products');
   const viewAllText = t('ui_products_view_all', 'All products');
 
   const readMore = t('ui_products_read_more', 'View details');
@@ -116,9 +117,7 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
           safeStr((p as any).image_url) ||
           safeStr(((p as any).images && (p as any).images[0]) || '');
 
-        // NOTE: toCdnSrc bazen boş dönebilir; ham url fallback var
         const hero = imgRaw ? toCdnSrc(imgRaw, CARD_W, CARD_H, 'fill') || imgRaw : '';
-
         const alt = safeStr((p as any).alt) || title || 'product image';
 
         return { id, slug, title, hero, alt };
@@ -126,7 +125,7 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
       .filter((x) => !!x.id && !!x.slug);
   }, [data]);
 
-  // items yok + loading değil => hiç render etme (istersen emptyText göster)
+  // items yok + loading değil => empty state
   if (!isLoading && items.length === 0) {
     return (
       <section className="product__area pt-120 pb-90">
@@ -157,18 +156,19 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
               <span className="section__subtitle">
                 <span>{subprefix}</span> {sublabel}
               </span>
-              <h2 className="section__title" style={{ marginBottom: 0 }}>
-                {decorateTitleWithMarkLine(title)}
-              </h2>
+
+              {/* ✅ NO inline style: use helper class */}
+              <h2 className="section__title ens-titleNoMb">{decorateTitleWithMarkLine(title)}</h2>
             </div>
           </div>
 
           <div className="col-12 col-md-5 d-flex justify-content-center justify-content-md-end align-items-center gap-2">
-            <div className="feedback__navigation me-2 d-none d-sm-flex">
-              <button className="products__button-prev" aria-label={prevLabel}>
+            {/* ✅ Nav buttons styled via global SCSS hook (no styled-jsx) */}
+            <div className="feedback__navigation ens-navRound me-2 d-none d-sm-flex">
+              <button type="button" className="products__button-prev" aria-label={prevLabel}>
                 <FiChevronLeft />
               </button>
-              <button className="products__button-next" aria-label={nextLabel}>
+              <button type="button" className="products__button-next" aria-label={nextLabel}>
                 <FiChevronRight />
               </button>
             </div>
@@ -219,7 +219,6 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
                             loading="lazy"
                             decoding="async"
                             draggable={false}
-                            // ✅ remote/CDN images görünmüyorsa bunu koy:
                             unoptimized
                           />
                         </Link>
@@ -247,31 +246,6 @@ const Product: React.FC<ProductSectionProps> = ({ categoryId }) => {
             {isLoading && <div className="skeleton-line mt-20" aria-hidden />}
           </div>
         </div>
-
-        {/* Okların stili (References ile aynı) */}
-        <style jsx>{`
-          .feedback__navigation button {
-            display: inline-flex;
-            width: 50px;
-            height: 50px;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            border: 1px solid rgba(0, 0, 0, 0.12);
-            background: #fff;
-            color: #111;
-            transition: all 0.2s ease;
-          }
-          .feedback__navigation button + button {
-            margin-left: 6px;
-          }
-          .feedback__navigation button:hover {
-            background: var(--clr-theme-1);
-            color: #fff;
-            border-color: transparent;
-            transform: translateY(-1px);
-          }
-        `}</style>
       </div>
     </section>
   );

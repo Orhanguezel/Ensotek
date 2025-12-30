@@ -1,14 +1,10 @@
 // =============================================================
 // FILE: src/components/containers/service/ServiceDetail.tsx
-// Ensotek – Public Service Detail Container (FINAL)
-// - Locale: ✅ useLocaleShort() (DB driven)
-// - Static texts: ui(...) + single-language fallback (TR)
-// - Hero: thumbnail click => changes hero image
-// - Hero click => opens modal at selected image
-// - Gallery: grid + captions + lightbox
-// - Quote CTA: clear button
-// - Contact: ContactCtaCard imported
-// - No duplicate "service type" in sidebar
+// UPDATED — NewsDetail sidebar pattern applied to Services
+// - ✅ Adds "Other services" sidebar block (like NewsDetail -> Other news)
+// - ✅ Uses public services list (DB) + filters current service
+// - ✅ Links are locale-aware (localizePath)
+// - ✅ No inline styles
 // =============================================================
 
 'use client';
@@ -21,30 +17,41 @@ import {
   useGetServiceBySlugPublicQuery,
   useListServiceImagesPublicQuery,
   useGetSiteSettingByKeyQuery,
+  // ✅ add list services for sidebar
+  useListServicesPublicQuery,
 } from '@/integrations/rtk/hooks';
 
 import type { ServiceImageDto } from '@/integrations/types/services.types';
 
-// ✅ Pattern
+// i18n
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
-
 import { normLocaleTag } from '@/i18n/localeUtils';
 
+// Helpers
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-import  OfferSection  from '@/components/containers/offer/OfferSection';
+// Sections / Cards
+import OfferSection from '@/components/containers/offer/OfferSection';
 import InfoContactCard from '@/components/common/public/InfoContactCard';
 
+// Lightbox (same pattern as NewsDetail)
 import ImageLightboxModal, {
   type LightboxImage,
 } from '@/components/common/public/ImageLightboxModal';
 
+// Skeletons
 import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
 
 const FALLBACK_IMG = '/img/project/project-thumb.jpg';
+
+const HERO_W = 1200;
+const HERO_H = 700;
+
+const THUMB_W = 220;
+const THUMB_H = 140;
 
 type ServiceDetailProps = { slug: string };
 
@@ -66,41 +73,46 @@ const safeUiText = (
   return s;
 };
 
+function safeStr(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
+
 const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   // ✅ DB-driven locale
   const locale = useLocaleShort() || 'de';
   const { ui } = useUiSection('ui_services', locale as any);
 
   // ✅ default_locale DB’den (fallback arama için)
-  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' });
+  const { data: defaultLocaleRow } = useGetSiteSettingByKeyQuery({ key: 'default_locale' } as any);
   const defaultLocale = useMemo(
-    () => normLocaleTag(defaultLocaleRow?.value) || 'de',
-    [defaultLocaleRow?.value],
+    () => normLocaleTag((defaultLocaleRow as any)?.value) || 'de',
+    [defaultLocaleRow],
   );
 
   const [showOfferForm, setShowOfferForm] = useState(false);
   const offerFormRef = useRef<HTMLDivElement | null>(null);
 
-  // Lightbox
+  // Gallery state (News pattern)
   const [lightboxOpen, setLightboxOpen] = useState(false);
-
-  // ✅ Selected image index (hero uses this)
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const {
     data: service,
     isLoading,
     isError,
-  } = useGetServiceBySlugPublicQuery(
-    { slug, locale, default_locale: defaultLocale },
-    { skip: !slug },
-  );
+  } = useGetServiceBySlugPublicQuery({ slug, locale, default_locale: defaultLocale } as any, {
+    skip: !slug,
+  });
+
+  const serviceId = useMemo(() => safeStr((service as any)?.id), [service]);
 
   const { data: images, isLoading: isImagesLoading } = useListServiceImagesPublicQuery(
-    service?.id
-      ? { serviceId: service.id, locale, default_locale: defaultLocale }
-      : { serviceId: '', locale, default_locale: defaultLocale },
-    { skip: !service?.id },
+    serviceId
+      ? ({ serviceId, locale, default_locale: defaultLocale } as any)
+      : ({ serviceId: '', locale, default_locale: defaultLocale } as any),
+    { skip: !serviceId },
   );
 
   const backHref = useMemo(() => localizePath(locale as any, '/service'), [locale]);
@@ -131,70 +143,92 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
 
   const gallery: ServiceImageDto[] = useMemo(() => {
     if (!Array.isArray(images)) return [];
-    return images.filter((img) => (img as any).is_active);
+    return images.filter((img) => (img as any)?.is_active);
   }, [images]);
 
+  // ✅ NewsDetail-like LightboxImage list
   const lightboxImages = useMemo<LightboxImage[]>(() => {
-    if (!gallery.length) return [];
-    return gallery
-      .map((img: any) => {
-        const rawBase = String(img.image_url || '').trim();
-        if (!rawBase) return null;
+    const out: LightboxImage[] = [];
 
-        const raw = toCdnSrc(rawBase, 1600, 1000, 'fit') || rawBase;
-        const thumb = toCdnSrc(rawBase, 560, 380, 'fill') || rawBase;
-        const alt = String(img.alt || img.title || title).trim() || title;
+    const add = (rawBase: string, alt?: string) => {
+      const base = safeStr(rawBase);
+      if (!base) return;
 
-        return { raw, thumb, alt };
-      })
-      .filter(Boolean) as LightboxImage[];
-  }, [gallery, title]);
+      const raw = toCdnSrc(base, 1600, 1200, 'fit') || base;
+      const thumb = toCdnSrc(base, THUMB_W, THUMB_H, 'fill') || base;
 
-  // ✅ keep selectedIndex valid when gallery changes
+      out.push({
+        raw,
+        thumb,
+        alt: safeStr(alt) || title || 'image',
+      });
+    };
+
+    // 1) Service featured (if exists)
+    const featured =
+      safeStr((service as any)?.featured_image_url) ||
+      safeStr((service as any)?.image_url) ||
+      safeStr((service as any)?.featured_image);
+
+    if (featured) add(featured, safeStr((service as any)?.image_alt));
+
+    // 2) Service gallery images
+    if (gallery.length) {
+      gallery.forEach((img: any) => add(safeStr(img?.image_url), safeStr(img?.alt || img?.title)));
+    }
+
+    // If nothing, fallback
+    if (!out.length) {
+      out.push({
+        raw: FALLBACK_IMG,
+        thumb: FALLBACK_IMG,
+        alt: title || 'image',
+      });
+    }
+
+    // de-dup by raw url (keep order)
+    const uniq = new Set<string>();
+    return out.filter((x) => {
+      const k = safeStr(x.raw);
+      if (!k) return false;
+      if (uniq.has(k)) return false;
+      uniq.add(k);
+      return true;
+    });
+  }, [service, gallery, title]);
+
+  // ✅ keep selectedIndex valid when list changes
   useEffect(() => {
-    if (!lightboxImages.length) {
+    const len = lightboxImages.length;
+    if (!len) {
       setSelectedIndex(0);
       return;
     }
     setSelectedIndex((prev) => {
-      const max = lightboxImages.length - 1;
       if (prev < 0) return 0;
-      if (prev > max) return max;
+      if (prev > len - 1) return len - 1;
       return prev;
     });
   }, [lightboxImages.length]);
 
-  // ✅ HERO image (selected thumbnail)
-  const heroImage = useMemo(() => {
-    // If gallery exists use selected; else fallback to service featured
-    if (lightboxImages.length) {
-      const idx = Math.max(0, Math.min(selectedIndex, lightboxImages.length - 1));
-      return lightboxImages[idx];
-    }
+  const safeActiveIdx = useMemo(() => {
+    const len = lightboxImages.length;
+    if (!len) return 0;
+    const i = selectedIndex % len;
+    return i < 0 ? i + len : i;
+  }, [selectedIndex, lightboxImages.length]);
 
-    const base =
-      (
-        (service as any)?.featured_image_url ||
-        (service as any)?.image_url ||
-        (service as any)?.featured_image ||
-        ''
-      )?.trim() || '';
+  const activeImage = lightboxImages[safeActiveIdx];
 
-    const raw = base ? toCdnSrc(base, 1200, 675, 'fill') || base : FALLBACK_IMG;
-    return {
-      raw,
-      thumb: raw,
-      alt: String((service as any)?.image_alt || title).trim() || title,
-    } as LightboxImage;
-  }, [lightboxImages, selectedIndex, service, title]);
+  const heroSrc = useMemo(() => {
+    const raw = safeStr(activeImage?.raw);
+    if (!raw) return FALLBACK_IMG;
+    return toCdnSrc(raw, HERO_W, HERO_H, 'fill') || raw;
+  }, [activeImage?.raw]);
 
-  const heroSrc = useMemo(
-    () => String(heroImage?.raw || FALLBACK_IMG).trim() || FALLBACK_IMG,
-    [heroImage],
-  );
   const heroAlt = useMemo(
-    () => String(heroImage?.alt || title).trim() || title,
-    [heroImage, title],
+    () => safeStr(activeImage?.alt) || title || 'service image',
+    [activeImage?.alt, title],
   );
 
   const hasMetaBlock = Boolean(
@@ -212,7 +246,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
       (service as any)?.soil_type || (service as any)?.thickness || (service as any)?.equipment,
     );
 
-  // ✅ Thumbnail click: change hero only
+  // ✅ Thumb click: change hero only
   const onThumbSelect = useCallback((idx: number) => {
     setSelectedIndex(idx);
   }, []);
@@ -222,6 +256,11 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
     if (!lightboxImages.length) return;
     setLightboxOpen(true);
   }, [lightboxImages.length]);
+
+  const openLightboxAt = useCallback((idx: number) => {
+    setSelectedIndex(idx);
+    setLightboxOpen(true);
+  }, []);
 
   // ✅ When lightbox index changes (next/prev), also sync hero + thumbs
   const onLightboxIndexChange = useCallback((next: number) => {
@@ -234,6 +273,52 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
     }
   }, [showOfferForm]);
 
+  // ============================================================
+  // OTHER SERVICES (DB) for sidebar — like NewsDetail "Other news"
+  // ============================================================
+  const { data: otherServicesData } = useListServicesPublicQuery(
+    {
+      locale,
+      default_locale: defaultLocale,
+      limit: 12,
+      offset: 0,
+      sort: 'created_at',
+      order: 'desc',
+      orderDir: 'desc',
+      is_active: 1,
+    } as any,
+    { skip: !safeStr(slug) },
+  );
+
+  const otherServices = useMemo(() => {
+    const raw =
+      (otherServicesData as any)?.items ??
+      (otherServicesData as any)?.data ??
+      (otherServicesData as any)?.rows ??
+      otherServicesData ??
+      [];
+
+    const arr = Array.isArray(raw) ? raw : [];
+
+    const currentSlug = safeStr(slug);
+    const currentId = safeStr(serviceId);
+
+    return arr
+      .map((x: any) => ({
+        id: safeStr(x?.id),
+        slug: safeStr(x?.slug),
+        name: safeStr(x?.name || x?.title),
+      }))
+      .filter((x) => x.slug && x.name)
+      .filter((x) => x.slug !== currentSlug && x.id !== currentId)
+      .slice(0, 8);
+  }, [otherServicesData, slug, serviceId]);
+  
+
+  const otherServicesTitle = safeUiText(ui as any, 'ui_services_other_title', 'Diğer Hizmetler', {
+    maxLen: 40,
+  });
+
   if (isLoading) {
     return (
       <div className="service__area pt-120 pb-90 ens-service__detail">
@@ -242,18 +327,18 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
             <div className="col-xl-8 col-lg-8">
               <div className="blog__content-wrapper">
                 <SkeletonStack>
-                  <SkeletonLine style={{ height: 32 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 18 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 18 }} />
-                  <SkeletonLine className="mt-20" style={{ height: 260 }} />
+                  <SkeletonLine className="ens-skel--h32" />
+                  <SkeletonLine className="mt-10 ens-skel--h18" />
+                  <SkeletonLine className="mt-10 ens-skel--h18" />
+                  <SkeletonLine className="mt-20 ens-skel--h260" />
                 </SkeletonStack>
               </div>
             </div>
             <div className="col-xl-4 col-lg-4">
               <div className="blog__content-wrapper">
                 <SkeletonStack>
-                  <SkeletonLine style={{ height: 160 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 90 }} />
+                  <SkeletonLine className="ens-skel--h160" />
+                  <SkeletonLine className="mt-10 ens-skel--h90" />
                 </SkeletonStack>
               </div>
             </div>
@@ -292,8 +377,6 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
     );
   }
 
-  const hasGallery = gallery.length > 0;
-
   const quoteBtnText = safeUiText(
     ui as any,
     'ui_services_cta_request_quote',
@@ -311,6 +394,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   const contactTitle = safeUiText(ui as any, 'ui_services_contact_title', 'İletişim', {
     maxLen: 40,
   });
+
   const contactDesc = safeUiText(
     ui as any,
     'ui_services_contact_desc',
@@ -319,8 +403,6 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
   );
 
   const galleryTitle = safeUiText(ui as any, 'ui_services_gallery_title', 'Hizmet Galerisi');
-
-  const selectedIsActive = (idx: number) => idx === selectedIndex;
 
   return (
     <div className="service__area pt-120 pb-90 ens-service__detail">
@@ -355,12 +437,11 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                 ) : null}
               </div>
 
-              {/* HERO */}
+              {/* HERO + THUMBS (NewsDetail pattern: ens-gallery__*) */}
               <div className="ens-service__hero mb-30">
-                {/* ✅ Big image click => open modal */}
                 <button
                   type="button"
-                  className="ens-service__heroBtn"
+                  className="ens-gallery__heroBtn"
                   onClick={onHeroOpenLightbox}
                   aria-label={safeUiText(ui as any, 'ui_services_gallery_open', 'Görseli büyüt')}
                   disabled={!lightboxImages.length}
@@ -370,54 +451,45 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                       : safeUiText(ui as any, 'ui_services_gallery_open', 'Görseli büyüt')
                   }
                 >
-                  <Image
-                    src={heroSrc}
-                    alt={heroAlt}
-                    width={1200}
-                    height={675}
-                    className="img-fluid w-100"
-                    priority
-                  />
+                  <div className="technical__thumb mb-20 ens-blog__hero">
+                    <Image src={heroSrc} alt={heroAlt} width={HERO_W} height={HERO_H} priority />
+                  </div>
                 </button>
 
-                {/* ✅ Thumbs: click => set hero image (NO modal) */}
-                {hasGallery && lightboxImages.length > 1 ? (
-                  <div
-                    className="ens-service__heroThumbs"
-                    aria-label={safeUiText(
-                      ui as any,
-                      'ui_services_gallery_thumbs',
-                      'Galeri küçük resimleri',
-                    )}
-                  >
-                    {lightboxImages.slice(0, 10).map((it, idx) => {
-                      const isActive = selectedIsActive(idx);
+                {lightboxImages.length > 1 && (
+                  <div className="ens-gallery__thumbs" aria-label={galleryTitle}>
+                    {lightboxImages.slice(0, 12).map((img, i) => {
+                      const src = safeStr(img.thumb || img.raw);
+                      if (!src) return null;
+
+                      const isActive = i === safeActiveIdx;
+
                       return (
                         <button
-                          key={`${it.raw}-${idx}`}
+                          key={`${img.raw}-${i}`}
                           type="button"
-                          className={`ens-service__heroThumb ${isActive ? 'is-active' : ''}`}
-                          onClick={() => onThumbSelect(idx)}
-                          aria-label={`${galleryTitle} ${idx + 1}`}
-                          title={`${galleryTitle} ${idx + 1}`}
+                          className={`ens-gallery__thumb ${isActive ? 'is-active' : ''}`}
+                          onClick={() => onThumbSelect(i)}
+                          onDoubleClick={() => openLightboxAt(i)}
+                          aria-label={`${galleryTitle} ${i + 1}`}
+                          title={`${i + 1}/${lightboxImages.length}`}
                         >
-                          <span className="ens-service__heroThumbImg">
+                          <span className="ens-gallery__thumbImg">
                             <Image
-                              src={String(it.thumb || it.raw)}
-                              alt={String(it.alt || title)}
-                              width={96}
-                              height={68}
-                              className="img-fluid"
-                              loading="lazy"
+                              src={src}
+                              alt={safeStr(img.alt) || title || 'thumbnail'}
+                              fill
+                              sizes="96px"
                             />
                           </span>
                         </button>
                       );
                     })}
                   </div>
-                ) : null}
+                )}
               </div>
 
+              {/* BODY */}
               <div className="postbox__text tp-postbox-details ens-service__body">
                 <p className="postbox__lead">{shortSummary}</p>
 
@@ -550,8 +622,8 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                   </div>
                 ) : null}
 
-                {/* Existing gallery grid stays (click opens modal) */}
-                {hasGallery ? (
+                {/* Keep existing grid gallery */}
+                {gallery.length > 0 ? (
                   <div className="ens-serviceGallery mt-40">
                     <div className="ens-serviceGallery__head">
                       <h4 className="ens-service__blockTitle mb-0">{galleryTitle}</h4>
@@ -559,28 +631,25 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
 
                     <div className="ens-serviceGallery__grid">
                       {gallery.map((img: any, idx: number) => {
-                        const base = String(img.image_url || '').trim();
+                        const base = safeStr(img?.image_url);
                         const thumb =
                           (base && (toCdnSrc(base, 620, 420, 'fill') || base)) || FALLBACK_IMG;
 
-                        const cardTitle = String(img.title || '').trim();
-                        const cardCaption = String(img.caption || '').trim();
+                        const cardTitle = safeStr(img?.title);
+                        const cardCaption = safeStr(img?.caption);
 
                         return (
                           <button
                             type="button"
-                            key={String(img.id || idx)}
+                            key={String(img?.id || idx)}
                             className="ens-serviceGallery__card"
-                            onClick={() => {
-                              setSelectedIndex(idx);
-                              setLightboxOpen(true);
-                            }}
+                            onClick={() => openLightboxAt(idx)}
                             aria-label={`${galleryTitle} ${idx + 1}`}
                           >
                             <span className="ens-serviceGallery__img">
                               <Image
                                 src={thumb}
-                                alt={String(img.alt || cardTitle || title)}
+                                alt={safeStr(img?.alt || cardTitle || title)}
                                 width={620}
                                 height={420}
                                 className="img-fluid"
@@ -606,7 +675,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                     {isImagesLoading ? (
                       <div className="mt-10" aria-hidden>
                         <SkeletonStack>
-                          <SkeletonLine style={{ height: 8 }} />
+                          <SkeletonLine className="ens-skel--h8" />
                         </SkeletonStack>
                       </div>
                     ) : null}
@@ -622,27 +691,62 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT SIDEBAR — NewsDetail pattern */}
           <div className="col-xl-4 col-lg-4">
-            <aside className="blog__thumb-wrapper">
-              <div className="blog__content-wrapper">
-                <button
-                  type="button"
-                  className="ens-service__quoteBtn"
-                  onClick={() => setShowOfferForm(true)}
-                >
-                  <span className="ens-service__quoteBtnIcon" aria-hidden>
-                    +
-                  </span>
-                  <span className="ens-service__quoteBtnText">{quoteBtnText}</span>
-                </button>
+            <div className="sideber__widget">
+              {/* ✅ Other services */}
+              <div className="sideber__widget-item mb-40">
+                <div className="sidebar__category">
+                  <div className="sidebar__contact-title mb-35">
+                    <h3>{otherServicesTitle}</h3>
+                  </div>
 
-                <div className="postbox__text mt-15">
-                  <p className="mb-0">{moreInfoText}</p>
+                  <ul>
+                    {otherServices.length > 0 ? (
+                      otherServices.map((s) => (
+                        <li key={s.slug}>
+                          <Link
+                            href={localizePath(
+                              locale as any,
+                              `/service/${encodeURIComponent(s.slug)}`,
+                            )}
+                            aria-label={s.name}
+                          >
+                            {s.name}
+                          </Link>
+                        </li>
+                      ))
+                    ) : (
+                      <li>
+                        <span>-</span>
+                      </li>
+                    )}
+                  </ul>
                 </div>
               </div>
 
-              <div className="blog__content-wrapper">
+              {/* CTA / Quote */}
+              <div className="sideber__widget-item mb-40">
+                <div className="blog__content-wrapper">
+                  <button
+                    type="button"
+                    className="ens-service__quoteBtn"
+                    onClick={() => setShowOfferForm(true)}
+                  >
+                    <span className="ens-service__quoteBtnIcon" aria-hidden>
+                      +
+                    </span>
+                    <span className="ens-service__quoteBtnText">{quoteBtnText}</span>
+                  </button>
+
+                  <div className="postbox__text mt-15">
+                    <p className="mb-0">{moreInfoText}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact */}
+              <div className="sideber__widget-item mb-40">
                 <InfoContactCard
                   locale={locale}
                   title={contactTitle}
@@ -653,20 +757,20 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                   contactHref={localizePath(locale as any, '/contact')}
                 />
               </div>
-            </aside>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* ✅ Lightbox: index synced with selectedIndex */}
+      {/* ✅ Lightbox modal (index synced) */}
       <ImageLightboxModal
         open={lightboxOpen}
         images={lightboxImages}
-        index={selectedIndex}
-        title={galleryTitle}
+        index={safeActiveIdx}
+        title={title}
         onClose={() => setLightboxOpen(false)}
         onIndexChange={onLightboxIndexChange}
-        showThumbs
+        showThumbs={true}
       />
     </div>
   );

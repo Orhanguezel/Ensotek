@@ -60,7 +60,7 @@ function buildLocaleLabel(item: { code: string; label?: string }): string {
 
   let dn: Intl.DisplayNames | null = null;
   try {
-    dn = new Intl.DisplayNames(['en'], { type: 'language' });
+    dn = new Intl.DisplayNames(['de'], { type: 'language' });
   } catch {
     dn = null;
   }

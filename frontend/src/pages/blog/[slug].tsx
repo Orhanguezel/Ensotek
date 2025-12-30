@@ -15,7 +15,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import Banner from '@/components/layout/banner/Breadcrum';
-import BlogDetailsArea from '@/components/containers/blog/BlogDetailsArea';
+import BlogDetailsArea from '@/components/containers/blog/BlogDetails';
 import Feedback from '@/components/containers/feedback/Feedback';
 
 // i18n

@@ -124,8 +124,8 @@ export default function SocialShare(props: SocialShareProps) {
     skip: !props.showCompanySocials || !locale,
   });
 
-  const { data: socialsEn } = useGetSiteSettingByKeyQuery({ key: 'socials', locale: 'en' } as any, {
-    skip: !props.showCompanySocials || !locale || locale === 'en',
+  const { data: socialsEn } = useGetSiteSettingByKeyQuery({ key: 'socials', locale: 'de' } as any, {
+    skip: !props.showCompanySocials || !locale || locale === 'de',
   });
 
   const companySocials = useMemo<Socials>(() => {

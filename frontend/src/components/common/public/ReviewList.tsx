@@ -49,7 +49,7 @@ const ReviewList: React.FC<ReviewListProps> = ({
 }) => {
   // FE locale (prop öncelikli)
   const resolvedLocale = useResolvedLocale();
-  const locale = (localeProp || resolvedLocale) ?? 'en';
+  const locale = (localeProp || resolvedLocale) ?? 'de';
 
   const { ui } = useUiSection('ui_feedback', locale);
 
