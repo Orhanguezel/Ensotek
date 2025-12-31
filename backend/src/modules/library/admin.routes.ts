@@ -1,7 +1,8 @@
 // src/modules/library/admin.routes.ts
 // =============================================================
 
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance } from 'fastify';
+
 import {
   listLibraryAdmin,
   getLibraryAdmin,
@@ -13,59 +14,28 @@ import {
   createLibraryImageAdmin,
   updateLibraryImageAdmin,
   removeLibraryImageAdmin,
+  reorderLibraryAdmin,
   listLibraryFilesAdmin,
   createLibraryFileAdmin,
   updateLibraryFileAdmin,
   removeLibraryFileAdmin,
-} from "./admin.controller";
+} from './admin.controller';
 
-const BASE = "/library";
+const BASE = '/library';
 
 export async function registerLibraryAdmin(app: FastifyInstance) {
   // library
-  app.get(
-    `${BASE}`,
-    { config: { auth: true, admin: true } },
-    listLibraryAdmin,
-  );
-  app.get(
-    `${BASE}/:id`,
-    { config: { auth: true, admin: true } },
-    getLibraryAdmin,
-  );
-  app.get(
-    `${BASE}/by-slug/:slug`,
-    { config: { auth: true, admin: true } },
-    getLibraryBySlugAdmin,
-  );
+  app.get(`${BASE}`, { config: { auth: true, admin: true } }, listLibraryAdmin);
+  app.get(`${BASE}/:id`, { config: { auth: true, admin: true } }, getLibraryAdmin);
+  app.get(`${BASE}/by-slug/:slug`, { config: { auth: true, admin: true } }, getLibraryBySlugAdmin);
 
-  app.post(
-    `${BASE}`,
-    { config: { auth: true, admin: true } },
-    createLibraryAdmin,
-  );
-  app.patch(
-    `${BASE}/:id`,
-    { config: { auth: true, admin: true } },
-    updateLibraryAdmin,
-  );
-  app.delete(
-    `${BASE}/:id`,
-    { config: { auth: true, admin: true } },
-    removeLibraryAdmin,
-  );
+  app.post(`${BASE}`, { config: { auth: true, admin: true } }, createLibraryAdmin);
+  app.patch(`${BASE}/:id`, { config: { auth: true, admin: true } }, updateLibraryAdmin);
+  app.delete(`${BASE}/:id`, { config: { auth: true, admin: true } }, removeLibraryAdmin);
 
-  // images
-  app.get(
-    `${BASE}/:id/images`,
-    { config: { auth: true, admin: true } },
-    listLibraryImagesAdmin,
-  );
-  app.post(
-    `${BASE}/:id/images`,
-    { config: { auth: true, admin: true } },
-    createLibraryImageAdmin,
-  );
+  // gallery
+  app.get(`${BASE}/:id/images`, { config: { auth: true, admin: true } }, listLibraryImagesAdmin);
+  app.post(`${BASE}/:id/images`, { config: { auth: true, admin: true } }, createLibraryImageAdmin);
   app.patch(
     `${BASE}/:id/images/:imageId`,
     { config: { auth: true, admin: true } },
@@ -77,17 +47,12 @@ export async function registerLibraryAdmin(app: FastifyInstance) {
     removeLibraryImageAdmin,
   );
 
+  // reorder (display_order)
+  app.post(`${BASE}/reorder`, { config: { auth: true, admin: true } }, reorderLibraryAdmin);
+
   // files
-  app.get(
-    `${BASE}/:id/files`,
-    { config: { auth: true, admin: true } },
-    listLibraryFilesAdmin,
-  );
-  app.post(
-    `${BASE}/:id/files`,
-    { config: { auth: true, admin: true } },
-    createLibraryFileAdmin,
-  );
+  app.get(`${BASE}/:id/files`, { config: { auth: true, admin: true } }, listLibraryFilesAdmin);
+  app.post(`${BASE}/:id/files`, { config: { auth: true, admin: true } }, createLibraryFileAdmin);
   app.patch(
     `${BASE}/:id/files/:fileId`,
     { config: { auth: true, admin: true } },

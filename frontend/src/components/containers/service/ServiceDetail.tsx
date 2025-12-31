@@ -752,8 +752,6 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                   title={contactTitle}
                   description={contactDesc}
                   phoneLabel={safeUiText(ui as any, 'ui_services_contact_phone', 'Telefon')}
-                  whatsappLabel={safeUiText(ui as any, 'ui_services_contact_whatsapp', 'WhatsApp')}
-                  formLabel={safeUiText(ui as any, 'ui_services_contact_form', 'İletişim Formu')}
                   contactHref={localizePath(locale as any, '/contact')}
                 />
               </div>

@@ -1,79 +1,108 @@
 // =============================================================
 // FILE: src/integrations/types/library.types.ts
-// Ensotek – Library tipleri (DB/DTO + payloadlar)
+// Ensotek – Library tipleri (DB/DTO + payloadlar) [SCHEMA-SAFE]
+// - Matches: src/modules/library/schema.ts + validation.ts
+// - Endpoints: public + admin routes (router.ts / admin.routes.ts)
 // =============================================================
 
-/**
- * Backend'deki boolLike ile uyumlu tip
- */
 export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
 
-/**
- * Backend'deki LibraryView ile bire bir DTO
- * (listLibraries / getLibrary* controller çıktısı)
- */
+/* =============================================================
+ * DTOs (response contracts)
+ * NOTE:
+ * - Controller “view” alanları ekliyorsa (resolved urls vb.)
+ *   bu tipler genişletilebilir.
+ * ============================================================= */
+
 export interface LibraryDto {
   id: string;
 
+  // parent
+  type: string;
+
+  category_id: string | null;
+  sub_category_id: string | null;
+
+  featured: 0 | 1;
   is_published: 0 | 1;
   is_active: 0 | 1;
   display_order: number;
 
-  /**
-   * Backend'deki LibraryView.tags
-   * - library.tags_json kolonundan çözümlenmiş dizi
-   * - Çok dilli yapı ({"de":[...],"en":[...]}) backend içinde
-   *   locale-aware şekilde string[]'e indirgeniyor.
-   * - FE tarafında her zaman string[] veya null gelir.
-   */
-  tags: string[] | null;
+  featured_image: string | null;
+  image_url: string | null;
+  image_asset_id: string | null;
 
-  // 🔗 Kategori bilgiler
-  category_id: string | null;
-  /** category_i18n üzerinden coalesced isim */
-  category_name: string | null;
-  /** category_i18n üzerinden coalesced slug */
-  category_slug: string | null;
-
-  // 🔗 Alt kategori bilgiler
-  sub_category_id: string | null;
-  /** sub_category_i18n üzerinden coalesced isim */
-  sub_category_name: string | null;
-  /** sub_category_i18n üzerinden coalesced slug */
-  sub_category_slug: string | null;
-
-  author: string | null;
-  /** Tüm sayfa görüntüleme / dosya indirmeleri vs. üzerinden artan sayaç */
   views: number;
   download_count: number;
 
-  /** ISO string – backend string’e çevirip gönderiyor */
   published_at: string | null;
+  created_at: string;
+  updated_at: string;
 
-  created_at: string | Date;
-  updated_at: string | Date;
-
-  // i18n alanları (library_i18n join)
-  title: string | null;
+  // i18n (library_i18n joined for resolved locale)
+  locale: string | null;
   slug: string | null;
-  summary: string | null;
+  name: string | null;
+  description: string | null;
+  image_alt: string | null;
 
-  /** packContent(JSON-string) – şimdilik string olarak kullanıyoruz */
-  content: string | null;
+  tags: string | null; // library_i18n.tags (varchar 255) – comma string or free string
 
   meta_title: string | null;
   meta_description: string | null;
+  meta_keywords: string | null;
 
-  /** hangi locale’den resolve edildi (req vs default) */
-  locale_resolved: string | null;
+  /** backend resolve bilgisi döndürüyorsa (opsiyonel) */
+  locale_resolved?: string | null;
 }
 
-/**
- * LIST query parametreleri
- * (libraryListQuerySchema + public ListQuery ile uyumlu)
- */
+export interface LibraryImageDto {
+  id: string;
+  library_id: string;
+
+  image_asset_id: string | null;
+  image_url: string | null;
+
+  is_active: 0 | 1;
+  display_order: number;
+
+  created_at: string;
+  updated_at: string;
+
+  // i18n (library_images_i18n resolved)
+  locale: string | null;
+  title: string | null;
+  alt: string | null;
+  caption: string | null;
+}
+
+export interface LibraryFileDto {
+  id: string;
+  library_id: string;
+
+  asset_id: string | null;
+  file_url: string | null;
+
+  name: string;
+
+  size_bytes: number | null;
+  mime_type: string | null;
+
+  /** JSON-string in DB; controllers typically deserialize to string[] */
+  tags: string[] | null;
+
+  display_order: number;
+  is_active: 0 | 1;
+
+  created_at: string;
+  updated_at: string;
+}
+
+/* =============================================================
+ * LIST Query Params (validation.ts ile uyumlu)
+ * ============================================================= */
+
 export interface LibraryListQueryParams {
-  /** "created_at.asc" gibi birleşik order paramı (opsiyonel) */
   order?: string;
   sort?:
     | 'created_at'
@@ -87,270 +116,170 @@ export interface LibraryListQueryParams {
   limit?: number;
   offset?: number;
 
-  is_published?: BoolLike;
-  is_active?: BoolLike;
-
   q?: string;
-  slug?: string;
-  select?: string;
 
-  // 🔗 Kategori filtreleri
+  type?: string;
+
   category_id?: string;
   sub_category_id?: string;
 
-  // 🔗 Module filtresi: categories.module_key üzerinden
   module_key?: string;
 
-  author?: string;
-
-  locale?: string;
+  featured?: BoolLike;
+  is_published?: BoolLike;
+  is_active?: BoolLike;
 
   published_before?: string; // ISO datetime
   published_after?: string; // ISO datetime
+
+  locale?: string;
+  default_locale?: string;
 }
 
-/**
- * Public list için de aynı query tipini kullanıyoruz.
- */
-export type LibraryPublicListQueryParams = LibraryListQueryParams;
+export type LibraryPublicListQueryParams = Omit<
+  LibraryListQueryParams,
+  'is_published' | 'is_active'
+>;
 
-/* ============== CREATE / UPDATE payload (library) ============== */
+/* =============================================================
+ * Payloads – Library (parent + i18n combined)
+ * - Matches: upsertLibraryBodySchema / patchLibraryBodySchema
+ * ============================================================= */
 
-/**
- * Create payload – upsertLibraryBodySchema ile uyumlu
- * (parent + i18n birleşik)
- */
 export interface LibraryCreatePayload {
   // parent
-  is_published?: BoolLike; // default false
-  is_active?: BoolLike; // default true
-  display_order?: number;
-
-  /**
-   * tags_json kolonuna yazılacak etiketler
-   * - Düz string[] gönderirsen backend bunları JSON-string'e çevirir.
-   * - Çok dilli seed'te {tr:[...],en:[...]} yapısı da destekleniyor,
-   *   ama o durumda DB'ye direkt SQL ile yazıyorsun.
-   */
-  tags?: string[];
+  type?: string;
 
   category_id?: string | null;
   sub_category_id?: string | null;
 
-  author?: string | null;
+  featured?: BoolLike;
+  is_published?: BoolLike;
+  is_active?: BoolLike;
+  display_order?: number;
 
-  /** ISO datetime string veya null */
+  featured_image?: string | null;
+  image_url?: string | null;
+  image_asset_id?: string | null;
+
   published_at?: string | null;
 
   // i18n
   locale?: string;
 
-  title?: string;
+  name?: string;
   slug?: string;
 
-  summary?: string | null;
+  description?: string | null;
+  image_alt?: string | null;
 
-  /** HTML metin veya {"html": "..."} gibi JSON-string */
-  content?: string;
-
+  tags?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
+  meta_keywords?: string | null;
 
-  /** create: tüm dillere kopyala? (default: true) */
   replicate_all_locales?: boolean;
 }
 
-/**
- * Update payload – patchLibraryBodySchema ile uyumlu
- * (partial + apply_all_locales)
- */
 export interface LibraryUpdatePayload {
-  // parent (hepsi opsiyonel)
-  is_published?: BoolLike;
-  is_active?: BoolLike;
-  display_order?: number;
-
-  /** null verilirse tags_json = NULL yapılır */
-  tags?: string[] | null;
+  // parent (partial)
+  type?: string;
 
   category_id?: string | null;
   sub_category_id?: string | null;
 
-  author?: string | null;
+  featured?: BoolLike;
+  is_published?: BoolLike;
+  is_active?: BoolLike;
+  display_order?: number;
+
+  featured_image?: string | null;
+  image_url?: string | null;
+  image_asset_id?: string | null;
 
   published_at?: string | null;
 
-  // i18n (hepsi opsiyonel)
+  // i18n (partial)
   locale?: string;
 
-  title?: string;
+  name?: string;
   slug?: string;
 
-  summary?: string | null;
-  content?: string;
+  description?: string | null;
+  image_alt?: string | null;
+
+  tags?: string | null;
   meta_title?: string | null;
   meta_description?: string | null;
+  meta_keywords?: string | null;
 
-  /** patch: tüm dillere uygula? (default: false) */
   apply_all_locales?: boolean;
 }
 
-/* ============== IMAGES DTO + payload ============== */
+/* =============================================================
+ * Payloads – Images (library_images + i18n inline)
+ * - Matches: upsertLibraryImageBodySchema / patchLibraryImageBodySchema
+ * ============================================================= */
 
-/**
- * Backend'deki LibraryImageView ile bire bir DTO
- * - Her tür görsel için kullanılabilir (kapak, galeri vs.)
- */
-export interface LibraryImageDto {
-  id: string;
-  library_id: string;
-  asset_id: string;
-
-  /** resolved url (image_url veya storage publicUrl) */
-  url: string | null;
-  /** thumb_url veya url */
-  thumbnail: string | null;
-  /** webp_url veya null */
-  webp: string | null;
-
-  /** library_images_i18n.alt */
-  alt: string | null;
-  /** library_images_i18n.caption */
-  caption: string | null;
-
-  display_order: number;
-  is_active: 0 | 1;
-
-  created_at: string | Date;
-  updated_at: string | Date;
-
-  asset?: {
-    bucket: string;
-    path: string;
-    url: string | null;
-    width: number | null;
-    height: number | null;
-    mime: string | null;
-  } | null;
-}
-
-/**
- * Create payload – upsertLibraryImageBodySchema ile uyumlu
- * (parent + i18n)
- */
 export interface LibraryImageCreatePayload {
-  asset_id: string;
-
+  image_asset_id?: string | null;
   image_url?: string | null;
-  thumb_url?: string | null;
-  webp_url?: string | null;
-  display_order?: number;
+
   is_active?: BoolLike;
+  display_order?: number;
 
   locale?: string;
+  title?: string | null;
   alt?: string | null;
   caption?: string | null;
 
-  /** create: tüm dillere kopyala? (default: true) */
   replicate_all_locales?: boolean;
 }
 
-/**
- * Update payload – patchLibraryImageBodySchema ile uyumlu
- */
 export interface LibraryImageUpdatePayload {
-  asset_id?: string;
+  image_asset_id?: string | null;
   image_url?: string | null;
-  thumb_url?: string | null;
-  webp_url?: string | null;
-  display_order?: number;
+
   is_active?: BoolLike;
+  display_order?: number;
 
   locale?: string;
+  title?: string | null;
   alt?: string | null;
   caption?: string | null;
 
-  /** patch: tüm dillere uygula? (default: false) */
   apply_all_locales?: boolean;
 }
 
-/* ============== FILES DTO + payload ============== */
+/* =============================================================
+ * Payloads – Files (library_files)
+ * - Matches: upsertLibraryFileBodySchema / patchLibraryFileBodySchema
+ * ============================================================= */
 
-/**
- * Backend'deki LibraryFileView ile bire bir DTO
- *
- * Burada PDF, Word, Excel, ZIP vs. her tür dosya için:
- *  - url: storage public URL veya file_url
- *  - mime_type: "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" vb.
- *  - name: kullanıcıya gösterilecek dosya adı
- */
-export interface LibraryFileDto {
-  id: string;
-  library_id: string;
-  asset_id: string;
-
-  /** resolved url (file_url veya storage publicUrl) – indirilebilir link */
-  url: string | null;
-
-  /** library_files.name – kullanıcıya gösterilen isim (örn: "Katalog 2025.pdf") */
-  name: string;
-
-  size_bytes: number | null;
-  mime_type: string | null;
-
-  /**
-   * Backend'deki LibraryFileView.tags
-   * - library_files.tags_json kolonundan çözümlenmiş dizi
-   * - Şu an için locale bağımsız, düz string[] veya null.
-   */
-  tags: string[] | null;
-
-  display_order: number;
-  is_active: 0 | 1;
-
-  created_at: string | Date;
-  updated_at: string | Date;
-
-  asset?: {
-    bucket: string;
-    path: string;
-    url: string | null;
-    mime: string | null;
-  } | null;
-}
-
-/**
- * Create payload – upsertLibraryFileParentBodySchema ile uyumlu
- * (dosya tarafında i18n yok, sadece parent)
- *
- * asset_id: storage modülünden gelen id
- * file_url: istersen override için manuel URL (çoğunlukla null bırakılabilir)
- */
 export interface LibraryFileCreatePayload {
-  asset_id: string;
+  asset_id?: string | null;
   file_url?: string | null;
+
   name: string;
+
   size_bytes?: number | null;
   mime_type?: string | null;
 
-  /** tags_json'a yazılacak etiketler (locale bağımsız) */
   tags?: string[];
 
   display_order?: number;
   is_active?: BoolLike;
 }
 
-/**
- * Update payload – patchLibraryFileParentBodySchema ile uyumlu
- */
 export interface LibraryFileUpdatePayload {
-  asset_id?: string;
+  asset_id?: string | null;
   file_url?: string | null;
+
   name?: string;
+
   size_bytes?: number | null;
   mime_type?: string | null;
 
-  /** null → tags_json = NULL, [] → "[]" */
   tags?: string[] | null;
 
   display_order?: number;

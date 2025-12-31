@@ -11,7 +11,6 @@
 
 import React, { useMemo } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
@@ -59,9 +58,6 @@ export type InfoContactCardProps = {
   showAddress?: boolean; // default true
   showWebsite?: boolean; // default false
   showWhatsapp?: boolean; // default true
-
-  // optional: show/hide CTA buttons
-  showCtas?: boolean; // default true
 };
 
 function safeStr(v: unknown): string {
@@ -103,7 +99,6 @@ const InfoContactCard: React.FC<InfoContactCardProps> = ({
 
   phoneLabel = 'Telefon',
   whatsappLabel = 'WhatsApp',
-  formLabel = 'İletişim Formu',
 
   contactHref,
 
@@ -115,8 +110,6 @@ const InfoContactCard: React.FC<InfoContactCardProps> = ({
   showAddress = true,
   showWebsite = false,
   showWhatsapp = true,
-
-  showCtas = true,
 }) => {
   const loc = safeStr(locale);
 
@@ -270,23 +263,6 @@ const InfoContactCard: React.FC<InfoContactCardProps> = ({
                   </a>
                 </span>
               </div>
-            </div>
-          ) : null}
-
-          {/* CTA Buttons (optional) */}
-          {showCtas ? (
-            <div className="mt-20">
-              {waHref ? (
-                <a className="tp-btn w-100 mb-10" href={waHref} target="_blank" rel="noreferrer">
-                  {whatsappLabel}
-                </a>
-              ) : null}
-
-              {contactHref ? (
-                <Link className="tp-btn tp-btn-2 w-100" href={contactHref}>
-                  {formLabel}
-                </Link>
-              ) : null}
             </div>
           ) : null}
         </div>

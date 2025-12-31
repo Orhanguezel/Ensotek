@@ -3,7 +3,7 @@
 // Ensotek – Library Detail Page (by slug) + SEO (HOOK-SAFE)
 //   - Route: /library/[slug]
 //   - i18n: useLocaleShort() + site_settings.ui_library
-//   - SEO: seo -> site_seo fallback + library.meta_* override (NO canonical here)
+//   - SEO: seo -> site_seo fallback + library.meta* override (NO canonical here)
 //   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
 
@@ -66,11 +66,11 @@ const LibraryDetailPage: React.FC = () => {
     data?: LibraryDto;
   };
 
-  // Banner title: item.title -> fallback
+  // Banner title: item.name -> fallback
   const bannerTitle = useMemo(() => {
-    const t = String((item as any)?.title ?? '').trim();
+    const t = String(item?.name ?? '').trim();
     return t || detailTitleFallback || listTitleFallback;
-  }, [item, detailTitleFallback, listTitleFallback]);
+  }, [item?.name, detailTitleFallback, listTitleFallback]);
 
   const seoSiteName = useMemo(() => String(seo?.site_name ?? '').trim() || 'Ensotek', [seo]);
   const titleTemplate = useMemo(
@@ -82,29 +82,22 @@ const LibraryDetailPage: React.FC = () => {
   const pageTitleRaw = useMemo(() => {
     if (!isSlugReady) return String(listTitleFallback || '').trim() || 'Library';
 
-    const metaTitle = String((item as any)?.meta_title ?? '').trim();
-    const title = String((item as any)?.title ?? '').trim();
+    const metaTitle = String(item?.meta_title ?? '').trim();
+    const name = String(item?.name ?? '').trim();
 
-    return metaTitle || title || String(bannerTitle || '').trim() || 'Library';
-  }, [isSlugReady, listTitleFallback, item, bannerTitle]);
+    return metaTitle || name || String(bannerTitle || '').trim() || 'Library';
+  }, [isSlugReady, listTitleFallback, item?.meta_title, item?.name, bannerTitle]);
 
   const pageDescRaw = useMemo(() => {
     const globalDesc = String(seo?.description ?? '').trim() || '';
 
     if (!isSlugReady) return globalDesc;
 
-    const metaDesc = String((item as any)?.meta_description ?? '').trim();
-    const summary = String((item as any)?.summary ?? '').trim();
-    const contentHtml = String((item as any)?.content_html ?? '').trim();
+    const metaDesc = String(item?.meta_description ?? '').trim();
+    const desc = String(item?.description ?? '').trim();
 
-    return (
-      metaDesc ||
-      summary ||
-      (contentHtml ? excerpt(contentHtml, 160).trim() : '') ||
-      globalDesc ||
-      ''
-    );
-  }, [isSlugReady, item, seo?.description]);
+    return metaDesc || (desc ? excerpt(desc, 160).trim() : '') || globalDesc || '';
+  }, [isSlugReady, item?.meta_description, item?.description, seo?.description]);
 
   const pageTitle = useMemo(() => {
     const t = titleTemplate.includes('%s')
@@ -119,11 +112,12 @@ const LibraryDetailPage: React.FC = () => {
 
     if (!isSlugReady) return fallback || absUrl('/favicon.svg');
 
-    const rawImg = String((item as any)?.featured_image ?? (item as any)?.image_url ?? '').trim();
+    // Backend DTO fields (schema-safe)
+    const rawImg = String(item?.featured_image ?? item?.image_url ?? '').trim();
     const img = rawImg ? toCdnSrc(rawImg, 1200, 630, 'fill') || rawImg : '';
 
     return (img && absUrl(img)) || fallback || absUrl('/favicon.svg');
-  }, [isSlugReady, item, seo]);
+  }, [isSlugReady, item?.featured_image, item?.image_url, seo]);
 
   const headSpecs = useMemo(() => {
     const tw = asObj(seo?.twitter) || {};

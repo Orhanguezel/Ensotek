@@ -32,14 +32,10 @@ const LibraryPage: React.FC = () => {
 
   const { ui } = useUiSection('ui_library', locale as any);
 
-  // ======================
   // Banner title (UI)
-  // ======================
   const bannerTitle = ui('ui_library_page_title', 'Library');
 
-  // ======================
   // Global SEO settings (seo -> site_seo fallback)
-  // ======================
   const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
   const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
 
@@ -48,9 +44,7 @@ const LibraryPage: React.FC = () => {
     return asObj(raw) ?? {};
   }, [seoPrimary?.value, seoFallback?.value]);
 
-  // ======================
   // SEO fields (page-level)
-  // ======================
   const pageTitleRaw = useMemo(() => {
     const t = String(ui('ui_library_meta_title', '') || '').trim();
     return t || String(bannerTitle || '').trim() || 'Library';

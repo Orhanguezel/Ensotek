@@ -1,20 +1,21 @@
 // =============================================================
 // FILE: src/components/admin/library/LibraryFormHeader.tsx
-// Ensotek – Library Form Header
+// Ensotek – Library Form Header (Create/Edit + Mode Switch)
 // =============================================================
 
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
-export type LibraryFormEditMode = "form" | "json";
+export type LibraryFormEditMode = 'form' | 'json';
 
 export type LibraryFormHeaderProps = {
-  mode: "create" | "edit";
+  mode: 'create' | 'edit';
   editMode: LibraryFormEditMode;
-  saving: boolean;
+  saving?: boolean;
+
   onChangeEditMode: (m: LibraryFormEditMode) => void;
-  onCancel: () => void;
+  onCancel?: () => void;
 };
 
 export const LibraryFormHeader: React.FC<LibraryFormHeaderProps> = ({
@@ -25,53 +26,44 @@ export const LibraryFormHeader: React.FC<LibraryFormHeaderProps> = ({
   onCancel,
 }) => {
   return (
-    <div className="card-header d-flex justify-content-between align-items-center">
-      <div>
-        <h5 className="mb-0">
-          {mode === "create"
-            ? "Yeni Library Kaydı Oluştur"
-            : "Library Kaydını Düzenle"}
-        </h5>
-        <small className="text-muted">
-          Form modunda alanları klasik form üzerinden; JSON modunda ise create /
-          update payload&apos;ını doğrudan JSON olarak yönetebilirsin.
-        </small>
+    <div className="card-header d-flex flex-column flex-md-row justify-content-between align-items-start gap-2">
+      <div className="ensotek-min-w-0">
+        <div className="fw-semibold">
+          {mode === 'create' ? 'Yeni Library Kaydı' : 'Library Kaydı Düzenle'}
+        </div>
+        <div className="text-muted small">Form veya JSON modunda düzenleyebilirsin.</div>
       </div>
 
-      <div className="d-flex gap-2 align-items-center">
+      <div className="d-flex align-items-center gap-2 flex-wrap justify-content-md-end">
         <div className="btn-group btn-group-sm">
           <button
             type="button"
-            className={
-              "btn btn-outline-primary " +
-              (editMode === "form" ? "active" : "")
-            }
-            disabled={saving}
-            onClick={() => onChangeEditMode("form")}
+            className={'btn btn-outline-secondary' + (editMode === 'form' ? ' active' : '')}
+            onClick={() => onChangeEditMode('form')}
+            disabled={!!saving}
           >
             Form
           </button>
           <button
             type="button"
-            className={
-              "btn btn-outline-primary " +
-              (editMode === "json" ? "active" : "")
-            }
-            disabled={saving}
-            onClick={() => onChangeEditMode("json")}
+            className={'btn btn-outline-secondary' + (editMode === 'json' ? ' active' : '')}
+            onClick={() => onChangeEditMode('json')}
+            disabled={!!saving}
           >
             JSON
           </button>
         </div>
 
-        <button
-          type="button"
-          className="btn btn-outline-secondary btn-sm"
-          disabled={saving}
-          onClick={onCancel}
-        >
-          ← Geri
-        </button>
+        {onCancel && (
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm"
+            onClick={onCancel}
+            disabled={!!saving}
+          >
+            Geri
+          </button>
+        )}
       </div>
     </div>
   );

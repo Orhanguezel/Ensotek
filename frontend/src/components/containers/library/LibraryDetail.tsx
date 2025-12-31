@@ -1,13 +1,16 @@
 // =============================================================
 // FILE: src/components/containers/library/LibraryDetail.tsx
-// Ensotek – Library Detail (NewsDetail pattern aligned) [FINAL]
-// - Main: hero + thumbs under hero + content (LEFT)
-// - Sidebar: Downloads (only if exists) + Share + Reviews + Contact (RIGHT)
+// Ensotek – Library Detail (NewsDetail style aligned) [FINAL / SCHEMA-SAFE]
+// - Main: Hero + thumbs (multi-image) + content (LEFT)
+// - Sidebar: Other documents + Downloads (ONLY if any downloadable file_url exists) + Share + Reviews + Contact + Image (RIGHT)
 // - Lightbox: hero/thumb click => modal
 // - i18n: useLocaleShort + useUiSection('ui_library', locale as any) + EN fallback only
 // - NO inline styles, NO styled-jsx
 // - Router-safe: skip queries until slug ready
-// - ✅ Fix: next/image src "[object Object]" crash (StaticImageData normalization)
+// - ✅ Uses FIXED types: LibraryDto / LibraryImageDto / LibraryFileDto
+// - ✅ Fix: next/image src "[object Object]" crash
+// - ✅ PDF preview: if a PDF exists, show iframe preview in hero area
+// - ✅ NEW: Other documents list (BlogDetails "Other blogs" pattern)
 // =============================================================
 
 'use client';
@@ -21,20 +24,31 @@ import {
   useGetLibraryBySlugQuery,
   useListLibraryImagesQuery,
   useListLibraryFilesQuery,
+
+  // ✅ NEW: list other docs (public list)
+  // Not: Hook adı projende farklıysa burada sadece ismi düzelt.
+  useListLibraryQuery,
 } from '@/integrations/rtk/hooks';
+
+import type {
+  LibraryDto,
+  LibraryImageDto,
+  LibraryFileDto,
+} from '@/integrations/types/library.types';
 
 // Helpers
 import { toCdnSrc } from '@/shared/media';
 import { stripHtml } from '@/shared/text';
 
-// i18n (PATTERN)
+// i18n
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
-// Share + Reviews
-import SocialShare from '@/components/common/public/SocialShare';
+// Reviews + Share
 import ReviewList from '@/components/common/public/ReviewList';
 import ReviewForm from '@/components/common/public/ReviewForm';
+import SocialShare from '@/components/common/public/SocialShare';
 
 // Lightbox
 import ImageLightboxModal, {
@@ -44,8 +58,10 @@ import ImageLightboxModal, {
 // Contact
 import InfoContactCard from '@/components/common/public/InfoContactCard';
 
+// PDF Preview (public)
+import LibraryPdfPreview from '@/components/containers/library/LibraryPdfPreview';
+
 // Assets
-import ShapePattern from 'public/img/shape/features-shape.png';
 import SidebarImage from 'public/img/others/sidebar.jpg';
 import FallbackCover from 'public/img/blog/3/1.jpg';
 
@@ -77,81 +93,93 @@ type NextImageLike = string | StaticImageData | { src?: string } | null | undefi
 function normalizeImgSrc(v: NextImageLike): string {
   if (!v) return '';
   if (typeof v === 'string') return v.trim();
-  if (typeof v === 'object' && typeof (v as any).src === 'string')
+  if (typeof v === 'object' && typeof (v as any).src === 'string') {
     return String((v as any).src).trim();
+  }
   return '';
 }
 
+function isPdfUrl(u: string): boolean {
+  const s = safeStr(u).toLowerCase();
+  if (!s) return false;
+  if (s.includes('application/pdf')) return true;
+  return /\.pdf(\?|#|$)/i.test(s);
+}
+
 /**
- * localizePath yerine:
- * - locale varsa: "/de/library" "/tr/library"
- * - locale yoksa: "/library"
+ * Tailwind / inline presentation temizliği:
+ * - class/style attr kaldır
+ * - ilk h1'i düşür (sayfa başlığını component basıyor)
  */
-function withLocale(locale: string, path: string): string {
-  const loc = safeStr(locale);
-  const p = path.startsWith('/') ? path : `/${path}`;
-  if (!loc) return p;
-  if (p === `/${loc}` || p.startsWith(`/${loc}/`)) return p;
-  return `/${loc}${p}`;
+function stripPresentationAttrs(html: string): string {
+  const src = safeStr(html);
+  if (!src) return '';
+
+  const noClass = src.replace(/\sclass="[^"]*"/gi, '');
+  const noStyle = noClass.replace(/\sstyle="[^"]*"/gi, '');
+  const dropFirstH1 = noStyle.replace(/<h1\b[^>]*>[\s\S]*?<\/h1>/i, '');
+
+  return dropFirstH1.trim();
 }
 
-/** content: JSON-string {"html": "..."} veya plain HTML */
-function resolveContentHtml(raw: unknown): string {
-  if (!raw) return '';
-  if (typeof raw !== 'string') return '';
-
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === 'object' && typeof (parsed as any).html === 'string') {
-      return String((parsed as any).html);
-    }
-  } catch {
-    // plain HTML
-  }
-  return raw;
+/**
+ * Library body:
+ * - content yok, summary yok → description HTML kullanıyoruz.
+ */
+function resolveBodyHtml(description: unknown): string {
+  const html = safeStr(description);
+  if (!html) return '';
+  return stripPresentationAttrs(html);
 }
 
-function buildGalleryFromLibraryImages(images: any[], title: string): LightboxImage[] {
-  const uniq = new Set<string>();
+/**
+ * Gallery builder:
+ * - 1) images[].image_url
+ * - 2) parent featured_image / image_url
+ * - 3) fallback cover
+ */
+function buildLibraryGalleryImages(
+  images: LibraryImageDto[] | undefined,
+  parentHeroRaw: string,
+  title: string,
+  heroAlt: string,
+): LightboxImage[] {
+  const unique = new Set<string>();
   const out: LightboxImage[] = [];
 
-  const add = (u: string) => {
-    const raw = safeStr(u);
-    if (!raw) return;
-    if (uniq.has(raw)) return;
-    uniq.add(raw);
+  const add = (rawUrl: string, alt?: string | null) => {
+    const u = safeStr(rawUrl);
+    if (!u) return;
+    if (unique.has(u)) return;
+    unique.add(u);
 
-    const thumb = toCdnSrc(raw, THUMB_W, THUMB_H, 'fill') || raw;
-    const large = toCdnSrc(raw, 1600, 1200, 'fit') || raw;
+    const thumb = toCdnSrc(u, THUMB_W, THUMB_H, 'fill') || u;
+    const raw = toCdnSrc(u, 1600, 1200, 'fit') || u;
 
     out.push({
-      raw: large,
+      raw,
       thumb,
-      alt: safeStr(title) || 'image',
+      alt: safeStr(alt) || safeStr(heroAlt) || safeStr(title) || 'image',
     });
   };
 
   for (const it of images || []) {
-    const src =
-      safeStr(it?.webp) || safeStr(it?.url) || safeStr(it?.thumbnail) || safeStr(it?.asset?.url);
-
-    if (src) add(src);
+    const src = safeStr(it.image_url);
+    if (src) add(src, (it as any).alt);
     if (out.length >= 12) break;
   }
 
-  // fallback cover (only if nothing)
   if (!out.length) {
-    const fallback = normalizeImgSrc(FallbackCover);
-    if (fallback) {
-      out.push({
-        raw: fallback,
-        thumb: fallback,
-        alt: safeStr(title) || 'image',
-      });
-    }
+    const p = safeStr(parentHeroRaw);
+    if (p) add(p, heroAlt || title);
   }
 
-  return out;
+  if (!out.length) {
+    const fallback = normalizeImgSrc(FallbackCover);
+    if (fallback) add(fallback, heroAlt || title);
+  }
+
+  return out.slice(0, 12);
 }
 
 export type LibraryDetailProps = {
@@ -163,7 +191,7 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_library', locale as any);
 
-  // DB -> EN fallback only
+  // EN fallback only
   const t = useCallback(
     (key: string, fallbackEn: string) => {
       const v = safeStr(ui(key, fallbackEn));
@@ -178,64 +206,96 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
   }, [slugOverride, router.query.slug]);
 
   const isSlugReady = !!slug;
-  const listHref = useMemo(() => withLocale(locale, '/library'), [locale]);
+  const listHref = useMemo(() => localizePath(locale, '/library'), [locale]);
 
   // --------------------
   // Main doc
   // --------------------
-  const {
-    data: library,
-    isLoading: libraryLoading,
-    isError: libraryError,
-  } = useGetLibraryBySlugQuery({ slug, locale } as any, { skip: !isSlugReady });
+  const { data, isLoading, isError } = useGetLibraryBySlugQuery(
+    { slug, locale },
+    { skip: !isSlugReady },
+  );
 
-  const libraryId = useMemo(() => safeStr((library as any)?.id), [library]);
-  const hasLibrary = !!library && !!libraryId && !libraryError;
+  const library = data as LibraryDto | undefined;
+  const libraryId = useMemo(() => safeStr(library?.id), [library]);
+  const hasLibrary = !!library && !!libraryId && !isError;
 
   // --------------------
   // Images + Files
   // --------------------
-  const { data: images = [] } = useListLibraryImagesQuery({ id: libraryId, locale } as any, {
-    skip: !libraryId,
-  });
-
-  const { data: files = [], isLoading: filesLoading } = useListLibraryFilesQuery(
-    { id: libraryId, locale } as any,
+  const { data: imagesData = [] } = useListLibraryImagesQuery(
+    { id: libraryId, locale },
     { skip: !libraryId },
   );
+  const images = imagesData as LibraryImageDto[];
 
-  // ✅ Downloads render gate:
-  // - only render if there are files
-  // - do NOT render while loading if empty/unknown
-  const hasDownloads = useMemo(() => Array.isArray(files) && files.length > 0, [files]);
+  const { data: filesData = [] } = useListLibraryFilesQuery(
+    { id: libraryId },
+    { skip: !libraryId },
+  );
+  const files = filesData as LibraryFileDto[];
+
+  const downloadableFiles = useMemo(() => {
+    const arr = Array.isArray(files) ? files : [];
+    return arr
+      .map((f) => ({
+        id: safeStr((f as any).id),
+        name: safeStr((f as any).name),
+        href: safeStr((f as any).file_url),
+        mime: safeStr((f as any).mime_type),
+      }))
+      .filter((x) => !!x.href);
+  }, [files]);
+
+  const hasDownloads = downloadableFiles.length > 0;
+
+  const pdfUrl = useMemo(() => {
+    const arr = downloadableFiles;
+    const byMime = arr.find((x) => safeStr(x.mime).toLowerCase() === 'application/pdf');
+    if (byMime?.href) return byMime.href;
+
+    const byExt = arr.find((x) => isPdfUrl(x.href));
+    return byExt?.href || null;
+  }, [downloadableFiles]);
+
+  const hasPdfPreview = !!pdfUrl;
 
   // --------------------
-  // Derived
+  // Derived fields
   // --------------------
-  const title = useMemo(() => {
-    return safeStr((library as any)?.title) || t('ui_library_untitled', 'Untitled content');
-  }, [library, t]);
-
-  const summaryText = useMemo(() => {
-    const s = safeStr((library as any)?.summary);
-    return s ? stripHtml(s).slice(0, 260) : '';
-  }, [library]);
-
-  const contentHtml = useMemo(() => {
-    const raw = resolveContentHtml((library as any)?.content);
-    return raw ? raw : '';
-  }, [library]);
+  const title = useMemo(
+    () => safeStr(library?.name) || t('ui_library_untitled', 'Untitled'),
+    [library, t],
+  );
 
   const heroAlt = useMemo(() => {
-    return safeStr((library as any)?.title) || t('ui_library_cover_alt', 'library cover');
+    return (
+      safeStr((library as any)?.image_alt) ||
+      safeStr((library as any)?.name) ||
+      t('ui_library_cover_alt', 'library cover')
+    );
   }, [library, t]);
 
-  // --------------------
-  // Gallery (hero + thumbs)
-  // --------------------
+  const parentHeroRaw = useMemo(
+    () => safeStr((library as any)?.featured_image) || safeStr((library as any)?.image_url),
+    [library],
+  );
+
+  const bodyHtml = useMemo(() => resolveBodyHtml((library as any)?.description), [library]);
+
+  const leadText = useMemo(() => {
+    const raw = safeStr(bodyHtml);
+    if (!raw) return '';
+    const s = stripHtml(raw).trim();
+    return s ? s.slice(0, 260) : '';
+  }, [bodyHtml]);
+
+  // -----------------------------
+  // Gallery (multi-image)
+  // -----------------------------
   const galleryImages = useMemo<LightboxImage[]>(
-    () => buildGalleryFromLibraryImages(images as any[], title),
-    [images, title],
+    () => buildLibraryGalleryImages(images, parentHeroRaw, title, heroAlt),
+    [images, parentHeroRaw, title, heroAlt],
   );
 
   const [activeIdx, setActiveIdx] = useState<number>(0);
@@ -249,14 +309,14 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
   const activeImage = galleryImages[safeActiveIdx];
 
   const heroSrc = useMemo(() => {
-    const raw = normalizeImgSrc(activeImage?.raw as any);
+    const raw = safeStr(activeImage?.raw);
     if (!raw) return '';
     return toCdnSrc(raw, HERO_W, HERO_H, 'fill') || raw;
   }, [activeImage?.raw]);
 
   const fallbackHero = useMemo(() => normalizeImgSrc(FallbackCover), []);
 
-  // Lightbox
+  // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const openLightboxAt = useCallback((idx: number) => {
     setActiveIdx(idx);
@@ -264,22 +324,77 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
   }, []);
   const closeLightbox = useCallback(() => setLightboxOpen(false), []);
 
-  // --------------------
-  // Render states
-  // --------------------
-  const loading = !isSlugReady || libraryLoading;
-  
+  // =============================================================
+  // ✅ OTHER DOCUMENTS (BlogDetails "Other blogs" pattern)
+  // =============================================================
 
-  if (loading) {
+  const { data: otherDocsData, isLoading: isOtherLoading } = useListLibraryQuery(
+    {
+      locale,
+      limit: 10,
+      offset: 0,
+      sort: 'published_at',
+      order: 'desc',
+      is_published: 1,
+    } as any,
+    { skip: !isSlugReady },
+  );
+
+  const otherDocs = useMemo(() => {
+    const raw =
+      (otherDocsData as any)?.items ??
+      (otherDocsData as any)?.data ??
+      (otherDocsData as any)?.rows ??
+      otherDocsData ??
+      [];
+
+    const arr = Array.isArray(raw) ? raw : [];
+
+    return arr
+      .map((x: any) => ({
+        id: safeStr(x?.id),
+        slug: safeStr(x?.slug),
+        name: safeStr(x?.name),
+      }))
+      .filter((x) => x.slug && x.name)
+      .filter((x) => x.slug !== slug && x.id !== libraryId)
+      .slice(0, 8);
+  }, [otherDocsData, slug, libraryId]);
+
+  // No hardcoded "/library": use current route template
+  const makeOtherHref = useCallback(
+    (s: string) => ({
+      pathname: router.pathname,
+      query: { ...router.query, slug: s },
+    }),
+    [router.pathname, router.query],
+  );
+
+  // -----------------------------------------
+  // RENDER STATES
+  // -----------------------------------------
+  if (!isSlugReady) {
     return (
-      <section className="features__area p-relative features-bg pt-120 pb-60 cus-faq">
-        <div className="features__pattern">
-          <Image src={ShapePattern} alt="pattern" loading="lazy" sizes="200px" />
-        </div>
-
+      <section className="technical__area pt-120 pb-60 cus-faq">
         <div className="container">
-          <div className="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
-            <div className="col-xl-8 col-lg-8 text-center">
+          <div className="row" data-aos="fade-up" data-aos-delay="300">
+            <div className="col-12">
+              <p>{t('ui_library_detail_loading', 'Loading document...')}</p>
+              <div className="ens-skel ens-skel--md mt-10" />
+              <div className="ens-skel ens-skel--md ens-skel--w80 mt-10" />
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <section className="technical__area pt-120 pb-60 cus-faq">
+        <div className="container">
+          <div className="row" data-aos="fade-up" data-aos-delay="300">
+            <div className="col-12">
               <p>{t('ui_library_detail_loading', 'Loading document...')}</p>
               <div className="ens-skel ens-skel--md mt-10" />
               <div className="ens-skel ens-skel--md ens-skel--w80 mt-10" />
@@ -292,29 +407,20 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
 
   if (!hasLibrary) {
     return (
-      <section className="features__area p-relative features-bg pt-120 pb-60 cus-faq">
-        <div className="features__pattern">
-          <Image src={ShapePattern} alt="pattern" loading="lazy" sizes="200px" />
-        </div>
-
+      <section className="technical__area pt-120 pb-60 cus-faq">
         <div className="container">
-          <div className="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
-            <div className="col-xl-8 col-lg-8 text-center">
-              <h3 className="mb-3">{t('ui_library_detail_not_found', 'Document not found')}</h3>
-              <p className="mb-4">
-                {t(
-                  'ui_library_detail_not_found_desc',
-                  'The requested document could not be found or is not available.',
-                )}
-              </p>
-
-              <Link
-                href={listHref}
-                className="solid__btn"
-                aria-label={t('ui_library_back_to_list', 'Back to library')}
-              >
-                {t('ui_library_back_to_list', 'Back to library')}
-              </Link>
+          <div className="row" data-aos="fade-up" data-aos-delay="300">
+            <div className="col-12">
+              <p>{t('ui_library_detail_not_found', 'Document not found')}</p>
+              <div className="ens-blog__back mt-10">
+                <Link
+                  href={listHref}
+                  className="link-more"
+                  aria-label={t('ui_library_back_to_list', 'Back to library')}
+                >
+                  ← {t('ui_library_back_to_list', 'Back to library')}
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -322,15 +428,15 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
     );
   }
 
-  // --------------------
-  // Main render (NewsDetail-like)
-  // --------------------
+  // -----------------------------------------
+  // MAIN RENDER
+  // -----------------------------------------
   return (
     <>
       <section className="technical__area pt-120 pb-60 cus-faq">
         <div className="container">
           <div className="row" data-aos="fade-up" data-aos-delay="300">
-            {/* MAIN (LEFT) */}
+            {/* MAIN */}
             <div className="col-xl-8 col-lg-12">
               <div className="technical__main-wrapper mb-60">
                 {/* Back */}
@@ -344,42 +450,46 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
                   </Link>
                 </div>
 
-                {/* HERO (click => lightbox) */}
-                <button
-                  type="button"
-                  className="ens-gallery__heroBtn"
-                  onClick={() => openLightboxAt(safeActiveIdx)}
-                  aria-label={t('ui_library_gallery_title', 'Gallery')}
-                  title={t('ui_library_gallery_title', 'Gallery')}
-                >
+                {/* HERO: PDF varsa iframe preview, yoksa image+lightbox */}
+                {hasPdfPreview ? (
                   <div className="technical__thumb mb-20 ens-blog__hero">
-                    <Image
-                      src={(heroSrc as any) || (fallbackHero as any)}
-                      alt={heroAlt || 'library image'}
-                      width={HERO_W}
-                      height={HERO_H}
-                      priority
-                    />
+                    <LibraryPdfPreview pdfUrl={pdfUrl} title={title} height={650} />
                   </div>
-                </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="ens-gallery__heroBtn"
+                    onClick={() => openLightboxAt(safeActiveIdx)}
+                    aria-label={t('ui_library_gallery_title', 'Gallery')}
+                    title={t('ui_library_gallery_title', 'Gallery')}
+                  >
+                    <div className="technical__thumb mb-20 ens-blog__hero">
+                      <Image
+                        src={heroSrc || parentHeroRaw || fallbackHero}
+                        alt={heroAlt || title || 'library image'}
+                        width={HERO_W}
+                        height={HERO_H}
+                        priority
+                      />
+                    </div>
+                  </button>
+                )}
 
-                {/* THUMBS under hero */}
-                {galleryImages.length > 1 && (
+                {/* THUMBS */}
+                {!hasPdfPreview && galleryImages.length > 1 && (
                   <div
                     className="ens-gallery__thumbs"
                     aria-label={t('ui_library_gallery_title', 'Gallery')}
                   >
                     {galleryImages.map((img, i) => {
-                      const src =
-                        normalizeImgSrc((img as any)?.thumb) || normalizeImgSrc((img as any)?.raw);
-
+                      const src = safeStr(img.thumb || img.raw);
                       if (!src) return null;
 
                       const isActive = i === safeActiveIdx;
 
                       return (
                         <button
-                          key={`${normalizeImgSrc((img as any)?.raw)}-${i}`}
+                          key={`${safeStr(img.raw)}-${i}`}
                           type="button"
                           className={`ens-gallery__thumb ${isActive ? 'is-active' : ''}`}
                           onClick={() => setActiveIdx(i)}
@@ -390,7 +500,7 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
                           <span className="ens-gallery__thumbImg">
                             <Image
                               src={src}
-                              alt={safeStr((img as any)?.alt) || title || 'thumbnail'}
+                              alt={safeStr(img.alt) || title || 'thumbnail'}
                               fill
                               sizes="96px"
                             />
@@ -401,7 +511,7 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
                   </div>
                 )}
 
-                {/* TITLE + SUMMARY */}
+                {/* CONTENT */}
                 <div className="blog__content-wrapper">
                   <div className="blog__content-item">
                     <div className="technical__content mb-25">
@@ -409,27 +519,55 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
                         <h3 className="postbox__title">{title}</h3>
                       </div>
 
-                      {summaryText ? <p className="postbox__lead">{summaryText}</p> : null}
+                      {leadText ? <p className="postbox__lead">{leadText}</p> : null}
                     </div>
 
-                    {/* BODY */}
-                    {contentHtml ? (
+                    {!!bodyHtml && (
                       <div className="technical__content">
                         <div
                           className="tp-postbox-details"
-                          dangerouslySetInnerHTML={{ __html: contentHtml }}
+                          dangerouslySetInnerHTML={{ __html: bodyHtml }}
                         />
                       </div>
-                    ) : null}
+                    )}
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* SIDEBAR (RIGHT) */}
+            {/* SIDEBAR */}
             <div className="col-xl-4 col-lg-6">
               <div className="sideber__widget">
-                {/* ✅ Downloads: only if files exist (no loading placeholder) */}
+                {/* ✅ Other documents */}
+                <div className="sideber__widget-item mb-40">
+                  <div className="sidebar__category">
+                    <div className="sidebar__contact-title mb-35">
+                      <h3>{t('ui_library_other_docs_title', 'Other documents')}</h3>
+                    </div>
+
+                    <ul>
+                      {isOtherLoading ? (
+                        <li>
+                          <span>{t('ui_library_other_docs_loading', 'Loading...')}</span>
+                        </li>
+                      ) : otherDocs.length ? (
+                        otherDocs.map((d) => (
+                          <li key={d.slug}>
+                            <Link href={makeOtherHref(d.slug)} aria-label={d.name}>
+                              {d.name}
+                            </Link>
+                          </li>
+                        ))
+                      ) : (
+                        <li>
+                          <span>{t('ui_library_other_docs_empty', 'No other documents')}</span>
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Downloads */}
                 {hasDownloads && (
                   <div className="sideber__widget-item mb-40">
                     <div className="sidebar__category">
@@ -438,26 +576,18 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
                       </div>
 
                       <ul>
-                        {files.map((f: any) => {
-                          const href = safeStr(f?.url);
-                          const name = safeStr(f?.name) || t('ui_library_file_unnamed', 'File');
-
-                          // If a file has no URL, skip it (otherwise dead list item)
-                          if (!href) return null;
-
-                          return (
-                            <li key={safeStr(f?.id) || `${name}-${href}`}>
-                              <a
-                                href={href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label={name}
-                              >
-                                {name}
-                              </a>
-                            </li>
-                          );
-                        })}
+                        {downloadableFiles.map((f) => (
+                          <li key={f.id || `${f.name}-${f.href}`}>
+                            <a
+                              href={f.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={f.name}
+                            >
+                              {f.name || t('ui_library_file_unnamed', 'File')}
+                            </a>
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   </div>
@@ -472,7 +602,7 @@ const LibraryDetail: React.FC<LibraryDetailProps> = ({ slugOverride }) => {
 
                     <SocialShare
                       title={title}
-                      text={summaryText || title}
+                      text={leadText || title}
                       showLabel={false}
                       showCompanySocials={true}
                     />

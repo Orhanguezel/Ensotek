@@ -1,7 +1,13 @@
 // =============================================================
 // FILE: src/pages/admin/custompage/index.tsx
 // Ensotek – Admin Custompage List
-// ID bazlı detail route: /admin/custompage/:id
+// Route: /admin/custompage
+//
+// ADMIN RULE:
+// - ✅ URL locale sync YOK
+// - ✅ localizePath YOK
+// - ✅ API locale: resolveAdminApiLocale (db default > first > 'tr')
+// - ✅ Module dropdown dinamik: listeden unique module_key toplanır
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -10,6 +16,8 @@ import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
+import { resolveAdminApiLocale } from '@/i18n/adminLocale';
+import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
 
 import {
   useListCustomPagesAdminQuery,
@@ -21,16 +29,9 @@ import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 import {
   CustomPageHeader,
   type CustomPageFilters,
+  type ModuleOption,
 } from '@/components/admin/custompage/CustomPageHeader';
 import { CustomPageList } from '@/components/admin/custompage/CustomPageList';
-
-const toShortLocale = (v: unknown): string =>
-  String(v || '')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
-    .trim();
 
 const AdminCustomPageIndex: NextPage = () => {
   const router = useRouter();
@@ -42,21 +43,10 @@ const AdminCustomPageIndex: NextPage = () => {
     fetching: localesFetching,
   } = useAdminLocales();
 
-  const localeSet = useMemo(
-    () => new Set((localeOptions ?? []).map((x) => toShortLocale(x.value))),
-    [localeOptions],
-  );
-
-  const initialLocale = useMemo(() => {
-    const qLocale = toShortLocale(router.query?.locale);
-    if (qLocale && localeSet.has(qLocale)) return qLocale;
-
-    const dbDef = toShortLocale(defaultLocaleFromDb);
-    if (dbDef && localeSet.has(dbDef)) return dbDef;
-
-    const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'de';
-  }, [router.query?.locale, defaultLocaleFromDb, localeOptions, localeSet]);
+  // ✅ Admin API locale (URL'e yazılmaz)
+  const apiLocale = useMemo(() => {
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'tr');
+  }, [localeOptions, defaultLocaleFromDb]);
 
   const [filters, setFilters] = useState<CustomPageFilters>({
     search: '',
@@ -65,52 +55,16 @@ const AdminCustomPageIndex: NextPage = () => {
     locale: '',
   });
 
+  // Admin filtre locale initial (sadece UI + API args için; URL sync yok)
   useEffect(() => {
     if (!router.isReady) return;
     if (!localeOptions || localeOptions.length === 0) return;
 
     setFilters((prev) => {
-      const p = toShortLocale(prev.locale);
-      if (p && localeSet.has(p)) return prev;
-      return { ...prev, locale: initialLocale };
+      if (prev.locale) return prev;
+      return { ...prev, locale: localeShortClientOr(apiLocale, 'tr') };
     });
-  }, [router.isReady, localeOptions, localeSet, initialLocale]);
-
-  // URL sync
-  useEffect(() => {
-    if (!router.isReady) return;
-
-    const cur = toShortLocale(router.query?.locale);
-    const next = toShortLocale(filters.locale);
-
-    if (!next) {
-      if (cur) {
-        const q = { ...router.query };
-        delete (q as any).locale;
-        void router.replace({ pathname: router.pathname, query: q }, undefined, { shallow: true });
-      }
-      return;
-    }
-
-    if (next === cur) return;
-
-    void router.replace(
-      { pathname: router.pathname, query: { ...router.query, locale: next } },
-      undefined,
-      { shallow: true },
-    );
-  }, [filters.locale, router]);
-
-  const apiLocale = useMemo(() => {
-    const f = toShortLocale(filters.locale);
-    if (f && localeSet.has(f)) return f;
-
-    const dbDef = toShortLocale(defaultLocaleFromDb);
-    if (dbDef && localeSet.has(dbDef)) return dbDef;
-
-    const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'de';
-  }, [filters.locale, defaultLocaleFromDb, localeOptions, localeSet]);
+  }, [router.isReady, localeOptions, apiLocale]);
 
   const is_published = useMemo(() => {
     if (filters.publishedFilter === 'all') return undefined;
@@ -118,23 +72,27 @@ const AdminCustomPageIndex: NextPage = () => {
     return 0;
   }, [filters.publishedFilter]);
 
+  // ✅ Locale filtre: boşsa apiLocale kullan
+  const effectiveLocale = useMemo(() => {
+    const f = localeShortClient(filters.locale);
+    return f || apiLocale;
+  }, [filters.locale, apiLocale]);
+
   const queryParams = useMemo(
     () => ({
       q: filters.search || undefined,
       module_key: filters.moduleKey || undefined,
       is_published,
-      locale: apiLocale || undefined,
+      locale: effectiveLocale || undefined,
       limit: 200,
       offset: 0,
     }),
-    [filters.search, filters.moduleKey, is_published, apiLocale],
+    [filters.search, filters.moduleKey, is_published, effectiveLocale],
   );
 
   const { data, isLoading, isFetching, refetch } = useListCustomPagesAdminQuery(
     queryParams as any,
-    {
-      refetchOnMountOrArgChange: true,
-    } as any,
+    { refetchOnMountOrArgChange: true } as any,
   );
 
   const items: CustomPageDto[] = useMemo(() => (data as any)?.items ?? [], [data]);
@@ -143,14 +101,44 @@ const AdminCustomPageIndex: NextPage = () => {
   const [rows, setRows] = useState<CustomPageDto[]>([]);
   useEffect(() => setRows(items), [items]);
 
+  // ✅ Module options: response items’dan unique module_key topla
+  const moduleOptions: ModuleOption[] = useMemo(() => {
+    const set = new Set<string>();
+
+    for (const it of items) {
+      const key = String(it.module_key || '').trim();
+      if (key) set.add(key);
+    }
+
+    if (filters.moduleKey && !set.has(filters.moduleKey)) set.add(filters.moduleKey);
+
+    const keys = Array.from(set).sort((a, b) => a.localeCompare(b));
+
+    const labelOf = (k: string) => {
+      const map: Record<string, string> = {
+        blog: 'Blog',
+        news: 'Haber / Duyuru',
+        about: 'Hakkında / Statik',
+        services: 'Hizmetler',
+        products: 'Ürünler',
+        solutions: 'Çözümler',
+        library: 'Kütüphane',
+        faq: 'SSS',
+        contact: 'İletişim',
+      };
+      return map[k] || k;
+    };
+
+    return keys.map((k) => ({ value: k, label: labelOf(k) }));
+  }, [items, filters.moduleKey]);
+
+
   const [reorder, { isLoading: isReordering }] = useReorderCustomPagesAdminMutation();
   const busy = isLoading || isFetching || localesLoading || localesFetching || isReordering;
 
   const handleSaveOrder = async () => {
     try {
-      const payload = {
-        items: rows.map((p, idx) => ({ id: p.id, display_order: idx })),
-      };
+      const payload = { items: rows.map((p, idx) => ({ id: p.id, display_order: idx })) };
       await reorder(payload as any).unwrap();
       toast.success('Sıralama kaydedildi.');
       await refetch();
@@ -162,10 +150,8 @@ const AdminCustomPageIndex: NextPage = () => {
   };
 
   const handleCreate = () => {
-    void router.push({
-      pathname: '/admin/custompage/new',
-      query: apiLocale ? { locale: apiLocale } : undefined,
-    });
+    // ✅ URL sabit: /admin/custompage/new
+    void router.push('/admin/custompage/new');
   };
 
   return (
@@ -174,8 +160,7 @@ const AdminCustomPageIndex: NextPage = () => {
         <div style={{ minWidth: 0 }}>
           <h4 className="h5 mb-1">Custom Pages</h4>
           <p className="text-muted small mb-0">
-            Özel sayfaları listele, filtrele ve sırala. Locale DB’den gelir ve URL ile senkron
-            çalışır.
+            Özel sayfaları listele, filtrele ve sırala. (Admin URL sabittir.)
           </p>
         </div>
 
@@ -192,6 +177,7 @@ const AdminCustomPageIndex: NextPage = () => {
         locales={localeOptions as any}
         localesLoading={localesLoading || localesFetching}
         allowAllOption={false}
+        moduleOptions={moduleOptions}
       />
 
       <CustomPageList
@@ -200,7 +186,7 @@ const AdminCustomPageIndex: NextPage = () => {
         onReorder={setRows}
         onSaveOrder={handleSaveOrder}
         savingOrder={isReordering}
-        activeLocale={apiLocale}
+        activeLocale={effectiveLocale}
       />
     </div>
   );

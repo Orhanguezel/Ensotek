@@ -55,10 +55,12 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 
       'ui_news_meta_title',               'Haberler',
       'ui_news_meta_description',         'Ensotek ile ilgili haberler, duyurular ve basın paylaşımları.',
-      'ui_news_filter_all',              'Tümü'
+      'ui_news_filter_all',              'Tümü',
+      'ui_news_other_title',               'Diğer Haberler'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),
+
   NOW(3),
   NOW(3)
 ),
@@ -104,7 +106,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 
       'ui_news_meta_title',               'News',
       'ui_news_meta_description',         'News, announcements and press releases about Ensotek.',
-      'ui_news_filter_all',              'All'
+      'ui_news_filter_all',              'All',
+      'ui_news_other_title',               'More News'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),
@@ -153,7 +156,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 
       'ui_news_meta_title',               'Neuigkeiten',
       'ui_news_meta_description',         'Neuigkeiten, Ankündigungen und Pressemitteilungen über Ensotek.',
-      'ui_news_filter_all',              'Alle'
+      'ui_news_filter_all',              'Alle',
+      'ui_news_other_title',               'Weitere News'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),

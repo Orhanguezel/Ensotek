@@ -1,3 +1,7 @@
+@forward 'admin/admin';
+@forward 'admin/ensotekAdminLayout';
+@forward 'admin/customPages';
+
 @forward 'components/theme';
 @forward 'components/background';
 @forward 'components/buttons';
@@ -9,7 +13,6 @@
 @forward 'components/preloader';
 @forward 'layout/meanmenu';
 @forward 'layout/team';
-@forward 'layout/admin';
 @forward 'layout/header';
 @forward 'layout/hero';
 @forward 'layout/about';

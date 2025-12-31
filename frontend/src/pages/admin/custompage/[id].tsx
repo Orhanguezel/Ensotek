@@ -1,10 +1,11 @@
 // =============================================================
 // FILE: src/pages/admin/custompage/[id].tsx
 // Ensotek – Admin Custompage Create/Edit Page (ID bazlı)
-// FIX:
-// - Flicker: fetch başında setPage(undefined) yok (keep previous data)
-// - URL sync: init guard (activeLocale ilk set edilmeden router.replace yok)
-// - Stale request guard (race condition önleme)
+//
+// ADMIN RULE:
+// - ✅ URL locale sync YOK (ne prefix ne ?locale)
+// - ✅ API locale: resolveAdminApiLocale (db default > first > 'tr')
+// - ✅ Form locale değişse bile URL değişmez (sadece state + API)
 // =============================================================
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
@@ -12,7 +13,10 @@ import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
+import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
+import { resolveAdminApiLocale } from '@/i18n/adminLocale';
 import { useAdminLocales } from '@/components/common/useAdminLocales';
+
 import {
   CustomPageForm,
   type CustomPageFormValues,
@@ -25,19 +29,10 @@ import type {
 } from '@/integrations/types/custom_pages.types';
 
 import {
-  // ✅ ID bazlı GET lazy hook (projendeki isim farklıysa sadece bunu değiştir)
   useLazyGetCustomPageAdminQuery,
   useCreateCustomPageAdminMutation,
   useUpdateCustomPageAdminMutation,
 } from '@/integrations/rtk/hooks';
-
-const toShortLocale = (v: unknown): string =>
-  String(v || '')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
-    .trim();
 
 const pickId = (v: string | string[] | undefined): string | undefined => {
   if (typeof v === 'string') return v.trim();
@@ -47,7 +42,6 @@ const pickId = (v: string | string[] | undefined): string | undefined => {
 
 const isUuidLike = (v?: string) => {
   if (!v) return false;
-  // UUID v4/v1 compatible basic check
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
 };
 
@@ -62,9 +56,6 @@ const AdminCustomPageDetailPage: NextPage = () => {
 
   const isCreateMode = routeId === 'new';
 
-  // ------------------------------
-  // Locales (DB)
-  // ------------------------------
   const {
     localeOptions,
     defaultLocaleFromDb,
@@ -72,81 +63,39 @@ const AdminCustomPageDetailPage: NextPage = () => {
     fetching: localesFetching,
   } = useAdminLocales();
 
-  const localeSet = useMemo(
-    () => new Set((localeOptions ?? []).map((x) => toShortLocale(x.value))),
-    [localeOptions],
-  );
+  const apiLocaleFromDb = useMemo(() => {
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'tr');
+  }, [localeOptions, defaultLocaleFromDb]);
 
-  const initialLocale = useMemo(() => {
-    const qLocale = toShortLocale(router.query?.locale);
-    if (qLocale && localeSet.has(qLocale)) return qLocale;
+  const localeSet = useMemo(() => {
+    return new Set((localeOptions ?? []).map((x) => localeShortClient(x.value)).filter(Boolean));
+  }, [localeOptions]);
 
-    const dbDef = toShortLocale(defaultLocaleFromDb);
-    if (dbDef && localeSet.has(dbDef)) return dbDef;
-
-    const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'de';
-  }, [router.query?.locale, defaultLocaleFromDb, localeOptions, localeSet]);
-
+  // activeLocale: admin içinde state (URL sync yok)
   const [activeLocale, setActiveLocale] = useState<string>('');
-
-  // ✅ init guard: activeLocale ilk set edilmeden URL sync çalışmasın
-  const localeInitRef = useRef(false);
 
   useEffect(() => {
     if (!localeOptions || localeOptions.length === 0) return;
 
     setActiveLocale((prev) => {
-      const p = toShortLocale(prev);
-      const next = p && localeSet.has(p) ? p : initialLocale;
-      if (next && !localeInitRef.current) localeInitRef.current = true;
+      const p = localeShortClient(prev);
+      if (p && localeSet.has(p)) return p;
+
+      const next = localeShortClientOr(apiLocaleFromDb, 'tr');
       return next;
     });
-  }, [localeOptions, localeSet, initialLocale]);
-
-  // ✅ activeLocale -> URL sync (init guard ile)
-  useEffect(() => {
-    if (!router.isReady) return;
-    if (!localeInitRef.current) return;
-
-    const next = toShortLocale(activeLocale);
-    const cur = toShortLocale(router.query?.locale);
-
-    if (!next) {
-      if (cur) {
-        const q = { ...router.query };
-        delete (q as any).locale;
-        void router.replace({ pathname: router.pathname, query: q }, undefined, { shallow: true });
-      }
-      return;
-    }
-
-    if (next === cur) return;
-
-    void router.replace(
-      { pathname: router.pathname, query: { ...router.query, locale: next } },
-      undefined,
-      { shallow: true },
-    );
-  }, [activeLocale, router]);
+  }, [localeOptions, localeSet, apiLocaleFromDb]);
 
   const queryLocale = useMemo(() => {
-    const l = toShortLocale(activeLocale);
+    const l = localeShortClient(activeLocale);
     if (l && localeSet.has(l)) return l;
-
-    const dbDef = toShortLocale(defaultLocaleFromDb);
-    if (dbDef && localeSet.has(dbDef)) return dbDef;
-
-    const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || 'de';
-  }, [activeLocale, defaultLocaleFromDb, localeOptions, localeSet]);
+    return localeShortClientOr(apiLocaleFromDb, 'tr');
+  }, [activeLocale, localeSet, apiLocaleFromDb]);
 
   const localesReady = !localesLoading && !localesFetching;
   const hasLocales = !!localeOptions && localeOptions.length > 0;
 
-  // ------------------------------
   // RTK: by-id (admin) – LAZY
-  // ------------------------------
   const shouldSkipQuery =
     !isRouterReady ||
     !hasLocales ||
@@ -197,25 +146,21 @@ const AdminCustomPageDetailPage: NextPage = () => {
 
   const loading = localesLoading || localesFetching || getState.isLoading || getState.isFetching;
 
-  // ------------------------------
   // Mutations
-  // ------------------------------
   const [createCustomPage, { isLoading: isCreating }] = useCreateCustomPageAdminMutation();
   const [updateCustomPage, { isLoading: isUpdating }] = useUpdateCustomPageAdminMutation();
   const saving = isCreating || isUpdating;
 
   const handleCancel = () => {
-    void router.push({
-      pathname: '/admin/custompage',
-      query: queryLocale ? { locale: queryLocale } : undefined,
-    });
+    // ✅ URL sabit (locale query yok)
+    void router.push('/admin/custompage');
   };
 
   const handleSubmit = async (values: CustomPageFormValues) => {
     try {
-      const loc = toShortLocale(values.locale || queryLocale || initialLocale);
+      const loc = localeShortClientOr(values.locale || queryLocale || apiLocaleFromDb, 'tr');
 
-      if (!loc || !localeSet.has(loc)) {
+      if (!loc || (localeSet.size > 0 && !localeSet.has(loc))) {
         toast.error('Geçerli bir locale seçilmedi. app_locales ve default_locale kontrol edin.');
         return;
       }
@@ -247,10 +192,8 @@ const AdminCustomPageDetailPage: NextPage = () => {
           return;
         }
 
-        void router.replace({
-          pathname: `/admin/custompage/${encodeURIComponent(nextId)}`,
-          query: { locale: loc },
-        });
+        // ✅ URL sabit, sadece id route’a geç
+        void router.replace(`/admin/custompage/${encodeURIComponent(nextId)}`);
         return;
       }
 
@@ -280,16 +223,12 @@ const AdminCustomPageDetailPage: NextPage = () => {
       toast.success('Sayfa güncellendi.');
 
       if (loc !== queryLocale) setActiveLocale(loc);
-
-      // ✅ ID bazlı route olduğu için slug değişse bile route değişmez.
     } catch (err: any) {
       toast.error(err?.data?.error?.message || err?.message || 'İşlem sırasında bir hata oluştu.');
     }
   };
 
-  // ------------------------------
   // UI Guards
-  // ------------------------------
   if (!isRouterReady) {
     return (
       <div className="container-fluid py-3">
@@ -317,7 +256,6 @@ const AdminCustomPageDetailPage: NextPage = () => {
     );
   }
 
-  // id param invalid (edit modda)
   if (!isCreateMode && routeId && !isUuidLike(routeId)) {
     return (
       <div className="container-fluid py-3">
@@ -353,8 +291,7 @@ const AdminCustomPageDetailPage: NextPage = () => {
       <div className="mb-3">
         <h4 className="h5 mb-1">{pageTitle}</h4>
         <p className="text-muted small mb-0">
-          Custom Page içeriklerini burada yönetebilirsin. Dil seçimi DB’den gelir ve URL ile senkron
-          çalışır.
+          Custom Page içeriklerini burada yönetebilirsin. (Admin URL sabittir.)
         </p>
         <div className="text-muted small mt-1">
           Active locale: <code>{queryLocale || '-'}</code>
@@ -376,7 +313,7 @@ const AdminCustomPageDetailPage: NextPage = () => {
         defaultLocale={queryLocale}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
-        onLocaleChange={(nextLocale) => setActiveLocale(toShortLocale(nextLocale))}
+        onLocaleChange={(nextLocale) => setActiveLocale(localeShortClientOr(nextLocale, 'tr'))}
       />
     </div>
   );

@@ -1,11 +1,12 @@
 // =============================================================
 // FILE: src/components/admin/custompage/CustomPageForm.tsx
 // Ensotek – Admin Custom Page Create/Edit Form (container)
-// Responsive & spacing fix:
-// - Header: compact on mobile, actions wrap cleanly
-// - Columns: stack on small screens, tighter gaps
-// - Remove duplicate locale select from main column (single source: AdminLocaleSelect)
+// - ✅ Custom Pages: cover + gallery (multi) + "set as cover"
+// - ✅ No styled-jsx / No inline styles
+// - ✅ Locale select single source: AdminLocaleSelect
 // =============================================================
+
+'use client';
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -56,6 +57,10 @@ export type CustomPageFormValues = {
 
   category_id: string;
   sub_category_id: string;
+
+  // ✅ parent gallery fields
+  images: string[];
+  storage_image_ids: string[];
 };
 
 export type CustomPageFormProps = {
@@ -128,6 +133,9 @@ const buildInitialValues = (
 
       category_id: '',
       sub_category_id: '',
+
+      images: [],
+      storage_image_ids: [],
     };
   }
 
@@ -162,33 +170,21 @@ const buildInitialValues = (
 
     category_id: (initial as any).category_id ?? '',
     sub_category_id: (initial as any).sub_category_id ?? '',
+
+    // ✅ normalized dto already returns arrays
+    images: Array.isArray((initial as any).images) ? (initial as any).images : [],
+    storage_image_ids: Array.isArray((initial as any).storage_image_ids)
+      ? (initial as any).storage_image_ids
+      : [],
   };
 };
 
 const buildContentImageHtml = (url: string, alt = '', size: ContentImageSize = 'lg'): string => {
   const safeAlt = alt.replace(/"/g, '&quot;');
 
-  let widthStyle: string;
-  switch (size) {
-    case 'sm':
-      widthStyle = 'width: 50%; max-width: 480px;';
-      break;
-    case 'md':
-      widthStyle = 'width: 75%; max-width: 720px;';
-      break;
-    case 'full':
-      widthStyle = 'width: 100%; max-width: 100%;';
-      break;
-    case 'lg':
-    default:
-      widthStyle = 'width: 100%; max-width: 900px;';
-      break;
-  }
-
   return `
-<figure class="content-image-block content-image-${size}" style="${widthStyle} margin: 1.25rem auto; text-align: center;">
-  <img src="${url}" alt="${safeAlt}" loading="lazy"
-       style="max-width: 100%; height: auto; display: block; margin: 0 auto;" />
+<figure class="content-image-block content-image-${size}">
+  <img src="${url}" alt="${safeAlt}" loading="lazy" />
 </figure>
 `.trim();
 };
@@ -316,7 +312,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
         pendingLocaleRef.current = '';
       } else {
         toast.info(
-          'Seçilen dil için mevcut kayıt bulunamadı, bu dilde yeni içerik oluşturabilirsin.',
+          'Seçilen dil için mevcut kayıt bulunamadı; bu dilde yeni içerik oluşturabilirsin.',
         );
       }
     } catch (err: any) {
@@ -325,7 +321,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
       const status = err?.status ?? err?.originalStatus;
       if (status === 400) {
         toast.info(
-          'Seçilen dil için kayıt listesi alınamadı. Bu dilde yeni içerik oluşturabilirsin.',
+          'Seçilen dil için kayıt listesi alınamadı; bu dilde yeni içerik oluşturabilirsin.',
         );
       } else {
         toast.error('Seçilen dil için özel sayfa yüklenirken bir hata oluştu.');
@@ -362,7 +358,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
 
   const imageMetadata = useMemo<Record<string, string | number | boolean>>(
     () => ({
-      module_key: 'custom_page',
+      module_key: 'custom_pages',
       locale: values.locale || safeDefaultLocale,
       page_slug: values.slug || values.title || '',
       ...(values.page_id || initialData?.id
@@ -467,166 +463,175 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <div className="card">
-        {/* Compact header */}
-        <div className="card-header py-2">
-          <div className="d-flex flex-column flex-lg-row align-items-start justify-content-between gap-2">
-            <div style={{ minWidth: 0 }}>
-              <h5 className="mb-1 small fw-semibold">
-                {mode === 'create' ? 'Yeni Sayfa Oluştur' : 'Sayfa Düzenle'}
-              </h5>
-              <div className="text-muted small">
-                Başlık, slug, içerik (HTML), etiketler ve SEO alanlarını doldur.
-              </div>
-            </div>
-
-            <div className="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
-              <div className="btn-group btn-group-sm">
-                <button
-                  type="button"
-                  className={
-                    'btn btn-outline-secondary btn-sm' + (activeMode === 'form' ? ' active' : '')
-                  }
-                  onClick={() => setActiveMode('form')}
-                  disabled={disabled}
-                >
-                  Form
-                </button>
-                <button
-                  type="button"
-                  className={
-                    'btn btn-outline-secondary btn-sm' + (activeMode === 'json' ? ' active' : '')
-                  }
-                  onClick={() => setActiveMode('json')}
-                  disabled={disabled}
-                >
-                  JSON
-                </button>
-              </div>
-
-              {onCancel && (
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary btn-sm"
-                  onClick={onCancel}
-                  disabled={disabled}
-                >
-                  Geri
-                </button>
-              )}
-
-              <button type="submit" className="btn btn-primary btn-sm" disabled={disabled}>
-                {saving
-                  ? mode === 'create'
-                    ? 'Oluşturuluyor...'
-                    : 'Kaydediliyor...'
-                  : mode === 'create'
-                  ? 'Sayfayı Oluştur'
-                  : 'Değişiklikleri Kaydet'}
-              </button>
-
-              {(loading || isLocaleSwitchLoading) && (
-                <span className="badge bg-secondary small">
-                  {isLocaleSwitchLoading ? 'Dil değiştiriliyor...' : 'Yükleniyor...'}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="card-body">
-          {activeMode === 'json' ? (
-            <AdminJsonEditor
-              value={values}
-              disabled={disabled}
-              onChange={(next) => setValues(next as CustomPageFormValues)}
-              label="Custom Page JSON"
-              helperText="Bu JSON, formdaki tüm alanların bire bir karşılığıdır."
-            />
-          ) : (
-            <>
-              {/* Locale (single source) */}
-              <div className="mb-2 mb-lg-3">
-                <label className="form-label small mb-1">Dil</label>
-                <AdminLocaleSelect
-                  value={values.locale}
-                  onChange={handleLocaleChange}
-                  options={localeSelectOptions as any}
-                  loading={!!localesLoading}
-                  disabled={
-                    disabled ||
-                    (!!localesLoading && !localeSelectOptions.length) ||
-                    isLocaleSwitchLoading
-                  }
-                  label="Dil"
-                />
-                <div className="form-text small">
-                  Seçim; aynı zamanda düzenlediğin locale kaydını belirler.
-                </div>
-              </div>
-
-              {/* Main grid: tighter gaps */}
-              <div className="row g-3">
-                <div className="col-12 col-lg-8">
-                  <CustomPageMainColumn
-                    values={values}
-                    disabled={disabled}
-                    slugTouched={slugTouched}
-                    setSlugTouched={setSlugTouched}
-                    setValues={setValues}
-                    handleChange={handleChange}
-                    effectiveDefaultLocale={safeDefaultLocale}
-                    locales={locales}
-                    localesLoading={localesLoading}
-                    isLocaleSwitchLoading={isLocaleSwitchLoading}
-                    // still passed for internal usage if needed
-                    handleLocaleChange={handleLocaleChange}
-                    handleCheckboxChange={handleCheckboxChange}
-                    // ✅ new: hide internal locale select (we removed it in component below anyway)
-                  />
-                </div>
-
-                <div className="col-12 col-lg-4">
-                  {/* image block first */}
-                  <div className="mb-3">
-                    <CustomPageFormImageColumn
-                      metadata={imageMetadata}
-                      featuredImageValue={values.featured_image}
-                      disabled={disabled}
-                      onFeaturedImageChange={(url) =>
-                        setValues((prev) => ({ ...prev, featured_image: url }))
-                      }
-                    />
+    <div className="ensotek-admin-page">
+      <div className="container-fluid px-2 px-lg-3">
+        <div className="ensotek-admin-page__inner">
+          <form onSubmit={handleSubmit}>
+            <div className="card ensotek-admin-card">
+              <div className="card-header py-2 ensotek-admin-card__header">
+                <div className="d-flex flex-column flex-lg-row align-items-start justify-content-between gap-2">
+                  <div className="ensotek-admin-card__title">
+                    <h5 className="mb-1 small fw-semibold text-truncate">
+                      {mode === 'create' ? 'Yeni Sayfa Oluştur' : 'Sayfa Düzenle'}
+                    </h5>
+                    <div className="text-muted small text-truncate">
+                      Başlık, slug, içerik (HTML), etiketler ve SEO alanlarını doldur.
+                    </div>
                   </div>
 
-                  <CustomPageSidebarColumn
-                    values={values}
-                    disabled={disabled}
-                    categoriesDisabled={categoriesDisabled}
-                    subCategoriesDisabled={subCategoriesDisabled}
-                    categoryOptions={categoryOptions as any}
-                    subCategoryOptions={subCategoryOptions as any}
-                    isCategoriesLoading={isCategoriesLoading}
-                    isSubCategoriesLoading={isSubCategoriesLoading}
-                    imageMetadata={imageMetadata}
-                    contentImageSize={contentImageSize}
-                    setContentImageSize={setContentImageSize}
-                    contentImagePreview={contentImagePreview}
-                    handleAddContentImage={handleAddContentImage}
-                    manualImageUrl={manualImageUrl}
-                    manualImageAlt={manualImageAlt}
-                    setManualImageUrl={setManualImageUrl}
-                    setManualImageAlt={setManualImageAlt}
-                    handleAddManualImage={handleAddManualImage}
-                    setValues={setValues}
-                  />
+                  <div className="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+                    <div className="btn-group btn-group-sm">
+                      <button
+                        type="button"
+                        className={
+                          'btn btn-outline-secondary btn-sm' +
+                          (activeMode === 'form' ? ' active' : '')
+                        }
+                        onClick={() => setActiveMode('form')}
+                        disabled={disabled}
+                      >
+                        Form
+                      </button>
+                      <button
+                        type="button"
+                        className={
+                          'btn btn-outline-secondary btn-sm' +
+                          (activeMode === 'json' ? ' active' : '')
+                        }
+                        onClick={() => setActiveMode('json')}
+                        disabled={disabled}
+                      >
+                        JSON
+                      </button>
+                    </div>
+
+                    {onCancel && (
+                      <button
+                        type="button"
+                        className="btn btn-outline-secondary btn-sm"
+                        onClick={onCancel}
+                        disabled={disabled}
+                      >
+                        Geri
+                      </button>
+                    )}
+
+                    <button type="submit" className="btn btn-primary btn-sm" disabled={disabled}>
+                      {saving
+                        ? mode === 'create'
+                          ? 'Oluşturuluyor...'
+                          : 'Kaydediliyor...'
+                        : mode === 'create'
+                        ? 'Sayfayı Oluştur'
+                        : 'Değişiklikleri Kaydet'}
+                    </button>
+
+                    {(loading || isLocaleSwitchLoading) && (
+                      <span className="badge bg-secondary small">
+                        {isLocaleSwitchLoading ? 'Dil değiştiriliyor...' : 'Yükleniyor...'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
-            </>
-          )}
+
+              <div className="card-body ensotek-admin-card__body">
+                {activeMode === 'json' ? (
+                  <AdminJsonEditor
+                    value={values}
+                    disabled={disabled}
+                    onChange={(next) => setValues(next as CustomPageFormValues)}
+                    label="Custom Page JSON"
+                    helperText="Bu JSON, formdaki tüm alanların bire bir karşılığıdır."
+                  />
+                ) : (
+                  <>
+                    <div className="mb-2 mb-lg-3">
+                      <label className="form-label small mb-1">Dil</label>
+                      <AdminLocaleSelect
+                        value={values.locale}
+                        onChange={handleLocaleChange}
+                        options={localeSelectOptions as any}
+                        loading={!!localesLoading}
+                        disabled={
+                          disabled ||
+                          (!!localesLoading && !localeSelectOptions.length) ||
+                          isLocaleSwitchLoading
+                        }
+                        label="Dil"
+                      />
+                      <div className="form-text small">
+                        Seçim; aynı zamanda düzenlediğin locale kaydını belirler.
+                      </div>
+                    </div>
+
+                    <div className="row g-3 ensotek-admin-grid">
+                      <div className="col-12 col-lg-8 ensotek-admin-col">
+                        <CustomPageMainColumn
+                          values={values}
+                          disabled={disabled}
+                          slugTouched={slugTouched}
+                          setSlugTouched={setSlugTouched}
+                          setValues={setValues}
+                          handleChange={handleChange}
+                          effectiveDefaultLocale={safeDefaultLocale}
+                          locales={locales}
+                          localesLoading={localesLoading}
+                          isLocaleSwitchLoading={isLocaleSwitchLoading}
+                          handleLocaleChange={handleLocaleChange}
+                          handleCheckboxChange={handleCheckboxChange}
+                        />
+                      </div>
+
+                      <div className="col-12 col-lg-4 ensotek-admin-col">
+                        <div className="mb-3">
+                          <CustomPageFormImageColumn
+                            metadata={imageMetadata}
+                            disabled={disabled}
+                            featuredImageValue={values.featured_image}
+                            onFeaturedImageChange={(url) =>
+                              setValues((prev) => ({ ...prev, featured_image: url }))
+                            }
+                            galleryUrls={values.images}
+                            onGalleryUrlsChange={(urls) =>
+                              setValues((prev) => ({ ...prev, images: urls }))
+                            }
+                            onSelectAsCover={(url) =>
+                              setValues((prev) => ({ ...prev, featured_image: url }))
+                            }
+                          />
+                        </div>
+
+                        <CustomPageSidebarColumn
+                          values={values}
+                          disabled={disabled}
+                          categoriesDisabled={categoriesDisabled}
+                          subCategoriesDisabled={subCategoriesDisabled}
+                          categoryOptions={categoryOptions as any}
+                          subCategoryOptions={subCategoryOptions as any}
+                          isCategoriesLoading={isCategoriesLoading}
+                          isSubCategoriesLoading={isSubCategoriesLoading}
+                          imageMetadata={imageMetadata}
+                          contentImageSize={contentImageSize}
+                          setContentImageSize={setContentImageSize}
+                          contentImagePreview={contentImagePreview}
+                          handleAddContentImage={handleAddContentImage}
+                          manualImageUrl={manualImageUrl}
+                          manualImageAlt={manualImageAlt}
+                          setManualImageUrl={setManualImageUrl}
+                          setManualImageAlt={setManualImageAlt}
+                          handleAddManualImage={handleAddManualImage}
+                          setValues={setValues}
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </form>
         </div>
       </div>
-    </form>
+    </div>
   );
 };

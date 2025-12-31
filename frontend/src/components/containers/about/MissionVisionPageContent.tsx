@@ -433,7 +433,6 @@ const MissionVisionPageContent: React.FC = () => {
                 showAddress
                 showWebsite={false}
                 showWhatsapp
-                showCtas
               />
             </aside>
           </div>

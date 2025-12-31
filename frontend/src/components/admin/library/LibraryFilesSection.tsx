@@ -3,6 +3,9 @@
 // Ensotek – Admin Library Files Section (Storage entegre)
 // - All RTK hooks imported from "@/integrations/rtk/hooks"
 // - Nested <form> yok
+// ✅ Schema/DTO aligned:
+//   - LibraryFileDto: file_url (NOT url)
+//   - asset_id is main reference
 // =============================================================
 
 'use client';
@@ -23,6 +26,8 @@ export type LibraryFilesSectionProps = {
   libraryId: string;
   disabled: boolean;
 };
+
+const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 
 export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
   libraryId,
@@ -80,9 +85,9 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
         payload: {
           asset_id: storage.id,
           name: displayName,
-          file_url: storage.url ?? null,
-          size_bytes: storage.size ?? undefined,
-          mime_type: storage.mime ?? selectedFile.type ?? undefined,
+          file_url: (storage.url ?? null) as any, // backend string|null bekliyor
+          size_bytes: (storage.size ?? null) as any,
+          mime_type: (storage.mime ?? selectedFile.type ?? null) as any,
         },
       }).unwrap();
 
@@ -92,7 +97,6 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
       setSelectedFile(null);
       setOverrideName('');
 
-      // file input’u temizle
       if (fileInputRef.current) fileInputRef.current.value = '';
 
       await refetch();
@@ -100,14 +104,14 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
       const msg =
         err?.data?.error?.message ||
         err?.message ||
-        'PDF yüklenirken veya library_files kaydedilirken hata oluştu.';
+        'Dosya yüklenirken veya library_files kaydedilirken hata oluştu.';
       toast.error(msg);
     }
   };
 
   const handleRemove = async (file: LibraryFileDto) => {
     if (!libraryId || !file.id) return;
-    if (!confirm(`"${file.name}" dosyasını silmek istiyor musun?`)) return;
+    if (!confirm(`"${safeText(file.name)}" dosyasını silmek istiyor musun?`)) return;
 
     try {
       await removeFile({ id: libraryId, fileId: file.id }).unwrap();
@@ -136,38 +140,41 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
         {files && files.length > 0 && (
           <ul className="list-group list-group-flush mb-3">
-            {files.map((f) => (
-              <li
-                key={f.id}
-                className="list-group-item px-0 py-2 d-flex justify-content-between align-items-center small"
-              >
-                <div className="me-2">
-                  <div className="fw-semibold">
-                    {f.url ? (
-                      <a href={f.url} target="_blank" rel="noreferrer">
-                        {f.name}
-                      </a>
-                    ) : (
-                      f.name
-                    )}
-                  </div>
-                  <div className="text-muted">
-                    {f.mime_type || 'mime yok'}
-                    {typeof f.size_bytes === 'number' && f.size_bytes > 0 && (
-                      <> • {(f.size_bytes / 1024).toFixed(1)} KB</>
-                    )}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  className="btn btn-sm btn-outline-danger"
-                  disabled={disabled || isRemoving}
-                  onClick={() => handleRemove(f)}
+            {files.map((f) => {
+              const href = safeText((f as any).file_url).trim(); // ✅ DTO: file_url
+              return (
+                <li
+                  key={f.id}
+                  className="list-group-item px-0 py-2 d-flex justify-content-between align-items-center small"
                 >
-                  Sil
-                </button>
-              </li>
-            ))}
+                  <div className="me-2" style={{ minWidth: 0 }}>
+                    <div className="fw-semibold text-truncate" title={safeText(f.name)}>
+                      {href ? (
+                        <a href={href} target="_blank" rel="noreferrer">
+                          {f.name}
+                        </a>
+                      ) : (
+                        f.name
+                      )}
+                    </div>
+                    <div className="text-muted text-truncate" title={safeText(f.mime_type)}>
+                      {f.mime_type || 'mime yok'}
+                      {typeof f.size_bytes === 'number' && f.size_bytes > 0 && (
+                        <> • {(f.size_bytes / 1024).toFixed(1)} KB</>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-outline-danger"
+                    disabled={disabled || isRemoving}
+                    onClick={() => handleRemove(f)}
+                  >
+                    Sil
+                  </button>
+                </li>
+              );
+            })}
           </ul>
         )}
 
@@ -186,8 +193,8 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
               disabled={disabled || uploading}
             />
             <div className="form-text small">
-              Dosya önce Storage modülüne yüklenir, ardından <code>library_files</code> tablosuna
-              asset id ile kaydedilir.
+              Dosya önce Storage modülüne yüklenir, ardından <code>library_files</code> tablosuna{' '}
+              <code>asset_id</code> ile kaydedilir.
             </div>
           </div>
 

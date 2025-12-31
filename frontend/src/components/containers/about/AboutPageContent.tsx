@@ -4,8 +4,10 @@
 // - NO inline styles / NO styled-jsx
 // - H1 forbidden: CMS html <h1> -> <h2>
 // - Modern lists (SCSS: ens-about__list* helpers) + span override safe
-// - ✅ FIX: UI fallbacks are locale-aware (no TR-only fallback leaking to EN/DE)
-// - ✅ Pattern: t(key, fb) wrapper (same idea as other pages)
+// - ✅ FIX: ui() missing-key returns key itself => treat as empty/fallback
+// - ✅ FIX: Lists now use flat keys (ui_about_what_item_1..N / ui_about_why_item_1..N)
+// - ✅ Backward compat: if ui_about_*_items (JSON array) exists, use it
+// - ✅ Pattern: t(key, fb) wrapper
 // =============================================================
 
 'use client';
@@ -112,101 +114,37 @@ function isRemoteUrl(src: unknown): src is string {
   return /^https?:\/\//i.test(src) || /^\/\//.test(src);
 }
 
+function toSafeInt(v: unknown, fallback: number): number {
+  if (typeof v === 'number' && Number.isFinite(v)) return Math.max(0, Math.floor(v));
+  if (typeof v === 'string') {
+    const n = parseInt(v.trim(), 10);
+    if (Number.isFinite(n)) return Math.max(0, n);
+  }
+  return fallback;
+}
+
 const AboutPageContent: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_about', locale as any);
 
-  // ✅ Standard helper: same usage as other pages (t(key, fallback))
+  // base wrapper
   const t = useCallback((key: string, fallback: any) => ui(key, fallback), [ui]);
 
-  // ✅ Locale-aware fallbacks (TR fallback EN/DE’ye sızmasın)
-  const fallbacks = useMemo(() => {
-    const loc = String(locale || '').toLowerCase();
+  // ✅ IMPORTANT: if ui() returns the key itself, treat as missing and use fallback
+  const readUi = useCallback(
+    (key: string, fallback: any) => {
+      const v = t(key, fallback);
 
-    const TR = {
-      headerSubtitleLabel: 'Hakkımızda',
-      headerTitle: 'Hakkımızda',
-      headerLead:
-        'Deneyim, üretim gücü ve kalite standartlarımızla projelerinize güvenilir çözümler sunuyoruz.',
-      whatTitle: 'Ne Yapıyoruz?',
-      whyTitle: 'Neden Ensotek?',
-      goalTitle: 'Hedefimiz',
-      emptyText: 'Hakkımızda içeriği bulunamadı.',
-      emptyBody: "Ensotek'in kurumsal yaklaşımı ve üretim gücü burada yayınlanacaktır.",
-      whatItems: [
-        'Proje analizi ve doğru ürün seçimi',
-        'Üretim, sevkiyat ve montaj koordinasyonu',
-        'Devreye alma ve performans takibi',
-        'Satış sonrası bakım ve teknik destek',
-      ],
-      whyItems: [
-        '40+ yıllık deneyim ve kurumsal üretim altyapısı',
-        'Kalite standartları ve dokümantasyon disiplini',
-        'Hızlı geri dönüş ve süreç şeffaflığı',
-        'Uzun vadeli iş ortaklığı yaklaşımı',
-      ],
-      goalText:
-        'Müşterilerimiz için verimli, sürdürülebilir ve güvenilir soğutma çözümleri sunarken; kaliteyi ölçülebilir hale getirip süreçleri sürekli iyileştirmektir.',
-    };
+      if (typeof v === 'string') {
+        const s = v.trim();
+        if (!s) return fallback;
+        if (s === key) return fallback; // missing-key behavior
+      }
 
-    const EN = {
-      headerSubtitleLabel: 'About',
-      headerTitle: 'About Us',
-      headerLead:
-        'With experience, manufacturing strength, and quality standards, we deliver reliable solutions for your projects.',
-      whatTitle: 'What do we do?',
-      whyTitle: 'Why Ensotek?',
-      goalTitle: 'Our Goal',
-      emptyText: 'About content not found.',
-      emptyBody:
-        'Ensotek’s corporate approach and manufacturing capabilities will be published here.',
-      whatItems: [
-        'Project analysis and correct product selection',
-        'Production, shipment and installation coordination',
-        'Commissioning and performance monitoring',
-        'After-sales maintenance and technical support',
-      ],
-      whyItems: [
-        '40+ years of experience and robust manufacturing infrastructure',
-        'Quality standards and disciplined documentation',
-        'Fast response and transparent processes',
-        'Long-term partnership approach',
-      ],
-      goalText:
-        'To deliver efficient, sustainable and reliable cooling solutions; while making quality measurable and continuously improving processes.',
-    };
-
-    const DE = {
-      headerSubtitleLabel: 'Über uns',
-      headerTitle: 'Über uns',
-      headerLead:
-        'Mit Erfahrung, Fertigungsstärke und Qualitätsstandards liefern wir zuverlässige Lösungen für Ihre Projekte.',
-      whatTitle: 'Was machen wir?',
-      whyTitle: 'Warum Ensotek?',
-      goalTitle: 'Unser Ziel',
-      emptyText: 'Über-uns-Inhalt nicht gefunden.',
-      emptyBody:
-        'Der Unternehmensansatz und die Fertigungskompetenz von Ensotek werden hier veröffentlicht.',
-      whatItems: [
-        'Projektanalyse und passende Produktauswahl',
-        'Koordination von Produktion, Versand und Montage',
-        'Inbetriebnahme und Performance-Überwachung',
-        'After-Sales-Wartung und technischer Support',
-      ],
-      whyItems: [
-        '40+ Jahre Erfahrung und starke Fertigungsinfrastruktur',
-        'Qualitätsstandards und konsequente Dokumentation',
-        'Schnelle Rückmeldung und transparente Prozesse',
-        'Langfristiger Partnerschaftsansatz',
-      ],
-      goalText:
-        'Effiziente, nachhaltige und zuverlässige Kühllösungen zu liefern; Qualität messbar zu machen und Prozesse kontinuierlich zu verbessern.',
-    };
-
-    if (loc === 'de') return DE;
-    if (loc === 'en') return EN;
-    return TR;
-  }, [locale]);
+      return v;
+    },
+    [t],
+  );
 
   const { data, isLoading, isError } = useListCustomPagesPublicQuery({
     module_key: 'about',
@@ -221,35 +159,32 @@ const AboutPageContent: React.FC = () => {
     [data],
   );
 
-  // Header strings (✅ locale-aware fallbacks)
+  // Header strings (rely on ui_about; no TR hardcode)
   const headerSubtitlePrefix = useMemo(
-    () => String(t('ui_about_subprefix', 'Ensotek') || '').trim() || 'Ensotek',
-    [t],
+    () => String(readUi('ui_about_subprefix', 'Ensotek') || '').trim() || 'Ensotek',
+    [readUi],
   );
 
-  const headerSubtitleLabel = useMemo(
-    () =>
-      String(t('ui_about_sublabel', fallbacks.headerSubtitleLabel) || '').trim() ||
-      fallbacks.headerSubtitleLabel,
-    [t, fallbacks.headerSubtitleLabel],
-  );
+  const headerSubtitleLabel = useMemo(() => {
+    const v = String(readUi('ui_about_sublabel', '') || '').trim();
+    return v; // empty allowed
+  }, [readUi]);
 
-  const headerTitle = useMemo(
-    () =>
-      String(t('ui_about_page_title', fallbacks.headerTitle) || '').trim() || fallbacks.headerTitle,
-    [t, fallbacks.headerTitle],
-  );
+  const headerTitle = useMemo(() => {
+    const v = String(readUi('ui_about_page_title', '') || '').trim();
+    return v || 'Ensotek';
+  }, [readUi]);
 
-  const headerLead = useMemo(
-    () => String(t('ui_about_page_lead', fallbacks.headerLead) || '').trim(),
-    [t, fallbacks.headerLead],
-  );
+  const headerLead = useMemo(() => String(readUi('ui_about_page_lead', '') || '').trim(), [readUi]);
 
   // Main content title
   const title = useMemo(() => {
     const tt = String(page?.title ?? '').trim();
-    return tt || String(t('ui_about_fallback_title', 'Ensotek') || '').trim() || 'Ensotek';
-  }, [page?.title, t]);
+    if (tt) return tt;
+
+    const fb = String(readUi('ui_about_fallback_title', '') || '').trim();
+    return fb || 'Ensotek';
+  }, [page?.title, readUi]);
 
   // CMS html
   const html = useMemo(() => {
@@ -275,36 +210,77 @@ const AboutPageContent: React.FC = () => {
     return alt || title || 'about image';
   }, [page, title]);
 
-  // Info blocks (✅ locale-aware fallbacks)
-  const whatTitle = useMemo(
-    () => String(t('ui_about_what_title', fallbacks.whatTitle) || '').trim() || fallbacks.whatTitle,
-    [t, fallbacks.whatTitle],
+  // Info block titles
+  const whatTitle = useMemo(() => {
+    const v = String(readUi('ui_about_what_title', '') || '').trim();
+    return v || 'Ensotek';
+  }, [readUi]);
+
+  const whyTitle = useMemo(() => {
+    const v = String(readUi('ui_about_why_title', '') || '').trim();
+    return v || 'Ensotek';
+  }, [readUi]);
+
+  const goalTitle = useMemo(() => {
+    const v = String(readUi('ui_about_goal_title', '') || '').trim();
+    return v || 'Ensotek';
+  }, [readUi]);
+
+  // ✅ List reader (NEW flat keys) + backward compat (legacy JSON array)
+  const readList = useCallback(
+    (opts: { legacyArrayKey: string; countKey: string; itemPrefix: string }) => {
+      // 1) Try legacy JSON array (if exists)
+      const legacy = readUi(opts.legacyArrayKey, '');
+      const legacyArr = normalizeStringArray(legacy);
+      if (legacyArr.length) return legacyArr;
+
+      // 2) Flat keys
+      const countRaw = readUi(opts.countKey, '0');
+      const n = toSafeInt(countRaw, 0);
+
+      const out: string[] = [];
+      const max = Math.min(Math.max(n, 0), 20); // safety cap
+      for (let i = 1; i <= max; i++) {
+        const k = `${opts.itemPrefix}${i}`;
+        const v = String(readUi(k, '') || '').trim();
+        if (v) out.push(v);
+      }
+
+      // 3) If count not set but items exist, try scanning first 10
+      if (!out.length && max === 0) {
+        for (let i = 1; i <= 10; i++) {
+          const k = `${opts.itemPrefix}${i}`;
+          const v = String(readUi(k, '') || '').trim();
+          if (v) out.push(v);
+        }
+      }
+
+      return out;
+    },
+    [readUi],
   );
 
-  const whyTitle = useMemo(
-    () => String(t('ui_about_why_title', fallbacks.whyTitle) || '').trim() || fallbacks.whyTitle,
-    [t, fallbacks.whyTitle],
+  const whatItems = useMemo(
+    () =>
+      readList({
+        legacyArrayKey: 'ui_about_what_items',
+        countKey: 'ui_about_what_item_count',
+        itemPrefix: 'ui_about_what_item_',
+      }),
+    [readList],
   );
 
-  const goalTitle = useMemo(
-    () => String(t('ui_about_goal_title', fallbacks.goalTitle) || '').trim() || fallbacks.goalTitle,
-    [t, fallbacks.goalTitle],
+  const whyItems = useMemo(
+    () =>
+      readList({
+        legacyArrayKey: 'ui_about_why_items',
+        countKey: 'ui_about_why_item_count',
+        itemPrefix: 'ui_about_why_item_',
+      }),
+    [readList],
   );
 
-  // ✅ The main fix: items fallback is locale-aware (not TR-only)
-  const whatItems = useMemo(() => {
-    const v = t('ui_about_what_items', JSON.stringify(fallbacks.whatItems)) ?? '';
-    return normalizeStringArray(v);
-  }, [t, fallbacks.whatItems]);
-
-  const whyItems = useMemo(() => {
-    const v = t('ui_about_why_items', JSON.stringify(fallbacks.whyItems)) ?? '';
-    return normalizeStringArray(v);
-  }, [t, fallbacks.whyItems]);
-
-  const goalText = useMemo(() => {
-    return String(t('ui_about_goal_text', fallbacks.goalText) || '').trim() || '';
-  }, [t, fallbacks.goalText]);
+  const goalText = useMemo(() => String(readUi('ui_about_goal_text', '') || '').trim(), [readUi]);
 
   const contentHref = useMemo(() => localizePath(locale as any, '/about#content'), [locale]);
 
@@ -320,7 +296,8 @@ const AboutPageContent: React.FC = () => {
           <div className="col-12">
             <div className="section__title-wrapper mb-40 text-center">
               <span className="section__subtitle-2">
-                <span>{headerSubtitlePrefix}</span> {headerSubtitleLabel}
+                <span>{headerSubtitlePrefix}</span>
+                {headerSubtitleLabel ? ` ${headerSubtitleLabel}` : null}
               </span>
 
               <h2 className="section__title-2">{headerTitle}</h2>
@@ -345,7 +322,9 @@ const AboutPageContent: React.FC = () => {
         {!isLoading && (!page || isError) && (
           <div className="row">
             <div className="col-12">
-              <div className="alert alert-warning">{t('ui_about_empty', fallbacks.emptyText)}</div>
+              <div className="alert alert-warning">
+                {readUi('ui_about_empty', 'Content not found.')}
+              </div>
             </div>
           </div>
         )}
@@ -385,7 +364,9 @@ const AboutPageContent: React.FC = () => {
                       />
                     ) : (
                       <div className="postbox__text">
-                        <p className="mb-0">{t('ui_about_empty_text', fallbacks.emptyBody)}</p>
+                        <p className="mb-0">
+                          {readUi('ui_about_empty_text', 'Content will be published here.')}
+                        </p>
                       </div>
                     )}
                   </div>
