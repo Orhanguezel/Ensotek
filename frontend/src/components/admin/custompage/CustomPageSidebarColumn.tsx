@@ -1,9 +1,10 @@
 // =============================================================
 // FILE: src/components/admin/custompage/CustomPageSidebarColumn.tsx
-// Responsive spacing fix:
-// - Reduce excessive vertical spacing on small screens
-// - Keep readability on lg+
+// - ✅ Cover/Gallery kaldırıldı (CustomPageFormImageColumn tek kaynak)
+// - ✅ Sidebar: category, tags, content-image insertion, SEO
 // =============================================================
+
+'use client';
 
 import React from 'react';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
@@ -56,7 +57,7 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
   handleAddManualImage,
   setValues,
 }) => {
-  const blockCls = 'mb-2 mb-lg-3'; // ✅ small: tight, lg+: normal
+  const blockCls = 'mb-2 mb-lg-3';
 
   return (
     <>
@@ -124,62 +125,6 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
         />
       </div>
 
-      {/* Öne çıkan görsel */}
-      <div className={blockCls}>
-        <AdminImageUploadField
-          label="Öne Çıkan Görsel"
-          helperText={
-            <>
-              Storage modülü üzerinden özel sayfa için görsel yükleyebilirsin. URL otomatik yazılır.
-            </>
-          }
-          bucket="public"
-          folder="custom_pages"
-          metadata={imageMetadata}
-          value={values.featured_image}
-          onChange={(url) => setValues((prev) => ({ ...prev, featured_image: url }))}
-          disabled={disabled}
-          openLibraryHref="/admin/storage"
-        />
-      </div>
-
-      <div className={blockCls}>
-        <label className="form-label small mb-1">Öne Çıkan Görsel URL</label>
-        <input
-          type="url"
-          className="form-control form-control-sm"
-          placeholder="https://..."
-          value={values.featured_image}
-          onChange={(e) => setValues((prev) => ({ ...prev, featured_image: e.target.value }))}
-          disabled={disabled}
-        />
-      </div>
-
-      <div className={blockCls}>
-        <label className="form-label small mb-1">Öne Çıkan Görsel Asset ID</label>
-        <input
-          type="text"
-          className="form-control form-control-sm"
-          placeholder="storage asset id (36 char)"
-          value={values.featured_image_asset_id}
-          onChange={(e) =>
-            setValues((prev) => ({ ...prev, featured_image_asset_id: e.target.value }))
-          }
-          disabled={disabled}
-        />
-      </div>
-
-      <div className={blockCls}>
-        <label className="form-label small mb-1">Görsel Alt Metni</label>
-        <input
-          type="text"
-          className="form-control form-control-sm"
-          value={values.featured_image_alt}
-          onChange={(e) => setValues((prev) => ({ ...prev, featured_image_alt: e.target.value }))}
-          disabled={disabled}
-        />
-      </div>
-
       {/* İçerik görsel boyutu */}
       <div className={blockCls}>
         <label className="form-label small mb-1">İçerik Görsel Boyutu</label>
@@ -204,11 +149,8 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
           bucket="public"
           folder="custom_pages/content"
           metadata={{
-            module_key: 'custom_page',
-            locale: values.locale || '',
-            page_slug: values.slug || values.title || '',
+            ...(imageMetadata || {}),
             section: 'content',
-            ...(values.page_id ? { page_id: values.page_id } : {}),
           }}
           multiple
           value={contentImagePreview}

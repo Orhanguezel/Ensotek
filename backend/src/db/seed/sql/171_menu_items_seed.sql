@@ -74,7 +74,7 @@ VALUES
 -- ------------------------
 ('6a4f6b37-ed99-4d98-8c54-d658096aacde', NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 0, 1), -- FAQs
 ('b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111', NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 1, 1), -- About
-('b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112', NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 2, 1), -- Services
+('b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112', NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 2, 1), -- Solutions
 ('b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113', NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 3, 1), -- Products
 ('b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114', NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 4, 1), -- Library
 ('b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115', NULL, 'footer', '59583ef1-0ba1-4c7c-b806-84fd204b52b9', 'custom', NULL, NULL, 5, 1), -- News
@@ -159,7 +159,7 @@ VALUES
 -- FOOTER: QUICK ACCESS (TR)
 (UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','tr','SSS','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','tr','Hakkımızda','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','tr','Hizmetler','/service','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','tr','Çözümler','/solutions','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113','tr','Ürünler','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114','tr','Kütüphane','/library','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115','tr','Haberler','/news','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -230,7 +230,7 @@ VALUES
 -- FOOTER: QUICK ACCESS (EN)
 (UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','en','FAQs','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','en','About','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','en','Services','/service','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','en','Solutions','/solutions','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113','en','Products','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114','en','Library','/library','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115','en','News','/news','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -301,7 +301,7 @@ VALUES
 -- FOOTER: QUICK ACCESS (DE)
 (UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','de','FAQ','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','de','Über uns','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','de','Leistungen','/service','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112','de','Lösungen','/solutions','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113','de','Produkte','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114','de','Bibliothek','/library','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115','de','Nachrichten','/news','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),

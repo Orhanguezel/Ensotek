@@ -99,7 +99,7 @@ VALUES
 -- 001 Maintenance & Repair
 (@SRV_001,'maintenance_and_repair',@CAT_SERVICES,@SUB_SVC_MAINTENANCE,
  1,1,10,
- NULL,'https://images.unsplash.com/photo-1516575150278-77136aed6920?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/maintenance_and_repair.png',NULL,
  'Existing cooling towers / plants / commercial buildings',
  '1 day – 4 weeks (scope dependent)',
  'Optional periodic maintenance contract',
@@ -111,7 +111,7 @@ VALUES
 -- 002 Modernization & Retrofit
 (@SRV_002,'modernization',@CAT_SERVICES,@SUB_SVC_MODERNIZATION,
  1,1,20,
- NULL,'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/modernization_and_retrofit.png',NULL,
  'Capacity increase / efficiency improvement',
  '1–6 weeks (analysis + implementation)',
  'Recommended together with maintenance planning',
@@ -123,7 +123,7 @@ VALUES
 -- 003 Spare Parts & Components
 (@SRV_003,'spare_parts_and_components',@CAT_SERVICES,@SUB_SVC_SPAREPARTS,
  1,1,30,
- NULL,'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/spare_parts_and_components.png',NULL,
  'Supply of critical parts / components',
  'Depends on stock and lead times',
  'Inspection plan recommended for critical parts',
@@ -135,7 +135,7 @@ VALUES
 -- 004 Automation & SCADA
 (@SRV_004,'automation_scada',@CAT_SERVICES,@SUB_SVC_ENGINEERING,
  1,1,40,
- NULL,'https://images.unsplash.com/photo-1581092334555-1f9b6b3f6d2c?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/automation_and_scada.png',NULL,
  'Monitoring / control / reporting',
  '2–8 weeks (scope dependent)',
  'Periodic calibration & verification recommended',
@@ -147,7 +147,7 @@ VALUES
 -- 005 Engineering Support
 (@SRV_005,'engineering_support',@CAT_SERVICES,@SUB_SVC_ENGINEERING,
  1,1,50,
- NULL,'https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/engineering_support.png',NULL,
  'Design / consulting / optimization',
  '2–8 weeks (scope dependent)',
  'Optional periodic review + reporting',
@@ -159,7 +159,7 @@ VALUES
 -- 006 Site Survey & Engineering
 (@SRV_006,'site_survey_engineering',@CAT_SERVICES,@SUB_SVC_ENGINEERING,
  1,1,60,
- NULL,'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/site_survey_and_engineering.png',NULL,
  'On-site survey / mechanical layout / selection',
  '1 day – 3 weeks (survey + design)',
  'Optional: integration plan with maintenance',
@@ -171,7 +171,7 @@ VALUES
 -- 007 Performance Optimization
 (@SRV_007,'performance_optimization',@CAT_SERVICES,@SUB_SVC_ENGINEERING,
  1,1,70,
- NULL,'https://images.unsplash.com/photo-1581092795360-0dc3e2b31d08?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/performance_optimization.png',NULL,
  'Measurement / reporting / optimization',
  '1 day – 4 weeks (measure + actions)',
  'Best results with periodic monitoring',
@@ -183,7 +183,7 @@ VALUES
 -- 008 Commissioning & Startup
 (@SRV_008,'commissioning_startup',@CAT_SERVICES,@SUB_SVC_ENGINEERING,
  1,1,80,
- NULL,'https://images.unsplash.com/photo-1518779578993-ec3579fee39f?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/commissioning_and_startup.png',NULL,
  'Installation coordination / commissioning / training',
  '1 day – 2 weeks (project dependent)',
  'Handover checklist & initial maintenance plan included',
@@ -195,7 +195,7 @@ VALUES
 -- 009 Emergency Response
 (@SRV_009,'emergency_response',@CAT_SERVICES,@SUB_SVC_MAINTENANCE,
  1,1,90,
- NULL,'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?auto=format&fit=crop&w=1600&q=80',NULL,
+ NULL,'http://localhost:8086/uploads/services/emergency_response.png',NULL,
  'Urgent troubleshooting / safe restart',
  'Same day – 7 days (depending on fault)',
  'Follow-up maintenance action plan recommended',

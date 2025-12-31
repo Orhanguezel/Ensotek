@@ -47,6 +47,8 @@ const normalizeList = (raw: unknown): ApiCustomPage[] => {
   return [];
 };
 
+const BASE= '/admin/custom_pages';
+
 export const customPagesAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     listCustomPagesAdmin: build.query<
@@ -54,7 +56,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       CustomPageListAdminQueryParams | void
     >({
       query: (params) => ({
-        url: '/admin/custom_pages',
+        url: `${BASE}`,
         method: 'GET',
         params: cleanParams(params as Record<string, unknown> | undefined),
       }),
@@ -77,7 +79,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       { id: string; locale?: string; default_locale?: string }
     >({
       query: ({ id, locale, default_locale }) => ({
-        url: `/admin/custom_pages/${encodeURIComponent(id)}`,
+        url: `${BASE}/${encodeURIComponent(id)}`,
         method: 'GET',
         params: cleanParams({ locale, default_locale }),
       }),
@@ -90,7 +92,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       { slug: string; locale?: string; default_locale?: string }
     >({
       query: ({ slug, locale, default_locale }) => ({
-        url: `/admin/custom_pages/by-slug/${encodeURIComponent(slug)}`,
+        url: `${BASE}/by-slug/${encodeURIComponent(slug)}`,
         method: 'GET',
         params: cleanParams({ locale, default_locale }),
       }),
@@ -100,7 +102,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
 
     createCustomPageAdmin: build.mutation<CustomPageDto, CustomPageCreatePayload>({
       query: (body) => ({
-        url: '/admin/custom_pages',
+        url: `${BASE}`,
         method: 'POST',
         body,
       }),
@@ -113,7 +115,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       { id: string; patch: CustomPageUpdatePayload }
     >({
       query: ({ id, patch }) => ({
-        url: `/admin/custom_pages/${encodeURIComponent(id)}`,
+        url: `${BASE}/${encodeURIComponent(id)}`,
         method: 'PATCH',
         body: patch,
       }),
@@ -126,7 +128,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
 
     deleteCustomPageAdmin: build.mutation<void, string>({
       query: (id) => ({
-        url: `/admin/custom_pages/${encodeURIComponent(id)}`,
+        url: `${BASE}/${encodeURIComponent(id)}`,
         method: 'DELETE',
       }),
       invalidatesTags: (_result, _error, id) => [
@@ -140,7 +142,7 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       { items: { id: string; display_order: number }[] }
     >({
       query: (payload) => ({
-        url: '/admin/custom_pages/reorder',
+        url: `${BASE}/reorder`,
         method: 'POST',
         body: payload,
       }),

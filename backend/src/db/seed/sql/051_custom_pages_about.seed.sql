@@ -1,8 +1,9 @@
 -- =============================================================
--- FILE: 051_custom_pages_about.seed.sql (FINAL)
+-- FILE: 051_custom_pages_about.seed.sql (FINAL / FULL)
 -- Ensotek Kurumsal Sayfaları – Hakkımızda
--- ✅ module_key artık PARENT: custom_pages.module_key = 'about'
--- categories + sub_categories ile ilişkili
+-- ✅ module_key PARENT: custom_pages.module_key = 'about'
+-- ✅ categories + sub_categories ilişkili
+-- ✅ images + storage_image_ids JSON-string güvenli yazılır
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -37,6 +38,10 @@ SET @IMG_ABOUT_2 :=
 SET @IMG_ABOUT_3 :=
   'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80';
 
+-- JSON-string alanlarına güvenli şekilde yaz (LONGTEXT/TEXT uyumlu)
+SET @IMAGES_JSON := JSON_ARRAY(@IMG_ABOUT_MAIN, @IMG_ABOUT_2, @IMG_ABOUT_3);
+SET @STORAGE_IMAGE_IDS_JSON := JSON_ARRAY();
+
 -- -------------------------------------------------------------
 -- PARENT UPSERT (custom_pages)
 -- -------------------------------------------------------------
@@ -67,12 +72,8 @@ VALUES
     NULL,
     @IMG_ABOUT_MAIN,
     NULL,
-    JSON_ARRAY(
-      @IMG_ABOUT_MAIN,
-      @IMG_ABOUT_2,
-      @IMG_ABOUT_3
-    ),
-    JSON_ARRAY(),
+    CAST(@IMAGES_JSON AS CHAR),
+    CAST(@STORAGE_IMAGE_IDS_JSON AS CHAR),
     @CAT_ABOUT_ROOT,
     @SUB_ABOUT_PAGE,
     NOW(3),
@@ -112,6 +113,7 @@ INSERT INTO `custom_pages_i18n`
    `created_at`,
    `updated_at`)
 VALUES
+
 -- TR
 (
   UUID(),
@@ -130,14 +132,15 @@ VALUES
       'Ensotek, CTI (Cooling Technology Institute) ve SOSIAD üyesidir; üretim sistemimiz ISO-9001:2015 ile belgelenmiştir ve ürünlerimiz CE belgelidir.</p>'
     )
   ),
-  'Ensotek''in 40 yıllık deneyimi, FRP su soğutma kuleleri üretimi ve ulusal/uluslararası projelerdeki lider konumu özetlenir.',
+  'Ensotek’in 40 yıllık deneyimi, FRP su soğutma kuleleri üretimi ve ulusal/uluslararası projelerdeki lider konumu özetlenir.',
   'Ensotek su soğutma kuleleri üretim tesisi',
   'Ensotek Su Soğutma Kuleleri | 40 Yıllık Deneyim',
-  'Ensotek, 40 yıllık deneyimi ve Türkiye''nin en büyük su soğutma kulesi üretim tesisiyle FRP açık ve kapalı devre soğutma kuleleri sunan sektör lideridir.',
-  'ensotek,hakkimizda,frp,su sogutma kuleleri,uretim tesisi',
+  'Ensotek, 40 yıllık deneyimi ve Türkiye’nin en büyük su soğutma kulesi üretim tesisiyle FRP açık ve kapalı devre soğutma kuleleri sunan sektör lideridir.',
+  'ensotek,hakkimizda,frp,su sogutma kuleleri,uretim tesisi,acik devre,kapali devre',
   NOW(3),
   NOW(3)
 ),
+
 -- EN
 (
   UUID(),
@@ -157,14 +160,15 @@ VALUES
       'Ensotek is a member of CTI (Cooling Technology Institute) and SOSIAD; our production system is certified with ISO-9001:2015 and our products are CE marked.</p>'
     )
   ),
-  'Summarizes Ensotek''s 40 years of experience, FRP water cooling tower production and leading position in global projects.',
+  'Summarizes Ensotek’s 40+ years of experience, FRP water cooling tower manufacturing, and leadership in domestic/international projects.',
   'Ensotek water cooling tower production facility',
-  'Ensotek Water Cooling Towers | 40 Years of Experience',
-  'Ensotek is the sector leader with Turkey''s largest water cooling tower production facility, delivering FRP open and closed circuit cooling towers for projects worldwide.',
-  'ensotek,about us,frp,water cooling towers,production facility',
+  'Ensotek Water Cooling Towers | 40+ Years of Experience',
+  'Ensotek is the sector leader with Turkey’s largest water cooling tower production facility, delivering FRP open and closed circuit cooling towers for projects worldwide.',
+  'ensotek,about us,frp,water cooling towers,production facility,open circuit,closed circuit',
   NOW(3),
   NOW(3)
 ),
+
 -- DE
 (
   UUID(),
@@ -188,10 +192,11 @@ VALUES
   'Produktionsanlage für Ensotek Wasserkühltürme',
   'Ensotek Wasserkühltürme | Über 40 Jahre Erfahrung',
   'Ensotek ist Branchenführer mit der größten Produktionsanlage für Wasserkühltürme in der Türkei und liefert FRP/GFK-Kühlturm-Lösungen für Projekte weltweit.',
-  'ensotek,über uns,gfk,frp,wasserkühltürme,produktionsanlage',
+  'ensotek,über uns,gfk,frp,wasserkühltürme,produktionsanlage,offener kreislauf,geschlossener kreislauf',
   NOW(3),
   NOW(3)
 )
+
 ON DUPLICATE KEY UPDATE
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),

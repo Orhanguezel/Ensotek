@@ -1,0 +1,45 @@
+@use "../utils" as *;
+
+/* -------------------------------------------------------------
+   ADMIN PAGE WIDTH / OVERFLOW FIX (desktop dahil)
+------------------------------------------------------------- */
+
+.ensotek-admin-shell {
+  /* shell zaten min-height: 100vh */
+  > .flex-grow-1 {
+    min-width: 0; /* desktop'ta da shrink edebilsin */
+  }
+}
+
+.ensotek-admin-page {
+  width: 100%;
+}
+
+.ensotek-admin-page__inner {
+  width: 100%;
+  max-width: 1320px; /* desktop clamp: 1440+ ekranda “aşırı geniş” olmasın */
+  margin-left: auto;
+  margin-right: auto;
+  min-width: 0;
+}
+
+.ensotek-admin-card {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden; /* card dışına taşmayı engeller */
+}
+
+.ensotek-admin-card__header,
+.ensotek-admin-card__body {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.ensotek-admin-card__title {
+  min-width: 0; /* text-truncate için şart */
+}
+
+.ensotek-admin-grid,
+.ensotek-admin-col {
+  min-width: 0; /* Bootstrap row/col içinde uzun içerik taşmasın */
+}

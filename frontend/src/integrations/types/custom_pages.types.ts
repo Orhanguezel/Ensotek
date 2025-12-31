@@ -48,6 +48,8 @@ export type CustomPageListPublicQueryParams = CustomPageListQueryParams;
  * ------------------------------------------------------------------ */
 export interface ApiCustomPage {
   id: string;
+  /** parent: custom_pages.module_key */
+  module_key: string;
 
   is_published: 0 | 1;
 
@@ -106,6 +108,9 @@ export interface ApiCustomPage {
  * ------------------------------------------------------------------ */
 export interface CustomPageDto {
   id: string;
+  /** parent: custom_pages.module_key */
+  module_key: string;
+
   is_published: boolean;
 
   featured_image: string | null;
@@ -245,6 +250,7 @@ export const normalizeCustomPage = (api: ApiCustomPage): CustomPageDto => {
 
   return {
     id: api.id,
+    module_key: String((api as any).module_key ?? (api as any).moduleKey ?? ''),
     is_published: toBoolFrom01(api.is_published),
 
     featured_image: api.featured_image ?? null,

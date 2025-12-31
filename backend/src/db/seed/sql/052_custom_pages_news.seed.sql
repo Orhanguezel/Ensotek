@@ -39,19 +39,19 @@ SET @MODULE_KEY_NEWS := 'news';
 -- FEATURED IMAGE (Cloudinary)
 -- -------------------------------------------------------------
 SET @IMG_NEWS_RENEWED :=
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753280071/uploads/metahub/news-images/untitled-1753280071057-80939909.webp';
+  'http://localhost:8086/uploads/news/site1.png';
 
 -- -------------------------------------------------------------
 -- GALLERY IMAGES (random)
 -- -------------------------------------------------------------
 SET @IMG_NEWS_2 :=
-  'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=1400&q=80';
+  'http://localhost:8086/uploads/news/site2.png';
 SET @IMG_NEWS_3 :=
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80';
+  'http://localhost:8086/uploads/news/site3.png';
 SET @IMG_NEWS_4 :=
-  'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=1400&q=80';
+  'http://localhost:8086/uploads/news/site4.png';
 SET @IMG_NEWS_5 :=
-  'https://images.unsplash.com/photo-1556761175-4b46a572b786?auto=format&fit=crop&w=1400&q=80';
+  'http://localhost:8086/uploads/news/site5.png';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)

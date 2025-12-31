@@ -3,6 +3,9 @@
 // Ensotek – Admin Library Sayfası (Liste + filtreler)
 // - Dynamic locales from DB (site_settings.app_locales + default_locale)
 // - No hardcoded locale map/list
+// - ✅ Schema-aligned: featured uses `featured`
+// - ✅ DTO-aligned: uses `name` (NOT title)
+// - ✅ Adds Active toggle (is_active) to avoid accidental DELETE for "Pasif yap"
 // =============================================================
 
 'use client';
@@ -33,12 +36,21 @@ function pickFirstString(v: unknown): string | undefined {
   return undefined;
 }
 
+const getItemLabel = (item: LibraryDto): string => {
+  const name = (item as any)?.name;
+  if (typeof name === 'string' && name.trim()) return name.trim();
+
+  const slug = (item as any)?.slug;
+  if (typeof slug === 'string' && slug.trim()) return slug.trim();
+
+  return item.id;
+};
+
 const LibraryAdminPage: React.FC = () => {
   const router = useRouter();
 
   const [search, setSearch] = useState('');
   const [showOnlyPublished, setShowOnlyPublished] = useState(false);
-  // UI'de ismini koruyoruz ama backend'de is_active filtresine bağlı
   const [showOnlyFeatured, setShowOnlyFeatured] = useState(false);
 
   const [orderBy, setOrderBy] = useState<
@@ -53,10 +65,9 @@ const LibraryAdminPage: React.FC = () => {
     loading: localesLoading,
   } = useAdminLocales();
 
-  // UI'de filtre için: "" = tüm diller (isteğe bağlı)
+  // UI'de filtre için: "" = tüm diller
   const [locale, setLocale] = useState<string>('');
 
-  // Query param ile locale seçildiyse (örn: /admin/library?locale=de) ilk açılışta uygula
   useEffect(() => {
     if (!router.isReady) return;
 
@@ -79,14 +90,10 @@ const LibraryAdminPage: React.FC = () => {
 
   const handleLocaleChange = (next: string) => {
     const normalized = (next ?? '').trim().toLowerCase();
-
-    // "" = tüm diller
     if (!normalized) {
       setLocale('');
       return;
     }
-
-    // DB’de yoksa default’a düşür
     const safe = coerceLocale(normalized, defaultLocaleFromDb);
     setLocale(safe || '');
   };
@@ -94,14 +101,14 @@ const LibraryAdminPage: React.FC = () => {
   /* -------------------- Liste + filtreler -------------------- */
 
   const listParams = useMemo<LibraryListQueryParams>(() => {
-    // locale boş değilse DB’ye göre güvenli hale getir
     const safeLocale = locale ? coerceLocale(locale, defaultLocaleFromDb) : '';
 
     return {
       q: search || undefined,
 
+      // backend filters
       is_published: showOnlyPublished ? '1' : undefined,
-      is_active: showOnlyFeatured ? '1' : undefined,
+      featured: showOnlyFeatured ? '1' : undefined,
 
       sort: orderBy,
       orderDir,
@@ -143,25 +150,20 @@ const LibraryAdminPage: React.FC = () => {
   };
 
   const handleEditRow = (item: LibraryDto) => {
-    // Edit sayfası locale’i query’den okuyabildiği için, filtre locale seçiliyse taşıyalım
     const q = locale ? `?locale=${encodeURIComponent(locale)}` : '';
     router.push(`/admin/library/${item.id}${q}`);
   };
 
   const handleDelete = async (item: LibraryDto) => {
-    if (
-      !window.confirm(
-        `"${
-          item.title || item.slug || item.id
-        }" kayıtlı içeriği silmek üzeresin. Devam etmek istiyor musun?`,
-      )
-    ) {
+    const label = getItemLabel(item);
+
+    if (!window.confirm(`"${label}" kayıtlı içeriği silmek üzeresin. Devam etmek istiyor musun?`)) {
       return;
     }
 
     try {
       await deleteLibrary(item.id).unwrap();
-      toast.success(`"${item.title || item.slug || item.id}" silindi.`);
+      toast.success(`"${label}" silindi.`);
       await refetch();
     } catch (err: any) {
       const msg = err?.data?.error?.message || err?.message || 'Kayıt silinirken bir hata oluştu.';
@@ -169,15 +171,21 @@ const LibraryAdminPage: React.FC = () => {
     }
   };
 
+  const patchAndUpdateLocalRow = async (
+    id: string,
+    patch: any,
+    localPatch: Partial<LibraryDto>,
+  ) => {
+    await updateLibrary({ id, patch }).unwrap();
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...localPatch } : r)));
+  };
+
   const handleTogglePublished = async (item: LibraryDto, value: boolean) => {
     try {
-      await updateLibrary({
-        id: item.id,
-        patch: { is_published: value ? '1' : '0' },
-      }).unwrap();
-
-      setRows((prev) =>
-        prev.map((r) => (r.id === item.id ? { ...r, is_published: value ? 1 : 0 } : r)),
+      await patchAndUpdateLocalRow(
+        item.id,
+        { is_published: value }, // ✅ boolean
+        { is_published: value ? 1 : 0 },
       );
     } catch (err: any) {
       const msg =
@@ -188,19 +196,30 @@ const LibraryAdminPage: React.FC = () => {
 
   const handleToggleFeatured = async (item: LibraryDto, value: boolean) => {
     try {
-      await updateLibrary({
-        id: item.id,
-        patch: { is_active: value ? '1' : '0' },
-      }).unwrap();
-
-      setRows((prev) =>
-        prev.map((r) => (r.id === item.id ? { ...r, is_active: value ? 1 : 0 } : r)),
+      await patchAndUpdateLocalRow(
+        item.id,
+        { featured: value }, // ✅ boolean
+        { featured: value ? 1 : 0 },
       );
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        'Aktiflik durumu güncellenirken bir hata oluştu.';
+        err?.data?.error?.message || err?.message || 'Öne çıkarma güncellenirken bir hata oluştu.';
+      toast.error(msg);
+    }
+  };
+
+  // ✅ NEW: Active toggle (Pasif/Aktif) - delete ile karışmasın
+  const handleToggleActive = async (item: LibraryDto, value: boolean) => {
+    try {
+      await patchAndUpdateLocalRow(
+        item.id,
+        { is_active: value }, // ✅ boolean
+        { is_active: value ? 1 : 0 },
+      );
+      toast.success(value ? 'Kayıt aktif edildi.' : 'Kayıt pasif edildi.');
+    } catch (err: any) {
+      const msg =
+        err?.data?.error?.message || err?.message || 'Aktif/Pasif güncellenirken bir hata oluştu.';
       toast.error(msg);
     }
   };
@@ -238,6 +257,8 @@ const LibraryAdminPage: React.FC = () => {
             onDelete={handleDelete}
             onTogglePublished={handleTogglePublished}
             onToggleFeatured={handleToggleFeatured}
+            // ✅ IMPORTANT: LibraryList bu prop'u kullanmalı
+            onToggleActive={handleToggleActive}
           />
         </div>
       </div>

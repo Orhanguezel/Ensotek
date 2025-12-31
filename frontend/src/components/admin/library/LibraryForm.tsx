@@ -1,9 +1,3 @@
-// =============================================================
-// FILE: src/components/admin/library/LibraryForm.tsx
-// Ensotek – Library Form Fields (LEFT COLUMN ONLY)
-// - All RTK hooks imported from "@/integrations/rtk/hooks"
-// =============================================================
-
 'use client';
 
 import React from 'react';
@@ -17,28 +11,38 @@ import {
   useListSubCategoriesAdminQuery,
 } from '@/integrations/rtk/hooks';
 
+import RichContentEditor from '@/components/common/RichContentEditor';
+
 export type LibraryFormValues = {
   locale: string;
 
   is_published: boolean;
   is_active: boolean;
-  display_order: number;
+  featured: boolean;
 
-  tags: string[] | null | undefined;
+  display_order: number;
+  type: string;
 
   category_id: string;
   sub_category_id: string;
 
-  author: string;
   published_at: string;
 
-  title: string;
+  name: string;
   slug: string;
-  summary: string;
-  content: string;
+
+  description: string;
+
+  image_alt: string;
+  tags: string;
 
   meta_title: string;
   meta_description: string;
+  meta_keywords: string;
+
+  featured_image: string;
+  image_url: string;
+  image_asset_id: string;
 };
 
 export type LibraryFormProps = {
@@ -46,7 +50,6 @@ export type LibraryFormProps = {
   values: LibraryFormValues;
 
   onChange: <K extends keyof LibraryFormValues>(field: K, value: LibraryFormValues[K]) => void;
-
   onLocaleChange?: (locale: string) => void;
 
   saving: boolean;
@@ -54,10 +57,7 @@ export type LibraryFormProps = {
   localesLoading?: boolean;
 };
 
-type CategoryOption = {
-  value: string;
-  label: string;
-};
+type SelectOption = { value: string; label: string };
 
 export const LibraryForm: React.FC<LibraryFormProps> = ({
   values,
@@ -67,19 +67,6 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
   localeOptions,
   localesLoading,
 }) => {
-  const tagsInputValue = Array.isArray(values.tags) ? values.tags.join(', ') : '';
-
-  const handleTagsChange = (raw: string) => {
-    const arr = raw
-      .split(',')
-      .map((t) => t.trim())
-      .filter(Boolean);
-
-    onChange('tags', arr);
-  };
-
-  /* -------------------- Kategori listesi (module_key=library) -------------------- */
-
   const categoryQueryParams = React.useMemo(
     () => ({
       locale: values.locale || undefined,
@@ -94,7 +81,7 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
     categoryQueryParams as any,
   );
 
-  const categoryOptions: CategoryOption[] = React.useMemo(
+  const categoryOptions: SelectOption[] = React.useMemo(
     () =>
       (categoryRows ?? []).map((c: CategoryDto) => ({
         value: c.id,
@@ -116,7 +103,7 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
   const { data: subCategoryRows, isLoading: isSubCategoriesLoading } =
     useListSubCategoriesAdminQuery(subCategoryQueryParams as any);
 
-  const subCategoryOptions: CategoryOption[] = React.useMemo(
+  const subCategoryOptions: SelectOption[] = React.useMemo(
     () =>
       (subCategoryRows ?? []).map((sc: SubCategoryDto) => ({
         value: sc.id,
@@ -129,8 +116,8 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
   const subCategoriesDisabled = saving || isSubCategoriesLoading || !values.category_id;
 
   return (
-    <div className="row g-2">
-      {/* Locale */}
+    <div className="row g-3">
+      {/* Üst satır */}
       <div className="col-md-4">
         <label className="form-label small">
           Dil {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
@@ -140,9 +127,9 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
           disabled={saving}
           value={values.locale}
           onChange={(e) => {
-            const locale = e.target.value;
-            onChange('locale', locale);
-            onLocaleChange?.(locale);
+            const nextLocale = e.target.value;
+            onChange('locale', nextLocale);
+            onLocaleChange?.(nextLocale);
           }}
         >
           {localeOptions.map((opt) => (
@@ -153,7 +140,18 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
         </select>
       </div>
 
-      {/* display_order */}
+      <div className="col-md-4">
+        <label className="form-label small">Tür (type)</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          value={values.type}
+          onChange={(e) => onChange('type', e.target.value)}
+          placeholder="Örn: other / brochure / principle"
+          maxLength={32}
+        />
+      </div>
+
       <div className="col-md-4">
         <label className="form-label small">Sıralama (display_order)</label>
         <input
@@ -161,53 +159,63 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
           className="form-control form-control-sm"
           disabled={saving}
           value={values.display_order}
+          min={0}
           onChange={(e) => onChange('display_order', Number(e.target.value) || 0)}
         />
       </div>
 
-      {/* flags */}
-      <div className="col-md-4 d-flex align-items-end">
-        <div className="d-flex gap-3 small">
-          <div className="form-check form-switch">
+      {/* Flags */}
+      <div className="col-12">
+        <div className="d-flex flex-wrap gap-3">
+          <div className="form-check form-switch small">
             <input
               type="checkbox"
               className="form-check-input"
               disabled={saving}
               checked={values.is_published}
               onChange={(e) => onChange('is_published', e.target.checked)}
+              id="lib-is-published"
             />
-            <label className="form-check-label">Yayında (is_published)</label>
+            <label className="form-check-label" htmlFor="lib-is-published">
+              Yayında (is_published)
+            </label>
           </div>
-          <div className="form-check form-switch">
+
+          <div className="form-check form-switch small">
             <input
               type="checkbox"
               className="form-check-input"
               disabled={saving}
               checked={values.is_active}
               onChange={(e) => onChange('is_active', e.target.checked)}
+              id="lib-is-active"
             />
-            <label className="form-check-label">Aktif (is_active)</label>
+            <label className="form-check-label" htmlFor="lib-is-active">
+              Aktif (is_active)
+            </label>
+          </div>
+
+          <div className="form-check form-switch small">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              disabled={saving}
+              checked={values.featured}
+              onChange={(e) => onChange('featured', e.target.checked)}
+              id="lib-featured"
+            />
+            <label className="form-check-label" htmlFor="lib-featured">
+              Öne Çıkan (featured)
+            </label>
           </div>
         </div>
       </div>
 
-      {/* tags */}
       <div className="col-12">
-        <label className="form-label small">Etiketler (tags – tags_json)</label>
-        <input
-          className="form-control form-control-sm"
-          disabled={saving}
-          placeholder="Örn: brochure, pdf, kurumsal"
-          value={tagsInputValue}
-          onChange={(e) => handleTagsChange(e.target.value)}
-        />
-        <div className="form-text small">
-          Virgülle ayırarak birden fazla etiket girebilirsin. Backend&apos;de <code>tags_json</code>{' '}
-          kolonuna JSON array olarak yazılacak.
-        </div>
+        <hr className="my-1" />
       </div>
 
-      {/* category_id / sub_category_id */}
+      {/* Kategoriler */}
       <div className="col-md-6">
         <label className="form-label small">Kategori (category_id)</label>
         <select
@@ -227,10 +235,6 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
             </option>
           ))}
         </select>
-        <div className="form-text small">
-          Kategoriler, <code>module_key = &apos;library&apos;</code> olan kategori modülünden gelir.
-        </div>
-        {isCategoriesLoading && <div className="form-text small">Kategoriler yükleniyor...</div>}
       </div>
 
       <div className="col-md-6">
@@ -248,46 +252,9 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
             </option>
           ))}
         </select>
-        <div className="form-text small">Alt kategoriler, seçili kategoriye göre filtrelenir.</div>
-        {isSubCategoriesLoading && (
-          <div className="form-text small">Alt kategoriler yükleniyor...</div>
-        )}
       </div>
 
-      {/* title */}
-      <div className="col-md-6">
-        <label className="form-label small">Başlık (title)</label>
-        <input
-          className="form-control form-control-sm"
-          disabled={saving}
-          value={values.title}
-          onChange={(e) => onChange('title', e.target.value)}
-        />
-      </div>
-
-      {/* slug */}
-      <div className="col-md-6">
-        <label className="form-label small">Slug</label>
-        <input
-          className="form-control form-control-sm"
-          disabled={saving}
-          value={values.slug}
-          onChange={(e) => onChange('slug', e.target.value)}
-        />
-      </div>
-
-      {/* author */}
-      <div className="col-md-6">
-        <label className="form-label small">Yazar / Kaynak (author)</label>
-        <input
-          className="form-control form-control-sm"
-          disabled={saving}
-          value={values.author}
-          onChange={(e) => onChange('author', e.target.value)}
-        />
-      </div>
-
-      {/* published_at */}
+      {/* Yayın + başlık */}
       <div className="col-md-6">
         <label className="form-label small">Yayın tarihi (published_at – ISO)</label>
         <div className="input-group input-group-sm">
@@ -309,36 +276,141 @@ export const LibraryForm: React.FC<LibraryFormProps> = ({
         </div>
       </div>
 
-      {/* summary */}
-      <div className="col-12">
-        <label className="form-label small">Kısa özet (summary)</label>
-        <textarea
+      <div className="col-md-6">
+        <label className="form-label small">Ad (name)</label>
+        <input
           className="form-control form-control-sm"
-          rows={2}
           disabled={saving}
-          value={values.summary}
-          onChange={(e) => onChange('summary', e.target.value)}
+          value={values.name}
+          onChange={(e) => onChange('name', e.target.value)}
+          maxLength={255}
         />
       </div>
 
-      {/* SEO */}
       <div className="col-md-6">
+        <label className="form-label small">Slug</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          value={values.slug}
+          onChange={(e) => onChange('slug', e.target.value)}
+          placeholder="kucuk-harf-ve-tire"
+          maxLength={255}
+        />
+      </div>
+
+      <div className="col-md-6">
+        <label className="form-label small">Görsel alt metni (image_alt)</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          value={values.image_alt}
+          onChange={(e) => onChange('image_alt', e.target.value)}
+          maxLength={255}
+        />
+      </div>
+
+      <div className="col-12">
+        <label className="form-label small">Etiketler (tags)</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          placeholder="Örn: brochure, pdf, kurumsal"
+          value={values.tags}
+          onChange={(e) => onChange('tags', e.target.value)}
+          maxLength={255}
+        />
+      </div>
+
+      <div className="col-12">
+        <hr className="my-1" />
+      </div>
+
+      {/* İçerik */}
+      <div className="col-12">
+        <RichContentEditor
+          label="Açıklama / İçerik (description – HTML + Önizleme)"
+          value={values.description}
+          onChange={(val) => onChange('description', val)}
+          disabled={saving}
+          height="280px"
+        />
+      </div>
+
+      <div className="col-12">
+        <hr className="my-1" />
+      </div>
+
+      {/* SEO */}
+      <div className="col-md-4">
         <label className="form-label small">Meta title</label>
         <input
           className="form-control form-control-sm"
           disabled={saving}
           value={values.meta_title}
           onChange={(e) => onChange('meta_title', e.target.value)}
+          maxLength={255}
         />
       </div>
 
-      <div className="col-md-6">
+      <div className="col-md-4">
         <label className="form-label small">Meta description</label>
         <input
           className="form-control form-control-sm"
           disabled={saving}
           value={values.meta_description}
           onChange={(e) => onChange('meta_description', e.target.value)}
+          maxLength={500}
+        />
+      </div>
+
+      <div className="col-md-4">
+        <label className="form-label small">Meta keywords</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          value={values.meta_keywords}
+          onChange={(e) => onChange('meta_keywords', e.target.value)}
+          maxLength={255}
+        />
+      </div>
+
+      <div className="col-12">
+        <hr className="my-1" />
+      </div>
+
+      {/* Legacy/storage */}
+      <div className="col-md-4">
+        <label className="form-label small">featured_image (legacy)</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          value={values.featured_image}
+          onChange={(e) => onChange('featured_image', e.target.value)}
+          maxLength={500}
+        />
+      </div>
+
+      <div className="col-md-4">
+        <label className="form-label small">image_url (legacy url)</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          value={values.image_url}
+          onChange={(e) => onChange('image_url', e.target.value)}
+          placeholder="https://..."
+          maxLength={500}
+        />
+      </div>
+
+      <div className="col-md-4">
+        <label className="form-label small">image_asset_id (storage)</label>
+        <input
+          className="form-control form-control-sm"
+          disabled={saving}
+          value={values.image_asset_id}
+          onChange={(e) => onChange('image_asset_id', e.target.value)}
+          maxLength={36}
         />
       </div>
     </div>

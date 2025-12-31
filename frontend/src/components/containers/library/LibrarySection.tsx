@@ -26,6 +26,13 @@ function safeStr(v: unknown): string {
   return String(v).trim();
 }
 
+function toBool(v: unknown): boolean {
+  if (typeof v === 'boolean') return v;
+  if (typeof v === 'number') return v === 1;
+  const s = safeStr(v).toLowerCase();
+  return s === '1' || s === 'true' || s === 'yes' || s === 'on';
+}
+
 type LibraryItemVM = {
   id: string;
   slug: string;
@@ -33,6 +40,38 @@ type LibraryItemVM = {
   summary: string;
   hero: string;
 };
+
+function mapToVm(it: any, t: (k: string, fb: string) => string): LibraryItemVM {
+  const title =
+    safeStr(it?.name) ||
+    safeStr(it?.title) ||
+    safeStr(it?.slug) ||
+    t('ui_library_untitled', 'Untitled content');
+
+  const sumRaw = safeStr(it?.summary) || safeStr(it?.description) || safeStr(it?.content) || '';
+  const summary = excerpt(stripHtml(sumRaw), 220) || '—';
+
+  // image candidates (library uses image_url / featured_image; some endpoints return images[])
+  const img = Array.isArray(it?.images) && it.images.length ? it.images[0] : null;
+
+  const imgSrc =
+    safeStr(it?.featured_image) ||
+    safeStr(it?.image_url) ||
+    safeStr(img?.webp) ||
+    safeStr(img?.url) ||
+    safeStr(img?.thumbnail) ||
+    safeStr(img?.asset?.url);
+
+  const hero = imgSrc ? toCdnSrc(imgSrc, 720, 520, 'fill') || imgSrc : '';
+
+  return {
+    id: safeStr(it?.id) || safeStr(it?._id) || safeStr(it?.uuid) || title,
+    slug: safeStr(it?.slug),
+    title,
+    summary,
+    hero,
+  };
+}
 
 const LibrarySection: React.FC = () => {
   const locale = useLocaleShort();
@@ -49,43 +88,59 @@ const LibrarySection: React.FC = () => {
   const listHref = useMemo(() => localizePath(locale, '/library'), [locale]);
   const [open, setOpen] = useState<number>(0);
 
-  const { data = [], isLoading } = useListLibraryQuery({
+  // ✅ 1) Featured items only (priority)
+  const { data: featuredData = [], isLoading: isLoadingFeatured } = useListLibraryQuery({
     locale,
-    limit: 2,
-    order: 'display_order.desc',
-    sort: 'published_at',
-    orderDir: 'desc',
+    limit: 4, // homepage preview: enough to pick 1-2 featured reliably
+    sort: 'display_order',
+    orderDir: 'asc',
     is_published: '1',
     is_active: '1',
+    featured: '1', // ✅ backend supports "featured" filter (if different, adjust here)
   } as any);
 
+  // ✅ 2) Fallback: latest items (if featured list empty)
+  const { data: fallbackData = [], isLoading: isLoadingFallback } = useListLibraryQuery(
+    {
+      locale,
+      limit: 2,
+      sort: 'published_at',
+      orderDir: 'desc',
+      is_published: '1',
+      is_active: '1',
+    } as any,
+    {
+      // only fetch fallback if featured is empty or not returned
+      skip: Array.isArray(featuredData) && featuredData.length > 0,
+    } as any,
+  );
+
+  const isLoading = isLoadingFeatured || isLoadingFallback;
+
   const items: LibraryItemVM[] = useMemo(() => {
-    const arr = Array.isArray(data) ? data : [];
+    const fArr = Array.isArray(featuredData) ? featuredData : [];
+    const fbArr = Array.isArray(fallbackData) ? fallbackData : [];
 
-    const base = arr.map((it: any) => {
-      const title =
-        safeStr(it?.title) || safeStr(it?.slug) || t('ui_library_untitled', 'Untitled content');
+    // Some backends may ignore featured filter; also support is_featured/featured fields in payload.
+    const featuredLike = fArr
+      .filter((x: any) => toBool(x?.featured) || toBool(x?.is_featured))
+      .map((x: any) => mapToVm(x, t))
+      .filter((x) => !!x.slug);
 
-      const sumRaw = safeStr(it?.summary) || safeStr(it?.content) || '';
-      const summary = excerpt(stripHtml(sumRaw), 220) || '—';
+    const fromFeatured =
+      featuredLike.length > 0
+        ? featuredLike.slice(0, 2)
+        : fArr
+            .map((x: any) => mapToVm(x, t))
+            .filter((x) => !!x.slug)
+            .slice(0, 2);
 
-      const img = Array.isArray(it?.images) && it.images.length ? it.images[0] : null;
-      const imgSrc =
-        safeStr(img?.webp) ||
-        safeStr(img?.url) ||
-        safeStr(img?.thumbnail) ||
-        safeStr(img?.asset?.url);
+    const fromFallback = fbArr
+      .map((x: any) => mapToVm(x, t))
+      .filter((x) => !!x.slug)
+      .slice(0, 2);
 
-      const hero = imgSrc ? toCdnSrc(imgSrc, 720, 520, 'fill') || imgSrc : '';
-
-      return {
-        id: safeStr(it?.id) || safeStr(it?._id) || title,
-        slug: safeStr(it?.slug),
-        title,
-        summary,
-        hero,
-      };
-    });
+    const base = fromFeatured.length ? fromFeatured : fromFallback;
 
     if (!base.length) {
       return [
@@ -106,14 +161,21 @@ const LibrarySection: React.FC = () => {
       ];
     }
 
-    return base.slice(0, 2);
-  }, [data, t]);
+    return base;
+  }, [featuredData, fallbackData, t]);
 
   const firstWithHero = items.find((x) => !!safeStr(x.hero));
   const leftHero: string | StaticImageData =
     (firstWithHero?.hero as string) || (Two as StaticImageData);
 
   const leftAlt = firstWithHero?.title || t('ui_library_cover_alt', 'library cover image');
+
+  // keep open index safe when items length changes
+  const safeOpen = useMemo(() => {
+    if (open < 0) return -1;
+    if (open >= items.length) return 0;
+    return open;
+  }, [open, items.length]);
 
   return (
     <section className="features__area p-relative features-bg pt-120 pb-35 cus-faq">
@@ -141,7 +203,7 @@ const LibrarySection: React.FC = () => {
             </div>
           </div>
 
-          {/* Sağ içerik – 2 kayıt */}
+          {/* Sağ içerik – Featured (2 kayıt) */}
           <div className="col-xl-6 col-lg-6">
             <div className="features__content-wrapper">
               <div className="section__title-wrapper mb-10">
@@ -159,7 +221,7 @@ const LibrarySection: React.FC = () => {
                 <div className="bd-faq__accordion" data-aos="fade-left" data-aos-duration="1000">
                   <div className="accordion" id="libAccordionPreview">
                     {items.map((it, idx) => {
-                      const isOpen = open === idx;
+                      const isOpen = safeOpen === idx;
 
                       const href = it.slug
                         ? localizePath(locale, `/library/${encodeURIComponent(it.slug)}`)

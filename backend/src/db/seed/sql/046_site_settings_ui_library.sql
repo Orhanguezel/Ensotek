@@ -74,7 +74,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_library_share_title',                  'Dokümanı Paylaş',
     'ui_library_write_comment',               'Yorum Yazın',
     'ui_library_sidebar_contact_title',        'Bizimle İletişime Geçin',
-    'ui_library_file_unnamed',        'İlgili Dokümanlar'
+    'ui_library_file_unnamed',        'İlgili Dokümanlar',
+    'ui_library_other_docs_title',         'Diğer Dokümanlar'
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -138,7 +139,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_library_share_title',                  'Share Document',
     'ui_library_write_comment',               'Write a Comment',
     'ui_library_sidebar_contact_title',        'Contact Us',
-    'ui_library_file_unnamed',        'Related Documents'
+    'ui_library_file_unnamed',        'Related Documents',
+    'ui_library_other_docs_title',         'Other Documents'
   ) AS CHAR),
   NOW(3),
   NOW(3)
@@ -202,7 +204,8 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
     'ui_library_share_title',                  'Dokument teilen',
     'ui_library_write_comment',               'Einen Kommentar schreiben',
     'ui_library_sidebar_contact_title',        'Kontaktieren Sie uns',
-    'ui_library_file_unnamed',        'Verwandte Dokumente'
+    'ui_library_file_unnamed',        'Verwandte Dokumente',
+    'ui_library_other_docs_title',         'Weitere Dokumente'
   ) AS CHAR),
   NOW(3),
   NOW(3)

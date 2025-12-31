@@ -1,4 +1,11 @@
-// src/components/containers/library/Library.tsx
+// =============================================================
+// FILE: src/components/containers/library/Library.tsx
+// Ensotek – Library Landing Section (Accordion List)
+// - Public list: GET /library (LibraryDto[])
+// - i18n: useUiSection('ui_library')
+// - Hero: parent featured_image/image_url (schema-safe)
+// =============================================================
+
 'use client';
 
 import React, { useMemo, useState, useCallback } from 'react';
@@ -6,6 +13,7 @@ import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 
 import { useListLibraryQuery } from '@/integrations/rtk/hooks';
+import type { LibraryDto } from '@/integrations/types/library.types';
 
 // Pattern + fallback görseller
 import One from 'public/img/shape/features-shape.png';
@@ -41,6 +49,7 @@ const Library: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_library', locale as any);
 
+  // EN fallback only
   const t = useCallback(
     (key: string, fallbackEn: string) => {
       const v = safeStr(ui(key, fallbackEn));
@@ -55,36 +64,34 @@ const Library: React.FC = () => {
   const { data = [], isLoading } = useListLibraryQuery({
     locale,
     limit: 200,
-    // Not: backend “order/sort/orderDir” birlikte kullanıyorsun; mevcut yapıyı bozmadım
+
+    // mevcut düzeni bozmadım
     order: 'display_order.desc',
     sort: 'published_at',
     orderDir: 'desc',
-    is_published: '1',
-    is_active: '1',
-  } as any);
+
+    // public schema: is_published / is_active yok (publicLibraryListQuerySchema)
+    // Eğer backend public list'te otomatik filtreliyorsa bu alanları göndermeyelim.
+  });
 
   const items: LibraryItemVM[] = useMemo(() => {
-    const arr = Array.isArray(data) ? data : [];
+    const arr = Array.isArray(data) ? (data as LibraryDto[]) : [];
 
-    const base = arr.map((it: any) => {
+    const base = arr.map((it) => {
       const title =
-        safeStr(it?.title) || safeStr(it?.slug) || t('ui_library_untitled', 'Untitled content');
+        safeStr(it.name) || safeStr(it.slug) || t('ui_library_untitled', 'Untitled content');
 
-      const sumRaw = safeStr(it?.summary) || safeStr(it?.content) || '';
-      const summary = excerpt(stripHtml(sumRaw), 220);
+      // Tip: description alanını özet gibi kullanıyoruz (HTML olabilir)
+      const descRaw = safeStr(it.description);
+      const summary = descRaw ? excerpt(stripHtml(descRaw), 220) : '';
 
-      const img = Array.isArray(it?.images) && it.images.length ? it.images[0] : null;
-      const imgSrc =
-        safeStr(img?.webp) ||
-        safeStr(img?.url) ||
-        safeStr(img?.thumbnail) ||
-        safeStr(img?.asset?.url);
-
-      const hero = imgSrc ? toCdnSrc(imgSrc, 720, 520, 'fill') || imgSrc : '';
+      // Hero: sadece schema-safe parent alanları
+      const rawImg = safeStr(it.featured_image) || safeStr(it.image_url);
+      const hero = rawImg ? toCdnSrc(rawImg, 720, 520, 'fill') || rawImg : '';
 
       return {
-        id: safeStr(it?.id) || safeStr(it?._id) || title,
-        slug: safeStr(it?.slug),
+        id: safeStr(it.id),
+        slug: safeStr(it.slug),
         title,
         summary: summary || '—',
         hero,

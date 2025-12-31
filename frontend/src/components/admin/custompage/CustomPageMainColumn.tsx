@@ -8,7 +8,7 @@
 import React from 'react';
 import type { LocaleOption } from './CustomPageHeader';
 import type { CustomPageFormValues } from './CustomPageForm';
-import { CustomPageRichContentField } from './CustomPageRichContentField';
+import RichContentEditor from '@/components/common/RichContentEditor';
 
 /* ----------------- slugify sadece bu kolon için ----------------- */
 const slugify = (value: string): string => {
@@ -146,7 +146,7 @@ export const CustomPageMainColumn: React.FC<Props> = ({
       </div>
 
       {/* Zengin Metin */}
-      <CustomPageRichContentField
+      <RichContentEditor
         value={values.content}
         disabled={disabled}
         onChange={(html: string) =>
