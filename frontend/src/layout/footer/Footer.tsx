@@ -15,7 +15,7 @@ import Link from 'next/link';
 
 import Shape from 'public/img/shape/footer-shape.png';
 
-import { SiteLogo } from '@/components/layout/SiteLogo';
+import { SiteLogo } from '@/layout/SiteLogo';
 import SocialLinks from '@/components/common/public/SocialLinks';
 
 import {

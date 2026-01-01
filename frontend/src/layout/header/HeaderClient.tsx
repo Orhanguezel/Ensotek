@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { type StaticImageData } from 'next/image';
 
 import HeaderOffcanvas from './HeaderOffcanvas';
-import { SiteLogo } from '@/components/layout/SiteLogo';
+import { SiteLogo } from '@/layout/SiteLogo';
 
 import { useListMenuItemsQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';

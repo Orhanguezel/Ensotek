@@ -16,7 +16,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/router';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import LibraryDetail from '@/components/containers/library/LibraryDetail';
 
 // ✅ Page -> Layout SEO overrides (STANDARD)

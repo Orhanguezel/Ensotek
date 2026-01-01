@@ -15,7 +15,7 @@
 import React, { useMemo } from 'react';
 import type { NextPage } from 'next';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import AboutPageContent from '@/components/containers/about/AboutPageContent';
 import AboutCounter from '@/components/containers/about/AboutCounter';
 import Sponsor from '@/components/containers/references/References';

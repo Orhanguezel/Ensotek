@@ -15,7 +15,7 @@
 
 import React, { useMemo } from 'react';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import LegalNoticePageContent from '@/components/containers/legal/LegalNoticePageContent';
 
 import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';

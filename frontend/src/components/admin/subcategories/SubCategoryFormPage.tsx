@@ -5,6 +5,7 @@
 // - Categories list is locale-dependent (query arg: locale) so it refetches on locale change
 // - Form init updates when initialData changes (not only first mount)
 // - After save, UI state is updated from mutation response (prevents "only after refresh" symptoms)
+// - ✅ Hook deps warning fixed: localeOptions is memoized (stable reference)
 // =============================================================
 
 'use client';
@@ -138,7 +139,14 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
     loading: isLocalesLoading,
   } = useAdminLocales();
 
-  const localeOptions = (adminLocaleOptions ?? []) as LocaleOption[];
+  // ✅ FIX: stabilize localeOptions reference (prevents exhaustive-deps warning)
+  const localeOptions: LocaleOption[] = useMemo(
+    () => (adminLocaleOptions ?? []) as LocaleOption[],
+    [adminLocaleOptions],
+  );
+
+  // First locale (stable primitive) for fallback decisions
+  const firstLocaleValue = localeOptions[0]?.value;
 
   const routerLocale = (router.locale as string | undefined)?.toLowerCase();
 
@@ -147,10 +155,11 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
     const base =
       coerceLocale(routerLocale, defaultLocaleFromDb) ||
       defaultLocaleFromDb ||
-      localeOptions[0]?.value ||
+      firstLocaleValue ||
       'de';
+
     return (base || 'de').toLowerCase();
-  }, [coerceLocale, routerLocale, defaultLocaleFromDb, localeOptions]);
+  }, [coerceLocale, routerLocale, defaultLocaleFromDb, firstLocaleValue]);
 
   /* -------------------- Categories (locale-dependent) -------------------- */
   // ✅ KRİTİK: locale arg ver -> dil değişince query arg değişsin -> refetch
@@ -198,7 +207,6 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
       const next = mapDtoToFormState(initialData);
 
       // Eğer kullanıcı formda değişiklik yaptıysa her render’da override etmeyelim.
-      // Sadece id aynıysa ve aynı locale ise ve prev boşsa/ya da yeni data daha güncelse güncelle.
       if (!prev) return next;
 
       // farklı kayıt geldiyse (id değiştiyse) direkt güncelle
@@ -207,7 +215,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
       // locale değişmişse (backend’den gelen) güncelle
       if (safeStr(prev.locale) !== safeStr(next.locale)) return next;
 
-      // icon/image gibi alanlar refresh gerektirmesin: backend’den gelen değer boş değilse overwrite et
+      // backend’den gelen boş değilse overwrite et
       const prevIcon = safeStr(prev.icon);
       const nextIcon = safeStr(next.icon);
       if (nextIcon && nextIcon !== prevIcon) {
@@ -504,7 +512,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
                 {editMode === 'form' ? (
                   <SubCategoryFormFields
                     formState={formState}
-                    localeOptions={localeOptions as LocaleOption[]}
+                    localeOptions={localeOptions}
                     categoryOptions={categoryOptions}
                     disabled={saving || loading}
                     isLocaleLoading={isLocaleLoading}

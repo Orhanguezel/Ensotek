@@ -13,7 +13,7 @@
 
 import React, { useMemo } from 'react';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import TeamPageContent from '@/components/containers/team/TeamPageContent';
 import ServiceCtaTwo from '@/components/containers/cta/CatalogCta';
 

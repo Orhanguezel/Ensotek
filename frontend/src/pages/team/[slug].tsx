@@ -16,7 +16,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/router';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import TeamDetail from '@/components/containers/team/TeamDetail';
 import ServiceCtaTwo from '@/components/containers/cta/CatalogCta';
 

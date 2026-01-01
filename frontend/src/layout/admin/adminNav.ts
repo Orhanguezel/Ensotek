@@ -1,5 +1,5 @@
 // src/components/layout/admin/adminNav.ts
-import type { ActiveTab } from '@/components/layout/admin/AdminLayout';
+import type { ActiveTab } from '@/layout/admin/AdminLayout';
 
 /**
  * Admin tab -> route eşlemesi.

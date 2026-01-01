@@ -13,7 +13,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/router';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import ProductDetail from '@/components/containers/product/ProductDetail';
 import ProductMore from '@/components/containers/product/ProductMore';
 

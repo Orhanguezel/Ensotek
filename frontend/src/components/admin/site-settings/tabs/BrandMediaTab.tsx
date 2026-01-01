@@ -162,6 +162,7 @@ export const BrandMediaTab: React.FC = () => {
 
   const refetchAll = useCallback(async () => {
     await qGlobal.refetch();
+    //eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qGlobal.refetch]);
 
   const rows = useMemo(() => {
