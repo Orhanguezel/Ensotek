@@ -453,7 +453,7 @@ VALUES
   '55555555-6666-4777-8888-aaaaaaaaaaaa',
   '55555555-5555-5555-5555-555555555555',
   NULL,
-  'http://localhost:8086/uploads/library/su-sogutma-kulesi-ozellikleri-1.jpg',
+  'https://www.ensotek.de/uploads/library/su-sogutma-kulesi-ozellikleri-1.jpg',
   10,
   1,
   NOW(3),

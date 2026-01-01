@@ -52,13 +52,13 @@ VALUES (
   'aaaa1001-1111-4111-8111-aaaaaaaa1001',
   'bbbb1002-1111-4111-8111-bbbbbbbb1002',
   0.00,
-  'http://localhost:8086/uploads/material/damlatutucu3-250x250-1.jpg',
+  'https://www.ensotek.de/uploads/material/damlatutucu3-250x250-1.jpg',
   NULL,
   JSON_ARRAY(
-    'http://localhost:8086/uploads/material/damlatutucu2-250x250-1.jpg',
-    'http://localhost:8086/uploads/material/damla-tutucu-pvc-c-145x45-250x250-1.jpg',
-    'http://localhost:8086/uploads/material/damlatutucu3-250x250-1.jpg',
-    'http://localhost:8086/uploads/material/cooling-tower-drift-eliminator-250x250-1.jpg'
+    'https://www.ensotek.de/uploads/material/damlatutucu2-250x250-1.jpg',
+    'https://www.ensotek.de/uploads/material/damla-tutucu-pvc-c-145x45-250x250-1.jpg',
+    'https://www.ensotek.de/uploads/material/damlatutucu3-250x250-1.jpg',
+    'https://www.ensotek.de/uploads/material/cooling-tower-drift-eliminator-250x250-1.jpg'
   ),
   JSON_ARRAY(),
   1,

@@ -274,7 +274,7 @@ VALUES
   '77777777-aaaa-4bbb-cccc-bbbbbbbbbbbb',
   '77777777-7777-7777-7777-777777777777',
   NULL,
-  'http://localhost:8086/uploads/catalog/Ensotek-cooling-tower-catalog.pdf',
+  'https://www.ensotek.de/uploads/catalog/Ensotek-cooling-tower-catalog.pdf',
   'Ensotek Cooling Tower Catalog (PDF)',
   NULL,
   'application/pdf',

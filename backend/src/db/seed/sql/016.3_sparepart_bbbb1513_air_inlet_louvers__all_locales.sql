@@ -52,10 +52,10 @@ VALUES (
   'aaaa1001-1111-4111-8111-aaaaaaaa1001',
   'bbbb1001-1111-4111-8111-bbbbbbbb1001',
   0.00,
-  'http://localhost:8086/uploads/material/hava-giris-panjuru2-250x250-1.jpg',
+  'https://www.ensotek.de/uploads/material/hava-giris-panjuru2-250x250-1.jpg',
   NULL,
   JSON_ARRAY(
-    'http://localhost:8086/uploads/material/hava-giris-panjuru2-250x250-1.jpg'
+    'https://www.ensotek.de/uploads/material/hava-giris-panjuru2-250x250-1.jpg'
   ),
   JSON_ARRAY(),
   1,

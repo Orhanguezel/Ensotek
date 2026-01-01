@@ -52,11 +52,11 @@ VALUES (
   'aaaa1001-1111-4111-8111-aaaaaaaa1001',
   'bbbb1003-1111-4111-8111-bbbbbbbb1003',
   0.00,
-  'http://localhost:8086/uploads/material/grid-250x250-1.jpg',
+  'https://www.ensotek.de/uploads/material/grid-250x250-1.jpg',
   NULL,
   JSON_ARRAY(
-    'http://localhost:8086/uploads/material/grid-250x250-1.jpg',
-    'http://localhost:8086/uploads/material/splash-grid-dolgu_1-250x250-1.jpg'
+    'https://www.ensotek.de/uploads/material/grid-250x250-1.jpg',
+    'https://www.ensotek.de/uploads/material/splash-grid-dolgu_1-250x250-1.jpg'
   ),
   JSON_ARRAY(),
   1,

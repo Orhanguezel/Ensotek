@@ -49,12 +49,12 @@ VALUES (
   'aaaa0002-1111-4111-8111-aaaaaaaa0002',
   'bbbb0102-1111-4111-8111-bbbbbbbb0102',
   0.00,
-  'http://localhost:8086/uploads/product/open-circuit-dctp-double-1-250x250-1.png',
+  'https://www.ensotek.de/uploads/product/open-circuit-dctp-double-1-250x250-1.png',
   NULL,
   JSON_ARRAY(
-    'http://localhost:8086/uploads/material/open-circuit-dctp-double-1-250x250-1.jpg',
-    'http://localhost:8086/uploads/material/open-circuit-dctp-double-2-250x250-1.jpg',
-    'http://localhost:8086/uploads/material/open-circuit-dctp-double-3-250x250-1.jpg'
+    'https://www.ensotek.de/uploads/material/open-circuit-dctp-double-1-250x250-1.jpg',
+    'https://www.ensotek.de/uploads/material/open-circuit-dctp-double-2-250x250-1.jpg',
+    'https://www.ensotek.de/uploads/material/open-circuit-dctp-double-3-250x250-1.jpg'
   ),
   JSON_ARRAY(),
   1,
