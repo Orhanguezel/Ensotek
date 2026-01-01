@@ -22,7 +22,7 @@ function getFileBase(): string {
     const { hostname, origin } = window.location;
 
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:8086';
+      return 'https://www.ensotek.de';
     }
 
     return String(origin || '')
@@ -30,7 +30,7 @@ function getFileBase(): string {
       .replace(/\/+$/, '');
   }
 
-  return 'http://localhost:8086';
+  return 'https://www.ensotek.de';
 }
 
 function normalizePdfPath(pdfUrl: string): string {
@@ -82,9 +82,9 @@ const LibraryPdfPreview: React.FC<Props> = ({ pdfUrl, title = 'PDF Preview', hei
       <div className="ens-pdfPreview__frame">
         <iframe
           title={title}
-            src={iframeSrc}
-            width="100%"
-            height={height}
+          src={iframeSrc}
+          width="100%"
+          height={height}
           allow="fullscreen"
           allowFullScreen
           loading="lazy"
