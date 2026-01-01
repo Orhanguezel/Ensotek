@@ -1,5 +1,9 @@
-// src/components/layout/banner/CookieSettingsModal.tsx
-
+// =============================================================
+// FILE: src/components/layout/banner/CookieSettingsModal.tsx
+// Ensotek – Cookie Settings Modal (DB/UI localized) + final consent state
+// - Necessary always on
+// - Analytics switch toggles analytics consent
+// =============================================================
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -70,7 +74,6 @@ export default function CookieSettingsModal({
 }: Props) {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_cookie', locale as any);
-
 
   const [analytics, setAnalytics] = useState<boolean>(!!consent.analytics);
 
