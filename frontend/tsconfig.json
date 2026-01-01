@@ -34,7 +34,18 @@
     "src/**/*",
     "src/types/**/*.d.ts",
     "tests/**/*",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "test-results/legal.static.spec.ts",
+    "test-results/library.detail.spec.ts",
+    "test-results/library.list.spec.ts",
+    "test-results/news.detail.spec.ts",
+    "test-results/news.list.spec.ts",
+    "test-results/product.detail.spec.ts",
+    "test-results/product.list.spec.ts",
+    "test-results/service.detail.spec.ts",
+    "test-results/service.list.spec.ts",
+    "test-results/team.detail.spec.ts",
+    "test-results/team.list.spec.ts"
   ],
   "exclude": [
     "node_modules"

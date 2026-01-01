@@ -1,0 +1,240 @@
+[
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.35,
+    "values": [
+      0.35
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.35,
+    "values": [
+      0.35
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/product"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.35,
+    "values": [
+      0.35
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/service"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.2,
+    "values": [
+      0.2
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/news"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.35,
+    "values": [
+      0.35
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/library"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.27,
+    "values": [
+      0.27
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/references"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.35,
+    "values": [
+      0.35
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/contact"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.36,
+    "values": [
+      0.36
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/offer"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.34,
+    "values": [
+      0.34
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/faqs"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.18,
+    "values": [
+      0.18
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/terms"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.16,
+    "values": [
+      0.16
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/privacy-policy"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.18,
+    "values": [
+      0.18
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/privacy-notice"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.19,
+    "values": [
+      0.19
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/cookie-policy"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.16,
+    "values": [
+      0.16
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/legal-notice"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.14,
+    "values": [
+      0.14
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/kvkk"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.16,
+    "values": [
+      0.16
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/mission-vision"
+  },
+  {
+    "name": "minScore",
+    "expected": 0.6,
+    "actual": 0.14,
+    "values": [
+      0.14
+    ],
+    "operator": ">=",
+    "passed": false,
+    "auditProperty": "performance",
+    "auditId": "categories",
+    "level": "warn",
+    "url": "http://localhost:3000/quality"
+  }
+]

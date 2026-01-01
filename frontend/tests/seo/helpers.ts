@@ -446,3 +446,28 @@ export function expectHreflangSet(hreflangs: Array<{ hreflang: string; href: str
   expect(langs.has('x-default'), 'hreflang must include x-default').toBeTruthy();
 }
 
+export function expectHreflangMatchesCanonical(
+  canonical: string | null,
+  hreflangs: Array<{ hreflang: string; href: string }>,
+  locale: string,
+) {
+  expect(canonical, 'canonical must exist').toBeTruthy();
+  const canon = String(canonical || '').trim();
+  const loc = String(locale || '')
+    .trim()
+    .toLowerCase();
+
+  const hit = hreflangs.find(
+    (x) =>
+      String(x.hreflang || '')
+        .trim()
+        .toLowerCase() === loc,
+  );
+  expect(hit, `hreflang must include current locale: ${loc}`).toBeTruthy();
+  expect(String(hit!.href || '').trim(), 'current locale hreflang href must exist').toBeTruthy();
+
+  // Canonical ile birebir aynı olmasını istiyorsan:
+  expect(String(hit!.href).trim()).toBe(canon);
+}
+
+
