@@ -15,7 +15,7 @@ const normalizeLocalhostOrigin = (origin: string): string => {
   return o;
 };
 
-/** Site'nin temel URL'si (örn: https://ensotek.de) */
+/** Site'nin temel URL'si (örn: https://www.ensotek.de) */
 export function siteUrlBase(): string {
   const envUrl = stripTrailingSlash(process.env.NEXT_PUBLIC_SITE_URL || '');
   if (envUrl) return normalizeLocalhostOrigin(envUrl);

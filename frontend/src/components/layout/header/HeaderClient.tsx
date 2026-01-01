@@ -74,7 +74,7 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
     const name = (brandVal?.name as string) || (contact?.companyName as string) || 'ENSOTEK';
 
     const website =
-      (brandVal?.website as string) || (contact?.website as string) || 'https://ensotek.de';
+      (brandVal?.website as string) || (contact?.website as string) || 'https://www.ensotek.de';
 
     const phones = Array.isArray(contact?.phones) ? contact.phones : [];
     const phone =
