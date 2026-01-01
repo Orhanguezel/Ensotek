@@ -1,17 +1,22 @@
 -- =============================================================
--- FILE: 015.7_sparepart_bbbb1507_frp_pultrusion_profiles__all_locales.sql (FINAL)
+-- FILE: 015.7_sparepart_bbbb1507_frp_pultrusion_profiles__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (07/14)
 -- Sparepart: CTP Profiller / FRP Pultrusion Profiles / FRP Pultrusionsprofil
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to 015.6 pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
---  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING
+--    (NO JSON_ARRAY/JSON_OBJECT nested inside specifications)
+--  - child tables (product_specs/product_faqs): locale-based reset with DELETE
+--  - reviews/options: id-based reset
+--  - options table is locale-less => TR/EN/DE separate option rows with different IDs
+--  - child IDs: 36-char uuid-like
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -81,7 +86,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -97,8 +102,8 @@ VALUES (
   JSON_ARRAY('yedek parça', 'ctp', 'gfrp', 'pultruzyon', 'profil', 'konstrüksiyon', 'ensotek'),
   JSON_OBJECT(
     'malzeme', 'CTP / GFRP (Cam elyaf takviyeli polyester)',
-    'uretim', 'Pultruzyon yöntemi (elyaf + reçine)',
-    'avantajlar', JSON_ARRAY('Yüksek mukavemet', 'Bakım/boya gerektirmez', 'Kimyasal dayanım', 'Uzun ömür'),
+    'uretim', 'Pultruzyon (elyaf + reçine kombinasyonu)',
+    'avantajlar', 'Yüksek mukavemet; bakım/boya gerektirmez; kimyasal dayanım; uzun ömür',
     'kullanim', 'Soğutma kulesi konstrüksiyon profilleri (çeşitli kesitler)'
   ),
   'CTP Profiller (Pultruzyon) | Soğutma Kulesi Yedek Parça | Ensotek',
@@ -115,7 +120,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1507-2222-4222-8222-bbbbbbbb1507' AND locale='tr';
 
@@ -127,7 +132,7 @@ VALUES
   ('11111507-aaaa-4aaa-8aaa-bbbb1507tr04','bbbb1507-2222-4222-8222-bbbbbbbb1507','tr','Bakım','Boyama/bakım gerektirmez','custom',40),
   ('11111507-aaaa-4aaa-8aaa-bbbb1507tr05','bbbb1507-2222-4222-8222-bbbbbbbb1507','tr','Dayanım','Kimyasallardan minimum etkilenir','material',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1507-2222-4222-8222-bbbbbbbb1507' AND locale='tr';
 
@@ -137,7 +142,7 @@ VALUES
   ('22221507-aaaa-4aaa-8aaa-bbbb1507tr02','bbbb1507-2222-4222-8222-bbbbbbbb1507','tr','CTP profillerin avantajı nedir?','Yüksek dayanım, korozyon/kimyasal dayanım ve bakım/boya gerektirmeyen uzun ömür sağlar.',20,1),
   ('22221507-aaaa-4aaa-8aaa-bbbb1507tr03','bbbb1507-2222-4222-8222-bbbbbbbb1507','tr','Hangi alanlarda kullanılır?','Soğutma kulesi konstrüksiyonunda farklı kesitli taşıyıcı/bağlantı profilleri olarak kullanılır.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331507-aaaa-4aaa-8aaa-bbbb1507tr01',
@@ -149,16 +154,20 @@ VALUES
   ('33331507-aaaa-4aaa-8aaa-bbbb1507tr01','bbbb1507-2222-4222-8222-bbbbbbbb1507',NULL,5,'Korozyon derdi yok; sahada uzun yıllar bakım istemeden duruyor.',1,'Bakım Ekibi'),
   ('33331507-aaaa-4aaa-8aaa-bbbb1507tr02','bbbb1507-2222-4222-8222-bbbbbbbb1507',NULL,4,'Montajda hafifliği ve rijitliği işimizi kolaylaştırdı.',1,'Saha Uygulama');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — locale-less table => separate row
 DELETE FROM product_options
-WHERE id='44441507-aaaa-4aaa-8aaa-bbbb1507op01';
+WHERE id='44441507-aaaa-4aaa-8aaa-bbbb1507tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441507-aaaa-4aaa-8aaa-bbbb1507op01','bbbb1507-2222-4222-8222-bbbbbbbb1507','Profile Section', JSON_ARRAY('I / U / L / Box','Custom Cut Length','Custom Section (on request)'));
+  ('44441507-aaaa-4aaa-8aaa-bbbb1507tr01','bbbb1507-2222-4222-8222-bbbbbbbb1507','Profil Kesiti', JSON_ARRAY(
+    'I / U / L / Kutu (Box)',
+    'Özel Kesim Boy',
+    'Özel Kesit (talebe göre)'
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -174,8 +183,8 @@ VALUES (
   JSON_ARRAY('spare part', 'frp', 'gfrp', 'pultrusion', 'profile', 'structure', 'ensotek'),
   JSON_OBJECT(
     'material', 'FRP / GFRP (glass fiber reinforced polyester)',
-    'process', 'Pultrusion (fiber + resin)',
-    'benefits', JSON_ARRAY('High strength', 'No painting/maintenance', 'Chemical resistance', 'Long service life'),
+    'process', 'Pultrusion (fiber + resin combination)',
+    'benefits', 'High strength; no painting/maintenance; chemical resistance; long service life',
     'application', 'Cooling tower structural profiles (various sections)'
   ),
   'FRP Pultrusion Profiles | Cooling Tower Spare Parts | Ensotek',
@@ -192,7 +201,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1507-2222-4222-8222-bbbbbbbb1507' AND locale='en';
 
@@ -204,7 +213,7 @@ VALUES
   ('11111507-bbbb-4bbb-8bbb-bbbb1507en04','bbbb1507-2222-4222-8222-bbbbbbbb1507','en','Maintenance','No painting / periodic maintenance required','custom',40),
   ('11111507-bbbb-4bbb-8bbb-bbbb1507en05','bbbb1507-2222-4222-8222-bbbbbbbb1507','en','Resistance','Minimally affected by chemicals','material',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1507-2222-4222-8222-bbbbbbbb1507' AND locale='en';
 
@@ -214,7 +223,7 @@ VALUES
   ('22221507-bbbb-4bbb-8bbb-bbbb1507en02','bbbb1507-2222-4222-8222-bbbbbbbb1507','en','What are the key advantages of FRP profiles?','High strength, corrosion/chemical resistance, and long service life without painting or periodic maintenance.',20,1),
   ('22221507-bbbb-4bbb-8bbb-bbbb1507en03','bbbb1507-2222-4222-8222-bbbbbbbb1507','en','Where are they used in cooling towers?','As structural and connection profiles with various cross-sections in tower construction.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331507-bbbb-4bbb-8bbb-bbbb1507en01',
@@ -226,8 +235,20 @@ VALUES
   ('33331507-bbbb-4bbb-8bbb-bbbb1507en01','bbbb1507-2222-4222-8222-bbbbbbbb1507',NULL,5,'Excellent corrosion resistance—no repainting needed over time.',1,'Maintenance Team'),
   ('33331507-bbbb-4bbb-8bbb-bbbb1507en02','bbbb1507-2222-4222-8222-bbbbbbbb1507',NULL,4,'Lightweight yet rigid—installation is faster compared to metal parts.',1,'Site Crew');
 
+-- OPTIONS (EN) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441507-bbbb-4bbb-8bbb-bbbb1507en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441507-bbbb-4bbb-8bbb-bbbb1507en01','bbbb1507-2222-4222-8222-bbbbbbbb1507','Profile Section', JSON_ARRAY(
+    'I / U / L / Box',
+    'Custom Cut Length',
+    'Custom Section (on request)'
+  ));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -244,7 +265,7 @@ VALUES (
   JSON_OBJECT(
     'material', 'FRP/GFK (glasfaserverstärkter Polyester)',
     'verfahren', 'Pultrusion (Faser + Harz)',
-    'vorteile', JSON_ARRAY('Hohe Festigkeit', 'Keine Lackierung/Wartung', 'Chemikalienbeständig', 'Lange Lebensdauer'),
+    'vorteile', 'Hohe Festigkeit; keine Lackierung/Wartung; chemikalienbeständig; lange Lebensdauer',
     'einsatz', 'Kühlturm-Konstruktionsprofile (verschiedene Querschnitte)'
   ),
   'FRP Pultrusionsprofile | Kühlturm Ersatzteile | Ensotek',
@@ -261,7 +282,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1507-2222-4222-8222-bbbbbbbb1507' AND locale='de';
 
@@ -273,7 +294,7 @@ VALUES
   ('11111507-cccc-4ccc-8ccc-bbbb1507de04','bbbb1507-2222-4222-8222-bbbbbbbb1507','de','Wartung','Keine Lackierung / regelmäßige Wartung erforderlich','custom',40),
   ('11111507-cccc-4ccc-8ccc-bbbb1507de05','bbbb1507-2222-4222-8222-bbbbbbbb1507','de','Beständigkeit','Geringe Beeinträchtigung durch Chemikalien','material',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1507-2222-4222-8222-bbbbbbbb1507' AND locale='de';
 
@@ -283,7 +304,7 @@ VALUES
   ('22221507-cccc-4ccc-8ccc-bbbb1507de02','bbbb1507-2222-4222-8222-bbbbbbbb1507','de','Welche Vorteile haben FRP/GFK-Profile?','Hohe Festigkeit, Korrosions-/Chemikalienbeständigkeit und lange Lebensdauer ohne Lackierung oder regelmäßige Wartung.',20,1),
   ('22221507-cccc-4ccc-8ccc-bbbb1507de03','bbbb1507-2222-4222-8222-bbbbbbbb1507','de','Wo werden sie im Kühlturm eingesetzt?','Als Konstruktions- und Verbindungsprofile mit unterschiedlichen Querschnitten im Turmbau.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331507-cccc-4ccc-8ccc-bbbb1507de01',
@@ -294,6 +315,18 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331507-cccc-4ccc-8ccc-bbbb1507de01','bbbb1507-2222-4222-8222-bbbbbbbb1507',NULL,5,'Sehr korrosionsbeständig – keine Nacharbeit mit Lack nötig.',1,'Instandhaltung'),
   ('33331507-cccc-4ccc-8ccc-bbbb1507de02','bbbb1507-2222-4222-8222-bbbbbbbb1507',NULL,4,'Leicht und dennoch steif – Montage geht deutlich schneller.',1,'Montage');
+
+-- OPTIONS (DE) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441507-cccc-4ccc-8ccc-bbbb1507de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441507-cccc-4ccc-8ccc-bbbb1507de01','bbbb1507-2222-4222-8222-bbbbbbbb1507','Profilquerschnitt', JSON_ARRAY(
+    'I / U / L / Kasten (Box)',
+    'Sonderlänge (Zuschnitt)',
+    'Sonderquerschnitt (auf Anfrage)'
+  ));
 
 COMMIT;
 

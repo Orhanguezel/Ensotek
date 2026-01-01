@@ -48,7 +48,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 
       -- More carousel (ProductMore.tsx)
       'ui_spareparts_more_title',                 'Diğer Yedek Parçalar',
-      'ui_spareparts_go_to_item',                 'Yedek parçayı görüntüle'
+      'ui_spareparts_go_to_item',                 'Yedek parçayı görüntüle',
+      'ui_spareparts_meta_title',                 'Yedek Parçalar',
+      'ui_spareparts_meta_description',           'Su soğutma kuleleri için yedek parçalar ve bakım bileşenleri.'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),
@@ -92,7 +94,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 
       -- More carousel
       'ui_spareparts_more_title',                 'More Spare Parts',
-      'ui_spareparts_go_to_item',                 'View spare part'
+      'ui_spareparts_go_to_item',                 'View spare part',
+      'ui_spareparts_meta_title',                 'Spare Parts',
+      'ui_spareparts_meta_description',           'Spare parts and maintenance components for cooling towers.'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),
@@ -136,7 +140,9 @@ INSERT INTO site_settings (id, `key`, locale, `value`, created_at, updated_at) V
 
       -- More carousel
       'ui_spareparts_more_title',                 'Weitere Ersatzteile',
-      'ui_spareparts_go_to_item',                 'Ersatzteil ansehen'
+      'ui_spareparts_go_to_item',                 'Ersatzteil ansehen',
+      'ui_spareparts_meta_title',                 'Ersatzteile',
+      'ui_spareparts_meta_description',           'Ersatzteile und Wartungskomponenten für Kühltürme.'
     )
     AS CHAR CHARACTER SET utf8mb4
   ),

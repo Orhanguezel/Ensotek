@@ -1,17 +1,20 @@
 -- =============================================================
--- FILE: 015.4_sparepart_bbbb1504_service_window__all_locales.sql (FINAL)
+-- FILE: 015.4_sparepart_bbbb1504_service_window__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (04/14)
 -- Sparepart: Servis Penceresi / Service Window / Servicefenster
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1002-1111-4111-8111-bbbbbbbb1002'  (Spare Parts & Accessories)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to 015.3 pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
---  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING (NO JSON_ARRAY inside)
+--  - child tables: locale-based reset with DELETE (product_id + locale)
+--  - options: TR/EN/DE separately (table is locale-less) => id-based delete
+--  - child IDs: 36-char uuid-like
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1002-1111-4111-8111-bbbbbbbb1002'  (Spare Parts & Accessories)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -80,7 +83,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -97,9 +100,9 @@ VALUES (
   JSON_OBJECT(
     'konum', 'Kule gövdesi dış yüzeyi, yan duvar',
     'amac', 'Gözlem ve bakım erişimi; su dağıtım sistemi kontrolü',
-    'kullanim', JSON_ARRAY('Kontrol ve arıza inceleme', 'Bakım erişimi', 'Dolgu boşaltma/temizlik işlemleri'),
-    'ozellikler', JSON_ARRAY('Kolay aç/kapa', 'Su sızdırmaz', 'Korozyona dayanıklı'),
-    'malzemeSecenekleri', JSON_ARRAY('Paslanmaz çelik', 'CTP (FRP)')
+    'kullanim', 'Kontrol/arıza inceleme | Bakım erişimi | Dolgu boşaltma/temizlik',
+    'ozellikler', 'Kolay aç/kapa | Su sızdırmaz | Korozyona dayanıklı',
+    'malzemeSecenekleri', 'Paslanmaz çelik | CTP (FRP)'
   ),
   'Servis Penceresi | Soğutma Kulesi Yedek Parça | Ensotek',
   'Soğutma kulesi servis penceresi: yan duvarda bakım ve gözlem erişimi sağlar. Su sızdırmaz, kolay aç/kapa; paslanmaz çelik veya CTP seçenekleri.'
@@ -115,7 +118,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1504-2222-4222-8222-bbbbbbbb1504' AND locale='tr';
 
@@ -127,7 +130,7 @@ VALUES
   ('11111504-aaaa-4aaa-8aaa-bbbb1504tr04','bbbb1504-2222-4222-8222-bbbbbbbb1504','tr','Malzeme Seçenekleri','Paslanmaz çelik / CTP (FRP)','material',40),
   ('11111504-aaaa-4aaa-8aaa-bbbb1504tr05','bbbb1504-2222-4222-8222-bbbbbbbb1504','tr','Ek Kullanım','Dolgu boşaltma/temizlik için alt kota yakın montaj seçeneği','custom',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1504-2222-4222-8222-bbbbbbbb1504' AND locale='tr';
 
@@ -137,7 +140,7 @@ VALUES
   ('22221504-aaaa-4aaa-8aaa-bbbb1504tr02','bbbb1504-2222-4222-8222-bbbbbbbb1504','tr','Nereye montajlanır?','Genellikle kulenin yan duvarına; ihtiyaca göre dolgu alt kotuna yakın bölgeye de uygulanabilir.',20,1),
   ('22221504-aaaa-4aaa-8aaa-bbbb1504tr03','bbbb1504-2222-4222-8222-bbbbbbbb1504','tr','Hangi malzemelerden üretilir?','Korozyon dayanımı için paslanmaz çelik veya CTP (FRP) seçenekleri tercih edilir.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331504-aaaa-4aaa-8aaa-bbbb1504tr01',
@@ -149,16 +152,19 @@ VALUES
   ('33331504-aaaa-4aaa-8aaa-bbbb1504tr01','bbbb1504-2222-4222-8222-bbbbbbbb1504',NULL,5,'Bakım sırasında kule içine erişimi ciddi hızlandırdı. Sızdırmazlık iyi.',1,'Bakım Ekibi'),
   ('33331504-aaaa-4aaa-8aaa-bbbb1504tr02','bbbb1504-2222-4222-8222-bbbbbbbb1504',NULL,4,'CTP versiyon hafif ve korozyona dayanıklı; montajı rahat.',1,'Tesis Operasyon');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — id-based reset (table is locale-less)
 DELETE FROM product_options
-WHERE id='44441504-aaaa-4aaa-8aaa-bbbb1504op01';
+WHERE id='44441504-aaaa-4aaa-8aaa-bbbb1504tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441504-aaaa-4aaa-8aaa-bbbb1504op01','bbbb1504-2222-4222-8222-bbbbbbbb1504','Material', JSON_ARRAY('Stainless Steel','FRP (CTP)'));
+  ('44441504-aaaa-4aaa-8aaa-bbbb1504tr01','bbbb1504-2222-4222-8222-bbbbbbbb1504','Malzeme', JSON_ARRAY(
+    'Paslanmaz Çelik',
+    'CTP (FRP)'
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -175,9 +181,9 @@ VALUES (
   JSON_OBJECT(
     'location', 'Outer tower casing, side wall',
     'purpose', 'Observation and maintenance access; water distribution inspection',
-    'useCases', JSON_ARRAY('Inspection and troubleshooting', 'Maintenance access', 'Fill draining/cleaning operations'),
-    'features', JSON_ARRAY('Easy open/close', 'Water-tight', 'Corrosion resistant'),
-    'materialOptions', JSON_ARRAY('Stainless steel', 'FRP (CTP)')
+    'useCases', 'Inspection & troubleshooting | Maintenance access | Fill draining/cleaning',
+    'features', 'Easy open/close | Water-tight | Corrosion resistant',
+    'materialOptions', 'Stainless steel | FRP (CTP)'
   ),
   'Service Window | Cooling Tower Spare Parts | Ensotek',
   'Cooling tower service window: provides observation and maintenance access from the side wall. Water-tight, easy open/close; stainless steel or FRP options.'
@@ -193,7 +199,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1504-2222-4222-8222-bbbbbbbb1504' AND locale='en';
 
@@ -205,7 +211,7 @@ VALUES
   ('11111504-bbbb-4bbb-8bbb-bbbb1504en04','bbbb1504-2222-4222-8222-bbbbbbbb1504','en','Material Options','Stainless steel / FRP (CTP)','material',40),
   ('11111504-bbbb-4bbb-8bbb-bbbb1504en05','bbbb1504-2222-4222-8222-bbbbbbbb1504','en','Additional Use','Optional mounting near lower fill level for draining/cleaning','custom',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1504-2222-4222-8222-bbbbbbbb1504' AND locale='en';
 
@@ -215,7 +221,7 @@ VALUES
   ('22221504-bbbb-4bbb-8bbb-bbbb1504en02','bbbb1504-2222-4222-8222-bbbbbbbb1504','en','Where is it installed?','Typically on the side wall of the outer casing; it can also be applied near the lower fill level if needed.',20,1),
   ('22221504-bbbb-4bbb-8bbb-bbbb1504en03','bbbb1504-2222-4222-8222-bbbbbbbb1504','en','Which materials are available?','Stainless steel and FRP (CTP) options are used for corrosion resistance.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331504-bbbb-4bbb-8bbb-bbbb1504en01',
@@ -227,8 +233,19 @@ VALUES
   ('33331504-bbbb-4bbb-8bbb-bbbb1504en01','bbbb1504-2222-4222-8222-bbbbbbbb1504',NULL,5,'Makes inspection and maintenance much faster. Sealing performance is solid.',1,'Maintenance Team'),
   ('33331504-bbbb-4bbb-8bbb-bbbb1504en02','bbbb1504-2222-4222-8222-bbbbbbbb1504',NULL,4,'FRP version is lightweight and corrosion-resistant; installation is straightforward.',1,'Operations');
 
+-- OPTIONS (EN) — id-based reset
+DELETE FROM product_options
+WHERE id='44441504-bbbb-4bbb-8bbb-bbbb1504en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441504-bbbb-4bbb-8bbb-bbbb1504en01','bbbb1504-2222-4222-8222-bbbbbbbb1504','Material', JSON_ARRAY(
+    'Stainless Steel',
+    'FRP (CTP)'
+  ));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -245,9 +262,9 @@ VALUES (
   JSON_OBJECT(
     'einbauort', 'Außenseite des Turms, Seitenwand',
     'zweck', 'Beobachtung und Wartungszugang; Kontrolle des Wasserverteilungssystems',
-    'einsatz', JSON_ARRAY('Kontrolle/Fehlersuche', 'Wartungszugang', 'Entleerung/Reinigung von Füllkörpern'),
-    'eigenschaften', JSON_ARRAY('Leicht zu öffnen/schließen', 'Wasserabdichtend', 'Korrosionsbeständig'),
-    'material', JSON_ARRAY('Edelstahl', 'FRP (CTP)')
+    'einsatz', 'Kontrolle/Fehlersuche | Wartungszugang | Entleerung/Reinigung von Füllkörpern',
+    'eigenschaften', 'Leicht zu öffnen/schließen | Wasserabdichtend | Korrosionsbeständig',
+    'material', 'Edelstahl | FRP (CTP)'
   ),
   'Servicefenster | Kühlturm Ersatzteile | Ensotek',
   'Servicefenster für Kühltürme: Beobachtung und Wartungszugang an der Seitenwand. Wasserabdichtend, leicht zu öffnen; Edelstahl oder FRP Optionen.'
@@ -263,7 +280,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1504-2222-4222-8222-bbbbbbbb1504' AND locale='de';
 
@@ -275,7 +292,7 @@ VALUES
   ('11111504-cccc-4ccc-8ccc-bbbb1504de04','bbbb1504-2222-4222-8222-bbbbbbbb1504','de','Material','Edelstahl / FRP (CTP)','material',40),
   ('11111504-cccc-4ccc-8ccc-bbbb1504de05','bbbb1504-2222-4222-8222-bbbbbbbb1504','de','Zusatz','Optional nahe der unteren Füllhöhe für Entleerung/Reinigung','custom',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1504-2222-4222-8222-bbbbbbbb1504' AND locale='de';
 
@@ -285,7 +302,7 @@ VALUES
   ('22221504-cccc-4ccc-8ccc-bbbb1504de02','bbbb1504-2222-4222-8222-bbbbbbbb1504','de','Wo wird es montiert?','Typischerweise an der Seitenwand der Außenverkleidung; je nach Bedarf auch nahe der unteren Füllhöhe.',20,1),
   ('22221504-cccc-4ccc-8ccc-bbbb1504de03','bbbb1504-2222-4222-8222-bbbbbbbb1504','de','Welche Materialien sind möglich?','Edelstahl oder FRP (CTP) für hohe Korrosionsbeständigkeit.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331504-cccc-4ccc-8ccc-bbbb1504de01',
@@ -296,6 +313,17 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331504-cccc-4ccc-8ccc-bbbb1504de01','bbbb1504-2222-4222-8222-bbbbbbbb1504',NULL,5,'Erleichtert Inspektion und Wartung deutlich. Dichtheit ist sehr gut.',1,'Instandhaltung'),
   ('33331504-cccc-4ccc-8ccc-bbbb1504de02','bbbb1504-2222-4222-8222-bbbbbbbb1504',NULL,4,'FRP-Ausführung ist leicht und korrosionsbeständig – Montage unkompliziert.',1,'Betrieb');
+
+-- OPTIONS (DE) — id-based reset
+DELETE FROM product_options
+WHERE id='44441504-cccc-4ccc-8ccc-bbbb1504de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441504-cccc-4ccc-8ccc-bbbb1504de01','bbbb1504-2222-4222-8222-bbbbbbbb1504','Material', JSON_ARRAY(
+    'Edelstahl',
+    'FRP (CTP)'
+  ));
 
 COMMIT;
 

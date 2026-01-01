@@ -27,6 +27,7 @@ const stripTrailingSlash = (u: string) =>
     .trim()
     .replace(/\/+$/, '');
 
+// Localhost/127.0.0.1 için portu normalize ederek false negative’i engeller
 const normalizeLocalhostOrigin = (origin: string): string => {
   const o = stripTrailingSlash(origin);
   if (/^https?:\/\/localhost:\d+$/i.test(o)) return o.replace(/:\d+$/i, '');
@@ -47,12 +48,15 @@ export function getBaseOrigin(): string {
 
   if (fromEnv) {
     try {
-      return normalizeLocalhostOrigin(new URL(fromEnv).origin);
+      const u = new URL(fromEnv);
+      // origin normalize: localhost port stripped for comparisons
+      return normalizeLocalhostOrigin(u.origin);
     } catch {
       // ignore
     }
   }
 
+  // default fallback (comparisons will normalize)
   return 'http://localhost';
 }
 
@@ -69,32 +73,37 @@ export function getPlaywrightLocales(): string[] {
   const one = (process.env.PLAYWRIGHT_LOCALE ?? '').trim();
 
   const raw = many
-    ? many.split(',').map((x) => x.trim()).filter(Boolean)
+    ? many
+        .split(',')
+        .map((x) => x.trim())
+        .filter(Boolean)
     : one
-      ? [one]
-      : ['tr'];
+    ? [one]
+    : ['tr'];
 
   const uniqLower = Array.from(new Set(raw.map((x) => x.toLowerCase())));
   return uniqLower.length ? uniqLower : ['tr'];
 }
 
 /**
- * If your routing has NO locale prefix for default locale, set:
+ * If routing has NO locale prefix for default locale, set:
  * - PLAYWRIGHT_DEFAULT_NO_PREFIX=1
  * - PLAYWRIGHT_DEFAULT_LOCALE=tr (optional, default "tr")
  */
 export function withLocalePath(path: string, locale: string): string {
-  const loc = String(locale || '').trim().toLowerCase() || 'tr';
+  const loc =
+    String(locale || '')
+      .trim()
+      .toLowerCase() || 'tr';
   const p = `/${String(path || '').replace(/^\/+/, '')}`; // ensure starts with "/"
 
   const defaultNoPrefix = (process.env.PLAYWRIGHT_DEFAULT_NO_PREFIX ?? '').trim() === '1';
   const defaultLocale = (process.env.PLAYWRIGHT_DEFAULT_LOCALE ?? 'tr').trim().toLowerCase();
 
   if (defaultNoPrefix && loc === defaultLocale) {
-    return p === '/' ? '/' : p; // no prefix for default locale
+    return p === '/' ? '/' : p;
   }
 
-  // "/tr" + "/product" => "/tr/product"
   if (p === '/') return `/${loc}`;
   return `/${loc}${p}`;
 }
@@ -163,8 +172,8 @@ async function readHeadDebug(page: Page): Promise<HeadDebug | null> {
       desc,
       hreflangCount,
       nextHeadCount,
-      headSample: headHtml.slice(0, 800),
-      bodySample: bodyTxt.slice(0, 800),
+      headSample: headHtml.slice(0, 900),
+      bodySample: bodyTxt.slice(0, 900),
     };
   });
 }
@@ -188,7 +197,7 @@ export async function waitForSeoHead(
   }
 
   // 0) Fatal overlay / server error sinyalleri (kısa)
-  const fatalOk = await pollUntil(
+  const fatalDetected = await pollUntil(
     page,
     () => {
       const txt = (document.body?.innerText || '').toLowerCase();
@@ -208,13 +217,13 @@ export async function waitForSeoHead(
     { timeoutMs: Math.min(3_000, timeout), intervalMs: 100 },
   );
 
-  if (fatalOk) {
+  if (fatalDetected) {
     const dbg = await readHeadDebug(page);
     throw new Error(
       `FATAL page error detected before SEO head was ready. ` +
         `title="${dbg?.title ?? ''}", canonical="${dbg?.canonical ?? ''}", ` +
         `descLen=${(dbg?.desc ?? '').length}, hreflangCount=${dbg?.hreflangCount ?? 0}. ` +
-        `bodySample="${(dbg?.bodySample ?? '').replace(/\s+/g, ' ').slice(0, 220)}"`,
+        `bodySample="${(dbg?.bodySample ?? '').replace(/\s+/g, ' ').slice(0, 240)}"`,
     );
   }
 
@@ -230,8 +239,8 @@ export async function waitForSeoHead(
     throw new Error(
       `Layout head marker not found within ${timeout}ms. ` +
         `next-head-count="${dbg?.nextHeadCount ?? ''}". ` +
-        `headSample="${(dbg?.headSample ?? '').replace(/\s+/g, ' ').slice(0, 240)}" ` +
-        `bodySample="${(dbg?.bodySample ?? '').replace(/\s+/g, ' ').slice(0, 240)}"`,
+        `headSample="${(dbg?.headSample ?? '').replace(/\s+/g, ' ').slice(0, 260)}" ` +
+        `bodySample="${(dbg?.bodySample ?? '').replace(/\s+/g, ' ').slice(0, 260)}"`,
     );
   }
 
@@ -260,7 +269,7 @@ export async function waitForSeoHead(
       `SEO head not ready within ${timeout}ms. ` +
         `title="${dbg?.title ?? ''}", canonical="${dbg?.canonical ?? ''}", ` +
         `descLen=${(dbg?.desc ?? '').length}, hreflangCount=${dbg?.hreflangCount ?? 0}. ` +
-        `headSample="${(dbg?.headSample ?? '').replace(/\s+/g, ' ').slice(0, 240)}"`,
+        `headSample="${(dbg?.headSample ?? '').replace(/\s+/g, ' ').slice(0, 260)}"`,
     );
   }
 
@@ -279,12 +288,12 @@ export async function waitForSeoHead(
       `hreflang links not found within ${hreflangWait}ms. ` +
         `title="${dbg?.title ?? ''}", canonical="${dbg?.canonical ?? ''}", ` +
         `descLen=${(dbg?.desc ?? '').length}, hreflangCount=${dbg?.hreflangCount ?? 0}. ` +
-        `headSample="${(dbg?.headSample ?? '').replace(/\s+/g, ' ').slice(0, 240)}"`,
+        `headSample="${(dbg?.headSample ?? '').replace(/\s+/g, ' ').slice(0, 260)}"`,
     );
   }
 }
 
-/* ------------------------- rest stays same ------------------------- */
+/* ------------------------- read head / ld+json ------------------------- */
 
 export async function readHead(page: Page): Promise<HeadSnapshot> {
   return page.evaluate(() => {
@@ -355,11 +364,13 @@ export async function readJsonLd(page: Page): Promise<any[]> {
   });
 }
 
+/* ------------------------- expectations ------------------------- */
+
 export function expectNotLocalhost(url: string | null) {
   expect(url, 'URL must exist').toBeTruthy();
 
   const baseOrigin = getBaseOrigin();
-  if (isLocalOrigin(baseOrigin)) return;
+  if (isLocalOrigin(baseOrigin)) return; // local env: allow localhost urls
 
   expect(url!, 'URL must not be localhost').not.toMatch(/:\/\/localhost[:/]/i);
   expect(url!, 'URL must not be 127.0.0.1').not.toMatch(/:\/\/127\.0\.0\.1[:/]/i);
@@ -384,11 +395,21 @@ export function expectSameOriginAsBase(url: string | null) {
   expect(targetOrigin, 'URL must match base origin').toBe(baseOrigin);
 }
 
+export function expectOgMatchesCanonical(head: HeadSnapshot) {
+  if (!head.ogUrl || !head.canonical) return;
+  expect(head.ogUrl, 'og:url must equal canonical').toBe(head.canonical);
+}
+
 /**
  * ✅ Locale-aware hreflang set validation
  * - includes all locales from getPlaywrightLocales()
  * - includes x-default
- * - unique hreflang and unique href
+ * - unique hreflang (strict)
+ *
+ * NOTE:
+ * - href uniqueness is NOT enforced because it is valid that:
+ *   - x-default points to the same URL as the default locale
+ *   - some setups intentionally reuse the same URL for multiple hreflang values
  */
 export function expectHreflangSet(hreflangs: Array<{ hreflang: string; href: string }>) {
   expect(Array.isArray(hreflangs), 'hreflang links must be an array').toBeTruthy();
@@ -408,10 +429,12 @@ export function expectHreflangSet(hreflangs: Array<{ hreflang: string; href: str
     expectSameOriginAsBase(href);
     expectNotLocalhost(href);
 
+    // ✅ strict: hreflang must be unique
     expect(langs.has(hreflang), `duplicate hreflang: ${hreflang}`).toBeFalsy();
-    expect(hrefs.has(href), `duplicate hreflang href: ${href}`).toBeFalsy();
 
     langs.add(hreflang);
+
+    // href duplicates are allowed; keep set only for optional debugging
     hrefs.add(href);
   }
 
@@ -422,3 +445,4 @@ export function expectHreflangSet(hreflangs: Array<{ hreflang: string; href: str
 
   expect(langs.has('x-default'), 'hreflang must include x-default').toBeTruthy();
 }
+

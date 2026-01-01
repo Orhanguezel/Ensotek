@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/modules/slider/validation.ts
-// Slider – parent + i18n (kategori pattern'iyle uyumlu)
+// Slider – parent + i18n (core/i18n runtime locale aware) [FINAL]
 // =============================================================
 import { z } from 'zod';
 
@@ -9,14 +9,23 @@ export const idParamSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-/** Ortak: idOrSlug param (public detail – slug veya id gibi kullanmak istersen) */
+/** Ortak: idOrSlug param (public detail – slug) */
 export const idOrSlugParamSchema = z.object({
   idOrSlug: z.string().min(1),
 });
 
-/** Public list (is_active dışarıdan alınmaz, hep aktifler) */
+/** Locale format (DB doğrulaması yok; yalnız format) */
+const LOCALE_SCHEMA = z
+  .string()
+  .min(2)
+  .max(10)
+  .regex(/^[a-zA-Z]{2,3}([_-][a-zA-Z0-9]{2,8})?$/, 'invalid_locale');
+
+/** Public list (aktifler; locale/default_locale controller’da çözülecek) */
 export const publicListQuerySchema = z.object({
-  locale: z.string().trim().min(2).max(8).default('de'),
+  locale: LOCALE_SCHEMA.optional(),
+  default_locale: LOCALE_SCHEMA.optional(),
+
   q: z.string().optional(),
   limit: z.coerce.number().int().min(0).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
@@ -24,13 +33,11 @@ export const publicListQuerySchema = z.object({
   order: z.enum(['asc', 'desc']).default('asc'),
 });
 
-/**
- * Admin list – kategori pattern'i ile uyumlu:
- *  - locale: opsiyonel (verirsen o dildeki i18n kayıtları, vermezsen tüm diller)
- *  - is_active: opsiyonel (parent slider.is_active)
- */
+/** Admin list */
 export const adminListQuerySchema = z.object({
-  locale: z.string().trim().min(2).max(8).optional(),
+  locale: LOCALE_SCHEMA.optional(),
+  default_locale: LOCALE_SCHEMA.optional(),
+
   q: z.string().optional(),
   limit: z.coerce.number().int().min(0).max(200).default(50),
   offset: z.coerce.number().int().min(0).default(0),
@@ -41,12 +48,10 @@ export const adminListQuerySchema = z.object({
 
 /**
  * Create:
- *  - Parent + i18n tek body içinde (kategori ile aynı pattern)
- *  - locale + (name, slug, description, alt, buttonText, buttonLink) => i18n
- *  - image_url, image_asset_id, featured, is_active, display_order => parent
+ *  - Parent + i18n tek body
  */
 export const createSchema = z.object({
-  locale: z.string().trim().min(2).max(8).default('de'),
+  locale: LOCALE_SCHEMA.optional(),
 
   name: z.string().min(1),
   slug: z
@@ -57,6 +62,7 @@ export const createSchema = z.object({
 
   image_url: z.string().url().optional().nullable(),
   image_asset_id: z.string().uuid().optional().nullable(),
+
   alt: z.string().max(255).optional().nullable(),
   buttonText: z.string().max(100).optional().nullable(),
   buttonLink: z.string().max(255).optional().nullable(),
@@ -67,27 +73,28 @@ export const createSchema = z.object({
   display_order: z.coerce.number().int().min(0).optional(),
 });
 
-/**
- * Update:
- *  - Tamamen partial (kategori gibi)
- *  - locale gönderirsen o dil için i18n upsert (yeni locale yaratma imkanı)
- */
+/** Update: tamamen partial */
 export const updateSchema = createSchema.partial();
 
-/** Reorder (verilen parent id sırasına göre 1..N) */
+/** Reorder */
 export const reorderSchema = z.object({
   ids: z.array(z.coerce.number().int().positive()).min(1),
 });
 
-/** Toggle/set status (parent slider.is_active) */
+/** Toggle/set status */
 export const setStatusSchema = z.object({
   is_active: z.coerce.boolean(),
 });
 
-/** ✅ Görsel bağlama/çıkarma (parent slider.image_* alanları) */
+/**
+ * ✅ Görsel bağlama/çıkarma (parent slider.image_* alanları)
+ * - asset_id: tek kapak
+ * - asset_ids: çoklu gönderilebilir; ilk geçerli olan kapak olur
+ * - null/undefined ⇒ temizle
+ */
 export const setImageSchema = z.object({
-  /** null/undefined ⇒ görseli kaldır */
   asset_id: z.string().uuid().nullable().optional(),
+  asset_ids: z.array(z.string().uuid()).optional(),
 });
 
 export type PublicListQuery = z.infer<typeof publicListQuerySchema>;

@@ -12,6 +12,7 @@ export type SettingsTab =
   | 'seo'
   | 'smtp'
   | 'cloudinary'
+  | 'brand_media'
   | 'api';
 
 export type LocaleOption = {
@@ -45,6 +46,7 @@ const TAB_ITEMS: { id: SettingsTab; label: string; scope: SettingsScope }[] = [
   { id: 'seo', label: 'SEO', scope: 'localized' },
   { id: 'smtp', label: 'SMTP / E-posta', scope: 'global' },
   { id: 'cloudinary', label: 'Cloudinary / Storage', scope: 'global' },
+  { id: 'brand_media', label: 'Marka Medyası', scope: 'global' },
   { id: 'api', label: 'API & Entegrasyon', scope: 'global' },
 ];
 
@@ -68,6 +70,7 @@ export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
     activeTab === 'global_list' ||
     activeTab === 'smtp' ||
     activeTab === 'cloudinary' ||
+    activeTab === 'brand_media' ||
     activeTab === 'api';
 
   return (

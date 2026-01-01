@@ -1,14 +1,16 @@
 // =============================================================
 // FILE: src/components/layout/header/HeaderOffcanvas.tsx
-// (DYNAMIC LOCALES) - FIXED
+// Ensotek – Header Offcanvas (DYNAMIC LOCALES + BRAND FROM SETTINGS + OVERRIDE)
 // =============================================================
 
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image, { type StaticImageData } from 'next/image';
+import { type StaticImageData } from 'next/image';
 import { useRouter } from 'next/router';
+
+import { SiteLogo } from '@/components/layout/SiteLogo';
 
 import { useResolvedLocale } from '@/i18n/locale';
 import { switchLocale } from '@/i18n/switchLocale';
@@ -25,10 +27,7 @@ import { useListMenuItemsQuery, useGetSiteSettingByKeyQuery } from '@/integratio
 import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
 import { useUiSection } from '@/i18n/uiDb';
 
-const IMG_W = 160;
-const IMG_H = 60;
-
-type SimpleBrand = {
+export type SimpleBrand = {
   name: string;
   email?: string;
   phone?: string;
@@ -39,15 +38,15 @@ type SimpleBrand = {
 export type HeaderOffcanvasProps = {
   open: boolean;
   onClose: () => void;
-  brand?: SimpleBrand;
   logoSrc?: StaticImageData | string;
+  brand?: SimpleBrand;
 };
 
 type MenuItemWithChildren = PublicMenuItemDto & {
   children?: MenuItemWithChildren[];
 };
 
-const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand, logoSrc }) => {
+const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSrc, brand }) => {
   const router = useRouter();
 
   // ✅ Tek kaynak: runtime locale resolver
@@ -78,35 +77,41 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
     const socials = (socialsSetting?.value ?? {}) as Record<string, string>;
     const brandVal = (companyBrandSetting?.value ?? {}) as any;
 
-    const name = (brandVal.name as string) || (contact.companyName as string) || 'ENSOTEK';
+    const name = (brandVal?.name as string) || (contact?.companyName as string) || 'ENSOTEK';
 
     const website =
-      (brandVal.website as string) || (contact.website as string) || 'https://ensotek.de';
+      (brandVal?.website as string) || (contact?.website as string) || 'https://ensotek.de';
 
-    const phones = Array.isArray(contact.phones) ? contact.phones : [];
+    const phones = Array.isArray(contact?.phones) ? contact.phones : [];
     const phone =
       (phones[0] as string | undefined) ||
-      (contact.whatsappNumber as string | undefined) ||
-      (brandVal.phone as string | undefined) ||
+      (contact?.whatsappNumber as string | undefined) ||
+      (brandVal?.phone as string | undefined) ||
       '+90 212 000 00 00';
 
-    const email = (contact.email as string) || (brandVal.email as string) || 'info@ensotek.com';
+    const email = (contact?.email as string) || (brandVal?.email as string) || 'info@ensotek.com';
 
     const mergedSocials: Record<string, string> = {
-      ...(brandVal.socials as Record<string, string> | undefined),
-      ...socials,
+      ...(brandVal?.socials as Record<string, string> | undefined),
+      ...(socials ?? {}),
     };
 
-    const logo = (brandVal.logo ||
-      (Array.isArray(brandVal.images) ? brandVal.images[0] : null) ||
+    const logo = (brandVal?.logo ||
+      (Array.isArray(brandVal?.images) ? brandVal.images[0] : null) ||
       {}) as { url?: string; width?: number; height?: number };
 
-    return { name, website, phone, email, socials: mergedSocials, logo };
+    return {
+      name,
+      website,
+      phone,
+      email,
+      socials: mergedSocials,
+      logo,
+    };
   }, [contactInfoSetting?.value, socialsSetting?.value, companyBrandSetting?.value]);
 
-  const effectiveBrand: SimpleBrand & {
-    logo?: { url?: string; width?: number; height?: number };
-  } = useMemo(
+  // ✅ Header’dan gelen brand ile DB brand’ini birleştir
+  const effectiveBrand = useMemo(
     () => ({
       ...brandFromSettings,
       ...(brand ?? {}),
@@ -117,16 +122,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
     }),
     [brandFromSettings, brand],
   );
-
-  const effectiveLogo: string | StaticImageData | undefined = useMemo(() => {
-    if (typeof logoSrc === 'string' && logoSrc.trim()) return logoSrc.trim();
-    if (logoSrc) return logoSrc;
-
-    const fromSettings = effectiveBrand.logo?.url;
-    if (fromSettings && fromSettings.trim()) return fromSettings.trim();
-
-    return 'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
-  }, [logoSrc, effectiveBrand.logo]);
 
   const webHost = useMemo(
     () => (effectiveBrand.website || 'https://ensotek.de').replace(/^https?:\/\//, ''),
@@ -139,12 +134,11 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
     const next = normLocaleTag(e.target.value);
     if (!next) return;
 
-    // ✅ activeLocales ver: default locale doğru hesaplanır
     await switchLocale(router, next as SupportedLocale, activeLocales);
     onClose();
   };
 
-  // Menu
+  // Menu (locale-aware)
   const { data: menuData, isLoading: isMenuLoading } = useListMenuItemsQuery({
     location: 'header',
     is_active: true,
@@ -198,11 +192,12 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
     const id = String(item.id ?? rawUrl ?? Math.random());
     const isOpen = !!openSubmenus[id];
     const submenuId = `submenu:${id}`;
-    const indent = depth * 14;
+
+    const depthClass = `depth-${depth}`;
 
     if (!hasChildren) {
       return (
-        <li key={id} style={{ paddingLeft: indent }}>
+        <li key={id} className={`offcanvas__menu-item ${depthClass}`}>
           <Link href={href} onClick={onClose}>
             {item.title || rawUrl}
           </Link>
@@ -213,8 +208,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
     return (
       <li
         key={id}
-        className={`has-submenu ${isOpen ? 'is-open' : ''}`}
-        style={{ paddingLeft: indent }}
+        className={`offcanvas__menu-item has-submenu ${depthClass} ${isOpen ? 'is-open' : ''}`}
       >
         <button
           type="button"
@@ -234,7 +228,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
     );
   };
 
-  const homeHref = localizePath(resolvedLocale, '/');
   const loginHref = localizePath(resolvedLocale, '/login');
   const registerHref = localizePath(resolvedLocale, '/register');
 
@@ -244,21 +237,11 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
         <div className="offcanvas__wrapper">
           <div className="offcanvas__content">
             <div className="offcanvas__top mb-40 d-flex justify-content-between align-items-center">
-              <div className="offcanvas__logo">
-                <Link href={homeHref} aria-label={effectiveBrand.name} onClick={onClose}>
-                  {effectiveLogo ? (
-                    <Image
-                      src={effectiveLogo}
-                      alt={effectiveBrand.name}
-                      width={effectiveBrand.logo?.width ?? IMG_W}
-                      height={effectiveBrand.logo?.height ?? IMG_H}
-                      sizes="(max-width: 992px) 120px, 160px"
-                      style={{ height: 'auto', width: 'auto' }}
-                      loading="lazy"
-                    />
-                  ) : null}
-                </Link>
-              </div>
+              {/* Logo – header’dan gelen overrideSrc varsa onu, yoksa settings logosunu kullan */}
+              <SiteLogo
+                alt={effectiveBrand.name}
+                overrideSrc={logoSrc ?? effectiveBrand.logo?.url}
+              />
 
               <div className="offcanvas__close">
                 <button aria-label={ui('ui_header_close', 'Close')} onClick={onClose} type="button">
@@ -266,12 +249,12 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </button>
               </div>
             </div>
+
             {/* Language */}
             <div className="d-flex flex-column gap-2 mb-25">
               <label
                 htmlFor="lang-any"
-                className="d-flex align-items-center gap-2"
-                style={{ fontSize: 14 }}
+                className="offcanvas__lang-label d-flex align-items-center gap-2"
               >
                 <FiGlobe /> <span>{ui('ui_header_language', 'Language')}</span>
               </label>
@@ -280,8 +263,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 id="lang-any"
                 value={resolvedLocale}
                 onChange={onLangChange}
-                className="form-select"
-                style={{ maxWidth: 240 }}
+                className="form-select offcanvas__lang-select"
                 disabled={localesLoading}
               >
                 {activeLocales.map((loc) => (
@@ -309,6 +291,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </Link>
               </div>
             </div>
+
             {/* Search */}
             <div className="offcanvas__search mb-25">
               <form action="/">
@@ -322,8 +305,9 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </button>
               </form>
             </div>
+
             {/* Menu */}
-            <div className="mobile-menu fix mb-40 mean-container">
+            <div className="offcanvas__menu mobile-menu fix mb-40 mean-container">
               <div className="mean-bar d-block">
                 <nav className="mean-nav">
                   <ul>
@@ -348,6 +332,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </nav>
               </div>
             </div>
+
             {/* Contact */}
             <div className="offcanvas__contact mt-30 mb-20">
               <h4>{ui('ui_header_contact_info', 'Contact Info')}</h4>
@@ -395,6 +380,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
                 </li>
               </ul>
             </div>
+
             <div className="offcanvas__social">
               <SocialLinks socials={effectiveBrand.socials} size="md" onClickItem={onClose} />
             </div>
@@ -404,47 +390,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, brand,
 
       <div className={(open ? ' overlay-open' : ' ') + ' offcanvas__overlay'} onClick={onClose} />
       <div className="offcanvas__overlay-white" />
-
-      <style jsx>{`
-        .submenu-toggle {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 10px;
-          background: transparent;
-          border: 0;
-          padding: 10px 0;
-          margin: 0;
-          text-align: left;
-          cursor: pointer;
-          font: inherit;
-          color: inherit;
-        }
-        .caret {
-          width: 8px;
-          height: 8px;
-          border-right: 2px solid currentColor;
-          border-bottom: 2px solid currentColor;
-          transform: rotate(45deg);
-          transition: transform 160ms ease;
-          margin-right: 2px;
-          opacity: 0.8;
-          flex: 0 0 auto;
-        }
-        li.has-submenu.is-open .caret {
-          transform: rotate(-135deg);
-        }
-        ul.submenu {
-          display: none;
-          margin: 6px 0 8px 0;
-          padding-left: 12px;
-          border-left: 1px solid rgba(0, 0, 0, 0.08);
-        }
-        ul.submenu.open {
-          display: block;
-        }
-      `}</style>
     </>
   );
 };

@@ -43,7 +43,7 @@ type CategoryFormPageProps = {
 };
 
 /* ------------------------------------------------------------- */
-/* Module options (şimdilik sabit; DB’ye taşınacaksa ayrıca ele alırız) */
+/* Module options */
 
 const STATIC_MODULE_OPTIONS: ModuleOption[] = [
   { value: 'about', label: 'Hakkımızda' },
@@ -116,12 +116,14 @@ function mapDtoToFormState(
     name: item.name,
     slug: item.slug,
     description: item.description || '',
-    icon: item.icon || '',
+    icon: (item.icon as any) || '', // (UI preview için string)
     is_active: !!item.is_active,
     is_featured: !!item.is_featured,
     display_order: item.display_order ?? 0,
   };
 }
+
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
 /* ------------------------------------------------------------- */
 
@@ -158,7 +160,6 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   const defaultModule = useMemo(() => moduleOptions[0]?.value ?? 'about', [moduleOptions]);
 
   const effectiveDefaultLocale = useMemo(() => {
-    // router.locale DB’de yoksa -> DB default’a düş
     return coerceLocale(currentLocaleFromRouter, defaultLocaleFromDb) || defaultLocaleFromDb || '';
   }, [coerceLocale, currentLocaleFromRouter, defaultLocaleFromDb]);
 
@@ -186,12 +187,11 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   /* -------------------- Form state init -------------------- */
 
   useEffect(() => {
-    if (loading) return; // localeOptions hazır olana kadar bekle
+    if (loading) return;
 
     if (mode === 'edit') {
       if (initialData && !formState) {
         const next = mapDtoToFormState(initialData, defaults);
-        // güvenlik: locale DB dışıysa coerce et
         next.locale = coerceLocale(next.locale, defaults.locale);
         setFormState(next);
         setSlugTouched(false);
@@ -224,9 +224,9 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
   const imageMetadata = useMemo(() => {
     if (!formState) return undefined;
     return {
-      module_key: formState.module_key || '',
-      locale: formState.locale || '',
-      category_slug: formState.slug || '',
+      module_key: safeStr(formState.module_key),
+      locale: safeStr(formState.locale),
+      category_slug: safeStr(formState.slug),
     };
   }, [formState]);
 
@@ -242,7 +242,6 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
       if (typeof json.locale === 'string') {
         next.locale = coerceLocale(json.locale, prev.locale);
       }
-
       if (typeof json.module_key === 'string') next.module_key = json.module_key;
       if (typeof json.name === 'string') next.name = json.name;
 
@@ -290,19 +289,11 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
     setFormState((prev) => (prev ? { ...prev, slug: slugValue } : prev));
   };
 
-  /**
-   * Locale değiştir:
-   *  - Create modunda sadece formState.locale güncellenir (DB whitelist)
-   *  - Edit modunda aynı kategori id'si için backend'den id+locale ile çekilir.
-   *  - 404 gelirse: aynı id ile, seçilen dil için yeni çeviri oluşturma moduna geçilir.
-   */
   const handleLocaleChange = async (nextLocaleRaw: string) => {
     if (!formState) return;
 
     const nextLocale = coerceLocale(nextLocaleRaw, formState.locale);
 
-    // Kullanıcı DB’de olmayan bir locale göndermişse, select zaten üretmez ama
-    // ekstra güvenlik olsun:
     if (!nextLocale || (hasLocale && !hasLocale(nextLocale))) {
       toast.error('Geçersiz dil seçimi.');
       return;
@@ -335,7 +326,6 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
           'Seçilen dil için kategori kaydı bulunamadı. Kaydettiğinde bu dil için yeni bir çeviri oluşturulacak (aynı kategori id ile).',
         );
       } else {
-        // hata -> locale yine de güncellensin ama kullanıcı bilgilensin
         console.error('Locale change error (category):', err);
         toast.error('Seçilen dil için kategori yüklenirken bir hata oluştu.');
         setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
@@ -382,7 +372,6 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
         await updateCategory({ id: formState.id, patch: payloadBase as any }).unwrap();
         toast.success('Kategori güncellendi.');
       } else {
-        // fallback
         await createCategory(payloadBase as any).unwrap();
         toast.success('Kategori oluşturuldu.');
       }
@@ -402,7 +391,7 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
     else router.push('/admin/categories');
   };
 
-  /* -------------------- Loading / not found state -------------------- */
+  /* -------------------- States -------------------- */
 
   if (mode === 'edit' && externalLoading && !initialData) {
     return (
@@ -506,10 +495,10 @@ const CategoryFormPage: React.FC<CategoryFormPageProps> = ({
               <div className="col-md-5">
                 <CategoryFormImageColumn
                   metadata={imageMetadata}
-                  iconValue={formState.icon}
-                  disabled={saving}
+                  iconValue={safeStr(formState.icon)}
+                  disabled={saving || loading}
                   onIconChange={(url) =>
-                    setFormState((prev) => (prev ? { ...prev, icon: url } : prev))
+                    setFormState((prev) => (prev ? { ...prev, icon: safeStr(url) } : prev))
                   }
                 />
               </div>

@@ -11,13 +11,14 @@ import {
   expectSameOriginAsBase,
   expectMinDescription,
   expectHreflangSet,
+  expectOgMatchesCanonical,
 } from './helpers';
 
 test.describe('SEO: /product (list)', () => {
   const locales = getPlaywrightLocales();
 
   for (const locale of locales) {
-    test(`has valid title/desc/canonical/hreflang and no localhost [${locale}]`, async ({
+    test(`has valid title/desc/canonical/hreflang and JSON-LD parse ok [${locale}]`, async ({
       page,
     }) => {
       await page.goto(withLocalePath('/product', locale), { waitUntil: 'domcontentloaded' });
@@ -37,8 +38,8 @@ test.describe('SEO: /product (list)', () => {
         expectAbsolute(head.ogUrl);
         expectSameOriginAsBase(head.ogUrl);
         expectNotLocalhost(head.ogUrl);
-        expect(head.ogUrl).toBe(head.canonical);
       }
+      expectOgMatchesCanonical(head);
 
       expectHreflangSet(head.hreflangs);
 

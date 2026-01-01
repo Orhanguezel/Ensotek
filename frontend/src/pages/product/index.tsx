@@ -1,110 +1,94 @@
 // =============================================================
 // FILE: src/pages/product/index.tsx
-// Ensotek – Products Page (full list) + SEO — FINAL
-// - Uses shared ProductPageContent with itemType="product"
+// Ensotek – Products Page (list) [FINAL / STANDARD]
+// - Route: /product
+// - ✅ NO <Head>
+// - ✅ Page SEO overrides via <LayoutSeoBridge />
+// - ✅ General meta/canonical/hreflang/etc. stays in Layout/_document (no duplication)
+// - Content: ProductPageContent itemType="product"
+// - SEO priority (list):
+//   title: ui_products_meta_title -> ui_products_page_title -> fallback
+//   desc : ui_products_meta_description -> Layout default
+//   og   : (optional) ui_products_og_image -> undefined (Layout decides)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import ProductPageContent from '@/components/containers/product/ProductPageContent';
 import Feedback from '@/components/containers/feedback/Feedback';
 
-// i18n
+// ✅ Page -> Layout SEO overrides (STANDARD)
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
+// i18n + UI
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { isValidUiText } from '@/i18n/uiText';
 
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+// helpers
+import { toCdnSrc } from '@/shared/media';
 
-// data
-import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
-
-function safeStr(x: unknown): string {
-  return typeof x === 'string' ? x.trim() : '';
-}
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
 const ProductPage: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_products', locale as any);
 
-  const bannerTitle = useMemo(() => ui('ui_products_page_title', 'Products'), [ui]);
+  // -----------------------------
+  // Banner title
+  // -----------------------------
+  const bannerTitle = useMemo(() => {
+    const key = 'ui_products_page_title';
+    const v = safeStr(ui(key, 'Products'));
+    return isValidUiText(v, key) ? v : 'Products';
+  }, [ui]);
 
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  // -----------------------------
+  // SEO overrides (list)
+  // - empty => Layout defaults
+  // -----------------------------
+  const pageTitle = useMemo(() => {
+    const key = 'ui_products_meta_title';
+    const v = safeStr(ui(key, ''));
+    if (isValidUiText(v, key)) return v;
 
-  const seo = useMemo(() => {
-    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoPrimary?.value, seoFallback?.value]);
-
-  const pageTitleRaw = useMemo(() => {
-    const t = safeStr(ui('ui_products_meta_title', ''));
-    return t || safeStr(bannerTitle) || 'Products';
+    return bannerTitle || 'Products';
   }, [ui, bannerTitle]);
 
-  const pageDescRaw = useMemo(() => {
-    const d = safeStr(ui('ui_products_meta_description', ''));
-    return d || safeStr((seo as any)?.description) || '';
-  }, [ui, seo]);
+  const pageDescription = useMemo(() => {
+    const key = 'ui_products_meta_description';
+    const v = safeStr(ui(key, ''));
+    if (isValidUiText(v, key)) return v;
 
-  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
-    [seo],
-  );
+    // empty => Layout default description
+    return '';
+  }, [ui]);
 
-  const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return safeStr(t);
-  }, [titleTemplate, pageTitleRaw]);
+  const ogImageOverride = useMemo(() => {
+    const key = 'ui_products_og_image';
+    const raw = safeStr(ui(key, ''));
+    if (!raw) return undefined;
 
-  const ogImage = useMemo(() => {
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-    return fallback || absUrl('/favicon.svg');
-  }, [seo]);
-
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
-    const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
-
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [ui]);
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link')
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          if (spec.kind === 'meta-name')
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={false}
+      />
 
       <Banner title={bannerTitle} />
+
       <ProductPageContent itemType="product" uiSectionKey="ui_products" basePath="/product" />
+
       <Feedback />
     </>
   );

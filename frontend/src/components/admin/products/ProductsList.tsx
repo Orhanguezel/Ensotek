@@ -1,10 +1,10 @@
 // =============================================================
 // FILE: src/components/admin/products/ProductsList.tsx
-// Ensotek – Admin Products List
-//
-// Responsive Strategy (Bootstrap 5):
-// - < xxl: CARDS (tablet + mobile)  ✅
-// - xxl+: TABLE (DnD enabled here only, if onReorder provided) ✅
+// Ensotek – Admin Products/Sparepart List (shared)
+// - < xxl: CARDS
+// - xxl+: TABLE (DnD enabled only if onReorder provided)
+// - Admin rule: NO locale in URL
+// - Route is dynamic via basePath (/admin/products OR /admin/sparepart)
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -21,6 +21,8 @@ import {
   PaginationEllipsis,
 } from '@/components/ui/pagination';
 
+import { localeShortClient } from '@/i18n/localeShortClient';
+
 export type ProductsListProps = {
   items?: ProductDto[];
   loading: boolean;
@@ -30,7 +32,15 @@ export type ProductsListProps = {
   onSaveOrder?: () => void;
   savingOrder?: boolean;
 
-  // parent'ın API’ye gönderdiği efektif locale (edit link'e taşı)
+  // ✅ hangi admin route altında kullanılacak?
+  // products:  "/admin/products"
+  // sparepart: "/admin/sparepart"
+  basePath?: string;
+
+  // (opsiyonel) başlık
+  title?: string;
+
+  // parent’ın hesapladığı efektif locale (sadece display/logic için; URL’e yazmayacağız)
   activeLocale?: string;
 };
 
@@ -49,17 +59,8 @@ const formatDate = (value: string | null | undefined): string => {
 
 const formatPrice = (value: number | null | undefined): string => {
   if (value === null || value === undefined) return '-';
-  // TR para simgesi sabit kalsın istiyorsun, böyle bırakıyorum
   return `${value.toFixed(2)} ₺`;
 };
-
-const normLocale = (v: unknown): string =>
-  String(v || '')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
-    .trim();
 
 /* ---------------- Component ---------------- */
 
@@ -70,6 +71,8 @@ export const ProductsList: React.FC<ProductsListProps> = ({
   onReorder,
   onSaveOrder,
   savingOrder,
+  basePath = '/admin/products',
+  title = 'Ürün Listesi',
   activeLocale,
 }) => {
   const rows = items ?? [];
@@ -95,11 +98,12 @@ export const ProductsList: React.FC<ProductsListProps> = ({
 
   const busy = loading || !!savingOrder;
 
-  const effectiveLocale = useMemo(() => normLocale(activeLocale), [activeLocale]);
+  // ✅ Admin: locale sadece display/isteğe bağlı; URL’e yazmayacağız.
+  const effectiveLocale = useMemo(() => localeShortClient(activeLocale) || '', [activeLocale]);
 
+  // ✅ edit route: basePath + id (locale query YOK)
   const editHref = (id: string) => ({
-    pathname: `/admin/products/${encodeURIComponent(id)}`,
-    query: effectiveLocale ? { locale: effectiveLocale } : undefined,
+    pathname: `${basePath}/${encodeURIComponent(id)}`,
   });
 
   const handleDelete = (p: ProductDto) => {
@@ -192,6 +196,11 @@ export const ProductsList: React.FC<ProductsListProps> = ({
       Sıralama değişikliği için satırları sürükleyip bırakabilirsin. Kalıcı yapmak için{' '}
       <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullan.
       <span className="ms-2">(Kart görünümü: tablet/mobil, Tablo: çok büyük ekranlar/xxl+)</span>
+      {effectiveLocale ? (
+        <span className="ms-2">
+          Aktif dil: <code>{effectiveLocale}</code>
+        </span>
+      ) : null}
     </span>
   );
 
@@ -199,7 +208,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
     <div className="card">
       <div className="card-header py-2">
         <div className="d-flex align-items-start align-items-md-center justify-content-between gap-2 flex-wrap">
-          <span className="small fw-semibold">Ürün Listesi</span>
+          <span className="small fw-semibold">{title}</span>
 
           <div className="d-flex align-items-center gap-2 flex-wrap">
             {busy && <span className="badge bg-secondary small">İşlem yapılıyor...</span>}
@@ -256,7 +265,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                   pageRows.map((p, index) => {
                     const globalIndex = startIndex + index;
 
-                    const canReorder = !!onReorder; // xxl+ tablo
+                    const canReorder = !!onReorder;
                     const title = safeText((p as any).title) || '(Başlık yok)';
                     const slug = safeText((p as any).slug) || '-';
 
@@ -350,7 +359,7 @@ export const ProductsList: React.FC<ProductsListProps> = ({
         </div>
 
         {/* =========================================================
-            < XXL : CARDS (tablet + mobile)
+            < XXL : CARDS
            ========================================================= */}
         <div className="d-block d-xxl-none">
           {loading ? (
@@ -370,7 +379,6 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                   return (
                     <div key={p.id} className="col-12 col-lg-6">
                       <div className="border rounded-3 p-3 bg-white h-100">
-                        {/* top line */}
                         <div className="d-flex justify-content-between align-items-start gap-2">
                           <div className="d-flex align-items-center gap-2 flex-wrap">
                             <span className="badge bg-light text-dark border">
@@ -393,7 +401,6 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                           </div>
                         </div>
 
-                        {/* main content */}
                         <div className="mt-2">
                           <div
                             className="fw-semibold"
@@ -433,7 +440,6 @@ export const ProductsList: React.FC<ProductsListProps> = ({
                           </div>
                         </div>
 
-                        {/* actions */}
                         <div className="mt-3 d-grid gap-2">
                           <Link href={editHref(p.id)} className="btn btn-outline-primary btn-sm">
                             Düzenle
@@ -464,7 +470,6 @@ export const ProductsList: React.FC<ProductsListProps> = ({
           )}
         </div>
 
-        {/* Pagination */}
         {pageCount > 1 && (
           <div className="py-2">
             <Pagination>

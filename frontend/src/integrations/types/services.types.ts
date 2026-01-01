@@ -102,8 +102,6 @@ export interface ApiServiceBase {
   duration: string | null;
   maintenance: string | null;
   season: string | null;
-  soil_type: string | null;
-  thickness: string | null;
   equipment: string | null;
 
   created_at: string; // JSON'da string bekliyoruz
@@ -174,8 +172,6 @@ export interface ServiceDto {
   duration: string | null;
   maintenance: string | null;
   season: string | null;
-  soil_type: string | null;
-  thickness: string | null;
   equipment: string | null;
 
   created_at: string;

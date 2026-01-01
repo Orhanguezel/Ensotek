@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/modules/categories/validation.ts
+// FILE: src/modules/categories/validation.ts  (FINAL)
 // =============================================================
 import { z } from 'zod';
 
@@ -19,6 +19,19 @@ export const boolLike = z.union([
   z.literal('true'),
   z.literal('false'),
 ]);
+
+/**
+ * image_url bazen tam URL, bazen relative ("/uploads/...") gelebilir.
+ * Eğer kesinlikle FULL URL kullanıyorsan bunu z.string().url() olarak bırakabilirsin.
+ */
+const urlOrRelativePath = z
+  .string()
+  .min(1)
+  .max(2000)
+  .refine(
+    (s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'),
+    'image_url_must_be_url_or_relative_path',
+  );
 
 /**
  * NOT: DB artık base + i18n (categories + category_i18n)
@@ -42,14 +55,12 @@ const baseCategorySchema = z
     description: emptyToNull(z.string().optional().nullable()),
 
     /** Base tablo görsel alanları */
-    image_url: emptyToNull(z.string().url().optional().nullable()),
+    image_url: emptyToNull(urlOrRelativePath.optional().nullable()),
+    storage_asset_id: emptyToNull(z.string().uuid().optional().nullable()),
     alt: emptyToNull(z.string().max(255).optional().nullable()),
 
     icon: emptyToNull(z.string().max(255).optional().nullable()),
 
-    // create/update tarafında boolLike ile gelen değeri
-    // olduğu gibi (true/false / "1"/"0" vs) kabul ediyoruz;
-    // DB update sırasında zaten bool'a cast edilecek.
     is_active: boolLike.optional(),
     is_featured: boolLike.optional(),
     display_order: z.coerce.number().int().min(0).optional(),
@@ -78,7 +89,7 @@ export const categoryCreateSchema = baseCategorySchema.superRefine((data, ctx) =
  * UPDATE şeması (PATCH / PUT)
  *  - partial: tüm alanlar opsiyonel
  *  - parent_id hâlâ yasak
- *  - ❌ no_fields_to_update kontrolünü kaldırdık (boş PATCH no-op olsun)
+ *  - ❌ no_fields_to_update kontrolü yok (boş PATCH no-op olsun)
  */
 export const categoryUpdateSchema = baseCategorySchema.partial().superRefine((data, ctx) => {
   if ('parent_id' in (data as Record<string, unknown>)) {
@@ -93,14 +104,30 @@ export const categoryUpdateSchema = baseCategorySchema.partial().superRefine((da
 export type CategoryCreateInput = z.infer<typeof categoryCreateSchema>;
 export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;
 
-/** ✅ Storage asset ile kategori görselini ayarlama/silme (+ alt) */
+/**
+ * ✅ Storage asset ile kategori görselini ayarlama/silme (+ alt)
+ * DB kolonu: categories.storage_asset_id
+ *
+ * Backward compatible:
+ * - asset_id (legacy)
+ * - storage_asset_id (canonical)
+ */
 export const categorySetImageSchema = z
   .object({
     /** null/undefined ⇒ görseli kaldır */
+    storage_asset_id: z.string().uuid().nullable().optional(),
     asset_id: z.string().uuid().nullable().optional(),
+
     /** alt gelirse güncellenir; null/"" ⇒ alt temizlenir */
     alt: emptyToNull(z.string().max(255).optional().nullable()),
   })
-  .strict();
+  .strict()
+  .transform((data) => {
+    const resolved = data.storage_asset_id ?? data.asset_id ?? null;
+    return {
+      storage_asset_id: resolved,
+      alt: data.alt ?? null,
+    };
+  });
 
 export type CategorySetImageInput = z.infer<typeof categorySetImageSchema>;

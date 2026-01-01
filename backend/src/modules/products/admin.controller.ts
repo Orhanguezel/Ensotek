@@ -7,7 +7,7 @@ import { z } from 'zod';
 import { and, asc, desc, eq, inArray, like, sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 
-import { products, productI18n } from './schema';
+import { products, productI18n, productImages } from './schema';
 import { storageAssets } from '@/modules/storage/schema';
 import {
   productCreateSchema,
@@ -116,10 +116,7 @@ export const adminListProducts: RouteHandler = async (req, reply) => {
   const locale = getEffectiveLocale(req);
   const itemType = normalizeItemType(q.item_type, 'product'); // ✅ default product
 
-  const conds: any[] = [
-    eq(productI18n.locale, locale),
-    eq(products.item_type, itemType as any), // ✅ FIX
-  ];
+  const conds: any[] = [eq(productI18n.locale, locale), eq(products.item_type, itemType as any)];
 
   if (q.q) conds.push(like(productI18n.title, `%${q.q}%`));
   if (q.category_id) conds.push(eq(products.category_id, q.category_id));
@@ -165,15 +162,12 @@ export const adminListProducts: RouteHandler = async (req, reply) => {
   reply.header('content-range', `*/${Number(total || 0)}`);
   reply.header('access-control-expose-headers', 'x-total-count, content-range');
 
-  // ✅ FIX: base + i18n (i18n overrides)
   const out = rows.map(({ p, i }) => normalizeProduct({ ...p, ...(i ?? {}) }));
   return reply.send(out);
 };
 
 /**
  * GET /admin/products/:id?locale=&item_type=
- * Admin detail: item_type zorunlu değil ama karışmayı önlemek için destekliyoruz.
- * Default: product
  */
 export const adminGetProduct: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
@@ -189,7 +183,7 @@ export const adminGetProduct: RouteHandler = async (req, reply) => {
       productI18n,
       and(eq(productI18n.product_id, products.id), eq(productI18n.locale, locale)),
     )
-    .where(and(eq(products.id, id), eq(products.item_type, itemType as any))) // ✅ FIX
+    .where(and(eq(products.id, id), eq(products.item_type, itemType as any)))
     .limit(1);
 
   if (!rows.length || !rows[0].p) {
@@ -197,8 +191,7 @@ export const adminGetProduct: RouteHandler = async (req, reply) => {
   }
 
   const { p, i } = rows[0];
-  const merged = normalizeProduct({ ...p, ...(i ?? {}) }); // ✅ FIX merge order
-  return reply.send(merged);
+  return reply.send(normalizeProduct({ ...p, ...(i ?? {}) }));
 };
 
 /* ----------------- CREATE / UPDATE / DELETE ----------------- */
@@ -211,8 +204,7 @@ export const adminCreateProduct: RouteHandler = async (req, reply) => {
     const targetLocales = getLocalesForCreate(req, baseLocale);
 
     const productId: string = input.id ?? randomUUID();
-
-    const itemType: ItemType = normalizeItemType(input.item_type, 'product'); // ✅ FIX
+    const itemType: ItemType = normalizeItemType(input.item_type, 'product');
 
     const coverId = input.storage_asset_id ?? null;
     const galleryIds: string[] = input.storage_image_ids ?? [];
@@ -227,7 +219,7 @@ export const adminCreateProduct: RouteHandler = async (req, reply) => {
 
     const baseRow: any = {
       id: productId,
-      item_type: itemType, // ✅ FIX (DB’ye yaz)
+      item_type: itemType,
       category_id: input.category_id,
       sub_category_id: input.sub_category_id ?? null,
       price: input.price,
@@ -296,8 +288,7 @@ export const adminCreateProduct: RouteHandler = async (req, reply) => {
       .where(eq(products.id, productId))
       .limit(1);
 
-    const merged = normalizeProduct({ ...(row?.p ?? {}), ...(row?.i ?? {}) });
-    return reply.code(201).send(merged);
+    return reply.code(201).send(normalizeProduct({ ...(row?.p ?? {}), ...(row?.i ?? {}) }));
   } catch (e: any) {
     if (e?.name === 'ZodError') {
       return reply.code(422).send({ error: { message: 'validation_error', details: e.issues } });
@@ -337,7 +328,7 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
     const {
       id: _ignoreId,
       locale: _ignoreLocale,
-      item_type, // ✅ allow patch
+      item_type,
       title,
       slug,
       description,
@@ -377,7 +368,6 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
       updated_at: now,
     };
 
-    // ✅ FIX: item_type update (if provided)
     if (item_type !== undefined) {
       baseUpdate.item_type = normalizeItemType(item_type, curMerged.item_type ?? 'product');
     }
@@ -428,8 +418,7 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
       .where(eq(products.id, id))
       .limit(1);
 
-    const merged = normalizeProduct({ ...(row?.p ?? {}), ...(row?.i ?? {}) });
-    return reply.send(merged);
+    return reply.send(normalizeProduct({ ...(row?.p ?? {}), ...(row?.i ?? {}) }));
   } catch (e: any) {
     if (e?.name === 'ZodError') {
       return reply.code(422).send({ error: { message: 'validation_error', details: e.issues } });
@@ -445,8 +434,11 @@ export const adminDeleteProduct: RouteHandler = async (req, reply) => {
   return reply.code(204).send();
 };
 
-/* ----------------- IMAGES: REPLACE ----------------- */
-
+/* ----------------- IMAGES: REPLACE (products table fields) ----------------- */
+/**
+ * PUT /admin/products/:id/images/replace
+ * - products.image_url + products.images + storage_* alanlarını replace eder
+ */
 export const adminSetProductImages: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
 
@@ -497,8 +489,147 @@ export const adminSetProductImages: RouteHandler = async (req, reply) => {
 
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
 
-  const merged = normalizeProduct({ ...row.p, ...(row.i ?? {}) });
-  return reply.send(merged);
+  return reply.send(normalizeProduct({ ...row.p, ...(row.i ?? {}) }));
+};
+
+/* ----------------- IMAGES POOL (product_images) ----------------- */
+
+const productImageCreateSchema = z.object({
+  image_url: z.string().min(1),
+  image_asset_id: z.string().nullable().optional(),
+  is_active: z.union([z.boolean(), z.number(), z.string()]).optional(),
+  display_order: z.union([z.number(), z.string()]).nullable().optional(),
+
+  title: z.string().nullable().optional(),
+  alt: z.string().nullable().optional(),
+  caption: z.string().nullable().optional(),
+
+  locale: z.string().optional(),
+  replicate_all_locales: z.union([z.boolean(), z.number(), z.string()]).optional(),
+});
+
+const boolish = (v: any, fallback = true) => {
+  if (v === undefined || v === null) return fallback;
+  const s = String(v).toLowerCase();
+  return s === '1' || s === 'true' || v === true || v === 1;
+};
+
+/**
+ * GET /admin/products/:id/images?locale=
+ */
+export const adminListProductImages: RouteHandler = async (req, reply) => {
+  const { id } = req.params as { id: string };
+
+  const locale = normalizeLocale((req.query as any)?.locale) ?? getEffectiveLocale(req);
+
+  const rows = await db
+    .select()
+    .from(productImages)
+    .where(and(eq(productImages.product_id, id), eq(productImages.locale, locale)))
+    .orderBy(asc(productImages.display_order), asc(productImages.created_at));
+
+  return reply.send(rows);
+};
+
+/**
+ * POST /admin/products/:id/images
+ * body: { image_url, ... , locale, replicate_all_locales }
+ */
+export const adminCreateProductImage: RouteHandler = async (req, reply) => {
+  const { id } = req.params as { id: string };
+
+  const parsed = productImageCreateSchema.safeParse(req.body ?? {});
+  if (!parsed.success) {
+    return reply.code(400).send({
+      error: { message: 'invalid_body', issues: parsed.error.flatten() },
+    });
+  }
+
+  const input = parsed.data;
+
+  const baseLocale =
+    normalizeLocale(input.locale) ??
+    normalizeLocale((req.query as any)?.locale) ??
+    getEffectiveLocale(req);
+
+  const replicate = boolish(input.replicate_all_locales, true);
+  const targetLocales = replicate ? getLocalesForCreate(req, baseLocale) : [baseLocale];
+
+  const now = new Date();
+
+  for (const loc of targetLocales) {
+    const exists = await db
+      .select({ id: productImages.id })
+      .from(productImages)
+      .where(
+        and(
+          eq(productImages.product_id, id),
+          eq(productImages.locale, loc),
+          eq(productImages.image_url, input.image_url),
+        ),
+      )
+      .limit(1);
+
+    if (exists.length) continue;
+
+    await db.insert(productImages).values({
+      id: randomUUID(),
+      product_id: id,
+      locale: loc,
+
+      image_url: input.image_url,
+      image_asset_id: input.image_asset_id ?? null,
+
+      title: input.title ?? null,
+      alt: input.alt ?? null,
+      caption: input.caption ?? null,
+
+      display_order:
+        input.display_order === null || input.display_order === undefined
+          ? 0
+          : Number(input.display_order) || 0,
+
+      is_active: boolish(input.is_active, true),
+
+      created_at: now,
+      updated_at: now,
+    } as any);
+  }
+
+  const rows = await db
+    .select()
+    .from(productImages)
+    .where(and(eq(productImages.product_id, id), eq(productImages.locale, baseLocale)))
+    .orderBy(asc(productImages.display_order), asc(productImages.created_at));
+
+  return reply.code(201).send(rows);
+};
+
+/**
+ * DELETE /admin/products/:id/images/:imageId
+ */
+export const adminDeleteProductImage: RouteHandler = async (req, reply) => {
+  const { id, imageId } = req.params as { id: string; imageId: string };
+
+  const locale = normalizeLocale((req.query as any)?.locale) ?? getEffectiveLocale(req);
+
+  await db
+    .delete(productImages)
+    .where(
+      and(
+        eq(productImages.id, imageId),
+        eq(productImages.product_id, id),
+        eq(productImages.locale, locale),
+      ),
+    );
+
+  const rows = await db
+    .select()
+    .from(productImages)
+    .where(and(eq(productImages.product_id, id), eq(productImages.locale, locale)))
+    .orderBy(asc(productImages.display_order), asc(productImages.created_at));
+
+  return reply.send(rows);
 };
 
 /* ----------------- REORDER ----------------- */

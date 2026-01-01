@@ -1,35 +1,39 @@
 // =============================================================
 // FILE: src/pages/quality.tsx
-// Ensotek – Quality Page + SEO
+// Ensotek – Quality Page + SEO (STANDARD / HOOK-SAFE) [FINAL]
+//   - Route: /quality
+//   - Data: custom_pages (module_key="quality") meta override (select by slug/id)
+//   - SEO: NO <Head>. Only <LayoutSeoBridge />
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import QualityPageContent from '@/components/containers/about/QualityPageContent';
 
-// i18n + UI
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { isValidUiText } from '@/i18n/uiText';
 
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+import { asObj } from '@/seo/pageSeo';
 
-// data
 import {
   useGetSiteSettingByKeyQuery,
   useListCustomPagesPublicQuery,
 } from '@/integrations/rtk/hooks';
 import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
-// helpers
-import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
+
+function safeStr(v: unknown): string {
+  if (v == null) return '';
+  return String(v).trim();
+}
 
 const QUALITY_SLUGS: Record<string, string> = {
   tr: 'kalite-belgelerimiz-kalite-standartlarimiz',
@@ -43,142 +47,137 @@ const QualityPage: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_quality', locale as any);
 
-  const qualitySlug = QUALITY_SLUGS[locale] ?? QUALITY_SLUGS.tr;
-
+  // -----------------------------
+  // UI (Banner Title)
+  // -----------------------------
   const bannerTitle = useMemo(() => {
     const key = 'ui_quality_page_title';
-    const v = String(ui(key, '') || '').trim();
+    const v = safeStr(ui(key, ''));
     return isValidUiText(v, key) ? v : 'Quality';
   }, [ui]);
 
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  // -----------------------------
+  // Slug selector (legacy mapping)
+  // -----------------------------
+  const qualitySlug = useMemo(() => {
+    // locale hook normalize ediyor; burada sadece güvenli erişim
+    const l = safeStr(locale).toLowerCase();
+    return QUALITY_SLUGS[l] ?? QUALITY_SLUGS.tr;
+  }, [locale]);
+
+  // -----------------------------
+  // Global SEO settings (seo -> site_seo fallback) [robots/noindex + description fallback]
+  // -----------------------------
+  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
+  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
+    key: 'site_seo',
+    locale,
+  } as any);
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+    const raw =
+      (seoSettingPrimary as any)?.value ??
+      (seoSettingFallback as any)?.value ??
+      seoSettingPrimary ??
+      seoSettingFallback;
 
-  const { data: aboutData, isLoading } = useListCustomPagesPublicQuery({
-    module_key: 'quality',
-    locale,
-    limit: 20,
-    sort: 'display_order',
-    orderDir: 'asc',
-  });
+    return asObj(raw) ?? {};
+  }, [seoSettingPrimary, seoSettingFallback]);
+
+  // -----------------------------
+  // Quality pages list
+  // -----------------------------
+  const { data: qualityData, isLoading } = useListCustomPagesPublicQuery(
+    {
+      module_key: 'quality',
+      locale,
+      limit: 50,
+      offset: 0,
+      sort: 'display_order',
+      orderDir: 'asc',
+      is_published: 1,
+    } as any,
+    { refetchOnMountOrArgChange: true },
+  );
 
   const primary = useMemo<CustomPageDto | null>(() => {
-    const items: CustomPageDto[] = (aboutData?.items ?? []) as any;
-    const published = items.filter((p) => p?.is_published);
-
+    const items: CustomPageDto[] = ((qualityData as any)?.items ?? []) as any;
+    const published = items.filter((p) => !!(p as any)?.is_published);
     if (!published.length) return null;
 
-    const bySlug = published.find(
-      (p) =>
-        String(p.slug || '')
-          .trim()
-          .toLowerCase() === qualitySlug.toLowerCase(),
-    );
-    const byId = published.find((p) => String(p.id) === QUALITY_PAGE_ID);
+    const targetSlug = qualitySlug.toLowerCase();
+    const bySlug =
+      published.find((p) => safeStr((p as any)?.slug).toLowerCase() === targetSlug) ?? null;
+
+    const byId = published.find((p) => safeStr((p as any)?.id) === QUALITY_PAGE_ID) ?? null;
 
     return (bySlug ?? byId ?? published[0] ?? null) as any;
-  }, [aboutData?.items, qualitySlug]);
+  }, [qualityData, qualitySlug]);
 
-  const pageTitleRaw = useMemo(() => {
+  // -----------------------------
+  // SEO: sources (UI -> custom_page -> seo fallback)
+  // -----------------------------
+  const pageTitle = useMemo(() => {
     const key = 'ui_quality_meta_title';
-
-    const fromUi = String(ui(key, '') || '').trim();
+    const fromUi = safeStr(ui(key, ''));
     if (isValidUiText(fromUi, key)) return fromUi;
 
-    const fromPageMeta = String(primary?.meta_title ?? '').trim();
+    const fromPageMeta = safeStr((primary as any)?.meta_title);
     if (fromPageMeta) return fromPageMeta;
 
-    const fromPageTitle = String(primary?.title ?? '').trim();
+    const fromPageTitle = safeStr((primary as any)?.title);
     if (fromPageTitle) return fromPageTitle;
 
-    return 'Quality Certificates & Standards';
-  }, [ui, primary?.meta_title, primary?.title]);
+    return bannerTitle || 'Quality';
+  }, [ui, primary, bannerTitle]);
 
-  const pageDescRaw = useMemo(() => {
+  const pageDescription = useMemo(() => {
     const key = 'ui_quality_meta_description';
-
-    const fromUi = String(ui(key, '') || '').trim();
+    const fromUi = safeStr(ui(key, ''));
     if (isValidUiText(fromUi, key)) return fromUi;
 
-    const fromPageMeta = String(primary?.meta_description ?? '').trim();
+    const fromPageMeta = safeStr((primary as any)?.meta_description);
     if (fromPageMeta) return fromPageMeta;
 
-    const fromSummary = String(primary?.summary ?? '').trim();
+    const fromSummary = safeStr((primary as any)?.summary);
     if (fromSummary) return fromSummary;
 
-    const fromExcerpt = excerpt(primary?.content_html ?? '', 160).trim();
+    const html = safeStr((primary as any)?.content_html);
+    const fromExcerpt = html ? excerpt(html, 160).trim() : '';
     if (fromExcerpt) return fromExcerpt;
 
-    const fromUiDesc = String(ui('ui_quality_page_description', '') || '').trim();
+    const fromUiDesc = safeStr(ui('ui_quality_page_description', ''));
     if (fromUiDesc && isValidUiText(fromUiDesc, 'ui_quality_page_description')) return fromUiDesc;
 
-    const fromSeo = String((seo as any)?.description ?? '').trim();
+    const fromSeo = safeStr((seo as any)?.description);
     if (fromSeo) return fromSeo;
 
     return 'Ensotek quality certificates and quality standards.';
-  }, [ui, primary?.meta_description, primary?.summary, primary?.content_html, seo]);
+  }, [ui, primary, seo]);
 
-  const seoSiteName = useMemo(
-    () => String((seo as any)?.site_name ?? '').trim() || 'Ensotek',
-    [seo],
-  );
-  const titleTemplate = useMemo(
-    () => String((seo as any)?.title_template ?? '').trim() || '%s | Ensotek',
-    [seo],
-  );
+  const ogImageOverride = useMemo(() => {
+    // optional: UI override > page featured image > undefined (Layout handles fallback)
+    const uiImgKey = 'ui_quality_og_image';
+    const fromUi = safeStr(ui(uiImgKey, ''));
+    if (isValidUiText(fromUi, uiImgKey) && fromUi) return fromUi;
 
-  const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return String(t).trim();
-  }, [titleTemplate, pageTitleRaw]);
+    const raw = safeStr((primary as any)?.featured_image);
+    return raw || undefined;
+  }, [ui, primary]);
 
-  const ogImage = useMemo(() => {
-    const pageImgRaw = String(primary?.featured_image ?? '').trim();
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
-
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
-  }, [primary?.featured_image, seo]);
-
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
+  const noindex = useMemo(() => {
     const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
-
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    return typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+  }, [seo]);
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link')
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          if (spec.kind === 'meta-name')
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={noindex}
+      />
 
       <Banner title={bannerTitle} />
       <QualityPageContent pageData={primary} isLoading={isLoading} />

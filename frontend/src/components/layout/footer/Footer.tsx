@@ -1,12 +1,12 @@
 // =============================================================
 // FILE: src/components/containers/footer/Footer.tsx
-// CHANGE: add socialsSetting + Social section icon-render
+// Ensotek – Public Footer (DB-backed sections + settings brand/social + SiteLogo)
 // =============================================================
 'use client';
 
 import React, { useMemo } from 'react';
-import Image from 'next/image';
 import Link from 'next/link';
+import { SiteLogo } from '@/components/layout/SiteLogo';
 
 import {
   useGetSiteSettingByKeyQuery,
@@ -16,15 +16,12 @@ import {
 
 import type { FooterSectionDto } from '@/integrations/types/footer_sections.types';
 import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
-import { localizePath } from '@/i18n/url';
 
+import { localizePath } from '@/i18n/url';
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
 
 import SocialLinks from '@/components/common/public/SocialLinks';
-
-const IMG_W = 160;
-const IMG_H = 60;
 
 const isExternalHref = (href: string) =>
   /^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^tel:/i.test(href) || /^#/i.test(href);
@@ -33,21 +30,29 @@ const Footer: React.FC = () => {
   const locale = useResolvedLocale();
   const { ui } = useUiSection('ui_footer', locale);
 
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({ key: 'contact_info', locale });
+  // site_settings – brand / contact / socials
+  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
+    key: 'contact_info',
+    locale,
+  });
+
   const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
     key: 'company_brand',
     locale,
   });
 
-  // ✅ socials settings (locale-aware)
-  const { data: socialsSetting } = useGetSiteSettingByKeyQuery({ key: 'socials', locale });
+  const { data: socialsSetting } = useGetSiteSettingByKeyQuery({
+    key: 'socials',
+    locale,
+  });
 
-  const { brandName, phone, email, website, logoUrl, addrLines, socials } = useMemo(() => {
+  const { brandName, phone, email, website, addrLines, socials } = useMemo(() => {
     const contact = (contactInfoSetting?.value ?? {}) as any;
     const brandVal = (companyBrandSetting?.value ?? {}) as any;
     const socialsVal = (socialsSetting?.value ?? {}) as Record<string, string>;
 
     const name = (brandVal.name as string) || (contact.companyName as string) || 'Ensotek';
+
     const site =
       (brandVal.website as string) || (contact.website as string) || 'https://ensotek.de';
 
@@ -67,18 +72,6 @@ const Footer: React.FC = () => {
       ...socialsVal,
     };
 
-    const logoObj = (brandVal.logo ||
-      (Array.isArray(brandVal.images) ? brandVal.images[0] : null) ||
-      {}) as {
-      url?: string;
-      width?: number;
-      height?: number;
-    };
-
-    const logo =
-      (logoObj.url && String(logoObj.url).trim()) ||
-      'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
-
     const addrLinesComputed: string[] = [];
     if (contact.address) addrLinesComputed.push(String(contact.address));
     if (contact.addressSecondary) addrLinesComputed.push(String(contact.addressSecondary));
@@ -88,7 +81,6 @@ const Footer: React.FC = () => {
       phone: phoneVal?.trim() || '',
       email: emailVal?.trim() || '',
       website: site?.trim() || '',
-      logoUrl: logo,
       addrLines: addrLinesComputed,
       socials: mergedSocials,
     };
@@ -99,21 +91,26 @@ const Footer: React.FC = () => {
       ? website
       : `https://${website}`
     : '';
+
   const telHref = phone ? `tel:${phone.replace(/\s+/g, '')}` : '';
   const mailHref = email ? `mailto:${email}` : '';
 
+  // Footer sections
   const { data: footerSections } = useListFooterSectionsQuery({
     is_active: true,
     order: 'display_order.asc',
     locale,
   });
 
-  const sections: FooterSectionDto[] = useMemo(() => {
-    return (footerSections ?? [])
-      .slice()
-      .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
-  }, [footerSections]);
+  const sections: FooterSectionDto[] = useMemo(
+    () =>
+      (footerSections ?? [])
+        .slice()
+        .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0)),
+    [footerSections],
+  );
 
+  // Footer menu items
   const { data: footerMenuData } = useListMenuItemsQuery({
     location: 'footer',
     is_active: true,
@@ -127,17 +124,21 @@ const Footer: React.FC = () => {
 
   const itemsBySectionId = useMemo(() => {
     const m = new Map<string, PublicMenuItemDto[]>();
+
     for (const item of footerMenuItems) {
       const sid = ((item as any).section_id ?? (item as any).sectionId) as string | undefined;
       if (!sid) continue;
+
       const arr = m.get(sid) ?? [];
       arr.push(item);
       m.set(sid, arr);
     }
+
     for (const [sid, arr] of m) {
       arr.sort((a: any, b: any) => (a.order_num ?? 0) - (b.order_num ?? 0));
       m.set(sid, arr);
     }
+
     return m;
   }, [footerMenuItems]);
 
@@ -160,6 +161,7 @@ const Footer: React.FC = () => {
     }
 
     const href = localizePath(locale, rawUrl);
+
     return (
       <li key={item.id}>
         <Link href={href}>{item.title || rawUrl}</Link>
@@ -167,7 +169,7 @@ const Footer: React.FC = () => {
     );
   };
 
-  // ✅ Social section detection (by slug/title) – no hard IDs
+  // Social section detection (slug/title)
   const isSocialSection = (sec: FooterSectionDto) => {
     const s = `${sec.slug || ''}`.toLowerCase();
     const t = `${sec.title || ''}`.toLowerCase();
@@ -179,12 +181,14 @@ const Footer: React.FC = () => {
       ? 'col-xl-2 col-lg-3 col-md-6 col-sm-6'
       : 'col-xl-3 col-lg-3 col-md-6 col-sm-6';
 
+  const homeHref = localizePath(locale, '/');
+
   return (
     <footer>
+      {/* Üst kısım: dinamik footer_sections + contact */}
       <section className="footer__border grey__bg pt-115 pb-60">
         <div className="container">
           <div className="row">
-            {/* DİNAMİK: Tüm footer_sections */}
             {sections.map((sec) => {
               const isSocial = isSocialSection(sec);
               const items = itemsBySectionId.get(sec.id) ?? [];
@@ -198,7 +202,6 @@ const Footer: React.FC = () => {
 
                     <div className="footer__link">
                       {isSocial ? (
-                        // ✅ Social: icons only (no text)
                         <SocialLinks socials={socials} size="md" />
                       ) : (
                         <ul>{items.map(renderMenuItem)}</ul>
@@ -209,9 +212,9 @@ const Footer: React.FC = () => {
               );
             })}
 
-            {/* Contact – site_settings (her zaman en sonda) */}
+            {/* Contact – her zaman en sonda */}
             <div className="col-xl-3 col-lg-3 col-md-6 col-sm-6">
-              <div className="footer__widget mb-55">
+              <div className="footer__widget mb-55 footer__contact">
                 <div className="footer__title">
                   <h3>{ui('ui_footer_contact', 'Contact')}</h3>
                 </div>
@@ -255,23 +258,13 @@ const Footer: React.FC = () => {
         </div>
       </section>
 
+      {/* Alt kısım: logo + telif metni – SCSS’teki .copyright__inner yapısıyla uyumlu */}
       <div className="footer__copyright grey-bg">
         <div className="container">
           <div className="copyright__inner">
             <div className="copyright__logo">
-              <Link href="/" aria-label={brandName}>
-                {logoUrl ? (
-                  <Image
-                    key={logoUrl}
-                    src={logoUrl}
-                    alt={brandName}
-                    width={IMG_W}
-                    height={IMG_H}
-                    sizes="(max-width: 992px) 120px, 160px"
-                    style={{ width: 'auto', height: 'auto', maxWidth: IMG_W, maxHeight: IMG_H }}
-                    loading="lazy"
-                  />
-                ) : null}
+              <Link href={homeHref} aria-label={brandName || 'Home'}>
+                <SiteLogo alt={brandName || 'Logo'} className="footer-logo" priority={false} />
               </Link>
             </div>
 

@@ -1,182 +1,160 @@
 // =============================================================
 // FILE: src/pages/news/[slug].tsx
-// Ensotek – News Detail Page (by slug) + SEO
-//   - Route: /news/[slug]
-//   - Data: custom_pages/by-slug (module_key="news")
-//   - i18n: useLocaleShort() + site_settings.ui_news
-//   - SEO: seo -> site_seo fallback + page.meta_* override (NO canonical here)
-//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
+// Ensotek – News Detail Page (by slug) [FINAL / STANDARD]
+// - Route: /news/[slug]
+// - Data: custom_pages/by-slug (module_key="news")
+// - ✅ NO <Head>
+// - ✅ Page SEO overrides via <LayoutSeoBridge />
+// - ✅ General meta/canonical/hreflang/etc. stays in Layout/_document (no duplication)
+// - SEO priority:
+//   title: page.meta_title -> page.title -> ui_news_detail_page_title -> ui_news_page_title -> fallback
+//   desc : page.meta_description -> page.summary -> excerpt(page.content_html) -> (optional UI fallback) -> Layout default
+//   og   : page.featured_image -> undefined (Layout decides)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import NewsDetail from '@/components/containers/news/NewsDetail';
 import NewsMore from '@/components/containers/news/NewsMore';
 
-// i18n
+// ✅ Page -> Layout SEO overrides (STANDARD)
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
+// i18n + UI
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
-
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+import { isValidUiText } from '@/i18n/uiText';
 
 // data
-import {
-  useGetSiteSettingByKeyQuery,
-  useGetCustomPageBySlugPublicQuery,
-} from '@/integrations/rtk/hooks';
+import { useGetCustomPageBySlugPublicQuery } from '@/integrations/rtk/hooks';
 
 // helpers
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-function readSlug(q: unknown): string {
-  if (typeof q === 'string') return q;
-  if (Array.isArray(q)) return String(q[0] ?? '');
-  return '';
-}
+// ✅ skeleton (shared, no inline styles)
+import Skeleton from '@/components/common/public/Skeleton';
 
-function safeStr(x: unknown): string {
-  return typeof x === 'string' ? x.trim() : '';
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+
+function readSlug(q: unknown): string {
+  if (typeof q === 'string') return q.trim();
+  if (Array.isArray(q)) return String(q[0] ?? '').trim();
+  return '';
 }
 
 const NewsDetailPage: React.FC = () => {
   const router = useRouter();
   const locale = useLocaleShort();
-
   const { ui } = useUiSection('ui_news', locale as any);
 
-  const slug = useMemo(() => readSlug(router.query.slug).trim(), [router.query.slug]);
-  const isSlugReady = !!slug;
+  const slug = useMemo(() => readSlug(router.query.slug), [router.query.slug]);
+  const isSlugReady = router.isReady && !!slug;
 
-  // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
-
-  const seo = useMemo(() => {
-    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoPrimary?.value, seoFallback?.value]);
-
-  // News item data (for SEO + banner)
-  const { data: page } = useGetCustomPageBySlugPublicQuery(
+  const { data: page, isFetching } = useGetCustomPageBySlugPublicQuery(
     { slug, locale },
     { skip: !isSlugReady },
   );
 
-  const listTitleFallback = ui('ui_news_page_title', 'News');
-  const detailTitleFallback = ui('ui_news_detail_page_title', 'News Detail');
+  // -----------------------------
+  // UI fallbacks
+  // -----------------------------
+  const listTitleFallback = useMemo(() => {
+    const key = 'ui_news_page_title';
+    const v = safeStr(ui(key, 'News'));
+    return isValidUiText(v, key) ? v : 'News';
+  }, [ui]);
 
+  const detailTitleFallback = useMemo(() => {
+    const key = 'ui_news_detail_page_title';
+    const v = safeStr(ui(key, 'News Detail'));
+    return isValidUiText(v, key) ? v : 'News Detail';
+  }, [ui]);
+
+  // -----------------------------
+  // Banner title
+  // -----------------------------
   const bannerTitle = useMemo(() => {
-    return safeStr(page?.title) || safeStr(detailTitleFallback) || safeStr(listTitleFallback);
+    const t = safeStr(page?.title);
+    if (t) return t;
+
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
+
+    return listTitleFallback || 'News';
   }, [page?.title, detailTitleFallback, listTitleFallback]);
 
-  // --- SEO fields ---
-  const pageTitleRaw = useMemo(() => {
-    const t =
-      safeStr(page?.meta_title) ||
-      safeStr(page?.title) ||
-      safeStr(bannerTitle) ||
-      safeStr(listTitleFallback) ||
-      'News';
-    return t;
-  }, [page?.meta_title, page?.title, bannerTitle, listTitleFallback]);
-
-  const pageDescRaw = useMemo(() => {
-    const globalDesc = safeStr(seo?.description) || '';
-
-    if (!isSlugReady) return globalDesc;
-
-    return (
-      safeStr(page?.meta_description) ||
-      safeStr(page?.summary) ||
-      safeStr(excerpt(page?.content_html ?? '', 160)) ||
-      globalDesc ||
-      ''
-    );
-  }, [isSlugReady, page?.meta_description, page?.summary, page?.content_html, seo?.description]);
-
-  const seoSiteName = useMemo(() => safeStr(seo?.site_name) || 'Ensotek', [seo?.site_name]);
-  const titleTemplate = useMemo(
-    () => safeStr(seo?.title_template) || '%s | Ensotek',
-    [seo?.title_template],
-  );
-
+  // -----------------------------
+  // SEO (page overrides only)
+  // -----------------------------
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return safeStr(t);
-  }, [titleTemplate, pageTitleRaw]);
+    if (!isSlugReady) return listTitleFallback || 'News';
 
-  const ogImage = useMemo(() => {
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    const mt = safeStr(page?.meta_title);
+    if (mt) return mt;
 
-    const pageImgRaw = safeStr(page?.featured_image);
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
+    const t = safeStr(page?.title);
+    if (t) return t;
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
-  }, [page?.featured_image, seo]);
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
 
-  const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
-    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+    return listTitleFallback || 'News';
+  }, [isSlugReady, page?.meta_title, page?.title, detailTitleFallback, listTitleFallback]);
 
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
+  const pageDescription = useMemo(() => {
+    if (!isSlugReady) return '';
 
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    const md = safeStr(page?.meta_description);
+    if (md) return md;
+
+    const s = safeStr(page?.summary);
+    if (s) return s;
+
+    const ex = excerpt(safeStr(page?.content_html), 160).trim();
+    if (ex) return ex;
+
+    // optional UI fallback
+    const uiDescKey = 'ui_news_detail_meta_description_fallback';
+    const uiDesc = safeStr(ui(uiDescKey, ''));
+    if (uiDesc && isValidUiText(uiDesc, uiDescKey)) return uiDesc;
+
+    return '';
+  }, [isSlugReady, page?.meta_description, page?.summary, page?.content_html, ui]);
+
+  const ogImageOverride = useMemo(() => {
+    if (!isSlugReady) return undefined;
+
+    const raw = safeStr(page?.featured_image);
+    if (!raw) return undefined;
+
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [isSlugReady, page?.featured_image]);
+
+  const showSkeleton = !isSlugReady || isFetching || !page;
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={false}
+      />
 
       <Banner title={bannerTitle} />
 
-      {!isSlugReady ? (
-        <div className="news__area grey-bg-3 pt-120 pb-90">
-          <div className="container">
-            <div className="row">
-              <div className="col-12">
-                <div className="skeleton-line" style={{ height: 24 }} />
-                <div className="skeleton-line mt-10" style={{ height: 16 }} />
-                <div className="skeleton-line mt-10" style={{ height: 16 }} />
-              </div>
-            </div>
-          </div>
-        </div>
+      {showSkeleton ? (
+        <Skeleton />
       ) : (
         <>
-            <NewsDetail slug={slug} />
-            <NewsMore currentSlug={slug} />
+          <NewsDetail slug={slug} />
+          <NewsMore currentSlug={slug} />
         </>
       )}
     </>

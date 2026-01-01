@@ -58,7 +58,7 @@ const CATEGORY_VIEW_FIELDS = {
   description: categoryI18n.description,
   image_url: categories.image_url,
   storage_asset_id: categories.storage_asset_id,
-  alt: categoryI18n.alt,
+  alt: categoryI18n.alt, // ✅ public view alt = i18n alt
   icon: categories.icon,
   is_active: categories.is_active,
   is_featured: categories.is_featured,
@@ -67,7 +67,7 @@ const CATEGORY_VIEW_FIELDS = {
   updated_at: categories.updated_at,
 } as const;
 
-/** GET /categories (public) — üst kategoriler (çok dilli + module_key destekli) */
+/** GET /categories (public) — çok dilli + module_key destekli */
 export const listCategories: RouteHandler<{
   Querystring: {
     q?: string;
@@ -98,12 +98,10 @@ export const listCategories: RouteHandler<{
   // 🌍 i18n locale filtresi
   conds.push(eq(categoryI18n.locale, effectiveLocale));
 
-  // ✅ Modul/domain filtresi (blog, news, library, product, docs, ...)
+  // ✅ Modul/domain filtresi
   const moduleKey =
     typeof q.module_key === 'string' && q.module_key.trim() ? q.module_key.trim() : undefined;
-  if (moduleKey) {
-    conds.push(eq(categories.module_key, moduleKey));
-  }
+  if (moduleKey) conds.push(eq(categories.module_key, moduleKey));
 
   const where = conds.length ? and(...conds) : undefined;
 
@@ -118,7 +116,6 @@ export const listCategories: RouteHandler<{
     .innerJoin(categoryI18n, eq(categoryI18n.category_id, categories.id));
 
   const countQ = where ? countBase.where(where as any) : countBase;
-
   const [{ total }] = await countQ;
 
   // ROWS
@@ -164,11 +161,10 @@ export const getCategoryById: RouteHandler<{
     .limit(1);
 
   if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
-
   return reply.send(rows[0]);
 };
 
-/** GET /categories/by-slug/:slug (public) — opsiyonel locale + module_key */
+/** GET /categories/by-slug/:slug (public) */
 export const getCategoryBySlug: RouteHandler<{
   Params: { slug: string };
   Querystring?: { locale?: string; module_key?: string };
@@ -186,9 +182,7 @@ export const getCategoryBySlug: RouteHandler<{
       : undefined;
 
   const conds: any[] = [eq(categoryI18n.slug, slug), eq(categoryI18n.locale, effectiveLocale)];
-  if (moduleKey) {
-    conds.push(eq(categories.module_key, moduleKey));
-  }
+  if (moduleKey) conds.push(eq(categories.module_key, moduleKey));
 
   const rows = await db
     .select(CATEGORY_VIEW_FIELDS)
@@ -198,6 +192,5 @@ export const getCategoryBySlug: RouteHandler<{
     .limit(1);
 
   if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
-
   return reply.send(rows[0]);
 };

@@ -1,17 +1,22 @@
 -- =============================================================
--- FILE: 016_sparepart_bbbb1510_pp_bigudi_fill__all_locales.sql (FINAL)
+-- FILE: 016_sparepart_bbbb1510_pp_bigudi_fill__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (10/14)
 -- Sparepart: PP Bigudi Dolgu / PP Ring Fill / PP Spritzring-Füllung
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1003-1111-4111-8111-bbbbbbbb1003'  (Fill Media)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to previous corrected pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING
+--    (NO JSON_ARRAY/JSON_OBJECT nested inside specifications)
+--  - product_specs/product_faqs: locale-based reset with DELETE
+--  - product_reviews: id-based reset
+--  - product_options is locale-less => TR/EN/DE separate option rows with different IDs
 --  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1003-1111-4111-8111-bbbbbbbb1003'  (Fill Media)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -80,7 +85,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -98,8 +103,8 @@ VALUES (
     'malzeme', 'PP (Polipropilen)',
     'uretim', 'Enjeksiyon',
     'sicaklik', 'Yaklaşık 100 °C’ye kadar',
-    'uygunluk', JSON_ARRAY('Kirli/yağlı/kumlu su', 'Kireçlenmeye yatkın prosesler', 'Tozlu ortamlar'),
-    'bakim', 'Yıkanabilir, tekrar kullanılabilir'
+    'uygunluk', 'Kirli/yağlı/kumlu su; kireçlenmeye yatkın prosesler; tozlu ortamlar',
+    'bakim', 'Yıkanabilir ve tekrar kullanılabilir'
   ),
   'PP Bigudi Dolgu | Soğutma Kulesi Yedek Parça | Ensotek',
   'PP bigudi (spritzring) dolgu: kirli/yağlı/kumlu sularda ve tozlu ortamlarda dayanıklı çözüm. Enjeksiyon PP, ~100 °C’ye kadar, yıkanabilir ve tekrar kullanılabilir.'
@@ -115,7 +120,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1510-2222-4222-8222-bbbbbbbb1510' AND locale='tr';
 
@@ -127,7 +132,7 @@ VALUES
   ('11111510-aaaa-4aaa-8aaa-bbbb1510tr04','bbbb1510-2222-4222-8222-bbbbbbbb1510','tr','Sıcaklık Dayanımı','~100 °C’ye kadar proses suyu','physical',40),
   ('11111510-aaaa-4aaa-8aaa-bbbb1510tr05','bbbb1510-2222-4222-8222-bbbbbbbb1510','tr','Önerilen Kullanım','Kirli/yağlı/kumlu ve kireçlenmeye yatkın sular; tozlu ortamlar','custom',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1510-2222-4222-8222-bbbbbbbb1510' AND locale='tr';
 
@@ -137,7 +142,7 @@ VALUES
   ('22221510-aaaa-4aaa-8aaa-bbbb1510tr02','bbbb1510-2222-4222-8222-bbbbbbbb1510','tr','Yüksek sıcaklıkta kullanılabilir mi?','Evet, PP bigudi dolgu yaklaşık 100 °C’ye kadar proses sularında kullanılabilir.',20,1),
   ('22221510-aaaa-4aaa-8aaa-bbbb1510tr03','bbbb1510-2222-4222-8222-bbbbbbbb1510','tr','Temizlenip tekrar kullanılabilir mi?','Evet. Yıkanarak tekrar kullanılabilir; bakım ve değişim maliyetini düşürür.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331510-aaaa-4aaa-8aaa-bbbb1510tr01',
@@ -149,16 +154,16 @@ VALUES
   ('33331510-aaaa-4aaa-8aaa-bbbb1510tr01','bbbb1510-2222-4222-8222-bbbbbbbb1510',NULL,5,'Kirli su prosesinde tıkanma problemi azaldı, temizlik sonrası tekrar kullandık.',1,'Bakım Ekibi'),
   ('33331510-aaaa-4aaa-8aaa-bbbb1510tr02','bbbb1510-2222-4222-8222-bbbbbbbb1510',NULL,4,'Tozlu ortamda dayanımı iyi; değişim aralığı uzadı.',1,'Tesis Operasyon');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — locale-less table => separate row
 DELETE FROM product_options
-WHERE id='44441510-aaaa-4aaa-8aaa-bbbb1510op01';
+WHERE id='44441510-aaaa-4aaa-8aaa-bbbb1510tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441510-aaaa-4aaa-8aaa-bbbb1510op01','bbbb1510-2222-4222-8222-bbbbbbbb1510','Material', JSON_ARRAY('PP (Polypropylene)'));
+  ('44441510-aaaa-4aaa-8aaa-bbbb1510tr01','bbbb1510-2222-4222-8222-bbbbbbbb1510','Malzeme', JSON_ARRAY('PP (Polipropilen)'));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -175,8 +180,8 @@ VALUES (
   JSON_OBJECT(
     'material', 'PP (Polypropylene)',
     'manufacturing', 'Injection molded',
-    'temperature', 'Up to ~100 °C process water',
-    'bestFor', JSON_ARRAY('Dirty/oily/sandy water', 'Scaling-prone applications', 'Dusty environments'),
+    'temperature', 'Up to about 100 °C',
+    'bestFor', 'Dirty/oily/sandy water; scaling-prone duty; dusty environments',
     'maintenance', 'Washable and reusable'
   ),
   'PP Ring Fill | Cooling Tower Spare Parts | Ensotek',
@@ -193,7 +198,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1510-2222-4222-8222-bbbbbbbb1510' AND locale='en';
 
@@ -202,10 +207,10 @@ VALUES
   ('11111510-bbbb-4bbb-8bbb-bbbb1510en01','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Fill Type','Ring / spritzring fill','custom',10),
   ('11111510-bbbb-4bbb-8bbb-bbbb1510en02','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Material','PP (Polypropylene)','material',20),
   ('11111510-bbbb-4bbb-8bbb-bbbb1510en03','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Manufacturing','Injection molded','custom',30),
-  ('11111510-bbbb-4bbb-8bbb-bbbb1510en04','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Temperature Capability','Up to ~100 °C process water','physical',40),
+  ('11111510-bbbb-4bbb-8bbb-bbbb1510en04','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Temperature Capability','Up to about 100 °C process water','physical',40),
   ('11111510-bbbb-4bbb-8bbb-bbbb1510en05','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Recommended Use','Dirty/oily/sandy water; scaling-prone duty; dusty environments','custom',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1510-2222-4222-8222-bbbbbbbb1510' AND locale='en';
 
@@ -215,7 +220,7 @@ VALUES
   ('22221510-bbbb-4bbb-8bbb-bbbb1510en02','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Can it handle high temperature water?','Yes. PP ring fill can be used with process water up to about 100 °C.',20,1),
   ('22221510-bbbb-4bbb-8bbb-bbbb1510en03','bbbb1510-2222-4222-8222-bbbbbbbb1510','en','Is it reusable after cleaning?','Yes. It can be washed and reused, reducing maintenance and replacement costs.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331510-bbbb-4bbb-8bbb-bbbb1510en01',
@@ -227,8 +232,16 @@ VALUES
   ('33331510-bbbb-4bbb-8bbb-bbbb1510en01','bbbb1510-2222-4222-8222-bbbbbbbb1510',NULL,5,'Less clogging in dirty-water service; we cleaned and reused the fill successfully.',1,'Maintenance'),
   ('33331510-bbbb-4bbb-8bbb-bbbb1510en02','bbbb1510-2222-4222-8222-bbbbbbbb1510',NULL,4,'Durable in dusty areas and extended replacement interval.',1,'Operations');
 
+-- OPTIONS (EN) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441510-bbbb-4bbb-8bbb-bbbb1510en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441510-bbbb-4bbb-8bbb-bbbb1510en01','bbbb1510-2222-4222-8222-bbbbbbbb1510','Material', JSON_ARRAY('PP (Polypropylene)'));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -245,8 +258,8 @@ VALUES (
   JSON_OBJECT(
     'material', 'PP (Polypropylen)',
     'herstellung', 'Spritzguss',
-    'temperatur', 'Bis ca. 100 °C Prozesswasser',
-    'geeignetFuer', JSON_ARRAY('Schmutzig/ölig/sandig', 'Verkalkungsanfällig', 'Staubige Umgebung'),
+    'temperatur', 'Bis ca. 100 °C',
+    'geeignetFuer', 'Schmutzig/ölig/sandig; verkalkungsanfällig; staubige Umgebung',
     'wartung', 'Reinigbar und wiederverwendbar'
   ),
   'PP Spritzring-Füllung | Kühlturm Ersatzteile | Ensotek',
@@ -263,7 +276,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1510-2222-4222-8222-bbbbbbbb1510' AND locale='de';
 
@@ -275,7 +288,7 @@ VALUES
   ('11111510-cccc-4ccc-8ccc-bbbb1510de04','bbbb1510-2222-4222-8222-bbbbbbbb1510','de','Temperaturbereich','Bis ca. 100 °C Prozesswasser','physical',40),
   ('11111510-cccc-4ccc-8ccc-bbbb1510de05','bbbb1510-2222-4222-8222-bbbbbbbb1510','de','Empfohlener Einsatz','Schmutzig/ölig/sandig, verkalkungsanfällig, staubige Umgebung','custom',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1510-2222-4222-8222-bbbbbbbb1510' AND locale='de';
 
@@ -285,7 +298,7 @@ VALUES
   ('22221510-cccc-4ccc-8ccc-bbbb1510de02','bbbb1510-2222-4222-8222-bbbbbbbb1510','de','Ist sie für hohe Temperaturen geeignet?','Ja. Sie kann mit Prozesswasser bis ca. 100 °C eingesetzt werden.',20,1),
   ('22221510-cccc-4ccc-8ccc-bbbb1510de03','bbbb1510-2222-4222-8222-bbbbbbbb1510','de','Kann sie wiederverwendet werden?','Ja. Nach Reinigung kann sie wiederverwendet werden, die Kosten bleiben gering.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331510-cccc-4ccc-8ccc-bbbb1510de01',
@@ -296,6 +309,14 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331510-cccc-4ccc-8ccc-bbbb1510de01','bbbb1510-2222-4222-8222-bbbbbbbb1510',NULL,5,'Weniger Verstopfung bei schmutzigem Wasser; nach Reinigung erneut eingesetzt.',1,'Instandhaltung'),
   ('33331510-cccc-4ccc-8ccc-bbbb1510de02','bbbb1510-2222-4222-8222-bbbbbbbb1510',NULL,4,'Robust in staubiger Umgebung und lange Standzeit.',1,'Betrieb');
+
+-- OPTIONS (DE) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441510-cccc-4ccc-8ccc-bbbb1510de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441510-cccc-4ccc-8ccc-bbbb1510de01','bbbb1510-2222-4222-8222-bbbbbbbb1510','Material', JSON_ARRAY('PP (Polypropylen)'));
 
 COMMIT;
 

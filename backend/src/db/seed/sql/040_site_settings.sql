@@ -124,12 +124,12 @@ VALUES
     'shortName','ENSOTEK',
     'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
       'width',160,
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp')
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -198,12 +198,12 @@ VALUES
     'shortName','ENSOTEK',
     'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
       'width',160,
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp')
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -276,12 +276,12 @@ VALUES
     'shortName','ENSOTEK',
     'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
       'width',160,
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp')
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -311,11 +311,11 @@ VALUES
 (UUID(), 'storage_driver',             '*', 'cloudinary',                                  NOW(3), NOW(3)),
 (UUID(), 'storage_local_root',         '*', '/var/www/Ensotek/uploads',                    NOW(3), NOW(3)),
 (UUID(), 'storage_local_base_url',     '*', '/uploads',                                    NOW(3), NOW(3)),
-(UUID(), 'cloudinary_cloud_name',      '*', 'dbozv7wqd',                             NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_key',         '*', '644676135993432',                     NOW(3), NOW(3)),
-(UUID(), 'cloudinary_api_secret',      '*', 'C2VWxsJ5j0jZpcxOhvuTOTKhaMo',                  NOW(3), NOW(3)),
+(UUID(), 'cloudinary_cloud_name',      '*', 'dbozv7wqd',                                   NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_key',         '*', '644676135993432',                             NOW(3), NOW(3)),
+(UUID(), 'cloudinary_api_secret',      '*', 'C2VWxsJ5j0jZpcxOhvuTOTKhaMo',                 NOW(3), NOW(3)),
 (UUID(), 'cloudinary_folder',          '*', 'uploads/ensotek',                             NOW(3), NOW(3)),
-(UUID(), 'cloudinary_unsigned_preset', '*', 'your_unsigned_preset',                        NOW(3), NOW(3)),
+(UUID(), 'cloudinary_unsigned_preset', '*', 'ensotek_unsigned',                            NOW(3), NOW(3)),
 (UUID(), 'storage_cdn_public_base',    '*', 'https://res.cloudinary.com',                  NOW(3), NOW(3)),
 (UUID(), 'storage_public_api_base',    '*', 'https://ensotek.guezelwebdesign.com/api',     NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
@@ -366,6 +366,129 @@ INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `upda
 VALUES
 (UUID(), 'gtm_container_id',   '*', 'GTM-WV5FRN93', NOW(3), NOW(3)),
 (UUID(), 'ga4_measurement_id', '*', 'G-JXG2XVVQ8C', NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
+
+-- =============================================================
+-- GLOBAL: Site Media (locale='*')  ✅ UPDATED
+-- Keys:
+--  - site_logo
+--  - site_logo_dark
+--  - site_logo_light
+--  - site_favicon
+--  - site_apple_touch_icon   (180x180)
+--  - site_app_icon_512       (512x512 manifest/icon)
+--  - site_og_default_image   (1200x630 OG default)
+--
+-- Value format:
+--  - simplest: URL string
+--  - optional: JSON_OBJECT('url',..., 'width',..., 'height',..., 'asset_id',..., 'alt',...)
+-- Service layer parseMediaUrl() supports both.
+-- =============================================================
+
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(
+  UUID(),
+  'site_logo',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'width',160,
+      'height',60,
+      'alt','Ensotek Logo'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'site_logo_dark',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'width',160,
+      'height',60,
+      'alt','Ensotek Logo (Dark)'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'site_logo_light',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'width',160,
+      'height',60,
+      'alt','Ensotek Logo (Light)'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'site_favicon',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/raw/upload/v1767244774/site-media/favicon',
+      'alt','Ensotek Favicon'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'site_apple_touch_icon',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767249207/site-media/apple-touch-icon.png',
+      'alt','Ensotek Apple Touch Icon (180x180)'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'site_app_icon_512',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767249213/site-media/ensotek-apple-icon-512.png',
+      'alt','Ensotek App Icon (512x512)'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+),
+(
+  UUID(),
+  'site_og_default_image',
+  '*',
+  CAST(
+    JSON_OBJECT(
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767249482/site-media/2.jpg',
+      'width',1200,
+      'height',630,
+      'alt','Ensotek – Industrial Cooling Solutions – Default Open Graph Image'
+    ) AS CHAR CHARACTER SET utf8mb4
+  ),
+  NOW(3),
+  NOW(3)
+)
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);

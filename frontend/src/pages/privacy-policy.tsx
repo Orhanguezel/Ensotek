@@ -1,39 +1,34 @@
 // =============================================================
 // FILE: src/pages/privacy-policy.tsx
-// Ensotek – Privacy Policy Page + SEO
+// Ensotek – Privacy Policy Page + SEO (STANDARD / HOOK-SAFE) [FINAL]
 //   - Route: /privacy-policy
 //   - Data: custom_pages (module_key="privacy") meta override
-//   - SEO: seo -> site_seo fallback + OG/Twitter (NO canonical here)
+//   - SEO: NO <Head>. Only <LayoutSeoBridge />
 //   - ✅ Canonical + og:url tek kaynak: _document (SSR)
-// Pattern: cookie-policy / privacy-notice ile aynı
+// Pattern: cookie-policy / privacy-notice ile aynı (sadeleştirilmiş)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import PrivacyPolicyPageContent from '@/components/containers/legal/PrivacyPolicyPageContent';
 
-// i18n + UI
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { isValidUiText } from '@/i18n/uiText';
 
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+import { asObj } from '@/seo/pageSeo';
 
-// data
 import {
   useGetSiteSettingByKeyQuery,
   useListCustomPagesPublicQuery,
 } from '@/integrations/rtk/hooks';
 import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
-// helpers
-import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
 function safeJson<T>(v: any, fallback: T): T {
@@ -49,10 +44,15 @@ function safeJson<T>(v: any, fallback: T): T {
   }
 }
 
+function safeStr(v: unknown): string {
+  if (v == null) return '';
+  return String(v).trim();
+}
+
 function extractHtmlFromAny(page: any): string {
   if (!page) return '';
 
-  const ch = String(page?.content_html ?? '').trim();
+  const ch = safeStr(page?.content_html);
   if (ch) return ch;
 
   const c = page?.content ?? page?.content_json ?? page?.contentJson;
@@ -66,11 +66,13 @@ function extractHtmlFromAny(page: any): string {
   if (typeof c === 'string') {
     const s = c.trim();
     if (!s) return '';
+
     if (s.startsWith('{') || s.startsWith('[')) {
       const obj = safeJson<any>(s, null);
       const html = obj?.html;
       if (typeof html === 'string' && html.trim()) return html.trim();
     }
+
     return s;
   }
 
@@ -86,143 +88,117 @@ const PrivacyPolicyPage: React.FC = () => {
   // -----------------------------
   const bannerTitle = useMemo(() => {
     const key = 'ui_privacy_policy_page_title';
-    const v = String(ui(key, '') || '').trim();
+    const v = safeStr(ui(key, ''));
     return isValidUiText(v, key) ? v : 'Privacy Policy';
   }, [ui]);
 
   // -----------------------------
-  // Global SEO settings (seo -> site_seo fallback)
+  // Global SEO settings (seo -> site_seo fallback) [for description fallback only]
   // -----------------------------
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
+  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({
+    key: 'site_seo',
+    locale,
+  } as any);
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw =
+      (seoSettingPrimary as any)?.value ??
+      (seoSettingFallback as any)?.value ??
+      seoSettingPrimary ??
+      seoSettingFallback;
+
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoSettingPrimary, seoSettingFallback]);
 
   // -----------------------------
   // Privacy custom page (meta override için: ilk published)
-  // module_key = 'privacy'  (seed: 051.4_custom_pages_privacy.seed.sql)
+  // module_key = 'privacy'
   // -----------------------------
-  const { data: privacyData } = useListCustomPagesPublicQuery({
-    module_key: 'privacy',
-    locale,
-    limit: 10,
-    sort: 'created_at',
-    orderDir: 'asc',
-  });
+  const { data: privacyData } = useListCustomPagesPublicQuery(
+    {
+      module_key: 'privacy',
+      locale,
+      limit: 10,
+      sort: 'created_at',
+      orderDir: 'asc',
+      is_published: 1,
+    } as any,
+    { refetchOnMountOrArgChange: true },
+  );
 
   const primary = useMemo<CustomPageDto | null>(() => {
     const items: CustomPageDto[] = ((privacyData as any)?.items ?? []) as any;
-    const published = items.filter((p) => !!p?.is_published);
+    const published = items.filter((p) => !!(p as any)?.is_published);
     return published[0] ?? null;
   }, [privacyData]);
 
   // -----------------------------
-  // SEO: title/description sources (UI -> custom_page -> seo)
+  // SEO: sources (UI -> custom_page -> seo fallback)
   // -----------------------------
-  const pageTitleRaw = useMemo(() => {
+  const pageTitle = useMemo(() => {
     const key = 'ui_privacy_policy_meta_title';
-
-    const fromUi = String(ui(key, '') || '').trim();
+    const fromUi = safeStr(ui(key, ''));
     if (isValidUiText(fromUi, key)) return fromUi;
 
-    const fromPageMeta = String((primary as any)?.meta_title ?? '').trim();
+    const fromPageMeta = safeStr((primary as any)?.meta_title);
     if (fromPageMeta) return fromPageMeta;
 
-    const fromPageTitle = String((primary as any)?.title ?? '').trim();
+    const fromPageTitle = safeStr((primary as any)?.title);
     if (fromPageTitle) return fromPageTitle;
 
-    return 'Privacy Policy | Ensotek';
-  }, [ui, primary]);
+    return bannerTitle || 'Privacy Policy';
+  }, [ui, primary, bannerTitle]);
 
-  const pageDescRaw = useMemo(() => {
+  const pageDescription = useMemo(() => {
     const key = 'ui_privacy_policy_meta_description';
-
-    const fromUi = String(ui(key, '') || '').trim();
+    const fromUi = safeStr(ui(key, ''));
     if (isValidUiText(fromUi, key)) return fromUi;
 
-    const fromPageMeta = String((primary as any)?.meta_description ?? '').trim();
+    const fromPageMeta = safeStr((primary as any)?.meta_description);
     if (fromPageMeta) return fromPageMeta;
 
-    const fromSummary = String((primary as any)?.summary ?? '').trim();
+    const fromSummary = safeStr((primary as any)?.summary);
     if (fromSummary) return fromSummary;
 
     const html = extractHtmlFromAny(primary);
-    const fromExcerpt = excerpt(html, 160).trim();
+    const fromExcerpt = html ? excerpt(html, 160).trim() : '';
     if (fromExcerpt) return fromExcerpt;
 
-    const fromUiDesc = String(ui('ui_privacy_policy_page_description', '') || '').trim();
-    if (fromUiDesc && isValidUiText(fromUiDesc, 'ui_privacy_policy_page_description'))
+    const fromUiDesc = safeStr(ui('ui_privacy_policy_page_description', ''));
+    if (fromUiDesc && isValidUiText(fromUiDesc, 'ui_privacy_policy_page_description')) {
       return fromUiDesc;
+    }
 
-    const fromSeo = String((seo as any)?.description ?? '').trim();
+    const fromSeo = safeStr((seo as any)?.description);
     if (fromSeo) return fromSeo;
 
     return 'Ensotek privacy policy: data we collect, purposes, retention, security, and user rights.';
   }, [ui, primary, seo]);
 
-  const seoSiteName = useMemo(
-    () => String((seo as any)?.site_name ?? '').trim() || 'Ensotek',
-    [seo],
-  );
+  const ogImageOverride = useMemo(() => {
+    // optional: UI override > page featured image (raw) > undefined (Layout handles fallback)
+    const uiImgKey = 'ui_privacy_policy_og_image';
+    const fromUi = safeStr(ui(uiImgKey, ''));
+    if (isValidUiText(fromUi, uiImgKey) && fromUi) return fromUi;
 
-  const titleTemplate = useMemo(
-    () => String((seo as any)?.title_template ?? '').trim() || '%s | Ensotek',
-    [seo],
-  );
+    const raw = safeStr((primary as any)?.featured_image);
+    return raw || undefined;
+  }, [ui, primary]);
 
-  const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return String(t).trim();
-  }, [titleTemplate, pageTitleRaw]);
-
-  const ogImage = useMemo(() => {
-    const pageImgRaw = String((primary as any)?.featured_image ?? '').trim();
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
-
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
-  }, [primary, seo]);
-
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
+  const noindex = useMemo(() => {
     const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
-
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
-      // canonical + og:url yok (SSR _document)
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    return typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+  }, [seo]);
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={noindex}
+      />
 
       <Banner title={bannerTitle} />
       <PrivacyPolicyPageContent />

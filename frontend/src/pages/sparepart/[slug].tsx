@@ -1,208 +1,144 @@
 // =============================================================
 // FILE: src/pages/sparepart/[slug].tsx
-// Ensotek – Sparepart Detail Page (by slug) + SEO
-//   - Route: /sparepart/[slug]
-//   - i18n: useLocaleShort() + site_settings.ui_spareparts
-//   - SEO: seo -> site_seo fallback + product(meta_*) override (NO canonical here)
-//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
+// Ensotek – Sparepart Detail Page (by slug) + SEO (STANDARD)
+// - NO <Head>
+// - SEO override: <LayoutSeoBridge />
+// - Skeleton: common public Skeleton
+// - slug: readSlug(router.query.slug) + router.isReady
+// - DB meta precedence
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import ProductDetail from '@/components/containers/product/ProductDetail';
 import ProductMore from '@/components/containers/product/ProductMore';
 
-// i18n
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { isValidUiText } from '@/i18n/uiText';
 
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+import Skeleton from '@/components/common/public/Skeleton';
 
-// data
-import { useGetSiteSettingByKeyQuery, useGetProductBySlugQuery } from '@/integrations/rtk/hooks';
-
-// helpers
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-// ui skeleton
-import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
+import { useGetProductBySlugQuery } from '@/integrations/rtk/hooks';
+
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
 function readSlug(q: unknown): string {
-  if (typeof q === 'string') return q;
-  if (Array.isArray(q)) return String(q[0] ?? '');
+  if (typeof q === 'string') return q.trim();
+  if (Array.isArray(q)) return String(q[0] ?? '').trim();
   return '';
-}
-
-function safeStr(x: unknown): string {
-  return typeof x === 'string' ? x.trim() : '';
-}
-
-function firstImageFromAny(product: any): string {
-  const raw1 = safeStr(product?.image_url);
-  if (raw1) return raw1;
-
-  const images = Array.isArray(product?.images) ? product.images : [];
-  const raw2 = safeStr(images?.[0]);
-  if (raw2) return raw2;
-
-  const raw3 = safeStr(product?.featured_image);
-  return raw3;
 }
 
 const SparepartDetailPage: React.FC = () => {
   const router = useRouter();
   const locale = useLocaleShort();
-
   const { ui } = useUiSection('ui_spareparts', locale as any);
 
-  const slug = useMemo(() => readSlug(router.query.slug).trim(), [router.query.slug]);
-  const isSlugReady = !!slug;
+  const slug = useMemo(() => readSlug(router.query.slug), [router.query.slug]);
+  const isSlugReady = router.isReady && !!slug;
 
-  // UI fallbacks (minimum; DB/UI overrides should win)
-  const listTitleFallback = ui('ui_spareparts_page_title', 'Spare Parts');
-  const detailTitleFallback = ui('ui_spareparts_detail_page_title', 'Spare Part');
+  const listTitleFallback = useMemo(() => {
+    const key = 'ui_spareparts_page_title';
+    const v = safeStr(ui(key, 'Spare Parts'));
+    return isValidUiText(v, key) ? v : 'Spare Parts';
+  }, [ui]);
 
-  // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  const detailTitleFallback = useMemo(() => {
+    const key = 'ui_spareparts_detail_page_title';
+    const v = safeStr(ui(key, 'Spare Part'));
+    return isValidUiText(v, key) ? v : 'Spare Part';
+  }, [ui]);
 
-  const seo = useMemo(() => {
-    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoPrimary?.value, seoFallback?.value]);
-
-  // Item data
-  const { data: product, isLoading: isLoadingItem } = useGetProductBySlugQuery(
-    { slug, locale },
+  // ✅ IMPORTANT: item_type=sparepart
+  const { data: product, isFetching } = useGetProductBySlugQuery(
+    { slug, locale, item_type: 'sparepart' } as any,
     { skip: !isSlugReady },
   );
 
   const bannerTitle = useMemo(() => {
-    return (
-      safeStr((product as any)?.title) ||
-      safeStr(detailTitleFallback) ||
-      safeStr(listTitleFallback) ||
-      'Spare Part'
-    );
+    const t = safeStr((product as any)?.title ?? (product as any)?.name);
+    if (t) return t;
+    return detailTitleFallback || listTitleFallback;
   }, [product, detailTitleFallback, listTitleFallback]);
 
-  // --- SEO fields ---
-  const pageTitleRaw = useMemo(() => {
-    const globalFallback =
-      safeStr(detailTitleFallback) || safeStr(listTitleFallback) || 'Spare Part';
-
-    if (!isSlugReady) return globalFallback;
-
-    return (
-      safeStr((product as any)?.meta_title) ||
-      safeStr((product as any)?.title) ||
-      safeStr(bannerTitle) ||
-      globalFallback
-    );
-  }, [isSlugReady, product, bannerTitle, detailTitleFallback, listTitleFallback]);
-
-  const pageDescRaw = useMemo(() => {
-    const globalDesc = safeStr((seo as any)?.description) || '';
-
-    if (!isSlugReady) return globalDesc;
-
-    const metaDesc = safeStr((product as any)?.meta_description);
-    const desc = safeStr((product as any)?.description);
-
-    const uiFallback = safeStr(
-      ui(
-        'ui_spareparts_detail_meta_description',
-        'View spare part details, technical specifications, and request a quote.',
-      ),
-    );
-
-    return metaDesc || (desc ? excerpt(desc, 160).trim() : '') || uiFallback || globalDesc || '';
-  }, [isSlugReady, product, seo, ui]);
-
-  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
-    [seo],
-  );
-
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return safeStr(t);
-  }, [titleTemplate, pageTitleRaw]);
+    if (!isSlugReady) return listTitleFallback;
 
-  const ogImage = useMemo(() => {
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    const mt = safeStr((product as any)?.meta_title);
+    if (mt) return mt;
 
-    const rawImg = firstImageFromAny(product as any);
-    const img = rawImg ? toCdnSrc(rawImg, 1200, 630, 'fill') || rawImg : '';
+    const t = safeStr((product as any)?.title ?? (product as any)?.name);
+    if (t) return t;
 
-    return (img && absUrl(img)) || fallback || absUrl('/favicon.svg');
-  }, [product, seo]);
+    return detailTitleFallback || listTitleFallback;
+  }, [isSlugReady, product, detailTitleFallback, listTitleFallback]);
 
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
-    const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+  const pageDescription = useMemo(() => {
+    if (!isSlugReady) return '';
 
-    // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
+    const md = safeStr((product as any)?.meta_description);
+    if (md) return md;
 
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    const rawDesc = safeStr((product as any)?.summary ?? (product as any)?.description ?? '');
+    if (rawDesc) {
+      const ex = excerpt(rawDesc, 160).trim();
+      if (ex) return ex;
+    }
 
-  const isLoadingState = !isSlugReady || (isLoadingItem && !product);
+    const keyNew = 'ui_spareparts_detail_meta_description_fallback';
+    const keyOld = 'ui_spareparts_detail_meta_description';
+
+    const vNew = safeStr(
+      ui(keyNew, 'View spare part details, technical specifications, and request a quote.'),
+    );
+    if (isValidUiText(vNew, keyNew)) return vNew;
+
+    const vOld = safeStr(
+      ui(keyOld, 'View spare part details, technical specifications, and request a quote.'),
+    );
+    if (isValidUiText(vOld, keyOld)) return vOld;
+
+    return '';
+  }, [isSlugReady, product, ui]);
+
+  const ogImageOverride = useMemo(() => {
+    if (!isSlugReady) return undefined;
+
+    const raw =
+      safeStr((product as any)?.featured_image) ||
+      safeStr((product as any)?.image_url) ||
+      safeStr((Array.isArray((product as any)?.images) ? (product as any).images?.[0] : '') || '');
+
+    if (!raw) return undefined;
+    if (/^https?:\/\//i.test(raw)) return raw;
+
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [isSlugReady, product]);
+
+  const showSkeleton = !isSlugReady || isFetching || !product;
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={false}
+      />
 
       <Banner title={bannerTitle} />
 
-      {isLoadingState ? (
-        <div className="service__area pt-120 pb-90">
-          <div className="container">
-            <div className="row">
-              <div className="col-12">
-                <SkeletonStack>
-                  <SkeletonLine style={{ height: 24 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 16, width: '80%' }} />
-                </SkeletonStack>
-              </div>
-            </div>
-          </div>
-        </div>
+      {showSkeleton ? (
+        <Skeleton />
       ) : (
         <>
           <ProductDetail />

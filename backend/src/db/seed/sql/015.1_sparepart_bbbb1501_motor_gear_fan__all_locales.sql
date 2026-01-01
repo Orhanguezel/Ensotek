@@ -1,17 +1,22 @@
 -- =============================================================
--- FILE: 015.1_sparepart_bbbb1501_motor_gear_fan__all_locales.sql (FINAL)
+-- FILE: 015.1_sparepart_bbbb1501_motor_gear_fan__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (01/..)
 -- Sparepart: Motor + Reducer + Fan Group
 --
--- FIXES:
+-- ✅ FIXES (schema + validation + admin controller aligned):
+--  - products.item_type = 'sparepart' (explicit)
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
---  - all child IDs: CHAR(36) safe
+--  - images: JSON_ARRAY(url...) only
+--  - storage_image_ids: JSON_ARRAY(assetId...) only (kept JSON_ARRAY())
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING (NO JSON_ARRAY / NO nested JSON)
+--  - locale child tables: DELETE (product_id+locale) then INSERT (stable + re-run safe)
+--  - locale-less child tables: id-based DELETE then INSERT
+--  - ✅ product_options EN/DE added (optional but keeps parity + re-run safety)
 --
 -- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1004-1111-4111-8111-bbbbbbbb1004'  (Fan & Motor Group)
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1004-1111-4111-8111-bbbbbbbb1004' (Fan & Motor Group)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -81,7 +86,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -97,7 +102,7 @@ VALUES (
   JSON_ARRAY('yedek parça', 'motor', 'redüktör', 'fan grubu', 'soğutma kulesi', 'ensotek'),
   JSON_OBJECT(
     'fanSpeed', '52–60 m/s',
-    'fanDiameterNote', 'Ø ≤ 1600 mm: yalnız motor; büyük modeller: motor + redüktör',
+    'fanDiameterNote', 'Ø ≤ 1600 mm: yalnız motor | büyük modeller: motor + redüktör',
     'mounting', 'V1 konumu, düşey flanşlı tip',
     'insulation', 'F sınıfı izolasyon',
     'protection', 'IP56'
@@ -116,7 +121,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1501-2222-4222-8222-bbbbbbbb1501' AND locale='tr';
 
@@ -128,7 +133,7 @@ VALUES
   ('11111501-aaaa-4aaa-8aaa-bbbb1501tr04','bbbb1501-2222-4222-8222-bbbbbbbb1501','tr','Montaj','V1 konumu, düşey flanşlı tip','physical',40),
   ('11111501-aaaa-4aaa-8aaa-bbbb1501tr05','bbbb1501-2222-4222-8222-bbbbbbbb1501','tr','Koruma / İzolasyon','IP56, F sınıfı izolasyon','material',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1501-2222-4222-8222-bbbbbbbb1501' AND locale='tr';
 
@@ -138,7 +143,7 @@ VALUES
   ('22221501-aaaa-4aaa-8aaa-bbbb1501tr02','bbbb1501-2222-4222-8222-bbbbbbbb1501','tr','Hangi durumda redüktör gerekir?','Fan çapı büyüdükçe (tipik olarak Ø > 1600 mm) motorla birlikte redüktör kullanımı tercih edilir.',20,1),
   ('22221501-aaaa-4aaa-8aaa-bbbb1501tr03','bbbb1501-2222-4222-8222-bbbbbbbb1501','tr','Koruma sınıfı nedir?','Motorlar IP56 koruma sınıfı ve F sınıfı izolasyonla toz, yağ ve neme karşı korunur.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331501-aaaa-4aaa-8aaa-bbbb1501tr01',
@@ -150,16 +155,19 @@ VALUES
   ('33331501-aaaa-4aaa-8aaa-bbbb1501tr01','bbbb1501-2222-4222-8222-bbbbbbbb1501',NULL,5,'IP56 koruma ve yüksek verim motor ile uzun süre stabil çalışıyor.',1,'Bakım Ekibi'),
   ('33331501-aaaa-4aaa-8aaa-bbbb1501tr02','bbbb1501-2222-4222-8222-bbbbbbbb1501',NULL,4,'Büyük fanlı kulelerde redüktörle birlikte daha güvenli sürüş sağlıyor.',1,'Tesis Operasyon');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — id-based reset
 DELETE FROM product_options
-WHERE id='44441501-aaaa-4aaa-8aaa-bbbb1501op01';
+WHERE id='44441501-aaaa-4aaa-8aaa-bbbb1501tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441501-aaaa-4aaa-8aaa-bbbb1501op01','bbbb1501-2222-4222-8222-bbbbbbbb1501','Konfigürasyon', JSON_ARRAY('Sadece Motor (Ø ≤ 1600 mm)','Motor + Redüktör (Büyük fanlı modeller)'));
+  ('44441501-aaaa-4aaa-8aaa-bbbb1501tr01','bbbb1501-2222-4222-8222-bbbbbbbb1501','Konfigürasyon', JSON_ARRAY(
+    'Sadece Motor (Ø ≤ 1600 mm)',
+    'Motor + Redüktör (Büyük fanlı modeller)'
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -175,7 +183,7 @@ VALUES (
   JSON_ARRAY('spare part', 'motor', 'reducer', 'fan group', 'cooling tower', 'ensotek'),
   JSON_OBJECT(
     'fanSpeed', '52–60 m/s',
-    'fanDiameterNote', 'Ø ≤ 1600 mm: motor only; larger units: motor + reducer',
+    'fanDiameterNote', 'Ø ≤ 1600 mm: motor only | larger units: motor + reducer',
     'mounting', 'V1 vertical flange type',
     'insulation', 'Class F',
     'protection', 'IP56'
@@ -194,7 +202,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1501-2222-4222-8222-bbbbbbbb1501' AND locale='en';
 
@@ -206,7 +214,7 @@ VALUES
   ('11111501-bbbb-4bbb-8bbb-bbbb1501en04','bbbb1501-2222-4222-8222-bbbbbbbb1501','en','Mounting','V1 position, vertical flange type','physical',40),
   ('11111501-bbbb-4bbb-8bbb-bbbb1501en05','bbbb1501-2222-4222-8222-bbbbbbbb1501','en','Protection / Insulation','IP56, Class F insulation','material',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1501-2222-4222-8222-bbbbbbbb1501' AND locale='en';
 
@@ -216,7 +224,7 @@ VALUES
   ('22221501-bbbb-4bbb-8bbb-bbbb1501en02','bbbb1501-2222-4222-8222-bbbbbbbb1501','en','When is a reducer required?','For larger fan diameters (typically Ø > 1600 mm), motor and reducer are used together.',20,1),
   ('22221501-bbbb-4bbb-8bbb-bbbb1501en03','bbbb1501-2222-4222-8222-bbbbbbbb1501','en','What is the protection class?','Motors are IP56 protected and Class F insulated against dust, oil and moisture.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331501-bbbb-4bbb-8bbb-bbbb1501en01',
@@ -228,8 +236,19 @@ VALUES
   ('33331501-bbbb-4bbb-8bbb-bbbb1501en01','bbbb1501-2222-4222-8222-bbbbbbbb1501',NULL,5,'High-efficiency motor with IP56 protection performs reliably in harsh environments.',1,'Maintenance Team'),
   ('33331501-bbbb-4bbb-8bbb-bbbb1501en02','bbbb1501-2222-4222-8222-bbbbbbbb1501',NULL,4,'Motor + reducer configuration is more stable for large fan applications.',1,'Plant Operations');
 
+-- OPTIONS (EN) — id-based reset (parity)
+DELETE FROM product_options
+WHERE id='44441501-bbbb-4bbb-8bbb-bbbb1501en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441501-bbbb-4bbb-8bbb-bbbb1501en01','bbbb1501-2222-4222-8222-bbbbbbbb1501','Configuration', JSON_ARRAY(
+    'Motor only (Ø ≤ 1600 mm)',
+    'Motor + Reducer (large fan units)'
+  ));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -245,7 +264,7 @@ VALUES (
   JSON_ARRAY('ersatzteil', 'motor', 'getriebe', 'lueftergruppe', 'kuehlturm', 'ensotek'),
   JSON_OBJECT(
     'umfangsgeschwindigkeit', '52–60 m/s',
-    'durchmesserHinweis', 'Ø ≤ 1600 mm: nur Motor; größer: Motor + Getriebe',
+    'durchmesserHinweis', 'Ø ≤ 1600 mm: nur Motor | größer: Motor + Getriebe',
     'montage', 'V1 vertikale Flanschausführung',
     'isolation', 'Klasse F',
     'schutzart', 'IP56'
@@ -264,7 +283,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1501-2222-4222-8222-bbbbbbbb1501' AND locale='de';
 
@@ -276,7 +295,7 @@ VALUES
   ('11111501-cccc-4ccc-8ccc-bbbb1501de04','bbbb1501-2222-4222-8222-bbbbbbbb1501','de','Montage','V1, vertikale Flanschausführung','physical',40),
   ('11111501-cccc-4ccc-8ccc-bbbb1501de05','bbbb1501-2222-4222-8222-bbbbbbbb1501','de','Schutz / Isolation','IP56, Isolationsklasse F','material',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1501-2222-4222-8222-bbbbbbbb1501' AND locale='de';
 
@@ -286,7 +305,7 @@ VALUES
   ('22221501-cccc-4ccc-8ccc-bbbb1501de02','bbbb1501-2222-4222-8222-bbbbbbbb1501','de','Wann wird ein Getriebe benötigt?','Bei größeren Ventilatordurchmessern (typisch > Ø 1600 mm) wird Motor + Getriebe verwendet.',20,1),
   ('22221501-cccc-4ccc-8ccc-bbbb1501de03','bbbb1501-2222-4222-8222-bbbbbbbb1501','de','Welche Schutzart hat der Motor?','IP56 Schutzart und Isolationsklasse F gegen Staub, Öl und Feuchtigkeit.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331501-cccc-4ccc-8ccc-bbbb1501de01',
@@ -297,6 +316,17 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331501-cccc-4ccc-8ccc-bbbb1501de01','bbbb1501-2222-4222-8222-bbbbbbbb1501',NULL,5,'Robuste Ausführung mit IP56 – läuft zuverlässig auch bei Feuchtigkeit.',1,'Instandhaltung'),
   ('33331501-cccc-4ccc-8ccc-bbbb1501de02','bbbb1501-2222-4222-8222-bbbbbbbb1501',NULL,4,'Mit Getriebe für große Lüfter deutlich stabiler im Betrieb.',1,'Betrieb');
+
+-- OPTIONS (DE) — id-based reset (parity)
+DELETE FROM product_options
+WHERE id='44441501-cccc-4ccc-8ccc-bbbb1501de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441501-cccc-4ccc-8ccc-bbbb1501de01','bbbb1501-2222-4222-8222-bbbbbbbb1501','Konfiguration', JSON_ARRAY(
+    'Nur Motor (Ø ≤ 1600 mm)',
+    'Motor + Getriebe (große Lüfteranlagen)'
+  ));
 
 COMMIT;
 

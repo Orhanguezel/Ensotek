@@ -6,6 +6,11 @@
 //  - Kaynak (HTML) sekmesi
 //  - Önizleme anlık güncellenir
 //  - Eski {"html":"..."} kayıtlarını otomatik düz HTML'e çevirir
+//
+// FIXES (FINAL):
+//  - ✅ H2/H3 buton label/arg düzeltildi
+//  - ✅ formatBlock arg: <p>, <h2>, <h3>
+//  - ✅ insertHtmlAtCursor caret davranışı iyileştirildi
 // =============================================================
 
 'use client';
@@ -57,16 +62,23 @@ function insertHtmlAtCursor(html: string) {
   temp.innerHTML = html;
 
   const frag = document.createDocumentFragment();
-  while (temp.firstChild) frag.appendChild(temp.firstChild);
+  let lastNode: ChildNode | null = null;
+
+  while (temp.firstChild) {
+    lastNode = temp.firstChild;
+    frag.appendChild(temp.firstChild);
+  }
 
   range.insertNode(frag);
 
   // caret: inserted content sonrası
-  sel.removeAllRanges();
-  const after = document.createRange();
-  after.selectNodeContents(range.endContainer);
-  after.collapse(false);
-  sel.addRange(after);
+  if (lastNode) {
+    const after = document.createRange();
+    after.setStartAfter(lastNode);
+    after.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(after);
+  }
 }
 
 const RichContentEditor: React.FC<RichContentEditorProps> = ({
@@ -89,10 +101,12 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
     setHtml(normalized);
 
     if (editorRef.current && activeTab === 'visual') {
-      if (editorRef.current.innerHTML !== normalized)
+      if (editorRef.current.innerHTML !== normalized) {
         editorRef.current.innerHTML = normalized || '';
+      }
     }
 
+    // legacy json -> plain html normalize
     if (
       typeof value === 'string' &&
       value.trim().startsWith('{') &&
@@ -201,9 +215,8 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
       focusEditor();
       insertHtmlAtCursor(imgHtml);
       if (editorRef.current) propagateChange(editorRef.current.innerHTML);
-    } catch (err) {
-      // burada istersen toast kullanabilirsin
-      // console.error('Image upload failed', err);
+    } catch {
+      // parent isterse toast basar
     }
   };
 
@@ -272,11 +285,11 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
           <span className="vr mx-1" />
 
-          {/* formatBlock: doğru mapping */}
+          {/* formatBlock */}
           <button
             type="button"
             className="btn btn-sm btn-outline-secondary"
-            onMouseDown={(e) => handleToolbarMouseDown(e, 'formatBlock', 'p')}
+            onMouseDown={(e) => handleToolbarMouseDown(e, 'formatBlock', '<p>')}
             disabled={disabled || activeTab !== 'visual'}
             title="Paragraf"
           >
@@ -285,20 +298,20 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
           <button
             type="button"
             className="btn btn-sm btn-outline-secondary"
-            onMouseDown={(e) => handleToolbarMouseDown(e, 'formatBlock', 'h2')}
+            onMouseDown={(e) => handleToolbarMouseDown(e, 'formatBlock', '<h2>')}
             disabled={disabled || activeTab !== 'visual'}
             title="Başlık (H2)"
           >
-            H1
+            H2
           </button>
           <button
             type="button"
             className="btn btn-sm btn-outline-secondary"
-            onMouseDown={(e) => handleToolbarMouseDown(e, 'formatBlock', 'h3')}
+            onMouseDown={(e) => handleToolbarMouseDown(e, 'formatBlock', '<h3>')}
             disabled={disabled || activeTab !== 'visual'}
             title="Alt başlık (H3)"
           >
-            H2
+            H3
           </button>
 
           <span className="vr mx-1" />
@@ -391,13 +404,6 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
             onChange={(e) => propagateChange(e.target.value)}
             disabled={disabled}
             placeholder="<p>HTML içeriği buraya yaz...</p>"
-          />
-        )}
-
-        {disabled && (
-          <div
-            className="position-absolute top-0 start-0 w-100 h-100"
-            style={{ background: 'rgba(255,255,255,0.35)', cursor: 'not-allowed', zIndex: 10 }}
           />
         )}
       </div>

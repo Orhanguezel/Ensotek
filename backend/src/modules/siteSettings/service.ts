@@ -8,6 +8,7 @@
 //  - buildLocaleFallbackChain order:
 //      requested -> prefix -> effective default -> preferred -> app_locales -> '*'
 //  - Adds: getGtmContainerId()
+//  - ✅ Adds: Global site media (logo/favicon) helpers (locale-independent via '*')
 // =============================================================
 
 import { db } from '@/db/client';
@@ -43,6 +44,22 @@ const STORAGE_KEYS = [
 ] as const;
 
 const GOOGLE_KEYS = ['google_client_id', 'google_client_secret'] as const;
+
+/**
+ * ✅ GLOBAL MEDIA KEYS (locale-independent; stored with locale='*')
+ * Value can be:
+ *  - string URL  (recommended simplest)
+ *  - JSON string: { "url": "...", "asset_id": "...", "alt": "..." }
+ */
+export const SITE_MEDIA_KEYS = [
+  'site_logo',
+  'site_logo_dark',
+  'site_logo_light',
+  'site_favicon',
+  'site_apple_touch_icon',
+  'site_app_icon_512',
+  'site_og_default_image',
+] as const;
 
 // ---------------------------------------------------------------------------
 // COMMON HELPERS
@@ -115,6 +132,32 @@ function normalizeDbValueToString(raw: unknown): string {
     // ignore
   }
   return v;
+}
+
+/**
+ * ✅ Media value resolver:
+ *  - raw is URL string => returns it
+ *  - raw is JSON string => tries parsed.url or parsed.value
+ *  - otherwise => returns trimmed raw
+ */
+function parseMediaUrl(raw: string | null | undefined): string | null {
+  const s = normalizeStr(raw);
+  if (!s) return null;
+
+  // Common URL forms
+  if (/^https?:\/\//i.test(s) || s.startsWith('/')) return s;
+
+  // JSON form
+  try {
+    const parsed: any = JSON.parse(s);
+    const u = typeof parsed?.url === 'string' ? parsed.url : undefined;
+    const v = typeof parsed?.value === 'string' ? parsed.value : undefined;
+    const out = normalizeStr(u || v);
+    return out || null;
+  } catch {
+    // not JSON; return as-is
+    return s;
+  }
 }
 
 /**
@@ -349,6 +392,55 @@ export async function buildLocaleFallbackChain(opts: {
   const appLocales = await getAppLocales(null);
 
   return uniqLocales([candidates[0], candidates[1], def, preferred, ...appLocales, GLOBAL_LOCALE]);
+}
+
+// ---------------------------------------------------------------------------
+// ✅ SITE MEDIA (GLOBAL-ONLY): LOGO / FAVICON
+// ---------------------------------------------------------------------------
+
+export type SiteMediaKey = (typeof SITE_MEDIA_KEYS)[number];
+
+/**
+ * Global media raw value (stored in site_settings with locale='*').
+ * Falls back to any-locale legacy row if '*' does not exist.
+ */
+export async function getSiteMediaRaw(key: SiteMediaKey): Promise<string | null> {
+  return await getGlobalSettingValue(key);
+}
+
+/** Global media URL resolver (string URL or JSON-string object {url,...}). */
+export async function getSiteMediaUrl(key: SiteMediaKey): Promise<string | null> {
+  const raw = await getSiteMediaRaw(key);
+  return parseMediaUrl(raw);
+}
+
+// Convenience helpers (most used)
+export async function getSiteLogoUrl(): Promise<string | null> {
+  return await getSiteMediaUrl('site_logo');
+}
+
+export async function getSiteLogoDarkUrl(): Promise<string | null> {
+  return await getSiteMediaUrl('site_logo_dark');
+}
+
+export async function getSiteLogoLightUrl(): Promise<string | null> {
+  return await getSiteMediaUrl('site_logo_light');
+}
+
+export async function getSiteFaviconUrl(): Promise<string | null> {
+  return await getSiteMediaUrl('site_favicon');
+}
+
+export async function getAppleTouchIconUrl(): Promise<string | null> {
+  return await getSiteMediaUrl('site_apple_touch_icon');
+}
+
+export async function getSiteAppIcon512Url(): Promise<string | null> {
+  return await getSiteMediaUrl('site_app_icon_512');
+}
+
+export async function getSiteOgDefaultImageUrl(): Promise<string | null> {
+  return await getSiteMediaUrl('site_og_default_image');
 }
 
 // ---------------------------------------------------------------------------

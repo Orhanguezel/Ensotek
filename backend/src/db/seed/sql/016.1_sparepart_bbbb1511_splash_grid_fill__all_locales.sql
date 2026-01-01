@@ -1,17 +1,22 @@
 -- =============================================================
--- FILE: 016.1_sparepart_bbbb1511_splash_grid_fill__all_locales.sql (FINAL)
+-- FILE: 016.1_sparepart_bbbb1511_splash_grid_fill__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (11/14)
 -- Sparepart: Splash Grid Dolgu / Splash Grid Fill / Spritzgitter-Füllung
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1003-1111-4111-8111-bbbbbbbb1003'  (Fill Media)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to corrected pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING
+--    (NO JSON_ARRAY/JSON_OBJECT nested inside specifications)
+--  - product_specs/product_faqs: locale-based reset with DELETE
+--  - product_reviews: id-based reset
+--  - product_options is locale-less => TR/EN/DE separate option rows with different IDs
 --  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1003-1111-4111-8111-bbbbbbbb1003'  (Fill Media)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -80,7 +85,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -97,7 +102,7 @@ VALUES (
   JSON_OBJECT(
     'kullanim', 'Kirli su ile çalışan uygulamalar',
     'avantaj', 'Tıkanmaya karşı toleranslı yapı',
-    'tipikTesisler', JSON_ARRAY('Domates salçası üretimi', 'Yağ fabrikası vakum hatları', 'Haddehaneler')
+    'tipikTesisler', 'Domates salçası üretimi; yağ fabrikası vakum hatları; haddehaneler'
   ),
   'Splash Grid Dolgu | Soğutma Kulesi Yedek Parça | Ensotek',
   'Kirli su uygulamaları için splash grid (sıçratmalı ızgara) dolgu. Tıkanmaya toleranslı yapı; salça üretimi, yağ fabrikası vakum hatları ve haddehanelerde tercih edilir.'
@@ -113,7 +118,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1511-2222-4222-8222-bbbbbbbb1511' AND locale='tr';
 
@@ -124,7 +129,7 @@ VALUES
   ('11111511-aaaa-4aaa-8aaa-bbbb1511tr03','bbbb1511-2222-4222-8222-bbbbbbbb1511','tr','Avantaj','Tıkanmaya karşı toleranslı yapı','physical',30),
   ('11111511-aaaa-4aaa-8aaa-bbbb1511tr04','bbbb1511-2222-4222-8222-bbbbbbbb1511','tr','Tipik Kullanım','Salça üretimi, vakum hatları, haddehaneler','custom',40);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1511-2222-4222-8222-bbbbbbbb1511' AND locale='tr';
 
@@ -134,7 +139,7 @@ VALUES
   ('22221511-aaaa-4aaa-8aaa-bbbb1511tr02','bbbb1511-2222-4222-8222-bbbbbbbb1511','tr','Hangi sektörlerde kullanımı yaygındır?','Domates salçası üretimi, yağ fabrikası vakum hatları ve haddehaneler gibi tesislerde yaygındır.',20,1),
   ('22221511-aaaa-4aaa-8aaa-bbbb1511tr03','bbbb1511-2222-4222-8222-bbbbbbbb1511','tr','Bakım açısından avantajı nedir?','Tıkanmaya daha toleranslı olduğu için temizleme ve bakım periyodunu kolaylaştırır.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331511-aaaa-4aaa-8aaa-bbbb1511tr01',
@@ -146,16 +151,16 @@ VALUES
   ('33331511-aaaa-4aaa-8aaa-bbbb1511tr01','bbbb1511-2222-4222-8222-bbbbbbbb1511',NULL,5,'Kirli su hattında tıkanma azaldı; bakım daha rahat.',1,'Bakım Ekibi'),
   ('33331511-aaaa-4aaa-8aaa-bbbb1511tr02','bbbb1511-2222-4222-8222-bbbbbbbb1511',NULL,4,'Haddehane prosesinde uzun süre stabil çalıştı.',1,'Operasyon');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — locale-less table => separate row
 DELETE FROM product_options
-WHERE id='44441511-aaaa-4aaa-8aaa-bbbb1511op01';
+WHERE id='44441511-aaaa-4aaa-8aaa-bbbb1511tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441511-aaaa-4aaa-8aaa-bbbb1511op01','bbbb1511-2222-4222-8222-bbbbbbbb1511','Application', JSON_ARRAY('Dirty water duty','High fouling duty'));
+  ('44441511-aaaa-4aaa-8aaa-bbbb1511tr01','bbbb1511-2222-4222-8222-bbbbbbbb1511','Uygulama', JSON_ARRAY('Kirli su prosesi','Yüksek kirlenme (fouling)'));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -172,7 +177,7 @@ VALUES (
   JSON_OBJECT(
     'service', 'Dirty-water duty',
     'benefit', 'More tolerant to clogging',
-    'typicalIndustries', JSON_ARRAY('Tomato paste production', 'Oil factory vacuum lines', 'Rolling mills')
+    'typicalIndustries', 'Tomato paste production; oil factory vacuum lines; rolling mills'
   ),
   'Splash Grid Fill | Cooling Tower Spare Parts | Ensotek',
   'Splash grid fill for dirty-water duty. Clogging-tolerant structure; commonly used in tomato paste production, oil factory vacuum lines and rolling mills.'
@@ -188,7 +193,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1511-2222-4222-8222-bbbbbbbb1511' AND locale='en';
 
@@ -199,7 +204,7 @@ VALUES
   ('11111511-bbbb-4bbb-8bbb-bbbb1511en03','bbbb1511-2222-4222-8222-bbbbbbbb1511','en','Benefit','More tolerant to clogging','physical',30),
   ('11111511-bbbb-4bbb-8bbb-bbbb1511en04','bbbb1511-2222-4222-8222-bbbbbbbb1511','en','Typical Use','Tomato paste, vacuum lines, rolling mills','custom',40);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1511-2222-4222-8222-bbbbbbbb1511' AND locale='en';
 
@@ -209,7 +214,7 @@ VALUES
   ('22221511-bbbb-4bbb-8bbb-bbbb1511en02','bbbb1511-2222-4222-8222-bbbbbbbb1511','en','Which industries commonly use it?','Common uses include tomato paste plants, vacuum lines in oil factories, and rolling mills.',20,1),
   ('22221511-bbbb-4bbb-8bbb-bbbb1511en03','bbbb1511-2222-4222-8222-bbbbbbbb1511','en','What is the maintenance advantage?','Its clogging-tolerant structure typically reduces cleaning frequency and simplifies upkeep.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331511-bbbb-4bbb-8bbb-bbbb1511en01',
@@ -221,8 +226,16 @@ VALUES
   ('33331511-bbbb-4bbb-8bbb-bbbb1511en01','bbbb1511-2222-4222-8222-bbbbbbbb1511',NULL,5,'Reduced clogging in dirty-water duty and maintenance became easier.',1,'Maintenance'),
   ('33331511-bbbb-4bbb-8bbb-bbbb1511en02','bbbb1511-2222-4222-8222-bbbbbbbb1511',NULL,4,'Stable operation in rolling-mill process water.',1,'Operations');
 
+-- OPTIONS (EN) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441511-bbbb-4bbb-8bbb-bbbb1511en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441511-bbbb-4bbb-8bbb-bbbb1511en01','bbbb1511-2222-4222-8222-bbbbbbbb1511','Application', JSON_ARRAY('Dirty water duty','High fouling duty'));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -239,7 +252,7 @@ VALUES (
   JSON_OBJECT(
     'einsatz', 'Schmutzwasser-Anwendungen',
     'vorteil', 'Toleranter gegenüber Verstopfung',
-    'typischeAnlagen', JSON_ARRAY('Tomatenmarkproduktion', 'Vakuumleitungen in Ölfabriken', 'Walzwerke')
+    'typischeAnlagen', 'Tomatenmarkproduktion; Vakuumleitungen in Ölfabriken; Walzwerke'
   ),
   'Spritzgitter-Füllung | Kühlturm Ersatzteile | Ensotek',
   'Spritzgitter-Füllung (Splash Grid) für schmutziges Wasser. Tolerant gegenüber Verstopfung; typische Anwendungen in Tomatenmarkproduktion, Ölfabrik-Vakuumleitungen und Walzwerken.'
@@ -255,7 +268,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1511-2222-4222-8222-bbbbbbbb1511' AND locale='de';
 
@@ -266,7 +279,7 @@ VALUES
   ('11111511-cccc-4ccc-8ccc-bbbb1511de03','bbbb1511-2222-4222-8222-bbbbbbbb1511','de','Vorteil','Toleranter gegenüber Verstopfung','physical',30),
   ('11111511-cccc-4ccc-8ccc-bbbb1511de04','bbbb1511-2222-4222-8222-bbbbbbbb1511','de','Typische Anwendung','Tomatenmark, Vakuumleitungen, Walzwerke','custom',40);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1511-2222-4222-8222-bbbbbbbb1511' AND locale='de';
 
@@ -276,7 +289,7 @@ VALUES
   ('22221511-cccc-4ccc-8ccc-bbbb1511de02','bbbb1511-2222-4222-8222-bbbbbbbb1511','de','Wo wird sie typischerweise eingesetzt?','In Tomatenmarkproduktion, Vakuumleitungen von Ölfabriken und in Walzwerken.',20,1),
   ('22221511-cccc-4ccc-8ccc-bbbb1511de03','bbbb1511-2222-4222-8222-bbbbbbbb1511','de','Was ist der Wartungsvorteil?','Die tolerante Struktur reduziert Verstopfung und vereinfacht Reinigung und Wartung.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331511-cccc-4ccc-8ccc-bbbb1511de01',
@@ -287,6 +300,14 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331511-cccc-4ccc-8ccc-bbbb1511de01','bbbb1511-2222-4222-8222-bbbbbbbb1511',NULL,5,'Bei schmutzigem Wasser deutlich weniger Verstopfung, Wartung einfacher.',1,'Instandhaltung'),
   ('33331511-cccc-4ccc-8ccc-bbbb1511de02','bbbb1511-2222-4222-8222-bbbbbbbb1511',NULL,4,'Im Walzwerk-Prozesswasser stabil und zuverlässig.',1,'Betrieb');
+
+-- OPTIONS (DE) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441511-cccc-4ccc-8ccc-bbbb1511de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441511-cccc-4ccc-8ccc-bbbb1511de01','bbbb1511-2222-4222-8222-bbbbbbbb1511','Anwendung', JSON_ARRAY('Schmutzwasserbetrieb','Hohe Verschmutzung (Fouling)'));
 
 COMMIT;
 

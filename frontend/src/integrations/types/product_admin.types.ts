@@ -10,6 +10,9 @@ export type AdminProductDto = ProductDto;
 /* --------- Admin list / query tipleri --------- */
 
 export type AdminProductListQueryParams = {
+  module_key?: 'products' | 'sparepart' | string;
+  item_type?: 'product' | 'sparepart' | string;
+
   q?: string;
   category_id?: string;
   sub_category_id?: string;
@@ -21,6 +24,7 @@ export type AdminProductListQueryParams = {
   order?: 'asc' | 'desc';
 };
 
+
 export type AdminProductListResponse = {
   items: AdminProductDto[];
   total: number;
@@ -30,6 +34,8 @@ export type AdminProductListResponse = {
 export type AdminGetProductParams = {
   id: string;
   locale?: string; // ürün detayı için admin tarafında locale seçilebiliyor
+  module_key?: string; // ✅ NEW
+  item_type?: string; // ✅ NEW
 };
 
 /* --------- Create / Update payloadları --------- */

@@ -4,11 +4,14 @@ import {
   readHead,
   readJsonLd,
   waitForSeoHead,
+  getPlaywrightLocales,
+  withLocalePath,
   expectNotLocalhost,
   expectAbsolute,
   expectSameOriginAsBase,
   expectMinDescription,
   expectHreflangSet,
+  expectOgMatchesCanonical,
 } from './helpers';
 
 const slug = (process.env.PLAYWRIGHT_SERVICE_SLUG ?? '').trim();
@@ -16,30 +19,35 @@ const slug = (process.env.PLAYWRIGHT_SERVICE_SLUG ?? '').trim();
 test.describe('SEO: /service/[slug] (detail)', () => {
   test.skip(!slug, 'Set PLAYWRIGHT_SERVICE_SLUG to run this test.');
 
-  test('has canonical/og/hreflang ok and JSON-LD parse ok', async ({ page }) => {
-    await page.goto(`/service/${encodeURIComponent(slug)}`, { waitUntil: 'domcontentloaded' });
+  const locales = getPlaywrightLocales();
 
-    await waitForSeoHead(page, { waitHreflang: true });
+  for (const locale of locales) {
+    test(`has canonical/og/hreflang ok and JSON-LD parse ok [${locale}]`, async ({ page }) => {
+      const url = withLocalePath(`/service/${encodeURIComponent(slug)}`, locale);
+      await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-    const head = await readHead(page);
+      await waitForSeoHead(page, { waitHreflang: true });
 
-    expect(head.title.trim().length).toBeGreaterThan(3);
-    expectMinDescription(head.description, 20);
+      const head = await readHead(page);
 
-    expectAbsolute(head.canonical);
-    expectSameOriginAsBase(head.canonical);
-    expectNotLocalhost(head.canonical);
+      expect(head.title.trim().length).toBeGreaterThan(3);
+      expectMinDescription(head.description, 20);
 
-    if (head.ogUrl) {
-      expectAbsolute(head.ogUrl);
-      expectSameOriginAsBase(head.ogUrl);
-      expectNotLocalhost(head.ogUrl);
-      expect(head.ogUrl).toBe(head.canonical);
-    }
+      expectAbsolute(head.canonical);
+      expectSameOriginAsBase(head.canonical);
+      expectNotLocalhost(head.canonical);
 
-    expectHreflangSet(head.hreflangs);
+      if (head.ogUrl) {
+        expectAbsolute(head.ogUrl);
+        expectSameOriginAsBase(head.ogUrl);
+        expectNotLocalhost(head.ogUrl);
+      }
+      expectOgMatchesCanonical(head);
 
-    const ld = await readJsonLd(page);
-    expect(ld.some((x) => x?.__parse_error__)).toBeFalsy();
-  });
+      expectHreflangSet(head.hreflangs);
+
+      const ld = await readJsonLd(page);
+      expect(ld.some((x) => x?.__parse_error__)).toBeFalsy();
+    });
+  }
 });

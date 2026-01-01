@@ -1,129 +1,114 @@
 // =============================================================
 // FILE: src/pages/references.tsx
-// Ensotek – References Page (full list) + SEO (HOOK-SAFE)
+// Ensotek – References Page (full list) + SEO (STANDARD / HOOK-SAFE) [FINAL]
 //   - Route: /references
-//   - i18n: useResolvedLocale + site_settings.ui_references
-//   - SEO: seo -> site_seo fallback + OG/Twitter (NO canonical here)
-//   - Canonical + og:url single source: _document (SSR)
-//   - EN-only fallback (no locale branching)
+//   - Locale: useResolvedLocale() single source
+//   - i18n UI: site_settings.ui_references
+//   - SEO: seo -> site_seo fallback + ui overrides
+//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
+//   - SEO: NO <Head>. Only <LayoutSeoBridge />
 // =============================================================
+
 'use client';
 
-import React, { useMemo, useCallback } from 'react';
-import Head from 'next/head';
+import React, { useMemo } from 'react';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import ReferencesPageContent from '@/components/containers/references/ReferencesPageContent';
 import Feedback from '@/components/containers/feedback/Feedback';
 
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
 // i18n
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
+import { isValidUiText } from '@/i18n/uiText';
 
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+// SEO helpers
+import { asObj } from '@/seo/pageSeo';
 
-// data (global SEO settings)
+// data
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 function safeStr(v: unknown): string {
-  return typeof v === 'string' ? v.trim() : '';
+  if (v == null) return '';
+  return String(v).trim();
 }
 
 const ReferencesPage: React.FC = () => {
   const locale = useResolvedLocale();
   const { ui } = useUiSection('ui_references', locale as any);
 
-  const t = useCallback(
-    (key: string, fallbackEn: string) => {
+  const t = useMemo(() => {
+    return (key: string, fallbackEn: string) => {
       const v = safeStr(ui(key, fallbackEn));
       return v || fallbackEn;
-    },
-    [ui],
-  );
+    };
+  }, [ui]);
 
-  // Banner title
+  // -----------------------------
+  // Banner title (UI)
+  // -----------------------------
   const bannerTitle = useMemo(() => t('ui_references_page_title', 'References'), [t]);
 
+  // -----------------------------
   // Global SEO settings (seo -> site_seo fallback)
+  // -----------------------------
   const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
   const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale } as any);
 
   const seo = useMemo(() => {
-    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
+    const raw =
+      (seoPrimary as any)?.value ?? (seoFallback as any)?.value ?? seoPrimary ?? seoFallback;
     return asObj(raw) ?? {};
-  }, [seoPrimary?.value, seoFallback?.value]);
+  }, [seoPrimary, seoFallback]);
 
-  // Page-level SEO fields from ui_references (fallback EN only)
-  const pageTitleRaw = useMemo(() => {
-    const uiTitle = safeStr(ui('ui_references_meta_title', ''));
-    return uiTitle || safeStr(bannerTitle) || 'References';
+  // -----------------------------
+  // SEO sources (UI -> seo fallback)
+  // -----------------------------
+  const pageTitle = useMemo(() => {
+    const key = 'ui_references_meta_title';
+    const fromUi = safeStr(ui(key, ''));
+    if (isValidUiText(fromUi, key)) return fromUi;
+
+    const fallback = safeStr(bannerTitle) || 'References';
+    return fallback;
   }, [ui, bannerTitle]);
 
-  const pageDescRaw = useMemo(() => {
-    const uiDesc = safeStr(ui('ui_references_meta_description', ''));
-    if (uiDesc) return uiDesc;
+  const pageDescription = useMemo(() => {
+    const keyMeta = 'ui_references_meta_description';
+    const fromMeta = safeStr(ui(keyMeta, ''));
+    if (isValidUiText(fromMeta, keyMeta)) return fromMeta;
 
-    const uiPageDesc = safeStr(ui('ui_references_page_description', ''));
-    if (uiPageDesc) return uiPageDesc;
+    const keyPage = 'ui_references_page_description';
+    const fromPage = safeStr(ui(keyPage, ''));
+    if (isValidUiText(fromPage, keyPage)) return fromPage;
 
-    return safeStr((seo as any)?.description) || '';
+    const fromSeo = safeStr((seo as any)?.description);
+    return fromSeo || '';
   }, [ui, seo]);
 
-  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
-    [seo],
-  );
+  const ogImageOverride = useMemo(() => {
+    // optional UI override; LayoutSeoBridge will fallback to seo/site default if undefined
+    const key = 'ui_references_og_image';
+    const v = safeStr(ui(key, ''));
+    if (isValidUiText(v, key) && v) return v;
+    return undefined;
+  }, [ui]);
 
-  const pageTitle = useMemo(() => {
-    const out = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return safeStr(out);
-  }, [titleTemplate, pageTitleRaw]);
-
-  const ogImage = useMemo(() => {
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-    return fallback || absUrl('/favicon.svg');
-  }, [seo]);
-
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
+  const noindex = useMemo(() => {
     const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
-
-    // canonical + og:url yok (SSR _document tek kaynak)
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? safeStr((tw as any).site) : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? safeStr((tw as any).creator) : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    return typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+  }, [seo]);
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={noindex}
+      />
 
       <Banner title={bannerTitle} />
       <ReferencesPageContent />

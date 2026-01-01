@@ -56,6 +56,8 @@ export const metahubTags = [
   'AuditRequestLog',
   'AuditMetric',
   'DbSnapshot',
+  'AdminProducts',
+  'AdminProductImages',
 ] as const;
 
 export type MetahubTag = (typeof metahubTags)[number];

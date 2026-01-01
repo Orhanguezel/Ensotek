@@ -11,7 +11,10 @@ import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import { ServiceForm, type ServiceFormValues } from '@/components/admin/services/ServiceForm';
+import {
+  ServiceForm,
+} from '@/components/admin/services/serviceForm/ServiceForm';
+import type { ServiceFormValues } from '@/components/admin/services/serviceForm/serviceForm.types';
 
 import {
   useGetServiceAdminQuery,
@@ -216,7 +219,6 @@ const AdminServiceDetailPage: NextPage = () => {
           duration: values.duration || null,
           maintenance: values.maintenance || null,
           season: values.season || null,
-          thickness: values.thickness || null,
           equipment: values.equipment || null,
 
           locale: loc,
@@ -262,7 +264,6 @@ const AdminServiceDetailPage: NextPage = () => {
           duration: values.duration || null,
           maintenance: values.maintenance || null,
           season: values.season || null,
-          thickness: values.thickness || null,
           equipment: values.equipment || null,
 
           locale: loc,

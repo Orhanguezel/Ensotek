@@ -29,6 +29,7 @@ import {
   SmtpSettingsTab,
   CloudinarySettingsTab,
   ApiSettingsTab,
+  BrandMediaTab,
 } from '@/components/admin/site-settings/tabs';
 
 import type { AppLocaleItem, SiteSetting } from '@/integrations/types/site_settings.types';
@@ -42,6 +43,7 @@ const TAB_SCOPE: Record<SettingsTab, SettingsScope> = {
   seo: 'localized',
   smtp: 'global',
   cloudinary: 'global',
+  brand_media: 'global',
   api: 'global',
 };
 
@@ -242,6 +244,7 @@ const SiteSettingsAdminPage: React.FC = () => {
 
           {activeTab === 'smtp' && <SmtpSettingsTab locale="*" />}
           {activeTab === 'cloudinary' && <CloudinarySettingsTab locale="*" />}
+          {activeTab === 'brand_media' && <BrandMediaTab />}
           {activeTab === 'api' && <ApiSettingsTab locale="*" />}
         </div>
       </div>

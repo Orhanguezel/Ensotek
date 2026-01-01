@@ -1,17 +1,21 @@
 -- =============================================================
--- FILE: 015.5_sparepart_bbbb1505_water_distribution_system__all_locales.sql (FINAL)
+-- FILE: 015.5_sparepart_bbbb1505_water_distribution_system__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (05/14)
 -- Sparepart: Su Dağıtım Sistemi / Water Distribution System / Wasserverteilungssystem
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to 015.4 pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
---  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING
+--    (NO nested JSON_OBJECT/JSON_ARRAY inside specifications)
+--  - child tables: locale-based reset with DELETE (product_id + locale)
+--  - options: TR/EN/DE separately (table is locale-less) => id-based delete
+--  - child IDs: 36-char uuid-like
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -81,7 +85,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -96,14 +100,12 @@ VALUES (
   'Soğutma kulesi su dağıtım sistemi yedek parça',
   JSON_ARRAY('yedek parça', 'su dağıtım', 'kolektör', 'by-pass', 'dolgu', 'soğutma kulesi', 'ensotek'),
   JSON_OBJECT(
-    'konum', 'Damlalık ile dolgu arasında (kule içi)',
-    'gorev', 'Sıcak suyu dolgular üzerine eşit dağıtım',
+    'konum', 'Damlalık (drift eliminator) ile dolgu malzemesi arasında (kule içi)',
+    'gorev', 'Tesisten gelen sıcak suyu dolgular üzerine eşit dağıtır',
     'sicaklikEsigi', '55°C',
-    'malzeme', JSON_OBJECT(
-      'lt55C', 'PVC (ana boru + by-pass)',
-      'gt55C', 'PP veya CTP (FRP)'
-    ),
-    'baglanti', 'Sızdırmaz bağlantı; bakımda kolay sök/tak'
+    'malzeme55Alti', 'PVC (ana boru + by-pass)',
+    'malzeme55Ustu', 'PP veya CTP (FRP)',
+    'baglanti', 'Sızdırmaz bağlantı; bakımda kesme/ekleme gerektirmeden sök/tak'
   ),
   'Su Dağıtım Sistemi | Soğutma Kulesi Yedek Parça | Ensotek',
   'Kule içi su dağıtım sistemi: sıcak suyu dolgulara eşit dağıtır. 55°C altı PVC; yüksek sıcaklıkta PP/CTP. Sızdırmaz bağlantı ile kolay bakım.'
@@ -119,19 +121,19 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1505-2222-4222-8222-bbbbbbbb1505' AND locale='tr';
 
 INSERT INTO product_specs (id, product_id, locale, name, value, category, order_num)
 VALUES
-  ('11111505-aaaa-4aaa-8aaa-bbbb1505tr01','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Konum','Damlalık ile dolgu arasında (kule içi)','custom',10),
+  ('11111505-aaaa-4aaa-8aaa-bbbb1505tr01','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Konum','Damlalık (drift eliminator) ile dolgu arasında (kule içi)','custom',10),
   ('11111505-aaaa-4aaa-8aaa-bbbb1505tr02','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Görev','Sıcak suyu dolgular üzerine eşit dağıtım','custom',20),
   ('11111505-aaaa-4aaa-8aaa-bbbb1505tr03','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Sıcaklık Eşiği','55°C','physical',30),
   ('11111505-aaaa-4aaa-8aaa-bbbb1505tr04','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Malzeme (≤55°C)','PVC (ana boru + by-pass)','material',40),
   ('11111505-aaaa-4aaa-8aaa-bbbb1505tr05','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Malzeme (>55°C)','PP veya CTP (FRP)','material',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1505-2222-4222-8222-bbbbbbbb1505' AND locale='tr';
 
@@ -141,7 +143,7 @@ VALUES
   ('22221505-aaaa-4aaa-8aaa-bbbb1505tr02','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Hangi sıcaklıkta hangi malzeme kullanılır?','55°C altı uygulamalarda PVC; daha yüksek sıcaklıklarda PP veya CTP (FRP) tercih edilir.',20,1),
   ('22221505-aaaa-4aaa-8aaa-bbbb1505tr03','bbbb1505-2222-4222-8222-bbbbbbbb1505','tr','Bakım sırasında sökme-takma kolay mı?','Evet. Sızdırmaz bağlantı yapısı sayesinde kesme/ekleme yapmadan kolayca sökülüp takılabilir.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331505-aaaa-4aaa-8aaa-bbbb1505tr01',
@@ -153,16 +155,20 @@ VALUES
   ('33331505-aaaa-4aaa-8aaa-bbbb1505tr01','bbbb1505-2222-4222-8222-bbbbbbbb1505',NULL,5,'Dağıtım homojenliği arttı, dolgu yüzeyi daha verimli çalışıyor.',1,'Operasyon'),
   ('33331505-aaaa-4aaa-8aaa-bbbb1505tr02','bbbb1505-2222-4222-8222-bbbbbbbb1505',NULL,4,'Sızdırmaz bağlantı bakımda çok zaman kazandırıyor.',1,'Bakım Ekibi');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — id-based reset (table is locale-less)
 DELETE FROM product_options
-WHERE id='44441505-aaaa-4aaa-8aaa-bbbb1505op01';
+WHERE id='44441505-aaaa-4aaa-8aaa-bbbb1505tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441505-aaaa-4aaa-8aaa-bbbb1505op01','bbbb1505-2222-4222-8222-bbbbbbbb1505','Material (Main/Bypass)', JSON_ARRAY('PVC (≤55°C)','PP (>55°C)','FRP/CTP (>55°C)'));
+  ('44441505-aaaa-4aaa-8aaa-bbbb1505tr01','bbbb1505-2222-4222-8222-bbbbbbbb1505','Malzeme', JSON_ARRAY(
+    'PVC (≤55°C)',
+    'PP (>55°C)',
+    'CTP (FRP) (>55°C)'
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -177,14 +183,12 @@ VALUES (
   'Cooling tower water distribution system spare part',
   JSON_ARRAY('spare part', 'water distribution', 'collector', 'bypass', 'fill media', 'cooling tower', 'ensotek'),
   JSON_OBJECT(
-    'location', 'Inside tower, between drift eliminator and fill',
-    'function', 'Uniform distribution of hot water onto the fill media',
+    'location', 'Inside tower, between drift eliminator and fill media',
+    'function', 'Uniformly distributes hot water onto the fill media',
     'temperatureThreshold', '55°C',
-    'material', JSON_OBJECT(
-      'below55C', 'PVC (main + bypass)',
-      'above55C', 'PP or FRP (CTP)'
-    ),
-    'connection', 'Leak-tight connection; easy maintenance without cutting/splicing'
+    'materialBelow55C', 'PVC (main pipe + bypass)',
+    'materialAbove55C', 'PP or FRP (CTP)',
+    'connection', 'Leak-tight joints; easy maintenance without cutting/splicing'
   ),
   'Water Distribution System | Cooling Tower Spare Parts | Ensotek',
   'Cooling tower water distribution system: distributes hot water uniformly onto fill media. PVC below 55°C; PP/FRP above 55°C. Leak-tight joints for easy maintenance.'
@@ -200,7 +204,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1505-2222-4222-8222-bbbbbbbb1505' AND locale='en';
 
@@ -212,7 +216,7 @@ VALUES
   ('11111505-bbbb-4bbb-8bbb-bbbb1505en04','bbbb1505-2222-4222-8222-bbbbbbbb1505','en','Material (≤55°C)','PVC (main pipe + bypass)','material',40),
   ('11111505-bbbb-4bbb-8bbb-bbbb1505en05','bbbb1505-2222-4222-8222-bbbbbbbb1505','en','Material (>55°C)','PP or FRP (CTP)','material',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1505-2222-4222-8222-bbbbbbbb1505' AND locale='en';
 
@@ -222,7 +226,7 @@ VALUES
   ('22221505-bbbb-4bbb-8bbb-bbbb1505en02','bbbb1505-2222-4222-8222-bbbbbbbb1505','en','Which material is used at different temperatures?','PVC is used below 55°C; PP or FRP (CTP) is preferred above 55°C.',20,1),
   ('22221505-bbbb-4bbb-8bbb-bbbb1505en03','bbbb1505-2222-4222-8222-bbbbbbbb1505','en','Is maintenance easy?','Yes. Leak-tight joints allow easy assembly/disassembly without cutting or splicing.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331505-bbbb-4bbb-8bbb-bbbb1505en01',
@@ -234,8 +238,20 @@ VALUES
   ('33331505-bbbb-4bbb-8bbb-bbbb1505en01','bbbb1505-2222-4222-8222-bbbbbbbb1505',NULL,5,'Improved distribution uniformity; fill surface works more efficiently.',1,'Operations'),
   ('33331505-bbbb-4bbb-8bbb-bbbb1505en02','bbbb1505-2222-4222-8222-bbbbbbbb1505',NULL,4,'Leak-tight connection saves significant time during maintenance.',1,'Maintenance');
 
+-- OPTIONS (EN) — id-based reset
+DELETE FROM product_options
+WHERE id='44441505-bbbb-4bbb-8bbb-bbbb1505en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441505-bbbb-4bbb-8bbb-bbbb1505en01','bbbb1505-2222-4222-8222-bbbbbbbb1505','Material (Main/Bypass)', JSON_ARRAY(
+    'PVC (≤55°C)',
+    'PP (>55°C)',
+    'FRP/CTP (>55°C)'
+  ));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -253,11 +269,9 @@ VALUES (
     'einbauort', 'Im Turm zwischen Tropfenabscheider und Füllkörpern',
     'funktion', 'Gleichmäßige Verteilung von heißem Wasser auf die Füllungen',
     'temperaturSchwelle', '55°C',
-    'material', JSON_OBJECT(
-      'unter55C', 'PVC (Hauptrohr + Bypass)',
-      'ueber55C', 'PP oder FRP (CTP)'
-    ),
-    'verbindung', 'Dichtende Verbindung; einfache Montage/Demontage ohne Schneiden'
+    'materialUnter55C', 'PVC (Hauptrohr + Bypass)',
+    'materialUeber55C', 'PP oder FRP (CTP)',
+    'verbindung', 'Dichtende Verbindung; Montage/Demontage ohne Schneiden und Einfügen'
   ),
   'Wasserverteilungssystem | Kühlturm Ersatzteile | Ensotek',
   'Wasserverteilungssystem im Kühlturm: verteilt heißes Wasser gleichmäßig auf Füllkörper. PVC unter 55°C, PP/FRP darüber. Dichtende Verbindung für einfache Wartung.'
@@ -273,7 +287,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1505-2222-4222-8222-bbbbbbbb1505' AND locale='de';
 
@@ -285,7 +299,7 @@ VALUES
   ('11111505-cccc-4ccc-8ccc-bbbb1505de04','bbbb1505-2222-4222-8222-bbbbbbbb1505','de','Material (≤55°C)','PVC (Hauptrohr + Bypass)','material',40),
   ('11111505-cccc-4ccc-8ccc-bbbb1505de05','bbbb1505-2222-4222-8222-bbbbbbbb1505','de','Material (>55°C)','PP oder FRP (CTP)','material',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1505-2222-4222-8222-bbbbbbbb1505' AND locale='de';
 
@@ -295,7 +309,7 @@ VALUES
   ('22221505-cccc-4ccc-8ccc-bbbb1505de02','bbbb1505-2222-4222-8222-bbbbbbbb1505','de','Welches Material wird bei welchen Temperaturen verwendet?','Unter 55°C PVC; bei höheren Temperaturen PP oder FRP (CTP).',20,1),
   ('22221505-cccc-4ccc-8ccc-bbbb1505de03','bbbb1505-2222-4222-8222-bbbbbbbb1505','de','Ist die Wartung einfach?','Ja. Durch dichtende Verbindungen ist die Montage/Demontage ohne Schneiden und Einfügen möglich.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331505-cccc-4ccc-8ccc-bbbb1505de01',
@@ -306,6 +320,18 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331505-cccc-4ccc-8ccc-bbbb1505de01','bbbb1505-2222-4222-8222-bbbbbbbb1505',NULL,5,'Sehr gleichmäßige Verteilung – die Füllkörper arbeiten spürbar effizienter.',1,'Betrieb'),
   ('33331505-cccc-4ccc-8ccc-bbbb1505de02','bbbb1505-2222-4222-8222-bbbbbbbb1505',NULL,4,'Die dichte Verbindung erleichtert Wartung und Umbau erheblich.',1,'Instandhaltung');
+
+-- OPTIONS (DE) — id-based reset
+DELETE FROM product_options
+WHERE id='44441505-cccc-4ccc-8ccc-bbbb1505de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441505-cccc-4ccc-8ccc-bbbb1505de01','bbbb1505-2222-4222-8222-bbbbbbbb1505','Material (Haupt/Bypass)', JSON_ARRAY(
+    'PVC (≤55°C)',
+    'PP (>55°C)',
+    'FRP/CTP (>55°C)'
+  ));
 
 COMMIT;
 

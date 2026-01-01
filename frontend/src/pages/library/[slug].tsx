@@ -1,160 +1,153 @@
 // =============================================================
 // FILE: src/pages/library/[slug].tsx
-// Ensotek – Library Detail Page (by slug) + SEO (HOOK-SAFE)
-//   - Route: /library/[slug]
-//   - i18n: useLocaleShort() + site_settings.ui_library
-//   - SEO: seo -> site_seo fallback + library.meta* override (NO canonical here)
-//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
+// Ensotek – Library Detail Page [FINAL / STANDARD]
+// - Route: /library/[slug]
+// - ✅ NO <Head>
+// - ✅ Page SEO overrides via <LayoutSeoBridge />
+// - ✅ General meta/canonical/hreflang/etc. stays in Layout/_document (no duplication)
+// - SEO priority (detail):
+//   title: item.meta_title -> item.name -> ui fallback -> fallback
+//   desc : item.meta_description -> excerpt(item.description) -> Layout default
+//   og   : item.featured_image || item.image_url -> undefined (Layout decides)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import LibraryDetail from '@/components/containers/library/LibraryDetail';
 
-// i18n
+// ✅ Page -> Layout SEO overrides (STANDARD)
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
+// i18n + UI
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
-
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+import { isValidUiText } from '@/i18n/uiText';
 
 // data
-import { useGetSiteSettingByKeyQuery, useGetLibraryBySlugQuery } from '@/integrations/rtk/hooks';
+import { useGetLibraryBySlugQuery } from '@/integrations/rtk/hooks';
 import type { LibraryDto } from '@/integrations/types/library.types';
 
 // helpers
 import { excerpt } from '@/shared/text';
 import { toCdnSrc } from '@/shared/media';
 
+// ✅ Skeleton (shared)
+import Skeleton from '@/components/common/public/Skeleton';
+
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+
 function readSlug(q: unknown): string {
-  if (typeof q === 'string') return q;
-  if (Array.isArray(q)) return String(q[0] ?? '');
+  if (typeof q === 'string') return q.trim();
+  if (Array.isArray(q)) return String(q[0] ?? '').trim();
   return '';
 }
 
 const LibraryDetailPage: React.FC = () => {
   const router = useRouter();
   const locale = useLocaleShort();
-
   const { ui } = useUiSection('ui_library', locale as any);
 
-  // slug normalize
-  const slug = useMemo(() => readSlug(router.query.slug).trim(), [router.query.slug]);
-  const isSlugReady = !!slug;
+  const slug = useMemo(() => readSlug(router.query.slug), [router.query.slug]);
+  const isSlugReady = router.isReady && !!slug;
 
+  // Library item
+  const { data: item, isFetching } = useGetLibraryBySlugQuery(
+    { slug, locale },
+    { skip: !isSlugReady },
+  ) as { data?: LibraryDto; isFetching: boolean };
+
+  // -----------------------------
   // UI fallbacks
-  const listTitleFallback = ui('ui_library_page_title', 'Library');
-  const detailTitleFallback = ui('ui_library_detail_page_title', 'Library Detail');
+  // -----------------------------
+  const listTitleFallback = useMemo(() => {
+    const key = 'ui_library_page_title';
+    const v = safeStr(ui(key, 'Library'));
+    return isValidUiText(v, key) ? v : 'Library';
+  }, [ui]);
 
-  // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  const detailTitleFallback = useMemo(() => {
+    const key = 'ui_library_detail_page_title';
+    const v = safeStr(ui(key, 'Library Detail'));
+    return isValidUiText(v, key) ? v : 'Library Detail';
+  }, [ui]);
 
-  const seo = useMemo(() => {
-    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoPrimary?.value, seoFallback?.value]);
-
-  // Library item (meta override)
-  const { data: item } = useGetLibraryBySlugQuery({ slug, locale }, { skip: !isSlugReady }) as {
-    data?: LibraryDto;
-  };
-
-  // Banner title: item.name -> fallback
+  // -----------------------------
+  // Banner title
+  // -----------------------------
   const bannerTitle = useMemo(() => {
-    const t = String(item?.name ?? '').trim();
-    return t || detailTitleFallback || listTitleFallback;
+    const t = safeStr(item?.name);
+    if (t) return t;
+
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
+
+    return listTitleFallback || 'Library';
   }, [item?.name, detailTitleFallback, listTitleFallback]);
 
-  const seoSiteName = useMemo(() => String(seo?.site_name ?? '').trim() || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => String(seo?.title_template ?? '').trim() || '%s | Ensotek',
-    [seo],
-  );
-
-  // --- SEO fields (detail page) ---
-  const pageTitleRaw = useMemo(() => {
-    if (!isSlugReady) return String(listTitleFallback || '').trim() || 'Library';
-
-    const metaTitle = String(item?.meta_title ?? '').trim();
-    const name = String(item?.name ?? '').trim();
-
-    return metaTitle || name || String(bannerTitle || '').trim() || 'Library';
-  }, [isSlugReady, listTitleFallback, item?.meta_title, item?.name, bannerTitle]);
-
-  const pageDescRaw = useMemo(() => {
-    const globalDesc = String(seo?.description ?? '').trim() || '';
-
-    if (!isSlugReady) return globalDesc;
-
-    const metaDesc = String(item?.meta_description ?? '').trim();
-    const desc = String(item?.description ?? '').trim();
-
-    return metaDesc || (desc ? excerpt(desc, 160).trim() : '') || globalDesc || '';
-  }, [isSlugReady, item?.meta_description, item?.description, seo?.description]);
-
+  // -----------------------------
+  // SEO overrides (detail)
+  // - empty => Layout defaults
+  // -----------------------------
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return String(t).trim();
-  }, [titleTemplate, pageTitleRaw]);
+    if (!isSlugReady) return listTitleFallback || 'Library';
 
-  const ogImage = useMemo(() => {
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    const mt = safeStr((item as any)?.meta_title);
+    if (mt) return mt;
 
-    if (!isSlugReady) return fallback || absUrl('/favicon.svg');
+    const name = safeStr(item?.name);
+    if (name) return name;
 
-    // Backend DTO fields (schema-safe)
-    const rawImg = String(item?.featured_image ?? item?.image_url ?? '').trim();
-    const img = rawImg ? toCdnSrc(rawImg, 1200, 630, 'fill') || rawImg : '';
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
 
-    return (img && absUrl(img)) || fallback || absUrl('/favicon.svg');
-  }, [isSlugReady, item?.featured_image, item?.image_url, seo]);
+    return listTitleFallback || 'Library';
+    //eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSlugReady, item, item?.name, detailTitleFallback, listTitleFallback]);
 
-  const headSpecs = useMemo(() => {
-    const tw = asObj(seo?.twitter) || {};
-    const robots = asObj(seo?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
+  const pageDescription = useMemo(() => {
+    if (!isSlugReady) return '';
 
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
+    const md = safeStr((item as any)?.meta_description);
+    if (md) return md;
 
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    const desc = safeStr((item as any)?.description);
+    if (desc) {
+      const ex = excerpt(desc, 160).trim();
+      if (ex) return ex;
+    }
+
+    // empty => Layout default description
+    return '';
+  }, [isSlugReady, item]);
+
+  const ogImageOverride = useMemo(() => {
+    if (!isSlugReady) return undefined;
+
+    const raw = safeStr((item as any)?.featured_image) || safeStr((item as any)?.image_url) || '';
+    if (!raw) return undefined;
+
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [isSlugReady, item]);
+
+  const showSkeleton = !isSlugReady || isFetching || !item;
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={false}
+      />
 
       <Banner title={bannerTitle} />
-      <LibraryDetail />
+
+      {showSkeleton ? <Skeleton /> : <LibraryDetail />}
     </>
   );
 };

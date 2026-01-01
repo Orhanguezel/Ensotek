@@ -11,6 +11,7 @@ import {
   expectSameOriginAsBase,
   expectMinDescription,
   expectHreflangSet,
+  expectOgMatchesCanonical,
 } from './helpers';
 
 test.describe('SEO: /service (list)', () => {
@@ -35,8 +36,8 @@ test.describe('SEO: /service (list)', () => {
         expectAbsolute(head.ogUrl);
         expectSameOriginAsBase(head.ogUrl);
         expectNotLocalhost(head.ogUrl);
-        expect(head.ogUrl).toBe(head.canonical);
       }
+      expectOgMatchesCanonical(head);
 
       expectHreflangSet(head.hreflangs);
 
