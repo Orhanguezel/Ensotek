@@ -1,0 +1,621 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - generic [ref=e3]:
+      - generic [ref=e6]:
+        - generic [ref=e7]:
+          - img "ENSOTEK Kühltürme & Technologien"
+          - button "Schließen" [ref=e9] [cursor=pointer]:
+            - img [ref=e10]
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - img [ref=e15]
+            - generic [ref=e18]: Sprache
+          - combobox "Sprache" [ref=e19]:
+            - option "Deutsch" [selected]
+            - option "Türkçe"
+            - option "English"
+          - generic [ref=e20]:
+            - link "Anmelden" [ref=e21] [cursor=pointer]:
+              - /url: /login
+              - img [ref=e22]
+              - text: Anmelden
+            - link "Registrieren" [ref=e25] [cursor=pointer]:
+              - /url: /register
+              - img [ref=e26]
+              - text: Registrieren
+        - generic [ref=e30]:
+          - textbox "Suchen..." [ref=e31]
+          - button "Suchen" [ref=e32] [cursor=pointer]:
+            - img [ref=e33]
+        - navigation [ref=e38]:
+          - list [ref=e39]:
+            - listitem [ref=e40]:
+              - link "Startseite" [ref=e41] [cursor=pointer]:
+                - /url: /
+            - listitem [ref=e42]:
+              - button "Organisation" [ref=e43] [cursor=pointer]:
+                - generic [ref=e44]: Organisation
+            - listitem [ref=e46]:
+              - button "Leistungen" [ref=e47] [cursor=pointer]:
+                - generic [ref=e48]: Leistungen
+            - listitem [ref=e50]:
+              - button "Produkte" [ref=e51] [cursor=pointer]:
+                - generic [ref=e52]: Produkte
+            - listitem [ref=e54]:
+              - button "Bibliothek" [ref=e55] [cursor=pointer]:
+                - generic [ref=e56]: Bibliothek
+            - listitem [ref=e58]:
+              - link "Nachrichten" [ref=e59] [cursor=pointer]:
+                - /url: /news
+            - listitem [ref=e60]:
+              - link "Blog" [ref=e61] [cursor=pointer]:
+                - /url: /blog
+            - listitem [ref=e62]:
+              - link "Kontakt" [ref=e63] [cursor=pointer]:
+                - /url: /contact
+        - generic [ref=e64]:
+          - heading "Kontaktinformationen" [level=4] [ref=e65]
+          - list [ref=e66]:
+            - listitem [ref=e67]:
+              - img [ref=e69]
+              - link "www.ensotek.de" [ref=e73] [cursor=pointer]:
+                - /url: https://www.ensotek.de
+            - listitem [ref=e74]:
+              - img [ref=e76]
+              - link "Anrufen" [ref=e79] [cursor=pointer]:
+                - /url: tel:+902126133301
+                - text: +90 212 613 33 01
+            - listitem [ref=e80]:
+              - img [ref=e82]
+              - link "E-Mail" [ref=e86] [cursor=pointer]:
+                - /url: mailto:ensotek@ensotek.com.tr
+                - text: ensotek@ensotek.com.tr
+        - list [ref=e88]:
+          - listitem [ref=e89]:
+            - link "Facebook" [ref=e90] [cursor=pointer]:
+              - /url: https://facebook.com/ensotek
+              - img [ref=e91]
+          - listitem [ref=e93]:
+            - link "X (Twitter)" [ref=e94] [cursor=pointer]:
+              - /url: https://x.com/ensotek
+              - img [ref=e95]
+          - listitem [ref=e97]:
+            - link "YouTube" [ref=e98] [cursor=pointer]:
+              - /url: https://youtube.com/@ensotek
+              - img [ref=e99]
+          - listitem [ref=e101]:
+            - link "LinkedIn" [ref=e102] [cursor=pointer]:
+              - /url: https://linkedin.com/company/ensotek
+              - img [ref=e103]
+          - listitem [ref=e105]:
+            - link "Instagram" [ref=e106] [cursor=pointer]:
+              - /url: https://instagram.com/ensotek
+              - img [ref=e107]
+      - banner:
+        - generic [ref=e111]:
+          - generic:
+            - generic:
+              - link "ENSOTEK Kühltürme & Technologien":
+                - /url: /
+                - img "ENSOTEK Kühltürme & Technologien"
+          - navigation [ref=e115]:
+            - list [ref=e116]:
+              - listitem [ref=e117]:
+                - link "Startseite" [ref=e118] [cursor=pointer]:
+                  - /url: /
+              - listitem [ref=e119]:
+                - link "Organisation" [ref=e120] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e121]:
+                - link "Leistungen" [ref=e122] [cursor=pointer]:
+                  - /url: /service
+              - listitem [ref=e123]:
+                - link "Produkte" [ref=e124] [cursor=pointer]:
+                  - /url: /product
+              - listitem [ref=e125]:
+                - link "Bibliothek" [ref=e126] [cursor=pointer]:
+                  - /url: /library
+              - listitem [ref=e127]:
+                - link "Nachrichten" [ref=e128] [cursor=pointer]:
+                  - /url: /news
+              - listitem [ref=e129]:
+                - link "Blog" [ref=e130] [cursor=pointer]:
+                  - /url: /blog
+              - listitem [ref=e131]:
+                - link "Kontakt" [ref=e132] [cursor=pointer]:
+                  - /url: /contact
+          - button "Menü öffnen" [ref=e136] [cursor=pointer]:
+            - img [ref=e137]
+      - main [ref=e148]:
+        - heading "Ensotek Kühltürme und Prozesskühlung" [level=1] [ref=e149]
+        - generic [ref=e155]:
+          - generic [ref=e162]:
+            - img "Industrielle Kühlturmlösungen" [ref=e166]
+            - img "Offene / geschlossene Kreislauf-Kühltürme" [ref=e170]
+            - img "Kühlturm Standortanalyse und Engineering" [ref=e174]
+            - img "Kühlturm Wartung und Revision" [ref=e178]
+            - img "Kühlturm Automation und SCADA" [ref=e182]
+          - generic [ref=e184]:
+            - generic [ref=e185]:
+              - generic [ref=e186]:
+                - text: Ensotek
+                - generic [ref=e187]: Engineering
+              - heading "Standortanalyse, Engineering & schlüsselfertige Umsetzung" [level=2] [ref=e188]
+              - paragraph [ref=e189]: Von der Standortanalyse und Wärmeleistungsberechnung über die mechanische Auslegung bis hin zur Montagekoordination und Inbetriebnahme – Ensotek übernimmt alles aus einer Hand.
+            - generic [ref=e190]:
+              - generic [ref=e191]:
+                - button "Vorherige Folie" [ref=e192] [cursor=pointer]:
+                  - img [ref=e193]
+                - button "Nächste Folie" [ref=e195] [cursor=pointer]:
+                  - img [ref=e196]
+              - link "Service ansehen" [ref=e198] [cursor=pointer]:
+                - /url: /services/site-survey-engineering
+        - generic [ref=e200]:
+          - generic [ref=e203]:
+            - generic [ref=e204]: Ensotek Leistungen
+            - heading "Was wir tun" [level=2] [ref=e205]: Was wir tun
+          - generic [ref=e207]:
+            - generic [ref=e209]:
+              - img [ref=e212]
+              - generic [ref=e215]:
+                - heading "Periodische Wartung & Reparatur" [level=3] [ref=e216]:
+                  - link "Periodische Wartung & Reparatur" [ref=e217] [cursor=pointer]:
+                    - /url: /service/maintenance-repair
+                - paragraph [ref=e218]: Ensotek wartet Kühltürme durch Prüfung von Füllkörpern, Sprühdüsen, Drift Eliminatoren, Ventilatorgruppe, Motor-Getriebe und mechanischen Baugruppen.…
+            - generic [ref=e220]:
+              - img [ref=e223]
+              - generic [ref=e227]:
+                - heading "Modernisierung & Retrofit" [level=3] [ref=e228]:
+                  - link "Modernisierung & Retrofit" [ref=e229] [cursor=pointer]:
+                    - /url: /service/modernization-retrofit
+                - paragraph [ref=e230]: "Retrofit für mehr Leistung und Effizienz: Füllkörper-/Düsen-Upgrade, Ventilatoroptimierung, Motor-Getriebe-Revision, VFD-Integration, Drift-Reduktion…"
+            - generic [ref=e232]:
+              - img [ref=e235]
+              - generic [ref=e239]:
+                - heading "Ersatzteile & Kritische Komponenten" [level=3] [ref=e240]:
+                  - link "Ersatzteile & Kritische Komponenten" [ref=e241] [cursor=pointer]:
+                    - /url: /service/spare-parts-components
+                - paragraph [ref=e242]: "Lieferung und Matching von katalogkonformen Komponenten: Düsentypen, Wasserverteilung, PVC/PP Füllkörper, Drift Eliminatoren, Ventilatorblätter,…"
+        - generic [ref=e245]:
+          - generic [ref=e247]:
+            - generic [ref=e248]:
+              - generic "1500+" [ref=e250]: "1500"
+              - generic [ref=e252]: +
+            - generic [ref=e253]:
+              - heading "Industrie-Referenzen" [level=3] [ref=e254]
+              - paragraph [ref=e255]: Referenzkunden & Anlagen
+          - generic [ref=e257]:
+            - generic [ref=e258]:
+              - generic "5000+" [ref=e260]: "5000"
+              - generic [ref=e262]: +
+            - generic [ref=e263]:
+              - heading "Abgeschlossene Projekte" [level=3] [ref=e264]
+              - paragraph [ref=e265]: Nationale und internationale Projekte
+          - generic [ref=e267]:
+            - generic [ref=e268]:
+              - generic "40+" [ref=e270]: "40"
+              - generic [ref=e272]: +
+            - generic [ref=e273]:
+              - heading "Jahre Erfahrung" [level=3] [ref=e274]
+              - paragraph [ref=e275]: Wasserkühlung und Prozesskühlung
+        - generic [ref=e276]:
+          - img [ref=e278]
+          - generic [ref=e280]:
+            - img "Produktionsanlage für Ensotek Wasserkühltürme" [ref=e284]
+            - generic [ref=e286]:
+              - generic [ref=e287]:
+                - generic [ref=e288]: Ensotek Über uns
+                - heading "Ensotek Wasserkühltürme" [level=2] [ref=e289]
+              - generic [ref=e290]:
+                - paragraph [ref=e291]: Ensotek betreut seine Kunden mit über 40 Jahren Erfahrung und einem erfahrenen Expertenteam vom Hauptsitz in Istanbul sowie dem Werk in Ankara im Bereich Wasserkühltürme. Unser Unternehmen verfügt über die größte Produktionsanlage für Wasserkühltürme in der…
+                - link "Mehr lesen" [ref=e292] [cursor=pointer]:
+                  - /url: /about
+                  - text: Mehr lesen →
+              - generic [ref=e293]:
+                - generic [ref=e294]:
+                  - generic [ref=e296]: 
+                  - generic [ref=e297]:
+                    - paragraph [ref=e298]:
+                      - strong [ref=e299]: Fertigung & Qualität
+                    - paragraph [ref=e300]: Unsere Qualitätsstandards und Fertigungsstärke.
+                - generic [ref=e301]:
+                  - generic [ref=e303]: 
+                  - generic [ref=e304]:
+                    - paragraph [ref=e305]:
+                      - strong [ref=e306]: Prozess & Support
+                    - paragraph [ref=e307]: Schnelle und transparente Kommunikation während des Projekts.
+              - link "Alle anzeigen" [ref=e309] [cursor=pointer]:
+                - /url: /about
+        - generic [ref=e311]:
+          - generic [ref=e312]:
+            - generic [ref=e314]:
+              - generic [ref=e315]: Ensotek Unsere Produkte
+              - heading "Unsere Produkte" [level=2] [ref=e316]
+            - generic [ref=e317]:
+              - generic [ref=e318]:
+                - button "Zurück" [ref=e319] [cursor=pointer]:
+                  - img [ref=e320]
+                - button "Weiter" [ref=e322] [cursor=pointer]:
+                  - img [ref=e323]
+              - link "Alle Produkte" [ref=e325] [cursor=pointer]:
+                - /url: /product
+          - generic [ref=e329]:
+            - generic [ref=e331]:
+              - link "Offener Kühlturm – Dreifachzelle TCTP-Serie" [ref=e333] [cursor=pointer]:
+                - /url: /product/offene-kuehltuerme-dreifachzelle-tctp-serie
+                - img "Offener Kühlturm – Dreifachzelle TCTP-Serie" [ref=e334]
+              - generic [ref=e335]:
+                - heading "Offene Kühltürme – Dreifachzelle (TCTP-Serie)" [level=3] [ref=e336]:
+                  - link "Offene Kühltürme – Dreifachzelle (TCTP-Serie)" [ref=e337] [cursor=pointer]:
+                    - /url: /product/offene-kuehltuerme-dreifachzelle-tctp-serie
+                - link "Offene Kühltürme – Dreifachzelle (TCTP-Serie) — Details anzeigen" [ref=e338] [cursor=pointer]:
+                  - /url: /product/offene-kuehltuerme-dreifachzelle-tctp-serie
+                  - text: Details anzeigen →
+            - generic [ref=e340]:
+              - link "Offener Kühlturm – Doppelzelle DCTP-Serie" [ref=e342] [cursor=pointer]:
+                - /url: /product/offene-kuehltuerme-doppelzelle-dctp-serie
+                - img "Offener Kühlturm – Doppelzelle DCTP-Serie" [ref=e343]
+              - generic [ref=e344]:
+                - heading "Offene Kühltürme – Doppelzelle (DCTP-Serie)" [level=3] [ref=e345]:
+                  - link "Offene Kühltürme – Doppelzelle (DCTP-Serie)" [ref=e346] [cursor=pointer]:
+                    - /url: /product/offene-kuehltuerme-doppelzelle-dctp-serie
+                - link "Offene Kühltürme – Doppelzelle (DCTP-Serie) — Details anzeigen" [ref=e347] [cursor=pointer]:
+                  - /url: /product/offene-kuehltuerme-doppelzelle-dctp-serie
+                  - text: Details anzeigen →
+            - generic [ref=e349]:
+              - link "Offener Kühlturm – Einzelzelle CTP-Serie" [ref=e351] [cursor=pointer]:
+                - /url: /product/offene-kuehltuerme-einzelzelle-ctp-serie
+                - img "Offener Kühlturm – Einzelzelle CTP-Serie" [ref=e352]
+              - generic [ref=e353]:
+                - heading "Offene Kühltürme – Einzelzelle (CTP-Serie)" [level=3] [ref=e354]:
+                  - link "Offene Kühltürme – Einzelzelle (CTP-Serie)" [ref=e355] [cursor=pointer]:
+                    - /url: /product/offene-kuehltuerme-einzelzelle-ctp-serie
+                - link "Offene Kühltürme – Einzelzelle (CTP-Serie) — Details anzeigen" [ref=e356] [cursor=pointer]:
+                  - /url: /product/offene-kuehltuerme-einzelzelle-ctp-serie
+                  - text: Details anzeigen →
+            - generic [ref=e358]:
+              - link "Geschlossener Kühlturm – CC CTP / CC DCTP Serie" [ref=e360] [cursor=pointer]:
+                - /url: /product/geschlossene-kuehltuerme-cc-ctp-cc-dctp
+                - img "Geschlossener Kühlturm – CC CTP / CC DCTP Serie" [ref=e361]
+              - generic [ref=e362]:
+                - heading "Geschlossene Kühltürme – CC CTP / CC DCTP Serie" [level=3] [ref=e363]:
+                  - link "Geschlossene Kühltürme – CC CTP / CC DCTP Serie" [ref=e364] [cursor=pointer]:
+                    - /url: /product/geschlossene-kuehltuerme-cc-ctp-cc-dctp
+                - link "Geschlossene Kühltürme – CC CTP / CC DCTP Serie — Details anzeigen" [ref=e365] [cursor=pointer]:
+                  - /url: /product/geschlossene-kuehltuerme-cc-ctp-cc-dctp
+                  - text: Details anzeigen →
+        - region "Bereich für Newsletter-Anmeldung" [ref=e366]:
+          - generic [ref=e369]:
+            - heading "Bleiben Sie auf dem Laufenden" [level=3] [ref=e372]
+            - paragraph [ref=e375]: Erhalten Sie Neuigkeiten zu unseren Projekten und Lösungen per E-Mail.
+            - generic [ref=e378]:
+              - textbox [ref=e379]
+              - textbox "Ihre E-Mail-Adresse" [ref=e380]
+              - button "Newsletter abonnieren" [disabled] [ref=e381]:
+                - img [ref=e382]
+        - generic [ref=e384]:
+          - img "pattern" [ref=e386]
+          - generic [ref=e388]:
+            - img "Titelbild der Bibliothek" [ref=e392]
+            - generic [ref=e394]:
+              - generic [ref=e395]:
+                - generic [ref=e396]: Ensotek Wissenszentrum
+                - heading "Engineering und Dokumente" [level=2] [ref=e397]
+              - generic [ref=e400]:
+                - generic [ref=e401]:
+                  - heading "Unternehmensbroschüre (PDF) " [level=2] [ref=e402]:
+                    - button "Unternehmensbroschüre (PDF) " [expanded] [ref=e403] [cursor=pointer]:
+                      - img [ref=e405]
+                      - generic [ref=e406]: Unternehmensbroschüre (PDF)
+                      - text: 
+                  - region "Unternehmensbroschüre (PDF) " [ref=e407]:
+                    - generic [ref=e408]:
+                      - paragraph [ref=e409]: Unternehmensbroschüre (PDF) Auf dieser Seite können Sie die Ensotek-Unternehmensbroschüre als PDF ansehen und herunterladen. Produktlinien und Lösungen Serviceumfang und Wartungsansatz Qualität, Zertifizierungen und…
+                      - link "Unternehmensbroschüre (PDF) – Details anzeigen" [ref=e410] [cursor=pointer]:
+                        - /url: /library/ensotek-unternehmensbroschuere
+                        - text: Details ansehen
+                        - img [ref=e411]
+                - 'heading "Türkei: Sommer-Auslegungswerte für Trocken- und Feuchtkugel +" [level=2] [ref=e414]':
+                  - 'button "Türkei: Sommer-Auslegungswerte für Trocken- und Feuchtkugel +" [ref=e415] [cursor=pointer]':
+                    - img [ref=e417]
+                    - generic [ref=e418]: "Türkei: Sommer-Auslegungswerte für Trocken- und Feuchtkugel"
+                    - text: +
+              - link "Alle Dokumente anzeigen" [ref=e420] [cursor=pointer]:
+                - /url: /library
+        - generic [ref=e423]:
+          - generic [ref=e425]:
+            - generic [ref=e426]:
+              - generic [ref=e427]:
+                - generic [ref=e428]: Ensotek
+                - text: Kundenstimmen
+              - heading "Was unsere Kunden über uns sagen" [level=2] [ref=e429]
+            - paragraph [ref=e430]: Kundenfeedback hilft uns, unsere Engineering- und Servicequalität kontinuierlich zu verbessern.
+            - generic [ref=e431]:
+              - generic [ref=e432]:
+                - button "Vorherige Bewertung" [ref=e433] [cursor=pointer]:
+                  - img [ref=e434]
+                - button "Nächste Bewertung" [ref=e436] [cursor=pointer]:
+                  - img [ref=e437]
+              - button "Bewertung schreiben" [ref=e440] [cursor=pointer]
+          - generic [ref=e446]:
+            - generic [ref=e448]:
+              - generic [ref=e449]:
+                - img [ref=e450]
+                - img [ref=e452]
+                - img [ref=e454]
+                - img [ref=e456]
+                - img [ref=e458]
+              - paragraph [ref=e460]: Wir haben den Website-Traffic unseres B2B-SaaS-Kunden in nur 3 Monaten um über 300% gesteigert.
+              - generic [ref=e462]:
+                - heading "Jane Cooper" [level=5] [ref=e463]
+                - text: Kunde
+            - generic [ref=e465]:
+              - generic [ref=e466]:
+                - img [ref=e467]
+                - img [ref=e469]
+                - img [ref=e471]
+                - img [ref=e473]
+                - img [ref=e475]
+              - paragraph [ref=e477]: Gezielter Content und technisches SEO sorgten für stetiges, kumulatives Wachstum über alle Kanäle.
+              - generic [ref=e479]:
+                - heading "Devon Lane" [level=5] [ref=e480]
+                - text: Kunde
+            - generic [ref=e482]:
+              - generic [ref=e483]:
+                - img [ref=e484]
+                - img [ref=e486]
+                - img [ref=e488]
+                - img [ref=e490]
+                - img [ref=e492]
+              - paragraph [ref=e494]: Klare Reports und planbare Lieferung — genau das, was wir zum Skalieren brauchten.
+              - generic [ref=e496]:
+                - heading "Courtney Henry" [level=5] [ref=e497]
+                - text: Kunde
+        - generic [ref=e499]:
+          - generic [ref=e500]:
+            - generic [ref=e502]:
+              - generic [ref=e503]: Ensotek Referenzen
+              - heading "Unsere Referenzen" [level=2] [ref=e504]
+            - generic [ref=e505]:
+              - generic [ref=e506]:
+                - button "Zurück" [ref=e507] [cursor=pointer]:
+                  - img [ref=e508]
+                - button "Weiter" [ref=e510] [cursor=pointer]:
+                  - img [ref=e511]
+              - link "Alle Referenzen anzeigen" [ref=e513] [cursor=pointer]:
+                - /url: /references
+          - generic [ref=e517]:
+            - img "Enerjisa" [ref=e521]
+            - img "Tüpraş" [ref=e525]
+            - img "OYAK Çimento" [ref=e529]
+            - img "Ülker" [ref=e533]
+            - img "Erdemir" [ref=e537]
+            - img "Ford Otosan" [ref=e541]
+            - img "ECE" [ref=e545]
+            - img "Turkcell" [ref=e549]
+            - img "Şişecam" [ref=e553]
+            - img "ENKA" [ref=e557]
+            - img "Şişecam" [ref=e561]
+            - img "Oyak Çimento" [ref=e565]
+            - img "Ülker" [ref=e569]
+            - img "Erdemir" [ref=e573]
+            - img "Ford Otosan" [ref=e577]
+            - img "Rönesans" [ref=e581]
+            - img "Turkcell" [ref=e585]
+            - img "Türk Hava Yolları" [ref=e589]
+        - generic [ref=e591]:
+          - generic [ref=e594]:
+            - generic [ref=e595]: Ensotek Neuigkeiten
+            - heading "Aktuelle Neuigkeiten" [level=2] [ref=e596]
+          - generic [ref=e597]:
+            - generic [ref=e599]:
+              - generic [ref=e601]:
+                - heading "Unsere Ensotek-Webseite ist erneuert!" [level=3] [ref=e602]:
+                  - link "Unsere Ensotek-Webseite ist erneuert!" [ref=e603] [cursor=pointer]:
+                    - /url: /news/ensotek-webseite-wurde-erneuert
+                - paragraph [ref=e604]: "Unsere neue Ensotek-Webseite ist online: modern, mehrsprachig und schneller."
+                - link "Unsere Ensotek-Webseite ist erneuert! — News-Details anzeigen" [ref=e605] [cursor=pointer]:
+                  - /url: /news/ensotek-webseite-wurde-erneuert
+                  - text: Weiterlesen →
+              - generic [ref=e607]:
+                - heading "Wir haben die Egypt HVAC-R Messe erfolgreich abgeschlossen!" [level=3] [ref=e608]:
+                  - link "Wir haben die Egypt HVAC-R Messe erfolgreich abgeschlossen!" [ref=e609] [cursor=pointer]:
+                    - /url: /news/egypt-hvacr-messe-erfolgreich-abgeschlossen
+                - paragraph [ref=e610]: Wir danken allen, die auf der Egypt HVAC-R 2025 Messe großes Interesse an unserem Stand gezeigt haben. Wir führten intensive Gespräche mit Besuchern aus Kairo, Alexandria und…
+                - link "Wir haben die Egypt HVAC-R Messe erfolgreich abgeschlossen! — News-Details anzeigen" [ref=e611] [cursor=pointer]:
+                  - /url: /news/egypt-hvacr-messe-erfolgreich-abgeschlossen
+                  - text: Weiterlesen →
+            - generic [ref=e613]:
+              - link "Unsere Ensotek-Webseite ist erneuert!" [ref=e614] [cursor=pointer]:
+                - /url: /news/ensotek-webseite-wurde-erneuert
+                - img "Ankündigungsbild zur erneuerten Ensotek-Webseite" [ref=e615]
+              - link "Wir haben die Egypt HVAC-R Messe erfolgreich abgeschlossen!" [ref=e616] [cursor=pointer]:
+                - /url: /news/egypt-hvacr-messe-erfolgreich-abgeschlossen
+                - img "ENSOTEK Messestand auf der Egypt HVAC-R 2025" [ref=e617]
+          - link "Alle News" [ref=e621] [cursor=pointer]:
+            - /url: /news
+        - generic [ref=e624]:
+          - generic [ref=e626]:
+            - generic [ref=e627]:
+              - generic [ref=e628]:
+                - generic [ref=e629]: Kontakt
+                - text: aufnehmen
+              - heading "Lassen Sie uns sprechen" [level=2] [ref=e630]
+            - paragraph [ref=e631]: Seit 2009 unterstützen wir Unternehmen beim Wachstum – gerne auch Ihres.
+            - generic [ref=e633]:
+              - generic [ref=e634]: Email
+              - textbox "Email" [ref=e635]:
+                - /placeholder: Ihre E-Mail-Adresse
+              - button "E-Mail übernehmen" [ref=e636] [cursor=pointer]:
+                - img [ref=e637]
+            - generic [ref=e639]:
+              - link "facebook" [ref=e640] [cursor=pointer]:
+                - /url: https://facebook.com/ensotek
+                - img [ref=e641]
+              - link "twitter" [ref=e643] [cursor=pointer]:
+                - /url: https://x.com/ensotek
+                - img [ref=e644]
+              - link "youtube" [ref=e646] [cursor=pointer]:
+                - /url: https://youtube.com/@ensotek
+                - img [ref=e647]
+              - link "linkedin" [ref=e650] [cursor=pointer]:
+                - /url: https://linkedin.com/company/ensotek
+                - img [ref=e651]
+              - link "instagram" [ref=e655] [cursor=pointer]:
+                - /url: https://instagram.com/ensotek
+                - img [ref=e656]
+          - generic [ref=e660]:
+            - heading "Beratungsanfrage senden" [level=3] [ref=e663]
+            - generic [ref=e665]:
+              - generic [ref=e667]:
+                - generic [ref=e668]: Vorname*
+                - textbox "Vorname*" [ref=e669]
+              - generic [ref=e671]:
+                - generic [ref=e672]: Nachname
+                - textbox "Nachname" [ref=e673]
+              - generic [ref=e675]:
+                - generic [ref=e676]: Firmenname
+                - textbox "Firmenname" [ref=e677]
+              - generic [ref=e679]:
+                - generic [ref=e680]: Webseite
+                - textbox "Webseite" [ref=e681]
+              - generic [ref=e683]:
+                - generic [ref=e684]: Telefonnummer
+                - textbox "Telefonnummer" [ref=e685]
+              - generic [ref=e687]:
+                - generic [ref=e688]: E-Mail*
+                - textbox "E-Mail*" [ref=e689]
+              - generic [ref=e691]:
+                - generic [ref=e692]: Wählen Sie eine Leistung
+                - combobox "Wählen Sie eine Leistung" [ref=e693]:
+                  - option "Wählen Sie eine Leistung" [selected]
+                  - option "Kühltürme"
+                  - option "Wartung"
+                  - option "Modernisierung"
+                  - option "Sonstiges"
+                - text: 
+              - generic [ref=e695]:
+                - generic [ref=e696]:
+                  - 'checkbox "Ich akzeptiere: Bedingungen & Konditionen" [ref=e697]'
+                  - generic [ref=e698]:
+                    - text: "Ich akzeptiere:"
+                    - generic [ref=e699]:
+                      - link "Bedingungen" [ref=e700] [cursor=pointer]:
+                        - /url: /de/terms
+                      - text: "&"
+                      - link "Konditionen" [ref=e701] [cursor=pointer]:
+                        - /url: /de/privacy-notice
+                - button "Anfrage senden" [disabled] [ref=e703] [cursor=pointer]
+      - contentinfo [ref=e704]:
+        - generic [ref=e705]:
+          - img "Image" [ref=e707]
+          - generic [ref=e709]:
+            - generic [ref=e711]:
+              - heading "Schnellzugriff" [level=3] [ref=e713]
+              - list [ref=e715]:
+                - listitem [ref=e716]:
+                  - link "FAQ" [ref=e717] [cursor=pointer]:
+                    - /url: /faqs
+                - listitem [ref=e718]:
+                  - link "Über uns" [ref=e719] [cursor=pointer]:
+                    - /url: /about
+                - listitem [ref=e720]:
+                  - link "Lösungen" [ref=e721] [cursor=pointer]:
+                    - /url: /solutions
+                - listitem [ref=e722]:
+                  - link "Produkte" [ref=e723] [cursor=pointer]:
+                    - /url: /product
+                - listitem [ref=e724]:
+                  - link "Bibliothek" [ref=e725] [cursor=pointer]:
+                    - /url: /library
+                - listitem [ref=e726]:
+                  - link "Nachrichten" [ref=e727] [cursor=pointer]:
+                    - /url: /news
+                - listitem [ref=e728]:
+                  - link "Blog" [ref=e729] [cursor=pointer]:
+                    - /url: /blog
+                - listitem [ref=e730]:
+                  - link "Kontakt" [ref=e731] [cursor=pointer]:
+                    - /url: /contact
+            - generic [ref=e733]:
+              - heading "Leistungen" [level=3] [ref=e735]
+              - list [ref=e737]:
+                - listitem [ref=e738]:
+                  - link "Wartung & Instandsetzung" [ref=e739] [cursor=pointer]:
+                    - /url: /service/maintenance-repair
+                - listitem [ref=e740]:
+                  - link "Modernisierung & Retrofit" [ref=e741] [cursor=pointer]:
+                    - /url: /service/modernization-retrofit
+            - generic [ref=e743]:
+              - heading "Rechtliches" [level=3] [ref=e745]
+              - list [ref=e747]:
+                - listitem [ref=e748]:
+                  - link "Datenschutzerklärung" [ref=e749] [cursor=pointer]:
+                    - /url: /privacy-policy
+                - listitem [ref=e750]:
+                  - link "Datenschutz (KVKK)" [ref=e751] [cursor=pointer]:
+                    - /url: /kvkk
+                - listitem [ref=e752]:
+                  - link "Nutzungsbedingungen" [ref=e753] [cursor=pointer]:
+                    - /url: /terms
+                - listitem [ref=e754]:
+                  - link "Cookie-Richtlinie" [ref=e755] [cursor=pointer]:
+                    - /url: /cookie-policy
+                - listitem [ref=e756]:
+                  - link "Hinweis zum Datenschutz" [ref=e757] [cursor=pointer]:
+                    - /url: /privacy-notice
+                - listitem [ref=e758]:
+                  - link "Impressum" [ref=e759] [cursor=pointer]:
+                    - /url: /legal-notice
+            - generic [ref=e761]:
+              - generic:
+                - link "ENSOTEK Kühltürme & Technologien":
+                  - /url: /
+                  - img "ENSOTEK Kühltürme & Technologien"
+              - generic [ref=e762]:
+                - generic [ref=e763]: Oruçreis Mah., Tekstilkent Sit., A17 Blok No:41, 34235 Esenler / Istanbul, Türkei
+                - generic [ref=e764]: "Werk: Saray Mah., Gimat Cad. No:6A, 06980 Kahramankazan / Ankara, Türkei"
+                - generic [ref=e765]: +90 212 613 33 01
+                - generic [ref=e766]: ensotek@ensotek.com.tr
+                - generic [ref=e767]: https://www.ensotek.de
+              - list [ref=e769]:
+                - listitem [ref=e770]:
+                  - link "Facebook" [ref=e771] [cursor=pointer]:
+                    - /url: https://facebook.com/ensotek
+                    - img [ref=e772]
+                - listitem [ref=e774]:
+                  - link "X (Twitter)" [ref=e775] [cursor=pointer]:
+                    - /url: https://x.com/ensotek
+                    - img [ref=e776]
+                - listitem [ref=e778]:
+                  - link "YouTube" [ref=e779] [cursor=pointer]:
+                    - /url: https://youtube.com/@ensotek
+                    - img [ref=e780]
+                - listitem [ref=e782]:
+                  - link "LinkedIn" [ref=e783] [cursor=pointer]:
+                    - /url: https://linkedin.com/company/ensotek
+                    - img [ref=e784]
+                - listitem [ref=e786]:
+                  - link "Instagram" [ref=e787] [cursor=pointer]:
+                    - /url: https://instagram.com/ensotek
+                    - img [ref=e788]
+        - paragraph [ref=e794]: Copyright © 2026 ENSOTEK Kühltürme & Technologien All rights reserved.
+    - region "Cookie consent":
+      - generic [ref=e795]:
+        - generic [ref=e796]:
+          - generic [ref=e797]: Cookie-Einstellungen
+          - generic [ref=e798]:
+            - text: Wir verwenden Cookies, um die Website korrekt zu betreiben und optional den Traffic zu analysieren. Sie können Ihre Einstellungen verwalten.
+            - link "Cookie-Richtlinie" [ref=e799] [cursor=pointer]:
+              - /url: /cookie-policy
+        - generic [ref=e800]:
+          - button "Cookie-Einstellungen" [ref=e801] [cursor=pointer]
+          - button "Alle ablehnen" [ref=e802] [cursor=pointer]
+          - button "Alle akzeptieren" [ref=e803] [cursor=pointer]
+        - button "Schließen" [ref=e804] [cursor=pointer]: ×
+  - alert [ref=e805]
+```

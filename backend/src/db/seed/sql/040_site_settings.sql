@@ -84,7 +84,7 @@ VALUES
   NOW(3),
   NOW(3)
 ),
-(UUID(), 'catalog_pdf_url',        'tr', 'https://ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'tr', 'https://ensotek.de/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_pdf_filename',   'tr', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_admin_email',    'tr', 'info@ensotek.com.tr', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'tr', 'Ensotek', NOW(3), NOW(3)),
@@ -152,7 +152,7 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'catalog_pdf_url',        'en', 'https://ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-catalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'en', 'https://ensotek.de/uploads/ensotek/catalog/ensotek-catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_pdf_filename',   'en', 'ensotek-catalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_admin_email',    'en', 'info@ensotek.com.tr', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'en', 'Ensotek', NOW(3), NOW(3)),
@@ -230,7 +230,7 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'catalog_pdf_url',        'de', 'https://ensotek.guezelwebdesign.com/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
+(UUID(), 'catalog_pdf_url',        'de', 'https://ensotek.de/uploads/ensotek/catalog/ensotek-katalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_pdf_filename',   'de', 'ensotek-katalog.pdf', NOW(3), NOW(3)),
 (UUID(), 'catalog_admin_email',    'de', 'info@ensotek.com.tr', NOW(3), NOW(3)),
 (UUID(), 'site_title',             'de', 'Ensotek', NOW(3), NOW(3)),
@@ -317,7 +317,7 @@ VALUES
 (UUID(), 'cloudinary_folder',          '*', 'uploads/ensotek',                             NOW(3), NOW(3)),
 (UUID(), 'cloudinary_unsigned_preset', '*', 'ensotek_unsigned',                            NOW(3), NOW(3)),
 (UUID(), 'storage_cdn_public_base',    '*', 'https://res.cloudinary.com',                  NOW(3), NOW(3)),
-(UUID(), 'storage_public_api_base',    '*', 'https://ensotek.guezelwebdesign.com/api',     NOW(3), NOW(3))
+(UUID(), 'storage_public_api_base',    '*', 'https://ensotek.de/api',     NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
@@ -327,7 +327,7 @@ ON DUPLICATE KEY UPDATE
 -- =============================================================
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
-(UUID(), 'public_base_url', '*', 'https://ensotek.guezelwebdesign.com', NOW(3), NOW(3))
+(UUID(), 'public_base_url', '*', 'https://ensotek.de', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
