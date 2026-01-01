@@ -1,5 +1,10 @@
-// src/components/layout/banner/CookieConsentBanner.tsx
-
+// =============================================================
+// FILE: src/components/layout/banner/CookieConsentBanner.tsx
+// Ensotek – Cookie Consent Banner (DB-driven + localized) + Analytics Consent bridge
+// - Reads site_settings key: cookie_consent (localized: tr/en/de)
+// - Persists consent to cookie + localStorage (versioned key)
+// - Calls window.__setAnalyticsConsent(boolean) OR queues until analytics-consent-init loads
+// =============================================================
 'use client';
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -12,20 +17,35 @@ import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { localizePath } from '@/i18n/url';
 
-const CONSENT_COOKIE = 'ensotek_cookie_consent_v1';
-const CONSENT_LS = 'ensotek_cookie_consent_v1';
+// DB
+import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+
+type CookieConsentDb = {
+  consent_version?: number;
+  defaults?: {
+    necessary?: boolean;
+    analytics?: boolean;
+    marketing?: boolean;
+  };
+  ui?: {
+    enabled?: boolean;
+    position?: 'bottom' | 'top';
+    show_reject_all?: boolean;
+  };
+  texts?: {
+    title?: string;
+    description?: string;
+  };
+};
+
 const COOKIE_DAYS = 180;
 
 function setCookie(name: string, value: string, days: number) {
   try {
     const maxAge = days * 24 * 60 * 60;
-
     const isHttps =
       typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
-
-    // SameSite=Lax + (https prod’da) Secure
     const secure = isHttps ? '; secure' : '';
-
     document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(
       value,
     )}; path=/; max-age=${maxAge}; samesite=lax${secure}`;
@@ -42,73 +62,114 @@ function getCookie(name: string): string | null {
   }
 }
 
-function safeParseConsent(raw: string | null): ConsentState | null {
+function safeJsonParse<T = any>(raw: string | null): T | null {
   if (!raw) return null;
   try {
     const obj = JSON.parse(raw);
-    if (typeof obj !== 'object' || !obj) return null;
-    const analytics = !!(obj as any).analytics;
-    return { necessary: true, analytics };
+    return obj && typeof obj === 'object' ? (obj as T) : null;
   } catch {
     return null;
   }
 }
 
-function persistConsent(consent: ConsentState) {
-  const raw = JSON.stringify({ analytics: !!consent.analytics });
-  try {
-    localStorage.setItem(CONSENT_LS, raw);
-  } catch {}
-  setCookie(CONSENT_COOKIE, raw, COOKIE_DAYS);
+function makeKeys(version: number) {
+  const v = Number.isFinite(version) && version > 0 ? version : 1;
+  const base = `ensotek_cookie_consent_v${v}`;
+  return {
+    cookieKey: base,
+    lsKey: base,
+    version: v,
+  };
 }
 
-function loadConsent(): ConsentState | null {
-  const fromCookie = safeParseConsent(getCookie(CONSENT_COOKIE));
+function normalizeConsent(input: any): ConsentState | null {
+  if (!input || typeof input !== 'object') return null;
+  // we only store analytics choice; necessary always true
+  const analytics = !!(input as any).analytics;
+  return { necessary: true, analytics };
+}
+
+function persistConsent(keys: { cookieKey: string; lsKey: string }, consent: ConsentState) {
+  const raw = JSON.stringify({ analytics: !!consent.analytics });
+  try {
+    localStorage.setItem(keys.lsKey, raw);
+  } catch {}
+  setCookie(keys.cookieKey, raw, COOKIE_DAYS);
+}
+
+function loadConsent(keys: { cookieKey: string; lsKey: string }): ConsentState | null {
+  const fromCookie = normalizeConsent(safeJsonParse(getCookie(keys.cookieKey)));
   if (fromCookie) return fromCookie;
 
   try {
-    const fromLs = safeParseConsent(localStorage.getItem(CONSENT_LS));
+    const fromLs = normalizeConsent(safeJsonParse(localStorage.getItem(keys.lsKey)));
     if (fromLs) return fromLs;
   } catch {}
 
   return null;
 }
 
-function queueConsent(payload: { analytics_storage: 'granted' | 'denied' } | boolean) {
+function queueConsent(next: boolean) {
   try {
     (window as any).__pendingAnalyticsConsent = (window as any).__pendingAnalyticsConsent || [];
     const q = (window as any).__pendingAnalyticsConsent as any[];
 
-    // dedupe: aynı payload üst üste birikmesin
     const last = q.length ? q[q.length - 1] : null;
-    const same =
-      JSON.stringify(last ?? null) === JSON.stringify(payload ?? null) ||
-      (typeof last === 'boolean' && typeof payload === 'boolean' && last === payload);
+    if (typeof last === 'boolean' && last === next) return;
 
-    if (!same) q.push(payload);
+    q.push(next);
   } catch {}
 }
 
-function applyAnalyticsConsent(analytics: boolean) {
+function applyAnalyticsConsent(next: boolean) {
   try {
-    const payload = { analytics_storage: analytics ? 'granted' : 'denied' } as const;
-
-    // UI tarafında da güncel tutalım
-    (window as any).__analyticsConsentGranted = analytics === true;
+    // UI tarafında da güncel tutalım (AnalyticsScripts de set ediyor)
+    (window as any).__analyticsConsentGranted = next === true;
 
     if (typeof (window as any).__setAnalyticsConsent === 'function') {
-      (window as any).__setAnalyticsConsent(payload);
+      // ✅ Final: boolean kullan
+      (window as any).__setAnalyticsConsent(next);
     } else {
-      queueConsent(payload);
+      queueConsent(next);
     }
   } catch {}
+}
+
+function parseCookieConsentSetting(value: unknown): CookieConsentDb | null {
+  // site_settings.value bazen JSON string olarak gelebilir
+  if (value === null || value === undefined) return null;
+  if (typeof value === 'object') return value as CookieConsentDb;
+  if (typeof value === 'string') return safeJsonParse<CookieConsentDb>(value);
+  return null;
 }
 
 export default function CookieConsentBanner() {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_cookie', locale as any);
 
+  // DB: cookie_consent (localized)
+  const { data: consentSettingRaw, isLoading: isConsentLoading } = useGetSiteSettingByKeyQuery({
+    key: 'cookie_consent',
+    locale,
+  } as any);
 
+  const consentSetting: CookieConsentDb | null = useMemo(() => {
+    const v = (consentSettingRaw as any)?.value ?? consentSettingRaw;
+    return parseCookieConsentSetting(v);
+  }, [consentSettingRaw]);
+
+  const consentVersion = useMemo(() => {
+    const v = Number(consentSetting?.consent_version);
+    return Number.isFinite(v) && v > 0 ? v : 1;
+  }, [consentSetting]);
+
+  const keys = useMemo(() => makeKeys(consentVersion), [consentVersion]);
+
+  const enabled = consentSetting?.ui?.enabled !== false; // default enabled
+  const showRejectAll = consentSetting?.ui?.show_reject_all !== false; // default true
+  const position = consentSetting?.ui?.position === 'top' ? 'top' : 'bottom';
+
+  const defaultAnalytics = !!consentSetting?.defaults?.analytics;
 
   const [ready, setReady] = useState(false);
   const [openSettings, setOpenSettings] = useState(false);
@@ -116,49 +177,75 @@ export default function CookieConsentBanner() {
   const [hasChoice, setHasChoice] = useState<boolean>(false);
 
   useEffect(() => {
-    const existing = loadConsent();
+    // DB gelmeden banner state başlatma (version bilgisi lazım)
+    if (isConsentLoading) return;
+
+    // Eğer banner kapalıysa, privacy-by-default yine uygulanmalı.
+    if (!enabled) {
+      applyAnalyticsConsent(false);
+      setReady(true);
+      setHasChoice(true);
+      return;
+    }
+
+    const existing = loadConsent(keys);
+
     if (existing) {
       setConsent(existing);
       setHasChoice(true);
       applyAnalyticsConsent(existing.analytics);
     } else {
+      // default: DB defaults (genelde false) ama privacy-by-default önerisi: false
+      const initial: ConsentState = { necessary: true, analytics: !!defaultAnalytics };
+      setConsent(initial);
       setHasChoice(false);
-      // default: analytics denied (privacy by default)
-      applyAnalyticsConsent(false);
+
+      // Banner görünürken bile, analytics’i varsayılan olarak denied tutmak istersen:
+      // applyAnalyticsConsent(false);
+      // Sen DB defaults ile yönetmek istiyorsan:
+      applyAnalyticsConsent(!!initial.analytics);
     }
+
     setReady(true);
-  }, []);
+  }, [isConsentLoading, enabled, keys, defaultAnalytics]);
 
   const policyHref = useMemo(() => localizePath(locale as any, '/cookie-policy'), [locale]);
 
   const onRejectAll = useCallback(() => {
     const next: ConsentState = { necessary: true, analytics: false };
     setConsent(next);
-    persistConsent(next);
+    persistConsent(keys, next);
     applyAnalyticsConsent(false);
     setHasChoice(true);
     setOpenSettings(false);
-  }, []);
+  }, [keys]);
 
   const onAcceptAll = useCallback(() => {
     const next: ConsentState = { necessary: true, analytics: true };
     setConsent(next);
-    persistConsent(next);
+    persistConsent(keys, next);
     applyAnalyticsConsent(true);
     setHasChoice(true);
     setOpenSettings(false);
-  }, []);
+  }, [keys]);
 
-  const onSaveSettings = useCallback((next: ConsentState) => {
-    setConsent(next);
-    persistConsent(next);
-    applyAnalyticsConsent(!!next.analytics);
-    setHasChoice(true);
-    setOpenSettings(false);
-  }, []);
+  const onSaveSettings = useCallback(
+    (next: ConsentState) => {
+      const normalized: ConsentState = { necessary: true, analytics: !!next.analytics };
+      setConsent(normalized);
+      persistConsent(keys, normalized);
+      applyAnalyticsConsent(!!normalized.analytics);
+      setHasChoice(true);
+      setOpenSettings(false);
+    },
+    [keys],
+  );
 
   // SSR/hydration güvenliği
   if (!ready) return null;
+
+  // Banner tamamen devre dışıysa hiçbir UI basma (ama modal da yok)
+  if (!enabled) return null;
 
   // Seçim yapıldıysa banner gizli kalsın; ayar modalı yine açılabilir.
   if (hasChoice) {
@@ -172,12 +259,17 @@ export default function CookieConsentBanner() {
     );
   }
 
-  // Banner metinleri (ui_cookie)
-  const titleText = ui('cc_banner_title', 'Cookie Policy');
-  const descText = ui(
-    'cc_banner_desc',
-    'We use cookies to ensure the site works properly and to analyze traffic. You can manage your preferences.',
-  );
+  // Text priority: DB(cookie_consent.texts) > ui_cookie > fallback
+  const titleText =
+    (consentSetting?.texts?.title ?? '').trim() || ui('cc_banner_title', 'Cookie Preferences');
+
+  const descText =
+    (consentSetting?.texts?.description ?? '').trim() ||
+    ui(
+      'cc_banner_desc',
+      'We use cookies to ensure the site works properly and to optionally analyze traffic. You can manage your preferences.',
+    );
+
   const policyLabel = ui('cc_banner_link_policy', 'Cookie Policy');
 
   const btnSettings = ui('cc_banner_btn_settings', 'Cookie Settings');
@@ -189,7 +281,7 @@ export default function CookieConsentBanner() {
   return (
     <>
       <div
-        className="ccb__wrap"
+        className={`ccb__wrap ccb__wrap--${position}`}
         role="region"
         aria-label={ui('cc_banner_aria_region', 'Cookie consent')}
       >
@@ -214,9 +306,11 @@ export default function CookieConsentBanner() {
               {btnSettings}
             </button>
 
-            <button type="button" className="ccb__btn ccb__btn--outline" onClick={onRejectAll}>
-              {btnReject}
-            </button>
+            {showRejectAll ? (
+              <button type="button" className="ccb__btn ccb__btn--outline" onClick={onRejectAll}>
+                {btnReject}
+              </button>
+            ) : null}
 
             <button type="button" className="ccb__btn ccb__btn--primary" onClick={onAcceptAll}>
               {btnAccept}
@@ -226,7 +320,7 @@ export default function CookieConsentBanner() {
           <button
             type="button"
             className="ccb__close"
-            onClick={onRejectAll}
+            onClick={showRejectAll ? onRejectAll : () => setOpenSettings(true)}
             aria-label={ariaClose}
             title={ariaClose}
           >
