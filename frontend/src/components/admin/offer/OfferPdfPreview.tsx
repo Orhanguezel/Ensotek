@@ -20,9 +20,9 @@ interface OfferPdfPreviewProps {
  * FILE_BASE (backend public origin):
  * 1) NEXT_PUBLIC_FILE_BASE_URL (en doğru kaynak)
  * 2) NEXT_PUBLIC_PUBLIC_BASE_URL (opsiyonel)
- * 3) LOCAL (localhost/127.0.0.1): varsayılan http://localhost:8086
+ * 3) LOCAL (localhost/127.0.0.1): varsayılan https://www.ensotek.de
  * 4) PROD: window.location.origin
- * 5) fallback: http://localhost:8086
+ * 5) fallback: https://www.ensotek.de
  */
 function getFileBase(): string {
   const envBase = (process.env.NEXT_PUBLIC_FILE_BASE_URL ||
@@ -36,7 +36,7 @@ function getFileBase(): string {
     const { hostname, origin } = window.location;
 
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:8086';
+      return 'https://www.ensotek.de';
     }
 
     return String(origin || '')
@@ -44,7 +44,7 @@ function getFileBase(): string {
       .replace(/\/+$/, '');
   }
 
-  return 'http://localhost:8086';
+  return 'https://www.ensotek.de';
 }
 
 /**

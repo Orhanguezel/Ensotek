@@ -44,7 +44,7 @@ function getApiBase(): string {
   const base = raw.replace(/\/+$/, '');
 
   // ✅ Senin projede RTK çağrıları /api/... gidiyor.
-  // Env yanlışlıkla http://localhost:8086 verildiyse burada /api ekleyerek tolere ediyoruz.
+  // Env yanlışlıkla https://www.ensotek.de verildiyse burada /api ekleyerek tolere ediyoruz.
   // Env zaten .../api ise aynen kalır.
   if (base && !/\/api$/i.test(base)) return `${base}/api`;
 

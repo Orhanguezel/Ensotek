@@ -28,7 +28,7 @@ function trimSlash(x: string) {
 /**
  * Env yoksa dev ortamda otomatik tahmin:
  *  - Next dev: http://localhost:3000
- *  - Backend:  http://localhost:8086/api
+ *  - Backend:  https://www.ensotek.de/api
  */
 function guessDevBackend(): string {
   try {
@@ -41,7 +41,7 @@ function guessDevBackend(): string {
   } catch {
     /* noop */
   }
-  return 'http://localhost:8086/api';
+  return 'https://www.ensotek.de/api';
 }
 
 const BASE_URL = trimSlash(
