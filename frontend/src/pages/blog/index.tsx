@@ -16,7 +16,7 @@
 import React, { useMemo } from 'react';
 import type { NextPage } from 'next';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import BlogPageContent from '@/components/containers/blog/BlogPageContent';
 import Feedback from '@/components/containers/feedback/Feedback';
 

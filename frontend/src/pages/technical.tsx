@@ -1,5 +1,5 @@
 import React from 'react';
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import TechnicalArea from '@/components/containers/cta/TechnicalArea';
 import TechnicalProject from '@/components/containers/projects/Project';
 

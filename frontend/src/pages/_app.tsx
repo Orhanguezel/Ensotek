@@ -7,7 +7,7 @@ import { Toaster } from 'sonner';
 
 import AnalyticsScripts from '@/features/analytics/AnalyticsScripts';
 import GAViewPages from '@/features/analytics/GAViewPages';
-import CookieConsentBanner from '@/components/layout/banner/CookieConsentBanner';
+import CookieConsentBanner from '@/layout/banner/CookieConsentBanner';
 
 // Global CSS
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -21,18 +21,18 @@ import '@/integrations/rtk/endpoints/_register';
 
 import { StoreProvider } from '@/store';
 import LangBoot from '@/i18n/LangBoot';
-import Layout from '@/components/layout/Layout';
+import Layout from '@/layout/Layout';
 
 // ✅ IMPORTANT: route change'de SEO override reset (rewrite/unmount edge-case fix)
 import { resetLayoutSeo } from '@/seo/layoutSeoStore';
 
 // Admin shell
-import AdminLayoutShell, { type ActiveTab } from '@/components/layout/admin/AdminLayout';
-import AdminHeader from '@/components/layout/admin/AdminHeader';
-import AdminFooter from '@/components/layout/admin/AdminFooter';
+import AdminLayoutShell, { type ActiveTab } from '@/layout/admin/AdminLayout';
+import AdminHeader from '@/layout/admin/AdminHeader';
+import AdminFooter from '@/layout/admin/AdminFooter';
 
 // Admin nav helpers
-import { isAdminPath, pathToTab, tabToPath } from '@/components/layout/admin/adminNav';
+import { isAdminPath, pathToTab, tabToPath } from '@/layout/admin/adminNav';
 
 function App({ Component, pageProps }: AppProps) {
   const router = useRouter();

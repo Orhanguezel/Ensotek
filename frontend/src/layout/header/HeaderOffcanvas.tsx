@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { type StaticImageData } from 'next/image';
 import { useRouter } from 'next/router';
 
-import { SiteLogo } from '@/components/layout/SiteLogo';
+import { SiteLogo } from '@/layout/SiteLogo';
 
 import { useResolvedLocale } from '@/i18n/locale';
 import { switchLocale } from '@/i18n/switchLocale';

@@ -20,7 +20,7 @@ import { useRouter } from 'next/router';
 import type { StaticImageData } from 'next/image';
 
 import Header from './header/Header';
-import FooterTwo from './footer/FooterTwo';
+import FooterTwo from './footer/Footer';
 import ScrollProgress from './ScrollProgress';
 
 import { SiteIconsHead } from '@/seo/SiteIconsHead';

@@ -3,7 +3,7 @@
 // Ensotek – GTM preferred, optional GA4 gtag.js (consent-mode)
 // - Pages Router: DO NOT use beforeInteractive outside pages/_document
 // - Consent Mode init via afterInteractive, with queued consent updates
-// - If GTM exists => loads GTM (GA4 should be configured in GTM)
+// - If GTM exists => loads GTM (page_view will be pushed to dataLayer by GAViewPages)
 // - If GTM missing but GA4 exists => loads gtag.js (send_page_view:false)
 // =============================================================
 'use client';
@@ -29,20 +29,22 @@ function isProdEnv() {
   return process.env.NODE_ENV === 'production';
 }
 
+function isValidGtmId(v: unknown) {
+  const s = String(v ?? '').trim();
+  return !!s && s.startsWith('GTM-');
+}
+
+function isValidGa4Id(v: unknown) {
+  const s = String(v ?? '').trim();
+  return !!s && s.startsWith('G-');
+}
+
 export default function AnalyticsScripts() {
   const { gtmId, ga4Id, isLoading } = useAnalyticsSettings();
-
   const isProd = isProdEnv();
 
-  const hasGtm = useMemo(() => {
-    const s = String(gtmId || '').trim();
-    return !!s && s.startsWith('GTM-');
-  }, [gtmId]);
-
-  const hasGa = useMemo(() => {
-    const s = String(ga4Id || '').trim();
-    return !!s && s.startsWith('G-');
-  }, [ga4Id]);
+  const hasGtm = useMemo(() => isValidGtmId(gtmId), [gtmId]);
+  const hasGa = useMemo(() => isValidGa4Id(ga4Id), [ga4Id]);
 
   // GTM noscript (Document kullanılmıyorsa pratik)
   useEffect(() => {
@@ -78,6 +80,8 @@ export default function AnalyticsScripts() {
       <Script id="analytics-consent-init" strategy="afterInteractive">
         {`
           window.dataLayer = window.dataLayer || [];
+
+          // gtag shim (safe even if gtag.js not loaded yet)
           function gtag(){ window.dataLayer.push(arguments); }
           window.gtag = window.gtag || gtag;
 
@@ -95,6 +99,7 @@ export default function AnalyticsScripts() {
 
           window.__analyticsConsentGranted = false;
 
+          // External setter for cookie banner
           window.__setAnalyticsConsent = function(next){
             try {
               var granted =
@@ -105,11 +110,17 @@ export default function AnalyticsScripts() {
               var v = granted ? 'granted' : 'denied';
               window.__analyticsConsentGranted = (v === 'granted');
 
-              // Update consent
-              window.gtag('consent', 'update', { analytics_storage: v });
+              // Update consent (gtag / Consent Mode)
+              window.gtag('consent', 'update', {
+                analytics_storage: v,
+                // keep ads denied by default unless you explicitly enable marketing later
+                ad_storage: 'denied',
+                ad_user_data: 'denied',
+                ad_personalization: 'denied'
+              });
 
-              // GTM side optional event
-              window.dataLayer.push({ event: 'consent_update', analytics_storage: v });
+              // Notify GTM (or any listener)
+              window.dataLayer.push({ event: 'ensotek_consent_update', analytics_storage: v });
             } catch (e) {}
           };
 
@@ -160,7 +171,7 @@ export default function AnalyticsScripts() {
 
                   window.gtag('js', new Date());
 
-                  // send_page_view:false => SPA page_view GAViewPages yönetir
+                  // send_page_view:false => SPA page_view GAViewPages will send
                   window.gtag('config', '${String(ga4Id)}', {
                     anonymize_ip: true,
                     send_page_view: false

@@ -15,7 +15,7 @@
 
 import React, { useMemo } from 'react';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import LibrarySection from '@/components/containers/library/Library';
 import WetBulbCalculator from '@/components/containers/library/WetBulbCalculator';
 

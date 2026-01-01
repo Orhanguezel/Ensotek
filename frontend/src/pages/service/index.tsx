@@ -11,7 +11,7 @@
 
 import React, { useMemo } from 'react';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import Service from '@/components/containers/service/Service';
 import ServiceMore from '@/components/containers/service/ServiceMore';
 

@@ -21,7 +21,7 @@
 import type { NextPage } from 'next';
 import React, { useMemo } from 'react';
 
-import Hero from '@/components/layout/banner/Hero';
+import Hero from '@/layout/banner/Hero';
 import AboutCounter from '@/components/containers/about/AboutCounter';
 import About from '@/components/containers/about/AboutSection';
 import Product from '@/components/containers/product/Product';

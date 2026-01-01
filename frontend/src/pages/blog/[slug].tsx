@@ -17,7 +17,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/router';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import BlogDetailsArea from '@/components/containers/blog/BlogDetails';
 import Feedback from '@/components/containers/feedback/Feedback';
 

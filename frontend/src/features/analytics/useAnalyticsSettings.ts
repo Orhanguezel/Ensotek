@@ -8,8 +8,6 @@
 
 import { useMemo } from 'react';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
-
-// i18n (PATTERN)
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 
 function coerceId(v: unknown): string {

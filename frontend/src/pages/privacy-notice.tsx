@@ -12,7 +12,7 @@
 
 import React, { useMemo } from 'react';
 
-import Banner from '@/components/layout/banner/Breadcrum';
+import Banner from '@/layout/banner/Breadcrum';
 import PrivacyNoticePageContent from '@/components/containers/legal/PrivacyNoticePageContent';
 
 import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
