@@ -49,7 +49,7 @@ VALUES
   1,
   10,
   NULL,
-  'http://localhost:8086/uploads/services/maintenance_and_repair.png',
+  'https://www.ensotek.de/uploads/services/maintenance_and_repair.png',
   NULL,
   'Existing cooling towers / plants / commercial buildings',
   '1 day – 4 weeks (scope dependent)',

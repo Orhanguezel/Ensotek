@@ -25,7 +25,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8006-1111-4111-8111-bbbbbbbb8006',
   1,1,70,
-  NULL,'http://localhost:8086/uploads/services/performance_optimization.png',NULL,
+  NULL,'https://www.ensotek.de/uploads/services/performance_optimization.png',NULL,
   'Measurement / reporting / optimization',
   '1 day – 4 weeks (measure + actions)',
   'Best results with periodic monitoring',

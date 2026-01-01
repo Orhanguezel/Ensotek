@@ -24,12 +24,12 @@ SET @IMG_QUALITY_MAIN :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1757875082/uploads/ensotek/about-images/russia-cooling-tower-1757875080869-645546842.webp';
 
 -- 6 Sertifika görselleri (LOCAL örnek)  ✅ (değiştirme / CDN yap)
-SET @IMG_CERT_1 := 'http://localhost:8086/uploads/zertifika/14001_1.jpg';
-SET @IMG_CERT_2 := 'http://localhost:8086/uploads/zertifika/45001_1.jpg';
-SET @IMG_CERT_3 := 'http://localhost:8086/uploads/zertifika/ce-belgesi-ce-declaration.jpg';
-SET @IMG_CERT_4 := 'http://localhost:8086/uploads/zertifika/eac-ensotek.jpg';
-SET @IMG_CERT_5 := 'http://localhost:8086/uploads/zertifika/iso-9001.jpg';
-SET @IMG_CERT_6 := 'http://localhost:8086/uploads/zertifika/iso-10002.jpg';
+SET @IMG_CERT_1 := 'https://www.ensotek.de/uploads/zertifika/14001_1.jpg';
+SET @IMG_CERT_2 := 'https://www.ensotek.de/uploads/zertifika/45001_1.jpg';
+SET @IMG_CERT_3 := 'https://www.ensotek.de/uploads/zertifika/ce-belgesi-ce-declaration.jpg';
+SET @IMG_CERT_4 := 'https://www.ensotek.de/uploads/zertifika/eac-ensotek.jpg';
+SET @IMG_CERT_5 := 'https://www.ensotek.de/uploads/zertifika/iso-9001.jpg';
+SET @IMG_CERT_6 := 'https://www.ensotek.de/uploads/zertifika/iso-10002.jpg';
 
 -- Cache-bust (deterministik)
 SET @IMG_QUALITY_MAIN := CONCAT(@IMG_QUALITY_MAIN, '?v=1');

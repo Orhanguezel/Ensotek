@@ -46,15 +46,15 @@ SET @TEAM_FT_1      := '44440006-4444-4444-8444-444444440006';
 -- -------------------------------------------------------------
 -- FEATURED IMAGES (primary) + random gallery extras
 -- -------------------------------------------------------------
-SET @IMG_TEAM_MGMT_1 := 'http://localhost:8086/uploads/team/1.jpeg';
-SET @IMG_TEAM_MGMT_2 := 'http://localhost:8086/uploads/team/2.jpeg';
-SET @IMG_TEAM_MGMT_3 := 'http://localhost:8086/uploads/team/3.jpeg';
+SET @IMG_TEAM_MGMT_1 := 'https://www.ensotek.de/uploads/team/1.jpeg';
+SET @IMG_TEAM_MGMT_2 := 'https://www.ensotek.de/uploads/team/2.jpeg';
+SET @IMG_TEAM_MGMT_3 := 'https://www.ensotek.de/uploads/team/3.jpeg';
 
-SET @IMG_TEAM_ENG_1 := 'http://localhost:8086/uploads/team/5.jpeg';
-SET @IMG_TEAM_SERVICE_1 := 'http://localhost:8086/uploads/team/5.jpeg';
-SET @IMG_TEAM_FT_1 := 'http://localhost:8086/uploads/team/5.jpeg';
+SET @IMG_TEAM_ENG_1 := 'https://www.ensotek.de/uploads/team/5.jpeg';
+SET @IMG_TEAM_SERVICE_1 := 'https://www.ensotek.de/uploads/team/5.jpeg';
+SET @IMG_TEAM_FT_1 := 'https://www.ensotek.de/uploads/team/5.jpeg';
 
-SET @IMG_TEAM_COMMON_1 := 'http://localhost:8086/uploads/team/9.jpeg';
+SET @IMG_TEAM_COMMON_1 := 'https://www.ensotek.de/uploads/team/9.jpeg';
 SET @IMG_TEAM_COMMON_2 := 'https://images.unsplash.com/photo-1522071901873-411886a10004?auto=format&fit=crop&w=1400&h=900&q=80';
 SET @IMG_TEAM_COMMON_3 := 'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&h=900&q=80';
 SET @IMG_TEAM_COMMON_4 := 'https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=1400&h=900&q=80';

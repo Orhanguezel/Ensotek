@@ -39,19 +39,19 @@ SET @MODULE_KEY_NEWS := 'news';
 -- FEATURED IMAGE (Cloudinary)
 -- -------------------------------------------------------------
 SET @IMG_NEWS_RENEWED :=
-  'http://localhost:8086/uploads/news/site1.png';
+  'https://www.ensotek.de/uploads/news/site1.png';
 
 -- -------------------------------------------------------------
 -- GALLERY IMAGES (random)
 -- -------------------------------------------------------------
 SET @IMG_NEWS_2 :=
-  'http://localhost:8086/uploads/news/site2.png';
+  'https://www.ensotek.de/uploads/news/site2.png';
 SET @IMG_NEWS_3 :=
-  'http://localhost:8086/uploads/news/site3.png';
+  'https://www.ensotek.de/uploads/news/site3.png';
 SET @IMG_NEWS_4 :=
-  'http://localhost:8086/uploads/news/site4.png';
+  'https://www.ensotek.de/uploads/news/site4.png';
 SET @IMG_NEWS_5 :=
-  'http://localhost:8086/uploads/news/site5.png';
+  'https://www.ensotek.de/uploads/news/site5.png';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)

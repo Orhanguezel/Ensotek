@@ -25,7 +25,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8002-1111-4111-8111-bbbbbbbb8002',
   1,1,90,
-  NULL,'http://localhost:8086/uploads/services/emergency_response.png',NULL,
+  NULL,'https://www.ensotek.de/uploads/services/emergency_response.png',NULL,
   'Urgent troubleshooting / safe restart',
   'Same day – 7 days (depending on fault)',
   'Follow-up maintenance action plan recommended',

@@ -451,7 +451,7 @@ VALUES
   '44444444-5555-4666-8777-aaaaaaaaaaaa',
   '44444444-4444-4444-4444-444444444444',
   NULL,
-  'http://localhost:8086/uploads/library/how-is-closed-circuit-water-cooling-tower-operation.png',
+  'https://www.ensotek.de/uploads/library/how-is-closed-circuit-water-cooling-tower-operation.png',
   10,
   1,
   NOW(3),

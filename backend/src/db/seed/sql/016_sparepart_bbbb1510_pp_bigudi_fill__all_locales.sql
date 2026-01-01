@@ -52,11 +52,11 @@ VALUES (
   'aaaa1001-1111-4111-8111-aaaaaaaa1001',
   'bbbb1003-1111-4111-8111-bbbbbbbb1003',
   0.00,
-  'http://localhost:8086/uploads/material/bigudi-250x250-1.jpg',
+  'https://www.ensotek.de/uploads/material/bigudi-250x250-1.jpg',
   NULL,
   JSON_ARRAY(
-    'http://localhost:8086/uploads/material/bigudi-250x250-1.jpg',
-    'http://localhost:8086/uploads/material/su-dagitim-250x250-1.jpg'
+    'https://www.ensotek.de/uploads/material/bigudi-250x250-1.jpg',
+    'https://www.ensotek.de/uploads/material/su-dagitim-250x250-1.jpg'
   ),
   JSON_ARRAY(),
   1,
