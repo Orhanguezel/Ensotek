@@ -35,9 +35,12 @@ import {
   reorderServices,
 } from './repository';
 
-// ✅ Dinamik locale/def locale DB’den
-import { getAppLocales, getDefaultLocale } from '@/modules/siteSettings/service';
-import { normalizeLocale } from '@/core/i18n';
+import {
+  LOCALES,
+  DEFAULT_LOCALE,
+  normalizeLocale,
+  ensureLocalesLoadedFromSettings,
+} from '@/core/i18n';
 
 type LocaleCode = string;
 type LocaleQueryLike = { locale?: string; default_locale?: string };
@@ -51,30 +54,38 @@ function normalizeLooseLocale(v: unknown): string | null {
   return normalizeLocale(s) || s.toLowerCase();
 }
 
+function pickSupportedLocale(raw?: string | null): string | null {
+  const n = normalizeLooseLocale(raw);
+  if (!n) return null;
+  return LOCALES.includes(n) ? n : null;
+}
+
 /**
- * Admin için DİNAMİK locale çözümü:
- *  - locale: query.locale > req.locale > db default_locale > ilk app_locales > "de"
- *  - default_locale: query.default_locale > db default_locale > "de"
+ * Admin için locale çözümü (core/i18n.ts runtime LOCALES kullanır)
+ *
+ * - ensureLocalesLoadedFromSettings() ile LOCALES güncel tutulur
+ * - locale: query.locale > req.locale > DEFAULT_LOCALE > LOCALES[0]
+ * - default_locale: query.default_locale > DEFAULT_LOCALE > LOCALES[0]
  */
 async function resolveLocales(
   req: any,
   query?: LocaleQueryLike,
 ): Promise<{ locale: LocaleCode; def: LocaleCode }> {
+  await ensureLocalesLoadedFromSettings();
+
   const q = query ?? ((req.query ?? {}) as LocaleQueryLike);
 
-  const reqRaw = normalizeLooseLocale(q.locale) ?? normalizeLooseLocale(req.locale);
-  const defRawFromQuery = normalizeLooseLocale(q.default_locale);
+  const reqCandidate = pickSupportedLocale(q.locale) || pickSupportedLocale(req.locale) || null;
+  const defCandidate = pickSupportedLocale(q.default_locale) || null;
 
-  const appLocales = await getAppLocales(reqRaw);
-  const dbDefault = normalizeLooseLocale(await getDefaultLocale(reqRaw)) ?? 'de';
+  const safeDefault =
+    defCandidate ||
+    (LOCALES.includes(DEFAULT_LOCALE) ? DEFAULT_LOCALE : null) ||
+    (LOCALES[0] ?? 'de');
 
-  const safeDefault = appLocales.includes(dbDefault) ? dbDefault : appLocales[0] ?? 'de';
-  const safeLocale = reqRaw && appLocales.includes(reqRaw) ? reqRaw : safeDefault;
+  const safeLocale = reqCandidate || safeDefault;
 
-  const safeDef =
-    defRawFromQuery && appLocales.includes(defRawFromQuery) ? defRawFromQuery : safeDefault;
-
-  return { locale: safeLocale, def: safeDef };
+  return { locale: safeLocale, def: safeDefault };
 }
 
 /* ----------------------------- list/get ----------------------------- */
@@ -148,6 +159,21 @@ export const createServiceAdmin: RouteHandler<{ Body: UpsertServiceBody }> = asy
   const id = randomUUID();
   const now = new Date();
 
+  // ✅ cover mirror: image_url canonical, featured_image legacy mirror
+  const coverImageUrl =
+    typeof b.image_url !== 'undefined'
+      ? b.image_url ?? null
+      : typeof b.featured_image !== 'undefined'
+      ? b.featured_image ?? null
+      : null;
+
+  const coverFeaturedImage =
+    typeof b.featured_image !== 'undefined'
+      ? b.featured_image ?? null
+      : typeof b.image_url !== 'undefined'
+      ? b.image_url ?? null
+      : null;
+
   await createServiceParent({
     id,
     type: b.type ?? 'other',
@@ -159,8 +185,9 @@ export const createServiceAdmin: RouteHandler<{ Body: UpsertServiceBody }> = asy
     is_active: toBool(b.is_active) ? 1 : 0,
     display_order: typeof b.display_order === 'number' ? b.display_order : 1,
 
-    featured_image: typeof b.featured_image !== 'undefined' ? b.featured_image ?? null : null,
-    image_url: typeof b.image_url !== 'undefined' ? b.image_url ?? null : null,
+    // ✅ mirror applied
+    image_url: coverImageUrl,
+    featured_image: coverFeaturedImage,
     image_asset_id: typeof b.image_asset_id !== 'undefined' ? b.image_asset_id ?? null : null,
 
     created_at: now as any,
@@ -181,7 +208,6 @@ export const createServiceAdmin: RouteHandler<{ Body: UpsertServiceBody }> = asy
     typeof b.meta_description !== 'undefined' ||
     typeof b.meta_keywords !== 'undefined';
 
-  // ✅ request locale’i dinamik çöz
   const { locale: reqLocale, def } = await resolveLocales(req, { locale: b.locale });
 
   if (hasI18nFields) {
@@ -253,11 +279,26 @@ export const updateServiceAdmin: RouteHandler<{
     if (typeof b.is_active !== 'undefined') parentPatch.is_active = toBool(b.is_active) ? 1 : 0;
     if (typeof b.display_order !== 'undefined') parentPatch.display_order = b.display_order;
 
-    if (typeof b.featured_image !== 'undefined')
-      parentPatch.featured_image = b.featured_image ?? null;
-    if (typeof b.image_url !== 'undefined') parentPatch.image_url = b.image_url ?? null;
     if (typeof b.image_asset_id !== 'undefined')
       parentPatch.image_asset_id = b.image_asset_id ?? null;
+
+    // ✅ cover mirror (fail-safe)
+    const hasFeatured = typeof b.featured_image !== 'undefined';
+    const hasImageUrl = typeof b.image_url !== 'undefined';
+
+    if (hasFeatured && !hasImageUrl) {
+      const v = b.featured_image ?? null;
+      parentPatch.featured_image = v;
+      parentPatch.image_url = v; // mirror to canonical
+    } else if (!hasFeatured && hasImageUrl) {
+      const v = b.image_url ?? null;
+      parentPatch.image_url = v;
+      parentPatch.featured_image = v; // mirror to legacy
+    } else if (hasFeatured && hasImageUrl) {
+      // both provided => keep as provided (or force equality if you prefer)
+      parentPatch.featured_image = b.featured_image ?? null;
+      parentPatch.image_url = b.image_url ?? null;
+    }
 
     await updateServiceParent(req.params.id, parentPatch);
   }
@@ -361,6 +402,7 @@ export const createServiceImageAdmin: RouteHandler<{
     typeof b.title !== 'undefined' ||
     typeof b.alt !== 'undefined' ||
     typeof b.caption !== 'undefined';
+
   if (hasI18nFields) {
     const payload = {
       title: typeof b.title !== 'undefined' ? b.title ?? null : undefined,
@@ -410,6 +452,7 @@ export const updateServiceImageAdmin: RouteHandler<{
     typeof b.title !== 'undefined' ||
     typeof b.alt !== 'undefined' ||
     typeof b.caption !== 'undefined';
+
   const { locale: loc, def } = await resolveLocales(req, { locale: b.locale });
 
   if (hasI18nFields) {

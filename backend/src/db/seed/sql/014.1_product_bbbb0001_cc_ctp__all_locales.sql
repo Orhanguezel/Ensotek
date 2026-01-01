@@ -1,15 +1,16 @@
 -- =============================================================
--- FILE: 014.1_product_bbbb0001_cc_ctp__all_locales.sql (FINAL)
+-- FILE: 014.1_product_bbbb0001_cc_ctp__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Product Seed (01/..)
 -- Product: Closed Circuit Cooling Towers – CC CTP / CC DCTP Series
 --
--- FIXES (sparepart pattern):
+-- FIXES:
 --  - products.image_url: FULL URL
 --  - products.images: MULTI IMAGE JSON_ARRAY
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
 --  - TR/EN/DE in ONE FILE
 --  - product_specs uses order_num (NO display_order)
 --  - all child IDs: CHAR(36) safe
+--  - ✅ product_i18n.specifications: RECORD<string,string> (NO JSON_ARRAY values) (validation.ts aligned)
 --
 -- RULES:
 --  - products.item_type = 'product'
@@ -97,10 +98,11 @@ VALUES (
   'Kapalı sistemler, soğutulacak suyun kirliliğe karşı hassas olduğu proseslerde tercih edilir. Temiz kalması istenen su, kapalı tip kule içindeki serpantinlerden geçerken soğutulur. Sıcak su boru içerisinden geçerken, soğuk hava ve kulenin sirkülasyon suyu boru yüzeyinden içerideki suyu soğutur. Kapalı sistem soğutma kuleleri; hava kompresörleri, indüksiyon ocakları ve chiller grupları gibi hassas ekipmanlar içeren proseslerde kullanılır.',
   'Kapalı tip su soğutma kulesi (closed circuit cooling tower) – CC CTP / CC DCTP',
   JSON_ARRAY('kapalı tip', 'closed circuit', 'soğutma kulesi', 'serpantin', 'proses soğutma', 'ensotek'),
+  -- ✅ validation.ts: Record<string,string> -> ALL VALUES MUST BE STRING
   JSON_OBJECT(
     'principle', 'Proses akışkanı serpantin/boru içinden geçer; dıştan hava + sirkülasyon suyu ile boru yüzeyinden soğutulur.',
-    'useCases', JSON_ARRAY('Hava kompresörleri', 'İndüksiyon ocakları', 'Chiller grupları'),
-    'series', JSON_ARRAY('CC CTP', 'CC DCTP')
+    'useCases', 'Hava kompresörleri | İndüksiyon ocakları | Chiller grupları',
+    'series', 'CC CTP | CC DCTP'
   ),
   'Kapalı Tip Su Soğutma Kuleleri | CC CTP / CC DCTP | Ensotek',
   'Kirliliğe hassas proses suları için kapalı tip (closed circuit) su soğutma kuleleri. CC CTP / CC DCTP serileri, model seçenekleri ve teknik özet.'
@@ -178,10 +180,11 @@ VALUES (
   'Closed circuit systems are preferred in processes where the water to be cooled is susceptible to contamination. The water required to remain clean is cooled as it passes through the pipe coils in the closed type tower. Hot water flows inside the coil, while cold air and circulating water remove heat from the coil surface. Closed circuit cooling towers are commonly used in processes containing sensitive equipment such as air compressors, induction furnaces and chillers.',
   'Closed circuit cooling tower – CC CTP / CC DCTP series',
   JSON_ARRAY('closed circuit', 'cooling tower', 'coil', 'process cooling', 'ensotek'),
+  -- ✅ validation.ts: Record<string,string> -> ALL VALUES MUST BE STRING
   JSON_OBJECT(
     'principle', 'Process fluid flows inside the coil; it is cooled from the outside by air and circulating water.',
-    'useCases', JSON_ARRAY('Air compressors', 'Induction furnaces', 'Chillers'),
-    'series', JSON_ARRAY('CC CTP', 'CC DCTP')
+    'useCases', 'Air compressors | Induction furnaces | Chillers',
+    'series', 'CC CTP | CC DCTP'
   ),
   'Closed Circuit Cooling Towers | CC CTP / CC DCTP | Ensotek',
   'Closed circuit cooling towers for contamination-sensitive process waters. CC CTP / CC DCTP series with a broad model range and technical highlights.'
@@ -259,10 +262,11 @@ VALUES (
   'Geschlossene Systeme werden in Prozessen bevorzugt, in denen das zu kühlende Wasser gegenüber Verunreinigungen empfindlich ist. Das Medium, das sauber bleiben soll, wird gekühlt, während es durch die Rohrschlangen (Coils) im geschlossenen Turm strömt. Das heiße Prozesswasser fließt im Rohr, während Außenluft und Umlaufwasser Wärme über die Rohr-/Coil-Oberfläche abführen. Geschlossene Kühltürme werden u. a. bei Luftkompressoren, Induktionsöfen und Kältemaschinen (Chiller) eingesetzt.',
   'Geschlossener Kühlturm – CC CTP / CC DCTP Serie',
   JSON_ARRAY('geschlossener kühlturm', 'closed circuit', 'coil', 'prozesskühlung', 'ensotek'),
+  -- ✅ validation.ts: Record<string,string> -> ALL VALUES MUST BE STRING
   JSON_OBJECT(
     'prinzip', 'Prozessmedium strömt im Coil; Kühlung von außen durch Luft und Umlaufwasser über die Coil-Oberfläche.',
-    'einsatz', JSON_ARRAY('Luftkompressoren', 'Induktionsöfen', 'Chiller'),
-    'serien', JSON_ARRAY('CC CTP', 'CC DCTP')
+    'einsatz', 'Luftkompressoren | Induktionsöfen | Chiller',
+    'serien', 'CC CTP | CC DCTP'
   ),
   'Geschlossene Kühltürme | CC CTP / CC DCTP | Ensotek',
   'Geschlossene (Closed-Circuit) Kühltürme für kontaminationssensitive Prozessmedien. CC CTP / CC DCTP mit umfangreicher Modellauswahl und technischen Eckdaten.'

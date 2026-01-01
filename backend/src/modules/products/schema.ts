@@ -312,6 +312,50 @@ export const productStock = mysqlTable(
   ],
 );
 
+export const productImages = mysqlTable(
+  'product_images',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    product_id: char('product_id', { length: 36 }).notNull(),
+    locale: varchar('locale', { length: 8 }).notNull().default('de'),
+
+    image_url: longtext('image_url').notNull(),
+    image_asset_id: char('image_asset_id', { length: 36 }),
+
+    title: varchar('title', { length: 255 }),
+    alt: varchar('alt', { length: 255 }),
+    caption: text('caption'),
+
+    display_order: int('display_order').notNull().default(0),
+    is_active: tinyint('is_active').notNull().default(1).$type<boolean>(),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('product_images_product_id_idx').on(t.product_id),
+    index('product_images_product_locale_idx').on(t.product_id, t.locale),
+    index('product_images_order_idx').on(t.product_id, t.display_order),
+
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_images_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export type ProductImageRow = typeof productImages.$inferSelect;
+export type NewProductImageRow = typeof productImages.$inferInsert;
+
 // Alias
 export { productReviews as product_reviews };
 export { productOptions as product_options };

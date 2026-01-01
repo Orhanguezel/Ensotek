@@ -43,7 +43,14 @@ const AdminSubCategoryEditPage: React.FC = () => {
     data: subCategory,
     isLoading,
     isFetching,
-  } = useGetSubCategoryAdminQuery({ id, locale: currentLocale }, { skip: shouldSkip });
+  } = useGetSubCategoryAdminQuery(
+    { id, locale: currentLocale },
+    {
+      skip: shouldSkip,
+      refetchOnMountOrArgChange: true, 
+    },
+  );
+
 
   const loading = isLoading || isFetching || shouldSkip;
 

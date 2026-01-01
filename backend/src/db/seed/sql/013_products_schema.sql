@@ -1,6 +1,9 @@
 -- =============================================================
--- 013_products_schema.sql (FINAL)
--- Products + Product_i18n + Specs + FAQs + Reviews + Options + Stock
+-- 013_products_schema.sql (FINAL / SCHEMA+VALIDATION ALIGNED)
+-- Products + Product_i18n + Specs + FAQs + Reviews + Options + Stock + Images Pool
+-- - products.item_type: product|sparepart
+-- - storage_asset_id: VARCHAR(64) (validation: assetId max(64), NOT uuid-only)
+-- - adds: product_images table (pool)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -20,14 +23,19 @@ CREATE TABLE IF NOT EXISTS products (
 
   price              DECIMAL(10,2) NOT NULL,
 
+  -- ✅ Görseller (tekil kapak + çoklu galeri)
   image_url          LONGTEXT      DEFAULT NULL,
-  storage_asset_id   CHAR(36)      DEFAULT NULL,
+
+  -- ❗ validation.assetId uuid değil -> VARCHAR(64) olmalı
+  storage_asset_id   VARCHAR(64)   DEFAULT NULL,
+
   images             JSON          DEFAULT (JSON_ARRAY()),
   storage_image_ids  JSON          DEFAULT (JSON_ARRAY()),
 
   is_active          TINYINT(1)    NOT NULL DEFAULT 1,
   is_featured        TINYINT(1)    NOT NULL DEFAULT 0,
 
+  -- 🔢 Drag & drop sıralama için
   order_num          INT(11)       NOT NULL DEFAULT 0,
 
   product_code       VARCHAR(64)   DEFAULT NULL,
@@ -113,8 +121,10 @@ CREATE TABLE IF NOT EXISTS product_specs (
                ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
-  KEY product_specs_product_locale_idx (product_id, locale),
-  KEY product_specs_locale_order_idx   (locale, order_num),
+
+  KEY product_specs_product_id_idx        (product_id),
+  KEY product_specs_product_locale_idx    (product_id, locale),
+  KEY product_specs_locale_idx            (locale),
 
   CONSTRAINT fk_product_specs_product
     FOREIGN KEY (product_id) REFERENCES products(id)
@@ -141,7 +151,11 @@ CREATE TABLE IF NOT EXISTS product_faqs (
                  ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
+
+  KEY product_faqs_product_id_idx     (product_id),
+  KEY product_faqs_order_idx          (display_order),
   KEY product_faqs_product_locale_idx (product_id, locale),
+  KEY product_faqs_locale_idx         (locale),
 
   CONSTRAINT fk_product_faqs_product
     FOREIGN KEY (product_id) REFERENCES products(id)
@@ -169,7 +183,10 @@ CREATE TABLE IF NOT EXISTS product_reviews (
                  ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
-  KEY product_reviews_product_active_idx (product_id, is_active),
+
+  KEY product_reviews_product_id_idx     (product_id),
+  KEY product_reviews_approved_idx       (product_id, is_active),
+  KEY product_reviews_rating_idx         (rating),
 
   CONSTRAINT fk_product_reviews_product
     FOREIGN KEY (product_id) REFERENCES products(id)
@@ -215,9 +232,50 @@ CREATE TABLE IF NOT EXISTS product_stock (
   created_at     DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (id),
-  KEY product_stock_product_used_idx (product_id, is_used),
+
+  KEY product_stock_product_id_idx      (product_id),
+  KEY product_stock_is_used_idx         (product_id, is_used),
+  KEY product_stock_order_item_id_idx   (order_item_id),
 
   CONSTRAINT fk_product_stock_product
+    FOREIGN KEY (product_id) REFERENCES products(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+-- =========================
+-- PRODUCT IMAGES (POOL)  ✅ NEW
+-- =========================
+CREATE TABLE IF NOT EXISTS product_images (
+  id            CHAR(36)     NOT NULL,
+
+  product_id    CHAR(36)     NOT NULL,
+  locale        VARCHAR(8)   NOT NULL DEFAULT 'de',
+
+  image_url     LONGTEXT     NOT NULL,
+
+  -- ❗ asset id uuid değil -> VARCHAR(64)
+  image_asset_id VARCHAR(64) DEFAULT NULL,
+
+  title         VARCHAR(255) DEFAULT NULL,
+  alt           VARCHAR(255) DEFAULT NULL,
+  caption       TEXT         DEFAULT NULL,
+
+  display_order INT(11)      NOT NULL DEFAULT 0,
+  is_active     TINYINT(1)   NOT NULL DEFAULT 1,
+
+  created_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  updated_at    DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
+                 ON UPDATE CURRENT_TIMESTAMP(3),
+
+  PRIMARY KEY (id),
+
+  KEY product_images_product_id_idx       (product_id),
+  KEY product_images_product_locale_idx   (product_id, locale),
+  KEY product_images_order_idx            (product_id, display_order),
+
+  CONSTRAINT fk_product_images_product
     FOREIGN KEY (product_id) REFERENCES products(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB

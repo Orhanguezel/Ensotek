@@ -19,6 +19,10 @@ import { STRICT_SEO_KEYS, validateSeoSettingValue, assertSeoLocaleRule } from '.
  *  - gtm_container_id: global
  *  - ga4_measurement_id: global (GTM yoksa fallback)
  *  - cookie_consent: global config
+ *
+ * Media (logo/favicon) yaklaşımı:
+ *  - site_logo / site_logo_dark / site_logo_light / site_favicon => global
+ *  - value: string URL veya { url, asset_id, alt } gibi JSON object olabilir
  */
 
 const normKey = (key: unknown) =>
@@ -65,21 +69,30 @@ export const GLOBAL_ONLY_KEYS = new Set<string>([
   'cloudinary_unsigned_preset',
   'storage_cdn_public_base',
   'storage_public_api_base',
+
+  // ✅ site media (global-only)
+  'site_logo',
+  'site_logo_dark',
+  'site_logo_light',
+  'site_favicon',
+  'site_apple_touch_icon', // opsiyonel ama faydalı
+  'site_app_icon_512',
+  'site_og_default_image',
 ]);
 
 /**
  * Value normalization/validation by key.
  * - SEO keys: strict Zod validation (single source: seo.validation.ts)
- * - Others: pass-through (or later: add analytics id format validators if desired)
+ * - Others: pass-through
  */
 export function normalizeValueByKey(key: string, value: JsonLike): JsonLike {
   const k = normKey(key);
 
   if (STRICT_SEO_KEYS.has(k)) {
-    // validateSeoSettingValue throws (ZodError or custom error)
     return validateSeoSettingValue(k, value) as unknown as JsonLike;
   }
 
+  // Media keys: pass-through (string veya object)
   return value;
 }
 

@@ -25,7 +25,7 @@
         }
     }
     &__info {
-        background: var(--clr-common-white)none repeat scroll 0 0;
+        background: var(--clr-common-white) none repeat scroll 0 0;
         border-left: 3px solid var(--clr-theme-1);
         position: fixed;
         right: 0;
@@ -165,7 +165,6 @@
                 text-align: center;
                 border: 1px solid var(--clr-border-1);
                 @include border-radius(50%);
-                @include border-radius(50%);
                 @include transition(.3s);
                 overflow: hidden;
                 color: var(--clr-common-heading);
@@ -276,5 +275,75 @@
         visibility: visible;
         @include transition(.3s);
     }
-}
 
+    /* -------- Language area -------- */
+    &__lang-label {
+        font-size: 14px;
+    }
+
+    &__lang-select {
+        max-width: 240px;
+    }
+
+    /* -------- Mobile menu / submenu -------- */
+    &__menu {
+        .offcanvas__menu-item {
+            padding-left: 0;
+
+            &.depth-1 {
+                padding-left: 14px;
+            }
+
+            &.depth-2 {
+                padding-left: 28px;
+            }
+
+            &.depth-3 {
+                padding-left: 42px;
+            }
+        }
+
+        .submenu-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            background: transparent;
+            border: 0;
+            padding: 10px 0;
+            margin: 0;
+            text-align: left;
+            cursor: pointer;
+            font: inherit;
+            color: inherit;
+        }
+
+        .caret {
+            width: 8px;
+            height: 8px;
+            border-right: 2px solid currentColor;
+            border-bottom: 2px solid currentColor;
+            transform: rotate(45deg);
+            transition: transform 160ms ease;
+            margin-right: 2px;
+            opacity: 0.8;
+            flex: 0 0 auto;
+        }
+
+        li.has-submenu.is-open > .submenu-toggle .caret {
+            transform: rotate(-135deg);
+        }
+
+        ul.submenu {
+            display: none;
+            margin: 6px 0 8px 0;
+            padding-left: 12px;
+            border-left: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        ul.submenu.open {
+            display: block;
+        }
+    }
+}

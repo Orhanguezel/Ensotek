@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/modules/categories/schema.ts
+// FILE: src/modules/categories/schema.ts  (FINAL)
 // =============================================================
 import {
   mysqlTable,

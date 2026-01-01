@@ -9,6 +9,10 @@
 // - RTK Query: refetchOnMountOrArgChange (global + locale)
 // - Deterministic preview
 // - site_meta_default GLOBAL(*) olamaz (override/create/restore guard)
+//
+// NEW:
+// - Global OG default image (site_og_default_image, locale='*')
+//   bu tab üzerinden de AdminImageUploadField ile yönetilebilir.
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -23,11 +27,9 @@ import {
 
 import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
 
-import {
-  DEFAULT_SEO_GLOBAL,
-  DEFAULT_SITE_SEO_GLOBAL,
-  DEFAULT_SITE_META_DEFAULT_BY_LOCALE,
-} from '@/seo/seoSchema';
+import { DEFAULT_SEO_GLOBAL, DEFAULT_SITE_META_DEFAULT_BY_LOCALE } from '@/seo/seoSchema';
+
+import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 /* ----------------------------- helpers ----------------------------- */
 
@@ -132,6 +134,62 @@ function getEditHref(key: string, targetLocale: string) {
   )}`;
 }
 
+/* ----- media helpers (OG default image) ----- */
+
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+
+/**
+ * DB'de media value:
+ *  - string url
+ *  - object: { url: "..." }
+ *  - stringified json: "{ "url": "..." }"
+ */
+function extractUrlFromSettingValue(v: SettingValue): string {
+  if (v === null || v === undefined) return '';
+
+  if (typeof v === 'string') {
+    const s = v.trim();
+    if (!s) return '';
+
+    const looksJson =
+      (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'));
+
+    if (!looksJson) return s;
+
+    try {
+      const parsed = JSON.parse(s);
+      return safeStr((parsed as any)?.url) || '';
+    } catch {
+      return s;
+    }
+  }
+
+  if (typeof v === 'object') {
+    return safeStr((v as any)?.url) || '';
+  }
+
+  return '';
+}
+
+/** Save format: JSON object { url } */
+function toMediaValue(url: string): SettingValue {
+  const u = safeStr(url);
+  if (!u) return null;
+  return { url: u };
+}
+
+async function copyToClipboard(text: string) {
+  const t = safeStr(text);
+  if (!t) return;
+
+  try {
+    await navigator.clipboard.writeText(t);
+    toast.success('URL kopyalandı.');
+  } catch {
+    toast.error('Kopyalama başarısız. Tarayıcı izni engelliyor olabilir.');
+  }
+}
+
 /* ----------------------------- component ----------------------------- */
 
 export type SeoSettingsTabProps = {
@@ -152,6 +210,20 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
     return { locale, q };
   }, [locale, search]);
 
+  // OG default image (GLOBAL '*') – sadece site_og_default_image
+  const ogArgs = useMemo(
+    () => ({
+      locale: '*',
+      // IMPORTANT: "as const" KULLANMIYORUZ; ListParams.keys => string[]
+      keys: ['site_og_default_image'],
+      sort: 'key' as const,
+      order: 'asc' as const,
+      limit: 1,
+      offset: 0,
+    }),
+    [],
+  );
+
   // ✅ IMPORTANT: refetchOnMountOrArgChange fixes stale locale switching in this tab
   const qGlobal = useListSiteSettingsAdminQuery(listArgsGlobal, {
     skip: !locale,
@@ -160,6 +232,10 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
 
   const qLocale = useListSiteSettingsAdminQuery(listArgsLocale, {
     skip: !locale,
+    refetchOnMountOrArgChange: true,
+  });
+
+  const qOg = useListSiteSettingsAdminQuery(ogArgs, {
     refetchOnMountOrArgChange: true,
   });
 
@@ -191,13 +267,15 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
   const busy =
     qGlobal.isLoading ||
     qLocale.isLoading ||
+    qOg.isLoading ||
     qGlobal.isFetching ||
     qLocale.isFetching ||
+    qOg.isFetching ||
     isSaving ||
     isDeleting;
 
   const refetchAll = async () => {
-    await Promise.all([qGlobal.refetch(), qLocale.refetch()]);
+    await Promise.all([qGlobal.refetch(), qLocale.refetch(), qOg.refetch()]);
   };
 
   // ✅ Locale changed => refetch; prevents “previous locale view”
@@ -254,7 +332,8 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
       if (key === 'seo') {
         await updateSetting({ key, locale: targetLocale, value: DEFAULT_SEO_GLOBAL }).unwrap();
       } else if (key === 'site_seo') {
-        await updateSetting({ key, locale: targetLocale, value: DEFAULT_SITE_SEO_GLOBAL }).unwrap();
+        // ✅ Artık site_seo için de aynı global schema kullanılıyor
+        await updateSetting({ key, locale: targetLocale, value: DEFAULT_SEO_GLOBAL }).unwrap();
       } else if (key === 'site_meta_default') {
         if (targetLocale === '*') {
           toast.error('site_meta_default global(*) olamaz. Locale seçerek restore et.');
@@ -289,7 +368,7 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
         await updateSetting({
           key: k,
           locale: '*',
-          value: k === 'seo' ? DEFAULT_SEO_GLOBAL : DEFAULT_SITE_SEO_GLOBAL,
+          value: DEFAULT_SEO_GLOBAL, // ✅ site_seo da aynı şemayı kullanıyor
         }).unwrap();
       }
       toast.success('Eksik GLOBAL SEO kayıtları oluşturuldu.');
@@ -313,6 +392,40 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
     // site_meta_default global edit yok -> locale ile aç
     if (key === 'site_meta_default') return locale;
     return '*';
+  };
+
+  // ---------------- OG DEFAULT IMAGE (GLOBAL '*') STATE ----------------
+
+  const ogRow: SiteSetting | null = useMemo(() => {
+    const arr = Array.isArray(qOg.data) ? qOg.data : [];
+    const row = arr.find((r) => r && r.key === 'site_og_default_image') || null;
+    return (row as SiteSetting | null) ?? null;
+  }, [qOg.data]);
+
+  const ogUrl = useMemo(() => {
+    if (!ogRow) return '';
+    return extractUrlFromSettingValue(ogRow.value as SettingValue);
+  }, [ogRow]);
+
+  const handleOgChange = async (nextUrl: string) => {
+    const u = safeStr(nextUrl);
+    if (!u) return;
+
+    try {
+      await updateSetting({
+        key: 'site_og_default_image',
+        locale: '*',
+        value: toMediaValue(u),
+      }).unwrap();
+      toast.success('Varsayılan OG görseli güncellendi.');
+      await qOg.refetch();
+    } catch (err: any) {
+      const msg =
+        err?.data?.error?.message ||
+        err?.message ||
+        'Varsayılan OG görseli kaydedilirken hata oluştu.';
+      toast.error(msg);
+    }
   };
 
   return (
@@ -349,6 +462,48 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
       </div>
 
       <div className="card-body">
+        {/* OG DEFAULT IMAGE (GLOBAL '*') BLOĞU */}
+        <div className="mb-3 border rounded-2 p-3">
+          <div className="d-flex justify-content-between align-items-center mb-2">
+            <div>
+              <div className="small fw-semibold">Varsayılan OG Görseli (Global)</div>
+              <div className="text-muted small">
+                Key: <code>site_og_default_image</code> / <code>locale=&quot;*&quot;</code>
+              </div>
+            </div>
+
+            {ogUrl && (
+              <button
+                type="button"
+                className="btn btn-outline-secondary btn-sm"
+                onClick={() => void copyToClipboard(ogUrl)}
+                disabled={busy}
+              >
+                URL Kopyala
+              </button>
+            )}
+          </div>
+
+          <AdminImageUploadField
+            label=""
+            helperText={
+              <span className="text-muted small">
+                Buradan yüklenen görsel, global OG varsayılanı olarak kullanılır. Brand &amp; Media
+                tabındaki <code>site_og_default_image</code> ile aynıdır.
+              </span>
+            }
+            bucket="public"
+            folder="site-media"
+            metadata={{ key: 'site_og_default_image', scope: 'site_settings', locale: '*' }}
+            value={ogUrl}
+            onChange={(u) => void handleOgChange(u)}
+            disabled={busy}
+            openLibraryHref="/admin/storage"
+            previewAspect="16x9"
+            previewObjectFit="cover"
+          />
+        </div>
+
         <div className="input-group input-group-sm mb-3">
           <span className="input-group-text">Ara</span>
           <input

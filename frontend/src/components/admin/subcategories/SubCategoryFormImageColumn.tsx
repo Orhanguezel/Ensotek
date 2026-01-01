@@ -1,10 +1,12 @@
 // =============================================================
 // FILE: src/components/admin/subcategories/SubCategoryFormImageColumn.tsx
 // Ensotek – Alt Kategori Görsel/Icon Kolonu
-// Kategori ile aynı storage upload pattern'i
+// - FIX: Upload sonrası anlık preview render (local state sync + key remount)
 // =============================================================
 
-import React from 'react';
+'use client';
+
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
@@ -21,6 +23,8 @@ export type SubCategoryFormImageColumnProps = {
   onIconChange: (url: string) => void;
 };
 
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+
 export const SubCategoryFormImageColumn: React.FC<SubCategoryFormImageColumnProps> = ({
   metadata,
   iconValue,
@@ -29,22 +33,47 @@ export const SubCategoryFormImageColumn: React.FC<SubCategoryFormImageColumnProp
 }) => {
   const router = useRouter();
 
+  // ✅ Controlled local state (AdminImageUploadField internal-state sync problemi için)
+  const [localValue, setLocalValue] = useState<string>(safeStr(iconValue));
+
+  // prop değişince (initialData load / locale switch) local’i sync et
+  useEffect(() => {
+    setLocalValue(safeStr(iconValue));
+  }, [iconValue]);
+
+  // ✅ Remount key: value veya metadata değişince alan kesin refresh
+  const remountKey = useMemo(() => {
+    const m = metadata
+      ? `${safeStr(metadata.category_id)}|${safeStr(metadata.locale)}|${safeStr(
+          metadata.sub_category_slug,
+        )}`
+      : 'no-meta';
+    return `${m}|${safeStr(localValue) || 'empty'}`;
+  }, [metadata, localValue]);
+
   return (
     <AdminImageUploadField
+      key={remountKey}
       label="Alt Kategori Görseli"
       helperText={
         <>
           Storage modülü üzerinden alt kategori için bir görsel yükleyebilirsin. Yüklenen görselin
-          URL&apos;i formdaki <strong>Icon / Görsel URL</strong> alanına otomatik yazılabilir ve
-          JSON modeline yansıtılabilir.
+          URL&apos;i anında burada önizleme olarak görünür ve formdaki{' '}
+          <strong>Icon / Görsel URL</strong> alanına da yansır.
         </>
       }
       bucket="public"
       folder="subcategories"
       metadata={metadata}
-      value={iconValue}
-      onChange={onIconChange}
-      disabled={disabled}
+      value={localValue}
+      onChange={(url) => {
+        const nextUrl = safeStr(url);
+        // ✅ önce UI’ı güncelle (anlık preview)
+        setLocalValue(nextUrl);
+        // ✅ sonra üst state’i güncelle
+        onIconChange(nextUrl);
+      }}
+      disabled={!!disabled}
       openLibraryHref="/admin/storage"
       onOpenLibraryClick={() => router.push('/admin/storage')}
     />

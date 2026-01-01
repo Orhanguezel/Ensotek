@@ -1,10 +1,14 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/site_settings.endpoints.ts
-// Ensotek – Public Site Settings RTK (aligned with BE routes)
+// Ensotek – Public Site Settings RTK (aligned with BE routes) [FINAL]
 //   - GET /site_settings
 //   - GET /site_settings/:key
 //   - GET /site_settings/app-locales
 //   - GET /site_settings/default-locale
+//
+// PERF:
+// - refetchOnFocus/reconnect/mountOrArgChange: OFF (stable config)
+// - keepUnusedDataFor: raised (less churn on route changes)
 // =============================================================
 
 import { baseApi } from '../baseApi';
@@ -22,7 +26,7 @@ export type ListSiteSettingsArgs = {
   locale?: string;
   keys?: string[];
 
-  // BE'de var (controller.ts)
+  // legacy/controller compatibility
   key?: string;
   order?: string;
   limit?: number | string;
@@ -53,11 +57,9 @@ const tryParse = (x: unknown): SettingValue => {
     if (s === 'true') return true;
     if (s === 'false') return false;
 
-    // number string
-    if (!Number.isNaN(Number(s)) && s !== '') return Number(s);
+    if (s !== '' && !Number.isNaN(Number(s))) return Number(s);
   }
 
-  // object/array/boolean/number/null already ok
   return x as SettingValue;
 };
 
@@ -65,11 +67,12 @@ function mapRowToSetting(r: unknown): SiteSettingRow | null {
   if (!r || typeof r !== 'object') return null;
 
   const o = r as any;
-  if (!o.key) return null;
+  const key = String(o.key ?? '').trim();
+  if (!key) return null;
 
   return {
     id: o.id,
-    key: String(o.key),
+    key,
     locale: typeof o.locale === 'string' ? o.locale : undefined,
     value: tryParse(o.value),
     created_at: typeof o.created_at === 'string' ? o.created_at : undefined,
@@ -93,6 +96,14 @@ function parseAppLocalesMeta(res: unknown): AppLocaleMeta[] {
     })
     .filter(Boolean) as AppLocaleMeta[];
 }
+
+/* ----------------------------- RTK defaults ----------------------------- */
+
+const stableQueryOptions = {
+  refetchOnFocus: false as const,
+  refetchOnReconnect: false as const,
+  refetchOnMountOrArgChange: false as const,
+};
 
 /* ----------------------------- API ----------------------------- */
 
@@ -132,7 +143,8 @@ export const siteSettingsApi = baseApi.injectEndpoints({
             ]
           : [{ type: 'SiteSettings' as const, id: 'LIST' }],
 
-      keepUnusedDataFor: 60,
+      keepUnusedDataFor: 300,
+      ...stableQueryOptions,
     }),
 
     // GET /site_settings/:key?locale=de
@@ -145,6 +157,9 @@ export const siteSettingsApi = baseApi.injectEndpoints({
       transformResponse: (res: unknown): SiteSettingRow | null => mapRowToSetting(res),
 
       providesTags: (_r, _e, arg) => [{ type: 'SiteSettings', id: arg.key }],
+
+      keepUnusedDataFor: 300,
+      ...stableQueryOptions,
     }),
 
     // GET /site_settings/app-locales
@@ -152,7 +167,8 @@ export const siteSettingsApi = baseApi.injectEndpoints({
       query: () => ({ url: '/site_settings/app-locales' }),
       transformResponse: (res: unknown) => parseAppLocalesMeta(res),
       providesTags: [{ type: 'SiteSettings', id: 'META:APP_LOCALES' }],
-      keepUnusedDataFor: 300,
+      keepUnusedDataFor: 600,
+      ...stableQueryOptions,
     }),
 
     // GET /site_settings/default-locale
@@ -162,7 +178,6 @@ export const siteSettingsApi = baseApi.injectEndpoints({
         if (typeof res === 'string') return res.trim().toLowerCase() || null;
         if (res == null) return null;
 
-        // toleranslı: { value: "de" }
         if (typeof res === 'object' && (res as any).value) {
           const v = (res as any).value;
           if (typeof v === 'string') return v.trim().toLowerCase() || null;
@@ -171,7 +186,8 @@ export const siteSettingsApi = baseApi.injectEndpoints({
         return null;
       },
       providesTags: [{ type: 'SiteSettings', id: 'META:DEFAULT_LOCALE' }],
-      keepUnusedDataFor: 300,
+      keepUnusedDataFor: 600,
+      ...stableQueryOptions,
     }),
   }),
   overrideExisting: true,

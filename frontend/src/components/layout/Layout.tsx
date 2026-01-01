@@ -1,23 +1,38 @@
-// src/components/layout/Layout.tsx
+// =============================================================
+// FILE: src/components/layout/Layout.tsx
+// Ensotek – Public Layout (CENTRAL SEO / SINGLE SOURCE) [FINAL / PERF]
+// - ✅ Page-level <Head> kaldırılacak: tüm title/desc/og/twitter/robots burada
+// - ✅ Canonical + og:url + hreflang SSR tek kaynak: _document (Pages Router)
+// - ✅ DB-driven SEO: seo/site_seo (locale -> '*' fallback)
+// - ✅ DB-driven Brand/Contact/Socials: locale -> '*' fallback
+// - ✅ Icons: GLOBAL '*'
+// - ✅ PERF: site_settings tek tek değil, batch listSiteSettings (2 query)
+// - ✅ RTK refetchOnFocus/reconnect/mountOrArgChange OFF
+// - ✅ SEO overrides: layoutSeoStore (LayoutSeoBridge) + optional Layout props
+// - ✅ No inline styles
+// =============================================================
+
 'use client';
 
-import React, { Fragment, useMemo, useCallback } from 'react';
+import React, { Fragment, useMemo, useCallback, useSyncExternalStore } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import type { StaticImageData } from 'next/image';
 
 import Header from './header/Header';
-import Footer from './footer/Footer';
+import FooterTwo from './footer/FooterTwo';
 import ScrollProgress from './ScrollProgress';
 
-import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { SiteIconsHead } from '@/seo/SiteIconsHead';
+
+import { useListSiteSettingsQuery } from '@/integrations/rtk/hooks';
+import type { SettingValue, SiteSettingRow } from '@/integrations/types/site_settings.types';
 
 import { asObj, buildCanonical } from '@/seo/pageSeo';
 import { siteUrlBase, absoluteUrl } from '@/features/seo/utils';
-
 import { buildMeta, filterClientHeadSpecs, type MetaInput } from '@/seo/meta';
 
-// ✅ i18n PATTERN
+// ✅ i18n
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { FALLBACK_LOCALE } from '@/i18n/config';
@@ -25,6 +40,16 @@ import { FALLBACK_LOCALE } from '@/i18n/config';
 // ✅ JSON-LD
 import JsonLd from '@/seo/JsonLd';
 import { graph, org, website, sameAsFromSocials } from '@/seo/jsonld';
+
+// ✅ SEO SCHEMA HELPERS (DB-backed)
+import { parseSeoFromSettings } from '@/seo/seoSchema';
+
+// ✅ Store-based page overrides (LayoutSeoBridge)
+import {
+  getLayoutSeoSnapshot,
+  subscribeLayoutSeo,
+  type LayoutSeoOverrides,
+} from '@/seo/layoutSeoStore';
 
 type SimpleBrand = {
   name: string;
@@ -36,25 +61,37 @@ type SimpleBrand = {
 
 type LayoutProps = {
   children: React.ReactNode;
+
+  /**
+   * Optional page overrides (legacy / optional)
+   * NOTE: store overrides (LayoutSeoBridge) take priority over these props.
+   */
   title?: string;
   description?: string;
+  ogImage?: string;
+  noindex?: boolean;
 
+  /**
+   * Optional brand overrides (rare; mostly DB)
+   */
   brand?: SimpleBrand;
   logoSrc?: StaticImageData | string;
-  noindex?: boolean;
-  ogImage?: string;
 };
+
+const FALLBACK_FAVICON = '/favicon.svg';
+
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
 function absUrlForPreload(pathOrUrl: string): string {
   const base = siteUrlBase();
-  const v = String(pathOrUrl || '').trim();
+  const v = safeStr(pathOrUrl);
   if (!v) return base;
   if (/^https?:\/\//i.test(v)) return v;
   return `${base}${v.startsWith('/') ? v : `/${v}`}`;
 }
 
 function toAbsoluteMaybe(u: string): string {
-  const v = String(u || '').trim();
+  const v = safeStr(u);
   if (!v) return '';
   if (/^https?:\/\//i.test(v)) return v;
   return absoluteUrl(v);
@@ -69,26 +106,86 @@ function cleanString(v: unknown): string {
 function cleanSocials(input: Record<string, any> | null | undefined): Record<string, string> {
   const obj = input && typeof input === 'object' ? input : {};
   const out: Record<string, string> = {};
-
   for (const k of Object.keys(obj)) {
     const v = cleanString((obj as any)[k]);
     if (!v) continue;
     out[k] = v;
   }
-
   return out;
 }
 
-/**
- * ✅ Tek fallback kuralı:
- * - Locale boşsa FALLBACK_LOCALE kullan
- * - Locale normalize etmiyoruz (DB already returns correct short codes)
- */
 function getSafeLocale(lc: unknown): string {
   const v = cleanString(lc);
   const fb = cleanString(FALLBACK_LOCALE) || 'de';
   return v || fb;
 }
+
+function extractMediaUrl(val: SettingValue | null | undefined): string {
+  if (val === null || val === undefined) return '';
+
+  if (typeof val === 'string') {
+    const s = val.trim();
+    if (!s) return '';
+
+    const looksJson =
+      (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'));
+    if (!looksJson) return s;
+
+    try {
+      const parsed = JSON.parse(s);
+      return safeStr((parsed as any)?.url);
+    } catch {
+      return s;
+    }
+  }
+
+  if (typeof val === 'object') {
+    return safeStr((val as any)?.url);
+  }
+
+  return '';
+}
+
+/* -----------------------------
+   RTK stable query options
+----------------------------- */
+
+const STABLE_QUERY_OPTS = {
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
+  refetchOnMountOrArgChange: false,
+} as const;
+
+/* -----------------------------
+   Helpers: rows -> map
+----------------------------- */
+
+function rowsToMap(rows: SiteSettingRow[] | undefined): Record<string, SettingValue> {
+  const out: Record<string, SettingValue> = {};
+  const arr = Array.isArray(rows) ? rows : [];
+  for (const r of arr) {
+    const k = safeStr((r as any)?.key);
+    if (!k) continue;
+    out[k] = (r as any)?.value as SettingValue;
+  }
+  return out;
+}
+
+function pickSetting(
+  localeMap: Record<string, SettingValue>,
+  globalMap: Record<string, SettingValue>,
+  key: string,
+): SettingValue | null {
+  const a = localeMap[key];
+  if (a !== null && a !== undefined) return a;
+  const b = globalMap[key];
+  if (b !== null && b !== undefined) return b;
+  return null;
+}
+
+/* -----------------------------
+   Error Boundary
+----------------------------- */
 
 class LayoutErrorBoundary extends React.Component<
   { children: React.ReactNode; fallback?: React.ReactNode },
@@ -109,9 +206,9 @@ class LayoutErrorBoundary extends React.Component<
     if (this.state.hasError) {
       return (
         this.props.fallback ?? (
-          <div className="container" style={{ padding: 24 }}>
-            <h1 style={{ marginBottom: 8 }}>Something went wrong</h1>
-            <p style={{ margin: 0 }}>
+          <div className="container py-4">
+            <h1 className="mb-2">Something went wrong</h1>
+            <p className="mb-0">
               The page content failed to render. Please refresh or try again later.
             </p>
           </div>
@@ -126,126 +223,199 @@ export default function Layout({
   children,
   title,
   description,
+  ogImage,
+  noindex,
   brand,
   logoSrc,
-  noindex,
-  ogImage,
 }: LayoutProps) {
   const router = useRouter();
-  const isClient = typeof window !== 'undefined';
   const isProd = process.env.NODE_ENV === 'production';
 
-  // ✅ Locale: DB-driven (scalable to 30+)
+  // ✅ Store overrides (LayoutSeoBridge) — navigation-safe
+  const storeOverrides: LayoutSeoOverrides = useSyncExternalStore(
+    subscribeLayoutSeo,
+    getLayoutSeoSnapshot,
+    getLayoutSeoSnapshot,
+  );
+
+  // ✅ merge (store has priority)
+  const effectiveTitleProp = storeOverrides.title ?? title;
+  const effectiveDescProp = storeOverrides.description ?? description;
+  const effectiveOgProp = storeOverrides.ogImage ?? ogImage;
+  const effectiveNoindexProp =
+    typeof storeOverrides.noindex === 'boolean' ? storeOverrides.noindex : noindex;
+
+  // ✅ Locale
   const locale = getSafeLocale(useLocaleShort());
 
-  /**
-   * ✅ Layout için tek ortak UI section:
-   * - ui_common altında 500, try again vb. her şeyi topla.
-   * - 30 dilde ölçeklenir; locale bazlı DB fallback zaten senin sistemde var.
-   */
+  // ✅ common UI
   const { ui: uiCommon } = useUiSection('ui_common', locale as any);
   const t = useCallback((key: string, fb: string) => uiCommon(key, fb), [uiCommon]);
 
-  // ✅ SEO settings: DB-driven
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery(
-    { key: 'seo', locale },
-    { skip: !isClient },
+  // ------------------------------------------------------------
+  // ✅ PERF: Batch fetch site_settings (2 query)
+  // - Query 1: locale-specific keys
+  // - Query 2: global '*' keys (also acts as fallback for locale keys)
+  // ------------------------------------------------------------
+
+  const LOCALE_KEYS = useMemo(
+    () => ['seo', 'site_seo', 'contact_info', 'company_brand', 'socials'],
+    [],
   );
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery(
-    { key: 'site_seo', locale },
-    { skip: !isClient },
+
+  const GLOBAL_KEYS = useMemo(
+    () => [
+      // icons
+      'site_favicon',
+      'site_apple_touch_icon',
+      'site_app_icon_512',
+      // fallback for locale keys (keeps total queries at 2)
+      'seo',
+      'site_seo',
+      'contact_info',
+      'company_brand',
+      'socials',
+    ],
+    [],
   );
+
+  const { data: localeRows } = useListSiteSettingsQuery(
+    { locale, keys: LOCALE_KEYS },
+    STABLE_QUERY_OPTS,
+  );
+
+  const { data: globalRows } = useListSiteSettingsQuery(
+    { locale: '*', keys: GLOBAL_KEYS },
+    STABLE_QUERY_OPTS,
+  );
+
+  const localeMap = useMemo(() => rowsToMap(localeRows as any), [localeRows]);
+  const globalMap = useMemo(() => rowsToMap(globalRows as any), [globalRows]);
+
+  // ------------------------------------------------------------
+  // ✅ SEO (seo -> site_seo fallback, locale -> '*' fallback)
+  // ------------------------------------------------------------
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+    const raw =
+      pickSetting(localeMap, globalMap, 'seo') ??
+      pickSetting(localeMap, globalMap, 'site_seo') ??
+      null;
 
-  const seoTitleDefault = cleanString(seo?.title_default);
-  const seoDescription = cleanString(seo?.description);
-  const seoSiteName = cleanString(seo?.site_name);
+    return parseSeoFromSettings(raw as any);
+  }, [localeMap, globalMap]);
 
-  const og = asObj(seo?.open_graph) ;
-  const ogImage1 = useMemo(() => {
-    const direct = cleanString(ogImage);
+  const seoTitleDefault = useMemo(() => cleanString(seo.title_default), [seo.title_default]);
+  const seoDescription = useMemo(() => cleanString(seo.description), [seo.description]);
+  const seoSiteName = useMemo(() => cleanString(seo.site_name), [seo.site_name]);
+
+  const ogLegacyImage = useMemo(() => {
+    const ogObj = asObj(seo.open_graph) || {};
+    return cleanString((ogObj as any)?.image);
+  }, [seo.open_graph]);
+
+  const ogImagesArrFirst = useMemo(() => {
+    const ogObj = asObj(seo.open_graph) || {};
+    const arr = Array.isArray((ogObj as any).images) ? (ogObj as any).images : [];
+    return arr?.[0] ? cleanString(arr[0]) : '';
+  }, [seo.open_graph]);
+
+  const twCard = useMemo(() => {
+    const twObj = asObj(seo.twitter) || {};
+    return cleanString((twObj as any).card) || 'summary_large_image';
+  }, [seo.twitter]);
+
+  const twSite = useMemo(() => {
+    const twObj = asObj(seo.twitter) || {};
+    return cleanString((twObj as any).site);
+  }, [seo.twitter]);
+
+  const twCreator = useMemo(() => {
+    const twObj = asObj(seo.twitter) || {};
+    return cleanString((twObj as any).creator);
+  }, [seo.twitter]);
+
+  // ------------------------------------------------------------
+  // ✅ Final SEO values (page overrides take precedence)
+  // ------------------------------------------------------------
+
+  const finalTitle = useMemo(() => {
+    return cleanString(effectiveTitleProp) || seoTitleDefault || t('meta_default_title', 'Ensotek');
+  }, [effectiveTitleProp, seoTitleDefault, t]);
+
+  const uiDefaultDesc = useMemo(() => {
+    return t(
+      'meta_default_description',
+      'Industrial solutions, products and services. Contact us for tailored support and consultation.',
+    );
+  }, [t]);
+
+  const finalDescription = useMemo(() => {
+    return cleanString(effectiveDescProp) || seoDescription || cleanString(uiDefaultDesc);
+  }, [effectiveDescProp, seoDescription, uiDefaultDesc]);
+
+  const resolvedOgImage = useMemo(() => {
+    const direct = cleanString(effectiveOgProp);
     if (direct) return direct;
+    if (ogLegacyImage) return ogLegacyImage;
+    if (ogImagesArrFirst) return ogImagesArrFirst;
+    return '';
+  }, [effectiveOgProp, ogLegacyImage, ogImagesArrFirst]);
 
-    const single = cleanString((og as any)?.image);
-    if (single) return single;
+  // ------------------------------------------------------------
+  // ✅ Icons (GLOBAL '*')
+  // ------------------------------------------------------------
 
-    const arr = Array.isArray((og as any)?.images) ? (og as any).images : [];
-    const first = arr?.[0] ? cleanString(arr[0]) : '';
-    return first;
-  }, [ogImage, og]);
+  const iconUrls = useMemo(() => {
+    const faviconUrl =
+      extractMediaUrl((globalMap.site_favicon as SettingValue) ?? null) || FALLBACK_FAVICON;
 
-  const tw = asObj(seo?.twitter) || {};
-  const twitterCard = cleanString((tw as any)?.card) || 'summary_large_image';
-  const twitterSite = cleanString((tw as any)?.site);
-  const twitterCreator = cleanString((tw as any)?.creator);
+    const appleTouchUrl = extractMediaUrl(
+      (globalMap.site_apple_touch_icon as SettingValue) ?? null,
+    );
 
-  const finalTitle = cleanString(title) || seoTitleDefault || t('meta_default_title', 'Ensotek');
+    const appIcon512Url = extractMediaUrl((globalMap.site_app_icon_512 as SettingValue) ?? null);
 
-  // ✅ Description: prop > seo.description > ui_common.meta_default_description > generic fallback
-  const uiDefaultDesc = t(
-    'meta_default_description',
-    'Industrial solutions, products and services. Contact us for tailored support and consultation.',
-  );
-  const safeDescription = cleanString(description) || seoDescription || cleanString(uiDefaultDesc);
+    return {
+      faviconUrl: safeStr(faviconUrl) || FALLBACK_FAVICON,
+      appleTouchUrl: safeStr(appleTouchUrl),
+      appIcon512Url: safeStr(appIcon512Url),
+    };
+  }, [globalMap.site_favicon, globalMap.site_apple_touch_icon, globalMap.site_app_icon_512]);
 
-  // ✅ og:url (client absolute)
-  const ogUrlAbs = useMemo(() => {
-    const raw = String(router.asPath || '/');
-    const [noHash] = raw.split('#');
-    const [noQuery] = noHash.split('?');
-    const path = noQuery || '/';
-    return absoluteUrl(path);
-  }, [router.asPath]);
-
-  // ✅ Brand/Contact Settings
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery(
-    { key: 'contact_info', locale },
-    { skip: !isClient },
-  );
-  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery(
-    { key: 'company_brand', locale },
-    { skip: !isClient },
-  );
-
-  // ✅ Socials setting
-  const { data: socialsSetting } = useGetSiteSettingByKeyQuery(
-    { key: 'socials', locale },
-    { skip: !isClient },
-  );
+  // ------------------------------------------------------------
+  // ✅ Brand/Contact/Socials (locale -> '*' fallback; brand prop can override)
+  // ------------------------------------------------------------
 
   const { normalizedBrand, logoHrefFromSettings } = useMemo(() => {
-    const contact = (contactInfoSetting?.value ?? {}) as any;
-    const brandVal = (companyBrandSetting?.value ?? {}) as any;
-    const socialsVal = (socialsSetting?.value ?? {}) as any;
+    const contact = (pickSetting(localeMap, globalMap, 'contact_info') ?? {}) as any;
+    const brandVal = (pickSetting(localeMap, globalMap, 'company_brand') ?? {}) as any;
+    const socialsVal = (pickSetting(localeMap, globalMap, 'socials') ?? {}) as any;
 
-    const name = cleanString(brandVal.name) || cleanString(contact.companyName) || 'Ensotek';
-    const website = cleanString(brandVal.website) || cleanString(contact.website) || siteUrlBase();
+    const name = cleanString(brandVal?.name) || cleanString(contact?.companyName) || 'Ensotek';
+    const website =
+      cleanString(brandVal?.website) || cleanString(contact?.website) || siteUrlBase();
 
-    const phones = Array.isArray(contact.phones) ? contact.phones : [];
+    const phones = Array.isArray(contact?.phones) ? contact.phones : [];
     const phoneVal =
-      cleanString(brandVal.phone) ||
+      cleanString(brandVal?.phone) ||
       cleanString(phones?.[0]) ||
-      cleanString(contact.whatsappNumber) ||
+      cleanString(contact?.whatsappNumber) ||
       '';
 
-    const emailVal = cleanString(brandVal.email) || cleanString(contact.email) || '';
+    const emailVal = cleanString(brandVal?.email) || cleanString(contact?.email) || '';
 
-    // ✅ Merge socials: site_settings.socials (primary) + company_brand.socials (secondary)
-    const merged = {
+    const mergedSocials = {
       ...cleanSocials(asObj(socialsVal) as any),
-      ...cleanSocials(asObj(brandVal.socials) as any),
+      ...cleanSocials(asObj(brandVal?.socials) as any),
     };
 
-    const logoObj = (brandVal.logo ||
-      (Array.isArray(brandVal.images) ? brandVal.images[0] : null) ||
+    const logoObj = (brandVal?.logo ||
+      (Array.isArray(brandVal?.images) ? brandVal.images[0] : null) ||
       {}) as { url?: string };
 
     const logoHref =
-      cleanString(logoObj.url) ||
+      cleanString(logoObj?.url) ||
       'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 
     return {
@@ -254,13 +424,12 @@ export default function Layout({
         website,
         phone: phoneVal,
         email: emailVal,
-        socials: merged,
+        socials: mergedSocials,
       } as SimpleBrand,
       logoHrefFromSettings: logoHref,
     };
-  }, [contactInfoSetting?.value, companyBrandSetting?.value, socialsSetting?.value]);
+  }, [localeMap, globalMap]);
 
-  // ✅ prop override (highest priority)
   const effectiveBrand: SimpleBrand = useMemo(() => {
     if (!brand) return normalizedBrand;
 
@@ -281,35 +450,40 @@ export default function Layout({
 
   const preloadLogoHref = typeof headerLogoSrc === 'string' ? headerLogoSrc : logoHrefFromSettings;
 
+  // ------------------------------------------------------------
   // ✅ Head Meta specs
+  // ------------------------------------------------------------
+
   const headMetaSpecs = useMemo(() => {
     const meta: MetaInput = {
       title: finalTitle,
-      description: safeDescription,
-      url: ogUrlAbs, // client filter will remove og:url if needed
-      image: ogImage1 ? toAbsoluteMaybe(ogImage1) : undefined,
+      description: finalDescription,
+      image: resolvedOgImage ? toAbsoluteMaybe(resolvedOgImage) : undefined,
       siteName: seoSiteName || effectiveBrand.name || 'Ensotek',
-      noindex: !!noindex,
-      twitterCard,
-      twitterSite: twitterSite || undefined,
-      twitterCreator: twitterCreator || undefined,
+      noindex: !!effectiveNoindexProp,
+      twitterCard: twCard,
+      twitterSite: twSite || undefined,
+      twitterCreator: twCreator || undefined,
     };
 
+    // Safety: canonical/hreflang/og:url client'ta basılmasın
     return filterClientHeadSpecs(buildMeta(meta));
   }, [
     finalTitle,
-    safeDescription,
-    ogUrlAbs,
-    ogImage1,
+    finalDescription,
+    resolvedOgImage,
     seoSiteName,
     effectiveBrand.name,
-    noindex,
-    twitterCard,
-    twitterSite,
-    twitterCreator,
+    effectiveNoindexProp,
+    twCard,
+    twSite,
+    twCreator,
   ]);
 
-  // ✅ JSON-LD graph: Organization.sameAs for Social Media Presence
+  // ------------------------------------------------------------
+  // ✅ JSON-LD
+  // ------------------------------------------------------------
+
   const jsonLdData = useMemo(() => {
     const base = siteUrlBase();
     const orgId = `${base}#org`;
@@ -334,7 +508,10 @@ export default function Layout({
     ]);
   }, [effectiveBrand.name, effectiveBrand.website, effectiveBrand.socials, logoHrefFromSettings]);
 
-  // ✅ Error fallback UI (ui_common)
+  // ------------------------------------------------------------
+  // ✅ Error fallback UI
+  // ------------------------------------------------------------
+
   const errorFallback = useMemo(() => {
     const titleText = t('ui_500_title', 'Something Went Wrong');
     const subtitleText = t(
@@ -344,9 +521,9 @@ export default function Layout({
     const tryAgainText = t('ui_500_try_again', 'Try Again');
 
     return (
-      <div className="container" style={{ padding: 24 }}>
-        <h1 style={{ marginBottom: 8 }}>{titleText}</h1>
-        <p style={{ margin: 0, marginBottom: 16 }}>{subtitleText}</p>
+      <div className="container py-4">
+        <h1 className="mb-2">{titleText}</h1>
+        <p className="mb-3">{subtitleText}</p>
         <button
           type="button"
           className="solid__btn d-inline-flex align-items-center"
@@ -381,22 +558,29 @@ export default function Layout({
     <Fragment>
       <Head>
         <meta name="app:layout" content="public" />
-        <link rel="shortcut icon" href="/favicon.svg" type="image/x-icon" />
+
+        <SiteIconsHead
+          faviconUrl={iconUrls.faviconUrl}
+          appleTouchUrl={iconUrls.appleTouchUrl}
+          appIcon512Url={iconUrls.appIcon512Url}
+        />
+
         <title>{finalTitle}</title>
 
         {/* ✅ Canonical + og:url + hreflang SSR tek kaynak: _document */}
-
-        {headMetaSpecs.map((spec, idx) => {
+        {headMetaSpecs.map((spec) => {
           if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
+            const k = `l:${spec.rel}:${spec.href}`;
+            return <link key={k} rel={spec.rel} href={spec.href} />;
           }
           if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
+            const k = `n:${spec.key}:${spec.value}`;
+            return <meta key={k} name={spec.key} content={spec.value} />;
           }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
+          const k = `p:${spec.key}:${spec.value}`;
+          return <meta key={k} property={spec.key} content={spec.value} />;
         })}
 
-        {/* ✅ Social Media Presence => Organization.sameAs */}
         <JsonLd id="global" data={jsonLdData} />
 
         {preloadLogoHref ? (
@@ -413,7 +597,7 @@ export default function Layout({
         <main>
           <LayoutErrorBoundary fallback={errorFallback}>{children}</LayoutErrorBoundary>
         </main>
-        <Footer />
+        <FooterTwo />
         <ScrollProgress />
       </div>
     </Fragment>

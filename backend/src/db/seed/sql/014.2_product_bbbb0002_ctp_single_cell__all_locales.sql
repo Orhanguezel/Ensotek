@@ -1,5 +1,5 @@
 -- =============================================================
--- FILE: 014.2_product_bbbb0002_ctp_single_cell__all_locales.sql (FINAL)
+-- FILE: 014.2_product_bbbb0002_ctp_single_cell__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Product Seed (02/..)
 -- Product: Open Circuit Cooling Towers – Single Cell / CTP Series
 -- Source: Catalog p.7
@@ -13,6 +13,7 @@
 --  - Re-runnable: ON DUPLICATE KEY UPDATE everywhere possible
 --  - child tables: locale-based reset with DELETE
 --  - all child IDs: CHAR(36) safe
+--  - ✅ product_i18n.specifications: RECORD<string,string> (NO JSON_ARRAY values) (validation.ts aligned)
 --
 -- RULES:
 --  - products.item_type   = 'product'
@@ -101,10 +102,11 @@ VALUES (
   'CTP serisi tek hücreli açık tip su soğutma kuleleri; geniş model skalası ile farklı kapasite ve debi ihtiyaçlarına uygun çözümler sunar. Kapasite değerleri 35/30/25°C ve 40/30/24°C çalışma koşullarına göre katalogda tablo halinde verilmektedir.',
   'Açık tip su soğutma kulesi – Tek hücreli CTP serisi',
   JSON_ARRAY('açık tip', 'open circuit', 'tek hücreli', 'CTP', 'soğutma kulesi', 'ensotek'),
+  -- ✅ validation.ts: Record<string,string> -> ALL VALUES MUST BE STRING
   JSON_OBJECT(
     'cellType', 'Tek hücreli',
     'series', 'CTP',
-    'capacityConditions', JSON_ARRAY('35/30/25°C', '40/30/24°C')
+    'capacityConditions', '35/30/25°C | 40/30/24°C'
   ),
   'Açık Tip Su Soğutma Kuleleri | Tek Hücreli CTP Serisi | Ensotek',
   'Tek hücreli açık tip su soğutma kuleleri (CTP serisi). CTP-1’den CTP-35’e model seçenekleri; ölçü, ağırlık, kapasite ve debi değerleri katalog tablosunda.'
@@ -181,10 +183,11 @@ VALUES (
   'CTP single-cell open circuit cooling towers provide a wide model range to match different capacity and flow requirements. Capacity and flow rate values are provided in the catalog table for 35/30/25°C and 40/30/24°C operating conditions.',
   'Open circuit cooling tower – single cell CTP series',
   JSON_ARRAY('open circuit', 'single cell', 'CTP', 'cooling tower', 'ensotek'),
+  -- ✅ validation.ts: Record<string,string> -> ALL VALUES MUST BE STRING
   JSON_OBJECT(
     'cellType', 'Single cell',
     'series', 'CTP',
-    'capacityConditions', JSON_ARRAY('35/30/25°C', '40/30/24°C')
+    'capacityConditions', '35/30/25°C | 40/30/24°C'
   ),
   'Open Circuit Cooling Towers | Single Cell CTP Series | Ensotek',
   'Single-cell open circuit cooling towers (CTP series). Model options from CTP-1 to CTP-35; dimensions, weights, capacities and flow rates are listed in the catalog table.'
@@ -261,10 +264,11 @@ VALUES (
   'Die CTP-Serie (Einzelzelle) der offenen Kühltürme bietet eine breite Modellauswahl für unterschiedliche Kapazitäts- und Volumenstromanforderungen. Kapazität und Volumenstrom sind in der Katalogtabelle für die Betriebsbedingungen 35/30/25°C und 40/30/24°C angegeben.',
   'Offener Kühlturm – Einzelzelle CTP-Serie',
   JSON_ARRAY('offener kühlturm', 'open circuit', 'einzelzelle', 'CTP', 'ensotek'),
+  -- ✅ validation.ts: Record<string,string> -> ALL VALUES MUST BE STRING
   JSON_OBJECT(
     'zelltyp', 'Einzelzelle',
     'serie', 'CTP',
-    'betriebsbedingungen', JSON_ARRAY('35/30/25°C', '40/30/24°C')
+    'betriebsbedingungen', '35/30/25°C | 40/30/24°C'
   ),
   'Offene Kühltürme | Einzelzelle CTP-Serie | Ensotek',
   'Einzelzellige offene Kühltürme (CTP-Serie) von CTP-1 bis CTP-35. Abmessungen, Gewichte, Kapazitäten und Volumenströme sind in der Katalogtabelle gelistet.'

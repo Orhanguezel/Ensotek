@@ -1,18 +1,14 @@
 -- =============================================================
--- FILE: 014.94_product_bbbb0004_tctp_triple_cell__all_locales.sql (FINAL)
+-- FILE: 014.94_product_bbbb0004_tctp_triple_cell__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Product Seed (04/..)
 -- Product: Open Circuit Cooling Towers – Triple Cell / TCTP Series
 -- Source: Catalog p.9
 --
--- FIXES (aligned with 014.2 pattern):
---  - products.image_url: FULL URL
---  - products.images: MULTI IMAGE JSON_ARRAY
---  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - TR/EN/DE in ONE FILE
+-- ✅ FIX (schema + validation + admin controller aligned):
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING (NO JSON_ARRAY / NO nested JSON)
 --  - product_specs uses order_num (NO display_order)
---  - Re-runnable: ON DUPLICATE KEY UPDATE everywhere possible
---  - child tables: locale-based reset with DELETE
---  - all child IDs: CHAR(36) safe
+--  - locale child tables: DELETE (product_id+locale) then INSERT (stable + re-run safe)
+--  - locale-less child tables: id-based DELETE then INSERT
 --
 -- RULES:
 --  - products.item_type   = 'product'
@@ -87,7 +83,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -102,9 +98,9 @@ VALUES (
   'Açık tip su soğutma kulesi – Üç hücreli TCTP serisi',
   JSON_ARRAY('açık tip','open circuit','üç hücreli','TCTP','soğutma kulesi','ensotek'),
   JSON_OBJECT(
-    'cellType','Üç hücreli',
-    'series','TCTP',
-    'capacityConditions', JSON_ARRAY('35/30/25°C','40/30/24°C')
+    'cellType', 'Üç hücreli',
+    'series', 'TCTP',
+    'capacityConditions', '35/30/25°C | 40/30/24°C'
   ),
   'Açık Tip Su Soğutma Kuleleri | Üç Hücreli TCTP Serisi | Ensotek',
   'Üç hücreli açık tip kuleler (TCTP serisi). TCTP-3’ten TCTP-35’e model seçenekleri; ölçü, ağırlık, kapasite ve debi değerleri katalog tablosuna göre.'
@@ -133,12 +129,7 @@ VALUES
   ('55550004-aaaa-4aaa-8aaa-bbbb0004tr05','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Debi Aralığı (35/30/25°C)','140 – 2080 m³/h (modele göre)','service',50),
   ('55550004-aaaa-4aaa-8aaa-bbbb0004tr06','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Kapasite Aralığı (40/30/24°C)','1.100.000 – 15.300.000 kcal/h (modele göre)','service',60),
   ('55550004-aaaa-4aaa-8aaa-bbbb0004tr07','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Debi Aralığı (40/30/24°C)','110 – 1530 m³/h (modele göre)','service',70),
-  ('55550004-aaaa-4aaa-8aaa-bbbb0004tr08','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Ağırlık (Boş/Çalışır)','950–11500 kg / 3400–60000 kg (modele göre)','physical',80)
-ON DUPLICATE KEY UPDATE
-  name      = VALUES(name),
-  value     = VALUES(value),
-  category  = VALUES(category),
-  order_num = VALUES(order_num);
+  ('55550004-aaaa-4aaa-8aaa-bbbb0004tr08','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Ağırlık (Boş/Çalışır)','950–11500 kg / 3400–60000 kg (modele göre)','physical',80);
 
 -- FAQS (TR) — locale reset
 DELETE FROM product_faqs
@@ -148,12 +139,7 @@ INSERT INTO product_faqs (id, product_id, locale, question, answer, display_orde
 VALUES
   ('66660004-aaaa-4aaa-8aaa-bbbb0004tr01','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Üç hücreli kule ne zaman tercih edilir?','Çok yüksek kapasite ve debi gereksinimlerinde, üç hücreli yapı ile ölçeklenebilir performans istendiğinde tercih edilir.',10,1),
   ('66660004-aaaa-4aaa-8aaa-bbbb0004tr02','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Kapasite/debi değerleri hangi koşullarda veriliyor?','Katalog tablosunda 35/30/25°C ve 40/30/24°C koşullarına göre kapasite (kcal/h) ve debi (m³/h) verilir.',20,1),
-  ('66660004-aaaa-4aaa-8aaa-bbbb0004tr03','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Model seçerken nelere bakılmalı?','İstenen debi, hedef koşul, taban alanı/yükseklik ve sahadaki kaldırma/taşıma şartları birlikte değerlendirilmelidir.',30,1)
-ON DUPLICATE KEY UPDATE
-  question      = VALUES(question),
-  answer        = VALUES(answer),
-  display_order = VALUES(display_order),
-  is_active     = VALUES(is_active);
+  ('66660004-aaaa-4aaa-8aaa-bbbb0004tr03','bbbb0004-2222-4222-8222-bbbbbbbb0004','tr','Model seçerken nelere bakılmalı?','İstenen debi, hedef koşul, taban alanı/yükseklik ve sahadaki kaldırma/taşıma şartları birlikte değerlendirilmelidir.',30,1);
 
 -- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
@@ -176,13 +162,10 @@ VALUES
   ('88880004-aaaa-4aaa-8aaa-bbbb0004tr01','bbbb0004-2222-4222-8222-bbbbbbbb0004','Model', JSON_ARRAY(
     'TCTP-3','TCTP-4','TCTP-5','TCTP-5.5','TCTP-6','TCTP-7','TCTP-9',
     'TCTP-12','TCTP-14','TCTP-16','TCTP-20','TCTP-24','TCTP-26','TCTP-30','TCTP-35'
-  ))
-ON DUPLICATE KEY UPDATE
-  option_name   = VALUES(option_name),
-  option_values = VALUES(option_values);
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -197,9 +180,9 @@ VALUES (
   'Open circuit cooling tower – triple cell TCTP series',
   JSON_ARRAY('open circuit','triple cell','TCTP','cooling tower','ensotek'),
   JSON_OBJECT(
-    'cellType','Triple cell',
-    'series','TCTP',
-    'capacityConditions',JSON_ARRAY('35/30/25°C','40/30/24°C')
+    'cellType', 'Triple cell',
+    'series', 'TCTP',
+    'capacityConditions', '35/30/25°C | 40/30/24°C'
   ),
   'Open Circuit Cooling Towers | Triple Cell TCTP Series | Ensotek',
   'Triple-cell open circuit towers (TCTP series). Models from TCTP-3 to TCTP-35 with catalog-based dimensions, weights, capacities and flow rates.'
@@ -228,12 +211,7 @@ VALUES
   ('55550004-bbbb-4bbb-8bbb-bbbb0004en05','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Flow Rate Range (35/30/25°C)','140 – 2080 m³/h (model dependent)','service',50),
   ('55550004-bbbb-4bbb-8bbb-bbbb0004en06','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Capacity Range (40/30/24°C)','1,100,000 – 15,300,000 kcal/h (model dependent)','service',60),
   ('55550004-bbbb-4bbb-8bbb-bbbb0004en07','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Flow Rate Range (40/30/24°C)','110 – 1530 m³/h (model dependent)','service',70),
-  ('55550004-bbbb-4bbb-8bbb-bbbb0004en08','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Weight (Empty/Operating)','950–11,500 kg / 3,400–60,000 kg (model dependent)','physical',80)
-ON DUPLICATE KEY UPDATE
-  name      = VALUES(name),
-  value     = VALUES(value),
-  category  = VALUES(category),
-  order_num = VALUES(order_num);
+  ('55550004-bbbb-4bbb-8bbb-bbbb0004en08','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Weight (Empty/Operating)','950–11,500 kg / 3,400–60,000 kg (model dependent)','physical',80);
 
 -- FAQS (EN) — locale reset
 DELETE FROM product_faqs
@@ -243,12 +221,7 @@ INSERT INTO product_faqs (id, product_id, locale, question, answer, display_orde
 VALUES
   ('66660004-bbbb-4bbb-8bbb-bbbb0004en01','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','When should a triple-cell tower be preferred?','Preferred for very high capacity/flow requirements where scalable performance with three cells is needed.',10,1),
   ('66660004-bbbb-4bbb-8bbb-bbbb0004en02','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Under which conditions are values listed?','Capacity (kcal/h) and flow rate (m³/h) are listed for 35/30/25°C and 40/30/24°C in the catalog table.',20,1),
-  ('66660004-bbbb-4bbb-8bbb-bbbb0004en03','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Key parameters for model selection?','Required flow rate, target condition, footprint/height constraints, and handling/weight constraints should be evaluated together.',30,1)
-ON DUPLICATE KEY UPDATE
-  question      = VALUES(question),
-  answer        = VALUES(answer),
-  display_order = VALUES(display_order),
-  is_active     = VALUES(is_active);
+  ('66660004-bbbb-4bbb-8bbb-bbbb0004en03','bbbb0004-2222-4222-8222-bbbbbbbb0004','en','Key parameters for model selection?','Required flow rate, target condition, footprint/height constraints, and handling/weight constraints should be evaluated together.',30,1);
 
 -- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
@@ -271,13 +244,10 @@ VALUES
   ('88880004-bbbb-4bbb-8bbb-bbbb0004en01','bbbb0004-2222-4222-8222-bbbbbbbb0004','Model', JSON_ARRAY(
     'TCTP-3','TCTP-4','TCTP-5','TCTP-5.5','TCTP-6','TCTP-7','TCTP-9',
     'TCTP-12','TCTP-14','TCTP-16','TCTP-20','TCTP-24','TCTP-26','TCTP-30','TCTP-35'
-  ))
-ON DUPLICATE KEY UPDATE
-  option_name   = VALUES(option_name),
-  option_values = VALUES(option_values);
+  ));
 
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -292,9 +262,9 @@ VALUES (
   'Offener Kühlturm – Dreifachzelle TCTP-Serie',
   JSON_ARRAY('offener kühlturm','open circuit','dreifachzelle','TCTP','ensotek'),
   JSON_OBJECT(
-    'zelltyp','Dreifachzelle',
-    'serie','TCTP',
-    'betriebsbedingungen',JSON_ARRAY('35/30/25°C','40/30/24°C')
+    'zelltyp', 'Dreifachzelle',
+    'serie', 'TCTP',
+    'betriebsbedingungen', '35/30/25°C | 40/30/24°C'
   ),
   'Offene Kühltürme | TCTP Dreifachzelle | Ensotek',
   'Dreizellige offene Kühltürme (TCTP-Serie). Modelle TCTP-3 bis TCTP-35 mit Abmessungen, Gewichten, Kapazitäten und Volumenströmen gemäß Katalogtabelle.'
@@ -323,12 +293,7 @@ VALUES
   ('55550004-cccc-4ccc-8ccc-bbbb0004de05','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Volumenstrombereich (35/30/25°C)','140 – 2080 m³/h (modellabhängig)','service',50),
   ('55550004-cccc-4ccc-8ccc-bbbb0004de06','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Kapazitätsbereich (40/30/24°C)','1.100.000 – 15.300.000 kcal/h (modellabhängig)','service',60),
   ('55550004-cccc-4ccc-8ccc-bbbb0004de07','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Volumenstrombereich (40/30/24°C)','110 – 1530 m³/h (modellabhängig)','service',70),
-  ('55550004-cccc-4ccc-8ccc-bbbb0004de08','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Gewichte (leer/Betrieb)','950–11.500 kg / 3.400–60.000 kg (modellabhängig)','physical',80)
-ON DUPLICATE KEY UPDATE
-  name      = VALUES(name),
-  value     = VALUES(value),
-  category  = VALUES(category),
-  order_num = VALUES(order_num);
+  ('55550004-cccc-4ccc-8ccc-bbbb0004de08','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Gewichte (leer/Betrieb)','950–11.500 kg / 3.400–60.000 kg (modellabhängig)','physical',80);
 
 -- FAQS (DE) — locale reset
 DELETE FROM product_faqs
@@ -338,12 +303,7 @@ INSERT INTO product_faqs (id, product_id, locale, question, answer, display_orde
 VALUES
   ('66660004-cccc-4ccc-8ccc-bbbb0004de01','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Wann ist eine Dreifachzelle sinnvoll?','Bei sehr hohen Kapazitäts- und Volumenstromanforderungen, wenn skalierbare Leistung über drei Zellen benötigt wird.',10,1),
   ('66660004-cccc-4ccc-8ccc-bbbb0004de02','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Unter welchen Bedingungen sind die Werte angegeben?','Kapazität (kcal/h) und Volumenstrom (m³/h) sind für 35/30/25°C und 40/30/24°C in der Katalogtabelle angegeben.',20,1),
-  ('66660004-cccc-4ccc-8ccc-bbbb0004de03','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Wichtige Auswahlparameter?','Erforderlicher Volumenstrom, Zielzustand, Platzbedarf (Grundfläche/Höhe) sowie Gewichts- und Handlinganforderungen.',30,1)
-ON DUPLICATE KEY UPDATE
-  question      = VALUES(question),
-  answer        = VALUES(answer),
-  display_order = VALUES(display_order),
-  is_active     = VALUES(is_active);
+  ('66660004-cccc-4ccc-8ccc-bbbb0004de03','bbbb0004-2222-4222-8222-bbbbbbbb0004','de','Wichtige Auswahlparameter?','Erforderlicher Volumenstrom, Zielzustand, Platzbedarf (Grundfläche/Höhe) sowie Gewichts- und Handlinganforderungen.',30,1);
 
 -- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
@@ -366,10 +326,7 @@ VALUES
   ('88880004-cccc-4ccc-8ccc-bbbb0004de01','bbbb0004-2222-4222-8222-bbbbbbbb0004','Modell', JSON_ARRAY(
     'TCTP-3','TCTP-4','TCTP-5','TCTP-5.5','TCTP-6','TCTP-7','TCTP-9',
     'TCTP-12','TCTP-14','TCTP-16','TCTP-20','TCTP-24','TCTP-26','TCTP-30','TCTP-35'
-  ))
-ON DUPLICATE KEY UPDATE
-  option_name   = VALUES(option_name),
-  option_values = VALUES(option_values);
+  ));
 
 COMMIT;
 

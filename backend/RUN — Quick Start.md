@@ -13,6 +13,9 @@ cd /var/www/ensotek/backend
 rm -rf dist .tsbuildinfo
 bun run build
 
+pm2 restart 0
+pm2 restart 1
+
 
 mkdir -p dist/db/seed/sql
 cp -f src/db/seed/sql/*.sql dist/db/seed/sql/

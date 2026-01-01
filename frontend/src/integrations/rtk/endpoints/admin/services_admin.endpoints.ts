@@ -44,8 +44,6 @@ const normalizeService = (
   duration: row.duration,
   maintenance: row.maintenance,
   season: row.season,
-  soil_type: row.soil_type,
-  thickness: row.thickness,
   equipment: row.equipment,
 
   created_at: row.created_at,

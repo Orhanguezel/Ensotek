@@ -150,7 +150,7 @@ VALUES
 -- Library submenu (TR) under /library/{slug}
 (UUID(),'7b000001-1111-4111-8111-7b0000000001','tr','Su Soğutma Kulesi','/library/su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000002-1111-4111-8111-7b0000000002','tr','Kule Özellikleri','/library/ensotek-sogutma-kulelerinin-ozellikleri','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'7b000003-1111-4111-8111-7b0000000003','tr','Kule Seçimi','/library/kule-secimi-icin-gerekli-bilgiler','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'7b000003-1111-4111-8111-7b0000000003','tr','Kule Seçimi','/library/su-sogutma-kulesi-nedir-cesitleri-nelerdir-nasil-calisir','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- Products submenu
 (UUID(),'88888888-1111-2222-3333-444444444444','tr','Tüm Ürünler','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -220,9 +220,9 @@ VALUES
 (UUID(),'5a000009-1111-4111-8111-5a0000000009','en','Emergency','/service/emergency-response','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- Library submenu (EN) under /library/{slug}
-(UUID(),'7b000001-1111-4111-8111-7b0000000001','en','Cooling Tower','/library/what-is-a-water-cooling-tower-types-and-working-principle','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'7b000001-1111-4111-8111-7b0000000001','en','Cooling Tower','/library/what-is-a-cooling-tower-types-and-how-it-works','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'7b000002-1111-4111-8111-7b0000000002','en','Tower Features','/library/features-of-ensotek-cooling-towers','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'7b000003-1111-4111-8111-7b0000000003','en','Selection Info','/library/information-required-for-cooling-tower-selection','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'7b000003-1111-4111-8111-7b0000000003','en','Selection Info','/library/required-data-for-cooling-tower-selection','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 (UUID(),'88888888-1111-2222-3333-444444444444','en','All Products','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','en','Spare Parts','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -291,9 +291,9 @@ VALUES
 (UUID(),'5a000009-1111-4111-8111-5a0000000009','de','Notfallservice','/service/emergency-response','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- Library submenu (DE) under /library/{slug}
-(UUID(),'7b000001-1111-4111-8111-7b0000000001','de','Wasserkühlturm','/library/was-ist-ein-wasser-kuehlturm-arten-und-funktionsprinzip','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'7b000002-1111-4111-8111-7b0000000002','de','Eigenschaften','/library/eigenschaften-der-ensotek-kuehltuerme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'7b000003-1111-4111-8111-7b0000000003','de','Auswahl Infos','/library/erforderliche-informationen-zur-kuehlturm-auswahl','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'7b000001-1111-4111-8111-7b0000000001','de','Wasserkühlturm','/library/was-ist-ein-kuehlturm-arten-und-funktionsweise','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'7b000002-1111-4111-8111-7b0000000002','de','Eigenschaften','/library/merkmale-der-ensotek-kuehltuerme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'7b000003-1111-4111-8111-7b0000000003','de','Auswahl Infos','/library/funktionsprinzip-geschlossener-kuehlturm','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 (UUID(),'88888888-1111-2222-3333-444444444444','de','Alle Produkte','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','de','Ersatzteile','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),

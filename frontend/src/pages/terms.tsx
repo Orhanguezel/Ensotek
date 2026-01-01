@@ -1,29 +1,31 @@
 // =============================================================
 // FILE: src/pages/terms.tsx
-// Ensotek – Terms Page + SEO
+// Ensotek – Terms Page + SEO (STANDARD / HOOK-SAFE) [FINAL]
 //   - Route: /terms
 //   - Data: custom_pages (module_key="terms") meta override
-//   - SEO: seo -> site_seo fallback + OG/Twitter (NO canonical here)
+//   - Locale: useLocaleShort() single source
+//   - SEO: seo -> site_seo fallback + UI overrides
 //   - ✅ Canonical + og:url tek kaynak: _document (SSR)
-// Pattern: cookie-policy / privacy-policy / privacy-notice ile aynı
+//   - SEO: NO <Head>. Only <LayoutSeoBridge />
+// Pattern: cookie-policy / privacy-policy / privacy-notice ile aynı (bridge)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import TermsPageContent from '@/components/containers/legal/TermsPageContent';
+
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
 
 // i18n + UI
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
 import { isValidUiText } from '@/i18n/uiText';
 
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+// SEO helpers
+import { asObj } from '@/seo/pageSeo';
 
 // data
 import {
@@ -33,7 +35,6 @@ import {
 import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
 // helpers
-import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
 function safeJson<T>(v: any, fallback: T): T {
@@ -49,10 +50,15 @@ function safeJson<T>(v: any, fallback: T): T {
   }
 }
 
+function safeStr(v: unknown): string {
+  if (v == null) return '';
+  return String(v).trim();
+}
+
 function extractHtmlFromAny(page: any): string {
   if (!page) return '';
 
-  const ch = String(page?.content_html ?? '').trim();
+  const ch = safeStr(page?.content_html);
   if (ch) return ch;
 
   const c = page?.content ?? page?.content_json ?? page?.contentJson;
@@ -82,146 +88,112 @@ const TermsPage: React.FC = () => {
   const { ui } = useUiSection('ui_terms', locale as any);
 
   // -----------------------------
-  // UI (Banner Title)
+  // Banner Title (UI)
   // -----------------------------
   const bannerTitle = useMemo(() => {
     const key = 'ui_terms_page_title';
-    const v = String(ui(key, '') || '').trim();
+    const v = safeStr(ui(key, ''));
     return isValidUiText(v, key) ? v : 'Terms';
   }, [ui]);
 
   // -----------------------------
   // Global SEO settings (seo -> site_seo fallback)
   // -----------------------------
-  const { data: seoSettingPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoSettingFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale } as any);
 
   const seo = useMemo(() => {
-    const raw = (seoSettingPrimary?.value ?? seoSettingFallback?.value) as any;
+    const raw =
+      (seoPrimary as any)?.value ?? (seoFallback as any)?.value ?? seoPrimary ?? seoFallback;
     return asObj(raw) ?? {};
-  }, [seoSettingPrimary?.value, seoSettingFallback?.value]);
+  }, [seoPrimary, seoFallback]);
 
   // -----------------------------
   // Terms custom page (meta override için: ilk published)
-  // module_key = 'terms'  (seed: 051.6_custom_pages_terms.seed.sql)
   // -----------------------------
-  const { data: termsData } = useListCustomPagesPublicQuery({
-    module_key: 'terms',
-    locale,
-    limit: 10,
-    sort: 'created_at',
-    orderDir: 'asc',
-  });
+  const { data: termsData } = useListCustomPagesPublicQuery(
+    {
+      module_key: 'terms',
+      locale,
+      limit: 10,
+      sort: 'created_at',
+      orderDir: 'asc',
+      is_published: 1,
+    } as any,
+    { refetchOnMountOrArgChange: true },
+  );
 
   const primary = useMemo<CustomPageDto | null>(() => {
     const items: CustomPageDto[] = ((termsData as any)?.items ?? []) as any;
-    const published = items.filter((p) => !!p?.is_published);
+    const published = items.filter((p) => !!(p as any)?.is_published);
     return published[0] ?? null;
   }, [termsData]);
 
   // -----------------------------
-  // SEO: title/description sources (UI -> custom_page -> seo)
+  // SEO sources (UI -> custom_page -> seo)
   // -----------------------------
-  const pageTitleRaw = useMemo(() => {
+  const pageTitle = useMemo(() => {
     const key = 'ui_terms_meta_title';
 
-    const fromUi = String(ui(key, '') || '').trim();
+    const fromUi = safeStr(ui(key, ''));
     if (isValidUiText(fromUi, key)) return fromUi;
 
-    const fromPageMeta = String((primary as any)?.meta_title ?? '').trim();
-    if (fromPageMeta) return fromPageMeta;
+    const fromMeta = safeStr((primary as any)?.meta_title);
+    if (fromMeta) return fromMeta;
 
-    const fromPageTitle = String((primary as any)?.title ?? '').trim();
-    if (fromPageTitle) return fromPageTitle;
+    const fromTitle = safeStr((primary as any)?.title);
+    if (fromTitle) return fromTitle;
 
-    return 'Terms | Ensotek';
-  }, [ui, primary]);
+    return safeStr(bannerTitle) || 'Terms';
+  }, [ui, primary, bannerTitle]);
 
-  const pageDescRaw = useMemo(() => {
+  const pageDescription = useMemo(() => {
     const key = 'ui_terms_meta_description';
 
-    const fromUi = String(ui(key, '') || '').trim();
+    const fromUi = safeStr(ui(key, ''));
     if (isValidUiText(fromUi, key)) return fromUi;
 
-    const fromPageMeta = String((primary as any)?.meta_description ?? '').trim();
-    if (fromPageMeta) return fromPageMeta;
+    const fromMeta = safeStr((primary as any)?.meta_description);
+    if (fromMeta) return fromMeta;
 
-    const fromSummary = String((primary as any)?.summary ?? '').trim();
+    const fromSummary = safeStr((primary as any)?.summary);
     if (fromSummary) return fromSummary;
 
     const html = extractHtmlFromAny(primary);
-    const fromExcerpt = excerpt(html, 160).trim();
+    const fromExcerpt = safeStr(excerpt(html, 160));
     if (fromExcerpt) return fromExcerpt;
 
-    const fromUiDesc = String(ui('ui_terms_page_description', '') || '').trim();
-    if (fromUiDesc && isValidUiText(fromUiDesc, 'ui_terms_page_description')) return fromUiDesc;
+    const keyPageDesc = 'ui_terms_page_description';
+    const fromUiDesc = safeStr(ui(keyPageDesc, ''));
+    if (fromUiDesc && isValidUiText(fromUiDesc, keyPageDesc)) return fromUiDesc;
 
-    const fromSeo = String((seo as any)?.description ?? '').trim();
+    const fromSeo = safeStr((seo as any)?.description);
     if (fromSeo) return fromSeo;
 
     return 'Ensotek terms of use: content usage, limitations, external links and updates.';
   }, [ui, primary, seo]);
 
-  const seoSiteName = useMemo(
-    () => String((seo as any)?.site_name ?? '').trim() || 'Ensotek',
-    [seo],
-  );
+  const ogImageOverride = useMemo(() => {
+    // optional UI override; otherwise LayoutSeoBridge will fallback to seo/site default
+    const key = 'ui_terms_og_image';
+    const v = safeStr(ui(key, ''));
+    if (isValidUiText(v, key) && v) return v;
+    return undefined;
+  }, [ui]);
 
-  const titleTemplate = useMemo(
-    () => String((seo as any)?.title_template ?? '').trim() || '%s | Ensotek',
-    [seo],
-  );
-
-  const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return String(t).trim();
-  }, [titleTemplate, pageTitleRaw]);
-
-  const ogImage = useMemo(() => {
-    const pageImgRaw = String((primary as any)?.featured_image ?? '').trim();
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
-
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
-
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
-  }, [primary, seo]);
-
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
+  const noindex = useMemo(() => {
     const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof robots.noindex === 'boolean' ? robots.noindex : false;
-
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
-      twitterCard: String(tw.card ?? '').trim() || 'summary_large_image',
-      twitterSite: typeof tw.site === 'string' ? tw.site.trim() : undefined,
-      twitterCreator: typeof tw.creator === 'string' ? tw.creator.trim() : undefined,
-      // canonical + og:url yok (SSR _document)
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    return typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+  }, [seo]);
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={noindex}
+      />
 
       <Banner title={bannerTitle} />
       <TermsPageContent />

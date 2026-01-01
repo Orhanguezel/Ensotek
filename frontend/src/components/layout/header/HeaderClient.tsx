@@ -1,18 +1,19 @@
 // src/components/layout/header/HeaderClient.tsx
-"use client";
+'use client';
 
-import React, { Fragment, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
-import Image, { type StaticImageData } from "next/image";
+import React, { Fragment, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { type StaticImageData } from 'next/image';
 
-import HeaderOffcanvas from "./HeaderOffcanvas";
+import HeaderOffcanvas from './HeaderOffcanvas';
+import { SiteLogo } from '@/components/layout/SiteLogo';
 
-import { useListMenuItemsQuery, useGetSiteSettingByKeyQuery } from "@/integrations/rtk/hooks";
-import type { PublicMenuItemDto } from "@/integrations/types/menu_items.types";
+import { useListMenuItemsQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
 
-import { localizePath } from "@/i18n/url";
-import { useResolvedLocale } from "@/i18n/locale";
-import { useUiSection } from "@/i18n/uiDb";
+import { localizePath } from '@/i18n/url';
+import { useResolvedLocale } from '@/i18n/locale';
+import { useUiSection } from '@/i18n/uiDb';
 
 type SimpleBrand = {
   name: string;
@@ -29,16 +30,6 @@ type MenuItemWithChildren = PublicMenuItemDto & {
   children?: MenuItemWithChildren[];
 };
 
-const IMG_W = 160;
-const IMG_H = 60;
-
-const imgStyle: React.CSSProperties = {
-  width: "auto",
-  height: "auto",
-  maxWidth: IMG_W,
-  maxHeight: IMG_H,
-};
-
 const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -47,31 +38,31 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   const locale = useResolvedLocale();
 
   // ✅ UI stringleri
-  const { ui, raw: uiHeaderJson } = useUiSection("ui_header", locale);
+  const { ui, raw: uiHeaderJson } = useUiSection('ui_header', locale);
 
   const menuEmptyLabel =
-    (typeof (uiHeaderJson as any)?.menu_empty === "string" &&
+    (typeof (uiHeaderJson as any)?.menu_empty === 'string' &&
       String((uiHeaderJson as any).menu_empty).trim()) ||
-    "(Menü tanımlı değil)";
+    '(Menü tanımlı değil)';
 
   const menuLoadingLabel =
-    (typeof (uiHeaderJson as any)?.menu_loading === "string" &&
+    (typeof (uiHeaderJson as any)?.menu_loading === 'string' &&
       String((uiHeaderJson as any).menu_loading).trim()) ||
-    "(Menü yükleniyor...)";
+    '(Menü yükleniyor...)';
 
   // 🔹 site_settings - locale-aware
   const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
-    key: "contact_info",
+    key: 'contact_info',
     locale,
   });
 
   const { data: socialsSetting } = useGetSiteSettingByKeyQuery({
-    key: "socials",
+    key: 'socials',
     locale,
   });
 
   const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
-    key: "company_brand",
+    key: 'company_brand',
     locale,
   });
 
@@ -80,27 +71,19 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
     const socials = (socialsSetting?.value ?? {}) as Record<string, string>;
     const brandVal = (companyBrandSetting?.value ?? {}) as any;
 
-    const name =
-      (brandVal?.name as string) ||
-      (contact?.companyName as string) ||
-      "ENSOTEK";
+    const name = (brandVal?.name as string) || (contact?.companyName as string) || 'ENSOTEK';
 
     const website =
-      (brandVal?.website as string) ||
-      (contact?.website as string) ||
-      "https://ensotek.de";
+      (brandVal?.website as string) || (contact?.website as string) || 'https://ensotek.de';
 
     const phones = Array.isArray(contact?.phones) ? contact.phones : [];
     const phone =
       (phones[0] as string | undefined) ||
       (contact?.whatsappNumber as string | undefined) ||
       (brandVal?.phone as string | undefined) ||
-      "+90 212 000 00 00";
+      '+90 212 000 00 00';
 
-    const email =
-      (contact?.email as string) ||
-      (brandVal?.email as string) ||
-      "info@ensotek.com";
+    const email = (contact?.email as string) || (brandVal?.email as string) || 'info@ensotek.com';
 
     const mergedSocials: Record<string, string> = {
       ...(brandVal?.socials as Record<string, string> | undefined),
@@ -134,19 +117,19 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   );
 
   const effectiveLogo: string | StaticImageData | undefined = useMemo(() => {
-    if (typeof logoSrc === "string" && logoSrc.trim()) return logoSrc.trim();
+    if (typeof logoSrc === 'string' && logoSrc.trim()) return logoSrc.trim();
     if (logoSrc) return logoSrc;
 
     const fromSettings = brandFromSettings.logo?.url;
     if (fromSettings && String(fromSettings).trim()) return String(fromSettings).trim();
 
     // hard fallback sadece logo url yoksa
-    return "https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp";
+    return 'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
   }, [logoSrc, brandFromSettings.logo]);
 
   // Menu items – locale-aware
   const { data: menuData, isLoading: isMenuLoading } = useListMenuItemsQuery({
-    location: "header",
+    location: 'header',
     is_active: true,
     locale,
     nested: true,
@@ -157,8 +140,8 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
     const list: MenuItemWithChildren[] = Array.isArray(raw)
       ? raw
       : Array.isArray(raw?.items)
-        ? raw.items
-        : [];
+      ? raw.items
+      : [];
 
     const sortRecursive = (items: MenuItemWithChildren[]): MenuItemWithChildren[] =>
       items
@@ -178,24 +161,22 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   const renderDesktopMenuItem = (item: MenuItemWithChildren) => {
-    const rawUrl = item.url || (item as any).href || "#";
+    const rawUrl = item.url || (item as any).href || '#';
     const href = localizePath(locale, rawUrl);
     const hasChildren = !!item.children && item.children.length > 0;
 
-    const isNowrap = rawUrl === "/sparepart" || rawUrl === "/blog";
+    const isNowrap = rawUrl === '/sparepart' || rawUrl === '/blog';
 
     if (!hasChildren) {
       return (
         <li key={item.id}>
           <Link href={href}>
-            <span className={isNowrap ? "nowrap" : undefined}>
-              {item.title || rawUrl}
-            </span>
+            <span className={isNowrap ? 'nowrap' : undefined}>{item.title || rawUrl}</span>
           </Link>
         </li>
       );
@@ -204,20 +185,18 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
     return (
       <li key={item.id} className="has-dropdown">
         <Link href={href}>
-          <span className={isNowrap ? "nowrap" : undefined}>
-            {item.title || rawUrl}
-          </span>
+          <span className={isNowrap ? 'nowrap' : undefined}>{item.title || rawUrl}</span>
         </Link>
         <ul className="submenu">
           {item.children!.map((child) => {
-            const childRawUrl = child.url || (child as any).href || "#";
+            const childRawUrl = child.url || (child as any).href || '#';
             const childHref = localizePath(locale, childRawUrl);
-            const childNowrap = childRawUrl === "/sparepart" || childRawUrl === "/blog";
+            const childNowrap = childRawUrl === '/sparepart' || childRawUrl === '/blog';
 
             return (
               <li key={child.id}>
                 <Link href={childHref}>
-                  <span className={childNowrap ? "nowrap" : undefined}>
+                  <span className={childNowrap ? 'nowrap' : undefined}>
                     {child.title || childRawUrl}
                   </span>
                 </Link>
@@ -241,7 +220,7 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
       <header>
         <div
           id="header-sticky"
-          className={(scrolled ? " sticky" : " ") + " header__area header__transparent"}
+          className={(scrolled ? ' sticky' : ' ') + ' header__area header__transparent'}
         >
           <div className="container">
             <div className="row align-items-center">
@@ -249,18 +228,7 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
               <div className="col-xl-2 col-lg-2 col-6">
                 <div className="header__logo">
                   <Link href="/" aria-label={resolvedBrand.name}>
-                    {effectiveLogo ? (
-                      <Image
-                        key={typeof effectiveLogo === "string" ? effectiveLogo : "static"}
-                        src={effectiveLogo}
-                        alt={resolvedBrand.name}
-                        width={brandFromSettings.logo?.width ?? IMG_W}
-                        height={brandFromSettings.logo?.height ?? IMG_H}
-                        sizes="(max-width: 992px) 120px, 160px"
-                        style={imgStyle}
-                        priority
-                      />
-                    ) : null}
+                    <SiteLogo alt={resolvedBrand.name} overrideSrc={effectiveLogo} />
                   </Link>
                 </div>
               </div>
@@ -275,17 +243,13 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
 
                         {!headerMenuItems.length && !isMenuLoading && (
                           <li>
-                            <span className="text-muted small ps-2">
-                              {menuEmptyLabel}
-                            </span>
+                            <span className="text-muted small ps-2">{menuEmptyLabel}</span>
                           </li>
                         )}
 
                         {isMenuLoading && (
                           <li>
-                            <span className="text-muted small ps-2">
-                              {menuLoadingLabel}
-                            </span>
+                            <span className="text-muted small ps-2">{menuLoadingLabel}</span>
                           </li>
                         )}
                       </ul>
@@ -300,11 +264,17 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
                   <div className="header__hamburger ml-60 d-none d-lg-inline-flex">
                     <button
                       className="humbager__icon sidebar__active"
-                      aria-label={ui("ui_header_open_menu", "Open Menu")}
+                      aria-label={ui('ui_header_open_menu', 'Open Menu')}
                       onClick={() => setOpen(true)}
                       type="button"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="28" height="24" viewBox="0 0 28 24" aria-hidden="true">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="28"
+                        height="24"
+                        viewBox="0 0 28 24"
+                        aria-hidden="true"
+                      >
                         <g transform="translate(-1629 -60)">
                           <circle cx="2" cy="2" r="2" transform="translate(1641 60)" />
                           <circle cx="2" cy="2" r="2" transform="translate(1653 60)" />
@@ -323,7 +293,7 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
                   <div className="header__toggle d-lg-none">
                     <button
                       className="sidebar__active"
-                      aria-label={ui("ui_header_open_sidebar", "Open Sidebar")}
+                      aria-label={ui('ui_header_open_sidebar', 'Open Sidebar')}
                       onClick={() => setOpen(true)}
                       type="button"
                     >
@@ -340,43 +310,6 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-          .nav-inline {
-            display: flex;
-            align-items: center;
-            flex-wrap: nowrap;
-            gap: 20px;
-            white-space: nowrap;
-          }
-          .nav-inline > li {
-            margin: 0 !important;
-          }
-          .nav-inline > li.has-dropdown {
-            position: relative;
-          }
-          .nav-inline > li > a {
-            display: inline-block;
-            padding: 6px 8px !important;
-            line-height: 1.2;
-            white-space: nowrap;
-          }
-          .nav-inline > li.has-dropdown > ul.submenu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            z-index: 1000;
-            min-width: 180px;
-          }
-          .nowrap {
-            white-space: nowrap;
-          }
-          @media (min-width: 1200px) {
-            .nav-inline {
-              gap: 20px;
-            }
-          }
-        `}</style>
       </header>
     </Fragment>
   );

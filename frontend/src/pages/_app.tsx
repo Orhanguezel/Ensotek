@@ -17,12 +17,14 @@ import 'aos/dist/aos.css';
 import 'nprogress/nprogress.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-
 import '@/integrations/rtk/endpoints/_register';
 
 import { StoreProvider } from '@/store';
 import LangBoot from '@/i18n/LangBoot';
 import Layout from '@/components/layout/Layout';
+
+// ✅ IMPORTANT: route change'de SEO override reset (rewrite/unmount edge-case fix)
+import { resetLayoutSeo } from '@/seo/layoutSeoStore';
 
 // Admin shell
 import AdminLayoutShell, { type ActiveTab } from '@/components/layout/admin/AdminLayout';
@@ -41,7 +43,7 @@ function App({ Component, pageProps }: AppProps) {
 
   const isAdminRoute = useMemo(() => isAdminPath(rawPath), [rawPath]);
 
-  // NProgress + AOS
+  // NProgress + AOS + ✅ SEO reset on route start
   useEffect(() => {
     let mounted = true;
 
@@ -49,6 +51,11 @@ function App({ Component, pageProps }: AppProps) {
     let AOSMod: any = null;
 
     const start = () => {
+      // ✅ prevent "stuck" overrides on rewrite/mount edge cases
+      try {
+        resetLayoutSeo();
+      } catch {}
+
       try {
         NProgressMod?.start?.();
       } catch {}
@@ -103,13 +110,9 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <StoreProvider>
-      {/* locale + ui boot */}
       <LangBoot />
 
-      {/* ✅ Analytics scripts (GTM preferred; consent default denied) */}
       {!isAdminRoute && <AnalyticsScripts />}
-
-      {/* ✅ Page view sender (Pages Router) */}
       {!isAdminRoute && <GAViewPages />}
 
       <Toaster position="top-right" richColors closeButton duration={4000} />
@@ -124,16 +127,11 @@ function App({ Component, pageProps }: AppProps) {
         </Layout>
       )}
 
-      {/* ✅ Cookie banner: admin’da göstermiyoruz */}
       {!isAdminRoute && <CookieConsentBanner />}
     </StoreProvider>
   );
 }
 
-/**
- * ✅ SSR'i zorlar: Pages Router'da rewrites + locale query senaryolarında
- * ilk HTML üretiminde path/locale bilgisinin stabil kalması için kritik.
- */
 App.getInitialProps = async (appCtx: AppContext) => {
   const appProps = await NextApp.getInitialProps(appCtx);
   return { ...appProps };

@@ -1,17 +1,22 @@
 -- =============================================================
--- FILE: 015.9_sparepart_bbbb1509_pvc_film_fill__all_locales.sql (FINAL)
+-- FILE: 015.9_sparepart_bbbb1509_pvc_film_fill__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (09/14)
 -- Sparepart: PVC Petek Dolgu (Film Tipi) / PVC Film Fill / PVC Folienfüllung
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1003-1111-4111-8111-bbbbbbbb1003'  (Fill Media)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to 015.8 pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING
+--    (NO JSON_ARRAY/JSON_OBJECT nested inside specifications)
+--  - product_specs/product_faqs: locale-based reset with DELETE
+--  - product_reviews: id-based reset
+--  - product_options is locale-less => TR/EN/DE separate option rows with different IDs
 --  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1003-1111-4111-8111-bbbbbbbb1003'  (Fill Media)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -83,7 +88,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -99,12 +104,10 @@ VALUES (
   JSON_ARRAY('yedek parça', 'pvc petek dolgu', 'film dolgu', 'cf-12', 'cf-19', 'cf-30', 'ensotek'),
   JSON_OBJECT(
     'malzeme', 'PVC',
-    'kullanimKosulu', 'Temiz su, maks. 55 °C',
-    'tipler', JSON_ARRAY('CF-12', 'CF-19', 'CF-30', 'CF-M', 'CF-O'),
-    'notlar', JSON_OBJECT(
-      'CF-30', 'Arıtma tesislerinde (özellikle biyolojik) yaygın kullanım',
-      'CF-O', 'Çapraz akışlı kulelerde kullanım'
-    )
+    'kullanimKosulu', 'Temiz su; maks. 55 °C',
+    'tipler', 'CF-12, CF-19, CF-30, CF-M, CF-O',
+    'CF-30', 'Arıtma tesisleri (özellikle biyolojik) için yaygın',
+    'CF-O', 'Çapraz akışlı kulelerde kullanım'
   ),
   'PVC Petek Dolgu (Film Tipi) | Soğutma Kulesi Yedek Parça | Ensotek',
   'PVC film tipi petek dolgu: yüksek yüzey alanı ile verimli ısı transferi. Temiz su ve 55 °C altı prosesler için CF-12/19/30/CF-M/CF-O seçenekleri.'
@@ -120,7 +123,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1509-2222-4222-8222-bbbbbbbb1509' AND locale='tr';
 
@@ -132,7 +135,7 @@ VALUES
   ('11111509-aaaa-4aaa-8aaa-bbbb1509tr04','bbbb1509-2222-4222-8222-bbbbbbbb1509','tr','Maks. Su Sıcaklığı','55 °C','physical',40),
   ('11111509-aaaa-4aaa-8aaa-bbbb1509tr05','bbbb1509-2222-4222-8222-bbbbbbbb1509','tr','Tip Seçenekleri','CF-12 / CF-19 / CF-30 / CF-M / CF-O','custom',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1509-2222-4222-8222-bbbbbbbb1509' AND locale='tr';
 
@@ -142,7 +145,7 @@ VALUES
   ('22221509-aaaa-4aaa-8aaa-bbbb1509tr02','bbbb1509-2222-4222-8222-bbbbbbbb1509','tr','Film tipi dolgunun avantajı nedir?','Yüksek yüzey alanı sayesinde ısı transfer verimi yüksektir.',20,1),
   ('22221509-aaaa-4aaa-8aaa-bbbb1509tr03','bbbb1509-2222-4222-8222-bbbbbbbb1509','tr','CF tipleri neyi ifade eder?','Farklı geometri ve adım (pitch) seçeneklerini ifade eder. Uygulamaya göre CF-12/19/30/CF-M/CF-O seçilir.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331509-aaaa-4aaa-8aaa-bbbb1509tr01',
@@ -154,16 +157,22 @@ VALUES
   ('33331509-aaaa-4aaa-8aaa-bbbb1509tr01','bbbb1509-2222-4222-8222-bbbbbbbb1509',NULL,5,'Temiz su prosesinde performansı çok iyi; kule verimi yükseldi.',1,'Tesis Operasyon'),
   ('33331509-aaaa-4aaa-8aaa-bbbb1509tr02','bbbb1509-2222-4222-8222-bbbbbbbb1509',NULL,4,'CF seçenekleriyle ihtiyaca göre doğru dolgu seçimi yapılabiliyor.',1,'Bakım Ekibi');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — locale-less table => separate row
 DELETE FROM product_options
-WHERE id='44441509-aaaa-4aaa-8aaa-bbbb1509op01';
+WHERE id='44441509-aaaa-4aaa-8aaa-bbbb1509tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441509-aaaa-4aaa-8aaa-bbbb1509op01','bbbb1509-2222-4222-8222-bbbbbbbb1509','Type', JSON_ARRAY('PVC CF-12','PVC CF-19','PVC CF-30','PVC CF-M','PVC CF-O'));
+  ('44441509-aaaa-4aaa-8aaa-bbbb1509tr01','bbbb1509-2222-4222-8222-bbbbbbbb1509','Tip', JSON_ARRAY(
+    'PVC CF-12',
+    'PVC CF-19',
+    'PVC CF-30',
+    'PVC CF-M',
+    'PVC CF-O'
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -179,12 +188,10 @@ VALUES (
   JSON_ARRAY('spare part', 'PVC film fill', 'film fill', 'CF-12', 'CF-19', 'CF-30', 'ensotek'),
   JSON_OBJECT(
     'material', 'PVC',
-    'recommendedProcess', 'Clean water, up to 55 °C',
-    'types', JSON_ARRAY('CF-12', 'CF-19', 'CF-30', 'CF-M', 'CF-O'),
-    'notes', JSON_OBJECT(
-      'CF-30', 'Common in wastewater treatment (biological)',
-      'CF-O', 'Used in crossflow towers'
-    )
+    'recommendedProcess', 'Clean water; up to 55 °C',
+    'types', 'CF-12, CF-19, CF-30, CF-M, CF-O',
+    'CF-30', 'Common in wastewater treatment (biological)',
+    'CF-O', 'Used in crossflow towers'
   ),
   'PVC Film Fill | Cooling Tower Spare Parts | Ensotek',
   'PVC film fill for efficient heat transfer in clean-water processes up to 55 °C. Available in CF-12/19/30/CF-M/CF-O options.'
@@ -200,7 +207,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1509-2222-4222-8222-bbbbbbbb1509' AND locale='en';
 
@@ -212,7 +219,7 @@ VALUES
   ('11111509-bbbb-4bbb-8bbb-bbbb1509en04','bbbb1509-2222-4222-8222-bbbbbbbb1509','en','Max. Water Temperature','55 °C','physical',40),
   ('11111509-bbbb-4bbb-8bbb-bbbb1509en05','bbbb1509-2222-4222-8222-bbbbbbbb1509','en','Type Options','CF-12 / CF-19 / CF-30 / CF-M / CF-O','custom',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1509-2222-4222-8222-bbbbbbbb1509' AND locale='en';
 
@@ -222,7 +229,7 @@ VALUES
   ('22221509-bbbb-4bbb-8bbb-bbbb1509en02','bbbb1509-2222-4222-8222-bbbbbbbb1509','en','What is the main advantage of film fill?','High surface area, which increases heat transfer efficiency.',20,1),
   ('22221509-bbbb-4bbb-8bbb-bbbb1509en03','bbbb1509-2222-4222-8222-bbbbbbbb1509','en','What do CF types indicate?','They represent different geometries/pitches. Selection depends on water quality and operating conditions.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331509-bbbb-4bbb-8bbb-bbbb1509en01',
@@ -234,8 +241,22 @@ VALUES
   ('33331509-bbbb-4bbb-8bbb-bbbb1509en01','bbbb1509-2222-4222-8222-bbbbbbbb1509',NULL,5,'Excellent thermal performance in clean-water duty; noticeable efficiency gain.',1,'Operations'),
   ('33331509-bbbb-4bbb-8bbb-bbbb1509en02','bbbb1509-2222-4222-8222-bbbbbbbb1509',NULL,4,'Multiple CF options make it easy to match site conditions.',1,'Maintenance');
 
+-- OPTIONS (EN) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441509-bbbb-4bbb-8bbb-bbbb1509en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441509-bbbb-4bbb-8bbb-bbbb1509en01','bbbb1509-2222-4222-8222-bbbbbbbb1509','Type', JSON_ARRAY(
+    'PVC CF-12',
+    'PVC CF-19',
+    'PVC CF-30',
+    'PVC CF-M',
+    'PVC CF-O'
+  ));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -251,12 +272,10 @@ VALUES (
   JSON_ARRAY('ersatzteil', 'pvc folienfuellung', 'filmfuellung', 'cf-12', 'cf-19', 'cf-30', 'ensotek'),
   JSON_OBJECT(
     'material', 'PVC',
-    'einsatz', 'Sauberes Wasser, bis ca. 55 °C',
-    'typen', JSON_ARRAY('CF-12', 'CF-19', 'CF-30', 'CF-M', 'CF-O'),
-    'hinweise', JSON_OBJECT(
-      'CF-30', 'Häufig in Kläranlagen (biologisch)',
-      'CF-O', 'Für Querstromkühltürme'
-    )
+    'einsatz', 'Sauberes Wasser; bis ca. 55 °C',
+    'typen', 'CF-12, CF-19, CF-30, CF-M, CF-O',
+    'CF-30', 'Häufig in Kläranlagen (biologisch)',
+    'CF-O', 'Für Querstromkühltürme'
   ),
   'PVC Folienfüllung | Kühlturm Ersatzteile | Ensotek',
   'PVC Filmfüllung für effiziente Wärmeübertragung bei sauberem Wasser bis 55 °C. Typen CF-12/19/30/CF-M/CF-O verfügbar.'
@@ -272,7 +291,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1509-2222-4222-8222-bbbbbbbb1509' AND locale='de';
 
@@ -284,7 +303,7 @@ VALUES
   ('11111509-cccc-4ccc-8ccc-bbbb1509de04','bbbb1509-2222-4222-8222-bbbbbbbb1509','de','Max. Wassertemperatur','55 °C','physical',40),
   ('11111509-cccc-4ccc-8ccc-bbbb1509de05','bbbb1509-2222-4222-8222-bbbbbbbb1509','de','Typen','CF-12 / CF-19 / CF-30 / CF-M / CF-O','custom',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1509-2222-4222-8222-bbbbbbbb1509' AND locale='de';
 
@@ -294,7 +313,7 @@ VALUES
   ('22221509-cccc-4ccc-8ccc-bbbb1509de02','bbbb1509-2222-4222-8222-bbbbbbbb1509','de','Was ist der Vorteil von Filmfüllung?','Hohe Oberfläche und damit sehr gute Wärmeübertragungsleistung.',20,1),
   ('22221509-cccc-4ccc-8ccc-bbbb1509de03','bbbb1509-2222-4222-8222-bbbbbbbb1509','de','Wofür stehen die CF-Typen?','Sie kennzeichnen unterschiedliche Geometrien/Teilungen. Die Auswahl erfolgt je nach Wasserqualität und Betriebsbedingungen.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331509-cccc-4ccc-8ccc-bbbb1509de01',
@@ -305,6 +324,20 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331509-cccc-4ccc-8ccc-bbbb1509de01','bbbb1509-2222-4222-8222-bbbbbbbb1509',NULL,5,'Sehr gute Leistung bei sauberem Wasser; die Kühlleistung ist gestiegen.',1,'Betrieb'),
   ('33331509-cccc-4ccc-8ccc-bbbb1509de02','bbbb1509-2222-4222-8222-bbbbbbbb1509',NULL,4,'Die CF-Varianten helfen, die passende Ausführung schnell zu wählen.',1,'Instandhaltung');
+
+-- OPTIONS (DE) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441509-cccc-4ccc-8ccc-bbbb1509de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441509-cccc-4ccc-8ccc-bbbb1509de01','bbbb1509-2222-4222-8222-bbbbbbbb1509','Typ', JSON_ARRAY(
+    'PVC CF-12',
+    'PVC CF-19',
+    'PVC CF-30',
+    'PVC CF-M',
+    'PVC CF-O'
+  ));
 
 COMMIT;
 

@@ -1,16 +1,19 @@
 // =============================================================
 // FILE: src/pages/product/[slug].tsx
-// Ensotek – Product Detail Page (by slug) + SEO
-//   - Route: /product/[slug]
-//   - i18n: useLocaleShort() + site_settings.ui_products
-//   - SEO: seo -> site_seo fallback + product.meta_* override (NO canonical here)
-//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
+// Ensotek – Product Detail Page [FINAL / STANDARD]
+// - Route: /product/[slug]
+// - ✅ NO <Head>
+// - ✅ Page SEO overrides via <LayoutSeoBridge />
+// - ✅ General meta/canonical/hreflang/etc. stays in Layout/_document (no duplication)
+// - SEO priority (detail):
+//   title: product.meta_title -> product.title -> ui_products_detail_page_title -> ui_products_page_title -> fallback
+//   desc : product.meta_description -> excerpt(product.description) -> ui fallback -> Layout default
+//   og   : product.featured_image || product.image_url -> undefined (Layout decides)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import Banner from '@/components/layout/banner/Breadcrum';
@@ -18,182 +21,142 @@ import ProductDetail from '@/components/containers/product/ProductDetail';
 import ProductMore from '@/components/containers/product/ProductMore';
 import ServiceCta from '@/components/containers/cta/ServiceCta';
 
-// i18n
+// ✅ Page -> Layout SEO overrides (STANDARD)
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
+// i18n + UI
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
-
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+import { isValidUiText } from '@/i18n/uiText';
 
 // data
-import { useGetSiteSettingByKeyQuery, useGetProductBySlugQuery } from '@/integrations/rtk/hooks';
+import { useGetProductBySlugQuery } from '@/integrations/rtk/hooks';
 
 // helpers
 import { excerpt } from '@/shared/text';
 import { toCdnSrc } from '@/shared/media';
 
-// ui skeleton
-import { SkeletonLine, SkeletonStack } from '@/components/ui/skeleton';
+// ✅ shared skeleton (NO inline styles)
+import Skeleton from '@/components/common/public/Skeleton';
+
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
 function readSlug(q: unknown): string {
-  if (typeof q === 'string') return q;
-  if (Array.isArray(q)) return String(q[0] ?? '');
+  if (typeof q === 'string') return q.trim();
+  if (Array.isArray(q)) return String(q[0] ?? '').trim();
   return '';
-}
-
-function safeStr(x: unknown): string {
-  return typeof x === 'string' ? x.trim() : '';
 }
 
 const ProductDetailPage: React.FC = () => {
   const router = useRouter();
   const locale = useLocaleShort();
-
   const { ui } = useUiSection('ui_products', locale as any);
 
-  const slug = useMemo(() => readSlug(router.query.slug).trim(), [router.query.slug]);
-  const isSlugReady = !!slug;
-
-  // UI fallbacks (minimum; DB/UI overrides should win)
-  const listTitleFallback = ui('ui_products_page_title', 'Products');
-  const detailTitleFallback = ui('ui_products_detail_page_title', 'Product');
-
-  // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
-
-  const seo = useMemo(() => {
-    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoPrimary?.value, seoFallback?.value]);
+  const slug = useMemo(() => readSlug(router.query.slug), [router.query.slug]);
+  const isSlugReady = router.isReady && !!slug;
 
   // Product data
-  const { data: product, isLoading: isProductLoading } = useGetProductBySlugQuery(
+  const { data: product, isFetching } = useGetProductBySlugQuery(
     { slug, locale },
     { skip: !isSlugReady },
   );
 
+  // -----------------------------
+  // UI fallbacks
+  // -----------------------------
+  const listTitleFallback = useMemo(() => {
+    const key = 'ui_products_page_title';
+    const v = safeStr(ui(key, 'Products'));
+    return isValidUiText(v, key) ? v : 'Products';
+  }, [ui]);
+
+  const detailTitleFallback = useMemo(() => {
+    const key = 'ui_products_detail_page_title';
+    const v = safeStr(ui(key, 'Product'));
+    return isValidUiText(v, key) ? v : 'Product';
+  }, [ui]);
+
+  // -----------------------------
+  // Banner title
+  // -----------------------------
   const bannerTitle = useMemo(() => {
-    return (
-      safeStr((product as any)?.title) ||
-      safeStr(detailTitleFallback) ||
-      safeStr(listTitleFallback) ||
-      'Product'
-    );
+    const t = safeStr((product as any)?.title);
+    if (t) return t;
+
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
+
+    return listTitleFallback || 'Product';
   }, [product, detailTitleFallback, listTitleFallback]);
 
-  // --- SEO fields ---
-  const pageTitleRaw = useMemo(() => {
-    const globalFallback = safeStr(detailTitleFallback) || safeStr(listTitleFallback) || 'Product';
-
-    if (!isSlugReady) return globalFallback;
-
-    return (
-      safeStr((product as any)?.meta_title) ||
-      safeStr((product as any)?.title) ||
-      safeStr(bannerTitle) ||
-      globalFallback
-    );
-  }, [isSlugReady, product, bannerTitle, detailTitleFallback, listTitleFallback]);
-
-  const pageDescRaw = useMemo(() => {
-    const globalDesc = safeStr((seo as any)?.description) || '';
-
-    if (!isSlugReady) return globalDesc;
-
-    const metaDesc = safeStr((product as any)?.meta_description);
-    const desc = safeStr((product as any)?.description);
-
-    // UI fallback (optional)
-    const uiFallback = safeStr(
-      ui(
-        'ui_products_detail_meta_description',
-        'View product details, technical specifications, and request a quote.',
-      ),
-    );
-
-    return metaDesc || (desc ? excerpt(desc, 160).trim() : '') || uiFallback || globalDesc || '';
-  }, [isSlugReady, product, seo, ui]);
-
-  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
-    [seo],
-  );
-
+  // -----------------------------
+  // SEO overrides (detail)
+  // - empty => Layout defaults
+  // -----------------------------
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return safeStr(t);
-  }, [titleTemplate, pageTitleRaw]);
+    if (!isSlugReady) return listTitleFallback || 'Products';
 
-  const ogImage = useMemo(() => {
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    const mt = safeStr((product as any)?.meta_title);
+    if (mt) return mt;
 
-    // Sende alan adı farklı olabilir: featured_image / image_url / cover...
-    const rawImg = safeStr((product as any)?.featured_image || (product as any)?.image_url);
-    const cdnImg = rawImg ? toCdnSrc(rawImg, 1200, 630, 'fill') || rawImg : '';
+    const t = safeStr((product as any)?.title);
+    if (t) return t;
 
-    return (cdnImg && absUrl(cdnImg)) || fallback || absUrl('/favicon.svg');
-  }, [product, seo]);
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
 
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
-    const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+    return listTitleFallback || 'Product';
+  }, [isSlugReady, product, detailTitleFallback, listTitleFallback]);
 
-    // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
+  const pageDescription = useMemo(() => {
+    if (!isSlugReady) return '';
 
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    const md = safeStr((product as any)?.meta_description);
+    if (md) return md;
 
-  const isLoadingState = !isSlugReady || (isProductLoading && !product);
+    const desc = safeStr((product as any)?.description);
+    if (desc) {
+      const ex = excerpt(desc, 160).trim();
+      if (ex) return ex;
+    }
+
+    // Optional UI fallback
+    const key = 'ui_products_detail_meta_description';
+    const uiFallback = safeStr(
+      ui(key, 'View product details, technical specifications, and request a quote.'),
+    );
+    if (isValidUiText(uiFallback, key)) return uiFallback;
+
+    // empty => Layout default description
+    return '';
+  }, [isSlugReady, product, ui]);
+
+  const ogImageOverride = useMemo(() => {
+    if (!isSlugReady) return undefined;
+
+    const raw =
+      safeStr((product as any)?.featured_image) || safeStr((product as any)?.image_url) || '';
+    if (!raw) return undefined;
+
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [isSlugReady, product]);
+
+  const showSkeleton = !isSlugReady || isFetching || !product;
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={false}
+      />
 
       <Banner title={bannerTitle} />
 
-      {isLoadingState ? (
-        <div className="service__area pt-120 pb-90">
-          <div className="container">
-            <div className="row">
-              <div className="col-12">
-                <SkeletonStack>
-                  <SkeletonLine style={{ height: 24 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 16 }} />
-                  <SkeletonLine className="mt-10" style={{ height: 16, width: '80%' }} />
-                </SkeletonStack>
-              </div>
-            </div>
-          </div>
-        </div>
+      {showSkeleton ? (
+        <Skeleton />
       ) : (
         <>
           <ProductDetail />

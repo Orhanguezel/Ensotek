@@ -1,15 +1,11 @@
 // =============================================================
 // FILE: src/modules/categories/admin.routes.ts   (ADMIN ROUTES)
 // =============================================================
-import type { FastifyInstance } from "fastify";
-import { requireAuth } from "@/common/middleware/auth";
-import { requireAdmin } from "@/common/middleware/roles";
+import type { FastifyInstance } from 'fastify';
+import { requireAuth } from '@/common/middleware/auth';
+import { requireAdmin } from '@/common/middleware/roles';
 
-import type {
-  CategoryCreateInput,
-  CategoryUpdateInput,
-  CategorySetImageInput,
-} from "./validation";
+import type { CategoryCreateInput, CategoryUpdateInput, CategorySetImageInput } from './validation';
 
 import {
   adminCreateCategory,
@@ -24,10 +20,10 @@ import {
   adminGetCategoryById,
   adminGetCategoryBySlug,
   type AdminListCategoriesQS,
-} from "./admin.controller";
+} from './admin.controller';
 
 // İdempotent guard (plugin iki kez register edilirse tekrar route ekleme)
-declare module "fastify" {
+declare module 'fastify' {
   interface FastifyInstance {
     categoriesAdminRoutesRegistered?: boolean;
   }
@@ -37,7 +33,7 @@ export async function registerCategoriesAdmin(app: FastifyInstance) {
   if (app.categoriesAdminRoutesRegistered) return;
   app.categoriesAdminRoutesRegistered = true;
 
-  const BASE = "/categories";
+  const BASE = '/categories';
 
   // LIST
   app.get<{ Querystring: AdminListCategoriesQS }>(
@@ -50,21 +46,13 @@ export async function registerCategoriesAdmin(app: FastifyInstance) {
   app.get<{
     Params: { id: string };
     Querystring: { locale?: string };
-  }>(
-    `${BASE}/:id`,
-    { preHandler: [requireAuth, requireAdmin] },
-    adminGetCategoryById,
-  );
+  }>(`${BASE}/:id`, { preHandler: [requireAuth, requireAdmin] }, adminGetCategoryById);
 
   // Slug ile okuma
   app.get<{
     Params: { slug: string };
     Querystring: { locale?: string; module_key?: string };
-  }>(
-    `${BASE}/by-slug/:slug`,
-    { preHandler: [requireAuth, requireAdmin] },
-    adminGetCategoryBySlug,
-  );
+  }>(`${BASE}/by-slug/:slug`, { preHandler: [requireAuth, requireAdmin] }, adminGetCategoryBySlug);
 
   // CRUD
   app.post<{ Body: CategoryCreateInput }>(
@@ -112,9 +100,10 @@ export async function registerCategoriesAdmin(app: FastifyInstance) {
   );
 
   // Kapak görseli (storage) + alt
-  app.patch<{ Params: { id: string }; Body: CategorySetImageInput }>(
-    `${BASE}/:id/image`,
-    { preHandler: [requireAuth, requireAdmin] },
-    adminSetCategoryImage,
-  );
+  // ✅ Querystring locale opsiyonel (alt update i18n için)
+  app.patch<{
+    Params: { id: string };
+    Querystring: { locale?: string };
+    Body: CategorySetImageInput;
+  }>(`${BASE}/:id/image`, { preHandler: [requireAuth, requireAdmin] }, adminSetCategoryImage);
 }

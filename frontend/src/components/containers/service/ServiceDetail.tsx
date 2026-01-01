@@ -427,7 +427,7 @@ const ServiceDetail: React.FC<ServiceDetailProps> = ({ slug }) => {
                   ) : null}
                 </div>
 
-                <h1 className="ens-service__title">{title}</h1>
+                <h2 className="ens-service__title">{title}</h2>
 
                 {(service as any)?.price ? (
                   <p className="ens-service__price mt-10">

@@ -138,3 +138,94 @@
     }
   }
 }
+
+/* =========================================================
+   Brand Media Tab (Admin)
+========================================================= */
+
+.ensotek-brand-media {
+  .ensotek-brand-media__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  @media (min-width: 992px) {
+    .ensotek-brand-media__grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .ensotek-brand-media__item {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    padding: 12px;
+    background: #fff;
+    min-width: 0;
+  }
+
+  .ensotek-brand-media__head {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+    min-width: 0;
+  }
+
+  .ensotek-brand-media__title {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 1.2;
+  }
+
+  .ensotek-brand-media__meta {
+    margin-top: 4px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    font-size: 12px;
+    min-width: 0;
+
+    .font-monospace {
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+  }
+
+  .ensotek-brand-media__actions {
+    display: inline-flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: felx-end;
+  }
+
+  .ensotek-brand-media__body {
+    margin-top: 10px;
+    min-width: 0;
+  }
+
+  .ensotek-brand-media__uploader {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .ensotek-brand-media__url {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 8px;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .ensotek-brand-media__urlCode {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    padding: 6px 8px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.04);
+  }
+}

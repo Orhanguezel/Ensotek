@@ -3,15 +3,16 @@
 // Ensotek – Site Settings Unified Form
 // FIX: Raw mode tek editor (textarea) + json parse fallback
 // FIX: Structured mode ayrı state
+// FIX: Image upload supports open library (no full reload)
 // =============================================================
 
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
+import { useRouter } from 'next/router';
 
 import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
-
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 /* ----------------------------- types ----------------------------- */
@@ -40,11 +41,16 @@ export type SiteSettingsFormProps = {
 
   imageUpload?: {
     label?: string;
+    helperText?: React.ReactNode;
     bucket?: string;
     folder?: string;
     metadata?: Record<string, string | number | boolean>;
     value?: string;
     onChange?: (url: string) => void;
+
+    /** optional: open storage library */
+    openLibraryHref?: string;
+    onOpenLibraryClick?: () => void;
   };
 };
 
@@ -108,6 +114,8 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
   showImageUpload,
   imageUpload,
 }) => {
+  const router = useRouter();
+
   const [mode, setMode] = useState<SiteSettingsFormMode>(initialMode);
 
   // structured
@@ -164,6 +172,10 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
     }
   };
 
+  const openLibraryHref = imageUpload?.openLibraryHref ?? '/admin/storage';
+  const onOpenLibraryClick =
+    imageUpload?.onOpenLibraryClick ?? (() => router.push(openLibraryHref));
+
   return (
     <div className="card">
       <div className="card-header py-2 d-flex justify-content-between align-items-center">
@@ -218,12 +230,15 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
           <div className="mb-3">
             <AdminImageUploadField
               label={imageUpload?.label ?? 'Görsel'}
+              helperText={imageUpload?.helperText}
               bucket={imageUpload?.bucket ?? 'public'}
               folder={imageUpload?.folder ?? 'uploads'}
               metadata={imageUpload?.metadata}
-              value={imageUpload?.value}
+              value={(imageUpload?.value ?? '') as any}
               onChange={(url) => imageUpload?.onChange?.(url)}
               disabled={disabled}
+              openLibraryHref={openLibraryHref}
+              onOpenLibraryClick={onOpenLibraryClick}
             />
           </div>
         )}

@@ -1,17 +1,22 @@
 -- =============================================================
--- FILE: 016.3_sparepart_bbbb1513_air_inlet_louvers__all_locales.sql (FINAL)
+-- FILE: 016.3_sparepart_bbbb1513_air_inlet_louvers__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (13/14)
 -- Sparepart: Hava Giriş Panjuru / Air Inlet Louvers / Lufteinlasslamellen
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to corrected pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
---  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING
+--    (NO JSON_ARRAY / NO nested JSON_OBJECT inside specifications)
+--  - product_specs/product_faqs: locale-based reset with DELETE
+--  - product_reviews: id-based reset
+--  - product_options is locale-less => TR/EN/DE separate option rows with different IDs
+--  - all child IDs: CHAR(36) safe
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -79,7 +84,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -95,8 +100,8 @@ VALUES (
   JSON_ARRAY('yedek parça', 'hava giriş panjuru', 'louver', 'lamel', 'su kaybı azaltma', 'ensotek'),
   JSON_OBJECT(
     'konum', 'Kule gövdesi; soğuk su havuzu ile dolgu seviyesi arası (dış)',
-    'amac', 'Hava yönlendirme, sıçrama kaybını azaltma, yosun oluşumunu azaltma',
-    'malzeme', '1. sınıf PVC (opsiyon: FRP/CTP)',
+    'amac', 'Hava yönlendirme; sıçrama kaybını azaltma; yosun oluşumunu azaltma',
+    'malzeme', 'PVC (1. sınıf) / opsiyon: FRP (CTP)',
     'tasarim', 'Minimum hava direnci sağlayan özel lamel formu',
     'uyumluluk', 'Yerli ve ithal paket kule tipleri'
   ),
@@ -114,7 +119,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1513-2222-4222-8222-bbbbbbbb1513' AND locale='tr';
 
@@ -122,11 +127,11 @@ INSERT INTO product_specs (id, product_id, locale, name, value, category, order_
 VALUES
   ('11111513-aaaa-4aaa-8aaa-bbbb1513tr01','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Konum','Kule gövdesi; soğuk su havuzu ile dolgu seviyesi arası (dış)','custom',10),
   ('11111513-aaaa-4aaa-8aaa-bbbb1513tr02','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Fonksiyon','Hava yönlendirme, su sıçrama kaybını azaltma, yosun oluşumunu azaltma','custom',20),
-  ('11111513-aaaa-4aaa-8aaa-bbbb1513tr03','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Standart Malzeme','1. sınıf PVC','material',30),
+  ('11111513-aaaa-4aaa-8aaa-bbbb1513tr03','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Standart Malzeme','PVC (1. sınıf)','material',30),
   ('11111513-aaaa-4aaa-8aaa-bbbb1513tr04','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Opsiyonel Malzeme','FRP/CTP','material',40),
   ('11111513-aaaa-4aaa-8aaa-bbbb1513tr05','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Tasarım','Minimum hava direnci sağlayan özel lamel formu','physical',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1513-2222-4222-8222-bbbbbbbb1513' AND locale='tr';
 
@@ -136,7 +141,7 @@ VALUES
   ('22221513-aaaa-4aaa-8aaa-bbbb1513tr02','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Hangi malzemeden üretilir?','Standart olarak 1. sınıf PVC lameller kullanılır. İstenirse FRP/CTP malzemeden de üretilebilir.',20,1),
   ('22221513-aaaa-4aaa-8aaa-bbbb1513tr03','bbbb1513-2222-4222-8222-bbbbbbbb1513','tr','Hangi kule tipleriyle uyumludur?','Yerli ve ithal paket kule tiplerine uygulanabilir.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331513-aaaa-4aaa-8aaa-bbbb1513tr01',
@@ -148,16 +153,16 @@ VALUES
   ('33331513-aaaa-4aaa-8aaa-bbbb1513tr01','bbbb1513-2222-4222-8222-bbbbbbbb1513',NULL,5,'Su sıçrama kaybını belirgin azalttı, çevre daha kuru kaldı.',1,'Saha Ekibi'),
   ('33331513-aaaa-4aaa-8aaa-bbbb1513tr02','bbbb1513-2222-4222-8222-bbbbbbbb1513',NULL,4,'Hava akışını düzenleyip dolgu performansını iyileştirdi.',1,'Operasyon');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — locale-less table => separate row
 DELETE FROM product_options
-WHERE id='44441513-aaaa-4aaa-8aaa-bbbb1513op01';
+WHERE id='44441513-aaaa-4aaa-8aaa-bbbb1513tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441513-aaaa-4aaa-8aaa-bbbb1513op01','bbbb1513-2222-4222-8222-bbbbbbbb1513','Material', JSON_ARRAY('PVC (standard)','FRP/CTP (optional)'));
+  ('44441513-aaaa-4aaa-8aaa-bbbb1513tr01','bbbb1513-2222-4222-8222-bbbbbbbb1513','Malzeme', JSON_ARRAY('PVC (standart)','FRP/CTP (opsiyonel)'));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -173,9 +178,8 @@ VALUES (
   JSON_ARRAY('spare part', 'air inlet louvers', 'louver', 'splash loss', 'algae reduction', 'ensotek'),
   JSON_OBJECT(
     'location', 'Tower casing; between cold-water basin and fill level (outside)',
-    'purpose', 'Air guidance, reduce splash loss, reduce algae formation',
-    'standardMaterial', 'First-grade PVC',
-    'optionalMaterial', 'FRP',
+    'purpose', 'Air guidance; reduce splash loss; reduce algae formation',
+    'material', 'First-grade PVC / optional: FRP',
     'design', 'Special low-resistance louver profile',
     'compatibility', 'Local and imported packaged tower types'
   ),
@@ -193,7 +197,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1513-2222-4222-8222-bbbbbbbb1513' AND locale='en';
 
@@ -205,7 +209,7 @@ VALUES
   ('11111513-bbbb-4bbb-8bbb-bbbb1513en04','bbbb1513-2222-4222-8222-bbbbbbbb1513','en','Optional Material','FRP','material',40),
   ('11111513-bbbb-4bbb-8bbb-bbbb1513en05','bbbb1513-2222-4222-8222-bbbbbbbb1513','en','Design','Low air-resistance louver profile','physical',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1513-2222-4222-8222-bbbbbbbb1513' AND locale='en';
 
@@ -215,7 +219,7 @@ VALUES
   ('22221513-bbbb-4bbb-8bbb-bbbb1513en02','bbbb1513-2222-4222-8222-bbbbbbbb1513','en','Which materials are available?','First-grade PVC is standard; FRP can be supplied on request.',20,1),
   ('22221513-bbbb-4bbb-8bbb-bbbb1513en03','bbbb1513-2222-4222-8222-bbbbbbbb1513','en','Are they compatible with packaged towers?','Yes. They can be applied to both local and imported packaged tower types.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331513-bbbb-4bbb-8bbb-bbbb1513en01',
@@ -227,8 +231,16 @@ VALUES
   ('33331513-bbbb-4bbb-8bbb-bbbb1513en01','bbbb1513-2222-4222-8222-bbbbbbbb1513',NULL,5,'Reduced splash losses and improved airflow distribution noticeably.',1,'Site Team'),
   ('33331513-bbbb-4bbb-8bbb-bbbb1513en02','bbbb1513-2222-4222-8222-bbbbbbbb1513',NULL,4,'Good fit and sturdiness; helps keep the basin area cleaner.',1,'Operations');
 
+-- OPTIONS (EN) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441513-bbbb-4bbb-8bbb-bbbb1513en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441513-bbbb-4bbb-8bbb-bbbb1513en01','bbbb1513-2222-4222-8222-bbbbbbbb1513','Material', JSON_ARRAY('PVC (standard)','FRP/CTP (optional)'));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -244,14 +256,13 @@ VALUES (
   JSON_ARRAY('ersatzteil', 'lufteinlasslamellen', 'louver', 'spritzwasser', 'algen', 'kuehlturm', 'ensotek'),
   JSON_OBJECT(
     'einbauort', 'Turmkörper; zwischen Kaltwasserbecken und Füllhöhe (außen)',
-    'zweck', 'Luftführung, Spritzwasserverluste reduzieren, Algenbildung verringern',
-    'standardMaterial', 'PVC 1. Klasse',
-    'optionalMaterial', 'FRP',
+    'zweck', 'Luftführung; Spritzwasserverluste reduzieren; Algenbildung verringern',
+    'material', 'PVC (1. Klasse) / optional: FRP',
     'design', 'Lamellenprofil mit minimalem Luftwiderstand',
     'kompatibilitaet', 'Lokale und importierte Paketkühltürme'
   ),
   'Lufteinlasslamellen | Kühlturm Ersatzteile | Ensotek',
-  'Lufteinlasslamellen: führen die Luft, reduzieren Spritzwasserverluste und helfen gegen Algenbildung. PVC standard, optional FRP, für Paketkühltürme geeignet.'
+  'Lufteinlasslamellen: führen die Luft, reduzieren Spritzwasserverluste und helfen gegen Algenbildung. PVC Standard, optional FRP, für Paketkühltürme geeignet.'
 )
 ON DUPLICATE KEY UPDATE
   title            = VALUES(title),
@@ -264,7 +275,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1513-2222-4222-8222-bbbbbbbb1513' AND locale='de';
 
@@ -273,10 +284,10 @@ VALUES
   ('11111513-cccc-4ccc-8ccc-bbbb1513de01','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Einbauort','Turmkörper; zwischen Kaltwasserbecken und Füllhöhe (außen)','custom',10),
   ('11111513-cccc-4ccc-8ccc-bbbb1513de02','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Funktion','Luftführung, Spritzwasserverluste reduzieren, Algenbildung verringern','custom',20),
   ('11111513-cccc-4ccc-8ccc-bbbb1513de03','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Standardmaterial','PVC 1. Klasse','material',30),
-  ('11111513-cccc-4ccc-8ccc-bbbb1513de04','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Optional','FRP','material',40),
+  ('11111513-cccc-4ccc-8ccc-bbbb1513de04','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Optionales Material','FRP','material',40),
   ('11111513-cccc-4ccc-8ccc-bbbb1513de05','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Design','Lamellenprofil mit geringem Luftwiderstand','physical',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1513-2222-4222-8222-bbbbbbbb1513' AND locale='de';
 
@@ -286,7 +297,7 @@ VALUES
   ('22221513-cccc-4ccc-8ccc-bbbb1513de02','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Aus welchem Material bestehen sie?','Standard ist PVC der 1. Klasse; auf Wunsch sind FRP-Ausführungen möglich.',20,1),
   ('22221513-cccc-4ccc-8ccc-bbbb1513de03','bbbb1513-2222-4222-8222-bbbbbbbb1513','de','Für welche Kühltürme sind sie geeignet?','Für lokale und importierte Paketkühltürme.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331513-cccc-4ccc-8ccc-bbbb1513de01',
@@ -297,6 +308,14 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331513-cccc-4ccc-8ccc-bbbb1513de01','bbbb1513-2222-4222-8222-bbbbbbbb1513',NULL,5,'Spritzwasser deutlich reduziert und die Luftverteilung verbessert.',1,'Außendienst'),
   ('33331513-cccc-4ccc-8ccc-bbbb1513de02','bbbb1513-2222-4222-8222-bbbbbbbb1513',NULL,4,'Stabil und passgenau, hilft den Bereich sauberer zu halten.',1,'Betrieb');
+
+-- OPTIONS (DE) — locale-less table => separate row
+DELETE FROM product_options
+WHERE id='44441513-cccc-4ccc-8ccc-bbbb1513de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441513-cccc-4ccc-8ccc-bbbb1513de01','bbbb1513-2222-4222-8222-bbbbbbbb1513','Material', JSON_ARRAY('PVC (Standard)','FRP/CTP (optional)'));
 
 COMMIT;
 

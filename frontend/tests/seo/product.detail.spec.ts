@@ -1,9 +1,10 @@
-// tests/seo/product.detail.spec.ts
 import { test, expect } from '@playwright/test';
 import {
   readHead,
   readJsonLd,
   waitForSeoHead,
+  getPlaywrightLocales,
+  withLocalePath,
   expectAbsolute,
   expectNotLocalhost,
   expectSameOriginAsBase,
@@ -35,37 +36,111 @@ function flattenJsonLd(nodes: any[]): any[] {
   return out;
 }
 
+async function waitForProductJsonLd(page: any, timeoutMs = 12_000) {
+  await page.waitForFunction(
+    () => {
+      const nodes = Array.from(
+        document.querySelectorAll('script[type="application/ld+json"]'),
+      ) as HTMLScriptElement[];
+
+      const parseAny = (raw: string) => {
+        try {
+          return JSON.parse(raw);
+        } catch {
+          return null;
+        }
+      };
+
+      const flatten = (x: any, acc: any[]) => {
+        if (!x) return;
+        if (Array.isArray(x)) return x.forEach((y) => flatten(y, acc));
+        if (typeof x === 'object') {
+          if (Array.isArray((x as any)['@graph'])) flatten((x as any)['@graph'], acc);
+          acc.push(x);
+        }
+      };
+
+      const all: any[] = [];
+      for (const n of nodes) {
+        const raw = (n.textContent || '').trim();
+        if (!raw) continue;
+        const parsed = parseAny(raw);
+        if (!parsed) continue;
+        flatten(parsed, all);
+      }
+
+      const hasProduct = all.some((obj) => {
+        const t = (obj as any)?.['@type'];
+        if (!t) return false;
+        if (typeof t === 'string') return t === 'Product';
+        if (Array.isArray(t)) return t.includes('Product');
+        return false;
+      });
+
+      return hasProduct;
+    },
+    { timeout: timeoutMs },
+  );
+}
+
 test.describe('SEO: /product/[slug] (detail)', () => {
   test.skip(!slug, 'Set PLAYWRIGHT_PRODUCT_SLUG to run this test.');
 
-  test('has Product JSON-LD + canonical/og/hreflang ok', async ({ page }) => {
-    await page.goto(`/product/${encodeURIComponent(slug)}`, { waitUntil: 'domcontentloaded' });
+  const locales = getPlaywrightLocales();
 
-    await waitForSeoHead(page, { waitHreflang: true });
+  for (const locale of locales) {
+    test(`has Product JSON-LD + canonical/og/hreflang ok [${locale}]`, async ({ page }) => {
+      // locale-aware url
+      await page.goto(withLocalePath(`/product/${encodeURIComponent(slug)}`, locale), {
+        waitUntil: 'domcontentloaded',
+      });
 
-    const head = await readHead(page);
+      await waitForSeoHead(page, { waitHreflang: true });
 
-    expect(head.title.trim().length).toBeGreaterThan(3);
-    expectMinDescription(head.description, 20);
+      const head = await readHead(page);
 
-    expectAbsolute(head.canonical);
-    expectSameOriginAsBase(head.canonical);
-    expectNotLocalhost(head.canonical);
+      expect(head.title.trim().length).toBeGreaterThan(3);
+      expectMinDescription(head.description, 20);
 
-    if (head.ogUrl) {
-      expectAbsolute(head.ogUrl);
-      expectSameOriginAsBase(head.ogUrl);
-      expectNotLocalhost(head.ogUrl);
-      expect(head.ogUrl).toBe(head.canonical);
-    }
+      expectAbsolute(head.canonical);
+      expectSameOriginAsBase(head.canonical);
+      expectNotLocalhost(head.canonical);
 
-    expectHreflangSet(head.hreflangs);
+      if (head.ogUrl) {
+        expectAbsolute(head.ogUrl);
+        expectSameOriginAsBase(head.ogUrl);
+        expectNotLocalhost(head.ogUrl);
+        expect(head.ogUrl).toBe(head.canonical);
+      }
 
-    const rawLd = await readJsonLd(page);
-    expect(rawLd.some((x) => x?.__parse_error__)).toBeFalsy();
+      expectHreflangSet(head.hreflangs);
 
-    const ld = flattenJsonLd(rawLd);
-    const product = ld.find((x) => isType(x, 'Product'));
-    expect(product, 'Product JSON-LD must exist').toBeTruthy();
-  });
+      // ✅ JSON-LD wait (CSR/RTK fetch gecikmesi için)
+      try {
+        await waitForProductJsonLd(page, 12_000);
+      } catch {
+        // debug: hangi type'lar var?
+        const rawLd = await readJsonLd(page);
+        const flat = flattenJsonLd(rawLd);
+
+        const types = flat
+          .map((x) => x?.['@type'])
+          .filter(Boolean)
+          .map((t) => (Array.isArray(t) ? t.join(',') : String(t)))
+          .slice(0, 30);
+
+        throw new Error(
+          `Product JSON-LD not found. Found types: [${types.join(' | ')}]. ` +
+            `ldCount=${flat.length}, scriptCount=${rawLd.length}`,
+        );
+      }
+
+      const rawLd = await readJsonLd(page);
+      expect(rawLd.some((x) => x?.__parse_error__)).toBeFalsy();
+
+      const ld = flattenJsonLd(rawLd);
+      const product = ld.find((x) => isType(x, 'Product'));
+      expect(product, 'Product JSON-LD must exist').toBeTruthy();
+    });
+  }
 });

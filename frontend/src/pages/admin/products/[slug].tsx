@@ -1,8 +1,8 @@
 // =============================================================
 // FILE: src/pages/admin/products/[slug].tsx
-// Ensotek – Admin Product Create/Edit Page (id/slug bazlı)
+// Ensotek – Admin Product Create/Edit Page (module_key=product)
 // Locale: DB (app_locales + default_locale)
-// URL: ?locale=... sync (stable)
+// Admin rule: locale URL'e yazılmaz (NO URL sync)
 // RTK: from "@/integrations/rtk/hooks"
 // =============================================================
 
@@ -11,7 +11,10 @@ import type { NextPage } from 'next';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import { ProductsForm, type ProductFormValues } from '@/components/admin/products/ProductsForm';
+import {
+  ProductsForm,
+  type ProductFormValues,
+} from '@/components/admin/products/productForm/ProductsForm';
 
 import {
   useGetProductAdminQuery,
@@ -20,27 +23,22 @@ import {
 } from '@/integrations/rtk/hooks';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
+import { resolveAdminApiLocale } from '@/i18n/adminLocale';
+import { localeShortClient } from '@/i18n/localeShortClient';
 
-const toShortLocale = (v: unknown): string =>
-  String(v || '')
-    .trim()
-    .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
-    .trim();
+const MODULE_KEY = 'product';
 
 const AdminProductDetailPage: NextPage = () => {
   const router = useRouter();
   const { slug: slugParam } = router.query;
-  const isRouterReady = router.isReady;
 
   const idOrSlug = useMemo(
-    () => (isRouterReady && typeof slugParam === 'string' ? slugParam : undefined),
-    [isRouterReady, slugParam],
+    () => (router.isReady && typeof slugParam === 'string' ? slugParam : undefined),
+    [router.isReady, slugParam],
   );
 
   const isCreateMode = idOrSlug === 'new';
-  const shouldSkipQuery = !isRouterReady || isCreateMode || !idOrSlug;
+  const shouldSkipQuery = !router.isReady || isCreateMode || !idOrSlug;
 
   const {
     localeOptions,
@@ -49,68 +47,29 @@ const AdminProductDetailPage: NextPage = () => {
     fetching: localesFetching,
   } = useAdminLocales();
 
-  const localeSet = useMemo(
-    () => new Set((localeOptions ?? []).map((x) => toShortLocale(x.value))),
-    [localeOptions],
+  // ✅ Admin API locale (NO URL sync)
+  const apiLocale = useMemo(
+    () => resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'de'),
+    [localeOptions, defaultLocaleFromDb],
   );
 
-  const initialLocale = useMemo(() => {
-    const qLocale = toShortLocale(router.query?.locale);
-    if (qLocale && localeSet.has(qLocale)) return qLocale;
-
-    const dbDef = toShortLocale(defaultLocaleFromDb);
-    if (dbDef && localeSet.has(dbDef)) return dbDef;
-
-    const first = toShortLocale(localeOptions?.[0]?.value);
-    return first || '';
-  }, [router.query?.locale, defaultLocaleFromDb, localeOptions, localeSet]);
-
+  // ✅ active locale state (form selector)
   const [activeLocale, setActiveLocale] = useState<string>('');
 
-  // ✅ ilk kurulum + option değişince SADECE gerekli ise onar
   useEffect(() => {
-    // localeOptions daha gelmediyse dokunma
     if (!localeOptions || localeOptions.length === 0) return;
 
     setActiveLocale((prev) => {
-      const p = toShortLocale(prev);
-
-      // zaten geçerli bir locale seçiliyse koru
-      if (p && localeSet.has(p)) return p;
-
-      // değilse initialLocale'e düş
-      return initialLocale;
+      const p = localeShortClient(prev);
+      if (p) return p;
+      return apiLocale;
     });
-  }, [localeOptions, localeSet, initialLocale]);
+  }, [localeOptions, apiLocale]);
 
-  // ✅ activeLocale -> URL sync (ekle/kaldır)
-  useEffect(() => {
-    if (!router.isReady) return;
-
-    const next = toShortLocale(activeLocale);
-    const cur = toShortLocale(router.query?.locale);
-
-    // boşsa url'den kaldır
-    if (!next) {
-      if (cur) {
-        const q = { ...router.query };
-        delete (q as any).locale;
-        void router.replace({ pathname: router.pathname, query: q }, undefined, { shallow: true });
-      }
-      return;
-    }
-
-    // aynıysa dokunma
-    if (next === cur) return;
-
-    void router.replace(
-      { pathname: router.pathname, query: { ...router.query, locale: next } },
-      undefined,
-      { shallow: true },
-    );
-  }, [activeLocale, router]);
-
-  const queryLocale = toShortLocale(activeLocale);
+  const queryLocale = useMemo(
+    () => localeShortClient(activeLocale) || apiLocale,
+    [activeLocale, apiLocale],
+  );
 
   const {
     data: product,
@@ -118,7 +77,7 @@ const AdminProductDetailPage: NextPage = () => {
     isFetching: isFetchingProduct,
     error: productError,
   } = useGetProductAdminQuery(
-    { id: idOrSlug ?? '', locale: queryLocale },
+    { id: idOrSlug ?? '', locale: queryLocale, module_key: MODULE_KEY } as any,
     { skip: shouldSkipQuery || !queryLocale },
   );
 
@@ -129,10 +88,7 @@ const AdminProductDetailPage: NextPage = () => {
   const saving = isCreating || isUpdating;
 
   const handleCancel = () => {
-    void router.push({
-      pathname: '/admin/products',
-      query: queryLocale ? { locale: queryLocale } : undefined,
-    });
+    void router.push('/admin/products');
   };
 
   const toNumberOrUndefined = (val: string): number | undefined => {
@@ -148,9 +104,12 @@ const AdminProductDetailPage: NextPage = () => {
 
   const handleSubmit = async (values: ProductFormValues) => {
     try {
-      const loc = toShortLocale(values.locale || queryLocale);
+      const loc = localeShortClient(values.locale || queryLocale) || apiLocale;
 
-      if (!loc || !localeSet.has(loc)) {
+      const allowed = new Set(
+        (localeOptions ?? []).map((x: any) => localeShortClient(x?.value)).filter(Boolean),
+      );
+      if (!loc || !allowed.has(loc)) {
         toast.error('Geçerli bir locale seçilmedi. app_locales ve default_locale kontrol edin.');
         return;
       }
@@ -159,6 +118,9 @@ const AdminProductDetailPage: NextPage = () => {
       const storageImageIds = parseCommaList(values.storage_image_ids);
 
       const commonPayload: Record<string, any> = {
+        module_key: MODULE_KEY,
+        locale: loc,
+
         is_active: values.is_active,
         is_featured: values.is_featured,
 
@@ -188,26 +150,25 @@ const AdminProductDetailPage: NextPage = () => {
       };
 
       if (isCreateMode) {
-        const createBody = { ...commonPayload, locale: loc };
-        const created = await createProduct(createBody as any).unwrap();
+        const created = await createProduct(commonPayload as any).unwrap();
 
         toast.success('Ürün başarıyla oluşturuldu.');
 
         const nextId = created.id;
-        void router.replace({
-          pathname: `/admin/products/${encodeURIComponent(nextId)}`,
-          query: { locale: loc },
-        });
+        void router.replace(`/admin/products/${encodeURIComponent(nextId)}`);
       } else {
         if (!product) {
           toast.error('Ürün verisi yüklenemedi.');
           return;
         }
 
-        await updateProduct({ id: product.id, patch: commonPayload as any }).unwrap();
+        await updateProduct({
+          id: product.id,
+          patch: { ...commonPayload, locale: loc } as any,
+        }).unwrap();
+
         toast.success('Ürün güncellendi.');
 
-        // form locale’i ile sayfa locale’i farklıysa (kullanıcı değiştirdiyse) state'i güncelle
         if (loc !== queryLocale) setActiveLocale(loc);
       }
     } catch (err: any) {
@@ -217,7 +178,7 @@ const AdminProductDetailPage: NextPage = () => {
 
   const pageTitle = isCreateMode ? 'Yeni Ürün Oluştur' : product?.title || 'Ürün Düzenle';
 
-  if (!isRouterReady) {
+  if (!router.isReady) {
     return (
       <div className="container-fluid py-3">
         <div className="text-muted small">Yükleniyor...</div>
@@ -225,7 +186,6 @@ const AdminProductDetailPage: NextPage = () => {
     );
   }
 
-  // app_locales yoksa net uyarı
   if (!localesLoading && !localesFetching && (!localeOptions || localeOptions.length === 0)) {
     return (
       <div className="container-fluid py-3">
@@ -265,7 +225,7 @@ const AdminProductDetailPage: NextPage = () => {
         <h4 className="h5 mb-1">{pageTitle}</h4>
         <p className="text-muted small mb-0">
           Ürün temel bilgilerini, fiyat, stok ve SEO alanlarını buradan yönetebilirsin. Dil seçimi
-          DB’den gelir ve URL ile senkron çalışır.
+          DB’den gelir.
         </p>
       </div>
 
@@ -279,7 +239,7 @@ const AdminProductDetailPage: NextPage = () => {
         defaultLocale={queryLocale}
         onSubmit={handleSubmit}
         onCancel={handleCancel}
-        onLocaleChange={(nextLocale) => setActiveLocale(toShortLocale(nextLocale))}
+        onLocaleChange={(nextLocale) => setActiveLocale(localeShortClient(nextLocale) || apiLocale)}
       />
     </div>
   );

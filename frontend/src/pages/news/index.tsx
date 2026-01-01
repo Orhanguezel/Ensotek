@@ -1,160 +1,121 @@
 // =============================================================
 // FILE: src/pages/news/index.tsx
-// Ensotek – News Page (full list) + SEO (EN fallback only)
+// Ensotek – News Page (list) [FINAL / STANDARD]
 // - Route: /news
 // - Data: custom_pages (module_key="news") for meta override (first published)
-// - i18n: useLocaleShort() + site_settings.ui_news (EN fallback only)
-// - SEO: seo -> site_seo fallback + custom_page meta override
-// - ✅ Canonical + og:url single source: _document (SSR)
-// - NO Tailwind, NO inline styles
+// - ✅ NO <Head>
+// - ✅ Page SEO overrides via <LayoutSeoBridge />
+// - ✅ General meta/canonical/hreflang/etc. stays in Layout/_document (no duplication)
+// - SEO priority:
+//   title: primary.meta_title -> primary.title -> ui_news_page_title -> fallback
+//   desc : primary.meta_description -> primary.summary -> excerpt(primary.content_html) -> Layout default
+//   og   : primary.featured_image -> undefined (Layout decides)
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import NewsPageContent from '@/components/containers/news/NewsPageContent';
 import Feedback from '@/components/containers/feedback/Feedback';
 
-// i18n
+// ✅ Page -> Layout SEO overrides (STANDARD)
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
+// i18n + UI
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
-
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
+import { isValidUiText } from '@/i18n/uiText';
 
 // data
-import {
-  useGetSiteSettingByKeyQuery,
-  useListCustomPagesPublicQuery,
-} from '@/integrations/rtk/hooks';
+import { useListCustomPagesPublicQuery } from '@/integrations/rtk/hooks';
 import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
 
 // helpers
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-function safeStr(x: unknown): string {
-  return typeof x === 'string' ? x.trim() : '';
-}
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
 const NewsPage: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_news', locale as any);
 
+  // -----------------------------
   // Banner title (UI)
-  const bannerTitle = ui('ui_news_page_title', 'News'); // EN fallback only
+  // -----------------------------
+  const bannerTitle = useMemo(() => {
+    const key = 'ui_news_page_title';
+    const v = safeStr(ui(key, 'News'));
+    return isValidUiText(v, key) ? v : 'News';
+  }, [ui]);
 
-  // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale } as any);
-
-  const seo = useMemo(() => {
-    const raw = (seoPrimary as any)?.value ?? (seoFallback as any)?.value;
-    return asObj(raw) ?? {};
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [(seoPrimary as any)?.value, (seoFallback as any)?.value]);
-
+  // -----------------------------
   // News list for meta override (first published)
-  const { data: newsData } = useListCustomPagesPublicQuery(
-    {
-      module_key: 'news',
-      locale,
-      limit: 10,
-      sort: 'created_at',
-      order: 'asc',
-      orderDir: 'asc',
-      is_published: 1,
-    } as any,
-    { skip: !locale },
-  );
+  // PERF: limit small
+  // -----------------------------
+  const { data: newsData } = useListCustomPagesPublicQuery({
+    module_key: 'news',
+    locale,
+    limit: 5,
+    sort: 'created_at',
+    orderDir: 'asc',
+  });
 
-  const primary = useMemo(() => {
-    const items: CustomPageDto[] = ((newsData as any)?.items ??
-      (newsData as any)?.data ??
-      (newsData as any)?.rows ??
-      []) as any;
-    const published = Array.isArray(items) ? items.filter((p) => !!(p as any)?.is_published) : [];
-    return published[0] as any;
-  }, [newsData]);
+  const primary = useMemo<CustomPageDto | null>(() => {
+    const items = (newsData?.items ?? []) as any[];
+    if (!Array.isArray(items) || items.length === 0) return null;
 
-  // --- SEO: Title/Description ---
-  const pageTitleRaw = useMemo(() => {
-    const titleFallback = safeStr(bannerTitle) || 'News';
-    return (
-      safeStr((primary as any)?.meta_title) || safeStr((primary as any)?.title) || titleFallback
-    );
-  }, [primary, bannerTitle]);
+    for (const it of items) {
+      if (it && it.is_published) return it as CustomPageDto;
+    }
+    return null;
+  }, [newsData?.items]);
 
-  const pageDescRaw = useMemo(() => {
-    const metaDesc = safeStr((primary as any)?.meta_description);
-    const summary = safeStr((primary as any)?.summary);
-    const html = safeStr((primary as any)?.content_html);
-    return (
-      metaDesc || summary || safeStr(excerpt(html, 160)) || safeStr((seo as any)?.description) || ''
-    );
-  }, [primary, seo]);
-
-  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
-    [seo],
-  );
-
+  // -----------------------------
+  // SEO (page overrides only)
+  // -----------------------------
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return safeStr(t);
-  }, [titleTemplate, pageTitleRaw]);
+    const mt = safeStr(primary?.meta_title);
+    if (mt) return mt;
 
-  const ogImage = useMemo(() => {
-    const pageImgRaw = safeStr((primary as any)?.featured_image);
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
+    const t = safeStr(primary?.title);
+    if (t) return t;
 
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    return bannerTitle || 'News';
+  }, [primary?.meta_title, primary?.title, bannerTitle]);
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
-  }, [primary, seo]);
+  const pageDescription = useMemo(() => {
+    const md = safeStr(primary?.meta_description);
+    if (md) return md;
 
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
-    const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+    const s = safeStr(primary?.summary);
+    if (s) return s;
 
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
+    const ex = excerpt(safeStr(primary?.content_html), 160).trim();
+    if (ex) return ex;
 
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    // empty => Layout default description
+    return '';
+  }, [primary?.meta_description, primary?.summary, primary?.content_html]);
+
+  const ogImageOverride = useMemo(() => {
+    const raw = safeStr(primary?.featured_image);
+    if (!raw) return undefined;
+
+    if (/^https?:\/\//i.test(raw)) return raw;
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [primary?.featured_image]);
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={false}
+      />
 
       <Banner title={bannerTitle} />
       <NewsPageContent />

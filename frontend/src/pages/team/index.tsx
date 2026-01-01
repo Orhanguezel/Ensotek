@@ -1,149 +1,132 @@
 // =============================================================
 // FILE: src/pages/team/index.tsx
-// Ensotek – Team Page (full list) + SEO (NEWS/PRODUCT pattern)
+// Ensotek – Team Page (list) + SEO (PUBLIC PAGES ROUTER STANDARD)
 //   - Route: /team
-//   - i18n: useLocaleShort() + site_settings.ui_team
-//   - Data: custom_pages (module_key="team") => meta override
-//   - SEO: seo -> site_seo fallback + custom_page meta override (NO canonical here)
-//   - ✅ Canonical + og:url tek kaynak: _document (SSR)
+//   - NO <Head>
+//   - SEO override: <LayoutSeoBridge />
+//   - Primary meta source (optional): first published custom_page (module_key="team")
+//   - Fallback order: UI meta -> DB primary -> Layout defaults
+//   - Content: <TeamPageContent />
 // =============================================================
 
 'use client';
 
 import React, { useMemo } from 'react';
-import Head from 'next/head';
 
 import Banner from '@/components/layout/banner/Breadcrum';
 import TeamPageContent from '@/components/containers/team/TeamPageContent';
 import ServiceCtaTwo from '@/components/containers/cta/CatalogCta';
 
-// i18n
+import { LayoutSeoBridge } from '@/seo/LayoutSeoBridge';
+
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { isValidUiText } from '@/i18n/uiText';
 
-// SEO
-import { buildMeta } from '@/seo/meta';
-import { asObj, absUrl, pickFirstImageFromSeo } from '@/seo/pageSeo';
-
-// data
-import {
-  useGetSiteSettingByKeyQuery,
-  useListCustomPagesPublicQuery,
-} from '@/integrations/rtk/hooks';
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
-
-// helpers
 import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
-function safeStr(x: unknown): string {
-  return typeof x === 'string' ? x.trim() : '';
-}
+import { useListCustomPagesPublicQuery } from '@/integrations/rtk/hooks';
+import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+
+const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
 const TeamPage: React.FC = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_team', locale as any);
 
-  // Banner title (UI)
-  const bannerTitle = ui('ui_team_page_title', 'Team');
+  // Banner Title (UI)
+  const bannerTitle = useMemo(() => {
+    const key = 'ui_team_page_title';
+    const v = safeStr(ui(key, 'Team'));
+    return isValidUiText(v, key) ? v : 'Team';
+  }, [ui]);
 
-  // Global SEO settings (seo -> site_seo fallback)
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale });
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale });
-
-  const seo = useMemo(() => {
-    const raw = (seoPrimary?.value ?? seoFallback?.value) as any;
-    return asObj(raw) ?? {};
-  }, [seoPrimary?.value, seoFallback?.value]);
-
-  // Team pages (meta override için ilk published kayıt)
-  const { data: teamData } = useListCustomPagesPublicQuery({
-    module_key: 'team',
-    locale,
-    limit: 10,
-    sort: 'created_at',
-    orderDir: 'asc',
-  });
-
-  const primary = useMemo(() => {
-    const items: CustomPageDto[] = (teamData?.items ?? []) as any;
-    const published = items.filter((p) => !!(p as any)?.is_published);
-    return published[0];
-  }, [teamData?.items]);
-
-  // --- SEO: Title/Description ---
-  const pageTitleRaw = useMemo(() => {
-    const fallback = safeStr(bannerTitle) || 'Team';
-    return safeStr(primary?.meta_title) || safeStr(primary?.title) || fallback;
-  }, [primary?.meta_title, primary?.title, bannerTitle]);
-
-  const pageDescRaw = useMemo(() => {
-    return (
-      safeStr(primary?.meta_description) ||
-      safeStr(primary?.summary) ||
-      safeStr(excerpt((primary as any)?.content_html ?? '', 160)) ||
-      safeStr((seo as any)?.description) ||
-      ''
-    );
-  }, [primary, seo]);
-
-  const seoSiteName = useMemo(() => safeStr((seo as any)?.site_name) || 'Ensotek', [seo]);
-  const titleTemplate = useMemo(
-    () => safeStr((seo as any)?.title_template) || '%s | Ensotek',
-    [seo],
+  // DB primary (optional): first published custom_page (module_key="team")
+  const { data: teamData } = useListCustomPagesPublicQuery(
+    {
+      module_key: 'team',
+      locale,
+      limit: 20,
+      offset: 0,
+      sort: 'created_at',
+      orderDir: 'asc',
+      is_published: 1,
+    } as any,
+    { skip: !locale },
   );
 
+  const primary = useMemo<CustomPageDto | null>(() => {
+    const items: CustomPageDto[] = ((teamData as any)?.items ?? []) as any;
+    const published = items.filter((p) => !!p?.is_published);
+    return published[0] ?? null;
+  }, [teamData]);
+
+  // --- SEO override (UI first, then DB, then fallback) ---
+
   const pageTitle = useMemo(() => {
-    const t = titleTemplate.includes('%s')
-      ? titleTemplate.replace('%s', pageTitleRaw)
-      : pageTitleRaw;
-    return safeStr(t);
-  }, [titleTemplate, pageTitleRaw]);
+    const key = 'ui_team_meta_title';
+    const fromUi = safeStr(ui(key, ''));
+    if (isValidUiText(fromUi, key)) return fromUi;
 
-  const ogImage = useMemo(() => {
-    const pageImgRaw = safeStr((primary as any)?.featured_image);
-    const pageImg = pageImgRaw ? toCdnSrc(pageImgRaw, 1200, 630, 'fill') || pageImgRaw : '';
+    const mt = safeStr(primary?.meta_title);
+    if (mt) return mt;
 
-    const fallbackSeoImg = pickFirstImageFromSeo(seo);
-    const fallback = fallbackSeoImg ? absUrl(fallbackSeoImg) : '';
+    const t = safeStr(primary?.title);
+    if (t) return t;
 
-    return (pageImg && absUrl(pageImg)) || fallback || absUrl('/favicon.svg');
-  }, [primary, seo]);
+    return bannerTitle || 'Team';
+  }, [ui, primary?.meta_title, primary?.title, bannerTitle]);
 
-  const headSpecs = useMemo(() => {
-    const tw = asObj((seo as any)?.twitter) || {};
-    const robots = asObj((seo as any)?.robots) || {};
-    const noindex = typeof (robots as any).noindex === 'boolean' ? (robots as any).noindex : false;
+  const pageDescription = useMemo(() => {
+    const key = 'ui_team_meta_description';
+    const fromUi = safeStr(ui(key, ''));
+    if (isValidUiText(fromUi, key)) return fromUi;
 
-    // ✅ canonical + og:url YOK (tek kaynak: _document SSR)
-    return buildMeta({
-      title: pageTitle,
-      description: pageDescRaw,
-      image: ogImage || undefined,
-      siteName: seoSiteName,
-      noindex,
+    const md = safeStr(primary?.meta_description);
+    if (md) return md;
 
-      twitterCard: safeStr((tw as any).card) || 'summary_large_image',
-      twitterSite: typeof (tw as any).site === 'string' ? (tw as any).site.trim() : undefined,
-      twitterCreator:
-        typeof (tw as any).creator === 'string' ? (tw as any).creator.trim() : undefined,
-    });
-  }, [seo, pageTitle, pageDescRaw, ogImage, seoSiteName]);
+    const sum = safeStr(primary?.summary);
+    if (sum) {
+      const ex = excerpt(sum, 160).trim();
+      if (ex) return ex;
+    }
+
+    const ex2 = excerpt(safeStr((primary as any)?.content_html), 160).trim();
+    if (ex2) return ex2;
+
+    return ''; // empty => Layout default
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ui, primary?.meta_description, primary?.summary, (primary as any)?.content_html]);
+
+  const ogImageOverride = useMemo(() => {
+    const key = 'ui_team_og_image';
+    const fromUi = safeStr(ui(key, ''));
+    if (fromUi) {
+      if (/^https?:\/\//i.test(fromUi)) return fromUi;
+      return toCdnSrc(fromUi, 1200, 630, 'fill') || fromUi;
+    }
+
+    const raw =
+      safeStr((primary as any)?.featured_image) ||
+      safeStr((primary as any)?.image_url) ||
+      safeStr((primary as any)?.featured_image_url) ||
+      '';
+
+    if (!raw) return undefined;
+    if (/^https?:\/\//i.test(raw)) return raw;
+
+    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
+  }, [ui, primary]);
 
   return (
     <>
-      <Head>
-        <title>{pageTitle}</title>
-        {headSpecs.map((spec, idx) => {
-          if (spec.kind === 'link') {
-            return <link key={`l:${spec.rel}:${idx}`} rel={spec.rel} href={spec.href} />;
-          }
-          if (spec.kind === 'meta-name') {
-            return <meta key={`n:${spec.key}:${idx}`} name={spec.key} content={spec.value} />;
-          }
-          return <meta key={`p:${spec.key}:${idx}`} property={spec.key} content={spec.value} />;
-        })}
-      </Head>
+      <LayoutSeoBridge
+        title={pageTitle}
+        description={pageDescription || undefined}
+        ogImage={ogImageOverride}
+        noindex={false}
+      />
 
       <Banner title={bannerTitle} />
       <TeamPageContent />

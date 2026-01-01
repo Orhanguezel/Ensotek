@@ -1,8 +1,11 @@
 -- =============================================================
--- FILE: 010_catalog_schema.sql  (FINAL)
+-- FILE: 010_catalog_schema.sql  (FINAL / DRIZZLE-ALIGNED)
 -- Ensotek – Catalog Schema (categories + category_i18n)
--- - Creates tables required by catalog seeds
--- - Future locale: add rows to category_i18n
+-- - Drizzle schema ile %100 uyumlu:
+--   * categories: LONGTEXT image_url, icon VARCHAR(255)
+--   * category_i18n: NO id column
+--   * PK: (category_id, locale)
+--   * UQ: (locale, slug)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -15,12 +18,12 @@ START TRANSACTION;
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `categories` (
   `id`              CHAR(36)     NOT NULL,
-  `module_key`      VARCHAR(64)  NOT NULL,
+  `module_key`      VARCHAR(64)  NOT NULL DEFAULT 'general',
 
-  `image_url`        TEXT         NULL,
+  `image_url`        LONGTEXT     NULL,
   `storage_asset_id` CHAR(36)     NULL,
   `alt`              VARCHAR(255) NULL,
-  `icon`             VARCHAR(64)  NULL,
+  `icon`             VARCHAR(255) NULL,
 
   `is_active`       TINYINT(1)   NOT NULL DEFAULT 1,
   `is_featured`     TINYINT(1)   NOT NULL DEFAULT 0,
@@ -30,32 +33,37 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `updated_at`      DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (`id`),
-  KEY `idx_categories_module_key` (`module_key`),
-  KEY `idx_categories_active` (`is_active`),
-  KEY `idx_categories_featured` (`is_featured`),
-  KEY `idx_categories_display_order` (`display_order`)
+
+  KEY `categories_module_idx` (`module_key`),
+  KEY `categories_active_idx` (`is_active`),
+  KEY `categories_featured_idx` (`is_featured`),
+  KEY `categories_order_idx` (`display_order`),
+  KEY `categories_storage_asset_idx` (`storage_asset_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------
 -- 2) category_i18n (I18N)
+--   - Drizzle: PK (category_id, locale)
+--   - locale length: 8
 -- -------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `category_i18n` (
-  `id`          CHAR(36)     NOT NULL,
   `category_id` CHAR(36)     NOT NULL,
-  `locale`      VARCHAR(10)  NOT NULL,   -- tr | en | de | ...
+  `locale`      VARCHAR(8)   NOT NULL DEFAULT 'de',   -- tr | en | de | ...
+
   `name`        VARCHAR(255) NOT NULL,
   `slug`        VARCHAR(255) NOT NULL,
+
   `description` TEXT         NULL,
   `alt`         VARCHAR(255) NULL,
 
   `created_at`  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at`  DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
 
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uq_category_i18n_category_locale` (`category_id`, `locale`),
-  UNIQUE KEY `uq_category_i18n_locale_slug` (`locale`, `slug`),
-  KEY `idx_category_i18n_locale` (`locale`),
-  KEY `idx_category_i18n_name` (`name`),
+  PRIMARY KEY (`category_id`, `locale`),
+
+  UNIQUE KEY `category_i18n_locale_slug_uq` (`locale`, `slug`),
+  KEY `category_i18n_locale_idx` (`locale`),
+  KEY `category_i18n_name_idx` (`name`),
 
   CONSTRAINT `fk_category_i18n_category`
     FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)

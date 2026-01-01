@@ -1,5 +1,5 @@
 -- =============================================================
--- 040.1_site_meta.sql  (FINAL)
+-- 040.1_site_meta.sql  (FINAL / DRY OG IMAGE)
 -- Ensotek – Default Meta + Global SEO (NEW STANDARD)
 --
 -- Goals:
@@ -10,6 +10,9 @@
 --       * seo + site_seo: global fallback => locale='*'
 --       * seo + site_seo: localized overrides => locale IN ('tr','en','de')
 --       * site_meta_default: add '*' fallback + per-locale overrides
+--   - DRY:
+--       * OG default image URL tek kaynaktan gelir:
+--         site_settings(key='site_og_default_image', locale='*')
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -38,7 +41,30 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 -- -------------------------------------------------------------
 -- Helpers
 -- -------------------------------------------------------------
-SET @OG_DEFAULT := '/img/og-default.jpg';
+-- OG DEFAULT:
+-- 1) Önce site_og_default_image (locale='*') kaydından 'url' alanını bul.
+-- 2) Eğer value JSON değilse, direkt value'yu kullan.
+-- 3) Kayıt yoksa veya url boşsa '/img/og-default.jpg' fallback kullan.
+--
+-- ÖNEMLİ: 040_site_settings.sql içindeki "Site Media" seed'inin
+-- bu dosyadan ÖNCE çalıştığından emin ol (dosya sırası buna göre).
+-- -------------------------------------------------------------
+SET @OG_DEFAULT := COALESCE(
+  (
+    SELECT COALESCE(
+      -- JSON format: { "url": "..." }
+      JSON_UNQUOTE(JSON_EXTRACT(`value`, '$.url')),
+      -- Non-JSON format: plain URL string
+      NULLIF(`value`, '')
+    )
+    FROM `site_settings`
+    WHERE `key` = 'site_og_default_image'
+      AND `locale` = '*'
+    ORDER BY `updated_at` DESC
+    LIMIT 1
+  ),
+  '/img/og-default.jpg'
+);
 
 -- Title policies:
 -- - Avoid: | & " ' < > etc. (some SEO tools flag these)
@@ -55,6 +81,7 @@ SET @DESC_DE := 'Offene und geschlossene GFK Kuehltuerme. Herstellung und Montag
 
 -- =============================================================
 -- GLOBAL SEO DEFAULTS (locale='*')  --> NÖTR/GENEL DEFAULT
+-- OG image: @OG_DEFAULT (site_og_default_image'tan gelir)
 -- =============================================================
 
 -- PRIMARY: seo (GLOBAL DEFAULT)
@@ -137,6 +164,7 @@ ON DUPLICATE KEY UPDATE
 
 -- =============================================================
 -- LOCALIZED SEO OVERRIDES (tr/en/de)
+-- OG image burada da @OG_DEFAULT'ten gelir (tek kaynak)
 -- =============================================================
 
 -- seo overrides
@@ -341,5 +369,4 @@ ON DUPLICATE KEY UPDATE
   `updated_at` = VALUES(`updated_at`);
 
 COMMIT;
-
 SET FOREIGN_KEY_CHECKS = 1;

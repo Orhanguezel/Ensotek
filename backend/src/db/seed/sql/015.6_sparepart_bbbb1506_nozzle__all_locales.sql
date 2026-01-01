@@ -1,17 +1,21 @@
 -- =============================================================
--- FILE: 015.6_sparepart_bbbb1506_nozzle__all_locales.sql (FINAL)
+-- FILE: 015.6_sparepart_bbbb1506_nozzle__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (06/14)
 -- Sparepart: Nozul / Nozzle / Kühlturmdüse
 --
--- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
---
--- FIXES:
+-- ✅ FIXES (schema + validation aligned to 015.5 pattern):
 --  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
---  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING
+--    (NO nested JSON_OBJECT/JSON_ARRAY inside specifications)
+--  - child tables: locale-based reset with DELETE (product_id + locale)
+--  - options: table is locale-less => id-based delete + TR/EN/DE separate option rows
+--  - child IDs: 36-char uuid-like
+--
+-- RULES (SABIT):
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1001-1111-4111-8111-bbbbbbbb1001'  (Tower Main Components)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -85,7 +89,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -119,7 +123,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1506-2222-4222-8222-bbbbbbbb1506' AND locale='tr';
 
@@ -131,7 +135,7 @@ VALUES
   ('11111506-aaaa-4aaa-8aaa-bbbb1506tr04','bbbb1506-2222-4222-8222-bbbbbbbb1506','tr','Uyumluluk','Farklı soğutma kulesi markaları için çeşitli tipler','custom',40),
   ('11111506-aaaa-4aaa-8aaa-bbbb1506tr05','bbbb1506-2222-4222-8222-bbbbbbbb1506','tr','Kullanım','Su dağıtım sisteminde püskürtme / dağıtım','custom',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1506-2222-4222-8222-bbbbbbbb1506' AND locale='tr';
 
@@ -141,7 +145,7 @@ VALUES
   ('22221506-aaaa-4aaa-8aaa-bbbb1506tr02','bbbb1506-2222-4222-8222-bbbbbbbb1506','tr','Basınç veya debi ayarı yapılabilir mi?','Evet. Farklı çap konik parçalar kullanılarak basınç/debi ayarı yapılabilir.',20,1),
   ('22221506-aaaa-4aaa-8aaa-bbbb1506tr03','bbbb1506-2222-4222-8222-bbbbbbbb1506','tr','Bakım ve temizlik kolay mı?','Evet. Kolay sök/tak tasarımı sayesinde temizlik ve bakım için uygundur.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331506-aaaa-4aaa-8aaa-bbbb1506tr01',
@@ -153,16 +157,21 @@ VALUES
   ('33331506-aaaa-4aaa-8aaa-bbbb1506tr01','bbbb1506-2222-4222-8222-bbbbbbbb1506',NULL,5,'Söküp temizlemesi çok kolay, tıkanma sonrası hızlı müdahale ediliyor.',1,'Bakım Ekibi'),
   ('33331506-aaaa-4aaa-8aaa-bbbb1506tr02','bbbb1506-2222-4222-8222-bbbbbbbb1506',NULL,4,'Farklı konilerle debi ayarı sahada işimizi kolaylaştırdı.',1,'Operasyon');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — id-based reset (table is locale-less)
 DELETE FROM product_options
-WHERE id='44441506-aaaa-4aaa-8aaa-bbbb1506op01';
+WHERE id='44441506-aaaa-4aaa-8aaa-bbbb1506tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441506-aaaa-4aaa-8aaa-bbbb1506op01','bbbb1506-2222-4222-8222-bbbbbbbb1506','Nozzle Type', JSON_ARRAY('Kademeli Nozul','Papatya Nozul','RK Fıskiye','İthal Kule Nozulu'));
+  ('44441506-aaaa-4aaa-8aaa-bbbb1506tr01','bbbb1506-2222-4222-8222-bbbbbbbb1506','Nozul Tipi', JSON_ARRAY(
+    'Kademeli Nozul',
+    'Papatya Nozul',
+    'RK Fıskiye',
+    'İthal Kule Nozulu'
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -196,7 +205,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1506-2222-4222-8222-bbbbbbbb1506' AND locale='en';
 
@@ -208,7 +217,7 @@ VALUES
   ('11111506-bbbb-4bbb-8bbb-bbbb1506en04','bbbb1506-2222-4222-8222-bbbbbbbb1506','en','Compatibility','Various types for different cooling tower brands','custom',40),
   ('11111506-bbbb-4bbb-8bbb-bbbb1506en05','bbbb1506-2222-4222-8222-bbbbbbbb1506','en','Use','Spray/distribution in the water distribution system','custom',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1506-2222-4222-8222-bbbbbbbb1506' AND locale='en';
 
@@ -218,7 +227,7 @@ VALUES
   ('22221506-bbbb-4bbb-8bbb-bbbb1506en02','bbbb1506-2222-4222-8222-bbbbbbbb1506','en','Can pressure or flow be adjusted?','Yes. Pressure/flow can be adjusted using cones with different diameters.',20,1),
   ('22221506-bbbb-4bbb-8bbb-bbbb1506en03','bbbb1506-2222-4222-8222-bbbbbbbb1506','en','Is maintenance easy?','Yes. The design allows easy removal/installation for cleaning and maintenance.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331506-bbbb-4bbb-8bbb-bbbb1506en01',
@@ -230,8 +239,21 @@ VALUES
   ('33331506-bbbb-4bbb-8bbb-bbbb1506en01','bbbb1506-2222-4222-8222-bbbbbbbb1506',NULL,5,'Very easy to remove and clean—quick recovery after clogging.',1,'Maintenance'),
   ('33331506-bbbb-4bbb-8bbb-bbbb1506en02','bbbb1506-2222-4222-8222-bbbbbbbb1506',NULL,4,'Flow adjustment with different cones is practical on site.',1,'Operations');
 
+-- OPTIONS (EN) — id-based reset
+DELETE FROM product_options
+WHERE id='44441506-bbbb-4bbb-8bbb-bbbb1506en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441506-bbbb-4bbb-8bbb-bbbb1506en01','bbbb1506-2222-4222-8222-bbbbbbbb1506','Nozzle Type', JSON_ARRAY(
+    'Stepped Nozzle',
+    'Daisy Nozzle',
+    'RK Sprinkler',
+    'Imported Tower Nozzle'
+  ));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -265,7 +287,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1506-2222-4222-8222-bbbbbbbb1506' AND locale='de';
 
@@ -277,7 +299,7 @@ VALUES
   ('11111506-cccc-4ccc-8ccc-bbbb1506de04','bbbb1506-2222-4222-8222-bbbbbbbb1506','de','Kompatibilität','Verschiedene Typen für unterschiedliche Kühlturmmarken','custom',40),
   ('11111506-cccc-4ccc-8ccc-bbbb1506de05','bbbb1506-2222-4222-8222-bbbbbbbb1506','de','Einsatz','Sprüh-/Verteilfunktion im Wasserverteilungssystem','custom',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1506-2222-4222-8222-bbbbbbbb1506' AND locale='de';
 
@@ -287,7 +309,7 @@ VALUES
   ('22221506-cccc-4ccc-8ccc-bbbb1506de02','bbbb1506-2222-4222-8222-bbbbbbbb1506','de','Kann man Druck oder Durchfluss einstellen?','Ja. Über Kegel mit unterschiedlichen Durchmessern lässt sich Druck/Durchfluss einstellen.',20,1),
   ('22221506-cccc-4ccc-8ccc-bbbb1506de03','bbbb1506-2222-4222-8222-bbbbbbbb1506','de','Ist die Wartung einfach?','Ja. Die Konstruktion ermöglicht eine leichte Montage/Demontage zur Reinigung.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331506-cccc-4ccc-8ccc-bbbb1506de01',
@@ -298,6 +320,19 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331506-cccc-4ccc-8ccc-bbbb1506de01','bbbb1506-2222-4222-8222-bbbbbbbb1506',NULL,5,'Sehr leicht zu reinigen – nach Verstopfung schnell wieder einsatzbereit.',1,'Instandhaltung'),
   ('33331506-cccc-4ccc-8ccc-bbbb1506de02','bbbb1506-2222-4222-8222-bbbbbbbb1506',NULL,4,'Die Einstellmöglichkeit über verschiedene Kegel ist in der Praxis sehr hilfreich.',1,'Betrieb');
+
+-- OPTIONS (DE) — id-based reset
+DELETE FROM product_options
+WHERE id='44441506-cccc-4ccc-8ccc-bbbb1506de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441506-cccc-4ccc-8ccc-bbbb1506de01','bbbb1506-2222-4222-8222-bbbbbbbb1506','Düsentyp', JSON_ARRAY(
+    'Stufendüse',
+    'Gänseblümchen-Düse',
+    'RK Sprinkler',
+    'Importierte Kühlturmdüse'
+  ));
 
 COMMIT;
 

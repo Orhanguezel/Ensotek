@@ -1,6 +1,6 @@
 // src/modules/services/controller.ts
 // =============================================================
-// Ensotek – Public Services Controller
+// Ensotek – Public Services Controller (FINAL - core/i18n aware)
 // =============================================================
 
 import type { RouteHandler } from 'fastify';
@@ -13,9 +13,12 @@ import {
   listServiceImages,
 } from './repository';
 
-// ✅ Dinamik locale/def locale DB’den
-import { getAppLocales, getDefaultLocale } from '@/modules/siteSettings/service';
-import { normalizeLocale } from '@/core/i18n'; // sadece normalize için kullanıyoruz
+import {
+  LOCALES,
+  DEFAULT_LOCALE,
+  normalizeLocale,
+  ensureLocalesLoadedFromSettings,
+} from '@/core/i18n';
 
 type LocaleCode = string;
 type LocaleQueryLike = { locale?: string; default_locale?: string };
@@ -27,32 +30,39 @@ function normalizeLooseLocale(v: unknown): string | null {
   return normalizeLocale(s) || s.toLowerCase();
 }
 
+function pickSupportedLocale(raw?: string | null): string | null {
+  const n = normalizeLooseLocale(raw);
+  if (!n) return null;
+  return LOCALES.includes(n) ? n : null;
+}
+
 /**
- * Public endpoint'ler için DİNAMİK locale çözümü:
- *  - locale: query.locale > req.locale > db default_locale > ilk app_locales > "de"
- *  - default_locale: query.default_locale > db default_locale > "de"
+ * Public endpoint'ler için locale çözümü (core/i18n.ts runtime LOCALES)
  *
- * Ayrıca: locale app_locales içinde değilse default’a düşer.
+ * - ensureLocalesLoadedFromSettings() ile LOCALES güncellenir
+ * - locale: query.locale > req.locale > DEFAULT_LOCALE > LOCALES[0]
+ * - default_locale: query.default_locale > DEFAULT_LOCALE > LOCALES[0]
+ * - destekli değilse default’a düşer
  */
 async function resolveLocalesPublic(
   req: any,
   query?: LocaleQueryLike,
 ): Promise<{ locale: LocaleCode; def: LocaleCode }> {
+  await ensureLocalesLoadedFromSettings();
+
   const q = query ?? ((req.query ?? {}) as LocaleQueryLike);
 
-  const reqRaw = normalizeLooseLocale(q.locale) ?? normalizeLooseLocale(req.locale);
-  const defRawFromQuery = normalizeLooseLocale(q.default_locale);
+  const reqCandidate = pickSupportedLocale(q.locale) || pickSupportedLocale(req.locale) || null;
+  const defCandidate = pickSupportedLocale(q.default_locale) || null;
 
-  const appLocales = await getAppLocales(reqRaw);
-  const dbDefault = normalizeLooseLocale(await getDefaultLocale(reqRaw)) ?? 'de';
+  const safeDefault =
+    defCandidate ||
+    (LOCALES.includes(DEFAULT_LOCALE) ? DEFAULT_LOCALE : null) ||
+    (LOCALES[0] ?? 'de');
 
-  const safeDefault: string = appLocales.includes(dbDefault) ? dbDefault : appLocales[0] ?? 'de';
-  const safeLocale: string = reqRaw && appLocales.includes(reqRaw) ? reqRaw : safeDefault;
+  const safeLocale = reqCandidate || safeDefault;
 
-  const safeDef: string =
-    defRawFromQuery && appLocales.includes(defRawFromQuery) ? defRawFromQuery : safeDefault;
-
-  return { locale: safeLocale, def: safeDef };
+  return { locale: safeLocale, def: safeDefault };
 }
 
 /* ----------------------------- LIST (PUBLIC) ----------------------------- */
@@ -75,7 +85,7 @@ export const listServicesPublic: RouteHandler<{ Querystring: ServiceListQuery }>
     default_locale: q.default_locale,
   });
 
-  // Public tarafta default: sadece aktif kayıtlar
+  // Public default: sadece aktif kayıtlar
   const isActive = typeof q.is_active === 'undefined' ? true : q.is_active;
 
   const { items, total } = await listServices({

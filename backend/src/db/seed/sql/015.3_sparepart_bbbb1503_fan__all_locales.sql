@@ -1,17 +1,20 @@
 -- =============================================================
--- FILE: 015.3_sparepart_bbbb1503_fan__all_locales.sql (FINAL)
+-- FILE: 015.3_sparepart_bbbb1503_fan__all_locales.sql (FINAL / VALIDATION ALIGNED)
 -- Ensotek – Sparepart Seed (03/14)
--- Sparepart: Fan / Axialventilator (Lüfter) / Fan
+-- Sparepart: Fan / Axialventilator (Lüfter)
+--
+-- ✅ FIXES (schema + validation aligned to 015.2 pattern):
+--  - product_i18n.description: PLAIN TEXT (NO HTML)
+--  - image urls: FULL URL
+--  - product_i18n.specifications: Record<string,string> => ALL VALUES STRING (NO JSON_ARRAY inside)
+--  - locale tables: DELETE (product_id+locale) then INSERT
+--  - options: add TR/EN/DE separately (table is locale-less; id-based delete is correct)
+--  - child IDs: 36-char uuid-like
 --
 -- RULES (SABIT):
---  - products.item_type   = 'sparepart'
---  - products.category_id = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
---  - products.sub_category_id = 'bbbb1004-1111-4111-8111-bbbbbbbb1004'  (Fan & Motor Group)
---
--- FIXES:
---  - product_i18n.description: PLAIN TEXT (NO HTML)
---  - image urls: FULL URL (http://localhost:8086/uploads/material/...)
---  - all child IDs: CHAR(36) safe (uuid-like, 36 chars)
+--  - products.item_type        = 'sparepart'
+--  - products.category_id      = 'aaaa1001-1111-4111-8111-aaaaaaaa1001'
+--  - products.sub_category_id  = 'bbbb1004-1111-4111-8111-bbbbbbbb1004' (Fan & Motor Group)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -82,7 +85,7 @@ ON DUPLICATE KEY UPDATE
   review_count       = VALUES(review_count);
 
 -- =============================================================
--- I18N (TR) — PLAIN TEXT
+-- I18N (TR) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -99,9 +102,9 @@ VALUES (
   JSON_OBJECT(
     'konum', 'Kule üstü fan şaftı / fan bacası bölgesi',
     'gorev', 'Havayı dolgulardan geçirerek buharlaşma ile soğutmayı sağlar',
-    'kanatMalzemeleri', JSON_ARRAY('Cam elyaf takviyeli PP', 'CTP (FRP)', 'Alüminyum pultruzyon profil', 'PP'),
+    'kanatMalzemeleri', 'Cam elyaf takviyeli PP | CTP (FRP) | Alüminyum pultruzyon profil | PP',
     'baglantiTablasi', 'Alüminyum pultruzyon profil veya kataforez kaplı karbon çelik',
-    'uyumluluk', 'Farklı kule tipleri ve çaplar için seçeneklenebilir'
+    'uyumluluk', 'Farklı kule tipleri ve fan çapları için seçeneklenebilir'
   ),
   'Aksiyal Fan | Soğutma Kulesi Yedek Parça | Ensotek',
   'Soğutma kulesi aksiyal fan: hava akışını sağlar, dolgulardan geçirip fan bacasından atmosfere atar. PP/CTP/Alüminyum seçenekleri, farklı kule tipleriyle uyum.'
@@ -117,7 +120,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (TR)
+-- SPECS (TR) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1503-2222-4222-8222-bbbbbbbb1503' AND locale='tr';
 
@@ -129,7 +132,7 @@ VALUES
   ('11111503-aaaa-4aaa-8aaa-bbbb1503tr04','bbbb1503-2222-4222-8222-bbbbbbbb1503','tr','Bağlantı Tablası','Alüminyum pultruzyon profil veya kataforez kaplı karbon çelik','material',40),
   ('11111503-aaaa-4aaa-8aaa-bbbb1503tr05','bbbb1503-2222-4222-8222-bbbbbbbb1503','tr','Uygulama','Farklı soğutma kulesi tipleri ve fan çapları için opsiyonlanabilir','custom',50);
 
--- FAQS (TR)
+-- FAQS (TR) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1503-2222-4222-8222-bbbbbbbb1503' AND locale='tr';
 
@@ -139,7 +142,7 @@ VALUES
   ('22221503-aaaa-4aaa-8aaa-bbbb1503tr02','bbbb1503-2222-4222-8222-bbbbbbbb1503','tr','Hangi kanat malzemeleri kullanılabilir?','Cam elyaf takviyeli PP, CTP (FRP), alüminyum pultruzyon profil veya PP seçenekleri bulunur.',20,1),
   ('22221503-aaaa-4aaa-8aaa-bbbb1503tr03','bbbb1503-2222-4222-8222-bbbbbbbb1503','tr','Fan seçimi neye göre yapılır?','Kule tipi, fan çapı, debi/çekiş ihtiyacı ve montaj yapısına göre uygun seçenek belirlenir.',30,1);
 
--- REVIEWS (TR)
+-- REVIEWS (TR) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331503-aaaa-4aaa-8aaa-bbbb1503tr01',
@@ -151,16 +154,21 @@ VALUES
   ('33331503-aaaa-4aaa-8aaa-bbbb1503tr01','bbbb1503-2222-4222-8222-bbbbbbbb1503',NULL,5,'Debi stabil, titreşim düşük. Malzeme seçenekleri sahaya göre iyi uyarlanabiliyor.',1,'Bakım Ekibi'),
   ('33331503-aaaa-4aaa-8aaa-bbbb1503tr02','bbbb1503-2222-4222-8222-bbbbbbbb1503',NULL,4,'Alüminyum seçenek hafif ve montajı pratik. Performans tatmin edici.',1,'Operasyon');
 
--- OPTIONS (shared)
+-- OPTIONS (TR) — id-based reset (table is locale-less)
 DELETE FROM product_options
-WHERE id='44441503-aaaa-4aaa-8aaa-bbbb1503op01';
+WHERE id='44441503-aaaa-4aaa-8aaa-bbbb1503tr01';
 
 INSERT INTO product_options (id, product_id, option_name, option_values)
 VALUES
-  ('44441503-aaaa-4aaa-8aaa-bbbb1503op01','bbbb1503-2222-4222-8222-bbbbbbbb1503','Blade Material', JSON_ARRAY('Glass fiber reinforced PP','FRP (CTP)','Aluminum pultrusion','PP'));
+  ('44441503-aaaa-4aaa-8aaa-bbbb1503tr01','bbbb1503-2222-4222-8222-bbbbbbbb1503','Kanat Malzemesi', JSON_ARRAY(
+    'Cam elyaf takviyeli PP',
+    'CTP (FRP)',
+    'Alüminyum pultruzyon',
+    'PP'
+  ));
 
 -- =============================================================
--- I18N (EN) — PLAIN TEXT
+-- I18N (EN) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -177,7 +185,7 @@ VALUES (
   JSON_OBJECT(
     'location', 'Top fan shaft / fan stack area',
     'function', 'Moves air through the tower to support evaporative cooling',
-    'bladeMaterials', JSON_ARRAY('Glass fiber reinforced PP', 'FRP (CTP)', 'Aluminum pultrusion', 'PP'),
+    'bladeMaterials', 'Glass fiber reinforced PP | FRP (CTP) | Aluminum pultrusion | PP',
     'connectionPlate', 'Aluminum pultrusion profile or cataphoresis-coated carbon steel',
     'compatibility', 'Configurable for different tower types and fan diameters'
   ),
@@ -195,7 +203,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (EN)
+-- SPECS (EN) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1503-2222-4222-8222-bbbbbbbb1503' AND locale='en';
 
@@ -207,7 +215,7 @@ VALUES
   ('11111503-bbbb-4bbb-8bbb-bbbb1503en04','bbbb1503-2222-4222-8222-bbbbbbbb1503','en','Connection Plate','Aluminum pultrusion or cataphoresis-coated carbon steel','material',40),
   ('11111503-bbbb-4bbb-8bbb-bbbb1503en05','bbbb1503-2222-4222-8222-bbbbbbbb1503','en','Selection','Depends on tower type, fan diameter and airflow requirement','custom',50);
 
--- FAQS (EN)
+-- FAQS (EN) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1503-2222-4222-8222-bbbbbbbb1503' AND locale='en';
 
@@ -217,7 +225,7 @@ VALUES
   ('22221503-bbbb-4bbb-8bbb-bbbb1503en02','bbbb1503-2222-4222-8222-bbbbbbbb1503','en','Which blade materials are available?','Glass-fiber reinforced PP, FRP (CTP), aluminum pultrusion and PP options are available.',20,1),
   ('22221503-bbbb-4bbb-8bbb-bbbb1503en03','bbbb1503-2222-4222-8222-bbbbbbbb1503','en','How do I select the right fan?','Selection depends on tower type, fan diameter, required airflow and mounting configuration.',30,1);
 
--- REVIEWS (EN)
+-- REVIEWS (EN) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331503-bbbb-4bbb-8bbb-bbbb1503en01',
@@ -229,8 +237,21 @@ VALUES
   ('33331503-bbbb-4bbb-8bbb-bbbb1503en01','bbbb1503-2222-4222-8222-bbbbbbbb1503',NULL,5,'Stable airflow and low vibration. Material options make it easy to match site conditions.',1,'Maintenance Team'),
   ('33331503-bbbb-4bbb-8bbb-bbbb1503en02','bbbb1503-2222-4222-8222-bbbbbbbb1503',NULL,4,'Aluminum option is lightweight and easy to install. Good overall performance.',1,'Operations');
 
+-- OPTIONS (EN) — id-based reset
+DELETE FROM product_options
+WHERE id='44441503-bbbb-4bbb-8bbb-bbbb1503en01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441503-bbbb-4bbb-8bbb-bbbb1503en01','bbbb1503-2222-4222-8222-bbbbbbbb1503','Blade Material', JSON_ARRAY(
+    'Glass fiber reinforced PP',
+    'FRP (CTP)',
+    'Aluminum pultrusion',
+    'PP'
+  ));
+
 -- =============================================================
--- I18N (DE) — PLAIN TEXT
+-- I18N (DE) — PLAIN TEXT + specifications: Record<string,string>
 -- =============================================================
 INSERT INTO product_i18n (
   product_id, locale, title, slug, description, alt, tags, specifications,
@@ -247,7 +268,7 @@ VALUES (
   JSON_OBJECT(
     'einbauort', 'Lüfterschacht oben am Turm / Bereich Lüfterkamin',
     'funktion', 'Führt Luft durch den Turm und unterstützt die Verdunstungskühlung',
-    'fluegelMaterial', JSON_ARRAY('Glasfaserverstärktes PP', 'FRP (CTP)', 'Aluminium-Pultrusionsprofil', 'PP'),
+    'fluegelMaterial', 'Glasfaserverstärktes PP | FRP (CTP) | Aluminium-Pultrusionsprofil | PP',
     'verbindung', 'Aluminium-Pultrusionsprofil oder kataphoretisch beschichteter Kohlenstoffstahl',
     'auswahl', 'Abhängig von Turmtyp, Durchmesser und Luftbedarf'
   ),
@@ -265,7 +286,7 @@ ON DUPLICATE KEY UPDATE
   meta_description = VALUES(meta_description),
   updated_at       = CURRENT_TIMESTAMP(3);
 
--- SPECS (DE)
+-- SPECS (DE) — locale reset
 DELETE FROM product_specs
 WHERE product_id='bbbb1503-2222-4222-8222-bbbbbbbb1503' AND locale='de';
 
@@ -275,9 +296,9 @@ VALUES
   ('11111503-cccc-4ccc-8ccc-bbbb1503de02','bbbb1503-2222-4222-8222-bbbbbbbb1503','de','Funktion','Führt Luft durch den Turm und unterstützt die Verdunstungskühlung','physical',20),
   ('11111503-cccc-4ccc-8ccc-bbbb1503de03','bbbb1503-2222-4222-8222-bbbbbbbb1503','de','Flügelmaterial','Glasfaserverstärktes PP / FRP (CTP) / Aluminium-Pultrusionsprofil / PP','material',30),
   ('11111503-cccc-4ccc-8ccc-bbbb1503de04','bbbb1503-2222-4222-8222-bbbbbbbb1503','de','Verbindungselemente','Aluminium-Pultrusionsprofil oder kataphoretisch beschichteter Kohlenstoffstahl','material',40),
-  ('11111503-cccc-4ccc-8ccc-bbbb1503de05','bbbb1503-2222-4222-8222-bbbbbbbb1503','de','Auswahl','Abhängig von Turmtyp, Durchmesser und Luftbedarf','custom',50);
+  ('11111503-cccc-4ccc-8ccc-bbbb1503de05','bbbb1503-2222-4222-8222-bbbbbbbb1503','de','Auswahl','Abhängig von Turmtyp, Ventilatordurchmesser, Luftbedarf und Montageausführung','custom',50);
 
--- FAQS (DE)
+-- FAQS (DE) — locale reset
 DELETE FROM product_faqs
 WHERE product_id='bbbb1503-2222-4222-8222-bbbbbbbb1503' AND locale='de';
 
@@ -287,7 +308,7 @@ VALUES
   ('22221503-cccc-4ccc-8ccc-bbbb1503de02','bbbb1503-2222-4222-8222-bbbbbbbb1503','de','Welche Materialien gibt es für die Flügel?','Glasfaserverstärktes PP, FRP (CTP), Aluminium-Pultrusionsprofil oder PP.',20,1),
   ('22221503-cccc-4ccc-8ccc-bbbb1503de03','bbbb1503-2222-4222-8222-bbbbbbbb1503','de','Wovon hängt die Auswahl ab?','Von Turmtyp, Ventilatordurchmesser, benötigtem Luftstrom und Montageausführung.',30,1);
 
--- REVIEWS (DE)
+-- REVIEWS (DE) — id-based reset
 DELETE FROM product_reviews
 WHERE id IN (
   '33331503-cccc-4ccc-8ccc-bbbb1503de01',
@@ -298,6 +319,19 @@ INSERT INTO product_reviews (id, product_id, user_id, rating, comment, is_active
 VALUES
   ('33331503-cccc-4ccc-8ccc-bbbb1503de01','bbbb1503-2222-4222-8222-bbbbbbbb1503',NULL,5,'Stabiler Luftstrom und geringe Vibration – sehr zuverlässig im Betrieb.',1,'Instandhaltung'),
   ('33331503-cccc-4ccc-8ccc-bbbb1503de02','bbbb1503-2222-4222-8222-bbbbbbbb1503',NULL,4,'Die Aluminium-Variante ist leicht und schnell zu montieren.',1,'Betrieb');
+
+-- OPTIONS (DE) — id-based reset
+DELETE FROM product_options
+WHERE id='44441503-cccc-4ccc-8ccc-bbbb1503de01';
+
+INSERT INTO product_options (id, product_id, option_name, option_values)
+VALUES
+  ('44441503-cccc-4ccc-8ccc-bbbb1503de01','bbbb1503-2222-4222-8222-bbbbbbbb1503','Flügelmaterial', JSON_ARRAY(
+    'Glasfaserverstärktes PP',
+    'FRP (CTP)',
+    'Aluminium-Pultrusionsprofil',
+    'PP'
+  ));
 
 COMMIT;
 

@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/modules/categories/admin.controller.ts
+// FILE: src/modules/categories/admin.controller.ts  (FINAL FIXED)
 // =============================================================
 import type { RouteHandler } from 'fastify';
 import { db } from '@/db/client';
@@ -26,7 +26,7 @@ const CATEGORY_VIEW_FIELDS = {
   description: categoryI18n.description,
   image_url: categories.image_url,
   storage_asset_id: categories.storage_asset_id,
-  alt: categoryI18n.alt,
+  alt: categoryI18n.alt, // ✅ admin view da i18n alt
   icon: categories.icon,
   is_active: categories.is_active,
   is_featured: categories.is_featured,
@@ -67,7 +67,6 @@ function isDup(err: any) {
 }
 
 /* 🌍 Çoklu dil helper'ları */
-
 const FALLBACK_LOCALES = ['de'];
 
 function normalizeLocale(loc: unknown): string | null {
@@ -77,12 +76,6 @@ function normalizeLocale(loc: unknown): string | null {
   return s.toLowerCase();
 }
 
-/**
- * CREATE sırasında kullanılacak locale listesi:
- *  1) APP_LOCALES / NEXT_PUBLIC_APP_LOCALES / LOCALES (örn: "tr,en,de")
- *  2) Fallback: ["de"]
- *  3) Base locale yoksa başa eklenir
- */
 function getLocalesForCreate(baseLocale: string): string[] {
   const base = normalizeLocale(baseLocale) ?? 'de';
 
@@ -100,10 +93,7 @@ function getLocalesForCreate(baseLocale: string): string[] {
   let list = envLocales.length ? envLocales : [...FALLBACK_LOCALES];
 
   if (!list.includes(base)) list.unshift(base);
-
-  // tekilleştir
   list = Array.from(new Set(list));
-
   return list;
 }
 
@@ -119,7 +109,6 @@ function nullIfEmpty(v: unknown): string | null {
   return String(v);
 }
 
-/** Ortak: admin tarafı için view query helper */
 async function fetchCategoryViewByIdAndLocale(id: string, locale: string) {
   const rows = await db
     .select(CATEGORY_VIEW_FIELDS)
@@ -131,25 +120,18 @@ async function fetchCategoryViewByIdAndLocale(id: string, locale: string) {
   return rows[0] ?? null;
 }
 
-/** POST /categories (admin) — 🌍 çoklu dil create (base + i18n) */
+/** POST /categories (admin) */
 export const adminCreateCategory: RouteHandler<{
   Body: CategoryCreateInput;
 }> = async (req, reply) => {
   const parsed = categoryCreateSchema.safeParse(req.body);
   if (!parsed.success) {
     req.log.warn(
-      {
-        where: 'adminCreateCategory',
-        body: req.body,
-        issues: parsed.error.flatten(),
-      },
+      { where: 'adminCreateCategory', body: req.body, issues: parsed.error.flatten() },
       'category create invalid_body',
     );
     return reply.code(400).send({
-      error: {
-        message: 'invalid_body',
-        issues: parsed.error.flatten(),
-      },
+      error: { message: 'invalid_body', issues: parsed.error.flatten() },
     });
   }
 
@@ -165,7 +147,7 @@ export const adminCreateCategory: RouteHandler<{
     id: baseId,
     module_key: moduleKey,
     image_url: (nullIfEmpty(data.image_url) as string | null) ?? null,
-    storage_asset_id: null as string | null,
+    storage_asset_id: (nullIfEmpty((data as any).storage_asset_id) as string | null) ?? null,
     alt: (nullIfEmpty(data.alt) as string | null) ?? null,
     icon: (nullIfEmpty(data.icon) as string | null) ?? null,
     is_active: data.is_active === undefined ? true : toBoolBody(data.is_active),
@@ -193,15 +175,10 @@ export const adminCreateCategory: RouteHandler<{
       await tx.insert(categoryI18n).values(i18nRows as any);
     });
   } catch (err: any) {
-    if (isDup(err)) {
-      return reply.code(409).send({ error: { message: 'duplicate_slug' } });
-    }
-    return reply.code(500).send({
-      error: {
-        message: 'db_error',
-        detail: String(err?.message ?? err),
-      },
-    });
+    if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
+    return reply
+      .code(500)
+      .send({ error: { message: 'db_error', detail: String(err?.message ?? err) } });
   }
 
   const created = await fetchCategoryViewByIdAndLocale(baseId, baseLocale);
@@ -218,31 +195,19 @@ export const adminPutCategory: RouteHandler<{
   const parsed = categoryUpdateSchema.safeParse(req.body);
   if (!parsed.success) {
     req.log.warn(
-      {
-        where: 'adminPutCategory',
-        id,
-        body: req.body,
-        issues: parsed.error.flatten(),
-      },
+      { where: 'adminPutCategory', id, body: req.body, issues: parsed.error.flatten() },
       'category put invalid_body',
     );
     return reply.code(400).send({
-      error: {
-        message: 'invalid_body',
-        issues: parsed.error.flatten(),
-      },
+      error: { message: 'invalid_body', issues: parsed.error.flatten() },
     });
   }
 
   const patch = parsed.data;
   const targetLocale = normalizeLocale(patch.locale) ?? 'de';
 
-  const baseSet: Record<string, unknown> = {
-    updated_at: sql`CURRENT_TIMESTAMP(3)`,
-  };
-  const i18nSet: Record<string, unknown> = {
-    updated_at: sql`CURRENT_TIMESTAMP(3)`,
-  };
+  const baseSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
+  const i18nSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
   let hasBase = false;
   let hasI18n = false;
 
@@ -252,6 +217,10 @@ export const adminPutCategory: RouteHandler<{
   }
   if (patch.image_url !== undefined) {
     baseSet.image_url = nullIfEmpty(patch.image_url);
+    hasBase = true;
+  }
+  if ((patch as any).storage_asset_id !== undefined) {
+    baseSet.storage_asset_id = nullIfEmpty((patch as any).storage_asset_id);
     hasBase = true;
   }
   if (patch.icon !== undefined) {
@@ -308,12 +277,9 @@ export const adminPutCategory: RouteHandler<{
     });
   } catch (err: any) {
     if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
-    return reply.code(500).send({
-      error: {
-        message: 'db_error',
-        detail: String(err?.message ?? err),
-      },
-    });
+    return reply
+      .code(500)
+      .send({ error: { message: 'db_error', detail: String(err?.message ?? err) } });
   }
 
   const row = await fetchCategoryViewByIdAndLocale(id, targetLocale);
@@ -326,38 +292,24 @@ export const adminPatchCategory: RouteHandler<{
   Params: { id: string };
   Body: CategoryUpdateInput;
 }> = async (req, reply) => {
-  // PATCH için aynı mantık; PUT ile aynı helper'ı paylaşabilirdik ama
-  // basitlik için aynı bloğu tekrar kullanıyoruz.
   const { id } = req.params;
 
   const parsed = categoryUpdateSchema.safeParse(req.body);
   if (!parsed.success) {
     req.log.warn(
-      {
-        where: 'adminPatchCategory',
-        id,
-        body: req.body,
-        issues: parsed.error.flatten(),
-      },
+      { where: 'adminPatchCategory', id, body: req.body, issues: parsed.error.flatten() },
       'category patch invalid_body',
     );
     return reply.code(400).send({
-      error: {
-        message: 'invalid_body',
-        issues: parsed.error.flatten(),
-      },
+      error: { message: 'invalid_body', issues: parsed.error.flatten() },
     });
   }
 
   const patch = parsed.data;
   const targetLocale = normalizeLocale(patch.locale) ?? 'de';
 
-  const baseSet: Record<string, unknown> = {
-    updated_at: sql`CURRENT_TIMESTAMP(3)`,
-  };
-  const i18nSet: Record<string, unknown> = {
-    updated_at: sql`CURRENT_TIMESTAMP(3)`,
-  };
+  const baseSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
+  const i18nSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
   let hasBase = false;
   let hasI18n = false;
 
@@ -367,6 +319,10 @@ export const adminPatchCategory: RouteHandler<{
   }
   if (patch.image_url !== undefined) {
     baseSet.image_url = nullIfEmpty(patch.image_url);
+    hasBase = true;
+  }
+  if ((patch as any).storage_asset_id !== undefined) {
+    baseSet.storage_asset_id = nullIfEmpty((patch as any).storage_asset_id);
     hasBase = true;
   }
   if (patch.icon !== undefined) {
@@ -423,12 +379,9 @@ export const adminPatchCategory: RouteHandler<{
     });
   } catch (err: any) {
     if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
-    return reply.code(500).send({
-      error: {
-        message: 'db_error',
-        detail: String(err?.message ?? err),
-      },
-    });
+    return reply
+      .code(500)
+      .send({ error: { message: 'db_error', detail: String(err?.message ?? err) } });
   }
 
   const row = await fetchCategoryViewByIdAndLocale(id, targetLocale);
@@ -437,12 +390,9 @@ export const adminPatchCategory: RouteHandler<{
 };
 
 /** DELETE /categories/:id (admin) */
-export const adminDeleteCategory: RouteHandler<{
-  Params: { id: string };
-}> = async (req, reply) => {
+export const adminDeleteCategory: RouteHandler<{ Params: { id: string } }> = async (req, reply) => {
   const { id } = req.params;
   await db.delete(categories).where(eq(categories.id, id));
-  // category_i18n ON DELETE CASCADE ile siliniyor
   return reply.code(204).send();
 };
 
@@ -457,12 +407,10 @@ export const adminReorderCategories: RouteHandler<{
     const n = Number(it.display_order) || 0;
     await db
       .update(categories)
-      .set({
-        display_order: n,
-        updated_at: sql`CURRENT_TIMESTAMP(3)`,
-      } as any)
+      .set({ display_order: n, updated_at: sql`CURRENT_TIMESTAMP(3)` } as any)
       .where(eq(categories.id, it.id));
   }
+
   return reply.send({ ok: true });
 };
 
@@ -470,18 +418,18 @@ export const adminReorderCategories: RouteHandler<{
 export const adminToggleActive: RouteHandler<{
   Params: { id: string };
   Body: { is_active: boolean };
+  Querystring?: { locale?: string };
 }> = async (req, reply) => {
   const { id } = req.params;
   const v = !!req.body?.is_active;
+
   await db
     .update(categories)
-    .set({
-      is_active: v,
-      updated_at: sql`CURRENT_TIMESTAMP(3)`,
-    } as any)
+    .set({ is_active: v, updated_at: sql`CURRENT_TIMESTAMP(3)` } as any)
     .where(eq(categories.id, id));
 
-  const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+  const loc = normalizeLocale((req.query as any)?.locale) ?? 'de';
+  const row = await fetchCategoryViewByIdAndLocale(id, loc);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
@@ -490,18 +438,18 @@ export const adminToggleActive: RouteHandler<{
 export const adminToggleFeatured: RouteHandler<{
   Params: { id: string };
   Body: { is_featured: boolean };
+  Querystring?: { locale?: string };
 }> = async (req, reply) => {
   const { id } = req.params;
   const v = !!req.body?.is_featured;
+
   await db
     .update(categories)
-    .set({
-      is_featured: v,
-      updated_at: sql`CURRENT_TIMESTAMP(3)`,
-    } as any)
+    .set({ is_featured: v, updated_at: sql`CURRENT_TIMESTAMP(3)` } as any)
     .where(eq(categories.id, id));
 
-  const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+  const loc = normalizeLocale((req.query as any)?.locale) ?? 'de';
+  const row = await fetchCategoryViewByIdAndLocale(id, loc);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
@@ -509,6 +457,7 @@ export const adminToggleFeatured: RouteHandler<{
 /** ✅ PATCH /categories/:id/image (admin) */
 export const adminSetCategoryImage: RouteHandler<{
   Params: { id: string };
+  Querystring?: { locale?: string };
   Body: CategorySetImageInput;
 }> = async (req, reply) => {
   const { id } = req.params;
@@ -516,39 +465,47 @@ export const adminSetCategoryImage: RouteHandler<{
   const parsed = categorySetImageSchema.safeParse(req.body ?? {});
   if (!parsed.success) {
     req.log.warn(
-      {
-        where: 'adminSetCategoryImage',
-        id,
-        body: req.body,
-        issues: parsed.error.flatten(),
-      },
+      { where: 'adminSetCategoryImage', id, body: req.body, issues: parsed.error.flatten() },
       'category setImage invalid_body',
     );
     return reply.code(400).send({
-      error: {
-        message: 'invalid_body',
-        issues: parsed.error.flatten(),
-      },
+      error: { message: 'invalid_body', issues: parsed.error.flatten() },
     });
   }
-  const assetId = parsed.data.asset_id ?? null;
-  const alt = parsed.data.alt; // undefined ⇒ dokunma, null ⇒ temizle
+
+  // ✅ validation FINAL: assetId = storage_asset_id (transform)
+  const assetId = (parsed.data as any).storage_asset_id ?? null;
+  const alt = (parsed.data as any).alt; // null | string | undefined
+
+  const targetLocale = normalizeLocale(req.query?.locale) ?? 'de';
 
   // Görseli kaldır
   if (!assetId) {
-    const patch: Record<string, unknown> = {
-      image_url: null,
-      storage_asset_id: null,
-      updated_at: sql`CURRENT_TIMESTAMP(3)`,
-    };
-    if (alt !== undefined) patch.alt = alt as string | null;
+    await db.transaction(async (tx) => {
+      const basePatch: Record<string, unknown> = {
+        image_url: null,
+        storage_asset_id: null,
+        updated_at: sql`CURRENT_TIMESTAMP(3)`,
+      };
 
-    await db
-      .update(categories)
-      .set(patch as any)
-      .where(eq(categories.id, id));
+      if (alt !== undefined) {
+        basePatch.alt = alt as string | null;
+      }
 
-    const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+      await tx
+        .update(categories)
+        .set(basePatch as any)
+        .where(eq(categories.id, id));
+
+      if (alt !== undefined) {
+        await tx
+          .update(categoryI18n)
+          .set({ alt: alt as string | null, updated_at: sql`CURRENT_TIMESTAMP(3)` } as any)
+          .where(and(eq(categoryI18n.category_id, id), eq(categoryI18n.locale, targetLocale)));
+      }
+    });
+
+    const row = await fetchCategoryViewByIdAndLocale(id, targetLocale);
     if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
     return reply.send(row);
   }
@@ -570,27 +527,40 @@ export const adminSetCategoryImage: RouteHandler<{
 
   const publicUrl = buildPublicUrl(asset.bucket, asset.path, asset.url ?? null);
 
-  const patch: Record<string, unknown> = {
-    image_url: publicUrl,
-    storage_asset_id: assetId,
-    updated_at: sql`CURRENT_TIMESTAMP(3)`,
-  };
-  if (alt !== undefined) patch.alt = alt as string | null;
+  await db.transaction(async (tx) => {
+    const basePatch: Record<string, unknown> = {
+      image_url: publicUrl,
+      storage_asset_id: assetId,
+      updated_at: sql`CURRENT_TIMESTAMP(3)`,
+    };
 
-  await db
-    .update(categories)
-    .set(patch as any)
-    .where(eq(categories.id, id));
+    if (alt !== undefined) {
+      basePatch.alt = alt as string | null;
+    }
 
-  const row = await fetchCategoryViewByIdAndLocale(id, 'de');
+    await tx
+      .update(categories)
+      .set(basePatch as any)
+      .where(eq(categories.id, id));
+
+    if (alt !== undefined) {
+      await tx
+        .update(categoryI18n)
+        .set({ alt: alt as string | null, updated_at: sql`CURRENT_TIMESTAMP(3)` } as any)
+        .where(and(eq(categoryI18n.category_id, id), eq(categoryI18n.locale, targetLocale)));
+    }
+  });
+
+  const row = await fetchCategoryViewByIdAndLocale(id, targetLocale);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
 
-// ✅ LIST /categories — locale + module_key ile filtrelenebilir
-export const adminListCategories: RouteHandler<{
-  Querystring: AdminListCategoriesQS;
-}> = async (req, reply) => {
+/** ✅ LIST /categories/list — locale + module_key ile filtrelenebilir */
+export const adminListCategories: RouteHandler<{ Querystring: AdminListCategoriesQS }> = async (
+  req,
+  reply,
+) => {
   const {
     q,
     is_active,
@@ -618,9 +588,7 @@ export const adminListCategories: RouteHandler<{
   const f = toBoolQS(is_featured);
   if (f !== undefined) conds.push(eq(categories.is_featured, f));
 
-  if (module_key && module_key.trim()) {
-    conds.push(eq(categories.module_key, module_key.trim()));
-  }
+  if (module_key && module_key.trim()) conds.push(eq(categories.module_key, module_key.trim()));
 
   const col =
     sort === 'name'
@@ -647,7 +615,6 @@ export const adminListCategories: RouteHandler<{
   return reply.send(rows);
 };
 
-// ✅ GET /categories/:id
 export const adminGetCategoryById: RouteHandler<{
   Params: { id: string };
   Querystring: { locale?: string };
@@ -660,7 +627,6 @@ export const adminGetCategoryById: RouteHandler<{
   return reply.send(row);
 };
 
-// ✅ GET /categories/by-slug/:slug
 export const adminGetCategoryBySlug: RouteHandler<{
   Params: { slug: string };
   Querystring: { locale?: string; module_key?: string };
@@ -673,9 +639,7 @@ export const adminGetCategoryBySlug: RouteHandler<{
       : undefined;
 
   const conds: any[] = [eq(categoryI18n.slug, slug), eq(categoryI18n.locale, effectiveLocale)];
-  if (moduleKey) {
-    conds.push(eq(categories.module_key, moduleKey));
-  }
+  if (moduleKey) conds.push(eq(categories.module_key, moduleKey));
 
   const rows = await db
     .select(CATEGORY_VIEW_FIELDS)
