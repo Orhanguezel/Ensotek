@@ -54,7 +54,7 @@ const Footer: React.FC = () => {
     const name = (brandVal.name as string) || (contact.companyName as string) || 'Ensotek';
 
     const site =
-      (brandVal.website as string) || (contact.website as string) || 'https://ensotek.de';
+      (brandVal.website as string) || (contact.website as string) || 'https://www.ensotek.de';
 
     const phoneVal =
       (brandVal.phone as string | undefined) ||

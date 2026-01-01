@@ -80,7 +80,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
     const name = (brandVal?.name as string) || (contact?.companyName as string) || 'ENSOTEK';
 
     const website =
-      (brandVal?.website as string) || (contact?.website as string) || 'https://ensotek.de';
+      (brandVal?.website as string) || (contact?.website as string) || 'https://www.ensotek.de';
 
     const phones = Array.isArray(contact?.phones) ? contact.phones : [];
     const phone =
@@ -124,7 +124,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
   );
 
   const webHost = useMemo(
-    () => (effectiveBrand.website || 'https://ensotek.de').replace(/^https?:\/\//, ''),
+    () => (effectiveBrand.website || 'https://www.ensotek.de').replace(/^https?:\/\//, ''),
     [effectiveBrand.website],
   );
 
