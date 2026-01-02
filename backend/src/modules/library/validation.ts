@@ -25,6 +25,43 @@ const LOCALE_SCHEMA = z
   .max(10)
   .regex(/^[a-zA-Z]{2,3}([_-][a-zA-Z0-9]{2,8})?$/, 'invalid_locale');
 
+/* -------------------------------------------------------------------------- */
+/*                               URL HELPERS                                  */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Ensotek’te storage/public dosyalar çoğu zaman relative gelebilir:
+ *  - /uploads/...
+ *  - /storage/...
+ * Aynı zamanda absolute URL’ler de olabilir.
+ */
+const isAbsoluteUrl = (s: string) => {
+  try {
+    const u = new URL(s);
+    return u.protocol === 'http:' || u.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
+const isRelativePath = (s: string) => {
+  // /uploads/.. gibi
+  if (!s.startsWith('/')) return false;
+  // whitespace olmasın
+  if (/\s/.test(s)) return false;
+  // çok kısa olmasın
+  return s.length >= 2;
+};
+
+const urlOrRelative = z
+  .string()
+  .max(500)
+  .refine((v) => {
+    const s = String(v ?? '').trim();
+    if (!s) return false;
+    return isAbsoluteUrl(s) || isRelativePath(s);
+  }, 'invalid_url_or_relative_path');
+
 /* ============== LIST QUERY (public/admin) ============== */
 /**
  * NOT: Library.type hardcode enum OLMAYACAK.
@@ -91,7 +128,11 @@ export const upsertLibraryParentBodySchema = z.object({
 
   // ana görsel (legacy + storage)
   featured_image: z.string().max(500).nullable().optional(),
-  image_url: z.string().url().max(500).nullable().optional(),
+
+  // ✅ önceki: z.string().url()
+  // ✅ şimdi: absolute URL veya /uploads/... gibi relative kabul
+  image_url: urlOrRelative.nullable().optional(),
+
   image_asset_id: z.string().length(36).nullable().optional(),
 
   published_at: z.string().datetime().nullable().optional(),
@@ -172,7 +213,10 @@ export type PatchLibraryBody = z.infer<typeof patchLibraryBodySchema>;
 const upsertLibraryImageBodyBase = z.object({
   // schema: library_images.image_asset_id / image_url
   image_asset_id: z.string().length(36).nullable().optional(),
-  image_url: z.string().url().max(500).nullable().optional(),
+
+  // ✅ önceki: z.string().url()
+  // ✅ şimdi: absolute veya relative
+  image_url: urlOrRelative.nullable().optional(),
 
   is_active: boolLike.optional().default(true),
   display_order: z.coerce.number().int().min(0).optional().default(0),
@@ -208,9 +252,17 @@ export type PatchLibraryImageBody = z.infer<typeof patchLibraryImageBodySchema>;
 const upsertLibraryFileBodyBase = z.object({
   // schema: library_files.asset_id / file_url
   asset_id: z.string().length(36).nullable().optional(),
-  file_url: z.string().url().max(500).nullable().optional(),
 
-  name: z.string().min(1).max(255),
+  // ✅ önceki: z.string().url()
+  // ✅ şimdi: absolute veya /uploads/... gibi relative
+  file_url: urlOrRelative.nullable().optional(),
+
+  /**
+   * ✅ FIX:
+   * - Eskiden zorunluydu → FE name göndermeyince 400
+   * - Artık optional: file_url varsa controller name derive edebilir.
+   */
+  name: z.string().min(1).max(255).optional(),
 
   size_bytes: z.coerce.number().int().min(0).nullable().optional(),
   mime_type: z.string().max(255).nullable().optional(),
@@ -222,14 +274,34 @@ const upsertLibraryFileBodyBase = z.object({
   is_active: boolLike.optional().default(true),
 });
 
-/** UPSERT: en az bir dosya referansı şart (asset_id veya file_url) */
+/**
+ * UPSERT rules:
+ * 1) asset_id veya file_url şart
+ * 2) name:
+ *    - file_url varsa name opsiyonel (controller fallback)
+ *    - sadece asset_id varsa name zorunlu (aksi halde fallback yok)
+ */
 export const upsertLibraryFileBodySchema = upsertLibraryFileBodyBase.superRefine((b, ctx) => {
-  if (!b.asset_id && !b.file_url) {
+  const hasRef = !!b.asset_id || !!b.file_url;
+  if (!hasRef) {
     ctx.addIssue({
       code: 'custom',
       message: 'asset_id_or_file_url_required',
       path: ['asset_id'],
     });
+    return;
+  }
+
+  // file_url yoksa ve sadece asset_id ile geliyorsa name zorunlu kıl
+  if (!b.file_url) {
+    const n = typeof b.name === 'string' ? b.name.trim() : '';
+    if (!n) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'name_required_when_file_url_missing',
+        path: ['name'],
+      });
+    }
   }
 });
 export type UpsertLibraryFileBody = z.infer<typeof upsertLibraryFileBodySchema>;
@@ -241,7 +313,6 @@ export type UpsertLibraryFileBody = z.infer<typeof upsertLibraryFileBodySchema>;
  * - dosya referansı zorunlu DEĞİL (metadata update)
  */
 export const patchLibraryFileBodySchema = upsertLibraryFileBodyBase
-  .omit({ name: true })
   .extend({
     name: z.string().min(1).max(255).optional(),
     tags: z.array(z.string().max(100)).max(100).nullable().optional(),

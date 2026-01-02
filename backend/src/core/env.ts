@@ -52,6 +52,7 @@ export const env = {
   CLOUDINARY_UPLOAD_PRESET: process.env.CLOUDINARY_UPLOAD_PRESET || '',
   CLOUDINARY_FOLDER: process.env.CLOUDINARY_FOLDER || '',
   CLOUDINARY_BASE_PUBLIC: process.env.CLOUDINARY_BASE_PUBLIC || '',
+  CLOUDINARY_UNSIGNED_UPLOAD_PRESET: process.env.CLOUDINARY_UNSIGNED_UPLOAD_PRESET || '',
 
   // Storage public URL fallback'leri (site_settings yoksa kullanılır)
   STORAGE_CDN_PUBLIC_BASE: process.env.STORAGE_CDN_PUBLIC_BASE || '',

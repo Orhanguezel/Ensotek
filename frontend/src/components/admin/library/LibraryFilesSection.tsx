@@ -1,10 +1,12 @@
 // =============================================================
 // FILE: src/components/admin/library/LibraryFilesSection.tsx
-// Ensotek – Admin Library Files Section (Storage entegre) [FINAL FIX]
-// FIX:
-// - PDF Cloudinary URL sometimes returns /image/upload/.../*.pdf
-//   => normalize to /raw/upload/.../*.pdf before saving to DB
-// - Keeps current RTK hooks + refetch behavior
+// Ensotek – Admin Library Files Section [FINAL - LOCAL FIRST]
+// FIX (MINIMAL):
+// - Send locale to list/create/delete (x-locale header RTK tarafında var)
+// - Default bucket "uploads" caused 400 on /admin/storage/assets (backend likely whitelists buckets)
+//   => default bucket set to "public" (works with most setups)
+// - Keep local-first expectation: folder default "uploads/catalog" (adjust if backend expects "catalog")
+// - Delete: treat 404 as success (idempotent), always refetch
 // =============================================================
 
 'use client';
@@ -23,46 +25,28 @@ import {
 
 export type LibraryFilesSectionProps = {
   libraryId: string;
+  locale?: string; // ✅ locale support
   disabled: boolean;
 };
 
 const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 const norm = (v: unknown) => String(v ?? '').trim();
 
-const isPdfLike = (nameOrUrl: string, mime?: string) => {
-  const m = norm(mime).toLowerCase();
-  if (m === 'application/pdf') return true;
-
-  const s = norm(nameOrUrl).toLowerCase();
-  const base = s.split('?')[0].split('#')[0];
-  return base.endsWith('.pdf');
-};
-
-/**
- * Cloudinary PDF fix:
- * if cloudinary url ends with .pdf and contains /image/upload/ => /raw/upload/
- */
-const normalizeCloudinaryPdfUrl = (urlRaw: string): string => {
-  const url = norm(urlRaw);
-  if (!url) return '';
-
-  const lower = url.toLowerCase();
-  if (!lower.includes('res.cloudinary.com')) return url;
-
-  const base = lower.split('?')[0].split('#')[0];
-  if (!base.endsWith('.pdf')) return url;
-
-  if (lower.includes('/raw/upload/')) return url;
-
-  if (lower.includes('/image/upload/')) {
-    return url.replace('/image/upload/', '/raw/upload/');
-  }
-
-  return url;
-};
+function extractErrMsg(err: any): string {
+  // RTK FetchBaseQueryError şekilleri
+  const data = err?.data;
+  return (
+    data?.error?.message ||
+    data?.message ||
+    err?.error ||
+    err?.message ||
+    'İşlem sırasında hata oluştu.'
+  );
+}
 
 export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
   libraryId,
+  locale,
   disabled,
 }) => {
   const {
@@ -70,7 +54,10 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
     isLoading,
     isFetching,
     refetch,
-  } = useListLibraryFilesAdminQuery({ id: libraryId }, { skip: !libraryId });
+  } = useListLibraryFilesAdminQuery(
+    { id: libraryId, locale }, // ✅ locale
+    { skip: !libraryId },
+  );
 
   const [createFile, { isLoading: isCreatingFile }] = useCreateLibraryFileAdminMutation();
   const [removeFile, { isLoading: isRemoving }] = useRemoveLibraryFileAdminMutation();
@@ -78,8 +65,12 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [overrideName, setOverrideName] = useState('');
+
+  // ✅ IMPORTANT: "uploads" bucket backend'inde whitelist dışıysa 400 verir.
+  // En güvenli default genelde "public".
   const [bucket, setBucket] = useState('public');
-  const [folder, setFolder] = useState(`library/${libraryId}`);
+  // local hedefin için:
+  const [folder, setFolder] = useState('uploads/catalog');
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -95,12 +86,13 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
     }
 
     try {
-      // 1) Storage'a upload
+      // 1) Upload (backend SHOULD return public url for local: /uploads/...)
       const storage = await createAsset({
         file: selectedFile,
         bucket,
         folder: folder || undefined,
         metadata: {
+          // storage endpoint type: Record<string,string>
           module_key: 'library',
           library_id: libraryId,
           original_name: selectedFile.name,
@@ -109,29 +101,23 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
       } as any).unwrap();
 
       const storageId = norm((storage as any)?.id);
-      const storageUrlRaw = norm((storage as any)?.url);
+      const storageUrl = norm((storage as any)?.url); // expected: https://www.ensotek.de/uploads/...
       const storageMime = norm((storage as any)?.mime) || norm(selectedFile.type);
       const storageSize = (storage as any)?.size;
 
-      if (!storageId) {
-        throw new Error('Upload başarılı ama asset_id alınamadı.');
-      }
+      if (!storageId) throw new Error('Upload başarılı ama asset_id alınamadı.');
+      if (!storageUrl) throw new Error('Upload başarılı ama public url alınamadı.');
 
-      // 2) library_files kaydı
+      // 2) library_files row
       const displayName = overrideName.trim() || selectedFile.name;
-
-      // ✅ FIX: PDF ise Cloudinary raw url’ye normalize et
-      const urlFixed =
-        isPdfLike(displayName || storageUrlRaw, storageMime) && storageUrlRaw
-          ? normalizeCloudinaryPdfUrl(storageUrlRaw)
-          : storageUrlRaw;
 
       await createFile({
         id: libraryId,
+        locale, // ✅ locale
         payload: {
           asset_id: storageId,
           name: displayName,
-          file_url: urlFixed || null,
+          file_url: storageUrl,
           size_bytes: typeof storageSize === 'number' ? storageSize : null,
           mime_type: storageMime || null,
         },
@@ -139,32 +125,44 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
       toast.success('Dosya yüklendi ve kaydedildi.');
 
-      // state reset
       setSelectedFile(null);
       setOverrideName('');
       if (fileInputRef.current) fileInputRef.current.value = '';
 
       await refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.message ||
-        'Dosya yüklenirken veya library_files kaydedilirken hata oluştu.';
-      toast.error(msg);
+      const status = err?.status ?? err?.originalStatus;
+
+      // 400 ise çoğunlukla bucket/folder validasyonu
+      if (status === 400) {
+        toast.error(
+          `Upload 400 (Bad Request). Bucket/Folder backend tarafından kabul edilmiyor olabilir. ` +
+            `bucket="${bucket}", folder="${folder}". ` +
+            `Detay: ${extractErrMsg(err)}`,
+        );
+        return;
+      }
+
+      toast.error(extractErrMsg(err));
     }
   };
 
   const handleRemove = async (file: LibraryFileDto) => {
-    if (!libraryId || !(file as any).id) return;
+    const fileId = norm((file as any)?.id);
+    if (!libraryId || !fileId) return;
+
     if (!confirm(`"${safeText((file as any).name)}" dosyasını silmek istiyor musun?`)) return;
 
     try {
-      await removeFile({ id: libraryId, fileId: (file as any).id } as any).unwrap();
+      await removeFile({ id: libraryId, fileId, locale } as any).unwrap(); // ✅ locale
       toast.success('Dosya silindi.');
-      await refetch();
     } catch (err: any) {
-      const msg = err?.data?.error?.message || err?.message || 'Dosya silinirken hata oluştu.';
-      toast.error(msg);
+      // ✅ idempotent delete: "not found" => ok
+      const status = err?.status ?? err?.originalStatus;
+      if (status === 404) toast.success('Dosya zaten silinmiş.');
+      else toast.error(extractErrMsg(err));
+    } finally {
+      await refetch();
     }
   };
 
@@ -178,7 +176,6 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
       </div>
 
       <div className="card-body">
-        {/* Liste */}
         {(!files || (files as any[]).length === 0) && !loading && (
           <div className="text-muted small mb-3">Henüz dosya eklenmemiş.</div>
         )}
@@ -186,7 +183,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
         {files && (files as any[]).length > 0 && (
           <ul className="list-group list-group-flush mb-3">
             {(files as any[]).map((f: any) => {
-              const href = norm(f?.file_url); // ✅ DTO: file_url
+              const href = norm(f?.file_url);
               const label = safeText(f?.name) || 'Dosya';
 
               return (
@@ -228,7 +225,6 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
         <hr className="my-2" />
 
-        {/* Upload alanı */}
         <div className="small">
           <div className="mb-2">
             <label className="form-label small mb-1">PDF / Dosya Seç</label>
@@ -241,9 +237,8 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
               disabled={disabled || uploading}
             />
             <div className="form-text small">
-              Dosya önce Storage modülüne yüklenir, ardından <code>library_files</code> tablosuna{' '}
-              <code>asset_id</code> ile kaydedilir. PDF ise URL otomatik olarak{' '}
-              <code>/raw/upload</code> formatına normalize edilir.
+              Dosya backend’e yüklenir. Lokal storage aktifse URL şu formatta olur:{' '}
+              <code>https://www.ensotek.de/uploads/...</code>
             </div>
           </div>
 
@@ -254,7 +249,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
               value={overrideName}
               onChange={(e) => setOverrideName(e.target.value)}
               disabled={disabled || uploading}
-              placeholder="Boş bırakılırsa dosya adı kullanılır (örn: brosur.pdf)"
+              placeholder="Boş bırakılırsa dosya adı kullanılır (örn: katalog.pdf)"
             />
           </div>
 
@@ -268,7 +263,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
                 disabled={disabled || uploading}
               />
               <div className="form-text small">
-                Örn: <code>public</code>
+                Çoğu backend whitelist: <code>public</code> güvenli default.
               </div>
             </div>
             <div className="col-6">
@@ -280,7 +275,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
                 disabled={disabled || uploading}
               />
               <div className="form-text small">
-                Örn: <code>library/{libraryId}</code>
+                Lokal için örn: <code>uploads/catalog</code> (backend kabulüne bağlı).
               </div>
             </div>
           </div>

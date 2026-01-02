@@ -542,7 +542,11 @@ const LibraryFormPage: React.FC<LibraryFormPageProps> = ({
                 )}
 
                 {formState.id ? (
-                  <LibraryFilesSection libraryId={formState.id} disabled={saving || pageLoading} />
+                  <LibraryFilesSection
+                    libraryId={formState.id}
+                    locale={formState.locale}
+                    disabled={saving || pageLoading}
+                  />
                 ) : (
                   <div className="card">
                     <div className="card-body small text-muted">

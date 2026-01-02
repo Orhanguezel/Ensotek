@@ -9,6 +9,8 @@
 //      requested -> prefix -> effective default -> preferred -> app_locales -> '*'
 //  - Adds: getGtmContainerId()
 //  - ✅ Adds: Global site media (logo/favicon) helpers (locale-independent via '*')
+// FIXES:
+//  - getAppLocalesMeta fallbacks: tr/en/de codes + labels (no duplicates)
 // =============================================================
 
 import { db } from '@/db/client';
@@ -144,10 +146,8 @@ function parseMediaUrl(raw: string | null | undefined): string | null {
   const s = normalizeStr(raw);
   if (!s) return null;
 
-  // Common URL forms
   if (/^https?:\/\//i.test(s) || s.startsWith('/')) return s;
 
-  // JSON form
   try {
     const parsed: any = JSON.parse(s);
     const u = typeof parsed?.url === 'string' ? parsed.url : undefined;
@@ -155,7 +155,6 @@ function parseMediaUrl(raw: string | null | undefined): string | null {
     const out = normalizeStr(u || v);
     return out || null;
   } catch {
-    // not JSON; return as-is
     return s;
   }
 }
@@ -292,11 +291,9 @@ function parseAppLocalesValueToMeta(v: unknown): AppLocaleMeta[] {
     const items = v.map(normalizeOne).filter(Boolean) as AppLocaleMeta[];
     const active = items.filter((it) => it.is_active !== false);
 
-    // default yoksa first'i default yap
     const hasDefault = active.some((it) => it.is_default);
     if (!hasDefault && active.length) active[0] = { ...active[0], is_default: true };
 
-    // uniq by code
     const map = new Map<string, AppLocaleMeta>();
     for (const it of active) map.set(it.code, it);
     return Array.from(map.values());
@@ -326,7 +323,12 @@ function parseAppLocalesValueToMeta(v: unknown): AppLocaleMeta[] {
 export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
   const raw = await getGlobalSettingValue('app_locales');
   if (!raw) {
-    return [{ code: 'de', label: 'Türkçe', is_default: true, is_active: true }];
+    // minimum fallback
+    return [
+      { code: 'tr', label: 'Türkçe', is_default: true, is_active: true },
+      { code: 'en', label: 'English', is_default: false, is_active: true },
+      { code: 'de', label: 'Deutsch', is_default: false, is_active: true },
+    ];
   }
 
   const v: unknown = (() => {
@@ -340,13 +342,13 @@ export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
   const metas = parseAppLocalesValueToMeta(v);
   if (metas.length) return metas;
 
-  // minimum fallback
   return [
-    { code: 'de', label: 'Türkçe', is_default: true, is_active: true },
+    { code: 'tr', label: 'Türkçe', is_default: true, is_active: true },
     { code: 'en', label: 'English', is_default: false, is_active: true },
     { code: 'de', label: 'Deutsch', is_default: false, is_active: true },
   ];
 }
+
 
 export async function getAppLocales(_locale?: string | null): Promise<string[]> {
   const metas = await getAppLocalesMeta();
@@ -378,7 +380,7 @@ export async function getEffectiveDefaultLocale(): Promise<string> {
  *  3) effective default_locale (global)
  *  4) preferred fallback (opsiyonel)
  *  5) app_locales (aktif)
- *  6) '*' (GLOBAL)  <-- KRİTİK
+ *  6) '*' (GLOBAL)
  */
 export async function buildLocaleFallbackChain(opts: {
   requested?: string | null;
@@ -400,21 +402,15 @@ export async function buildLocaleFallbackChain(opts: {
 
 export type SiteMediaKey = (typeof SITE_MEDIA_KEYS)[number];
 
-/**
- * Global media raw value (stored in site_settings with locale='*').
- * Falls back to any-locale legacy row if '*' does not exist.
- */
 export async function getSiteMediaRaw(key: SiteMediaKey): Promise<string | null> {
   return await getGlobalSettingValue(key);
 }
 
-/** Global media URL resolver (string URL or JSON-string object {url,...}). */
 export async function getSiteMediaUrl(key: SiteMediaKey): Promise<string | null> {
   const raw = await getSiteMediaRaw(key);
   return parseMediaUrl(raw);
 }
 
-// Convenience helpers (most used)
 export async function getSiteLogoUrl(): Promise<string | null> {
   return await getSiteMediaUrl('site_logo');
 }
@@ -497,7 +493,10 @@ export type StorageSettings = {
   apiKey: string | null;
   apiSecret: string | null;
   folder: string | null;
+
+  // ✅ ZATEN VAR: DB key = cloudinary_unsigned_preset
   unsignedUploadPreset: string | null;
+
   cdnPublicBase: string | null;
   publicApiBase: string | null;
 };
@@ -560,9 +559,12 @@ export async function getStorageSettings(locale?: string | null): Promise<Storag
     normalizeStr(env.CLOUDINARY?.folder) ??
     null;
 
+  // ✅ DB key map: cloudinary_unsigned_preset
   const unsignedUploadPreset =
     normalizeStr(map.get('cloudinary_unsigned_preset')) ??
-    normalizeStr(env.CLOUDINARY_UNSIGNED_PRESET) ??
+    // ENV fallback'leri (isim değiştirmeden ALIAS)
+    normalizeStr((env as any).CLOUDINARY_UNSIGNED_UPLOAD_PRESET) ??
+    normalizeStr((env as any).CLOUDINARY_UNSIGNED_PRESET) ??
     normalizeStr((env.CLOUDINARY as any)?.unsignedUploadPreset) ??
     normalizeStr((env.CLOUDINARY as any)?.uploadPreset) ??
     null;
