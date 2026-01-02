@@ -7,6 +7,8 @@
 //  - Refresh concurrency (tek refresh in-flight)
 //  - MaybePromise uyumlu (no .finally())
 //  - Unused params temiz
+//  - ✅ FIX: FormData (multipart) body varsa Content-Type asla set edilmez
+//           (PDF upload dahil). Varsa kaldırılır ki boundary bozulmasın.
 // =============================================================
 
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
@@ -28,7 +30,7 @@ function trimSlash(x: string) {
 /**
  * Env yoksa dev ortamda otomatik tahmin:
  *  - Next dev: http://localhost:3000
- *  - Backend:  https://www.ensotek.de/api
+ *  - Backend:  http://localhost:8086/api
  */
 function guessDevBackend(): string {
   try {
@@ -55,9 +57,13 @@ function isRecord(v: unknown): v is Record<string, unknown> {
 
 type AnyArgs = string | FetchArgs;
 
+function isFormDataBody(b: unknown): boolean {
+  return typeof FormData !== 'undefined' && b instanceof FormData;
+}
+
 function isJsonLikeBody(b: unknown): b is Record<string, unknown> {
   if (!b) return false;
-  if (typeof FormData !== 'undefined' && b instanceof FormData) return false;
+  if (isFormDataBody(b)) return false;
   if (typeof Blob !== 'undefined' && b instanceof Blob) return false;
   if (typeof ArrayBuffer !== 'undefined' && b instanceof ArrayBuffer) return false;
   return isRecord(b);
@@ -189,10 +195,25 @@ const AUTH_SKIP_REAUTH = new Set<string>([
   '/auth/logout',
 ]);
 
+/**
+ * ✅ JSON body'lerde Content-Type ekle.
+ * ✅ FormData body'lerde Content-Type'ı asla set etme; varsa kaldır (boundary bozulmasın).
+ */
 const ensureJson = (fa: FetchArgs) => {
+  // multipart (PDF upload vs)
+  if (typeof fa.body !== 'undefined' && isFormDataBody(fa.body)) {
+    const h = { ...(fa.headers || {}) } as Record<string, any>;
+    delete h['content-type'];
+    delete h['Content-Type'];
+    fa.headers = h;
+    return fa;
+  }
+
+  // json-like
   if (typeof fa.body !== 'undefined' && isJsonLikeBody(fa.body)) {
     fa.headers = { ...(fa.headers || {}), 'Content-Type': 'application/json' };
   }
+
   return fa;
 };
 
@@ -236,7 +257,7 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
     }
 
     req = stripAuthHeaderIfNeeded(req, cleanPath);
-    req = ensureJson(req);
+    req = ensureJson(req); // ✅ burada FormData Content-Type cleanup da yapılır
   }
 
   let result: RawResult = (await Promise.resolve(rawBaseQuery(req, api, extra))) as RawResult;
@@ -269,7 +290,7 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
           retry.headers = { ...(retry.headers || {}), 'x-skip-auth': '1' };
         }
         retry = stripAuthHeaderIfNeeded(retry, retryCleanPath);
-        retry = ensureJson(retry);
+        retry = ensureJson(retry); // ✅ retry'da da FormData cleanup
       }
 
       result = (await Promise.resolve(rawBaseQuery(retry, api, extra))) as RawResult;

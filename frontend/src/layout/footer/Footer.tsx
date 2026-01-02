@@ -34,7 +34,7 @@ import { useUiSection } from '@/i18n/uiDb';
 const isExternalHref = (href: string) =>
   /^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^tel:/i.test(href) || /^#/i.test(href);
 
-const FooterTwo: React.FC = () => {
+const Footer: React.FC = () => {
   const locale = useResolvedLocale();
   const { ui } = useUiSection('ui_footer', locale);
 
@@ -91,15 +91,6 @@ const FooterTwo: React.FC = () => {
       socials: mergedSocials,
     };
   }, [contactInfoSetting?.value, companyBrandSetting?.value, socialsSetting?.value]);
-
-  const websiteHref = website
-    ? /^https?:\/\//i.test(website)
-      ? website
-      : `https://${website}`
-    : '';
-
-  const telHref = phone ? `tel:${phone.replace(/\s+/g, '')}` : '';
-  const mailHref = email ? `mailto:${email}` : '';
 
   // --------- footer_sections ----------
   const { data: footerSections } = useListFooterSectionsQuery({
@@ -263,4 +254,4 @@ const FooterTwo: React.FC = () => {
   );
 };
 
-export default FooterTwo;
+export default Footer;

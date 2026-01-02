@@ -3,6 +3,10 @@
 // Ensotek – Admin Library RTK Endpoints (SCHEMA-SAFE)
 // Base URL: /api/admin (baseApi üzerinden)
 // Routes: src/modules/library/admin.routes.ts
+//
+// FIX (MINIMAL):
+// - Files endpoints also accept optional locale and send x-locale header
+//   (Some backends rely on locale context; otherwise files may appear "missing")
 // =============================================================
 
 import { baseApi } from '../../baseApi';
@@ -151,40 +155,45 @@ export const libraryAdminApi = baseApi.injectEndpoints({
     /* ------------------------------ */
     /* Files (Admin)                  */
     /* ------------------------------ */
+    // ✅ FIX: locale support + x-locale header (minimal, hook names unchanged)
 
-    listLibraryFilesAdmin: build.query<LibraryFileDto[], { id: string }>({
-      query: ({ id }) => ({
+    listLibraryFilesAdmin: build.query<LibraryFileDto[], { id: string; locale?: string }>({
+      query: ({ id, locale }) => ({
         url: `/admin/library/${id}/files`,
         method: 'GET',
+        headers: locale ? { 'x-locale': locale } : undefined,
       }),
     }),
 
     createLibraryFileAdmin: build.mutation<
       LibraryFileDto[],
-      { id: string; payload: LibraryFileCreatePayload }
+      { id: string; payload: LibraryFileCreatePayload; locale?: string }
     >({
-      query: ({ id, payload }) => ({
+      query: ({ id, payload, locale }) => ({
         url: `/admin/library/${id}/files`,
         method: 'POST',
         body: payload,
+        headers: locale ? { 'x-locale': locale } : undefined,
       }),
     }),
 
     updateLibraryFileAdmin: build.mutation<
       LibraryFileDto[],
-      { id: string; fileId: string; patch: LibraryFileUpdatePayload }
+      { id: string; fileId: string; patch: LibraryFileUpdatePayload; locale?: string }
     >({
-      query: ({ id, fileId, patch }) => ({
+      query: ({ id, fileId, patch, locale }) => ({
         url: `/admin/library/${id}/files/${fileId}`,
         method: 'PATCH',
         body: patch,
+        headers: locale ? { 'x-locale': locale } : undefined,
       }),
     }),
 
-    removeLibraryFileAdmin: build.mutation<void, { id: string; fileId: string }>({
-      query: ({ id, fileId }) => ({
+    removeLibraryFileAdmin: build.mutation<void, { id: string; fileId: string; locale?: string }>({
+      query: ({ id, fileId, locale }) => ({
         url: `/admin/library/${id}/files/${fileId}`,
         method: 'DELETE',
+        headers: locale ? { 'x-locale': locale } : undefined,
       }),
     }),
   }),
