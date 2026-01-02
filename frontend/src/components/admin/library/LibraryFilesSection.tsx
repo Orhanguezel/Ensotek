@@ -1,11 +1,10 @@
 // =============================================================
 // FILE: src/components/admin/library/LibraryFilesSection.tsx
-// Ensotek – Admin Library Files Section (Storage entegre)
-// - All RTK hooks imported from "@/integrations/rtk/hooks"
-// - Nested <form> yok
-// ✅ Schema/DTO aligned:
-//   - LibraryFileDto: file_url (NOT url)
-//   - asset_id is main reference
+// Ensotek – Admin Library Files Section (Storage entegre) [FINAL FIX]
+// FIX:
+// - PDF Cloudinary URL sometimes returns /image/upload/.../*.pdf
+//   => normalize to /raw/upload/.../*.pdf before saving to DB
+// - Keeps current RTK hooks + refetch behavior
 // =============================================================
 
 'use client';
@@ -28,6 +27,39 @@ export type LibraryFilesSectionProps = {
 };
 
 const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+const norm = (v: unknown) => String(v ?? '').trim();
+
+const isPdfLike = (nameOrUrl: string, mime?: string) => {
+  const m = norm(mime).toLowerCase();
+  if (m === 'application/pdf') return true;
+
+  const s = norm(nameOrUrl).toLowerCase();
+  const base = s.split('?')[0].split('#')[0];
+  return base.endsWith('.pdf');
+};
+
+/**
+ * Cloudinary PDF fix:
+ * if cloudinary url ends with .pdf and contains /image/upload/ => /raw/upload/
+ */
+const normalizeCloudinaryPdfUrl = (urlRaw: string): string => {
+  const url = norm(urlRaw);
+  if (!url) return '';
+
+  const lower = url.toLowerCase();
+  if (!lower.includes('res.cloudinary.com')) return url;
+
+  const base = lower.split('?')[0].split('#')[0];
+  if (!base.endsWith('.pdf')) return url;
+
+  if (lower.includes('/raw/upload/')) return url;
+
+  if (lower.includes('/image/upload/')) {
+    return url.replace('/image/upload/', '/raw/upload/');
+  }
+
+  return url;
+};
 
 export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
   libraryId,
@@ -42,7 +74,6 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
   const [createFile, { isLoading: isCreatingFile }] = useCreateLibraryFileAdminMutation();
   const [removeFile, { isLoading: isRemoving }] = useRemoveLibraryFileAdminMutation();
-
   const [createAsset, { isLoading: isUploadingAsset }] = useCreateAssetAdminMutation();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -75,28 +106,42 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
           original_name: selectedFile.name,
           mime: selectedFile.type || 'application/octet-stream',
         },
-      }).unwrap();
+      } as any).unwrap();
 
-      // 2) library_files kaydı oluştur
+      const storageId = norm((storage as any)?.id);
+      const storageUrlRaw = norm((storage as any)?.url);
+      const storageMime = norm((storage as any)?.mime) || norm(selectedFile.type);
+      const storageSize = (storage as any)?.size;
+
+      if (!storageId) {
+        throw new Error('Upload başarılı ama asset_id alınamadı.');
+      }
+
+      // 2) library_files kaydı
       const displayName = overrideName.trim() || selectedFile.name;
+
+      // ✅ FIX: PDF ise Cloudinary raw url’ye normalize et
+      const urlFixed =
+        isPdfLike(displayName || storageUrlRaw, storageMime) && storageUrlRaw
+          ? normalizeCloudinaryPdfUrl(storageUrlRaw)
+          : storageUrlRaw;
 
       await createFile({
         id: libraryId,
         payload: {
-          asset_id: storage.id,
+          asset_id: storageId,
           name: displayName,
-          file_url: (storage.url ?? null) as any, // backend string|null bekliyor
-          size_bytes: (storage.size ?? null) as any,
-          mime_type: (storage.mime ?? selectedFile.type ?? null) as any,
+          file_url: urlFixed || null,
+          size_bytes: typeof storageSize === 'number' ? storageSize : null,
+          mime_type: storageMime || null,
         },
-      }).unwrap();
+      } as any).unwrap();
 
       toast.success('Dosya yüklendi ve kaydedildi.');
 
       // state reset
       setSelectedFile(null);
       setOverrideName('');
-
       if (fileInputRef.current) fileInputRef.current.value = '';
 
       await refetch();
@@ -110,11 +155,11 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
   };
 
   const handleRemove = async (file: LibraryFileDto) => {
-    if (!libraryId || !file.id) return;
-    if (!confirm(`"${safeText(file.name)}" dosyasını silmek istiyor musun?`)) return;
+    if (!libraryId || !(file as any).id) return;
+    if (!confirm(`"${safeText((file as any).name)}" dosyasını silmek istiyor musun?`)) return;
 
     try {
-      await removeFile({ id: libraryId, fileId: file.id }).unwrap();
+      await removeFile({ id: libraryId, fileId: (file as any).id } as any).unwrap();
       toast.success('Dosya silindi.');
       await refetch();
     } catch (err: any) {
@@ -134,41 +179,44 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
       <div className="card-body">
         {/* Liste */}
-        {(!files || files.length === 0) && !loading && (
+        {(!files || (files as any[]).length === 0) && !loading && (
           <div className="text-muted small mb-3">Henüz dosya eklenmemiş.</div>
         )}
 
-        {files && files.length > 0 && (
+        {files && (files as any[]).length > 0 && (
           <ul className="list-group list-group-flush mb-3">
-            {files.map((f) => {
-              const href = safeText((f as any).file_url).trim(); // ✅ DTO: file_url
+            {(files as any[]).map((f: any) => {
+              const href = norm(f?.file_url); // ✅ DTO: file_url
+              const label = safeText(f?.name) || 'Dosya';
+
               return (
                 <li
-                  key={f.id}
+                  key={f?.id || `${label}-${href}`}
                   className="list-group-item px-0 py-2 d-flex justify-content-between align-items-center small"
                 >
                   <div className="me-2" style={{ minWidth: 0 }}>
-                    <div className="fw-semibold text-truncate" title={safeText(f.name)}>
+                    <div className="fw-semibold text-truncate" title={label}>
                       {href ? (
                         <a href={href} target="_blank" rel="noreferrer">
-                          {f.name}
+                          {label}
                         </a>
                       ) : (
-                        f.name
+                        label
                       )}
                     </div>
-                    <div className="text-muted text-truncate" title={safeText(f.mime_type)}>
-                      {f.mime_type || 'mime yok'}
-                      {typeof f.size_bytes === 'number' && f.size_bytes > 0 && (
+                    <div className="text-muted text-truncate" title={safeText(f?.mime_type)}>
+                      {f?.mime_type || 'mime yok'}
+                      {typeof f?.size_bytes === 'number' && f.size_bytes > 0 && (
                         <> • {(f.size_bytes / 1024).toFixed(1)} KB</>
                       )}
                     </div>
                   </div>
+
                   <button
                     type="button"
                     className="btn btn-sm btn-outline-danger"
                     disabled={disabled || isRemoving}
-                    onClick={() => handleRemove(f)}
+                    onClick={() => handleRemove(f as any)}
                   >
                     Sil
                   </button>
@@ -194,7 +242,8 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
             />
             <div className="form-text small">
               Dosya önce Storage modülüne yüklenir, ardından <code>library_files</code> tablosuna{' '}
-              <code>asset_id</code> ile kaydedilir.
+              <code>asset_id</code> ile kaydedilir. PDF ise URL otomatik olarak{' '}
+              <code>/raw/upload</code> formatına normalize edilir.
             </div>
           </div>
 
@@ -219,7 +268,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
                 disabled={disabled || uploading}
               />
               <div className="form-text small">
-                Örn: <code>public</code>, <code>docs</code>
+                Örn: <code>public</code>
               </div>
             </div>
             <div className="col-6">
