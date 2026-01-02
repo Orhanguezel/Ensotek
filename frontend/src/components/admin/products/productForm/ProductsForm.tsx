@@ -755,6 +755,17 @@ export const ProductsForm: React.FC<ProductsFormProps> = ({
                         onGalleryChange={() => {
                           /* no-op */
                         }}
+                        // ✅ NEW: legacy fallback
+                        legacyUrls={
+                          Array.isArray((initialData as any)?.images)
+                            ? ((initialData as any).images as any)
+                            : []
+                        }
+                        onLegacyUrlsChange={(urls) => {
+                          // UI state’i de güncel tutmak istersen burada yapabilirsin (opsiyonel)
+                          // values’da images alanı yok → sadece initialData refresh’le güncellenir.
+                          void urls;
+                        }}
                       />
 
                       <div className="mt-3">

@@ -7,11 +7,9 @@ import type { ProductDto, ProductSpecifications, BoolLike } from './product.type
 
 export type AdminProductDto = ProductDto;
 
-/* --------- Admin list / query tipleri --------- */
-
 export type AdminProductListQueryParams = {
   module_key?: 'products' | 'sparepart' | string;
-  item_type?: 'product' | 'sparepart' | string;
+  item_type?: 'product' | 'sparepart' | string; // ✅ backend: item_type
 
   q?: string;
   category_id?: string;
@@ -24,26 +22,22 @@ export type AdminProductListQueryParams = {
   order?: 'asc' | 'desc';
 };
 
-
 export type AdminProductListResponse = {
   items: AdminProductDto[];
   total: number;
 };
 
-// ⬇⬇⬇ BURAYI DÜZELTTİK
 export type AdminGetProductParams = {
   id: string;
-  locale?: string; // ürün detayı için admin tarafında locale seçilebiliyor
-  module_key?: string; // ✅ NEW
-  item_type?: string; // ✅ NEW
+  locale?: string;
+  module_key?: string;
+  item_type?: string;
 };
-
-/* --------- Create / Update payloadları --------- */
 
 export type AdminProductCreatePayload = {
   id?: string;
 
-  locale?: string; // boş ise backend "de" ile dolduracak
+  locale?: string;
   title: string;
   slug: string;
   price: number;
@@ -54,6 +48,8 @@ export type AdminProductCreatePayload = {
 
   image_url?: string | null;
   alt?: string | null;
+
+  // ✅ legacy (products.images) – seed bunu dolduruyor
   images?: string[];
 
   storage_asset_id?: string | null;
@@ -76,8 +72,6 @@ export type AdminProductCreatePayload = {
 };
 
 export type AdminProductUpdatePayload = Partial<AdminProductCreatePayload>;
-
-/* --------- Images payload --------- */
 
 export type AdminProductSetImagesPayload = {
   cover_id?: string | null;
@@ -112,8 +106,6 @@ export type AdminProductSubCategoryListQueryParams = {
   locale?: string;
   is_active?: BoolLike;
 };
-
-/* ---------- Reorder payload tipleri ---------- */
 
 export type AdminProductsReorderItem = {
   id: string;
