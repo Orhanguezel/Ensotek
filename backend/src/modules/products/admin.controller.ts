@@ -513,9 +513,11 @@ const boolish = (v: any, fallback = true) => {
   const s = String(v).toLowerCase();
   return s === '1' || s === 'true' || v === true || v === 1;
 };
-
 /**
  * GET /admin/products/:id/images?locale=
+ * - locale verilirse o locale listelenir
+ * - verilmezse effective locale kullanılır
+ * - sadece aktifler (is_active=1)
  */
 export const adminListProductImages: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
@@ -525,11 +527,18 @@ export const adminListProductImages: RouteHandler = async (req, reply) => {
   const rows = await db
     .select()
     .from(productImages)
-    .where(and(eq(productImages.product_id, id), eq(productImages.locale, locale)))
+    .where(
+      and(
+        eq(productImages.product_id, id),
+        eq(productImages.locale, locale),
+        eq(productImages.is_active, true as any), // ✅ only active
+      ),
+    )
     .orderBy(asc(productImages.display_order), asc(productImages.created_at));
 
   return reply.send(rows);
 };
+
 
 /**
  * POST /admin/products/:id/images
@@ -607,30 +616,47 @@ export const adminCreateProductImage: RouteHandler = async (req, reply) => {
 
 /**
  * DELETE /admin/products/:id/images/:imageId
+ * - ✅ locale'e bağlı olmadan siler (id + product_id)
+ * - ✅ silinmediyse 404 döner
+ * - ✅ response: current locale listesi (fe için)
  */
 export const adminDeleteProductImage: RouteHandler = async (req, reply) => {
   const { id, imageId } = req.params as { id: string; imageId: string };
 
+  // LIST için locale: query varsa onu kullan, yoksa effective
   const locale = normalizeLocale((req.query as any)?.locale) ?? getEffectiveLocale(req);
 
-  await db
+  const result = await db
     .delete(productImages)
-    .where(
-      and(
-        eq(productImages.id, imageId),
-        eq(productImages.product_id, id),
-        eq(productImages.locale, locale),
-      ),
-    );
+    .where(and(eq(productImages.id, imageId), eq(productImages.product_id, id)));
+
+  // ✅ Drizzle driver'a göre farklı alan adları olabiliyor
+  const affected =
+    (result as any)?.[0]?.affectedRows ??
+    (result as any)?.affectedRows ??
+    (result as any)?.rowsAffected ??
+    (result as any)?.rowCount ??
+    0;
+
+  if (!affected) {
+    return reply.code(404).send({ ok: false, error: { message: 'not_found' } });
+  }
 
   const rows = await db
     .select()
     .from(productImages)
-    .where(and(eq(productImages.product_id, id), eq(productImages.locale, locale)))
+    .where(
+      and(
+        eq(productImages.product_id, id),
+        eq(productImages.locale, locale),
+        eq(productImages.is_active, true as any),
+      ),
+    )
     .orderBy(asc(productImages.display_order), asc(productImages.created_at));
 
   return reply.send(rows);
 };
+
 
 /* ----------------- REORDER ----------------- */
 

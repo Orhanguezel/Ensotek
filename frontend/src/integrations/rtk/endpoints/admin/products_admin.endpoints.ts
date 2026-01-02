@@ -1,7 +1,6 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/admin/products_admin.endpoints.ts
 // Admin Products (CRUD + Images + Category helpers)
-// Pattern: services_admin.endpoints.ts ile aynı (credentials include + params ?? {})
 // =============================================================
 
 import { baseApi } from '../../baseApi';
@@ -20,7 +19,6 @@ import type {
   AdminProductsReorderPayload,
 } from '@/integrations/types/product_admin.types';
 
-// ✅ NEW: product_images admin types
 import type {
   ProductImageDto,
   ProductImageCreatePayload,
@@ -35,8 +33,8 @@ export const productsAdminApi = baseApi.injectEndpoints({
       query: (params?: AdminProductListQueryParams) => ({
         url: `${BASE}`,
         method: 'GET',
-        params: params ?? {}, // ✅ services pattern
-        credentials: 'include', // ✅ services pattern
+        params: params ?? {},
+        credentials: 'include',
       }),
       transformResponse: (response: AdminProductDto[], meta): AdminProductListResponse => {
         const items = response ?? [];
@@ -79,25 +77,27 @@ export const productsAdminApi = baseApi.injectEndpoints({
         url: `${BASE}`,
         method: 'POST',
         body,
-        credentials: 'include', // ✅ services pattern
+        credentials: 'include',
       }),
       invalidatesTags: [{ type: 'AdminProducts' as const, id: 'LIST' }],
     }),
 
     // -------- UPDATE --------
+    // ✅ locale gibi parametreleri ileride querystring’e taşıyabilmek için params ekledik
     updateProductAdmin: build.mutation<
       AdminProductDto,
-      { id: string; patch: AdminProductUpdatePayload }
+      { id: string; patch: AdminProductUpdatePayload; params?: Record<string, any> }
     >({
-      query: ({ id, patch }) => ({
+      query: ({ id, patch, params }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
         method: 'PATCH',
         body: patch,
-        credentials: 'include', // ✅ services pattern
+        params: params && Object.keys(params).length ? params : undefined,
+        credentials: 'include',
       }),
       invalidatesTags: (_res, _err, arg) => [
         { type: 'AdminProducts' as const, id: arg.id },
-        { type: 'AdminProductImages' as const, id: arg.id }, // cover değişince gallery UI da güncellensin
+        { type: 'AdminProductImages' as const, id: arg.id },
       ],
     }),
 
@@ -106,7 +106,7 @@ export const productsAdminApi = baseApi.injectEndpoints({
       query: ({ id }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
         method: 'DELETE',
-        credentials: 'include', // ✅ services pattern
+        credentials: 'include',
       }),
       invalidatesTags: (_res, _err, arg) => [
         { type: 'AdminProducts' as const, id: arg.id },
@@ -123,7 +123,7 @@ export const productsAdminApi = baseApi.injectEndpoints({
         url: `${BASE}/${encodeURIComponent(id)}/images`,
         method: 'PUT',
         body: payload,
-        credentials: 'include', // ✅ services pattern
+        credentials: 'include',
       }),
       invalidatesTags: (_res, _err, arg) => [
         { type: 'AdminProducts' as const, id: arg.id },
@@ -132,20 +132,19 @@ export const productsAdminApi = baseApi.injectEndpoints({
     }),
 
     // =============================================================
-    // ✅ NEW: PRODUCT IMAGES POOL (product_images)
-    // - GET    /admin/products/:id/images
-    // - POST   /admin/products/:id/images
-    // - DELETE /admin/products/:id/images/:imageId
+    // PRODUCT IMAGES POOL (product_images)
     // =============================================================
 
-    listProductImagesAdmin: build.query<ProductImageDto[], string>({
-      query: (productId) => ({
+    // ✅ locale param destekli (backend filtreliyorsa boş dönmesin)
+    listProductImagesAdmin: build.query<ProductImageDto[], { productId: string; locale?: string }>({
+      query: ({ productId, locale }) => ({
         url: `${BASE}/${encodeURIComponent(productId)}/images`,
         method: 'GET',
         credentials: 'include',
+        params: locale ? { locale } : undefined,
       }),
-      providesTags: (_res, _err, productId) => [
-        { type: 'AdminProductImages' as const, id: productId },
+      providesTags: (_res, _err, arg) => [
+        { type: 'AdminProductImages' as const, id: arg.productId },
       ],
     }),
 
@@ -169,9 +168,7 @@ export const productsAdminApi = baseApi.injectEndpoints({
       { productId: string; imageId: string }
     >({
       query: ({ productId, imageId }) => ({
-        url: `${BASE}/${encodeURIComponent(productId)}/images/${encodeURIComponent(
-          imageId,
-        )}`,
+        url: `${BASE}/${encodeURIComponent(productId)}/images/${encodeURIComponent(imageId)}`,
         method: 'DELETE',
         credentials: 'include',
       }),
@@ -186,7 +183,7 @@ export const productsAdminApi = baseApi.injectEndpoints({
         url: `${BASE}/reorder`,
         method: 'POST',
         body,
-        credentials: 'include', // ✅ services pattern
+        credentials: 'include',
       }),
       invalidatesTags: [{ type: 'AdminProducts' as const, id: 'LIST' }],
     }),
@@ -199,8 +196,8 @@ export const productsAdminApi = baseApi.injectEndpoints({
       query: (params?: AdminProductCategoryListQueryParams) => ({
         url: `${BASE}/categories`,
         method: 'GET',
-        params: params ?? {}, // ✅ services pattern
-        credentials: 'include', // ✅ services pattern
+        params: params ?? {},
+        credentials: 'include',
       }),
     }),
 
@@ -211,16 +208,14 @@ export const productsAdminApi = baseApi.injectEndpoints({
       query: (params?: AdminProductSubCategoryListQueryParams) => ({
         url: `${BASE}/subcategories`,
         method: 'GET',
-        params: params ?? {}, // ✅ services pattern
-        credentials: 'include', // ✅ services pattern
+        params: params ?? {},
+        credentials: 'include',
       }),
     }),
   }),
   overrideExisting: false,
 });
 
-// ✅ Eğer baseApi tagTypes içinde yoksa eklenmeli:
-// tagTypes: ['AdminProducts','AdminProductImages', ...]
 export const {
   useListProductsAdminQuery,
   useGetProductAdminQuery,
@@ -232,7 +227,6 @@ export const {
   useListProductSubcategoriesAdminQuery,
   useReorderProductsAdminMutation,
 
-  // ✅ NEW exports
   useListProductImagesAdminQuery,
   useCreateProductImageAdminMutation,
   useDeleteProductImageAdminMutation,
