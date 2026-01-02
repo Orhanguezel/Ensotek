@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/admin/references_admin.endpoints.ts
-// Ensotek – References (admin API) – LOCALE AWARE
+// Ensotek – References (admin API) – LOCALE AWARE (FINAL)
 // =============================================================
 
 import { baseApi } from '../../baseApi';
@@ -13,55 +13,44 @@ import type {
   ReferenceImageUpsertPayload,
 } from '@/integrations/types/references.types';
 
+/* ---------------- Helpers ---------------- */
+
 const serializeListQuery = (q?: ReferenceListQueryParams): Record<string, any> => {
   if (!q) return {};
-  const {
-    order,
-    sort,
-    orderDir,
-    limit,
-    offset,
-    is_published,
-    is_featured,
-    q: search,
-    slug,
-    select,
-    category_id,
-    sub_category_id,
-    module_key,
-    has_website,
-    locale,
-  } = q;
-
   const params: Record<string, any> = {};
-  if (order) params.order = order;
-  if (sort) params.sort = sort;
-  if (orderDir) params.orderDir = orderDir;
-  if (typeof limit === 'number') params.limit = limit;
-  if (typeof offset === 'number') params.offset = offset;
 
-  if (typeof is_published !== 'undefined') params.is_published = is_published;
-  if (typeof is_featured !== 'undefined') params.is_featured = is_featured;
+  if (q.order) params.order = q.order;
+  if (q.sort) params.sort = q.sort;
+  if (q.orderDir) params.orderDir = q.orderDir;
+  if (typeof q.limit === 'number') params.limit = q.limit;
+  if (typeof q.offset === 'number') params.offset = q.offset;
 
-  if (search) params.q = search;
-  if (slug) params.slug = slug;
-  if (select) params.select = select;
-  if (category_id) params.category_id = category_id;
-  if (sub_category_id) params.sub_category_id = sub_category_id;
-  if (module_key) params.module_key = module_key;
-  if (typeof has_website !== 'undefined') params.has_website = has_website;
+  if (typeof q.is_published !== 'undefined') params.is_published = q.is_published;
+  if (typeof q.is_featured !== 'undefined') params.is_featured = q.is_featured;
 
-  // ✅ locale param
-  if (locale) params.locale = locale;
+  if (q.q) params.q = q.q;
+  if (q.slug) params.slug = q.slug;
+  if (q.select) params.select = q.select;
+
+  if (q.category_id) params.category_id = q.category_id;
+  if (q.sub_category_id) params.sub_category_id = q.sub_category_id;
+
+  if (q.module_key) params.module_key = q.module_key;
+  if (typeof q.has_website !== 'undefined') params.has_website = q.has_website;
+
+  // ✅ locale param (dynamic server-side validation handled by backend)
+  if (q.locale) params.locale = q.locale;
 
   return params;
 };
 
-// ✅ helper: response’a locale alanını stabilize et
 const withResolvedLocale = (r: ReferenceDto): ReferenceDto => ({
   ...r,
-  locale: (r.locale_resolved ?? (r as any).locale ?? null) as any,
+  // normalize for FE usage
+  locale: (r.locale_resolved ?? r.locale ?? null) as any,
 });
+
+/* ---------------- API ---------------- */
 
 export const referencesAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -77,33 +66,25 @@ export const referencesAdminApi = baseApi.injectEndpoints({
         const total = Number(totalHeader) || 0;
 
         const items = Array.isArray(response) ? response.map(withResolvedLocale) : [];
-
         return { items, total };
       },
       providesTags: (result) =>
-        result?.items
+        result?.items?.length
           ? [
               { type: 'AdminReferences', id: 'LIST' },
-              ...result.items.map((r: ReferenceDto) => ({
-                type: 'AdminReferences' as const,
-                id: r.id,
-              })),
+              ...result.items.map((r) => ({ type: 'AdminReferences' as const, id: r.id })),
             ]
           : [{ type: 'AdminReferences', id: 'LIST' }],
     }),
 
-    /* -------------------- GET BY ID (admin, locale-aware) --- */
+    /* -------------------- GET BY ID (admin) ---------------- */
     getReferenceAdmin: build.query<
       ReferenceDto,
       { id: string | number; locale?: string } | string | number
     >({
       query: (arg) => {
         const id = typeof arg === 'string' || typeof arg === 'number' ? arg : arg.id;
-
-        const locale =
-          typeof arg === 'object' && arg !== null && 'locale' in arg
-            ? (arg as { locale?: string }).locale
-            : undefined;
+        const locale = typeof arg === 'object' && arg !== null ? arg.locale : undefined;
 
         return {
           url: `/admin/references/${encodeURIComponent(String(id))}`,
@@ -119,15 +100,11 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       },
     }),
 
-    /* -------------------- GET BY SLUG (admin, locale-aware) - */
+    /* -------------------- GET BY SLUG (admin) -------------- */
     getReferenceBySlugAdmin: build.query<ReferenceDto, { slug: string; locale?: string } | string>({
       query: (arg) => {
         const slug = typeof arg === 'string' ? arg : arg.slug;
-
-        const locale =
-          typeof arg === 'object' && arg !== null && 'locale' in arg
-            ? (arg as { locale?: string }).locale
-            : undefined;
+        const locale = typeof arg === 'object' && arg !== null ? arg.locale : undefined;
 
         return {
           url: `/admin/references/by-slug/${encodeURIComponent(slug)}`,
@@ -139,7 +116,7 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       providesTags: (res) => (res?.id ? [{ type: 'AdminReferences', id: res.id }] : []),
     }),
 
-    /* -------------------- CREATE (admin) -------------------- */
+    /* -------------------- CREATE (admin) ------------------- */
     createReferenceAdmin: build.mutation<ReferenceDto, ReferenceUpsertPayload>({
       query: (payload) => ({
         url: '/admin/references',
@@ -149,7 +126,7 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       invalidatesTags: [{ type: 'AdminReferences', id: 'LIST' }],
     }),
 
-    /* -------------------- UPDATE (admin) -------------------- */
+    /* -------------------- UPDATE (admin) ------------------- */
     updateReferenceAdmin: build.mutation<
       ReferenceDto,
       { id: string; patch: ReferenceUpsertPayload }
@@ -165,7 +142,7 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       ],
     }),
 
-    /* -------------------- DELETE (admin) -------------------- */
+    /* -------------------- DELETE (admin) ------------------- */
     deleteReferenceAdmin: build.mutation<void, string>({
       query: (id) => ({
         url: `/admin/references/${encodeURIComponent(id)}`,
@@ -177,7 +154,7 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       ],
     }),
 
-    /* -------------------- GALLERY LIST (admin) -------------- */
+    /* -------------------- GALLERY LIST (admin) ------------- */
     listReferenceImagesAdmin: build.query<ReferenceImageDto[], string>({
       query: (referenceId) => ({
         url: `/admin/references/${encodeURIComponent(referenceId)}/images`,
@@ -188,7 +165,7 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       ],
     }),
 
-    /* -------------------- GALLERY CREATE (admin) ------------ */
+    /* -------------------- GALLERY CREATE (admin) ----------- */
     createReferenceImageAdmin: build.mutation<
       ReferenceImageDto[],
       { referenceId: string; payload: ReferenceImageUpsertPayload }
@@ -201,14 +178,10 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       invalidatesTags: (_res, _err, arg) => [{ type: 'AdminReferenceImages', id: arg.referenceId }],
     }),
 
-    /* -------------------- GALLERY UPDATE (admin) ------------ */
+    /* -------------------- GALLERY UPDATE (admin) ----------- */
     updateReferenceImageAdmin: build.mutation<
       ReferenceImageDto[],
-      {
-        referenceId: string;
-        imageId: string;
-        patch: ReferenceImageUpsertPayload;
-      }
+      { referenceId: string; imageId: string; patch: ReferenceImageUpsertPayload }
     >({
       query: ({ referenceId, imageId, patch }) => ({
         url: `/admin/references/${encodeURIComponent(referenceId)}/images/${encodeURIComponent(
@@ -220,7 +193,7 @@ export const referencesAdminApi = baseApi.injectEndpoints({
       invalidatesTags: (_res, _err, arg) => [{ type: 'AdminReferenceImages', id: arg.referenceId }],
     }),
 
-    /* -------------------- GALLERY DELETE (admin) ------------ */
+    /* -------------------- GALLERY DELETE (admin) ----------- */
     deleteReferenceImageAdmin: build.mutation<void, { referenceId: string; imageId: string }>({
       query: ({ referenceId, imageId }) => ({
         url: `/admin/references/${encodeURIComponent(referenceId)}/images/${encodeURIComponent(

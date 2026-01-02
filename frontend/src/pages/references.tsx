@@ -1,17 +1,18 @@
 // =============================================================
 // FILE: src/pages/references.tsx
-// Ensotek – References Page (full list) + SEO (STANDARD / HOOK-SAFE) [FINAL]
+// Ensotek – References Page (full list) + SEO (STANDARD / HOOK-SAFE) [FIXED]
 //   - Route: /references
-//   - Locale: useResolvedLocale() single source
+//   - Locale: useResolvedLocale() single source (stabilized)
 //   - i18n UI: site_settings.ui_references
 //   - SEO: seo -> site_seo fallback + ui overrides
 //   - ✅ Canonical + og:url tek kaynak: _document (SSR)
-//   - SEO: NO <Head>. Only <LayoutSeoBridge />
+//   - ✅ SEO: NO <Head>. Only <LayoutSeoBridge />
+//   - ✅ FIX: locale-ready gating to prevent first-render empty-cache issues
 // =============================================================
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import Banner from '@/layout/banner/Breadcrum';
 import ReferencesPageContent from '@/components/containers/references/ReferencesPageContent';
@@ -36,15 +37,31 @@ function safeStr(v: unknown): string {
 }
 
 const ReferencesPage: React.FC = () => {
-  const locale = useResolvedLocale();
-  const { ui } = useUiSection('ui_references', locale as any);
+  // ✅ Single source (may be initially empty/unstable depending on app_locales fetch)
+  const resolvedLocale = useResolvedLocale();
 
-  const t = useMemo(() => {
-    return (key: string, fallbackEn: string) => {
-      const v = safeStr(ui(key, fallbackEn));
+  // ✅ Stabilize + gate queries until we have a real locale
+  const locale = useMemo(() => safeStr(resolvedLocale), [resolvedLocale]);
+  const localeReady = Boolean(locale);
+
+  // ✅ UI section (do NOT call with empty locale)
+  // If locale isn't ready yet, we return a safe ui() function that yields fallbacks.
+  const uiSection = useUiSection('ui_references', localeReady ? (locale as any) : undefined);
+  const uiSafe = useCallback(
+    (key: string, hardFallback = '') => {
+      if (!localeReady) return hardFallback || key;
+      return uiSection.ui(key, hardFallback);
+    },
+    [localeReady, uiSection],
+  );
+
+  const t = useCallback(
+    (key: string, fallbackEn: string) => {
+      const v = safeStr(uiSafe(key, fallbackEn));
       return v || fallbackEn;
-    };
-  }, [ui]);
+    },
+    [uiSafe],
+  );
 
   // -----------------------------
   // Banner title (UI)
@@ -54,8 +71,15 @@ const ReferencesPage: React.FC = () => {
   // -----------------------------
   // Global SEO settings (seo -> site_seo fallback)
   // -----------------------------
-  const { data: seoPrimary } = useGetSiteSettingByKeyQuery({ key: 'seo', locale } as any);
-  const { data: seoFallback } = useGetSiteSettingByKeyQuery({ key: 'site_seo', locale } as any);
+  const { data: seoPrimary } = useGetSiteSettingByKeyQuery(
+    localeReady ? ({ key: 'seo', locale } as any) : (undefined as any),
+    { skip: !localeReady } as any,
+  );
+
+  const { data: seoFallback } = useGetSiteSettingByKeyQuery(
+    localeReady ? ({ key: 'site_seo', locale } as any) : (undefined as any),
+    { skip: !localeReady } as any,
+  );
 
   const seo = useMemo(() => {
     const raw =
@@ -68,33 +92,32 @@ const ReferencesPage: React.FC = () => {
   // -----------------------------
   const pageTitle = useMemo(() => {
     const key = 'ui_references_meta_title';
-    const fromUi = safeStr(ui(key, ''));
+    const fromUi = safeStr(uiSafe(key, ''));
     if (isValidUiText(fromUi, key)) return fromUi;
 
     const fallback = safeStr(bannerTitle) || 'References';
     return fallback;
-  }, [ui, bannerTitle]);
+  }, [uiSafe, bannerTitle]);
 
   const pageDescription = useMemo(() => {
     const keyMeta = 'ui_references_meta_description';
-    const fromMeta = safeStr(ui(keyMeta, ''));
+    const fromMeta = safeStr(uiSafe(keyMeta, ''));
     if (isValidUiText(fromMeta, keyMeta)) return fromMeta;
 
     const keyPage = 'ui_references_page_description';
-    const fromPage = safeStr(ui(keyPage, ''));
+    const fromPage = safeStr(uiSafe(keyPage, ''));
     if (isValidUiText(fromPage, keyPage)) return fromPage;
 
     const fromSeo = safeStr((seo as any)?.description);
     return fromSeo || '';
-  }, [ui, seo]);
+  }, [uiSafe, seo]);
 
   const ogImageOverride = useMemo(() => {
-    // optional UI override; LayoutSeoBridge will fallback to seo/site default if undefined
     const key = 'ui_references_og_image';
-    const v = safeStr(ui(key, ''));
+    const v = safeStr(uiSafe(key, ''));
     if (isValidUiText(v, key) && v) return v;
     return undefined;
-  }, [ui]);
+  }, [uiSafe]);
 
   const noindex = useMemo(() => {
     const robots = asObj((seo as any)?.robots) || {};
@@ -111,7 +134,10 @@ const ReferencesPage: React.FC = () => {
       />
 
       <Banner title={bannerTitle} />
-      <ReferencesPageContent />
+
+      {/* ✅ Gate content until locale is ready to prevent initial empty-cache requests */}
+      {localeReady ? <ReferencesPageContent /> : null}
+
       <Feedback />
     </>
   );

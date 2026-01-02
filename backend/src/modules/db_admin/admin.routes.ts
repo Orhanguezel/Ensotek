@@ -1,8 +1,10 @@
 // =============================================================
 // FILE: src/modules/db_admin/admin.routes.ts
 // =============================================================
-import type { FastifyInstance } from "fastify";
-import { requireAuth } from "@/common/middleware/auth";
+
+import type { FastifyInstance } from 'fastify';
+import { requireAuth } from '@/common/middleware/auth';
+
 import {
   adminExportSql,
   adminImportSqlText,
@@ -12,60 +14,48 @@ import {
   adminCreateDbSnapshot,
   adminRestoreDbSnapshot,
   adminDeleteDbSnapshot,
-} from "./admin.controller";
+} from './admin.controller';
+
+import {
+  adminExportModuleSql,
+  adminImportModuleSql,
+  adminExportSiteSettingsUiJson,
+  adminBootstrapSiteSettingsUiLocale,
+} from './moduleExportImport.controller';
+
+import { adminValidateModuleManifest } from './moduleValidation.controller';
 
 export async function registerDbAdmin(app: FastifyInstance) {
-  // Export (full backup - download)
+  // FULL DB
+  app.get('/db/export', { preHandler: [requireAuth] }, adminExportSql);
+  app.post('/db/import-sql', { preHandler: [requireAuth] }, adminImportSqlText);
+  app.post('/db/import-url', { preHandler: [requireAuth] }, adminImportSqlFromUrl);
+  app.post('/db/import-file', { preHandler: [requireAuth] }, adminImportSqlFromFile);
+
+  // MODULE export/import
+  app.get('/db/export-module', { preHandler: [requireAuth] }, adminExportModuleSql);
+  app.post('/db/import-module', { preHandler: [requireAuth] }, adminImportModuleSql);
+
+  // SITE SETTINGS bulk UI ops
   app.get(
-    "/db/export",
+    '/db/site-settings/ui-export',
     { preHandler: [requireAuth] },
-    adminExportSql,
-  );
-
-  // Import seçenekleri
-  app.post(
-    "/db/import-sql",
-    { preHandler: [requireAuth] },
-    adminImportSqlText,
+    adminExportSiteSettingsUiJson,
   );
   app.post(
-    "/db/import-url",
+    '/db/site-settings/ui-bootstrap',
     { preHandler: [requireAuth] },
-    adminImportSqlFromUrl,
-  );
-  app.post(
-    "/db/import-file",
-    { preHandler: [requireAuth] },
-    adminImportSqlFromFile,
+    adminBootstrapSiteSettingsUiLocale,
   );
 
-  // === SNAPSHOT API ===
+  // ✅ MANIFEST VALIDATION
+  // GET /admin/db/modules/validate
+  // Optional: ?module=products&module=site_settings&includeDbTables=1
+  app.get('/db/modules/validate', { preHandler: [requireAuth] }, adminValidateModuleManifest);
 
-  // Snapshot listesi
-  app.get(
-    "/db/snapshots",
-    { preHandler: [requireAuth] },
-    adminListDbSnapshots,
-  );
-
-  // Yeni snapshot oluştur
-  app.post(
-    "/db/snapshots",
-    { preHandler: [requireAuth] },
-    adminCreateDbSnapshot,
-  );
-
-  // Snapshot'tan geri yükle
-  app.post(
-    "/db/snapshots/:id/restore",
-    { preHandler: [requireAuth] },
-    adminRestoreDbSnapshot,
-  );
-
-  // Snapshot sil
-  app.delete(
-    "/db/snapshots/:id",
-    { preHandler: [requireAuth] },
-    adminDeleteDbSnapshot,
-  );
+  // SNAPSHOT
+  app.get('/db/snapshots', { preHandler: [requireAuth] }, adminListDbSnapshots);
+  app.post('/db/snapshots', { preHandler: [requireAuth] }, adminCreateDbSnapshot);
+  app.post('/db/snapshots/:id/restore', { preHandler: [requireAuth] }, adminRestoreDbSnapshot);
+  app.delete('/db/snapshots/:id', { preHandler: [requireAuth] }, adminDeleteDbSnapshot);
 }

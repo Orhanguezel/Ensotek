@@ -1,19 +1,11 @@
 // =============================================================
 // FILE: src/integrations/types/product.types.ts
 // Public Products + FAQ + Specs + Reviews
+// - ✅ ProductListQueryParams includes orderDir (fix)
 // =============================================================
 
 /** Backend'deki boolLike ile uyumlu tip */
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false"
-  | "yes"
-  | "no";
+export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false' | 'yes' | 'no';
 
 export type ProductItemType = 'product' | 'sparepart';
 
@@ -83,22 +75,32 @@ export type ProductDto = {
   sub_category?: ProductSubCategoryRef | null;
 };
 
-/* ---------- Public list / detail query tipleri ---------- */
+export type SortDir = 'asc' | 'desc';
 
 export type ProductListQueryParams = {
-  item_type?: ProductItemType;
-  category_id?: string;
-  sub_category_id?: string;
-  is_active?: BoolLike;
-  q?: string;
+  // paging
   limit?: number;
   offset?: number;
-  sort?: 'price' | 'rating' | 'created_at' | 'order_num';
-  order?: 'asc' | 'desc';
-  min_price?: number;
-  max_price?: number;
+
+  // sorting
+  sort?: string;
+  order?: string;
+  orderDir?: SortDir;
+
+  // filters
+  q?: string;
+  slug?: string;
+
+  category_id?: string;
+  sub_category_id?: string;
+
+  only_active?: BoolLike;
+
+  item_type?: ProductItemType;
   locale?: string;
-  slug?: string; // listProducts içindeki slug shortcuta da izin
+
+  // future-proof
+  [key: string]: any;
 };
 
 export type ProductListResponse = {
@@ -109,16 +111,19 @@ export type ProductListResponse = {
 export type GetProductByIdOrSlugParams = {
   idOrSlug: string;
   locale?: string;
+  item_type?: ProductItemType;
 };
 
 export type GetProductBySlugParams = {
   slug: string;
   locale?: string;
+  item_type?: ProductItemType;
 };
 
 export type GetProductByIdParams = {
   id: string;
   locale?: string;
+  item_type?: ProductItemType;
 };
 
 /* ---------- Public FAQ / Spec / Review tipleri ---------- */
@@ -139,13 +144,10 @@ export type ProductFaqListQueryParams = {
   product_id?: string;
   only_active?: BoolLike;
   locale?: string;
+  item_type?: ProductItemType;
 };
 
-export type ProductSpecCategory =
-  | "physical"
-  | "material"
-  | "service"
-  | "custom";
+export type ProductSpecCategory = 'physical' | 'material' | 'service' | 'custom';
 
 export type ProductSpecDto = {
   id: string;
@@ -162,6 +164,7 @@ export type ProductSpecDto = {
 export type ProductSpecListQueryParams = {
   product_id?: string;
   locale?: string;
+  item_type?: ProductItemType;
 };
 
 export type ProductReviewDto = {
@@ -182,4 +185,6 @@ export type ProductReviewListQueryParams = {
   only_active?: BoolLike;
   limit?: number;
   offset?: number;
+  locale?: string;
+  item_type?: ProductItemType;
 };

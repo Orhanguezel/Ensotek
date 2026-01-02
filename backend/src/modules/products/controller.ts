@@ -496,81 +496,168 @@ export const getProductById: RouteHandler = async (req, reply) => {
 /**
  * GET /products/by-slug/:slug?locale=&item_type=
  * ✅ default item_type=product
+ * ✅ NEW: slug resolve ANY locale, then pick requested locale content (fallback en->tr->any)
  */
 export const getProductBySlug: RouteHandler<{
   Params: { slug: string };
   Querystring: { locale?: string; item_type?: ItemType };
 }> = async (req, reply) => {
   const { slug } = req.params;
-  const locale = normalizeLocaleFromString(req.query?.locale, 'de');
+  const requestedLocale = normalizeLocaleFromString(req.query?.locale, 'de');
   const itemType = normalizeItemType(req.query?.item_type, 'product');
 
-  const conds: any[] = [
-    eq(productI18n.slug, slug),
-    eq(productI18n.locale, locale),
-    eq(products.item_type, itemType as any), // ✅ FIX
-    eq(products.is_active, 1 as any),
-  ];
-
-  const rows = await db
+  // 1) Resolve product_id by slug in ANY locale (active + item_type)
+  const baseHit = await db
     .select({
-      p: products,
-      i: productI18n,
-      c: {
-        id: categories.id,
-        module_key: categories.module_key,
-        image_url: categories.image_url,
-        storage_asset_id: categories.storage_asset_id,
-        alt: categories.alt,
-        icon: categories.icon,
-        is_active: categories.is_active,
-        is_featured: categories.is_featured,
-        display_order: categories.display_order,
-        name: categoryI18n.name,
-        slug: categoryI18n.slug,
-      },
-      s: {
-        id: subCategories.id,
-        category_id: subCategories.category_id,
-        image_url: subCategories.image_url,
-        storage_asset_id: subCategories.storage_asset_id,
-        alt: subCategories.alt,
-        icon: subCategories.icon,
-        is_active: subCategories.is_active,
-        is_featured: subCategories.is_featured,
-        display_order: subCategories.display_order,
-        name: subCategoryI18n.name,
-        slug: subCategoryI18n.slug,
-      },
+      product_id: products.id,
     })
     .from(products)
     .innerJoin(productI18n, eq(productI18n.product_id, products.id))
-    .leftJoin(categories, eq(products.category_id, categories.id))
-    .leftJoin(
-      categoryI18n,
-      and(eq(categoryI18n.category_id, categories.id), eq(categoryI18n.locale, locale)),
-    )
-    .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id))
-    .leftJoin(
-      subCategoryI18n,
+    .where(
       and(
-        eq(subCategoryI18n.sub_category_id, subCategories.id),
-        eq(subCategoryI18n.locale, locale),
+        eq(productI18n.slug, slug),
+        eq(products.item_type, itemType as any),
+        eq(products.is_active, 1 as any),
       ),
     )
-    .where(and(...conds))
     .limit(1);
 
-  if (!rows.length) return reply.code(404).send({ error: { message: 'not_found' } });
+  if (!baseHit.length) {
+    return reply.code(404).send({ error: { message: 'not_found' } });
+  }
 
-  const r = rows[0];
-  const merged = { ...r.p, ...r.i }; // ✅ FIX
+  const productId = baseHit[0].product_id;
+
+  // helper: fetch one locale detail (must exist in that locale)
+  const fetchLocale = async (loc: string) => {
+    const rows = await db
+      .select({
+        p: products,
+        i: productI18n,
+        c: {
+          id: categories.id,
+          module_key: categories.module_key,
+          image_url: categories.image_url,
+          storage_asset_id: categories.storage_asset_id,
+          alt: categories.alt,
+          icon: categories.icon,
+          is_active: categories.is_active,
+          is_featured: categories.is_featured,
+          display_order: categories.display_order,
+          name: categoryI18n.name,
+          slug: categoryI18n.slug,
+        },
+        s: {
+          id: subCategories.id,
+          category_id: subCategories.category_id,
+          image_url: subCategories.image_url,
+          storage_asset_id: subCategories.storage_asset_id,
+          alt: subCategories.alt,
+          icon: subCategories.icon,
+          is_active: subCategories.is_active,
+          is_featured: subCategories.is_featured,
+          display_order: subCategories.display_order,
+          name: subCategoryI18n.name,
+          slug: subCategoryI18n.slug,
+        },
+      })
+      .from(products)
+      // i18n MUST match locale for the payload language
+      .innerJoin(
+        productI18n,
+        and(eq(productI18n.product_id, products.id), eq(productI18n.locale, loc)),
+      )
+      .leftJoin(categories, eq(products.category_id, categories.id))
+      .leftJoin(
+        categoryI18n,
+        and(eq(categoryI18n.category_id, categories.id), eq(categoryI18n.locale, loc)),
+      )
+      .leftJoin(subCategories, eq(products.sub_category_id, subCategories.id))
+      .leftJoin(
+        subCategoryI18n,
+        and(
+          eq(subCategoryI18n.sub_category_id, subCategories.id),
+          eq(subCategoryI18n.locale, loc),
+        ),
+      )
+      .where(
+        and(
+          eq(products.id, productId),
+          eq(products.item_type, itemType as any),
+          eq(products.is_active, 1 as any),
+        ),
+      )
+      .limit(1);
+
+    return rows.length ? rows[0] : null;
+  };
+
+  // 2) Locale selection chain:
+  //    requested -> en -> tr -> any existing locale
+  const candidates = Array.from(
+    new Set([requestedLocale, 'en', 'tr'].filter(Boolean)),
+  );
+
+  let hit: any | null = null;
+  let usedLocale = requestedLocale;
+
+  for (const loc of candidates) {
+    const r = await fetchLocale(loc);
+    if (r) {
+      hit = r;
+      usedLocale = loc;
+      break;
+    }
+  }
+
+  // 3) If still not found, pick ANY locale row for that product (deterministic)
+  if (!hit) {
+    const anyRow = await db
+      .select({
+        p: products,
+        i: productI18n,
+      })
+      .from(products)
+      .innerJoin(productI18n, eq(productI18n.product_id, products.id))
+      .where(
+        and(
+          eq(products.id, productId),
+          eq(products.item_type, itemType as any),
+          eq(products.is_active, 1 as any),
+        ),
+      )
+      .orderBy(asc(productI18n.locale))
+      .limit(1);
+
+    if (!anyRow.length) {
+      return reply.code(404).send({ error: { message: 'not_found' } });
+    }
+
+    // hit yoksa category/subcategory lokalizasyonu da en azından requestedLocale ile gelsin
+    // (burada minimal tutuyoruz)
+    const merged0 = { ...anyRow[0].p, ...anyRow[0].i };
+    const normalized0 = normalizeProduct(merged0);
+    return reply.send({
+      ...normalized0,
+      locale: anyRow[0].i.locale, // gerçek dönen locale
+      category: null,
+      sub_category: null,
+    });
+  }
+
+  // ✅ base + i18n (i18n override)
+  const merged = { ...hit.p, ...hit.i };
+  const normalized = normalizeProduct(merged);
+
   return reply.send({
-    ...normalizeProduct(merged),
-    category: r.c,
-    sub_category: r.s,
+    ...normalized,
+    // response locale: hangi locale içeriği döndüysek onu belirtmek daha doğru
+    locale: usedLocale,
+    category: hit.c,
+    sub_category: hit.s,
   });
 };
+
 
 /* ===================== */
 /* FAQ & SPECS & REVIEWS */

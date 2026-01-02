@@ -1,3 +1,10 @@
+// =============================================================
+// FILE: src/layout/SiteLogo.tsx
+// Ensotek – Dynamic Site Logo (GLOBAL '*') [FINAL]
+// - ✅ site_logo / site_logo_dark / site_logo_light from site_settings
+// - ✅ No inline styles
+// =============================================================
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -22,15 +29,6 @@ const FALLBACK_URL =
 const DEFAULT_W = 160;
 const DEFAULT_H = 60;
 
-const baseImgStyle: React.CSSProperties = {
-  width: 'auto',
-  height: 'auto',
-  maxWidth: DEFAULT_W,
-  maxHeight: DEFAULT_H,
-  display: 'block', // logo ile menünün üst üste gelmesini engeller (baseline yerine block)
-  objectFit: 'contain',
-};
-
 const variantKeyMap: Record<Variant, string> = {
   default: 'site_logo',
   dark: 'site_logo_dark',
@@ -39,12 +37,6 @@ const variantKeyMap: Record<Variant, string> = {
 
 const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
-/**
- * site_settings.value için desteklenen formatlar:
- *  - "https://..." (string URL)
- *  - { url, width?, height? }
- *  - "{ \"url\": \"...\", \"width\": 160, \"height\": 60 }"
- */
 function extractMedia(val: SettingValue | null | undefined): {
   url: string;
   width?: number;
@@ -59,9 +51,7 @@ function extractMedia(val: SettingValue | null | undefined): {
     const looksJson =
       (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'));
 
-    if (!looksJson) {
-      return { url: s };
-    }
+    if (!looksJson) return { url: s };
 
     try {
       const parsed = JSON.parse(s);
@@ -74,7 +64,6 @@ function extractMedia(val: SettingValue | null | undefined): {
         height: typeof height === 'number' ? height : undefined,
       };
     } catch {
-      // JSON parse patlarsa, stringi direk URL gibi kullan
       return { url: s };
     }
   }
@@ -103,18 +92,16 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({
 }) => {
   const key = variantKeyMap[variant];
 
-  // 🔹 Hook her zaman çağrılıyor (overrideSrc olsa da olmasa da)
+  // ✅ GLOBAL logo
   const { data: setting } = useGetSiteSettingByKeyQuery({
     key,
-    locale: '*', // GLOBAL logo
+    locale: '*',
   });
 
   const { url, width, height } = useMemo(
     () => extractMedia((setting?.value as SettingValue) ?? null),
     [setting?.value],
   );
-
-  // -------------------- SRC + SIZE RESOLUTION --------------------
 
   let finalSrc: StaticImageData | string = FALLBACK_URL;
   let finalW = DEFAULT_W;
@@ -124,7 +111,6 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({
     if (typeof overrideSrc === 'string') {
       finalSrc = overrideSrc;
     } else {
-      // StaticImageData
       finalSrc = overrideSrc;
       finalW = overrideSrc.width ?? DEFAULT_W;
       finalH = overrideSrc.height ?? DEFAULT_H;
@@ -143,7 +129,6 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({
       alt={alt}
       width={finalW}
       height={finalH}
-      style={baseImgStyle}
       className={className}
       sizes="(max-width: 992px) 120px, 160px"
       priority={priority}

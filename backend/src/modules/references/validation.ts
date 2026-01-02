@@ -3,6 +3,9 @@
 // =============================================================
 import { z } from 'zod';
 
+// ✅ Core i18n (dynamic locales runtime from site_settings)
+import { type Locale, isSupported, normalizeLocale } from '@/core/i18n';
+
 export const boolLike = z.union([
   z.boolean(),
   z.literal(0),
@@ -13,14 +16,17 @@ export const boolLike = z.union([
   z.literal('false'),
 ]);
 
-/** Lokal locale listesi (şimdilik tr + en, genişletilebilir) */
-export const LOCALES = ['de', 'en'] as const;
-
-/** Locale tipi (buradan export ediyoruz) */
-export type Locale = (typeof LOCALES)[number];
-
-/** Locale enum (i18n) */
-const LOCALE_ENUM = z.enum(LOCALES);
+/**
+ * Locale input: accept string, validate later (dynamic).
+ * We do NOT use z.enum(...) because locales are runtime-loaded.
+ */
+export const localeInputSchema = z
+  .string()
+  .optional()
+  .transform((v) => {
+    const n = normalizeLocale(v);
+    return n || undefined;
+  });
 
 /** LIST query (public/admin ortak temel) */
 export const referencesListQuerySchema = z.object({
@@ -35,18 +41,14 @@ export const referencesListQuerySchema = z.object({
   slug: z.string().optional(),
   select: z.string().optional(),
 
-  // 🔗 Kategori / alt kategori filtreleri
   category_id: z.string().uuid().optional(),
   sub_category_id: z.string().uuid().optional(),
 
-  // 🔗 Module bazlı filtre (kategori üzerinden: categories.module_key)
   module_key: z.string().optional(),
-
-  // 🔗 Website var/yok
   has_website: boolLike.optional(),
 
-  // 🔗 Listeleme için locale override
-  locale: LOCALE_ENUM.optional(),
+  // ✅ dynamic locale input (validated in controller)
+  locale: localeInputSchema,
 });
 
 export type ReferencesListQuery = z.infer<typeof referencesListQuerySchema>;
@@ -69,20 +71,18 @@ export const upsertReferenceParentBodySchema = z.object({
 
   website_url: z.string().max(500).url().nullable().optional(),
 
-  // 🔗 Kategori bağları
   category_id: z.string().uuid().nullable().optional(),
   sub_category_id: z.string().uuid().nullable().optional(),
 });
 
 export type UpsertReferenceParentBody = z.infer<typeof upsertReferenceParentBodySchema>;
-
 export const patchReferenceParentBodySchema = upsertReferenceParentBodySchema.partial();
-
 export type PatchReferenceParentBody = z.infer<typeof patchReferenceParentBodySchema>;
 
-/** i18n create/update (title/slug/summary/content/meta/alt) */
+/** i18n create/update */
 export const upsertReferenceI18nBodySchema = z.object({
-  locale: LOCALE_ENUM.optional(),
+  // ✅ accept input locale, validate later
+  locale: localeInputSchema,
   title: z.string().min(1).max(255).trim(),
   slug: z
     .string()
@@ -90,9 +90,7 @@ export const upsertReferenceI18nBodySchema = z.object({
     .max(255)
     .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'slug sadece küçük harf, rakam ve tire içermelidir')
     .trim(),
-  /** Özet: LONGTEXT ama biz metinsel (plain) kullanıyoruz */
   summary: z.string().nullable().optional(),
-  /** İçerik: HTML veya {"html":"..."} JSON string (packContent ile sarılıyor) */
   content: z.string().min(1),
 
   featured_image_alt: z.string().max(255).nullable().optional(),
@@ -103,7 +101,7 @@ export const upsertReferenceI18nBodySchema = z.object({
 export type UpsertReferenceI18nBody = z.infer<typeof upsertReferenceI18nBodySchema>;
 
 export const patchReferenceI18nBodySchema = z.object({
-  locale: LOCALE_ENUM.optional(),
+  locale: localeInputSchema,
   title: z.string().min(1).max(255).trim().optional(),
   slug: z
     .string()
@@ -121,7 +119,6 @@ export const patchReferenceI18nBodySchema = z.object({
 
 export type PatchReferenceI18nBody = z.infer<typeof patchReferenceI18nBodySchema>;
 
-/** Geriye dönük: tek body (parent + i18n birlikte) */
 export const upsertReferenceBodySchema = upsertReferenceI18nBodySchema.extend({
   is_published: boolLike.optional().default(false),
   is_featured: boolLike.optional().default(false),
@@ -152,15 +149,23 @@ export const patchReferenceBodySchema = patchReferenceI18nBodySchema.extend({
 
 export type PatchReferenceBody = z.infer<typeof patchReferenceBodySchema>;
 
-/** BY-SLUG params */
 export const referenceBySlugParamsSchema = z.object({
   slug: z.string().min(1),
 });
 
-/** BY-SLUG query (sadece locale override) */
 export const referenceBySlugQuerySchema = z.object({
-  locale: LOCALE_ENUM.optional(),
+  locale: localeInputSchema,
 });
 
 export type ReferenceBySlugParams = z.infer<typeof referenceBySlugParamsSchema>;
 export type ReferenceBySlugQuery = z.infer<typeof referenceBySlugQuerySchema>;
+
+/**
+ * Helper: validate/resolve locale at runtime
+ * - If invalid: return undefined, controller will pick req.locale or default
+ */
+export function resolveLocaleOrUndefined(input?: string): Locale | undefined {
+  const n = normalizeLocale(input);
+  if (n && isSupported(n)) return n as Locale;
+  return undefined;
+}

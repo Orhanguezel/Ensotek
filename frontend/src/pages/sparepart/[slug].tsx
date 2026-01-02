@@ -1,11 +1,11 @@
 // =============================================================
 // FILE: src/pages/sparepart/[slug].tsx
-// Ensotek – Sparepart Detail Page (by slug) + SEO (STANDARD)
-// - NO <Head>
-// - SEO override: <LayoutSeoBridge />
-// - Skeleton: common public Skeleton
-// - slug: readSlug(router.query.slug) + router.isReady
-// - DB meta precedence
+// Ensotek – Sparepart Detail Page [FINAL / STANDARD]
+// - Route: /sparepart/[slug]
+// - ✅ NO <Head>
+// - ✅ Page SEO overrides via <LayoutSeoBridge />
+// - ✅ Query args aligned with ProductDetail (item_type=sparepart) => RTK cache dedupe
+// - ✅ 404/error state: no infinite skeleton
 // =============================================================
 
 'use client';
@@ -41,11 +41,16 @@ function readSlug(q: unknown): string {
 const SparepartDetailPage: React.FC = () => {
   const router = useRouter();
   const locale = useLocaleShort();
+
+  // ✅ spareparts UI
   const { ui } = useUiSection('ui_spareparts', locale as any);
 
   const slug = useMemo(() => readSlug(router.query.slug), [router.query.slug]);
   const isSlugReady = router.isReady && !!slug;
 
+  // -----------------------------
+  // UI fallbacks
+  // -----------------------------
   const listTitleFallback = useMemo(() => {
     const key = 'ui_spareparts_page_title';
     const v = safeStr(ui(key, 'Spare Parts'));
@@ -58,20 +63,34 @@ const SparepartDetailPage: React.FC = () => {
     return isValidUiText(v, key) ? v : 'Spare Part';
   }, [ui]);
 
-  // ✅ IMPORTANT: item_type=sparepart
-  const { data: product, isFetching } = useGetProductBySlugQuery(
-    { slug, locale, item_type: 'sparepart' } as any,
-    { skip: !isSlugReady },
-  );
+  // ✅ IMPORTANT: item_type=sparepart (must match ProductDetail)
+  const {
+    data: product,
+    isFetching,
+    isLoading,
+    isError,
+  } = useGetProductBySlugQuery({ slug, locale, item_type: 'sparepart' } as any, {
+    skip: !isSlugReady,
+  });
 
+  // -----------------------------
+  // Banner title
+  // -----------------------------
   const bannerTitle = useMemo(() => {
     const t = safeStr((product as any)?.title ?? (product as any)?.name);
     if (t) return t;
-    return detailTitleFallback || listTitleFallback;
+
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
+
+    return listTitleFallback || 'Spare Part';
   }, [product, detailTitleFallback, listTitleFallback]);
 
+  // -----------------------------
+  // SEO overrides
+  // -----------------------------
   const pageTitle = useMemo(() => {
-    if (!isSlugReady) return listTitleFallback;
+    if (!isSlugReady) return listTitleFallback || 'Spare Parts';
 
     const mt = safeStr((product as any)?.meta_title);
     if (mt) return mt;
@@ -79,7 +98,10 @@ const SparepartDetailPage: React.FC = () => {
     const t = safeStr((product as any)?.title ?? (product as any)?.name);
     if (t) return t;
 
-    return detailTitleFallback || listTitleFallback;
+    const d = safeStr(detailTitleFallback);
+    if (d) return d;
+
+    return listTitleFallback || 'Spare Part';
   }, [isSlugReady, product, detailTitleFallback, listTitleFallback]);
 
   const pageDescription = useMemo(() => {
@@ -94,17 +116,15 @@ const SparepartDetailPage: React.FC = () => {
       if (ex) return ex;
     }
 
+    // keep backward compatible keys
     const keyNew = 'ui_spareparts_detail_meta_description_fallback';
     const keyOld = 'ui_spareparts_detail_meta_description';
+    const def = 'View spare part details, technical specifications, and request a quote.';
 
-    const vNew = safeStr(
-      ui(keyNew, 'View spare part details, technical specifications, and request a quote.'),
-    );
+    const vNew = safeStr(ui(keyNew, def));
     if (isValidUiText(vNew, keyNew)) return vNew;
 
-    const vOld = safeStr(
-      ui(keyOld, 'View spare part details, technical specifications, and request a quote.'),
-    );
+    const vOld = safeStr(ui(keyOld, def));
     if (isValidUiText(vOld, keyOld)) return vOld;
 
     return '';
@@ -113,10 +133,11 @@ const SparepartDetailPage: React.FC = () => {
   const ogImageOverride = useMemo(() => {
     if (!isSlugReady) return undefined;
 
+    const img0 = Array.isArray((product as any)?.images) ? (product as any).images?.[0] : '';
     const raw =
       safeStr((product as any)?.featured_image) ||
       safeStr((product as any)?.image_url) ||
-      safeStr((Array.isArray((product as any)?.images) ? (product as any).images?.[0] : '') || '');
+      safeStr(img0);
 
     if (!raw) return undefined;
     if (/^https?:\/\//i.test(raw)) return raw;
@@ -124,7 +145,8 @@ const SparepartDetailPage: React.FC = () => {
     return toCdnSrc(raw, 1200, 630, 'fill') || raw;
   }, [isSlugReady, product]);
 
-  const showSkeleton = !isSlugReady || isFetching || !product;
+  // ✅ Critical fix: do NOT keep skeleton forever on 404/error
+  const showSkeleton = !isSlugReady || isLoading || (isFetching && !isError);
 
   return (
     <>
@@ -141,6 +163,7 @@ const SparepartDetailPage: React.FC = () => {
         <Skeleton />
       ) : (
         <>
+          {/* ProductDetail already handles notFound UI via its own query/error handling */}
           <ProductDetail />
           <ProductMore />
         </>

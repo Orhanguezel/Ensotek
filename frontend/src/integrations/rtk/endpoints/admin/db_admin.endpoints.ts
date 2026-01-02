@@ -1,7 +1,9 @@
 // =============================================================
 // FILE: src/integrations/rtk/endpoints/admin/db_admin.endpoints.ts
 // Ensotek – Admin DB Endpoints (RTK Query)
-// Fix: tags + invalidations + consistent typing
+// CLEAN:
+// - Types: db.types.ts tek kaynak
+// - Endpoints: db + module + site_settings ui + manifest validate + snapshots
 // =============================================================
 
 import { baseApi } from '../../baseApi';
@@ -15,39 +17,55 @@ import type {
   CreateDbSnapshotBody,
   DeleteSnapshotResponse,
   SqlImportParams,
+  ModuleExportFormat,
+  ExportModuleParams,
+  ImportModuleBody,
+  SiteSettingsUiExportResponse,
+  SiteSettingsUiBootstrapBody,
+  ManifestValidateQuery,
+  ManifestValidateResponse,
 } from '@/integrations/types/db.types';
+
+/* ---------------- Helpers ---------------- */
+
+const toSqlBlob = (ab: ArrayBuffer) => new Blob([ab], { type: 'application/sql' });
+const toJsonBlob = (ab: ArrayBuffer) => new Blob([ab], { type: 'application/json' });
+
+const isFileBody = (v: ImportModuleBody): v is Extract<ImportModuleBody, { file: File }> =>
+  typeof (v as any)?.file !== 'undefined' && (v as any)?.file instanceof File;
+
+const normalizeBool01 = (v: any): 0 | 1 => (v === true || v === 1 || v === '1' ? 1 : 0);
 
 export const dbAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     /* ---------------------------------------------------------
-     * EXPORT SQL: GET /admin/db/export  -> Blob (.sql)
+     * FULL DB EXPORT SQL: GET /admin/db/export -> Blob
      * --------------------------------------------------------- */
     exportSql: b.mutation<Blob, void>({
       query: () => ({
         url: '/admin/db/export',
         method: 'GET',
-        // credentials: 'include', // baseQuery global ise şart değil
         responseHandler: (resp: Response) => resp.arrayBuffer(),
       }),
-      transformResponse: (ab: ArrayBuffer) => new Blob([ab], { type: 'application/sql' }),
+      transformResponse: (ab: ArrayBuffer) => toSqlBlob(ab),
     }),
 
     /* ---------------------------------------------------------
-     * EXPORT JSON: GET /admin/db/export?format=json  -> Blob (.json)
+     * FULL DB EXPORT JSON: GET /admin/db/export?format=json -> Blob
      * --------------------------------------------------------- */
     exportJson: b.mutation<Blob, void>({
       query: () => ({
         url: '/admin/db/export',
         method: 'GET',
         params: { format: 'json' },
-        // credentials: 'include',
         responseHandler: (resp: Response) => resp.arrayBuffer(),
       }),
-      transformResponse: (ab: ArrayBuffer) => new Blob([ab], { type: 'application/json' }),
+      transformResponse: (ab: ArrayBuffer) => toJsonBlob(ab),
     }),
 
     /* ---------------------------------------------------------
      * IMPORT (TEXT): POST /admin/db/import-sql
+     * Body: { sql, truncateBefore?, dryRun? }
      * --------------------------------------------------------- */
     importSqlText: b.mutation<DbImportResponse, SqlImportTextParams>({
       query: (body) => ({
@@ -55,10 +73,15 @@ export const dbAdminApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: [
+        { type: 'DbSnapshot' as const, id: 'LIST' },
+        { type: 'DbAdmin' as const, id: 'STATE' },
+      ],
     }),
 
     /* ---------------------------------------------------------
      * IMPORT (URL): POST /admin/db/import-url
+     * Body: { url, truncateBefore?, dryRun? }
      * --------------------------------------------------------- */
     importSqlUrl: b.mutation<DbImportResponse, SqlImportUrlParams>({
       query: (body) => ({
@@ -66,6 +89,10 @@ export const dbAdminApi = baseApi.injectEndpoints({
         method: 'POST',
         body,
       }),
+      invalidatesTags: [
+        { type: 'DbSnapshot' as const, id: 'LIST' },
+        { type: 'DbAdmin' as const, id: 'STATE' },
+      ],
     }),
 
     /* ---------------------------------------------------------
@@ -87,10 +114,14 @@ export const dbAdminApi = baseApi.injectEndpoints({
           body: form,
         };
       },
+      invalidatesTags: [
+        { type: 'DbSnapshot' as const, id: 'LIST' },
+        { type: 'DbAdmin' as const, id: 'STATE' },
+      ],
     }),
 
     /* ---------------------------------------------------------
-     * (GERİYE DÖNÜK ALIAS) importSql -> /admin/db/import-file
+     * (LEGACY) importSql -> /admin/db/import-file
      * --------------------------------------------------------- */
     importSql: b.mutation<DbImportResponse, { file: File } & Partial<SqlImportParams>>({
       query: ({ file, truncate_before_import }) => {
@@ -108,6 +139,110 @@ export const dbAdminApi = baseApi.injectEndpoints({
           body: form,
         };
       },
+      invalidatesTags: [
+        { type: 'DbSnapshot' as const, id: 'LIST' },
+        { type: 'DbAdmin' as const, id: 'STATE' },
+      ],
+    }),
+
+    /* ---------------------------------------------------------
+     * MODULE EXPORT: GET /admin/db/export-module?module=...&format=sql|json
+     * --------------------------------------------------------- */
+    exportModule: b.mutation<Blob, ExportModuleParams>({
+      query: ({ module, format }) => ({
+        url: '/admin/db/export-module',
+        method: 'GET',
+        params: { module, format: (format ?? 'sql') as ModuleExportFormat },
+        responseHandler: (resp: Response) => resp.arrayBuffer(),
+      }),
+      transformResponse: (ab: ArrayBuffer, _meta, arg) =>
+        (arg?.format ?? 'sql') === 'json' ? toJsonBlob(ab) : toSqlBlob(ab),
+    }),
+
+    /* ---------------------------------------------------------
+     * MODULE IMPORT: POST /admin/db/import-module
+     * - JSON body (sqlText) veya multipart (file)
+     * --------------------------------------------------------- */
+    importModule: b.mutation<DbImportResponse, ImportModuleBody>({
+      query: (body) => {
+        if (isFileBody(body)) {
+          const form = new FormData();
+          form.append('module', body.module);
+          form.append('file', body.file, body.file.name);
+          if (typeof body.truncateBefore !== 'undefined') {
+            form.append('truncateBefore', String(!!body.truncateBefore));
+          }
+          return { url: '/admin/db/import-module', method: 'POST', body: form };
+        }
+
+        return {
+          url: '/admin/db/import-module',
+          method: 'POST',
+          body: {
+            module: body.module,
+            sqlText: body.sqlText,
+            truncateBefore: body.truncateBefore ?? true,
+          },
+        };
+      },
+      invalidatesTags: (_res, _err, arg) => [
+        { type: 'DbAdmin' as const, id: 'STATE' },
+        { type: 'DbModule' as const, id: arg.module },
+        { type: 'DbSnapshot' as const, id: 'LIST' },
+      ],
+    }),
+
+    /* ---------------------------------------------------------
+     * SITE SETTINGS UI EXPORT: GET /admin/db/site-settings/ui-export
+     * --------------------------------------------------------- */
+    exportSiteSettingsUiJson: b.query<SiteSettingsUiExportResponse, void>({
+      query: () => ({
+        url: '/admin/db/site-settings/ui-export',
+        method: 'GET',
+      }),
+      providesTags: [{ type: 'DbModule' as const, id: 'site_settings' }],
+    }),
+
+    /* ---------------------------------------------------------
+     * SITE SETTINGS UI BOOTSTRAP: POST /admin/db/site-settings/ui-bootstrap
+     * --------------------------------------------------------- */
+    bootstrapSiteSettingsUiLocale: b.mutation<DbImportResponse, SiteSettingsUiBootstrapBody>({
+      query: (body) => ({
+        url: '/admin/db/site-settings/ui-bootstrap',
+        method: 'POST',
+        body,
+      }),
+      invalidatesTags: [
+        { type: 'DbAdmin' as const, id: 'STATE' },
+        { type: 'DbModule' as const, id: 'site_settings' },
+      ],
+    }),
+
+    /* ---------------------------------------------------------
+     * MANIFEST VALIDATION: GET /admin/db/modules/validate
+     * Optional: ?module=products&module=site_settings&includeDbTables=1
+     * --------------------------------------------------------- */
+    validateModuleManifest: b.query<ManifestValidateResponse, ManifestValidateQuery | void>({
+      query: (arg) => {
+        const a = (arg ?? {}) as ManifestValidateQuery;
+
+        const params: Record<string, any> = {};
+
+        if (typeof a.includeDbTables !== 'undefined') {
+          params.includeDbTables = normalizeBool01(a.includeDbTables);
+        }
+
+        if (typeof a.module !== 'undefined') {
+          params.module = a.module;
+        }
+
+        return {
+          url: '/admin/db/modules/validate',
+          method: 'GET',
+          params,
+        };
+      },
+      providesTags: [{ type: 'DbManifest' as const, id: 'VALIDATION' }],
     }),
 
     /* ---------------------------------------------------------
@@ -157,6 +292,7 @@ export const dbAdminApi = baseApi.injectEndpoints({
       invalidatesTags: (_res, _err, arg) => [
         { type: 'DbSnapshot' as const, id: 'LIST' },
         { type: 'DbSnapshot' as const, id: arg.id },
+        { type: 'DbAdmin' as const, id: 'STATE' },
       ],
     }),
 
@@ -184,6 +320,14 @@ export const {
   useImportSqlUrlMutation,
   useImportSqlFileMutation,
   useImportSqlMutation,
+
+  useExportModuleMutation,
+  useImportModuleMutation,
+
+  useExportSiteSettingsUiJsonQuery,
+  useBootstrapSiteSettingsUiLocaleMutation,
+
+  useValidateModuleManifestQuery,
 
   useListDbSnapshotsQuery,
   useCreateDbSnapshotMutation,

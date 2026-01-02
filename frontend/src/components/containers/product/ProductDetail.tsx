@@ -1,18 +1,20 @@
 // =============================================================
 // FILE: src/components/containers/product/ProductDetail.tsx
-// FINAL — NewsDetail pattern applied + FIXES
-// - NO inline styles
-// - Hero + thumbs under hero
-// - Click hero/thumb => opens ImageLightboxModal
-// - Sidebar pattern: Other items / Share / Reviews / Contact / Sidebar image
-// - Works for BOTH: /product/[slug] and /sparepart/[slug] (itemType auto)
-// - Locale-safe: useLocaleShort + useUiSection(sectionKey, locale as any)
+// FINAL — NewsDetail pattern applied + FIXES (PATCHED)
+// - ✅ NO inline styles
+// - ✅ Hero + thumbs under hero
+// - ✅ Click hero/thumb => opens ImageLightboxModal
+// - ✅ Sidebar pattern: Other items / Share / Reviews / Contact / Sidebar image
+// - ✅ Works for BOTH: /product/[slug] and /sparepart/[slug] (itemType auto)
+// - ✅ Locale-safe: useLocaleShort + useUiSection(sectionKey, locale as any)
 // - ✅ FIX: Specs & FAQs stacked
 // - ✅ FIX: Tags style (chips + wrap) without bootstrap
 // - ✅ FIX: Tags parsing supports array OR json-string OR hash-delimited OR plain string
 // - ✅ FIX: Reviews block rendered + reviews variable used (no lint error)
-// - ✅ FIX: TS errors (useState, ReactNode) fixed
 // - ✅ FIX: Request quote click scrolls + focuses Offer form
+// - ✅ FIX (CRITICAL): remove withLocale() + use localizePath everywhere (single routing source)
+// - ✅ FIX (CRITICAL): isSlugReady uses router.isReady to avoid noise/duplicate calls
+// - ✅ FIX (CRITICAL): listProducts params aligned (is_active instead of only_active; removed orderDir)
 // =============================================================
 
 'use client';
@@ -44,6 +46,7 @@ import { toCdnSrc } from '@/shared/media';
 // i18n
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';
+import { localizePath } from '@/i18n/url';
 
 // Blocks
 import ProductSpecsBlock, {
@@ -92,19 +95,6 @@ function tryParseJson<T>(v: unknown): T | null {
   } catch {
     return null;
   }
-}
-
-/**
- * localizePath yok (NewsDetail pattern)
- * - locale varsa: "/de/product" "/tr/product"
- * - locale yoksa: "/product"
- */
-function withLocale(locale: string, path: string): string {
-  const loc = safeStr(locale);
-  const p = path.startsWith('/') ? path : `/${path}`;
-  if (!loc) return p;
-  if (p === `/${loc}` || p.startsWith(`/${loc}/`)) return p;
-  return `/${loc}${p}`;
 }
 
 /**
@@ -307,9 +297,12 @@ const ProductDetail: React.FC = () => {
     () => safeStr(Array.isArray(slugParam) ? slugParam[0] : slugParam),
     [slugParam],
   );
-  const isSlugReady = !!safeStr(slug);
 
-  const listHref = useMemo(() => withLocale(locale, basePath), [locale, basePath]);
+  // ✅ CRITICAL: router.isReady gate (avoid noise calls)
+  const isSlugReady = router.isReady && !!safeStr(slug);
+
+  // ✅ CRITICAL: use localizePath (single source of truth)
+  const listHref = useMemo(() => localizePath(locale as any, basePath), [locale, basePath]);
 
   // ✅ PRODUCT/SPAREPART (locale short)
   const {
@@ -364,14 +357,14 @@ const ProductDetail: React.FC = () => {
   // -----------------------------
   const tags = useMemo(() => normalizeTags((product as any)?.tags), [product]);
 
-  // ✅ FAQ (locale short)
+  // ✅ FAQ (align params: use only_active if your backend expects it; keep as-is if currently required)
   const { data: faqsData, isLoading: isFaqsLoading } = useListProductFaqsQuery(
     { product_id: productId, only_active: 1, locale, item_type: itemType } as any,
     { skip: !productId },
   );
   const faqs: ProductFaqDto[] = useMemo(() => (faqsData ?? []) as any, [faqsData]);
 
-  // ✅ SPECS (locale short)
+  // ✅ SPECS
   const { data: specsData, isLoading: isSpecsLoading } = useListProductSpecsQuery(
     { product_id: productId, locale, item_type: itemType } as any,
     { skip: !productId },
@@ -440,6 +433,7 @@ const ProductDetail: React.FC = () => {
   // -----------------------------
   // OTHER ITEMS (sidebar list)
   // -----------------------------
+  // ✅ CRITICAL: align with ProductListQueryParams (is_active; remove orderDir/only_active)
   const { data: otherData } = useListProductsQuery(
     {
       locale,
@@ -448,8 +442,7 @@ const ProductDetail: React.FC = () => {
       offset: 0,
       sort: 'created_at',
       order: 'desc',
-      orderDir: 'desc',
-      only_active: 1,
+      is_active: 1,
     } as any,
     { skip: !isSlugReady },
   );
@@ -484,34 +477,30 @@ const ProductDetail: React.FC = () => {
 
     node.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    // İlk focusable alanı bul ve focusla
     const focusable = node.querySelector<HTMLElement>(
       'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])',
     );
 
-    // scroll sonrası focus daha stabil
     window.setTimeout(() => {
       focusable?.focus();
     }, 150);
   }, []);
 
-  // İlk kez açıldığında otomatik scroll/focus
   useEffect(() => {
     if (!offerOpen) return;
     window.setTimeout(() => focusOfferForm(), 0);
   }, [offerOpen, focusOfferForm]);
 
   const handleRequestQuote = useCallback(() => {
-    // Aç
     setOfferOpen(true);
 
-    // Zaten açıksa yine scroll/focus
     if (offerOpen) {
       window.setTimeout(() => focusOfferForm(), 0);
     }
   }, [offerOpen, focusOfferForm]);
 
-  const showSkeleton = isProductLoading || (!isSlugReady && !product && !isProductError);
+  // ✅ show skeleton only while loading; avoid “infinite skeleton” on 404
+  const showSkeleton = !isSlugReady || isProductLoading;
 
   const hasSpecs = specsEntries.length > 0;
   const hasFaqs = faqs.length > 0;
@@ -745,7 +734,10 @@ const ProductDetail: React.FC = () => {
                         otherItems.map((n) => (
                           <li key={n.slug}>
                             <Link
-                              href={withLocale(locale, `${basePath}/${encodeURIComponent(n.slug)}`)}
+                              href={localizePath(
+                                locale as any,
+                                `${basePath}/${encodeURIComponent(n.slug)}`,
+                              )}
                               aria-label={n.title}
                             >
                               {n.title}
