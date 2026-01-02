@@ -7,11 +7,15 @@
 //   => default bucket set to "public" (works with most setups)
 // - Keep local-first expectation: folder default "uploads/catalog" (adjust if backend expects "catalog")
 // - Delete: treat 404 as success (idempotent), always refetch
+// EXTRA (SAFE):
+// - locale normalize (avoid undefined propagation)
+// - refetch calls are non-blocking (avoid promise lint issues)
+// - safer asset response parsing
 // =============================================================
 
 'use client';
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
 import type { LibraryFileDto } from '@/integrations/types/library.types';
@@ -26,14 +30,20 @@ import {
 export type LibraryFilesSectionProps = {
   libraryId: string;
   locale?: string; // ✅ locale support
-  disabled: boolean;
+  disabled?: boolean; // ✅ was required; make optional to be safe
 };
 
 const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
 const norm = (v: unknown) => String(v ?? '').trim();
 
+function normalizeLocale(raw?: string, fallback = 'de') {
+  const s = String(raw ?? '').trim();
+  if (!s) return fallback;
+  const [short] = s.split('-');
+  return (short || fallback).toLowerCase();
+}
+
 function extractErrMsg(err: any): string {
-  // RTK FetchBaseQueryError şekilleri
   const data = err?.data;
   return (
     data?.error?.message ||
@@ -47,15 +57,17 @@ function extractErrMsg(err: any): string {
 export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
   libraryId,
   locale,
-  disabled,
+  disabled = false,
 }) => {
+  const effectiveLocale = useMemo(() => normalizeLocale(locale, 'de'), [locale]);
+
   const {
     data: files,
     isLoading,
     isFetching,
     refetch,
   } = useListLibraryFilesAdminQuery(
-    { id: libraryId, locale }, // ✅ locale
+    { id: libraryId, locale: effectiveLocale }, // ✅ locale normalized
     { skip: !libraryId },
   );
 
@@ -97,12 +109,14 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
           library_id: libraryId,
           original_name: selectedFile.name,
           mime: selectedFile.type || 'application/octet-stream',
+          locale: effectiveLocale, // (metadata içinde kalması zararsız; bazı backendlere faydalı)
         },
       } as any).unwrap();
 
       const storageId = norm((storage as any)?.id);
-      const storageUrl = norm((storage as any)?.url); // expected: https://www.ensotek.de/uploads/...
-      const storageMime = norm((storage as any)?.mime) || norm(selectedFile.type);
+      const storageUrl = norm((storage as any)?.url);
+      const storageMime =
+        norm((storage as any)?.mime) || norm(selectedFile.type) || 'application/octet-stream';
       const storageSize = (storage as any)?.size;
 
       if (!storageId) throw new Error('Upload başarılı ama asset_id alınamadı.');
@@ -113,7 +127,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
       await createFile({
         id: libraryId,
-        locale, // ✅ locale
+        locale: effectiveLocale, // ✅ locale normalized
         payload: {
           asset_id: storageId,
           name: displayName,
@@ -129,11 +143,11 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
       setOverrideName('');
       if (fileInputRef.current) fileInputRef.current.value = '';
 
-      await refetch();
+      // non-blocking refetch
+      void refetch();
     } catch (err: any) {
       const status = err?.status ?? err?.originalStatus;
 
-      // 400 ise çoğunlukla bucket/folder validasyonu
       if (status === 400) {
         toast.error(
           `Upload 400 (Bad Request). Bucket/Folder backend tarafından kabul edilmiyor olabilir. ` +
@@ -151,20 +165,26 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
     const fileId = norm((file as any)?.id);
     if (!libraryId || !fileId) return;
 
-    if (!confirm(`"${safeText((file as any).name)}" dosyasını silmek istiyor musun?`)) return;
+    const ok =
+      typeof window !== 'undefined'
+        ? window.confirm(`"${safeText((file as any).name)}" dosyasını silmek istiyor musun?`)
+        : false;
+
+    if (!ok) return;
 
     try {
-      await removeFile({ id: libraryId, fileId, locale } as any).unwrap(); // ✅ locale
+      await removeFile({ id: libraryId, fileId, locale: effectiveLocale } as any).unwrap();
       toast.success('Dosya silindi.');
     } catch (err: any) {
-      // ✅ idempotent delete: "not found" => ok
       const status = err?.status ?? err?.originalStatus;
       if (status === 404) toast.success('Dosya zaten silinmiş.');
       else toast.error(extractErrMsg(err));
     } finally {
-      await refetch();
+      void refetch();
     }
   };
+
+  const list = (files || []) as LibraryFileDto[];
 
   return (
     <div className="card h-100">
@@ -176,19 +196,19 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
       </div>
 
       <div className="card-body">
-        {(!files || (files as any[]).length === 0) && !loading && (
+        {list.length === 0 && !loading && (
           <div className="text-muted small mb-3">Henüz dosya eklenmemiş.</div>
         )}
 
-        {files && (files as any[]).length > 0 && (
+        {list.length > 0 && (
           <ul className="list-group list-group-flush mb-3">
-            {(files as any[]).map((f: any) => {
-              const href = norm(f?.file_url);
-              const label = safeText(f?.name) || 'Dosya';
+            {list.map((f) => {
+              const href = norm((f as any)?.file_url);
+              const label = safeText((f as any)?.name) || 'Dosya';
 
               return (
                 <li
-                  key={f?.id || `${label}-${href}`}
+                  key={(f as any)?.id || `${label}-${href}`}
                   className="list-group-item px-0 py-2 d-flex justify-content-between align-items-center small"
                 >
                   <div className="me-2" style={{ minWidth: 0 }}>
@@ -201,10 +221,13 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
                         label
                       )}
                     </div>
-                    <div className="text-muted text-truncate" title={safeText(f?.mime_type)}>
-                      {f?.mime_type || 'mime yok'}
-                      {typeof f?.size_bytes === 'number' && f.size_bytes > 0 && (
-                        <> • {(f.size_bytes / 1024).toFixed(1)} KB</>
+                    <div
+                      className="text-muted text-truncate"
+                      title={safeText((f as any)?.mime_type)}
+                    >
+                      {(f as any)?.mime_type || 'mime yok'}
+                      {typeof (f as any)?.size_bytes === 'number' && (f as any).size_bytes > 0 && (
+                        <> • {(((f as any).size_bytes as number) / 1024).toFixed(1)} KB</>
                       )}
                     </div>
                   </div>
@@ -213,7 +236,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
                     type="button"
                     className="btn btn-sm btn-outline-danger"
                     disabled={disabled || isRemoving}
-                    onClick={() => handleRemove(f as any)}
+                    onClick={() => handleRemove(f)}
                   >
                     Sil
                   </button>
