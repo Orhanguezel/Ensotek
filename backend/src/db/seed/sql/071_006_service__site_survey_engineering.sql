@@ -28,7 +28,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8006-1111-4111-8111-bbbbbbbb8006',
   1,1,60,
-  NULL,'https://www.ensotek.de/uploads/services/site_survey_and_engineering.png',NULL,
+  NULL,'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767320879/services/cover/site_survey_and_engineering.png',NULL,
   'On-site survey / mechanical layout / selection',
   '1 day – 3 weeks (survey + design)',
   'Optional: integration plan with maintenance',

@@ -54,7 +54,7 @@ VALUES (
   'aaaa0002-1111-4111-8111-aaaaaaaa0002',
   'bbbb0102-1111-4111-8111-bbbbbbbb0102',
   0.00,
-  'https://www.ensotek.de/uploads/product/open-circuit-ctp-single-1-250x250-1.png',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767321557/products/cover/open-circuit-ctp-single-1-250x250-1.png',
   NULL,
   JSON_ARRAY(
     'https://www.ensotek.de/uploads/material/open-circuit-ctp-single-1-250x250-1.jpg',

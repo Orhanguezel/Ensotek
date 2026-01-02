@@ -24,7 +24,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8004-1111-4111-8111-bbbbbbbb8004',
   1,1,30,
-  NULL,'https://www.ensotek.de/uploads/services/spare_parts_and_components.png',NULL,
+  NULL,'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767320725/services/cover/spare_parts_and_components.png',NULL,
   'Supply of critical parts / components',
   'Depends on stock and lead times',
   'Inspection plan recommended for critical parts',

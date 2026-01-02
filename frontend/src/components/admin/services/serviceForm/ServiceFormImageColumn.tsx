@@ -1,15 +1,16 @@
 // =============================================================
 // FILE: src/components/admin/services/serviceForm/ServiceFormImageColumn.tsx
-// Ensotek – Services Form Right Column (FINAL FIX)
+// Ensotek – Services Form Right Column (FINAL FIX + INSTANT UI UPDATE)
 // - ✅ Cover persists reliably (supports different RTK arg shapes)
 // - ✅ Cover image is never removed from pool (service_images)
 // - ✅ Selecting cover does NOT remove from gallery
 // - ✅ Pool is canonical; cover is just pointer (services.image_url + legacy featured_image)
+// - ✅ INSTANT UI: upload/delete updates immediately without page refresh
 // =============================================================
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
@@ -55,6 +56,19 @@ const sortImages = (items: ServiceImageDto[]) => {
   });
 };
 
+const uniq = (arr: string[]) => {
+  const out: string[] = [];
+  const set = new Set<string>();
+  for (const x of arr) {
+    const v = norm(x);
+    if (!v) continue;
+    if (set.has(v)) continue;
+    set.add(v);
+    out.push(v);
+  }
+  return out;
+};
+
 export const ServiceFormImageColumn: React.FC<Props> = ({
   serviceId,
   locale,
@@ -82,9 +96,21 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
   const [deleteImage, { isLoading: isDeleting }] = useDeleteServiceImageAdminMutation();
   const [updateService, { isLoading: isUpdatingService }] = useUpdateServiceAdminMutation();
 
-  const galleryUrls = useMemo(() => {
+  /**
+   * ✅ IMPORTANT: UI canonical gallery state
+   * - UI should update immediately on upload/delete without waiting for refetch/RTK invalidation.
+   * - We still refetch after mutations to re-align with server truth.
+   */
+  const serverGalleryUrls = useMemo(() => {
     return (imageItems ?? []).map((x) => norm((x as any)?.image_url)).filter(Boolean);
   }, [imageItems]);
+
+  const [uiGalleryUrls, setUiGalleryUrls] = useState<string[]>(serverGalleryUrls);
+
+  // Keep UI synced when server data changes (after refetch, navigation, etc.)
+  useEffect(() => {
+    setUiGalleryUrls(serverGalleryUrls);
+  }, [serverGalleryUrls]);
 
   const uploadingDisabled =
     disabled || imagesLoading || imagesFetching || isCreating || isDeleting || isUpdatingService;
@@ -92,6 +118,7 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
   const existsInPool = (urlRaw: string) => {
     const u = norm(urlRaw);
     if (!u) return false;
+    // use server list (DB truth) for existence checks
     return (imageItems ?? []).some((x) => norm((x as any)?.image_url) === u);
   };
 
@@ -130,6 +157,7 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
 
     const next = await deleteImage({ serviceId, imageId: (row as any).id } as any).unwrap();
     onGalleryChange?.(next as ServiceImageDto[]);
+    return next as ServiceImageDto[];
   };
 
   const persistCover = async (urlRaw: string) => {
@@ -168,15 +196,23 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
     const url = norm(urlRaw);
     if (!url) return;
 
+    // ✅ UI: set cover instantly
     setCoverUI(url);
+
+    // ✅ UI: ensure cover exists in UI gallery instantly (pool cannot lose it)
+    setUiGalleryUrls((prev) => uniq([url, ...(prev ?? [])]));
+
     if (!serviceId) return;
 
     void (async () => {
       try {
+        // ensure exists in DB pool
         const list = await upsertOne(url);
         if (list) onGalleryChange?.(list);
 
         await persistCover(url);
+
+        // ✅ align with server truth (but UI already updated)
         await refetch();
 
         toast.success('Kapak görseli kaydedildi.');
@@ -193,9 +229,14 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
 
   const handleCoverChange = (urlRaw: string) => {
     const url = norm(urlRaw);
+
+    // ✅ UI: set cover instantly
     setCoverUI(url);
 
     if (!serviceId || !url) return;
+
+    // ✅ UI: ensure it is visible in gallery instantly
+    setUiGalleryUrls((prev) => uniq([url, ...(prev ?? [])]));
 
     void (async () => {
       try {
@@ -203,6 +244,8 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
         if (list) onGalleryChange?.(list);
 
         await persistCover(url);
+
+        // ✅ align with server truth (but UI already updated)
         await refetch();
 
         toast.success('Kapak görseli kaydedildi.');
@@ -220,36 +263,77 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
   const handleGalleryUrlsChange = (nextUrlsRaw: string[]) => {
     if (!serviceId) return;
 
-    const nextUrls = (nextUrlsRaw ?? []).map((u) => norm(u)).filter(Boolean);
+    const nextUrls = uniq((nextUrlsRaw ?? []).map((u) => norm(u)));
 
-    const prevSet = new Set(galleryUrls);
+    // ✅ UI: update instantly (no refresh required)
+    setUiGalleryUrls(nextUrls);
+
+    const prevSet = new Set(serverGalleryUrls);
     const nextSet = new Set(nextUrls);
 
     const added = nextUrls.filter((u) => !prevSet.has(u));
-    const removed = galleryUrls.filter((u) => !nextSet.has(u));
+    const removed = serverGalleryUrls.filter((u) => !nextSet.has(u));
 
     const coverUrl = norm(featuredImageValue);
     const removedSafe = removed.filter((u) => u !== coverUrl);
 
+    if (removed.length > 0 && removedSafe.length !== removed.length) {
+      // cover attempt removed: keep it in UI
+      setUiGalleryUrls((prev) => uniq([coverUrl, ...(prev ?? [])]));
+      toast.error('Kapak görseli silinemez. Önce başka bir kapak seç.');
+    }
+
     if (added.length > 0) {
       void (async () => {
-        let lastList: ServiceImageDto[] | null = null;
-        for (const url of added) {
-          const list = await upsertOne(url);
-          if (list) lastList = list;
+        try {
+          let lastList: ServiceImageDto[] | null = null;
+          for (const url of added) {
+            const list = await upsertOne(url);
+            if (list) lastList = list;
+          }
+          if (lastList) onGalleryChange?.(lastList);
+
+          // ✅ align with server truth
+          await refetch();
+        } catch (err: any) {
+          const msg =
+            err?.data?.error?.message ||
+            err?.data?.message ||
+            err?.message ||
+            'Görseller eklenirken hata oluştu.';
+          toast.error(msg);
+
+          // ✅ rollback from server truth
+          await refetch();
         }
-        if (lastList) onGalleryChange?.(lastList);
       })();
     }
 
     if (removedSafe.length > 0) {
       void (async () => {
-        for (const url of removedSafe) {
-          await removeByUrl(url);
+        try {
+          for (const url of removedSafe) {
+            // ✅ UI already removed; DB sync now
+            await removeByUrl(url);
+          }
+          // ✅ align with server truth
+          await refetch();
+        } catch (err: any) {
+          const msg =
+            err?.data?.error?.message ||
+            err?.data?.message ||
+            err?.message ||
+            'Görseller silinirken hata oluştu.';
+          toast.error(msg);
+
+          // ✅ rollback from server truth
+          await refetch();
         }
       })();
     }
   };
+
+  const cover = norm(featuredImageValue);
 
   return (
     <div className="d-flex flex-column gap-3">
@@ -264,7 +348,7 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
         bucket="public"
         folder="services/cover"
         metadata={{ ...(metadata || {}), section: 'cover' }}
-        value={norm(featuredImageValue)}
+        value={cover}
         onChange={handleCoverChange}
         disabled={disabled}
         openLibraryHref="/admin/storage"
@@ -284,10 +368,10 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
           folder="services/gallery"
           metadata={{ ...(metadata || {}), section: 'gallery' }}
           multiple
-          values={galleryUrls}
+          values={uiGalleryUrls} // ✅ UI state (instant)
           onChangeMultiple={handleGalleryUrlsChange}
           onSelectAsCover={handleSelectAsCover}
-          coverValue={norm(featuredImageValue)}
+          coverValue={cover}
           disabled={uploadingDisabled}
           openLibraryHref="/admin/storage"
           onOpenLibraryClick={() => router.push('/admin/storage')}

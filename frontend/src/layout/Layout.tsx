@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/components/layout/Layout.tsx
+// FILE: src/layout/Layout.tsx
 // Ensotek – Public Layout (CENTRAL SEO / SINGLE SOURCE) [FINAL / PERF]
 // - ✅ Page-level <Head> kaldırılacak: tüm title/desc/og/twitter/robots burada
 // - ✅ Canonical + og:url + hreflang SSR tek kaynak: _document (Pages Router)

@@ -1,5 +1,5 @@
 -- =============================================================
--- 020_references.schema.sql  (schema)  [FIXED / IDEMPOTENT]
+-- 020_references.schema.sql  (schema)  [FINAL / IDEMPOTENT]
 -- =============================================================
 
 SET NAMES utf8mb4;

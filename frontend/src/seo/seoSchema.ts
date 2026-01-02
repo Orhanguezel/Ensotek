@@ -79,11 +79,11 @@ export const DEFAULT_OG_IMAGE = '/img/og-default.jpg';
  * Asıl değerler site_settings.seo içinden gelir.
  */
 export const DEFAULT_SEO_GLOBAL: SeoObject = {
-  site_name: 'Ensotek',
-  title_default: 'Ensotek',
-  title_template: '%s | Ensotek',
+  site_name: 'Ensotek Industrial Cooling Towers',
+  title_default: 'Ensotek Industrial Cooling Towers and Engineering',
+  title_template: '%s – Ensotek',
   description:
-    'Ensotek Energy Systems provides industrial solutions and energy efficiency services.',
+    'Industrial cooling towers, engineering, installation and service solutions for efficient process cooling.',
   open_graph: {
     type: 'website',
     images: [DEFAULT_OG_IMAGE],
@@ -106,22 +106,22 @@ export const DEFAULT_SEO_GLOBAL: SeoObject = {
  */
 export const DEFAULT_SITE_META_DEFAULT_BY_LOCALE: Record<string, SiteMetaDefaultObject> = {
   tr: {
-    title: 'Ensotek | Endüstriyel Çözümler',
+    title: 'Ensotek – Endüstriyel Su Soğutma Kuleleri ve Mühendislik',
     description:
-      'Endüstriyel soğutma kuleleri, modernizasyon ve enerji verimliliği çözümleri sunan Ensotek Enerji Sistemleri.',
+      'Endüstriyel soğutma kuleleri, modernizasyon ve enerji verimliliği çözümleri. Keşif, üretim, montaj, bakım ve yedek parça.',
     keywords: 'ensotek, endüstriyel, soğutma kulesi, enerji verimliliği, b2b',
   },
   en: {
-    title: 'Ensotek | Industrial Solutions',
+    title: 'Ensotek – Industrial Cooling Towers and Engineering',
     description:
-      'Ensotek Energy Systems provides industrial cooling tower engineering and energy efficiency solutions.',
+      'Industrial cooling towers and energy efficiency solutions. Engineering, manufacturing, installation, modernization, testing and spare parts.',
     keywords: 'ensotek, industrial, cooling towers, energy efficiency, b2b',
   },
   de: {
-    title: 'Ensotek | Industrielle Lösungen',
+    title: 'Ensotek – Industrielle Kuehltuerme und Engineering',
     description:
-      'Ensotek Energiesysteme bietet industrielle Kühlturmtechnik und Energieeffizienzlösungen.',
-    keywords: 'ensotek, industriell, kühlturm, energieeffizienz, b2b',
+      'Industrielle Kuehlturmtechnik und Energieeffizienzloesungen. Planung, Fertigung, Montage, Modernisierung, Leistungstests und Ersatzteile.',
+    keywords: 'ensotek, industriell, kuehlturm, energieeffizienz, b2b',
   },
 };
 
