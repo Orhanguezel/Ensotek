@@ -1,9 +1,11 @@
 // =============================================================
 // FILE: src/components/containers/library/LibraryPdfPreview.tsx
-// Ensotek – PDF Preview (FINAL / CLOUDINARY-SAFE)
+// Ensotek – PDF Preview (FINAL / LOCAL+PROD SAFE)
 // FIX:
-// - Cloudinary PDF URL may come as /image/upload/.../*.pdf (wrong delivery type)
-//   => rewrite to /raw/upload/.../*.pdf
+// - Local dev’de /uploads/... Next(3000) tarafından servis edilmez.
+//   Dosyalar backend’de (ör: 8086) durur.
+// - Env önceliği korunur. Env yoksa localhost’ta backend origin’e düşer.
+// - Cloudinary PDF URL: /image/upload/...pdf => /raw/upload/...pdf (safe)
 // - Keeps existing /api/uploads -> /uploads normalization logic
 // =============================================================
 
@@ -19,19 +21,71 @@ type Props = {
 
 const safeStr = (v: unknown) => String(v ?? '').trim();
 
-function getFileBase(): string {
-  const envBase = safeStr(
-    process.env.NEXT_PUBLIC_FILE_BASE_URL || (process.env as any).NEXT_PUBLIC_PUBLIC_BASE_URL || '',
-  ).replace(/\/+$/, '');
+function isHttpUrl(s: string): boolean {
+  return /^https?:\/\//i.test(s);
+}
 
+function stripTrailingSlash(s: string): string {
+  return String(s || '').replace(/\/+$/, '');
+}
+
+function originFromUrl(u: string): string | null {
+  try {
+    const x = new URL(u);
+    return `${x.protocol}//${x.host}`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * ✅ File base resolution order:
+ *  1) NEXT_PUBLIC_FILE_BASE_URL (explicit, recommended)
+ *  2) NEXT_PUBLIC_BACKEND_URL / NEXT_PUBLIC_API_BASE_URL (derive origin)
+ *  3) window.origin (prod’da doğru)
+ *  4) localhost fallback => http://localhost:8086
+ *  5) final fallback => https://www.ensotek.de
+ */
+function getFileBase(): string {
+  // 1) explicit
+  const envBase = stripTrailingSlash(
+    safeStr(
+      process.env.NEXT_PUBLIC_FILE_BASE_URL ||
+        (process.env as any).NEXT_PUBLIC_PUBLIC_BASE_URL ||
+        '',
+    ),
+  );
   if (envBase) return envBase;
 
+  // 2) derive from backend/api env if present
+  const backendLike = stripTrailingSlash(
+    safeStr(
+      (process.env as any).NEXT_PUBLIC_BACKEND_URL ||
+        (process.env as any).NEXT_PUBLIC_API_BASE_URL ||
+        (process.env as any).NEXT_PUBLIC_API_URL ||
+        '',
+    ),
+  );
+  if (backendLike) {
+    // if it's full URL, take origin; if it's origin already keep it
+    const o = originFromUrl(backendLike);
+    return o ? stripTrailingSlash(o) : backendLike;
+  }
+
+  // 3) window origin
   if (typeof window !== 'undefined' && window.location) {
-    const origin = safeStr(window.location.origin).replace(/\/+$/, '');
+    const host = safeStr(window.location.hostname);
+    const origin = stripTrailingSlash(safeStr(window.location.origin));
+
+    // 4) localhost fallback (local dev standard: backend 8086)
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return 'http://localhost:8086';
+    }
+
     if (origin) return origin;
   }
 
-  // fallback
+  // 5) final fallback
   return 'https://www.ensotek.de';
 }
 
@@ -47,19 +101,15 @@ function normalizeCloudinaryPdfUrl(input: string): string {
   const lower = url.toLowerCase();
   if (!lower.includes('res.cloudinary.com')) return url;
 
-  // Must look like a PDF
   const base = lower.split('?')[0].split('#')[0];
   if (!base.endsWith('.pdf')) return url;
 
-  // If already raw/upload, keep it
   if (lower.includes('/raw/upload/')) return url;
 
-  // Rewrite image/upload -> raw/upload
   if (lower.includes('/image/upload/')) {
     return url.replace('/image/upload/', '/raw/upload/');
   }
 
-  // If for some reason it's /upload/ without resource type, do nothing
   return url;
 }
 
@@ -68,7 +118,7 @@ function normalizePdfPath(pdfUrl: string): string {
   if (!s) return '/uploads';
 
   // absolute URLs handled elsewhere
-  if (/^https?:\/\//i.test(s)) return s;
+  if (isHttpUrl(s)) return s;
 
   const [pathOnly, suffix = ''] = s.split(/(?=[?#])/);
 
@@ -89,8 +139,11 @@ function normalizePdfPath(pdfUrl: string): string {
   const idx = p.indexOf('/uploads/');
   if (idx >= 0) return `${p.substring(idx)}${suffix}`;
 
-  // final fallback
-  return `/uploads${p}${suffix}`.replace(/^\/uploads\/uploads(\/|$)/, '/uploads$1');
+  // final fallback: if caller gave "catalog/x.pdf" etc.
+  return `/uploads/${p.replace(/^\/+/, '')}${suffix}`.replace(
+    /^\/uploads\/uploads(\/|$)/,
+    '/uploads$1',
+  );
 }
 
 function buildIframeSrc(pdfUrl: string | null): string | null {
@@ -98,16 +151,14 @@ function buildIframeSrc(pdfUrl: string | null): string | null {
   if (!raw) return null;
 
   // Absolute URL
-  if (/^https?:\/\//i.test(raw)) {
-    // ✅ Cloudinary PDF correction
-    const fixedCloudinary = normalizeCloudinaryPdfUrl(raw);
-    return fixedCloudinary;
+  if (isHttpUrl(raw)) {
+    return normalizeCloudinaryPdfUrl(raw);
   }
 
-  // Relative path => attach to our site base
-  const fileBase = getFileBase();
+  // Relative path => attach to our file base
+  const fileBase = getFileBase(); // local’de 8086’e düşer
   const normalized = normalizePdfPath(raw); // "/uploads/..."
-  const base = String(fileBase).replace(/\/+$/, '');
+  const base = stripTrailingSlash(fileBase);
 
   return `${base}${normalized.startsWith('/') ? '' : '/'}${normalized}`;
 }
@@ -125,10 +176,8 @@ const LibraryPdfPreview: React.FC<Props> = ({ pdfUrl, title = 'PDF Preview', hei
           src={iframeSrc}
           width="100%"
           height={height}
-          allow="fullscreen"
-          allowFullScreen
           loading="lazy"
-          referrerPolicy="no-referrer"
+          style={{ border: 0 }}
         />
       </div>
     </div>

@@ -58,3 +58,73 @@ export type DeleteSnapshotResponse = {
   ok: boolean;
   message?: string;
 };
+
+/* =============================================================
+ * MODULE Export/Import Types
+ * ============================================================= */
+
+export type ModuleExportFormat = 'sql' | 'json';
+
+export type ExportModuleParams = {
+  module: string; // ModuleKey (backend validate ediyor)
+  format?: ModuleExportFormat; // default: 'sql'
+};
+
+/** SQL text ile module import */
+export type ImportModuleSqlTextBody = {
+  module: string;
+  sqlText: string;
+  truncateBefore?: boolean;
+};
+
+/** File ile module import (multipart) */
+export type ImportModuleFileBody = {
+  module: string;
+  file: File;
+  truncateBefore?: boolean;
+};
+
+export type ImportModuleBody = ImportModuleSqlTextBody | ImportModuleFileBody;
+
+/* =============================================================
+ * Site Settings UI Bulk Ops
+ * ============================================================= */
+
+export type SiteSettingsUiExportResponse = {
+  data: Record<string, Record<string, unknown>>;
+  locales: string[];
+  keys: string[];
+};
+
+export type SiteSettingsUiBootstrapBody = {
+  locale: string;
+  fromLocale?: string;
+  overwrite?: boolean;
+  onlyUiKeys?: boolean;
+};
+
+/* =============================================================
+ * Manifest Validation
+ * ============================================================= */
+
+export type ManifestValidateQuery = {
+  module?: string[] | string;
+  includeDbTables?: boolean | 0 | 1 | '0' | '1';
+};
+
+export type ManifestValidateResponse = {
+  ok: boolean;
+  summary?: {
+    checkedModules: string[];
+    totalTablesDeclared: number;
+    duplicates: string[];
+    unknownTablesInManifest?: string[];
+    missingInDb?: string[];
+  };
+  results: Array<{
+    module: string;
+    ok: boolean;
+    warnings: string[];
+    errors: string[];
+  }>;
+};

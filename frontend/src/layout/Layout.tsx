@@ -1,12 +1,14 @@
 // =============================================================
 // FILE: src/layout/Layout.tsx
 // Ensotek – Public Layout (CENTRAL SEO / SINGLE SOURCE) [FINAL / PERF]
-// - ✅ Page-level <Head> kaldırılacak: tüm title/desc/og/twitter/robots burada
+// - ✅ ui_common KALDIRILDI (site_settings.site_meta_default kullanılır)
+// - ✅ Default meta/title/desc: site_meta_default (locale -> '*' fallback)
+// - ✅ Logo: site_logo(*) dinamik + preload
+// - ✅ PERF: site_settings batch listSiteSettings (2 query)
 // - ✅ Canonical + og:url + hreflang SSR tek kaynak: _document (Pages Router)
 // - ✅ DB-driven SEO: seo/site_seo (locale -> '*' fallback)
 // - ✅ DB-driven Brand/Contact/Socials: locale -> '*' fallback
 // - ✅ Icons: GLOBAL '*'
-// - ✅ PERF: site_settings tek tek değil, batch listSiteSettings (2 query)
 // - ✅ RTK refetchOnFocus/reconnect/mountOrArgChange OFF
 // - ✅ SEO overrides: layoutSeoStore (LayoutSeoBridge) + optional Layout props
 // - ✅ No inline styles
@@ -14,7 +16,7 @@
 
 'use client';
 
-import React, { Fragment, useMemo, useCallback, useSyncExternalStore } from 'react';
+import React, { Fragment, useMemo, useSyncExternalStore } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import type { StaticImageData } from 'next/image';
@@ -34,7 +36,6 @@ import { buildMeta, filterClientHeadSpecs, type MetaInput } from '@/seo/meta';
 
 // ✅ i18n
 import { useLocaleShort } from '@/i18n/useLocaleShort';
-import { useUiSection } from '@/i18n/uiDb';
 import { FALLBACK_LOCALE } from '@/i18n/config';
 
 // ✅ JSON-LD
@@ -75,19 +76,27 @@ type LayoutProps = {
    * Optional brand overrides (rare; mostly DB)
    */
   brand?: SimpleBrand;
+
+  /**
+   * Optional logo override (rare)
+   * If not provided, site_logo(*) is used.
+   */
   logoSrc?: StaticImageData | string;
 };
 
 const FALLBACK_FAVICON = '/favicon.svg';
 
 const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+function cleanString(v: unknown): string {
+  if (typeof v === 'string') return v.trim();
+  if (v == null) return '';
+  return String(v).trim();
+}
 
-function absUrlForPreload(pathOrUrl: string): string {
-  const base = siteUrlBase();
-  const v = safeStr(pathOrUrl);
-  if (!v) return base;
-  if (/^https?:\/\//i.test(v)) return v;
-  return `${base}${v.startsWith('/') ? v : `/${v}`}`;
+function getSafeLocale(lc: unknown): string {
+  const v = cleanString(lc);
+  const fb = cleanString(FALLBACK_LOCALE) || 'de';
+  return v || fb;
 }
 
 function toAbsoluteMaybe(u: string): string {
@@ -95,12 +104,6 @@ function toAbsoluteMaybe(u: string): string {
   if (!v) return '';
   if (/^https?:\/\//i.test(v)) return v;
   return absoluteUrl(v);
-}
-
-function cleanString(v: unknown): string {
-  if (typeof v === 'string') return v.trim();
-  if (v == null) return '';
-  return String(v).trim();
 }
 
 function cleanSocials(input: Record<string, any> | null | undefined): Record<string, string> {
@@ -114,12 +117,20 @@ function cleanSocials(input: Record<string, any> | null | undefined): Record<str
   return out;
 }
 
-function getSafeLocale(lc: unknown): string {
-  const v = cleanString(lc);
-  const fb = cleanString(FALLBACK_LOCALE) || 'de';
-  return v || fb;
+function absUrlForPreload(pathOrUrl: string): string {
+  const base = siteUrlBase();
+  const v = safeStr(pathOrUrl);
+  if (!v) return base;
+  if (/^https?:\/\//i.test(v)) return v;
+  return `${base}${v.startsWith('/') ? v : `/${v}`}`;
 }
 
+/**
+ * site_settings.value için desteklenen formatlar:
+ *  - "https://..." (string URL)
+ *  - { url, width?, height? }
+ *  - "{ \"url\": \"...\", \"width\": 160, \"height\": 60 }"
+ */
 function extractMediaUrl(val: SettingValue | null | undefined): string {
   if (val === null || val === undefined) return '';
 
@@ -144,6 +155,28 @@ function extractMediaUrl(val: SettingValue | null | undefined): string {
   }
 
   return '';
+}
+
+function extractJson(val: SettingValue | null | undefined): any {
+  if (val === null || val === undefined) return null;
+  if (typeof val === 'object') return val;
+
+  if (typeof val === 'string') {
+    const s = val.trim();
+    if (!s) return null;
+
+    const looksJson =
+      (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'));
+    if (!looksJson) return null;
+
+    try {
+      return JSON.parse(s);
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
 }
 
 /* -----------------------------
@@ -208,9 +241,7 @@ class LayoutErrorBoundary extends React.Component<
         this.props.fallback ?? (
           <div className="container py-4">
             <h1 className="mb-2">Something went wrong</h1>
-            <p className="mb-0">
-              The page content failed to render. Please refresh or try again later.
-            </p>
+            <p className="mb-0">The page content failed to render. Please refresh and try again.</p>
           </div>
         )
       );
@@ -248,10 +279,6 @@ export default function Layout({
   // ✅ Locale
   const locale = getSafeLocale(useLocaleShort());
 
-  // ✅ common UI
-  const { ui: uiCommon } = useUiSection('ui_common', locale as any);
-  const t = useCallback((key: string, fb: string) => uiCommon(key, fb), [uiCommon]);
-
   // ------------------------------------------------------------
   // ✅ PERF: Batch fetch site_settings (2 query)
   // - Query 1: locale-specific keys
@@ -259,19 +286,32 @@ export default function Layout({
   // ------------------------------------------------------------
 
   const LOCALE_KEYS = useMemo(
-    () => ['seo', 'site_seo', 'contact_info', 'company_brand', 'socials'],
+    () => [
+      'seo',
+      'site_seo',
+      'site_meta_default', // ✅ new default title/desc fallback
+      'contact_info',
+      'company_brand',
+      'socials',
+    ],
     [],
   );
 
   const GLOBAL_KEYS = useMemo(
     () => [
-      // icons
+      // icons + site media
+      'site_logo',
+      'site_logo_dark',
+      'site_logo_light',
       'site_favicon',
       'site_apple_touch_icon',
       'site_app_icon_512',
-      // fallback for locale keys (keeps total queries at 2)
+      'site_og_default_image',
+
+      // fallback for locale keys
       'seo',
       'site_seo',
+      'site_meta_default',
       'contact_info',
       'company_brand',
       'socials',
@@ -291,6 +331,20 @@ export default function Layout({
 
   const localeMap = useMemo(() => rowsToMap(localeRows as any), [localeRows]);
   const globalMap = useMemo(() => rowsToMap(globalRows as any), [globalRows]);
+
+  // ------------------------------------------------------------
+  // ✅ site_meta_default (locale -> '*' fallback)
+  // ------------------------------------------------------------
+
+  const metaDefault = useMemo(() => {
+    const raw = pickSetting(localeMap, globalMap, 'site_meta_default');
+    const obj = extractJson(raw) || {};
+    return {
+      title: cleanString((obj as any).title),
+      description: cleanString((obj as any).description),
+      keywords: cleanString((obj as any).keywords),
+    };
+  }, [localeMap, globalMap]);
 
   // ------------------------------------------------------------
   // ✅ SEO (seo -> site_seo fallback, locale -> '*' fallback)
@@ -337,30 +391,34 @@ export default function Layout({
 
   // ------------------------------------------------------------
   // ✅ Final SEO values (page overrides take precedence)
+  // Fallback order:
+  // - store/prop overrides
+  // - seo.title_default / seo.description
+  // - site_meta_default (locale -> '*' fallback)
+  // - hard fallback
   // ------------------------------------------------------------
 
   const finalTitle = useMemo(() => {
-    return cleanString(effectiveTitleProp) || seoTitleDefault || t('meta_default_title', 'Ensotek');
-  }, [effectiveTitleProp, seoTitleDefault, t]);
-
-  const uiDefaultDesc = useMemo(() => {
-    return t(
-      'meta_default_description',
-      'Industrial solutions, products and services. Contact us for tailored support and consultation.',
-    );
-  }, [t]);
+    const hardFb = 'Ensotek';
+    return cleanString(effectiveTitleProp) || seoTitleDefault || metaDefault.title || hardFb;
+  }, [effectiveTitleProp, seoTitleDefault, metaDefault.title]);
 
   const finalDescription = useMemo(() => {
-    return cleanString(effectiveDescProp) || seoDescription || cleanString(uiDefaultDesc);
-  }, [effectiveDescProp, seoDescription, uiDefaultDesc]);
+    const hardFb =
+      'Industrial cooling towers, engineering, installation and service solutions for efficient process cooling.';
+    return cleanString(effectiveDescProp) || seoDescription || metaDefault.description || hardFb;
+  }, [effectiveDescProp, seoDescription, metaDefault.description]);
 
   const resolvedOgImage = useMemo(() => {
     const direct = cleanString(effectiveOgProp);
     if (direct) return direct;
     if (ogLegacyImage) return ogLegacyImage;
     if (ogImagesArrFirst) return ogImagesArrFirst;
-    return '';
-  }, [effectiveOgProp, ogLegacyImage, ogImagesArrFirst]);
+
+    // ✅ final fallback: site_og_default_image (*)
+    const ogDefault = extractMediaUrl((globalMap.site_og_default_image as SettingValue) ?? null);
+    return cleanString(ogDefault) || '';
+  }, [effectiveOgProp, ogLegacyImage, ogImagesArrFirst, globalMap.site_og_default_image]);
 
   // ------------------------------------------------------------
   // ✅ Icons (GLOBAL '*')
@@ -387,12 +445,13 @@ export default function Layout({
   // ✅ Brand/Contact/Socials (locale -> '*' fallback; brand prop can override)
   // ------------------------------------------------------------
 
-  const { normalizedBrand, logoHrefFromSettings } = useMemo(() => {
+  const normalizedBrand = useMemo(() => {
     const contact = (pickSetting(localeMap, globalMap, 'contact_info') ?? {}) as any;
     const brandVal = (pickSetting(localeMap, globalMap, 'company_brand') ?? {}) as any;
     const socialsVal = (pickSetting(localeMap, globalMap, 'socials') ?? {}) as any;
 
     const name = cleanString(brandVal?.name) || cleanString(contact?.companyName) || 'Ensotek';
+
     const website =
       cleanString(brandVal?.website) || cleanString(contact?.website) || siteUrlBase();
 
@@ -410,24 +469,13 @@ export default function Layout({
       ...cleanSocials(asObj(brandVal?.socials) as any),
     };
 
-    const logoObj = (brandVal?.logo ||
-      (Array.isArray(brandVal?.images) ? brandVal.images[0] : null) ||
-      {}) as { url?: string };
-
-    const logoHref =
-      cleanString(logoObj?.url) ||
-      'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
-
     return {
-      normalizedBrand: {
-        name,
-        website,
-        phone: phoneVal,
-        email: emailVal,
-        socials: mergedSocials,
-      } as SimpleBrand,
-      logoHrefFromSettings: logoHref,
-    };
+      name,
+      website,
+      phone: phoneVal,
+      email: emailVal,
+      socials: mergedSocials,
+    } as SimpleBrand;
   }, [localeMap, globalMap]);
 
   const effectiveBrand: SimpleBrand = useMemo(() => {
@@ -438,17 +486,19 @@ export default function Layout({
       ...cleanSocials(brand.socials || {}),
     };
 
-    return {
-      ...normalizedBrand,
-      ...brand,
-      socials: mergedSocials,
-    };
+    return { ...normalizedBrand, ...brand, socials: mergedSocials };
   }, [brand, normalizedBrand]);
 
-  const headerLogoSrc: StaticImageData | string | undefined =
-    logoSrc || logoHrefFromSettings || undefined;
+  // ------------------------------------------------------------
+  // ✅ Logo (GLOBAL '*') + optional override prop
+  // ------------------------------------------------------------
 
-  const preloadLogoHref = typeof headerLogoSrc === 'string' ? headerLogoSrc : logoHrefFromSettings;
+  const siteLogoUrl = useMemo(() => {
+    return extractMediaUrl((globalMap.site_logo as SettingValue) ?? null);
+  }, [globalMap.site_logo]);
+
+  const headerLogoSrc: StaticImageData | string | undefined = logoSrc || siteLogoUrl || undefined;
+  const preloadLogoHref = typeof headerLogoSrc === 'string' ? headerLogoSrc : siteLogoUrl;
 
   // ------------------------------------------------------------
   // ✅ Head Meta specs
@@ -496,7 +546,7 @@ export default function Layout({
         id: orgId,
         name: effectiveBrand.name || 'Ensotek',
         url: cleanString(effectiveBrand.website) || base,
-        logo: logoHrefFromSettings || undefined,
+        logo: siteLogoUrl || undefined,
         sameAs,
       }),
       website({
@@ -506,34 +556,27 @@ export default function Layout({
         publisherId: orgId,
       }),
     ]);
-  }, [effectiveBrand.name, effectiveBrand.website, effectiveBrand.socials, logoHrefFromSettings]);
+  }, [effectiveBrand.name, effectiveBrand.website, effectiveBrand.socials, siteLogoUrl]);
 
   // ------------------------------------------------------------
-  // ✅ Error fallback UI
+  // ✅ Error fallback UI (no ui_common)
   // ------------------------------------------------------------
 
   const errorFallback = useMemo(() => {
-    const titleText = t('ui_500_title', 'Something Went Wrong');
-    const subtitleText = t(
-      'ui_500_subtitle',
-      'An unexpected error occurred. Please try again later.',
-    );
-    const tryAgainText = t('ui_500_try_again', 'Try Again');
-
     return (
       <div className="container py-4">
-        <h1 className="mb-2">{titleText}</h1>
-        <p className="mb-3">{subtitleText}</p>
+        <h1 className="mb-2">Something Went Wrong</h1>
+        <p className="mb-3">An unexpected error occurred. Please refresh the page and try again.</p>
         <button
           type="button"
           className="solid__btn d-inline-flex align-items-center"
           onClick={() => window.location.reload()}
         >
-          {tryAgainText}
+          Try Again
         </button>
       </div>
     );
-  }, [t]);
+  }, []);
 
   // ✅ Debug canonical (dev only)
   const debugCanonicalAbs = useMemo(() => {

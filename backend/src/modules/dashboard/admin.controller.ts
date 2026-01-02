@@ -27,6 +27,7 @@ import { reviews } from "@/modules/review/schema";
 import { supportTickets } from "@/modules/support/schema";
 import { users } from "@/modules/auth/schema";
 import { offersTable } from '@/modules/offer/schema';
+import { storageAssets } from '@/modules/storage/schema';
 
 type DashboardCountItem = {
   key: string;
@@ -69,6 +70,7 @@ export const getDashboardSummaryAdmin: RouteHandler = async (req, reply) => {
       { key: "support", label: "Destek Talepleri", table: supportTickets },
       { key: "users", label: "Kullanıcılar", table: users },
       { key: "offers", label: "Teklifler", table: offersTable },
+      { key: "storage", label: "Depolama Öğeleri", table: storageAssets },
     ];
 
     // Hepsini paralel say

@@ -25,7 +25,9 @@ import {
 } from "./schema";
 import { categories } from "@/modules/categories/schema";
 import { subCategories } from "@/modules/subcategories/schema";
-import type { Locale } from "./validation";
+import type { Locale } from '@/core/i18n';
+
+
 
 /** Güvenilir sıralama kolonları */
 type Sortable = "created_at" | "updated_at" | "display_order";

@@ -56,6 +56,9 @@ export const metahubTags = [
   'AuditRequestLog',
   'AuditMetric',
   'DbSnapshot',
+  'DbAdmin',
+  'DbModule',
+  'DbManifest',
   'AdminProducts',
   'AdminProductImages',
 ] as const;

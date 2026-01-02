@@ -6,7 +6,6 @@
 //  - Stale Bearer header 401 üretiyorsa path bazlı bypass
 //  - Refresh concurrency (tek refresh in-flight)
 //  - MaybePromise uyumlu (no .finally())
-//  - Unused params temiz
 //  - ✅ FIX: FormData (multipart) body varsa Content-Type asla set edilmez
 //           (PDF upload dahil). Varsa kaldırılır ki boundary bozulmasın.
 // =============================================================
@@ -146,7 +145,6 @@ function shouldBypassAuthHeader(path: string): boolean {
 const rawBaseQuery: RBQ = fetchBaseQuery({
   baseUrl: BASE_URL,
   credentials: 'include',
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   prepareHeaders: (headers) => {
     // `x-skip-auth` ile refresh işleminde auth'u bypass et
     if (headers.get('x-skip-auth') === '1') {
@@ -231,7 +229,6 @@ function stripAuthHeaderIfNeeded(req: FetchArgs, cleanPath: string): FetchArgs {
 let refreshInFlight: Promise<RawResult> | null = null;
 
 async function runRefresh(api: any, extra: any): Promise<RawResult> {
-  // rawBaseQuery MaybePromise dönebileceği için Promise.resolve ile sarıyoruz
   const r = await Promise.resolve(
     rawBaseQuery(
       {
@@ -257,13 +254,12 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
     }
 
     req = stripAuthHeaderIfNeeded(req, cleanPath);
-    req = ensureJson(req); // ✅ burada FormData Content-Type cleanup da yapılır
+    req = ensureJson(req);
   }
 
   let result: RawResult = (await Promise.resolve(rawBaseQuery(req, api, extra))) as RawResult;
 
   if (result.error?.status === 401 && !AUTH_SKIP_REAUTH.has(cleanPath)) {
-    // Refresh dene (tek sefer)
     if (!refreshInFlight) {
       refreshInFlight = (async () => {
         try {
@@ -290,7 +286,7 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
           retry.headers = { ...(retry.headers || {}), 'x-skip-auth': '1' };
         }
         retry = stripAuthHeaderIfNeeded(retry, retryCleanPath);
-        retry = ensureJson(retry); // ✅ retry'da da FormData cleanup
+        retry = ensureJson(retry);
       }
 
       result = (await Promise.resolve(rawBaseQuery(retry, api, extra))) as RawResult;

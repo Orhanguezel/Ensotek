@@ -1,4 +1,4 @@
-// src/components/common/ScrollProgress.tsx
+// src/layout/ScrollProgress.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
