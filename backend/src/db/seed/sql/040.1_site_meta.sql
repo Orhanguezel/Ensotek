@@ -4,14 +4,14 @@
 --
 -- Goals:
 --   - Fix SEO tool warnings:
---       * Meta title: remove disallowed characters (avoid: | & etc.)
+--       * Meta title: avoid disallowed characters (avoid: | & " ' < > etc.)
 --       * Meta description: keep <= ~160 chars
 --   - Future-proof:
 --       * seo + site_seo: global fallback => locale='*'
 --       * seo + site_seo: localized overrides => locale IN ('tr','en','de')
 --       * site_meta_default: add '*' fallback + per-locale overrides
 --   - DRY:
---       * OG default image URL tek kaynaktan gelir:
+--       * OG default image URL single source:
 --         site_settings(key='site_og_default_image', locale='*')
 -- =============================================================
 
@@ -42,19 +42,14 @@ CREATE TABLE IF NOT EXISTS `site_settings` (
 -- Helpers
 -- -------------------------------------------------------------
 -- OG DEFAULT:
--- 1) Önce site_og_default_image (locale='*') kaydından 'url' alanını bul.
--- 2) Eğer value JSON değilse, direkt value'yu kullan.
--- 3) Kayıt yoksa veya url boşsa '/img/og-default.jpg' fallback kullan.
---
--- ÖNEMLİ: 040_site_settings.sql içindeki "Site Media" seed'inin
--- bu dosyadan ÖNCE çalıştığından emin ol (dosya sırası buna göre).
+-- 1) First try site_og_default_image (locale='*') JSON -> $.url
+-- 2) If not JSON, use value as plain URL
+-- 3) If missing/empty, fallback to '/img/og-default.jpg'
 -- -------------------------------------------------------------
 SET @OG_DEFAULT := COALESCE(
   (
     SELECT COALESCE(
-      -- JSON format: { "url": "..." }
       JSON_UNQUOTE(JSON_EXTRACT(`value`, '$.url')),
-      -- Non-JSON format: plain URL string
       NULLIF(`value`, '')
     )
     FROM `site_settings`
@@ -66,22 +61,37 @@ SET @OG_DEFAULT := COALESCE(
   '/img/og-default.jpg'
 );
 
+-- -------------------------------------------------------------
 -- Title policies:
--- - Avoid: | & " ' < > etc. (some SEO tools flag these)
+-- - Avoid: | & " ' < > etc.
 -- - Use: "–" as separator, and "and/und/ve" instead of "&"
+-- -------------------------------------------------------------
 
-SET @BRAND_TR := 'Ensotek Su Sogutma Kuleleri ve Teknolojileri';
-SET @BRAND_EN := 'Ensotek Cooling Towers and Technologies';
-SET @BRAND_DE := 'Ensotek Kuehltuerme und Technologien';
+-- Brand / default titles (ASCII-safe: use Sogutma, Kuehltuerme etc.)
+SET @BRAND_TR := 'Ensotek – Endustriyel Su Sogutma Kuleleri ve Muhendislik';
+SET @BRAND_EN := 'Ensotek – Industrial Cooling Towers and Engineering';
+SET @BRAND_DE := 'Ensotek – Industrielle Kuehltuerme und Engineering';
+
+-- Site name (shorter, neutral)
+SET @SITE_NAME_GLOBAL := 'Ensotek Industrial Cooling Towers';
+
+-- Global default title (must NOT be single word)
+SET @TITLE_GLOBAL := 'Ensotek Industrial Cooling Towers and Engineering';
 
 -- Concise descriptions (target: ~150-160 chars)
 SET @DESC_TR := 'CTP malzemeden acik ve kapali tip su sogutma kuleleri. Imaalat ve montaj. Bakim, onarim, modernizasyon, test ve yedek parca.';
 SET @DESC_EN := 'Open and closed-circuit FRP cooling towers. Manufacturing and installation. Maintenance, repair, modernization, performance testing and spare parts.';
 SET @DESC_DE := 'Offene und geschlossene GFK Kuehltuerme. Herstellung und Montage. Wartung, Reparatur, Modernisierung, Leistungstests und Ersatzteile.';
 
+-- Global concise description
+SET @DESC_GLOBAL := 'Industrial cooling towers, engineering, installation and service solutions for efficient process cooling.';
+
+-- Global keywords (neutral)
+SET @KW_GLOBAL := 'ensotek, cooling tower, industrial cooling, FRP, engineering, installation, service';
+
 -- =============================================================
--- GLOBAL SEO DEFAULTS (locale='*')  --> NÖTR/GENEL DEFAULT
--- OG image: @OG_DEFAULT (site_og_default_image'tan gelir)
+-- GLOBAL SEO DEFAULTS (locale='*')  --> neutral fallback
+-- OG image: @OG_DEFAULT (single source)
 -- =============================================================
 
 -- PRIMARY: seo (GLOBAL DEFAULT)
@@ -96,10 +106,10 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek',
+      'site_name',      @SITE_NAME_GLOBAL,
+      'title_default',  @TITLE_GLOBAL,
       'title_template', '%s – Ensotek',
-      'description',    'Industrial cooling solutions and cooling towers.',
+      'description',    @DESC_GLOBAL,
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -135,10 +145,10 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'site_name',      'Ensotek',
-      'title_default',  'Ensotek',
+      'site_name',      @SITE_NAME_GLOBAL,
+      'title_default',  @TITLE_GLOBAL,
       'title_template', '%s – Ensotek',
-      'description',    'Industrial cooling solutions and cooling towers.',
+      'description',    @DESC_GLOBAL,
       'open_graph', JSON_OBJECT(
         'type',   'website',
         'images', JSON_ARRAY(@OG_DEFAULT)
@@ -164,7 +174,7 @@ ON DUPLICATE KEY UPDATE
 
 -- =============================================================
 -- LOCALIZED SEO OVERRIDES (tr/en/de)
--- OG image burada da @OG_DEFAULT'ten gelir (tek kaynak)
+-- OG image uses @OG_DEFAULT (single source)
 -- =============================================================
 
 -- seo overrides
@@ -261,7 +271,7 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
--- site_seo overrides (fallback) – seo ile aynı tutulur (kopya)
+-- site_seo overrides (fallback) – keep identical to seo (copy)
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (
@@ -307,9 +317,9 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'title',       'Ensotek',
-      'description', 'Industrial cooling solutions and cooling towers.',
-      'keywords',    'ensotek, cooling tower, industrial cooling, FRP'
+      'title',       @TITLE_GLOBAL,
+      'description', @DESC_GLOBAL,
+      'keywords',    @KW_GLOBAL
     ) AS CHAR CHARACTER SET utf8mb4
   ),
   NOW(3),

@@ -24,7 +24,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8006-1111-4111-8111-bbbbbbbb8006',
   1,1,40,
-  NULL,'https://www.ensotek.de/uploads/services/automation_and_scada.png',NULL,
+  NULL,'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767320750/services/cover/automation_and_scada.png',NULL,
   'Monitoring / control / reporting',
   '2–8 weeks (scope dependent)',
   'Periodic calibration & verification recommended',

@@ -25,7 +25,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8003-1111-4111-8111-bbbbbbbb8003',
   1,1,20,
-  NULL,'https://www.ensotek.de/uploads/services/modernization_and_retrofit.png',NULL,
+  NULL,'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767320683/services/cover/modernization_and_retrofit.png',NULL,
   'Capacity increase / efficiency improvement',
   '1–6 weeks (analysis + implementation)',
   'Recommended together with maintenance planning',

@@ -365,7 +365,7 @@ ON DUPLICATE KEY UPDATE
 INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
 VALUES
 (UUID(), 'gtm_container_id',   '*', 'GTM-WV5FRN93', NOW(3), NOW(3)),
-(UUID(), 'ga4_measurement_id', '*', 'G-JXG2XVVQ8C', NOW(3), NOW(3))
+(UUID(), 'ga4_measurement_id', '*', 'G-7S6TW9CNRJ', NOW(3), NOW(3))
 ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);

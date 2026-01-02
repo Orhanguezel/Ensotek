@@ -50,7 +50,7 @@ VALUES (
   'aaaa0003-1111-4111-8111-aaaaaaaa0003',
   'bbbb0201-1111-4111-8111-bbbbbbbb0201',
   0.00,
-  'https://www.ensotek.de/uploads/product/closed-circuit-cooling-tower-1-250x250-1.png',
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767321365/products/cover/closed-circuit-cooling-tower-1-250x250-1.png',
   NULL,
   JSON_ARRAY(
     'https://www.ensotek.de/uploads/material/closed-circuit-cooling-tower-1-250x250-1.jpg',

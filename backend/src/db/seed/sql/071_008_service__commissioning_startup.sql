@@ -25,7 +25,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8006-1111-4111-8111-bbbbbbbb8006',
   1,1,80,
-  NULL,'https://www.ensotek.de/uploads/services/commissioning_and_startup.png',NULL,
+  NULL,'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767321196/services/cover/commissioning_and_startup.png',NULL,
   'Installation coordination / commissioning / training',
   '1 day – 2 weeks (project dependent)',
   'Handover checklist & initial maintenance plan included',

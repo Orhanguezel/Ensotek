@@ -24,7 +24,7 @@ VALUES
   'aaaa8001-1111-4111-8111-aaaaaaaa8001',
   'bbbb8006-1111-4111-8111-bbbbbbbb8006',
   1,1,50,
-  NULL,'https://www.ensotek.de/uploads/services/engineering_support.png',NULL,
+  NULL,'https://res.cloudinary.com/dbozv7wqd/image/upload/v1767320817/services/cover/engineering_support.png',NULL,
   'Design / consulting / optimization',
   '2–8 weeks (scope dependent)',
   'Optional periodic review + reporting',

@@ -33,7 +33,7 @@ const nextConfig = {
       { protocol: 'https', hostname: 'cdn.example.com', pathname: '/**' },
 
       { protocol: 'https', hostname: 'ensotek.de', pathname: '/**' },
-      { protocol: 'https', hostname: 'ensotek.de', pathname: '/**' },
+      { protocol: 'https', hostname: 'www.ensotek.de', pathname: '/**' },
       { protocol: 'https', hostname: 'cdn.ensotek.de', pathname: '/**' },
       { protocol: 'https', hostname: 'your-real-cdn.com', pathname: '/**' },
     ],
