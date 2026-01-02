@@ -1,4 +1,12 @@
-// src/components/containers/library/LibraryPdfPreview.tsx
+// =============================================================
+// FILE: src/components/containers/library/LibraryPdfPreview.tsx
+// Ensotek – PDF Preview (FINAL / CLOUDINARY-SAFE)
+// FIX:
+// - Cloudinary PDF URL may come as /image/upload/.../*.pdf (wrong delivery type)
+//   => rewrite to /raw/upload/.../*.pdf
+// - Keeps existing /api/uploads -> /uploads normalization logic
+// =============================================================
+
 'use client';
 
 import React, { useMemo } from 'react';
@@ -9,9 +17,7 @@ type Props = {
   height?: number;
 };
 
-function safeStr(v: unknown): string {
-  return String(v ?? '').trim();
-}
+const safeStr = (v: unknown) => String(v ?? '').trim();
 
 function getFileBase(): string {
   const envBase = safeStr(
@@ -20,81 +26,89 @@ function getFileBase(): string {
 
   if (envBase) return envBase;
 
-  if (typeof window !== 'undefined' && window.location?.origin) {
-    return safeStr(window.location.origin).replace(/\/+$/, '');
+  if (typeof window !== 'undefined' && window.location) {
+    const origin = safeStr(window.location.origin).replace(/\/+$/, '');
+    if (origin) return origin;
   }
 
+  // fallback
   return 'https://www.ensotek.de';
 }
 
 /**
- * Key fix:
- * - Absolute URL includes /api/uploads => normalize to /uploads
- * - Relative /api/uploads => /uploads
+ * Cloudinary PDF fix:
+ * - If URL is Cloudinary and ends with .pdf, and path contains /image/upload/,
+ *   rewrite to /raw/upload/
  */
-function normalizeApiUploadsEverywhere(raw: string): string {
-  const s = safeStr(raw);
-  if (!s) return '';
+function normalizeCloudinaryPdfUrl(input: string): string {
+  const url = safeStr(input);
+  if (!url) return '';
 
-  // Absolute URL case
-  if (/^https?:\/\//i.test(s)) {
-    try {
-      const u = new URL(s);
-      // /api/uploads/... => /uploads/...
-      if (u.pathname === '/api/uploads') u.pathname = '/uploads';
-      if (u.pathname.startsWith('/api/uploads/'))
-        u.pathname = u.pathname.replace(/^\/api\/uploads\//, '/uploads/');
-      return u.toString();
-    } catch {
-      // fallthrough
-    }
+  const lower = url.toLowerCase();
+  if (!lower.includes('res.cloudinary.com')) return url;
+
+  // Must look like a PDF
+  const base = lower.split('?')[0].split('#')[0];
+  if (!base.endsWith('.pdf')) return url;
+
+  // If already raw/upload, keep it
+  if (lower.includes('/raw/upload/')) return url;
+
+  // Rewrite image/upload -> raw/upload
+  if (lower.includes('/image/upload/')) {
+    return url.replace('/image/upload/', '/raw/upload/');
   }
 
-  // Relative case
-  if (s === '/api/uploads') return '/uploads';
-  if (s.startsWith('/api/uploads/')) return s.replace(/^\/api/, '');
-
-  return s;
+  // If for some reason it's /upload/ without resource type, do nothing
+  return url;
 }
 
 function normalizePdfPath(pdfUrl: string): string {
-  const s0 = normalizeApiUploadsEverywhere(pdfUrl);
-  const s = safeStr(s0);
-  if (!s) return '';
+  const s = safeStr(pdfUrl);
+  if (!s) return '/uploads';
 
-  // If absolute after normalization, return as is
+  // absolute URLs handled elsewhere
   if (/^https?:\/\//i.test(s)) return s;
 
   const [pathOnly, suffix = ''] = s.split(/(?=[?#])/);
 
-  // strip any accidental host
   const cleaned = String(pathOnly).replace(/^https?:\/\/[^/]+/i, '');
-  const p = cleaned.startsWith('/') ? cleaned : `/${cleaned}`;
+  let p = cleaned.startsWith('/') ? cleaned : `/${cleaned}`;
 
-  // already fine
+  // collapse accidental /api/api
+  while (p.startsWith('/api/api/')) p = p.replace('/api/api/', '/api/');
+
+  // normalize legacy api uploads
+  if (p === '/api/uploads') return `/uploads${suffix}`;
+  if (p.startsWith('/api/uploads/')) return `${p.replace(/^\/api/, '')}${suffix}`;
+
+  // already uploads
   if (p === '/uploads' || p.startsWith('/uploads/')) return `${p}${suffix}`;
 
-  // if contains /uploads/ somewhere
+  // if it contains uploads segment anywhere
   const idx = p.indexOf('/uploads/');
   if (idx >= 0) return `${p.substring(idx)}${suffix}`;
 
-  // last resort: treat as relative under uploads
-  return `/uploads/${p.replace(/^\/+/, '')}${suffix}`.replace(
-    /^\/uploads\/uploads(\/|$)/,
-    '/uploads$1',
-  );
+  // final fallback
+  return `/uploads${p}${suffix}`.replace(/^\/uploads\/uploads(\/|$)/, '/uploads$1');
 }
 
 function buildIframeSrc(pdfUrl: string | null): string | null {
   const raw = safeStr(pdfUrl);
   if (!raw) return null;
 
-  const normalized = normalizePdfPath(raw);
+  // Absolute URL
+  if (/^https?:\/\//i.test(raw)) {
+    // ✅ Cloudinary PDF correction
+    const fixedCloudinary = normalizeCloudinaryPdfUrl(raw);
+    return fixedCloudinary;
+  }
 
-  // If normalized is absolute url, use it directly
-  if (/^https?:\/\//i.test(normalized)) return normalized;
+  // Relative path => attach to our site base
+  const fileBase = getFileBase();
+  const normalized = normalizePdfPath(raw); // "/uploads/..."
+  const base = String(fileBase).replace(/\/+$/, '');
 
-  const base = getFileBase();
   return `${base}${normalized.startsWith('/') ? '' : '/'}${normalized}`;
 }
 
