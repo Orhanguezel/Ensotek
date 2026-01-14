@@ -16,7 +16,7 @@ import { useRouter } from 'next/router';
 
 // RTK
 import { useListProductsQuery } from '@/integrations/rtk/hooks';
-import type { ProductDto } from '@/integrations/types/product.types';
+import type { ProductDto } from '@/integrations/types';
 
 // helpers
 import { toCdnSrc } from '@/shared/media';

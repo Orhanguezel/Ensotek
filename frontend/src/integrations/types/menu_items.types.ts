@@ -2,18 +2,13 @@
 // FILE: src/integrations/types/menu_items.types.ts
 // Ensotek – Menu Items shared types (Admin + Public)
 // =============================================================
+import { BoolLike } from '@/integrations/types';
+
 
 export type MenuLocation = "header" | "footer";
 export type MenuItemType = "page" | "custom";
 
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false";
+
 
 // ---------------- PUBLIC DTO ----------------
 

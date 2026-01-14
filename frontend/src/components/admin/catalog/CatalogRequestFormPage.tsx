@@ -8,7 +8,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import type { CatalogRequestDto } from '@/integrations/types/catalog.types';
+import type { CatalogRequestDto } from '@/integrations/types';
 import {
   useGetCatalogRequestAdminQuery,
   usePatchCatalogRequestAdminMutation,

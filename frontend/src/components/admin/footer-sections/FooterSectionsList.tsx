@@ -11,7 +11,7 @@
 'use client';
 
 import React from 'react';
-import type { FooterSectionDto } from '@/integrations/types/footer_sections.types';
+import type { FooterSectionDto } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

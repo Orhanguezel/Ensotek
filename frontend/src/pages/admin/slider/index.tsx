@@ -22,7 +22,7 @@ import {
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 
-import type { SliderAdminDto } from '@/integrations/types/slider.types';
+import type { SliderAdminDto } from '@/integrations/types';
 import type { LocaleOption } from '@/components/admin/categories/CategoriesHeader';
 
 import { SliderHeader } from '@/components/admin/slider/SliderHeader';

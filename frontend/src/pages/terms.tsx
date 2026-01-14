@@ -32,7 +32,7 @@ import {
   useGetSiteSettingByKeyQuery,
   useListCustomPagesPublicQuery,
 } from '@/integrations/rtk/hooks';
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+import type { CustomPageDto } from '@/integrations/types';
 
 // helpers
 import { excerpt } from '@/shared/text';

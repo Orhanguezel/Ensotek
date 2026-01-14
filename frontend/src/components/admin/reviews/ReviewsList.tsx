@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/router';
-import type { AdminReviewDto } from '@/integrations/types/review_admin.types';
+import type { AdminReviewDto } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

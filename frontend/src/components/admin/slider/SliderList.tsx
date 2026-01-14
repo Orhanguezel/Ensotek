@@ -13,7 +13,7 @@
 // =============================================================
 
 import React, { useState } from 'react';
-import type { SliderAdminDto } from '@/integrations/types/slider.types';
+import type { SliderAdminDto } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

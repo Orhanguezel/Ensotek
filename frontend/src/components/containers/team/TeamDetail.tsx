@@ -15,7 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { useGetCustomPageBySlugPublicQuery } from '@/integrations/rtk/hooks';
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+import type { CustomPageDto } from '@/integrations/types';
 
 import { toCdnSrc } from '@/shared/media';
 

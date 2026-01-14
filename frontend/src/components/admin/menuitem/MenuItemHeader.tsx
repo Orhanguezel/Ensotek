@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { MenuLocation } from '@/integrations/types/menu_items.types';
+import type { MenuLocation } from '@/integrations/types';
 
 export type LocaleOption = {
   value: string;

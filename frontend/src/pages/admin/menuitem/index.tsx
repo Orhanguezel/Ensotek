@@ -22,7 +22,7 @@ import {
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 
-import type { AdminMenuItemDto } from '@/integrations/types/menu_items.types';
+import type { AdminMenuItemDto } from '@/integrations/types';
 
 /* -------------------- helpers -------------------- */
 

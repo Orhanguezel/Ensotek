@@ -4,13 +4,13 @@ import React, { useEffect, useMemo, useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import type { OfferRow } from '@/integrations/types/offers.types';
+import type { OfferRow } from '@/integrations/types';
 import {
   useCreateOfferAdminMutation,
   useUpdateOfferAdminMutation,
   useGenerateOfferPdfAdminMutation,
   useSendOfferEmailAdminMutation,
-} from '@/integrations/rtk/endpoints/admin/offers_admin.endpoints';
+} from '@/integrations/rtk/hooks';
 
 import { OfferForm, type OfferFormValues } from './OfferForm';
 import { OfferFormHeader, type OfferFormEditMode } from './OfferFormHeader';

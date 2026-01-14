@@ -5,7 +5,7 @@
 // =============================================================
 
 /** Backend'deki boolLike ile uyumlu tip */
-export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false' | 'yes' | 'no';
+import type { BoolLike } from '@/integrations/types';
 
 export type ProductItemType = 'product' | 'sparepart';
 

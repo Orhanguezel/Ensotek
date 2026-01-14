@@ -3,7 +3,7 @@
 // Admin Product Specs
 // =============================================================
 
-import type { ProductSpecCategory } from "./product.types";
+import type { ProductSpecCategory } from '@/integrations/types';
 
 export type AdminProductSpecDto = {
   id: string;

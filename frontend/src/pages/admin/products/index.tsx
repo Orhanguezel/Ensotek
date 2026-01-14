@@ -13,10 +13,15 @@ import { toast } from 'sonner';
 import { ProductsHeader, type ProductFilters } from '@/components/admin/products/ProductsHeader';
 import { ProductsList } from '@/components/admin/products/ProductsList';
 
-import type { ProductDto } from '@/integrations/types/product.types';
-import type { AdminProductListResponse } from '@/integrations/types/product_admin.types';
+import type {
+  ProductDto,
+  AdminProductListResponse
+} from '@/integrations/types';
 
-import { useListProductsAdminQuery, useDeleteProductAdminMutation } from '@/integrations/rtk/hooks';
+import {
+  useListProductsAdminQuery,
+  useDeleteProductAdminMutation
+} from '@/integrations/rtk/hooks';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 import { resolveAdminApiLocale } from '@/i18n/adminLocale';

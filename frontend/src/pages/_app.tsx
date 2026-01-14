@@ -17,7 +17,7 @@ import 'aos/dist/aos.css';
 import 'nprogress/nprogress.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
-import '@/integrations/rtk/endpoints/_register';
+import '@/integrations/rtk/public/_register';
 
 import { StoreProvider } from '@/store';
 import LangBoot from '@/i18n/LangBoot';

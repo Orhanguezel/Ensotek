@@ -12,7 +12,7 @@
 'use client';
 
 import React from 'react';
-import type { ContactDto, ContactStatus } from '@/integrations/types/contacts.types';
+import type { ContactDto, ContactStatus } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

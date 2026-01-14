@@ -22,7 +22,7 @@ import {
   useGetCustomPageBySlugPublicQuery,
   useListCustomPagesPublicQuery,
 } from '@/integrations/rtk/hooks';
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+import type { CustomPageDto } from '@/integrations/types';
 
 // Helpers
 import { toCdnSrc } from '@/shared/media';

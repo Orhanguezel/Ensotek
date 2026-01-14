@@ -10,7 +10,7 @@
 'use client';
 
 import React from 'react';
-import type { EmailTemplateAdminListItemDto } from '@/integrations/types/email_templates.types';
+import type { EmailTemplateAdminListItemDto } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

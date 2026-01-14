@@ -19,7 +19,7 @@ import { AdminImageUploadField } from '@/components/common/AdminImageUploadField
 import type {
   ProductImageDto,
   ProductImageCreatePayload,
-} from '@/integrations/types/product_images_admin.types';
+} from '@/integrations/types';
 
 import {
   useListProductImagesAdminQuery,

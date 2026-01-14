@@ -16,7 +16,7 @@ import type {
   AdminProductFaqDto,
   AdminProductFaqCreatePayload,
   AdminProductFaqListParams,
-} from "@/integrations/types/product_faqs_admin.types";
+} from "@/integrations/types";
 
 import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
 

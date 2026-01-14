@@ -17,7 +17,7 @@ import {
 import { ReviewsList } from '@/components/admin/reviews/ReviewsList';
 
 import { useListReviewsAdminQuery, useDeleteReviewAdminMutation } from '@/integrations/rtk/hooks';
-import type { AdminReviewDto } from '@/integrations/types/review_admin.types';
+import type { AdminReviewDto } from '@/integrations/types';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 

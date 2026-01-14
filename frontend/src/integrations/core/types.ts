@@ -1,9 +1,9 @@
 // src/integrations/core/types.ts
 
-export type UserRole = import("@/integrations/types/users").UserRoleName;
+export type UserRole = import("@/integrations/types").UserRoleName;
 
 // FE User tipini, users.ts içindeki ile aynı yap:
-export type User = import("@/integrations/types/users").User;
+export type User = import("@/integrations/types").User;
 
 export type UserMetadata =
   | {

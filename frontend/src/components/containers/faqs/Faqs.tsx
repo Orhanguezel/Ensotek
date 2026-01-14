@@ -14,7 +14,7 @@ import Link from 'next/link';
 
 // RTK – PUBLIC FAQs
 import { useListFaqsQuery } from '@/integrations/rtk/hooks';
-import { type FaqDto, type Faq, normalizeFaq } from '@/integrations/types/faqs.types';
+import { type FaqDto, type Faq, normalizeFaq } from '@/integrations/types';
 
 // Pattern + fallback görseller (library ile aynı görsel pattern)
 import One from 'public/img/shape/features-shape.png';

@@ -5,7 +5,7 @@
 // - Endpoints: public + admin routes (router.ts / admin.routes.ts)
 // =============================================================
 
-export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
+import { BoolLike } from '@/integrations/types';
 
 /* =============================================================
  * DTOs (response contracts)

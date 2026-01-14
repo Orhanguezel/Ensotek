@@ -11,9 +11,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
-import type { CategoryDto } from '@/integrations/types/category.types';
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
+import type { CustomPageDto, CategoryDto, SubCategoryDto } from '@/integrations/types';
 
 import type { LocaleOption } from './CustomPageHeader';
 import { AdminJsonEditor } from '@/components/common/AdminJsonEditor';

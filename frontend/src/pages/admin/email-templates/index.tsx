@@ -20,7 +20,7 @@ import {
 import type {
   EmailTemplateAdminListItemDto,
   EmailTemplateAdminListQueryParams,
-} from '@/integrations/types/email_templates.types';
+} from '@/integrations/types';
 
 import {
   EmailTemplateHeader,

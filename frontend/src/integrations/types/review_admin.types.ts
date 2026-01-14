@@ -8,7 +8,7 @@ import type {
   ReviewListQueryParams,
   ReviewCreatePayload,
   ReviewUpdatePayload,
-} from "./review.types";
+} from '@/integrations/types';
 
 export type AdminReviewDto = ReviewDto;
 

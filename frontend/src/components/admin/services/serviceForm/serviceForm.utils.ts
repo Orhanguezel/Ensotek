@@ -3,8 +3,7 @@
 // Ensotek – ServiceForm helpers (normalize/build)
 // =============================================================
 
-import type { ServiceDto } from '@/integrations/types/services.types';
-import type { ServiceFormValues } from './serviceForm.types';
+import type { ServiceDto,ServiceFormValues } from '@/integrations/types';
 
 export const normalizeLocale = (v: unknown): string => {
   const s = typeof v === 'string' ? v.trim().toLowerCase() : '';

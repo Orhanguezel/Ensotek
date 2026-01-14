@@ -28,7 +28,7 @@ import { toCdnSrc } from '@/shared/media';
 import { excerpt } from '@/shared/text';
 
 import { useListCustomPagesPublicQuery } from '@/integrations/rtk/hooks';
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+import type { CustomPageDto } from '@/integrations/types';
 
 const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 

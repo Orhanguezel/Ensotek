@@ -11,8 +11,8 @@
 import React, { useMemo, useState, useEffect, useId, useCallback } from 'react';
 
 import { useListFaqsQuery } from '@/integrations/rtk/hooks';
-import type { FaqDto } from '@/integrations/types/faqs.types';
-import { normalizeFaq } from '@/integrations/types/faqs.types';
+import type { FaqDto } from '@/integrations/types';
+import { normalizeFaq } from '@/integrations/types';
 
 // i18n (PATTERN)
 import { useLocaleShort } from '@/i18n/useLocaleShort';

@@ -4,14 +4,7 @@
 // Backend: src/modules/references/*
 // =============================================================
 
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false";
+import type { BoolLike } from '@/integrations/types';
 
 /* -------------------------------------------------------------
  * LIST QUERY (public + admin ortak)

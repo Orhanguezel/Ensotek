@@ -12,9 +12,11 @@ import React, { useEffect, useMemo } from 'react';
 
 import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 
-import type { BoolLike } from '@/integrations/types/services.types';
-import type { CategoryDto } from '@/integrations/types/category.types';
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
+import type {
+  BoolLike,
+  CategoryDto,
+  SubCategoryDto
+ } from '@/integrations/types';
 
 import {
   useListCategoriesAdminQuery,

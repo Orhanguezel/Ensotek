@@ -28,7 +28,7 @@ import { FaStar } from 'react-icons/fa';
 
 // RTK – Public reviews
 import { useCreateReviewPublicMutation, useListReviewsPublicQuery } from '@/integrations/rtk/hooks';
-import type { ReviewCreatePayload, ReviewDto } from '@/integrations/types/review.types';
+import type { ReviewCreatePayload, ReviewDto } from '@/integrations/types';
 
 // Helpers
 import { excerpt } from '@/shared/text';

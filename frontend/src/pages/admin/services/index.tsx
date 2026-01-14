@@ -26,7 +26,7 @@ import {
 import type {
   ServiceListAdminQueryParams,
   ServiceDto,
-} from "@/integrations/types/services.types";
+} from "@/integrations/types";
 
 import type { AdminLocaleOption } from "@/components/common/AdminLocaleSelect";
 

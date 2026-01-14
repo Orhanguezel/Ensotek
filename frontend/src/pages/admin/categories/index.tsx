@@ -18,7 +18,7 @@ import {
   useToggleCategoryFeaturedAdminMutation,
 } from '@/integrations/rtk/hooks';
 
-import type { CategoryDto } from '@/integrations/types/category.types';
+import type { CategoryDto } from '@/integrations/types';
 import type { LocaleOption, ModuleOption } from '@/components/admin/categories/CategoriesHeader';
 import { CategoriesHeader } from '@/components/admin/categories/CategoriesHeader';
 import { CategoriesList } from '@/components/admin/categories/CategoriesList';

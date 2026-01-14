@@ -17,7 +17,7 @@ import {
 import type {
   AdminSupportTicketDto,
   AdminSupportTicketListQueryParams,
-} from "@/integrations/types/support.types";
+} from "@/integrations/types";
 
 const AdminSupportIndexPage: NextPage = () => {
   const [filters, setFilters] = useState<SupportFilters>({

@@ -13,7 +13,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { ProductDto, ProductSpecifications } from '@/integrations/types/product.types';
+import type { ProductDto, ProductSpecifications } from '@/integrations/types';
 
 import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 

@@ -3,7 +3,7 @@
 // Admin Product Reviews
 // =============================================================
 
-import type { BoolLike } from "./product.types";
+import type { BoolLike } from '@/integrations/types';
 
 export type AdminProductReviewDto = {
   id: string;

@@ -26,7 +26,7 @@ import type {
   CatalogRequestDto,
   CatalogRequestListQueryParams,
   CatalogRequestStatus,
-} from '@/integrations/types/catalog.types';
+} from '@/integrations/types';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 

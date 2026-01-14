@@ -4,7 +4,7 @@
 // =============================================================
 
 import React from 'react';
-import type { StorageAsset } from '@/integrations/types/storage';
+import type { StorageAsset } from '@/integrations/types';
 import {
   Pagination,
   PaginationContent,

@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import Image, { type StaticImageData } from 'next/image';
 
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
-import type { SettingValue } from '@/integrations/types/site_settings.types';
+import type { SettingValue } from '@/integrations/types';
 
 type Variant = 'default' | 'dark' | 'light';
 

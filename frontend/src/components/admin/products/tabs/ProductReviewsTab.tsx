@@ -16,7 +16,7 @@ import {
 import type {
   AdminProductReviewDto,
   AdminProductReviewCreatePayload,
-} from "@/integrations/types/product_reviews_admin.types";
+} from "@/integrations/types";
 
 export type ProductReviewsTabProps = {
   productId?: string;

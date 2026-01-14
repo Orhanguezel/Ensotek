@@ -3,7 +3,8 @@
 // Admin Products (CRUD + Images)
 // =============================================================
 
-import type { ProductDto, ProductSpecifications, BoolLike } from './product.types';
+import type {ProductDto, ProductSpecifications,BoolLike } from '@/integrations/types';
+
 
 export type AdminProductDto = ProductDto;
 

@@ -3,7 +3,7 @@
 // Ensotek – Admin Users tipleri
 // =============================================================
 
-import type { UserRoleName } from "@/integrations/types/users";
+import type { UserRoleName } from '@/integrations/types';
 
 /**
  * Backend rolleri:

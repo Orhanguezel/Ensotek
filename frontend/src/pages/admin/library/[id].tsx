@@ -13,7 +13,7 @@ import { useRouter } from "next/router";
 import { useAdminLocales } from "@/components/common/useAdminLocales";
 import { useGetLibraryAdminQuery } from "@/integrations/rtk/hooks";
 import LibraryFormPage from "@/components/admin/library/LibraryFormPage";
-import type { LibraryDto } from "@/integrations/types/library.types";
+import type { LibraryDto } from "@/integrations/types";
 
 function pickFirstString(v: unknown): string | undefined {
   if (typeof v === "string") return v;

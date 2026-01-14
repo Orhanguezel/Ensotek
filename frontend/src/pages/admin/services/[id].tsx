@@ -14,7 +14,6 @@ import { toast } from 'sonner';
 import {
   ServiceForm,
 } from '@/components/admin/services/serviceForm/ServiceForm';
-import type { ServiceFormValues } from '@/components/admin/services/serviceForm/serviceForm.types';
 
 import {
   useGetServiceAdminQuery,
@@ -29,7 +28,8 @@ import {
 import type {
   ServiceCreatePayload,
   ServiceUpdatePayload,
-} from '@/integrations/types/services.types';
+  ServiceFormValues
+} from '@/integrations/types';
 
 import type { AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 

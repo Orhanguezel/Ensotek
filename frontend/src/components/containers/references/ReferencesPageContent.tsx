@@ -31,9 +31,11 @@ import {
   useListSubCategoriesQuery,
 } from '@/integrations/rtk/hooks';
 
-import type { ReferenceDto } from '@/integrations/types/references.types';
-import type { CategoryDto } from '@/integrations/types/category.types';
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
+import type {
+  ReferenceDto,
+  CategoryDto,
+  SubCategoryDto
+ } from '@/integrations/types';
 
 // Pagination UI
 import {

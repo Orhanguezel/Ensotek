@@ -8,7 +8,7 @@ import type {
   AdminSupportTicketDto,
   SupportTicketPriority,
   SupportTicketStatus,
-} from "@/integrations/types/support.types";
+} from "@/integrations/types";
 
 export type SupportFormValues = {
   user_id: string;

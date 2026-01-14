@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { MenuItemType } from '@/integrations/types/menu_items.types';
+import type { MenuItemType } from '@/integrations/types';
 
 export type MenuItemFormValues = {
   title: string;

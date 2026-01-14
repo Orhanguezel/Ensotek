@@ -13,7 +13,7 @@ import Image, { type StaticImageData } from 'next/image';
 import Link from 'next/link';
 
 import { useListLibraryQuery } from '@/integrations/rtk/hooks';
-import type { LibraryDto } from '@/integrations/types/library.types';
+import type { LibraryDto } from '@/integrations/types';
 
 // Pattern + fallback görseller
 import One from 'public/img/shape/features-shape.png';

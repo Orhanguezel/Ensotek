@@ -32,7 +32,7 @@ import {
   BrandMediaTab,
 } from '@/components/admin/site-settings/tabs';
 
-import type { AppLocaleItem, SiteSetting } from '@/integrations/types/site_settings.types';
+import type { AppLocaleItem, SiteSetting } from '@/integrations/types';
 
 type SettingsScope = 'localized' | 'global' | 'mixed';
 

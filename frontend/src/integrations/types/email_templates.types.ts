@@ -2,15 +2,7 @@
 // FILE: src/integrations/types/email_templates.types.ts
 // Email Templates – Tipler (public + admin)
 // =============================================================
-
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false";
+import { BoolLike } from '@/integrations/types';
 
 /* -------------------- PUBLIC DTO'lar -------------------- */
 

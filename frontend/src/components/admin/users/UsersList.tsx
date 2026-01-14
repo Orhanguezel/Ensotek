@@ -5,7 +5,7 @@
 // =============================================================
 
 import React, { useEffect, useState } from "react";
-import type { AdminUserDto } from "@/integrations/types/admin_users.types";
+import type { AdminUserDto } from "@/integrations/types";
 import {
   Pagination,
   PaginationContent,

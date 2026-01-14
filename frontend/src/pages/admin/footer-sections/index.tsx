@@ -25,9 +25,10 @@ import {
 } from '@/integrations/rtk/hooks';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
-
-import type { FooterSectionDto } from '@/integrations/types/footer_sections.types';
-import type { AdminMenuItemDto } from '@/integrations/types/menu_items.types';
+import type {
+  FooterSectionDto,
+  AdminMenuItemDto
+} from '@/integrations/types';
 
 import {
   FooterSectionsHeader,

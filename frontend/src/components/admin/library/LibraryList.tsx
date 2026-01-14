@@ -13,7 +13,7 @@
 'use client';
 
 import React from 'react';
-import type { LibraryDto } from '@/integrations/types/library.types';
+import type { LibraryDto } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

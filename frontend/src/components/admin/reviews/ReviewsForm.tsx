@@ -4,7 +4,7 @@
 // =============================================================
 
 import React, { useEffect, useState } from 'react';
-import type { AdminReviewDto } from '@/integrations/types/review_admin.types';
+import type { AdminReviewDto } from '@/integrations/types';
 import type { LocaleOption } from './ReviewsHeader';
 
 export type ReviewFormValues = {

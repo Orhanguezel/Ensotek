@@ -3,7 +3,7 @@
 // Public Reviews
 // =============================================================
 
-export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false' | 'yes' | 'no';
+import type { BoolLike } from '@/integrations/types';
 
 export type ReviewDto = {
   id: string;

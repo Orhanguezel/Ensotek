@@ -10,7 +10,7 @@ import React, { useEffect, useMemo, useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import type { ReferenceDto } from '@/integrations/types/references.types';
+import type { ReferenceDto } from '@/integrations/types';
 import type { LocaleOption } from '@/components/admin/categories/CategoriesHeader';
 
 import {

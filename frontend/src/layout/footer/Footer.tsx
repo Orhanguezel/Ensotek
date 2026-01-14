@@ -24,8 +24,10 @@ import {
   useListMenuItemsQuery,
 } from '@/integrations/rtk/hooks';
 
-import type { FooterSectionDto } from '@/integrations/types/footer_sections.types';
-import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
+import type {
+  FooterSectionDto,
+  PublicMenuItemDto
+ } from '@/integrations/types';
 
 import { useResolvedLocale } from '@/i18n/locale';
 import { localizePath } from '@/i18n/url';

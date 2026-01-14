@@ -20,7 +20,7 @@ import {
   useRemoveLibraryAdminMutation,
 } from '@/integrations/rtk/hooks';
 
-import type { LibraryDto, LibraryListQueryParams } from '@/integrations/types/library.types';
+import type { LibraryDto, LibraryListQueryParams } from '@/integrations/types';
 
 import { LibraryHeader, type LocaleOption } from '@/components/admin/library/LibraryHeader';
 import { LibraryList } from '@/components/admin/library/LibraryList';

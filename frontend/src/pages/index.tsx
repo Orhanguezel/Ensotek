@@ -1,19 +1,9 @@
 // =============================================================
 // FILE: src/pages/index.tsx
-// Ensotek – Home Page (PUBLIC PAGES ROUTER STANDARD)
-// - NO <Head>
-// - SEO override only via <LayoutSeoBridge />
-// - NO inline styles / NO styled-jsx
-// - Locale: useLocaleShort() (Pages Router standard)
-// - H1: site_settings.ui_home.ui_home_h1 -> fallback (brand-safe)
-// - Optional SEO keys (UI):
-//   - ui_home_meta_title
-//   - ui_home_meta_description
-//   - ui_home_og_image
-//
-// NOTE:
-// - "sr-only" class MUST exist in global stylesheet (template/global scss).
-//   (Previously it was defined via styled-jsx; that is removed by standard.)
+// Ensotek – Home Page (PUBLIC PAGES ROUTER STANDARD) — FINAL
+// - Fix: ui() missing key may return the key itself => avoid bogus og:image (/ui_home_og_image)
+// - OG source of truth: DB site_settings(key='site_og_default_image', locale='*') -> $.url (or plain url)
+// - UI optional overrides still allowed, but guarded
 // =============================================================
 
 'use client';
@@ -45,6 +35,28 @@ import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 
 const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
 
+function tryParseJson(input: unknown): any {
+  if (typeof input !== 'string') return input;
+  const s = input.trim();
+  if (!s) return null;
+  try {
+    return JSON.parse(s);
+  } catch {
+    return null;
+  }
+}
+
+function pickOgUrlFromSettingValue(value: unknown): string | undefined {
+  const raw = tryParseJson(value);
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+    const url = safeStr((raw as any).url);
+    if (url && /^https?:\/\//i.test(url)) return url;
+  }
+  const plain = safeStr(value);
+  if (plain && /^https?:\/\//i.test(plain)) return plain;
+  return undefined;
+}
+
 const Home: NextPage = () => {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_home', locale as any);
@@ -58,6 +70,16 @@ const Home: NextPage = () => {
     const t = safeStr(siteTitleSetting?.value);
     return t || 'Ensotek';
   }, [siteTitleSetting?.value]);
+
+  // ✅ DB global OG default (single source)
+  const { data: ogDefaultSetting } = useGetSiteSettingByKeyQuery({
+    key: 'site_og_default_image',
+    locale: '*',
+  });
+
+  const ogDefaultUrl = useMemo(() => {
+    return pickOgUrlFromSettingValue(ogDefaultSetting?.value);
+  }, [ogDefaultSetting?.value]);
 
   // ----------------------------------------
   // H1 (SEO) – dynamic, brand-safe
@@ -82,28 +104,38 @@ const Home: NextPage = () => {
   const pageTitle = useMemo(() => {
     const key = 'ui_home_meta_title';
     const v = safeStr(ui(key, ''));
-    if (isValidUiText(v, key)) return v;
+    // ✅ Guard: if ui() echoes key, treat as missing
+    if (v && v !== key && isValidUiText(v, key)) return v;
 
-    // Home title default: use H1 (already brand-safe)
     return h1 || siteTitle || 'Ensotek';
   }, [ui, h1, siteTitle]);
 
   const pageDescription = useMemo(() => {
     const key = 'ui_home_meta_description';
     const v = safeStr(ui(key, ''));
-    if (isValidUiText(v, key)) return v;
+    // ✅ Guard: if ui() echoes key, treat as missing
+    if (v && v !== key && isValidUiText(v, key)) return v;
 
     return ''; // empty => Layout default
   }, [ui]);
 
+  // ----------------------------------------
+  // OG image override
+  // Priority:
+  // 1) ui_home_og_image (only if exists and NOT key-echo)
+  // 2) DB global site_og_default_image
+  // 3) undefined => Layout default fallback
+  // ----------------------------------------
   const ogImageOverride = useMemo(() => {
     const key = 'ui_home_og_image';
     const raw = safeStr(ui(key, ''));
-    if (!raw) return undefined;
+
+    // ✅ if missing-key echo (== key) or empty -> ignore
+    if (!raw || raw === key) return ogDefaultUrl;
 
     if (/^https?:\/\//i.test(raw)) return raw;
-    return toCdnSrc(raw, 1200, 630, 'fill') || raw;
-  }, [ui]);
+    return toCdnSrc(raw, 1200, 630, 'fill') || ogDefaultUrl || raw;
+  }, [ui, ogDefaultUrl]);
 
   return (
     <>
@@ -114,7 +146,6 @@ const Home: NextPage = () => {
         noindex={false}
       />
 
-      {/* SEO-only H1 */}
       <h1 className="sr-only">{h1}</h1>
 
       <Hero />

@@ -34,7 +34,7 @@ import type {
   LibraryDto,
   LibraryImageDto,
   LibraryFileDto,
-} from '@/integrations/types/library.types';
+} from '@/integrations/types';
 
 // Helpers
 import { toCdnSrc } from '@/shared/media';
