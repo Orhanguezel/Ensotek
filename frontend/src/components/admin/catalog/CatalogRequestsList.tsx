@@ -15,7 +15,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/router';
-import type { CatalogRequestDto } from '@/integrations/types/catalog.types';
+import type { CatalogRequestDto } from '@/integrations/types';
 import { statusBadgeClass } from './CatalogStatus';
 
 /* ---------------- Helpers ---------------- */

@@ -19,7 +19,7 @@ import type {
   LibraryDto,
   LibraryCreatePayload,
   LibraryUpdatePayload,
-} from '@/integrations/types/library.types';
+} from '@/integrations/types';
 import type { LocaleOption } from '@/components/admin/library/LibraryHeader';
 
 import {

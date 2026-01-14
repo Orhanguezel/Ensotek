@@ -15,7 +15,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { useListServicesPublicQuery } from '@/integrations/rtk/hooks';
-import type { ServiceDto } from '@/integrations/types/services.types';
+import type { ServiceDto } from '@/integrations/types';
 
 import { useUiSection } from '@/i18n/uiDb';
 import { useLocaleShort } from '@/i18n/useLocaleShort';

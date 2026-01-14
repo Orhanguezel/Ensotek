@@ -3,8 +3,10 @@
 import React from 'react';
 import type { LocaleOption } from '@/components/admin/library/LibraryHeader';
 
-import type { CategoryDto } from '@/integrations/types/category.types';
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
+import type {
+  CategoryDto,
+  SubCategoryDto
+} from '@/integrations/types';
 
 import {
   useListCategoriesAdminQuery,

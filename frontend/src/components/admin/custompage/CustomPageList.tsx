@@ -14,7 +14,7 @@ import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+import type { CustomPageDto } from '@/integrations/types';
 import { useDeleteCustomPageAdminMutation } from '@/integrations/rtk/hooks';
 
 export type CustomPageListProps = {

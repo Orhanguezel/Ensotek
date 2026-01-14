@@ -18,7 +18,7 @@
 import React, { useRef, useState, useMemo } from 'react';
 import { toast } from 'sonner';
 
-import type { LibraryFileDto } from '@/integrations/types/library.types';
+import type { LibraryFileDto } from '@/integrations/types';
 
 import {
   useListLibraryFilesAdminQuery,

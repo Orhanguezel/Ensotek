@@ -12,7 +12,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/router';
 
-import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
+import type { SiteSetting, SettingValue } from '@/integrations/types';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 /* ----------------------------- types ----------------------------- */

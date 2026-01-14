@@ -14,7 +14,7 @@ import { useGetFaqAdminQuery } from '@/integrations/rtk/hooks';
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 import FaqsFormPage from '@/components/admin/faqs/FaqsFormPage';
-import type { FaqDto } from '@/integrations/types/faqs.types';
+import type { FaqDto } from '@/integrations/types';
 
 function pickFirstString(v: unknown): string | undefined {
   if (typeof v === 'string') return v;

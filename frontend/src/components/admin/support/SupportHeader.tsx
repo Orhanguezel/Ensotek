@@ -7,7 +7,7 @@ import React from "react";
 import type {
   SupportTicketPriority,
   SupportTicketStatus,
-} from "@/integrations/types/support.types";
+} from "@/integrations/types";
 
 export type SupportFilters = {
   search: string;

@@ -12,7 +12,7 @@
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
-import type { CategoryDto } from '@/integrations/types/category.types';
+import type { CategoryDto } from '@/integrations/types';
 import {
   Pagination,
   PaginationContent,

@@ -12,7 +12,7 @@
 'use client';
 
 import React from 'react';
-import type { NewsletterAdminDto } from '@/integrations/types/newsletter.types';
+import type { NewsletterAdminDto } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

@@ -19,7 +19,7 @@ import {
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 
-import type { ReferenceDto, ReferenceListQueryParams } from '@/integrations/types/references.types';
+import type { ReferenceDto, ReferenceListQueryParams } from '@/integrations/types';
 
 import {
   ReferencesHeader,

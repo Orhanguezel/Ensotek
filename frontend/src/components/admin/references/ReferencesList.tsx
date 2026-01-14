@@ -14,7 +14,7 @@
 'use client';
 
 import React from 'react';
-import type { ReferenceDto } from '@/integrations/types/references.types';
+import type { ReferenceDto } from '@/integrations/types';
 import Image from 'next/image';
 
 /* ---------------- Helpers ---------------- */

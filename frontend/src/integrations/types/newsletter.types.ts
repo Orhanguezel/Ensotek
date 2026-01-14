@@ -2,14 +2,7 @@
 // FILE: src/integrations/types/newsletter.types.ts
 // =============================================================
 
-export type BoolLike =
-  | boolean
-  | 0
-  | 1
-  | "0"
-  | "1"
-  | "true"
-  | "false";
+import { BoolLike } from '@/integrations/types';
 
 /* ---------- PUBLIC DTO (controller mapRow) ---------- */
 

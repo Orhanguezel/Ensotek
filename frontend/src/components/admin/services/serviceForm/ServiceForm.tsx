@@ -13,9 +13,13 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 
-import type { CategoryDto } from '@/integrations/types/category.types';
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
-import type { ServiceDto } from '@/integrations/types/services.types';
+import type {
+  CategoryDto,
+  ServiceFormProps,
+  ServiceFormValues,
+  SubCategoryDto,
+  ServiceDto
+} from '@/integrations/types';
 
 import { AdminLocaleSelect, type AdminLocaleOption } from '@/components/common/AdminLocaleSelect';
 import { AdminJsonEditor } from '@/components/common/AdminJsonEditor';
@@ -26,7 +30,6 @@ import {
   useListSubCategoriesAdminQuery,
 } from '@/integrations/rtk/hooks';
 
-import type { ServiceFormProps, ServiceFormValues } from './serviceForm.types';
 import { buildInitialValues, normalizeLocale, slugify } from './serviceForm.utils';
 import { ServiceFormImageColumn } from './ServiceFormImageColumn';
 import { useServiceEditorImageUpload } from './useServiceEditorImageUpload';

@@ -20,7 +20,7 @@ import {
   useDeleteSiteSettingAdminMutation,
 } from '@/integrations/rtk/hooks';
 
-import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
+import type { SiteSetting, SettingValue } from '@/integrations/types';
 
 import { SiteSettingsForm } from '@/components/admin/site-settings/SiteSettingsForm';
 import { AdminJsonEditor } from '@/components/common/AdminJsonEditor';

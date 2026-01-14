@@ -19,7 +19,7 @@ import {
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 
-import type { FaqDto, FaqListQueryParams } from '@/integrations/types/faqs.types';
+import type { FaqDto, FaqListQueryParams } from '@/integrations/types';
 
 import {
   FaqsHeader,

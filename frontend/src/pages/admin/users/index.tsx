@@ -16,12 +16,12 @@ import {
   useSetUserRolesAdminMutation,
   useSetUserPasswordAdminMutation,
   useRemoveUserAdminMutation,
-} from "@/integrations/rtk/endpoints/admin/users_admin.endpoints";
+} from "@/integrations/rtk/hooks";
 
 import type {
   AdminUserDto,
   AdminUserRoleName,
-} from "@/integrations/types/admin_users.types";
+} from "@/integrations/types";
 
 import { UsersHeader } from "@/components/admin/users/UsersHeader";
 import { UsersList } from "@/components/admin/users/UsersList";

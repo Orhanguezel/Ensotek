@@ -4,7 +4,7 @@
 // =============================================================
 
 import React from "react";
-import type { AdminUserRoleName } from "@/integrations/types/admin_users.types";
+import type { AdminUserRoleName } from "@/integrations/types";
 
 export type UsersHeaderProps = {
   search: string;

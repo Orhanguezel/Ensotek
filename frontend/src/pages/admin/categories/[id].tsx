@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 
 import { useGetCategoryAdminQuery } from '@/integrations/rtk/hooks';
 import CategoryFormPage from '@/components/admin/categories/CategoryFormPage';
-import type { CategoryDto } from '@/integrations/types/category.types';
+import type { CategoryDto } from '@/integrations/types';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 

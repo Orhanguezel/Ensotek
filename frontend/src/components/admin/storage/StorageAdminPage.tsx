@@ -14,7 +14,7 @@ import { StorageList } from "./StorageList";
 import type {
   StorageAsset,
   StorageListQuery,
-} from "@/integrations/types/storage";
+} from "@/integrations/types";
 import {
   useListAssetsAdminQuery,
   useCreateAssetAdminMutation,

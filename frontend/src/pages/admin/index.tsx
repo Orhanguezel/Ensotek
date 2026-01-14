@@ -28,8 +28,7 @@ import {
   useGetAuditMetricsDailyAdminQuery,
 } from '@/integrations/rtk/hooks';
 
-import type { DashboardCountItemDto } from '@/integrations/types/dashboard.types';
-import type { AuditRequestLogDto, AuditAuthEventDto } from '@/integrations/types/audit.types';
+import type {DashboardCountItemDto, AuditRequestLogDto, AuditAuthEventDto } from '@/integrations/types';
 
 import { AuditDailyChart } from '@/components/admin/audit/AuditDailyChart';
 

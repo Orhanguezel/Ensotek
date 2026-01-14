@@ -13,7 +13,7 @@ import { useRouter } from 'next/router';
 
 import { useGetReferenceAdminQuery } from '@/integrations/rtk/hooks';
 import ReferencesFormPage from '@/components/admin/references/ReferencesFormPage';
-import type { ReferenceDto as ReferenceAdminDto } from '@/integrations/types/references.types';
+import type { ReferenceDto as ReferenceAdminDto } from '@/integrations/types';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 

@@ -14,7 +14,7 @@ import React, { useEffect, useMemo, useState, FormEvent } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import type { FaqDto, FaqCreatePayload, FaqUpdatePayload } from '@/integrations/types/faqs.types';
+import type { FaqDto, FaqCreatePayload, FaqUpdatePayload } from '@/integrations/types';
 import type { LocaleOption } from '@/components/admin/faqs/FaqsHeader';
 
 import {

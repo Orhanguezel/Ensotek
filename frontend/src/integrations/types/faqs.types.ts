@@ -3,8 +3,7 @@
 // Backend faqs modülü ile bire bir uyumlu tipler
 // =============================================================
 
-export type Bool01 = 0 | 1;
-export type BoolLike = boolean | 0 | 1 | "0" | "1" | "true" | "false";
+import type { BoolLike } from '@/integrations/types';
 
 export type FaqSortable = "created_at" | "updated_at" | "display_order";
 
@@ -14,7 +13,7 @@ export type FaqSortable = "created_at" | "updated_at" | "display_order";
  */
 export interface FaqDto {
   id: string;
-  is_active: Bool01;
+  is_active: BoolLike;
   display_order: number;
   created_at: string | Date;
   updated_at: string | Date;

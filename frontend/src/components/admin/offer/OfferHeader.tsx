@@ -7,7 +7,7 @@
 "use client";
 
 import React from "react";
-import type { OfferStatus } from "@/integrations/types/offers.types";
+import type { OfferStatus } from "@/integrations/types";
 
 export interface OfferHeaderProps {
   search: string;

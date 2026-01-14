@@ -3,7 +3,7 @@
 // Ensotek – Footer Sections DTO & Payload Types
 // =============================================================
 
-export type BoolLike = boolean | 0 | 1 | "0" | "1" | "true" | "false";
+import { BoolLike } from '@/integrations/types';
 
 /**
  * LIST query params – backend'deki footerSectionListQuerySchema ile uyumlu

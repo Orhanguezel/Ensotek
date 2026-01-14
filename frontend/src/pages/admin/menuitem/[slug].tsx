@@ -26,7 +26,7 @@ import type {
   AdminMenuItemDto,
   AdminMenuItemCreatePayload,
   AdminMenuItemUpdatePayload,
-} from '@/integrations/types/menu_items.types';
+} from '@/integrations/types';
 
 type EditMode = 'form' | 'json';
 type MenuItemFormState = MenuItemFormValues & { id?: string };

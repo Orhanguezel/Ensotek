@@ -30,7 +30,7 @@ import type {
   TicketReplyDto,
   SupportTicketCreatePayload,
   SupportTicketUpdatePayload,
-} from "@/integrations/types/support.types";
+} from "@/integrations/types";
 
 const AdminSupportDetailPage: NextPage = () => {
   const router = useRouter();

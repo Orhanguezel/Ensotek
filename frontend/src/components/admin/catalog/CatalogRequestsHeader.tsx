@@ -5,7 +5,7 @@
 
 import React from 'react';
 import { CATALOG_STATUS_OPTIONS } from './CatalogStatus';
-import type { CatalogRequestStatus } from '@/integrations/types/catalog.types';
+import type { CatalogRequestStatus } from '@/integrations/types';
 
 export type LocaleOption = {
   value: string;

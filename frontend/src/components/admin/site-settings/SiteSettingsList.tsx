@@ -10,7 +10,7 @@
 
 import React, { useMemo } from 'react';
 import Link from 'next/link';
-import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
+import type { SiteSetting, SettingValue } from '@/integrations/types';
 
 /* ----------------------------- helpers ----------------------------- */
 

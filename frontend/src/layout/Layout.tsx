@@ -28,7 +28,7 @@ import ScrollProgress from './ScrollProgress';
 import { SiteIconsHead } from '@/seo/SiteIconsHead';
 
 import { useListSiteSettingsQuery } from '@/integrations/rtk/hooks';
-import type { SettingValue, SiteSettingRow } from '@/integrations/types/site_settings.types';
+import type { SettingValue, SiteSettingRow } from '@/integrations/types';
 
 import { asObj, buildCanonical } from '@/seo/pageSeo';
 import { siteUrlBase, absoluteUrl } from '@/features/seo/utils';

@@ -25,7 +25,7 @@ import {
   useDeleteSiteSettingAdminMutation,
 } from '@/integrations/rtk/hooks';
 
-import type { SiteSetting, SettingValue } from '@/integrations/types/site_settings.types';
+import type { SiteSetting, SettingValue } from '@/integrations/types';
 
 import { DEFAULT_SEO_GLOBAL, DEFAULT_SITE_META_DEFAULT_BY_LOCALE } from '@/seo/seoSchema';
 

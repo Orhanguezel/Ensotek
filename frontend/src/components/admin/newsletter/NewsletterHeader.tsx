@@ -4,7 +4,7 @@
 // =============================================================
 
 import React from 'react';
-import type { NewsletterOrderBy } from '@/integrations/types/newsletter.types';
+import type { NewsletterOrderBy } from '@/integrations/types';
 
 export type LocaleOption = { value: string; label: string };
 

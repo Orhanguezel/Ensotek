@@ -15,7 +15,7 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import Image from 'next/image';
 
-import type { CustomPageDto } from '@/integrations/types/custom_pages.types';
+import type { CustomPageDto } from '@/integrations/types';
 
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useUiSection } from '@/i18n/uiDb';

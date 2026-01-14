@@ -10,7 +10,7 @@
 'use client';
 
 import React, { useMemo, useState, useEffect, useId } from 'react';
-import type { ProductFaqDto } from '@/integrations/types/product.types';
+import type { ProductFaqDto } from '@/integrations/types';
 
 interface ProductFaqBlockProps {
   title: string;

@@ -14,8 +14,10 @@ import React, { FormEvent, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
-import type { CategoryDto } from '@/integrations/types/category.types';
+import type {
+  SubCategoryDto,
+  CategoryDto
+} from '@/integrations/types';
 import type { LocaleOption, CategoryOption } from './SubCategoriesHeader';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';

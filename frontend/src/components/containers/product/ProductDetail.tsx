@@ -38,7 +38,7 @@ import type {
   ProductSpecDto,
   ProductReviewDto,
   ProductSpecifications,
-} from '@/integrations/types/product.types';
+} from '@/integrations/types';
 
 // Helpers
 import { toCdnSrc } from '@/shared/media';

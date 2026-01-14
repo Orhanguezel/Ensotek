@@ -6,7 +6,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import type { AdminMenuItemDto } from '@/integrations/types/menu_items.types';
+import type { AdminMenuItemDto } from '@/integrations/types';
 import {
   Pagination,
   PaginationContent,

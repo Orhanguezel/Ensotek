@@ -23,7 +23,7 @@ import 'swiper/css';
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 import { useListProductsQuery } from '@/integrations/rtk/hooks';
-import type { ProductDto } from '@/integrations/types/product.types';
+import type { ProductDto } from '@/integrations/types';
 
 import { toCdnSrc } from '@/shared/media';
 

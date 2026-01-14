@@ -11,7 +11,7 @@
 import React, { useMemo } from "react";
 
 import { AdminImageUploadField } from "@/components/common/AdminImageUploadField";
-import type { SettingValue } from "@/integrations/types/site_settings.types";
+import type { SettingValue } from "@/integrations/types";
 
 /* ----------------------------- types ----------------------------- */
 

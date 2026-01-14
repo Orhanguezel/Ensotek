@@ -5,7 +5,7 @@
 // =============================================================
 
 import React, { useEffect, useState } from 'react';
-import type { ServiceDto } from '@/integrations/types/services.types';
+import type { ServiceDto } from '@/integrations/types';
 import {
   Pagination,
   PaginationContent,

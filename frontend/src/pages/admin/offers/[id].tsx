@@ -10,7 +10,7 @@ import { useRouter } from "next/router";
 
 import { useGetOfferAdminQuery } from "@/integrations/rtk/hooks";
 import { OfferFormPage } from "@/components/admin/offer/OfferFormPage";
-import type { OfferRow } from "@/integrations/types/offers.types";
+import type { OfferRow } from "@/integrations/types";
 
 const AdminOfferEditPage: React.FC = () => {
   const router = useRouter();

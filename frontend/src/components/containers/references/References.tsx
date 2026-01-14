@@ -22,7 +22,7 @@ import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 // RTK – References public
 import { useListReferencesQuery } from '@/integrations/rtk/hooks';
-import type { ReferenceDto } from '@/integrations/types/references.types';
+import type { ReferenceDto } from '@/integrations/types';
 
 // Placeholders
 import One from 'public/img/brand/1.png';

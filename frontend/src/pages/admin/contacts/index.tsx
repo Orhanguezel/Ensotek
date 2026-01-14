@@ -17,7 +17,7 @@ import {
 import type {
   ContactDto,
   ContactStatus,
-} from "@/integrations/types/contacts.types";
+} from "@/integrations/types";
 
 import { ContactHeader } from "@/components/admin/contact/ContactHeader";
 import { ContactList } from "@/components/admin/contact/ContactList";

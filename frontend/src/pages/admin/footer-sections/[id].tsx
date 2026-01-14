@@ -15,7 +15,7 @@ import { useGetFooterSectionAdminQuery } from '@/integrations/rtk/hooks';
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 import FooterSectionsFormPage from '@/components/admin/footer-sections/FooterSectionsFormPage';
-import type { FooterSectionDto } from '@/integrations/types/footer_sections.types';
+import type { FooterSectionDto } from '@/integrations/types';
 
 /* -------------------- helpers -------------------- */
 

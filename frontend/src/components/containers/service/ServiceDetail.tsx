@@ -21,7 +21,7 @@ import {
   useListServicesPublicQuery,
 } from '@/integrations/rtk/hooks';
 
-import type { ServiceImageDto } from '@/integrations/types/services.types';
+import type { ServiceImageDto } from '@/integrations/types';
 
 // i18n
 import { useLocaleShort } from '@/i18n/useLocaleShort';

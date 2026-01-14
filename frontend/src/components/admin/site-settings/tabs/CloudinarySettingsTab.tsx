@@ -12,7 +12,7 @@ import {
   useLazyDiagCloudinaryAdminQuery,
 } from '@/integrations/rtk/hooks';
 
-import type { SiteSetting } from '@/integrations/types/site_settings.types';
+import type { SiteSetting } from '@/integrations/types';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';

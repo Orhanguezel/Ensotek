@@ -29,7 +29,7 @@ import { isValidUiText } from '@/i18n/uiText';
 
 // data
 import { useGetLibraryBySlugQuery } from '@/integrations/rtk/hooks';
-import type { LibraryDto } from '@/integrations/types/library.types';
+import type { LibraryDto } from '@/integrations/types';
 
 // helpers
 import { excerpt } from '@/shared/text';

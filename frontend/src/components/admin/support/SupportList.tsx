@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/router';
-import type { AdminSupportTicketDto } from '@/integrations/types/support.types';
+import type { AdminSupportTicketDto } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 

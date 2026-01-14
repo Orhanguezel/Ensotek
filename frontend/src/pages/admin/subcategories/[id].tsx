@@ -10,7 +10,7 @@ import { useRouter } from 'next/router';
 
 import { useGetSubCategoryAdminQuery } from '@/integrations/rtk/hooks';
 import SubCategoryFormPage from '@/components/admin/subcategories/SubCategoryFormPage';
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
+import type { SubCategoryDto } from '@/integrations/types';
 
 // ✅ DB’den locale + default locale
 import { useAdminLocales } from '@/components/common/useAdminLocales';

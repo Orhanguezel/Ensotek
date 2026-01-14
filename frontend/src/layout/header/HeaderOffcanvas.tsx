@@ -24,7 +24,7 @@ import { useActiveLocales } from '@/i18n/activeLocales';
 import { FiX, FiSearch, FiGlobe, FiPhone, FiMail, FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 import { useListMenuItemsQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
-import type { PublicMenuItemDto } from '@/integrations/types/menu_items.types';
+import type { PublicMenuItemDto } from '@/integrations/types';
 import { useUiSection } from '@/i18n/uiDb';
 
 export type SimpleBrand = {

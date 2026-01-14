@@ -19,7 +19,7 @@ import { AdminImageUploadField } from '@/components/common/AdminImageUploadField
 import type {
   ServiceImageDto,
   ServiceImageCreatePayload,
-} from '@/integrations/types/services.types';
+} from '@/integrations/types';
 
 import {
   useListServiceImagesAdminQuery,

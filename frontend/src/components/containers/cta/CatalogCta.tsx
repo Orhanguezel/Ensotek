@@ -24,7 +24,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 import { useCreateCatalogRequestPublicMutation } from '@/integrations/rtk/hooks';
-import type { CreateCatalogRequestPublicBody } from '@/integrations/types/catalog_public.types';
+import type { CreateCatalogRequestPublicBody } from '@/integrations/types';
 
 const isEmailValid = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(

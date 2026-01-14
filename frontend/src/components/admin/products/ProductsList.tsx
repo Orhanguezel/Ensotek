@@ -10,7 +10,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 
-import type { ProductDto } from '@/integrations/types/product.types';
+import type { ProductDto } from '@/integrations/types';
 import {
   Pagination,
   PaginationContent,

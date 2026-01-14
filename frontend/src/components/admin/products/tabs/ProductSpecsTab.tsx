@@ -15,7 +15,7 @@ import type {
   AdminProductSpecDto,
   AdminProductSpecCreatePayload,
   AdminProductSpecListParams,
-} from "@/integrations/types/product_specs_admin.types";
+} from "@/integrations/types";
 
 import { AdminJsonEditor } from "@/components/common/AdminJsonEditor";
 

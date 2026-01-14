@@ -12,7 +12,7 @@ import { useGetSliderAdminQuery } from '@/integrations/rtk/hooks';
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 
 import SliderFormPage from '@/components/admin/slider/SliderFormPage';
-import type { SliderAdminDto } from '@/integrations/types/slider.types';
+import type { SliderAdminDto } from '@/integrations/types';
 
 const AdminSliderEditPage: React.FC = () => {
   const router = useRouter();

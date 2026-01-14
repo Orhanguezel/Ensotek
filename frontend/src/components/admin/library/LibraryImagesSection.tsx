@@ -9,7 +9,7 @@ import type {
   LibraryImageDto,
   LibraryImageCreatePayload,
   LibraryImageUpdatePayload,
-} from '@/integrations/types/library.types';
+} from '@/integrations/types';
 
 import {
   useListLibraryImagesAdminQuery,

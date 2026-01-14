@@ -26,7 +26,7 @@ import type {
   CustomPageCreatePayload,
   CustomPageDto,
   CustomPageUpdatePayload,
-} from '@/integrations/types/custom_pages.types';
+} from '@/integrations/types';
 
 import {
   useLazyGetCustomPageAdminQuery,

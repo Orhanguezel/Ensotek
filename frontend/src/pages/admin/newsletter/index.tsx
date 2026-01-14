@@ -16,7 +16,7 @@ import {
   useDeleteNewsletterAdminMutation,
 } from '@/integrations/rtk/hooks';
 
-import type { NewsletterAdminDto, NewsletterOrderBy } from '@/integrations/types/newsletter.types';
+import type { NewsletterAdminDto, NewsletterOrderBy } from '@/integrations/types';
 
 import { useAdminLocales } from '@/components/common/useAdminLocales';
 import type { LocaleOption } from '@/components/admin/newsletter/NewsletterHeader';

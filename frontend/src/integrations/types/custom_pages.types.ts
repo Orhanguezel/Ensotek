@@ -7,11 +7,10 @@
 /**
  * Backend'deki boolLike ile uyumlu
  */
-export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
+import { BoolLike, SortDirection } from '@/integrations/types';
 
 /** Sıralama alanları – backend customPageListQuerySchema ile uyumlu */
 export type CustomPageSortField = 'created_at' | 'updated_at' | 'display_order' | 'order_num';
-export type SortDirection = 'asc' | 'desc';
 
 /* ------------------------------------------------------------------
  * LIST QUERY PARAMS (public + admin)

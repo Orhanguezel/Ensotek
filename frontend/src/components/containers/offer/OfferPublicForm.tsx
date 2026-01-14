@@ -17,10 +17,12 @@ import {
   useSubscribeNewsletterMutation,
 } from '@/integrations/rtk/hooks';
 
-import type { ServiceDto } from '@/integrations/types/services.types';
-import type { ProductDto } from '@/integrations/types/product.types';
-import type { OfferRequestPublic } from '@/integrations/types/offers.types';
-import type { NewsletterSubscribePayload } from '@/integrations/types/newsletter.types';
+import type {
+  ServiceDto,
+  ProductDto,
+  OfferRequestPublic,
+  NewsletterSubscribePayload
+} from '@/integrations/types';
 
 // i18n (PATTERN)
 import { useLocaleShort } from '@/i18n/useLocaleShort';

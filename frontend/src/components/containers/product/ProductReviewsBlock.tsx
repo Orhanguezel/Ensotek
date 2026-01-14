@@ -15,7 +15,7 @@ import { Autoplay, Navigation } from 'swiper';
 import 'swiper/css';
 
 import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import type { ProductReviewDto } from '@/integrations/types/product.types';
+import type { ProductReviewDto } from '@/integrations/types';
 
 // i18n (PATTERN)
 import { useUiSection } from '@/i18n/uiDb';

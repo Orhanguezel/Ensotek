@@ -14,7 +14,7 @@ import {
   useRemoveOfferAdminMutation,
 } from "@/integrations/rtk/hooks";
 
-import type { OfferRow, OfferStatus } from "@/integrations/types/offers.types";
+import type { OfferRow, OfferStatus } from "@/integrations/types";
 import { OfferHeader } from "@/components/admin/offer/OfferHeader";
 import { OfferList } from "@/components/admin/offer/OfferList";
 

@@ -3,25 +3,23 @@
 // Admin Contact Listesi – Üst Filtre Barı
 // =============================================================
 
-import React from "react";
-import type { ContactStatus } from "@/integrations/types/contacts.types";
+import React from 'react';
+import type { ContactStatus } from '@/integrations/types';
 
 interface ContactHeaderProps {
   search: string;
   onSearchChange: (v: string) => void;
 
-  status: "" | ContactStatus;
-  onStatusChange: (v: "" | ContactStatus) => void;
+  status: '' | ContactStatus;
+  onStatusChange: (v: '' | ContactStatus) => void;
 
   showOnlyUnresolved: boolean;
   onShowOnlyUnresolvedChange: (v: boolean) => void;
 
-  orderBy: "created_at" | "updated_at" | "status" | "name";
-  order: "asc" | "desc";
-  onOrderByChange: (
-    v: "created_at" | "updated_at" | "status" | "name",
-  ) => void;
-  onOrderChange: (v: "asc" | "desc") => void;
+  orderBy: 'created_at' | 'updated_at' | 'status' | 'name';
+  order: 'asc' | 'desc';
+  onOrderByChange: (v: 'created_at' | 'updated_at' | 'status' | 'name') => void;
+  onOrderChange: (v: 'asc' | 'desc') => void;
 
   loading: boolean;
   onRefresh: () => void;
@@ -68,11 +66,7 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({
             <select
               className="form-select form-select-sm"
               value={status}
-              onChange={(e) =>
-                onStatusChange(
-                  (e.target.value || "") as "" | ContactStatus,
-                )
-              }
+              onChange={(e) => onStatusChange((e.target.value || '') as '' | ContactStatus)}
             >
               <option value="">Tümü</option>
               <option value="new">Yeni</option>
@@ -89,14 +83,9 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({
                 type="checkbox"
                 id="filter-unresolved"
                 checked={showOnlyUnresolved}
-                onChange={(e) =>
-                  onShowOnlyUnresolvedChange(e.target.checked)
-                }
+                onChange={(e) => onShowOnlyUnresolvedChange(e.target.checked)}
               />
-              <label
-                className="form-check-label ms-1"
-                htmlFor="filter-unresolved"
-              >
+              <label className="form-check-label ms-1" htmlFor="filter-unresolved">
                 Sadece çözülmemişler
               </label>
             </div>
@@ -106,19 +95,13 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({
           <div className="col-md-3">
             <div className="row g-1">
               <div className="col-7">
-                <label className="form-label small mb-1">
-                  Sırala (orderBy)
-                </label>
+                <label className="form-label small mb-1">Sırala (orderBy)</label>
                 <select
                   className="form-select form-select-sm"
                   value={orderBy}
                   onChange={(e) =>
                     onOrderByChange(
-                      e.target.value as
-                        | "created_at"
-                        | "updated_at"
-                        | "status"
-                        | "name",
+                      e.target.value as 'created_at' | 'updated_at' | 'status' | 'name',
                     )
                   }
                 >
@@ -133,9 +116,7 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({
                 <select
                   className="form-select form-select-sm"
                   value={order}
-                  onChange={(e) =>
-                    onOrderChange(e.target.value as "asc" | "desc")
-                  }
+                  onChange={(e) => onOrderChange(e.target.value as 'asc' | 'desc')}
                 >
                   <option value="desc">Desc</option>
                   <option value="asc">Asc</option>
@@ -156,7 +137,7 @@ export const ContactHeader: React.FC<ContactHeaderProps> = ({
             onClick={onRefresh}
             disabled={loading}
           >
-            {loading ? "Yenileniyor..." : "Yenile"}
+            {loading ? 'Yenileniyor...' : 'Yenile'}
           </button>
         </div>
       </div>

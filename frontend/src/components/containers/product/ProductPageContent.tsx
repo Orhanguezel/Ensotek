@@ -16,7 +16,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 import { useListProductsQuery } from '@/integrations/rtk/hooks';
-import type { ProductDto } from '@/integrations/types/product.types';
+import type { ProductDto } from '@/integrations/types';
 
 import { toCdnSrc } from '@/shared/media';
 

@@ -3,7 +3,7 @@
 // Ensotek – Audit Types (Frontend DTO + Query Params)
 // =============================================================
 
-export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
+import { BoolLike } from '@/integrations/types';
 
 export type AuditRequestLogDto = {
   id: number;

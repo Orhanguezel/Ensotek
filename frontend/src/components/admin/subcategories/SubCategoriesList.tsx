@@ -12,8 +12,10 @@
 // =============================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
-import type { SubCategoryDto } from '@/integrations/types/subcategory.types';
-import type { CategoryDto } from '@/integrations/types/category.types';
+import type {
+  SubCategoryDto,
+  CategoryDto
+ } from '@/integrations/types';
 import {
   Pagination,
   PaginationContent,

@@ -8,7 +8,7 @@
 
 import React, { useMemo } from 'react';
 import { toast } from 'sonner';
-import type { DbSnapshot } from '@/integrations/types/db.types';
+import type { DbSnapshot } from '@/integrations/types';
 import {
   useRestoreDbSnapshotMutation,
   useDeleteDbSnapshotMutation,

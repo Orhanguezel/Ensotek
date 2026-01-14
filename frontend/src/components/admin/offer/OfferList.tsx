@@ -9,7 +9,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import type { OfferRow } from '@/integrations/types/offers.types';
+import type { OfferRow } from '@/integrations/types';
 
 /* ---------------- Helpers ---------------- */
 
