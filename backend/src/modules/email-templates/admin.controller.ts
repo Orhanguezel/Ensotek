@@ -1,10 +1,12 @@
 // =============================================================
 // FILE: src/modules/email-templates/admin.controller.ts
+// FINAL — Fix ZodError import + unknown catch handling (TS strict)
 // =============================================================
-import type { RouteHandler } from "fastify";
-import { randomUUID } from "crypto";
-import { and, desc, eq, like, or, type SQL } from "drizzle-orm";
-import { db } from "@/db/client";
+
+import type { RouteHandler } from 'fastify';
+import { randomUUID } from 'crypto';
+import { and, desc, eq, like, or, type SQL } from 'drizzle-orm';
+import { db } from '@/db/client';
 import {
   emailTemplates,
   emailTemplatesI18n,
@@ -12,21 +14,21 @@ import {
   type NewEmailTemplateI18nRow,
   type EmailTemplateRow,
   type EmailTemplateI18nRow,
-} from "./schema";
+} from './schema';
 import {
   emailTemplateCreateSchema,
   emailTemplateUpdateSchema,
   listQuerySchema,
-} from "./validation";
+} from './validation';
 import {
   extractVariablesFromText,
   parseVariablesColumn,
   toBool,
   now,
   normalizeVariablesInput,
-} from "./utils";
-import { DEFAULT_LOCALE } from "@/core/i18n";
-import { ZodError } from "zod";
+} from './utils';
+import { DEFAULT_LOCALE } from '@/core/i18n';
+import { z } from 'zod';
 
 type ListQuery = {
   q?: string;
@@ -36,6 +38,14 @@ type ListQuery = {
 
 // and(...) her koşulda SQL döndürsün (union yok)
 const andNonEmpty = (conds: SQL[]): SQL => and(...conds) as SQL;
+
+// -------------------------------------------
+// Zod error guard (TS strict, catch unknown)
+// -------------------------------------------
+function isZodError(e: unknown): e is z.ZodError {
+  // ZodError runtime class exists on z.ZodError
+  return e instanceof z.ZodError;
+}
 
 /* -------------------------------------------
    i18n helper: upsert (template_id + locale)
@@ -53,22 +63,22 @@ async function upsertEmailTemplateI18n(
     id: randomUUID(),
     template_id: templateId,
     locale,
-    template_name: data.template_name ?? "",
-    subject: data.subject ?? "",
-    content: data.content ?? "",
+    template_name: data.template_name ?? '',
+    subject: data.subject ?? '',
+    content: data.content ?? '',
     created_at: now(),
     updated_at: now(),
   };
 
   const setObj: Partial<EmailTemplateI18nRow> = { updated_at: now() };
 
-  if (typeof data.template_name !== "undefined") {
+  if (typeof data.template_name !== 'undefined') {
     setObj.template_name = data.template_name;
   }
-  if (typeof data.subject !== "undefined") {
+  if (typeof data.subject !== 'undefined') {
     setObj.subject = data.subject;
   }
-  if (typeof data.content !== "undefined") {
+  if (typeof data.content !== 'undefined') {
     setObj.content = data.content;
   }
 
@@ -101,10 +111,8 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
       );
     }
 
-    if (typeof qdata.is_active !== "undefined") {
-      filters.push(
-        eq(emailTemplates.is_active, toBool(qdata.is_active) ? 1 : 0) as SQL,
-      );
+    if (typeof qdata.is_active !== 'undefined') {
+      filters.push(eq(emailTemplates.is_active, toBool(qdata.is_active) ? 1 : 0) as SQL);
     }
 
     let rows: {
@@ -120,11 +128,9 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
       content: string | null;
     }[];
 
-    const baseWhere =
-      filters.length > 0 ? (andNonEmpty(filters) as SQL) : (undefined as any);
+    const baseWhere = filters.length > 0 ? (andNonEmpty(filters) as SQL) : (undefined as any);
 
     if (qdata.locale) {
-      // Belirli locale için (template + bu locale satırı)
       rows = await db
         .select({
           id: emailTemplates.id,
@@ -147,12 +153,8 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
           ),
         )
         .where(baseWhere as any)
-        .orderBy(
-          desc(emailTemplates.updated_at),
-          desc(emailTemplatesI18n.locale),
-        );
+        .orderBy(desc(emailTemplates.updated_at), desc(emailTemplatesI18n.locale));
     } else {
-      // Tüm locale'ler (her locale için 1 satır)
       rows = await db
         .select({
           id: emailTemplates.id,
@@ -167,15 +169,9 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
           content: emailTemplatesI18n.content,
         })
         .from(emailTemplates)
-        .leftJoin(
-          emailTemplatesI18n,
-          eq(emailTemplatesI18n.template_id, emailTemplates.id),
-        )
+        .leftJoin(emailTemplatesI18n, eq(emailTemplatesI18n.template_id, emailTemplates.id))
         .where(baseWhere as any)
-        .orderBy(
-          desc(emailTemplates.updated_at),
-          desc(emailTemplatesI18n.locale),
-        );
+        .orderBy(desc(emailTemplates.updated_at), desc(emailTemplatesI18n.locale));
     }
 
     const out = rows.map((r) => ({
@@ -186,9 +182,7 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
       content: r.content,
       locale: r.locale,
       variables: parseVariablesColumn(r.variables),
-      detected_variables: r.content
-        ? extractVariablesFromText(r.content)
-        : [],
+      detected_variables: r.content ? extractVariablesFromText(r.content) : [],
       is_active: toBool(r.is_active),
       created_at: r.created_at,
       updated_at: r.updated_at,
@@ -197,9 +191,7 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
     return reply.send(out);
   } catch (e) {
     (req as any).log?.error?.(e);
-    return reply
-      .code(500)
-      .send({ error: { message: "email_templates_list_failed" } });
+    return reply.code(500).send({ error: { message: 'email_templates_list_failed' } });
   }
 };
 
@@ -207,8 +199,7 @@ export const listEmailTemplatesAdmin: RouteHandler = async (req, reply) => {
 export const getEmailTemplateAdmin: RouteHandler = async (req, reply) => {
   try {
     const { id } = (req.params as { id?: string }) ?? {};
-    if (!id)
-      return reply.code(400).send({ error: { message: "invalid_id" } });
+    if (!id) return reply.code(400).send({ error: { message: 'invalid_id' } });
 
     const [parent] = await db
       .select()
@@ -216,8 +207,7 @@ export const getEmailTemplateAdmin: RouteHandler = async (req, reply) => {
       .where(eq(emailTemplates.id, id))
       .limit(1);
 
-    if (!parent)
-      return reply.code(404).send({ error: { message: "not_found" } });
+    if (!parent) return reply.code(404).send({ error: { message: 'not_found' } });
 
     const translations = await db
       .select()
@@ -237,18 +227,14 @@ export const getEmailTemplateAdmin: RouteHandler = async (req, reply) => {
         template_name: tr.template_name,
         subject: tr.subject,
         content: tr.content,
-        detected_variables: tr.content
-          ? extractVariablesFromText(tr.content)
-          : [],
+        detected_variables: tr.content ? extractVariablesFromText(tr.content) : [],
         created_at: tr.created_at,
         updated_at: tr.updated_at,
       })),
     });
   } catch (e) {
     (req as any).log?.error?.(e);
-    return reply
-      .code(500)
-      .send({ error: { message: "email_template_get_failed" } });
+    return reply.code(500).send({ error: { message: 'email_template_get_failed' } });
   }
 };
 
@@ -257,19 +243,13 @@ export const createEmailTemplateAdmin: RouteHandler = async (req, reply) => {
   try {
     const input = emailTemplateCreateSchema.parse(req.body ?? {});
     const id = randomUUID();
-
     const nowDate = now();
 
     const parent: NewEmailTemplateRow = {
       id,
       template_key: input.template_key,
       variables: normalizeVariablesInput(input.variables),
-      is_active:
-        typeof input.is_active === "undefined"
-          ? 1
-          : toBool(input.is_active)
-            ? 1
-            : 0,
+      is_active: typeof input.is_active === 'undefined' ? 1 : toBool(input.is_active) ? 1 : 0,
       created_at: nowDate,
       updated_at: nowDate,
     };
@@ -284,7 +264,6 @@ export const createEmailTemplateAdmin: RouteHandler = async (req, reply) => {
       content: input.content,
     });
 
-    // Son hali ile parent + translations dön
     const [createdParent] = await db
       .select()
       .from(emailTemplates)
@@ -309,32 +288,24 @@ export const createEmailTemplateAdmin: RouteHandler = async (req, reply) => {
         template_name: tr.template_name,
         subject: tr.subject,
         content: tr.content,
-        detected_variables: tr.content
-          ? extractVariablesFromText(tr.content)
-          : [],
+        detected_variables: tr.content ? extractVariablesFromText(tr.content) : [],
         created_at: tr.created_at,
         updated_at: tr.updated_at,
       })),
     });
   } catch (e) {
-    const msg = String((e as Error).message || "");
-    if (
-      msg.includes("ux_email_tpl_key_locale") ||
-      msg.includes("ux_email_tpl_key")
-    ) {
-      return reply
-        .code(409)
-        .send({ error: { message: "key_exists_for_locale" } });
+    const msg = e instanceof Error ? e.message : String(e ?? '');
+
+    if (msg.includes('ux_email_tpl_key_locale') || msg.includes('ux_email_tpl_key')) {
+      return reply.code(409).send({ error: { message: 'key_exists_for_locale' } });
     }
-    if (e instanceof ZodError) {
-      return reply.code(400).send({
-        error: { message: "validation_error", details: e.issues },
-      });
+
+    if (isZodError(e)) {
+      return reply.code(400).send({ error: { message: 'validation_error', details: e.issues } });
     }
+
     (req as any).log?.error?.(e);
-    return reply
-      .code(500)
-      .send({ error: { message: "email_template_create_failed" } });
+    return reply.code(500).send({ error: { message: 'email_template_create_failed' } });
   }
 };
 
@@ -342,8 +313,7 @@ export const createEmailTemplateAdmin: RouteHandler = async (req, reply) => {
 export const updateEmailTemplateAdmin: RouteHandler = async (req, reply) => {
   try {
     const { id } = (req.params as { id?: string }) ?? {};
-    if (!id)
-      return reply.code(400).send({ error: { message: "invalid_id" } });
+    if (!id) return reply.code(400).send({ error: { message: 'invalid_id' } });
 
     const patch = emailTemplateUpdateSchema.parse(req.body ?? {});
     const [parent] = await db
@@ -352,33 +322,25 @@ export const updateEmailTemplateAdmin: RouteHandler = async (req, reply) => {
       .where(eq(emailTemplates.id, id))
       .limit(1);
 
-    if (!parent)
-      return reply.code(404).send({ error: { message: "not_found" } });
+    if (!parent) return reply.code(404).send({ error: { message: 'not_found' } });
 
     const updateData: Partial<EmailTemplateRow> = { updated_at: now() };
 
-    if (typeof patch.template_key !== "undefined") {
-      updateData.template_key = patch.template_key;
-    }
-    if (typeof patch.variables !== "undefined") {
+    if (typeof patch.template_key !== 'undefined') updateData.template_key = patch.template_key;
+    if (typeof patch.variables !== 'undefined') {
       updateData.variables = normalizeVariablesInput(patch.variables);
     }
-    if (typeof patch.is_active !== "undefined") {
+    if (typeof patch.is_active !== 'undefined')
       updateData.is_active = toBool(patch.is_active) ? 1 : 0;
-    }
 
     if (Object.keys(updateData).length > 1) {
-      await db
-        .update(emailTemplates)
-        .set(updateData)
-        .where(eq(emailTemplates.id, id));
+      await db.update(emailTemplates).set(updateData).where(eq(emailTemplates.id, id));
     }
 
-    // i18n patch (varsa)
     const anyI18n =
-      typeof patch.template_name !== "undefined" ||
-      typeof patch.subject !== "undefined" ||
-      typeof patch.content !== "undefined";
+      typeof patch.template_name !== 'undefined' ||
+      typeof patch.subject !== 'undefined' ||
+      typeof patch.content !== 'undefined';
 
     if (anyI18n) {
       const loc = (patch.locale || DEFAULT_LOCALE) as string;
@@ -413,32 +375,24 @@ export const updateEmailTemplateAdmin: RouteHandler = async (req, reply) => {
         template_name: tr.template_name,
         subject: tr.subject,
         content: tr.content,
-        detected_variables: tr.content
-          ? extractVariablesFromText(tr.content)
-          : [],
+        detected_variables: tr.content ? extractVariablesFromText(tr.content) : [],
         created_at: tr.created_at,
         updated_at: tr.updated_at,
       })),
     });
   } catch (e) {
-    const msg = String((e as Error).message || "");
-    if (
-      msg.includes("ux_email_tpl_key_locale") ||
-      msg.includes("ux_email_tpl_key")
-    ) {
-      return reply
-        .code(409)
-        .send({ error: { message: "key_exists_for_locale" } });
+    const msg = e instanceof Error ? e.message : String(e ?? '');
+
+    if (msg.includes('ux_email_tpl_key_locale') || msg.includes('ux_email_tpl_key')) {
+      return reply.code(409).send({ error: { message: 'key_exists_for_locale' } });
     }
-    if (e instanceof ZodError) {
-      return reply.code(400).send({
-        error: { message: "validation_error", details: e.issues },
-      });
+
+    if (isZodError(e)) {
+      return reply.code(400).send({ error: { message: 'validation_error', details: e.issues } });
     }
+
     (req as any).log?.error?.(e);
-    return reply
-      .code(500)
-      .send({ error: { message: "email_template_update_failed" } });
+    return reply.code(500).send({ error: { message: 'email_template_update_failed' } });
   }
 };
 
@@ -446,16 +400,12 @@ export const updateEmailTemplateAdmin: RouteHandler = async (req, reply) => {
 export const deleteEmailTemplateAdmin: RouteHandler = async (req, reply) => {
   try {
     const { id } = (req.params as { id?: string }) ?? {};
-    if (!id)
-      return reply.code(400).send({ error: { message: "invalid_id" } });
+    if (!id) return reply.code(400).send({ error: { message: 'invalid_id' } });
 
     await db.delete(emailTemplates).where(eq(emailTemplates.id, id));
-    // email_templates_i18n tarafında FK + ON DELETE CASCADE varsa otomatik silinir
     return reply.code(204).send();
   } catch (e) {
     (req as any).log?.error?.(e);
-    return reply
-      .code(500)
-      .send({ error: { message: "email_template_delete_failed" } });
+    return reply.code(500).send({ error: { message: 'email_template_delete_failed' } });
   }
 };
