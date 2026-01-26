@@ -124,12 +124,12 @@ VALUES
     'shortName','ENSOTEK',
     'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png',
       'width',160,
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png')
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -198,12 +198,12 @@ VALUES
     'shortName','ENSOTEK',
     'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png',
       'width',160,
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png')
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -276,12 +276,12 @@ VALUES
     'shortName','ENSOTEK',
     'website','https://www.ensotek.de',
     'logo',JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png',
       'width',160,
       'height',60
     ),
     'images',JSON_ARRAY(
-      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png')
+      JSON_OBJECT('type','logo','url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png')
     )
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
@@ -396,7 +396,7 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png',
       'width',160,
       'height',60,
       'alt','Ensotek Logo'
@@ -411,7 +411,7 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png',
       'width',160,
       'height',60,
       'alt','Ensotek Logo (Dark)'
@@ -426,7 +426,7 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1767244177/site-media/logo.png',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1769440786/site-media/ensotek_icon_512.png',
       'width',160,
       'height',60,
       'alt','Ensotek Logo (Light)'

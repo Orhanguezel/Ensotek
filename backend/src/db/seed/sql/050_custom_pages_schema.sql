@@ -1,9 +1,11 @@
 -- =============================================================
--- FILE: 050_custom_pages.sql (FINAL / CLEAN / NO DROP)
+-- FILE: 050_custom_pages_schema.sql (FINAL / CLEAN / NO DROP)
 -- Custom Pages (parent + i18n)
 -- ✅ module_key PARENT TABLODA
 -- ✅ i18n içinde module_key YOK
--- ✅ MariaDB + MySQL uyumlu: JSON kolon yerine LONGTEXT + DEFAULT '[]' + JSON_VALID CHECK
+-- ✅ MySQL 8.4 uyumlu:
+--    - LONGTEXT/TEXT kolonlarda DEFAULT YOK (MySQL izin vermez)
+--    - JSON metin olarak saklanır, JSON_VALID CHECK ile doğrulanır
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -27,9 +29,9 @@ CREATE TABLE IF NOT EXISTS `custom_pages` (
   `image_url`                LONGTEXT      DEFAULT NULL,
   `storage_asset_id`         CHAR(36)      DEFAULT NULL,
 
-  -- ✅ JSON metin olarak sakla (driver/DB farklarında en sağlam)
-  `images`                   LONGTEXT      NOT NULL DEFAULT '[]',
-  `storage_image_ids`        LONGTEXT      NOT NULL DEFAULT '[]',
+  -- ✅ JSON metin olarak sakla (DEFAULT verilemez)
+  `images`                   LONGTEXT      NOT NULL,
+  `storage_image_ids`        LONGTEXT      NOT NULL,
 
   `category_id`              CHAR(36)      DEFAULT NULL,
   `sub_category_id`          CHAR(36)      DEFAULT NULL,
@@ -51,9 +53,11 @@ CREATE TABLE IF NOT EXISTS `custom_pages` (
   KEY `custom_pages_category_id_idx`       (`category_id`),
   KEY `custom_pages_sub_category_id_idx`   (`sub_category_id`),
 
-  -- ✅ JSON doğrulama (DB destekliyorsa çalışır; desteklemiyorsa sessizce ignore olabilir)
-  CONSTRAINT `chk_custom_pages_images_json` CHECK (JSON_VALID(`images`)),
-  CONSTRAINT `chk_custom_pages_storage_image_ids_json` CHECK (JSON_VALID(`storage_image_ids`)),
+  -- ✅ JSON doğrulama
+  CONSTRAINT `chk_custom_pages_images_json`
+    CHECK (JSON_VALID(`images`)),
+  CONSTRAINT `chk_custom_pages_storage_image_ids_json`
+    CHECK (JSON_VALID(`storage_image_ids`)),
 
   CONSTRAINT `fk_custom_pages_category`
     FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`)
