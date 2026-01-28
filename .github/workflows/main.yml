@@ -1,0 +1,104 @@
+name: Ensotek Deploy
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # ----------------------------
+      # Backend (Bun)
+      # ----------------------------
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Build backend (bun)
+        working-directory: backend
+        run: |
+          rm -rf dist .tsbuildinfo || true
+          bun install --frozen-lockfile || bun install
+          bun run build
+
+      - name: Deploy backend to VPS (rsync)
+        uses: burnett01/rsync-deployments@v8
+        with:
+          switches: >-
+            -avz --delete
+            --exclude=node_modules
+            --exclude=.git
+            --exclude=.env
+            --exclude=.DS_Store
+          path: backend/
+          remote_path: /var/www/Ensotek/backend
+          remote_host: ${{ secrets.VPS_HOST }}
+          remote_user: ${{ secrets.VPS_USER }}
+          remote_key: ${{ secrets.VPS_KEY }}
+          strict_hostkeys_checking: false
+
+      # ----------------------------
+      # Frontend (Next.js)
+      # ----------------------------
+      - name: Setup Node (for frontend build)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build frontend (Next.js)
+        working-directory: frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci --no-audit --no-fund
+          else
+            npm install --no-audit --no-fund
+          fi
+          npm run build
+
+      - name: Deploy frontend to VPS (rsync)
+        uses: burnett01/rsync-deployments@v8
+        with:
+          switches: >-
+            -avz --delete
+            --exclude=node_modules
+            --exclude=.git
+            --exclude=.env
+            --exclude=.DS_Store
+          path: frontend/
+          remote_path: /var/www/Ensotek/frontend
+          remote_host: ${{ secrets.VPS_HOST }}
+          remote_user: ${{ secrets.VPS_USER }}
+          remote_key: ${{ secrets.VPS_KEY }}
+          strict_hostkeys_checking: false
+
+      # ----------------------------
+      # PM2 reload (backend + frontend) + bind check
+      # ----------------------------
+      - name: Reload PM2 (backend + frontend)
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          script: |
+            set -e
+
+            cd /var/www/Ensotek/backend
+            pm2 reload ensotek-backend || pm2 start ecosystem.config.cjs --only ensotek-backend
+
+            cd /var/www/Ensotek/frontend
+            pm2 reload ensotek-frontend || pm2 start ecosystem.config.cjs --only ensotek-frontend
+
+            pm2 save
+
+            # Bind kontrol (Ensotek frontend port)
+            ss -ltnp | grep -E "127\.0\.0\.1:3011|:3011" || true
