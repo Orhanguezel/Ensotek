@@ -76,6 +76,8 @@ pm2 reload ecosystem.config.cjs --env production
 # gerekirse log izle
 pm2 logs ensotek-backend --lines 100
 
+
+
 ```
 
 
