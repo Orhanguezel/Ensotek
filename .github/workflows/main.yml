@@ -45,7 +45,6 @@ jobs:
           remote_host: ${{ secrets.VPS_HOST }}
           remote_user: ${{ secrets.VPS_USER }}
           remote_key: ${{ secrets.VPS_KEY }}
-          strict_hostkeys_checking: false
 
       # ----------------------------
       # Frontend build + deploy (Next.js with Bun)
@@ -72,7 +71,6 @@ jobs:
           remote_host: ${{ secrets.VPS_HOST }}
           remote_user: ${{ secrets.VPS_USER }}
           remote_key: ${{ secrets.VPS_KEY }}
-          strict_hostkeys_checking: false
 
       # ----------------------------
       # PM2 reload (backend + frontend) + bind check
