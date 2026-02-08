@@ -10,7 +10,6 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
-import { useRouter } from 'next/router';
 
 import type { SiteSetting, SettingValue } from '@/integrations/types';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
@@ -47,10 +46,6 @@ export type SiteSettingsFormProps = {
     metadata?: Record<string, string | number | boolean>;
     value?: string;
     onChange?: (url: string) => void;
-
-    /** optional: open storage library */
-    openLibraryHref?: string;
-    onOpenLibraryClick?: () => void;
   };
 };
 
@@ -114,8 +109,6 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
   showImageUpload,
   imageUpload,
 }) => {
-  const router = useRouter();
-
   const [mode, setMode] = useState<SiteSettingsFormMode>(initialMode);
 
   // structured
@@ -171,10 +164,6 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
       toast.error(msg);
     }
   };
-
-  const openLibraryHref = imageUpload?.openLibraryHref ?? '/admin/storage';
-  const onOpenLibraryClick =
-    imageUpload?.onOpenLibraryClick ?? (() => router.push(openLibraryHref));
 
   return (
     <div className="card">
@@ -237,8 +226,6 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
               value={(imageUpload?.value ?? '') as any}
               onChange={(url) => imageUpload?.onChange?.(url)}
               disabled={disabled}
-              openLibraryHref={openLibraryHref}
-              onOpenLibraryClick={onOpenLibraryClick}
             />
           </div>
         )}

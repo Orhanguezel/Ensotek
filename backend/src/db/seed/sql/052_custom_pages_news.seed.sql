@@ -36,22 +36,22 @@ SET @NEWS_ANNOUNCE_1 := '22220001-2222-4222-8222-222222220001';
 SET @MODULE_KEY_NEWS := 'news';
 
 -- -------------------------------------------------------------
--- FEATURED IMAGE (Cloudinary)
+-- FEATURED IMAGE (Cloudinary) - Updated to use valid image
 -- -------------------------------------------------------------
 SET @IMG_NEWS_RENEWED :=
-  'https://www.ensotek.de/uploads/news/site1.png';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 
 -- -------------------------------------------------------------
--- GALLERY IMAGES (random)
+-- GALLERY IMAGES (updated to use valid images)
 -- -------------------------------------------------------------
 SET @IMG_NEWS_2 :=
-  'https://www.ensotek.de/uploads/news/site2.png';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 SET @IMG_NEWS_3 :=
-  'https://www.ensotek.de/uploads/news/site3.png';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 SET @IMG_NEWS_4 :=
-  'https://www.ensotek.de/uploads/news/site4.png';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 SET @IMG_NEWS_5 :=
-  'https://www.ensotek.de/uploads/news/site5.png';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)

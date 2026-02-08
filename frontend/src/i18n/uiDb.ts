@@ -88,6 +88,7 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
 
   ui_home: [
     'ui_home_h1',
+    'ui_home_seo_h1',
     'ui_hero_kicker_prefix',
     'ui_hero_kicker_brand',
     'ui_hero_title_fallback',

@@ -327,7 +327,6 @@ export const BrandMediaTab: React.FC = () => {
                       value={rawUrl}
                       onChange={(nextUrl) => void quickUpload(k, nextUrl)}
                       disabled={busy}
-                      openLibraryHref="/admin/storage"
                       previewAspect={cfg.aspect}
                       previewObjectFit={cfg.fit}
                     />

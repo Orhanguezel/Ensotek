@@ -117,15 +117,14 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   );
 
   const effectiveLogo: string | StaticImageData | undefined = useMemo(() => {
+    // Only use logoSrc prop if explicitly provided
     if (typeof logoSrc === 'string' && logoSrc.trim()) return logoSrc.trim();
     if (logoSrc) return logoSrc;
 
-    const fromSettings = brandFromSettings.logo?.url;
-    if (fromSettings && String(fromSettings).trim()) return String(fromSettings).trim();
-
-    // hard fallback sadece logo url yoksa
-    return 'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
-  }, [logoSrc, brandFromSettings.logo]);
+    // ✅ REMOVED: company_brand.logo override
+    // Let SiteLogo component use site_logo from database
+    return undefined;
+  }, [logoSrc]);
 
   // Menu items – locale-aware
   const { data: menuData, isLoading: isMenuLoading } = useListMenuItemsQuery({

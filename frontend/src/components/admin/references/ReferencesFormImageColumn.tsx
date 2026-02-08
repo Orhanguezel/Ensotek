@@ -7,7 +7,6 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { useRouter } from 'next/router';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 /**
@@ -37,8 +36,6 @@ export const ReferencesFormImageColumn: React.FC<ReferencesFormImageColumnProps>
   disabled,
   onImageUrlChange,
 }) => {
-  const router = useRouter();
-
   // AdminImageUploadField metadata: Record<string, string | number | boolean>
   // Biz string’e normalize ederek stabil hale getiriyoruz.
   const effectiveMeta: Record<string, string> | undefined = useMemo(() => {
@@ -67,9 +64,9 @@ export const ReferencesFormImageColumn: React.FC<ReferencesFormImageColumnProps>
       label="Referans Görseli"
       helperText={
         <>
-          Storage modülü üzerinden referans için bir <strong>öne çıkan görsel</strong>{' '}
-          yükleyebilirsin. Yüklenen görselin URL&apos;i soldaki formda{' '}
-          <strong>Öne çıkan görsel URL (featured_image)</strong> alanına otomatik yazılabilir.
+          <strong>Yeni görsel yükle</strong> veya <strong>Resim Havuzu</strong> üzerinden mevcut
+          görseller arasından seç. Seçilen görselin URL&apos;i soldaki formda{' '}
+          <strong>Öne çıkan görsel URL (featured_image)</strong> alanına otomatik yazılır.
         </>
       }
       bucket="public"
@@ -78,8 +75,6 @@ export const ReferencesFormImageColumn: React.FC<ReferencesFormImageColumnProps>
       value={imageUrl}
       onChange={(url) => onImageUrlChange(url)}
       disabled={disabled}
-      openLibraryHref="/admin/storage"
-      onOpenLibraryClick={() => router.push('/admin/storage')}
     />
   );
 };

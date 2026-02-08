@@ -38,6 +38,16 @@ const nextConfig = {
       { protocol: 'https', hostname: 'your-real-cdn.com', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    dangerouslyAllowSVG: false,
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+  },
+
+  // Performance optimizations
+  experimental: {
+    optimizePackageImports: ['@/components', '@/utils', 'framer-motion', 'swiper'],
+    scrollRestoration: true,
   },
 
   // ✅ i18n intentionally removed
@@ -46,15 +56,33 @@ const nextConfig = {
     const defaultLc = getDefaultLocaleShort();
     const prefixless = getPrefixlessFlag();
 
+    const redirects = [];
+
     // Prefixless default locale politikasında: /de ve /de/... => / ve /...
     if (prefixless && defaultLc) {
-      return [
+      redirects.push(
         { source: `/${defaultLc}`, destination: '/', permanent: true },
-        { source: `/${defaultLc}/:path*`, destination: '/:path*', permanent: true },
-      ];
+        { source: `/${defaultLc}/:path*`, destination: '/:path*', permanent: true }
+      );
     }
 
-    return [];
+    // Production'da non-www -> www redirect (SEO için)
+    // Development'ta bu redirect'i devre dışı bırak
+    if (process.env.NODE_ENV === 'production') {
+      redirects.push({
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'ensotek.de',
+          },
+        ],
+        destination: 'https://www.ensotek.de/:path*',
+        permanent: true,
+      });
+    }
+
+    return redirects;
   },
 
   async rewrites() {
@@ -62,7 +90,16 @@ const nextConfig = {
     const localeSrc = ':lc([a-z]{2,3}(?:-[a-zA-Z]{2,4})?)';
 
     return {
-      beforeFiles: [],
+      beforeFiles: [
+        // SEO: Sitemap rewrites
+        { source: '/sitemap.xml', destination: '/api/sitemap.xml' },
+        { source: '/sitemap-index.xml', destination: '/api/sitemap-index.xml' },
+        { source: '/sitemap-pages.xml', destination: '/api/sitemap-pages.xml' },
+        { source: '/sitemap-products.xml', destination: '/api/sitemap-products.xml' },
+        { source: '/sitemap-services.xml', destination: '/api/sitemap-services.xml' },
+        { source: '/sitemap-blog.xml', destination: '/api/sitemap-blog.xml' },
+        { source: '/sitemap-news.xml', destination: '/api/sitemap-news.xml' },
+      ],
       afterFiles: [],
       fallback: [
         // locale prefix’i query’e çevir (SSR canonical builder __lc ile doğru locale seçsin)
@@ -78,8 +115,64 @@ const nextConfig = {
     };
   },
 
-  webpack: (config) => {
-    config.cache = { type: 'memory' };
+  webpack: (config, { dev, isServer }) => {
+    // Bundle analyzer (enable only when needed)
+    if (process.env.ANALYZE === 'true' && !dev && !isServer) {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'static',
+          openAnalyzer: false,
+        })
+      );
+    }
+    
+    // Performance optimizations
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              chunks: 'all',
+              maxSize: 244 * 1024, // 244KB
+            },
+            common: {
+              name: 'common',
+              minChunks: 2,
+              chunks: 'all',
+              maxSize: 244 * 1024,
+            },
+            framework: {
+              chunks: 'all',
+              name: 'framework',
+              test: /(?<!node_modules.*)[\\/]node_modules[\\/](react|react-dom|scheduler|prop-types|use-subscription)[\\/]/,
+              priority: 40,
+              enforce: true,
+            },
+          },
+        },
+      };
+
+      // Tree shaking optimization
+      config.optimization.usedExports = true;
+      config.optimization.sideEffects = false;
+
+      // Cache optimization
+      config.cache = {
+        type: 'filesystem',
+        buildDependencies: {
+          config: [__filename],
+        },
+      };
+    } else {
+      // Cache optimization for development
+      config.cache = { type: 'memory' };
+    }
+
     return config;
   },
 };

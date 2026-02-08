@@ -2,10 +2,78 @@
 
 // Yorumları temizle + güvenli split
 export function cleanSql(input: string): string {
-  // -- satır sonuna kadar ve /* ... */ blok yorumlarını temizle
-  return input
-    .replace(/--.*?(\r?\n|$)/g, '$1')
-    .replace(/\/\*[\s\S]*?\*\//g, '');
+  // String literallerini koru, sadece gerçek yorumları temizle
+  let inString = false;
+  let quote = '';
+  let result = '';
+  let i = 0;
+
+  while (i < input.length) {
+    const char = input[i];
+    const nextChar = input[i + 1] || '';
+
+    // String literal başlangıç/bitiş kontrolü
+    if (!inString && (char === "'" || char === '"')) {
+      inString = true;
+      quote = char;
+      result += char;
+      i++;
+      continue;
+    }
+
+    if (inString && char === quote) {
+      // Escaped quote mu kontrol et
+      if (nextChar === quote) {
+        result += char + nextChar;
+        i += 2;
+        continue;
+      }
+      // String bitti
+      inString = false;
+      result += char;
+      i++;
+      continue;
+    }
+
+    // String içindeyken her şeyi koru
+    if (inString) {
+      result += char;
+      i++;
+      continue;
+    }
+
+    // -- yorumlarını temizle (sadece string dışında)
+    if (char === '-' && nextChar === '-') {
+      // Satır sonuna kadar atla
+      while (i < input.length && input[i] !== '\n' && input[i] !== '\r') {
+        i++;
+      }
+      // Newline karakterini koru
+      if (i < input.length) {
+        result += input[i];
+        i++;
+      }
+      continue;
+    }
+
+    // /* */ blok yorumlarını temizle
+    if (char === '/' && nextChar === '*') {
+      i += 2;
+      while (i < input.length - 1) {
+        if (input[i] === '*' && input[i + 1] === '/') {
+          i += 2;
+          break;
+        }
+        i++;
+      }
+      continue;
+    }
+
+    result += char;
+    i++;
+  }
+
+  return result;
 }
 
 // ; ile biten cümleleri ayrıştır (stringlerin içinde ; varsa bu basit split bozulabilir

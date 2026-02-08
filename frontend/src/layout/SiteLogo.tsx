@@ -23,8 +23,6 @@ export type SiteLogoProps = {
   priority?: boolean;
 };
 
-const FALLBACK_URL =
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 
 const DEFAULT_W = 160;
 const DEFAULT_H = 60;
@@ -103,7 +101,7 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({
     [setting?.value],
   );
 
-  let finalSrc: StaticImageData | string = FALLBACK_URL;
+  let finalSrc: StaticImageData | string = '';
   let finalW = DEFAULT_W;
   let finalH = DEFAULT_H;
 
@@ -117,9 +115,27 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({
     }
   } else {
     const u = safeStr(url);
-    finalSrc = u || FALLBACK_URL;
+    finalSrc = u || '';
     finalW = width || DEFAULT_W;
     finalH = height || DEFAULT_H;
+  }
+
+  // Don't render anything if no logo available
+  if (!finalSrc) {
+    // Return a short text fallback when no logo available
+    return (
+      <span 
+        className="header__logo-text"
+        style={{
+          fontSize: '18px',
+          fontWeight: 600,
+          color: '#1976d2',
+          textDecoration: 'none'
+        }}
+      >
+        ENSOTEK
+      </span>
+    );
   }
 
   return (

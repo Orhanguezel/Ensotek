@@ -120,32 +120,6 @@ VALUES
   ('9d9d5201-0003-4222-8222-520100000003', '7b1b5201-0003-4222-8222-520100000003',
    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&h=900&q=80', NULL,
    0, 3, 1,
-   NOW(3), NOW(3)),
-
-  ('9d9d5201-0001-4222-8222-520100000004', '7b1b5201-0004-4222-8222-520100000004',
-   'https://images.unsplash.com/photo-1466611653911-95081537e5b7?auto=format&fit=crop&w=1600&h=900&q=80', NULL,
-   1, 1, 1,
-   NOW(3), NOW(3)),
-  ('9d9d5201-0002-4222-8222-520100000004', '7b1b5201-0004-4222-8222-520100000004',
-   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&h=900&q=80', NULL,
-   0, 2, 1,
-   NOW(3), NOW(3)),
-  ('9d9d5201-0003-4222-8222-520100000004', '7b1b5201-0004-4222-8222-520100000004',
-   'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&h=900&q=80', NULL,
-   0, 3, 1,
-   NOW(3), NOW(3)),
-
-  ('9d9d5201-0001-4222-8222-520100000005', '7b1b5201-0005-4222-8222-520100000005',
-   'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?auto=format&fit=crop&w=1600&h=900&q=80', NULL,
-   1, 1, 1,
-   NOW(3), NOW(3)),
-  ('9d9d5201-0002-4222-8222-520100000005', '7b1b5201-0005-4222-8222-520100000005',
-   'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1600&h=900&q=80', NULL,
-   0, 2, 1,
-   NOW(3), NOW(3)),
-  ('9d9d5201-0003-4222-8222-520100000005', '7b1b5201-0005-4222-8222-520100000005',
-   'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1600&h=900&q=80', NULL,
-   0, 3, 1,
    NOW(3), NOW(3))
 
   -- (devamı sende aynı şekilde sürüyor; bu blok mevcut dosyandaki gibi eksiksiz kalmalı)

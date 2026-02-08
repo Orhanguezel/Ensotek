@@ -8,7 +8,6 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/router';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 export type CustomPageFormImageColumnProps = {
@@ -37,8 +36,6 @@ export const CustomPageFormImageColumn: React.FC<CustomPageFormImageColumnProps>
   onGalleryUrlsChange,
   onSelectAsCover,
 }) => {
-  const router = useRouter();
-
   return (
     <div className="d-flex flex-column gap-3">
       {/* COVER */}
@@ -56,8 +53,6 @@ export const CustomPageFormImageColumn: React.FC<CustomPageFormImageColumnProps>
         value={featuredImageValue}
         onChange={(url) => onFeaturedImageChange(url)}
         disabled={disabled}
-        openLibraryHref="/admin/storage"
-        onOpenLibraryClick={() => router.push('/admin/storage')}
       />
 
       {/* GALLERY */}
@@ -81,8 +76,6 @@ export const CustomPageFormImageColumn: React.FC<CustomPageFormImageColumnProps>
           }
           coverValue={featuredImageValue}
           disabled={disabled}
-          openLibraryHref="/admin/storage"
-          onOpenLibraryClick={() => router.push('/admin/storage')}
         />
       )}
     </div>

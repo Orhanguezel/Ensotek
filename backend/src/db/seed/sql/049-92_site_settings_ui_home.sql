@@ -17,8 +17,9 @@ INSERT INTO site_settings (`id`, `key`, `locale`, `value`, `created_at`, `update
   'tr',
   CAST(
     JSON_OBJECT(
-      'ui_home_h1', 'Ensotek Su Soğutma Kuleleri ve Proses Soğutma Çözümleri',
-      'ui_home_meta_title', 'Ensotek Su Soğutma Kuleleri ve Proses Soğutma',
+      'ui_home_h1', 'Ensotek Su Soğutma Kuleleri',
+      'ui_home_seo_h1', 'Ensotek Kühltürme',
+      'ui_home_meta_title', 'Ensotek Su Soğutma Kuleleri',
       'ui_home_meta_description', 'Açık ve kapalı devre FRP soğutma kuleleri. Keşif, üretim, montaj, bakım, modernizasyon, performans testleri ve yedek parça.'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
@@ -31,8 +32,9 @@ INSERT INTO site_settings (`id`, `key`, `locale`, `value`, `created_at`, `update
   'en',
   CAST(
     JSON_OBJECT(
-      'ui_home_h1', 'Ensotek Cooling Towers and Process Cooling Solutions',
-      'ui_home_meta_title', 'Ensotek Cooling Towers and Process Cooling',
+      'ui_home_h1', 'Ensotek Cooling Towers',
+      'ui_home_seo_h1', 'Ensotek Cooling Towers',
+      'ui_home_meta_title', 'Ensotek Cooling Towers',
       'ui_home_meta_description', 'Open and closed circuit FRP cooling towers. Engineering, manufacturing, installation, maintenance, modernization, performance testing and spare parts.'
     ) AS CHAR CHARACTER SET utf8mb4
   ),
@@ -45,8 +47,9 @@ INSERT INTO site_settings (`id`, `key`, `locale`, `value`, `created_at`, `update
   'de',
   CAST(
     JSON_OBJECT(
-      'ui_home_h1', 'Ensotek Kühltürme und Prozesskühlung',
-      'ui_home_meta_title', 'Ensotek Kühltürme und Prozesskühlung',
+      'ui_home_h1', 'Ensotek Kühltürme',
+      'ui_home_seo_h1', 'Ensotek Kühltürme',
+      'ui_home_meta_title', 'Ensotek Kühltürme',
       'ui_home_meta_description', 'Offene und geschlossene GFK Kühltürme. Herstellung und Montage, Wartung, Reparatur, Modernisierung, Leistungstests und Ersatzteile.'
     ) AS CHAR CHARACTER SET utf8mb4
   ),

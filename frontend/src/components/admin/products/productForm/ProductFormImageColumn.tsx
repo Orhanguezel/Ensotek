@@ -11,7 +11,6 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
@@ -78,8 +77,6 @@ export const ProductFormImageColumn: React.FC<Props> = ({
   legacyUrls,
   onLegacyUrlsChange,
 }) => {
-  const router = useRouter();
-
   // ---------------- POOL (product_images) ----------------
 
   const {
@@ -365,8 +362,6 @@ export const ProductFormImageColumn: React.FC<Props> = ({
         value={norm(coverValue)}
         onChange={handleCoverChange}
         disabled={disabled}
-        openLibraryHref="/admin/storage"
-        onOpenLibraryClick={() => router.push('/admin/storage')}
       />
 
       {productId ? (
@@ -395,8 +390,6 @@ export const ProductFormImageColumn: React.FC<Props> = ({
           onSelectAsCover={handleSelectAsCover}
           coverValue={norm(coverValue)}
           disabled={uploadingDisabled}
-          openLibraryHref="/admin/storage"
-          onOpenLibraryClick={() => router.push('/admin/storage')}
         />
       ) : (
         <div className="border rounded-2 p-3 bg-light text-muted small">

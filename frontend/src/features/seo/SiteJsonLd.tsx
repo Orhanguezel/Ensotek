@@ -164,7 +164,8 @@ export default async function SiteJsonLd({ locale }: { locale: SupportedLocale }
   // --- logo ---
   const firstImg = (company?.images ?? []).find((i) => i?.webp || i?.url);
   const logoRaw = String(firstImg?.webp || firstImg?.url || '').trim();
-  const logo = logoRaw ? logoRaw : absoluteUrl('/logo.png');
+  // Only use actual logo from database, no hardcoded fallback
+  const logo = logoRaw || null;
 
   // --- sameAs ---
   const fromCompany = Object.values(company?.socialLinks ?? {}).filter(Boolean) as string[];
@@ -232,10 +233,12 @@ export default async function SiteJsonLd({ locale }: { locale: SupportedLocale }
       url: `${base}/`,
       name,
       description: orgDescription,
-      logo: {
-        '@type': 'ImageObject',
-        url: logo.startsWith('http') ? logo : absoluteUrl(logo),
-      },
+      ...(logo ? {
+        logo: {
+          '@type': 'ImageObject',
+          url: logo.startsWith('http') ? logo : absoluteUrl(logo),
+        }
+      } : {}),
       ...(sameAs.length ? { sameAs } : {}),
       ...(Object.keys(contactPoint).length ? { contactPoint: [contactPoint] } : {}),
     }),

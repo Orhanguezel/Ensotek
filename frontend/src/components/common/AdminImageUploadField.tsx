@@ -14,9 +14,10 @@
 
 'use client';
 
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useCreateAssetAdminMutation } from '@/integrations/rtk/hooks';
+import { StoragePickerModal } from './StoragePickerModal';
 
 export type AdminImageUploadFieldProps = {
   label?: string;
@@ -36,9 +37,6 @@ export type AdminImageUploadFieldProps = {
   coverValue?: string;
 
   disabled?: boolean;
-
-  openLibraryHref?: string;
-  onOpenLibraryClick?: () => void;
 
   multiple?: boolean;
 
@@ -221,8 +219,6 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   coverValue,
 
   disabled,
-  openLibraryHref,
-  onOpenLibraryClick,
   multiple = false,
 
   previewAspect = '16x9',
@@ -230,6 +226,7 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [createAssetAdmin, { isLoading: isUploading }] = useCreateAssetAdminMutation();
+  const [showStoragePicker, setShowStoragePicker] = useState(false);
 
   const meta = useMemo(() => toMeta(metadata), [metadata]);
   const gallery = useMemo(
@@ -306,11 +303,23 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
     }
   };
 
-  const handleOpenLibrary = (e: React.MouseEvent) => {
-    if (onOpenLibraryClick) {
-      e.preventDefault();
-      onOpenLibraryClick();
-      return;
+  const handleStorageSelect = (urls: string[]) => {
+    if (!multiple) {
+      // Tekli seçim
+      if (urls[0]) {
+        onChange?.(urls[0]);
+        toast.success('Görsel seçildi.');
+      }
+    } else {
+      // Çoklu seçim
+      if (onChangeMultiple) {
+        const next = uniqAppend(gallery, urls);
+        onChangeMultiple(next);
+        toast.success(`${urls.length} görsel eklendi.`);
+      } else {
+        onChange?.(urls[0]);
+        toast.success('Görsel seçildi.');
+      }
     }
   };
 
@@ -495,45 +504,62 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   };
 
   return (
-    <div className="border rounded-2 p-3">
-      <div className="d-flex justify-content-between align-items-center mb-2">
-        <span className="small fw-semibold">{label}</span>
-        {isUploading && <span className="badge bg-secondary small">Yükleniyor...</span>}
-      </div>
+    <>
+      <div className="border rounded-2 p-3">
+        <div className="d-flex justify-content-between align-items-center mb-2">
+          <span className="small fw-semibold">{label}</span>
+          {isUploading && <span className="badge bg-secondary small">Yükleniyor...</span>}
+        </div>
 
-      {helperText && <div className="text-muted small mb-2">{helperText}</div>}
+        {helperText && <div className="text-muted small mb-2">{helperText}</div>}
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        multiple={isMulti}
-        className="d-none"
-        onChange={handleFileChange}
-      />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple={isMulti}
+          className="d-none"
+          onChange={handleFileChange}
+        />
 
-      <div className="mb-2">
-        <button
-          type="button"
-          className="btn btn-outline-primary btn-sm"
-          onClick={handlePickClick}
-          disabled={disabled || isUploading}
-        >
-          {isMulti ? 'Görseller Yükle' : 'Görsel Yükle'}
-        </button>
-
-        {openLibraryHref || onOpenLibraryClick ? (
-          <a
-            href={openLibraryHref || '#'}
-            className="btn btn-link btn-sm ms-2 px-1"
-            onClick={handleOpenLibrary}
+        <div className="mb-2">
+          <button
+            type="button"
+            className="btn btn-outline-primary btn-sm"
+            onClick={handlePickClick}
+            disabled={disabled || isUploading}
           >
-            Kütüphaneyi aç
-          </a>
-        ) : null}
+            {isMulti ? 'Görseller Yükle' : 'Görsel Yükle'}
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-outline-secondary btn-sm ms-2"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowStoragePicker(true);
+            }}
+            disabled={disabled || isUploading}
+            title="Yüklü görseller arasından seç"
+          >
+            <i className="bi bi-images me-1"></i>
+            Resim Havuzu
+          </button>
+        </div>
+
+        {!isMulti ? renderSinglePreview() : renderMultiPreview()}
       </div>
 
-      {!isMulti ? renderSinglePreview() : renderMultiPreview()}
-    </div>
+      {/* Storage Picker Modal */}
+      <StoragePickerModal
+        show={showStoragePicker}
+        onHide={() => setShowStoragePicker(false)}
+        onSelect={handleStorageSelect}
+        multiple={isMulti}
+        selectedUrls={isMulti ? gallery : value ? [value] : []}
+        bucket={bucket}
+        folder={folder}
+      />
+    </>
   );
 };

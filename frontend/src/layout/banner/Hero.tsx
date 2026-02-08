@@ -118,7 +118,7 @@ const Hero: React.FC = () => {
   const current = slides[activeIdx] || slides[0];
 
   // Başlık & paragraf – önce slider title/desc, yoksa UI fallback
-  const h2Text =
+  const h1Text =
     (current?.title || '').trim() ||
     ui('ui_hero_title_fallback', 'Industrial cooling tower solutions tailored to your process.');
 
@@ -221,13 +221,13 @@ const Hero: React.FC = () => {
                     <span>{ui('ui_hero_kicker_brand', 'Engineering')}</span>
                   </span>
 
-                  <h2
+                  <h1
                     data-aos="fade-up"
                     data-aos-delay="500"
                     style={{ lineHeight: 1.1, marginTop: 10 }}
                   >
-                    {h2Text}
-                  </h2>
+                    {h1Text}
+                  </h1>
 
                   <p data-aos="fade-up" data-aos-delay="600" style={{ maxWidth: 720 }}>
                     {text}

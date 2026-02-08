@@ -99,8 +99,8 @@ SET @SEO_GLOBAL := CAST(
     ),
     'twitter', JSON_OBJECT(
       'card',    'summary_large_image',
-      'site',    '',
-      'creator', ''
+      'site',    '@ensotek',
+      'creator', '@ensotek'
     ),
     'robots', JSON_OBJECT(
       'noindex', false,
@@ -123,8 +123,8 @@ SET @SEO_TR := CAST(
     ),
     'twitter', JSON_OBJECT(
       'card',    'summary_large_image',
-      'site',    '',
-      'creator', ''
+      'site',    '@ensotek',
+      'creator', '@ensotek'
     ),
     'robots', JSON_OBJECT(
       'noindex', false,
@@ -146,8 +146,8 @@ SET @SEO_EN := CAST(
     ),
     'twitter', JSON_OBJECT(
       'card',    'summary_large_image',
-      'site',    '',
-      'creator', ''
+      'site',    '@ensotek',
+      'creator', '@ensotek'
     ),
     'robots', JSON_OBJECT(
       'noindex', false,
@@ -169,8 +169,8 @@ SET @SEO_DE := CAST(
     ),
     'twitter', JSON_OBJECT(
       'card',    'summary_large_image',
-      'site',    '',
-      'creator', ''
+      'site',    '@ensotek',
+      'creator', '@ensotek'
     ),
     'robots', JSON_OBJECT(
       'noindex', false,

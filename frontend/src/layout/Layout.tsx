@@ -490,15 +490,19 @@ export default function Layout({
   }, [brand, normalizedBrand]);
 
   // ------------------------------------------------------------
-  // ✅ Logo (GLOBAL '*') + optional override prop
+  // ✅ Logo - SEPARATION OF CONCERNS
+  // - JSON-LD metadata: Use site_logo from DB (SEO requirement)
+  // - Visual rendering: SiteLogo component fetches independently (single source)
+  // - Header: NO logoSrc prop (SiteLogo handles it)
   // ------------------------------------------------------------
 
+  // For JSON-LD Organization schema only (not passed to Header)
   const siteLogoUrl = useMemo(() => {
     return extractMediaUrl((globalMap.site_logo as SettingValue) ?? null);
   }, [globalMap.site_logo]);
 
-  const headerLogoSrc: StaticImageData | string | undefined = logoSrc || siteLogoUrl || undefined;
-  const preloadLogoHref = typeof headerLogoSrc === 'string' ? headerLogoSrc : siteLogoUrl;
+  // Preload only if explicit prop override exists (rare)
+  const preloadLogoHref = logoSrc && typeof logoSrc === 'string' ? logoSrc : undefined;
 
   // ------------------------------------------------------------
   // ✅ Head Meta specs
@@ -636,7 +640,7 @@ export default function Layout({
       </Head>
 
       <div className="my-app">
-        <Header brand={effectiveBrand} logoSrc={headerLogoSrc} />
+        <Header brand={effectiveBrand} />
         <main>
           <LayoutErrorBoundary fallback={errorFallback}>{children}</LayoutErrorBoundary>
         </main>

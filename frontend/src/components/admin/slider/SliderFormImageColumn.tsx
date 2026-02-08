@@ -6,7 +6,6 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/router';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 export type SliderImageMetadata = {
@@ -29,8 +28,6 @@ export const SliderFormImageColumn: React.FC<SliderFormImageColumnProps> = ({
   disabled,
   onImageUrlChange,
 }) => {
-  const router = useRouter();
-
   const effectiveMeta: Record<string, string> | undefined = (() => {
     const base: SliderImageMetadata = {
       module_key: metadata?.module_key ?? 'slider',
@@ -63,8 +60,6 @@ export const SliderFormImageColumn: React.FC<SliderFormImageColumnProps> = ({
       value={imageUrl}
       onChange={onImageUrlChange}
       disabled={disabled}
-      openLibraryHref="/admin/storage"
-      onOpenLibraryClick={() => router.push('/admin/storage')}
     />
   );
 };

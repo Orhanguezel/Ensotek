@@ -11,7 +11,6 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
 import { toast } from 'sonner';
 
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
@@ -78,8 +77,6 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
   onFeaturedImageChange,
   onGalleryChange,
 }) => {
-  const router = useRouter();
-
   const {
     data: imageItemsRaw,
     isLoading: imagesLoading,
@@ -351,8 +348,6 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
         value={cover}
         onChange={handleCoverChange}
         disabled={disabled}
-        openLibraryHref="/admin/storage"
-        onOpenLibraryClick={() => router.push('/admin/storage')}
       />
 
       {serviceId ? (
@@ -373,8 +368,6 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
           onSelectAsCover={handleSelectAsCover}
           coverValue={cover}
           disabled={uploadingDisabled}
-          openLibraryHref="/admin/storage"
-          onOpenLibraryClick={() => router.push('/admin/storage')}
         />
       ) : (
         <div className="border rounded-2 p-3 bg-light text-muted small">

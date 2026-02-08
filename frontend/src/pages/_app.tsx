@@ -9,13 +9,12 @@ import AnalyticsScripts from '@/features/analytics/AnalyticsScripts';
 import GAViewPages from '@/features/analytics/GAViewPages';
 import CookieConsentBanner from '@/layout/banner/CookieConsentBanner';
 
-// Global CSS
+// Critical CSS - Bootstrap is required for layout, must be loaded first
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@/styles/index-four.scss';
 import '@/styles/main.scss';
-import 'aos/dist/aos.css';
 import 'nprogress/nprogress.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+// Note: FontAwesome and AOS CSS will be loaded async via _document.tsx
 
 import '@/integrations/rtk/public/_register';
 
@@ -42,6 +41,22 @@ function App({ Component, pageProps }: AppProps) {
   }, [router.asPath, router.pathname]);
 
   const isAdminRoute = useMemo(() => isAdminPath(rawPath), [rawPath]);
+
+  // Web Vitals tracking (load once on mount)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Dynamic import to avoid blocking initial load
+    import('@/utils/webVitals')
+      .then(({ initWebVitals }) => {
+        initWebVitals();
+      })
+      .catch((err) => {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Failed to load web vitals:', err);
+        }
+      });
+  }, []); // Empty deps - run once on mount
 
   // NProgress + AOS + ✅ SEO reset on route start
   useEffect(() => {

@@ -7,7 +7,6 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 export type SubCategoryImageMetadata = {
@@ -31,8 +30,6 @@ export const SubCategoryFormImageColumn: React.FC<SubCategoryFormImageColumnProp
   disabled,
   onIconChange,
 }) => {
-  const router = useRouter();
-
   // ✅ Controlled local state (AdminImageUploadField internal-state sync problemi için)
   const [localValue, setLocalValue] = useState<string>(safeStr(iconValue));
 
@@ -74,8 +71,6 @@ export const SubCategoryFormImageColumn: React.FC<SubCategoryFormImageColumnProp
         onIconChange(nextUrl);
       }}
       disabled={!!disabled}
-      openLibraryHref="/admin/storage"
-      onOpenLibraryClick={() => router.push('/admin/storage')}
     />
   );
 };

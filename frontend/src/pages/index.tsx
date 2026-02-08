@@ -146,7 +146,10 @@ const Home: NextPage = () => {
         noindex={false}
       />
 
-      <h1 className="sr-only">{h1}</h1>
+      {/* SEO için gizli H1 - kısa ve spesifik */}
+      <h1 className="visually-hidden">
+        {ui('ui_home_seo_h1', 'Ensotek Kühltürme')}
+      </h1>
 
       <Hero />
       <ServiceSection />

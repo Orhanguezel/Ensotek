@@ -498,7 +498,6 @@ export const SeoSettingsTab: React.FC<SeoSettingsTabProps> = ({ locale }) => {
             value={ogUrl}
             onChange={(u) => void handleOgChange(u)}
             disabled={busy}
-            openLibraryHref="/admin/storage"
             previewAspect="16x9"
             previewObjectFit="cover"
           />

@@ -16,7 +16,10 @@
     "test:seo:ui": "npx playwright test tests/seo --ui",
     "pw:install": "npx playwright install chromium",
     "pw:deps": "npx playwright install-deps chromium",
-    "lh:autorun": "lhci autorun --config=./lighthouserc.cjs"
+    "lh:autorun": "lhci autorun --config=./lighthouserc.cjs",
+    "analyze": "ANALYZE=true npm run build",
+    "analyze:server": "npm run build && npx serve out",
+    "analyze:bundle": "npx webpack-bundle-analyzer .next/static/chunks/"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.4.0",
@@ -61,6 +64,7 @@
     "sonner": "2.0.3",
     "swiper": "^9.1.1",
     "tailwind-merge": "^2.2.0",
+    "web-vitals": "^4.2.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -79,7 +83,8 @@
     "@typescript-eslint/parser": "^6.21.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "14.2.35",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "webpack-bundle-analyzer": "^4.10.2"
   },
   "overrides": {
     "lucide-react": "0.555.0"

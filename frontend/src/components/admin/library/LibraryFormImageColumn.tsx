@@ -10,7 +10,6 @@
 'use client';
 
 import React from 'react';
-import { useRouter } from 'next/router';
 import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
 
 export type ReferenceImageMetadata = {
@@ -44,8 +43,6 @@ export const LibraryFormImageColumn: React.FC<LibraryFormImageColumnProps> = ({
   galleryUrls,
   onGalleryUrlsChange,
 }) => {
-  const router = useRouter();
-
   return (
     <div className="d-flex flex-column gap-3">
       {/* COVER */}
@@ -64,8 +61,6 @@ export const LibraryFormImageColumn: React.FC<LibraryFormImageColumnProps> = ({
         value={imageUrl}
         onChange={(url) => onImageUrlChange(url)}
         disabled={disabled}
-        openLibraryHref="/admin/storage"
-        onOpenLibraryClick={() => router.push('/admin/storage')}
       />
 
       {/* GALLERY (optional) */}
@@ -91,8 +86,6 @@ export const LibraryFormImageColumn: React.FC<LibraryFormImageColumnProps> = ({
           onSelectAsCover={(url) => onImageUrlChange(url)}
           coverValue={imageUrl}
           disabled={disabled}
-          openLibraryHref="/admin/storage"
-          onOpenLibraryClick={() => router.push('/admin/storage')}
         />
       )}
     </div>

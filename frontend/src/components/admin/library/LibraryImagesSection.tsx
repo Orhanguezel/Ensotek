@@ -251,7 +251,6 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
           value={lastUploadedUrl}
           onChange={handleUploadedUrl}
           disabled={busy}
-          openLibraryHref="/admin/storage"
         />
 
         <hr className="my-3" />

@@ -156,7 +156,6 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
           value={contentImagePreview}
           onChange={(url) => handleAddContentImage(url)}
           disabled={disabled}
-          openLibraryHref="/admin/storage"
         />
       </div>
 

@@ -96,9 +96,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
       ...(socials ?? {}),
     };
 
-    const logo = (brandVal?.logo ||
-      (Array.isArray(brandVal?.images) ? brandVal.images[0] : null) ||
-      {}) as { url?: string; width?: number; height?: number };
+    // ✅ REMOVED: company_brand.logo (use SiteLogo component instead)
 
     return {
       name,
@@ -106,7 +104,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
       phone,
       email,
       socials: mergedSocials,
-      logo,
     };
   }, [contactInfoSetting?.value, socialsSetting?.value, companyBrandSetting?.value]);
 
@@ -237,10 +234,10 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
         <div className="offcanvas__wrapper">
           <div className="offcanvas__content">
             <div className="offcanvas__top mb-40 d-flex justify-content-between align-items-center">
-              {/* Logo – header’dan gelen overrideSrc varsa onu, yoksa settings logosunu kullan */}
+              {/* Logo – SiteLogo uses site_logo from database */}
               <SiteLogo
                 alt={effectiveBrand.name}
-                overrideSrc={logoSrc ?? effectiveBrand.logo?.url}
+                overrideSrc={logoSrc}
               />
 
               <div className="offcanvas__close">
