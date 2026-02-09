@@ -498,15 +498,15 @@ export function useUiSection(section: UiSectionKey, localeOverride?: string): Ui
     return tryParseJsonObject(rowMap[section]?.value);
   }, [rowMap, section]);
 
-  const keys = SECTION_KEYS[section] ?? [];
   const labelMap = useMemo<Record<string, Record<string, unknown>>>(() => {
+    const keys = SECTION_KEYS[section] ?? [];
     const out: Record<string, Record<string, unknown>> = {};
     for (const k of keys) {
       const raw = rowMap[k]?.value;
       out[k] = normalizeValueToLabel(raw);
     }
     return out;
-  }, [rowMap, keys]);
+  }, [rowMap, section]);
 
   const resolveLabel = (key: string): string => {
     const label = (labelMap[key]?.label || {}) as Record<string, string>;

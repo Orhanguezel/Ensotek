@@ -53,8 +53,8 @@ export const StoragePickerModal: React.FC<StoragePickerModalProps> = ({
     { skip: !show },
   );
 
-  const assets = data?.items || [];
-  const total = data?.total || 0;
+  const assets = useMemo(() => data?.items ?? [], [data?.items]);
+  const total = useMemo(() => data?.total ?? 0, [data?.total]);
 
   // Extract unique folders from assets
   const folders = useMemo(() => {

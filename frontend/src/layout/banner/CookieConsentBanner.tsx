@@ -219,7 +219,7 @@ export default function CookieConsentBanner() {
 
     let cancelled = false;
     let idleId: number | undefined;
-    let timeoutId: number | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const show = () => {
       if (!cancelled) setShowBanner(true);
@@ -227,15 +227,15 @@ export default function CookieConsentBanner() {
 
     if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
       idleId = (window as any).requestIdleCallback(show, { timeout: 2000 });
-      timeoutId = window.setTimeout(show, 2000);
+      timeoutId = setTimeout(show, 2000);
     } else {
-      timeoutId = window.setTimeout(show, 2000);
+      timeoutId = setTimeout(show, 2000);
     }
 
     return () => {
       cancelled = true;
       if (idleId) (window as any).cancelIdleCallback(idleId);
-      if (timeoutId) window.clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
     };
   }, [ready, enabled, hasChoice]);
 
