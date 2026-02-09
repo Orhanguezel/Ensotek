@@ -3,17 +3,14 @@
 // =============================================================
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FALLBACK_LOCALE } from '@/i18n/config';
 import { normLocaleTag } from '@/i18n/localeUtils';
 import { ensureLocationEventsPatched } from '@/i18n/locationEvents';
-
-type AppLocaleMeta = {
-  code?: unknown;
-  label?: unknown;
-  is_default?: unknown;
-  is_active?: unknown;
-};
+import {
+  useGetAppLocalesPublicQuery,
+  useGetDefaultLocalePublicQuery,
+} from '@/integrations/rtk/hooks';
 
 function readLocaleFromCookie(): string {
   if (typeof document === 'undefined') return '';
@@ -48,43 +45,12 @@ function computeActiveLocales(meta: any[] | undefined): string[] {
   return out.length ? out : [normLocaleTag(FALLBACK_LOCALE) || 'de'];
 }
 
-function getApiBase(): string {
-  const raw =
-    (process.env.NEXT_PUBLIC_API_BASE_URL || '').trim() || (process.env.API_BASE_URL || '').trim();
-  return raw.replace(/\/+$/, '');
-}
-
-async function fetchJson<T>(url: string): Promise<T | null> {
-  try {
-    const res = await fetch(url, { credentials: 'omit', cache: 'no-store' });
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
-  }
-}
-
-function normalizeDefaultLocaleValue(v: any): string {
-  if (v && typeof v === 'object' && 'data' in v) return normLocaleTag((v as any).data);
-  return normLocaleTag(v);
-}
-
-function normalizeAppLocalesValue(v: any): AppLocaleMeta[] {
-  if (Array.isArray(v)) return v as AppLocaleMeta[];
-  if (v && typeof v === 'object' && 'data' in v && Array.isArray((v as any).data)) {
-    return (v as any).data as AppLocaleMeta[];
-  }
-  return [];
-}
-
 export function useResolvedLocale(explicitLocale?: string | null): string {
   // pathname sadece SPA değişimini tetiklemek için tutuluyor
   const [pathname, setPathname] = useState<string>('/');
 
-  const [appLocalesMeta, setAppLocalesMeta] = useState<AppLocaleMeta[] | null>(null);
-  const [defaultLocaleMeta, setDefaultLocaleMeta] = useState<string | null>(null);
-
-  const didFetchRef = useRef(false);
+  const { data: appLocalesMeta } = useGetAppLocalesPublicQuery();
+  const { data: defaultLocaleMeta } = useGetDefaultLocalePublicQuery();
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -104,27 +70,6 @@ export function useResolvedLocale(explicitLocale?: string | null): string {
       window.removeEventListener('popstate', read);
       window.removeEventListener('hashchange', read);
     };
-  }, []);
-
-  useEffect(() => {
-    if (didFetchRef.current) return;
-    didFetchRef.current = true;
-
-    const base = getApiBase();
-    if (!base) return;
-
-    (async () => {
-      const [appLocalesRaw, defaultLocaleRaw] = await Promise.all([
-        fetchJson<any>(`${base}/site_settings/app-locales`),
-        fetchJson<any>(`${base}/site_settings/default-locale`),
-      ]);
-
-      const appArr = normalizeAppLocalesValue(appLocalesRaw);
-      const def = normalizeDefaultLocaleValue(defaultLocaleRaw);
-
-      setAppLocalesMeta(appArr.length ? appArr : null);
-      setDefaultLocaleMeta(def || null);
-    })();
   }, []);
 
   return useMemo(() => {
