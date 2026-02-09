@@ -26,6 +26,12 @@ const parseTotalFromMeta = (dataLength: number, meta?: MetaWithHeaders | unknown
   return Number.isFinite(n) ? n : dataLength;
 };
 
+const stableQueryOptions = {
+  refetchOnFocus: false as const,
+  refetchOnReconnect: false as const,
+  refetchOnMountOrArgChange: false as const,
+};
+
 export const menuItemsApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // LIST – GET /menu_items
@@ -55,6 +61,8 @@ export const menuItemsApi = baseApi.injectEndpoints({
               })),
             ]
           : [{ type: 'MenuItemPublic' as const, id: 'LIST' }],
+      keepUnusedDataFor: 600,
+      ...stableQueryOptions,
     }),
 
     // GET by id – GET /menu_items/:id
@@ -66,6 +74,8 @@ export const menuItemsApi = baseApi.injectEndpoints({
         params: locale ? { locale } : undefined,
       }),
       providesTags: (_r, _e, arg) => [{ type: 'MenuItemPublic' as const, id: arg.id }],
+      keepUnusedDataFor: 600,
+      ...stableQueryOptions,
     }),
   }),
   overrideExisting: false,

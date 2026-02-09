@@ -1,5 +1,7 @@
 // SSR-side settings helper'ları (SEO, başlık vs. için)
 
+import { cache } from 'react';
+
 // ✅ Yeni importlar
 import { BASE_URL } from '@/integrations/rtk/constants';
 import { normLocaleTag } from '@/i18n/localeUtils';
@@ -10,6 +12,8 @@ export type RuntimeLocale = string;
 
 // RTK tarafındaki SiteSetting yapısına benzer basit tip
 type SettingDoc = { key: string; value: any };
+
+const REVALIDATE_SECONDS = 1800;
 
 function toShortLocale(v: unknown): string {
   // normLocaleTag zaten normalize ediyor; yine de short’a düşürelim
@@ -67,7 +71,7 @@ export function readLocalizedLabel(value: any, locale: RuntimeLocale): string {
  * site_settings listesini çeker.
  * BE: GET /site_settings?locale=tr
  */
-async function fetchSettingsList(locale: RuntimeLocale): Promise<SettingDoc[]> {
+const fetchSettingsList = cache(async (locale: RuntimeLocale): Promise<SettingDoc[]> => {
   const apiBase = resolveApiBase();
   const l = toShortLocale(locale) || 'de'; // son çare: "de" (istersen FALLBACK_LOCALE kullan)
   const url = `${apiBase}/site_settings?locale=${encodeURIComponent(l)}`;
@@ -77,8 +81,7 @@ async function fetchSettingsList(locale: RuntimeLocale): Promise<SettingDoc[]> {
       Accept: 'application/json',
       'Accept-Language': l,
     },
-    // SEO snapshot/test için deterministik: DB’den güncel gelsin
-    cache: 'no-store',
+    next: { revalidate: REVALIDATE_SECONDS },
   });
 
   if (!res.ok) throw new Error(`site_settings ${res.status}`);
@@ -86,7 +89,7 @@ async function fetchSettingsList(locale: RuntimeLocale): Promise<SettingDoc[]> {
 
   // RTK'ye paralel: API ya [] ya da {data: []} dönebilir
   return Array.isArray(j) ? (j as SettingDoc[]) : j?.data ?? [];
-}
+});
 
 /** Ham value’yu döndürür (array/obje/string olabilir) */
 export async function getSettingValue(locale: RuntimeLocale, key: string): Promise<any> {

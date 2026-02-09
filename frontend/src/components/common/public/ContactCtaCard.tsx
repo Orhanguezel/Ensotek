@@ -14,6 +14,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 // Icons (same family as InfoContactCard)
 import PhoneIcon from 'public/img/svg/call.svg';
@@ -92,26 +93,49 @@ const ContactCtaCard: React.FC<Props> = ({
 
   contactHref = '/contact',
 }) => {
-  const phoneDisplayQ = useGetSiteSettingByKeyQuery({ key: 'contact_phone_display' });
-  const phoneTelQ = useGetSiteSettingByKeyQuery({ key: 'contact_phone_tel' });
-  const waLinkQ = useGetSiteSettingByKeyQuery({ key: 'contact_whatsapp_link' });
+  const settingsCtx = useSiteSettingsContext();
+
+  const phoneDisplayQ = useGetSiteSettingByKeyQuery(
+    { key: 'contact_phone_display' },
+    { skip: !!settingsCtx },
+  );
+  const phoneTelQ = useGetSiteSettingByKeyQuery(
+    { key: 'contact_phone_tel' },
+    { skip: !!settingsCtx },
+  );
+  const waLinkQ = useGetSiteSettingByKeyQuery(
+    { key: 'contact_whatsapp_link' },
+    { skip: !!settingsCtx },
+  );
+
+  const phoneDisplayValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'contact_phone_display')
+    : (phoneDisplayQ.data as any)?.value;
+
+  const phoneTelValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'contact_phone_tel')
+    : (phoneTelQ.data as any)?.value;
+
+  const whatsappLinkValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'contact_whatsapp_link')
+    : (waLinkQ.data as any)?.value;
 
   const phoneDisplay = useMemo(() => {
-    const s = safeSettingString((phoneDisplayQ.data as any)?.value);
+    const s = safeSettingString(phoneDisplayValue);
     return s;
-  }, [phoneDisplayQ.data]);
+  }, [phoneDisplayValue]);
 
   const phoneRaw = useMemo(() => {
-    const s = safeSettingString((phoneTelQ.data as any)?.value);
+    const s = safeSettingString(phoneTelValue);
     return s || phoneDisplay;
-  }, [phoneTelQ.data, phoneDisplay]);
+  }, [phoneTelValue, phoneDisplay]);
 
   const telHref = useMemo(() => buildTelHref(phoneRaw), [phoneRaw]);
 
   const waHref = useMemo(() => {
-    const explicit = safeSettingString((waLinkQ.data as any)?.value);
+    const explicit = safeSettingString(whatsappLinkValue);
     return explicit || buildWhatsappHref(phoneRaw);
-  }, [waLinkQ.data, phoneRaw]);
+  }, [whatsappLinkValue, phoneRaw]);
 
   const hasAny = !!phoneDisplay || !!telHref || !!waHref || !!contactHref || !!description;
 

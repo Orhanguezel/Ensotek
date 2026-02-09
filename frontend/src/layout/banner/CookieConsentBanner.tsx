@@ -19,6 +19,7 @@ import { localizePath } from '@/i18n/url';
 
 // DB
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 type CookieConsentDb = {
   consent_version?: number;
@@ -147,16 +148,24 @@ export default function CookieConsentBanner() {
   const locale = useLocaleShort();
   const { ui } = useUiSection('ui_cookie', locale as any);
 
+  const settingsCtx = useSiteSettingsContext();
+
   // DB: cookie_consent (localized)
-  const { data: consentSettingRaw, isLoading: isConsentLoading } = useGetSiteSettingByKeyQuery({
-    key: 'cookie_consent',
-    locale,
-  } as any);
+  const { data: consentSettingRaw, isLoading: isConsentLoading } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'cookie_consent',
+      locale,
+    } as any,
+    { skip: !!settingsCtx },
+  );
+
+  const consentSettingValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'cookie_consent')
+    : (consentSettingRaw as any)?.value ?? consentSettingRaw;
 
   const consentSetting: CookieConsentDb | null = useMemo(() => {
-    const v = (consentSettingRaw as any)?.value ?? consentSettingRaw;
-    return parseCookieConsentSetting(v);
-  }, [consentSettingRaw]);
+    return parseCookieConsentSetting(consentSettingValue);
+  }, [consentSettingValue]);
 
   const consentVersion = useMemo(() => {
     const v = Number(consentSetting?.consent_version);

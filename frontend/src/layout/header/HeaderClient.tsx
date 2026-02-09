@@ -14,6 +14,7 @@ import type { PublicMenuItemDto } from '@/integrations/types';
 import { localizePath } from '@/i18n/url';
 import { useResolvedLocale } from '@/i18n/locale';
 import { useUiSection } from '@/i18n/uiDb';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 type SimpleBrand = {
   name: string;
@@ -37,6 +38,8 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
   // ✅ Tek kaynak: runtime locale resolver (app_locales + default + url/cookie)
   const locale = useResolvedLocale();
 
+  const settingsCtx = useSiteSettingsContext();
+
   // ✅ UI stringleri
   const { ui, raw: uiHeaderJson } = useUiSection('ui_header', locale);
 
@@ -51,25 +54,46 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
     '(Menü yükleniyor...)';
 
   // 🔹 site_settings - locale-aware
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
-    key: 'contact_info',
-    locale,
-  });
+  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'contact_info',
+      locale,
+    },
+    { skip: !!settingsCtx },
+  );
 
-  const { data: socialsSetting } = useGetSiteSettingByKeyQuery({
-    key: 'socials',
-    locale,
-  });
+  const { data: socialsSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'socials',
+      locale,
+    },
+    { skip: !!settingsCtx },
+  );
 
-  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
-    key: 'company_brand',
-    locale,
-  });
+  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'company_brand',
+      locale,
+    },
+    { skip: !!settingsCtx },
+  );
+
+  const contactInfoValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'contact_info')
+    : contactInfoSetting?.value;
+
+  const socialsValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'socials')
+    : socialsSetting?.value;
+
+  const companyBrandValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'company_brand')
+    : companyBrandSetting?.value;
 
   const brandFromSettings = useMemo(() => {
-    const contact = (contactInfoSetting?.value ?? {}) as any;
-    const socials = (socialsSetting?.value ?? {}) as Record<string, string>;
-    const brandVal = (companyBrandSetting?.value ?? {}) as any;
+    const contact = (contactInfoValue ?? {}) as any;
+    const socials = (socialsValue ?? {}) as Record<string, string>;
+    const brandVal = (companyBrandValue ?? {}) as any;
 
     const name = (brandVal?.name as string) || (contact?.companyName as string) || 'ENSOTEK';
 
@@ -102,7 +126,7 @@ const HeaderClient: React.FC<Props> = ({ brand, logoSrc }) => {
       socials: mergedSocials,
       logo,
     };
-  }, [contactInfoSetting?.value, socialsSetting?.value, companyBrandSetting?.value]);
+  }, [contactInfoValue, socialsValue, companyBrandValue]);
 
   const resolvedBrand = useMemo(
     () => ({

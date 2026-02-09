@@ -44,6 +44,12 @@ const normalizeList = (raw: unknown): ApiCustomPage[] => {
   return [];
 };
 
+const stableQueryOptions = {
+  refetchOnFocus: false as const,
+  refetchOnReconnect: false as const,
+  refetchOnMountOrArgChange: false as const,
+};
+
 export type CustomPageBySlugArgs = {
   slug: string;
   locale?: string;
@@ -73,6 +79,8 @@ export const customPagesPublicApi = baseApi.injectEndpoints({
               { type: 'CustomPage' as const, id: 'PUBLIC_LIST' },
             ]
           : [{ type: 'CustomPage' as const, id: 'PUBLIC_LIST' }],
+      keepUnusedDataFor: 600,
+      ...stableQueryOptions,
     }),
 
     getCustomPagePublic: build.query<
@@ -86,6 +94,8 @@ export const customPagesPublicApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
       providesTags: (_result, _error, { id }) => [{ type: 'CustomPage' as const, id }],
+      keepUnusedDataFor: 600,
+      ...stableQueryOptions,
     }),
 
     getCustomPageBySlugPublic: build.query<CustomPageDto, CustomPageBySlugArgs>({
@@ -96,6 +106,8 @@ export const customPagesPublicApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiCustomPage) => mapApiCustomPageToDto(response),
       providesTags: (_result, _error, args) => [{ type: 'CustomPageSlug' as const, id: args.slug }],
+      keepUnusedDataFor: 600,
+      ...stableQueryOptions,
     }),
   }),
   overrideExisting: false,

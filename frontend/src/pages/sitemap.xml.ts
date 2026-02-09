@@ -4,8 +4,10 @@ import { getRequestBaseUrl } from '@/seo/serverBase';
 import { FALLBACK_LOCALE } from '@/i18n/config';
 
 // === Ayarlar ===
-const revalidateSeconds = 3600;
+const revalidateSeconds = 1800;
 const DEFAULT_LOCALE_PREFIXLESS = true;
+
+type CacheEntry<T> = { ts: number; data: T };
 
 type AppLocaleMeta = {
   code?: unknown;
@@ -20,6 +22,19 @@ function stripTrailingSlash(u: string) {
   return String(u || '')
     .trim()
     .replace(/\/+$/, '');
+}
+
+const memoryCache = new Map<string, CacheEntry<unknown>>();
+
+function getCached<T>(key: string, ttlSeconds: number): T | null {
+  const hit = memoryCache.get(key) as CacheEntry<T> | undefined;
+  if (!hit) return null;
+  if (Date.now() - hit.ts > ttlSeconds * 1000) return null;
+  return hit.data ?? null;
+}
+
+function setCached<T>(key: string, data: T) {
+  memoryCache.set(key, { ts: Date.now(), data });
 }
 
 function normLocaleShort(x: any, fallback: string): string {
@@ -85,10 +100,14 @@ function getApiBaseServer(): string {
 
 async function fetchJsonSafe<T>(url: string): Promise<T | null> {
   if (!url) return null;
+  const cached = getCached<T>(`json:${url}`, revalidateSeconds);
+  if (cached) return cached;
   try {
     const r = await fetch(url, { cache: 'no-store', headers: { accept: 'application/json' } });
     if (!r.ok) return null;
-    return (await r.json()) as T;
+    const data = (await r.json()) as T;
+    setCached(`json:${url}`, data);
+    return data;
   } catch {
     return null;
   }
@@ -145,11 +164,15 @@ function pickSlug(rec: any, locale: string, defaultLocale: string) {
 async function fetchList(apiBase: string, path: string) {
   if (!apiBase) return [] as any[];
   const url = `${apiBase}/${path}?limit=500`;
+  const cached = getCached<any[]>(`list:${url}`, revalidateSeconds);
+  if (cached) return cached;
   const r = await fetch(url, { cache: 'no-store' });
   if (!r.ok) return [];
   const j = await r.json();
   const data = Array.isArray(j) ? j : j?.data;
-  return Array.isArray(data) ? data : [];
+  const out = Array.isArray(data) ? data : [];
+  setCached(`list:${url}`, out);
+  return out;
 }
 
 /* -------------------- sitemap model -------------------- */

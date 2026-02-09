@@ -12,6 +12,7 @@ import Image, { type StaticImageData } from 'next/image';
 
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 import type { SettingValue } from '@/integrations/types';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 type Variant = 'default' | 'dark' | 'light';
 
@@ -90,15 +91,22 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({
 }) => {
   const key = variantKeyMap[variant];
 
+  const settingsCtx = useSiteSettingsContext();
+
   // ✅ GLOBAL logo
-  const { data: setting } = useGetSiteSettingByKeyQuery({
-    key,
-    locale: '*',
-  });
+  const { data: setting } = useGetSiteSettingByKeyQuery(
+    {
+      key,
+      locale: '*',
+    },
+    { skip: !!settingsCtx },
+  );
+
+  const settingValue = settingsCtx ? pickSettingValue(settingsCtx, key) : setting?.value;
 
   const { url, width, height } = useMemo(
-    () => extractMedia((setting?.value as SettingValue) ?? null),
-    [setting?.value],
+    () => extractMedia((settingValue as SettingValue) ?? null),
+    [settingValue],
   );
 
   let finalSrc: StaticImageData | string = '';
@@ -122,20 +130,7 @@ export const SiteLogo: React.FC<SiteLogoProps> = ({
 
   // Don't render anything if no logo available
   if (!finalSrc) {
-    // Return a short text fallback when no logo available
-    return (
-      <span 
-        className="header__logo-text"
-        style={{
-          fontSize: '18px',
-          fontWeight: 600,
-          color: '#1976d2',
-          textDecoration: 'none'
-        }}
-      >
-        ENSOTEK
-      </span>
-    );
+    return <span className="header__logo-text">ENSOTEK</span>;
   }
 
   return (

@@ -29,7 +29,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   ].join('\n');
 
   res.setHeader('Content-Type', 'text/plain; charset=utf-8');
-  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600');
+  res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=1800, stale-while-revalidate=86400');
   res.write(lines);
   res.end();
 

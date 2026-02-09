@@ -30,6 +30,21 @@ interface Sparepart {
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.ensotek.de';
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://www.ensotek.de/api';
+const REVALIDATE_SECONDS = 1800;
+
+type CacheEntry<T> = { ts: number; data: T };
+const memoryCache = new Map<string, CacheEntry<unknown>>();
+
+function getCached<T>(key: string, ttlSeconds: number): T | null {
+  const hit = memoryCache.get(key) as CacheEntry<T> | undefined;
+  if (!hit) return null;
+  if (Date.now() - hit.ts > ttlSeconds * 1000) return null;
+  return hit.data ?? null;
+}
+
+function setCached<T>(key: string, data: T) {
+  memoryCache.set(key, { ts: Date.now(), data });
+}
 
 // Helper function to validate and sanitize slugs
 function isValidSlug(slug: string): boolean {
@@ -51,13 +66,18 @@ function isValidSlug(slug: string): boolean {
 
 // Helper function to fetch data from backend
 async function fetchApi(endpoint: string): Promise<any> {
+  const cacheKey = `api:${endpoint}`;
+  const cached = getCached<any>(cacheKey, REVALIDATE_SECONDS);
+  if (cached) return cached;
   try {
     const response = await fetch(`${API_BASE}${endpoint}`);
     if (!response.ok) {
       console.warn(`Failed to fetch ${endpoint}:`, response.status);
       return null;
     }
-    return await response.json();
+    const data = await response.json();
+    setCached(cacheKey, data);
+    return data;
   } catch (error) {
     console.warn(`Error fetching ${endpoint}:`, error);
     return null;
@@ -89,6 +109,17 @@ const DEFAULT_LOCALE = 'de';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
+    const cachedSitemap = getCached<string>('sitemap:xml', REVALIDATE_SECONDS);
+    if (cachedSitemap) {
+      res.setHeader('Content-Type', 'application/xml');
+      res.setHeader(
+        'Cache-Control',
+        `public, max-age=0, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=86400`,
+      );
+      res.status(200).send(cachedSitemap);
+      return;
+    }
+
     const urls: string[] = [];
     
     // Static pages with high priority
@@ -235,8 +266,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 ${urls.join('\n')}
 </urlset>`;
 
+    setCached('sitemap:xml', sitemap);
+
     res.setHeader('Content-Type', 'application/xml');
-    res.setHeader('Cache-Control', 'public, max-age=86400, s-maxage=86400'); // Cache for 24 hours
+    res.setHeader(
+      'Cache-Control',
+      `public, max-age=0, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=86400`,
+    );
     res.status(200).send(sitemap);
 
   } catch (error) {

@@ -10,6 +10,8 @@ import { normLocaleTag, pickFromAcceptLanguage, pickFromCookie } from '@/i18n/lo
 
 const API = (process.env.API_BASE_URL || '').trim();
 
+const REVALIDATE_SECONDS = 1800;
+
 // Hard fallback only if DB/API not reachable or empty
 export const DEFAULT_LOCALE_FALLBACK = 'de';
 
@@ -36,7 +38,7 @@ async function fetchJson<T>(path: string, opts?: { revalidate?: number }): Promi
     const url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
 
     const res = await fetch(url, {
-      next: { revalidate: opts?.revalidate ?? 600 },
+      next: { revalidate: opts?.revalidate ?? REVALIDATE_SECONDS },
     });
 
     if (!res.ok) return null;
@@ -45,6 +47,14 @@ async function fetchJson<T>(path: string, opts?: { revalidate?: number }): Promi
     return null;
   }
 }
+
+const fetchAppLocales = cache(async () =>
+  fetchJson<AppLocaleMeta[]>('/site_settings/app-locales', { revalidate: REVALIDATE_SECONDS }),
+);
+
+const fetchDefaultLocaleMeta = cache(async () =>
+  fetchJson<string | null>('/site_settings/default-locale', { revalidate: REVALIDATE_SECONDS }),
+);
 
 function computeActiveLocales(meta: AppLocaleMeta[] | null | undefined): {
   activeLocales: string[];
@@ -76,7 +86,7 @@ export async function fetchActiveLocales(): Promise<string[]> {
   const def = DEFAULT_LOCALE_FALLBACK;
   if (!API) return [def];
 
-  const meta = await fetchJson<AppLocaleMeta[]>('/site_settings/app-locales', { revalidate: 600 });
+  const meta = await fetchAppLocales();
   const parsed = computeActiveLocales(meta);
   return parsed.activeLocales.length ? parsed.activeLocales : [def];
 }
@@ -93,10 +103,7 @@ export const getDefaultLocale = cache(async (): Promise<string> => {
   const def = DEFAULT_LOCALE_FALLBACK;
   if (!API) return def;
 
-  const [meta, defaultMeta] = await Promise.all([
-    fetchJson<AppLocaleMeta[]>('/site_settings/app-locales', { revalidate: 600 }),
-    fetchJson<string | null>('/site_settings/default-locale', { revalidate: 600 }),
-  ]);
+  const [meta, defaultMeta] = await Promise.all([fetchAppLocales(), fetchDefaultLocaleMeta()]);
 
   const parsed = computeActiveLocales(meta);
   const active = parsed.activeLocales;
@@ -154,7 +161,7 @@ export async function fetchSetting(
   const row = await fetchJson<SiteSettingRow | { data: SiteSettingRow }>(
     `/site_settings/by-key?${qs}`,
     {
-      revalidate: opts?.revalidate ?? 600,
+      revalidate: opts?.revalidate ?? REVALIDATE_SECONDS,
     },
   );
 

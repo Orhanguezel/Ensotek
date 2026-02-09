@@ -13,6 +13,7 @@ import { useRouter } from 'next/router';
 
 import { useLocaleShort } from '@/i18n/useLocaleShort';
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 type Socials = Partial<{
   facebook: string;
@@ -93,6 +94,8 @@ export default function SocialShare(props: SocialShareProps) {
   const router = useRouter();
   const locale = useLocaleShort();
 
+  const settingsCtx = useSiteSettingsContext();
+
   const showLabel = props.showLabel ?? true;
   const label = safeStr(props.label) || 'Share';
 
@@ -111,30 +114,42 @@ export default function SocialShare(props: SocialShareProps) {
   // --- public_base_url (for stable absolute links)
   const { data: basePrimary } = useGetSiteSettingByKeyQuery(
     { key: 'public_base_url', locale: '*' } as any,
-    { skip: false },
+    { skip: !!settingsCtx },
   );
 
+  const baseValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'public_base_url')
+    : (basePrimary as any)?.value ?? basePrimary;
+
   const baseUrl = useMemo(() => {
-    const v = safeStr((basePrimary as any)?.value ?? basePrimary);
+    const v = safeStr(baseValue);
     return stripTrailingSlash(v);
-  }, [basePrimary]);
+  }, [baseValue]);
 
   // --- socials (company profile links): localized + EN fallback
   const { data: socialsTrg } = useGetSiteSettingByKeyQuery({ key: 'socials', locale } as any, {
-    skip: !props.showCompanySocials || !locale,
+    skip: !props.showCompanySocials || !locale || !!settingsCtx,
   });
 
   const { data: socialsEn } = useGetSiteSettingByKeyQuery({ key: 'socials', locale: 'de' } as any, {
-    skip: !props.showCompanySocials || !locale || locale === 'de',
+    skip: !props.showCompanySocials || !locale || locale === 'de' || !!settingsCtx,
   });
+
+  const socialsPrimaryValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'socials')
+    : (socialsTrg as any)?.value ?? socialsTrg;
+
+  const socialsFallbackValue = settingsCtx
+    ? null
+    : (socialsEn as any)?.value ?? socialsEn;
 
   const companySocials = useMemo<Socials>(() => {
     if (!props.showCompanySocials) return {};
-    const primary = tryParseJson<Socials>((socialsTrg as any)?.value ?? socialsTrg);
-    const fallback = tryParseJson<Socials>((socialsEn as any)?.value ?? socialsEn);
+    const primary = tryParseJson<Socials>(socialsPrimaryValue);
+    const fallback = tryParseJson<Socials>(socialsFallbackValue);
     const pick = primary && Object.values(primary).some(Boolean) ? primary : fallback;
     return (pick ?? {}) as Socials;
-  }, [props.showCompanySocials, socialsTrg, socialsEn]);
+  }, [props.showCompanySocials, socialsPrimaryValue, socialsFallbackValue]);
 
   // --- share url (prefer baseUrl + asPath, fallback window)
   const shareUrl = useMemo(() => {

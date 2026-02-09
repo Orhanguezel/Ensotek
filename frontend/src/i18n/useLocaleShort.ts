@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 import { useResolvedLocale } from '@/i18n/locale';
 import { normLocaleTag } from '@/i18n/localeUtils';
 
-export function useLocaleShort(explicitLocale?: string | null): string {
+export const useLocaleShort = (explicitLocale?: string | null): string => {
   const resolved = useResolvedLocale(explicitLocale);
 
   return useMemo(() => {
@@ -15,4 +15,6 @@ export function useLocaleShort(explicitLocale?: string | null): string {
     // Burada sadece normalize ediyoruz.
     return normLocaleTag(resolved) || 'de';
   }, [resolved]);
-}
+};
+
+export default useLocaleShort;

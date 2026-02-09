@@ -13,6 +13,7 @@ import React, { useMemo } from 'react';
 import Image from 'next/image';
 
 import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 // Icons
 import PhoneIcon from 'public/img/svg/call.svg';
@@ -113,21 +114,31 @@ const InfoContactCard: React.FC<InfoContactCardProps> = ({
 }) => {
   const loc = safeStr(locale);
 
+  const settingsCtx = useSiteSettingsContext();
+
   // contact_info (target locale)
   const { data: contactTrg } = useGetSiteSettingByKeyQuery(
     { key: 'contact_info', locale: loc } as any,
-    { skip: !loc },
+    { skip: !loc || !!settingsCtx },
   );
 
   // fallback locale
   const { data: contactFb } = useGetSiteSettingByKeyQuery(
     { key: 'contact_info', locale: fallbackLocale } as any,
-    { skip: !loc || loc === fallbackLocale },
+    { skip: !loc || loc === fallbackLocale || !!settingsCtx },
   );
 
+  const contactPrimaryValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'contact_info')
+    : (contactTrg as any)?.value ?? contactTrg;
+
+  const contactFallbackValue = settingsCtx
+    ? null
+    : (contactFb as any)?.value ?? contactFb;
+
   const contactInfo = useMemo<ContactInfo>(() => {
-    const primary = tryParseJson<ContactInfo>((contactTrg as any)?.value ?? contactTrg);
-    const fallback = tryParseJson<ContactInfo>((contactFb as any)?.value ?? contactFb);
+    const primary = tryParseJson<ContactInfo>(contactPrimaryValue);
+    const fallback = tryParseJson<ContactInfo>(contactFallbackValue);
 
     const ok =
       primary &&
@@ -139,7 +150,7 @@ const InfoContactCard: React.FC<InfoContactCardProps> = ({
         primary.website);
 
     return (ok ? primary : fallback) ?? {};
-  }, [contactTrg, contactFb]);
+  }, [contactPrimaryValue, contactFallbackValue]);
 
   const phone = useMemo(() => {
     const arr = Array.isArray(contactInfo?.phones) ? contactInfo.phones : [];

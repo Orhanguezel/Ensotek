@@ -26,6 +26,7 @@ import { FiX, FiSearch, FiGlobe, FiPhone, FiMail, FiLogIn, FiUserPlus } from 're
 import { useListMenuItemsQuery, useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
 import type { PublicMenuItemDto } from '@/integrations/types';
 import { useUiSection } from '@/i18n/uiDb';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 export type SimpleBrand = {
   name: string;
@@ -52,6 +53,8 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
   // ✅ Tek kaynak: runtime locale resolver
   const resolvedLocale = useResolvedLocale();
 
+  const settingsCtx = useSiteSettingsContext();
+
   // ✅ Dinamik locale listesi (DB meta endpoint)
   const { locales: activeLocales, isLoading: localesLoading } = useActiveLocales();
 
@@ -59,23 +62,44 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
   const { ui } = useUiSection('ui_header', resolvedLocale);
 
   // Brand settings (locale-aware)
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
-    key: 'contact_info',
-    locale: resolvedLocale,
-  });
-  const { data: socialsSetting } = useGetSiteSettingByKeyQuery({
-    key: 'socials',
-    locale: resolvedLocale,
-  });
-  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
-    key: 'company_brand',
-    locale: resolvedLocale,
-  });
+  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'contact_info',
+      locale: resolvedLocale,
+    },
+    { skip: !!settingsCtx },
+  );
+  const { data: socialsSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'socials',
+      locale: resolvedLocale,
+    },
+    { skip: !!settingsCtx },
+  );
+  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'company_brand',
+      locale: resolvedLocale,
+    },
+    { skip: !!settingsCtx },
+  );
+
+  const contactInfoValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'contact_info')
+    : contactInfoSetting?.value;
+
+  const socialsValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'socials')
+    : socialsSetting?.value;
+
+  const companyBrandValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'company_brand')
+    : companyBrandSetting?.value;
 
   const brandFromSettings = useMemo(() => {
-    const contact = (contactInfoSetting?.value ?? {}) as any;
-    const socials = (socialsSetting?.value ?? {}) as Record<string, string>;
-    const brandVal = (companyBrandSetting?.value ?? {}) as any;
+    const contact = (contactInfoValue ?? {}) as any;
+    const socials = (socialsValue ?? {}) as Record<string, string>;
+    const brandVal = (companyBrandValue ?? {}) as any;
 
     const name = (brandVal?.name as string) || (contact?.companyName as string) || 'ENSOTEK';
 
@@ -105,7 +129,7 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
       email,
       socials: mergedSocials,
     };
-  }, [contactInfoSetting?.value, socialsSetting?.value, companyBrandSetting?.value]);
+  }, [contactInfoValue, socialsValue, companyBrandValue]);
 
   // ✅ Header’dan gelen brand ile DB brand’ini birleştir
   const effectiveBrand = useMemo(

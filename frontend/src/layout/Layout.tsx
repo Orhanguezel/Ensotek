@@ -52,6 +52,8 @@ import {
   type LayoutSeoOverrides,
 } from '@/seo/layoutSeoStore';
 
+import { SiteSettingsProvider } from '@/layout/SiteSettingsContext';
+
 type SimpleBrand = {
   name: string;
   email?: string;
@@ -293,6 +295,11 @@ export default function Layout({
       'contact_info',
       'company_brand',
       'socials',
+      'cookie_consent',
+      'public_base_url',
+      'contact_phone_display',
+      'contact_phone_tel',
+      'contact_whatsapp_link',
     ],
     [],
   );
@@ -315,6 +322,11 @@ export default function Layout({
       'contact_info',
       'company_brand',
       'socials',
+      'cookie_consent',
+      'public_base_url',
+      'contact_phone_display',
+      'contact_phone_tel',
+      'contact_whatsapp_link',
     ],
     [],
   );
@@ -601,6 +613,15 @@ export default function Layout({
     });
   }, [isProd, router.asPath, router.query?.__lc, locale]);
 
+  const contextValue = useMemo(
+    () => ({
+      locale,
+      localeMap,
+      globalMap,
+    }),
+    [locale, localeMap, globalMap],
+  );
+
   return (
     <Fragment>
       <Head>
@@ -639,14 +660,16 @@ export default function Layout({
         ) : null}
       </Head>
 
-      <div className="my-app">
-        <Header brand={effectiveBrand} />
-        <main>
-          <LayoutErrorBoundary fallback={errorFallback}>{children}</LayoutErrorBoundary>
-        </main>
-        <FooterTwo />
-        <ScrollProgress />
-      </div>
+      <SiteSettingsProvider value={contextValue}>
+        <div className="my-app">
+          <Header brand={effectiveBrand} />
+          <main>
+            <LayoutErrorBoundary fallback={errorFallback}>{children}</LayoutErrorBoundary>
+          </main>
+          <FooterTwo />
+          <ScrollProgress />
+        </div>
+      </SiteSettingsProvider>
     </Fragment>
   );
 }

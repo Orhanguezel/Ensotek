@@ -32,6 +32,7 @@ import type {
 import { useResolvedLocale } from '@/i18n/locale';
 import { localizePath } from '@/i18n/url';
 import { useUiSection } from '@/i18n/uiDb';
+import { pickSettingValue, useSiteSettingsContext } from '@/layout/SiteSettingsContext';
 
 const isExternalHref = (href: string) =>
   /^https?:\/\//i.test(href) || /^mailto:/i.test(href) || /^tel:/i.test(href) || /^#/i.test(href);
@@ -40,26 +41,49 @@ const Footer: React.FC = () => {
   const locale = useResolvedLocale();
   const { ui } = useUiSection('ui_footer', locale);
 
+  const settingsCtx = useSiteSettingsContext();
+
   // --------- site_settings: brand + contact + socials ----------
-  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery({
-    key: 'contact_info',
-    locale,
-  });
+  const { data: contactInfoSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'contact_info',
+      locale,
+    },
+    { skip: !!settingsCtx },
+  );
 
-  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery({
-    key: 'company_brand',
-    locale,
-  });
+  const { data: companyBrandSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'company_brand',
+      locale,
+    },
+    { skip: !!settingsCtx },
+  );
 
-  const { data: socialsSetting } = useGetSiteSettingByKeyQuery({
-    key: 'socials',
-    locale,
-  });
+  const { data: socialsSetting } = useGetSiteSettingByKeyQuery(
+    {
+      key: 'socials',
+      locale,
+    },
+    { skip: !!settingsCtx },
+  );
+
+  const contactInfoValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'contact_info')
+    : contactInfoSetting?.value;
+
+  const companyBrandValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'company_brand')
+    : companyBrandSetting?.value;
+
+  const socialsValue = settingsCtx
+    ? pickSettingValue(settingsCtx, 'socials')
+    : socialsSetting?.value;
 
   const { brandName, phone, email, website, addrLines, socials } = useMemo(() => {
-    const contact = (contactInfoSetting?.value ?? {}) as any;
-    const brandVal = (companyBrandSetting?.value ?? {}) as any;
-    const socialsVal = (socialsSetting?.value ?? {}) as Record<string, string>;
+    const contact = (contactInfoValue ?? {}) as any;
+    const brandVal = (companyBrandValue ?? {}) as any;
+    const socialsVal = (socialsValue ?? {}) as Record<string, string>;
 
     const name = (brandVal.name as string) || (contact.companyName as string) || 'Ensotek';
 
@@ -92,7 +116,7 @@ const Footer: React.FC = () => {
       addrLines: addrLinesComputed,
       socials: mergedSocials,
     };
-  }, [contactInfoSetting?.value, companyBrandSetting?.value, socialsSetting?.value]);
+  }, [contactInfoValue, companyBrandValue, socialsValue]);
 
   // --------- footer_sections ----------
   const { data: footerSections } = useListFooterSectionsQuery({
