@@ -100,9 +100,9 @@
         position: relative;
         & input{
             width: 100%;
-            height: 40px;
-            line-height: 40px;
-            padding-right: 20px;
+            height: 44px;
+            line-height: 44px;
+            padding-right: 56px;
             background: transparent;
             border: none;
             outline: none;
@@ -121,7 +121,12 @@
             top: 50%;
             right: 0;
             @include transform(translateY(-50%));
-            font-size: 16px;
+            width: 44px;
+            height: 44px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
             color: var(--clr-common-heading);
             &:hover {
                 color: var(--clr-theme-1);
@@ -211,6 +216,17 @@
                         background-color: var(--clr-theme-1);
                     }
                 }
+            }
+        }
+    }
+
+    &__content {
+        .border__btn {
+            color: var(--clr-common-heading);
+            border-color: var(--clr-common-heading);
+            &:hover {
+                background-color: var(--clr-common-heading);
+                color: var(--clr-common-white);
             }
         }
     }

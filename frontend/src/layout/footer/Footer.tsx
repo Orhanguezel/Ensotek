@@ -200,7 +200,7 @@ const Footer: React.FC = () => {
     <footer>
       <section className="footer__border footer-bg grey__bg p-relative z-index-11 pt-120 pb-60">
         <div className="footer__shape">
-          <Image src={Shape} alt="Image" />
+          <Image src={Shape} alt="Image" width={444} height={421} />
         </div>
         <div className="container">
           <div className="row">

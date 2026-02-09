@@ -1,0 +1,326 @@
+[
+  {
+    "url": "http://localhost:3000/",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_07_19--unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_07_19--unknown.json",
+    "summary": {
+      "performance": 0.27,
+      "accessibility": 0.91,
+      "best-practices": 0.93,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/product",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_09_15-product-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_09_15-product-unknown.json",
+    "summary": {
+      "performance": 0.37,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/service",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_10_21-service-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_10_21-service-unknown.json",
+    "summary": {
+      "performance": 0.36,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/news",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_11_29-news-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_11_29-news-unknown.json",
+    "summary": {
+      "performance": 0.2,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/library",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_11_59-library-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_11_59-library-unknown.json",
+    "summary": {
+      "performance": 0.4,
+      "accessibility": 0.93,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/references",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_13_26-references-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_13_26-references-unknown.json",
+    "summary": {
+      "performance": 0.28,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/contact",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_14_26-contact-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_14_26-contact-unknown.json",
+    "summary": {
+      "performance": 0.4,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/offer",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_15_24-offer-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_15_24-offer-unknown.json",
+    "summary": {
+      "performance": 0.41,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/faqs",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_16_26-faqs-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_16_26-faqs-unknown.json",
+    "summary": {
+      "performance": 0.36,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/terms",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_16_55-terms-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_16_55-terms-unknown.json",
+    "summary": {
+      "performance": 0.21,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/privacy-policy",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_17_52-privacy_policy-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_17_52-privacy_policy-unknown.json",
+    "summary": {
+      "performance": 0.17,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/privacy-notice",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_19_24-privacy_notice-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_19_24-privacy_notice-unknown.json",
+    "summary": {
+      "performance": 0.2,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/cookie-policy",
+    "isRepresentativeRun": false,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_19_51-cookie_policy-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_19_51-cookie_policy-unknown.json",
+    "summary": {
+      "performance": 0.23,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_05_49--unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_05_49--unknown.json",
+    "summary": {
+      "performance": 0.27,
+      "accessibility": 0.91,
+      "best-practices": 0.93,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/product",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_08_46-product-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_08_46-product-unknown.json",
+    "summary": {
+      "performance": 0.36,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/service",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_09_44-service-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_09_44-service-unknown.json",
+    "summary": {
+      "performance": 0.36,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/news",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_10_57-news-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_10_57-news-unknown.json",
+    "summary": {
+      "performance": 0.2,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/library",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_12_27-library-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_12_27-library-unknown.json",
+    "summary": {
+      "performance": 0.41,
+      "accessibility": 0.93,
+      "best-practices": 0.96,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/references",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_12_54-references-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_12_54-references-unknown.json",
+    "summary": {
+      "performance": 0.3,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/contact",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_13_56-contact-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_13_56-contact-unknown.json",
+    "summary": {
+      "performance": 0.39,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/offer",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_14_55-offer-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_14_55-offer-unknown.json",
+    "summary": {
+      "performance": 0.39,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/faqs",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_15_53-faqs-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_15_53-faqs-unknown.json",
+    "summary": {
+      "performance": 0.34,
+      "accessibility": 0.91,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/terms",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_17_22-terms-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_17_22-terms-unknown.json",
+    "summary": {
+      "performance": 0.21,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/privacy-policy",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_18_23-privacy_policy-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_18_23-privacy_policy-unknown.json",
+    "summary": {
+      "performance": 0.19,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/privacy-notice",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_18_53-privacy_notice-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_18_53-privacy_notice-unknown.json",
+    "summary": {
+      "performance": 0.17,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/cookie-policy",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_20_17-cookie_policy-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_20_17-cookie_policy-unknown.json",
+    "summary": {
+      "performance": 0.23,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  },
+  {
+    "url": "http://localhost:3000/legal-notice",
+    "isRepresentativeRun": true,
+    "htmlPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_20_44-legal_notice-unknown.html",
+    "jsonPath": "/home/orhan/Documents/Ensotek/frontend/.lighthouseci/ensotek-lh-2026_02_09_00_20_44-legal_notice-unknown.json",
+    "summary": {
+      "performance": 0.15,
+      "accessibility": 0.93,
+      "best-practices": 1,
+      "seo": 1
+    }
+  }
+]

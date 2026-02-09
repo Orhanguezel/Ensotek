@@ -354,7 +354,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
                       href={
                         safePhone ? `tel:${safePhone}` : localizePath(resolvedLocale, '/contact')
                       }
-                      aria-label={ui('ui_header_call', 'Call')}
                       onClick={safePhone ? undefined : onClose}
                     >
                       {effectiveBrand.phone || '—'}
@@ -369,7 +368,6 @@ const HeaderOffcanvas: React.FC<HeaderOffcanvasProps> = ({ open, onClose, logoSr
                   <div className="offcanvas__contact-text">
                     <Link
                       href={`mailto:${effectiveBrand.email}`}
-                      aria-label={ui('ui_header_email', 'Email')}
                     >
                       <span>{effectiveBrand.email}</span>
                     </Link>

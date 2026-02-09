@@ -6,18 +6,105 @@
 
 import Document, { Html, Head, Main, NextScript, DocumentContext } from 'next/document';
 
+// Server-side hreflang generation for Pages Router
+interface HreflangLink {
+  hreflang: string;
+  href: string;
+}
+
+function generateHreflangUrls(currentPath: string, host: string): HreflangLink[] {
+  // Active locales - sync with database app_locales
+  const activeLocales = ['de', 'tr', 'en'];
+  const defaultLocale = 'de';
+  const defaultPrefixless = true;
+
+  // Base URL
+  const protocol = process.env.NODE_ENV === 'production' ? 'https://' : 'http://';
+  const baseUrl = `${protocol}${host}`;
+
+  // Strip locale from path
+  const stripLocaleFromPath = (path: string): string => {
+    const pathLower = path.toLowerCase();
+    for (const loc of activeLocales) {
+      if (pathLower === `/${loc}` || pathLower.startsWith(`/${loc}/`)) {
+        return path.substring(loc.length + 1) || '/';
+      }
+    }
+    return path;
+  };
+
+  // Generate localized path
+  const generateLocalizedPath = (locale: string, basePath: string): string => {
+    if (defaultPrefixless && locale === defaultLocale) {
+      return basePath;
+    }
+    return basePath === '/' ? `/${locale}` : `/${locale}${basePath}`;
+  };
+
+  const cleanPath = stripLocaleFromPath(currentPath);
+  const links: HreflangLink[] = [];
+
+  // Generate URLs for all active locales
+  for (const locale of activeLocales) {
+    const localizedPath = generateLocalizedPath(locale, cleanPath);
+    links.push({
+      hreflang: locale,
+      href: `${baseUrl}${localizedPath}`
+    });
+  }
+
+  // x-default points to default locale
+  const defaultPath = generateLocalizedPath(defaultLocale, cleanPath);
+  links.push({
+    hreflang: 'x-default',
+    href: `${baseUrl}${defaultPath}`
+  });
+
+  return links;
+}
+
 class MyDocument extends Document {
   static async getInitialProps(ctx: DocumentContext) {
     const initialProps = await Document.getInitialProps(ctx);
-    return { ...initialProps };
+    
+    // Generate hreflang URLs
+    const currentPath = ctx.pathname || '/';
+    const host = ctx.req?.headers?.host || 'www.ensotek.de';
+    const hreflangLinks = generateHreflangUrls(currentPath, host);
+
+    return { 
+      ...initialProps, 
+      hreflangLinks 
+    };
   }
 
   render() {
+    // Type assertion for hreflangLinks
+    const { hreflangLinks } = this.props as any;
+    
     return (
       <Html>
         <Head>
           {/* Viewport optimization for better mobile performance */}
           <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+
+          {/* Generate canonical URL */}
+          {hreflangLinks && hreflangLinks.length > 0 && (
+            <link 
+              rel="canonical" 
+              href={hreflangLinks.find((link: HreflangLink) => link.hreflang === 'x-default')?.href || hreflangLinks[0]?.href} 
+            />
+          )}
+
+          {/* ✅ Hreflang links - Server-side generated */}
+          {hreflangLinks?.map((link: HreflangLink) => (
+            <link 
+              key={link.hreflang}
+              rel="alternate" 
+              hrefLang={link.hreflang} 
+              href={link.href} 
+            />
+          ))}
 
           {/* DNS prefetch for external resources */}
           <link rel="dns-prefetch" href="//fonts.googleapis.com" />

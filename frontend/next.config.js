@@ -20,6 +20,22 @@ const getPrefixlessFlag = () => {
   return raw === '1' || raw === 'true' || raw === 'yes';
 };
 
+const cspHeader = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "object-src 'none'",
+  "frame-ancestors 'self'",
+  "img-src 'self' data: blob: https://res.cloudinary.com https://images.unsplash.com https://ensotek.de https://www.ensotek.de https://cdn.ensotek.de https://www.googletagmanager.com https://www.google-analytics.com",
+  "font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com",
+  "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com https://unpkg.com",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+  "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+  "connect-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://ensotek.de https://www.ensotek.de",
+  "frame-src https://www.googletagmanager.com",
+  'upgrade-insecure-requests',
+].join('; ');
+
 const nextConfig = {
   reactStrictMode: true,
   trailingSlash: false,
@@ -51,6 +67,20 @@ const nextConfig = {
   },
 
   // ✅ i18n intentionally removed
+
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: cspHeader,
+          },
+        ],
+      },
+    ];
+  },
 
   async redirects() {
     const defaultLc = getDefaultLocaleShort();

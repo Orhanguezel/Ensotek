@@ -59,10 +59,14 @@
 // Header style
 .header {
     &__area {
+        min-height: 100px;
         &-2 {
             .container {
                 max-width: 1500px;
             }
+        }
+        @media #{$xs,$sm,$md}{
+            min-height: 84px;
         }
         @media #{$xs,$sm,$md}{
             padding: 27px 0;

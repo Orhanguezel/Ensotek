@@ -5,13 +5,13 @@ const baseUrl =
   process.env.NEXT_PUBLIC_SITE_URL ||
   'http://localhost:3000';
 
-const locales = (process.env.LH_LOCALES || 'tr,en,de')
+const locales = (process.env.LH_LOCALES || 'de,tr,en')
   .split(',')
   .map((x) => x.trim().toLowerCase())
   .filter(Boolean);
 
 const defaultNoPrefix = (process.env.LH_DEFAULT_NO_PREFIX || '1') === '1';
-const defaultLocale = (process.env.LH_DEFAULT_LOCALE || 'tr').trim().toLowerCase();
+const defaultLocale = (process.env.LH_DEFAULT_LOCALE || 'de').trim().toLowerCase();
 
 function withLocalePath(path, locale) {
   const p = `/${String(path || '').replace(/^\/+/, '')}`;
@@ -73,24 +73,50 @@ module.exports = {
   ci: {
     collect: {
       url: urls,
-      numberOfRuns: 1,
+      numberOfRuns: 2, // Daha stable results için 2 run
       settings: {
         preset: 'desktop',
-        chromeFlags: ['--no-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+        chromeFlags: [
+          '--no-sandbox', 
+          '--disable-dev-shm-usage', 
+          '--disable-gpu',
+          '--disable-features=VizDisplayCompositor'
+        ],
+        // Ensotek için özel ayarlar
+        throttling: {
+          rttMs: 40,
+          throughputKbps: 10240,
+          cpuSlowdownMultiplier: 1
+        }
       },
     },
     assert: {
-      // İlk aşamada çok agresif threshold koyma; stabilize edince sıkılaştır.
+      // Ensotek için realistic thresholds
       assertions: {
-        'categories:performance': ['warn', { minScore: 0.6 }],
-        'categories:accessibility': ['warn', { minScore: 0.8 }],
-        'categories:best-practices': ['warn', { minScore: 0.8 }],
-        'categories:seo': ['warn', { minScore: 0.9 }],
+        'categories:performance': ['warn', { minScore: 0.75 }], // Cloudinary + FontAwesome yükünde realistic
+        'categories:accessibility': ['error', { minScore: 0.9 }], // Accessibility kritik
+        'categories:best-practices': ['warn', { minScore: 0.85 }],
+        'categories:seo': ['error', { minScore: 0.95 }], // SEO bizim için kritik
+        
+        // Specific metrics for Ensotek
+        'first-contentful-paint': ['warn', { maxNumericValue: 2500 }],
+        'largest-contentful-paint': ['warn', { maxNumericValue: 4000 }],
+        'cumulative-layout-shift': ['warn', { maxNumericValue: 0.1 }],
+        'speed-index': ['warn', { maxNumericValue: 3500 }],
+        
+        // Critical SEO checks 
+        'meta-description': 'error',
+        'document-title': 'error',
+        'hreflang': 'error',
+        'canonical': 'error',
+        'robots-txt': 'warn',
+        'structured-data': 'warn'
       },
     },
     upload: {
       target: 'filesystem',
       outputDir: './.lighthouseci',
+      reportFilenamePattern: 'ensotek-lh-%%DATETIME%%-%%PATHNAME%%-%%LOCALE%%.%%EXTENSION%%'
     },
   },
 };

@@ -175,6 +175,7 @@ export default function CookieConsentBanner() {
   const [openSettings, setOpenSettings] = useState(false);
   const [consent, setConsent] = useState<ConsentState>({ necessary: true, analytics: false });
   const [hasChoice, setHasChoice] = useState<boolean>(false);
+  const [showBanner, setShowBanner] = useState<boolean>(false);
 
   useEffect(() => {
     // DB gelmeden banner state başlatma (version bilgisi lazım)
@@ -208,6 +209,35 @@ export default function CookieConsentBanner() {
 
     setReady(true);
   }, [isConsentLoading, enabled, keys, defaultAnalytics]);
+
+  useEffect(() => {
+    if (!ready) return;
+    if (!enabled || hasChoice) {
+      setShowBanner(false);
+      return;
+    }
+
+    let cancelled = false;
+    let idleId: number | undefined;
+    let timeoutId: number | undefined;
+
+    const show = () => {
+      if (!cancelled) setShowBanner(true);
+    };
+
+    if (typeof window !== 'undefined' && 'requestIdleCallback' in window) {
+      idleId = (window as any).requestIdleCallback(show, { timeout: 2000 });
+      timeoutId = window.setTimeout(show, 2000);
+    } else {
+      timeoutId = window.setTimeout(show, 2000);
+    }
+
+    return () => {
+      cancelled = true;
+      if (idleId) (window as any).cancelIdleCallback(idleId);
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [ready, enabled, hasChoice]);
 
   const policyHref = useMemo(() => localizePath(locale as any, '/cookie-policy'), [locale]);
 
@@ -258,6 +288,8 @@ export default function CookieConsentBanner() {
       />
     );
   }
+
+  if (!showBanner) return null;
 
   // Text priority: DB(cookie_consent.texts) > ui_cookie > fallback
   const titleText =

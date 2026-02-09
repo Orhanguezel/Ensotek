@@ -14,9 +14,19 @@
     "noEmit": "tsc -p tsconfig.json --noEmit",
     "test:seo": "npx playwright test tests/seo --reporter=line",
     "test:seo:ui": "npx playwright test tests/seo --ui",
+    "test:seo:debug": "npx playwright test tests/seo --debug",
+    "test:seo:headed": "npx playwright test tests/seo --headed",
+    "test:all": "npx playwright test --reporter=html",
+    
     "pw:install": "npx playwright install chromium",
     "pw:deps": "npx playwright install-deps chromium",
+    "test:setup": "npm run pw:install && npm run pw:deps",
+    "test:clean": "rm -rf test-results .lighthouseci",
+    
     "lh:autorun": "lhci autorun --config=./lighthouserc.cjs",
+    "lh:collect": "lhci collect --config=./lighthouserc.cjs",
+    "lh:assert": "lhci assert --config=./lighthouserc.cjs",
+    "lh:upload": "lhci upload --config=./lighthouserc.cjs",
     "analyze": "ANALYZE=true npm run build",
     "analyze:server": "npm run build && npx serve out",
     "analyze:bundle": "npx webpack-bundle-analyzer .next/static/chunks/"
