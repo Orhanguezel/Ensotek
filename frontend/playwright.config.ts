@@ -9,21 +9,6 @@ const rawBaseURL =
 
 const baseURL = String(rawBaseURL).trim().replace(/\/+$/, '');
 
-// Test environment configuration
-const testEnv = {
-  // Default test slugs for detail pages
-  PLAYWRIGHT_PRODUCT_SLUG: process.env.PLAYWRIGHT_PRODUCT_SLUG || 'cooling-tower-test',
-  PLAYWRIGHT_SERVICE_SLUG: process.env.PLAYWRIGHT_SERVICE_SLUG || 'maintenance-service',
-  PLAYWRIGHT_NEWS_SLUG: process.env.PLAYWRIGHT_NEWS_SLUG || 'latest-technology-2024',
-  PLAYWRIGHT_LIBRARY_SLUG: process.env.PLAYWRIGHT_LIBRARY_SLUG || 'installation-guide',
-  PLAYWRIGHT_TEAM_SLUG: process.env.PLAYWRIGHT_TEAM_SLUG || 'engineering-team',
-  
-  // Locale configuration
-  PLAYWRIGHT_LOCALES: process.env.PLAYWRIGHT_LOCALES || 'de,tr,en',
-  PLAYWRIGHT_DEFAULT_LOCALE: process.env.PLAYWRIGHT_DEFAULT_LOCALE || 'de',
-  PLAYWRIGHT_DEFAULT_NO_PREFIX: process.env.PLAYWRIGHT_DEFAULT_NO_PREFIX || '1'
-};
-
 export default defineConfig({
   testDir: './tests',
   timeout: 90_000, // Arttırıldı: Cloudinary image loading için
@@ -48,10 +33,6 @@ export default defineConfig({
       'Accept-Language': 'de,tr,en'
     }
   },
-  
-  // Environment variables for tests
-  env: testEnv,
-  
   projects: [
     {
       name: 'chromium-desktop',

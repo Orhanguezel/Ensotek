@@ -4,9 +4,9 @@
 'use client';
 
 import { useMemo } from 'react';
-import { useGetSiteSettingByKeyQuery } from '@/integrations/rtk/hooks';
+import { useListSiteSettingsQuery } from '@/integrations/rtk/hooks';
 import { useResolvedLocale } from '@/i18n/locale';
-import { useUIStrings, UI_FALLBACK_EN } from './ui';
+import { UI_FALLBACK_EN } from './ui';
 
 /**
  * DB tarafında kullanacağın section key'leri (site_settings.key)
@@ -433,20 +433,97 @@ function tryParseJsonObject(input: unknown): Record<string, unknown> {
   return {};
 }
 
+function normShortLocale(x: unknown): string {
+  return String(x || '')
+    .trim()
+    .toLowerCase()
+    .replace('_', '-')
+    .split('-')[0]
+    .trim();
+}
+
+function tryParseJsonValue(x: unknown): unknown {
+  if (typeof x !== 'string') return x;
+  const s = x.trim();
+  if (!s) return x;
+  if ((s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'))) {
+    try {
+      return JSON.parse(s);
+    } catch {
+      return x;
+    }
+  }
+  return x;
+}
+
+function normalizeValueToLabel(value: unknown): Record<string, unknown> {
+  const v = tryParseJsonValue(value);
+
+  if (typeof v === 'string') {
+    return { label: { en: v } };
+  }
+
+  if (v && typeof v === 'object' && !Array.isArray(v)) {
+    const obj = v as any;
+
+    if (obj.label && typeof obj.label === 'object' && !Array.isArray(obj.label)) {
+      return obj as Record<string, unknown>;
+    }
+
+    return { label: obj };
+  }
+
+  return {};
+}
+
 export function useUiSection(section: UiSectionKey, localeOverride?: string): UiSectionResult {
   // ✅ single source of truth
   const locale = useResolvedLocale(localeOverride);
 
-  // 1) section bazlı JSON override (ui_header, ui_footer, ...)
-  const { data: uiSetting } = useGetSiteSettingByKeyQuery({ key: section, locale });
+  // ✅ Batched UI settings (single request per locale)
+  const { data: uiRows } = useListSiteSettingsQuery({ prefix: 'ui_', locale });
+
+  const rowMap = useMemo<Record<string, any>>(() => {
+    const out: Record<string, any> = {};
+    if (!uiRows) return out;
+    for (const item of uiRows as any[]) {
+      const k = String(item?.key || '').trim();
+      if (!k) continue;
+      out[k] = item;
+    }
+    return out;
+  }, [uiRows]);
 
   const json = useMemo<Record<string, unknown>>(() => {
-    return tryParseJsonObject(uiSetting?.value);
-  }, [uiSetting?.value]);
+    return tryParseJsonObject(rowMap[section]?.value);
+  }, [rowMap, section]);
 
-  // 2) tekil key’ler (ui_header_nav_home gibi)
   const keys = SECTION_KEYS[section] ?? [];
-  const { t: tInner } = useUIStrings(keys, locale);
+  const labelMap = useMemo<Record<string, Record<string, unknown>>>(() => {
+    const out: Record<string, Record<string, unknown>> = {};
+    for (const k of keys) {
+      const raw = rowMap[k]?.value;
+      out[k] = normalizeValueToLabel(raw);
+    }
+    return out;
+  }, [rowMap, keys]);
+
+  const resolveLabel = (key: string): string => {
+    const label = (labelMap[key]?.label || {}) as Record<string, string>;
+    const l = normShortLocale(locale);
+    const fallbackFromConst = (UI_FALLBACK_EN as any)[key] ?? '';
+
+    const val =
+      (l && (label as any)[l]) ||
+      (label as any).en ||
+      (label as any).tr ||
+      (Object.values(label || {})[0] as string) ||
+      fallbackFromConst ||
+      key;
+
+    const s = (typeof val === 'string' ? val : '').trim();
+    return s || fallbackFromConst || key;
+  };
 
   const ui = (key: string, hardFallback = ''): string => {
     const k = String(key || '').trim();
@@ -457,7 +534,7 @@ export function useUiSection(section: UiSectionKey, localeOverride?: string): Ui
     if (typeof raw === 'string' && raw.trim()) return raw.trim();
 
     // B) tekil UI key DB
-    const fromDb = String(tInner(k) || '').trim();
+    const fromDb = String(resolveLabel(k) || '').trim();
     if (fromDb && fromDb !== k) return fromDb;
 
     // C) param hard fallback
