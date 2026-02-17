@@ -37,11 +37,19 @@ export const slidersAdminApi = baseApi.injectEndpoints({
           : [{ type: 'Slider' as const, id: 'LIST' }],
     }),
 
-    adminGetSlide: b.query<SliderAdminView, string | number>({
-      query: (id): FetchArgs | string => `${ADMIN_BASE}/${encodeURIComponent(String(id))}`,
+    adminGetSlide: b.query<SliderAdminView, string | number | { id: string | number; locale?: string }>({
+      query: (arg): FetchArgs | string => {
+        const id = typeof arg === 'object' ? arg.id : arg;
+        const locale = typeof arg === 'object' ? arg.locale : undefined;
+        const url = `${ADMIN_BASE}/${encodeURIComponent(String(id))}`;
+        return locale ? { url, params: { locale } } : url;
+      },
       transformResponse: (res: unknown): SliderAdminView =>
         toAdminSliderView(res as SliderAdminRow),
-      providesTags: (_r, _e, id) => [{ type: 'Slider' as const, id: String(id) }],
+      providesTags: (_r, _e, arg) => {
+        const id = typeof arg === 'object' ? arg.id : arg;
+        return [{ type: 'Slider' as const, id: String(id) }];
+      },
     }),
 
     adminCreateSlide: b.mutation<SliderAdminView, SliderCreatePayload>({

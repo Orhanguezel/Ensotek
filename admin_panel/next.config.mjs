@@ -3,6 +3,11 @@ const nextConfig = {
   reactCompiler: true,
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
 
+  // Disable Turbopack by default (use npm run dev:turbo to enable)
+  experimental: {
+    turbo: undefined,
+  },
+
   // ✅ Image optimization config
   images: {
     remotePatterns: [

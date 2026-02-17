@@ -72,10 +72,10 @@ export default function AdminSliderDetailClient(props: Props) {
   // ✅ Only skip when we truly cannot query.
   const skipDetail = props.mode !== 'edit' || localesLoading || !id || !effectiveLocale;
 
-  // ✅ IMPORTANT: use object arg-shape (matches old pages router code)
+  // ✅ IMPORTANT: use object arg-shape with locale support
   const { data, isLoading, isFetching, isError } = useGetSliderAdminQuery(
-    { id, locale: effectiveLocale || undefined } as any,
-    { skip: skipDetail } as any,
+    { id, locale: effectiveLocale || undefined },
+    { skip: skipDetail },
   );
 
   // ✅ Fix stuck "loading": skipDetail should NOT be treated as loading forever
