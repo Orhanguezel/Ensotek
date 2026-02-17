@@ -11,7 +11,7 @@ export const LOCALE_MESSAGES: Record<string, AbstractIntlMessages> = {
 };
 
 export const AVAILABLE_LOCALES = Object.keys(LOCALE_MESSAGES);
-export const FALLBACK_LOCALE = "tr";
+export const FALLBACK_LOCALE = "de";
 
 export function hasLocale(locale: string): boolean {
   return locale in LOCALE_MESSAGES;

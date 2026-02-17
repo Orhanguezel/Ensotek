@@ -342,5 +342,14 @@ UPDATE `menu_items_i18n`
 SET `url` = '/sparepart', `updated_at` = CURRENT_TIMESTAMP(3)
 WHERE `url` IN ('/spareparts', '/spareparts/', 'spareparts');
 
+-- Fix /services -> /service (singular canonical)
+UPDATE `menu_items_i18n`
+SET `url` = REPLACE(`url`, '/services/', '/service/'), `updated_at` = CURRENT_TIMESTAMP(3)
+WHERE `url` LIKE '/services/%';
+
+UPDATE `menu_items_i18n`
+SET `url` = '/service', `updated_at` = CURRENT_TIMESTAMP(3)
+WHERE `url` IN ('/services', '/services/');
+
 COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
