@@ -78,7 +78,6 @@ jobs:
           SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=15 -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key"
           rsync -avz --delete \
             --exclude=node_modules --exclude=.git --exclude=.env --exclude=.tsbuildinfo \
-            --exclude=dist \
             -e "ssh $SSH_OPTS" \
             backend/ "$VPS_USER@$VPS_HOST:/var/www/Ensotek/backend/"
 
@@ -111,6 +110,17 @@ jobs:
             --exclude=dist --exclude=.tsbuildinfo \
             -e "ssh $SSH_OPTS" \
             admin_panel/ "$VPS_USER@$VPS_HOST:/var/www/Ensotek/admin_panel/"
+
+      # ----------------------------
+      # Run DB Migrations / Seeds
+      # ----------------------------
+      - name: Run DB Seeds on VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=15 -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key"
+          ssh $SSH_OPTS $VPS_USER@$VPS_HOST "cd /var/www/Ensotek/backend && /home/orhan/.bun/bin/bun dist/db/seed/index.js --no-drop"
 
       # ----------------------------
       # PM2 restart all services
