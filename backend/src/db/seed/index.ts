@@ -127,7 +127,18 @@ async function runSqlFile(conn: mysql.Connection, absPath: string, adminVars: { 
 
   for (const stmt of statements) {
     if (!stmt) continue;
-    await conn.query(stmt);
+    try {
+      await conn.query(stmt);
+    } catch (err: any) {
+      // 1060: Duplicate column name -> "ADD COLUMN" idempotent yapmak için
+      // 1061: Duplicate key name -> "ADD INDEX" idempotent yapmak için
+      // 1050: Table already exists -> "CREATE TABLE" (genelde IF NOT EXISTS varsa fırlamaz ama yine de)
+      if (err.errno === 1060 || err.errno === 1061) {
+        // debug log isteğe bağlı, şimdilik sessiz geç
+      } else {
+        throw err;
+      }
+    }
   }
   logStep(`✅ ${name} bitti`);
 }
