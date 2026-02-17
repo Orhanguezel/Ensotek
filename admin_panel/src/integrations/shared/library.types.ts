@@ -287,14 +287,4 @@ export interface LibraryFileUpdatePayload {
 }
 
 
-export type WithLocale<T> = T & { locale?: string };
 
-export const cleanParams = (params?: Record<string, unknown>): Record<string, unknown> | undefined => {
-  if (!params) return undefined;
-  const out: Record<string, unknown> = {};
-  for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '') continue;
-    out[k] = v;
-  }
-  return Object.keys(out).length ? out : undefined;
-};
