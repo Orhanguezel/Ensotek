@@ -1,13 +1,13 @@
 // =============================================================
 // FILE: ecosystem.config.cjs
-// konigsmassage - admin_panel PM2 config
+// Ensotek - admin_panel PM2 config
 // =============================================================
 
 module.exports = {
   apps: [
     {
-      name: 'konigsmassage-admin-panel',
-      cwd: '/var/www/konigsmassage/admin_panel',
+      name: 'ensotek-admin-panel',
+      cwd: '/var/www/Ensotek/admin_panel',
       script: '/home/orhan/.bun/bin/bun',
       args: 'run start -- -p 3056 -H 127.0.0.1',
       exec_mode: 'fork',
@@ -26,8 +26,8 @@ module.exports = {
         HOSTNAME: '127.0.0.1',
         NEXT_TELEMETRY_DISABLED: '1',
       },
-      out_file: '/home/orhan/.pm2/logs/konigsmassage-admin-panel.out.log',
-      error_file: '/home/orhan/.pm2/logs/konigsmassage-admin-panel.err.log',
+      out_file: '/home/orhan/.pm2/logs/ensotek-admin-panel.out.log',
+      error_file: '/home/orhan/.pm2/logs/ensotek-admin-panel.err.log',
       combine_logs: true,
       time: true,
     },
