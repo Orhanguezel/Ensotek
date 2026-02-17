@@ -325,6 +325,114 @@
     transform: translate(-50%, -50%) scale(1);
   }
 }
+// Language Switcher Styles
+.ens-lang-switcher {
+  position: relative;
+  display: inline-block;
+
+  z-index: 1000002 !important;
+
+  &__trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--clr-bg-gray-1);
+    border: 1px solid var(--clr-border-1);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--clr-common-heading);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 110px;
+
+    &:hover {
+      background-color: var(--clr-common-white);
+      border-color: var(--clr-theme-1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+  }
+
+  &__globe {
+    color: var(--clr-theme-1);
+    opacity: 0.7;
+  }
+
+  &__icon {
+    opacity: 0.5;
+    transition: transform 0.2s ease;
+  }
+
+  &[data-state="open"] &__icon {
+    transform: rotate(180deg);
+  }
+
+  &__content {
+    background-color: var(--clr-common-white);
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    z-index: 10000000 !important;
+    min-width: 130px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    animation: slideDownFade 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  &__viewport {
+    padding: 6px;
+  }
+
+  &__item {
+    font-size: 13px;
+    line-height: 1;
+    color: var(--clr-common-heading);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &[data-disabled] {
+      color: var(--clr-common-placeholder);
+      pointer-events: none;
+    }
+
+    &[data-highlighted] {
+      outline: none;
+      background-color: var(--clr-theme-1);
+      color: var(--clr-common-white);
+    }
+  }
+}
+
+// Special styling for transparent header
+.header__transparent:not(.sticky) {
+  .ens-lang-switcher {
+    &__trigger {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+      border-color: rgba(255, 255, 255, 0.2) !important;
+      color: var(--clr-common-white) !important;
+      backdrop-filter: blur(5px);
+      
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+        border-color: rgba(255, 255, 255, 0.4) !important;
+      }
+    }
+    &__globe, &__icon {
+      color: var(--clr-common-white);
+    }
+  }
+}
+
+@keyframes slideDownFade {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 
 // Mobile hiding or shrinking
 @media #{$xs, $sm} {

@@ -5,6 +5,7 @@ import { CustomPage } from "@/features/custom-pages/customPages.type";
 import SocialShare from "./SocialShare";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface QualityDetailContentProps {
   items: CustomPage[];
@@ -17,11 +18,22 @@ const QualityDetailContent = ({ items, ui }: QualityDetailContentProps) => {
   
   // The first item in items should be our main quality page data (containing images)
   const mainPage = items[0];
-  // Filter out the main featured image from the gallery images if needed, 
-  // but seed 051.3 says images = [main, cert1, cert2...]
+  
+  // Resolve featured image URL
+  const featuredImageUrl = resolveMediaUrl(mainPage?.image_url);
+  
+  // Gallery images handling
   const galleryImages = mainPage?.images || [];
-  // Skip the first one if it's the hero image (which is already shown as featured_image)
-  const certificates = galleryImages.slice(1);
+  
+  // Logic: In our system, the first image in the 'images' array is often the same as the 'featured_image'.
+  // However, we should be careful not to hide valid certificates.
+  // We'll show all images unless they exactly match the featured image after resolution.
+  const certificates = galleryImages.map(img => resolveMediaUrl(img)).filter(url => url && url !== featuredImageUrl);
+  
+  // If after filtering we have no certificates but we have gallery images, 
+  // and the featured image is NOT a certificate, maybe we shouldn't have filtered.
+  // But usually, it's safer to just show everything if filtering leaves us empty.
+  const displayCertificates = certificates.length > 0 ? certificates : (galleryImages.length > 1 ? galleryImages.slice(1).map(img => resolveMediaUrl(img)) : []);
 
   return (
     <section className="technical__area pt-80 pb-120">
@@ -42,15 +54,15 @@ const QualityDetailContent = ({ items, ui }: QualityDetailContentProps) => {
               </div>
 
               {/* Main Featured Image */}
-              {mainPage?.image_url && (
+              {featuredImageUrl && (
                 <div className="technical__thumb mb-60">
                   <Image 
-                    src={mainPage.image_url} 
-                    alt={mainPage.title} 
+                    src={featuredImageUrl} 
+                    alt={mainPage?.title || "Quality"} 
                     width={1200} 
                     height={600} 
                     layout="responsive"
-                    style={{ borderRadius: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
+                    style={{ borderRadius: '15px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', objectFit: 'cover' }}
                   />
                 </div>
               )}
@@ -104,8 +116,8 @@ const QualityDetailContent = ({ items, ui }: QualityDetailContentProps) => {
                 </div>
 
                 <div className="row">
-                  {certificates.length > 0 ? (
-                    certificates.map((img: string, idx: number) => (
+                  {displayCertificates.length > 0 ? (
+                    displayCertificates.map((imgUrl: string, idx: number) => (
                       <div key={idx} className="col-md-4 col-sm-6 mb-30">
                         <div className="certificate-card p-3 bg-white text-center" style={{ 
                           borderRadius: '12px', 
@@ -115,20 +127,26 @@ const QualityDetailContent = ({ items, ui }: QualityDetailContentProps) => {
                           flexDirection: 'column',
                           justifyContent: 'space-between'
                         }}>
-                          <div className="cert-img-wrapper mb-20" style={{ cursor: 'pointer' }} onClick={() => window.open(img, '_blank')}>
-                            <Image 
-                              src={img} 
+                          <div className="cert-img-wrapper mb-20" style={{ cursor: 'pointer' }} onClick={() => window.open(imgUrl, '_blank')}>
+                            {/* Using standard img tag to troubleshoot Next.js Image domain/loader issues */}
+                            <img 
+                              src={imgUrl} 
                               alt={`${ui?.ui_quality_certificate_label || 'Certificate'} ${idx+1}`}
-                              width={300} 
-                              height={420}
-                              style={{ borderRadius: '8px', objectFit: 'contain', width: '100%', height: 'auto' }}
+                              style={{ 
+                                borderRadius: '8px', 
+                                objectFit: 'contain', 
+                                width: '100%', 
+                                height: 'auto',
+                                maxHeight: '420px',
+                                display: 'block'
+                              }}
                             />
                           </div>
                           <div className="cert-info">
                             <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
                               {ui?.ui_quality_certificate_label || "Certificate"} {idx + 1}
                             </h4>
-                            <a href={img} target="_blank" className="btn btn-sm btn-outline-primary" rel="noreferrer">
+                            <a href={imgUrl} target="_blank" className="tp-btn TP-btn-sm w-100 text-center" rel="noreferrer" style={{ padding: '8px', fontSize: '14px' }}>
                               {ui?.ui_quality_certificate_open || "Open"}
                             </a>
                           </div>

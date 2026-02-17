@@ -1,11 +1,13 @@
 "use client";
 import React from "react";
+import * as Select from "@radix-ui/react-select";
 import { useLocale } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { siteSettingsService } from "@/features/site-settings/siteSettings.service";
 import { AVAILABLE_LOCALES } from "@/i18n/locales";
+import { ChevronDown, Globe } from "lucide-react";
 
 type LanguageSwitcherProps = {
   className?: string;
@@ -24,20 +26,16 @@ const LanguageSwitcher = ({ className = "" }: LanguageSwitcherProps) => {
   const router = useRouter();
   const queryClient = useQueryClient();
 
-  // Fetch available locales from backend site settings
   const { data: appLocales } = useQuery({
     queryKey: queryKeys.siteSettings.locales(),
     queryFn: siteSettingsService.getAppLocales,
     staleTime: 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
   });
+  
   const { data: defaultLocaleData } = useQuery({
     queryKey: queryKeys.siteSettings.defaultLocale(),
     queryFn: siteSettingsService.getDefaultLocale,
     staleTime: 60 * 1000,
-    refetchOnMount: true,
-    refetchOnWindowFocus: true,
   });
 
   const runtimeDefaultLocale = normalizeLocaleCode(defaultLocaleData?.locale);
@@ -63,8 +61,7 @@ const LanguageSwitcher = ({ className = "" }: LanguageSwitcherProps) => {
 
   const handleLocaleChange = (newLocale: string) => {
     if (!newLocale || newLocale === currentLocale) return;
-    if (!AVAILABLE_LOCALES.includes(newLocale)) return;
-
+    
     const currentPath = pathname || "/";
     const segments = currentPath.split("/").filter(Boolean);
     const normalizedSegments = AVAILABLE_LOCALES.includes(segments[0] || "")
@@ -78,29 +75,31 @@ const LanguageSwitcher = ({ className = "" }: LanguageSwitcherProps) => {
     router.refresh();
   };
 
+  const selectedLocale = locales.find(l => l.code === normalizeLocaleCode(currentLocale)) || locales[0];
+
   return (
-    <div className={`language-switcher ${className}`.trim()}>
-      <select
-        aria-label="Language"
-        value={normalizeLocaleCode(currentLocale)}
-        onChange={(e) => handleLocaleChange(e.target.value)}
-        className="form-select form-select-sm"
-        style={{
-          minWidth: "108px",
-          borderColor: "rgba(0,0,0,0.1)",
-          color: "#666",
-          fontSize: "12px",
-          borderRadius: "4px",
-          paddingTop: "4px",
-          paddingBottom: "4px",
-        }}
-      >
-        {locales.map((lang) => (
-          <option key={lang.code} value={lang.code}>
-            {lang.label}
-          </option>
-        ))}
-      </select>
+    <div className={`ens-lang-switcher ${className}`.trim()}>
+      <Select.Root value={selectedLocale.code} onValueChange={handleLocaleChange}>
+        <Select.Trigger className="ens-lang-switcher__trigger" aria-label="Language Selector">
+          <Globe size={14} className="ens-lang-switcher__globe" />
+          <Select.Value>{selectedLocale.label}</Select.Value>
+          <Select.Icon className="ens-lang-switcher__icon">
+            <ChevronDown size={14} />
+          </Select.Icon>
+        </Select.Trigger>
+
+        <Select.Portal>
+          <Select.Content position="popper" sideOffset={5} className="ens-lang-switcher__content">
+            <Select.Viewport className="ens-lang-switcher__viewport">
+              {locales.map((lang) => (
+                <Select.Item key={lang.code} value={lang.code} className="ens-lang-switcher__item">
+                  <Select.ItemText>{lang.label}</Select.ItemText>
+                </Select.Item>
+              ))}
+            </Select.Viewport>
+          </Select.Content>
+        </Select.Portal>
+      </Select.Root>
     </div>
   );
 };

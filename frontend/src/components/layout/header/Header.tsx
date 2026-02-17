@@ -434,9 +434,9 @@ const Header = () => {
                       </Link>
                     </li>
                   )}
-                  {socialLinks?.x && (
+                  {(socialLinks?.x || socialLinks?.twitter) && (
                     <li>
-                      <Link href={socialLinks.x} target="_blank" aria-label="X">
+                      <Link href={socialLinks.x || socialLinks.twitter} target="_blank" aria-label="X / Twitter">
                         <i className="fa-brands fa-x-twitter"></i>
                       </Link>
                     </li>
@@ -445,6 +445,20 @@ const Header = () => {
                     <li>
                       <Link href={socialLinks.youtube} target="_blank" aria-label="YouTube">
                         <i className="fa-brands fa-youtube"></i>
+                      </Link>
+                    </li>
+                  )}
+                  {socialLinks?.linkedin && (
+                    <li>
+                      <Link href={socialLinks.linkedin} target="_blank" aria-label="LinkedIn">
+                        <i className="fa-brands fa-linkedin-in"></i>
+                      </Link>
+                    </li>
+                  )}
+                  {socialLinks?.instagram && (
+                    <li>
+                      <Link href={socialLinks.instagram} target="_blank" aria-label="Instagram">
+                        <i className="fa-brands fa-instagram"></i>
                       </Link>
                     </li>
                   )}
