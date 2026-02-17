@@ -128,15 +128,35 @@ jobs:
 
             echo "=== Restarting backend ==="
             cd /var/www/Ensotek/backend
-            pm2 restart ensotek-backend || pm2 start ecosystem.config.cjs
+            if pm2 describe ensotek-backend > /dev/null 2>&1; then
+              pm2 restart ensotek-backend
+            else
+              pm2 start ecosystem.config.cjs || pm2 start dist/index.js
+            fi
 
             echo "=== Restarting frontend ==="
             cd /var/www/Ensotek/frontend
-            pm2 restart ensotek-frontend || pm2 start ecosystem.config.cjs
+            if pm2 describe ensotek-frontend > /dev/null 2>&1; then
+              pm2 restart ensotek-frontend
+            else
+              if [ -f ecosystem.config.cjs ]; then
+                pm2 start ecosystem.config.cjs
+              else
+                pm2 start --name ensotek-frontend -- run start -p 3011 -H 127.0.0.1
+              fi
+            fi
 
             echo "=== Restarting admin panel ==="
             cd /var/www/Ensotek/admin_panel
-            pm2 restart ensotek-admin-panel || pm2 start ecosystem.config.cjs
+            if pm2 describe ensotek-admin-panel > /dev/null 2>&1; then
+              pm2 restart ensotek-admin-panel
+            else
+              if [ -f ecosystem.config.cjs ]; then
+                pm2 start ecosystem.config.cjs
+              else
+                pm2 start --name ensotek-admin-panel -- run start -p 3022 -H 127.0.0.1
+              fi
+            fi
 
             echo "=== Saving PM2 state ==="
             pm2 save
