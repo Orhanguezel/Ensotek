@@ -1,16 +1,8 @@
-<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
-  <rect width="32" height="32" rx="6" fill="#FFF5F3"/>
-  
-  <g transform="translate(16, 16)" stroke="#D88D7E" stroke-width="1.5" fill="none">
-    <circle cx="0" cy="0" r="12"/>
-    <circle cx="0" cy="0" r="5"/>
-    <circle cx="4" cy="0" r="5"/>
-    <circle cx="-4" cy="0" r="5"/>
-    <circle cx="2" cy="3.5" r="5"/>
-    <circle cx="-2" cy="3.5" r="5"/>
-  </g>
-  
-  <!-- Hands hint -->
-  <path d="M 6 22 Q 8 20 10 22" stroke="#F4BDB3" stroke-width="1.5" fill="none"/>
-  <path d="M 26 22 Q 24 20 22 22" stroke="#F4BDB3" stroke-width="1.5" fill="none"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     xmlns:xlink="http://www.w3.org/1999/xlink"
+     width="32" height="32" viewBox="0 0 32 32">
+  <image width="32" height="32"
+         href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACGUlEQVR4nO2Wv0sDQRTHf3c2k0pR0oJQyFQ6hQkVQWQ0KQqC0EoKgoKLoIggqC4uLi4u8iNQWQqC4iCk0G0q0g0o0m0w2m1cXyQ1u7u2c9x0gZf7c7M7s7M7s7s7e0mQm0o8dQxg0nQHcYp6j0QH0m1f4m2M7fXkO8cQO2m8bGm3kQbY0Qm7mX0lJ7oGg0GQwGQzj3m0mQm8W2m2GQyG0hYj8cQmGQyGQyGQwGQ0GQwGQwGQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQyGQyGQyGQ0GQwGQzj/4G0Hk3d7m1m2wAAAABJRU5ErkJggg=="
+         xlink:href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAACGUlEQVR4nO2Wv0sDQRTHf3c2k0pR0oJQyFQ6hQkVQWQ0KQqC0EoKgoKLoIggqC4uLi4u8iNQWQqC4iCk0G0q0g0o0m0w2m1cXyQ1u7u2c9x0gZf7c7M7s7M7s7s7e0mQm0o8dQxg0nQHcYp6j0QH0m1f4m2M7fXkO8cQO2m8bGm3kQbY0Qm7mX0lJ7oGg0GQwGQzj3m0mQm8W2m2GQyG0hYj8cQmGQyGQyGQwGQ0GQwGQwGQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQwGQwGQwGQwGQ0GQwGQyGQyGQyGQ0GQwGQzj/4G0Hk3d7m1m2wAAAABJRU5ErkJggg==" />
 </svg>
