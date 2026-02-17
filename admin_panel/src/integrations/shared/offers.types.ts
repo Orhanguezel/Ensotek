@@ -93,6 +93,7 @@ export type OfferAdminUpsertBody = OfferPublicCreateBody & {
   pdf_asset_id?: string | null;
 
   email_sent_at?: string | null; // ISO
+  service_title?: string | null;
 };
 
 export type OfferAdminPatchBody = Partial<OfferAdminUpsertBody>;
@@ -115,6 +116,7 @@ export type OfferRowRaw = {
 
   product_id?: string | null;
   service_id?: string | null;
+  service_title?: string | null;
 
   form_data?: string | Record<string, unknown> | null;
   form_data_parsed?: Record<string, unknown> | null;
@@ -160,6 +162,7 @@ export type OfferView = {
 
   product_id: string | null;
   service_id: string | null;
+  service_title: string | null;
 
   form_data: Record<string, any> | null;
 
@@ -228,6 +231,7 @@ export const normalizeOffer = (raw: unknown): OfferView => {
 
     product_id: r.product_id == null ? null : s(r.product_id),
     service_id: r.service_id == null ? null : s(r.service_id),
+    service_title: r.service_title == null ? null : s(r.service_title),
 
     form_data: formObj,
 
@@ -315,6 +319,7 @@ export const toOfferAdminUpsertBody = (b: OfferAdminUpsertBody): Record<string, 
   ...(typeof b.pdf_url !== 'undefined' ? { pdf_url: b.pdf_url } : {}),
   ...(typeof b.pdf_asset_id !== 'undefined' ? { pdf_asset_id: b.pdf_asset_id } : {}),
   ...(typeof b.email_sent_at !== 'undefined' ? { email_sent_at: b.email_sent_at } : {}),
+  ...(b.service_title ? { service_title: b.service_title } : {}),
 });
 
 export const toOfferAdminPatchBody = (b: OfferAdminPatchBody): Record<string, any> =>

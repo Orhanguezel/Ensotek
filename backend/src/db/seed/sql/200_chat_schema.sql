@@ -45,7 +45,6 @@ CREATE TABLE IF NOT EXISTS `chat_messages` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Existing installations: add new routing fields if table already existed.
--- Existing installations: add new routing fields if table already existed.
 -- (IF NOT EXISTS syntax removed for compatibility; duplicate column errors are ignored by seed runner)
 ALTER TABLE `chat_threads` ADD COLUMN `handoff_mode` varchar(20) NOT NULL DEFAULT 'ai';
 ALTER TABLE `chat_threads` ADD COLUMN `ai_provider_preference` varchar(20) NOT NULL DEFAULT 'auto';

@@ -7,7 +7,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { AdminImageUploadField } from '@/components/common/AdminImageUploadField';
+import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
 
 export type SubCategoryImageMetadata = {
   category_id?: string;

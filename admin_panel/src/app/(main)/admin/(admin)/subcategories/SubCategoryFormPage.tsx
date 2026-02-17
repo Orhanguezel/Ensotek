@@ -27,7 +27,7 @@ import {
   useUpdateSubCategoryAdminMutation,
   useLazyGetSubCategoryAdminQuery,
   useListCategoriesAdminQuery,
-} from '@/integrations/rtk/hooks';
+} from '@/integrations/hooks';
 
 import { SubCategoryFormFields, type SubCategoryFormStateLike } from './SubCategoryFormFields';
 import { SubCategoryFormJsonSection } from './SubCategoryFormJsonSection';

@@ -14,7 +14,7 @@ const QualityListPage = async ({
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "ensotek.staticPages" });
 
-  let items = [];
+  let items: any[] = [];
   let uiData = null;
   try {
     const [pageRes, uiRes] = await Promise.all([
