@@ -1,4 +1,3 @@
-// src/app/PreferencesEffects.tsx
 'use client';
 
 import { useEffect, useRef } from 'react';

@@ -59,7 +59,6 @@ export * from '@/integrations/endpoints/admin/telegram_inbound.endpoints';
 export * from '@/integrations/endpoints/admin/telegram_webhook.endpoints';
 export * from '@/integrations/endpoints/admin/telegram_admin.endpoints';
 
-// Chat / AI Support
 export * from '@/integrations/endpoints/admin/chat_admin.endpoints';
 export * from '@/integrations/endpoints/admin/catalog_admin.endpoints';
 export * from '@/integrations/endpoints/admin/categories_admin.endpoints';

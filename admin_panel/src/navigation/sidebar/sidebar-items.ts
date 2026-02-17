@@ -11,6 +11,7 @@ import {
   Bell,
   BookOpen,
   Bot,
+  CalendarCheck,
   ClipboardList,
   Cog,
   DollarSign,
@@ -85,6 +86,7 @@ export type AdminNavItemKey =
   | 'storage'
   | 'db'
   | 'audit'
+  | 'availability'
   | 'reports'
   | 'offers'
   | 'catalog_requests'
@@ -129,6 +131,7 @@ export const adminNavConfig: AdminNavConfigGroup[] = [
       { key: 'footer_sections', url: '/admin/footer-sections', icon: FileText },
       { key: 'faqs', url: '/admin/faqs', icon: HelpCircle },
       { key: 'references', url: '/admin/references', icon: Award },
+      { key: 'availability', url: '/admin/availability', icon: CalendarCheck },
     ],
   },
   {
@@ -190,6 +193,7 @@ const FALLBACK_TITLES: Record<AdminNavItemKey, string> = {
   storage: 'Storage',
   db: 'Database',
   audit: 'Audit',
+  availability: 'Availability',
   reports: 'Reports',
   telegram: 'Telegram',
   chat: 'Chat & AI',
