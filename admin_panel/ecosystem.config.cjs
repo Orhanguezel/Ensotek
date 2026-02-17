@@ -9,7 +9,7 @@ module.exports = {
       name: 'ensotek-admin-panel',
       cwd: '/var/www/Ensotek/admin_panel',
       script: '/home/orhan/.bun/bin/bun',
-      args: 'run start -- -p 3056 -H 127.0.0.1',
+      args: 'run start -- -p 3022 -H 127.0.0.1',
       exec_mode: 'fork',
       instances: 1,
       watch: false,
@@ -22,7 +22,7 @@ module.exports = {
       listen_timeout: 10000,
       env: {
         NODE_ENV: 'production',
-        PORT: '3056',
+        PORT: '3022',
         HOSTNAME: '127.0.0.1',
         NEXT_TELEMETRY_DISABLED: '1',
       },
