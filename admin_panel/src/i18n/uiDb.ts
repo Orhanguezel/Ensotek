@@ -387,7 +387,7 @@ const SECTION_KEYS: Record<UiSectionKey, readonly string[]> = {
     'ui_solutions_meta_title',
     'ui_solutions_meta_description',
   ],
-  ],
+
 };
 
 export type UiSectionResult = {
