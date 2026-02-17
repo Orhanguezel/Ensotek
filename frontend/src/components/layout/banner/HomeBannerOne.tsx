@@ -103,6 +103,16 @@ const HomeBannerOne = () => {
                               <p className="hero-desc-animate mb-45">
                                 {slider.description}
                               </p>
+                              {(slider.buttonText || t("cta")) && (
+                                <div className="hero-btn-animate">
+                                  <Link 
+                                    href={slider.buttonLink || "/service"} 
+                                    className="ens-hero-btn"
+                                  >
+                                    {slider.buttonText || t("cta")}
+                                  </Link>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

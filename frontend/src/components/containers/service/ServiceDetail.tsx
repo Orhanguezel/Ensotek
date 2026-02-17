@@ -9,6 +9,8 @@ import PageComments from "../custom-pages/PageComments";
 import { useTranslations } from "next-intl";
 import { useServices } from "@/features/services/services.action";
 
+import { resolveMediaUrl } from "@/lib/media";
+
 interface ServiceDetailProps {
   item: Service;
 }
@@ -26,15 +28,20 @@ function cleanContentHtml(html: string): string {
 
 const ServiceDetail = ({ item }: ServiceDetailProps) => {
   const t = useTranslations("ensotek.customPage");
+  const ts = useTranslations("ensotek.staticPages");
   
   // Fetch related services
-  const { data: relatedData } = useServices({ limit: 6 });
+  const m = useServices({ limit: 6 });
+  const relatedData = m.data;
   const relatedItems = (relatedData || [])
     .filter((x: any) => x.id !== item.id)
     .slice(0, 5);
 
   const cleanHtml = cleanContentHtml(item.description || "");
   const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  
+  // Resolve featured image
+  const featuredImage = resolveMediaUrl(item.image_url || item.featured_image);
 
   return (
     <section className="technical__area pt-120 pb-120">
@@ -45,23 +52,26 @@ const ServiceDetail = ({ item }: ServiceDetailProps) => {
             <div className="technical__main-wrapper mb-60">
                 {/* Back Link */}
                 <div className="mb-35">
-                    <Link href="/service" className="text-primary font-weight-bold">
+                    <Link href="/service" className="text-primary font-weight-bold" style={{ display: 'inline-flex', alignItems: 'center' }}>
                         <i className="fa-light fa-arrow-left-long mr-10"></i>
                         {t("backToList", { module: t("moduleNames.services") })}
                     </Link>
                 </div>
 
                 {/* Featured Image */}
-                {(item.image_url || item.featured_image) && (
+                {featuredImage && (
                   <div className="technical__thumb mb-40">
-                    <Image 
-                        src={item.image_url || item.featured_image || ""} 
+                    <img 
+                        src={featuredImage} 
                         alt={item.name} 
-                        width={1200} 
-                        height={600} 
-                        layout="responsive"
-                        priority
-                        style={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
+                        style={{ 
+                            borderRadius: '20px', 
+                            boxShadow: '0 10px 30px rgba(0,0,0,0.08)',
+                            width: '100%',
+                            height: 'auto',
+                            objectFit: 'cover',
+                            maxHeight: '600px'
+                        }}
                     />
                   </div>
                 )}
@@ -146,7 +156,7 @@ const ServiceDetail = ({ item }: ServiceDetailProps) => {
                                     <i className="fa-light fa-gear"></i>
                                 </div>
                                 <div className="sideber__contact-text">
-                                    <span>{item.type || t("service")}</span>
+                                    <span>{item.type ? (ts.has(item.type) ? ts(item.type) : item.type) : t("service")}</span>
                                 </div>
                             </div>
                             <PageReaction pageId={item.id} />

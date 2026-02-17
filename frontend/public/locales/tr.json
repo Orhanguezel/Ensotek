@@ -629,7 +629,10 @@
       "aboutTitle": "Kurumsal",
       "missionVisionTitle": "Misyon ve Vizyon",
       "qualityTitle": "Kalite",
-      "teamTitle": "Ekip"
+      "teamTitle": "Ekip",
+      "spare_parts_and_components": "Yedek Parça ve Bileşenler",
+      "automation_scada": "Otomasyon ve SCADA",
+      "site_survey_engineering": "Saha İnceleme ve Mühendislik"
     },
     "legalPages": {
       "cookiePolicyTitle": "Çerez Politikası",

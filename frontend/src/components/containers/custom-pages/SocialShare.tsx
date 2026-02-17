@@ -47,33 +47,19 @@ const SocialShare = ({ url: initialUrl, title, label }: SocialShareProps) => {
 
   return (
     <div className="social-share-wrapper d-flex align-items-center">
-      <span className="mr-15 font-weight-bold" style={{ fontSize: '14px', color: '#666' }}>{(label || 'SHARE')?.toUpperCase()}:</span>
-      <div className="share-links d-flex">
+      {label !== null && (
+        <span className="mr-15 font-weight-bold" style={{ fontSize: '14px', color: '#666' }}>
+          {(label || 'SHARE')?.toUpperCase()}:
+        </span>
+      )}
+      <div className="ens-social-links">
         {shareLinks.map((social) => (
           <a
             key={social.name}
             href={social.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="share-item mr-10 d-flex align-items-center justify-content-center"
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              backgroundColor: "#f8f9fa",
-              color: social.color,
-              fontSize: "16px",
-              transition: "all 0.3s ease",
-              boxShadow: "0 2px 5px rgba(0,0,0,0.05)"
-            }}
-            onMouseOver={(e) => {
-              e.currentTarget.style.backgroundColor = social.color;
-              e.currentTarget.style.color = "#fff";
-            }}
-            onMouseOut={(e) => {
-              e.currentTarget.style.backgroundColor = "#f8f9fa";
-              e.currentTarget.style.color = social.color;
-            }}
+            className={`ens-social-links__item is-light ${social.name.toLowerCase()}`}
             title={`Share on ${social.name}`}
           >
             <i className={social.icon}></i>

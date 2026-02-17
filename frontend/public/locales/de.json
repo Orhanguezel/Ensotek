@@ -722,7 +722,10 @@
       "aboutTitle": "Über Uns",
       "missionVisionTitle": "Mission und Vision",
       "qualityTitle": "Qualität",
-      "teamTitle": "Team"
+      "teamTitle": "Team",
+      "spare_parts_and_components": "Ersatzteile und Komponenten",
+      "automation_scada": "Automatisierung und SCADA",
+      "site_survey_engineering": "Standortaufnahme und Engineering"
     },
     "legalPages": {
       "cookiePolicyTitle": "Cookie-Richtlinie",

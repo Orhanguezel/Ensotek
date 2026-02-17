@@ -425,67 +425,48 @@ const Header = () => {
                   </li>
                 </ul>
               </div>
-              <div className="offcanvas__social">
-                <ul>
-                  {socialLinks?.facebook && (
-                    <li>
-                      <Link href={socialLinks.facebook} target="_blank" aria-label="Facebook">
+                <div className="offcanvas__social">
+                  <div className="ens-social-links is-large is-light">
+                    {socialLinks?.facebook && (
+                      <Link href={socialLinks.facebook} target="_blank" className="ens-social-links__item facebook" aria-label="Facebook">
                         <i className="fa-brands fa-facebook-f"></i>
                       </Link>
-                    </li>
-                  )}
-                  {(socialLinks?.x || socialLinks?.twitter) && (
-                    <li>
-                      <Link href={socialLinks.x || socialLinks.twitter} target="_blank" aria-label="X / Twitter">
-                        <i className="fa-brands fa-x-twitter"></i>
+                    )}
+                    {(socialLinks?.x || socialLinks?.twitter) && (
+                      <Link href={socialLinks.x || socialLinks.twitter} target="_blank" className="ens-social-links__item twitter" aria-label="Twitter">
+                        <i className="fa-brands fa-twitter"></i>
                       </Link>
-                    </li>
-                  )}
-                  {socialLinks?.youtube && (
-                    <li>
-                      <Link href={socialLinks.youtube} target="_blank" aria-label="YouTube">
+                    )}
+                    {socialLinks?.youtube && (
+                      <Link href={socialLinks.youtube} target="_blank" className="ens-social-links__item youtube" aria-label="YouTube">
                         <i className="fa-brands fa-youtube"></i>
                       </Link>
-                    </li>
-                  )}
-                  {socialLinks?.linkedin && (
-                    <li>
-                      <Link href={socialLinks.linkedin} target="_blank" aria-label="LinkedIn">
+                    )}
+                    {socialLinks?.linkedin && (
+                      <Link href={socialLinks.linkedin} target="_blank" className="ens-social-links__item linkedin" aria-label="LinkedIn">
                         <i className="fa-brands fa-linkedin-in"></i>
                       </Link>
-                    </li>
-                  )}
-                  {socialLinks?.instagram && (
-                    <li>
-                      <Link href={socialLinks.instagram} target="_blank" aria-label="Instagram">
+                    )}
+                    {socialLinks?.instagram && (
+                      <Link href={socialLinks.instagram} target="_blank" className="ens-social-links__item instagram" aria-label="Instagram">
                         <i className="fa-brands fa-instagram"></i>
                       </Link>
-                    </li>
-                  )}
-                  {socialLinks?.linkedin && (
-                    <li>
-                      <Link href={socialLinks.linkedin} target="_blank" aria-label="LinkedIn">
-                        <i className="fa-brands fa-linkedin-in"></i>
+                    )}
+                    {socialLinks?.tiktok && (
+                      <Link href={socialLinks.tiktok} target="_blank" className="ens-social-links__item tiktok" aria-label="TikTok">
+                        <i className="fa-brands fa-tiktok"></i>
                       </Link>
-                    </li>
-                  )}
-                  {socialLinks?.instagram && (
-                    <li>
-                      <Link href={socialLinks.instagram} target="_blank" aria-label="Instagram">
-                        <i className="fa-brands fa-instagram"></i>
-                      </Link>
-                    </li>
-                  )}
-                  {!socialLinks && (
-                    <>
-                      <li><Link href={toLocalizedHref("/")}><i className="fa-brands fa-facebook-f"></i></Link></li>
-                      <li><Link href={toLocalizedHref("/")}><i className="fa-brands fa-x-twitter"></i></Link></li>
-                      <li><Link href={toLocalizedHref("/")}><i className="fa-brands fa-youtube"></i></Link></li>
-                      <li><Link href={toLocalizedHref("/")}><i className="fa-brands fa-linkedin-in"></i></Link></li>
-                    </>
-                  )}
-                </ul>
-              </div>
+                    )}
+                    {!socialLinks && (
+                      <>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item facebook"><i className="fa-brands fa-facebook-f"></i></Link>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item twitter"><i className="fa-brands fa-twitter"></i></Link>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item youtube"><i className="fa-brands fa-youtube"></i></Link>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item linkedin"><i className="fa-brands fa-linkedin-in"></i></Link>
+                      </>
+                    )}
+                  </div>
+                </div>
             </div>
           </div>
         </div>

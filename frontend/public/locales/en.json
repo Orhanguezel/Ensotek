@@ -629,7 +629,10 @@
       "aboutTitle": "About",
       "missionVisionTitle": "Mission and Vision",
       "qualityTitle": "Quality",
-      "teamTitle": "Team"
+      "teamTitle": "Team",
+      "spare_parts_and_components": "Spare Parts and Components",
+      "automation_scada": "Automation and SCADA",
+      "site_survey_engineering": "Site Survey and Engineering"
     },
     "legalPages": {
       "cookiePolicyTitle": "Cookie Policy",
