@@ -49,6 +49,7 @@ INSERT INTO `custom_pages`
   (`id`,
    `module_key`,
    `is_published`,
+   `featured`,
    `display_order`,
    `order_num`,
    `featured_image`,
@@ -66,6 +67,7 @@ VALUES
     @PAGE_ABOUT,
     @MODULE_KEY,
     1,
+    0,
     30,
     30,
     @IMG_ABOUT_MAIN,
@@ -82,6 +84,7 @@ VALUES
 ON DUPLICATE KEY UPDATE
   `module_key`               = VALUES(`module_key`),
   `is_published`             = VALUES(`is_published`),
+  `featured`                = VALUES(`featured`),
   `display_order`            = VALUES(`display_order`),
   `order_num`                = VALUES(`order_num`),
   `featured_image`           = VALUES(`featured_image`),

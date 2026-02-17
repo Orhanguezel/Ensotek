@@ -1,192 +1,111 @@
-// =============================================================
-// FILE: src/components/containers/faqs/FaqsPageContent.tsx
-// Ensotek – Full FAQs Page Content
-// - i18n: useLocaleShort() + ui_faqs (DB) with EN fallback
-// - Accordion: uses theme SCSS (.bd-faq__accordion) (no inline css)
-// - No content + not loading => empty message inside accordion
-// =============================================================
-
 'use client';
 
-import React, { useMemo, useState, useEffect, useId, useCallback } from 'react';
+import { useMemo, useState } from 'react';
+import { useLocale } from 'next-intl';
+import { useFaqs } from '@/features/faqs/faqs.action';
 
-import { useListFaqsQuery } from '@/integrations/rtk/hooks';
-import type { FaqDto } from '@/integrations/types';
-import { normalizeFaq } from '@/integrations/types';
+const copy = {
+  tr: {
+    kicker: 'Ensotek - Sık Sorulan Sorular',
+    title: 'Sık Sorulan Sorular',
+    subtitle: 'Aklınıza takılan soruların yanıtlarını burada bulabilirsiniz.',
+    empty: 'Gösterilecek FAQ kaydı bulunamadı.',
+    loading: 'Yükleniyor...',
+  },
+  en: {
+    kicker: 'Ensotek - Frequently Asked Questions',
+    title: 'Frequently Asked Questions',
+    subtitle: 'You can find answers to common questions here.',
+    empty: 'No FAQ records to display.',
+    loading: 'Loading...',
+  },
+  de: {
+    kicker: 'Ensotek - Haufig gestellte Fragen',
+    title: 'Haufig gestellte Fragen',
+    subtitle: 'Hier finden Sie Antworten auf haufige Fragen.',
+    empty: 'Keine FAQ-Eintrage zum Anzeigen.',
+    loading: 'Wird geladen...',
+  },
+} as const;
 
-// i18n (PATTERN)
-import { useLocaleShort } from '@/i18n/useLocaleShort';
-import { useUiSection } from '@/i18n/uiDb';
-
-function safeStr(v: unknown): string {
-  if (typeof v === 'string') return v.trim();
-  if (v == null) return '';
-  return String(v).trim();
-}
-
-const FaqsPageContent: React.FC = () => {
-  const uid = useId();
-  const locale = useLocaleShort();
-
-  const { ui } = useUiSection('ui_faqs', locale as any);
-  const t = useCallback((key: string, fallback: string) => ui(key, fallback), [ui]);
-
-  // DB -> EN fallback only
-  const kickerPrefix = t('ui_faqs_kicker_prefix', 'Ensotek');
-  const kickerLabel = t('ui_faqs_kicker_label', 'Frequently Asked Questions');
-
-  const titlePrefix = t('ui_faqs_page_title_prefix', 'Common');
-  const titleMark = t('ui_faqs_page_title_mark', 'questions');
-
-  const intro = t(
-    'ui_faqs_intro',
-    'Find answers to the most common questions about Ensotek products, services and processes.',
-  );
-
-  const emptyText = t('ui_faqs_empty', 'There are no FAQs to display at the moment.');
-  const untitled = t('ui_faqs_untitled', 'Untitled question');
-  const noAnswer = t('ui_faqs_no_answer', 'No answer has been provided for this question yet.');
-  const footerNote = t(
-    'ui_faqs_footer_note',
-    'If you cannot find the answer you are looking for, please contact us.',
-  );
-
-  const { data = [], isLoading } = useListFaqsQuery(
-    {
-      is_active: 1,
-      sort: 'display_order',
-      orderDir: 'asc',
-      limit: 200,
-      locale,
-    } as any,
-    { skip: !locale },
-  );
-
-  const faqs = useMemo(() => {
-    const list = (Array.isArray(data) ? data : []) as FaqDto[];
-
-    return list
-      .map((dto) => normalizeFaq(dto))
-      .filter((f) => !!f && !!f.is_active)
-      .sort((a, b) => {
-        if (a.display_order !== b.display_order) return a.display_order - b.display_order;
-        const ac = safeStr(a.created_at);
-        const bc = safeStr(b.created_at);
-        return ac.localeCompare(bc);
-      });
-  }, [data]);
-
-  const hasFaqs = faqs.length > 0;
-
-  // open state (first item auto-open)
+export default function FaqsPageContent() {
+  const locale = useLocale();
+  const t = copy[(locale as 'tr' | 'en' | 'de') || 'tr'] ?? copy.tr;
+  const { data, isLoading } = useFaqs({ is_active: true });
   const [openId, setOpenId] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!hasFaqs) {
-      setOpenId(null);
-      return;
-    }
-    if (openId == null) setOpenId(faqs[0]?.id ?? null);
-  }, [hasFaqs, faqs, openId]);
+  const faqs = useMemo(() => {
+    const list = Array.isArray(data) ? data : [];
+    return list
+      .filter((item) => item.is_active)
+      .sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+  }, [data]);
 
   return (
     <section className="faq__area pt-120 pb-90 grey-bg-3">
       <div className="container">
-        {/* HEADER */}
-        <div className="row">
-          <div className="col-12">
-            <div className="section__title-wrapper text-center mb-50">
-              <span className="section__subtitle">
-                <span>{kickerPrefix}</span> {kickerLabel}
-              </span>
-
-              <h2 className="section__title">
-                {titlePrefix} <span className="down__mark-line">{titleMark}</span>
-              </h2>
-
-              {safeStr(intro) ? <p className="ens-faqs__intro">{intro}</p> : null}
+        <div className="row justify-content-center">
+          <div className="col-xl-8 col-lg-10">
+            <div className="section__title-wrapper text-center mb-45">
+              <span className="section__title-pre">{t.kicker}</span>
+              <h2 className="section__title">{t.title}</h2>
+              <p>{t.subtitle}</p>
             </div>
           </div>
         </div>
 
-        {/* ACCORDION */}
-        <div className="row" data-aos="fade-up" data-aos-delay="200">
-          <div className="col-xl-10 col-lg-11 mx-auto">
-            {/* wrapper uses your SCSS */}
+        <div className="row justify-content-center">
+          <div className="col-xl-10 col-lg-11">
             <div className="bd-faq__wrapper-2 mb-10">
-              <div className="bd-faq__accordion" data-aos="fade-left" data-aos-duration="1000">
-                <div className="accordion" id={`faqAccordion-${uid}`}>
-                  {!isLoading && !hasFaqs ? (
-                    <div className="accordion-item">
-                      <div className="accordion-body">
-                        <p className="text-center mb-0">{emptyText}</p>
-                      </div>
-                    </div>
-                  ) : null}
+              <div className="bd-faq__accordion" data-aos="fade-up" data-aos-duration="900">
+                <div className="accordion" id="faqsAccordionPage">
+                  {isLoading && (
+                    <div className="alert alert-light border">{t.loading}</div>
+                  )}
 
-                  {faqs.map((faq, idx) => {
-                    const id = safeStr(faq.id) || `${uid}-${idx}`;
-                    const isOpen = openId === id;
+                  {!isLoading && faqs.length === 0 && (
+                    <div className="alert alert-light border">{t.empty}</div>
+                  )}
 
-                    const headingId = `faqHeading-${id}`;
-                    const panelId = `faqCollapse-${id}`;
+                  {!isLoading &&
+                    faqs.map((faq, idx) => {
+                      const id = faq.id || String(idx);
+                      const headingId = `faqHeading-${id}`;
+                      const panelId = `faqCollapse-${id}`;
+                      const isOpen = openId === id || (openId === null && idx === 0);
 
-                    const q = safeStr(faq.question) || untitled;
-                    const a = safeStr(faq.answer);
+                      return (
+                        <div className="accordion-item" key={id}>
+                          <h2 className="accordion-header" id={headingId}>
+                            <button
+                              className={`accordion-button ${isOpen ? '' : 'collapsed'}`}
+                              type="button"
+                              onClick={() => setOpenId((prev) => (prev === id ? null : id))}
+                              aria-expanded={isOpen}
+                              aria-controls={panelId}
+                            >
+                              {faq.question}
+                            </button>
+                          </h2>
 
-                    return (
-                      <div className="accordion-item" key={id}>
-                        <h2 className="accordion-header" id={headingId}>
-                          <button
-                            type="button"
-                            className={`accordion-button${isOpen ? '' : ' collapsed'}`}
-                            aria-expanded={isOpen ? 'true' : 'false'}
-                            aria-controls={panelId}
-                            onClick={() => setOpenId((prev) => (prev === id ? null : id))}
+                          <div
+                            id={panelId}
+                            className={`accordion-collapse collapse ${isOpen ? 'show' : ''}`}
+                            aria-labelledby={headingId}
                           >
-                            {q}
-                          </button>
-                        </h2>
-
-                        {/* Bootstrap JS yok: class ile show/hide */}
-                        <div
-                          id={panelId}
-                          className={`accordion-collapse collapse${isOpen ? ' show' : ''}`}
-                          aria-labelledby={headingId}
-                        >
-                          <div className="accordion-body">
-                            {a ? (
-                              <div dangerouslySetInnerHTML={{ __html: a }} />
-                            ) : (
-                              <p className="text-muted small mb-0">{noAnswer}</p>
-                            )}
+                            <div className="accordion-body">
+                              <div dangerouslySetInnerHTML={{ __html: faq.answer || '' }} />
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    );
-                  })}
-
-                  {isLoading ? (
-                    <div className="accordion-item" aria-hidden>
-                      <div className="accordion-body">
-                        <div className="skeleton-line ens-faqs__skelLine" />
-                        <div className="skeleton-line ens-faqs__skelLine ens-faqs__skelLine--w80" />
-                      </div>
-                    </div>
-                  ) : null}
+                      );
+                    })}
                 </div>
               </div>
-            </div>
-
-            {/* FOOTER NOTE */}
-            <div className="text-center mt-20">
-              <p className="small text-muted mb-0">{footerNote}</p>
             </div>
           </div>
         </div>
       </div>
     </section>
   );
-};
-
-export default FaqsPageContent;
+}

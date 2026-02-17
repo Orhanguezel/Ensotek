@@ -16,38 +16,18 @@ import {
 import { storageAssets } from '@/modules/storage/schema';
 import { buildPublicUrl } from '@/modules/storage/_util';
 import { randomUUID } from 'crypto';
-
-const CATEGORY_VIEW_FIELDS = {
-  id: categories.id,
-  module_key: categories.module_key,
-  locale: categoryI18n.locale,
-  name: categoryI18n.name,
-  slug: categoryI18n.slug,
-  description: categoryI18n.description,
-  image_url: categories.image_url,
-  storage_asset_id: categories.storage_asset_id,
-  alt: categoryI18n.alt, // ✅ admin view da i18n alt
-  icon: categories.icon,
-  is_active: categories.is_active,
-  is_featured: categories.is_featured,
-  display_order: categories.display_order,
-  created_at: categories.created_at,
-  updated_at: categories.updated_at,
-} as const;
-
-const toBoolQS = (v: unknown): boolean | undefined => {
-  if (v === undefined) return undefined;
-  if (typeof v === 'boolean') return v;
-  const s = String(v).toLowerCase();
-  if (s === 'true' || s === '1') return true;
-  if (s === 'false' || s === '0') return false;
-  return undefined;
-};
-
-const toNum = (v: unknown, def = 0) => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : def;
-};
+import {
+  toBool,
+  toBoolOrUndefined,
+  toInt,
+  nullIfEmpty,
+  isDuplicateError,
+  normalizeLocale,
+  getLocalesForCreate,
+  buildBasePayload,
+  buildI18nRows,
+} from '@/modules/_shared';
+import { CATEGORY_VIEW_FIELDS, fetchCategoryViewByIdAndLocale } from './helpers';
 
 export type AdminListCategoriesQS = {
   q?: string;
@@ -60,65 +40,6 @@ export type AdminListCategoriesQS = {
   locale?: string;
   module_key?: string;
 };
-
-function isDup(err: any) {
-  const code = err?.code ?? err?.errno;
-  return code === 'ER_DUP_ENTRY' || code === 1062;
-}
-
-/* 🌍 Çoklu dil helper'ları */
-const FALLBACK_LOCALES = ['de'];
-
-function normalizeLocale(loc: unknown): string | null {
-  if (!loc) return null;
-  const s = String(loc).trim();
-  if (!s) return null;
-  return s.toLowerCase();
-}
-
-function getLocalesForCreate(baseLocale: string): string[] {
-  const base = normalizeLocale(baseLocale) ?? 'de';
-
-  const envLocalesRaw =
-    process.env.APP_LOCALES || process.env.NEXT_PUBLIC_APP_LOCALES || process.env.LOCALES || '';
-
-  let envLocales: string[] = [];
-  if (envLocalesRaw) {
-    envLocales = envLocalesRaw
-      .split(',')
-      .map((x) => normalizeLocale(x))
-      .filter((x): x is string => !!x);
-  }
-
-  let list = envLocales.length ? envLocales : [...FALLBACK_LOCALES];
-
-  if (!list.includes(base)) list.unshift(base);
-  list = Array.from(new Set(list));
-  return list;
-}
-
-function toBoolBody(v: unknown): boolean {
-  if (typeof v === 'boolean') return v;
-  if (typeof v === 'number') return v !== 0;
-  const s = String(v).toLowerCase();
-  return s === '1' || s === 'true';
-}
-
-function nullIfEmpty(v: unknown): string | null {
-  if (v === '' || v === null || v === undefined) return null;
-  return String(v);
-}
-
-async function fetchCategoryViewByIdAndLocale(id: string, locale: string) {
-  const rows = await db
-    .select(CATEGORY_VIEW_FIELDS)
-    .from(categories)
-    .innerJoin(categoryI18n, eq(categoryI18n.category_id, categories.id))
-    .where(and(eq(categories.id, id), eq(categoryI18n.locale, locale)))
-    .limit(1);
-
-  return rows[0] ?? null;
-}
 
 /** POST /categories (admin) */
 export const adminCreateCategory: RouteHandler<{
@@ -141,33 +62,18 @@ export const adminCreateCategory: RouteHandler<{
   const baseLocale = normalizeLocale(data.locale) ?? 'de';
   const locales = getLocalesForCreate(baseLocale);
 
-  const moduleKey = (data.module_key ?? 'general').trim();
-
   const basePayload = {
     id: baseId,
-    module_key: moduleKey,
-    image_url: (nullIfEmpty(data.image_url) as string | null) ?? null,
-    storage_asset_id: (nullIfEmpty((data as any).storage_asset_id) as string | null) ?? null,
-    alt: (nullIfEmpty(data.alt) as string | null) ?? null,
-    icon: (nullIfEmpty(data.icon) as string | null) ?? null,
-    is_active: data.is_active === undefined ? true : toBoolBody(data.is_active),
-    is_featured: data.is_featured === undefined ? false : toBoolBody(data.is_featured),
-    display_order: data.display_order ?? 0,
+    ...buildBasePayload(data),
   };
 
-  const baseName = String(data.name ?? '').trim();
-  const baseSlug = String(data.slug ?? '').trim();
-  const baseDescription = (nullIfEmpty(data.description) as string | null) ?? null;
-  const baseAlt = (nullIfEmpty(data.alt) as string | null) ?? null;
-
-  const i18nRows = locales.map((loc) => ({
-    category_id: baseId,
-    locale: loc,
-    name: baseName,
-    slug: baseSlug,
-    description: baseDescription,
-    alt: baseAlt,
-  }));
+  const i18nRows = buildI18nRows(baseId, locales, {
+    name: data.name,
+    slug: data.slug,
+    description: data.description,
+    alt: data.alt,
+    i18n_data: (data as any).i18n_data,
+  });
 
   try {
     await db.transaction(async (tx) => {
@@ -175,7 +81,7 @@ export const adminCreateCategory: RouteHandler<{
       await tx.insert(categoryI18n).values(i18nRows as any);
     });
   } catch (err: any) {
-    if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
+    if (isDuplicateError(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
     return reply
       .code(500)
       .send({ error: { message: 'db_error', detail: String(err?.message ?? err) } });
@@ -228,11 +134,11 @@ export const adminPutCategory: RouteHandler<{
     hasBase = true;
   }
   if (patch.is_active !== undefined) {
-    baseSet.is_active = toBoolBody(patch.is_active);
+    baseSet.is_active = toBool(patch.is_active);
     hasBase = true;
   }
   if (patch.is_featured !== undefined) {
-    baseSet.is_featured = toBoolBody(patch.is_featured);
+    baseSet.is_featured = toBool(patch.is_featured);
     hasBase = true;
   }
   if (patch.display_order !== undefined) {
@@ -259,6 +165,11 @@ export const adminPutCategory: RouteHandler<{
     hasI18n = true;
     hasBase = true;
   }
+  if ((patch as any).i18n_data !== undefined) {
+    const jsonVal = (patch as any).i18n_data;
+    i18nSet.i18n_data = jsonVal ? JSON.stringify(jsonVal) : null;
+    hasI18n = true;
+  }
 
   try {
     await db.transaction(async (tx) => {
@@ -276,7 +187,7 @@ export const adminPutCategory: RouteHandler<{
       }
     });
   } catch (err: any) {
-    if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
+    if (isDuplicateError(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
     return reply
       .code(500)
       .send({ error: { message: 'db_error', detail: String(err?.message ?? err) } });
@@ -330,11 +241,11 @@ export const adminPatchCategory: RouteHandler<{
     hasBase = true;
   }
   if (patch.is_active !== undefined) {
-    baseSet.is_active = toBoolBody(patch.is_active);
+    baseSet.is_active = toBool(patch.is_active);
     hasBase = true;
   }
   if (patch.is_featured !== undefined) {
-    baseSet.is_featured = toBoolBody(patch.is_featured);
+    baseSet.is_featured = toBool(patch.is_featured);
     hasBase = true;
   }
   if (patch.display_order !== undefined) {
@@ -361,6 +272,11 @@ export const adminPatchCategory: RouteHandler<{
     hasI18n = true;
     hasBase = true;
   }
+  if ((patch as any).i18n_data !== undefined) {
+    const jsonVal = (patch as any).i18n_data;
+    i18nSet.i18n_data = jsonVal ? JSON.stringify(jsonVal) : null;
+    hasI18n = true;
+  }
 
   try {
     await db.transaction(async (tx) => {
@@ -378,7 +294,7 @@ export const adminPatchCategory: RouteHandler<{
       }
     });
   } catch (err: any) {
-    if (isDup(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
+    if (isDuplicateError(err)) return reply.code(409).send({ error: { message: 'duplicate_slug' } });
     return reply
       .code(500)
       .send({ error: { message: 'db_error', detail: String(err?.message ?? err) } });
@@ -583,9 +499,9 @@ export const adminListCategories: RouteHandler<{ Querystring: AdminListCategorie
     conds.push(or(like(categoryI18n.name, pattern), like(categoryI18n.slug, pattern)));
   }
 
-  const a = toBoolQS(is_active);
+  const a = toBoolOrUndefined(is_active);
   if (a !== undefined) conds.push(eq(categories.is_active, a));
-  const f = toBoolQS(is_featured);
+  const f = toBoolOrUndefined(is_featured);
   if (f !== undefined) conds.push(eq(categories.is_featured, f));
 
   if (module_key && module_key.trim()) conds.push(eq(categories.module_key, module_key.trim()));
@@ -609,10 +525,22 @@ export const adminListCategories: RouteHandler<{ Querystring: AdminListCategorie
 
   const rows = await qb
     .orderBy(order === 'desc' ? desc(col) : asc(col))
-    .limit(toNum(limit, 500))
-    .offset(toNum(offset, 0));
+    .limit(toInt(limit, 500))
+    .offset(toInt(offset, 0));
 
-  return reply.send(rows);
+  // Parse i18n_data JSON strings
+  const parsed = rows.map((row) => {
+    if (row.i18n_data && typeof row.i18n_data === 'string') {
+      try {
+        return { ...row, i18n_data: JSON.parse(row.i18n_data) };
+      } catch {
+        return { ...row, i18n_data: {} };
+      }
+    }
+    return row;
+  });
+
+  return reply.send(parsed);
 };
 
 export const adminGetCategoryById: RouteHandler<{

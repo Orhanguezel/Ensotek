@@ -11,7 +11,7 @@
     @include transition(.3s);
     overflow: hidden;
     &:hover {
-        background: var(-clr-common-white);
+        background: var(--clr-common-white);
         box-shadow: 0px 15px 30px rgba(50, 73, 179, 0.2);
 		.choose__features-icon {
 			margin-bottom: 55px;
@@ -42,7 +42,7 @@
 				font-size: 20px;
 			}
             &:hover {
-                background-color: var(-clr-common-white);
+                background-color: var(--clr-common-white);
                 color: var(--clr-theme-5);
             }
 		}

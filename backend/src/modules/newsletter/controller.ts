@@ -7,6 +7,7 @@ import { randomUUID } from "crypto";
 import { db } from "@/db/client";
 import { DEFAULT_LOCALE } from "@/core/i18n";
 import { eq } from "drizzle-orm";
+import { telegramNotify } from "@/modules/telegram/telegram.notifier";
 import {
   newsletterSubscribers,
   type NewsletterRow,
@@ -96,6 +97,21 @@ export const subscribeNewsletterPublic: RouteHandler = async (req, reply) => {
     .from(newsletterSubscribers)
     .where(eq(newsletterSubscribers.email, email))
     .limit(1);
+
+  // Telegram notification
+  try {
+    await telegramNotify({
+      event: "new_newsletter_subscription",
+      data: {
+        email,
+        name: body.meta?.name ?? "",
+        locale: finalLocale,
+        created_at: now.toISOString(),
+      },
+    });
+  } catch (err: any) {
+    req.log?.error?.({ err }, "newsletter_telegram_failed");
+  }
 
   return reply.code(201).send(mapRow(row));
 };

@@ -25,7 +25,7 @@ SET @IMG_3 :=
 
 -- PARENT UPSERT
 INSERT INTO `custom_pages`
-(`id`,`module_key`,`is_published`,`display_order`,`order_num`,
+(`id`,`module_key`,`is_published`,`featured`,`display_order`,`order_num`,
  `featured_image`,`featured_image_asset_id`,
  `image_url`,`storage_asset_id`,
  `images`,`storage_image_ids`,
@@ -36,6 +36,7 @@ VALUES
   @PAGE,
   @MODULE_KEY,
   1,
+  0,
   42,
   42,
   @IMG_MAIN,
@@ -52,6 +53,7 @@ VALUES
 ON DUPLICATE KEY UPDATE
   `module_key`              = VALUES(`module_key`),
   `is_published`            = VALUES(`is_published`),
+  `featured`                = VALUES(`featured`),
   `display_order`           = VALUES(`display_order`),
   `order_num`               = VALUES(`order_num`),
   `featured_image`          = VALUES(`featured_image`),

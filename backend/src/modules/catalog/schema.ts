@@ -14,12 +14,9 @@ import {
 } from "drizzle-orm/mysql-core";
 import { sql } from "drizzle-orm";
 
-// LONGTEXT custom type
-const longtext = customType<{ data: string | null; driverData: string }>({
-  dataType() {
-    return "longtext";
-  },
-});
+import {
+longtext
+} from '@/modules/_shared';
 
 export const catalogRequestsTable = mysqlTable(
   "catalog_requests",

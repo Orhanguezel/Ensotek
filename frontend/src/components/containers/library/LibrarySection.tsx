@@ -1,181 +1,45 @@
-// src/components/containers/library/LibrarySection.tsx
-'use client';
+"use client";
 
-import React, { useMemo, useState, useCallback } from 'react';
-import Image, { type StaticImageData } from 'next/image';
-import Link from 'next/link';
+import React, { useMemo, useState } from "react";
+import Image from "next/image";
+import { Link } from "@/i18n/routing";
+import { ArrowRight, Plus, Minus } from "lucide-react";
 
-import { useListLibraryQuery } from '@/integrations/rtk/hooks';
+import { useLibrary } from "@/features/library/library.action";
+import type { LibraryItem } from "@/features/library/library.types";
+import { useTranslations } from "next-intl";
 
-import One from 'public/img/shape/features-shape.png';
-import Two from 'public/img/features/1.png';
+import One from "public/img/shape/features-shape.png";
+import Two from "public/img/features/1.png";
 
-import { FiArrowRight, FiPlus, FiMinus } from 'react-icons/fi';
-
-import { toCdnSrc } from '@/shared/media';
-import { stripHtml, excerpt } from '@/shared/text';
-
-// i18n (PATTERN)
-import { useLocaleShort } from '@/i18n/useLocaleShort';
-import { useUiSection } from '@/i18n/uiDb';
-import { localizePath } from '@/i18n/url';
-
-function safeStr(v: unknown): string {
-  if (typeof v === 'string') return v.trim();
-  if (v == null) return '';
-  return String(v).trim();
-}
-
-function toBool(v: unknown): boolean {
-  if (typeof v === 'boolean') return v;
-  if (typeof v === 'number') return v === 1;
-  const s = safeStr(v).toLowerCase();
-  return s === '1' || s === 'true' || s === 'yes' || s === 'on';
-}
-
-type LibraryItemVM = {
-  id: string;
-  slug: string;
-  title: string;
-  summary: string;
-  hero: string;
-};
-
-function mapToVm(it: any, t: (k: string, fb: string) => string): LibraryItemVM {
-  const title =
-    safeStr(it?.name) ||
-    safeStr(it?.title) ||
-    safeStr(it?.slug) ||
-    t('ui_library_untitled', 'Untitled content');
-
-  const sumRaw = safeStr(it?.summary) || safeStr(it?.description) || safeStr(it?.content) || '';
-  const summary = excerpt(stripHtml(sumRaw), 220) || '—';
-
-  // image candidates (library uses image_url / featured_image; some endpoints return images[])
-  const img = Array.isArray(it?.images) && it.images.length ? it.images[0] : null;
-
-  const imgSrc =
-    safeStr(it?.featured_image) ||
-    safeStr(it?.image_url) ||
-    safeStr(img?.webp) ||
-    safeStr(img?.url) ||
-    safeStr(img?.thumbnail) ||
-    safeStr(img?.asset?.url);
-
-  const hero = imgSrc ? toCdnSrc(imgSrc, 720, 520, 'fill') || imgSrc : '';
-
-  return {
-    id: safeStr(it?.id) || safeStr(it?._id) || safeStr(it?.uuid) || title,
-    slug: safeStr(it?.slug),
-    title,
-    summary,
-    hero,
-  };
+function stripHtml(input?: string): string {
+  if (!input) return "";
+  return input.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
 const LibrarySection: React.FC = () => {
-  const locale = useLocaleShort();
-  const { ui } = useUiSection('ui_library', locale as any);
-
-  const t = useCallback(
-    (key: string, fallbackEn: string) => {
-      const v = safeStr(ui(key, fallbackEn));
-      return v || fallbackEn;
-    },
-    [ui],
-  );
-
-  const listHref = useMemo(() => localizePath(locale, '/library'), [locale]);
+  const t = useTranslations("ensotek.library");
   const [open, setOpen] = useState<number>(0);
 
-  // ✅ 1) Featured items only (priority)
-  const { data: featuredData = [], isLoading: isLoadingFeatured } = useListLibraryQuery({
-    locale,
-    limit: 4, // homepage preview: enough to pick 1-2 featured reliably
-    sort: 'display_order',
-    orderDir: 'asc',
-    is_published: '1',
-    is_active: '1',
-    featured: '1', // ✅ backend supports "featured" filter (if different, adjust here)
-  } as any);
+  const { data, isLoading } = useLibrary({ page: 1, limit: 2 });
 
-  // ✅ 2) Fallback: latest items (if featured list empty)
-  const { data: fallbackData = [], isLoading: isLoadingFallback } = useListLibraryQuery(
-    {
-      locale,
-      limit: 2,
-      sort: 'published_at',
-      orderDir: 'desc',
-      is_published: '1',
-      is_active: '1',
-    } as any,
-    {
-      // only fetch fallback if featured is empty or not returned
-      skip: Array.isArray(featuredData) && featuredData.length > 0,
-    } as any,
-  );
+  const items = useMemo(() => {
+    const arr = Array.isArray(data)
+      ? (data as LibraryItem[])
+      : Array.isArray((data as { data?: unknown[] } | undefined)?.data)
+        ? (((data as { data?: unknown[] }).data as unknown[]) as LibraryItem[])
+        : [];
 
-  const isLoading = isLoadingFeatured || isLoadingFallback;
+    return arr.slice(0, 2).map((it) => ({
+      id: it.id,
+      slug: it.slug,
+      title: it.name || t("untitled"),
+      summary: stripHtml(it.description || "").slice(0, 180) || t("summaryFallback"),
+      hero: it.featured_image || it.image_url || "",
+    }));
+  }, [data, t]);
 
-  const items: LibraryItemVM[] = useMemo(() => {
-    const fArr = Array.isArray(featuredData) ? featuredData : [];
-    const fbArr = Array.isArray(fallbackData) ? fallbackData : [];
-
-    // Some backends may ignore featured filter; also support is_featured/featured fields in payload.
-    const featuredLike = fArr
-      .filter((x: any) => toBool(x?.featured) || toBool(x?.is_featured))
-      .map((x: any) => mapToVm(x, t))
-      .filter((x) => !!x.slug);
-
-    const fromFeatured =
-      featuredLike.length > 0
-        ? featuredLike.slice(0, 2)
-        : fArr
-            .map((x: any) => mapToVm(x, t))
-            .filter((x) => !!x.slug)
-            .slice(0, 2);
-
-    const fromFallback = fbArr
-      .map((x: any) => mapToVm(x, t))
-      .filter((x) => !!x.slug)
-      .slice(0, 2);
-
-    const base = fromFeatured.length ? fromFeatured : fromFallback;
-
-    if (!base.length) {
-      return [
-        {
-          id: 'ph-1',
-          slug: '',
-          title: t('ui_library_sample_one', 'Sample article 1'),
-          summary: '—',
-          hero: '',
-        },
-        {
-          id: 'ph-2',
-          slug: '',
-          title: t('ui_library_sample_two', 'Sample article 2'),
-          summary: '—',
-          hero: '',
-        },
-      ];
-    }
-
-    return base;
-  }, [featuredData, fallbackData, t]);
-
-  const firstWithHero = items.find((x) => !!safeStr(x.hero));
-  const leftHero: string | StaticImageData =
-    (firstWithHero?.hero as string) || (Two as StaticImageData);
-
-  const leftAlt = firstWithHero?.title || t('ui_library_cover_alt', 'library cover image');
-
-  // keep open index safe when items length changes
-  const safeOpen = useMemo(() => {
-    if (open < 0) return -1;
-    if (open >= items.length) return 0;
-    return open;
-  }, [open, items.length]);
+  const leftHero = items[0]?.hero || Two;
 
   return (
     <section className="features__area p-relative features-bg pt-120 pb-35 cus-faq">
@@ -185,88 +49,52 @@ const LibrarySection: React.FC = () => {
 
       <div className="container">
         <div className="row" data-aos="fade-up" data-aos-delay="300">
-          {/* Sol görsel */}
           <div className="col-xl-6 col-lg-6">
             <div className="features__thumb-wrapper mb-60">
               <div className="features__thumb ens-library__thumb">
-                <Image
-                  src={leftHero as any}
-                  alt={leftAlt}
-                  width={720}
-                  height={520}
-                  sizes="(max-width: 992px) 100vw, 50vw"
-                  className="ens-media--fluid"
-                  loading={typeof leftHero === 'string' ? 'lazy' : undefined}
-                  priority={typeof leftHero !== 'string'}
-                />
+                <Image src={leftHero} alt={t("coverAlt")} width={720} height={520} className="ens-media--fluid" />
               </div>
             </div>
           </div>
 
-          {/* Sağ içerik – Featured (2 kayıt) */}
           <div className="col-xl-6 col-lg-6">
             <div className="features__content-wrapper">
               <div className="section__title-wrapper mb-10">
                 <span className="section__subtitle">
-                  <span>{t('ui_library_subprefix', 'Ensotek')}</span>{' '}
-                  {t('ui_library_sublabel', 'Knowledge Hub')}
+                  <span>{t("subprefix")}</span> {t("sublabel")}
                 </span>
                 <h2 className="section__title">
-                  {t('ui_library_title_prefix', 'Engineering and')}{' '}
-                  <span className="down__mark-line">{t('ui_library_title_mark', 'Documents')}</span>
+                  {t("titlePrefix")} <span className="down__mark-line">{t("titleMark")}</span>
                 </h2>
               </div>
 
               <div className="bd-faq__wrapper mb-40">
                 <div className="bd-faq__accordion" data-aos="fade-left" data-aos-duration="1000">
-                  <div className="accordion" id="libAccordionPreview">
+                  <div className="accordion" id="libAccordionHome">
                     {items.map((it, idx) => {
-                      const isOpen = safeOpen === idx;
-
-                      const href = it.slug
-                        ? localizePath(locale, `/library/${encodeURIComponent(it.slug)}`)
-                        : listHref;
-
-                      const headingId = `lib-preview-heading-${idx}`;
-                      const panelId = `lib-preview-collapse-${idx}`;
-
+                      const isOpen = open === idx;
                       return (
-                        <div className="accordion-item" key={it.id}>
-                          <h2 className="accordion-header" id={headingId}>
+                        <div className="accordion-item" key={it.id || `${it.slug}-${idx}`}>
+                          <h2 className="accordion-header" id={`lib-home-heading-${idx}`}>
                             <button
-                              className={`accordion-button ens-acc-btn d-flex align-items-center${
-                                isOpen ? '' : ' collapsed'
-                              }`}
+                              className={`accordion-button ens-acc-btn d-flex align-items-center${isOpen ? "" : " collapsed"}`}
                               aria-expanded={isOpen}
-                              aria-controls={panelId}
+                              aria-controls={`lib-home-collapse-${idx}`}
                               onClick={() => setOpen(isOpen ? -1 : idx)}
                               type="button"
                             >
                               <span className="ens-acc-icon" aria-hidden="true">
-                                {isOpen ? <FiMinus size={22} /> : <FiPlus size={22} />}
+                                {isOpen ? <Minus size={22} /> : <Plus size={22} />}
                               </span>
                               <span className="ens-acc-text">{it.title}</span>
                             </button>
                           </h2>
 
-                          <div
-                            id={panelId}
-                            role="region"
-                            aria-labelledby={headingId}
-                            className={`accordion-collapse collapse${isOpen ? ' show' : ''}`}
-                          >
+                          <div id={`lib-home-collapse-${idx}`} className={`accordion-collapse collapse${isOpen ? " show" : ""}`}>
                             <div className="accordion-body">
                               <p className="ens-acc-summary">{it.summary}</p>
-
-                              <Link
-                                href={href}
-                                className="link-more d-inline-flex align-items-center gap-1"
-                                aria-label={`${it.title} – ${t(
-                                  'ui_library_view_detail_aria',
-                                  'view details',
-                                )}`}
-                              >
-                                {t('ui_library_view_detail', 'View details')} <FiArrowRight />
+                              <Link href={`/library/${encodeURIComponent(it.slug)}`} className="link-more d-inline-flex align-items-center gap-1">
+                                {t("viewDetail")} <ArrowRight size={16} />
                               </Link>
                             </div>
                           </div>
@@ -274,20 +102,20 @@ const LibrarySection: React.FC = () => {
                       );
                     })}
 
-                    {isLoading && (
+                    {isLoading ? (
                       <div className="accordion-item" aria-hidden>
                         <div className="accordion-body">
                           <div className="skeleton-line ens-skel--h10" />
                         </div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 </div>
               </div>
 
               <div className="project__view">
-                <Link href={listHref} className="solid__btn">
-                  {t('ui_library_view_all', 'View all documents')}
+                <Link href="/library" className="solid__btn">
+                  {t("viewAll")}
                 </Link>
               </div>
             </div>

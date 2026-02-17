@@ -4,68 +4,9 @@
 import type { RouteHandler } from 'fastify';
 import { db } from '@/db/client';
 import { categories, categoryI18n } from './schema';
-import { and, asc, desc, eq, sql, or, like } from 'drizzle-orm';
-
-function toBool(v: unknown): boolean {
-  if (typeof v === 'boolean') return v;
-  if (typeof v === 'number') return v !== 0;
-  const s = String(v).toLowerCase();
-  return s === '1' || s === 'true';
-}
-
-function normalizeLocale(loc: unknown): string | null {
-  if (!loc) return null;
-  const s = String(loc).trim();
-  if (!s) return null;
-  return s.toLowerCase();
-}
-
-const ORDER_WHITELIST = {
-  display_order: categories.display_order,
-  name: categoryI18n.name,
-  created_at: categories.created_at,
-  updated_at: categories.updated_at,
-} as const;
-
-function parseOrder(q: Record<string, unknown>) {
-  const sort = typeof q.sort === 'string' ? q.sort : undefined;
-  const dir1 = typeof q.order === 'string' ? q.order : undefined;
-  const combined = typeof q.order === 'string' && q.order.includes('.') ? q.order : undefined;
-
-  let col: keyof typeof ORDER_WHITELIST = 'created_at';
-  let dir: 'asc' | 'desc' = 'desc';
-
-  if (combined) {
-    const [c, d] = combined.split('.');
-    if (c && c in ORDER_WHITELIST) col = c as keyof typeof ORDER_WHITELIST;
-    if (d === 'asc' || d === 'desc') dir = d;
-  } else {
-    if (sort && sort in ORDER_WHITELIST) col = sort as keyof typeof ORDER_WHITELIST;
-    if (dir1 === 'asc' || dir1 === 'desc') dir = dir1;
-  }
-
-  const colExpr = ORDER_WHITELIST[col];
-  const primary = dir === 'asc' ? asc(colExpr) : desc(colExpr);
-  return { primary, primaryCol: col };
-}
-
-const CATEGORY_VIEW_FIELDS = {
-  id: categories.id,
-  module_key: categories.module_key,
-  locale: categoryI18n.locale,
-  name: categoryI18n.name,
-  slug: categoryI18n.slug,
-  description: categoryI18n.description,
-  image_url: categories.image_url,
-  storage_asset_id: categories.storage_asset_id,
-  alt: categoryI18n.alt, // ✅ public view alt = i18n alt
-  icon: categories.icon,
-  is_active: categories.is_active,
-  is_featured: categories.is_featured,
-  display_order: categories.display_order,
-  created_at: categories.created_at,
-  updated_at: categories.updated_at,
-} as const;
+import { and, asc, eq, sql, or, like } from 'drizzle-orm';
+import { toBool, toBoolOrUndefined, toInt, normalizeLocale } from '@/modules/_shared';
+import { CATEGORY_VIEW_FIELDS, parseOrder } from './helpers';
 
 /** GET /categories (public) — çok dilli + module_key destekli */
 export const listCategories: RouteHandler<{
@@ -92,8 +33,11 @@ export const listCategories: RouteHandler<{
     conds.push(or(like(categoryI18n.name, pattern), like(categoryI18n.slug, pattern)));
   }
 
-  if (q.is_active !== undefined) conds.push(eq(categories.is_active, toBool(q.is_active)));
-  if (q.is_featured !== undefined) conds.push(eq(categories.is_featured, toBool(q.is_featured)));
+  const isActive = toBoolOrUndefined(q.is_active);
+  if (isActive !== undefined) conds.push(eq(categories.is_active, isActive));
+
+  const isFeatured = toBoolOrUndefined(q.is_featured);
+  if (isFeatured !== undefined) conds.push(eq(categories.is_featured, isFeatured));
 
   // 🌍 i18n locale filtresi
   conds.push(eq(categoryI18n.locale, effectiveLocale));
@@ -105,8 +49,8 @@ export const listCategories: RouteHandler<{
 
   const where = conds.length ? and(...conds) : undefined;
 
-  const limit = Math.min(Number(q.limit ?? 50) || 50, 100);
-  const offset = Math.max(Number(q.offset ?? 0) || 0, 0);
+  const limit = Math.min(toInt(q.limit, 50), 100);
+  const offset = Math.max(toInt(q.offset, 0), 0);
   const { primary, primaryCol } = parseOrder(q as any);
 
   // COUNT

@@ -417,7 +417,7 @@ VALUES
   '*',
   CAST(
     JSON_OBJECT(
-      'url','https://res.cloudinary.com/dbozv7wqd/raw/upload/v1767244774/site-media/favicon',
+      'url','https://res.cloudinary.com/dbozv7wqd/image/upload/v1770613423/site-media/favicon.ico',
       'alt','Ensotek Favicon'
     ) AS CHAR CHARACTER SET utf8mb4
   ),

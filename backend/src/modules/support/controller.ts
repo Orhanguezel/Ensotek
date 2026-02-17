@@ -19,6 +19,7 @@ import {
 } from "@/modules/notifications/schema";
 import { randomUUID } from "crypto";
 import { eq } from "drizzle-orm";
+import { telegramNotify } from "@/modules/telegram/telegram.notifier";
 
 // yeni email template sistemi
 import { sendTemplatedEmail } from "@/modules/email-templates/mailer";
@@ -122,6 +123,22 @@ export async function fireTicketRepliedEventsForTicket(args: {
   } catch (err) {
     req.log?.error?.(err, "ticket_reply_email_failed");
   }
+
+  // 5) Telegram bildirimi
+  try {
+    await telegramNotify({
+      event: "ticket_replied",
+      data: {
+        user_name: userName,
+        subject: ticket.subject ?? "",
+        priority: ticket.priority ?? "medium",
+        message: replyMessage,
+        created_at: now().toISOString(),
+      },
+    });
+  } catch (err) {
+    req.log?.error?.(err, "ticket_reply_telegram_failed");
+  }
 }
 
 /* ========== Controller ========== */
@@ -168,6 +185,40 @@ export const SupportController = {
         message: body.message,
         priority: body.priority as any,
       });
+      if (!created) {
+        reply.code(500);
+        return { message: "Kayıt oluşturulamadı." };
+      }
+
+      try {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.id, created.user_id as any))
+          .limit(1);
+
+        const userName = buildDisplayNameFromUser({
+          full_name: (user as any)?.full_name ?? null,
+          email: (user as any)?.email ?? null,
+        });
+
+        await telegramNotify({
+          event: "new_ticket",
+          data: {
+            user_name: userName,
+            subject: created.subject,
+            priority: created.priority ?? "medium",
+            message: created.message,
+            created_at:
+              created.created_at instanceof Date
+                ? created.created_at.toISOString()
+                : now().toISOString(),
+          },
+        });
+      } catch (err) {
+        req.log?.error?.({ err }, "support_ticket_telegram_failed");
+      }
+
       reply.code(201);
       return created;
     } catch (err) {
@@ -202,6 +253,24 @@ export const SupportController = {
         reply.code(404);
         return { message: "Kayıt bulunamadı." };
       }
+
+      try {
+        if (typeof patch.status !== "undefined" || typeof patch.priority !== "undefined") {
+          await telegramNotify({
+            title: "Support Ticket Güncellendi",
+            message: [
+              `Ticket: ${updated.id}`,
+              `Konu: ${updated.subject}`,
+              `Durum: ${updated.status}`,
+              `Öncelik: ${updated.priority}`,
+            ].join("\n"),
+            type: "support_ticket_updated",
+          });
+        }
+      } catch (err) {
+        req.log?.error?.({ err }, "support_ticket_update_telegram_failed");
+      }
+
       return updated;
     } catch (err) {
       req.log.error({ err }, "support_tickets_update_failed");

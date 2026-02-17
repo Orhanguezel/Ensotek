@@ -26,6 +26,7 @@ export type OfferListParams = {
   q?: string;
   email?: string;
   product_id?: string;
+  service_id?: string;
 
   created_from?: string;
   created_to?: string;
@@ -108,6 +109,7 @@ export async function listOffers(
 
   if (params.email) conds.push(eq(offersTable.email, params.email));
   if (params.product_id) conds.push(eq(offersTable.product_id, params.product_id));
+  if (params.service_id) conds.push(eq(offersTable.service_id, params.service_id));
 
   if (params.q && params.q.trim()) {
     const s = `%${params.q.trim()}%`;
@@ -258,6 +260,7 @@ export async function createOffer(
     subject: typeof values.subject === 'undefined' ? null : values.subject,
     message: typeof values.message === 'undefined' ? null : values.message,
     product_id: typeof values.product_id === 'undefined' ? null : values.product_id,
+    service_id: typeof values.service_id === 'undefined' ? null : values.service_id,
 
     form_data: typeof values.form_data === 'undefined' ? null : values.form_data,
 

@@ -1,86 +1,85 @@
-// =============================================================
-// FILE: src/components/containers/offer/OfferPage.tsx
-// Ensotek – Offer Page Container (I18N PATTERN, DB UI, EN-only fallback) [FINAL]
-// - i18n (PATTERN): useLocaleShort + useUiSection + localizePath
-// - UI strings: site_settings.ui_offer
-// - Fallback: EN only (no locale branching)
-// =============================================================
+"use client";
 
-'use client';
+import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
+import { siteSettingsService } from "@/features/site-settings/siteSettings.service";
+import Banner from "@/components/layout/banner/Banner";
+import OfferForm from "./OfferForm";
 
-import React, { useMemo, useCallback } from 'react';
+type ContactMap = {
+  title?: string;
+  height?: number;
+  query?: string;
+  embed_url?: string;
+};
 
-import  OfferPublicForm  from '@/components/containers/offer/OfferPublicForm';
+const OfferPage = () => {
+  const t = useTranslations("ensotek.offer");
+  
+  const { data: siteSettings } = useQuery({
+    queryKey: queryKeys.siteSettings.list(),
+    queryFn: siteSettingsService.getAll,
+    staleTime: 60 * 1000,
+  });
 
-// i18n (PATTERN)
-import { useLocaleShort } from '@/i18n/useLocaleShort';
-import { useUiSection } from '@/i18n/uiDb';
-import { localizePath } from '@/i18n/url';
+  const settingsByKey = useMemo(() => {
+    const map = new Map<string, unknown>();
+    (siteSettings || []).forEach((item: any) => {
+      map.set(item.key, item.value);
+    });
+    return map;
+  }, [siteSettings]);
 
-const OfferPage: React.FC = () => {
-  const locale = useLocaleShort();
-  const { ui } = useUiSection('ui_offer', locale as any);
-
-  // DB -> EN fallback only
-  const t = useCallback((key: string, fallback: string) => ui(key, fallback), [ui]);
-
-  // UI strings
-  const subprefix = t('ui_offer_subprefix', 'Ensotek');
-  const sectionLabel = t('ui_offer_section_label', 'Technical Offers');
-
-  const heading = t('ui_offer_heading_general', 'Request an Offer');
-
-  const subText = t('ui_offer_subtitle', 'Tailored cooling solutions and technical consulting.');
-  const longDescription = t(
-    'ui_offer_description',
-    'Fill in the form and our sales team will contact you as soon as possible.',
-  );
-
-  // If you later add buttons/links, you already have the pattern + helper.
-  // Example usage:
-  // const offersHref = useMemo(() => localizePath(locale, '/offer'), [locale]);
-  useMemo(() => localizePath(locale, '/offer'), [locale]); // keeps pattern + avoids unused import risk
-
-  // Country code default: do NOT branch on locale for 30-language scaling.
-  // Use a stable default; form itself should be resilient and allow change.
-  const defaultCountryCode = 'DE';
+  const contactMap = (settingsByKey.get("contact_map") || {}) as ContactMap;
+  const mapHeight = Number(contactMap.height || 420);
+  const mapEmbedUrl =
+    contactMap.embed_url ||
+    (contactMap.query
+      ? `https://www.google.com/maps?q=${encodeURIComponent(
+          contactMap.query,
+        )}&output=embed`
+      : "");
 
   return (
-    <section className="features__area pt-120 pb-120">
-      <div className="container">
-        <div className="row justify-content-center" data-aos="fade-up" data-aos-delay="200">
-          {/* Title + description */}
-          <div className="col-xl-8 col-lg-9">
-            <div className="section__title-wrapper text-center mb-40">
-              <span className="section__subtitle">
-                <span>{subprefix}</span> {sectionLabel}
-              </span>
+    <>
+      <Banner title={t("title") || "Technical Cooling Tower Offer Form"} />
 
-              <h2 className="section__title">{heading}</h2>
-
-              <p className="mb-0 text-muted mt-15">
-                {subText}
-                <br />
-                {longDescription}
-              </p>
-            </div>
-          </div>
-
-          {/* Form */}
-          <div className="col-xl-8 col-lg-9">
-            <div className="card border-0 shadow-sm">
-              <div className="card-body p-3 p-md-4 p-lg-5">
-                <OfferPublicForm
-                  defaultCountryCode={defaultCountryCode}
-                  productId={null}
-                  productName={null}
-                />
+      <section className="offer__area touch__area pt-120 pb-120">
+        <div className="container">
+          <div className="row justify-content-center">
+            <div className="col-xl-10 col-lg-11">
+              <div className="section__title-wrapper text-center mb-60">
+                <span className="section__subtitle">
+                  <span>{t("subtitle") || "Request an Offer"}</span>
+                </span>
+                <p className="mt-20">
+                  {t("description") || 
+                   "Please provide the technical specifications of your project. Our engineering team will prepare a tailored solution for you."}
+                </p>
               </div>
+              
+              <OfferForm />
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {mapEmbedUrl && (
+        <section className="google__map-area">
+          <div className="container-fluid p-0">
+             <iframe
+                src={mapEmbedUrl}
+                title={contactMap.title || "Ensotek Map"}
+                style={{ width: "100%", height: `${mapHeight}px`, border: 0, display: 'block' }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+          </div>
+        </section>
+      )}
+    </>
   );
 };
 

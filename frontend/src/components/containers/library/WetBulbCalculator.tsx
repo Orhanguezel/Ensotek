@@ -1,112 +1,64 @@
-// =============================================================
-// FILE: src/components/containers/library/WetBulbCalculator.tsx
-// Ensotek – Wet-Bulb Temperature Calculator (Air T + RH)
-// - SCSS aligned: NO styled-jsx, NO inline styles
-// - i18n PATTERN: useLocaleShort + useUiSection('ui_library', locale as any)
-// - UI: DB -> EN fallback only (NO locale branching)
-// =============================================================
+"use client";
 
-'use client';
-
-import React, { useCallback, useMemo, useState, type FormEvent } from 'react';
-
-// i18n (PATTERN)
-import { useLocaleShort } from '@/i18n/useLocaleShort';
-import { useUiSection } from '@/i18n/uiDb';
+import React, { useMemo, useState, type FormEvent } from "react";
+import { useTranslations } from "next-intl";
 
 function safeStr(v: unknown): string {
-  if (typeof v === 'string') return v.trim();
-  if (v == null) return '';
+  if (typeof v === "string") return v.trim();
+  if (v == null) return "";
   return String(v).trim();
 }
 
-/** "12,3" -> 12.3 */
 function parseDecimal(raw: string): number {
-  const s = safeStr(raw).replace(',', '.');
+  const s = safeStr(raw).replace(",", ".");
   if (!s) return Number.NaN;
   return Number.parseFloat(s);
 }
 
 const WetBulbCalculator: React.FC = () => {
-  const locale = useLocaleShort();
-  const { ui } = useUiSection('ui_library', locale as any);
+  const t = useTranslations("ensotek.library");
 
-  const t = useCallback(
-    (key: string, fallbackEn: string) => {
-      const v = safeStr(ui(key, fallbackEn));
-      return v || fallbackEn;
-    },
-    [ui],
+  const [temperature, setTemperature] = useState<string>("");
+  const [humidity, setHumidity] = useState<string>("");
+  const [result, setResult] = useState<string>("");
+  const [error, setError] = useState<string>("");
+
+  const canSubmit = useMemo(
+    () => safeStr(temperature).length > 0 && safeStr(humidity).length > 0,
+    [temperature, humidity],
   );
 
-  const [temperature, setTemperature] = useState<string>('');
-  const [humidity, setHumidity] = useState<string>('');
-  const [result, setResult] = useState<string>(''); // "xx.xx °C"
-  const [error, setError] = useState<string>('');
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
 
-  // UI strings (DB -> EN fallback only)
-  const subprefix = t('ui_library_subprefix', 'Ensotek');
-  const subLabel = t('ui_library_wb_sublabel', 'Psychrometric Tools');
+    const tVal = parseDecimal(temperature);
+    const rhVal = parseDecimal(humidity);
 
-  const heading = t('ui_library_wb_title', 'Wet-Bulb Temperature Calculator');
-  const subTitle = t(
-    'ui_library_wb_subtitle',
-    'Enter air temperature and relative humidity to estimate wet-bulb temperature.',
-  );
+    const invalid =
+      Number.isNaN(tVal) ||
+      Number.isNaN(rhVal) ||
+      !Number.isFinite(tVal) ||
+      !Number.isFinite(rhVal) ||
+      rhVal < 0 ||
+      rhVal > 100;
 
-  const tLabel = t('ui_library_wb_temperature_label', 'Air Temperature (°C)');
-  const hLabel = t('ui_library_wb_humidity_label', 'Relative Humidity (%)');
-  const btnLabel = t('ui_library_wb_calculate_button', 'Calculate');
+    if (invalid) {
+      setError(t("wbError"));
+      setResult("");
+      return;
+    }
 
-  const resultPrefix = t('ui_library_wb_result_label', 'Wet-bulb temperature:');
+    setError("");
 
-  const placeholderT = t('ui_library_wb_temperature_placeholder', 'Air temperature (°C)');
-  const placeholderH = t('ui_library_wb_humidity_placeholder', 'Relative humidity (%)');
+    const wb =
+      tVal * Math.atan(0.151977 * Math.sqrt(rhVal + 8.313659)) +
+      Math.atan(tVal + rhVal) -
+      Math.atan(rhVal - 1.676331) +
+      0.00391838 * Math.pow(rhVal, 1.5) * Math.atan(0.023101 * rhVal) -
+      4.686035;
 
-  const errorText = t('ui_library_wb_error_invalid_input', 'Please enter valid values.');
-  const emptyResultText = t('ui_library_wb_result_placeholder', 'Result will be shown here.');
-
-  const handleSubmit = useCallback(
-    (e: FormEvent) => {
-      e.preventDefault();
-
-      const tVal = parseDecimal(temperature);
-      const rhVal = parseDecimal(humidity);
-
-      const invalid =
-        Number.isNaN(tVal) ||
-        Number.isNaN(rhVal) ||
-        !Number.isFinite(tVal) ||
-        !Number.isFinite(rhVal) ||
-        rhVal < 0 ||
-        rhVal > 100;
-
-      if (invalid) {
-        setError(errorText);
-        setResult('');
-        return;
-      }
-
-      setError('');
-
-      // Empirical approximation (common wet-bulb approx)
-      const wb =
-        tVal * Math.atan(0.151977 * Math.sqrt(rhVal + 8.313659)) +
-        Math.atan(tVal + rhVal) -
-        Math.atan(rhVal - 1.676331) +
-        0.00391838 * Math.pow(rhVal, 1.5) * Math.atan(0.023101 * rhVal) -
-        4.686035;
-
-      const value = wb.toFixed(2);
-      setResult(`${value} °C`);
-    },
-    [temperature, humidity, errorText],
-  );
-
-  const canSubmit = useMemo(() => {
-    // boş iken disable etmek istiyorsan
-    return safeStr(temperature).length > 0 && safeStr(humidity).length > 0;
-  }, [temperature, humidity]);
+    setResult(`${wb.toFixed(2)} °C`);
+  };
 
   return (
     <section className="features__area p-relative features-bg pt-60 pb-120">
@@ -115,12 +67,10 @@ const WetBulbCalculator: React.FC = () => {
           <div className="col-xl-8 col-lg-9">
             <div className="section__title-wrapper text-center">
               <span className="section__subtitle">
-                <span>{subprefix}</span> {subLabel}
+                <span>{t("subprefix")}</span> {t("wbSubLabel")}
               </span>
-
-              <h2 className="section__title">{heading}</h2>
-
-              <p className="wetbulb__subtitle mt-10">{subTitle}</p>
+              <h2 className="section__title">{t("wbTitle")}</h2>
+              <p className="wetbulb__subtitle mt-10">{t("wbDescription")}</p>
             </div>
           </div>
         </div>
@@ -131,7 +81,7 @@ const WetBulbCalculator: React.FC = () => {
               <form className="row g-3 align-items-end" onSubmit={handleSubmit}>
                 <div className="col-md-4 col-sm-6">
                   <label className="wetbulb__label" htmlFor="wetbulb-temp">
-                    {tLabel}
+                    {t("wbTemperatureLabel")}
                   </label>
                   <input
                     id="wetbulb-temp"
@@ -139,7 +89,7 @@ const WetBulbCalculator: React.FC = () => {
                     className="wetbulb__input"
                     value={temperature}
                     onChange={(e) => setTemperature(e.target.value)}
-                    placeholder={placeholderT}
+                    placeholder={t("wbTemperaturePlaceholder")}
                     inputMode="decimal"
                     autoComplete="off"
                   />
@@ -147,7 +97,7 @@ const WetBulbCalculator: React.FC = () => {
 
                 <div className="col-md-4 col-sm-6">
                   <label className="wetbulb__label" htmlFor="wetbulb-rh">
-                    {hLabel}
+                    {t("wbHumidityLabel")}
                   </label>
                   <input
                     id="wetbulb-rh"
@@ -155,7 +105,7 @@ const WetBulbCalculator: React.FC = () => {
                     className="wetbulb__input"
                     value={humidity}
                     onChange={(e) => setHumidity(e.target.value)}
-                    placeholder={placeholderH}
+                    placeholder={t("wbHumidityPlaceholder")}
                     inputMode="decimal"
                     autoComplete="off"
                   />
@@ -168,7 +118,7 @@ const WetBulbCalculator: React.FC = () => {
                     disabled={!canSubmit}
                     aria-disabled={!canSubmit}
                   >
-                    {btnLabel}
+                    {t("wbCalculate")}
                   </button>
                 </div>
               </form>
@@ -179,13 +129,13 @@ const WetBulbCalculator: React.FC = () => {
 
               {!error && result ? (
                 <>
-                  <span className="wetbulb__result-label">{resultPrefix} </span>
+                  <span className="wetbulb__result-label">{t("wbResultLabel")} </span>
                   <strong className="wetbulb__result-value">{result}</strong>
                 </>
               ) : null}
 
               {!error && !result ? (
-                <span className="wetbulb__result-placeholder">{emptyResultText}</span>
+                <span className="wetbulb__result-placeholder">{t("wbResultPlaceholder")}</span>
               ) : null}
             </div>
           </div>

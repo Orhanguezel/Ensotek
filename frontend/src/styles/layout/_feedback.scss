@@ -256,143 +256,123 @@
 		transform: scale(0.9);
 	}
 }
-/* FEEDBACK – React icons star colors (filled yellow, empty black) */
-.feedback__review-icon svg {
-  width: 18px;
-  height: 18px;
-  vertical-align: middle;
-}
-
-.feedback__review-icon svg.is-filled {
-  color: #f5b301; /* yellow */
-}
-
-.feedback__review-icon svg.is-empty {
-  color: #000; /* black */
-  opacity: 0.9;
-}
-
-/* Avatar (remove inline styles) */
-.ens-feedback-avatar {
-  border-radius: 50%;
-}
-
-/* Modal rating picker */
-.ens-rating-picker {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.ens-rating-star {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  line-height: 1;
-  opacity: 0.35;
-}
-
-.ens-rating-star.is-active {
-  opacity: 1;
-}
-
-.ens-rating-star svg {
-  color: #000; /* empty default black */
-}
-
-.ens-rating-star.is-active svg {
-  color: #f5b301; /* active yellow */
-}
-
-/* =========================================================
-   FEEDBACK – arrows (references gibi dairesel ok butonları)
-   ========================================================= */
 
 .ens-circle-nav {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
 }
 
 .ens-circle-arrow {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  border: 1px solid rgba(0, 0, 0, 0.14);
-  border-radius: 999px;
-  background: transparent;
-
-  color: var(--clr-common-heading);
-  transition: all 0.2s ease;
+	width: 44px;
+	height: 44px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid rgba(0, 0, 0, 0.14);
+	border-radius: 999px;
+	background: transparent;
+	color: var(--clr-common-heading);
+	transition: all 0.2s ease;
 }
 
 .ens-circle-arrow svg {
-  width: 18px;
-  height: 18px;
+	width: 18px;
+	height: 18px;
 }
 
 .ens-circle-arrow:hover {
-  background: var(--clr-theme-1);
-  border-color: transparent;
-  color: var(--clr-common-white);
+	background: var(--clr-theme-1);
+	border-color: transparent;
+	color: var(--clr-common-white);
 }
 
-/* Swiper disabled state (when loop is off or only one slide) */
 .ens-circle-arrow.swiper-button-disabled,
 .ens-circle-arrow[disabled] {
-  opacity: 0.45;
-  cursor: not-allowed;
+	opacity: 0.45;
+	cursor: not-allowed;
 }
 
-/* =========================================================
-   FEEDBACK – stars (filled yellow, empty black)
-   ========================================================= */
-
 .feedback__review-icon svg {
-  width: 18px;
-  height: 18px;
-  vertical-align: middle;
+	width: 18px;
+	height: 18px;
+	vertical-align: middle;
 }
 
 .feedback__review-icon svg.is-filled {
-  color: #f5b301;
+	color: #f5b301;
 }
 
 .feedback__review-icon svg.is-empty {
-  color: #000;
-  opacity: 0.9;
+	color: #000;
+	opacity: 0.9;
 }
 
-/* =========================================================
-   Modal rating picker (same star behavior)
-   ========================================================= */
-
 .ens-rating-picker {
-  display: inline-flex;
-  gap: 6px;
-  align-items: center;
+	display: inline-flex;
+	gap: 6px;
+	align-items: center;
 }
 
 .ens-rating-star {
-  border: 0;
-  background: transparent;
-  padding: 0;
-  line-height: 1;
-  opacity: 0.35;
+	border: 0;
+	background: transparent;
+	padding: 0;
+	line-height: 1;
+	opacity: 0.35;
 }
 
 .ens-rating-star.is-active {
-  opacity: 1;
+	opacity: 1;
 }
 
 .ens-rating-star svg {
-  color: #000;
+	color: #000;
 }
 
 .ens-rating-star.is-active svg {
-  color: #f5b301;
+	color: #f5b301;
 }
 
+.modal-backdrop-custom {
+	position: fixed;
+	inset: 0;
+	z-index: 1050;
+	background: rgba(0, 0, 0, 0.45);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 20px;
+}
+
+.modal-card-custom {
+	width: min(640px, 100%);
+	background: #fff;
+	border-radius: 12px;
+	overflow: hidden;
+	box-shadow: 0 20px 60px rgba(0, 0, 0, 0.22);
+}
+
+.modal-head-custom {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 16px 20px;
+	border-bottom: 1px solid #e8edf5;
+}
+
+.modal-title-custom {
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.modal-close-custom {
+	font-size: 28px;
+	color: #111;
+	line-height: 1;
+	text-decoration: none;
+}
+
+.modal-body-custom {
+	padding: 20px;
+}

@@ -3,16 +3,7 @@
 // =============================================================
 
 import { z } from 'zod';
-
-export const boolLike = z.union([
-  z.boolean(),
-  z.literal(0),
-  z.literal(1),
-  z.literal('0'),
-  z.literal('1'),
-  z.literal('true'),
-  z.literal('false'),
-]);
+import { boolLike } from '@/modules/_shared';
 
 // ✅ herkes aynı helper’ı kullansın (repo/controller/service)
 export const isTruthyBoolLike = (v: any) => v === true || v === 1 || v === '1' || v === 'true';
@@ -78,3 +69,25 @@ export const auditMetricsDailyQuerySchema = z.object({
 });
 
 export type AuditMetricsDailyQuery = z.infer<typeof auditMetricsDailyQuerySchema>;
+
+/* -------------------------------------------------------------
+ * ADMIN – Geo stats query
+ * GET /audit/geo-stats?days=30&only_admin=true&source=requests
+ * ------------------------------------------------------------- */
+export const auditGeoStatsQuerySchema = z.object({
+  days: z.coerce.number().int().min(1).max(90).default(30),
+  only_admin: boolLike.optional(),
+  source: z.enum(['requests', 'auth']).default('requests'),
+});
+
+export type AuditGeoStatsQueryValidated = z.infer<typeof auditGeoStatsQuerySchema>;
+
+/* -------------------------------------------------------------
+ * ADMIN – Clear audit logs
+ * DELETE /audit/clear?target=all|requests|auth
+ * ------------------------------------------------------------- */
+export const auditClearQuerySchema = z.object({
+  target: z.enum(['requests', 'auth', 'all']).default('all'),
+});
+
+export type AuditClearQuery = z.infer<typeof auditClearQuerySchema>;

@@ -114,6 +114,7 @@ export const listPagesAdmin: RouteHandler<{ Querystring: CustomPageListQuery }> 
     limit: q.limit,
     offset: q.offset,
     is_published: q.is_published,
+    featured: q.featured,
     q: q.q,
     slug: q.slug,
     category_id: q.category_id,
@@ -188,6 +189,7 @@ export const createPageAdmin: RouteHandler<{ Body: UpsertCustomPageBody }> = asy
       module_key: typeof (b as any).module_key === 'string' ? (b as any).module_key.trim() : '',
 
       is_published: toBool(b.is_published) ? 1 : 0,
+      featured: toBool(b.featured) ? 1 : 0,
 
       display_order: typeof b.display_order !== 'undefined' ? (b.display_order as number) : 0,
       order_num: typeof b.order_num !== 'undefined' ? (b.order_num as number) : 0,
@@ -279,6 +281,8 @@ export const updatePageAdmin: RouteHandler<{
 
     if (typeof b.is_published !== 'undefined')
       parentPatch.is_published = toBool(b.is_published) ? 1 : 0;
+    if (typeof b.featured !== 'undefined')
+      parentPatch.featured = toBool(b.featured) ? 1 : 0;
 
     if (typeof b.featured_image !== 'undefined')
       parentPatch.featured_image = b.featured_image ?? null;

@@ -2,6 +2,16 @@
 import 'fastify';
 
 declare module 'fastify' {
+  interface FastifyContextConfig {
+    auth?: boolean;
+    admin?: boolean;
+    public?: boolean;
+    rateLimit?: {
+      max: number;
+      timeWindow: string;
+    };
+  }
+
   // Bazı TS kombinasyonlarında bu alanlar tipten "kaybolabiliyor".
   interface FastifyRequest {
     headers: Record<string, string | string[] | undefined>;

@@ -1,42 +1,12 @@
 // =============================================================
-// FILE: src/modules/categories/validation.ts  (FINAL)
+// FILE: src/modules/categories/validation.ts
 // =============================================================
 import { z } from 'zod';
-
-const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
-  z.preprocess((v) => (v === '' ? null : v), schema);
+import { boolLike, emptyToNull, urlOrRelativePath, UUID36 } from '@/modules/_shared/validation';
 
 /**
- * FE'den gelebilecek bütün boolean varyantlarını kabul et
- * (true/false, 0/1, "0"/"1", "true"/"false")
- */
-export const boolLike = z.union([
-  z.boolean(),
-  z.literal(0),
-  z.literal(1),
-  z.literal('0'),
-  z.literal('1'),
-  z.literal('true'),
-  z.literal('false'),
-]);
-
-/**
- * image_url bazen tam URL, bazen relative ("/uploads/...") gelebilir.
- * Eğer kesinlikle FULL URL kullanıyorsan bunu z.string().url() olarak bırakabilirsin.
- */
-const urlOrRelativePath = z
-  .string()
-  .min(1)
-  .max(2000)
-  .refine(
-    (s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'),
-    'image_url_must_be_url_or_relative_path',
-  );
-
-/**
+ * Base category schema
  * NOT: DB artık base + i18n (categories + category_i18n)
- * ama API input'unda name/slug/locale almaya devam ediyoruz.
- * Admin tarafında bunları base ve i18n tablosuna paylaştırıyoruz.
  */
 const baseCategorySchema = z
   .object({
@@ -56,7 +26,7 @@ const baseCategorySchema = z
 
     /** Base tablo görsel alanları */
     image_url: emptyToNull(urlOrRelativePath.optional().nullable()),
-    storage_asset_id: emptyToNull(z.string().uuid().optional().nullable()),
+    storage_asset_id: emptyToNull(UUID36.optional().nullable()),
     alt: emptyToNull(z.string().max(255).optional().nullable()),
 
     icon: emptyToNull(z.string().max(255).optional().nullable()),
@@ -65,7 +35,7 @@ const baseCategorySchema = z
     is_featured: boolLike.optional(),
     display_order: z.coerce.number().int().min(0).optional(),
 
-    // FE’den gelebilecek ama DB’de olmayan alanları tolere et
+    // FE'den gelebilecek ama DB'de olmayan alanları tolere et
     seo_title: emptyToNull(z.string().max(255).optional().nullable()),
     seo_description: emptyToNull(z.string().max(500).optional().nullable()),
   })
@@ -75,7 +45,7 @@ const baseCategorySchema = z
  * CREATE şeması
  */
 export const categoryCreateSchema = baseCategorySchema.superRefine((data, ctx) => {
-  // Şu an için parent_id bu tabloda yok; ayrı alt kategori modülü var.
+  // parent_id bu tabloda yok
   if ('parent_id' in (data as Record<string, unknown>)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
@@ -87,9 +57,6 @@ export const categoryCreateSchema = baseCategorySchema.superRefine((data, ctx) =
 
 /**
  * UPDATE şeması (PATCH / PUT)
- *  - partial: tüm alanlar opsiyonel
- *  - parent_id hâlâ yasak
- *  - ❌ no_fields_to_update kontrolü yok (boş PATCH no-op olsun)
  */
 export const categoryUpdateSchema = baseCategorySchema.partial().superRefine((data, ctx) => {
   if ('parent_id' in (data as Record<string, unknown>)) {
@@ -106,19 +73,12 @@ export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;
 
 /**
  * ✅ Storage asset ile kategori görselini ayarlama/silme (+ alt)
- * DB kolonu: categories.storage_asset_id
- *
- * Backward compatible:
- * - asset_id (legacy)
- * - storage_asset_id (canonical)
  */
 export const categorySetImageSchema = z
   .object({
-    /** null/undefined ⇒ görseli kaldır */
-    storage_asset_id: z.string().uuid().nullable().optional(),
-    asset_id: z.string().uuid().nullable().optional(),
+    storage_asset_id: UUID36.nullable().optional(),
+    asset_id: UUID36.nullable().optional(), // backward compatible
 
-    /** alt gelirse güncellenir; null/"" ⇒ alt temizlenir */
     alt: emptyToNull(z.string().max(255).optional().nullable()),
   })
   .strict()

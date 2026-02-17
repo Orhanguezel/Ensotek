@@ -48,6 +48,39 @@ const STORAGE_KEYS = [
 const GOOGLE_KEYS = ['google_client_id', 'google_client_secret'] as const;
 
 /**
+ * ✅ TELEGRAM KEYS (Ensotek)
+ * Base settings + event flags + templates for Ensotek business flows
+ */
+const TELEGRAM_KEYS = [
+  // Base settings
+  'telegram_notifications_enabled',
+  'telegram_webhook_enabled',
+  'telegram_bot_token',
+  'telegram_default_chat_id',
+
+  // Auto-reply
+  'telegram_autoreply_enabled',
+  'telegram_autoreply_mode',
+  'telegram_autoreply_template',
+
+  // Event flags - Ensotek specific
+  'telegram_event_new_catalog_request_enabled',
+  'telegram_event_new_offer_request_enabled',
+  'telegram_event_new_contact_enabled',
+  'telegram_event_new_ticket_enabled',
+  'telegram_event_ticket_replied_enabled',
+  'telegram_event_new_newsletter_subscription_enabled',
+
+  // Event templates - Ensotek specific
+  'telegram_template_new_catalog_request',
+  'telegram_template_new_offer_request',
+  'telegram_template_new_contact',
+  'telegram_template_new_ticket',
+  'telegram_template_ticket_replied',
+  'telegram_template_new_newsletter_subscription',
+] as const;
+
+/**
  * ✅ GLOBAL MEDIA KEYS (locale-independent; stored with locale='*')
  * Value can be:
  *  - string URL  (recommended simplest)
@@ -677,4 +710,38 @@ export async function getCookieConsentConfig(locale?: string | null): Promise<Co
   } catch {
     return defaultCookieConsentConfig;
   }
+}
+
+// ---------------------------------------------------------------------------
+// TELEGRAM (Ensotek)
+// ---------------------------------------------------------------------------
+
+export type TelegramSettings = {
+  enabled: boolean;
+  webhookEnabled: boolean;
+  botToken: string | null;
+  defaultChatId: string | null;
+  autoReplyEnabled: boolean;
+  autoReplyTemplate: string | null;
+};
+
+export async function getTelegramSettings(locale?: string | null): Promise<TelegramSettings> {
+  const localeCandidates = await buildLocaleFallbackChain({ requested: locale });
+  const map = await loadSettingsMap({ keys: TELEGRAM_KEYS, localeCandidates });
+
+  const enabled = toBool(map.get('telegram_notifications_enabled'));
+  const webhookEnabled = toBool(map.get('telegram_webhook_enabled'));
+  const botToken = normalizeStr(map.get('telegram_bot_token'));
+  const defaultChatId = normalizeStr(map.get('telegram_default_chat_id'));
+  const autoReplyEnabled = toBool(map.get('telegram_autoreply_enabled'));
+  const autoReplyTemplate = normalizeStr(map.get('telegram_autoreply_template'));
+
+  return {
+    enabled,
+    webhookEnabled,
+    botToken,
+    defaultChatId,
+    autoReplyEnabled,
+    autoReplyTemplate,
+  };
 }

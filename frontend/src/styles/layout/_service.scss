@@ -122,20 +122,3 @@
         }
     }
 }
-
-/* Ensotek – Services equal-height cards (no inline, no tailwind) */
-
-.ens-serviceCard {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-.ens-serviceCard__content {
-  flex: 1 1 auto; /* metin alanı uzayıp kısalsın */
-}
-
-.ens-serviceCard__link {
-  margin-top: auto; /* oku her zaman en alta it */
-}
-

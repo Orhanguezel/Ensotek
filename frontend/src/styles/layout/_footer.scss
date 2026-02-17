@@ -95,8 +95,6 @@
 	position: absolute;
 	top: 0;
 	right: 0;
-	width: 444px;
-	height: 421px;
 	z-index: -1;
 	@media #{$xs,$sm,$md,$lg} {
 		display: none;

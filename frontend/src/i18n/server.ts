@@ -1,171 +1,50 @@
-// =============================================================
-// FILE: src/i18n/server.ts  (DYNAMIC DEFAULT FROM DB via META endpoints)
-// =============================================================
 import 'server-only';
 
-import { cache } from 'react';
-import { headers, cookies } from 'next/headers';
+import { getRuntimeLocaleSettings, API_BASE_URL } from './locale-settings';
+import { FALLBACK_LOCALE } from './locales';
 
-import { normLocaleTag, pickFromAcceptLanguage, pickFromCookie } from '@/i18n/localeUtils';
+export type JsonLike = string | number | boolean | null | JsonLike[] | { [key: string]: JsonLike };
 
-const API = (process.env.API_BASE_URL || '').trim();
+type SettingRow = { value: JsonLike } | null;
 
-const REVALIDATE_SECONDS = 1800;
-
-// Hard fallback only if DB/API not reachable or empty
-export const DEFAULT_LOCALE_FALLBACK = 'de';
-
-export type JsonLike = null | boolean | number | string | JsonLike[] | { [k: string]: JsonLike };
-
-export type AppLocaleMeta = {
-  code: string;
-  label?: string;
-  is_default?: boolean;
-  is_active?: boolean;
-};
-
-export type SiteSettingRow = {
-  key: string;
-  value: JsonLike;
-  locale?: string;
-};
-
-async function fetchJson<T>(path: string, opts?: { revalidate?: number }): Promise<T | null> {
-  if (!API) return null;
-
-  try {
-    const base = API.replace(/\/+$/, '');
-    const url = `${base}${path.startsWith('/') ? path : `/${path}`}`;
-
-    const res = await fetch(url, {
-      next: { revalidate: opts?.revalidate ?? REVALIDATE_SECONDS },
-    });
-
-    if (!res.ok) return null;
-    return (await res.json()) as T;
-  } catch {
-    return null;
-  }
-}
-
-const fetchAppLocales = cache(async () =>
-  fetchJson<AppLocaleMeta[]>('/site_settings/app-locales', { revalidate: REVALIDATE_SECONDS }),
-);
-
-const fetchDefaultLocaleMeta = cache(async () =>
-  fetchJson<string | null>('/site_settings/default-locale', { revalidate: REVALIDATE_SECONDS }),
-);
-
-function computeActiveLocales(meta: AppLocaleMeta[] | null | undefined): {
-  activeLocales: string[];
-  preferredDefault: string | null; // from is_default
-} {
-  const def = DEFAULT_LOCALE_FALLBACK;
-  const arr = Array.isArray(meta) ? meta : [];
-
-  const active = arr
-    .filter((x) => x && x.is_active !== false)
-    .map((x) => normLocaleTag(x.code))
-    .filter(Boolean) as string[];
-
-  const uniq = Array.from(new Set(active));
-
-  const preferredDefault =
-    arr.find((x) => x?.is_default === true && x?.is_active !== false)?.code ?? null;
-
-  return {
-    activeLocales: uniq.length ? uniq : [def],
-    preferredDefault: preferredDefault ? normLocaleTag(preferredDefault) : null,
-  };
-}
-
-/**
- * DB: /site_settings/app-locales => active locales
- */
 export async function fetchActiveLocales(): Promise<string[]> {
-  const def = DEFAULT_LOCALE_FALLBACK;
-  if (!API) return [def];
-
-  const meta = await fetchAppLocales();
-  const parsed = computeActiveLocales(meta);
-  return parsed.activeLocales.length ? parsed.activeLocales : [def];
+  const { activeLocales } = await getRuntimeLocaleSettings();
+  return activeLocales;
 }
 
-/**
- * ✅ Dynamic default locale (DB):
- * Priority:
- *  1) /site_settings/default-locale (if in activeLocales)
- *  2) /site_settings/app-locales[].is_default=true (active)
- *  3) app-locales[0]
- *  4) fallback "de"
- */
-export const getDefaultLocale = cache(async (): Promise<string> => {
-  const def = DEFAULT_LOCALE_FALLBACK;
-  if (!API) return def;
+export async function getDefaultLocale(): Promise<string> {
+  const { defaultLocale } = await getRuntimeLocaleSettings();
+  return defaultLocale;
+}
 
-  const [meta, defaultMeta] = await Promise.all([fetchAppLocales(), fetchDefaultLocaleMeta()]);
-
-  const parsed = computeActiveLocales(meta);
-  const active = parsed.activeLocales;
-  const activeSet = new Set(active.map(normLocaleTag));
-
-  const fromDefaultEndpoint = normLocaleTag(defaultMeta);
-  if (fromDefaultEndpoint && activeSet.has(fromDefaultEndpoint)) return fromDefaultEndpoint;
-
-  const fromAppIsDefault = normLocaleTag(parsed.preferredDefault);
-  if (fromAppIsDefault && activeSet.has(fromAppIsDefault)) return fromAppIsDefault;
-
-  const first = normLocaleTag(active?.[0]);
-  return (first && activeSet.has(first) ? first : def) || def;
-});
-
-/**
- * ✅ Single request i18n context:
- * - activeLocales (META)
- * - defaultLocale (META + validation)
- * - detectedLocale (cookie > accept-language > defaultLocale)
- */
-export const getServerI18nContext = cache(async () => {
-  const h = await headers();
-  const c = await cookies();
-
-  const activeLocales = await fetchActiveLocales();
-  const defaultLocale = await getDefaultLocale();
-
-  const cookieLocale = c.get('NEXT_LOCALE')?.value;
-  const fromCookie = pickFromCookie(cookieLocale, activeLocales);
-
-  const detectedLocale =
-    fromCookie ?? pickFromAcceptLanguage(h.get('accept-language'), activeLocales) ?? defaultLocale;
-
-  return { activeLocales, defaultLocale, detectedLocale };
-});
-
-/**
- * ✅ Single setting fetcher (key + locale) — serverMetadata.ts bunu kullanıyor.
- * Endpoint varsayımı:
- *   GET /site_settings/by-key?key=seo&locale=tr
- */
 export async function fetchSetting(
   key: string,
   locale: string,
-  opts?: { revalidate?: number },
-): Promise<SiteSettingRow | null> {
-  const k = String(key || '').trim();
-  const l = normLocaleTag(locale);
-  if (!k) return null;
+  options?: { revalidate?: number },
+): Promise<SettingRow> {
+  try {
+    const url = `${API_BASE_URL}/site_settings/${encodeURIComponent(key)}?locale=${encodeURIComponent(locale)}`;
+    const res = await fetch(url, {
+      next: options?.revalidate != null ? { revalidate: options.revalidate } : undefined,
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
 
-  const qs = `key=${encodeURIComponent(k)}&locale=${encodeURIComponent(
-    l || DEFAULT_LOCALE_FALLBACK,
-  )}`;
-  const row = await fetchJson<SiteSettingRow | { data: SiteSettingRow }>(
-    `/site_settings/by-key?${qs}`,
-    {
-      revalidate: opts?.revalidate ?? REVALIDATE_SECONDS,
-    },
-  );
+    // Backend may return { value: ... } directly or the full row
+    const value = data?.value ?? data?.data?.value ?? null;
+    if (value == null) return null;
 
-  if (!row) return null;
-  if (typeof row === 'object' && row && 'data' in (row as any)) return (row as any).data ?? null;
-  return row as SiteSettingRow;
+    // Try parsing JSON strings
+    if (typeof value === 'string') {
+      try {
+        return { value: JSON.parse(value) };
+      } catch {
+        return { value };
+      }
+    }
+
+    return { value };
+  } catch {
+    return null;
+  }
 }

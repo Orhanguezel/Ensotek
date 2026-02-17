@@ -42,9 +42,6 @@ export const GLOBAL_ONLY_KEYS = new Set<string>([
   'gtm_container_id',
   'ga4_measurement_id',
 
-  // consent
-  'cookie_consent',
-
   // smtp
   'smtp_host',
   'smtp_port',
@@ -70,14 +67,7 @@ export const GLOBAL_ONLY_KEYS = new Set<string>([
   'storage_cdn_public_base',
   'storage_public_api_base',
 
-  // ✅ site media (global-only)
-  'site_logo',
-  'site_logo_dark',
-  'site_logo_light',
-  'site_favicon',
-  'site_apple_touch_icon', // opsiyonel ama faydalı
-  'site_app_icon_512',
-  'site_og_default_image',
+  // Media keys and admin UI config are removed from here to allow localized overrides
 ]);
 
 /**

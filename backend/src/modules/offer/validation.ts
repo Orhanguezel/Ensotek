@@ -56,6 +56,7 @@ export const offerRequestBodySchema = z.object({
   message: z.string().optional().nullable(),
 
   product_id: z.string().uuid().optional().nullable(),
+  service_id: z.string().uuid().optional().nullable(),
 
   form_data: z.record(z.any()).optional().default({}),
 
@@ -85,6 +86,7 @@ export const offerListQuerySchema = z.object({
   q: z.string().optional(),
   email: z.string().optional(),
   product_id: z.string().uuid().optional(),
+  service_id: z.string().uuid().optional(),
 
   created_from: z.string().optional(),
   created_to: z.string().optional(),

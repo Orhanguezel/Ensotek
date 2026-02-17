@@ -116,14 +116,3 @@ Eğer “ne yapayım?” diyorsan, **bunu sırayla yap**:
 5. Internal traffic filtrele
 
 ---
-
-## ŞİMDİ TOP SANA
-
-Birini seç, oradan devam edelim:
-
-1️⃣ “Contact form conversion’ı şimdi yapalım”
-2️⃣ “Telefon / mail click takibi yapalım”
-3️⃣ “Hangi event’leri tanımlamalıyım, liste çıkar”
-4️⃣ “SEO + GA4 birlikte nasıl okunur anlat”
-
-Hangisiyle devam edelim?

@@ -1,5 +1,4 @@
 // src/index.ts
-// src/index.ts
 import { createApp } from './app';
 import { env } from '@/core/env';
 

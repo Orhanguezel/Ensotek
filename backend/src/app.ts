@@ -7,6 +7,8 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import cookie from '@fastify/cookie';
 import multipart from '@fastify/multipart';
+import fastifySwagger from '@fastify/swagger';
+import fastifySwaggerUi from '@fastify/swagger-ui';
 import authPlugin from './plugins/authPlugin';
 import mysqlPlugin from '@/plugins/mysql';
 import staticUploads from './plugins/staticUploads';
@@ -40,11 +42,13 @@ import { registerNotifications } from '@/modules/notifications/router';
 import { registerProducts } from '@/modules/products/router';
 import { registerReviews } from '@/modules/review/router';
 import { registerSupport } from '@/modules/support/router';
+import { registerChat } from '@/modules/chat/router';
 import { registerOffer } from '@/modules/offer/router';
 import { registerCatalog } from '@/modules/catalog/router';
 
 // ✅ Audit single entry
 import { registerAudit } from '@/modules/audit/router';
+import { shouldSkipAuditLog, writeRequestAuditLog } from '@/modules/audit/service';
 
 // Admin modüller
 import { registerCustomPagesAdmin } from '@/modules/customPages/admin.routes';
@@ -70,6 +74,16 @@ import { registerSupportAdmin } from '@/modules/support/admin.routes';
 import { registerDashboardAdmin } from '@/modules/dashboard/admin.routes';
 import { registerOfferAdmin } from '@/modules/offer/admin.routes';
 import { registerCatalogAdmin } from '@/modules/catalog/admin.routes';
+import { registerTelegram } from '@/modules/telegram/router';
+import { registerTelegramAdmin } from '@/modules/telegram/admin.routes';
+import { registerChatAdmin } from '@/modules/chat/admin.routes';
+ 
+
+import {
+  jsonSchemaTransform,
+  serializerCompiler,
+  validatorCompiler,
+} from 'fastify-type-provider-zod';
 
 function parseCorsOrigins(v?: string | string[]): boolean | string[] {
   if (!v) return true;
@@ -92,6 +106,9 @@ export async function createApp() {
     logger: env.NODE_ENV !== 'production',
   }) as FastifyInstance;
 
+  app.setValidatorCompiler(validatorCompiler);
+  app.setSerializerCompiler(serializerCompiler);
+
   await app.register(cors, {
     origin: parseCorsOrigins(env.CORS_ORIGIN as any),
     credentials: true,
@@ -108,6 +125,46 @@ export async function createApp() {
       'Range',
     ],
     exposedHeaders: ['x-total-count', 'content-range', 'range'],
+  });
+
+  // Swagger docs
+  await app.register(fastifySwagger, {
+    openapi: {
+      info: {
+        title: 'Ensotek API',
+        description: 'Ensotek Backend API Documentation',
+        version: '0.1.0',
+      },
+      servers: [
+        {
+          url: `http://${process.env.HOST || 'localhost'}:${env.PORT}`,
+          description: 'Local server',
+        },
+      ],
+      components: {
+        securitySchemes: {
+          apiKey: {
+            type: 'apiKey',
+            name: 'Authorization',
+            in: 'header',
+          },
+        },
+      },
+    },
+    transform: jsonSchemaTransform,
+  });
+
+  await app.register(fastifySwaggerUi, {
+    routePrefix: '/documentation',
+    uiConfig: {
+      docExpansion: 'list',
+      deepLinking: false,
+    },
+    // transformStaticCSP allow 'unsafe-inline' because of Swagger UI inline styles issue
+    staticCSP: true,
+    transformStaticCSP: (header) => {
+      return header.replace('style-src', "style-src 'unsafe-inline'");
+    },
   });
 
   const cookieSecret =
@@ -146,6 +203,21 @@ export async function createApp() {
   await app.register(
     async (api) => {
       api.get('/health', async () => ({ ok: true }));
+
+      // ✅ Audit request logger: /api scope'unda — TÜM API trafiğini loglar
+      api.addHook('onResponse', async (req, reply) => {
+        try {
+          if (shouldSkipAuditLog(req)) return;
+          const reqId = String((req as any).id || (req as any).reqId || '');
+          const elapsed =
+            typeof (reply as any).elapsedTime === 'number' ? (reply as any).elapsedTime : 0;
+          await writeRequestAuditLog({ req, reply, reqId, responseTimeMs: elapsed });
+        } catch (err) {
+          (req as any).log?.warn?.({ err }, 'audit_request_log_failed');
+        }
+      });
+
+      // Audit admin endpoints + SSE stream
       await api.register(async (i) => registerAudit(i), { prefix: '/admin' });
       await api.register(async (i) => registerCustomPagesAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerSiteSettingsAdmin(i), { prefix: '/admin' });
@@ -167,6 +239,8 @@ export async function createApp() {
       await api.register(async (i) => registerProductsAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerReviewsAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerSupportAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerChatAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerTelegramAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerDashboardAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerOfferAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerCatalogAdmin(i), { prefix: '/admin' });
@@ -195,6 +269,8 @@ export async function createApp() {
       await registerProducts(api);
       await registerReviews(api);
       await registerSupport(api);
+      await registerChat(api);
+      await registerTelegram(api);
       await registerOffer(api);
       await registerCatalog(api);
     },

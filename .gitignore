@@ -154,3 +154,5 @@ frontend/.next/
 frontend/out/
 frontend/dist/
 backend/dist/
+
+.lighthouseci

@@ -1,141 +1,164 @@
 -- =============================================================
--- 151_offers_seed.sql
--- offers seed (+ offer_number_counters opsiyonel seed)
--- TR + EN + DE örnek kayıtlar
+-- FILE: 151_offers_seed.sql
+-- Ensotek – Offers Seed Data (test/demo)
 -- =============================================================
 
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
+SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
--- =============================================================
--- (Opsiyonel) Teklif numarası sayaçları seed
--- Not: Sadece örnek. Prod'da servis bunu yönetiyor olabilir.
--- =============================================================
+-- Sayaç: 2026 yılı, 5 kayıt eklenecek
 INSERT INTO `offer_number_counters` (`year`, `last_seq`, `prefix`)
-VALUES
-(2024, 2, 'ENS')
-ON DUPLICATE KEY UPDATE
-  `last_seq` = VALUES(`last_seq`),
-  `prefix`   = VALUES(`prefix`);
+VALUES (2026, 5, 'ENS')
+ON DUPLICATE KEY UPDATE `last_seq` = VALUES(`last_seq`), `prefix` = VALUES(`prefix`);
 
--- =============================================================
--- SEED: offers
--- =============================================================
+-- =========================
+-- DEMO OFFERS
+-- =========================
+
 INSERT INTO `offers`
 (
   `id`, `offer_no`, `status`, `locale`, `country_code`,
   `customer_name`, `company_name`, `email`, `phone`,
-  `subject`, `message`, `product_id`, `form_data`,
+  `subject`, `message`, `product_id`, `service_id`,
+  `form_data`,
   `consent_marketing`, `consent_terms`,
   `currency`, `net_total`, `vat_rate`, `vat_total`, `shipping_total`, `gross_total`,
-  `valid_until`, `admin_notes`, `pdf_url`, `pdf_asset_id`,
-  `email_sent_at`, `created_at`, `updated_at`
+  `valid_until`, `admin_notes`, `pdf_url`, `pdf_asset_id`, `email_sent_at`,
+  `created_at`, `updated_at`
 )
 VALUES
 
--- 1) Public Form (TR)
-('aaaa0000-0000-0000-0000-000000000001',
- NULL, 'new', 'tr', 'TR',
- 'Ahmet Yılmaz', 'Yılmaz Soğutma Sistemleri', 'ahmet.yilmaz@example.com', '+90 532 000 00 01',
- 'Endüstriyel su soğutma kulesi teklifi',
- 'Mevcut tesisteki 500 m³/h debiye uygun, kapalı devre kule için teklif rica ediyoruz.',
- NULL,
- '{"design_flow_m3h":500,"inlet_temp_c":35,"outlet_temp_c":28,"wet_bulb_c":24,"notes":"Mevcut pompa korunacak"}',
- 1, 1, 'EUR',
- NULL, NULL, NULL, NULL, NULL,
- NULL, NULL, NULL, NULL,
- NULL,
- '2024-01-10 10:00:00.000', '2024-01-10 10:00:00.000'),
+-- 1) Yeni teklif (new) – TR
+(
+  'ff000001-0001-4000-8000-000000000001',
+  'ENS-2026-0001',
+  'new',
+  'tr',
+  'Türkiye',
+  'Ahmet Yılmaz',
+  'Yılmaz Endüstri A.Ş.',
+  'ahmet@yilmazendustri.com.tr',
+  '+90 532 111 2233',
+  'Açık Devre Soğutma Kulesi Teklif Talebi',
+  'Fabrikamız için 500 m³/h kapasiteli açık devre soğutma kulesi teklifi almak istiyoruz.',
+  NULL, NULL,
+  '{"relatedType":"product","process":"Plastik Enjeksiyon","city":"Bursa","district":"Nilüfer","waterFlow":"500","inletTemp":"45","outletTemp":"32","wetBulb":"24","capacity":"7500 kW","waterQuality":"Şehir suyu","referralSource":"Google"}',
+  1, 1,
+  'EUR', 45000.00, 20.00, 9000.00, 1500.00, 55500.00,
+  DATE_ADD(NOW(), INTERVAL 30 DAY),
+  NULL, NULL, NULL, NULL,
+  DATE_SUB(NOW(), INTERVAL 2 DAY),
+  DATE_SUB(NOW(), INTERVAL 2 DAY)
+),
 
--- 2) Public form (EN)
-('bbbb0000-0000-0000-0000-000000000002',
- NULL, 'new', 'en', 'DE',
- 'Michael Fischer', 'Fischer Industrie GmbH', 'm.fischer@example.de', '+49 170 0000002',
- 'Cooling tower quotation request',
- 'We are planning to replace our existing cooling tower and need a quotation including installation.',
- NULL,
- '{"design_flow_m3h":250,"inlet_temp_c":32,"outlet_temp_c":27,"wet_bulb_c":23,"notes":"Outdoor installation, noise level is important"}',
- 0, 1, 'EUR',
- NULL, NULL, NULL, NULL, NULL,
- NULL, NULL, NULL, NULL,
- NULL,
- '2024-01-11 09:15:00.000', '2024-01-11 09:15:00.000'),
+-- 2) İncelemede (in_review) – DE
+(
+  'ff000001-0001-4000-8000-000000000002',
+  'ENS-2026-0002',
+  'in_review',
+  'de',
+  'Deutschland',
+  'Thomas Müller',
+  'Müller Chemie GmbH',
+  'thomas@mueller-chemie.de',
+  '+49 170 123 4567',
+  'Angebot für geschlossenen Kühlturm',
+  'Wir benötigen ein Angebot für einen geschlossenen Kreislauf-Kühlturm für unsere chemische Produktionsanlage.',
+  NULL, NULL,
+  '{"relatedType":"product","process":"Chemische Produktion","city":"München","waterFlow":"300","inletTemp":"40","outletTemp":"28","wetBulb":"21","capacity":"4200 kW","waterQuality":"Prozesswasser"}',
+  0, 1,
+  'EUR', 62000.00, 19.00, 11780.00, 2800.00, 76580.00,
+  DATE_ADD(NOW(), INTERVAL 45 DAY),
+  'Teknik ekip kapasiteyi inceliyor.',
+  NULL, NULL, NULL,
+  DATE_SUB(NOW(), INTERVAL 5 DAY),
+  DATE_SUB(NOW(), INTERVAL 3 DAY)
+),
 
--- 3) Admin – quoted (TR)
-('cccc0000-0000-0000-0000-000000000003',
- 'ENS-2024-0001', 'quoted', 'de', 'TR',
- 'Mehmet Demir', 'Demir Makina', 'mehmet.demir@example.com', '+90 532 000 00 03',
- 'Açık devre FRP kule teklifi',
- 'Teknik detaylar alınmış, fiyat çalışması yapılmıştır.',
- NULL,
- '{"design_flow_m3h":400,"inlet_temp_c":35,"outlet_temp_c":27,"wet_bulb_c":24,"options":["sound_attenuators","ladder_with_cage"]}',
- 1, 1, 'EUR',
- 18500.00, 19.00, 3515.00, NULL, 22015.00,
- '2024-02-15 00:00:00.000',
- 'Teslim süresi 8-10 hafta.',
- NULL, NULL,
- NULL,
- '2024-01-12 14:30:00.000', '2024-01-12 14:30:00.000'),
+-- 3) Fiyatlandırıldı (quoted) – EN
+(
+  'ff000001-0001-4000-8000-000000000003',
+  'ENS-2026-0003',
+  'quoted',
+  'en',
+  'United Kingdom',
+  'James Wilson',
+  'Wilson Engineering Ltd.',
+  'james@wilson-eng.co.uk',
+  '+44 7700 900123',
+  'Hybrid Cooling System Quote',
+  'We are looking for a hybrid cooling system for our HVAC plant. Please provide a detailed quotation.',
+  NULL, NULL,
+  '{"relatedType":"product","process":"HVAC","city":"Manchester","waterFlow":"200","inletTemp":"38","outletTemp":"30","wetBulb":"19","capacity":"1860 kW","waterQuality":"Mains water","poolType":"Open","location":"Rooftop"}',
+  1, 1,
+  'EUR', 38500.00, 20.00, 7700.00, 3200.00, 49400.00,
+  DATE_ADD(NOW(), INTERVAL 60 DAY),
+  'PDF hazırlandı, müşteriye gönderilecek.',
+  NULL, NULL, NULL,
+  DATE_SUB(NOW(), INTERVAL 10 DAY),
+  DATE_SUB(NOW(), INTERVAL 1 DAY)
+),
 
--- 4) Sent (PDF hazır) (EN)
-('dddd0000-0000-0000-0000-000000000004',
- 'ENS-2024-0002', 'sent', 'en', 'DE',
- 'Thomas Müller', 'Müller Kältetechnik GmbH', 't.mueller@example.com', '+49 170 0000004',
- 'Closed circuit cooling tower quotation',
- 'Final offer prepared and sent to customer.',
- NULL,
- '{"design_flow_m3h":300,"inlet_temp_c":30,"outlet_temp_c":25,"wet_bulb_c":21,"options":["winter_kit","bypass_line"]}',
- 0, 1, 'EUR',
- 23600.00, 19.00, 4484.00, NULL, 28084.00,
- '2024-03-01 00:00:00.000',
- 'Delivery time 10-12 weeks.',
- '/uploads/offers/ENS-2024-0002.pdf',
- '99999999-9999-9999-9999-999999999999',
- '2024-01-15 16:45:00.000',
- '2024-01-13 09:00:00.000', '2024-01-15 16:45:00.000'),
+-- 4) Gönderildi (sent) – TR
+(
+  'ff000001-0001-4000-8000-000000000004',
+  'ENS-2026-0004',
+  'sent',
+  'tr',
+  'Türkiye',
+  'Fatma Demir',
+  'Demir Gıda San. Tic. Ltd.',
+  'fatma@demirgida.com.tr',
+  '+90 544 555 6677',
+  'Soğutma Kulesi Yedek Parça Teklifi',
+  'Mevcut soğutma kulemiz için fan, dolgu malzemesi ve nozul yedek parçaları teklif istiyoruz.',
+  NULL, NULL,
+  '{"relatedType":"sparepart","existingTower":"Ensotek CTP-150 (2019)","notes":"Acil ihtiyaç, 2 hafta içinde teslimat bekleniyor."}',
+  1, 1,
+  'EUR', 8750.00, 20.00, 1750.00, 500.00, 11000.00,
+  DATE_ADD(NOW(), INTERVAL 15 DAY),
+  'PDF gönderildi, müşteri dönüş bekliyor.',
+  '/uploads/offers/ENS-2026-0004.pdf',
+  NULL,
+  DATE_SUB(NOW(), INTERVAL 1 DAY),
+  DATE_SUB(NOW(), INTERVAL 14 DAY),
+  DATE_SUB(NOW(), INTERVAL 1 DAY)
+),
 
--- 5) Public form (DE)  ✅ ILAVE
-('eeee0000-0000-0000-0000-000000000005',
- NULL, 'new', 'de', 'DE',
- 'Anna Schneider', 'Schneider Anlagenbau GmbH', 'anna.schneider@example.de', '+49 171 0000005',
- 'Anfrage: Angebot für Kühlturm',
- 'Wir benötigen ein Angebot für einen offenen Kühlturm inklusive Montage. Bitte berücksichtigen Sie niedrige Geräuschpegel und kurze Lieferzeit.',
- NULL,
- '{"design_flow_m3h":180,"inlet_temp_c":33,"outlet_temp_c":27,"wet_bulb_c":22,"notes":"Montage vor Ort, Schalldämpfung wichtig"}',
- 0, 1, 'EUR',
- NULL, NULL, NULL, NULL, NULL,
- NULL, NULL, NULL, NULL,
- NULL,
- '2024-01-11 11:20:00.000', '2024-01-11 11:20:00.000')
+-- 5) Kabul edildi (accepted) – DE
+(
+  'ff000001-0001-4000-8000-000000000005',
+  'ENS-2026-0005',
+  'accepted',
+  'de',
+  'Österreich',
+  'Anna Schneider',
+  'Schneider Technik AG',
+  'anna@schneider-technik.at',
+  '+43 660 123 4567',
+  'Wartungsvertrag Kühlturm',
+  'Wir möchten einen jährlichen Wartungsvertrag für unseren bestehenden Ensotek-Kühlturm abschließen.',
+  NULL, '90000001-1111-4111-8111-900000000001',
+  '{"relatedType":"service","serviceName":"Wartung & Reparatur","existingTower":"Ensotek DCTP-200 (2021)","city":"Wien","referralSource":"Messe Aquatherm"}',
+  1, 1,
+  'EUR', 12000.00, 20.00, 2400.00, 0.00, 14400.00,
+  NULL,
+  'Yıllık bakım sözleşmesi onaylandı. Sözleşme hazırlanıyor.',
+  '/uploads/offers/ENS-2026-0005.pdf',
+  NULL,
+  DATE_SUB(NOW(), INTERVAL 7 DAY),
+  DATE_SUB(NOW(), INTERVAL 30 DAY),
+  DATE_SUB(NOW(), INTERVAL 2 DAY)
+)
 
 ON DUPLICATE KEY UPDATE
-  `offer_no`          = VALUES(`offer_no`),
-  `status`            = VALUES(`status`),
-  `locale`            = VALUES(`locale`),
-  `country_code`      = VALUES(`country_code`),
-  `customer_name`     = VALUES(`customer_name`),
-  `company_name`      = VALUES(`company_name`),
-  `email`             = VALUES(`email`),
-  `phone`             = VALUES(`phone`),
-  `subject`           = VALUES(`subject`),
-  `message`           = VALUES(`message`),
-  `product_id`        = VALUES(`product_id`),
-  `form_data`         = VALUES(`form_data`),
-  `consent_marketing` = VALUES(`consent_marketing`),
-  `consent_terms`     = VALUES(`consent_terms`),
-  `currency`          = VALUES(`currency`),
-  `net_total`         = VALUES(`net_total`),
-  `vat_rate`          = VALUES(`vat_rate`),
-  `vat_total`         = VALUES(`vat_total`),
-  `shipping_total`    = VALUES(`shipping_total`),
-  `gross_total`       = VALUES(`gross_total`),
-  `valid_until`       = VALUES(`valid_until`),
-  `admin_notes`       = VALUES(`admin_notes`),
-  `pdf_url`           = VALUES(`pdf_url`),
-  `pdf_asset_id`      = VALUES(`pdf_asset_id`),
-  `email_sent_at`     = VALUES(`email_sent_at`),
-  `updated_at`        = VALUES(`updated_at`);
+  `offer_no`     = VALUES(`offer_no`),
+  `status`       = VALUES(`status`),
+  `updated_at`   = VALUES(`updated_at`);
 
 COMMIT;
+
+SET FOREIGN_KEY_CHECKS = 1;

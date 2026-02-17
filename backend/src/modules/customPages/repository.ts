@@ -32,6 +32,7 @@ export type ListParams = {
   offset?: number;
 
   is_published?: boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
+  featured?: boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
   q?: string;
   slug?: string;
 
@@ -122,6 +123,7 @@ export type CustomPageMerged = {
   module_key: string;
 
   is_published: 0 | 1;
+  featured: 0 | 1;
   featured_image: string | null;
   featured_image_asset_id: string | null;
 
@@ -170,6 +172,7 @@ function baseSelect(
     module_key: customPages.module_key,
 
     is_published: customPages.is_published,
+    featured: customPages.featured,
     featured_image: customPages.featured_image,
     featured_image_asset_id: customPages.featured_image_asset_id,
 
@@ -256,6 +259,9 @@ export async function listCustomPages(params: ListParams) {
 
   const pub = to01(params.is_published);
   if (pub !== undefined) filters.push(eq(customPages.is_published, pub));
+
+  const feat = to01(params.featured);
+  if (feat !== undefined) filters.push(eq(customPages.featured, feat));
 
   // ✅ slug OR matching
   if (params.slug && params.slug.trim()) {

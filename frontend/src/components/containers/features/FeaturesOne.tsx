@@ -1,13 +1,56 @@
+"use client";
 import React from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
+import { useQuery } from "@tanstack/react-query";
+import { queryKeys } from "@/lib/query-client";
+import { servicesService } from "@/features/services/services.service";
 
-import One from "public/img/features/icon-1.png";
-import Two from "public/img/features/icon-2.png";
-import Three from "public/img/features/icon-3.png";
-import Four from "public/img/features/icon-4.png";
+import IconOne from "public/img/features/icon-1.png";
+import IconTwo from "public/img/features/icon-2.png";
+import IconThree from "public/img/features/icon-3.png";
+import IconFour from "public/img/features/icon-4.png";
+
+const fallbackIcons = [IconOne, IconTwo, IconThree, IconFour];
 
 const FeaturesOne = () => {
+  const t = useTranslations("ensotek.features");
+
+  const { data: services, isLoading } = useQuery({
+    queryKey: queryKeys.services.list({ featured: true }),
+    queryFn: () => servicesService.getAll({ featured: true, is_active: true }),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const hasServices = services && services.length > 0;
+
+  // Fallback static data
+  const staticServices = [
+    { name: t("staticItems.item1.title"), description: t("staticItems.item1.description") },
+    { name: t("staticItems.item2.title"), description: t("staticItems.item2.description") },
+    { name: t("staticItems.item3.title"), description: t("staticItems.item3.description") },
+    { name: t("staticItems.item4.title"), description: t("staticItems.item4.description") },
+  ];
+
+  const displayServices = hasServices
+    ? services.slice(0, 4).map((s, i) => ({
+        id: s.id,
+        name: s.name,
+        description: s.description || "",
+        slug: s.slug,
+        icon: s.image_url,
+        fallbackIcon: fallbackIcons[i % fallbackIcons.length],
+      }))
+    : staticServices.map((s, i) => ({
+        id: `static-${i}`,
+        name: s.name,
+        description: s.description,
+        slug: "service",
+        icon: null,
+        fallbackIcon: fallbackIcons[i],
+      }));
+
   return (
     <section className="features__area grey-bg-3 pt-120 pb-60">
       <div className="container">
@@ -15,91 +58,43 @@ const FeaturesOne = () => {
           <div className="col-xl-6">
             <div className="section__title-wrapper text-center mb-70">
               <div className="section__subtitle-3">
-                <span>OUR FEATURE SERVICES</span>
+                <span>{t("subtitle")}</span>
               </div>
               <div className="section__title-3">
-                We specialize in the features services
+                {t("title")}
               </div>
             </div>
           </div>
         </div>
-        <div className="row " data-aos="fade-up" data-aos-delay="300">
-          <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-            <div className="features__items mb-60">
-              <div className="features__items-icon">
-                <Image src={One} alt="image not found" />
+        <div className="row" data-aos="fade-up" data-aos-delay="300">
+          {displayServices.map((item) => (
+            <div key={item.id} className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+              <div className="features__items mb-60">
+                <div className="features__items-icon">
+                  {item.icon ? (
+                    <Image
+                      src={item.icon}
+                      alt={item.name}
+                      width={60}
+                      height={60}
+                      style={{ objectFit: "contain" }}
+                    />
+                  ) : (
+                    <Image src={item.fallbackIcon} alt={item.name} />
+                  )}
+                </div>
+                <div className="features__items-content">
+                  <h3>
+                    <Link href={`/services/${item.slug}`}>{item.name}</Link>
+                  </h3>
+                  <p>{item.description}</p>
+                </div>
+                <Link className="features__btn" href={`/services/${item.slug}`}>
+                  {t("viewDetails")}
+                </Link>
               </div>
-              <div className="features__items-content">
-                <h3>
-                  <Link href="/service">IT Management</Link>
-                </h3>
-                <p>
-                  We rank among the best in the US, Argentina, and Ukraine. Our
-                  apps get
-                </p>
-              </div>
-              <Link className="features__btn" href="/service">
-                VIEW DETAILS
-              </Link>
             </div>
-          </div>
-          <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-            <div className="features__items mb-60">
-              <div className="features__items-icon">
-                <Image src={Two} alt="image not found" />
-              </div>
-              <div className="features__items-content">
-                <h3>
-                  <Link href="/service">Data Security</Link>
-                </h3>
-                <p>
-                  We rank among the best in the US, Argentina, and Ukraine. Our
-                  apps get
-                </p>
-              </div>
-              <Link className="features__btn" href="/service">
-                VIEW DETAILS
-              </Link>
-            </div>
-          </div>
-          <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-            <div className="features__items mb-60">
-              <div className="features__items-icon">
-                <Image src={Three} alt="image not found" />
-              </div>
-              <div className="features__items-content">
-                <h3>
-                  <Link href="/service">Business Consulting</Link>
-                </h3>
-                <p>
-                  We rank among the best in the US, Argentina, and Ukraine. Our
-                  apps get
-                </p>
-              </div>
-              <Link className="features__btn" href="/service">
-                VIEW DETAILS
-              </Link>
-            </div>
-          </div>
-          <div className="col-xl-3 col-lg-4 col-md-6 col-sm-6">
-            <div className="features__items mb-60">
-              <div className="features__items-icon">
-                <Image src={Four} alt="image not found" />
-              </div>
-              <div className="features__items-content">
-                <h3>
-                  <Link href="/service">QA & Testing</Link>
-                </h3>
-                <p>
-                  We rank among the best in the US, Argentina, and Ukraine. Our
-                  apps get
-                </p>
-              </div>
-              <Link className="features__btn" href="/service">
-                VIEW DETAILS
-              </Link>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
     </section>

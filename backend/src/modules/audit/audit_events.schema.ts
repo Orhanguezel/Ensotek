@@ -6,7 +6,7 @@
 
 import { mysqlTable, bigint, varchar, datetime, index } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
-import { longtext } from './_longtext';
+import { longtext } from '@/modules/_shared';
 
 export const auditEvents = mysqlTable(
   'audit_events',

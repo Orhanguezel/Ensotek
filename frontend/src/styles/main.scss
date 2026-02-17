@@ -1,7 +1,3 @@
-@forward 'admin/admin';
-@forward 'admin/ensotekAdminLayout';
-@forward 'admin/customPages';
-
 @forward 'components/theme';
 @forward 'components/background';
 @forward 'components/buttons';
@@ -12,12 +8,10 @@
 @forward 'components/animation';
 @forward 'components/preloader';
 @forward 'layout/meanmenu';
-@forward 'layout/team';
 @forward 'layout/header';
 @forward 'layout/hero';
 @forward 'layout/about';
 @forward 'layout/service';
-@forward 'layout/servicedetail';
 @forward 'layout/approach';
 @forward 'layout/project';
 @forward 'layout/seo';
@@ -28,10 +22,10 @@
 @forward 'layout/brand';
 @forward 'layout/blog';
 @forward 'layout/blogdetail';
+@forward 'layout/library';
 @forward 'layout/cta';
 @forward 'layout/touch';
 @forward 'layout/partner';
-@forward 'layout/product';
 @forward 'layout/boost';
 @forward 'layout/choose';
 @forward 'layout/development';
@@ -39,10 +33,7 @@
 @forward 'layout/technical';
 @forward 'layout/fact';
 @forward 'layout/footer';
-@forward 'layout/quality';
-@forward 'layout/cookie-consent';
 @import "./components/spacing";
 @import "./components/back-to-top";
-@import "./utils/visually-hidden";
 @import "./utils/my-custom";
 

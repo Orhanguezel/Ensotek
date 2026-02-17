@@ -16,17 +16,52 @@
 	button {
 		width: 50px;
 		height: 50px;
-		border: 1px solid #E2E2E2;
+		border: 2px solid #3887fe;
 		border-radius: 50%;
-		color: #727272;
+		color: #3887fe;
+		font-size: 20px;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-    &:hover {
-      background-color: var(--clr-theme-1);
-      color: var(--clr-common-white);
-      border-color:transparent;
-    }
+		background-color: var(--clr-common-white);
+		transition: all 0.3s ease;
+		svg {
+			width: 20px;
+			height: 20px;
+			stroke-width: 2.5px;
+		}
+		&:hover {
+			background-color: #3887fe;
+			color: var(--clr-common-white);
+			border-color: #3887fe;
+			transform: scale(1.1);
+		}
+	}
+}
+// Swiper navigation - explicit
+.recent-2__button-prev,
+.recent-2__button-next {
+	width: 50px !important;
+	height: 50px !important;
+	border: 2px solid #3887fe !important;
+	border-radius: 50% !important;
+	color: #3887fe !important;
+	font-size: 20px !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	background-color: var(--clr-common-white) !important;
+	transition: all 0.3s ease !important;
+	svg {
+		width: 20px;
+		height: 20px;
+		stroke-width: 2.5px;
+	}
+	&:hover {
+		background-color: #3887fe !important;
+		color: var(--clr-common-white) !important;
+		border-color: #3887fe !important;
+		transform: scale(1.1) !important;
 	}
 }
 .feedback__navigation {

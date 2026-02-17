@@ -118,3 +118,27 @@
 		color: var(--clr-theme-1);
 	}
 }
+
+.ens-newsletter-home__card {
+	background: #f7faff;
+	border: 1px solid #e7edf8;
+	border-radius: 16px;
+	padding: 22px 20px;
+}
+
+.ens-newsletter-home__form {
+	margin-bottom: 0;
+}
+
+.ens-newsletter-home__status {
+	margin-top: 10px;
+	font-size: 13px;
+}
+
+.ens-newsletter-home__status.is-success {
+	color: #0f8a3c;
+}
+
+.ens-newsletter-home__status.is-error {
+	color: #cc2d2d;
+}

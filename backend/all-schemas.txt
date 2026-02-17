@@ -1,0 +1,2927 @@
+// === src/modules/chat/schema.ts ===
+// =============================================================
+// FILE: src/modules/chat/schema.ts
+// Projewin – Chat Schema (threads/participants/messages)
+// Fastify + Drizzle (MySQL)
+// =============================================================
+
+import {
+  mysqlTable,
+  varchar,
+  text,
+  datetime,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/mysql-core";
+
+export const chat_threads = mysqlTable(
+  "chat_threads",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+
+    context_type: varchar("context_type", { length: 20 }).notNull(), // job | request
+    context_id: varchar("context_id", { length: 36 }).notNull(),
+
+    created_by_user_id: varchar("created_by_user_id", { length: 36 }),
+    created_at: datetime("created_at", { mode: "date" }).notNull(),
+    updated_at: datetime("updated_at", { mode: "date" }).notNull(),
+  },
+  (t) => ({
+    uq_ctx: uniqueIndex("uq_chat_threads_ctx").on(t.context_type, t.context_id),
+    ix_ctx: index("ix_chat_threads_ctx").on(t.context_type, t.context_id),
+    ix_updated: index("ix_chat_threads_updated").on(t.updated_at),
+  }),
+);
+
+export const chat_participants = mysqlTable(
+  "chat_participants",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    thread_id: varchar("thread_id", { length: 36 }).notNull(),
+    user_id: varchar("user_id", { length: 36 }).notNull(),
+    role: varchar("role", { length: 20 }).notNull(), // buyer|vendor|admin
+
+    joined_at: datetime("joined_at", { mode: "date" }).notNull(),
+    last_read_at: datetime("last_read_at", { mode: "date" }),
+  },
+  (t) => ({
+    uq_thread_user: uniqueIndex("uq_chat_participants_thread_user").on(
+      t.thread_id,
+      t.user_id,
+    ),
+    ix_thread: index("ix_chat_participants_thread").on(t.thread_id),
+    ix_user: index("ix_chat_participants_user").on(t.user_id),
+  }),
+);
+
+export const chat_messages = mysqlTable(
+  "chat_messages",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    thread_id: varchar("thread_id", { length: 36 }).notNull(),
+    sender_user_id: varchar("sender_user_id", { length: 36 }).notNull(),
+
+    client_id: varchar("client_id", { length: 64 }), // FE optimistic ack map
+    text: text("text").notNull(),
+
+    created_at: datetime("created_at", { mode: "date" }).notNull(),
+  },
+  (t) => ({
+    ix_thread_time: index("ix_chat_messages_thread_time").on(
+      t.thread_id,
+      t.created_at,
+    ),
+    ix_sender_time: index("ix_chat_messages_sender_time").on(
+      t.sender_user_id,
+      t.created_at,
+    ),
+  }),
+);
+
+export type ChatThread = typeof chat_threads.$inferSelect;
+export type ChatParticipant = typeof chat_participants.$inferSelect;
+export type ChatMessage = typeof chat_messages.$inferSelect;
+
+export type ChatThreadInsert = typeof chat_threads.$inferInsert;
+export type ChatParticipantInsert = typeof chat_participants.$inferInsert;
+export type ChatMessageInsert = typeof chat_messages.$inferInsert;
+// === src/modules/auth/schema.ts ===
+// =============================================================
+// FILE: src/modules/auth/schema.ts
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  tinyint,
+  decimal,
+  datetime,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+/** USERS */
+export const users = mysqlTable(
+  "users",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    password_hash: varchar("password_hash", { length: 255 }).notNull(),
+    full_name: varchar("full_name", { length: 255 }),
+    phone: varchar("phone", { length: 50 }),
+
+    is_active: tinyint("is_active").notNull().default(1),
+    email_verified: tinyint("email_verified").notNull().default(0),
+
+    reset_token: varchar("reset_token", { length: 255 }),
+    reset_token_expires: datetime("reset_token_expires", { fsp: 3 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+    last_sign_in_at: datetime("last_sign_in_at", { fsp: 3 }),
+  },
+  (t) => [uniqueIndex("users_email_unique").on(t.email)],
+);
+
+/** REFRESH TOKENS (hash + rotation) */
+export const refresh_tokens = mysqlTable(
+  "refresh_tokens",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(), // jti
+    user_id: char("user_id", { length: 36 }).notNull(),
+    token_hash: varchar("token_hash", { length: 255 }).notNull(),
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    expires_at: datetime("expires_at", { fsp: 3 }).notNull(),
+    revoked_at: datetime("revoked_at", { fsp: 3 }),
+    replaced_by: char("replaced_by", { length: 36 }),
+  },
+  (t) => [
+    index("refresh_tokens_user_id_idx").on(t.user_id),
+    index("refresh_tokens_expires_at_idx").on(t.expires_at),
+  ],
+);
+
+// Tipler
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;
+export type RefreshToken = typeof refresh_tokens.$inferSelect;
+// === src/modules/review/schema.ts ===
+// =============================================================
+// FILE: src/modules/review/schema.ts
+// =============================================================
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  boolean,
+  int,
+  tinyint,
+  timestamp,
+} from "drizzle-orm/mysql-core";
+
+export const reviews = mysqlTable("reviews", {
+  id: char("id", { length: 36 }).primaryKey().notNull(),
+
+  target_type: varchar("target_type", { length: 50 }).notNull(),
+  target_id: char("target_id", { length: 36 }).notNull(),
+
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+
+  rating: tinyint("rating").notNull(), // 1..5
+
+  is_active: boolean("is_active").notNull().default(true),
+  is_approved: boolean("is_approved").notNull().default(false),
+  display_order: int("display_order").notNull().default(0),
+
+  likes_count: int("likes_count").notNull().default(0),
+  dislikes_count: int("dislikes_count").notNull().default(0),
+  helpful_count: int("helpful_count").notNull().default(0),
+
+  submitted_locale: varchar("submitted_locale", { length: 8 }).notNull(),
+
+  created_at: timestamp("created_at", { fsp: 3 })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp("updated_at", { fsp: 3 })
+    .notNull()
+    .defaultNow()
+    .onUpdateNow(),
+});
+
+// I18N TABLO: review_i18n
+export const reviewTranslations = mysqlTable("review_i18n", {
+  id: char("id", { length: 36 }).primaryKey().notNull(),
+  review_id: char("review_id", { length: 36 }).notNull(),
+  locale: varchar("locale", { length: 8 }).notNull(),
+
+  // NULL olabilir → default/null vermeye gerek yok, MySQL'de zaten DEFAULT NULL
+  title: varchar("title", { length: 255 }),
+  comment: text("comment").notNull(),
+  admin_reply: text("admin_reply"),
+
+  created_at: timestamp("created_at", { fsp: 3 })
+    .notNull()
+    .defaultNow(),
+  updated_at: timestamp("updated_at", { fsp: 3 })
+    .notNull()
+    .defaultNow()
+    .onUpdateNow(),
+});
+
+// Önerilen indexler / constraintler migration SQL'de (060_reviews.sql)
+
+export type ReviewRow = typeof reviews.$inferSelect;
+export type ReviewInsert = typeof reviews.$inferInsert;
+
+export type ReviewTranslationRow = typeof reviewTranslations.$inferSelect;
+export type ReviewTranslationInsert = typeof reviewTranslations.$inferInsert;
+
+/** FE/Public View tipi (coalesced) */
+export type ReviewView = ReviewRow & {
+  comment: string | null;
+  locale_resolved: string | null;
+};
+// === src/modules/menuItems/schema.ts ===
+// ===================================================================
+// FILE: src/modules/menuItems/schema.ts
+// ===================================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  int,
+  boolean,
+  datetime,
+  index,
+  foreignKey,
+  uniqueIndex,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+export const menuItems = mysqlTable(
+  "menu_items",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+
+    parent_id: char("parent_id", { length: 36 }),
+
+    // parent alanlar
+    type: varchar("type", { length: 16 }).notNull().default("custom"), // 'page' | 'custom'
+    page_id: char("page_id", { length: 36 }),
+    location: varchar("location", { length: 16 })
+      .notNull()
+      .default("header"),
+    icon: varchar("icon", { length: 64 }),
+    section_id: char("section_id", { length: 36 }),
+
+    order_num: int("order_num").notNull().default(0),
+    is_active: boolean("is_active").notNull().default(true),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("menu_items_parent_idx").on(t.parent_id),
+    index("menu_items_active_idx").on(t.is_active),
+    index("menu_items_order_idx").on(t.order_num),
+    index("menu_items_created_idx").on(t.created_at),
+    index("menu_items_updated_idx").on(t.updated_at),
+    index("menu_items_location_idx").on(t.location),
+    index("menu_items_section_idx").on(t.section_id),
+    foreignKey({
+      columns: [t.parent_id],
+      foreignColumns: [t.id],
+      name: "menu_items_parent_fk",
+    })
+      .onDelete("set null")
+      .onUpdate("cascade"),
+  ],
+);
+
+export const menuItemsI18n = mysqlTable(
+  "menu_items_i18n",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    menu_item_id: char("menu_item_id", { length: 36 })
+      .notNull()
+      .references(() => menuItems.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    locale: varchar("locale", { length: 10 }).notNull(),
+
+    title: varchar("title", { length: 100 }).notNull(),
+    url: varchar("url", { length: 500 }).notNull(),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("ux_menu_items_i18n_item_locale").on(
+      t.menu_item_id,
+      t.locale,
+    ),
+    index("menu_items_i18n_locale_idx").on(t.locale),
+    index("menu_items_i18n_title_idx").on(t.title),
+  ],
+);
+
+export type MenuItemRow = typeof menuItems.$inferSelect;
+export type NewMenuItemRow = typeof menuItems.$inferInsert;
+
+export type MenuItemI18nRow = typeof menuItemsI18n.$inferSelect;
+export type NewMenuItemI18nRow = typeof menuItemsI18n.$inferInsert;
+// === src/modules/profiles/schema.ts ===
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  datetime,
+  foreignKey,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+import { users } from '@/modules/auth/schema';
+
+/**
+ * profiles.id = users.id (UUID)
+ * Adres alanları opsiyonel.
+ */
+export const profiles = mysqlTable(
+  'profiles',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(), // FK (users.id)
+    full_name: text('full_name'),
+    phone: varchar('phone', { length: 64 }),
+    avatar_url: text('avatar_url'),
+    address_line1: varchar('address_line1', { length: 255 }),
+    address_line2: varchar('address_line2', { length: 255 }),
+    city: varchar('city', { length: 128 }),
+    country: varchar('country', { length: 128 }),
+    postal_code: varchar('postal_code', { length: 32 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    foreignKey({
+      columns: [t.id],
+      foreignColumns: [users.id],
+      name: 'fk_profiles_id_users_id',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export type ProfileRow = typeof profiles.$inferSelect;
+export type ProfileInsert = typeof profiles.$inferInsert;
+// === src/modules/subcategories/schema.ts ===
+// =============================================================
+// FILE: src/modules/subcategories/schema.ts
+// =============================================================
+import {
+  mysqlTable,
+  char,
+  varchar,
+  longtext,
+  text,
+  int,
+  tinyint,
+  datetime,
+  index,
+  uniqueIndex,
+  foreignKey,
+  primaryKey,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+import { categories } from '../categories/schema';
+
+export const subCategories = mysqlTable(
+  'sub_categories',
+  {
+    id: char('id', { length: 36 }).notNull().primaryKey(),
+    category_id: char('category_id', { length: 36 }).notNull(),
+
+    // Tekil storage pattern (base tablo)
+    image_url: longtext('image_url'),
+    storage_asset_id: char('storage_asset_id', { length: 36 }),
+    alt: varchar('alt', { length: 255 }),
+
+    icon: varchar('icon', { length: 100 }),
+
+    is_active: tinyint('is_active').notNull().default(1).$type<boolean>(),
+    is_featured: tinyint('is_featured').notNull().default(0).$type<boolean>(),
+    display_order: int('display_order').notNull().default(0),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => ({
+    sub_categories_category_id_idx: index('sub_categories_category_id_idx').on(t.category_id),
+    sub_categories_active_idx: index('sub_categories_active_idx').on(t.is_active),
+    sub_categories_order_idx: index('sub_categories_order_idx').on(t.display_order),
+    sub_categories_storage_asset_idx: index('sub_categories_storage_asset_idx').on(
+      t.storage_asset_id,
+    ),
+    fk_sub_categories_category: foreignKey({
+      columns: [t.category_id],
+      foreignColumns: [categories.id],
+      name: 'fk_sub_categories_category',
+    })
+      .onDelete('restrict')
+      .onUpdate('cascade'),
+  }),
+);
+
+export const subCategoryI18n = mysqlTable(
+  'sub_category_i18n',
+  {
+    sub_category_id: char('sub_category_id', { length: 36 }).notNull(),
+    locale: varchar('locale', { length: 8 }).notNull().default('de'),
+
+    name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
+
+    description: text('description'),
+    alt: varchar('alt', { length: 255 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => ({
+    pk: primaryKey({
+      name: 'sub_category_i18n_pk',
+      columns: [t.sub_category_id, t.locale],
+    }),
+    sub_category_i18n_locale_slug_uq: uniqueIndex('sub_category_i18n_locale_slug_uq').on(
+      t.locale,
+      t.slug,
+    ),
+    sub_category_i18n_locale_idx: index('sub_category_i18n_locale_idx').on(t.locale),
+    fk_sub_category_i18n_sub_category: foreignKey({
+      columns: [t.sub_category_id],
+      foreignColumns: [subCategories.id],
+      name: 'fk_sub_category_i18n_sub_category',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  }),
+);
+
+export type SubCategoryRow = typeof subCategories.$inferSelect;
+export type NewSubCategoryRow = typeof subCategories.$inferInsert;
+
+export type SubCategoryI18nRow = typeof subCategoryI18n.$inferSelect;
+export type NewSubCategoryI18nRow = typeof subCategoryI18n.$inferInsert;
+// === src/modules/catalog/schema.ts ===
+// =============================================================
+// FILE: src/modules/catalog/schema.ts
+// Ensotek – Catalog Request Module Schema (Drizzle ORM)
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  tinyint,
+  datetime,
+  int,
+  customType,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+// LONGTEXT custom type
+const longtext = customType<{ data: string | null; driverData: string }>({
+  dataType() {
+    return "longtext";
+  },
+});
+
+export const catalogRequestsTable = mysqlTable(
+  "catalog_requests",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+
+    status: varchar("status", { length: 32 }).notNull().default("new"),
+
+    locale: varchar("locale", { length: 10 }),
+    country_code: varchar("country_code", { length: 2 }),
+
+    customer_name: varchar("customer_name", { length: 255 }).notNull(),
+    company_name: varchar("company_name", { length: 255 }),
+    email: varchar("email", { length: 255 }).notNull(),
+    phone: varchar("phone", { length: 50 }),
+
+    message: longtext("message"),
+
+    consent_marketing: tinyint("consent_marketing").notNull().default(0),
+    consent_terms: tinyint("consent_terms").notNull().default(0),
+
+    admin_notes: longtext("admin_notes"),
+
+    // Müşteriye katalog maili gönderim zamanı
+    email_sent_at: datetime("email_sent_at", { fsp: 3 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    {
+      idx_status_created: {
+        columns: [t.status, t.created_at],
+        name: "catalog_requests_status_created_idx",
+      },
+    } as any,
+    {
+      idx_email: {
+        columns: [t.email],
+        name: "catalog_requests_email_idx",
+      },
+    } as any,
+    {
+      idx_locale: {
+        columns: [t.locale],
+        name: "catalog_requests_locale_idx",
+      },
+    } as any,
+    {
+      idx_country: {
+        columns: [t.country_code],
+        name: "catalog_requests_country_idx",
+      },
+    } as any,
+  ],
+);
+
+export type CatalogRequestRow = typeof catalogRequestsTable.$inferSelect;
+export type NewCatalogRequestRow = typeof catalogRequestsTable.$inferInsert;
+// === src/modules/notifications/schema.ts ===
+// ===================================================================
+// FILE: src/modules/notifications/schema.ts
+// ===================================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  boolean,
+  datetime,
+  index,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+export const notifications = mysqlTable(
+  "notifications",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    user_id: char("user_id", { length: 36 }).notNull(),
+    title: varchar("title", { length: 255 }).notNull(),
+    message: text("message").notNull(),
+    type: varchar("type", { length: 50 }).notNull(),
+    is_read: boolean("is_read").notNull().default(false),
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+  },
+  (table) => ({
+    userIdx: index("idx_notifications_user_id").on(table.user_id),
+    userReadIdx: index("idx_notifications_user_read").on(
+      table.user_id,
+      table.is_read,
+    ),
+    createdIdx: index("idx_notifications_created_at").on(table.created_at),
+  }),
+);
+
+export type NotificationRow = typeof notifications.$inferSelect;
+export type NotificationInsert = typeof notifications.$inferInsert;
+
+export type NotificationType =
+  | "order_created"
+  | "order_paid"
+  | "order_failed"
+  | "catalog_request_created" // ✅ EKLENDİ
+  | "system"
+  | "custom"
+  | (string & {});
+// === src/modules/slider/schema.ts ===
+// =============================================================
+// FILE: src/modules/slider/schema.ts
+// Slider – parent + i18n (slider + slider_i18n)
+// =============================================================
+import {
+  mysqlTable,
+  int,
+  char,
+  varchar,
+  text,
+  tinyint,
+  datetime,
+  index,
+  uniqueIndex,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+
+/**
+ * slider — parent tablo (locale'siz)
+ *  - id: int AI (FE için numeric)
+ *  - uuid: unique stable id
+ *  - image_url / image_asset_id: storage entegrasyonu
+ *  - featured, is_active, display_order: locale'den bağımsız
+ */
+export const slider = mysqlTable(
+  'slider',
+  {
+    id: int('id', { unsigned: true }).autoincrement().notNull().primaryKey(),
+
+    uuid: char('uuid', { length: 36 }).notNull(),
+
+    image_url: text('image_url'),
+    /** ✅ Standart ad: image_asset_id */
+    image_asset_id: char('image_asset_id', { length: 36 }),
+
+    featured: tinyint('featured', { unsigned: true }).notNull().default(0),
+    is_active: tinyint('is_active', { unsigned: true }).notNull().default(1),
+
+    display_order: int('display_order', { unsigned: true }).notNull().default(0),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => ({
+    idx_active: index('idx_slider_active').on(t.is_active),
+    idx_order: index('idx_slider_order').on(t.display_order),
+    idx_image_asset: index('idx_slider_image_asset').on(t.image_asset_id),
+    idx_uuid: uniqueIndex('uniq_slider_uuid').on(t.uuid),
+  }),
+);
+
+/**
+ * slider_i18n — locale bazlı metin alanları
+ *  - slider_id: parent FK
+ *  - locale: 'de', 'en', ...
+ *  - name, slug, description, alt, buttonText, buttonLink
+ */
+export const sliderI18n = mysqlTable(
+  'slider_i18n',
+  {
+    id: int('id', { unsigned: true }).autoincrement().notNull().primaryKey(),
+
+    sliderId: int('slider_id', { unsigned: true }).notNull(),
+
+    locale: varchar('locale', { length: 8 }).notNull(),
+
+    name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
+    description: text('description'),
+
+    alt: varchar('alt', { length: 255 }),
+    buttonText: varchar('button_text', { length: 100 }),
+    buttonLink: varchar('button_link', { length: 255 }),
+  },
+  (t) => ({
+    uniqSliderLocale: uniqueIndex('uniq_slider_i18n_slider_locale').on(t.sliderId, t.locale),
+    uniqSlugLocale: uniqueIndex('uniq_slider_i18n_slug_locale').on(t.slug, t.locale),
+    idxLocale: index('idx_slider_i18n_locale').on(t.locale),
+  }),
+);
+
+export type SliderRow = typeof slider.$inferSelect;
+export type NewSliderRow = typeof slider.$inferInsert;
+
+export type SliderI18nRow = typeof sliderI18n.$inferSelect;
+export type NewSliderI18nRow = typeof sliderI18n.$inferInsert;
+// === src/modules/categories/schema.ts ===
+// =============================================================
+// FILE: src/modules/categories/schema.ts  (FINAL)
+// =============================================================
+import {
+  mysqlTable,
+  char,
+  varchar,
+  longtext,
+  text,
+  int,
+  tinyint,
+  datetime,
+  index,
+  uniqueIndex,
+  primaryKey,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+
+export const categories = mysqlTable(
+  'categories',
+  {
+    id: char('id', { length: 36 }).notNull().primaryKey(),
+
+    /**
+     * Kategori hangi modüle / alana ait?
+     * Örnekler:
+     *  - "blog"
+     *  - "news"
+     *  - "library"
+     *  - "product"
+     *  - "sparepart"
+     *  - "references"
+     *  - "about"
+     *  - "services"
+     */
+    module_key: varchar('module_key', { length: 64 }).notNull().default('general'),
+
+    // ✅ STORAGE entegrasyonu (tekil asset)
+    image_url: longtext('image_url'),
+    storage_asset_id: char('storage_asset_id', { length: 36 }),
+    alt: varchar('alt', { length: 255 }),
+
+    icon: varchar('icon', { length: 255 }),
+
+    /** aktif/öne çıkarılmış ve sıralama */
+    is_active: tinyint('is_active').notNull().default(1).$type<boolean>(),
+    is_featured: tinyint('is_featured').notNull().default(0).$type<boolean>(),
+    display_order: int('display_order').notNull().default(0),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => ({
+    categories_active_idx: index('categories_active_idx').on(t.is_active),
+    categories_order_idx: index('categories_order_idx').on(t.display_order),
+    categories_storage_asset_idx: index('categories_storage_asset_idx').on(t.storage_asset_id),
+    categories_module_idx: index('categories_module_idx').on(t.module_key),
+  }),
+);
+
+export type CategoryRow = typeof categories.$inferSelect;
+export type NewCategoryRow = typeof categories.$inferInsert;
+
+export const categoryI18n = mysqlTable(
+  'category_i18n',
+  {
+    category_id: char('category_id', { length: 36 }).notNull(),
+    locale: varchar('locale', { length: 8 }).notNull().default('de'),
+
+    name: varchar('name', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
+
+    description: text('description'),
+    alt: varchar('alt', { length: 255 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => ({
+    pk: primaryKey({
+      columns: [t.category_id, t.locale],
+      name: 'category_i18n_pk',
+    }),
+    ux_locale_slug: uniqueIndex('category_i18n_locale_slug_uq').on(t.locale, t.slug),
+    category_i18n_locale_idx: index('category_i18n_locale_idx').on(t.locale),
+  }),
+);
+
+export type CategoryI18nRow = typeof categoryI18n.$inferSelect;
+export type NewCategoryI18nRow = typeof categoryI18n.$inferInsert;
+// === src/modules/siteSettings/schema.ts ===
+// src/modules/siteSettings/schema.ts
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  datetime,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+export const siteSettings = mysqlTable(
+  "site_settings",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    key: varchar("key", { length: 100 }).notNull(),
+    locale: varchar("locale", { length: 8 }).notNull(),
+    value: text("value").notNull(),
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("site_settings_key_locale_uq").on(t.key, t.locale),
+    index("site_settings_key_idx").on(t.key),
+    index("site_settings_locale_idx").on(t.locale),
+  ],
+);
+// === src/modules/library/schema.ts ===
+// src/modules/library/schema.ts
+// =============================================================
+// Ensotek – Library Schema (Drizzle)
+// FIX:
+// - datetime alanları mode:'date' (Date tipi standardı)
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  tinyint,
+  int,
+  datetime,
+  text,
+  index,
+  uniqueIndex,
+  foreignKey,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+
+import { categories } from '@/modules/categories/schema';
+import { subCategories } from '@/modules/subcategories/schema';
+import { storageAssets } from '@/modules/storage/schema';
+
+/* ============== LIBRARY PARENT ============== */
+
+export const library = mysqlTable(
+  'library',
+  {
+    id: char('id', { length: 36 }).notNull().primaryKey(),
+
+    // non-i18n
+    type: varchar('type', { length: 32 }).notNull().default('other'),
+
+    // category relations
+    category_id: char('category_id', { length: 36 }),
+    sub_category_id: char('sub_category_id', { length: 36 }),
+
+    featured: tinyint('featured').notNull().default(0),
+    is_published: tinyint('is_published').notNull().default(0),
+    is_active: tinyint('is_active').notNull().default(1),
+    display_order: int('display_order').notNull().default(0),
+
+    // ana görsel alanları (legacy + storage)
+    featured_image: varchar('featured_image', { length: 500 }),
+    image_url: varchar('image_url', { length: 500 }),
+    image_asset_id: char('image_asset_id', { length: 36 }),
+
+    // metrics
+    views: int('views').notNull().default(0),
+    download_count: int('download_count').notNull().default(0),
+
+    // ✅ Date mode
+    published_at: datetime('published_at', { fsp: 3, mode: 'date' }),
+
+    created_at: datetime('created_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('library_active_idx').on(t.is_active),
+    index('library_published_idx').on(t.is_published),
+    index('library_order_idx').on(t.display_order),
+
+    index('library_type_idx').on(t.type),
+    index('library_featured_idx').on(t.featured),
+
+    index('library_category_id_idx').on(t.category_id),
+    index('library_sub_category_id_idx').on(t.sub_category_id),
+
+    index('library_asset_idx').on(t.image_asset_id),
+
+    index('library_created_idx').on(t.created_at),
+    index('library_updated_idx').on(t.updated_at),
+    index('library_published_at_idx').on(t.published_at),
+    index('library_views_idx').on(t.views),
+    index('library_download_idx').on(t.download_count),
+
+    foreignKey({
+      columns: [t.category_id],
+      foreignColumns: [categories.id],
+      name: 'fk_library_category',
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+
+    foreignKey({
+      columns: [t.sub_category_id],
+      foreignColumns: [subCategories.id],
+      name: 'fk_library_sub_category',
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+
+    foreignKey({
+      columns: [t.image_asset_id],
+      foreignColumns: [storageAssets.id],
+      name: 'fk_library_featured_asset',
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+);
+
+export type LibraryRow = typeof library.$inferSelect;
+export type NewLibraryRow = typeof library.$inferInsert;
+
+/* ============== LIBRARY I18N ============== */
+
+export const libraryI18n = mysqlTable(
+  'library_i18n',
+  {
+    id: char('id', { length: 36 }).notNull().primaryKey(),
+
+    library_id: char('library_id', { length: 36 })
+      .notNull()
+      .references(() => library.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+    locale: varchar('locale', { length: 10 }).notNull(),
+
+    slug: varchar('slug', { length: 255 }).notNull(),
+    name: varchar('name', { length: 255 }).notNull(),
+    description: text('description'),
+    image_alt: varchar('image_alt', { length: 255 }),
+
+    tags: varchar('tags', { length: 255 }),
+    meta_title: varchar('meta_title', { length: 255 }),
+    meta_description: varchar('meta_description', { length: 500 }),
+    meta_keywords: varchar('meta_keywords', { length: 255 }),
+
+    created_at: datetime('created_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex('ux_library_i18n_unique').on(t.library_id, t.locale),
+    uniqueIndex('ux_library_locale_slug').on(t.locale, t.slug),
+
+    index('library_i18n_slug_idx').on(t.slug),
+    index('library_i18n_name_idx').on(t.name),
+    index('library_i18n_created_idx').on(t.created_at),
+    index('library_i18n_updated_idx').on(t.updated_at),
+  ],
+);
+
+export type LibraryI18nRow = typeof libraryI18n.$inferSelect;
+export type NewLibraryI18nRow = typeof libraryI18n.$inferInsert;
+
+/* ============== GALLERY IMAGES ============== */
+
+export const libraryImages = mysqlTable(
+  'library_images',
+  {
+    id: char('id', { length: 36 }).notNull().primaryKey(),
+
+    library_id: char('library_id', { length: 36 })
+      .notNull()
+      .references(() => library.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+    image_asset_id: char('image_asset_id', { length: 36 }).references(() => storageAssets.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+    image_url: varchar('image_url', { length: 500 }),
+
+    is_active: tinyint('is_active').notNull().default(1),
+    display_order: int('display_order').notNull().default(0),
+
+    created_at: datetime('created_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('library_images_library_idx').on(t.library_id),
+    index('library_images_active_idx').on(t.is_active),
+    index('library_images_order_idx').on(t.display_order),
+    index('library_images_asset_idx').on(t.image_asset_id),
+  ],
+);
+
+export type LibraryImageRow = typeof libraryImages.$inferSelect;
+export type NewLibraryImageRow = typeof libraryImages.$inferInsert;
+
+export const libraryImagesI18n = mysqlTable(
+  'library_images_i18n',
+  {
+    id: char('id', { length: 36 }).notNull().primaryKey(),
+
+    image_id: char('image_id', { length: 36 })
+      .notNull()
+      .references(() => libraryImages.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+    locale: varchar('locale', { length: 10 }).notNull(),
+
+    title: varchar('title', { length: 255 }),
+    alt: varchar('alt', { length: 255 }),
+    caption: varchar('caption', { length: 500 }),
+
+    created_at: datetime('created_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex('ux_library_images_i18n_unique').on(t.image_id, t.locale),
+    index('library_images_i18n_locale_idx').on(t.locale),
+  ],
+);
+
+export type LibraryImageI18nRow = typeof libraryImagesI18n.$inferSelect;
+export type NewLibraryImageI18nRow = typeof libraryImagesI18n.$inferInsert;
+
+/* ============== FILES ============== */
+
+export const libraryFiles = mysqlTable(
+  'library_files',
+  {
+    id: char('id', { length: 36 }).notNull().primaryKey(),
+
+    library_id: char('library_id', { length: 36 })
+      .notNull()
+      .references(() => library.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+
+    asset_id: char('asset_id', { length: 36 }).references(() => storageAssets.id, {
+      onDelete: 'set null',
+      onUpdate: 'cascade',
+    }),
+
+    file_url: varchar('file_url', { length: 500 }),
+    name: varchar('name', { length: 255 }).notNull(),
+
+    size_bytes: int('size_bytes'),
+    mime_type: varchar('mime_type', { length: 255 }),
+
+    // JSON-string: ["tag1","tag2"]
+    tags_json: text('tags_json'),
+
+    display_order: int('display_order').notNull().default(0),
+    is_active: tinyint('is_active').notNull().default(1),
+
+    created_at: datetime('created_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3, mode: 'date' })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('library_files_library_idx').on(t.library_id),
+    index('library_files_asset_idx').on(t.asset_id),
+    index('library_files_active_idx').on(t.is_active),
+    index('library_files_order_idx').on(t.display_order),
+  ],
+);
+
+export type LibraryFileRow = typeof libraryFiles.$inferSelect;
+export type NewLibraryFileRow = typeof libraryFiles.$inferInsert;
+// === src/modules/offer/schema.ts ===
+// =============================================================
+// FILE: src/modules/offer/schema.ts
+// Ensotek – Offer Module Schema (Drizzle ORM)
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  int,
+  tinyint,
+  datetime,
+  customType,
+  decimal,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+
+import { products } from '@/modules/products/schema';
+
+// LONGTEXT custom type
+const longtext = customType<{ data: string | null; driverData: string }>({
+  dataType() {
+    return 'longtext';
+  },
+});
+
+// -------------------- offers --------------------
+export const offersTable = mysqlTable(
+  'offers',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    offer_no: varchar('offer_no', { length: 100 }),
+
+    status: varchar('status', { length: 32 }).notNull().default('new'),
+
+    locale: varchar('locale', { length: 10 }),
+
+    country_code: varchar('country_code', { length: 80 }),
+
+    customer_name: varchar('customer_name', { length: 255 }).notNull(),
+    company_name: varchar('company_name', { length: 255 }),
+    email: varchar('email', { length: 255 }).notNull(),
+    phone: varchar('phone', { length: 50 }),
+
+    subject: varchar('subject', { length: 255 }),
+    message: longtext('message'),
+
+    product_id: char('product_id', { length: 36 }),
+
+    form_data: longtext('form_data'),
+
+    consent_marketing: tinyint('consent_marketing').notNull().default(0),
+    consent_terms: tinyint('consent_terms').notNull().default(0),
+
+    currency: varchar('currency', { length: 10 }).notNull().default('EUR'),
+    net_total: decimal('net_total', { precision: 12, scale: 2 }),
+    vat_rate: decimal('vat_rate', { precision: 5, scale: 2 }), // YENİ
+    vat_total: decimal('vat_total', { precision: 12, scale: 2 }),
+    shipping_total: decimal('shipping_total', { precision: 12, scale: 2 }), // YENİ
+    gross_total: decimal('gross_total', { precision: 12, scale: 2 }),
+
+    valid_until: datetime('valid_until', { fsp: 3 }),
+
+    admin_notes: longtext('admin_notes'),
+
+    pdf_url: varchar('pdf_url', { length: 500 }),
+    pdf_asset_id: char('pdf_asset_id', { length: 36 }),
+
+    email_sent_at: datetime('email_sent_at', { fsp: 3 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    {
+      idx_status_created: {
+        columns: [t.status, t.created_at],
+        name: 'offers_status_created_idx',
+      },
+    } as any,
+    {
+      idx_email: {
+        columns: [t.email],
+        name: 'offers_email_idx',
+      },
+    } as any,
+    {
+      idx_product: {
+        columns: [t.product_id],
+        name: 'offers_product_idx',
+      },
+    } as any,
+    {
+      idx_offer_no: {
+        columns: [t.offer_no],
+        name: 'offers_offer_no_idx',
+      },
+    } as any,
+    {
+      idx_locale: {
+        columns: [t.locale],
+        name: 'offers_locale_idx',
+      },
+    } as any,
+    {
+      idx_country: {
+        columns: [t.country_code],
+        name: 'offers_country_idx',
+      },
+    } as any,
+    {
+      fk_product: {
+        columns: [t.product_id],
+        foreignColumns: [products.id],
+        name: 'fk_offers_product',
+        onDelete: 'set null',
+        onUpdate: 'cascade',
+      },
+    } as any,
+  ],
+);
+
+export type OfferRow = typeof offersTable.$inferSelect;
+export type NewOfferRow = typeof offersTable.$inferInsert;
+
+// -------------------- offer_number_counters --------------------
+export const offerNumberCountersTable = mysqlTable('offer_number_counters', {
+  year: int('year').primaryKey().notNull(),
+  last_seq: int('last_seq').notNull(),
+  prefix: varchar('prefix', { length: 20 }).notNull().default('ENS'),
+});
+
+export type OfferNumberCounterRow = typeof offerNumberCountersTable.$inferSelect;
+export type NewOfferNumberCounterRow = typeof offerNumberCountersTable.$inferInsert;
+// === src/modules/userRoles/schema.ts ===
+// =============================================================
+// FILE: src/modules/userRoles/schema.ts
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  mysqlEnum,
+  datetime,
+  index,
+  uniqueIndex,
+  foreignKey,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+import { users } from "@/modules/auth/schema";
+
+export const userRoles = mysqlTable(
+  "user_roles",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    user_id: char("user_id", { length: 36 }).notNull(),
+    role: mysqlEnum("role", ["admin", "moderator", "user"])
+      .notNull()
+      .default("user"),
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+  },
+  (t) => [
+    // FK → users.id
+    foreignKey({
+      columns: [t.user_id],
+      foreignColumns: [users.id],
+      name: "fk_user_roles_user_id_users_id",
+    })
+      .onDelete("cascade")
+      .onUpdate("cascade"),
+
+    // Benzersizlik: aynı user aynı role bir kez
+    uniqueIndex("user_roles_user_id_role_unique").on(t.user_id, t.role),
+
+    // Arama performansı için indexler
+    index("user_roles_user_id_idx").on(t.user_id),
+    index("user_roles_role_idx").on(t.role),
+    index("user_roles_user_id_created_at_idx").on(t.user_id, t.created_at),
+  ],
+);
+
+export type UserRole = typeof userRoles.$inferSelect;
+export type NewUserRole = typeof userRoles.$inferInsert;
+// === src/modules/customPages/schema.ts ===
+// =============================================================
+// FILE: src/modules/customPages/schema.ts
+// FINAL — MariaDB/MySQL compatible (LONGTEXT JSON-string columns)
+// - module_key on parent table
+// - images/storage_image_ids are LONGTEXT in DB, but exposed as string[] in app
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  tinyint,
+  datetime,
+  uniqueIndex,
+  index,
+  customType,
+  foreignKey,
+  int,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+
+import { categories } from '@/modules/categories/schema';
+import { subCategories } from '@/modules/subcategories/schema';
+
+/** LONGTEXT */
+const longtext = customType<{ data: string; driverData: string }>({
+  dataType() {
+    return 'longtext';
+  },
+});
+
+/**
+ * LONGTEXT that stores JSON-string for string[] (e.g. '[]', '["a","b"]')
+ * App tarafında: string[]
+ */
+const longtextJsonStringArray = customType<{ data: string[]; driverData: string }>({
+  dataType() {
+    return 'longtext';
+  },
+  toDriver(value) {
+    // value app tarafında string[] bekliyoruz
+    if (!value) return '[]';
+    if (Array.isArray(value)) return JSON.stringify(value);
+    // güvenlik
+    return '[]';
+  },
+  fromDriver(value) {
+    const s = String(value ?? '').trim();
+    if (!s) return [];
+    try {
+      const parsed = JSON.parse(s);
+      return Array.isArray(parsed) ? parsed.map((x) => String(x ?? '').trim()).filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  },
+});
+
+export const customPages = mysqlTable(
+  'custom_pages',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    /** module_key parent'ta */
+    module_key: varchar('module_key', { length: 100 }).notNull().default(''),
+
+    // dil bağımsız
+    is_published: tinyint('is_published').notNull().default(0),
+
+    /** sıralama */
+    display_order: int('display_order').notNull().default(0),
+    order_num: int('order_num').notNull().default(0),
+
+    /** kapak */
+    featured_image: varchar('featured_image', { length: 500 }),
+    featured_image_asset_id: char('featured_image_asset_id', { length: 36 }),
+
+    /** legacy / serbest URL */
+    image_url: longtext('image_url'),
+    storage_asset_id: char('storage_asset_id', { length: 36 }),
+
+    /**
+     * ✅ DB: LONGTEXT DEFAULT '[]'
+     * ✅ App: string[]
+     */
+    images: longtextJsonStringArray('images').notNull().default([]),
+    storage_image_ids: longtextJsonStringArray('storage_image_ids').notNull().default([]),
+
+    /** kategori bağları */
+    category_id: char('category_id', { length: 36 }),
+    sub_category_id: char('sub_category_id', { length: 36 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('custom_pages_created_idx').on(t.created_at),
+    index('custom_pages_updated_idx').on(t.updated_at),
+    index('custom_pages_is_published_idx').on(t.is_published),
+
+    index('custom_pages_module_key_idx').on(t.module_key),
+
+    index('custom_pages_featured_asset_idx').on(t.featured_image_asset_id),
+    index('custom_pages_storage_asset_idx').on(t.storage_asset_id),
+
+    index('custom_pages_category_id_idx').on(t.category_id),
+    index('custom_pages_sub_category_id_idx').on(t.sub_category_id),
+
+    index('custom_pages_display_order_idx').on(t.display_order),
+    index('custom_pages_order_num_idx').on(t.order_num),
+
+    foreignKey({
+      columns: [t.category_id],
+      foreignColumns: [categories.id],
+      name: 'fk_custom_pages_category',
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+
+    foreignKey({
+      columns: [t.sub_category_id],
+      foreignColumns: [subCategories.id],
+      name: 'fk_custom_pages_sub_category',
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+);
+
+export const customPagesI18n = mysqlTable(
+  'custom_pages_i18n',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    page_id: char('page_id', { length: 36 })
+      .notNull()
+      .references(() => customPages.id, {
+        onDelete: 'cascade',
+        onUpdate: 'cascade',
+      }),
+
+    locale: varchar('locale', { length: 10 }).notNull(),
+
+    title: varchar('title', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
+
+    /** DB: LONGTEXT JSON-string {"html":"..."} */
+    content: longtext('content').notNull(),
+
+    summary: varchar('summary', { length: 1000 }),
+    featured_image_alt: varchar('featured_image_alt', { length: 255 }),
+
+    meta_title: varchar('meta_title', { length: 255 }),
+    meta_description: varchar('meta_description', { length: 500 }),
+
+    tags: varchar('tags', { length: 1000 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex('ux_custom_pages_i18n_parent_locale').on(t.page_id, t.locale),
+    uniqueIndex('ux_custom_pages_i18n_locale_slug').on(t.locale, t.slug),
+    index('custom_pages_i18n_page_idx').on(t.page_id),
+    index('custom_pages_i18n_locale_idx').on(t.locale),
+    index('custom_pages_i18n_slug_idx').on(t.slug),
+  ],
+);
+
+export type CustomPageRow = typeof customPages.$inferSelect;
+export type NewCustomPageRow = typeof customPages.$inferInsert;
+
+export type CustomPageI18nRow = typeof customPagesI18n.$inferSelect;
+export type NewCustomPageI18nRow = typeof customPagesI18n.$inferInsert;
+// === src/modules/footerSections/schema.ts ===
+// ===================================================================
+// FILE: src/modules/footerSections/schema.ts
+// ===================================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  int,
+  datetime,
+  index,
+  uniqueIndex,
+  customType,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+/** LONGTEXT type helper */
+const longtext = customType<{ data: string | null; driverData: string | null }>({
+  dataType() {
+    return "longtext";
+  },
+});
+
+export const footerSections = mysqlTable(
+  "footer_sections",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+
+    is_active: int("is_active").notNull().default(1),
+    display_order: int("display_order").notNull().default(0),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("footer_sections_active_idx").on(t.is_active),
+    index("footer_sections_order_idx").on(t.display_order),
+    index("footer_sections_created_idx").on(t.created_at),
+    index("footer_sections_updated_idx").on(t.updated_at),
+  ]
+);
+
+export const footerSectionsI18n = mysqlTable(
+  "footer_sections_i18n",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+
+    section_id: char("section_id", { length: 36 })
+      .notNull()
+      .references(() => footerSections.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+
+    locale: varchar("locale", { length: 10 }).notNull(),
+    title: varchar("title", { length: 150 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+    description: longtext("description"),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("ux_footer_sections_i18n_section_locale").on(
+      t.section_id,
+      t.locale,
+    ),
+    uniqueIndex("ux_footer_sections_i18n_locale_slug").on(t.locale, t.slug),
+    index("footer_sections_i18n_locale_idx").on(t.locale),
+    index("footer_sections_i18n_title_idx").on(t.title),
+  ]
+);
+
+export type FooterSectionRow = typeof footerSections.$inferSelect;
+export type NewFooterSectionRow = typeof footerSections.$inferInsert;
+
+export type FooterSectionI18nRow = typeof footerSectionsI18n.$inferSelect;
+export type NewFooterSectionI18nRow = typeof footerSectionsI18n.$inferInsert;
+// === src/modules/references/schema.ts ===
+// =============================================================
+// FILE: src/modules/references/schema.ts
+// =============================================================
+import {
+  mysqlTable,
+  char,
+  varchar,
+  int,
+  tinyint,
+  datetime,
+  index,
+  uniqueIndex,
+  customType,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+import { categories } from "@/modules/categories/schema";
+import { subCategories } from "@/modules/subcategories/schema";
+
+/** LONGTEXT -> string */
+const longtext = customType<{ data: string; driverData: string }>({
+  dataType() {
+    return "longtext";
+  },
+});
+
+// -------------------- references (parent) --------------------
+export const referencesTable = mysqlTable(
+  "references",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+
+    is_published: tinyint("is_published").notNull().default(0),
+    is_featured: tinyint("is_featured").notNull().default(0),
+    display_order: int("display_order").notNull().default(0),
+
+    featured_image: varchar("featured_image", { length: 500 }),
+    featured_image_asset_id: char("featured_image_asset_id", {
+      length: 36,
+    }),
+
+    website_url: varchar("website_url", { length: 500 }),
+
+    category_id: char("category_id", { length: 36 }),
+    sub_category_id: char("sub_category_id", { length: 36 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("references_created_idx").on(t.created_at),
+    index("references_updated_idx").on(t.updated_at),
+    index("references_published_idx").on(t.is_published),
+    index("references_featured_idx").on(t.is_featured),
+    index("references_display_order_idx").on(t.display_order),
+    index("references_featured_asset_idx").on(t.featured_image_asset_id),
+
+    index("references_category_id_idx").on(t.category_id),
+    index("references_sub_category_id_idx").on(t.sub_category_id),
+
+    // FK'ler
+    {
+      fk_category: {
+        columns: [t.category_id],
+        foreignColumns: [categories.id],
+        name: "fk_references_category",
+        onDelete: "set null",
+        onUpdate: "cascade",
+      },
+      fk_sub_category: {
+        columns: [t.sub_category_id],
+        foreignColumns: [subCategories.id],
+        name: "fk_references_sub_category",
+        onDelete: "set null",
+        onUpdate: "cascade",
+      },
+    } as any,
+  ],
+);
+
+// -------------------- references_i18n --------------------
+export const referencesI18n = mysqlTable(
+  "references_i18n",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+
+    reference_id: char("reference_id", { length: 36 })
+      .notNull()
+      .references(() => referencesTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+
+    locale: varchar("locale", { length: 10 }).notNull(),
+
+    title: varchar("title", { length: 255 }).notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+
+    summary: longtext("summary"),
+    content: longtext("content").notNull(),
+
+    featured_image_alt: varchar("featured_image_alt", { length: 255 }),
+    meta_title: varchar("meta_title", { length: 255 }),
+    meta_description: varchar("meta_description", { length: 500 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("ux_references_i18n_parent_locale").on(
+      t.reference_id,
+      t.locale,
+    ),
+    uniqueIndex("ux_references_i18n_locale_slug").on(t.locale, t.slug),
+    index("references_i18n_locale_idx").on(t.locale),
+    index("references_i18n_slug_idx").on(t.slug),
+  ],
+);
+
+// -------------------- reference_images --------------------
+export const referenceImages = mysqlTable(
+  "reference_images",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    reference_id: char("reference_id", { length: 36 })
+      .notNull()
+      .references(() => referencesTable.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    asset_id: char("asset_id", { length: 36 }).notNull(),
+    image_url: varchar("image_url", { length: 500 }),
+
+    display_order: int("display_order").notNull().default(0),
+    is_active: tinyint("is_active").notNull().default(1),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("reference_images_reference_idx").on(t.reference_id),
+    index("reference_images_asset_idx").on(t.asset_id),
+    index("reference_images_active_idx").on(t.is_active),
+    index("reference_images_order_idx").on(t.display_order),
+  ],
+);
+
+// -------------------- reference_images_i18n --------------------
+export const referenceImagesI18n = mysqlTable(
+  "reference_images_i18n",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    image_id: char("image_id", { length: 36 })
+      .notNull()
+      .references(() => referenceImages.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    locale: varchar("locale", { length: 10 }).notNull(),
+    alt: varchar("alt", { length: 255 }),
+    caption: varchar("caption", { length: 1000 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("ux_reference_images_i18n_parent_locale").on(
+      t.image_id,
+      t.locale,
+    ),
+    index("reference_images_i18n_locale_idx").on(t.locale),
+  ],
+);
+
+export type ReferenceRow = typeof referencesTable.$inferSelect;
+export type NewReferenceRow = typeof referencesTable.$inferInsert;
+
+export type ReferenceI18nRow = typeof referencesI18n.$inferSelect;
+export type NewReferenceI18nRow = typeof referencesI18n.$inferInsert;
+
+export type ReferenceImageRow = typeof referenceImages.$inferSelect;
+export type NewReferenceImageRow = typeof referenceImages.$inferInsert;
+
+export type ReferenceImageI18nRow = typeof referenceImagesI18n.$inferSelect;
+export type NewReferenceImageI18nRow =
+  typeof referenceImagesI18n.$inferInsert;
+// === src/modules/services/schema.ts ===
+// src/modules/services/schema.ts
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  tinyint,
+  int,
+  datetime,
+  text,
+  index,
+  uniqueIndex,
+  foreignKey,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+import { categories } from "@/modules/categories/schema";
+import { subCategories } from "@/modules/subcategories/schema";
+import { storageAssets } from "@/modules/storage/schema";
+
+export const services = mysqlTable(
+  "services",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+
+    // non-i18n
+    type: varchar("type", { length: 32 }).notNull().default("other"),
+
+    // category relations
+    category_id: char("category_id", { length: 36 }),
+    sub_category_id: char("sub_category_id", { length: 36 }),
+
+    featured: tinyint("featured").notNull().default(0),
+    is_active: tinyint("is_active").notNull().default(1),
+    display_order: int("display_order").notNull().default(0),
+
+    // ana görsel alanları (legacy + storage)
+    featured_image: varchar("featured_image", { length: 500 }), // legacy
+    image_url: varchar("image_url", { length: 500 }), // legacy
+    image_asset_id: char("image_asset_id", { length: 36 }), // storage_assets.id
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("services_active_idx").on(t.is_active),
+    index("services_order_idx").on(t.display_order),
+    index("services_type_idx").on(t.type),
+    index("services_category_id_idx").on(t.category_id),
+    index("services_sub_category_id_idx").on(t.sub_category_id),
+    index("services_asset_idx").on(t.image_asset_id),
+    index("services_created_idx").on(t.created_at),
+    index("services_updated_idx").on(t.updated_at),
+
+    foreignKey({
+      columns: [t.category_id],
+      foreignColumns: [categories.id],
+      name: "fk_services_category",
+    })
+      .onDelete("set null")
+      .onUpdate("cascade"),
+
+    foreignKey({
+      columns: [t.sub_category_id],
+      foreignColumns: [subCategories.id],
+      name: "fk_services_sub_category",
+    })
+      .onDelete("set null")
+      .onUpdate("cascade"),
+
+    foreignKey({
+      columns: [t.image_asset_id],
+      foreignColumns: [storageAssets.id],
+      name: "fk_services_featured_asset",
+    })
+      .onDelete("set null")
+      .onUpdate("cascade"),
+  ],
+);
+
+export type ServiceRow = typeof services.$inferSelect;
+export type NewServiceRow = typeof services.$inferInsert;
+
+/** i18n: slug, name, description, material, price, includes, warranty, image_alt, tags, meta_* */
+export const servicesI18n = mysqlTable(
+  "services_i18n",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+    service_id: char("service_id", { length: 36 })
+      .notNull()
+      .references(() => services.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    locale: varchar("locale", { length: 10 }).notNull(),
+
+    slug: varchar("slug", { length: 255 }).notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    material: varchar("material", { length: 255 }),
+    price: varchar("price", { length: 128 }),
+    includes: varchar("includes", { length: 255 }),
+    warranty: varchar("warranty", { length: 128 }),
+    image_alt: varchar("image_alt", { length: 255 }),
+
+    tags: varchar("tags", { length: 255 }),
+    meta_title: varchar("meta_title", { length: 255 }),
+    meta_description: varchar("meta_description", { length: 500 }),
+    meta_keywords: varchar("meta_keywords", { length: 255 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("ux_services_i18n_unique").on(t.service_id, t.locale),
+    uniqueIndex("ux_services_locale_slug").on(t.locale, t.slug),
+    index("services_i18n_slug_idx").on(t.slug),
+    index("services_i18n_name_idx").on(t.name),
+    index("services_i18n_created_idx").on(t.created_at),
+    index("services_i18n_updated_idx").on(t.updated_at),
+  ],
+);
+
+export type ServiceI18nRow = typeof servicesI18n.$inferSelect;
+export type NewServiceI18nRow = typeof servicesI18n.$inferInsert;
+
+/** Gallery images */
+export const serviceImages = mysqlTable(
+  "service_images",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+    service_id: char("service_id", { length: 36 })
+      .notNull()
+      .references(() => services.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+
+    image_asset_id: char("image_asset_id", { length: 36 }).references(
+      () => storageAssets.id,
+      {
+        onDelete: "set null",
+        onUpdate: "cascade",
+      },
+    ),
+    image_url: varchar("image_url", { length: 500 }),
+
+    is_active: tinyint("is_active").notNull().default(1),
+    display_order: int("display_order").notNull().default(0),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("service_images_service_idx").on(t.service_id),
+    index("service_images_active_idx").on(t.is_active),
+    index("service_images_order_idx").on(t.display_order),
+    index("service_images_asset_idx").on(t.image_asset_id),
+  ],
+);
+
+export type ServiceImageRow = typeof serviceImages.$inferSelect;
+export type NewServiceImageRow = typeof serviceImages.$inferInsert;
+
+export const serviceImagesI18n = mysqlTable(
+  "service_images_i18n",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+    image_id: char("image_id", { length: 36 })
+      .notNull()
+      .references(() => serviceImages.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    locale: varchar("locale", { length: 10 }).notNull(),
+
+    title: varchar("title", { length: 255 }),
+    alt: varchar("alt", { length: 255 }),
+    caption: varchar("caption", { length: 500 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("ux_service_images_i18n_unique").on(
+      t.image_id,
+      t.locale,
+    ),
+    index("service_images_i18n_locale_idx").on(t.locale),
+  ],
+);
+
+export type ServiceImageI18nRow = typeof servicesI18n.$inferSelect;
+export type NewServiceImageI18nRow = typeof serviceImagesI18n.$inferInsert;
+// === src/modules/contact/schema.ts ===
+// =============================================================
+// FILE: src/modules/contact/schema.ts
+// =============================================================
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  boolean,
+  timestamp,
+  index,
+} from "drizzle-orm/mysql-core";
+
+export const contact_messages = mysqlTable(
+  "contact_messages",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    email: varchar("email", { length: 255 }).notNull(),
+    phone: varchar("phone", { length: 64 }).notNull(),
+    subject: varchar("subject", { length: 255 }).notNull(),
+    message: text("message").notNull(),
+
+    status: varchar("status", { length: 32 }).notNull().default("new"), // 'new' | 'in_progress' | 'closed'
+    is_resolved: boolean("is_resolved").notNull().default(false),
+
+    admin_note: varchar("admin_note", { length: 2000 }),
+
+    // meta
+    ip: varchar("ip", { length: 64 }),
+    user_agent: varchar("user_agent", { length: 512 }),
+
+    // antispam
+    website: varchar("website", { length: 255 }),
+
+    created_at: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
+    updated_at: timestamp("updated_at", { fsp: 3 }).notNull().defaultNow().onUpdateNow(),
+  },
+  (t) => [
+    index("idx_contact_created_at").on(t.created_at),
+    index("idx_contact_status").on(t.status),
+    index("idx_contact_resolved").on(t.is_resolved),
+  ],
+);
+
+export type ContactRow = typeof contact_messages.$inferSelect;
+export type ContactInsert = typeof contact_messages.$inferInsert;
+
+// Şimdilik ekstra projection yok, direkt row'u view gibi kullanıyoruz
+export type ContactView = ContactRow;
+// === src/modules/faqs/schema.ts ===
+// ===================================================================
+// FILE: src/modules/faqs/schema.ts
+// ===================================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  tinyint,
+  datetime,
+  index,
+  uniqueIndex,
+  customType,
+  int,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+/** LONGTEXT */
+const longtext = customType<{ data: string; driverData: string }>({
+  dataType() {
+    return "longtext";
+  },
+});
+
+export const faqs = mysqlTable(
+  "faqs",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    is_active: tinyint("is_active").notNull().default(1),
+    display_order: int("display_order").notNull().default(0),
+
+    // Kategori ilişkileri (dil bağımsız; ID bazlı)
+    category_id: char("category_id", { length: 36 }),
+    sub_category_id: char("sub_category_id", { length: 36 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("faqs_active_idx").on(t.is_active),
+    index("faqs_order_idx").on(t.display_order),
+    index("faqs_created_idx").on(t.created_at),
+    index("faqs_updated_idx").on(t.updated_at),
+    index("faqs_category_idx").on(t.category_id),
+    index("faqs_sub_category_idx").on(t.sub_category_id),
+  ],
+);
+
+export const faqsI18n = mysqlTable(
+  "faqs_i18n",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+    faq_id: char("faq_id", { length: 36 })
+      .notNull()
+      .references(() => faqs.id, {
+        onDelete: "cascade",
+        onUpdate: "cascade",
+      }),
+    locale: varchar("locale", { length: 10 }).notNull(),
+
+    // Localize alanlar
+    question: varchar("question", { length: 500 }).notNull(),
+    answer: longtext("answer").notNull(),
+    slug: varchar("slug", { length: 255 }).notNull(),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    // Bir parent için her locale tekil
+    uniqueIndex("ux_faqs_i18n_parent_locale").on(t.faq_id, t.locale),
+    // Bir locale içinde slug tekil (SEO)
+    uniqueIndex("ux_faqs_i18n_locale_slug").on(t.locale, t.slug),
+    index("faqs_i18n_locale_idx").on(t.locale),
+    index("faqs_i18n_slug_idx").on(t.slug),
+  ],
+);
+
+export type FaqRow = typeof faqs.$inferSelect;
+export type NewFaqRow = typeof faqs.$inferInsert;
+
+export type FaqI18nRow = typeof faqsI18n.$inferSelect;
+export type NewFaqI18nRow = typeof faqsI18n.$inferInsert;
+// === src/modules/audit/schema.ts ===
+// =============================================================
+// FILE: src/modules/audit/schema.ts
+// Ensotek – Audit Schema (Drizzle ORM)
+// FIX: LONGTEXT via customType + proper index() usage
+// =============================================================
+
+import { mysqlTable, varchar, bigint, int, datetime, index } from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+import { longtext } from './_longtext';
+
+export const auditRequestLogs = mysqlTable(
+  'audit_request_logs',
+  {
+    id: bigint('id', { mode: 'number', unsigned: true }).primaryKey().autoincrement(),
+
+    req_id: varchar('req_id', { length: 64 }).notNull(),
+    method: varchar('method', { length: 16 }).notNull(),
+
+    url: longtext('url').notNull(), // LONGTEXT
+    path: varchar('path', { length: 255 }).notNull(),
+
+    status_code: int('status_code').notNull(),
+    response_time_ms: int('response_time_ms').notNull().default(0),
+
+    ip: varchar('ip', { length: 64 }).notNull(),
+    user_agent: longtext('user_agent'), // LONGTEXT
+    referer: longtext('referer'), // LONGTEXT
+
+    user_id: varchar('user_id', { length: 64 }),
+    is_admin: int('is_admin').notNull().default(0),
+
+    country: varchar('country', { length: 8 }),
+    city: varchar('city', { length: 64 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+  },
+  (t) => ({
+    idx_created: index('audit_request_logs_created_idx').on(t.created_at),
+    idx_user: index('audit_request_logs_user_idx').on(t.user_id),
+    idx_path: index('audit_request_logs_path_idx').on(t.path),
+    idx_ip: index('audit_request_logs_ip_idx').on(t.ip),
+  }),
+);
+
+export const auditAuthEvents = mysqlTable(
+  'audit_auth_events',
+  {
+    id: bigint('id', { mode: 'number', unsigned: true }).primaryKey().autoincrement(),
+
+    event: varchar('event', { length: 32 }).notNull(),
+    user_id: varchar('user_id', { length: 64 }),
+    email: varchar('email', { length: 255 }),
+
+    ip: varchar('ip', { length: 64 }).notNull(),
+    user_agent: longtext('user_agent'), // LONGTEXT
+
+    country: varchar('country', { length: 8 }),
+    city: varchar('city', { length: 64 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+  },
+  (t) => ({
+    idx_created: index('audit_auth_events_created_idx').on(t.created_at),
+    idx_event: index('audit_auth_events_event_idx').on(t.event),
+    idx_user: index('audit_auth_events_user_idx').on(t.user_id),
+    idx_ip: index('audit_auth_events_ip_idx').on(t.ip),
+  }),
+);
+
+export type AuditRequestLogRow = typeof auditRequestLogs.$inferSelect;
+export type NewAuditRequestLogRow = typeof auditRequestLogs.$inferInsert;
+
+export type AuditAuthEventRow = typeof auditAuthEvents.$inferSelect;
+export type NewAuditAuthEventRow = typeof auditAuthEvents.$inferInsert;
+// === src/modules/storage/schema.ts ===
+// src/modules/storage/schema.ts
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  int,
+  bigint,
+  json,
+  datetime,
+  uniqueIndex,
+  index,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+/** storage_assets — tenantsiz (Cloudinary / local) */
+export const storageAssets = mysqlTable(
+  "storage_assets",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+    user_id: char("user_id", { length: 36 }),
+
+    name: varchar("name", { length: 255 }).notNull(),
+    bucket: varchar("bucket", { length: 64 }).notNull(),
+    path: varchar("path", { length: 512 }).notNull(), // folder/name.ext
+    folder: varchar("folder", { length: 255 }),
+
+    mime: varchar("mime", { length: 127 }).notNull(),
+    size: bigint("size", { mode: "number", unsigned: true }).notNull(),
+
+    width: int("width", { unsigned: true }),
+    height: int("height", { unsigned: true }),
+
+    /** Provider absolute URL (Cloudinary secure_url / local URL) */
+    url: text("url"),
+    /** Opsiyonel hash / etag */
+    hash: varchar("hash", { length: 64 }),
+
+    /** Provider alanları — silme/rename için zorunlu */
+    provider: varchar("provider", { length: 16 })
+      .notNull()
+      .default("cloudinary"),
+    provider_public_id: varchar("provider_public_id", { length: 255 }),
+    provider_resource_type: varchar("provider_resource_type", {
+      length: 16, // image | video | raw
+    }),
+    provider_format: varchar("provider_format", { length: 32 }),
+    provider_version: int("provider_version", { unsigned: true }),
+    etag: varchar("etag", { length: 64 }),
+
+    metadata: json("metadata")
+      .$type<Record<string, string> | null>()
+      .default(null),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => ({
+    uniq_bucket_path: uniqueIndex("uniq_bucket_path").on(
+      t.bucket,
+      t.path,
+    ),
+    idx_bucket: index("idx_storage_bucket").on(t.bucket),
+    idx_folder: index("idx_storage_folder").on(t.folder),
+    idx_created: index("idx_storage_created").on(t.created_at),
+    idx_provider_pubid: index("idx_provider_pubid").on(
+      t.provider_public_id,
+    ),
+  }),
+);
+
+export type StorageAsset = typeof storageAssets.$inferSelect;
+export type NewStorageAsset = typeof storageAssets.$inferInsert;
+// === src/modules/email-templates/schema.ts ===
+// =============================================================
+// FILE: src/modules/email-templates/schema.ts
+// =============================================================
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  datetime,
+  tinyint,
+  uniqueIndex,
+  index,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+/**
+ * Parent tablo:
+ * - template_key
+ * - variables
+ * - is_active
+ * - timestamps
+ */
+export const emailTemplates = mysqlTable(
+  "email_templates",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+
+    template_key: varchar("template_key", { length: 100 }).notNull(),
+
+    // JSON-string (string[]) | null
+    variables: text("variables"),
+
+    // 0/1
+    is_active: tinyint("is_active").notNull().default(1),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    // Aynı key sadece bir parent kayıt
+    uniqueIndex("ux_email_tpl_key").on(t.template_key),
+    index("ix_email_tpl_active").on(t.is_active),
+    index("ix_email_tpl_updated_at").on(t.updated_at),
+  ],
+);
+
+/**
+ * i18n tablo:
+ * - template_name, subject, content
+ * - locale
+ */
+export const emailTemplatesI18n = mysqlTable(
+  "email_templates_i18n",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+    template_id: char("template_id", { length: 36 }).notNull(),
+    locale: varchar("locale", { length: 10 }).notNull(),
+
+    template_name: varchar("template_name", { length: 150 }).notNull(),
+    subject: varchar("subject", { length: 255 }).notNull(),
+    content: text("content").notNull(),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    // Bir template için locale tekil olsun
+    uniqueIndex("ux_email_tpl_key_locale").on(t.template_id, t.locale),
+    index("ix_email_tpl_i18n_locale").on(t.locale),
+    index("ix_email_tpl_i18n_name").on(t.template_name),
+  ],
+);
+
+export type EmailTemplateRow = typeof emailTemplates.$inferSelect;
+export type NewEmailTemplateRow = typeof emailTemplates.$inferInsert;
+
+export type EmailTemplateI18nRow = typeof emailTemplatesI18n.$inferSelect;
+export type NewEmailTemplateI18nRow = typeof emailTemplatesI18n.$inferInsert;
+// === src/modules/products/schema.ts ===
+// =============================================================
+// FILE: src/modules/products/schema.ts  (LOCALE DESTEKLİ)  ✅ FIXED
+// - products.item_type eklendi: product | sparepart
+// - index eklendi: products_item_type_idx
+// =============================================================
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  longtext,
+  int,
+  tinyint,
+  decimal,
+  datetime,
+  json,
+  index,
+  uniqueIndex,
+  foreignKey,
+  mysqlEnum,
+  primaryKey,
+} from 'drizzle-orm/mysql-core';
+import { sql } from 'drizzle-orm';
+import { categories } from '../categories/schema';
+import { subCategories } from '../subcategories/schema';
+
+export type ProductItemType = 'product' | 'sparepart';
+
+/* =========================
+ * PRODUCTS (BASE TABLO – DİL BAĞIMSIZ)
+ * ========================= */
+export const products = mysqlTable(
+  'products',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    // ✅ Ürün tipi: product / sparepart (karışmayı bitirir)
+    item_type: mysqlEnum('item_type', ['product', 'sparepart']).notNull().default('product'),
+
+    // Dilden bağımsız alanlar
+    category_id: char('category_id', { length: 36 }).notNull(),
+    sub_category_id: char('sub_category_id', { length: 36 }),
+
+    price: decimal('price', { precision: 10, scale: 2 }).notNull(),
+
+    // ✅ Görseller (tekil kapak + çoklu galeri)
+    image_url: longtext('image_url'),
+    storage_asset_id: char('storage_asset_id', { length: 36 }),
+    images: json('images')
+      .$type<string[]>()
+      .default(sql`JSON_ARRAY()`),
+    storage_image_ids: json('storage_image_ids')
+      .$type<string[]>()
+      .default(sql`JSON_ARRAY()`),
+
+    is_active: tinyint('is_active').notNull().default(1).$type<boolean>(),
+    is_featured: tinyint('is_featured').notNull().default(0).$type<boolean>(),
+
+    // 🔢 Drag & drop sıralama için
+    order_num: int('order_num').notNull().default(0),
+
+    product_code: varchar('product_code', { length: 64 }),
+    stock_quantity: int('stock_quantity').notNull().default(0),
+    rating: decimal('rating', { precision: 3, scale: 2 }).notNull().default('5.00'),
+    review_count: int('review_count').notNull().default(0),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex('products_code_uq').on(t.product_code),
+
+    index('products_item_type_idx').on(t.item_type), // ✅ yeni index
+    index('products_category_id_idx').on(t.category_id),
+    index('products_sub_category_id_idx').on(t.sub_category_id),
+    index('products_active_idx').on(t.is_active),
+    index('products_asset_idx').on(t.storage_asset_id),
+    index('products_order_idx').on(t.order_num),
+
+    foreignKey({
+      columns: [t.category_id],
+      foreignColumns: [categories.id],
+      name: 'fk_products_category',
+    })
+      .onDelete('restrict')
+      .onUpdate('cascade'),
+
+    foreignKey({
+      columns: [t.sub_category_id],
+      foreignColumns: [subCategories.id],
+      name: 'fk_products_subcategory',
+    })
+      .onDelete('set null')
+      .onUpdate('cascade'),
+  ],
+);
+
+/* =========================
+ * PRODUCT I18N (LOCALE BAZLI)
+ * ========================= */
+export const productI18n = mysqlTable(
+  'product_i18n',
+  {
+    product_id: char('product_id', { length: 36 }).notNull(),
+    locale: varchar('locale', { length: 8 }).notNull().default('de'),
+
+    title: varchar('title', { length: 255 }).notNull(),
+    slug: varchar('slug', { length: 255 }).notNull(),
+
+    description: text('description'),
+    alt: varchar('alt', { length: 255 }),
+
+    tags: json('tags')
+      .$type<string[]>()
+      .default(sql`JSON_ARRAY()`),
+    specifications: json('specifications').$type<Record<string, string>>(),
+
+    meta_title: varchar('meta_title', { length: 255 }),
+    meta_description: varchar('meta_description', { length: 500 }),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    primaryKey({
+      name: 'product_i18n_pk',
+      columns: [t.product_id, t.locale],
+    }),
+
+    uniqueIndex('product_i18n_locale_slug_uq').on(t.locale, t.slug),
+    index('product_i18n_locale_idx').on(t.locale),
+
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_i18n_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+// ========== SPECS / FAQS / REVIEWS / OPTIONS / STOCK ==========
+
+export const productSpecs = mysqlTable(
+  'product_specs',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+    product_id: char('product_id', { length: 36 }).notNull(),
+    locale: varchar('locale', { length: 8 }).notNull().default('de'),
+
+    name: varchar('name', { length: 255 }).notNull(),
+    value: text('value').notNull(),
+    category: mysqlEnum('category', ['physical', 'material', 'service', 'custom'])
+      .notNull()
+      .default('custom'),
+    order_num: int('order_num').notNull().default(0),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('product_specs_product_id_idx').on(t.product_id),
+    index('product_specs_product_locale_idx').on(t.product_id, t.locale),
+    index('product_specs_locale_idx').on(t.locale),
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_specs_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export const productFaqs = mysqlTable(
+  'product_faqs',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+    product_id: char('product_id', { length: 36 }).notNull(),
+    locale: varchar('locale', { length: 8 }).notNull().default('de'),
+
+    question: varchar('question', { length: 500 }).notNull(),
+    answer: text('answer').notNull(),
+    display_order: int('display_order').notNull().default(0),
+    is_active: tinyint('is_active').notNull().default(1).$type<boolean>(),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('product_faqs_product_id_idx').on(t.product_id),
+    index('product_faqs_order_idx').on(t.display_order),
+    index('product_faqs_product_locale_idx').on(t.product_id, t.locale),
+    index('product_faqs_locale_idx').on(t.locale),
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_faqs_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export const productReviews = mysqlTable(
+  'product_reviews',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+    product_id: char('product_id', { length: 36 }).notNull(),
+    user_id: char('user_id', { length: 36 }),
+    rating: int('rating').notNull(),
+    comment: text('comment'),
+    is_active: tinyint('is_active').notNull().default(1).$type<boolean>(),
+    customer_name: varchar('customer_name', { length: 255 }),
+    review_date: datetime('review_date', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('product_reviews_product_id_idx').on(t.product_id),
+    index('product_reviews_approved_idx').on(t.product_id, t.is_active),
+    index('product_reviews_rating_idx').on(t.rating),
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_reviews_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export const productOptions = mysqlTable(
+  'product_options',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+    product_id: char('product_id', { length: 36 }).notNull(),
+    option_name: varchar('option_name', { length: 100 }).notNull(),
+    option_values: json('option_values').$type<any[]>().notNull(),
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('product_options_product_id_idx').on(t.product_id),
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_options_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export const productStock = mysqlTable(
+  'product_stock',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+    product_id: char('product_id', { length: 36 }).notNull(),
+    stock_content: varchar('stock_content', { length: 255 }).notNull(),
+    is_used: tinyint('is_used').notNull().default(0).$type<boolean>(),
+    used_at: datetime('used_at', { fsp: 3 }),
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    order_item_id: char('order_item_id', { length: 36 }),
+  },
+  (t) => [
+    index('product_stock_product_id_idx').on(t.product_id),
+    index('product_stock_is_used_idx').on(t.product_id, t.is_used),
+    index('product_stock_order_item_id_idx').on(t.order_item_id),
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_stock_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export const productImages = mysqlTable(
+  'product_images',
+  {
+    id: char('id', { length: 36 }).primaryKey().notNull(),
+
+    product_id: char('product_id', { length: 36 }).notNull(),
+    locale: varchar('locale', { length: 8 }).notNull().default('de'),
+
+    image_url: longtext('image_url').notNull(),
+    image_asset_id: char('image_asset_id', { length: 36 }),
+
+    title: varchar('title', { length: 255 }),
+    alt: varchar('alt', { length: 255 }),
+    caption: text('caption'),
+
+    display_order: int('display_order').notNull().default(0),
+    is_active: tinyint('is_active').notNull().default(1).$type<boolean>(),
+
+    created_at: datetime('created_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime('updated_at', { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index('product_images_product_id_idx').on(t.product_id),
+    index('product_images_product_locale_idx').on(t.product_id, t.locale),
+    index('product_images_order_idx').on(t.product_id, t.display_order),
+
+    foreignKey({
+      columns: [t.product_id],
+      foreignColumns: [products.id],
+      name: 'fk_product_images_product',
+    })
+      .onDelete('cascade')
+      .onUpdate('cascade'),
+  ],
+);
+
+export type ProductImageRow = typeof productImages.$inferSelect;
+export type NewProductImageRow = typeof productImages.$inferInsert;
+
+// Alias
+export { productReviews as product_reviews };
+export { productOptions as product_options };
+export { productStock as product_stock };
+
+// Types
+export type ProductRow = typeof products.$inferSelect;
+export type NewProductRow = typeof products.$inferInsert;
+
+export type ProductI18nRow = typeof productI18n.$inferSelect;
+export type NewProductI18nRow = typeof productI18n.$inferInsert;
+
+export type ProductSpecRow = typeof productSpecs.$inferSelect;
+export type NewProductSpecRow = typeof productSpecs.$inferInsert;
+export type ProductFaqRow = typeof productFaqs.$inferSelect;
+export type NewProductFaqRow = typeof productFaqs.$inferInsert;
+export type ProductReviewRow = typeof productReviews.$inferSelect;
+export type NewProductReviewRow = typeof productReviews.$inferInsert;
+export type ProductOptionRow = typeof productOptions.$inferSelect;
+export type NewProductOptionRow = typeof productOptions.$inferInsert;
+export type ProductStockRow = typeof productStock.$inferSelect;
+export type NewProductStockRow = typeof productStock.$inferInsert;
+// === src/modules/support/schema.ts ===
+// =============================================================
+// FILE: src/modules/support/schema.ts
+// =============================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  text,
+  mysqlEnum,
+  datetime,
+  tinyint,
+  index,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+export const supportTickets = mysqlTable(
+  "support_tickets",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+    user_id: char("user_id", { length: 36 }).notNull(),
+    subject: varchar("subject", { length: 255 }).notNull(),
+    message: text("message").notNull(),
+    status: mysqlEnum("status", [
+      "open",
+      "in_progress",
+      "waiting_response",
+      "closed",
+    ])
+      .notNull()
+      .default("open"),
+    priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"])
+      .notNull()
+      .default("medium"),
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    index("idx_support_tickets_user").on(t.user_id),
+    index("idx_support_tickets_created").on(t.created_at),
+    index("idx_support_tickets_updated").on(t.updated_at),
+    index("idx_support_tickets_status").on(t.status),
+    index("idx_support_tickets_priority").on(t.priority),
+  ],
+);
+
+export type SupportTicketRow = typeof supportTickets.$inferSelect;
+export type SupportTicketInsert = typeof supportTickets.$inferInsert;
+
+export const ticketReplies = mysqlTable(
+  "ticket_replies",
+  {
+    id: char("id", { length: 36 }).notNull().primaryKey(),
+    ticket_id: char("ticket_id", { length: 36 }).notNull(),
+    user_id: char("user_id", { length: 36 }),
+    message: text("message").notNull(),
+    is_admin: tinyint("is_admin").notNull().default(0),
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+  },
+  (t) => [
+    index("idx_ticket_replies_ticket").on(t.ticket_id),
+    index("idx_ticket_replies_created").on(t.created_at),
+  ],
+);
+
+export type TicketReplyRow = typeof ticketReplies.$inferSelect;
+export type TicketReplyInsert = typeof ticketReplies.$inferInsert;
+// === src/modules/newsletter/schema.ts ===
+// ===================================================================
+// FILE: src/modules/newsletter/schema.ts
+// ===================================================================
+
+import {
+  mysqlTable,
+  char,
+  varchar,
+  boolean,
+  datetime,
+  text,
+  index,
+  uniqueIndex,
+} from "drizzle-orm/mysql-core";
+import { sql } from "drizzle-orm";
+
+export const newsletterSubscribers = mysqlTable(
+  "newsletter_subscribers",
+  {
+    id: char("id", { length: 36 }).primaryKey().notNull(),
+
+    email: varchar("email", { length: 255 }).notNull(),
+
+    // Eski INewsletter.verified → is_verified
+    is_verified: boolean("is_verified").notNull().default(false),
+
+    // Çoklu dil
+    locale: varchar("locale", { length: 10 }),
+
+    // JSON string olarak saklıyoruz (FE tarafında parse edilir)
+    meta: text("meta").notNull().default("{}"),
+
+    // Unsubscribe olunca dolan alan
+    unsubscribed_at: datetime("unsubscribed_at", { fsp: 3 }),
+
+    created_at: datetime("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
+    updated_at: datetime("updated_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
+      .$onUpdateFn(() => new Date()),
+  },
+  (t) => [
+    uniqueIndex("ux_newsletter_email").on(t.email),
+    index("newsletter_verified_idx").on(t.is_verified),
+    index("newsletter_locale_idx").on(t.locale),
+    index("newsletter_unsub_idx").on(t.unsubscribed_at),
+    index("newsletter_created_idx").on(t.created_at),
+    index("newsletter_updated_idx").on(t.updated_at),
+  ],
+);
+
+export type NewsletterRow = typeof newsletterSubscribers.$inferSelect;
+export type NewsletterInsert = typeof newsletterSubscribers.$inferInsert;

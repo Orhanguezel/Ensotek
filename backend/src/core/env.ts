@@ -100,6 +100,30 @@ export const env = {
   SMTP_USER: process.env.SMTP_USER || '',
   SMTP_PASS: process.env.SMTP_PASS || '',
   MAIL_FROM: process.env.MAIL_FROM || '',
+
+  // AI support routing (chat)
+  AI_SUPPORT_ENABLED: toBool(process.env.AI_SUPPORT_ENABLED, true),
+  AI_PROVIDER_ORDER: process.env.AI_PROVIDER_ORDER || 'openai,anthropic,grok',
+  AI_SUPPORT_SYSTEM_PROMPT: process.env.AI_SUPPORT_SYSTEM_PROMPT || '',
+
+  // GPT
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
+  OPENAI_API_BASE: process.env.OPENAI_API_BASE || 'https://api.openai.com/v1',
+  OPENAI_MODEL: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+
+  // Claude
+  ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || '',
+  ANTHROPIC_MODEL: process.env.ANTHROPIC_MODEL || 'claude-3-5-haiku-latest',
+
+  // Grok / xAI
+  XAI_API_KEY: process.env.XAI_API_KEY || process.env.GROK_API_KEY || '',
+  XAI_API_BASE: process.env.XAI_API_BASE || 'https://api.x.ai/v1',
+  XAI_MODEL: process.env.XAI_MODEL || process.env.GROK_MODEL || 'grok-2-latest',
+
+  // Groq (OpenAI-compatible)
+  GROQ_API_KEY: process.env.GROQ_API_KEY || '',
+  GROQ_API_BASE: process.env.GROQ_API_BASE || 'https://api.groq.com/openai/v1',
+  GROQ_MODEL: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
 } as const;
 
 export type AppEnv = typeof env;

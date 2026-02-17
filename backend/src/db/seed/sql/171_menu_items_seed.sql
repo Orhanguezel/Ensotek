@@ -330,5 +330,17 @@ ON DUPLICATE KEY UPDATE
   `url`        = VALUES(`url`),
   `updated_at` = CURRENT_TIMESTAMP(3);
 
+-- ============================================================
+-- 5) URL NORMALIZATION (legacy plural -> canonical singular)
+--    Keeps existing DB rows consistent even with --no-drop seed runs.
+-- ============================================================
+UPDATE `menu_items_i18n`
+SET `url` = '/product', `updated_at` = CURRENT_TIMESTAMP(3)
+WHERE `url` IN ('/products', '/products/', 'products');
+
+UPDATE `menu_items_i18n`
+SET `url` = '/sparepart', `updated_at` = CURRENT_TIMESTAMP(3)
+WHERE `url` IN ('/spareparts', '/spareparts/', 'spareparts');
+
 COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;

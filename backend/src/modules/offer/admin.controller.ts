@@ -28,6 +28,7 @@ import {
   generateAndAttachOfferPdf,
   sendOfferEmailsAndNotifications,
   sendOfferEmailOnly,
+  triggerNewOfferNotifications,
 } from './service';
 import { setContentRange } from '@/common/utils/contentRange';
 
@@ -83,6 +84,7 @@ export const listOffersAdmin: RouteHandler = async (req, reply) => {
     q: q.q,
     email: q.email,
     product_id: q.product_id,
+    service_id: q.service_id,
     created_from: q.created_from,
     created_to: q.created_to,
   });
@@ -138,6 +140,7 @@ export const createOfferAdmin: RouteHandler = async (req, reply) => {
       subject: typeof b.subject === 'string' ? b.subject.trim() : b.subject ?? null,
       message: typeof b.message === 'string' ? b.message.trim() : b.message ?? null,
       product_id: b.product_id ?? null,
+      service_id: b.service_id ?? null,
       form_data: packFormData(b.form_data),
 
       consent_marketing:
@@ -177,6 +180,13 @@ export const createOfferAdmin: RouteHandler = async (req, reply) => {
     });
 
     const row = await getOfferById(id);
+    if (row) {
+      try {
+        await triggerNewOfferNotifications(row as any);
+      } catch (err: any) {
+        (req as any).log?.error({ err }, 'offer_admin_notification_failed');
+      }
+    }
     return reply.code(201).send(row);
   } catch (err: any) {
     (req as any).log?.error({ err }, 'offer_create_admin_failed');
@@ -228,6 +238,7 @@ export const updateOfferAdmin: RouteHandler = async (req, reply) => {
       patch.message = typeof b.message === 'string' ? b.message.trim() : b.message ?? null;
 
     if (typeof b.product_id !== 'undefined') patch.product_id = b.product_id ?? null;
+    if (typeof b.service_id !== 'undefined') patch.service_id = b.service_id ?? null;
 
     if (typeof b.form_data !== 'undefined') patch.form_data = packFormData(b.form_data);
 

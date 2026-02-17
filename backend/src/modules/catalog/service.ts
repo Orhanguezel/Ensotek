@@ -25,6 +25,7 @@ import { notifications, type NotificationType } from "@/modules/notifications/sc
 import { userRoles } from "@/modules/userRoles/schema"; // ✅ role bazlı admin bulma
 import { renderEmailTemplateByKey } from "@/modules/email-templates/service";
 import { sendMail } from "@/modules/mail/service";
+import { telegramNotify } from "@/modules/telegram/telegram.notifier";
 
 import { updateCatalogRequest } from "./repository";
 
@@ -173,6 +174,22 @@ Telefon: ${ctx.phone ?? "-"}`;
         console.error("catalog_request_admin_notification_failed", err);
     }
 
+    try {
+        await telegramNotify({
+            event: "new_catalog_request",
+            data: {
+                customer_name: ctx.customer_name,
+                customer_email: ctx.email,
+                customer_phone: ctx.phone ?? "",
+                company_name: ctx.company_name ?? "",
+                message: ctx.message ?? "",
+                created_at: new Date().toISOString(),
+            },
+        });
+    } catch (err) {
+        console.error("catalog_request_telegram_failed", err);
+    }
+
     // ✅ Admin mail (site_settings üzerinden)
     try {
         const adminEmails = await getCatalogAdminEmails();
@@ -294,6 +311,21 @@ export async function sendCatalogToCustomer(ctx: CatalogRequestContext): Promise
                 email_sent_at: new Date() as any,
                 admin_notes: null as any,
             } as any);
+        }
+
+        try {
+            await telegramNotify({
+                title: "Katalog Gönderildi",
+                message: [
+                    `Talep ID: ${ctx.id ?? "-"}`,
+                    `Müşteri: ${ctx.customer_name}`,
+                    `E-posta: ${ctx.email}`,
+                    `Durum: sent`,
+                ].join("\n"),
+                type: "catalog_sent",
+            });
+        } catch (err) {
+            console.error("catalog_sent_telegram_failed", err);
         }
 
         return true;

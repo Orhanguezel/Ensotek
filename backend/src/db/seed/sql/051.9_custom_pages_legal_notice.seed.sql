@@ -34,6 +34,7 @@ INSERT INTO `custom_pages`
   (`id`,
    `module_key`,
    `is_published`,
+   `featured`,
    `display_order`,
    `order_num`,
    `featured_image`,
@@ -51,6 +52,7 @@ VALUES
     @PAGE_LEGAL,
     @MODULE_KEY,
     1,
+    0,
     60,
     60,
     @IMG_LEGAL,
@@ -67,6 +69,7 @@ VALUES
 ON DUPLICATE KEY UPDATE
   `module_key`              = VALUES(`module_key`),
   `is_published`            = VALUES(`is_published`),
+  `featured`                = VALUES(`featured`),
   `display_order`           = VALUES(`display_order`),
   `order_num`               = VALUES(`order_num`),
   `category_id`             = VALUES(`category_id`),

@@ -1,0 +1,16 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build with Claude",
+      "type": "shell",
+      "command": "claude fix build errors && npm run build",
+      "problemMatcher": []
+    },
+    {
+      "label": "Auto Deploy",
+      "type": "shell",
+      "command": "claude run tests && npm run deploy"
+    }
+  ]
+}

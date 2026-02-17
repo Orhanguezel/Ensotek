@@ -16,6 +16,7 @@ import {
 import { sql } from 'drizzle-orm';
 
 import { products } from '@/modules/products/schema';
+import { services } from '@/modules/services/schema';
 
 // LONGTEXT custom type
 const longtext = customType<{ data: string | null; driverData: string }>({
@@ -47,6 +48,7 @@ export const offersTable = mysqlTable(
     message: longtext('message'),
 
     product_id: char('product_id', { length: 36 }),
+    service_id: char('service_id', { length: 36 }),
 
     form_data: longtext('form_data'),
 
@@ -119,6 +121,21 @@ export const offersTable = mysqlTable(
         columns: [t.product_id],
         foreignColumns: [products.id],
         name: 'fk_offers_product',
+        onDelete: 'set null',
+        onUpdate: 'cascade',
+      },
+    } as any,
+    {
+      idx_service: {
+        columns: [t.service_id],
+        name: 'offers_service_idx',
+      },
+    } as any,
+    {
+      fk_service: {
+        columns: [t.service_id],
+        foreignColumns: [services.id],
+        name: 'fk_offers_service',
         onDelete: 'set null',
         onUpdate: 'cascade',
       },

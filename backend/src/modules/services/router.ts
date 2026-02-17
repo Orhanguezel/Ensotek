@@ -2,6 +2,8 @@
 // =============================================================
 
 import type { FastifyInstance } from "fastify";
+import type { ZodTypeProvider } from "fastify-type-provider-zod";
+import { serviceListQuerySchema } from "./validation";
 import {
   listServicesPublic,
   getServicePublic,
@@ -12,12 +14,25 @@ import {
 const BASE = "/services";
 
 export async function registerServices(app: FastifyInstance) {
-  app.get(`${BASE}`, { config: { public: true } }, listServicesPublic);
-  app.get(`${BASE}/:id`, { config: { public: true } }, getServicePublic);
-  app.get(
+  const api = app.withTypeProvider<ZodTypeProvider>();
+
+  api.get(
+    `${BASE}`,
+    {
+      config: { public: true },
+      schema: {
+        querystring: serviceListQuerySchema,
+        tags: ["Services"],
+        description: "Public service list",
+      },
+    },
+    listServicesPublic as any,
+  );
+  api.get(`${BASE}/:id`, { config: { public: true } }, getServicePublic as any);
+  api.get(
     `${BASE}/by-slug/:slug`,
     { config: { public: true } },
-    getServiceBySlugPublic,
+    getServiceBySlugPublic as any,
   );
 
   // gallery (public)

@@ -5,7 +5,6 @@ import {
   mysqlTable,
   char,
   varchar,
-  longtext,
   text,
   int,
   tinyint,
@@ -15,6 +14,7 @@ import {
   primaryKey,
 } from 'drizzle-orm/mysql-core';
 import { sql } from 'drizzle-orm';
+import { longtext } from '@/modules/_shared';
 
 export const categories = mysqlTable(
   'categories',
@@ -77,6 +77,9 @@ export const categoryI18n = mysqlTable(
 
     description: text('description'),
     alt: varchar('alt', { length: 255 }),
+
+    // ✅ JSON ek veri desteği
+    i18n_data: longtext('i18n_data'),
 
     created_at: datetime('created_at', { fsp: 3 })
       .notNull()

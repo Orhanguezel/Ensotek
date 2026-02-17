@@ -26,6 +26,7 @@ import { renderOfferPdfHtml } from './pdfTemplate';
 
 import { renderEmailTemplateByKey } from '@/modules/email-templates/service';
 import { sendMail } from '@/modules/mail/service';
+import { telegramNotify } from '@/modules/telegram/telegram.notifier';
 
 // ✅ Product/Service schemas (i18n)
 import { products, productI18n } from '@/modules/products/schema';
@@ -600,6 +601,24 @@ Teklif ID: ${offer.id}`;
   });
 
   try {
+    await telegramNotify({
+      event: 'new_offer_request',
+      data: {
+        customer_name: offer.customer_name,
+        customer_email: offer.email,
+        customer_phone: offer.phone ?? '',
+        company_name: offer.company_name ?? '',
+        product_service: offer.subject ?? '',
+        message: offer.message ?? '',
+        created_at:
+          offer.created_at instanceof Date ? offer.created_at.toISOString() : new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    console.error('offer_request_telegram_failed', err);
+  }
+
+  try {
     const adminEmails = await getOffersAdminEmails(offer.locale ?? null);
     if (!adminEmails.length) return;
 
@@ -679,6 +698,21 @@ E-posta: ${offer.email}`;
     type: 'offer_sent' as NotificationType,
     locale: offer.locale ?? null,
   });
+
+  try {
+    await telegramNotify({
+      title: 'Teklif Gönderildi',
+      message: [
+        `Teklif No: ${offer.offer_no ?? offer.id}`,
+        `Müşteri: ${offer.customer_name}`,
+        `E-posta: ${offer.email}`,
+        `Durum: sent`,
+      ].join('\n'),
+      type: 'offer_sent',
+    });
+  } catch (err) {
+    console.error('offer_sent_telegram_failed', err);
+  }
 
   await db
     .update(offersTable)

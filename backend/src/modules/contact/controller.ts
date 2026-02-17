@@ -8,6 +8,7 @@ import type { ContactView } from "./schema";
 import { sendMail } from "@/modules/mail/service";
 import { getSmtpSettings } from "@/modules/siteSettings/service";
 import { renderEmailTemplateByKey } from "@/modules/email-templates/service";
+import { telegramNotify } from "@/modules/telegram/telegram.notifier";
 
 type CreateReq = FastifyRequest<{ Body: unknown }>;
 
@@ -135,6 +136,27 @@ export async function createContactPublic(req: CreateReq, reply: FastifyReply) {
     await sendContactEmails(created, locale);
   } catch (err: any) {
     req.log?.error?.({ err }, "contact_email_send_failed");
+  }
+
+  // Telegram notification
+  try {
+    await telegramNotify({
+      event: "new_contact",
+      data: {
+        customer_name: created.name,
+        customer_email: created.email,
+        customer_phone: created.phone ?? "",
+        company_name: "",
+        subject: created.subject ?? "",
+        message: created.message,
+        created_at:
+          created.created_at instanceof Date
+            ? created.created_at.toISOString()
+            : new Date().toISOString(),
+      },
+    });
+  } catch (err: any) {
+    req.log?.error?.({ err }, "contact_telegram_failed");
   }
 
   return reply.code(201).send(created);

@@ -8,6 +8,7 @@ import { and, asc, desc, eq, inArray, like, sql } from 'drizzle-orm';
 import { randomUUID } from 'crypto';
 
 import { products, productI18n, productImages } from './schema';
+import { categories, categoryI18n } from '@/modules/categories/schema';
 import { storageAssets } from '@/modules/storage/schema';
 import {
   productCreateSchema,
@@ -150,9 +151,17 @@ export const adminListProducts: RouteHandler = async (req, reply) => {
     .where(whereExpr as any);
 
   const rows = await db
-    .select({ p: products, i: productI18n })
+    .select({
+      p: products,
+      i: productI18n,
+      category_name: categoryI18n.name,
+    })
     .from(products)
     .innerJoin(productI18n, eq(productI18n.product_id, products.id))
+    .leftJoin(
+      categoryI18n,
+      and(eq(categoryI18n.category_id, products.category_id), eq(categoryI18n.locale, locale)),
+    )
     .where(whereExpr as any)
     .orderBy(orderExpr)
     .limit(limit)
@@ -162,7 +171,9 @@ export const adminListProducts: RouteHandler = async (req, reply) => {
   reply.header('content-range', `*/${Number(total || 0)}`);
   reply.header('access-control-expose-headers', 'x-total-count, content-range');
 
-  const out = rows.map(({ p, i }) => normalizeProduct({ ...p, ...(i ?? {}) }));
+  const out = rows.map(({ p, i, category_name }) =>
+    normalizeProduct({ ...p, ...(i ?? {}), category_name }),
+  );
   return reply.send(out);
 };
 
@@ -177,11 +188,15 @@ export const adminGetProduct: RouteHandler = async (req, reply) => {
   const itemType = normalizeItemType(q.item_type, 'product');
 
   const rows = await db
-    .select({ p: products, i: productI18n })
+    .select({ p: products, i: productI18n, category_name: categoryI18n.name })
     .from(products)
     .leftJoin(
       productI18n,
       and(eq(productI18n.product_id, products.id), eq(productI18n.locale, locale)),
+    )
+    .leftJoin(
+      categoryI18n,
+      and(eq(categoryI18n.category_id, products.category_id), eq(categoryI18n.locale, locale)),
     )
     .where(and(eq(products.id, id), eq(products.item_type, itemType as any)))
     .limit(1);
@@ -190,8 +205,8 @@ export const adminGetProduct: RouteHandler = async (req, reply) => {
     return reply.code(404).send({ error: { message: 'not_found' } });
   }
 
-  const { p, i } = rows[0];
-  return reply.send(normalizeProduct({ ...p, ...(i ?? {}) }));
+  const { p, i, category_name } = rows[0];
+  return reply.send(normalizeProduct({ ...p, ...(i ?? {}), category_name }));
 };
 
 /* ----------------- CREATE / UPDATE / DELETE ----------------- */

@@ -28,6 +28,9 @@ import { supportTickets } from "@/modules/support/schema";
 import { users } from "@/modules/auth/schema";
 import { offersTable } from '@/modules/offer/schema';
 import { storageAssets } from '@/modules/storage/schema';
+import { referencesTable } from '@/modules/references/schema';
+import { catalogRequestsTable } from '@/modules/catalog/schema';
+import { chat_threads } from '@/modules/chat/schema';
 
 type DashboardCountItem = {
   key: string;
@@ -62,8 +65,8 @@ export const getDashboardSummaryAdmin: RouteHandler = async (req, reply) => {
       { key: "email_templates", label: "E-posta Şablonları", table: emailTemplates },
       { key: "site_settings", label: "Site Ayarları", table: siteSettings },
       { key: "custom_pages", label: "Özel Sayfalar", table: customPages },
-      { key: "menuitem", label: "Menü Öğeleri", table: menuItems },
-      { key: "slider", label: "Slider Öğeleri", table: slider },
+      { key: "menu_items", label: "Menü Öğeleri", table: menuItems },
+      { key: "sliders", label: "Slider Öğeleri", table: slider },
       { key: "footer_sections", label: "Footer Bölümleri", table: footerSections },
       { key: "library", label: "Kütüphane / Library", table: library },
       { key: "reviews", label: "Yorumlar", table: reviews },
@@ -71,6 +74,9 @@ export const getDashboardSummaryAdmin: RouteHandler = async (req, reply) => {
       { key: "users", label: "Kullanıcılar", table: users },
       { key: "offers", label: "Teklifler", table: offersTable },
       { key: "storage", label: "Depolama Öğeleri", table: storageAssets },
+      { key: "references", label: "Referanslar", table: referencesTable },
+      { key: "catalog_requests", label: "Katalog Talepleri", table: catalogRequestsTable },
+      { key: "chat", label: "Sohbet", table: chat_threads },
     ];
 
     // Hepsini paralel say

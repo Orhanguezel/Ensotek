@@ -66,6 +66,7 @@ export const customPages = mysqlTable(
 
     // dil bağımsız
     is_published: tinyint('is_published').notNull().default(0),
+    featured: tinyint('featured').notNull().default(0),
 
     /** sıralama */
     display_order: int('display_order').notNull().default(0),
@@ -103,6 +104,7 @@ export const customPages = mysqlTable(
     index('custom_pages_created_idx').on(t.created_at),
     index('custom_pages_updated_idx').on(t.updated_at),
     index('custom_pages_is_published_idx').on(t.is_published),
+    index('custom_pages_featured_idx').on(t.featured),
 
     index('custom_pages_module_key_idx').on(t.module_key),
 

@@ -27,7 +27,7 @@
     
     @each $fs, $shades in $font-scale {
         @each $shade, $value in $shades {
-            --bd-#{$fs}-#{$shade}: #{$value};
+            --bd-#{$fs}-#{$shade + ""}: #{$value};
         }
     }
 

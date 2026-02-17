@@ -77,6 +77,7 @@ export const customPageListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional(),
   offset: z.coerce.number().int().min(0).optional(),
   is_published: boolLike.optional(),
+  featured: boolLike.optional(),
   q: z.string().optional(),
   slug: z.string().optional(),
   select: z.string().optional(),
@@ -98,6 +99,7 @@ export const upsertCustomPageParentBodySchema = z.object({
   module_key: MODULE_KEY.optional(),
 
   is_published: boolLike.optional().default(false),
+  featured: boolLike.optional().default(false),
 
   featured_image: URL2000.nullable().optional(),
   featured_image_asset_id: UUID36.nullable().optional(),
@@ -166,6 +168,7 @@ export const upsertCustomPageBodySchema = upsertCustomPageI18nBodySchema.extend(
   module_key: MODULE_KEY.optional(),
 
   is_published: boolLike.optional().default(false),
+  featured: boolLike.optional().default(false),
 
   featured_image: URL2000.nullable().optional(),
   featured_image_asset_id: UUID36.nullable().optional(),
@@ -190,6 +193,7 @@ export const patchCustomPageBodySchema = patchCustomPageI18nBodySchema.extend({
   module_key: MODULE_KEY.optional(),
 
   is_published: boolLike.optional(),
+  featured: boolLike.optional(),
 
   featured_image: URL2000.nullable().optional(),
   featured_image_asset_id: UUID36.nullable().optional(),
