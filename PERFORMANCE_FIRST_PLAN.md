@@ -25,6 +25,8 @@ Performance Score =
   (LCP × 0.25) +
   (TBT × 0.30) +
   (CLS × 0.25)
+
+  
 ```
 
 **En kritik:** TBT (Total Blocking Time) → JavaScript execution optimize edilmeli!
