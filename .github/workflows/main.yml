@@ -1,3 +1,4 @@
+# GitHub Actions Workflow - Ensotek Deploy
 name: Ensotek Deploy
 
 on:
@@ -7,14 +8,17 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
+      # ----------------------------
+      # Checkout
+      # ----------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
       # ----------------------------
-      # Bun (backend + frontend)
+      # Bun setup
       # ----------------------------
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -22,12 +26,34 @@ jobs:
           bun-version: latest
 
       # ----------------------------
-      # Backend build + deploy
+      # Backend build
       # ----------------------------
-      - name: Build backend (bun)
+      - name: Build backend
         working-directory: backend
         run: |
-          rm -rf dist .tsbuildinfo || true
+          rm -rf dist .tsbuildinfo 2>/dev/null || true
+          bun install --frozen-lockfile || bun install
+          bun run build
+
+      # ----------------------------
+      # Frontend build
+      # ----------------------------
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: |
+          bun install --frozen-lockfile || bun install
+          bun run build
+
+      # ----------------------------
+      # Admin Panel build
+      # ----------------------------
+      - name: Build admin panel
+        working-directory: admin_panel
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+        run: |
           bun install --frozen-lockfile || bun install
           bun run build
 
@@ -39,71 +65,82 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.VPS_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -T 10 -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Deploy backend to VPS (rsync with retry)
+      # ----------------------------
+      # Deploy backend
+      # ----------------------------
+      - name: Deploy backend to VPS
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key"
-          for i in 1 2 3; do
-            rsync -avz --delete \
-              --exclude=node_modules --exclude=.git --exclude=.env --exclude=.DS_Store \
-              -e "ssh $SSH_OPTS" \
-              backend/ "${VPS_USER}@${VPS_HOST}:/var/www/Ensotek/backend" \
-              && break
-            echo "⚠ Attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
+          SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=15 -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key"
+          rsync -avz --delete \
+            --exclude=node_modules --exclude=.git --exclude=.env --exclude=.tsbuildinfo \
+            --exclude=dist \
+            -e "ssh $SSH_OPTS" \
+            backend/ "$VPS_USER@$VPS_HOST:/var/www/Ensotek/backend/"
 
       # ----------------------------
-      # Frontend build + deploy (Next.js with Bun)
+      # Deploy frontend
       # ----------------------------
-      - name: Build frontend (bun)
-        working-directory: frontend
-        env:
-          NEXT_TELEMETRY_DISABLED: "1"
-        run: |
-          bun install --frozen-lockfile || bun install
-          bun run build
-
-      - name: Deploy frontend to VPS (rsync with retry)
+      - name: Deploy frontend to VPS
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USER: ${{ secrets.VPS_USER }}
         run: |
-          SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=15 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key"
-          for i in 1 2 3; do
-            rsync -avz --delete \
-              --exclude=node_modules --exclude=.git --exclude=.env --exclude=.DS_Store \
-              -e "ssh $SSH_OPTS" \
-              frontend/ "${VPS_USER}@${VPS_HOST}:/var/www/Ensotek/frontend" \
-              && break
-            echo "⚠ Attempt $i failed, retrying in 10s..."
-            sleep 10
-          done
+          SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=15 -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key"
+          rsync -avz --delete \
+            --exclude=node_modules --exclude=.git --exclude=.env --exclude=.next \
+            --exclude=dist --exclude=.tsbuildinfo \
+            -e "ssh $SSH_OPTS" \
+            frontend/ "$VPS_USER@$VPS_HOST:/var/www/Ensotek/frontend/"
 
       # ----------------------------
-      # PM2 reload (backend + frontend) + bind check
+      # Deploy admin panel
       # ----------------------------
-      - name: Reload PM2 (backend + frontend)
+      - name: Deploy admin panel to VPS
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+        run: |
+          SSH_OPTS="-o ConnectTimeout=30 -o ServerAliveInterval=15 -o StrictHostKeyChecking=no -i ~/.ssh/deploy_key"
+          rsync -avz --delete \
+            --exclude=node_modules --exclude=.git --exclude=.env --exclude=.next \
+            --exclude=dist --exclude=.tsbuildinfo \
+            -e "ssh $SSH_OPTS" \
+            admin_panel/ "$VPS_USER@$VPS_HOST:/var/www/Ensotek/admin_panel/"
+
+      # ----------------------------
+      # PM2 restart all services
+      # ----------------------------
+      - name: Restart PM2 services
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_KEY }}
           timeout: 60s
-          command_timeout: 120s
+          command_timeout: 180s
           script: |
             set -e
 
+            echo "=== Restarting backend ==="
             cd /var/www/Ensotek/backend
-            pm2 reload ensotek-backend || pm2 start ecosystem.config.cjs --only ensotek-backend
+            pm2 restart ensotek-backend || pm2 start ecosystem.config.cjs
 
+            echo "=== Restarting frontend ==="
             cd /var/www/Ensotek/frontend
-            pm2 reload ensotek-frontend || pm2 start ecosystem.config.cjs --only ensotek-frontend
+            pm2 restart ensotek-frontend || pm2 start ecosystem.config.cjs
 
+            echo "=== Restarting admin panel ==="
+            cd /var/www/Ensotek/admin_panel
+            pm2 restart ensotek-admin-panel || pm2 start ecosystem.config.cjs
+
+            echo "=== Saving PM2 state ==="
             pm2 save
 
-            ss -ltnp | grep -E "127\.0\.0\.1:3011|:3011" || true
+            echo "=== Checking ports ==="
+            ss -ltnp | grep -E "127\.0\.0\.1:(8086|3011|3022)" || true
+            echo "Backend: 8086, Frontend: 3011, Admin: 3022"

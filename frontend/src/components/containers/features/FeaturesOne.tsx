@@ -85,11 +85,11 @@ const FeaturesOne = () => {
                 </div>
                 <div className="features__items-content">
                   <h3>
-                    <Link href={`/services/${item.slug}`}>{item.name}</Link>
+                    <Link href={`/service/${item.slug}`}>{item.name}</Link>
                   </h3>
                   <p>{item.description}</p>
                 </div>
-                <Link className="features__btn" href={`/services/${item.slug}`}>
+                <Link className="features__btn" href={`/service/${item.slug}`}>
                   {t("viewDetails")}
                 </Link>
               </div>

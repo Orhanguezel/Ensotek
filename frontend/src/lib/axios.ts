@@ -6,7 +6,7 @@ import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 // If env variable is set, use it. Otherwise fallback.
 // Note: If NEXT_PUBLIC_API_URL includes /api, we should use it directly or handle it.
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8086/api';
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
