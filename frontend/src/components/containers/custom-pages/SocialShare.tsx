@@ -52,14 +52,14 @@ const SocialShare = ({ url: initialUrl, title, label }: SocialShareProps) => {
           {(label || 'SHARE')?.toUpperCase()}:
         </span>
       )}
-      <div className="ens-social-links">
+      <div className="ens-social-links is-light">
         {shareLinks.map((social) => (
           <a
             key={social.name}
             href={social.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={`ens-social-links__item is-light ${social.name.toLowerCase()}`}
+            className={`ens-social-links__item ${social.name.toLowerCase()}`}
             title={`Share on ${social.name}`}
           >
             <i className={social.icon}></i>

@@ -29,6 +29,21 @@ const nextConfig = {
     ],
   },
 
+  async redirects() {
+    return [
+      {
+        source: '/:locale/services/:path*',
+        destination: '/:locale/service/:path*',
+        permanent: true,
+      },
+      {
+        source: '/services/:path*',
+        destination: '/service/:path*',
+        permanent: true,
+      },
+    ];
+  },
+
   // Performance optimizations
   experimental: {
     optimizePackageImports: [
@@ -94,6 +109,32 @@ const nextConfig = {
     }
 
     return config;
+  },
+
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: `
+              default-src 'self';
+              script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com;
+              style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+              img-src 'self' blob: data: https://res.cloudinary.com https://images.unsplash.com https://cdn.ensotek.de https://www.ensotek.de;
+              font-src 'self' https://fonts.gstatic.com data:;
+              connect-src 'self' http://127.0.0.1:8086 http://localhost:8086 https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://ensotek.de https://www.ensotek.de https://cdn.ensotek.de;
+              object-src 'none';
+              base-uri 'self';
+              form-action 'self';
+              frame-ancestors 'none';
+              block-all-mixed-content;
+            `.replace(/\s{2,}/g, ' ').trim()
+          }
+        ],
+      },
+    ];
   },
 };
 
