@@ -383,7 +383,7 @@ export default function SupportBotWidget() {
         aria-label="Support chat"
         style={{
           position: "fixed",
-          right: isMobile ? 12 : 22,
+          left: isMobile ? 12 : 22,
           bottom: isMobile ? 12 : 22,
           width: isMobile ? 56 : 62,
           height: isMobile ? 56 : 62,
@@ -392,10 +392,14 @@ export default function SupportBotWidget() {
           zIndex: 9999,
           background: headerGradient,
           color: "#fff",
-          boxShadow: "0 18px 40px rgba(10,132,216,0.35)",
+          boxShadow: isAdmin ? "0 18px 40px rgba(15,23,42,0.35)" : "0 18px 40px rgba(10,132,216,0.35)",
           display: "grid",
           placeItems: "center",
+          transition: "all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+          cursor: "pointer",
         }}
+        onMouseEnter={(e) => (e.currentTarget.style.transform = "scale(1.05) translateY(-2px)")}
+        onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
       >
         {open ? <X size={24} /> : <MessageCircle size={26} />}
       </button>
@@ -404,8 +408,8 @@ export default function SupportBotWidget() {
         <div
           style={{
             position: "fixed",
-            right: isMobile ? 8 : 22,
-            left: isMobile ? 8 : "auto",
+            left: isMobile ? 8 : 22,
+            right: isMobile ? 8 : "auto",
             bottom: isMobile ? "calc(env(safe-area-inset-bottom, 0px) + 76px)" : 94,
             width: isMobile ? "auto" : isAdmin ? "min(460px, calc(100vw - 24px))" : "min(360px, calc(100vw - 24px))",
             height: isMobile ? "min(560px, calc(100dvh - 140px))" : isAdmin ? 620 : 520,

@@ -8,6 +8,7 @@ import { ArrowRight, Plus, Minus } from "lucide-react";
 import { useLibrary } from "@/features/library/library.action";
 import type { LibraryItem } from "@/features/library/library.types";
 import { useTranslations } from "next-intl";
+import { resolveMediaUrl } from "@/lib/media";
 
 import One from "public/img/shape/features-shape.png";
 import Two from "public/img/features/1.png";
@@ -35,7 +36,7 @@ const LibrarySection: React.FC = () => {
       slug: it.slug,
       title: it.name || t("untitled"),
       summary: stripHtml(it.description || "").slice(0, 180) || t("summaryFallback"),
-      hero: it.featured_image || it.image_url || "",
+      hero: resolveMediaUrl(it.featured_image || it.image_url || ""),
     }));
   }, [data, t]);
 

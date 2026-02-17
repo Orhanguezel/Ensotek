@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { useLibraryItem, useLibraryFiles, useLibraryImages } from "@/features/library/library.action";
 import { useTranslations } from "next-intl";
 import LibraryPdfPreview from "./LibraryPdfPreview";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface LibraryDetailProps {
   slug: string;
@@ -34,6 +35,8 @@ function isPdfUrl(input?: string | null): boolean {
 
 const LibraryDetail = ({ slug }: LibraryDetailProps) => {
   const t = useTranslations("ensotek.library");
+  const [imageError, setImageError] = React.useState<boolean>(false);
+  const [galleryErrors, setGalleryErrors] = React.useState<Record<string, boolean>>({});
 
   const { data: item, isLoading, isError } = useLibraryItem(slug);
   const libraryId = item?.id || "";
@@ -42,12 +45,22 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
   const { data: images } = useLibraryImages(libraryId);
 
   const html = useMemo(() => resolveHtml(item?.description), [item?.description]);
-  const mainImage = item?.featured_image || item?.image_url || "/img/blog/3/1.jpg";
+  
+  const imageItems = Array.isArray(images) ? images : [];
+  
+  // Determine the main image to show. 
+  // Priority: 1. featured_image, 2. image_url, 3. First record from gallery images.
+  const mainImageRaw = useMemo(() => {
+    if (item?.featured_image) return item.featured_image;
+    if (item?.image_url) return item.image_url;
+    if (imageItems.length > 0) return imageItems[0].image_url;
+    return null;
+  }, [item, imageItems]);
+
+  const mainImage = useMemo(() => resolveMediaUrl(mainImageRaw), [mainImageRaw]);
 
   const fileItems = Array.isArray(files) ? files : [];
-  const imageItems = Array.isArray(images) ? images : [];
-
-  const pdfFile = fileItems.find((f) => isPdfUrl(f.file_url) || isPdfUrl(f.mime_type));
+  const pdfFile = fileItems.find((f: any) => isPdfUrl(f.file_url) || isPdfUrl(f.mime_type));
 
   if (isLoading) {
     return (
@@ -85,15 +98,19 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
                 </Link>
               </div>
 
-              <div className="technical__thumb w-img mb-35">
-                <Image
-                  src={mainImage}
-                  alt={item.name}
-                  width={1200}
-                  height={700}
-                  className="ens-media--fluid"
-                />
-              </div>
+              {mainImage && !imageError && (
+                <div className="technical__thumb w-img mb-35">
+                  <Image
+                    src={mainImage}
+                    alt={item.name}
+                    width={1200}
+                    height={700}
+                    className="ens-media--fluid"
+                    onError={() => setImageError(true)}
+                    priority
+                  />
+                </div>
+              )}
 
               {pdfFile?.file_url ? (
                 <div className="mb-35">
@@ -105,10 +122,6 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
                 <h1 className="postbox__title mb-20">{item.name}</h1>
 
                 <div className="interaction-bar mb-30 pb-20 border-bottom d-flex align-items-center justify-content-between">
-                  {/* <span className="text-muted">
-                    <i className="fal fa-calendar-alt mr-5"></i>
-                    {new Date(item.published_at || item.created_at).toLocaleDateString()}
-                  </span> */}
                   <span className="text-muted">
                     <i className="fal fa-eye mr-5"></i>
                     {item.views || 0}
@@ -134,7 +147,7 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
                   <ul className="sidebar__download-list">
                     {fileItems.map((file) => (
                       <li key={file.id}>
-                        <a href={file.file_url || "#"} target="_blank" rel="noreferrer">
+                        <a href={resolveMediaUrl(file.file_url) || "#"} target="_blank" rel="noreferrer">
                           <i className="fal fa-file-arrow-down mr-8"></i>
                           {file.name || t("downloadFile")}
                         </a>
@@ -144,25 +157,31 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
                 </div>
               ) : null}
 
-              {imageItems.length > 0 ? (
+              {imageItems.length > 0 && imageItems.some(img => !galleryErrors[img.id]) ? (
                 <div className="sideber__widget-item mb-40">
                   <div className="sidebar__contact-title mb-25">
                     <h3>{t("gallery")}</h3>
                   </div>
                   <div className="row g-2">
-                    {imageItems.slice(0, 6).map((img) => (
-                      <div key={img.id} className="col-4">
-                        <a href={img.image_url || "#"} target="_blank" rel="noreferrer">
-                          <Image
-                            src={img.image_url || "/img/blog/3/1.jpg"}
-                            alt={img.alt || item.name}
-                            width={120}
-                            height={90}
-                            className="library__side-thumb"
-                          />
-                        </a>
-                      </div>
-                    ))}
+                    {imageItems.slice(0, 6).map((img) => {
+                      const resolvedImgUrl = resolveMediaUrl(img.image_url);
+                      if (!resolvedImgUrl || galleryErrors[img.id]) return null;
+                      
+                      return (
+                        <div key={img.id} className="col-4">
+                          <a href={resolvedImgUrl} target="_blank" rel="noreferrer">
+                            <Image
+                              src={resolvedImgUrl}
+                              alt={img.alt || item.name}
+                              width={120}
+                              height={90}
+                              className="library__side-thumb"
+                              onError={() => setGalleryErrors(prev => ({ ...prev, [img.id]: true }))}
+                            />
+                          </a>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               ) : null}

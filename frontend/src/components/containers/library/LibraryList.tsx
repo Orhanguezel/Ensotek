@@ -8,6 +8,7 @@ import { ArrowRight, Plus, Minus } from "lucide-react";
 import { useLibrary } from "@/features/library/library.action";
 import type { LibraryItem } from "@/features/library/library.types";
 import { useTranslations } from "next-intl";
+import { resolveMediaUrl } from "@/lib/media";
 
 import One from "public/img/shape/features-shape.png";
 import Two from "public/img/features/1.png";
@@ -52,7 +53,8 @@ const LibraryList: React.FC = () => {
     const mapped = arr.map((it) => {
       const title = safeStr(it.name) || safeStr(it.slug) || t("untitled");
       const summary = excerpt(stripHtml(safeStr(it.description)), 220) || t("summaryFallback");
-      const hero = safeStr(it.featured_image) || safeStr(it.image_url);
+      const heroRaw = safeStr(it.featured_image) || safeStr(it.image_url);
+      const hero = resolveMediaUrl(heroRaw);
 
       return {
         id: safeStr(it.id),

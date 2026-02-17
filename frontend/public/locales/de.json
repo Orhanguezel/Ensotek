@@ -454,7 +454,8 @@
       "defaultDescription": "Gestalten Sie Ihre Innovation und digitale Zukunft mit Vertrauen",
       "trustedBy": "Vertraut von mehr als 1200 Organisationen",
       "companies": "weltweit",
-      "cta": "JETZT STARTEN"
+      "cta": "JETZT STARTEN",
+      "companyName": "ENSOTEK Kühltürme & Technologien Engineering GmbH (Ltd.)"
     },
     "sponsor": {
       "title": "Tausende Unternehmen vertrauen uns"
@@ -712,6 +713,10 @@
       "wbError": "Bitte geben Sie gultige Werte ein.",
       "wbResultLabel": "Feuchtkugeltemperatur:",
       "wbResultPlaceholder": "Das Ergebnis wird hier angezeigt."
+    },
+    "widgets": {
+      "catalog_request": "KATALOG ANFORDERN",
+      "offer_request": "ANGEBOT ANFORDERN"
     },
     "staticPages": {
       "aboutTitle": "Über Uns",

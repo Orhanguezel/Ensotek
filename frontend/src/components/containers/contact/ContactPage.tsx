@@ -117,7 +117,7 @@ export default function ContactPage() {
       <Banner title={t("pages.contact")} />
 
       <section
-        className="touch__arae touch-bg include__bg pt-120 pb-120"
+        className="touch__area touch-bg include__bg pt-120 pb-0"
         data-background="assets/img/shape/touch-shape.png"
       >
         <div className="container">
@@ -274,7 +274,7 @@ export default function ContactPage() {
       </section>
 
       {mapEmbedUrl && (
-        <section className="google__map-area pt-120">
+        <section className="google__map-area pt-0">
           <iframe
             src={mapEmbedUrl}
             title={contactMap.title || `${companyBrand.shortName || "Ensotek"} Map`}

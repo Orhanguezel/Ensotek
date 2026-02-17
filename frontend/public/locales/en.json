@@ -454,7 +454,8 @@
       "defaultDescription": "Build your innovation and digital future with confidence",
       "trustedBy": "Trusted by 1200+ organizations",
       "companies": "worldwide",
-      "cta": "GET STARTED"
+      "cta": "GET STARTED",
+      "companyName": "ENSOTEK Cooling Towers & Technologies Engineering Ltd."
     },
     "sponsor": {
       "title": "Thousands of companies trust us"
@@ -619,6 +620,10 @@
       "wbError": "Please enter valid values.",
       "wbResultLabel": "Wet-bulb temperature:",
       "wbResultPlaceholder": "Result will be shown here."
+    },
+    "widgets": {
+      "catalog_request": "CATALOG REQUEST",
+      "offer_request": "GET OFFER"
     },
     "staticPages": {
       "aboutTitle": "About",

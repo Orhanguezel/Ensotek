@@ -454,7 +454,8 @@
       "defaultDescription": "Yeniliklerinizi ve dijital geleceğinizi birlikte inşa edin",
       "trustedBy": "1200+ kurum tarafından",
       "companies": "güveniliyor",
-      "cta": "HEMEN BAŞLAYIN"
+      "cta": "HEMEN BAŞLAYIN",
+      "companyName": "ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti"
     },
     "sponsor": {
       "title": "Binlerce şirket bize güveniyor"
@@ -619,6 +620,10 @@
       "wbError": "Lütfen geçerli değerler girin.",
       "wbResultLabel": "Yaş termometre sıcaklığı:",
       "wbResultPlaceholder": "Sonuç burada gösterilecektir."
+    },
+    "widgets": {
+      "catalog_request": "KATALOG TALEBİ",
+      "offer_request": "TEKLİF İSTE"
     },
     "staticPages": {
       "aboutTitle": "Kurumsal",

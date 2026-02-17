@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, Fragment, useMemo } from "react";
+import React, { useState, useEffect, Fragment, useMemo, useRef, useCallback } from "react";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
@@ -22,6 +22,8 @@ const Header = () => {
   const pathname = usePathname();
   const [toggleMenu, setToggleMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [menuFits, setMenuFits] = useState(true);
+  const navRef = useRef<HTMLElement>(null);
   const { user, isAuthenticated } = useAuthStore();
   const isLoggedIn = Boolean(isAuthenticated && user);
   const { data: profile } = useProfile({ enabled: isLoggedIn });
@@ -48,19 +50,40 @@ const Header = () => {
     return submenu === openSubMenu ? " sm-btn-active" : " ";
   };
 
+  // Check if the desktop nav menu fits without overflowing
+  const checkMenuFit = useCallback(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    const ul = nav.querySelector("ul");
+    if (!ul) return;
+    // Temporarily show the nav to measure
+    const wasHidden = nav.closest(".header__nav-desktop")?.classList.contains("header__nav-hidden");
+    if (wasHidden) {
+      nav.closest(".header__nav-desktop")?.classList.remove("header__nav-hidden");
+    }
+    const fits = ul.scrollWidth <= nav.clientWidth + 60;
+    if (wasHidden) {
+      nav.closest(".header__nav-desktop")?.classList.add("header__nav-hidden");
+    }
+    setMenuFits(fits);
+  }, []);
+
   useEffect(() => {
     const handleResizeHeader = (): void => {
       setToggleMenu(false);
       setOpenSubMenu(null);
       setShowUserMenu(false);
+      checkMenuFit();
     };
 
     window.addEventListener("resize", handleResizeHeader);
+    // Initial check
+    checkMenuFit();
 
     return () => {
       window.removeEventListener("resize", handleResizeHeader);
     };
-  }, []);
+  }, [checkMenuFit]);
 
   const isHomePage = useMemo(() => {
     const segments = (pathname || "/").split("/").filter(Boolean);
@@ -162,6 +185,11 @@ const Header = () => {
   ];
 
   const displayMenu = headerMenu.length > 0 ? headerMenu : staticMenu;
+
+  // Re-check menu fit when menu items change
+  useEffect(() => {
+    checkMenuFit();
+  }, [displayMenu.length, checkMenuFit]);
 
   const toLocalizedHref = (value?: string) => {
     const raw = (value || "/").trim();
@@ -458,13 +486,13 @@ const Header = () => {
           id="header-sticky"
           className={
             isHomePage
-              ? (scrolled ? " sticky" : " ") + " header__area-3 header__transparent"
+              ? (scrolled ? " sticky" : " is-home-initial") + " header__area-3 header__transparent"
               : " sticky header__area-3"
           }
         >
-          <div className="container">
-            <div className="row align-items-center">
-              <div className="col-xl-2 col-lg-2 col-6">
+          <div className="container-fluid" style={{ maxWidth: 1580 }}>
+            <div className="row align-items-center justify-content-between flex-nowrap">
+              <div className="col-auto">
                 <div className="header__logo">
                   <Link href={toLocalizedHref("/")}>
                     <SiteLogo
@@ -475,19 +503,22 @@ const Header = () => {
                   </Link>
                 </div>
               </div>
-              <div className="col-xl-8 col-lg-8 d-none d-lg-block">
-                <div className="menu__main-wrapper-3 d-flex justify-content-end">
-                  <div className="main-menu main-menu-3 d-none d-lg-block">
-                    <nav id="mobile-menu">
+              <div
+                className={`col d-none d-xl-block header__nav-desktop${menuFits ? "" : " header__nav-hidden"}`}
+                style={{ minWidth: 0 }}
+              >
+                <div className="menu__main-wrapper-3 d-flex justify-content-center">
+                  <div className="main-menu main-menu-3">
+                    <nav id="mobile-menu" ref={navRef}>
                       {renderDesktopMenu(displayMenu)}
                     </nav>
                   </div>
                 </div>
               </div>
-              <div className="col-xl-2 col-lg-2 col-6">
+              <div className="col-auto">
                 <div className="header__right d-flex align-items-center justify-content-end">
                   {isLoggedIn && (
-                    <div className="position-relative d-none d-lg-block me-2">
+                    <div className={`position-relative d-none ${menuFits ? "d-xl-block" : ""} me-2`}>
                       <button
                         className="d-flex align-items-center justify-content-center border-0 bg-white shadow-sm p-0"
                         aria-label="Open account menu"
@@ -530,7 +561,7 @@ const Header = () => {
                       )}
                     </div>
                   )}
-                  <div className="header__hamburger d-none d-xl-block ml-20">
+                  <div className={`header__hamburger d-none ${menuFits ? "d-xl-block" : ""} ml-20`}>
                     <button
                       className="humbager__icon sidebar__active"
                       aria-label="Open menu"
@@ -555,7 +586,7 @@ const Header = () => {
                       </svg>
                     </button>
                   </div>
-                  <div className="header__toggle d-xl-none">
+                  <div className={`header__toggle ${menuFits ? "d-xl-none" : ""}`}>
                     <button
                       className="sidebar__active"
                       aria-label="Toggle Sidebar"

@@ -8,6 +8,7 @@ import { getRuntimeLocaleSettings } from "../../i18n/locale-settings";
 
 import { AosProvider } from '@/providers/AosProvider';
 import { AppProviders } from '@/providers/AppProviders';
+import { StackableWidgets } from '@/features/catalog';
 
 // Global Styles
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -52,6 +53,7 @@ export default async function LocaleLayout({
            <AppProviders>
               <AosProvider>
                 {children}
+                <StackableWidgets />
               </AosProvider>
            </AppProviders>
         </NextIntlClientProvider>

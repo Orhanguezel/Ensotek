@@ -2,10 +2,11 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { sliderService } from "@/features/slider/slider.service";
+import { useSiteSetting } from "@/features/site-settings/siteSettings.action";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -17,7 +18,11 @@ import "swiper/css/navigation";
 
 const HomeBannerOne = () => {
   const t = useTranslations("ensotek.banner");
+  const locale = useLocale();
   const [failedImageIds, setFailedImageIds] = useState<Record<string, boolean>>({});
+  
+  // Fetch contact_info from database for current locale
+  const { data: contactInfoSetting } = useSiteSetting("contact_info");
 
   const { data: sliders, isLoading } = useQuery({
     queryKey: queryKeys.slider.list(),
@@ -98,16 +103,24 @@ const HomeBannerOne = () => {
                               <p className="hero-desc-animate mb-45">
                                 {slider.description}
                               </p>
-                              <div className="hero-btn-animate">
-                                  <Link
-                                      className="solid__btn hero__cta-btn shadow-lg"
-                                      href={slider.buttonLink || "/service"}
-                                  >
-                                      {slider.buttonText || t("cta")}
-                                  </Link>
-                              </div>
                             </div>
                           </div>
+                        </div>
+                      </div>
+                      
+                      {/* Bottom Blue Bar with Company Name */}
+                      <div className="hero__bottom-bar">
+                        <div className="hero__bottom-bar-content">
+                          <span className="hero__company-name">
+                            {(() => {
+                              const value = contactInfoSetting?.value;
+                              if (!value) return t("companyName");
+                              
+                              // Backend might have already parsed it, or it might be a string
+                              const contactInfo = typeof value === 'string' ? JSON.parse(value) : value;
+                              return contactInfo?.companyName || t("companyName");
+                            })()}
+                          </span>
                         </div>
                       </div>
                     </div>
