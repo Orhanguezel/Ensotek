@@ -36,38 +36,48 @@ const NewsSection = () => {
         </div>
 
         <div className="row" data-aos="fade-up" data-aos-delay="300">
-          {items.map((item) => (
-            <div key={item.id} className="col-xl-6 col-lg-6">
-              <div className="blog__item-3 mb-30">
-                <div className="blog__thumb-3 w-img">
-                  <Link href={`/news/${item.slug}`}>
-                    <Image
-                      src={item.image_url || item.featured_image || "/img/blog/3/1.jpg"}
-                      alt={item.featured_image_alt || item.title}
-                      width={700}
-                      height={420}
-                    />
-                  </Link>
-                </div>
-
-                <div className="blog__content-3">
-                  <h3>
-                    <Link href={`/news/${item.slug}`}>{item.title}</Link>
-                  </h3>
-                  <p>{(item.summary || "").replace(/<[^>]*>/g, " ").slice(0, 170)}</p>
-                  <Link className="link-more" href={`/news/${item.slug}`}>
-                    {t("readMore")}
-                  </Link>
+          {isLoading ? (
+            [1, 2].map((n) => (
+              <div key={`news-sk-${n}`} className="col-xl-6 col-lg-6">
+                <div className="blog__item-3 mb-30">
+                  <div className="blog__thumb-3 w-img service__skeleton" style={{ minHeight: 280 }} />
                 </div>
               </div>
-            </div>
-          ))}
-
-          {!isLoading && items.length === 0 ? (
+            ))
+          ) : items.length === 0 ? (
             <div className="col-12 text-center">
               <p>{t("empty")}</p>
             </div>
-          ) : null}
+          ) : (
+            items.map((item) => (
+              <div key={item.id} className="col-xl-6 col-lg-6">
+                <div className="blog__item-3 mb-30">
+                  <div className="blog__thumb-3 w-img">
+                    <Link href={`/news/${item.slug}`}>
+                      <Image
+                        src={item.image_url || item.featured_image || "/img/blog/3/1.jpg"}
+                        alt={item.featured_image_alt || item.title}
+                        width={700}
+                        height={420}
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        style={{ width: "100%", height: "auto" }}
+                      />
+                    </Link>
+                  </div>
+
+                  <div className="blog__content-3">
+                    <h3>
+                      <Link href={`/news/${item.slug}`}>{item.title}</Link>
+                    </h3>
+                    <p>{(item.summary || "").replace(/<[^>]*>/g, " ").slice(0, 170)}</p>
+                    <Link className="link-more" href={`/news/${item.slug}`}>
+                      {t("readMore")}
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
 
         <div className="row">

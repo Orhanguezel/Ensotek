@@ -6,8 +6,13 @@ import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { sliderService } from "@/features/slider/slider.service";
+import type { Slider } from "@/features/slider/slider.type";
 import { useSiteSetting } from "@/features/site-settings/siteSettings.action";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+interface HomeBannerOneProps {
+  initialSliders?: Record<string, unknown>[];
+}
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade, Navigation } from "swiper";
@@ -16,7 +21,7 @@ import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 
-const HomeBannerOne = () => {
+const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
   const t = useTranslations("ensotek.banner");
   const [failedImageIds, setFailedImageIds] = useState<Record<string, boolean>>({});
 
@@ -26,6 +31,7 @@ const HomeBannerOne = () => {
     queryKey: queryKeys.slider.list(),
     queryFn: sliderService.getAll,
     staleTime: 5 * 60 * 1000,
+    initialData: initialSliders?.length ? (initialSliders as unknown as Slider[]) : undefined,
   });
 
   const activeSliders = sliders?.filter((s: any) => s.isActive !== false) || [];
@@ -99,7 +105,9 @@ const HomeBannerOne = () => {
     </div>
   );
 
-  if (isLoading || !hasSliders) {
+  const showLoading = (isLoading && !initialSliders?.length) || (!isLoading && !hasSliders);
+
+  if (showLoading) {
     return (
       <section className="hero__area-3 p-relative overflow-hidden">
         <div className="hero__wrapper-v3">

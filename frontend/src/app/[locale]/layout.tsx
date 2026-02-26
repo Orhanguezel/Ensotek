@@ -130,6 +130,11 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://cdn.ensotek.de" />
+      </head>
       <body suppressHydrationWarning={true}>
         <NextIntlClientProvider locale={locale} messages={messages}>
            <AppProviders>

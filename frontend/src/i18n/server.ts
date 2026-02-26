@@ -90,3 +90,23 @@ export async function fetchProductBySlug(slug: string, locale: string): Promise<
 export async function fetchLibraryBySlug(slug: string, locale: string): Promise<ContentMeta> {
   return fetchContent(`library/by-slug/${encodeURIComponent(slug)}`, locale);
 }
+
+export async function fetchSliders(locale?: string): Promise<Record<string, unknown>[]> {
+  try {
+    const url = `${API_BASE_URL}/sliders`;
+    const headers: Record<string, string> = {};
+    if (locale) {
+      headers['x-locale'] = locale;
+      headers['accept-language'] = locale;
+    }
+    const res = await fetch(url, {
+      next: { revalidate: 60 },
+      headers,
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+  } catch {
+    return [];
+  }
+}

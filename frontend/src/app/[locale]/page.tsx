@@ -13,6 +13,7 @@ import AboutCounter from "@/components/containers/counter/AboutCounter";
 import Newsletter from "@/components/containers/newsletter/Newsletter";
 import LibrarySection from "@/components/containers/library/LibrarySection";
 import NewsSection from "@/components/containers/news/NewsSection";
+import { fetchSliders } from "@/i18n/server";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -20,21 +21,31 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: t("home_title"), description: t("home_description") };
 }
 
-const Home = () => {
+const Home = async ({ params }: { params: Promise<{ locale: string }> }) => {
+  const { locale } = await params;
+  const initialSliders = await fetchSliders(locale);
+  const firstSliderImage =
+    typeof initialSliders[0]?.image === "string" ? initialSliders[0].image : null;
+
   return (
-    <Layout header={1} footer={1}>
-      <HomeBannerOne />
-      <ServiceSection />
-      <AboutCounter />
-      <Newsletter />
-      <LibrarySection />
-      <NewsSection />
-      <SponsorOne />
-      <ProjectOne />
-      <FeedbackOne />
-      <BlogOne /> 
-      <SupportBotWidget />
-    </Layout>
+    <>
+      {firstSliderImage && (
+        <link rel="preload" as="image" href={firstSliderImage} fetchPriority="high" />
+      )}
+      <Layout header={1} footer={1}>
+        <HomeBannerOne initialSliders={initialSliders} />
+        <ServiceSection />
+        <AboutCounter />
+        <Newsletter />
+        <LibrarySection />
+        <NewsSection />
+        <SponsorOne />
+        <ProjectOne />
+        <FeedbackOne />
+        <BlogOne />
+        <SupportBotWidget />
+      </Layout>
+    </>
   );
 };
 
