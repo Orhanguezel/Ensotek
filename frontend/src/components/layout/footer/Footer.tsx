@@ -120,7 +120,7 @@ const Footer = () => {
                         {companyBrand?.name || "ENSOTEK Kühltürme & Technologien"}
                       </span>
                       {companyProfile?.subline && (
-                        <p className="mt-10" style={{ fontSize: "14px", opacity: 0.8 }}>
+                        <p className="mt-10" style={{ fontSize: "16px", opacity: 0.8 }}>
                           {companyProfile.subline}
                         </p>
                       )}
