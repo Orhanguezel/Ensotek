@@ -11,6 +11,13 @@
   gap: 28px;
   filter: drop-shadow(-5px 0 15px rgba(0, 0, 0, 0.1));
 
+  &__label {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    white-space: nowrap;
+  }
+
   &__item {
     display: flex;
     align-items: center;
@@ -19,9 +26,6 @@
     color: var(--clr-common-white) !important;
     text-decoration: none;
     padding: 24px 12px;
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
     border-radius: 6px 0 0 6px;
     font-weight: 700;
     font-size: 13px;
@@ -72,13 +76,14 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      transform: rotate(90deg);
+      // Icon counter-rotates to stay upright while the label rotates
+      transform: rotate(-180deg);
       transition: all 0.3s ease;
     }
 
     &:hover .ens-sticky-widgets__icon {
       background: rgba(255, 255, 255, 0.3);
-      transform: rotate(90deg) scale(1.1);
+      transform: rotate(-180deg) scale(1.1);
     }
   }
 
@@ -512,30 +517,65 @@
   }
 }
 
-@media #{$xs, $sm} {
+// ── Mobile: collapsed icon-only, expands on tap ──────────────
+@media (max-width: 767px) {
   .ens-sticky-widgets {
-    top: 60%;
+    gap: 10px;
+    top: 50%;
+
     &__item {
-      padding: 16px 10px;
-      font-size: 13px;
+      // Horizontal layout (no vertical text)
+      writing-mode: horizontal-tb;
+      flex-direction: row-reverse; // icon on right (at edge), label on left
+      padding: 0;
+      border-radius: 8px 0 0 8px;
+      max-width: 40px;    // collapsed: only icon visible
+      height: 40px;
+      overflow: hidden;
+      justify-content: flex-end;
+      transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+                  background-color 0.3s ease;
 
-      &:hover {
-        padding-right: 18px;
-        margin-left: 0;
+      // Label: hidden by default, fades in when expanded
+      .ens-sticky-widgets__label {
+        writing-mode: horizontal-tb;
+        transform: none;
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        padding-left: 10px;
+        opacity: 0;
+        transition: opacity 0.2s ease 0.15s;
+        white-space: nowrap;
       }
 
+      // Icon: upright, no rotation, right-anchored
       .ens-sticky-widgets__icon {
-        margin-bottom: 8px;
+        transform: none;
+        margin-bottom: 0;
+        margin-right: 5px;
+        margin-left: 5px;
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
       }
-    }
 
-    &--left {
-      top: 65%; // Lower priority than catalog on mobile
-      .ens-sticky-widgets__item {
-        &:hover {
-          padding-left: 18px;
-          padding-right: 10px;
-          margin-right: 0;
+      // Override desktop hover
+      &:hover {
+        padding-right: 0;
+        margin-left: 0;
+        max-width: 40px;
+        &::after { transform: translateX(100%); }
+        .ens-sticky-widgets__icon {
+          transform: none;
+          background: rgba(255, 255, 255, 0.25);
+        }
+      }
+
+      // Expanded state (tap)
+      &.is-expanded {
+        max-width: 160px;
+        .ens-sticky-widgets__label {
+          opacity: 1;
         }
       }
     }
