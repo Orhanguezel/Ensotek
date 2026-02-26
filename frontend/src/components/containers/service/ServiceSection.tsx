@@ -54,6 +54,7 @@ const ServiceSection: React.FC = () => {
                       width={640}
                       height={420}
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                      style={{ width: '100%', height: 'auto' }}
                     />
                   </div>
 
