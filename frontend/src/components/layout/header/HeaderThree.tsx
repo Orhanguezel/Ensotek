@@ -192,7 +192,7 @@ const HeaderThree = () => {
                 </div>
               </div>
               <div className="offcanvas__contact mt-30 mb-20">
-                <h4>Contact Info</h4>
+                <p>Contact Info</p>
                 <ul>
                   <li className="d-flex align-items-center">
                     <div className="offcanvas__contact-icon mr-15">
@@ -200,7 +200,7 @@ const HeaderThree = () => {
                     </div>
                     <div className="offcanvas__contact-text">
                       <Link
-                        target="_blank"
+                        target="_blank" rel="nofollow noopener noreferrer"
                         href="https://www.google.com/maps/place/Dhaka/@23.7806207,90.3492859,12z/data=!3m1!4b1!4m5!3m4!1s0x3755b8b087026b81:0x8fa563bbdd5904c2!8m2!3d23.8104753!4d90.4119873"
                       >
                         12/A, Mirnada City Tower, NYC

@@ -1,8 +1,15 @@
 import React from "react";
+import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import Banner from "@/components/layout/banner/Banner";
 import LegalModulePage from "@/components/containers/legal/LegalModulePage";
 import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("cookie_policy_title") };
+}
 
 const CookiePolicyPage = async ({ params }: { params: Promise<{ locale: string }> }) => {
   const { locale } = await params;

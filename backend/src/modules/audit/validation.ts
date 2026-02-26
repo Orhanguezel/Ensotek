@@ -24,6 +24,7 @@ export const auditRequestLogsListQuerySchema = z.object({
   ip: z.string().max(64).optional(),
 
   only_admin: boolLike.optional(),
+  exclude_localhost: boolLike.optional(),
 
   created_from: z.string().optional(),
   created_to: z.string().optional(),
@@ -46,6 +47,8 @@ export const auditAuthEventsListQuerySchema = z.object({
   email: z.string().max(255).optional(),
   ip: z.string().max(64).optional(),
 
+  exclude_localhost: boolLike.optional(),
+
   created_from: z.string().optional(),
   created_to: z.string().optional(),
 
@@ -65,6 +68,7 @@ export type AuditAuthEventsListQuery = z.infer<typeof auditAuthEventsListQuerySc
 export const auditMetricsDailyQuerySchema = z.object({
   days: z.coerce.number().int().min(1).max(90).default(14),
   only_admin: boolLike.optional(),
+  exclude_localhost: boolLike.optional(),
   path_prefix: z.string().max(255).optional(),
 });
 
@@ -77,6 +81,7 @@ export type AuditMetricsDailyQuery = z.infer<typeof auditMetricsDailyQuerySchema
 export const auditGeoStatsQuerySchema = z.object({
   days: z.coerce.number().int().min(1).max(90).default(30),
   only_admin: boolLike.optional(),
+  exclude_localhost: boolLike.optional(),
   source: z.enum(['requests', 'auth']).default('requests'),
 });
 
@@ -91,3 +96,72 @@ export const auditClearQuerySchema = z.object({
 });
 
 export type AuditClearQuery = z.infer<typeof auditClearQuerySchema>;
+
+/* -------------------------------------------------------------
+ * ANALYTICS – Date range query (shared base)
+ * ------------------------------------------------------------- */
+export const analyticsDateRangeQuery = z.object({
+  created_from: z.string().optional(),
+  created_to: z.string().optional(),
+  exclude_localhost: boolLike.optional(),
+  limit: z.coerce.number().int().min(1).max(100).optional(),
+});
+
+export type AnalyticsDateRangeQuery = z.infer<typeof analyticsDateRangeQuery>;
+
+/* -------------------------------------------------------------
+ * ANALYTICS – Hourly breakdown query
+ * ------------------------------------------------------------- */
+export const analyticsHourlyQuery = z.object({
+  created_from: z.string().min(1, 'created_from is required'),
+  created_to: z.string().min(1, 'created_to is required'),
+  exclude_localhost: boolLike.optional(),
+});
+
+export type AnalyticsHourlyQuery = z.infer<typeof analyticsHourlyQuery>;
+
+/* -------------------------------------------------------------
+ * ANALYTICS – Response time stats query
+ * ------------------------------------------------------------- */
+export const analyticsResponseTimeQuery = z.object({
+  created_from: z.string().optional(),
+  created_to: z.string().optional(),
+  exclude_localhost: boolLike.optional(),
+  path: z.string().max(255).optional(),
+});
+
+export type AnalyticsResponseTimeQuery = z.infer<typeof analyticsResponseTimeQuery>;
+
+/* -------------------------------------------------------------
+ * ANALYTICS – Monthly aggregation query
+ * ------------------------------------------------------------- */
+export const analyticsMonthlyQuery = z.object({
+  months: z.coerce.number().int().min(1).max(24).default(12),
+  exclude_localhost: boolLike.optional(),
+});
+
+export type AnalyticsMonthlyQuery = z.infer<typeof analyticsMonthlyQuery>;
+
+/* -------------------------------------------------------------
+ * EXPORT – Audit logs export query
+ * ------------------------------------------------------------- */
+export const auditExportQuery = z.object({
+  format: z.enum(['csv', 'json']).default('csv'),
+
+  // Shared filters (same as list endpoints)
+  q: z.string().optional(),
+  method: z.string().max(16).optional(),
+  status_code: z.coerce.number().int().min(100).max(599).optional(),
+  user_id: z.string().max(64).optional(),
+  ip: z.string().max(64).optional(),
+  only_admin: boolLike.optional(),
+  exclude_localhost: boolLike.optional(),
+  created_from: z.string().optional(),
+  created_to: z.string().optional(),
+
+  // Auth events specific
+  event: AUDIT_AUTH_EVENT_ENUM.optional(),
+  email: z.string().max(255).optional(),
+});
+
+export type AuditExportQuery = z.infer<typeof auditExportQuery>;

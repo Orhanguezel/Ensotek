@@ -183,7 +183,7 @@ const ServiceDetail = ({ item }: ServiceDetailProps) => {
                 <div className="sideber__widget-item">
                     <div className="slideber__thumb w-img" style={{ borderRadius: '15px', overflow: 'hidden' }}>
                         <Image 
-                            src="/img/others/sidebar.jpg" 
+                            src="/img/project/03.jpg" 
                             alt={t("sidebarAlt")} 
                             width={400} 
                             height={500}

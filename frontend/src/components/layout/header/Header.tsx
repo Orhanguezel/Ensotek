@@ -304,7 +304,7 @@ const Header = () => {
             <div className="offcanvas__content">
               <div className="offcanvas__top mb-40 d-flex justify-content-between align-items-center">
                 <div className="offcanvas__logo">
-                  <Link href={toLocalizedHref("/")}>
+                  <Link href={toLocalizedHref("/")} aria-label={companyBrand?.shortName || "Ensotek"} title={companyBrand?.shortName || "Ensotek"}>
                     <SiteLogo
                       variant="dark"
                       alt={companyBrand?.shortName || "Ensotek"}
@@ -400,7 +400,7 @@ const Header = () => {
                 </div>
               </div>
               <div className="offcanvas__contact mt-30 mb-20">
-                <h4>Contact Info</h4>
+                <p>Contact Info</p>
                 <ul>
                   <li className="d-flex align-items-center">
                     <div className="offcanvas__contact-icon mr-15">
@@ -417,7 +417,7 @@ const Header = () => {
                     <div className="offcanvas__contact-text">
                       <Link
                         href={companyBrand?.website || "https://www.ensotek.de"}
-                        target="_blank"
+                        target="_blank" rel="nofollow noopener noreferrer"
                       >
                         {companyBrand?.website || "www.ensotek.de"}
                       </Link>
@@ -428,41 +428,41 @@ const Header = () => {
                 <div className="offcanvas__social">
                   <div className="ens-social-links is-large is-light">
                     {socialLinks?.facebook && (
-                      <Link href={socialLinks.facebook} target="_blank" className="ens-social-links__item facebook" aria-label="Facebook">
+                      <Link href={socialLinks.facebook} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item facebook" aria-label="Facebook">
                         <i className="fa-brands fa-facebook-f"></i>
                       </Link>
                     )}
                     {(socialLinks?.x || socialLinks?.twitter) && (
-                      <Link href={socialLinks.x || socialLinks.twitter} target="_blank" className="ens-social-links__item twitter" aria-label="Twitter">
+                      <Link href={socialLinks.x || socialLinks.twitter} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item twitter" aria-label="Twitter">
                         <i className="fa-brands fa-twitter"></i>
                       </Link>
                     )}
                     {socialLinks?.youtube && (
-                      <Link href={socialLinks.youtube} target="_blank" className="ens-social-links__item youtube" aria-label="YouTube">
+                      <Link href={socialLinks.youtube} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item youtube" aria-label="YouTube">
                         <i className="fa-brands fa-youtube"></i>
                       </Link>
                     )}
                     {socialLinks?.linkedin && (
-                      <Link href={socialLinks.linkedin} target="_blank" className="ens-social-links__item linkedin" aria-label="LinkedIn">
+                      <Link href={socialLinks.linkedin} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item linkedin" aria-label="LinkedIn">
                         <i className="fa-brands fa-linkedin-in"></i>
                       </Link>
                     )}
                     {socialLinks?.instagram && (
-                      <Link href={socialLinks.instagram} target="_blank" className="ens-social-links__item instagram" aria-label="Instagram">
+                      <Link href={socialLinks.instagram} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item instagram" aria-label="Instagram">
                         <i className="fa-brands fa-instagram"></i>
                       </Link>
                     )}
                     {socialLinks?.tiktok && (
-                      <Link href={socialLinks.tiktok} target="_blank" className="ens-social-links__item tiktok" aria-label="TikTok">
+                      <Link href={socialLinks.tiktok} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item tiktok" aria-label="TikTok">
                         <i className="fa-brands fa-tiktok"></i>
                       </Link>
                     )}
                     {!socialLinks && (
                       <>
-                        <Link href={toLocalizedHref("/")} className="ens-social-links__item facebook"><i className="fa-brands fa-facebook-f"></i></Link>
-                        <Link href={toLocalizedHref("/")} className="ens-social-links__item twitter"><i className="fa-brands fa-twitter"></i></Link>
-                        <Link href={toLocalizedHref("/")} className="ens-social-links__item youtube"><i className="fa-brands fa-youtube"></i></Link>
-                        <Link href={toLocalizedHref("/")} className="ens-social-links__item linkedin"><i className="fa-brands fa-linkedin-in"></i></Link>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item facebook" aria-label="Facebook" title="Facebook"><i className="fa-brands fa-facebook-f"></i></Link>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item twitter" aria-label="Twitter" title="Twitter"><i className="fa-brands fa-twitter"></i></Link>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item youtube" aria-label="YouTube" title="YouTube"><i className="fa-brands fa-youtube"></i></Link>
+                        <Link href={toLocalizedHref("/")} className="ens-social-links__item linkedin" aria-label="LinkedIn" title="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></Link>
                       </>
                     )}
                   </div>
@@ -489,7 +489,7 @@ const Header = () => {
             <div className="row align-items-center justify-content-between flex-nowrap">
               <div className="col-auto">
                 <div className="header__logo">
-                  <Link href={toLocalizedHref("/")}>
+                  <Link href={toLocalizedHref("/")} aria-label={companyBrand?.shortName || "Ensotek"} title={companyBrand?.shortName || "Ensotek"}>
                     <SiteLogo
                       variant={isHomePage && !scrolled ? "light" : "dark"}
                       alt={companyBrand?.shortName || "Ensotek"}

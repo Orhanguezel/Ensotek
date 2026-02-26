@@ -102,7 +102,7 @@ const Footer = () => {
                 <div className="col-xl-4 col-lg-4 col-md-5 col-sm-6">
                   <div className="footer__widget mb-55">
                     <div className="footer__logo mb-20">
-                      <Link href="/">
+                      <Link href="/" aria-label={companyBrand?.shortName || "Ensotek"} title={companyBrand?.shortName || "Ensotek"}>
                         {logoUrl ? (
                           <Image
                             src={logoUrl}
@@ -128,41 +128,41 @@ const Footer = () => {
                     <div className="touch__social">
                       <div className="ens-social-links is-large">
                         {socialLinks?.facebook && (
-                          <Link href={socialLinks.facebook} target="_blank" className="ens-social-links__item facebook" aria-label="Facebook">
+                          <Link href={socialLinks.facebook} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item facebook" aria-label="Facebook">
                             <i className="fa-brands fa-facebook-f"></i>
                           </Link>
                         )}
                         {(socialLinks?.x || socialLinks?.twitter) && (
-                          <Link href={socialLinks.x || socialLinks.twitter} target="_blank" className="ens-social-links__item twitter" aria-label="Twitter">
+                          <Link href={socialLinks.x || socialLinks.twitter} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item twitter" aria-label="Twitter">
                             <i className="fa-brands fa-twitter"></i>
                           </Link>
                         )}
                         {socialLinks?.youtube && (
-                          <Link href={socialLinks.youtube} target="_blank" className="ens-social-links__item youtube" aria-label="YouTube">
+                          <Link href={socialLinks.youtube} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item youtube" aria-label="YouTube">
                             <i className="fa-brands fa-youtube"></i>
                           </Link>
                         )}
                         {socialLinks?.linkedin && (
-                          <Link href={socialLinks.linkedin} target="_blank" className="ens-social-links__item linkedin" aria-label="LinkedIn">
+                          <Link href={socialLinks.linkedin} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item linkedin" aria-label="LinkedIn">
                             <i className="fa-brands fa-linkedin-in"></i>
                           </Link>
                         )}
                         {socialLinks?.instagram && (
-                          <Link href={socialLinks.instagram} target="_blank" className="ens-social-links__item instagram" aria-label="Instagram">
+                          <Link href={socialLinks.instagram} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item instagram" aria-label="Instagram">
                             <i className="fa-brands fa-instagram"></i>
                           </Link>
                         )}
                         {socialLinks?.tiktok && (
-                          <Link href={socialLinks.tiktok} target="_blank" className="ens-social-links__item tiktok" aria-label="TikTok">
+                          <Link href={socialLinks.tiktok} target="_blank" rel="nofollow noopener noreferrer" className="ens-social-links__item tiktok" aria-label="TikTok">
                             <i className="fa-brands fa-tiktok"></i>
                           </Link>
                         )}
                         {!socialLinks && (
                           <>
-                            <Link href="/" className="ens-social-links__item facebook"><i className="fa-brands fa-facebook-f"></i></Link>
-                            <Link href="/" className="ens-social-links__item twitter"><i className="fa-brands fa-twitter"></i></Link>
-                            <Link href="/" className="ens-social-links__item youtube"><i className="fa-brands fa-youtube"></i></Link>
-                            <Link href="/" className="ens-social-links__item linkedin"><i className="fa-brands fa-linkedin-in"></i></Link>
+                            <Link href="/" className="ens-social-links__item facebook" aria-label="Facebook" title="Facebook"><i className="fa-brands fa-facebook-f"></i></Link>
+                            <Link href="/" className="ens-social-links__item twitter" aria-label="Twitter" title="Twitter"><i className="fa-brands fa-twitter"></i></Link>
+                            <Link href="/" className="ens-social-links__item youtube" aria-label="YouTube" title="YouTube"><i className="fa-brands fa-youtube"></i></Link>
+                            <Link href="/" className="ens-social-links__item linkedin" aria-label="LinkedIn" title="LinkedIn"><i className="fa-brands fa-linkedin-in"></i></Link>
                           </>
                         )}
                       </div>

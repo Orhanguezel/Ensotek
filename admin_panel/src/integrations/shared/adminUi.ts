@@ -100,8 +100,9 @@ const emptyNav: AdminNavCopy = {
     storage: '',
     db: '',
     audit: '',
-    availability: '',
+
     reports: '',
+    support: '',
     telegram: '',
     chat: '',
     references: '',
@@ -147,8 +148,9 @@ export function normalizeAdminUiCopy(raw: unknown): AdminUiCopy {
     storage: uiText(itemsRaw.storage),
     db: uiText(itemsRaw.db),
     audit: uiText(itemsRaw.audit),
-    availability: uiText(itemsRaw.availability),
+
     reports: uiText(itemsRaw.reports),
+    support: uiText(itemsRaw.support),
     telegram: uiText(itemsRaw.telegram),
     chat: uiText(itemsRaw.chat),
     references: uiText(itemsRaw.references),

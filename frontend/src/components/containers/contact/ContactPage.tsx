@@ -141,27 +141,27 @@ export default function ContactPage() {
 
                 <div className="touch__social">
                   {socialLinks.facebook && (
-                    <Link href={socialLinks.facebook} target="_blank" rel="noreferrer">
+                    <Link href={socialLinks.facebook} target="_blank" rel="nofollow noreferrer">
                       <i className="fa-brands fa-facebook-f"></i>
                     </Link>
                   )}
                   {socialLinks.x && (
-                    <Link href={socialLinks.x} target="_blank" rel="noreferrer">
+                    <Link href={socialLinks.x} target="_blank" rel="nofollow noreferrer">
                       <i className="fa-brands fa-twitter"></i>
                     </Link>
                   )}
                   {socialLinks.youtube && (
-                    <Link href={socialLinks.youtube} target="_blank" rel="noreferrer">
+                    <Link href={socialLinks.youtube} target="_blank" rel="nofollow noreferrer">
                       <i className="fa-brands fa-youtube"></i>
                     </Link>
                   )}
                   {socialLinks.linkedin && (
-                    <Link href={socialLinks.linkedin} target="_blank" rel="noreferrer">
+                    <Link href={socialLinks.linkedin} target="_blank" rel="nofollow noreferrer">
                       <i className="fa-brands fa-linkedin"></i>
                     </Link>
                   )}
                   {socialLinks.instagram && (
-                    <Link href={socialLinks.instagram} target="_blank" rel="noreferrer">
+                    <Link href={socialLinks.instagram} target="_blank" rel="nofollow noreferrer">
                       <i className="fa-brands fa-instagram"></i>
                     </Link>
                   )}

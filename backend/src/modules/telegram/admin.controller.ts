@@ -6,6 +6,7 @@
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { TelegramInboundListQuerySchema, TelegramAutoReplyUpdateBodySchema } from './validation';
 import { TelegramAdminRepo } from './repository';
+import { isZodValidationError } from './helpers';
 
 export const TelegramAdminController = {
   async listInbound(req: FastifyRequest, reply: FastifyReply) {
@@ -14,11 +15,10 @@ export const TelegramAdminController = {
       const result = await TelegramAdminRepo.listInbound(q);
       return reply.code(200).send(result);
     } catch (e: unknown) {
-      const err = e as { name?: string; issues?: unknown };
-      if (err?.name === 'ZodError') {
+      if (isZodValidationError(e)) {
         return reply
           .code(400)
-          .send({ error: { message: 'validation_error', details: (err as any).issues } });
+          .send({ error: { message: 'validation_error', details: (e as any).issues } });
       }
       req.log.error(e, 'GET /admin/telegram/inbound failed');
       return reply.code(500).send({ message: 'İşlem gerçekleştirilemedi.' });
@@ -41,11 +41,10 @@ export const TelegramAdminController = {
       const result = await TelegramAdminRepo.upsertAutoReply(body);
       return reply.code(200).send(result);
     } catch (e: unknown) {
-      const err = e as { name?: string; issues?: unknown };
-      if (err?.name === 'ZodError') {
+      if (isZodValidationError(e)) {
         return reply
           .code(400)
-          .send({ error: { message: 'validation_error', details: (err as any).issues } });
+          .send({ error: { message: 'validation_error', details: (e as any).issues } });
       }
       req.log.error(e, 'POST /admin/telegram/autoreply failed');
       return reply.code(500).send({ message: 'İşlem gerçekleştirilemedi.' });

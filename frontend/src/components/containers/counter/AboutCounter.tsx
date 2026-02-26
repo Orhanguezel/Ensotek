@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 
 function useCountUp(end: number, duration: number, inView: boolean) {
   const [value, setValue] = useState(0);
@@ -67,9 +66,7 @@ const AboutCounter = () => {
                 </div>
               </div>
               <div className="fact__content">
-                <h3>
-                  <Link href="/">Succeeded projects</Link>
-                </h3>
+                <p>Succeeded projects</p>
                 <p>Projects Completed</p>
               </div>
             </div>
@@ -86,9 +83,7 @@ const AboutCounter = () => {
                 </div>
               </div>
               <div className="fact__content">
-                <h3>
-                  <Link href="/">Succeeded projects</Link>
-                </h3>
+                <p>Succeeded projects</p>
                 <p>Projects Completed</p>
               </div>
             </div>
@@ -105,9 +100,7 @@ const AboutCounter = () => {
                 </div>
               </div>
               <div className="fact__content">
-                <h3>
-                  <Link href="/">Succeeded projects</Link>
-                </h3>
+                <p>Succeeded projects</p>
                 <p>Projects Completed</p>
               </div>
             </div>

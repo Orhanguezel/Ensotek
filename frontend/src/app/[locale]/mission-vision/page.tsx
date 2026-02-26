@@ -1,9 +1,16 @@
 import React from "react";
+import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import Banner from "@/components/layout/banner/Banner";
 import MissionVisionContent from "@/components/containers/custom-pages/MissionVisionContent";
 import { getTranslations } from "next-intl/server";
 import { customPagesService } from "@/features/custom-pages/customPages.service";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("mission_vision_title"), description: t("mission_vision_description") };
+}
 
 const MissionVisionListPage = async ({
   params,

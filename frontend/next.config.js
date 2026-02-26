@@ -31,6 +31,19 @@ const nextConfig = {
     ],
   },
 
+  async rewrites() {
+    return {
+      // beforeFiles: runs before static files + pages → transparent rewrite (no redirect)
+      // `/` → `/de` so that http://localhost:3002 serves the default locale without a redirect.
+      // Update `/de` here if FALLBACK_LOCALE ever changes.
+      beforeFiles: [
+        { source: '/', destination: '/de' },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
+
   async redirects() {
     return [
       {
@@ -123,7 +136,7 @@ const nextConfig = {
         isDev
           ? 'http://127.0.0.1:8086 http://localhost:8086 ws://127.0.0.1:8086 ws://localhost:8086'
           : ''
-      } https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://ensotek.de https://www.ensotek.de https://cdn.ensotek.de`,
+      } https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://ensotek.de https://www.ensotek.de https://cdn.ensotek.de https://cdn.jsdelivr.net`,
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",

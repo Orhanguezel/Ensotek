@@ -121,7 +121,7 @@ const HomeTwoFeedback = () => {
                                 </p>
                                 <div className="feedback__meta">
                                   <div className="feedback__meta-author">
-                                    <h5>Neal Kapur</h5>
+                                    <p>Neal Kapur</p>
                                     <span>Head of Marketing at Glossy</span>
                                   </div>
                                   <div className="feedback__meta-thumb">
@@ -208,7 +208,7 @@ const HomeTwoFeedback = () => {
                                 </p>
                                 <div className="feedback__meta">
                                   <div className="feedback__meta-author">
-                                    <h5>Neal Kapur</h5>
+                                    <p>Neal Kapur</p>
                                     <span>Head of Marketing at Glossy</span>
                                   </div>
                                   <div className="feedback__meta-thumb">

@@ -3,12 +3,16 @@
 // Ensotek – Audit Service
 //   - shouldSkipAuditLog()
 //   - writeRequestAuditLog()
+//   - sanitizeRequestBody()
+//   - startRetentionJob()
 // =============================================================
 
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { db } from '@/db/client';
-import { auditRequestLogs } from './schema';
+import { auditRequestLogs, auditAuthEvents } from './schema';
+import { auditEvents } from './audit_events.schema';
 import { emitAppEvent } from '@/common/events/bus';
+import { sql } from 'drizzle-orm';
 import geoip from 'geoip-lite';
 
 /* -------------------- helper: headers -------------------- */
@@ -39,7 +43,7 @@ export function shouldSkipAuditLog(req: FastifyRequest): boolean {
   if (path === '/api/health' || path === '/health') return true;
   if (path.startsWith('/uploads/')) return true;
 
-  // istersen audit stream’i loglama (loop önler)
+  // istersen audit stream'i loglama (loop önler)
   if (path.startsWith('/api/admin/audit/stream')) return true;
 
   return false;
@@ -122,6 +126,56 @@ function normalizeGeo(req: FastifyRequest, ip: string): { country: string | null
   return { country: null, city: null };
 }
 
+/* -------------------- request body sanitization -------------------- */
+const SENSITIVE_FIELDS = new Set([
+  'password',
+  'password_hash',
+  'token',
+  'secret',
+  'api_key',
+  'apikey',
+  'access_token',
+  'refresh_token',
+  'authorization',
+  'credit_card',
+  'cvv',
+  'ssn',
+  'pin',
+  'current_password',
+  'new_password',
+  'confirm_password',
+]);
+
+const MAX_BODY_SIZE = 4096; // 4KB
+
+function stripSensitive(obj: Record<string, any>): void {
+  for (const key of Object.keys(obj)) {
+    if (SENSITIVE_FIELDS.has(key.toLowerCase())) {
+      obj[key] = '[REDACTED]';
+    } else if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+      stripSensitive(obj[key]);
+    }
+  }
+}
+
+function sanitizeRequestBody(body: unknown): string | null {
+  if (!body || typeof body !== 'object') return null;
+
+  try {
+    const cloned = JSON.parse(JSON.stringify(body));
+    if (typeof cloned === 'object' && cloned !== null) {
+      stripSensitive(cloned);
+    }
+    const json = JSON.stringify(cloned);
+    if (json.length > MAX_BODY_SIZE) {
+      return json.slice(0, MAX_BODY_SIZE) + '...[TRUNCATED]';
+    }
+    return json;
+  } catch {
+    return null;
+  }
+}
+
 /* -------------------- writer -------------------- */
 export async function writeRequestAuditLog(args: {
   req: FastifyRequest;
@@ -143,10 +197,32 @@ export async function writeRequestAuditLog(args: {
   const ua = normalizeUserAgent(req);
   const referer = normalizeReferer(req);
   const geo = normalizeGeo(req, ip);
+  const method = String(req.method || '').toUpperCase();
+
+  // Error detail capture (set by error.ts handler)
+  const auditError = (req as any).auditError as
+    | { message?: string; code?: string; stack?: string }
+    | undefined;
+
+  let errorMessage: string | null = null;
+  let errorCode: string | null = null;
+
+  if (statusCode >= 400 && auditError) {
+    errorMessage = auditError.message ? String(auditError.message).slice(0, 512) : null;
+    errorCode = auditError.code ? String(auditError.code).slice(0, 64) : null;
+  }
+
+  // Request body logging (opt-in via env)
+  let requestBody: string | null = null;
+  const logBody = process.env.LOG_REQUEST_BODY === 'true';
+
+  if (logBody && ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    requestBody = sanitizeRequestBody(req.body);
+  }
 
   await db.insert(auditRequestLogs).values({
     req_id: String(args.reqId || ''),
-    method: String(req.method || '').toUpperCase(),
+    method,
     url,
     path,
     status_code: Number(statusCode || 0),
@@ -158,6 +234,9 @@ export async function writeRequestAuditLog(args: {
     is_admin: isAdmin,
     country: geo.country,
     city: geo.city,
+    error_message: errorMessage,
+    error_code: errorCode,
+    request_body: requestBody,
     created_at: new Date() as any,
   } as any);
 
@@ -167,14 +246,50 @@ export async function writeRequestAuditLog(args: {
     topic: 'audit.request.logged',
     message: 'request_logged',
     meta: {
-      method: String(req.method || '').toUpperCase(),
+      method,
       path,
       status_code: Number(statusCode || 0),
       ip,
       response_time_ms: Math.max(0, Math.round(Number(args.responseTimeMs || 0))),
       user_id: userId,
       is_admin: isAdmin,
+      error_message: errorMessage,
+      error_code: errorCode,
     },
     entity: null,
   });
+}
+
+/* -------------------- retention job -------------------- */
+export function startRetentionJob() {
+  const RETENTION_REQUEST_DAYS = Number(process.env.AUDIT_RETENTION_REQUEST_LOGS_DAYS || 90);
+  const RETENTION_AUTH_DAYS = Number(process.env.AUDIT_RETENTION_AUTH_EVENTS_DAYS || 180);
+  const RETENTION_EVENTS_DAYS = Number(process.env.AUDIT_RETENTION_AUDIT_EVENTS_DAYS || 30);
+
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+
+  async function runCleanup() {
+    try {
+      const r1 = await db.execute(
+        sql`DELETE FROM audit_request_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL ${RETENTION_REQUEST_DAYS} DAY)`,
+      );
+      const r2 = await db.execute(
+        sql`DELETE FROM audit_auth_events WHERE created_at < DATE_SUB(NOW(), INTERVAL ${RETENTION_AUTH_DAYS} DAY)`,
+      );
+      const r3 = await db.execute(
+        sql`DELETE FROM audit_events WHERE ts < DATE_SUB(NOW(), INTERVAL ${RETENTION_EVENTS_DAYS} DAY)`,
+      );
+
+      console.log(
+        `[audit] Retention cleanup done — request_logs: ${RETENTION_REQUEST_DAYS}d, auth_events: ${RETENTION_AUTH_DAYS}d, audit_events: ${RETENTION_EVENTS_DAYS}d`,
+      );
+    } catch (err) {
+      console.error('[audit] Retention cleanup failed:', err);
+    }
+  }
+
+  // İlk çalıştırma: startup'tan 30sn sonra (DB'nin hazır olmasını bekle)
+  setTimeout(runCleanup, 30_000);
+  // Sonra her 24 saatte bir
+  setInterval(runCleanup, ONE_DAY_MS);
 }

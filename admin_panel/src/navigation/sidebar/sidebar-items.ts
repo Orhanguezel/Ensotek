@@ -11,7 +11,7 @@ import {
   Bell,
   BookOpen,
   Bot,
-  CalendarCheck,
+
   ClipboardList,
   Cog,
   DollarSign,
@@ -22,6 +22,7 @@ import {
   FolderOpen,
   Folders,
   HardDrive,
+  Headphones,
   HelpCircle,
   Images,
   LayoutDashboard,
@@ -86,10 +87,11 @@ export type AdminNavItemKey =
   | 'storage'
   | 'db'
   | 'audit'
-  | 'availability'
+
   | 'reports'
   | 'offers'
   | 'catalog_requests'
+  | 'support'
   | 'telegram'
   | 'chat'
   | 'references';
@@ -131,7 +133,7 @@ export const adminNavConfig: AdminNavConfigGroup[] = [
       { key: 'footer_sections', url: '/admin/footer-sections', icon: FileText },
       { key: 'faqs', url: '/admin/faqs', icon: HelpCircle },
       { key: 'references', url: '/admin/references', icon: Award },
-      { key: 'availability', url: '/admin/availability', icon: CalendarCheck },
+
     ],
   },
   {
@@ -141,6 +143,7 @@ export const adminNavConfig: AdminNavConfigGroup[] = [
       { key: 'offers', url: '/admin/offer', icon: DollarSign },
       { key: 'catalog_requests', url: '/admin/catalog', icon: ClipboardList },
       { key: 'contacts', url: '/admin/contacts', icon: Contact2 },
+      { key: 'support', url: '/admin/support', icon: Headphones },
       { key: 'reviews', url: '/admin/reviews', icon: MessageSquare },
       { key: 'mail', url: '/admin/mail', icon: Send },
       { key: 'telegram', url: '/admin/telegram', icon: MessageCircle },
@@ -190,10 +193,11 @@ const FALLBACK_TITLES: Record<AdminNavItemKey, string> = {
   users: 'Users',
   email_templates: 'Email Templates',
   notifications: 'Notifications',
+  support: 'Support Tickets',
   storage: 'Storage',
   db: 'Database',
   audit: 'Audit',
-  availability: 'Availability',
+
   reports: 'Reports',
   telegram: 'Telegram',
   chat: 'Chat & AI',

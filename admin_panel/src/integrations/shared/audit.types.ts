@@ -57,6 +57,7 @@ export type AuditRequestLogsListQueryParams = {
   ip?: string;
 
   only_admin?: BoolLike;
+  exclude_localhost?: BoolLike;
 
   created_from?: string; // "2025-12-24 10:00:00.000" gibi
   created_to?: string;
@@ -73,6 +74,7 @@ export type AuditAuthEventsListQueryParams = {
   user_id?: string;
   email?: string;
   ip?: string;
+  exclude_localhost?: BoolLike;
 
   created_from?: string;
   created_to?: string;
@@ -93,6 +95,7 @@ export type AuditAuthEventsListQueryParams = {
 export type AuditMetricsDailyQueryParams = {
   days?: number; // default 14
   only_admin?: BoolLike;
+  exclude_localhost?: BoolLike;
   path_prefix?: string;
 };
 
@@ -135,6 +138,7 @@ export function coerceAuditList<T>(raw: unknown): AuditListResponse<T> {
 export type AuditGeoStatsQueryParams = {
   days?: number;
   only_admin?: BoolLike;
+  exclude_localhost?: BoolLike;
   source?: 'requests' | 'auth';
 };
 
@@ -165,4 +169,133 @@ export function coerceAuditMetricsDaily(raw: unknown): AuditMetricsDailyResponse
   if (Array.isArray(r.items)) return { ...r, days: r.items };
   if (Array.isArray(r.data)) return { ...r, days: r.data };
   return { days: [] };
+}
+
+/* ================================================================
+ * ANALYTICS TYPES
+ * ================================================================ */
+
+export type AnalyticsDateRangeParams = {
+  created_from?: string;
+  created_to?: string;
+  exclude_localhost?: BoolLike;
+  limit?: number;
+};
+
+export type AnalyticsHourlyParams = {
+  created_from: string;
+  created_to: string;
+  exclude_localhost?: BoolLike;
+};
+
+export type AnalyticsResponseTimeParams = {
+  created_from?: string;
+  created_to?: string;
+  exclude_localhost?: BoolLike;
+  path?: string;
+};
+
+export type AnalyticsMonthlyParams = {
+  months?: number;
+  exclude_localhost?: BoolLike;
+};
+
+/* ---- Summary ---- */
+export type AuditSummaryDto = {
+  today_requests: number;
+  today_errors: number;
+  today_error_rate: number;
+  today_avg_response_time: number;
+  today_unique_ips: number;
+  today_unique_users: number;
+  top_error_endpoint: { path: string; count: number } | null;
+  slowest_endpoint: { path: string; avg_ms: number } | null;
+};
+
+/* ---- Top Endpoints ---- */
+export type TopEndpointDto = {
+  path: string;
+  request_count: number;
+  avg_response_time: number;
+  error_rate: number;
+};
+
+/* ---- Slowest Endpoints ---- */
+export type SlowestEndpointDto = {
+  path: string;
+  avg_response_time: number;
+  max_response_time: number;
+  request_count: number;
+};
+
+/* ---- Top Users ---- */
+export type TopUserDto = {
+  user_id: string;
+  email: string | null;
+  full_name: string | null;
+  request_count: number;
+  last_seen: string;
+};
+
+/* ---- Top IPs ---- */
+export type TopIpDto = {
+  ip: string;
+  country: string | null;
+  request_count: number;
+  last_seen: string;
+};
+
+/* ---- Status Distribution ---- */
+export type StatusDistributionDto = {
+  status_group: string;
+  count: number;
+};
+
+/* ---- Method Distribution ---- */
+export type MethodDistributionDto = {
+  method: string;
+  count: number;
+};
+
+/* ---- Hourly Breakdown ---- */
+export type HourlyBreakdownDto = {
+  date: string;
+  hour: number;
+  requests: number;
+  errors: number;
+  avg_response_time: number;
+};
+
+/* ---- Response Time Stats ---- */
+export type ResponseTimeStatsDto = {
+  p50: number;
+  p95: number;
+  p99: number;
+  avg: number;
+  min: number;
+  max: number;
+  total_requests: number;
+};
+
+/* ---- Monthly Aggregation ---- */
+export type MonthlyAggregationDto = {
+  month: string;
+  requests: number;
+  unique_ips: number;
+  errors: number;
+  avg_response_time: number;
+};
+
+/* ---- Coerce helpers ---- */
+function coerceItems<T>(raw: unknown): { items: T[] } {
+  const r = raw as any;
+  if (!r) return { items: [] };
+  if (Array.isArray(r)) return { items: r };
+  if (Array.isArray(r.items)) return { items: r.items };
+  if (Array.isArray(r.data)) return { items: r.data };
+  return { items: [] };
+}
+
+export function coerceAnalyticsItems<T>(raw: unknown): T[] {
+  return coerceItems<T>(raw).items;
 }

@@ -7,7 +7,7 @@ import One from "public/img/others/analys.jpg";
 import Two from "public/img/svg/call.svg";
 import Three from "public/img/svg/mail.svg";
 import Four from "public/img/svg/location.svg";
-import Five from "public/img/others/sidebar.jpg";
+import Five from "public/img/project/03.jpg";
 import Six from "public/img/others/technical-sm-2.jpg";
 import Seven from "public/img/others/technical-sm-1.jpg";
 
@@ -244,7 +244,7 @@ const AnalysArea = () => {
               <div className="sideber__widget-item mb-40">
                 <div className="sidebar__contact">
                   <div className="sidebar__contact-title mb-35">
-                    <h3>Contact Info</h3>
+                    <p>Contact Info</p>
                   </div>
                   <div className="sidebar__contact-inner">
                     <div className="sidebar__contact-item">

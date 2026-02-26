@@ -32,6 +32,10 @@ export const auditRequestLogs = mysqlTable(
     country: varchar('country', { length: 8 }),
     city: varchar('city', { length: 64 }),
 
+    error_message: varchar('error_message', { length: 512 }),
+    error_code: varchar('error_code', { length: 64 }),
+    request_body: longtext('request_body'),
+
     created_at: datetime('created_at', { fsp: 3 })
       .notNull()
       .default(sql`CURRENT_TIMESTAMP(3)`),
@@ -41,6 +45,8 @@ export const auditRequestLogs = mysqlTable(
     index('audit_request_logs_user_idx').on(t.user_id),
     index('audit_request_logs_path_idx').on(t.path),
     index('audit_request_logs_ip_idx').on(t.ip),
+    index('audit_request_logs_status_idx').on(t.status_code),
+    index('audit_request_logs_method_idx').on(t.method),
   ],
 );
 

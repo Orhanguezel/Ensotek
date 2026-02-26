@@ -1,6 +1,4 @@
-import { and, eq, inArray } from 'drizzle-orm';
-import { db } from '@/db/client';
-import { siteSettings } from '@/modules/siteSettings/schema';
+import { getGlobalSiteSettingsMap, safeTrim, toBoolDefault } from '@/modules/_shared';
 
 /**
  * Ensotek Telegram Event Types
@@ -22,35 +20,7 @@ type TelegramSettings = {
   events: Partial<Record<TelegramEvent, boolean>>;
   templates: Partial<Record<TelegramEvent, string>>;
 };
-
-const GLOBAL_LOCALE = '*';
-
-function toBool(v: string | null | undefined, fallback = false): boolean {
-  if (v == null) return fallback;
-  const s = String(v).trim().toLowerCase();
-  if (!s) return fallback;
-  return ['1', 'true', 'yes', 'on', 'y'].includes(s);
-}
-
-function toText(v: string | null | undefined): string {
-  return String(v ?? '').trim();
-}
-
-export async function getSiteSettingsMap(keys: readonly string[]): Promise<Map<string, string>> {
-  if (!keys.length) return new Map();
-
-  const rows = await db
-    .select({ key: siteSettings.key, locale: siteSettings.locale, value: siteSettings.value })
-    .from(siteSettings)
-    .where(and(inArray(siteSettings.key, keys as string[]), inArray(siteSettings.locale, [GLOBAL_LOCALE])));
-
-  const out = new Map<string, string>();
-  for (const k of keys) {
-    const hit = rows.find((r) => r.key === k && r.locale === GLOBAL_LOCALE);
-    if (hit) out.set(k, String(hit.value ?? ''));
-  }
-  return out;
-}
+export const getSiteSettingsMap = getGlobalSiteSettingsMap;
 
 export async function getTelegramSettings(): Promise<TelegramSettings> {
   const events: TelegramEvent[] = [
@@ -81,13 +51,13 @@ export async function getTelegramSettings(): Promise<TelegramSettings> {
   const map = await getSiteSettingsMap(allKeys);
 
   const enabled =
-    toBool(map.get('telegram_notifications_enabled'), false) ||
-    toBool(map.get('telegram_enabled'), false);
+    toBoolDefault(map.get('telegram_notifications_enabled'), false) ||
+    toBoolDefault(map.get('telegram_enabled'), false);
 
-  const webhookEnabled = toBool(map.get('telegram_webhook_enabled'), true);
-  const botToken = toText(map.get('telegram_bot_token'));
-  const defaultChatId = toText(map.get('telegram_default_chat_id')) || null;
-  const legacyChatId = toText(map.get('telegram_chat_id')) || null;
+  const webhookEnabled = toBoolDefault(map.get('telegram_webhook_enabled'), true);
+  const botToken = safeTrim(map.get('telegram_bot_token'));
+  const defaultChatId = safeTrim(map.get('telegram_default_chat_id')) || null;
+  const legacyChatId = safeTrim(map.get('telegram_chat_id')) || null;
 
   const eventMap: Partial<Record<TelegramEvent, boolean>> = {};
   const templates: Partial<Record<TelegramEvent, string>> = {};
@@ -95,11 +65,11 @@ export async function getTelegramSettings(): Promise<TelegramSettings> {
   for (const event of events) {
     const enabledRaw =
       map.get(`telegram_event_${event}_enabled`) ?? map.get(`telegram_${event}_enabled`) ?? null;
-    if (enabledRaw != null) eventMap[event] = toBool(enabledRaw, true);
+    if (enabledRaw != null) eventMap[event] = toBoolDefault(enabledRaw, true);
 
     const templateRaw =
       map.get(`telegram_template_${event}`) ?? map.get(`telegram_${event}_template`) ?? null;
-    const tpl = toText(templateRaw);
+    const tpl = safeTrim(templateRaw);
     if (tpl) templates[event] = tpl;
   }
 

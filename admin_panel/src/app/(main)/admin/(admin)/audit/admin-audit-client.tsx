@@ -4,8 +4,8 @@
 // FILE: src/app/(main)/admin/(admin)/audit/admin-audit-client.tsx
 // Admin Audit (Requests / Auth Events / Daily Metrics / Map)
 // - i18n: useAdminT() ile tüm statikler dil kontrollü
-// - Tabs: requests | auth | metrics | map
-// - URL state: filters + pagination
+// - Tabs: analytics | requests | auth | metrics | map
+// - URL state: filters + pagination + localhost toggle
 // =============================================================
 
 import * as React from 'react';
@@ -22,6 +22,8 @@ import {
   Loader2,
   Globe,
   Trash2,
+  BarChart3,
+  Download,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -50,6 +52,7 @@ import {
 
 import { AuditDailyChart } from '@/components/admin/audit/AuditDailyChart';
 import { AuditGeoMap } from './AuditGeoMap';
+import AuditAnalyticsTab from './AuditAnalyticsTab';
 import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
 
 import type {
@@ -71,7 +74,7 @@ import {
 
 /* ----------------------------- helpers ----------------------------- */
 
-type TabKey = 'requests' | 'auth' | 'metrics' | 'map';
+type TabKey = 'analytics' | 'requests' | 'auth' | 'metrics' | 'map';
 
 function safeText(v: unknown, fb = ''): string {
   const s = String(v ?? '').trim();
@@ -92,11 +95,15 @@ function parseStatusCode(v: string): number | undefined {
 
 function normalizeTab(v: string | null): TabKey {
   const s = String(v ?? '').toLowerCase();
+  if (s === 'analytics') return 'analytics';
   if (s === 'auth') return 'auth';
   if (s === 'metrics') return 'metrics';
   if (s === 'map') return 'map';
-  return 'requests';
+  if (s === 'requests') return 'requests';
+  return 'analytics';
 }
+
+const EXPORT_BASE = '/api/admin/audit/export';
 
 function normalizeBoolLike(v: string | null): boolean {
   return v === '1' || v === 'true';
@@ -174,6 +181,7 @@ export default function AdminAuditClient() {
   const from = sp.get('from') ?? '';
   const to = sp.get('to') ?? '';
   const onlyAdmin = normalizeBoolLike(sp.get('only_admin'));
+  const excludeLocalhost = normalizeBoolLike(sp.get('exclude_localhost'));
 
   const reqUserId = sp.get('req_user_id') ?? '';
   const reqIp = sp.get('req_ip') ?? '';
@@ -198,6 +206,7 @@ export default function AdminAuditClient() {
   const [fromText, setFromText] = React.useState(from);
   const [toText, setToText] = React.useState(to);
   const [onlyAdminFlag, setOnlyAdminFlag] = React.useState(onlyAdmin);
+  const [excludeLocalhostFlag, setExcludeLocalhostFlag] = React.useState(excludeLocalhost);
   const [reqUserIdText, setReqUserIdText] = React.useState(reqUserId);
   const [reqIpText, setReqIpText] = React.useState(reqIp);
   const [sortText, setSortText] = React.useState<SortKey>(sort);
@@ -219,6 +228,7 @@ export default function AdminAuditClient() {
   React.useEffect(() => setFromText(from), [from]);
   React.useEffect(() => setToText(to), [to]);
   React.useEffect(() => setOnlyAdminFlag(onlyAdmin), [onlyAdmin]);
+  React.useEffect(() => setExcludeLocalhostFlag(excludeLocalhost), [excludeLocalhost]);
   React.useEffect(() => setReqUserIdText(reqUserId), [reqUserId]);
   React.useEffect(() => setReqIpText(reqIp), [reqIp]);
   React.useEffect(() => setSortText(sort), [sort]);
@@ -241,6 +251,7 @@ export default function AdminAuditClient() {
       from,
       to,
       only_admin: onlyAdmin ? '1' : '',
+      exclude_localhost: excludeLocalhost ? '1' : '',
       req_user_id: reqUserId,
       req_ip: reqIp,
       sort,
@@ -266,6 +277,7 @@ export default function AdminAuditClient() {
       from: merged.from || undefined,
       to: merged.to || undefined,
       only_admin: merged.only_admin || undefined,
+      exclude_localhost: merged.exclude_localhost || undefined,
       req_user_id: merged.req_user_id || undefined,
       req_ip: merged.req_ip || undefined,
       sort: merged.sort !== 'created_at' ? merged.sort : undefined,
@@ -400,6 +412,7 @@ export default function AdminAuditClient() {
       user_id: reqUserId || undefined,
       ip: reqIp || undefined,
       only_admin: onlyAdmin ? 1 : undefined,
+      exclude_localhost: excludeLocalhost ? 1 : undefined,
       created_from: from || undefined,
       created_to: to || undefined,
       sort: sort as 'created_at' | 'response_time_ms' | 'status_code',
@@ -407,7 +420,7 @@ export default function AdminAuditClient() {
       limit,
       offset,
     };
-  }, [q, method, status, reqUserId, reqIp, onlyAdmin, from, to, sort, orderDir, limit, offset]);
+  }, [q, method, status, reqUserId, reqIp, onlyAdmin, excludeLocalhost, from, to, sort, orderDir, limit, offset]);
 
   const authParams = React.useMemo(() => {
     const ev = event && event !== ALL ? event : undefined;
@@ -416,6 +429,7 @@ export default function AdminAuditClient() {
       email: email || undefined,
       user_id: user_id || undefined,
       ip: ip || undefined,
+      exclude_localhost: excludeLocalhost ? 1 : undefined,
       created_from: from || undefined,
       created_to: to || undefined,
       sort: 'created_at' as const,
@@ -423,16 +437,17 @@ export default function AdminAuditClient() {
       limit,
       offset,
     };
-  }, [event, email, user_id, ip, from, to, limit, offset]);
+  }, [event, email, user_id, ip, excludeLocalhost, from, to, limit, offset]);
 
   const metricsParams = React.useMemo(() => {
     const d = safeInt(days, 14) || 14;
     return {
       days: d,
       only_admin: onlyAdmin ? 1 : undefined,
+      exclude_localhost: excludeLocalhost ? 1 : undefined,
       path_prefix: path_prefix || undefined,
     };
-  }, [days, onlyAdmin, path_prefix]);
+  }, [days, onlyAdmin, excludeLocalhost, path_prefix]);
 
   const reqQ = useListAuditRequestLogsAdminQuery(
     tab === 'requests' ? (reqParams as any) : (undefined as any),
@@ -454,9 +469,10 @@ export default function AdminAuditClient() {
     return {
       days: d,
       only_admin: onlyAdmin ? 1 : undefined,
+      exclude_localhost: excludeLocalhost ? 1 : undefined,
       source: 'requests' as const,
     };
-  }, [days, onlyAdmin]);
+  }, [days, onlyAdmin, excludeLocalhost]);
 
   const geoQ = useGetAuditGeoStatsAdminQuery(
     tab === 'map' ? (geoParams as any) : (undefined as any),
@@ -524,7 +540,44 @@ export default function AdminAuditClient() {
           <h1 className="text-lg font-semibold">{t('header.title')}</h1>
           <p className="text-sm text-muted-foreground">{t('header.description')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Localhost toggle */}
+          <div className="flex items-center gap-2 rounded-md border px-3 py-1.5">
+            <Switch
+              checked={excludeLocalhostFlag}
+              onCheckedChange={(v) => {
+                setExcludeLocalhostFlag(v);
+                apply({ exclude_localhost: v ? '1' : '' });
+              }}
+              id="exclude-localhost"
+            />
+            <Label htmlFor="exclude-localhost" className="text-xs whitespace-nowrap cursor-pointer">
+              {t('common.excludeLocalhost')}
+            </Label>
+          </div>
+
+          {/* Export dropdown */}
+          <Select onValueChange={(v) => {
+            const base = `${EXPORT_BASE}/${v.startsWith('auth') ? 'auth-events' : 'request-logs'}`;
+            const format = v.endsWith('-json') ? 'json' : 'csv';
+            const params = new URLSearchParams({ format });
+            if (excludeLocalhost) params.set('exclude_localhost', '1');
+            if (from) params.set('created_from', from);
+            if (to) params.set('created_to', to);
+            window.open(`${base}?${params}`, '_blank');
+          }}>
+            <SelectTrigger className="w-auto gap-1">
+              <Download className="h-4 w-4" />
+              <SelectValue placeholder={t('common.export')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="requests-csv">{t('common.exportCsv')} (Requests)</SelectItem>
+              <SelectItem value="requests-json">{t('common.exportJson')} (Requests)</SelectItem>
+              <SelectItem value="auth-csv">{t('common.exportCsv')} (Auth)</SelectItem>
+              <SelectItem value="auth-json">{t('common.exportJson')} (Auth)</SelectItem>
+            </SelectContent>
+          </Select>
+
           <Button variant="outline" onClick={onRefresh} disabled={anyLoading}>
             <RefreshCcw className="mr-2 h-4 w-4" />
             {t('refresh')}
@@ -537,7 +590,10 @@ export default function AdminAuditClient() {
       </div>
 
       <Tabs value={tab} onValueChange={onTabChange}>
-        <TabsList>
+        <TabsList className="flex-wrap">
+          <TabsTrigger value="analytics">
+            <BarChart3 className="mr-2 h-4 w-4" /> {t('tabs.analytics')}
+          </TabsTrigger>
           <TabsTrigger value="requests">
             <Activity className="mr-2 h-4 w-4" /> {t('tabs.requests')}
           </TabsTrigger>
@@ -551,6 +607,14 @@ export default function AdminAuditClient() {
             <Globe className="mr-2 h-4 w-4" /> {t('tabs.map')}
           </TabsTrigger>
         </TabsList>
+
+        {/* ==================== ANALYTICS TAB ==================== */}
+        <TabsContent value="analytics" className="space-y-4">
+          <AuditAnalyticsTab
+            excludeLocalhost={excludeLocalhost}
+            dateRange={{ from: from, to: to }}
+          />
+        </TabsContent>
 
         {/* ==================== REQUESTS TAB ==================== */}
         <TabsContent value="requests" className="space-y-4">

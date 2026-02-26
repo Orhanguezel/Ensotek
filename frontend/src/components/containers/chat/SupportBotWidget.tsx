@@ -73,7 +73,7 @@ function renderMessageText(raw: string, isMine: boolean) {
           key={`${part}-${idx}`}
           href={part}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="nofollow noopener noreferrer"
           style={{
             color: isMine ? "#ffffff" : "#0a5ea8",
             textDecoration: "underline",

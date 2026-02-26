@@ -146,7 +146,7 @@ const QualityDetailContent = ({ items, ui }: QualityDetailContentProps) => {
                             <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '10px' }}>
                               {ui?.ui_quality_certificate_label || "Certificate"} {idx + 1}
                             </h4>
-                            <a href={imgUrl} target="_blank" className="tp-btn TP-btn-sm w-100 text-center" rel="noreferrer" style={{ padding: '8px', fontSize: '14px' }}>
+                            <a href={imgUrl} target="_blank" className="tp-btn TP-btn-sm w-100 text-center" rel="nofollow noreferrer" style={{ padding: '8px', fontSize: '14px' }}>
                               {ui?.ui_quality_certificate_open || "Open"}
                             </a>
                           </div>

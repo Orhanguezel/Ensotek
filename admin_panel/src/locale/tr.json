@@ -1,65 +1,78 @@
 {
   "admin": {
     "reports": {
-      "title": "Raporlar (Admin)",
-      "description": "KPI, kaynak performansı ve lokasyon kırılımı.",
+      "title": "Raporlar",
+      "description": "Sistem trafik analizi, performans metrikleri ve kullanıcı aktiviteleri.",
       "refresh": "Yenile",
-      "tabs": {
-        "title": "Sekmeler",
-        "description": "KPI • Kaynak Performansı • Lokasyonlar",
-        "kpi": "KPI",
-        "users": "Kaynaklar",
-        "locations": "Lokasyonlar"
-      },
+      "loading": "Yükleniyor...",
+      "noRecords": "Kayıt bulunamadı.",
+      "excludeLocalhost": "Localhost Hariç",
+      "export": "Dışa Aktar",
+      "exportCsv": "CSV İndir",
+      "exportJson": "JSON İndir",
       "filter": {
-        "title": "Filtre",
-        "description": "Tarih aralığı (başlangıç/bitiş) ve kaynak seçimi.",
-        "apply": "Uygula",
-        "reset": "Sıfırla",
         "from": "Başlangıç",
         "to": "Bitiş",
-        "role": "Rol",
-        "roleHint": "Sadece “Kaynaklar” sekmesinde kullanılır.",
-        "invalidFrom": "Başlangıç geçersiz tarih.",
-        "invalidTo": "Bitiş geçersiz tarih."
+        "apply": "Uygula",
+        "reset": "Sıfırla"
       },
-      "kpi": {
-        "daily": "Günlük",
-        "weekly": "Haftalık",
-        "monthly": "Aylık",
-        "loadingError": "KPI yüklenemedi.",
-        "noData": "Kayıt yok.",
-        "bucket": "Dönem",
-        "total": "Toplam",
-        "completed": "Tamamlanan",
-        "success": "Başarı"
+      "tabs": {
+        "overview": "Genel Bakış",
+        "performance": "Performans",
+        "traffic": "Trafik",
+        "users": "Kullanıcılar"
+      },
+      "overview": {
+        "todayRequests": "Bugünkü İstekler",
+        "todayErrors": "Bugünkü Hatalar",
+        "errorRate": "Hata Oranı",
+        "avgResponseTime": "Ort. Yanıt Süresi",
+        "uniqueVisitors": "Tekil Ziyaretçi",
+        "uniqueUsers": "Tekil Kullanıcı",
+        "dailyChart": "Günlük Metrikler",
+        "dailyChartDesc": "Son {days} günün istek istatistikleri.",
+        "monthlyTrend": "Aylık Trend",
+        "monthlyTrendDesc": "Son 12 ayın istek, hata ve yanıt süresi trendi.",
+        "requests": "İstekler",
+        "errors": "Hatalar",
+        "avgTime": "Ort. Süre"
+      },
+      "performance": {
+        "responseTimeStats": "Yanıt Süresi İstatistikleri",
+        "responseTimeStatsDesc": "Yüzdelik dilimler ve ortalama yanıt süreleri.",
+        "topEndpoints": "En Çok İstek Alan Endpointler",
+        "topEndpointsDesc": "En fazla istek alan API endpointleri.",
+        "slowestEndpoints": "En Yavaş Endpointler",
+        "slowestEndpointsDesc": "Ortalama yanıt süresine göre en yavaş endpointler.",
+        "path": "Yol",
+        "requestCount": "İstek Sayısı",
+        "avgTime": "Ort. Süre",
+        "maxTime": "Maks. Süre",
+        "errorRate": "Hata Oranı",
+        "avg": "Ortalama",
+        "min": "Minimum",
+        "max": "Maksimum",
+        "totalRequests": "Toplam İstek"
+      },
+      "traffic": {
+        "statusDistribution": "Durum Kodu Dağılımı",
+        "statusDistributionDesc": "HTTP durum kodlarının dağılımı (2xx, 3xx, 4xx, 5xx).",
+        "methodDistribution": "HTTP Metod Dağılımı",
+        "methodDistributionDesc": "HTTP metodlarının kullanım dağılımı.",
+        "requests": "İstekler",
+        "geoTitle": "Coğrafi Dağılım",
+        "geoDesc": "Son 30 günün konuma göre istek dağılımı."
       },
       "users": {
-        "title": "Kaynak Performansı",
-        "description": "rol={role} • kayıt: {count}",
-        "loadingError": "Performans raporu yüklenemedi.",
-        "noData": "Kayıt bulunamadı.",
-        "table": {
-          "user": "Kaynak",
-          "total": "Rezervasyon",
-          "completed": "Tamamlanan",
-          "cancelled": "İptal",
-          "success": "Başarı"
-        }
-      },
-      "locations": {
-        "title": "Lokasyon (Dil) Kırılımı",
-        "description": "kayıt: {count}",
-        "loadingError": "Lokasyon raporu yüklenemedi.",
-        "noData": "Kayıt bulunamadı.",
-        "table": {
-          "city": "Dil / Bölge",
-          "district": "Alt Bölge",
-          "total": "Rezervasyon",
-          "completed": "Tamamlanan",
-          "cancelled": "İptal",
-          "success": "Başarı"
-        }
+        "topUsers": "En Aktif Kullanıcılar",
+        "topUsersDesc": "En çok istek yapan kullanıcılar.",
+        "topIps": "En Aktif IP'ler",
+        "topIpsDesc": "En çok istek yapan IP adresleri.",
+        "user": "Kullanıcı",
+        "ip": "IP Adresi",
+        "country": "Ülke",
+        "requestCount": "İstek Sayısı",
+        "lastSeen": "Son Görülme"
       }
     },
     "db": {
@@ -803,7 +816,6 @@
       "items": {
         "db": "Veritabanı",
         "audit": "Denetim Kayıtları",
-        "availability": "Rezervasyon Saatleri",
         "notifications": "Bildirimler",
         "storage": "Dosya Yöneticisi",
         "contacts": "İletişim Mesajları",
@@ -831,7 +843,8 @@
         "library": "Kütüphane",
         "catalog_requests": "Katalog Talepleri",
         "offers": "Teklifler",
-        "references": "Referanslar"
+        "references": "Referanslar",
+        "support": "Destek Talepleri"
       },
       "stats": {
         "deliveredOrders": "Teslim Edilen Sipariş",
@@ -1979,7 +1992,8 @@
         "requests": "İstekler",
         "auth": "Kimlik Doğrulama",
         "metrics": "Metrikler",
-        "map": "Harita"
+        "map": "Harita",
+        "analytics": "Analitik"
       },
       "requests": {
         "filtersTitle": "Filtreler",
@@ -2011,7 +2025,133 @@
       },
       "map": {
         "title": "Coğrafi Dağılım",
-        "description": "Son {days} günün konuma göre istek dağılımı."
+        "description": "Son {days} günün konuma göre istek dağılımı.",
+        "loading": "Harita yükleniyor...",
+        "colorScale": "Renk Skalası",
+        "topCountries": "En Çok İstek Yapan Ülkeler",
+        "totalRequests": "toplam istek",
+        "requests": "istek",
+        "uniqueIps": "benzersiz IP",
+        "noData": "Veri yok",
+        "noLocationData": "Konum verisi yok.",
+        "countries": {
+          "TR": "Türkiye",
+          "DE": "Almanya",
+          "US": "ABD",
+          "GB": "Birleşik Krallık",
+          "FR": "Fransa",
+          "NL": "Hollanda",
+          "IT": "İtalya",
+          "ES": "İspanya",
+          "AT": "Avusturya",
+          "CH": "İsviçre",
+          "BE": "Belçika",
+          "PL": "Polonya",
+          "SE": "İsveç",
+          "NO": "Norveç",
+          "DK": "Danimarka",
+          "FI": "Finlandiya",
+          "RU": "Rusya",
+          "UA": "Ukrayna",
+          "CN": "Çin",
+          "JP": "Japonya",
+          "KR": "Güney Kore",
+          "IN": "Hindistan",
+          "BR": "Brezilya",
+          "CA": "Kanada",
+          "AU": "Avustralya",
+          "MX": "Meksika",
+          "SA": "Suudi Arabistan",
+          "AE": "BAE",
+          "EG": "Mısır",
+          "ZA": "Güney Afrika",
+          "IR": "İran",
+          "IQ": "Irak",
+          "SY": "Suriye",
+          "GR": "Yunanistan",
+          "PT": "Portekiz",
+          "IE": "İrlanda",
+          "CZ": "Çekya",
+          "RO": "Romanya",
+          "HU": "Macaristan",
+          "BG": "Bulgaristan",
+          "RS": "Sırbistan",
+          "HR": "Hırvatistan",
+          "SK": "Slovakya",
+          "SI": "Slovenya",
+          "BA": "Bosna",
+          "AL": "Arnavutluk",
+          "MK": "K. Makedonya",
+          "XK": "Kosova",
+          "ME": "Karadağ",
+          "GE": "Gürcistan",
+          "AZ": "Azerbaycan",
+          "AM": "Ermenistan",
+          "KZ": "Kazakistan",
+          "UZ": "Özbekistan",
+          "TM": "Türkmenistan",
+          "KG": "Kırgızistan",
+          "TJ": "Tacikistan",
+          "PK": "Pakistan",
+          "BD": "Bangladeş",
+          "ID": "Endonezya",
+          "MY": "Malezya",
+          "TH": "Tayland",
+          "VN": "Vietnam",
+          "PH": "Filipinler",
+          "SG": "Singapur",
+          "NZ": "Yeni Zelanda",
+          "AR": "Arjantin",
+          "CL": "Şili",
+          "CO": "Kolombiya",
+          "PE": "Peru",
+          "LOCAL": "Localhost"
+        }
+      },
+      "analytics": {
+        "title": "Analitik Dashboard",
+        "description": "Detaylı istek analizi ve istatistikler.",
+        "summary": "Günün Özeti",
+        "todayRequests": "Bugünkü İstekler",
+        "todayErrors": "Bugünkü Hatalar",
+        "errorRate": "Hata Oranı",
+        "avgResponseTime": "Ort. Yanıt Süresi",
+        "uniqueIps": "Tekil IP",
+        "uniqueUsers": "Tekil Kullanıcı",
+        "uniqueVisitors": "Tekil Ziyaretçi",
+        "topEndpoints": "En Çok İstek Alan Endpointler",
+        "topEndpointsDesc": "En fazla istek alan API endpointleri.",
+        "slowestEndpoints": "En Yavaş Endpointler",
+        "slowestEndpointsDesc": "Ortalama yanıt süresine göre en yavaş endpointler.",
+        "topUsers": "En Aktif Kullanıcılar",
+        "topUsersDesc": "En çok istek yapan kullanıcılar.",
+        "topIps": "En Aktif IP'ler",
+        "topIpsDesc": "En çok istek yapan IP adresleri.",
+        "statusDistribution": "Durum Kodu Dağılımı",
+        "statusDistributionDesc": "HTTP durum kodlarının dağılımı (2xx, 3xx, 4xx, 5xx).",
+        "methodDistribution": "HTTP Metod Dağılımı",
+        "methodDistributionDesc": "HTTP metodlarının kullanım dağılımı (GET, POST, PUT, DELETE).",
+        "responseTimeStats": "Yanıt Süresi İstatistikleri",
+        "responseTimeStatsDesc": "Yüzdelik dilimler ve ortalama yanıt süreleri.",
+        "monthlyTrend": "Aylık Trend",
+        "monthlyTrendDesc": "Son 12 ayın istek, hata ve yanıt süresi trendi.",
+        "path": "Yol",
+        "requestCount": "İstek Sayısı",
+        "avgTime": "Ort. Süre",
+        "maxTime": "Maks. Süre",
+        "errorRateCol": "Hata %",
+        "user": "Kullanıcı",
+        "lastSeen": "Son Görülme",
+        "ip": "IP Adresi",
+        "country": "Ülke",
+        "requests": "İstekler",
+        "errors": "Hatalar",
+        "avg": "Ortalama",
+        "min": "Minimum",
+        "max": "Maksimum",
+        "totalRequests": "Toplam İstek",
+        "topErrorEndpoint": "En Hatalı Endpoint",
+        "slowestEndpoint": "En Yavaş Endpoint"
       },
       "common": {
         "from": "Başlangıç",
@@ -2031,7 +2171,22 @@
         "recordCount": "{count} kayıt",
         "prev": "Önceki",
         "next": "Sonraki",
-        "anon": "Anonim"
+        "anon": "Anonim",
+        "excludeLocalhost": "Localhost Hariç",
+        "localhostTraffic": "Localhost trafiği",
+        "export": "Dışa Aktar",
+        "exportCsv": "CSV İndir",
+        "exportJson": "JSON İndir",
+        "dateRange": "Tarih Aralığı",
+        "today": "Bugün",
+        "thisWeek": "Bu Hafta",
+        "thisMonth": "Bu Ay",
+        "lastWeek": "Geçen Hafta",
+        "lastMonth": "Geçen Ay",
+        "last7Days": "Son 7 Gün",
+        "last30Days": "Son 30 Gün",
+        "last90Days": "Son 90 Gün",
+        "custom": "Özel"
       },
       "columns": {
         "date": "Tarih",
@@ -2138,7 +2293,7 @@
         "structuredMissingDesc": "Bu key için structured renderer tanımlı değil. Raw modunu kullanın.",
         "rawHelp": "Raw: Geçerli JSON girersen parse edilerek kaydedilir; değilse düz string kaydedilir.",
         "rawPlaceholder": "Örn: {\"title\":\"...\"} veya düz metin",
-        "rawTip": "İpucu: JSON formatında kaydetmek istiyorsan başı “{” veya “[” ile başlamalı."
+        "rawTip": "İpucu: JSON formatında kaydetmek istiyorsan başı '{' veya '[' ile ile başlamalı."
       },
       "detail": {
         "globalOption": "Global (*)",
@@ -2926,97 +3081,6 @@
         }
       }
     },
-    "availability": {
-      "header": {
-        "title": "Müsaitlik Yönetimi",
-        "description": "Kaynakları (terapist, oda, vb.) ve çalışma saatlerini yönetin.",
-        "totalLabel": "Toplam:",
-        "actions": {
-          "refresh": "Yenile",
-          "create": "Yeni Kaynak"
-        }
-      },
-      "filters": {
-        "searchLabel": "Ara",
-        "searchPlaceholder": "Ad veya referans...",
-        "typeLabel": "Tür",
-        "typeAll": "Tümü",
-        "statusLabel": "Durum",
-        "statusAll": "Tümü",
-        "statusActive": "Aktif",
-        "statusInactive": "Pasif",
-        "clear": "Temizle",
-        "statusOptions": {
-          "all": "Hepsi",
-          "active": "Aktif",
-          "inactive": "Pasif"
-        }
-      },
-      "list": {
-        "title": "Kaynak Listesi",
-        "empty": "Kayıt bulunamadı",
-        "loading": "Yükleniyor...",
-        "total": "Toplam: {count}",
-        "columns": {
-          "name": "Ad",
-          "type": "Tür",
-          "status": "Durum",
-          "updated": "Güncellendi",
-          "created": "Oluşturuldu",
-          "actions": "İşlemler",
-          "ref": "Referans"
-        },
-        "actions": {
-          "manage": "Yönet",
-          "delete": "Sil"
-        },
-        "deleteConfirm": {
-          "title": "Kaynağı Sil",
-          "description": "\"{name}\" kaynağını silmek istediğinize emin misiniz?\nTür: {type}\nReferans: {ref}\nBu işlem geri alınamaz."
-        }
-      },
-      "form": {
-        "createTitle": "Yeni Kaynak",
-        "editTitle": "Kaynak Yönetimi",
-        "description": "Kaynak detaylarını, haftalık ve günlük planları yönetin.",
-        "tabs": {
-          "resource": "Genel Bilgiler",
-          "weekly": "Haftalık Plan",
-          "daily": "Günlük Plan"
-        },
-        "buttons": {
-          "back": "Geri",
-          "create": "Oluştur",
-          "save": "Kaydet",
-          "creating": "Oluşturuluyor...",
-          "saving": "Kaydediliyor..."
-        },
-        "messages": {
-          "createSuccess": "Kaynak başarıyla oluşturuldu.",
-          "updateSuccess": "Kaynak başarıyla güncellendi.",
-          "deleteSuccess": "Kaynak başarıyla silindi.",
-          "invalidId": "Geçersiz ID.",
-          "notFound": "Kaynak bulunamadı.",
-          "notFoundDesc": "Bu kaynağa erişilemedi veya silinmiş olabilir.",
-          "returnToList": "Listeye Dön"
-        },
-        "resource": {
-          "titleLabel": "Kaynak Adı",
-          "titlePlaceholder": "Örn: Terapist Ayşe",
-          "typeLabel": "Tür",
-          "refLabel": "Harici Referans",
-          "refPlaceholder": "Örn: room-101 (opsiyonel)",
-          "statusLabel": "Durum",
-          "active": "Aktif",
-          "inactive": "Pasif"
-        }
-      },
-      "common": {
-        "loading": "Yükleniyor...",
-        "noName": "(ad yok)",
-        "noRef": "(referans yok)"
-      }
-    },
     "telegram": {
       "header": {
         "title": "Telegram",
@@ -3362,6 +3426,84 @@
         "toggleFeaturedError": "Öne çıkarma değiştirilemedi",
         "confirmDelete": "\"{title}\" silinsin mi?"
       }
+    },
+    "support": {
+      "header": {
+        "title": "Destek Talepleri",
+        "subtitle": "Kullanıcı destek taleplerini yönetin, yanıtlayın ve durumlarını güncelleyin."
+      },
+      "filters": {
+        "title": "Filtreler",
+        "description": "Talepleri konu, durum veya önceliğe göre filtreleyin.",
+        "searchPlaceholder": "Konu veya mesajda ara...",
+        "statusLabel": "Durum",
+        "statusAll": "Tüm durumlar",
+        "priorityLabel": "Öncelik",
+        "priorityAll": "Tüm öncelikler",
+        "sortLabel": "Sıralama",
+        "sortCreated": "Oluşturulma tarihi",
+        "sortUpdated": "Güncellenme tarihi",
+        "orderLabel": "Yön",
+        "orderAsc": "Eskiden yeniye",
+        "orderDesc": "Yeniden eskiye",
+        "onlyOpen": "Yalnızca açık talepler"
+      },
+      "list": {
+        "title": "Talepler",
+        "description": "Sistemdeki tüm destek talepleri",
+        "loading": "Yükleniyor...",
+        "empty": "Kayıt bulunamadı."
+      },
+      "columns": {
+        "subject": "Konu",
+        "user": "Kullanıcı",
+        "status": "Durum",
+        "priority": "Öncelik",
+        "createdAt": "Tarih"
+      },
+      "status": {
+        "open": "Açık",
+        "in_progress": "İşlemde",
+        "waiting_response": "Yanıt Bekleniyor",
+        "closed": "Kapalı"
+      },
+      "priority": {
+        "low": "Düşük",
+        "medium": "Orta",
+        "high": "Yüksek",
+        "urgent": "Acil"
+      },
+      "viewDialog": {
+        "title": "Talep Detayı",
+        "description": "Talebi görüntüleyin, yanıtlayın ve durumunu güncelleyin.",
+        "infoTitle": "Talep Bilgileri",
+        "userLabel": "Kullanıcı",
+        "emailLabel": "E-posta",
+        "messageLabel": "Mesaj",
+        "statusLabel": "Durum",
+        "priorityLabel": "Öncelik",
+        "replies": "Yanıtlar",
+        "noReplies": "Henüz yanıt yok.",
+        "adminBadge": "Admin",
+        "userBadge": "Kullanıcı",
+        "replyPlaceholder": "Admin yanıtı yazın...",
+        "sendReply": "Yanıt Gönder",
+        "sending": "Gönderiliyor...",
+        "deleteReply": "Yanıtı sil"
+      },
+      "messages": {
+        "saved": "Talep güncellendi.",
+        "deleted": "Talep silindi.",
+        "replySent": "Yanıt gönderildi.",
+        "replyDeleted": "Yanıt silindi.",
+        "noChanges": "Değişiklik yok.",
+        "loadError": "Talepler yüklenemedi.",
+        "saveError": "Güncelleme başarısız.",
+        "deleteError": "Silme başarısız.",
+        "replyError": "Yanıt gönderilemedi.",
+        "replyDeleteError": "Yanıt silinemedi."
+      },
+      "confirmDelete": "Bu talebi silmek istediğinize emin misiniz? Konu: {subject} (ID: {id})"
     }
   },
   "notFound": {

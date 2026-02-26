@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import {
   ComposableMap,
   Geographies,
@@ -9,10 +9,11 @@ import {
 } from 'react-simple-maps';
 
 import type { AuditGeoStatsRowDto } from '@/integrations/shared';
+import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
 
 const GEO_URL = 'https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json';
 
-/* ISO 3166-1 numeric → alpha-2 mapping (for world-atlas topojson) */
+/* ISO 3166-1 numeric → alpha-2 mapping (world-atlas topojson uses numeric IDs) */
 const NUM_TO_A2: Record<string, string> = {
   '004': 'AF', '008': 'AL', '012': 'DZ', '020': 'AD', '024': 'AO',
   '028': 'AG', '032': 'AR', '036': 'AU', '040': 'AT', '044': 'BS',
@@ -56,43 +57,30 @@ const NUM_TO_A2: Record<string, string> = {
   '-99': 'XK', // Kosovo
 };
 
-/* Country name labels for tooltip */
-const COUNTRY_NAMES: Record<string, string> = {
-  TR: 'Türkiye', DE: 'Almanya', US: 'ABD', GB: 'Birleşik Krallık',
-  FR: 'Fransa', NL: 'Hollanda', IT: 'İtalya', ES: 'İspanya',
-  AT: 'Avusturya', CH: 'İsviçre', BE: 'Belçika', PL: 'Polonya',
-  SE: 'İsveç', NO: 'Norveç', DK: 'Danimarka', FI: 'Finlandiya',
-  RU: 'Rusya', UA: 'Ukrayna', CN: 'Çin', JP: 'Japonya',
-  KR: 'Güney Kore', IN: 'Hindistan', BR: 'Brezilya', CA: 'Kanada',
-  AU: 'Avustralya', MX: 'Meksika', SA: 'Suudi Arabistan', AE: 'BAE',
-  EG: 'Mısır', ZA: 'Güney Afrika', IR: 'İran', IQ: 'Irak',
-  SY: 'Suriye', GR: 'Yunanistan', PT: 'Portekiz', IE: 'İrlanda',
-  CZ: 'Çekya', RO: 'Romanya', HU: 'Macaristan', BG: 'Bulgaristan',
-  RS: 'Sırbistan', HR: 'Hırvatistan', SK: 'Slovakya', SI: 'Slovenya',
-  BA: 'Bosna', AL: 'Arnavutluk', MK: 'K. Makedonya', XK: 'Kosova',
-  ME: 'Karadağ', GE: 'Gürcistan', AZ: 'Azerbaycan', AM: 'Ermenistan',
-  KZ: 'Kazakistan', UZ: 'Özbekistan', TM: 'Türkmenistan',
-  KG: 'Kırgızistan', TJ: 'Tacikistan', PK: 'Pakistan', BD: 'Bangladeş',
-  ID: 'Endonezya', MY: 'Malezya', TH: 'Tayland', VN: 'Vietnam',
-  PH: 'Filipinler', SG: 'Singapur', NZ: 'Yeni Zelanda',
-  AR: 'Arjantin', CL: 'Şili', CO: 'Kolombiya', PE: 'Peru',
-  LOCAL: 'Localhost',
-};
+/* Color scale: 0 → #e2e8f0, max → #1e3a8a */
+const COLOR_STEPS = ['#dbeafe', '#93c5fd', '#3b82f6', '#1d4ed8', '#1e3a8a'] as const;
 
-function getCountryName(code: string): string {
-  return COUNTRY_NAMES[code] || code;
-}
-
-/* Color scale: 0 → #e2e8f0, max → #1e40af */
 function getColor(count: number, max: number): string {
   if (count === 0 || max === 0) return '#e2e8f0';
   const ratio = Math.min(count / max, 1);
-  // interpolate between light blue and dark blue
-  const colors = ['#dbeafe', '#93c5fd', '#3b82f6', '#1d4ed8', '#1e3a8a'];
-  const idx = Math.min(Math.floor(ratio * (colors.length - 1)), colors.length - 2);
-  const t = ratio * (colors.length - 1) - idx;
-  // simple step
-  return colors[Math.round(ratio * (colors.length - 1))];
+  return COLOR_STEPS[Math.round(ratio * (COLOR_STEPS.length - 1))];
+}
+
+function clampTooltip(x: number, y: number): { left: number; top: number } {
+  const PAD = 16;
+  const TIP_W = 220;
+  const TIP_H = 60;
+  const vw = typeof window !== 'undefined' ? window.innerWidth : 1920;
+  const vh = typeof window !== 'undefined' ? window.innerHeight : 1080;
+
+  let left = x + 12;
+  let top = y - 40;
+
+  if (left + TIP_W + PAD > vw) left = x - TIP_W - 12;
+  if (top < PAD) top = y + 16;
+  if (top + TIP_H + PAD > vh) top = vh - TIP_H - PAD;
+
+  return { left, top };
 }
 
 type Props = {
@@ -101,6 +89,8 @@ type Props = {
 };
 
 export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
+  const t = useAdminT('admin.audit');
+
   const [tooltip, setTooltip] = useState<{
     name: string;
     code: string;
@@ -142,6 +132,13 @@ export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
       .slice(0, 10);
   }, [countByCode]);
 
+  const getCountryName = useCallback(
+    (code: string): string => t(`map.countries.${code}`, undefined, code),
+    [t],
+  );
+
+  const tooltipPos = tooltip ? clampTooltip(tooltip.x, tooltip.y) : null;
+
   return (
     <div className="space-y-4">
       <div
@@ -150,7 +147,9 @@ export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
       >
         {loading && (
           <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60">
-            <span className="text-sm text-muted-foreground animate-pulse">Harita yükleniyor...</span>
+            <span className="text-sm text-muted-foreground animate-pulse">
+              {t('map.loading')}
+            </span>
           </div>
         )}
 
@@ -164,11 +163,8 @@ export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
             <Geographies geography={GEO_URL}>
               {({ geographies }) =>
                 geographies.map((geo) => {
-                  const numId = geo.id ?? geo.properties?.['ISO_N3'] ?? '';
-                  const a2 =
-                    geo.properties?.['ISO_A2'] ??
-                    NUM_TO_A2[String(numId)] ??
-                    '';
+                  const numId = geo.id ?? '';
+                  const a2 = NUM_TO_A2[String(numId)] ?? '';
                   const data = countByCode.get(a2);
                   const count = data?.count ?? 0;
 
@@ -209,20 +205,20 @@ export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
           </ZoomableGroup>
         </ComposableMap>
 
-        {tooltip && (
+        {tooltip && tooltipPos && (
           <div
             className="pointer-events-none fixed z-50 rounded-md border bg-popover px-3 py-2 text-sm shadow-md"
-            style={{ left: tooltip.x + 12, top: tooltip.y - 40 }}
+            style={{ left: tooltipPos.left, top: tooltipPos.top }}
           >
             <div className="font-medium">
               {tooltip.name} ({tooltip.code})
             </div>
             {tooltip.count > 0 ? (
               <div className="text-muted-foreground">
-                {tooltip.count} istek · {tooltip.unique_ips} benzersiz IP
+                {tooltip.count} {t('map.requests')} · {tooltip.unique_ips} {t('map.uniqueIps')}
               </div>
             ) : (
-              <div className="text-muted-foreground">Veri yok</div>
+              <div className="text-muted-foreground">{t('map.noData')}</div>
             )}
           </div>
         )}
@@ -232,9 +228,9 @@ export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
       <div className="grid gap-4 md:grid-cols-2">
         {/* Color Legend */}
         <div className="rounded-lg border bg-card p-4">
-          <div className="mb-2 text-sm font-medium">Renk Skalası</div>
+          <div className="mb-2 text-sm font-medium">{t('map.colorScale')}</div>
           <div className="flex items-center gap-1">
-            {['#dbeafe', '#93c5fd', '#3b82f6', '#1d4ed8', '#1e3a8a'].map((c, i) => (
+            {COLOR_STEPS.map((c) => (
               <div
                 key={c}
                 className="h-4 flex-1 first:rounded-l last:rounded-r"
@@ -251,10 +247,10 @@ export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
         {/* Top Countries Table */}
         <div className="rounded-lg border bg-card p-4">
           <div className="mb-2 text-sm font-medium">
-            Top Ülkeler ({totalRequests} toplam istek)
+            {t('map.topCountries')} ({totalRequests} {t('map.totalRequests')})
           </div>
           {topCountries.length === 0 ? (
-            <div className="text-sm text-muted-foreground">Konum verisi yok.</div>
+            <div className="text-sm text-muted-foreground">{t('map.noLocationData')}</div>
           ) : (
             <div className="space-y-1">
               {topCountries.map((c, i) => {

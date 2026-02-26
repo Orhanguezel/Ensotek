@@ -10,9 +10,11 @@ import { and, desc, eq, like, or, lt } from 'drizzle-orm';
 import type { SQL } from 'drizzle-orm';
 
 import { db } from '@/db/client';
+import { safeTrim, toBoolDefault } from '@/modules/_shared';
 import { siteSettings } from '@/modules/siteSettings/schema';
 import { telegramInboundMessages } from '@/modules/telegram/schema';
 import { getSiteSettingsMap } from './settings';
+import { decodeDateIdCursor, encodeDateIdCursor, DEFAULT_AUTOREPLY_TEMPLATE } from './helpers';
 
 export type InboundListParams = {
   chat_id?: string;
@@ -30,29 +32,6 @@ export type TelegramInboundInsert = typeof telegramInboundMessages.$inferInsert;
 
 const now = () => new Date();
 
-/** Cursor = base64("created_at_iso|id") */
-function encodeCursor(createdAtIso: string, id: string): string {
-  return Buffer.from(`${createdAtIso}|${id}`, 'utf8').toString('base64');
-}
-
-function decodeCursor(cursor: string): { createdAtIso: string; id: string } | null {
-  try {
-    const raw = Buffer.from(cursor, 'base64').toString('utf8');
-    const [createdAtIso, id] = raw.split('|');
-    if (!createdAtIso || !id) return null;
-
-    const d = new Date(createdAtIso);
-    if (Number.isNaN(d.getTime())) return null;
-
-    return { createdAtIso: d.toISOString(), id };
-  } catch {
-    return null;
-  }
-}
-
-const DEFAULT_TEMPLATE =
-  'Vielen Dank für Ihre Nachricht! Wir werden uns schnellstmöglich bei Ihnen melden.\n\nMesajınız için teşekkür ederiz. En kısa sürede size dönüş yapacağız.\n\n- Ensotek Team';
-
 export const TelegramAdminRepo = {
   async listInbound(params: InboundListParams): Promise<InboundListResult> {
     const limit = Math.min(Math.max(params.limit ?? 50, 1), 200);
@@ -68,7 +47,7 @@ export const TelegramAdminRepo = {
       if (q) conds.push(like(telegramInboundMessages.text, `%${q}%`));
     }
 
-    const cur = params.cursor ? decodeCursor(params.cursor) : null;
+    const cur = params.cursor ? decodeDateIdCursor(params.cursor) : null;
     if (cur) {
       const cursorDate = new Date(cur.createdAtIso);
       conds.push(
@@ -100,7 +79,7 @@ export const TelegramAdminRepo = {
             const createdAt = last.created_at instanceof Date ? last.created_at : null;
             const id = typeof last.id === 'string' ? last.id : null;
             if (!createdAt || !id) return null;
-            return encodeCursor(createdAt.toISOString(), id);
+            return encodeDateIdCursor(createdAt.toISOString(), id);
           })()
         : null;
 
@@ -114,13 +93,9 @@ export const TelegramAdminRepo = {
       'telegram_autoreply_template',
     ]);
 
-    const enabledRaw = String(map.get('telegram_autoreply_enabled') ?? '')
-      .trim()
-      .toLowerCase();
-    const enabled = ['1', 'true', 'yes', 'on', 'y'].includes(enabledRaw);
+    const enabled = toBoolDefault(map.get('telegram_autoreply_enabled'), false);
 
-    const template =
-      String(map.get('telegram_autoreply_template') ?? '').trim() || DEFAULT_TEMPLATE;
+    const template = safeTrim(map.get('telegram_autoreply_template')) || DEFAULT_AUTOREPLY_TEMPLATE;
 
     // şimdilik sabit
     return { enabled, mode: 'simple', template };

@@ -1,8 +1,15 @@
 import React from "react";
+import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import Banner from "@/components/layout/banner/Banner";
 import ProductList from "@/components/containers/product/ProductList";
 import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("products_title"), description: t("products_description") };
+}
 
 const ProductsPage = async ({
   params,

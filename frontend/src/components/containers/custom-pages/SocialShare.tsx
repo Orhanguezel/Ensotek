@@ -57,8 +57,7 @@ const SocialShare = ({ url: initialUrl, title, label }: SocialShareProps) => {
           <a
             key={social.name}
             href={social.href}
-            target="_blank"
-            rel="noopener noreferrer"
+            target="_blank" rel="nofollow noopener noreferrer"
             className={`ens-social-links__item ${social.name.toLowerCase()}`}
             title={`Share on ${social.name}`}
           >

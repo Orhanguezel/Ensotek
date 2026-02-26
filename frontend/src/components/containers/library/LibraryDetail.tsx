@@ -147,7 +147,7 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
                   <ul className="sidebar__download-list">
                     {fileItems.map((file) => (
                       <li key={file.id}>
-                        <a href={resolveMediaUrl(file.file_url) || "#"} target="_blank" rel="noreferrer">
+                        <a href={resolveMediaUrl(file.file_url) || "#"} target="_blank" rel="nofollow noreferrer">
                           <i className="fal fa-file-arrow-down mr-8"></i>
                           {file.name || t("downloadFile")}
                         </a>
@@ -169,7 +169,7 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
                       
                       return (
                         <div key={img.id} className="col-4">
-                          <a href={resolvedImgUrl} target="_blank" rel="noreferrer">
+                          <a href={resolvedImgUrl} target="_blank" rel="nofollow noreferrer">
                             <Image
                               src={resolvedImgUrl}
                               alt={img.alt || item.name}

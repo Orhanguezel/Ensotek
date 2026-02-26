@@ -66,6 +66,12 @@ export function toBool(v: unknown): boolean {
   return s === '1' || s === 'true';
 }
 
+export function toBoolDefault(v: unknown, fallback = false): boolean {
+  const s = safeTrim(v);
+  if (!s) return fallback;
+  return toBool(s);
+}
+
 /**
  * QueryString için boolean parser (undefined korumalı)
  * undefined → undefined
@@ -119,4 +125,3 @@ export const ymdSchema = z
   .transform((v) => safeTrim(v));
 
 export const dowSchema = z.coerce.number().int().min(1).max(7) as any;
-

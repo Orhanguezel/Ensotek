@@ -48,7 +48,7 @@ import { registerCatalog } from '@/modules/catalog/router';
 
 // ✅ Audit single entry
 import { registerAudit } from '@/modules/audit/router';
-import { shouldSkipAuditLog, writeRequestAuditLog } from '@/modules/audit/service';
+import { shouldSkipAuditLog, writeRequestAuditLog, startRetentionJob } from '@/modules/audit/service';
 
 // Admin modüller
 import { registerCustomPagesAdmin } from '@/modules/customPages/admin.routes';
@@ -278,5 +278,9 @@ export async function createApp() {
   );
 
   registerErrorHandlers(app);
+
+  // Audit log retention cleanup (runs daily)
+  startRetentionJob();
+
   return app;
 }

@@ -170,6 +170,7 @@ export const tags = [
   'AuditAuthEvent',
   'AuditRequestLog',
   'AuditMetric',
+  'AuditAnalytics',
   'AvailabilityWH',
   'AvailabilityPlan',
   'AvailabilitySlots',

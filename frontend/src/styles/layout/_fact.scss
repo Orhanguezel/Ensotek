@@ -40,14 +40,12 @@
     }
 }
 .fact__content {
-	h3 {
-		a {
+	p {
+		margin-bottom: 0;
+		&:first-child {
 			font-size: 22px;
 			display: inline-block;
 			margin-bottom: 25px;
 		}
-	}
-	p {
-		margin-bottom: 0;
 	}
 }

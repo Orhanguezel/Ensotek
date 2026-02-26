@@ -44,7 +44,7 @@ export * from '@/integrations/endpoints/admin/mail_admin.endpoints';
 export * from '@/integrations/endpoints/admin/newsletter_admin.endpoints';
 export * from '@/integrations/endpoints/admin/notifications_admin.endpoints';
 export * from '@/integrations/endpoints/admin/offers_admin.endpoints';
-export * from '@/integrations/endpoints/admin/reports_admin.endpoints';
+
 export * from '@/integrations/endpoints/admin/popups_admin.endpoints';
 export * from '@/integrations/endpoints/admin/menu_items_admin.endpoints';
 export * from '@/integrations/endpoints/admin/projects_admin.endpoints';
@@ -54,7 +54,7 @@ export * from '@/integrations/endpoints/admin/skill.admin.endpoints';
 export * from '@/integrations/endpoints/admin/brands.admin.endpoints';
 export * from '@/integrations/endpoints/admin/footer_sections_admin.endpoints';
 export * from '@/integrations/endpoints/admin/resources_admin.endpoints';
-export * from '@/integrations/endpoints/admin/availability_admin.endpoints';
+
 export * from '@/integrations/endpoints/admin/telegram_inbound.endpoints';
 export * from '@/integrations/endpoints/admin/telegram_webhook.endpoints';
 export * from '@/integrations/endpoints/admin/telegram_admin.endpoints';
@@ -69,4 +69,5 @@ export * from '@/integrations/endpoints/admin/products_admin.faqs.endpoints';
 export * from '@/integrations/endpoints/admin/products_admin.reviews.endpoints';
 export * from '@/integrations/endpoints/admin/references_admin.endpoints';
 export * from '@/integrations/endpoints/admin/subcategories_admin.endpoints';
+export * from '@/integrations/endpoints/admin/support_admin.endpoints';
 

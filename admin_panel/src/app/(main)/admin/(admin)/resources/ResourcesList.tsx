@@ -122,12 +122,6 @@ export const ResourcesList: React.FC<ResourcesListProps> = ({ items, loading }) 
                     >
                       Düzenle
                     </Link>
-                    <Link
-                      href={`/admin/availability/${encodeURIComponent(String(r.id))}`}
-                      className="btn btn-outline-secondary btn-sm"
-                    >
-                      Müsaitlik
-                    </Link>
                     <button
                       type="button"
                       className="btn btn-outline-danger btn-sm"
@@ -200,12 +194,6 @@ export const ResourcesList: React.FC<ResourcesListProps> = ({ items, loading }) 
                       className="btn btn-outline-primary btn-sm"
                     >
                       Düzenle
-                    </Link>
-                    <Link
-                      href={`/admin/availability/${encodeURIComponent(String(r.id))}`}
-                      className="btn btn-outline-secondary btn-sm"
-                    >
-                      Müsaitlik
                     </Link>
                     <button
                       type="button"

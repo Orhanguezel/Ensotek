@@ -53,15 +53,14 @@ const LibraryPdfPreview: React.FC<Props> = ({ pdfUrl, title = "PDF Preview", hei
         >
           <p>
             Your browser does not support iframes. 
-            <a href={iframeSrc} target="_blank" rel="noreferrer">Download the PDF</a>
+            <a href={iframeSrc} target="_blank" rel="nofollow noopener noreferrer">Download the PDF</a>
           </p>
         </iframe>
       </div>
       <div className="mt-15 text-center">
         <a 
           href={iframeSrc} 
-          target="_blank" 
-          rel="noreferrer" 
+          target="_blank" rel="nofollow noopener noreferrer"
           className="tp-btn tp-btn-2"
           style={{ padding: '10px 25px', fontSize: '14px' }}
         >

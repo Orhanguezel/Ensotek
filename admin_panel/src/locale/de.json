@@ -1,65 +1,78 @@
 {
   "admin": {
     "reports": {
-      "title": "Berichte (Admin)",
-      "description": "KPI, Ressourcenleistung und Standortaufschlüsselung.",
+      "title": "Berichte",
+      "description": "System-Verkehrsanalyse, Leistungsmetriken und Benutzeraktivitäten.",
       "refresh": "Aktualisieren",
-      "tabs": {
-        "title": "Ansichten",
-        "description": "KPI • Ressourcenleistung • Standorte",
-        "kpi": "KPI",
-        "users": "Ressourcen",
-        "locations": "Standorte"
-      },
+      "loading": "Wird geladen...",
+      "noRecords": "Keine Einträge gefunden.",
+      "excludeLocalhost": "Localhost ausschließen",
+      "export": "Exportieren",
+      "exportCsv": "CSV herunterladen",
+      "exportJson": "JSON herunterladen",
       "filter": {
-        "title": "Filter",
-        "description": "Datumsbereich (Start/Ende) und Ressourcenauswahl.",
+        "from": "Von",
+        "to": "Bis",
         "apply": "Anwenden",
-        "reset": "Zurücksetzen",
-        "from": "Start",
-        "to": "Ende",
-        "role": "Rolle",
-        "roleHint": "Wird nur im Tab „Ressourcen“ verwendet.",
-        "invalidFrom": "Startdatum ist ungültig.",
-        "invalidTo": "Endedatum ist ungültig."
+        "reset": "Zurücksetzen"
       },
-      "kpi": {
-        "daily": "Täglich",
-        "weekly": "Wöchentlich",
-        "monthly": "Monatlich",
-        "loadingError": "KPI konnten nicht geladen werden.",
-        "noData": "Keine Datensätze gefunden.",
-        "bucket": "Zeitraum",
-        "total": "Gesamt",
-        "completed": "Abgeschlossen",
-        "success": "Erfolg"
+      "tabs": {
+        "overview": "Übersicht",
+        "performance": "Leistung",
+        "traffic": "Datenverkehr",
+        "users": "Benutzer"
+      },
+      "overview": {
+        "todayRequests": "Heutige Anfragen",
+        "todayErrors": "Heutige Fehler",
+        "errorRate": "Fehlerrate",
+        "avgResponseTime": "Durchschn. Antwortzeit",
+        "uniqueVisitors": "Eindeutige Besucher",
+        "uniqueUsers": "Eindeutige Benutzer",
+        "dailyChart": "Tägliche Metriken",
+        "dailyChartDesc": "Anfragenstatistiken der letzten {days} Tage.",
+        "monthlyTrend": "Monatlicher Trend",
+        "monthlyTrendDesc": "Anfrage-, Fehler- und Antwortzeit-Trends der letzten 12 Monate.",
+        "requests": "Anfragen",
+        "errors": "Fehler",
+        "avgTime": "Durchschn. Zeit"
+      },
+      "performance": {
+        "responseTimeStats": "Antwortzeit-Statistiken",
+        "responseTimeStatsDesc": "Perzentil-Aufschlüsselung und durchschnittliche Antwortzeiten.",
+        "topEndpoints": "Meistangeforderte Endpunkte",
+        "topEndpointsDesc": "API-Endpunkte mit den meisten Anfragen.",
+        "slowestEndpoints": "Langsamste Endpunkte",
+        "slowestEndpointsDesc": "Endpunkte mit der höchsten durchschnittlichen Antwortzeit.",
+        "path": "Pfad",
+        "requestCount": "Anzahl Anfragen",
+        "avgTime": "Durchschn. Zeit",
+        "maxTime": "Max. Zeit",
+        "errorRate": "Fehlerrate",
+        "avg": "Durchschnitt",
+        "min": "Minimum",
+        "max": "Maximum",
+        "totalRequests": "Gesamtanfragen"
+      },
+      "traffic": {
+        "statusDistribution": "Statuscode-Verteilung",
+        "statusDistributionDesc": "Verteilung der HTTP-Statuscodes (2xx, 3xx, 4xx, 5xx).",
+        "methodDistribution": "HTTP-Methoden-Verteilung",
+        "methodDistributionDesc": "Nutzungsverteilung der HTTP-Methoden.",
+        "requests": "Anfragen",
+        "geoTitle": "Geografische Verteilung",
+        "geoDesc": "Anfragen nach Standort der letzten 30 Tage."
       },
       "users": {
-        "title": "Ressourcenleistung",
-        "description": "Rolle={role} • Anzahl: {count}",
-        "loadingError": "Leistungsbericht konnte nicht geladen werden.",
-        "noData": "Keine Datensätze gefunden.",
-        "table": {
-          "user": "Ressource",
-          "total": "Buchungen",
-          "completed": "Abgeschlossen",
-          "cancelled": "Storniert",
-          "success": "Erfolg"
-        }
-      },
-      "locations": {
-        "title": "Standort (Locale) Aufschlüsselung",
-        "description": "Anzahl: {count}",
-        "loadingError": "Standortbericht konnte nicht geladen werden.",
-        "noData": "Keine Datensätze gefunden.",
-        "table": {
-          "city": "Locale / Region",
-          "district": "Unterregion",
-          "total": "Buchungen",
-          "completed": "Abgeschlossen",
-          "cancelled": "Storniert",
-          "success": "Erfolg"
-        }
+        "topUsers": "Aktivste Benutzer",
+        "topUsersDesc": "Benutzer mit den meisten Anfragen.",
+        "topIps": "Aktivste IPs",
+        "topIpsDesc": "IP-Adressen mit den meisten Anfragen.",
+        "user": "Benutzer",
+        "ip": "IP-Adresse",
+        "country": "Land",
+        "requestCount": "Anzahl Anfragen",
+        "lastSeen": "Zuletzt gesehen"
       }
     },
     "db": {
@@ -803,7 +816,6 @@
       "items": {
         "db": "Datenbank",
         "audit": "Audit-Protokolle",
-        "availability": "Availability",
         "notifications": "Benachrichtigungen",
         "storage": "Dateimanager",
         "contacts": "Kontaktanfragen",
@@ -831,7 +843,8 @@
         "library": "Bibliothek",
         "catalog_requests": "Kataloganfragen",
         "offers": "Angebote",
-        "references": "Referenzen"
+        "references": "Referenzen",
+        "support": "Support-Tickets"
       },
       "stats": {
         "deliveredOrders": "Gelieferte Bestellungen",
@@ -1102,13 +1115,13 @@
         "statusAll": "Alle",
         "orderLabel": "Sortierung",
         "orderDesc": "Neueste zuerst",
-        "orderAsc": "\u00c4lteste zuerst"
+        "orderAsc": "Älteste zuerst"
       },
       "list": {
         "title": "Angebote",
-        "description": "Alle Angebotsdatens\u00e4tze anzeigen.",
+        "description": "Alle Angebotsdatensätze anzeigen.",
         "loading": "Angebote werden geladen...",
-        "empty": "Noch keine Angebotsdatens\u00e4tze."
+        "empty": "Noch keine Angebotsdatensätze."
       },
       "columns": {
         "offerNo": "Angebots-Nr.",
@@ -1122,7 +1135,7 @@
       },
       "status": {
         "new": "Neu",
-        "in_review": "In Pr\u00fcfung",
+        "in_review": "In Prüfung",
         "quoted": "Angebot erstellt",
         "sent": "Gesendet",
         "accepted": "Angenommen",
@@ -1134,15 +1147,15 @@
         "editTitle": "Angebot bearbeiten",
         "subtitle": "Angebotsfelder im Formularmodus, technische form_data-Inhalte im JSON-Modus verwalten.",
         "notFoundTitle": "Datensatz nicht gefunden",
-        "notFoundDescription": "Kein Angebot f\u00fcr diese ID gefunden:",
+        "notFoundDescription": "Kein Angebot für diese ID gefunden:",
         "formDataTitle": "Kundenformular-Details",
         "formDataFields": "Felder",
-        "formDataDesc": "Vom Kunden \u00fcbermittelte technische Formularinformationen.",
+        "formDataDesc": "Vom Kunden übermittelte technische Formularinformationen.",
         "extraFields": "Weitere Felder",
         "pdfTitle": "Angebots-PDF Vorschau",
         "pdfDesc": "PDF erstellen, E-Mail senden und Vorschau.",
         "pdfEmpty": "Noch kein PDF erstellt.",
-        "pdfFallback": "Falls das PDF nicht l\u00e4dt, \u00f6ffnen Sie es in einem neuen Tab.",
+        "pdfFallback": "Falls das PDF nicht lädt, öffnen Sie es in einem neuen Tab.",
         "lastSent": "Zuletzt gesendet",
         "tabForm": "Formular",
         "tabJson": "JSON",
@@ -1161,17 +1174,17 @@
         "email": "E-Mail",
         "phone": "Telefon",
         "locale": "Sprache",
-        "countryCode": "L\u00e4ndercode",
+        "countryCode": "Ländercode",
         "subject": "Betreff",
         "message": "Nachricht",
-        "currency": "W\u00e4hrung",
+        "currency": "Währung",
         "netTotal": "Nettobetrag",
         "vatRate": "MwSt.-Satz (%)",
         "shippingTotal": "Versandkosten",
         "vatTotal": "MwSt.-Betrag (automatisch)",
         "grossTotal": "Bruttobetrag (automatisch)",
         "offerNo": "Angebots-Nr.",
-        "validUntil": "G\u00fcltig bis",
+        "validUntil": "Gültig bis",
         "productId": "Produkt-ID",
         "serviceId": "Leistungs-ID",
         "adminNotes": "Admin-Notizen",
@@ -1191,25 +1204,25 @@
         "process": "Prozess",
         "city": "Stadt",
         "district": "Bezirk",
-        "waterFlow": "Wasserdurchfluss (m\u00b3/h)",
-        "inletTemp": "Einlasstemperatur (\u00b0C)",
-        "outletTemp": "Auslasstemperatur (\u00b0C)",
-        "wetBulb": "Feuchtkugeltemperatur (\u00b0C)",
-        "capacity": "Kapazit\u00e4t (kcal/h, kW)",
-        "waterQuality": "Wasserqualit\u00e4t",
+        "waterFlow": "Wasserdurchfluss (m³/h)",
+        "inletTemp": "Einlasstemperatur (°C)",
+        "outletTemp": "Auslasstemperatur (°C)",
+        "wetBulb": "Feuchtkugeltemperatur (°C)",
+        "capacity": "Kapazität (kcal/h, kW)",
+        "waterQuality": "Wasserqualität",
         "poolType": "Beckentyp",
         "location": "Standort / Untergrund",
         "existingTower": "Vorhandene Turminfo",
         "referralSource": "Wie haben Sie von uns erfahren",
-        "notes": "Zus\u00e4tzliche Hinweise (form_data)",
+        "notes": "Zusätzliche Hinweise (form_data)",
         "productNameLegacy": "Produktname (Legacy)"
       },
       "actions": {
         "refresh": "Aktualisieren",
         "create": "Neues Angebot",
         "edit": "Bearbeiten",
-        "delete": "L\u00f6schen",
-        "backToList": "Zur\u00fcck zur Liste",
+        "delete": "Löschen",
+        "backToList": "Zurück zur Liste",
         "save": "Speichern",
         "saving": "Speichert...",
         "generatePdf": "PDF erstellen",
@@ -1217,25 +1230,25 @@
         "generatingPdf": "PDF wird erstellt...",
         "sendEmail": "E-Mail senden",
         "sendingEmail": "E-Mail wird gesendet...",
-        "openPdf": "PDF in neuem Tab \u00f6ffnen"
+        "openPdf": "PDF in neuem Tab öffnen"
       },
       "messages": {
         "saved": "Angebot aktualisiert.",
         "created": "Angebot erstellt.",
         "saveError": "Speichern fehlgeschlagen.",
-        "deleted": "Angebot gel\u00f6scht.",
-        "deleteError": "L\u00f6schen fehlgeschlagen.",
+        "deleted": "Angebot gelöscht.",
+        "deleteError": "Löschen fehlgeschlagen.",
         "loadError": "Angebote konnten nicht geladen werden.",
         "requiredError": "Kundenname und E-Mail sind erforderlich.",
         "pdfGenerated": "PDF erstellt.",
         "pdfRegenerated": "PDF neu erstellt.",
         "pdfError": "PDF-Erstellungsfehler.",
-        "pdfRequired": "Sie m\u00fcssen zuerst ein PDF erstellen.",
+        "pdfRequired": "Sie müssen zuerst ein PDF erstellen.",
         "emailSent": "E-Mail gesendet.",
         "emailError": "E-Mail-Versandfehler.",
-        "invalidJson": "Ung\u00fcltiges JSON."
+        "invalidJson": "Ungültiges JSON."
       },
-      "confirmDelete": "Sie sind dabei, dieses Angebot zu l\u00f6schen.\n\nKunde: {name}\nE-Mail: {email}\nID: {id}\n\nM\u00f6chten Sie fortfahren?"
+      "confirmDelete": "Sie sind dabei, dieses Angebot zu löschen.\n\nKunde: {name}\nE-Mail: {email}\nID: {id}\n\nMöchten Sie fortfahren?"
     },
     "catalog": {
       "header": {
@@ -1979,7 +1992,8 @@
         "requests": "Anfragen",
         "auth": "Authentifizierung",
         "metrics": "Metriken",
-        "map": "Karte"
+        "map": "Karte",
+        "analytics": "Analytik"
       },
       "requests": {
         "filtersTitle": "Filter",
@@ -2011,7 +2025,133 @@
       },
       "map": {
         "title": "Geografische Verteilung",
-        "description": "Anfragen nach Standort der letzten {days} Tage."
+        "description": "Anfragen nach Standort der letzten {days} Tage.",
+        "loading": "Karte wird geladen...",
+        "colorScale": "Farbskala",
+        "topCountries": "Top-Länder",
+        "totalRequests": "Anfragen gesamt",
+        "requests": "Anfragen",
+        "uniqueIps": "eindeutige IPs",
+        "noData": "Keine Daten",
+        "noLocationData": "Keine Standortdaten verfügbar.",
+        "countries": {
+          "TR": "Türkei",
+          "DE": "Deutschland",
+          "US": "USA",
+          "GB": "Vereinigtes Königreich",
+          "FR": "Frankreich",
+          "NL": "Niederlande",
+          "IT": "Italien",
+          "ES": "Spanien",
+          "AT": "Österreich",
+          "CH": "Schweiz",
+          "BE": "Belgien",
+          "PL": "Polen",
+          "SE": "Schweden",
+          "NO": "Norwegen",
+          "DK": "Dänemark",
+          "FI": "Finnland",
+          "RU": "Russland",
+          "UA": "Ukraine",
+          "CN": "China",
+          "JP": "Japan",
+          "KR": "Südkorea",
+          "IN": "Indien",
+          "BR": "Brasilien",
+          "CA": "Kanada",
+          "AU": "Australien",
+          "MX": "Mexiko",
+          "SA": "Saudi-Arabien",
+          "AE": "VAE",
+          "EG": "Ägypten",
+          "ZA": "Südafrika",
+          "IR": "Iran",
+          "IQ": "Irak",
+          "SY": "Syrien",
+          "GR": "Griechenland",
+          "PT": "Portugal",
+          "IE": "Irland",
+          "CZ": "Tschechien",
+          "RO": "Rumänien",
+          "HU": "Ungarn",
+          "BG": "Bulgarien",
+          "RS": "Serbien",
+          "HR": "Kroatien",
+          "SK": "Slowakei",
+          "SI": "Slowenien",
+          "BA": "Bosnien",
+          "AL": "Albanien",
+          "MK": "N. Mazedonien",
+          "XK": "Kosovo",
+          "ME": "Montenegro",
+          "GE": "Georgien",
+          "AZ": "Aserbaidschan",
+          "AM": "Armenien",
+          "KZ": "Kasachstan",
+          "UZ": "Usbekistan",
+          "TM": "Turkmenistan",
+          "KG": "Kirgisistan",
+          "TJ": "Tadschikistan",
+          "PK": "Pakistan",
+          "BD": "Bangladesch",
+          "ID": "Indonesien",
+          "MY": "Malaysia",
+          "TH": "Thailand",
+          "VN": "Vietnam",
+          "PH": "Philippinen",
+          "SG": "Singapur",
+          "NZ": "Neuseeland",
+          "AR": "Argentinien",
+          "CL": "Chile",
+          "CO": "Kolumbien",
+          "PE": "Peru",
+          "LOCAL": "Localhost"
+        }
+      },
+      "analytics": {
+        "title": "Analytik-Dashboard",
+        "description": "Detaillierte Anfragenanalyse und Statistiken.",
+        "summary": "Tageszusammenfassung",
+        "todayRequests": "Heutige Anfragen",
+        "todayErrors": "Heutige Fehler",
+        "errorRate": "Fehlerrate",
+        "avgResponseTime": "Durchschn. Antwortzeit",
+        "uniqueIps": "Eindeutige IPs",
+        "uniqueUsers": "Eindeutige Benutzer",
+        "uniqueVisitors": "Eindeutige Besucher",
+        "topEndpoints": "Meistangeforderte Endpunkte",
+        "topEndpointsDesc": "API-Endpunkte mit den meisten Anfragen.",
+        "slowestEndpoints": "Langsamste Endpunkte",
+        "slowestEndpointsDesc": "Endpunkte mit der höchsten durchschnittlichen Antwortzeit.",
+        "topUsers": "Aktivste Benutzer",
+        "topUsersDesc": "Benutzer mit den meisten Anfragen.",
+        "topIps": "Aktivste IPs",
+        "topIpsDesc": "IP-Adressen mit den meisten Anfragen.",
+        "statusDistribution": "Statuscode-Verteilung",
+        "statusDistributionDesc": "Verteilung der HTTP-Statuscodes (2xx, 3xx, 4xx, 5xx).",
+        "methodDistribution": "HTTP-Methoden-Verteilung",
+        "methodDistributionDesc": "Nutzungsverteilung der HTTP-Methoden (GET, POST, PUT, DELETE).",
+        "responseTimeStats": "Antwortzeit-Statistiken",
+        "responseTimeStatsDesc": "Perzentil-Aufschlüsselung und durchschnittliche Antwortzeiten.",
+        "monthlyTrend": "Monatlicher Trend",
+        "monthlyTrendDesc": "Anfrage-, Fehler- und Antwortzeit-Trends der letzten 12 Monate.",
+        "path": "Pfad",
+        "requestCount": "Anzahl Anfragen",
+        "avgTime": "Durchschn. Zeit",
+        "maxTime": "Max. Zeit",
+        "errorRateCol": "Fehler %",
+        "user": "Benutzer",
+        "lastSeen": "Zuletzt gesehen",
+        "ip": "IP-Adresse",
+        "country": "Land",
+        "requests": "Anfragen",
+        "errors": "Fehler",
+        "avg": "Durchschnitt",
+        "min": "Minimum",
+        "max": "Maximum",
+        "totalRequests": "Gesamtanfragen",
+        "topErrorEndpoint": "Fehleranfälligster Endpunkt",
+        "slowestEndpoint": "Langsamster Endpunkt"
       },
       "common": {
         "from": "Von",
@@ -2031,7 +2171,22 @@
         "recordCount": "{count} Einträge",
         "prev": "Zurück",
         "next": "Weiter",
-        "anon": "Anonym"
+        "anon": "Anonym",
+        "excludeLocalhost": "Localhost ausschließen",
+        "localhostTraffic": "Localhost-Datenverkehr",
+        "export": "Exportieren",
+        "exportCsv": "CSV herunterladen",
+        "exportJson": "JSON herunterladen",
+        "dateRange": "Zeitraum",
+        "today": "Heute",
+        "thisWeek": "Diese Woche",
+        "thisMonth": "Dieser Monat",
+        "lastWeek": "Letzte Woche",
+        "lastMonth": "Letzter Monat",
+        "last7Days": "Letzte 7 Tage",
+        "last30Days": "Letzte 30 Tage",
+        "last90Days": "Letzte 90 Tage",
+        "custom": "Benutzerdefiniert"
       },
       "columns": {
         "date": "Datum",
@@ -2138,7 +2293,7 @@
         "structuredMissingDesc": "Für diesen Schlüssel ist kein Structured Renderer definiert. Verwenden Sie den Raw-Modus.",
         "rawHelp": "Raw: Wenn Sie gültiges JSON eingeben, wird es geparst und gespeichert; andernfalls als Text gespeichert.",
         "rawPlaceholder": "z.B.: {\"title\":\"...\"} oder Text",
-        "rawTip": "Tipp: Um als JSON zu speichern, muss der Text mit „{“ oder „[“ beginnen."
+        "rawTip": "Tipp: Um als JSON zu speichern, muss der Text mit '{' oder '[' beginnen."
       },
       "detail": {
         "globalOption": "Global (*)",
@@ -2926,97 +3081,6 @@
         }
       }
     },
-    "availability": {
-      "header": {
-        "title": "Verfügbarkeitsverwaltung",
-        "description": "Ressourcen (Therapeuten, Räume usw.) und Arbeitszeiten verwalten.",
-        "totalLabel": "Gesamt:",
-        "actions": {
-          "refresh": "Aktualisieren",
-          "create": "Neue Ressource"
-        }
-      },
-      "filters": {
-        "searchLabel": "Suche",
-        "searchPlaceholder": "Name oder Referenz...",
-        "typeLabel": "Typ",
-        "typeAll": "Alle",
-        "statusLabel": "Status",
-        "statusAll": "Alle",
-        "statusActive": "Aktiv",
-        "statusInactive": "Inaktiv",
-        "clear": "Zurücksetzen",
-        "statusOptions": {
-          "all": "Alle",
-          "active": "Aktiv",
-          "inactive": "Inaktiv"
-        }
-      },
-      "list": {
-        "title": "Ressourcenliste",
-        "empty": "Keine Einträge gefunden",
-        "loading": "Lädt...",
-        "total": "Gesamt: {count}",
-        "columns": {
-          "name": "Name",
-          "type": "Typ",
-          "status": "Status",
-          "updated": "Aktualisiert",
-          "created": "Erstellt",
-          "actions": "Aktionen",
-          "ref": "Referenz"
-        },
-        "actions": {
-          "manage": "Verwalten",
-          "delete": "Löschen"
-        },
-        "deleteConfirm": {
-          "title": "Ressource löschen",
-          "description": "Möchten Sie \"{name}\" wirklich löschen?\nTyp: {type}\nRef: {ref}\nDiese Aktion kann nicht rückgängig gemacht werden."
-        }
-      },
-      "form": {
-        "createTitle": "Neue Ressource",
-        "editTitle": "Ressourcenverwaltung",
-        "description": "Ressourcendetails, Wochen- und Tagespläne verwalten.",
-        "tabs": {
-          "resource": "Allgemeine Info",
-          "weekly": "Wochenplan",
-          "daily": "Tagesplan"
-        },
-        "buttons": {
-          "back": "Zurück",
-          "create": "Erstellen",
-          "save": "Speichern",
-          "creating": "Wird erstellt...",
-          "saving": "Wird gespeichert..."
-        },
-        "messages": {
-          "createSuccess": "Ressource erfolgreich erstellt.",
-          "updateSuccess": "Ressource erfolgreich aktualisiert.",
-          "deleteSuccess": "Ressource erfolgreich gelöscht.",
-          "invalidId": "Ungültige ID.",
-          "notFound": "Ressource nicht gefunden.",
-          "notFoundDesc": "Auf diese Ressource konnte nicht zugegriffen werden oder sie wurde möglicherweise gelöscht.",
-          "returnToList": "Zurück zur Liste"
-        },
-        "resource": {
-          "titleLabel": "Ressourcenname",
-          "titlePlaceholder": "z.B. Therapeut Anna",
-          "typeLabel": "Typ",
-          "refLabel": "Externe Referenz",
-          "refPlaceholder": "z.B. raum-101 (optional)",
-          "statusLabel": "Status",
-          "active": "Aktiv",
-          "inactive": "Inaktiv"
-        }
-      },
-      "common": {
-        "loading": "Lädt...",
-        "noName": "(kein Name)",
-        "noRef": "(keine Ref)"
-      }
-    },
     "telegram": {
       "header": {
         "title": "Telegram",
@@ -3363,6 +3427,84 @@
         "toggleFeaturedError": "Hervorhebung fehlgeschlagen",
         "confirmDelete": "\"{title}\" löschen?"
       }
+    },
+    "support": {
+      "header": {
+        "title": "Support-Tickets",
+        "subtitle": "Benutzer-Support-Tickets verwalten, beantworten und Status aktualisieren."
+      },
+      "filters": {
+        "title": "Filter",
+        "description": "Tickets nach Betreff, Status oder Prioritat filtern.",
+        "searchPlaceholder": "In Betreff oder Nachricht suchen...",
+        "statusLabel": "Status",
+        "statusAll": "Alle Status",
+        "priorityLabel": "Prioritat",
+        "priorityAll": "Alle Prioritaten",
+        "sortLabel": "Sortieren nach",
+        "sortCreated": "Erstellungsdatum",
+        "sortUpdated": "Aktualisierungsdatum",
+        "orderLabel": "Richtung",
+        "orderAsc": "Alteste zuerst",
+        "orderDesc": "Neueste zuerst",
+        "onlyOpen": "Nur offene Tickets"
+      },
+      "list": {
+        "title": "Tickets",
+        "description": "Alle Support-Tickets im System",
+        "loading": "Wird geladen...",
+        "empty": "Keine Eintraege gefunden."
+      },
+      "columns": {
+        "subject": "Betreff",
+        "user": "Benutzer",
+        "status": "Status",
+        "priority": "Prioritat",
+        "createdAt": "Datum"
+      },
+      "status": {
+        "open": "Offen",
+        "in_progress": "In Bearbeitung",
+        "waiting_response": "Antwort ausstehend",
+        "closed": "Geschlossen"
+      },
+      "priority": {
+        "low": "Niedrig",
+        "medium": "Mittel",
+        "high": "Hoch",
+        "urgent": "Dringend"
+      },
+      "viewDialog": {
+        "title": "Ticket-Details",
+        "description": "Ticket anzeigen, beantworten und Status aktualisieren.",
+        "infoTitle": "Ticket-Informationen",
+        "userLabel": "Benutzer",
+        "emailLabel": "E-Mail",
+        "messageLabel": "Nachricht",
+        "statusLabel": "Status",
+        "priorityLabel": "Prioritat",
+        "replies": "Antworten",
+        "noReplies": "Noch keine Antworten.",
+        "adminBadge": "Admin",
+        "userBadge": "Benutzer",
+        "replyPlaceholder": "Admin-Antwort schreiben...",
+        "sendReply": "Antwort senden",
+        "sending": "Wird gesendet...",
+        "deleteReply": "Antwort loschen"
+      },
+      "messages": {
+        "saved": "Ticket aktualisiert.",
+        "deleted": "Ticket geloscht.",
+        "replySent": "Antwort gesendet.",
+        "replyDeleted": "Antwort geloscht.",
+        "noChanges": "Keine Anderungen zu speichern.",
+        "loadError": "Tickets konnten nicht geladen werden.",
+        "saveError": "Aktualisierung fehlgeschlagen.",
+        "deleteError": "Loschen fehlgeschlagen.",
+        "replyError": "Antwort konnte nicht gesendet werden.",
+        "replyDeleteError": "Antwort konnte nicht geloscht werden."
+      },
+      "confirmDelete": "Mochten Sie dieses Ticket wirklich loschen? Betreff: {subject} (ID: {id})"
     }
   },
   "header": {

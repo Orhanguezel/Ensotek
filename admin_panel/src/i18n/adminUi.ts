@@ -42,8 +42,7 @@ function normalizeAdminLocaleJson(raw: unknown): PlainObject {
     admin.notifications = base.notifications as PlainObject;
   if (!isPlainObject(admin.mail) && isPlainObject(base.mail))
     admin.mail = base.mail as PlainObject;
-  if (!isPlainObject(admin.availability) && isPlainObject(base.availability))
-    admin.availability = base.availability as PlainObject;
+
 
   // tr.json gibi: admin.db.siteSettings / admin.db.audit (yanlış yerde)
   const adminDb = isPlainObject(admin.db) ? (admin.db as PlainObject) : null;

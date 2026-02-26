@@ -1,8 +1,15 @@
 import React from "react";
+import type { Metadata } from "next";
 import Layout from "@/components/layout/Layout";
 import PageList from "@/components/containers/custom-pages/PageList";
 import Banner from "@/components/layout/banner/Banner";
 import { getTranslations } from "next-intl/server";
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("blog_title"), description: t("blog_description") };
+}
 
 const BlogListPage = async ({
   params,

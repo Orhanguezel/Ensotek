@@ -4,26 +4,15 @@
 // ===================================================================
 
 import { randomUUID } from 'crypto';
+import { safeTrim } from '@/modules/_shared';
 import { telegramNotify, telegramSendRaw } from './telegram.notifier';
+import { toTelegramBoolInt, toTelegramChatId } from './helpers';
 import { TelegramAdminRepo } from './repository';
 import type {
   TelegramSendBody,
   TelegramEventBody,
   TelegramWebhookBody,
 } from './validation';
-
-function toSafeString(v: unknown): string {
-  return String(v ?? '').trim();
-}
-
-function toChatId(v: unknown): string {
-  if (typeof v === 'number' && Number.isFinite(v)) return String(v);
-  return toSafeString(v);
-}
-
-function toBoolInt(v: unknown): number {
-  return v === true ? 1 : 0;
-}
 
 /**
  * Generic message send (no template selection).
@@ -72,7 +61,7 @@ export async function sendTelegramTest(chatId?: string) {
  */
 export async function processTelegramWebhook(update: TelegramWebhookBody) {
   const msg = update.message;
-  const chatId = toChatId(msg?.chat?.id);
+  const chatId = toTelegramChatId(msg?.chat?.id);
 
   // Persist only message updates with chat_id.
   if (msg && chatId) {
@@ -81,14 +70,14 @@ export async function processTelegramWebhook(update: TelegramWebhookBody) {
       update_id: Number(update.update_id),
       message_id: typeof msg.message_id === 'number' ? msg.message_id : null,
       chat_id: chatId,
-      chat_type: toSafeString(msg.chat?.type) || null,
-      chat_title: toSafeString(msg.chat?.title) || null,
-      chat_username: toSafeString(msg.chat?.username) || null,
-      from_id: toChatId(msg.from?.id) || null,
-      from_username: toSafeString(msg.from?.username) || null,
-      from_first_name: toSafeString(msg.from?.first_name) || null,
-      from_last_name: toSafeString(msg.from?.last_name) || null,
-      from_is_bot: toBoolInt(msg.from?.is_bot),
+      chat_type: safeTrim(msg.chat?.type) || null,
+      chat_title: safeTrim(msg.chat?.title) || null,
+      chat_username: safeTrim(msg.chat?.username) || null,
+      from_id: toTelegramChatId(msg.from?.id) || null,
+      from_username: safeTrim(msg.from?.username) || null,
+      from_first_name: safeTrim(msg.from?.first_name) || null,
+      from_last_name: safeTrim(msg.from?.last_name) || null,
+      from_is_bot: toTelegramBoolInt(msg.from?.is_bot),
       text: typeof msg.text === 'string' ? msg.text : null,
       raw: JSON.stringify(update),
       telegram_date: typeof msg.date === 'number' ? msg.date : null,

@@ -47,10 +47,10 @@ export * from '@/integrations/shared/pageCopies';
 export * from '@/integrations/shared/footer_sections.types';
 export * from '@/integrations/shared/home';
 export * from '@/integrations/shared/adminUi';
-export * from '@/integrations/shared/reports';
+
 export * from '@/integrations/shared/users/admin_users.types';
 export * from '@/integrations/shared/audit.types';
-export * from '@/integrations/shared/availability.types';
+
 export * from '@/integrations/shared/resources.types';
 export * from '@/integrations/shared/telegram';
 export * from '@/integrations/shared/telegram_inbound';

@@ -16,6 +16,7 @@ import {
   sendTelegramGeneric,
   sendTelegramTest,
 } from './service';
+import { isZodValidationError } from './helpers';
 
 export const telegramWebhookCtrl: RouteHandler = async (req, reply) => {
   try {
@@ -23,11 +24,10 @@ export const telegramWebhookCtrl: RouteHandler = async (req, reply) => {
     const result = await processTelegramWebhook(body);
     return reply.code(200).send(result);
   } catch (e: unknown) {
-    const err = e as { name?: string; issues?: unknown };
-    if (err?.name === 'ZodError') {
+    if (isZodValidationError(e)) {
       return reply
         .code(400)
-        .send({ error: { message: 'validation_error', details: (err as any).issues } });
+        .send({ error: { message: 'validation_error', details: (e as any).issues } });
     }
     req.log.error(e, 'POST /telegram/webhook failed');
     return reply.code(500).send({ error: { message: 'telegram_webhook_failed' } });
@@ -40,16 +40,15 @@ export const telegramTestCtrl: RouteHandler = async (req, reply) => {
     const result = await sendTelegramTest(body.chat_id);
     return reply.code(200).send(result);
   } catch (e: unknown) {
-    const err = e as { name?: string; issues?: unknown; message?: string };
-    if (err?.name === 'ZodError') {
+    if (isZodValidationError(e)) {
       return reply
         .code(400)
-        .send({ error: { message: 'validation_error', details: (err as any).issues } });
+        .send({ error: { message: 'validation_error', details: (e as any).issues } });
     }
     req.log.error(e, 'POST /admin/telegram/test failed');
     return reply
       .code(500)
-      .send({ error: { message: 'telegram_test_failed', details: err?.message } });
+      .send({ error: { message: 'telegram_test_failed', details: (e as any)?.message } });
   }
 };
 
@@ -59,16 +58,15 @@ export const telegramSendCtrl: RouteHandler = async (req, reply) => {
     const result = await sendTelegramGeneric(body);
     return reply.code(201).send(result);
   } catch (e: unknown) {
-    const err = e as { name?: string; issues?: unknown; message?: string };
-    if (err?.name === 'ZodError') {
+    if (isZodValidationError(e)) {
       return reply
         .code(400)
-        .send({ error: { message: 'validation_error', details: (err as any).issues } });
+        .send({ error: { message: 'validation_error', details: (e as any).issues } });
     }
     req.log.error(e, 'POST /admin/telegram/send failed');
     return reply
       .code(500)
-      .send({ error: { message: 'telegram_send_failed', details: err?.message } });
+      .send({ error: { message: 'telegram_send_failed', details: (e as any)?.message } });
   }
 };
 
@@ -78,15 +76,14 @@ export const telegramEventCtrl: RouteHandler = async (req, reply) => {
     const result = await sendTelegramEvent(body);
     return reply.code(201).send(result);
   } catch (e: unknown) {
-    const err = e as { name?: string; issues?: unknown; message?: string };
-    if (err?.name === 'ZodError') {
+    if (isZodValidationError(e)) {
       return reply
         .code(400)
-        .send({ error: { message: 'validation_error', details: (err as any).issues } });
+        .send({ error: { message: 'validation_error', details: (e as any).issues } });
     }
     req.log.error(e, 'POST /admin/telegram/event failed');
     return reply
       .code(500)
-      .send({ error: { message: 'telegram_event_failed', details: err?.message } });
+      .send({ error: { message: 'telegram_event_failed', details: (e as any)?.message } });
   }
 };

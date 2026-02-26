@@ -48,3 +48,45 @@ export async function fetchSetting(
     return null;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/*  Server-side content fetchers (for generateMetadata in pages)       */
+/* ------------------------------------------------------------------ */
+
+type ContentMeta = {
+  title?: string;
+  name?: string;
+  slug?: string;
+  meta_title?: string | null;
+  meta_description?: string | null;
+  summary?: string | null;
+  description?: string | null;
+} | null;
+
+async function fetchContent(path: string, locale: string): Promise<ContentMeta> {
+  try {
+    const url = `${API_BASE_URL}/${path}?locale=${encodeURIComponent(locale)}`;
+    const res = await fetch(url, { next: { revalidate: 300 } });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data?.data ?? data ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchCustomPage(slug: string, locale: string): Promise<ContentMeta> {
+  return fetchContent(`custom_pages/by-slug/${encodeURIComponent(slug)}`, locale);
+}
+
+export async function fetchServiceBySlug(slug: string, locale: string): Promise<ContentMeta> {
+  return fetchContent(`services/by-slug/${encodeURIComponent(slug)}`, locale);
+}
+
+export async function fetchProductBySlug(slug: string, locale: string): Promise<ContentMeta> {
+  return fetchContent(`products/by-slug/${encodeURIComponent(slug)}`, locale);
+}
+
+export async function fetchLibraryBySlug(slug: string, locale: string): Promise<ContentMeta> {
+  return fetchContent(`library/by-slug/${encodeURIComponent(slug)}`, locale);
+}

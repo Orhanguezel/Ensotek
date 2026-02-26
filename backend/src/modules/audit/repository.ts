@@ -1,9 +1,11 @@
 // =============================================================
 // FILE: src/modules/audit/repository.ts
 // Ensotek – Audit Repository (Drizzle queries)
-//   - listAuditRequestLogs
-//   - listAuditAuthEvents
+//   - listAuditRequestLogs (with user enrichment)
+//   - listAuditAuthEvents (with user enrichment)
 //   - getAuditMetricsDaily
+//   - getAuditGeoStats
+//   - clearAuditLogs
 // =============================================================
 
 import { db } from '@/db/client';
@@ -15,6 +17,8 @@ import {
   type AuditRequestLogRow,
   type AuditAuthEventRow,
 } from './schema';
+
+import { users } from '@/modules/auth/schema';
 
 import type {
   AuditRequestLogsListQuery,
@@ -28,12 +32,27 @@ function parseDateTime3(s: string) {
   return sql`CAST(${s} AS DATETIME(3))`;
 }
 
+/* ---- Localhost exclusion helper ---- */
+export function excludeLocalhostCond(table: { ip: any }): SQL {
+  return sql`${table.ip} NOT IN ('127.0.0.1', '::1', '::ffff:127.0.0.1')`;
+}
+
+/* ---- Enriched types (with user info) ---- */
+export type AuditRequestLogEnriched = AuditRequestLogRow & {
+  user_email: string | null;
+  user_full_name: string | null;
+};
+
+export type AuditAuthEventEnriched = AuditAuthEventRow & {
+  user_full_name: string | null;
+};
+
 /* -------------------------------------------------------------
- * LIST – Request logs
+ * LIST – Request logs (with user enrichment)
  * ------------------------------------------------------------- */
 export async function listAuditRequestLogs(
   q: AuditRequestLogsListQuery,
-): Promise<{ items: AuditRequestLogRow[]; total: number }> {
+): Promise<{ items: AuditRequestLogEnriched[]; total: number }> {
   const conds: (SQL | undefined)[] = [];
 
   if (q.q && q.q.trim()) {
@@ -54,6 +73,10 @@ export async function listAuditRequestLogs(
 
   if (typeof q.only_admin !== 'undefined' && isTruthyBoolLike(q.only_admin)) {
     conds.push(eq(auditRequestLogs.is_admin, 1));
+  }
+
+  if (typeof q.exclude_localhost !== 'undefined' && isTruthyBoolLike(q.exclude_localhost)) {
+    conds.push(excludeLocalhostCond(auditRequestLogs));
   }
 
   if (q.created_from && q.created_from.trim()) {
@@ -85,7 +108,32 @@ export async function listAuditRequestLogs(
       ? asc(auditRequestLogs.created_at)
       : desc(auditRequestLogs.created_at);
 
-  const baseQuery = db.select().from(auditRequestLogs);
+  const baseQuery = db
+    .select({
+      id: auditRequestLogs.id,
+      req_id: auditRequestLogs.req_id,
+      method: auditRequestLogs.method,
+      url: auditRequestLogs.url,
+      path: auditRequestLogs.path,
+      status_code: auditRequestLogs.status_code,
+      response_time_ms: auditRequestLogs.response_time_ms,
+      ip: auditRequestLogs.ip,
+      user_agent: auditRequestLogs.user_agent,
+      referer: auditRequestLogs.referer,
+      user_id: auditRequestLogs.user_id,
+      is_admin: auditRequestLogs.is_admin,
+      country: auditRequestLogs.country,
+      city: auditRequestLogs.city,
+      error_message: auditRequestLogs.error_message,
+      error_code: auditRequestLogs.error_code,
+      request_body: auditRequestLogs.request_body,
+      created_at: auditRequestLogs.created_at,
+      user_email: users.email,
+      user_full_name: users.full_name,
+    })
+    .from(auditRequestLogs)
+    .leftJoin(users, eq(auditRequestLogs.user_id, users.id));
+
   const rowsQuery = whereCond ? baseQuery.where(whereCond as SQL) : baseQuery;
 
   const items = await rowsQuery
@@ -99,21 +147,32 @@ export async function listAuditRequestLogs(
   const cnt = await countQuery;
   const total = Number(cnt[0]?.c ?? 0);
 
-  return { items: items as AuditRequestLogRow[], total };
+  return {
+    items: items.map((r: any) => ({
+      ...r,
+      user_email: r.user_email ?? null,
+      user_full_name: r.user_full_name ?? null,
+    })) as AuditRequestLogEnriched[],
+    total,
+  };
 }
 
 /* -------------------------------------------------------------
- * LIST – Auth events
+ * LIST – Auth events (with user enrichment)
  * ------------------------------------------------------------- */
 export async function listAuditAuthEvents(
   q: AuditAuthEventsListQuery,
-): Promise<{ items: AuditAuthEventRow[]; total: number }> {
+): Promise<{ items: AuditAuthEventEnriched[]; total: number }> {
   const conds: (SQL | undefined)[] = [];
 
   if (q.event) conds.push(eq(auditAuthEvents.event, q.event));
   if (q.user_id) conds.push(eq(auditAuthEvents.user_id, q.user_id));
   if (q.email) conds.push(eq(auditAuthEvents.email, q.email));
   if (q.ip) conds.push(eq(auditAuthEvents.ip, q.ip));
+
+  if (typeof q.exclude_localhost !== 'undefined' && isTruthyBoolLike(q.exclude_localhost)) {
+    conds.push(excludeLocalhostCond(auditAuthEvents));
+  }
 
   if (q.created_from && q.created_from.trim()) {
     conds.push(gte(auditAuthEvents.created_at, parseDateTime3(q.created_from.trim())));
@@ -132,7 +191,22 @@ export async function listAuditAuthEvents(
   const orderExpr: SQL =
     dir === 'asc' ? asc(auditAuthEvents.created_at) : desc(auditAuthEvents.created_at);
 
-  const baseQuery = db.select().from(auditAuthEvents);
+  const baseQuery = db
+    .select({
+      id: auditAuthEvents.id,
+      event: auditAuthEvents.event,
+      user_id: auditAuthEvents.user_id,
+      email: auditAuthEvents.email,
+      ip: auditAuthEvents.ip,
+      user_agent: auditAuthEvents.user_agent,
+      country: auditAuthEvents.country,
+      city: auditAuthEvents.city,
+      created_at: auditAuthEvents.created_at,
+      user_full_name: users.full_name,
+    })
+    .from(auditAuthEvents)
+    .leftJoin(users, eq(auditAuthEvents.user_id, users.id));
+
   const rowsQuery = whereCond ? baseQuery.where(whereCond as SQL) : baseQuery;
 
   const items = await rowsQuery
@@ -146,7 +220,13 @@ export async function listAuditAuthEvents(
   const cnt = await countQuery;
   const total = Number(cnt[0]?.c ?? 0);
 
-  return { items: items as AuditAuthEventRow[], total };
+  return {
+    items: items.map((r: any) => ({
+      ...r,
+      user_full_name: r.user_full_name ?? null,
+    })) as AuditAuthEventEnriched[],
+    total,
+  };
 }
 
 /* -------------------------------------------------------------
@@ -161,6 +241,7 @@ export type AuditGeoStatsRow = {
 export type AuditGeoStatsQuery = {
   days?: number;
   only_admin?: any;
+  exclude_localhost?: any;
   source?: 'requests' | 'auth';
 };
 
@@ -179,6 +260,10 @@ export async function getAuditGeoStats(
 
   if (!useAuth && typeof q.only_admin !== 'undefined' && isTruthyBoolLike(q.only_admin)) {
     conds.push(eq(auditRequestLogs.is_admin, 1));
+  }
+
+  if (typeof q.exclude_localhost !== 'undefined' && isTruthyBoolLike(q.exclude_localhost)) {
+    conds.push(excludeLocalhostCond(table));
   }
 
   const whereCond = and(...(conds.filter(Boolean) as SQL[]));
@@ -251,6 +336,10 @@ export async function getAuditMetricsDaily(
 
   if (typeof q.only_admin !== 'undefined' && isTruthyBoolLike(q.only_admin)) {
     conds.push(eq(auditRequestLogs.is_admin, 1));
+  }
+
+  if (typeof (q as any).exclude_localhost !== 'undefined' && isTruthyBoolLike((q as any).exclude_localhost)) {
+    conds.push(excludeLocalhostCond(auditRequestLogs));
   }
 
   if (q.path_prefix && q.path_prefix.trim()) {

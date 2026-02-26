@@ -10,3 +10,4 @@ export * from './time';
 export * from './dashboar_admin.types';
 export * from './validation';
 export * from './categories';
+export * from './site-settings';

@@ -22,7 +22,7 @@ export const SupportAdminController = {
       const q = adminListQuerySchema.parse(req.query);
       const { data, total } = await SupportRepo.list(q);
       reply.header("x-total-count", String(total));
-      return data;
+      return { data, total };
     } catch (err) {
       req.log.error({ err }, "admin_support_tickets_list_failed");
       reply.code(400);

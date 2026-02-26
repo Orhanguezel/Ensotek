@@ -4,7 +4,7 @@ import Layout from "@/components/layout/Layout";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Page Not Found | Digitek",
+  title: "Page Not Found | Ensotek",
 };
 
 const NotFound = () => {

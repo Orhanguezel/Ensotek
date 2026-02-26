@@ -1,63 +1,78 @@
 {
   "admin": {
     "reports": {
-      "title": "Reports (Admin)",
-      "description": "KPI, resource performance and location breakdown.",
+      "title": "Reports",
+      "description": "System traffic analysis, performance metrics and user activity.",
       "refresh": "Refresh",
-      "tabs": {
-        "title": "Tabs",
-        "description": "KPI • Resource Performance • Locations",
-        "kpi": "KPI",
-        "users": "Resources",
-        "locations": "Locations"
-      },
+      "loading": "Loading...",
+      "noRecords": "No records found.",
+      "excludeLocalhost": "Exclude Localhost",
+      "export": "Export",
+      "exportCsv": "Download CSV",
+      "exportJson": "Download JSON",
       "filter": {
-        "title": "Filter",
-        "description": "Date range (start/end) and resource selection.",
+        "from": "From",
+        "to": "To",
         "apply": "Apply",
-        "reset": "Reset",
-        "from": "Start",
-        "to": "End",
-        "role": "Role",
-        "roleHint": "Only used in the “Resources” tab.",
-        "invalidFrom": "Start date is invalid.",
-        "invalidTo": "End date is invalid."
+        "reset": "Reset"
       },
-      "kpi": {
-        "daily": "Daily",
-        "weekly": "Weekly",
-        "monthly": "Monthly",
-        "loadingError": "KPI could not be loaded.",
-        "noData": "No records found.",
-        "bucket": "Period",
-        "total": "Total",
-        "completed": "Completed",
-        "success": "Success"
+      "tabs": {
+        "overview": "Overview",
+        "performance": "Performance",
+        "traffic": "Traffic",
+        "users": "Users"
+      },
+      "overview": {
+        "todayRequests": "Today's Requests",
+        "todayErrors": "Today's Errors",
+        "errorRate": "Error Rate",
+        "avgResponseTime": "Avg. Response Time",
+        "uniqueVisitors": "Unique Visitors",
+        "uniqueUsers": "Unique Users",
+        "dailyChart": "Daily Metrics",
+        "dailyChartDesc": "Request statistics for the last {days} days.",
+        "monthlyTrend": "Monthly Trend",
+        "monthlyTrendDesc": "Request, error and response time trends for the last 12 months.",
+        "requests": "Requests",
+        "errors": "Errors",
+        "avgTime": "Avg. Time"
+      },
+      "performance": {
+        "responseTimeStats": "Response Time Statistics",
+        "responseTimeStatsDesc": "Percentile breakdown and average response times.",
+        "topEndpoints": "Top Requested Endpoints",
+        "topEndpointsDesc": "API endpoints with the most requests.",
+        "slowestEndpoints": "Slowest Endpoints",
+        "slowestEndpointsDesc": "Endpoints with the highest average response time.",
+        "path": "Path",
+        "requestCount": "Request Count",
+        "avgTime": "Avg. Time",
+        "maxTime": "Max. Time",
+        "errorRate": "Error Rate",
+        "avg": "Average",
+        "min": "Minimum",
+        "max": "Maximum",
+        "totalRequests": "Total Requests"
+      },
+      "traffic": {
+        "statusDistribution": "Status Code Distribution",
+        "statusDistributionDesc": "Distribution of HTTP status codes (2xx, 3xx, 4xx, 5xx).",
+        "methodDistribution": "HTTP Method Distribution",
+        "methodDistributionDesc": "Usage distribution of HTTP methods.",
+        "requests": "Requests",
+        "geoTitle": "Geographic Distribution",
+        "geoDesc": "Requests by location for the last 30 days."
       },
       "users": {
-        "title": "Resource Performance",
-        "description": "role={role} • count: {count}",
-        "loadingError": "Performance report could not be loaded.",
-        "noData": "No records found.",
-        "table": {
-          "user": "Resource",
-          "completed": "Completed",
-          "cancelled": "Cancelled",
-          "success": "Success"
-        }
-      },
-      "locations": {
-        "title": "Location (Locale) Breakdown",
-        "description": "count: {count}",
-        "loadingError": "Location report could not be loaded.",
-        "noData": "No records found.",
-        "table": {
-          "city": "Locale / Region",
-          "district": "Sub Region",
-          "completed": "Completed",
-          "cancelled": "Cancelled",
-          "success": "Success"
-        }
+        "topUsers": "Most Active Users",
+        "topUsersDesc": "Users with the most requests.",
+        "topIps": "Most Active IPs",
+        "topIpsDesc": "IP addresses with the most requests.",
+        "user": "User",
+        "ip": "IP Address",
+        "country": "Country",
+        "requestCount": "Request Count",
+        "lastSeen": "Last Seen"
       }
     },
     "auth": {
@@ -708,10 +723,10 @@
         "process": "Process",
         "city": "City",
         "district": "District",
-        "waterFlow": "Water Flow (m\u00b3/h)",
-        "inletTemp": "Inlet Temperature (\u00b0C)",
-        "outletTemp": "Outlet Temperature (\u00b0C)",
-        "wetBulb": "Wet Bulb (\u00b0C)",
+        "waterFlow": "Water Flow (m³/h)",
+        "inletTemp": "Inlet Temperature (°C)",
+        "outletTemp": "Outlet Temperature (°C)",
+        "wetBulb": "Wet Bulb (°C)",
         "capacity": "Capacity (kcal/h, kW)",
         "waterQuality": "Water Quality",
         "poolType": "Pool Type",
@@ -1227,7 +1242,6 @@
       "items": {
         "db": "Database",
         "audit": "Audit Logs",
-        "availability": "Availability",
         "notifications": "Notifications",
         "storage": "File Manager",
         "contacts": "Contact Messages",
@@ -1255,7 +1269,8 @@
         "library": "Library",
         "catalog_requests": "Catalog Requests",
         "offers": "Offers",
-        "references": "References"
+        "references": "References",
+        "support": "Support Tickets"
       },
       "stats": {
         "deliveredOrders": "Delivered Orders",
@@ -1650,97 +1665,6 @@
         }
       }
     },
-    "availability": {
-      "header": {
-        "title": "Availability Management",
-        "description": "Manage resources (therapist, room, etc.) and weekly schedules.",
-        "totalLabel": "Total:",
-        "actions": {
-          "refresh": "Refresh",
-          "create": "New Resource"
-        }
-      },
-      "filters": {
-        "searchLabel": "Search",
-        "searchPlaceholder": "Name or reference...",
-        "typeLabel": "Type",
-        "typeAll": "All",
-        "statusLabel": "Status",
-        "statusAll": "All",
-        "statusActive": "Active",
-        "statusInactive": "Inactive",
-        "clear": "Clear",
-        "statusOptions": {
-          "all": "All",
-          "active": "Active",
-          "inactive": "Inactive"
-        }
-      },
-      "list": {
-        "title": "Resource List",
-        "empty": "No records found",
-        "loading": "Loading...",
-        "total": "Total: {count}",
-        "columns": {
-          "name": "Name",
-          "type": "Type",
-          "status": "Status",
-          "updated": "Updated",
-          "created": "Created",
-          "actions": "Actions",
-          "ref": "Reference"
-        },
-        "actions": {
-          "manage": "Manage",
-          "delete": "Delete"
-        },
-        "deleteConfirm": {
-          "title": "Delete Resource",
-          "description": "Are you sure you want to delete \"{name}\"?\nType: {type}\nRef: {ref}\nThis action cannot be undone."
-        }
-      },
-      "form": {
-        "createTitle": "New Resource",
-        "editTitle": "Resource Management",
-        "description": "Manage resource details, weekly and daily plans.",
-        "tabs": {
-          "resource": "General Info",
-          "weekly": "Weekly Plan",
-          "daily": "Daily Plan"
-        },
-        "buttons": {
-          "back": "Back",
-          "create": "Create",
-          "save": "Save",
-          "creating": "Creating...",
-          "saving": "Saving..."
-        },
-        "messages": {
-          "createSuccess": "Resource created successfully.",
-          "updateSuccess": "Resource updated successfully.",
-          "deleteSuccess": "Resource deleted successfully.",
-          "invalidId": "Invalid ID.",
-          "notFound": "Resource not found.",
-          "notFoundDesc": "This resource could not be accessed or may have been deleted.",
-          "returnToList": "Return to List"
-        },
-        "resource": {
-          "titleLabel": "Resource Name",
-          "titlePlaceholder": "e.g. Therapist Anna",
-          "typeLabel": "Type",
-          "refLabel": "External Reference",
-          "refPlaceholder": "e.g. room-101 (optional)",
-          "statusLabel": "Status",
-          "active": "Active",
-          "inactive": "Inactive"
-        }
-      },
-      "common": {
-        "loading": "Loading...",
-        "noName": "(no name)",
-        "noRef": "(no ref)"
-      }
-    },
     "audit": {
       "header": {
         "title": "Audit Logs",
@@ -1761,7 +1685,8 @@
         "requests": "Requests",
         "auth": "Authentication",
         "metrics": "Metrics",
-        "map": "Map"
+        "map": "Map",
+        "analytics": "Analytics"
       },
       "requests": {
         "filtersTitle": "Filters",
@@ -1793,7 +1718,133 @@
       },
       "map": {
         "title": "Geographic Distribution",
-        "description": "Requests by location for the last {days} days."
+        "description": "Requests by location for the last {days} days.",
+        "loading": "Loading map...",
+        "colorScale": "Color Scale",
+        "topCountries": "Top Countries",
+        "totalRequests": "total requests",
+        "requests": "requests",
+        "uniqueIps": "unique IPs",
+        "noData": "No data",
+        "noLocationData": "No location data available.",
+        "countries": {
+          "TR": "Turkey",
+          "DE": "Germany",
+          "US": "United States",
+          "GB": "United Kingdom",
+          "FR": "France",
+          "NL": "Netherlands",
+          "IT": "Italy",
+          "ES": "Spain",
+          "AT": "Austria",
+          "CH": "Switzerland",
+          "BE": "Belgium",
+          "PL": "Poland",
+          "SE": "Sweden",
+          "NO": "Norway",
+          "DK": "Denmark",
+          "FI": "Finland",
+          "RU": "Russia",
+          "UA": "Ukraine",
+          "CN": "China",
+          "JP": "Japan",
+          "KR": "South Korea",
+          "IN": "India",
+          "BR": "Brazil",
+          "CA": "Canada",
+          "AU": "Australia",
+          "MX": "Mexico",
+          "SA": "Saudi Arabia",
+          "AE": "UAE",
+          "EG": "Egypt",
+          "ZA": "South Africa",
+          "IR": "Iran",
+          "IQ": "Iraq",
+          "SY": "Syria",
+          "GR": "Greece",
+          "PT": "Portugal",
+          "IE": "Ireland",
+          "CZ": "Czech Republic",
+          "RO": "Romania",
+          "HU": "Hungary",
+          "BG": "Bulgaria",
+          "RS": "Serbia",
+          "HR": "Croatia",
+          "SK": "Slovakia",
+          "SI": "Slovenia",
+          "BA": "Bosnia",
+          "AL": "Albania",
+          "MK": "N. Macedonia",
+          "XK": "Kosovo",
+          "ME": "Montenegro",
+          "GE": "Georgia",
+          "AZ": "Azerbaijan",
+          "AM": "Armenia",
+          "KZ": "Kazakhstan",
+          "UZ": "Uzbekistan",
+          "TM": "Turkmenistan",
+          "KG": "Kyrgyzstan",
+          "TJ": "Tajikistan",
+          "PK": "Pakistan",
+          "BD": "Bangladesh",
+          "ID": "Indonesia",
+          "MY": "Malaysia",
+          "TH": "Thailand",
+          "VN": "Vietnam",
+          "PH": "Philippines",
+          "SG": "Singapore",
+          "NZ": "New Zealand",
+          "AR": "Argentina",
+          "CL": "Chile",
+          "CO": "Colombia",
+          "PE": "Peru",
+          "LOCAL": "Localhost"
+        }
+      },
+      "analytics": {
+        "title": "Analytics Dashboard",
+        "description": "Detailed request analysis and statistics.",
+        "summary": "Today's Summary",
+        "todayRequests": "Today's Requests",
+        "todayErrors": "Today's Errors",
+        "errorRate": "Error Rate",
+        "avgResponseTime": "Avg. Response Time",
+        "uniqueIps": "Unique IPs",
+        "uniqueUsers": "Unique Users",
+        "uniqueVisitors": "Unique Visitors",
+        "topEndpoints": "Top Requested Endpoints",
+        "topEndpointsDesc": "API endpoints with the most requests.",
+        "slowestEndpoints": "Slowest Endpoints",
+        "slowestEndpointsDesc": "Endpoints with the highest average response time.",
+        "topUsers": "Most Active Users",
+        "topUsersDesc": "Users with the most requests.",
+        "topIps": "Most Active IPs",
+        "topIpsDesc": "IP addresses with the most requests.",
+        "statusDistribution": "Status Code Distribution",
+        "statusDistributionDesc": "Distribution of HTTP status codes (2xx, 3xx, 4xx, 5xx).",
+        "methodDistribution": "HTTP Method Distribution",
+        "methodDistributionDesc": "Usage distribution of HTTP methods (GET, POST, PUT, DELETE).",
+        "responseTimeStats": "Response Time Statistics",
+        "responseTimeStatsDesc": "Percentile breakdown and average response times.",
+        "monthlyTrend": "Monthly Trend",
+        "monthlyTrendDesc": "Request, error and response time trends for the last 12 months.",
+        "path": "Path",
+        "requestCount": "Request Count",
+        "avgTime": "Avg. Time",
+        "maxTime": "Max. Time",
+        "errorRateCol": "Error %",
+        "user": "User",
+        "lastSeen": "Last Seen",
+        "ip": "IP Address",
+        "country": "Country",
+        "requests": "Requests",
+        "errors": "Errors",
+        "avg": "Average",
+        "min": "Minimum",
+        "max": "Maximum",
+        "totalRequests": "Total Requests",
+        "topErrorEndpoint": "Top Error Endpoint",
+        "slowestEndpoint": "Slowest Endpoint"
       },
       "common": {
         "from": "From",
@@ -1813,7 +1864,22 @@
         "recordCount": "{count} records",
         "prev": "Previous",
         "next": "Next",
-        "anon": "Anonymous"
+        "anon": "Anonymous",
+        "excludeLocalhost": "Exclude Localhost",
+        "localhostTraffic": "Localhost traffic",
+        "export": "Export",
+        "exportCsv": "Download CSV",
+        "exportJson": "Download JSON",
+        "dateRange": "Date Range",
+        "today": "Today",
+        "thisWeek": "This Week",
+        "thisMonth": "This Month",
+        "lastWeek": "Last Week",
+        "lastMonth": "Last Month",
+        "last7Days": "Last 7 Days",
+        "last30Days": "Last 30 Days",
+        "last90Days": "Last 90 Days",
+        "custom": "Custom"
       },
       "columns": {
         "date": "Date",
@@ -1920,7 +1986,7 @@
         "structuredMissingDesc": "No structured renderer is defined for this key. Use Raw mode.",
         "rawHelp": "Raw: If you enter valid JSON it will be parsed and saved; otherwise it will be saved as plain text.",
         "rawPlaceholder": "E.g.: {\"title\":\"...\"} or plain text",
-        "rawTip": "Tip: To save as JSON, start the text with “{” or “[”."
+        "rawTip": "Tip: To save as JSON, start the text with '{' or '['."
       },
       "detail": {
         "globalOption": "Global (*)",
@@ -3381,6 +3447,84 @@
         "toggleFeaturedError": "Failed to toggle featured",
         "confirmDelete": "Delete \"{title}\"?"
       }
+    },
+    "support": {
+      "header": {
+        "title": "Support Tickets",
+        "subtitle": "Manage user support tickets, reply to them and update their status."
+      },
+      "filters": {
+        "title": "Filters",
+        "description": "Filter tickets by subject, status or priority.",
+        "searchPlaceholder": "Search in subject or message...",
+        "statusLabel": "Status",
+        "statusAll": "All statuses",
+        "priorityLabel": "Priority",
+        "priorityAll": "All priorities",
+        "sortLabel": "Sort by",
+        "sortCreated": "Created date",
+        "sortUpdated": "Updated date",
+        "orderLabel": "Direction",
+        "orderAsc": "Oldest first",
+        "orderDesc": "Newest first",
+        "onlyOpen": "Only open tickets"
+      },
+      "list": {
+        "title": "Tickets",
+        "description": "All support tickets in the system",
+        "loading": "Loading...",
+        "empty": "No records found."
+      },
+      "columns": {
+        "subject": "Subject",
+        "user": "User",
+        "status": "Status",
+        "priority": "Priority",
+        "createdAt": "Date"
+      },
+      "status": {
+        "open": "Open",
+        "in_progress": "In Progress",
+        "waiting_response": "Waiting Response",
+        "closed": "Closed"
+      },
+      "priority": {
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "urgent": "Urgent"
+      },
+      "viewDialog": {
+        "title": "Ticket Detail",
+        "description": "View, reply to and update the status of this ticket.",
+        "infoTitle": "Ticket Information",
+        "userLabel": "User",
+        "emailLabel": "Email",
+        "messageLabel": "Message",
+        "statusLabel": "Status",
+        "priorityLabel": "Priority",
+        "replies": "Replies",
+        "noReplies": "No replies yet.",
+        "adminBadge": "Admin",
+        "userBadge": "User",
+        "replyPlaceholder": "Write an admin reply...",
+        "sendReply": "Send Reply",
+        "sending": "Sending...",
+        "deleteReply": "Delete reply"
+      },
+      "messages": {
+        "saved": "Ticket updated.",
+        "deleted": "Ticket deleted.",
+        "replySent": "Reply sent.",
+        "replyDeleted": "Reply deleted.",
+        "noChanges": "No changes to save.",
+        "loadError": "Failed to load tickets.",
+        "saveError": "Update failed.",
+        "deleteError": "Delete failed.",
+        "replyError": "Failed to send reply.",
+        "replyDeleteError": "Failed to delete reply."
+      },
+      "confirmDelete": "Are you sure you want to delete this ticket? Subject: {subject} (ID: {id})"
     }
   },
   "notFound": {
