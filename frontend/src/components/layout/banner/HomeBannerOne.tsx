@@ -128,6 +128,8 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
         <div className="hero__mobile-view d-md-none">
           <Swiper
             slidesPerView={1}
+            direction="horizontal"
+            speed={500}
             loop={activeSliders.length > 1}
             modules={[Autoplay, Pagination]}
             autoplay={{ delay: 5000, disableOnInteraction: false }}

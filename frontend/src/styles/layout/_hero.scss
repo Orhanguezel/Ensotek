@@ -88,6 +88,15 @@
 .hero__mobile-view {
 	.hero__mobile-swiper {
 		width: 100%;
+		overflow: hidden;
+
+		.swiper-wrapper {
+			align-items: stretch;
+		}
+
+		.swiper-slide {
+			height: auto;
+		}
 	}
 
 	// Pagination dots for mobile swiper
@@ -178,21 +187,6 @@
 	.swiper-wrapper,
 	.swiper-slide {
 		height: 100%;
-	}
-	@media (max-width: 767px) {
-		height: auto !important;
-		.swiper-wrapper {
-			height: auto !important;
-			transform: none !important;
-		}
-		.swiper-slide {
-			height: auto !important;
-			position: relative !important;
-			opacity: 1 !important;
-			&:not(.swiper-slide-active) {
-				display: none !important;
-			}
-		}
 	}
 }
 
