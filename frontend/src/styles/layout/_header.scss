@@ -62,8 +62,8 @@
     background: var(--clr-common-white) !important;
     box-shadow: 0 0 60px 0 rgba(53, 57, 69, 0.15) !important;
     // iPhone Dynamic Island / notch safe area
-    padding-top: max(10px, env(safe-area-inset-top)) !important;
-    padding-bottom: 10px !important;
+    padding-top: max(8px, env(safe-area-inset-top)) !important;
+    padding-bottom: 8px !important;
 
     .bar-icon span {
       background: #000 !important;
@@ -76,6 +76,17 @@
     background: rgba(0, 0, 0, 0.45) !important;
     backdrop-filter: blur(2px);
     transition: all 0.4s ease;
+
+    // Mobile override: is-home-initial has higher specificity than @media rule above,
+    // so we must reset mobile styles explicitly here.
+    @media (max-width: 767px) {
+      padding-top: max(8px, env(safe-area-inset-top)) !important;
+      padding-bottom: 8px !important;
+      background: var(--clr-common-white) !important;
+      backdrop-filter: none !important;
+      &::before, &::after { display: none; }
+      .header__logo::before { display: none; }
+    }
 
     // Horizontal thin lines as requested
     &::before, &::after {
@@ -202,8 +213,8 @@
   @include box-shadow(0 0 60px 0 rgba(53, 57, 69, 0.15));
   animation: 300ms ease-in-out 0s normal none 1 running fadeInDown;
   @media #{$xs,$sm,$md} {
-    padding-top: max(12px, env(safe-area-inset-top));
-    padding-bottom: 12px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: 8px;
   }
 }
 .copyright__logo img,
@@ -212,7 +223,9 @@
   max-width: 170px;
   height: auto;
   @media (max-width: 767px) {
-    max-width: 130px;
+    max-width: 120px;
+    max-height: 34px;
+    width: auto;
   }
 }
 
@@ -254,8 +267,8 @@
 }
 .header__area-3 {
   @media #{$xs,$sm,$md} {
-    padding-top: max(12px, env(safe-area-inset-top));
-    padding-bottom: 12px;
+    padding-top: max(8px, env(safe-area-inset-top));
+    padding-bottom: 8px;
   }
 }
 // Header style
