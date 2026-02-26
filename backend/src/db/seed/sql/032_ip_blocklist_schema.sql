@@ -16,6 +16,3 @@ CREATE TABLE IF NOT EXISTS `ip_blocklist` (
   INDEX `ip_blocklist_created_idx` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Seed: block the known scanner IP immediately
-INSERT IGNORE INTO `ip_blocklist` (`ip`, `note`)
-VALUES ('72.61.93.212', 'Auto-blocked: 4000+ scanner requests (Hostinger VPS)');
