@@ -12,6 +12,9 @@ ALTER TABLE `audit_request_logs`
   ADD COLUMN IF NOT EXISTS `error_code` VARCHAR(64) DEFAULT NULL AFTER `error_message`,
   ADD COLUMN IF NOT EXISTS `request_body` LONGTEXT DEFAULT NULL AFTER `error_code`;
 
--- Analytics performance indexes
+-- Analytics performance indexes (DROP first so re-runs are safe)
+DROP INDEX IF EXISTS `audit_request_logs_status_idx` ON `audit_request_logs`;
 CREATE INDEX `audit_request_logs_status_idx` ON `audit_request_logs` (`status_code`);
+
+DROP INDEX IF EXISTS `audit_request_logs_method_idx` ON `audit_request_logs`;
 CREATE INDEX `audit_request_logs_method_idx` ON `audit_request_logs` (`method`);

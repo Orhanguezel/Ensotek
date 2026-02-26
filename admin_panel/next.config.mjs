@@ -42,6 +42,35 @@ const nextConfig = {
     ];
   },
 
+  async headers() {
+    const isDev = process.env.NODE_ENV === 'development';
+    const apiBase = (
+      process.env.PANEL_API_URL ||
+      process.env.NEXT_PUBLIC_PANEL_API_URL ||
+      'http://localhost:8093'
+    ).replace(/\/+$/, '');
+
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' blob: data: https://res.cloudinary.com https://www.ensotek.de https://ensotek.de",
+      `connect-src 'self' ${isDev ? apiBase : ''} https://cdn.jsdelivr.net https://api.cloudinary.com https://www.ensotek.de https://ensotek.de`.trim(),
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+    ].join('; ');
+
+    return [
+      {
+        source: '/:path*',
+        headers: [{ key: 'Content-Security-Policy', value: csp }],
+      },
+    ];
+  },
+
   async rewrites() {
     const origin =
       process.env.PANEL_API_URL || process.env.NEXT_PUBLIC_PANEL_API_URL || 'http://localhost:8093';
