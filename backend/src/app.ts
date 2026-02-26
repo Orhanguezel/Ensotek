@@ -206,14 +206,16 @@ export async function createApp() {
     async (api) => {
       api.get('/health', async () => ({ ok: true }));
 
-      // ✅ IP Blocklist check: skip admin routes to prevent self-lock
+      // ✅ IP Blocklist check: skip admin routes + excluded IPs to prevent self-lock
       api.addHook('onRequest', async (req, reply) => {
         if (req.url.startsWith('/api/admin')) return;
         const ip =
           (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
           req.socket?.remoteAddress ??
           '';
-        if (ip && (await isIpBlocked(ip))) {
+        if (!ip) return;
+        if (env.AUDIT_EXCLUDE_IPS.includes(ip)) return; // kendi sunucusu asla engellenmez
+        if (await isIpBlocked(ip)) {
           return reply.code(403).send({ error: { message: 'ip_blocked' } });
         }
       });

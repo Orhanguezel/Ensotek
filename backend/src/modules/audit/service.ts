@@ -14,6 +14,7 @@ import { auditEvents } from './audit_events.schema';
 import { emitAppEvent } from '@/common/events/bus';
 import { sql } from 'drizzle-orm';
 import geoip from 'geoip-lite';
+import { env } from '@/core/env';
 
 /* -------------------- helper: headers -------------------- */
 function firstHeader(req: FastifyRequest, name: string): string {
@@ -45,6 +46,12 @@ export function shouldSkipAuditLog(req: FastifyRequest): boolean {
 
   // istersen audit stream'i loglama (loop önler)
   if (path.startsWith('/api/admin/audit/stream')) return true;
+
+  // Hariç tutulan IP'ler (AUDIT_EXCLUDE_IPS env — sunucunun kendi IP'si vs.)
+  if (env.AUDIT_EXCLUDE_IPS.length > 0) {
+    const ip = normalizeClientIp(req);
+    if (ip && env.AUDIT_EXCLUDE_IPS.includes(ip)) return true;
+  }
 
   return false;
 }

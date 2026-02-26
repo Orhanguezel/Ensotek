@@ -101,6 +101,9 @@ export const env = {
   SMTP_PASS: process.env.SMTP_PASS || '',
   MAIL_FROM: process.env.MAIL_FROM || '',
 
+  // Audit: IPs to exclude from logging and blocklist checks (e.g. server's own IP)
+  AUDIT_EXCLUDE_IPS: toList(process.env.AUDIT_EXCLUDE_IPS),
+
   // AI support routing (chat)
   AI_SUPPORT_ENABLED: toBool(process.env.AI_SUPPORT_ENABLED, true),
   AI_PROVIDER_ORDER: process.env.AI_PROVIDER_ORDER || 'openai,anthropic,grok',
