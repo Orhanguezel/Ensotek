@@ -228,7 +228,7 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
 
   const meta = useMemo(() => toMeta(metadata), [metadata]);
   const gallery = useMemo(
-    () => (Array.isArray(values) ? values.map(norm).filter(Boolean) : []),
+    () => (Array.isArray(values) ? [...new Set(values.map(norm).filter(Boolean))] : []),
     [values],
   );
 
@@ -366,14 +366,6 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
 
   const removeAt = (idx: number) => {
     if (!onChangeMultiple) return;
-
-    const url = gallery[idx];
-    const isCover = !!coverValue && norm(coverValue) === url;
-
-    if (isCover) {
-      toast.error('Kapak görseli silinemez. Önce başka bir kapak seç.');
-      return;
-    }
     onChangeMultiple(gallery.filter((_, i) => i !== idx));
   };
 
