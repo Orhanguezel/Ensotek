@@ -76,7 +76,7 @@ const LibrarySection: React.FC = () => {
                       const isOpen = open === idx;
                       return (
                         <div className="accordion-item" key={it.id || `${it.slug}-${idx}`}>
-                          <h2 className="accordion-header" id={`lib-home-heading-${idx}`}>
+                          <h3 className="accordion-header" id={`lib-home-heading-${idx}`}>
                             <button
                               className={`accordion-button ens-acc-btn d-flex align-items-center${isOpen ? "" : " collapsed"}`}
                               aria-expanded={isOpen}
@@ -89,7 +89,7 @@ const LibrarySection: React.FC = () => {
                               </span>
                               <span className="ens-acc-text">{it.title}</span>
                             </button>
-                          </h2>
+                          </h3>
 
                           <div id={`lib-home-collapse-${idx}`} className={`accordion-collapse collapse${isOpen ? " show" : ""}`}>
                             <div className="accordion-body">

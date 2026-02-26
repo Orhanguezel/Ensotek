@@ -10,6 +10,7 @@ import { fetchSetting } from "../../i18n/server";
 import { AosProvider } from '@/providers/AosProvider';
 import { AppProviders } from '@/providers/AppProviders';
 import { StackableWidgets } from '@/features/catalog';
+import { FontAwesomeLoader } from '@/components/FontAwesomeLoader';
 
 // Global Styles
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -75,6 +76,9 @@ export async function generateMetadata({
       images: ogImages,
       locale,
     },
+    ...(seo?.facebook?.app_id
+      ? { other: { 'fb:app_id': String(seo.facebook.app_id) } }
+      : {}),
     twitter: {
       card: (seo?.twitter?.card as any) ?? 'summary_large_image',
       site: seo?.twitter?.site ?? undefined,
@@ -126,13 +130,11 @@ export default async function LocaleLayout({
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">
-      <head>
-        <link rel="stylesheet" href="/app/css/fontawesome-pro.css" />
-      </head>
       <body suppressHydrationWarning={true}>
         <NextIntlClientProvider locale={locale} messages={messages}>
            <AppProviders>
               <AosProvider>
+                <FontAwesomeLoader />
                 {children}
                 <StackableWidgets />
               </AosProvider>

@@ -49,7 +49,7 @@ const Newsletter: React.FC = () => {
           <div className="row align-items-center">
             <div className="col-xl-4 col-lg-4">
               <div className="project__title mb-20 mb-lg-0">
-                <h3>{te("title")}</h3>
+                <h2>{te("title")}</h2>
               </div>
             </div>
 

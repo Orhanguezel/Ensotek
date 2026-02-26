@@ -31,43 +31,52 @@ const ServiceSection: React.FC = () => {
         </div>
 
         <div className="row tik" data-aos="fade-left" data-aos-delay="300">
-          {services.map((item) => (
-            <div className="col-xl-4 col-lg-6 col-md-6" key={item.id}>
-              <div className="service__item mb-30">
-                <div className="service__thumb include__bg service-two-cmn">
-                  <Image
-                    src={item.image_url || item.featured_image || "/img/project/project-thumb.jpg"}
-                    alt={item.image_alt || item.name}
-                    width={640}
-                    height={420}
-                  />
-                </div>
-
-                <div className="service__icon transition-3">
-                  <i className="fa-light fa-gears"></i>
-                </div>
-
-                <div className="service__content">
-                  <h3>
-                    <Link href={`/service/${item.slug}`}>{item.name}</Link>
-                  </h3>
-                  <p>{(item.description || "").replace(/<[^>]*>/g, " ").slice(0, 150)}</p>
-                </div>
-
-                <div className="service__link">
-                  <Link href={`/service/${item.slug}`} aria-label={item.name}>
-                    <i className="fa-regular fa-arrow-right"></i>
-                  </Link>
+          {isLoading ? (
+            [1, 2, 3].map((n) => (
+              <div className="col-xl-4 col-lg-6 col-md-6" key={`sk-${n}`}>
+                <div className="service__item mb-30">
+                  <div className="service__thumb include__bg service-two-cmn service__skeleton" />
                 </div>
               </div>
-            </div>
-          ))}
-
-          {!isLoading && services.length === 0 ? (
+            ))
+          ) : services.length === 0 ? (
             <div className="col-12 text-center">
               <p>{c("no_data")}</p>
             </div>
-          ) : null}
+          ) : (
+            services.map((item) => (
+              <div className="col-xl-4 col-lg-6 col-md-6" key={item.id}>
+                <div className="service__item mb-30">
+                  <div className="service__thumb include__bg service-two-cmn">
+                    <Image
+                      src={item.image_url || item.featured_image || "/img/project/project-thumb.jpg"}
+                      alt={item.image_alt || item.name}
+                      width={640}
+                      height={420}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                    />
+                  </div>
+
+                  <div className="service__icon transition-3">
+                    <i className="fa-light fa-gears"></i>
+                  </div>
+
+                  <div className="service__content">
+                    <h3>
+                      <Link href={`/service/${item.slug}`}>{item.name}</Link>
+                    </h3>
+                    <p>{(item.description || "").replace(/<[^>]*>/g, " ").slice(0, 150)}</p>
+                  </div>
+
+                  <div className="service__link">
+                    <Link href={`/service/${item.slug}`} aria-label={item.name}>
+                      <i className="fa-regular fa-arrow-right"></i>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </section>

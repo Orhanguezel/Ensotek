@@ -200,7 +200,7 @@ const FeedbackOne = () => {
                           <p>{review.comment}</p>
                           <div className="feedback__meta">
                             <div className="feedback__meta-author">
-                              <h5>{review.customer_name}</h5>
+                              <p className="feedback__author-name"><strong>{review.customer_name}</strong></p>
                               <span>{t("valuedCustomer")}</span>
                             </div>
                           </div>

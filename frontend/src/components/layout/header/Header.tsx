@@ -234,17 +234,17 @@ const Header = () => {
           <li key={item.id} className={hasChildren ? "has-dropdown" : ""}>
             {hasChildren ? (
               <>
-                <button aria-label="Select dropdown">{item.title}</button>
+                <button aria-haspopup="true">{item.title}</button>
                 <ul className="submenu">
                   {item.children.map((child: any) => (
                     <li key={child.id}>
-                      <Link href={toLocalizedHref(child.url || child.href || "/")}>{child.title}</Link>
+                      <Link href={toLocalizedHref(child.url || child.href || "/")} title={child.title}>{child.title}</Link>
                     </li>
                   ))}
                 </ul>
               </>
             ) : (
-              <Link href={toLocalizedHref(item.url || item.href || "/")}>{item.title}</Link>
+              <Link href={toLocalizedHref(item.url || item.href || "/")} title={item.title}>{item.title}</Link>
             )}
           </li>
         );
@@ -264,25 +264,26 @@ const Header = () => {
             {hasChildren ? (
               <>
                 <button
-                  aria-label="Select Dropdown"
+                  aria-label={`${item.title} Untermenü öffnen`}
+                  aria-haspopup="true"
                   className={`nul ${isSubMenuButton(item.id)}`}
                   onClick={() => handleSubmenu(item.id)}
                 >
                   {item.title}
-                  <span className="mean-expand">
+                  <span className="mean-expand" aria-hidden="true">
                     <i className="fa-regular fa-plus"></i>
                   </span>
                 </button>
                 <ul className={`sub-menu ${isSubMenuOpen(item.id)}`}>
                   {item.children.map((child: any) => (
                     <li key={child.id}>
-                      <Link href={toLocalizedHref(child.url || child.href || "/")}>{child.title}</Link>
+                      <Link href={toLocalizedHref(child.url || child.href || "/")} title={child.title}>{child.title}</Link>
                     </li>
                   ))}
                 </ul>
               </>
             ) : (
-              <Link href={toLocalizedHref(item.url || item.href || "/")}>{item.title}</Link>
+              <Link href={toLocalizedHref(item.url || item.href || "/")} title={item.title}>{item.title}</Link>
             )}
           </li>
         );
@@ -328,8 +329,8 @@ const Header = () => {
                     placeholder={t("search")}
                     required
                   />
-                  <button type="submit">
-                    <i className="fa-regular fa-magnifying-glass"></i>
+                  <button type="submit" aria-label={t("search")}>
+                    <i className="fa-regular fa-magnifying-glass" aria-hidden="true"></i>
                   </button>
                 </form>
               </div>

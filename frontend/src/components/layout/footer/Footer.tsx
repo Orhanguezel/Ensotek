@@ -186,7 +186,7 @@ const Footer = () => {
                             <ul>
                               {items.map((item: any) => (
                                 <li key={item.id}>
-                                  <Link href={item.url || item.href || "/"}>
+                                  <Link href={item.url || item.href || "/"} title={item.title}>
                                     {item.title}
                                   </Link>
                                 </li>
@@ -207,9 +207,9 @@ const Footer = () => {
                         </div>
                         <div className="footer__link">
                           <ul>
-                            <li><Link href="/about">About Us</Link></li>
-                            <li><Link href="/service">Services</Link></li>
-                            <li><Link href="/contact">Contact Us</Link></li>
+                            <li><Link href="/about" title="About Us">About Us</Link></li>
+                            <li><Link href="/service" title="Services">Services</Link></li>
+                            <li><Link href="/contact" title="Contact Us">Contact Us</Link></li>
                           </ul>
                         </div>
                       </div>
@@ -221,9 +221,9 @@ const Footer = () => {
                         </div>
                         <div className="footer__link">
                           <ul>
-                            <li><Link href="/product">Products</Link></li>
-                            <li><Link href="/project">Portfolio</Link></li>
-                            <li><Link href="/blog">Blog</Link></li>
+                            <li><Link href="/product" title="Products">Products</Link></li>
+                            <li><Link href="/project" title="Portfolio">Portfolio</Link></li>
+                            <li><Link href="/blog" title="Blog">Blog</Link></li>
                           </ul>
                         </div>
                       </div>
