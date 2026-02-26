@@ -8,7 +8,7 @@ import { queryKeys } from "@/lib/query-client";
 import { sliderService } from "@/features/slider/slider.service";
 import type { Slider } from "@/features/slider/slider.type";
 import { useSiteSetting } from "@/features/site-settings/siteSettings.action";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 interface HomeBannerOneProps {
   initialSliders?: Record<string, unknown>[];
@@ -89,6 +89,7 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
             className="ens-hero-btn"
           >
             {slider.buttonText || t("cta")}
+            <ArrowRight size={16} />
           </Link>
         </div>
       )}
