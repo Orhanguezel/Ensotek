@@ -124,15 +124,29 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
     <section className="hero__area-3 p-relative overflow-hidden">
       <div className="hero__wrapper-v3">
 
-        {/* === MOBILE: Simple static hero (no Swiper) === */}
+        {/* === MOBILE: Swiper with touch swipe === */}
         <div className="hero__mobile-view d-md-none">
-          <div className="hero__mobile-item">
-            {renderSlideImage(firstSlider)}
-            <div className="hero__mobile-content">
-              {renderSlideContent(firstSlider)}
-            </div>
-            {renderBottomBar()}
-          </div>
+          <Swiper
+            slidesPerView={1}
+            loop={activeSliders.length > 1}
+            modules={[Autoplay, Pagination]}
+            autoplay={{ delay: 5000, disableOnInteraction: false }}
+            pagination={{ clickable: true }}
+            grabCursor={true}
+            className="hero__mobile-swiper"
+          >
+            {activeSliders.map((slider: any) => (
+              <SwiperSlide key={slider.id}>
+                <div className="hero__mobile-item">
+                  {renderSlideImage(slider)}
+                  <div className="hero__mobile-content">
+                    {renderSlideContent(slider)}
+                  </div>
+                  {renderBottomBar()}
+                </div>
+              </SwiperSlide>
+            ))}
+          </Swiper>
         </div>
 
         {/* === DESKTOP: Swiper with fade effect === */}

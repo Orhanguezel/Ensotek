@@ -84,8 +84,42 @@
 	height: 100%;
 }
 
-// Mobile hero (no Swiper)
+// Mobile hero (with Swiper touch swipe)
 .hero__mobile-view {
+	.hero__mobile-swiper {
+		width: 100%;
+	}
+
+	// Pagination dots for mobile swiper
+	.hero__mobile-swiper .swiper-pagination {
+		position: relative !important;
+		bottom: auto !important;
+		left: auto !important;
+		transform: none !important;
+		width: 100% !important;
+		display: flex;
+		justify-content: center;
+		gap: 6px;
+		padding: 10px 0;
+		background-color: #fff;
+
+		.swiper-pagination-bullet {
+			width: 8px;
+			height: 8px;
+			background: #ccc;
+			opacity: 1;
+			border: none;
+			margin: 0 !important;
+			transition: all 0.3s ease;
+		}
+		.swiper-pagination-bullet-active {
+			background: var(--clr-theme-1, #2563eb);
+			width: 28px;
+			border-radius: 4px;
+			box-shadow: none;
+		}
+	}
+
 	.hero__mobile-item {
 		display: flex;
 		flex-direction: column;
