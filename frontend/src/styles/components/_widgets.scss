@@ -12,9 +12,7 @@
   filter: drop-shadow(-5px 0 15px rgba(0, 0, 0, 0.1));
 
   &__label {
-    writing-mode: vertical-rl;
-    text-orientation: mixed;
-    transform: rotate(180deg);
+    // Desktop: inherits writing-mode from parent __item — no special styles needed
     white-space: nowrap;
   }
 
@@ -22,10 +20,15 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background-color: #2b3b5e; // Premium dark blue matching reference
+    background-color: #2b3b5e;
     color: var(--clr-common-white) !important;
     text-decoration: none;
     padding: 24px 12px;
+    // ── Restore original vertical text layout ──
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    // ───────────────────────────────────────────
     border-radius: 6px 0 0 6px;
     font-weight: 700;
     font-size: 13px;
@@ -45,7 +48,7 @@
       right: 0;
       width: 4px;
       height: 100%;
-      background-color: var(--clr-theme-3); // Yellow accent
+      background-color: var(--clr-theme-3);
       transform: translateX(100%);
       transition: transform 0.3s ease;
     }
@@ -54,19 +57,18 @@
       background-color: var(--clr-theme-1);
       padding-right: 30px;
       margin-left: -10px;
-      
       &::after {
         transform: translateX(0);
       }
     }
 
     &.ens-sticky-widgets__item--offer {
-      background-color: #1e2a4a; // Slightly darker
+      background-color: #1e2a4a;
       &:hover {
         background-color: var(--clr-theme-1);
       }
     }
-    
+
     .ens-sticky-widgets__icon {
       margin-bottom: 12px;
       background: rgba(255, 255, 255, 0.15);
@@ -76,14 +78,14 @@
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      // Icon counter-rotates to stay upright while the label rotates
-      transform: rotate(-180deg);
+      // Counteracts parent rotate(180deg) so icon stays upright
+      transform: rotate(90deg);
       transition: all 0.3s ease;
     }
 
     &:hover .ens-sticky-widgets__icon {
       background: rgba(255, 255, 255, 0.3);
-      transform: rotate(-180deg) scale(1.1);
+      transform: rotate(90deg) scale(1.1);
     }
   }
 
@@ -517,66 +519,54 @@
   }
 }
 
-// ── Mobile: collapsed icon-only, expands on tap ──────────────
+// ── Mobile: compact icon + short label, always visible ──────
 @media (max-width: 767px) {
   .ens-sticky-widgets {
-    gap: 10px;
-    top: 50%;
+    gap: 16px; // More spacing between buttons
 
     &__item {
-      // Horizontal layout (no vertical text)
+      // Switch to horizontal layout
       writing-mode: horizontal-tb;
-      flex-direction: row-reverse; // icon on right (at edge), label on left
-      padding: 0;
+      transform: none;
+      flex-direction: column; // Icon above label
+      padding: 10px 6px;
       border-radius: 8px 0 0 8px;
-      max-width: 40px;    // collapsed: only icon visible
-      height: 40px;
-      overflow: hidden;
-      justify-content: flex-end;
-      transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1),
-                  background-color 0.3s ease;
+      width: 52px;
+      font-size: 8px;
+      letter-spacing: 0.06em;
 
-      // Label: hidden by default, fades in when expanded
-      .ens-sticky-widgets__label {
-        writing-mode: horizontal-tb;
-        transform: none;
-        font-size: 11px;
-        letter-spacing: 0.08em;
-        padding-left: 10px;
-        opacity: 0;
-        transition: opacity 0.2s ease 0.15s;
-        white-space: nowrap;
+      // Override desktop hover side-effects
+      &:hover {
+        padding: 10px 6px;
+        margin-left: 0;
+        &::after { transform: translateX(100%); }
       }
 
-      // Icon: upright, no rotation, right-anchored
+      // Icon: upright, no rotation, smaller
       .ens-sticky-widgets__icon {
         transform: none;
-        margin-bottom: 0;
-        margin-right: 5px;
-        margin-left: 5px;
-        width: 28px;
-        height: 28px;
+        margin-bottom: 5px;
+        margin-right: 0;
+        width: 22px;
+        height: 22px;
         flex-shrink: 0;
       }
 
-      // Override desktop hover
-      &:hover {
-        padding-right: 0;
-        margin-left: 0;
-        max-width: 40px;
-        &::after { transform: translateX(100%); }
-        .ens-sticky-widgets__icon {
-          transform: none;
-          background: rgba(255, 255, 255, 0.25);
-        }
+      &:hover .ens-sticky-widgets__icon {
+        transform: none;
+        background: rgba(255, 255, 255, 0.25);
       }
 
-      // Expanded state (tap)
-      &.is-expanded {
-        max-width: 160px;
-        .ens-sticky-widgets__label {
-          opacity: 1;
-        }
+      // Label: horizontal short text, centered, wraps to 2 lines
+      .ens-sticky-widgets__label {
+        writing-mode: horizontal-tb;
+        transform: none;
+        font-size: 8px;
+        text-align: center;
+        white-space: normal;
+        line-height: 1.25;
+        word-break: break-word;
+        max-width: 42px;
       }
     }
   }

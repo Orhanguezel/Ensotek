@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { FileText, MessageSquare } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
@@ -9,25 +9,13 @@ import { CatalogModal } from "./CatalogModal";
 export const StackableWidgets: React.FC = () => {
   const t = useTranslations("ensotek.widgets");
   const [isCatalogOpen, setIsCatalogOpen] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!expandedId) return;
-    const timer = setTimeout(() => setExpandedId(null), 2000);
-    return () => clearTimeout(timer);
-  }, [expandedId]);
-
-  const handleCatalogClick = () => {
-    setExpandedId("catalog");
-    setIsCatalogOpen(true);
-  };
 
   return (
     <>
       <div className="ens-sticky-widgets">
         <button
-          className={`ens-sticky-widgets__item${expandedId === "catalog" ? " is-expanded" : ""}`}
-          onClick={handleCatalogClick}
+          className="ens-sticky-widgets__item"
+          onClick={() => setIsCatalogOpen(true)}
           title={t("catalog_request")}
         >
           <span className="ens-sticky-widgets__icon">
@@ -38,9 +26,8 @@ export const StackableWidgets: React.FC = () => {
 
         <Link
           href="/offer"
-          className={`ens-sticky-widgets__item ens-sticky-widgets__item--offer${expandedId === "offer" ? " is-expanded" : ""}`}
+          className="ens-sticky-widgets__item ens-sticky-widgets__item--offer"
           title={t("offer_request")}
-          onClick={() => setExpandedId("offer")}
         >
           <span className="ens-sticky-widgets__icon">
             <MessageSquare size={18} />
