@@ -74,11 +74,13 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
     </div>
   );
 
-  const renderSlideContent = (slider: any) => (
+  const renderSlideContent = (slider: any, isFirst = false) => (
     <div className="hero__content-3">
-      <h1 className="hero-title-animate mb-25">
-        {slider.title}
-      </h1>
+      {isFirst ? (
+        <h1 className="hero-title-animate mb-25">{slider.title}</h1>
+      ) : (
+        <h2 className="hero-title-animate mb-25">{slider.title}</h2>
+      )}
       <p className="hero-desc-animate mb-45">
         {slider.description}
       </p>
@@ -137,12 +139,12 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
             grabCursor={true}
             className="hero__mobile-swiper"
           >
-            {activeSliders.map((slider: any) => (
+            {activeSliders.map((slider: any, idx: number) => (
               <SwiperSlide key={slider.id}>
                 <div className="hero__mobile-item">
                   {renderSlideImage(slider)}
                   <div className="hero__mobile-content">
-                    {renderSlideContent(slider)}
+                    {renderSlideContent(slider, idx === 0)}
                   </div>
                   {renderBottomBar()}
                 </div>
@@ -198,9 +200,9 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
                       <div className="row">
                         <div className="col-xl-9 col-lg-11">
                           <div className="hero__content-3">
-                            <h1 className="hero-title-animate text-white mb-25">
+                            <h2 className="hero-title-animate text-white mb-25">
                               {slider.title}
-                            </h1>
+                            </h2>
                             <p className="hero-desc-animate mb-45">
                               {slider.description}
                             </p>
