@@ -1,4 +1,3 @@
-import React from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import Layout from "@/components/layout/Layout";
@@ -14,6 +13,7 @@ import Newsletter from "@/components/containers/newsletter/Newsletter";
 import LibrarySection from "@/components/containers/library/LibrarySection";
 import NewsSection from "@/components/containers/news/NewsSection";
 import { fetchSliders } from "@/i18n/server";
+import { resolveMediaUrl } from "@/lib/media";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -25,7 +25,7 @@ const Home = async ({ params }: { params: Promise<{ locale: string }> }) => {
   const { locale } = await params;
   const initialSliders = await fetchSliders(locale);
   const firstSliderImage =
-    typeof initialSliders[0]?.image === "string" ? initialSliders[0].image : null;
+    typeof initialSliders[0]?.image === "string" ? resolveMediaUrl(initialSliders[0].image) || null : null;
 
   return (
     <>

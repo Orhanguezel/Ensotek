@@ -8,6 +8,7 @@ import { queryKeys } from "@/lib/query-client";
 import { sliderService } from "@/features/slider/slider.service";
 import type { Slider } from "@/features/slider/slider.type";
 import { useSiteSetting } from "@/features/site-settings/siteSettings.action";
+import { resolveMediaUrl } from "@/lib/media";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 
 interface HomeBannerOneProps {
@@ -52,27 +53,30 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
     return contactInfo?.companyName || t("companyName");
   };
 
-  const renderSlideImage = (slider: any) => (
-    <div className="hero__bg-img">
-      {!isLikelyBrokenSliderImage(slider.image) && !failedImageIds[String(slider.id)] ? (
-        <Image
-          src={slider.image}
-          alt={slider.alt || slider.title || t("defaultTitle")}
-          fill
-          priority
-          sizes="100vw"
-          onError={() =>
-            setFailedImageIds((prev) => ({
-              ...prev,
-              [String(slider.id)]: true,
-            }))
-          }
-        />
-      ) : (
-        <div className="hero__bg-fallback" />
-      )}
-    </div>
-  );
+  const renderSlideImage = (slider: any) => {
+    const imageUrl = resolveMediaUrl(slider.image) || "";
+    return (
+      <div className="hero__bg-img">
+        {!isLikelyBrokenSliderImage(imageUrl) && !failedImageIds[String(slider.id)] ? (
+          <Image
+            src={imageUrl}
+            alt={slider.alt || slider.title || t("defaultTitle")}
+            fill
+            priority
+            sizes="100vw"
+            onError={() =>
+              setFailedImageIds((prev) => ({
+                ...prev,
+                [String(slider.id)]: true,
+              }))
+            }
+          />
+        ) : (
+          <div className="hero__bg-fallback" />
+        )}
+      </div>
+    );
+  };
 
   const renderSlideContent = (slider: any, isFirst = false) => (
     <div className="hero__content-3">
@@ -119,8 +123,6 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
       </section>
     );
   }
-
-  const firstSlider = activeSliders[0];
 
   return (
     <section className="hero__area-3 p-relative overflow-hidden">
@@ -173,13 +175,15 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
               }}
               className="hero__slider-full"
             >
-              {activeSliders.map((slider: any) => (
+              {activeSliders.map((slider: any) => {
+                const desktopImageUrl = resolveMediaUrl(slider.image) || "";
+                return (
                 <SwiperSlide key={slider.id}>
                   <div className="hero__item p-relative d-flex align-items-center">
                     <div className="hero__bg-img p-absolute">
-                      {!isLikelyBrokenSliderImage(slider.image) && !failedImageIds[String(slider.id)] ? (
+                      {!isLikelyBrokenSliderImage(desktopImageUrl) && !failedImageIds[String(slider.id)] ? (
                         <Image
-                          src={slider.image}
+                          src={desktopImageUrl}
                           alt={slider.alt || slider.title || t("defaultTitle")}
                           fill
                           priority
@@ -224,7 +228,8 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
                     {renderBottomBar()}
                   </div>
                 </SwiperSlide>
-              ))}
+              );
+              })}
             </Swiper>
 
             <div className="hero__navigation d-none d-md-flex">
