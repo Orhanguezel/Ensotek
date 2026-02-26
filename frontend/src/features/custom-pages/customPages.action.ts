@@ -15,6 +15,7 @@ export function useCustomPageBySlug(slug: string) {
     queryKey: queryKeys.customPages.bySlug(slug),
     queryFn: () => customPagesService.getBySlug(slug),
     enabled: !!slug,
+    staleTime: 0,
   });
 }
 

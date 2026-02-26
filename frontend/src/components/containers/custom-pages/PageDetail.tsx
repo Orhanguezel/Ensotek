@@ -98,7 +98,7 @@ const PageDetail = ({ item }: PageDetailProps) => {
                 {(item.image_url || item.featured_image) && (
                   <div className="technical__thumb mb-40">
                     <Image 
-                        src={item.image_url || item.featured_image || ""} 
+                        src={item.featured_image || item.image_url || ""}
                         alt={item.title} 
                         width={1200} 
                         height={600} 
