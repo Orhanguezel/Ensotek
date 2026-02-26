@@ -519,20 +519,26 @@
   }
 }
 
-// ── Mobile: compact icon + short label, always visible ──────
+// ── Mobile: compact icon, anchored from bottom ──────────────
 @media (max-width: 767px) {
   .ens-sticky-widgets {
-    gap: 16px; // More spacing between buttons
+    // Anchor from bottom — avoids header overlap and iOS safe-area issues
+    top: auto;
+    bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    transform: none;
+    gap: 14px;
+    // Above header so it's never hidden
+    z-index: 100000;
 
     &__item {
-      // Switch to horizontal layout — icon only
+      // Icon-only square pill
       writing-mode: horizontal-tb;
       transform: none;
       flex-direction: row;
       padding: 0;
       border-radius: 8px 0 0 8px;
-      width: 42px;
-      height: 42px;
+      width: 44px;
+      height: 44px;
 
       // Override desktop hover side-effects
       &:hover {
@@ -541,7 +547,7 @@
         &::after { transform: translateX(100%); }
       }
 
-      // Icon: centered, upright, no rotation
+      // Icon: centered, upright
       .ens-sticky-widgets__icon {
         transform: none;
         margin: 0;
@@ -555,7 +561,7 @@
         background: rgba(255, 255, 255, 0.25);
       }
 
-      // Label: hidden on mobile — icon alone is sufficient
+      // Label hidden on mobile
       .ens-sticky-widgets__label {
         display: none;
       }

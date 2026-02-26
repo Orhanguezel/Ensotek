@@ -1,5 +1,5 @@
 import React from "react";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -107,6 +107,16 @@ export async function generateMetadata({
 export function generateStaticParams() {
   return AVAILABLE_LOCALES.map((locale) => ({ locale }));
 }
+
+/* ------------------------------------------------------------------ */
+/*  Viewport — viewport-fit=cover for iPhone Dynamic Island support    */
+/* ------------------------------------------------------------------ */
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 /* ------------------------------------------------------------------ */
 /*  Layout                                                              */
