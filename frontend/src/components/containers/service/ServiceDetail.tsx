@@ -29,6 +29,7 @@ function cleanContentHtml(html: string): string {
 const ServiceDetail = ({ item }: ServiceDetailProps) => {
   const t = useTranslations("ensotek.customPage");
   const ts = useTranslations("ensotek.staticPages");
+  const tOffer = useTranslations("ensotek.offer");
   
   // Fetch related services
   const m = useServices({ limit: 6 });
@@ -162,17 +163,18 @@ const ServiceDetail = ({ item }: ServiceDetailProps) => {
                             <PageReaction pageId={item.id} />
                             
                             <div className="mt-30">
-                                <Link 
-                                    href={`/offer?type=service&id=${item.id}`} 
+                                <Link
+                                    href={`/offer?type=service&id=${item.id}`}
                                     className="border__btn w-100 text-center"
-                                    style={{ 
-                                        backgroundColor: 'var(--clr-theme-1)', 
-                                        color: 'white', 
+                                    title={tOffer("getOffer")}
+                                    style={{
+                                        backgroundColor: 'var(--clr-theme-1)',
+                                        color: 'white',
                                         borderColor: 'var(--clr-theme-1)',
                                         display: 'block'
                                     }}
                                 >
-                                    {useTranslations("ensotek.offer")("getOffer")}
+                                    {tOffer("getOffer")}
                                 </Link>
                             </div>
                         </div>

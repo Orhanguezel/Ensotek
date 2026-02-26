@@ -378,6 +378,7 @@ const Header = () => {
                       className="border__btn text-center"
                       href={toLocalizedHref("/login")}
                       onClick={() => setToggleMenu(false)}
+                      title={t("login")}
                       style={{ flex: 1, paddingLeft: "12px", paddingRight: "12px" }}
                     >
                       {t("login")}
@@ -386,6 +387,7 @@ const Header = () => {
                       className="border__btn text-center"
                       href={toLocalizedHref("/register")}
                       onClick={() => setToggleMenu(false)}
+                      title={t("register")}
                       style={{ flex: 1, paddingLeft: "12px", paddingRight: "12px" }}
                     >
                       {t("register")}

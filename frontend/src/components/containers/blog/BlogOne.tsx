@@ -35,11 +35,11 @@ const BlogOne = () => {
             <div key={blog.id} className="col-xl-4 col-lg-6 col-md-6">
               <div className="blog__item-3 mb-30" style={{ borderRadius: '12px', overflow: 'hidden' }}>
                 <div className="blog__thumb-3 w-img">
-                  <Link href={`/blog/${blog.slug}`}>
-                    <Image 
-                      src={blog.image_url || blog.featured_image || "/img/blog/3/1.jpg"} 
-                      alt={blog.title} 
-                      width={400} 
+                  <Link href={`/blog/${blog.slug}`} title={blog.title}>
+                    <Image
+                      src={blog.image_url || blog.featured_image || "/img/blog/3/1.jpg"}
+                      alt={blog.title}
+                      width={400}
                       height={250}
                       style={{ objectFit: 'cover', height: '250px' }}
                     />
@@ -55,7 +55,7 @@ const BlogOne = () => {
                     </div>
                   </div> */}
                   <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                    <Link href={`/blog/${blog.slug}`}>
+                    <Link href={`/blog/${blog.slug}`} title={blog.title}>
                       {blog.title}
                     </Link>
                   </h3>

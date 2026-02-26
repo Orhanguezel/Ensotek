@@ -94,7 +94,7 @@ const LibrarySection: React.FC = () => {
                           <div id={`lib-home-collapse-${idx}`} className={`accordion-collapse collapse${isOpen ? " show" : ""}`}>
                             <div className="accordion-body">
                               <p className="ens-acc-summary">{it.summary}</p>
-                              <Link href={`/library/${encodeURIComponent(it.slug)}`} className="link-more d-inline-flex align-items-center gap-1">
+                              <Link href={`/library/${encodeURIComponent(it.slug)}`} className="link-more d-inline-flex align-items-center gap-1" title={it.title}>
                                 {t("viewDetail")} <ArrowRight size={16} />
                               </Link>
                             </div>
@@ -115,7 +115,7 @@ const LibrarySection: React.FC = () => {
               </div>
 
               <div className="project__view">
-                <Link href="/library" className="solid__btn">
+                <Link href="/library" className="solid__btn" title={t("viewAll")}>
                   {t("viewAll")}
                 </Link>
               </div>

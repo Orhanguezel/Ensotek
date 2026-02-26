@@ -53,7 +53,7 @@ const NewsSection = () => {
               <div key={item.id} className="col-xl-6 col-lg-6">
                 <div className="blog__item-3 mb-30">
                   <div className="blog__thumb-3 w-img">
-                    <Link href={`/news/${item.slug}`}>
+                    <Link href={`/news/${item.slug}`} title={item.title}>
                       <Image
                         src={item.image_url || item.featured_image || "/img/blog/3/1.jpg"}
                         alt={item.featured_image_alt || item.title}
@@ -67,10 +67,10 @@ const NewsSection = () => {
 
                   <div className="blog__content-3">
                     <h3>
-                      <Link href={`/news/${item.slug}`}>{item.title}</Link>
+                      <Link href={`/news/${item.slug}`} title={item.title}>{item.title}</Link>
                     </h3>
                     <p>{(item.summary || "").replace(/<[^>]*>/g, " ").slice(0, 170)}</p>
-                    <Link className="link-more" href={`/news/${item.slug}`}>
+                    <Link className="link-more" href={`/news/${item.slug}`} title={item.title}>
                       {t("readMore")}
                     </Link>
                   </div>
@@ -82,7 +82,7 @@ const NewsSection = () => {
 
         <div className="row">
           <div className="col-12 text-center mt-20">
-            <Link href="/news" className="solid__btn">
+            <Link href="/news" className="solid__btn" title={t("title")}>
               {t("title")}
             </Link>
           </div>

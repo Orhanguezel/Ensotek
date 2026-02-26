@@ -52,7 +52,7 @@ const ProductList = ({ itemType, basePath }: ProductListProps) => {
             <div key={item.id} className="col-xl-4 col-lg-4 col-md-6">
               <div className="blog__item-3 mb-30 p-relative fix">
                 <div className="blog__thumb-3 w-img">
-                  <Link href={`${basePath}/${item.slug}`}>
+                  <Link href={`${basePath}/${item.slug}`} title={item.title}>
                     <img
                       src={item.image_url || fallbackSrc}
                       alt={item.alt || item.title}
@@ -65,14 +65,14 @@ const ProductList = ({ itemType, basePath }: ProductListProps) => {
                 </div>
                 <div className="blog__content-3 p-4 bg-white">
                   <h3 className="blog__title-3">
-                    <Link href={`${basePath}/${item.slug}`}>{item.title}</Link>
+                    <Link href={`${basePath}/${item.slug}`} title={item.title}>{item.title}</Link>
                   </h3>
                   <p className="text-muted">
                     {(item.description || "")
                       .replace(/<[^>]*>/g, "")
                       .slice(0, 150)}
                   </p>
-                  <Link href={`${basePath}/${item.slug}`} className="read-more-btn">
+                  <Link href={`${basePath}/${item.slug}`} className="read-more-btn" title={item.title}>
                     {t("readMore")} <i className="fal fa-arrow-right ml-5"></i>
                   </Link>
                 </div>

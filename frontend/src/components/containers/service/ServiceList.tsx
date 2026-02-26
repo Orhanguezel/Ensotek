@@ -30,11 +30,11 @@ const ServiceList = () => {
             <div key={item.id} className="col-xl-4 col-lg-4 col-md-6">
               <div className="blog__item-3 mb-30 p-relative fix" style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
                 <div className="blog__thumb-3 w-img">
-                  <Link href={`/service/${item.slug}`}>
-                    <Image 
-                      src={item.image_url || item.featured_image || "/img/blog/blog-1.jpg"} 
-                      alt={item.name} 
-                      width={400} 
+                  <Link href={`/service/${item.slug}`} title={item.name}>
+                    <Image
+                      src={item.image_url || item.featured_image || "/img/blog/blog-1.jpg"}
+                      alt={item.name}
+                      width={400}
                       height={250}
                       style={{ objectFit: 'cover', height: '250px' }}
                     />
@@ -42,12 +42,12 @@ const ServiceList = () => {
                 </div>
                 <div className="blog__content-3 p-4 bg-white">
                   <h3 className="blog__title-3" style={{ fontSize: '20px', lineHeight: '1.4', marginBottom: '15px' }}>
-                    <Link href={`/service/${item.slug}`}>{item.name}</Link>
+                    <Link href={`/service/${item.slug}`} title={item.name}>{item.name}</Link>
                   </h3>
                   <p className="text-muted" style={{ fontSize: '16px', marginBottom: '20px', display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                     {item.summary || item.description?.replace(/<[^>]*>/g, '').substring(0, 150)}
                   </p>
-                  <Link href={`/service/${item.slug}`} className="read-more-btn" style={{ color: '#0056b3', fontWeight: '600' }}>
+                  <Link href={`/service/${item.slug}`} className="read-more-btn" style={{ color: '#0056b3', fontWeight: '600' }} title={item.name}>
                     Read More <i className="fal fa-arrow-right ml-5"></i>
                   </Link>
                 </div>

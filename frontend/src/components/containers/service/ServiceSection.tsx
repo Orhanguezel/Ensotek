@@ -64,13 +64,13 @@ const ServiceSection: React.FC = () => {
 
                   <div className="service__content">
                     <h3>
-                      <Link href={`/service/${item.slug}`}>{item.name}</Link>
+                      <Link href={`/service/${item.slug}`} title={item.name}>{item.name}</Link>
                     </h3>
                     <p>{(item.description || "").replace(/<[^>]*>/g, " ").slice(0, 150)}</p>
                   </div>
 
                   <div className="service__link">
-                    <Link href={`/service/${item.slug}`} aria-label={item.name}>
+                    <Link href={`/service/${item.slug}`} aria-label={item.name} title={item.name}>
                       <i className="fa-regular fa-arrow-right"></i>
                     </Link>
                   </div>
