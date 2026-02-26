@@ -77,6 +77,16 @@
     backdrop-filter: blur(2px);
     transition: all 0.4s ease;
 
+    // Tablet (768-1199px): desktop nav is hidden (hamburger only) — dark bg looks odd.
+    // Use fully transparent so hero image shows through.
+    @media (min-width: 768px) and (max-width: 1199px) {
+      background: transparent !important;
+      backdrop-filter: none !important;
+      box-shadow: none !important;
+      &::before, &::after { display: none; }
+      .header__logo::before { display: none; }
+    }
+
     // Mobile override: is-home-initial has higher specificity than @media rule above,
     // so we must reset mobile styles explicitly here.
     @media (max-width: 767px) {

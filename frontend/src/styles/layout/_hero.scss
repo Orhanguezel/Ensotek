@@ -59,7 +59,8 @@
 		min-height: auto;
 		height: auto;
 		background-color: #fff;
-		padding-top: 75px; // Space for fixed header
+		// Space for fixed header: logo(34) + padding(8+8) + safe-area-inset-top
+		padding-top: calc(52px + env(safe-area-inset-top, 0px));
 	}
 }
 .hero__area {
