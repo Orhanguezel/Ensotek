@@ -36,6 +36,6 @@
 @forward 'layout/fact';
 @forward 'layout/footer';
 @forward 'components/widgets';
-@import "./components/spacing";
-@import "./components/back-to-top";
-@import "./utils/my-custom";
+@forward 'components/spacing';
+@forward 'components/back-to-top';
+@forward 'utils/my-custom';
