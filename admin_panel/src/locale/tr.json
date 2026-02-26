@@ -1993,7 +1993,8 @@
         "auth": "Kimlik Doğrulama",
         "metrics": "Metrikler",
         "map": "Harita",
-        "analytics": "Analitik"
+        "analytics": "Analitik",
+        "blocklist": "Engellenen IP'ler"
       },
       "requests": {
         "filtersTitle": "Filtreler",
@@ -2196,6 +2197,38 @@
         "location": "Konum",
         "userAgent": "User Agent",
         "user": "Kullanıcı"
+      },
+      "blocklist": {
+        "title": "IP Engelleme Listesi",
+        "description": "Kötü niyetli veya istenmeyen IP adreslerini engelleyin.",
+        "addIp": "IP Ekle",
+        "ipLabel": "IP Adresi",
+        "noteLabel": "Not",
+        "ipPlaceholder": "192.168.1.1",
+        "notePlaceholder": "Engelleme sebebi...",
+        "listTitle": "Engellenen IP Adresleri",
+        "listDescription": "Aşağıdaki IP adresleri tüm public API rotalarından bloke edilmiştir.",
+        "empty": "Engellenmiş IP adresi bulunmuyor.",
+        "loading": "Yükleniyor...",
+        "deleteEntry": "Engellemeyi kaldır",
+        "confirmDelete": "Emin misiniz?",
+        "messages": {
+          "added": "IP başarıyla engellendi.",
+          "deleted": "IP engelleme listesinden kaldırıldı.",
+          "addError": "IP eklenemedi.",
+          "deleteError": "Silinemedi."
+        },
+        "errors": {
+          "ownIp": "Kendi IP adresinizi engelleyemezsiniz."
+        },
+        "columns": {
+          "ip": "IP Adresi",
+          "note": "Not",
+          "addedAt": "Eklenme Tarihi",
+          "actions": "İşlemler",
+          "confirmYes": "Evet, sil",
+          "confirmNo": "İptal"
+        }
       }
     },
     "siteSettings": {

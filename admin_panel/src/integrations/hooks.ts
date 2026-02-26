@@ -70,4 +70,5 @@ export * from '@/integrations/endpoints/admin/products_admin.reviews.endpoints';
 export * from '@/integrations/endpoints/admin/references_admin.endpoints';
 export * from '@/integrations/endpoints/admin/subcategories_admin.endpoints';
 export * from '@/integrations/endpoints/admin/support_admin.endpoints';
+export * from '@/integrations/endpoints/admin/ip_blocklist_admin.endpoints';
 

@@ -1993,7 +1993,8 @@
         "auth": "Authentifizierung",
         "metrics": "Metriken",
         "map": "Karte",
-        "analytics": "Analytik"
+        "analytics": "Analytik",
+        "blocklist": "Gesperrte IPs"
       },
       "requests": {
         "filtersTitle": "Filter",
@@ -2196,6 +2197,38 @@
         "location": "Standort",
         "userAgent": "User-Agent",
         "user": "Benutzer"
+      },
+      "blocklist": {
+        "title": "IP-Sperrliste",
+        "description": "Blockieren Sie schädliche oder unerwünschte IP-Adressen.",
+        "addIp": "IP hinzufügen",
+        "ipLabel": "IP-Adresse",
+        "noteLabel": "Notiz",
+        "ipPlaceholder": "192.168.1.1",
+        "notePlaceholder": "Grund für die Sperrung...",
+        "listTitle": "Gesperrte IP-Adressen",
+        "listDescription": "Die folgenden IP-Adressen sind von allen öffentlichen API-Routen gesperrt.",
+        "empty": "Keine gesperrten IP-Adressen.",
+        "loading": "Wird geladen...",
+        "deleteEntry": "Sperre aufheben",
+        "confirmDelete": "Sind Sie sicher?",
+        "messages": {
+          "added": "IP erfolgreich gesperrt.",
+          "deleted": "IP aus der Sperrliste entfernt.",
+          "addError": "IP konnte nicht hinzugefügt werden.",
+          "deleteError": "Konnte nicht gelöscht werden."
+        },
+        "errors": {
+          "ownIp": "Sie können Ihre eigene IP-Adresse nicht sperren."
+        },
+        "columns": {
+          "ip": "IP-Adresse",
+          "note": "Notiz",
+          "addedAt": "Hinzugefügt",
+          "actions": "Aktionen",
+          "confirmYes": "Ja, löschen",
+          "confirmNo": "Abbrechen"
+        }
       }
     },
     "siteSettings": {

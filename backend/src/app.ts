@@ -77,6 +77,8 @@ import { registerCatalogAdmin } from '@/modules/catalog/admin.routes';
 import { registerTelegram } from '@/modules/telegram/router';
 import { registerTelegramAdmin } from '@/modules/telegram/admin.routes';
 import { registerChatAdmin } from '@/modules/chat/admin.routes';
+import { registerIpBlocklist } from '@/modules/ip-blocklist/router';
+import { isIpBlocked } from '@/modules/ip-blocklist/service';
  
 
 import {
@@ -204,6 +206,18 @@ export async function createApp() {
     async (api) => {
       api.get('/health', async () => ({ ok: true }));
 
+      // ✅ IP Blocklist check: skip admin routes to prevent self-lock
+      api.addHook('onRequest', async (req, reply) => {
+        if (req.url.startsWith('/api/admin')) return;
+        const ip =
+          (req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() ??
+          req.socket?.remoteAddress ??
+          '';
+        if (ip && (await isIpBlocked(ip))) {
+          return reply.code(403).send({ error: { message: 'ip_blocked' } });
+        }
+      });
+
       // ✅ Audit request logger: /api scope'unda — TÜM API trafiğini loglar
       api.addHook('onResponse', async (req, reply) => {
         try {
@@ -244,6 +258,7 @@ export async function createApp() {
       await api.register(async (i) => registerDashboardAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerOfferAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerCatalogAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerIpBlocklist(i), { prefix: '/admin' });
 
       // --- Public modüller: /api/...
       await registerAuth(api);

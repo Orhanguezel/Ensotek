@@ -1686,7 +1686,8 @@
         "auth": "Authentication",
         "metrics": "Metrics",
         "map": "Map",
-        "analytics": "Analytics"
+        "analytics": "Analytics",
+        "blocklist": "Blocked IPs"
       },
       "requests": {
         "filtersTitle": "Filters",
@@ -1889,6 +1890,38 @@
         "location": "Location",
         "userAgent": "User Agent",
         "user": "User"
+      },
+      "blocklist": {
+        "title": "IP Blocklist",
+        "description": "Block malicious or unwanted IP addresses.",
+        "addIp": "Add IP",
+        "ipLabel": "IP Address",
+        "noteLabel": "Note",
+        "ipPlaceholder": "192.168.1.1",
+        "notePlaceholder": "Reason for blocking...",
+        "listTitle": "Blocked IP Addresses",
+        "listDescription": "The following IP addresses are blocked from all public API routes.",
+        "empty": "No blocked IP addresses.",
+        "loading": "Loading...",
+        "deleteEntry": "Remove block",
+        "confirmDelete": "Are you sure?",
+        "messages": {
+          "added": "IP successfully blocked.",
+          "deleted": "IP removed from blocklist.",
+          "addError": "Could not add IP.",
+          "deleteError": "Could not delete."
+        },
+        "errors": {
+          "ownIp": "You cannot block your own IP address."
+        },
+        "columns": {
+          "ip": "IP Address",
+          "note": "Note",
+          "addedAt": "Added",
+          "actions": "Actions",
+          "confirmYes": "Yes, delete",
+          "confirmNo": "Cancel"
+        }
       }
     },
     "siteSettings": {

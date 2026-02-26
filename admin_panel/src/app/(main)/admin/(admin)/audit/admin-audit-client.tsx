@@ -24,6 +24,8 @@ import {
   Trash2,
   BarChart3,
   Download,
+  Ban,
+  Plus,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -70,11 +72,15 @@ import {
   useGetAuditMetricsDailyAdminQuery,
   useGetAuditGeoStatsAdminQuery,
   useClearAuditLogsAdminMutation,
+  useListBlockedIpsAdminQuery,
+  useAddBlockedIpAdminMutation,
+  useDeleteBlockedIpAdminMutation,
 } from '@/integrations/hooks';
+import type { IpBlocklistEntry } from '@/integrations/shared/ip-blocklist.types';
 
 /* ----------------------------- helpers ----------------------------- */
 
-type TabKey = 'analytics' | 'requests' | 'auth' | 'metrics' | 'map';
+type TabKey = 'analytics' | 'requests' | 'auth' | 'metrics' | 'map' | 'blocklist';
 
 function safeText(v: unknown, fb = ''): string {
   const s = String(v ?? '').trim();
@@ -100,6 +106,7 @@ function normalizeTab(v: string | null): TabKey {
   if (s === 'metrics') return 'metrics';
   if (s === 'map') return 'map';
   if (s === 'requests') return 'requests';
+  if (s === 'blocklist') return 'blocklist';
   return 'analytics';
 }
 
@@ -506,6 +513,48 @@ export default function AdminAuditClient() {
 
   const [clearAuditLogs, { isLoading: isClearing }] = useClearAuditLogsAdminMutation();
 
+  /* ---- Blocklist ---- */
+  const blocklistQ = useListBlockedIpsAdminQuery(undefined, {
+    skip: tab !== 'blocklist',
+    refetchOnFocus: true,
+  } as any) as any;
+  const [addBlockedIp, { isLoading: isAddingIp }] = useAddBlockedIpAdminMutation();
+  const [deleteBlockedIp] = useDeleteBlockedIpAdminMutation();
+  const blocklistItems: IpBlocklistEntry[] = (blocklistQ.data as any)?.items ?? [];
+  const blocklistLoading = blocklistQ.isLoading || blocklistQ.isFetching;
+
+  const [newIpText, setNewIpText] = React.useState('');
+  const [newNoteText, setNewNoteText] = React.useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = React.useState<number | null>(null);
+
+  async function onAddIp() {
+    const ip = newIpText.trim();
+    if (!ip) return;
+    try {
+      await addBlockedIp({ ip, note: newNoteText.trim() || null }).unwrap();
+      setNewIpText('');
+      setNewNoteText('');
+      toast.success(t('blocklist.messages.added'));
+    } catch (err: any) {
+      const code = err?.data?.error?.message;
+      if (code === 'cannot_block_own_ip') {
+        toast.error(t('blocklist.errors.ownIp'));
+      } else {
+        toast.error(getErrMessage(err, t('blocklist.messages.addError')));
+      }
+    }
+  }
+
+  async function onDeleteIp(id: number) {
+    try {
+      await deleteBlockedIp(id).unwrap();
+      setDeleteConfirmId(null);
+      toast.success(t('blocklist.messages.deleted'));
+    } catch (err) {
+      toast.error(getErrMessage(err, t('blocklist.messages.deleteError')));
+    }
+  }
+
   async function onRefresh() {
     try {
       if (tab === 'requests') await reqQ.refetch();
@@ -605,6 +654,9 @@ export default function AdminAuditClient() {
           </TabsTrigger>
           <TabsTrigger value="map">
             <Globe className="mr-2 h-4 w-4" /> {t('tabs.map')}
+          </TabsTrigger>
+          <TabsTrigger value="blocklist">
+            <Ban className="mr-2 h-4 w-4" /> {t('tabs.blocklist')}
           </TabsTrigger>
         </TabsList>
 
@@ -1072,6 +1124,119 @@ export default function AdminAuditClient() {
                 </div>
               )}
               <AuditGeoMap items={geoData.items ?? []} loading={geoLoading} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ==================== BLOCKLIST TAB ==================== */}
+        <TabsContent value="blocklist" className="space-y-4">
+          {/* Add IP form */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Ban className="h-4 w-4" /> {t('blocklist.title')}
+              </CardTitle>
+              <CardDescription>{t('blocklist.description')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="flex-1 min-w-[180px] space-y-2">
+                  <Label htmlFor="new-ip">{t('blocklist.ipLabel')}</Label>
+                  <Input
+                    id="new-ip"
+                    placeholder={t('blocklist.ipPlaceholder')}
+                    value={newIpText}
+                    onChange={(e) => setNewIpText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddIp(); } }}
+                  />
+                </div>
+                <div className="flex-1 min-w-[180px] space-y-2">
+                  <Label htmlFor="new-note">{t('blocklist.noteLabel')}</Label>
+                  <Input
+                    id="new-note"
+                    placeholder={t('blocklist.notePlaceholder')}
+                    value={newNoteText}
+                    onChange={(e) => setNewNoteText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); onAddIp(); } }}
+                  />
+                </div>
+                <Button onClick={onAddIp} disabled={!newIpText.trim() || isAddingIp}>
+                  <Plus className="mr-2 h-4 w-4" /> {t('blocklist.addIp')}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Blocked IPs list */}
+          <Card>
+            <CardHeader>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <CardTitle className="text-base">{t('blocklist.listTitle')}</CardTitle>
+                  <CardDescription>{t('blocklist.listDescription')}</CardDescription>
+                </div>
+                {blocklistLoading && (
+                  <Badge variant="outline" className="flex items-center gap-2">
+                    <Loader2 className="h-3 w-3 animate-spin" /> {t('common.loading')}
+                  </Badge>
+                )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {blocklistQ.error && (
+                <div className="rounded-md border border-destructive/30 bg-destructive/5 p-3 text-sm">
+                  {getErrMessage(blocklistQ.error, t('error'))}
+                </div>
+              )}
+              {!blocklistLoading && blocklistItems.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t('blocklist.empty')}</p>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{t('blocklist.columns.ip')}</TableHead>
+                      <TableHead>{t('blocklist.columns.note')}</TableHead>
+                      <TableHead>{t('blocklist.columns.addedAt')}</TableHead>
+                      <TableHead className="text-right">{t('blocklist.columns.actions')}</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {blocklistItems.map((entry) => (
+                      <TableRow key={entry.id}>
+                        <TableCell className="font-mono text-sm">{entry.ip}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {entry.note || '—'}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                          {fmtWhen(entry.created_at)}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          {deleteConfirmId === entry.id ? (
+                            <div className="flex items-center justify-end gap-2">
+                              <span className="text-xs text-muted-foreground">{t('blocklist.confirmDelete')}</span>
+                              <Button size="sm" variant="destructive" onClick={() => onDeleteIp(entry.id)}>
+                                {t('blocklist.columns.confirmYes')}
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setDeleteConfirmId(null)}>
+                                {t('blocklist.columns.confirmNo')}
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => setDeleteConfirmId(entry.id)}
+                              title={t('blocklist.deleteEntry')}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

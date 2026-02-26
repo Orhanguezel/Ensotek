@@ -187,7 +187,8 @@ export const tags = [
   'AdminProducts',
   'AdminProductImages',
   'AdminReferences',
-  'AdminReferenceImages'
+  'AdminReferenceImages',
+  'IpBlocklistEntry'
 ] as const;
 
 export type tag = typeof tags[number];
