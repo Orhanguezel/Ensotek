@@ -331,10 +331,27 @@ export async function uploadBufferAuto(
         params.upload_preset = cfg.unsignedUploadPreset;
       }
 
+      // ✅ FIX: api_key + api_secret doğrudan params'a geç
+      // Global config race-condition'ına karşı her upload'da explicit set et
+      if (canSigned && cfg.apiKey) {
+        params.api_key = cfg.apiKey;
+        params.api_secret = cfg.apiSecret;
+      }
+
       const stream = cloudinary.uploader.upload_stream(params, (err, res) => {
         if (err || !res) return reject(err ?? new Error('upload_failed'));
         resolve(res);
       });
+
+      // ✅ FIX: Upload timeout (60 saniye) — büyük dosyalar asılı kalmasın
+      const timeout = setTimeout(() => {
+        stream.destroy();
+        reject(Object.assign(new Error('cloudinary_upload_timeout'), { http_code: 504 }));
+      }, 60_000);
+
+      stream.on('close', () => clearTimeout(timeout));
+      stream.on('finish', () => clearTimeout(timeout));
+      stream.on('error', () => clearTimeout(timeout));
 
       stream.end(buffer);
     });
