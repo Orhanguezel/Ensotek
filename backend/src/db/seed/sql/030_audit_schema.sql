@@ -34,6 +34,10 @@ CREATE TABLE IF NOT EXISTS `audit_request_logs` (
   `country`          VARCHAR(8)   DEFAULT NULL,
   `city`             VARCHAR(64)  DEFAULT NULL,
 
+  `error_message`    VARCHAR(512) DEFAULT NULL,
+  `error_code`       VARCHAR(64)  DEFAULT NULL,
+  `request_body`     LONGTEXT     DEFAULT NULL,
+
   `created_at`       DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
   PRIMARY KEY (`id`),
@@ -41,7 +45,9 @@ CREATE TABLE IF NOT EXISTS `audit_request_logs` (
   KEY `audit_request_logs_created_idx` (`created_at`),
   KEY `audit_request_logs_user_idx` (`user_id`),
   KEY `audit_request_logs_path_idx` (`path`),
-  KEY `audit_request_logs_ip_idx` (`ip`)
+  KEY `audit_request_logs_ip_idx` (`ip`),
+  KEY `audit_request_logs_status_idx` (`status_code`),
+  KEY `audit_request_logs_method_idx` (`method`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------
