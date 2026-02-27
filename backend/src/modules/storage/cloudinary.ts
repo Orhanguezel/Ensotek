@@ -317,43 +317,41 @@ export async function uploadBufferAuto(
     preset: canSigned ? undefined : cfg.unsignedUploadPreset,
   });
 
+  // ✅ FIX: upload_stream yerine data URI upload kullan
+  // Node.js 20'de upload_stream pipe race-condition: form fields (api_key/signature)
+  // pipe ile yazılan file data'dan önce Cloudinary'e ulaşamıyor → hata.
+  // data URI: tüm istek senkron form field olarak gönderilir, streaming yok.
+  const dataUri = `data:${mime || 'image/png'};base64,${buffer.toString('base64')}`;
+
   try {
     const rawResult = await new Promise<unknown>((resolve, reject) => {
-      const params: Record<string, any> = {
+      const uploadOptions: Record<string, any> = {
         folder,
         public_id: opts.publicId,
         resource_type,
         overwrite: true,
       };
 
-      // ✅ unsigned ise preset zorunlu
+      // unsigned ise preset zorunlu
       if (!canSigned) {
-        params.upload_preset = cfg.unsignedUploadPreset;
+        uploadOptions.upload_preset = cfg.unsignedUploadPreset;
       }
 
-      // ✅ FIX: api_key + api_secret doğrudan params'a geç
-      // Global config race-condition'ına karşı her upload'da explicit set et
+      // api_key + api_secret: sign_request bu options'dan okur
       if (canSigned && cfg.apiKey) {
-        params.api_key = cfg.apiKey;
-        params.api_secret = cfg.apiSecret;
+        uploadOptions.api_key = cfg.apiKey;
+        uploadOptions.api_secret = cfg.apiSecret;
       }
 
-      const stream = cloudinary.uploader.upload_stream(params, (err, res) => {
-        if (err || !res) return reject(err ?? new Error('upload_failed'));
-        resolve(res);
-      });
-
-      // ✅ FIX: Upload timeout (60 saniye) — büyük dosyalar asılı kalmasın
       const timeout = setTimeout(() => {
-        stream.destroy();
         reject(Object.assign(new Error('cloudinary_upload_timeout'), { http_code: 504 }));
       }, 60_000);
 
-      stream.on('close', () => clearTimeout(timeout));
-      stream.on('finish', () => clearTimeout(timeout));
-      stream.on('error', () => clearTimeout(timeout));
-
-      stream.end(buffer);
+      cloudinary.uploader.upload(dataUri, uploadOptions, (err: any, res: any) => {
+        clearTimeout(timeout);
+        if (err || !res) return reject(err ?? new Error('upload_failed'));
+        resolve(res);
+      });
     });
 
     const r = rawResult as {
