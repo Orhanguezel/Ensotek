@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS `slider` (
   `image_url`         TEXT,
   `image_asset_id`    CHAR(36),
 
+  `site_id`           CHAR(36)     DEFAULT NULL COMMENT 'NULL = global (all sites)',
+
   `featured`          TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
   `is_active`         TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
 
@@ -34,6 +36,7 @@ CREATE TABLE IF NOT EXISTS `slider` (
   PRIMARY KEY (`id`),
 
   UNIQUE KEY `uniq_slider_uuid`        (`uuid`),
+  KEY `idx_slider_site`                (`site_id`),
   KEY `idx_slider_active`              (`is_active`),
   KEY `idx_slider_order`               (`display_order`),
   KEY `idx_slider_image_asset`         (`image_asset_id`)

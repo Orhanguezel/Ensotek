@@ -51,18 +51,12 @@ VALUES
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
+  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten by re-seeding
   `module_key`              = VALUES(`module_key`),
   `is_published`            = VALUES(`is_published`),
   `featured`                = VALUES(`featured`),
   `display_order`           = VALUES(`display_order`),
-  `order_num`               = VALUES(`order_num`),
-  `featured_image`          = VALUES(`featured_image`),
-  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
-  `image_url`               = VALUES(`image_url`),
-  `storage_asset_id`        = VALUES(`storage_asset_id`),
-  `images`                  = VALUES(`images`),
-  `storage_image_ids`       = VALUES(`storage_image_ids`),
-  `category_id`             = VALUES(`category_id`),
+  `order_num`               = VALUES(`order_num`),  `category_id`             = VALUES(`category_id`),
   `sub_category_id`         = VALUES(`sub_category_id`),
   `updated_at`              = VALUES(`updated_at`);
 
@@ -195,6 +189,7 @@ VALUES
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
+  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten by re-seeding
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),
   `content`            = VALUES(`content`),

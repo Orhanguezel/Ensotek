@@ -31,6 +31,8 @@ export const menuItems = mysqlTable(
     icon: varchar("icon", { length: 64 }),
     section_id: char("section_id", { length: 36 }),
 
+    site_id: char("site_id", { length: 36 }),
+
     order_num: int("order_num").notNull().default(0),
     is_active: boolean("is_active").notNull().default(true),
 
@@ -44,6 +46,7 @@ export const menuItems = mysqlTable(
   },
   (t) => [
     index("menu_items_parent_idx").on(t.parent_id),
+    index("menu_items_site_idx").on(t.site_id),
     index("menu_items_active_idx").on(t.is_active),
     index("menu_items_order_idx").on(t.order_num),
     index("menu_items_created_idx").on(t.created_at),

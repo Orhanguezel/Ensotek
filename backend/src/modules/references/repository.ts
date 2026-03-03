@@ -581,12 +581,13 @@ export async function upsertReferenceI18n(
 export type ReferenceImageMerged = {
   id: string;
   reference_id: string;
-  asset_id: string;
+  storage_asset_id: string | null;
   image_url: string | null;
   display_order: number;
-  is_active: 0 | 1;
+  is_published: 0 | 1;
+  is_featured: 0 | 1;
   alt: string | null;
-  caption: string | null;
+  title: string | null;
   locale_resolved: string | null;
 };
 
@@ -602,15 +603,16 @@ export async function listReferenceImagesForReference(
     .select({
       id: referenceImages.id,
       reference_id: referenceImages.reference_id,
-      asset_id: referenceImages.asset_id,
+      storage_asset_id: referenceImages.storage_asset_id,
       image_url: referenceImages.image_url,
       display_order: referenceImages.display_order,
-      is_active: referenceImages.is_active,
+      is_published: referenceImages.is_published,
+      is_featured: referenceImages.is_featured,
       alt: sql<string>`COALESCE(${i18nReq.alt}, ${i18nDef.alt})`.as(
         "alt",
       ),
-      caption: sql<string>`COALESCE(${i18nReq.caption}, ${i18nDef.caption})`.as(
-        "caption",
+      title: sql<string>`COALESCE(${i18nReq.title}, ${i18nDef.title})`.as(
+        "title",
       ),
       locale_resolved: sql<string>`
         CASE WHEN ${i18nReq.id} IS NOT NULL

@@ -15,6 +15,7 @@ DROP TABLE IF EXISTS `footer_sections`;
 -- Parent tablo
 CREATE TABLE IF NOT EXISTS `footer_sections` (
   `id`            CHAR(36)     NOT NULL,
+  `site_id`       CHAR(36)     DEFAULT NULL COMMENT 'NULL = global (all sites)',
   `is_active`     TINYINT(1)   NOT NULL DEFAULT 1,
   `display_order` INT(11)      NOT NULL DEFAULT 0,
 
@@ -24,6 +25,7 @@ CREATE TABLE IF NOT EXISTS `footer_sections` (
 
   PRIMARY KEY (`id`),
 
+  KEY `footer_sections_site_idx`    (`site_id`),
   KEY `footer_sections_active_idx`  (`is_active`),
   KEY `footer_sections_order_idx`   (`display_order`),
   KEY `footer_sections_created_idx` (`created_at`),

@@ -17,6 +17,137 @@ SET FOREIGN_KEY_CHECKS = 0;
 START TRANSACTION;
 
 -- ============================================================
+-- 0) CLEANUP: remove any rows NOT part of this canonical set
+--    (stale seeds, old test data, duplicate IDs, etc.)
+-- ============================================================
+
+-- Canonical menu_item IDs (all header + footer items)
+-- Delete i18n rows first (no cascade when FK checks are off)
+DELETE FROM `menu_items_i18n`
+WHERE `menu_item_id` NOT IN (
+  -- HEADER ROOT
+  'fe8120b3-919a-49b8-8035-df6fd2a2433f',
+  '25740da6-c0f2-4c1d-b131-998018699bfd',
+  'c47a1c3f-cea1-4780-9381-77336bc8ac59',
+  'f2570596-db46-4028-902c-d6fe2c9a8312',
+  'ceed431a-aafb-4aba-bf1f-6217b3960c01',
+  '33333333-4444-5555-6666-777777777777',
+  '555c6ddf-658b-4c0f-8a9e-0b104708dd07',
+  '455c6ddf-658b-4c0f-8a9e-0b104708dd07',
+  -- ORGANISATION submenus
+  'aaaa1111-2222-3333-4444-555555555555',
+  'aaaa1111-2222-3333-4444-666666666666',
+  'aaaa1111-2222-3333-4444-777777777777',
+  'aaaa1111-2222-3333-4444-888888888888',
+  'aaaa1111-2222-3333-4444-999999999999',
+  -- SERVICES submenus
+  '5a000001-1111-4111-8111-5a0000000001',
+  '5a000002-1111-4111-8111-5a0000000002',
+  '5a000003-1111-4111-8111-5a0000000003',
+  '5a000004-1111-4111-8111-5a0000000004',
+  '5a000005-1111-4111-8111-5a0000000005',
+  '5a000006-1111-4111-8111-5a0000000006',
+  '5a000007-1111-4111-8111-5a0000000007',
+  '5a000008-1111-4111-8111-5a0000000008',
+  '5a000009-1111-4111-8111-5a0000000009',
+  -- PRODUCTS submenus
+  '88888888-1111-2222-3333-444444444444',
+  '88888888-1111-2222-3333-555555555555',
+  -- LIBRARY submenus
+  '7b000001-1111-4111-8111-7b0000000001',
+  '7b000002-1111-4111-8111-7b0000000002',
+  '7b000003-1111-4111-8111-7b0000000003',
+  -- REFERENCES header
+  '44444444-5555-6666-7777-888888888888',
+  -- FOOTER: QUICK ACCESS
+  '6a4f6b37-ed99-4d98-8c54-d658096aacde',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1116',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117',
+  -- FOOTER: SERVICES
+  'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111',
+  'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112',
+  -- FOOTER: CORPORATE / LEGAL
+  '71c28444-7b6e-47ae-92be-f59206a1b820',
+  '3d325c92-d59e-4730-8301-5c9bcff463bc',
+  '24c49639-01d0-4274-8fb9-c31ed64d0726',
+  'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111',
+  'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112',
+  'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113',
+  -- FOOTER: SOCIAL
+  'a9b1c2d3-e4f5-4a66-8b11-111111111111',
+  'a9b1c2d3-e4f5-4a66-8b11-222222222222',
+  'a9b1c2d3-e4f5-4a66-8b11-333333333333',
+  'a9b1c2d3-e4f5-4a66-8b11-444444444444'
+);
+
+DELETE FROM `menu_items`
+WHERE `id` NOT IN (
+  -- HEADER ROOT
+  'fe8120b3-919a-49b8-8035-df6fd2a2433f',
+  '25740da6-c0f2-4c1d-b131-998018699bfd',
+  'c47a1c3f-cea1-4780-9381-77336bc8ac59',
+  'f2570596-db46-4028-902c-d6fe2c9a8312',
+  'ceed431a-aafb-4aba-bf1f-6217b3960c01',
+  '33333333-4444-5555-6666-777777777777',
+  '555c6ddf-658b-4c0f-8a9e-0b104708dd07',
+  '455c6ddf-658b-4c0f-8a9e-0b104708dd07',
+  -- ORGANISATION submenus
+  'aaaa1111-2222-3333-4444-555555555555',
+  'aaaa1111-2222-3333-4444-666666666666',
+  'aaaa1111-2222-3333-4444-777777777777',
+  'aaaa1111-2222-3333-4444-888888888888',
+  'aaaa1111-2222-3333-4444-999999999999',
+  -- SERVICES submenus
+  '5a000001-1111-4111-8111-5a0000000001',
+  '5a000002-1111-4111-8111-5a0000000002',
+  '5a000003-1111-4111-8111-5a0000000003',
+  '5a000004-1111-4111-8111-5a0000000004',
+  '5a000005-1111-4111-8111-5a0000000005',
+  '5a000006-1111-4111-8111-5a0000000006',
+  '5a000007-1111-4111-8111-5a0000000007',
+  '5a000008-1111-4111-8111-5a0000000008',
+  '5a000009-1111-4111-8111-5a0000000009',
+  -- PRODUCTS submenus
+  '88888888-1111-2222-3333-444444444444',
+  '88888888-1111-2222-3333-555555555555',
+  -- LIBRARY submenus
+  '7b000001-1111-4111-8111-7b0000000001',
+  '7b000002-1111-4111-8111-7b0000000002',
+  '7b000003-1111-4111-8111-7b0000000003',
+  -- REFERENCES header
+  '44444444-5555-6666-7777-888888888888',
+  -- FOOTER: QUICK ACCESS
+  '6a4f6b37-ed99-4d98-8c54-d658096aacde',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1112',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1113',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1114',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1115',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1116',
+  'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117',
+  -- FOOTER: SERVICES
+  'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111',
+  'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112',
+  -- FOOTER: CORPORATE / LEGAL
+  '71c28444-7b6e-47ae-92be-f59206a1b820',
+  '3d325c92-d59e-4730-8301-5c9bcff463bc',
+  '24c49639-01d0-4274-8fb9-c31ed64d0726',
+  'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111',
+  'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112',
+  'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113',
+  -- FOOTER: SOCIAL
+  'a9b1c2d3-e4f5-4a66-8b11-111111111111',
+  'a9b1c2d3-e4f5-4a66-8b11-222222222222',
+  'a9b1c2d3-e4f5-4a66-8b11-333333333333',
+  'a9b1c2d3-e4f5-4a66-8b11-444444444444'
+);
+
+-- ============================================================
 -- 1) PARENT (menu_items)
 -- ============================================================
 INSERT INTO `menu_items`
@@ -63,11 +194,16 @@ VALUES
 ('88888888-1111-2222-3333-555555555555', 'f2570596-db46-4028-902c-d6fe2c9a8312', 'header', NULL, 'custom', NULL, NULL, 1, 1),
 
 -- ------------------------
--- LIBRARY SUBMENUS (4 items) ✅ FIX: parent 4. item eklendi
+-- LIBRARY SUBMENUS
 -- ------------------------
 ('7b000001-1111-4111-8111-7b0000000001', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 0, 1),
 ('7b000002-1111-4111-8111-7b0000000002', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 1, 1),
 ('7b000003-1111-4111-8111-7b0000000003', 'ceed431a-aafb-4aba-bf1f-6217b3960c01', 'header', NULL, 'custom', NULL, NULL, 2, 1),
+
+-- ------------------------
+-- REFERENCES (standalone)
+-- ------------------------
+('44444444-5555-6666-7777-888888888888', NULL, 'header', NULL, 'custom', NULL, NULL, 5, 1),
 
 -- ------------------------
 -- FOOTER: QUICK ACCESS
@@ -130,11 +266,11 @@ VALUES
 (UUID(),'555c6ddf-658b-4c0f-8a9e-0b104708dd07','tr','Blog','/blog','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'455c6ddf-658b-4c0f-8a9e-0b104708dd07','tr','İletişim','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
-(UUID(),'aaaa1111-2222-3333-4444-555555555555','tr','Hakkımızda','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'aaaa1111-2222-3333-4444-666666666666','tr','Misyon & Vizyon','/mission-vision','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'aaaa1111-2222-3333-4444-777777777777','tr','Kalite','/quality','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-555555555555','tr','Hakkımızda','/about/ensotek-su-sogutma-kuleleri','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-666666666666','tr','Misyon & Vizyon','/about/misyonumuz','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-777777777777','tr','Kalite','/about/kalite-belgelerimiz-kalite-standartlarimiz','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'aaaa1111-2222-3333-4444-888888888888','tr','Ekip','/team','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'aaaa1111-2222-3333-4444-999999999999','tr','Sıkça Sorulan Sorular','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-999999999999','tr','SSS','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- Services submenu URLs = stable slugs
 (UUID(),'5a000001-1111-4111-8111-5a0000000001','tr','Bakım & Onarım','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -156,6 +292,9 @@ VALUES
 (UUID(),'88888888-1111-2222-3333-444444444444','tr','Tüm Ürünler','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','tr','Yedek Parçalar','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- References
+(UUID(),'44444444-5555-6666-7777-888888888888','tr','Referanslar','/references','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
 -- FOOTER: QUICK ACCESS (TR)
 (UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','tr','SSS','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','tr','Hakkımızda','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -171,12 +310,12 @@ VALUES
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','tr','Modernizasyon ve Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: CORPORATE / LEGAL (TR)
-(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','tr','Gizlilik Politikası','/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','tr','KVKK','/kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','tr','Kullanım Koşulları','/terms','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','tr','Çerez Politikası','/cookie-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','tr','Aydınlatma Metni','/privacy-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','tr','Yasal Bilgilendirme','/legal-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','tr','Gizlilik Politikası','/legal/gizlilik-politikasi','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','tr','KVKK','/legal/kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','tr','Kullanım Koşulları','/legal/kullanim-kosullari','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','tr','Çerez Politikası','/legal/cerez-politikasi','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','tr','Aydınlatma Metni','/legal/aydinlatma-metni','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','tr','Yasal Bilgilendirme','/legal/yasal-bilgilendirme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: SOCIAL (TR)
 (UUID(),'a9b1c2d3-e4f5-4a66-8b11-111111111111','tr','LinkedIn','https://www.linkedin.com/company/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -203,9 +342,9 @@ VALUES
 (UUID(),'555c6ddf-658b-4c0f-8a9e-0b104708dd07','en','Blog','/blog','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'455c6ddf-658b-4c0f-8a9e-0b104708dd07','en','Contact','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
-(UUID(),'aaaa1111-2222-3333-4444-555555555555','en','About','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'aaaa1111-2222-3333-4444-666666666666','en','Mission & Vision','/mission-vision','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'aaaa1111-2222-3333-4444-777777777777','en','Quality','/quality','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-555555555555','en','About','/about/ensotek-water-cooling-towers','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-666666666666','en','Mission & Vision','/about/our-mission','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-777777777777','en','Quality','/about/quality-certificates-quality-standards','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'aaaa1111-2222-3333-4444-888888888888','en','Team','/team','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'aaaa1111-2222-3333-4444-999999999999','en','FAQs','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
@@ -227,6 +366,9 @@ VALUES
 (UUID(),'88888888-1111-2222-3333-444444444444','en','All Products','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','en','Spare Parts','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- References
+(UUID(),'44444444-5555-6666-7777-888888888888','en','References','/references','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
 -- FOOTER: QUICK ACCESS (EN)
 (UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','en','FAQs','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','en','About','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -242,12 +384,12 @@ VALUES
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','en','Modernization & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: CORPORATE / LEGAL (EN)
-(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','en','Privacy Policy','/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','en','Data Protection (KVKK)','/kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','en','Terms of Use','/terms','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','en','Cookie Policy','/cookie-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','en','Privacy Notice','/privacy-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','en','Legal Notice','/legal-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','en','Privacy Policy','/legal/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','en','Data Protection (KVKK)','/legal/pdpl-kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','en','Terms of Use','/legal/terms-of-use','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','en','Cookie Policy','/legal/cookie-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','en','Privacy Notice','/legal/information-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','en','Legal Notice','/legal/legal-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: SOCIAL (EN)
 (UUID(),'a9b1c2d3-e4f5-4a66-8b11-111111111111','en','LinkedIn','https://www.linkedin.com/company/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -274,9 +416,9 @@ VALUES
 (UUID(),'555c6ddf-658b-4c0f-8a9e-0b104708dd07','de','Blog','/blog','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'455c6ddf-658b-4c0f-8a9e-0b104708dd07','de','Kontakt','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
-(UUID(),'aaaa1111-2222-3333-4444-555555555555','de','Über uns','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'aaaa1111-2222-3333-4444-666666666666','de','Mission & Vision','/mission-vision','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'aaaa1111-2222-3333-4444-777777777777','de','Qualität','/quality','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-555555555555','de','Über uns','/about/ensotek-wasserkuehltuerme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-666666666666','de','Mission & Vision','/about/unsere-mission','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'aaaa1111-2222-3333-4444-777777777777','de','Qualität','/about/qualitaetszertifikate-qualitaetsstandards','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'aaaa1111-2222-3333-4444-888888888888','de','Team','/team','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'aaaa1111-2222-3333-4444-999999999999','de','FAQ','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
@@ -298,6 +440,9 @@ VALUES
 (UUID(),'88888888-1111-2222-3333-444444444444','de','Alle Produkte','/product','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'88888888-1111-2222-3333-555555555555','de','Ersatzteile','/sparepart','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
+-- References
+(UUID(),'44444444-5555-6666-7777-888888888888','de','Referenzen','/references','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+
 -- FOOTER: QUICK ACCESS (DE)
 (UUID(),'6a4f6b37-ed99-4d98-8c54-d658096aacde','de','FAQ','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1111','de','Über uns','/about','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -313,12 +458,12 @@ VALUES
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','de','Modernisierung & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: CORPORATE / LEGAL (DE)
-(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','de','Datenschutzerklärung','/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','de','Datenschutz (KVKK)','/kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','de','Nutzungsbedingungen','/terms','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','de','Cookie-Richtlinie','/cookie-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','de','Hinweis zum Datenschutz','/privacy-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
-(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','de','Impressum','/legal-notice','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','de','Datenschutzerklärung','/legal/datenschutzerklaerung','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'3d325c92-d59e-4730-8301-5c9bcff463bc','de','Datenschutz (KVKK)','/legal/dsgvo-kvkk','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'24c49639-01d0-4274-8fb9-c31ed64d0726','de','Nutzungsbedingungen','/legal/nutzungsbedingungen','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111111','de','Cookie-Richtlinie','/legal/cookie-richtlinie','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111112','de','Hinweis zum Datenschutz','/legal/informationspflicht','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'b6a6f5d1-8e1a-4a1c-9b0f-1c7a0d111113','de','Impressum','/legal/impressum-rechtliche-hinweise','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: SOCIAL (DE)
 (UUID(),'a9b1c2d3-e4f5-4a66-8b11-111111111111','de','LinkedIn','https://www.linkedin.com/company/ensotek','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -350,6 +495,50 @@ WHERE `url` LIKE '/services/%';
 UPDATE `menu_items_i18n`
 SET `url` = '/service', `updated_at` = CURRENT_TIMESTAMP(3)
 WHERE `url` IN ('/services', '/services/');
+
+-- ============================================================
+-- Fix legacy legal URLs -> /legal/{locale-slug}
+-- Maps old standalone paths to new /legal/ module routes
+-- ============================================================
+-- TR
+UPDATE `menu_items_i18n` SET `url` = '/legal/gizlilik-politikasi',        `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'tr' AND `url` = '/privacy-policy';
+UPDATE `menu_items_i18n` SET `url` = '/legal/kvkk',                       `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'tr' AND `url` = '/kvkk';
+UPDATE `menu_items_i18n` SET `url` = '/legal/kullanim-kosullari',          `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'tr' AND `url` = '/terms';
+UPDATE `menu_items_i18n` SET `url` = '/legal/cerez-politikasi',            `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'tr' AND `url` = '/cookie-policy';
+UPDATE `menu_items_i18n` SET `url` = '/legal/aydinlatma-metni',            `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'tr' AND `url` = '/privacy-notice';
+UPDATE `menu_items_i18n` SET `url` = '/legal/yasal-bilgilendirme',         `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'tr' AND `url` = '/legal-notice';
+
+-- EN
+UPDATE `menu_items_i18n` SET `url` = '/legal/privacy-policy',             `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'en' AND `url` = '/privacy-policy';
+UPDATE `menu_items_i18n` SET `url` = '/legal/pdpl-kvkk',                  `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'en' AND `url` = '/kvkk';
+UPDATE `menu_items_i18n` SET `url` = '/legal/terms-of-use',               `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'en' AND `url` = '/terms';
+UPDATE `menu_items_i18n` SET `url` = '/legal/cookie-policy',              `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'en' AND `url` = '/cookie-policy';
+UPDATE `menu_items_i18n` SET `url` = '/legal/information-notice',         `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'en' AND `url` = '/privacy-notice';
+UPDATE `menu_items_i18n` SET `url` = '/legal/legal-notice',               `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'en' AND `url` = '/legal-notice';
+
+-- DE
+UPDATE `menu_items_i18n` SET `url` = '/legal/datenschutzerklaerung',      `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'de' AND `url` = '/privacy-policy';
+UPDATE `menu_items_i18n` SET `url` = '/legal/dsgvo-kvkk',                 `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'de' AND `url` = '/kvkk';
+UPDATE `menu_items_i18n` SET `url` = '/legal/nutzungsbedingungen',        `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'de' AND `url` = '/terms';
+UPDATE `menu_items_i18n` SET `url` = '/legal/cookie-richtlinie',          `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'de' AND `url` = '/cookie-policy';
+UPDATE `menu_items_i18n` SET `url` = '/legal/informationspflicht',        `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'de' AND `url` = '/privacy-notice';
+UPDATE `menu_items_i18n` SET `url` = '/legal/impressum-rechtliche-hinweise', `updated_at` = CURRENT_TIMESTAMP(3) WHERE `locale` = 'de' AND `url` = '/legal-notice';
+
+-- Fix old about submenu standalone URLs -> /about/{slug}
+UPDATE `menu_items_i18n` SET `url` = '/about/ensotek-su-sogutma-kuleleri',                   `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-555555555555' AND `locale` = 'tr' AND `url` = '/about';
+UPDATE `menu_items_i18n` SET `url` = '/about/ensotek-water-cooling-towers',                  `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-555555555555' AND `locale` = 'en' AND `url` = '/about';
+UPDATE `menu_items_i18n` SET `url` = '/about/ensotek-wasserkuehltuerme',                     `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-555555555555' AND `locale` = 'de' AND `url` = '/about';
+UPDATE `menu_items_i18n` SET `url` = '/about/misyonumuz',                                    `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-666666666666' AND `locale` = 'tr' AND `url` = '/mission-vision';
+UPDATE `menu_items_i18n` SET `url` = '/about/our-mission',                                   `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-666666666666' AND `locale` = 'en' AND `url` = '/mission-vision';
+UPDATE `menu_items_i18n` SET `url` = '/about/unsere-mission',                                `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-666666666666' AND `locale` = 'de' AND `url` = '/mission-vision';
+UPDATE `menu_items_i18n` SET `url` = '/about/kalite-belgelerimiz-kalite-standartlarimiz',    `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-777777777777' AND `locale` = 'tr' AND `url` = '/quality';
+UPDATE `menu_items_i18n` SET `url` = '/about/quality-certificates-quality-standards',        `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-777777777777' AND `locale` = 'en' AND `url` = '/quality';
+UPDATE `menu_items_i18n` SET `url` = '/about/qualitaetszertifikate-qualitaetsstandards',     `updated_at` = CURRENT_TIMESTAMP(3) WHERE `menu_item_id` = 'aaaa1111-2222-3333-4444-777777777777' AND `locale` = 'de' AND `url` = '/quality';
+
+-- Fix legacy module_key for existing custom_pages records
+UPDATE `custom_pages`
+SET `module_key` = 'legal', `updated_at` = CURRENT_TIMESTAMP(3)
+WHERE `module_key` IN ('privacy', 'kvkk', 'terms', 'cookies', 'privacy_notice', 'legal_notice');
 
 COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;

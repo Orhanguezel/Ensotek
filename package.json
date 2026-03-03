@@ -1,0 +1,18 @@
+{
+  "name": "ensotek-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "kuhlturm-frontend",
+    "de_frontend"
+  ],
+  "scripts": {
+    "dev:kuhlturm": "bun run --cwd kuhlturm-frontend dev",
+    "build:kuhlturm": "bun run --cwd kuhlturm-frontend build",
+    "dev:com-tr": "bun run --cwd com.tr-fronten dev",
+    "build:com-tr": "bun run --cwd com.tr-fronten build",
+    "dev:de": "bun run --cwd de_frontend dev",
+    "build:de": "bun run --cwd de_frontend build"
+  }
+}

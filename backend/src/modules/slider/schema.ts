@@ -33,6 +33,8 @@ export const slider = mysqlTable(
     /** ✅ Standart ad: image_asset_id */
     image_asset_id: char('image_asset_id', { length: 36 }),
 
+    site_id: char('site_id', { length: 36 }),
+
     featured: tinyint('featured', { unsigned: true }).notNull().default(0),
     is_active: tinyint('is_active', { unsigned: true }).notNull().default(1),
 
@@ -47,6 +49,7 @@ export const slider = mysqlTable(
       .$onUpdateFn(() => new Date()),
   },
   (t) => ({
+    idx_site: index('idx_slider_site').on(t.site_id),
     idx_active: index('idx_slider_active').on(t.is_active),
     idx_order: index('idx_slider_order').on(t.display_order),
     idx_image_asset: index('idx_slider_image_asset').on(t.image_asset_id),

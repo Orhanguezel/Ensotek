@@ -11,3 +11,4 @@ export * from './dashboar_admin.types';
 export * from './validation';
 export * from './categories';
 export * from './site-settings';
+export * from './common';

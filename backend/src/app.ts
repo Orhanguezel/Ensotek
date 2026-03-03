@@ -45,6 +45,8 @@ import { registerSupport } from '@/modules/support/router';
 import { registerChat } from '@/modules/chat/router';
 import { registerOffer } from '@/modules/offer/router';
 import { registerCatalog } from '@/modules/catalog/router';
+import { registerSites } from '@/modules/sites/router';
+import { registerProject } from '@/modules/projects/router';
 
 // ✅ Audit single entry
 import { registerAudit } from '@/modules/audit/router';
@@ -74,6 +76,8 @@ import { registerSupportAdmin } from '@/modules/support/admin.routes';
 import { registerDashboardAdmin } from '@/modules/dashboard/admin.routes';
 import { registerOfferAdmin } from '@/modules/offer/admin.routes';
 import { registerCatalogAdmin } from '@/modules/catalog/admin.routes';
+import { registerSitesAdmin } from '@/modules/sites/admin.routes';
+import { registerProjectAdmin } from '@/modules/projects/admin.routes';
 import { registerTelegram } from '@/modules/telegram/router';
 import { registerTelegramAdmin } from '@/modules/telegram/admin.routes';
 import { registerChatAdmin } from '@/modules/chat/admin.routes';
@@ -260,6 +264,8 @@ export async function createApp() {
       await api.register(async (i) => registerDashboardAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerOfferAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerCatalogAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerSitesAdmin(i), { prefix: '/admin' });
+      await api.register(async (i) => registerProjectAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerIpBlocklist(i), { prefix: '/admin' });
 
       // --- Public modüller: /api/...
@@ -290,6 +296,8 @@ export async function createApp() {
       await registerTelegram(api);
       await registerOffer(api);
       await registerCatalog(api);
+      await registerSites(api);
+      await registerProject(api);
     },
     { prefix: '/api' },
   );

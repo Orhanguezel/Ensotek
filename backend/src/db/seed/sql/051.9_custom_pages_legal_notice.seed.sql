@@ -18,7 +18,7 @@ SET @SUB_LEGAL  := 'bbbb7010-1111-4111-8111-bbbbbbbb7010';
 SET @PAGE_LEGAL := '55550007-5555-4555-8555-555555550007';
 
 -- PARENT MODULE KEY
-SET @MODULE_KEY := 'legal_notice';
+SET @MODULE_KEY := 'legal';
 
 SET @IMG_LEGAL :=
   'https://images.unsplash.com/photo-1521791136064-7986c2920216?auto=format&fit=crop&w=1400&q=80';
@@ -67,20 +67,14 @@ VALUES
     NOW(3)
   )
 ON DUPLICATE KEY UPDATE
+  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten by re-seeding
   `module_key`              = VALUES(`module_key`),
   `is_published`            = VALUES(`is_published`),
   `featured`                = VALUES(`featured`),
   `display_order`           = VALUES(`display_order`),
   `order_num`               = VALUES(`order_num`),
   `category_id`             = VALUES(`category_id`),
-  `sub_category_id`         = VALUES(`sub_category_id`),
-  `featured_image`          = VALUES(`featured_image`),
-  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
-  `image_url`               = VALUES(`image_url`),
-  `storage_asset_id`        = VALUES(`storage_asset_id`),
-  `images`                  = VALUES(`images`),
-  `storage_image_ids`       = VALUES(`storage_image_ids`),
-  `updated_at`              = VALUES(`updated_at`);
+  `sub_category_id`         = VALUES(`sub_category_id`),  `updated_at`              = VALUES(`updated_at`);
 
 -- -------------------------------------------------------------
 -- I18N UPSERT (custom_pages_i18n)
@@ -272,6 +266,7 @@ VALUES
   NOW(3), NOW(3)
 )
 ON DUPLICATE KEY UPDATE
+  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten by re-seeding
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),
   `content`            = VALUES(`content`),

@@ -3,9 +3,9 @@ const nextConfig = {
   reactCompiler: true,
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
 
-  // Disable Turbopack by default (use npm run dev:turbo to enable)
-  experimental: {
-    turbo: undefined,
+  // Silence "multiple lockfiles" workspace root warning
+  turbopack: {
+    root: '.',
   },
 
   // ✅ Image optimization config

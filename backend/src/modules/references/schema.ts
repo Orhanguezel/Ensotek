@@ -137,11 +137,12 @@ export const referenceImages = mysqlTable(
         onDelete: "cascade",
         onUpdate: "cascade",
       }),
-    asset_id: char("asset_id", { length: 36 }).notNull(),
     image_url: varchar("image_url", { length: 500 }),
+    storage_asset_id: char("storage_asset_id", { length: 36 }),
 
+    is_featured: tinyint("is_featured").notNull().default(0),
     display_order: int("display_order").notNull().default(0),
-    is_active: tinyint("is_active").notNull().default(1),
+    is_published: tinyint("is_published").notNull().default(0),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()
@@ -153,8 +154,8 @@ export const referenceImages = mysqlTable(
   },
   (t) => [
     index("reference_images_reference_idx").on(t.reference_id),
-    index("reference_images_asset_idx").on(t.asset_id),
-    index("reference_images_active_idx").on(t.is_active),
+    index("reference_images_asset_idx").on(t.storage_asset_id),
+    index("reference_images_published_idx").on(t.is_published),
     index("reference_images_order_idx").on(t.display_order),
   ],
 );
@@ -171,8 +172,8 @@ export const referenceImagesI18n = mysqlTable(
         onUpdate: "cascade",
       }),
     locale: varchar("locale", { length: 10 }).notNull(),
+    title: varchar("title", { length: 200 }),
     alt: varchar("alt", { length: 255 }),
-    caption: varchar("caption", { length: 1000 }),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()

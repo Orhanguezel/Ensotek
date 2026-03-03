@@ -1,5 +1,7 @@
 // src/modules/_shared/locale.ts
 
+import { z } from 'zod';
+
 import {
   LOCALES,
   normalizeLocale,
@@ -13,6 +15,17 @@ export { normalizeLocale };
 
 export type LocaleQueryLike = { locale?: string; default_locale?: string };
 export type ResolvedLocales = { locale: string; def: string };
+
+export const LOCALE_SCHEMA = z
+  .string()
+  .min(2)
+  .max(10)
+  .regex(/^[a-zA-Z]{2,3}([_-][a-zA-Z0-9]{2,8})?$/, 'invalid_locale');
+
+// ⚠️ Dynamic locales: avoid static enum (LOCALES can change at runtime)
+export const LOCALE_ENUM = LOCALE_SCHEMA;
+
+
 
 function normalizeLooseLocale(v: unknown): string | null {
   if (typeof v !== 'string') return null;

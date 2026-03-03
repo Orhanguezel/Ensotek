@@ -1,12 +1,14 @@
 -- =============================================================
--- FILE: 052_custom_pages_news.seed.sql  (FINAL / SCHEMA-OK)
--- Ensotek – NEWS Custom Page Seed (TR/EN/DE)
--- TEK HABER: “Ensotek Web Sitemiz Yenilendi!”
--- ✅ module_key artık PARENT: custom_pages.module_key = 'news'
--- ✅ i18n içinde module_key YOK
--- ✅ multi-image gallery (images JSON_ARRAY)
--- ✅ deterministic i18n IDs
--- ✅ NO block comments (/* */)
+-- FILE: 052_custom_pages_news.seed.sql
+-- Ensotek – NEWS custom_pages PARENT KAYITLARI (tüm haberler)
+-- ⚠  i18n içerik → 052.tr / 052.en / 052.de dosyalarına taşındı
+-- =============================================================
+-- UUID / display_order tablosu:
+--   22220001  101  Web Sitemiz Yenilendi (duyuru)
+--   22220003  102  Egypt HVAC-R 2025
+--   22220004  103  Aquatherm Bakü 2025
+--   22220005  104  Hotel-Tech Antalya 2025
+--   22220006  105  ALUEXPO 2025 (İstanbul, Hall 2, E155)
 -- =============================================================
 
 SET NAMES utf8mb4;
@@ -15,257 +17,126 @@ SET FOREIGN_KEY_CHECKS = 0;
 
 START TRANSACTION;
 
--- -------------------------------------------------------------
--- CATEGORY / SUB CATEGORY (011 & 012 ile hizalı)
--- -------------------------------------------------------------
-SET @CAT_NEWS_GENERAL  := 'aaaa2001-1111-4111-8111-aaaaaaaa2001';
-SET @CAT_NEWS_DUYS     := 'aaaa2003-1111-4111-8111-aaaaaaaa2003';
-SET @CAT_NEWS_PRESS    := 'aaaa2004-1111-4111-8111-aaaaaaaa2004';
+-- category / sub-category sabitleri (011 & 012 ile hizalı)
+SET @CAT_NEWS_DUYS        := 'aaaa2003-1111-4111-8111-aaaaaaaa2003';
+SET @SUB_NEWS_GENERAL_ANN := 'bbbb2001-1111-4111-8111-bbbbbbbb2001';
 
-SET @SUB_NEWS_GENERAL_ANN  := 'bbbb2001-1111-4111-8111-bbbbbbbb2001';
-
--- -------------------------------------------------------------
--- PAGE ID (deterministik)
--- -------------------------------------------------------------
-SET @NEWS_ANNOUNCE_1 := '22220001-2222-4222-8222-222222220001';
-
--- -------------------------------------------------------------
--- MODULE KEY (PARENT)
--- Eğer sisteminde farklı key varsa SADECE burayı değiştir.
--- -------------------------------------------------------------
+-- module key
 SET @MODULE_KEY_NEWS := 'news';
 
--- -------------------------------------------------------------
--- FEATURED IMAGE (Cloudinary) - Updated to use valid image
--- -------------------------------------------------------------
-SET @IMG_NEWS_RENEWED :=
+-- ---- görsel URL sabitleri -----------------------------------------
+-- 01 — Web sitesi yenilendi
+SET @IMG_NEWS_WEB :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
 
--- -------------------------------------------------------------
--- GALLERY IMAGES (updated to use valid images)
--- -------------------------------------------------------------
-SET @IMG_NEWS_2 :=
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
-SET @IMG_NEWS_3 :=
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
-SET @IMG_NEWS_4 :=
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
-SET @IMG_NEWS_5 :=
-  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1753707610/uploads/ensotek/company-images/logo-1753707609976-31353110.webp';
+-- 02 — Egypt HVAC-R 2025
+SET @IMG_EGYPT_1 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958173/uploads/metahub/news-images/img-20240520-wa0183-1752958172132-879111355.webp';
 
--- -------------------------------------------------------------
--- I18N IDS (deterministik)
--- -------------------------------------------------------------
-SET @I18N_NEWS_ANNOUNCE_1_TR := '66662001-0001-4001-8001-666666662001';
-SET @I18N_NEWS_ANNOUNCE_1_EN := '66662001-0002-4002-8002-666666662001';
-SET @I18N_NEWS_ANNOUNCE_1_DE := '66662001-0003-4003-8003-666666662001';
+-- 03 — Aquatherm Bakü 2025
+SET @IMG_BAKU_1 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/img-20241017-wa0040-1752958289686-74069766.webp';
+SET @IMG_BAKU_2 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/baku-fuar-1-1752958289688-847911396.webp';
+SET @IMG_BAKU_3 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/img-20241017-wa0033-1752958290248-519948162.webp';
+SET @IMG_BAKU_4 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958291/uploads/metahub/news-images/img-20241017-wa0042-1752958290250-566260910.webp';
+SET @IMG_BAKU_5 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958292/uploads/metahub/news-images/img-20241127-wa0007-1752958291068-704255418.webp';
 
--- -------------------------------------------------------------
--- PARENT UPSERT (custom_pages)
--- ✅ module_key BURADA
--- -------------------------------------------------------------
+-- 04 — Hotel-Tech Antalya 2025
+SET @IMG_HOTEL_1 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958402/uploads/metahub/news-images/img-20250618-wa0024-1752958401251-408905732.webp';
+SET @IMG_HOTEL_2 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958400/uploads/metahub/news-images/img-20250618-wa0021-1752958399183-255418708.webp';
+SET @IMG_HOTEL_3 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958402/uploads/metahub/news-images/img-20250618-wa0012-1752958400227-284317921.webp';
+SET @IMG_HOTEL_4 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752958401/uploads/metahub/news-images/img-20250618-wa0023-1752958401249-770223355.webp';
+
+-- 05 — ALUEXPO 2025  (fuar öncesi duyuru görseli)
+SET @IMG_ALUEXPO_1 :=
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752945605/uploads/metahub/news-images/ensotek-email-imza-1752945605003-245572109.webp';
+
+-- =============================================================
+-- PARENT UPSERT (custom_pages) — tüm haberler
+-- =============================================================
+
 INSERT INTO `custom_pages`
-  (`id`,
-   `module_key`,
-   `is_published`,
-   `featured`,
-   `display_order`,
-   `order_num`,
-   `featured_image`,
-   `featured_image_asset_id`,
-   `image_url`,
-   `storage_asset_id`,
-   `images`,
-   `storage_image_ids`,
-   `category_id`,
-   `sub_category_id`,
-   `created_at`,
-   `updated_at`)
-VALUES
-  (
-    @NEWS_ANNOUNCE_1,
-    @MODULE_KEY_NEWS,
-    1,
-    0,
-    101,
-    101,
-    @IMG_NEWS_RENEWED,
-    NULL,
-    @IMG_NEWS_RENEWED,
-    NULL,
-    JSON_ARRAY(
-      @IMG_NEWS_RENEWED,
-      @IMG_NEWS_2,
-      @IMG_NEWS_3,
-      @IMG_NEWS_4,
-      @IMG_NEWS_5
-    ),
-    JSON_ARRAY(),
-    @CAT_NEWS_DUYS,
-    @SUB_NEWS_GENERAL_ANN,
-    NOW(3),
-    NOW(3)
-  )
-ON DUPLICATE KEY UPDATE
-  `module_key`              = VALUES(`module_key`),
-  `is_published`            = VALUES(`is_published`),
-  `featured`                = VALUES(`featured`),
-  `display_order`           = VALUES(`display_order`),
-  `order_num`               = VALUES(`order_num`),
-  `category_id`             = VALUES(`category_id`),
-  `sub_category_id`         = VALUES(`sub_category_id`),
-  `featured_image`          = VALUES(`featured_image`),
-  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
-  `image_url`               = VALUES(`image_url`),
-  `storage_asset_id`        = VALUES(`storage_asset_id`),
-  `images`                  = VALUES(`images`),
-  `storage_image_ids`       = VALUES(`storage_image_ids`),
-  `updated_at`              = VALUES(`updated_at`);
-
--- -------------------------------------------------------------
--- I18N UPSERT (custom_pages_i18n)
--- ✅ module_key yok
--- -------------------------------------------------------------
-INSERT INTO `custom_pages_i18n`
-  (`id`,
-   `page_id`,
-   `locale`,
-   `title`,
-   `slug`,
-   `content`,
-   `summary`,
-   `featured_image_alt`,
-   `meta_title`,
-   `meta_description`,
-   `tags`,
-   `created_at`,
-   `updated_at`)
+  (`id`, `module_key`, `is_published`, `featured`, `display_order`, `order_num`,
+   `featured_image`, `featured_image_asset_id`,
+   `image_url`, `storage_asset_id`,
+   `images`, `storage_image_ids`,
+   `category_id`, `sub_category_id`,
+   `created_at`, `updated_at`)
 VALUES
 
--- TR
+-- 01 — Web Sitemiz Yenilendi
 (
-  @I18N_NEWS_ANNOUNCE_1_TR,
-  @NEWS_ANNOUNCE_1,
-  'tr',
-  'Ensotek Web Sitemiz Yenilendi!',
-  'ensotek-web-sitemiz-yenilendi',
-  JSON_OBJECT(
-    'html',
-    CONCAT(
-      '<section class="container mx-auto px-4 py-8">',
-        '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">Ensotek Web Sitemiz Yenilendi!</h1>',
-        '<p class="text-slate-700 mb-4">',
-          'Dijital dönüşüm vizyonumuz doğrultusunda, Ensotek web sitemizi tamamen yeniledik. ',
-          'Yeni arayüzümüzle sizlere daha hızlı, modern ve etkileşimli bir kullanıcı deneyimi sunmayı hedefliyoruz.',
-        '</p>',
-        '<p class="text-slate-700 mb-4">',
-          'Artık çok dilli altyapımızla global erişim sağlıyor, güncel haberlerimizi ve teknolojik gelişmelerimizi ',
-          'daha kolay duyurabiliyoruz.',
-        '</p>',
-        '<div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">',
-          '<h2 class="text-xl font-semibold text-slate-900 mb-3">Neler Değişti?</h2>',
-          '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
-            '<li>Modern ve hızlı kullanıcı arayüzü</li>',
-            '<li>Çok dilli içerik altyapısı (TR/EN/DE)</li>',
-            '<li>Haberler ve duyurular için güçlendirilmiş içerik yönetimi</li>',
-            '<li>Mobil uyumluluk ve SEO iyileştirmeleri</li>',
-          '</ul>',
-        '</div>',
-      '</section>'
-    )
-  ),
-  'Modern arayüz, çok dilli destek ve kullanıcı odaklı tasarımıyla yeni Ensotek web sitemiz yayında!',
-  'Ensotek web sitesi yenilendi – duyuru görseli',
-  'Ensotek Web Sitemiz Yenilendi! | Ensotek',
-  'Ensotek web sitesi yenilendi: modern arayüz, çok dilli altyapı, daha hızlı ve etkileşimli deneyim.',
-  'ensotek,web sitesi,yenilendi,duyuru,çok dilli,etkileşim',
-  NOW(3),
-  NOW(3)
+  '22220001-2222-4222-8222-222222220001',
+  @MODULE_KEY_NEWS, 1, 0, 101, 101,
+  @IMG_NEWS_WEB, NULL, @IMG_NEWS_WEB, NULL,
+  JSON_ARRAY(@IMG_NEWS_WEB),
+  JSON_ARRAY(),
+  @CAT_NEWS_DUYS, @SUB_NEWS_GENERAL_ANN,
+  NOW(3), NOW(3)
 ),
 
--- EN
+-- 02 — Egypt HVAC-R 2025
 (
-  @I18N_NEWS_ANNOUNCE_1_EN,
-  @NEWS_ANNOUNCE_1,
-  'en',
-  'Our Ensotek Website Has Been Renewed!',
-  'ensotek-website-has-been-renewed',
-  JSON_OBJECT(
-    'html',
-    CONCAT(
-      '<section class="container mx-auto px-4 py-8">',
-        '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">Our Ensotek Website Has Been Renewed!</h1>',
-        '<p class="text-slate-700 mb-4">',
-          'In line with our digital transformation vision, we have completely renewed our Ensotek website. ',
-          'With the new interface, we aim to provide a faster, modern, and more interactive experience.',
-        '</p>',
-        '<div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">',
-          '<h2 class="text-xl font-semibold text-slate-900 mb-3">What’s New?</h2>',
-          '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
-            '<li>Modern and faster UI</li>',
-            '<li>Multilingual content (TR/EN/DE)</li>',
-            '<li>Stronger content management for news and announcements</li>',
-            '<li>Mobile-ready pages and SEO improvements</li>',
-          '</ul>',
-        '</div>',
-      '</section>'
-    )
-  ),
-  'Our renewed Ensotek website is live with a modern interface and multilingual support.',
-  'Announcement image for the renewed Ensotek website',
-  'Ensotek Website Renewed | Ensotek',
-  'Ensotek has renewed its website with a modern UI, multilingual support, and a faster experience.',
-  'ensotek,website,renewed,announcement,multilingual,interactive',
-  NOW(3),
-  NOW(3)
+  '22220003-2222-4222-8222-222222220003',
+  @MODULE_KEY_NEWS, 1, 0, 102, 102,
+  @IMG_EGYPT_1, NULL, @IMG_EGYPT_1, NULL,
+  JSON_ARRAY(@IMG_EGYPT_1),
+  JSON_ARRAY(),
+  @CAT_NEWS_DUYS, @SUB_NEWS_GENERAL_ANN,
+  '2025-07-19 17:20:06.428', '2025-07-19 20:49:51.752'
 ),
 
--- DE
+-- 03 — Aquatherm Bakü 2025
 (
-  @I18N_NEWS_ANNOUNCE_1_DE,
-  @NEWS_ANNOUNCE_1,
-  'de',
-  'Unsere Ensotek-Webseite ist erneuert!',
-  'ensotek-webseite-wurde-erneuert',
-  JSON_OBJECT(
-    'html',
-    CONCAT(
-      '<section class="container mx-auto px-4 py-8">',
-        '<h1 class="text-3xl md:text-4xl font-semibold text-slate-900 mb-4">Unsere Ensotek-Webseite ist erneuert!</h1>',
-        '<p class="text-slate-700 mb-4">',
-          'Im Rahmen unserer Digitalisierungsstrategie haben wir unsere Ensotek-Webseite vollständig erneuert. ',
-          'Mit der neuen Oberfläche bieten wir ein schnelleres, moderneres und interaktiveres Nutzererlebnis.',
-        '</p>',
-        '<div class="bg-white border border-slate-200 rounded-xl p-6 mb-6">',
-          '<h2 class="text-xl font-semibold text-slate-900 mb-3">Was ist neu?</h2>',
-          '<ul class="list-disc pl-6 text-slate-700 space-y-2">',
-            '<li>Modernes, schnelleres UI</li>',
-            '<li>Mehrsprachige Inhalte (TR/EN/DE)</li>',
-            '<li>Stärkeres Content-Management für News & Ankündigungen</li>',
-            '<li>Mobile Optimierung und SEO-Verbesserungen</li>',
-          '</ul>',
-        '</div>',
-      '</section>'
-    )
-  ),
-  'Unsere neue Ensotek-Webseite ist online: modern, mehrsprachig und schneller.',
-  'Ankündigungsbild zur erneuerten Ensotek-Webseite',
-  'Ensotek-Webseite erneuert | Ensotek',
-  'Ensotek hat seine Webseite erneuert: moderne Oberfläche, mehrsprachige Struktur und bessere Performance.',
-  'ensotek,webseite,erneuert,ankündigung,mehrsprachig,interaktiv',
-  NOW(3),
-  NOW(3)
+  '22220004-2222-4222-8222-222222220004',
+  @MODULE_KEY_NEWS, 1, 0, 103, 103,
+  @IMG_BAKU_1, NULL, @IMG_BAKU_1, NULL,
+  JSON_ARRAY(@IMG_BAKU_1, @IMG_BAKU_2, @IMG_BAKU_3, @IMG_BAKU_4, @IMG_BAKU_5),
+  JSON_ARRAY(),
+  @CAT_NEWS_DUYS, @SUB_NEWS_GENERAL_ANN,
+  '2025-07-19 17:20:06.428', '2025-07-19 20:51:33.294'
+),
+
+-- 04 — Hotel-Tech Antalya 2025
+(
+  '22220005-2222-4222-8222-222222220005',
+  @MODULE_KEY_NEWS, 1, 0, 104, 104,
+  @IMG_HOTEL_1, NULL, @IMG_HOTEL_1, NULL,
+  JSON_ARRAY(@IMG_HOTEL_1, @IMG_HOTEL_2, @IMG_HOTEL_3, @IMG_HOTEL_4),
+  JSON_ARRAY(),
+  @CAT_NEWS_DUYS, @SUB_NEWS_GENERAL_ANN,
+  '2025-07-19 17:20:06.428', '2025-07-19 20:53:23.466'
+),
+
+-- 05 — ALUEXPO 2025 (İstanbul Fuar Merkezi, Hall 2, Stand E155, 18-20 Eylül 2025)
+(
+  '22220006-2222-4222-8222-222222220006',
+  @MODULE_KEY_NEWS, 1, 0, 105, 105,
+  @IMG_ALUEXPO_1, NULL, @IMG_ALUEXPO_1, NULL,
+  JSON_ARRAY(@IMG_ALUEXPO_1),
+  JSON_ARRAY(),
+  @CAT_NEWS_DUYS, @SUB_NEWS_GENERAL_ANN,
+  '2025-07-19 17:20:06.428', '2025-07-19 20:46:40.260'
 )
+
 ON DUPLICATE KEY UPDATE
-  `title`              = VALUES(`title`),
-  `slug`               = VALUES(`slug`),
-  `content`            = VALUES(`content`),
-  `summary`            = VALUES(`summary`),
-  `featured_image_alt` = VALUES(`featured_image_alt`),
-  `meta_title`         = VALUES(`meta_title`),
-  `meta_description`   = VALUES(`meta_description`),
-  `tags`               = VALUES(`tags`),
-  `updated_at`         = VALUES(`updated_at`);
+  `module_key`     = VALUES(`module_key`),
+  `is_published`   = VALUES(`is_published`),
+  `featured`       = VALUES(`featured`),
+  `display_order`  = VALUES(`display_order`),
+  `order_num`      = VALUES(`order_num`),
+  `category_id`    = VALUES(`category_id`),
+  `sub_category_id`= VALUES(`sub_category_id`),
+  `updated_at`     = VALUES(`updated_at`);
+  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten
 
 COMMIT;
 

@@ -26,6 +26,8 @@ export const footerSections = mysqlTable(
   {
     id: char("id", { length: 36 }).primaryKey().notNull(),
 
+    site_id: char("site_id", { length: 36 }),
+
     is_active: int("is_active").notNull().default(1),
     display_order: int("display_order").notNull().default(0),
 
@@ -39,6 +41,7 @@ export const footerSections = mysqlTable(
       .$onUpdateFn(() => new Date()),
   },
   (t) => [
+    index("footer_sections_site_idx").on(t.site_id),
     index("footer_sections_active_idx").on(t.is_active),
     index("footer_sections_order_idx").on(t.display_order),
     index("footer_sections_created_idx").on(t.created_at),

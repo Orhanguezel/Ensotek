@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `menu_items` (
 
   `order_num`  INT(11)        NOT NULL DEFAULT 0,
   `is_active`  TINYINT(1)     NOT NULL DEFAULT 1,
+  `site_id`    CHAR(36)       DEFAULT NULL COMMENT 'NULL = global (all sites)',
 
   `created_at` DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
   `updated_at` DATETIME(3)    NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
@@ -47,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `menu_items` (
   KEY `menu_items_section_idx`  (`section_id`),
 
   KEY `menu_items_loc_parent_order_idx` (`location`, `parent_id`, `order_num`),
+  KEY `menu_items_site_idx`             (`site_id`),
 
   CONSTRAINT `menu_items_parent_fk`
     FOREIGN KEY (`parent_id`) REFERENCES `menu_items` (`id`)

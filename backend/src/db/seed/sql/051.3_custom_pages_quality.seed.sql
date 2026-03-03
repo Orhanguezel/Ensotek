@@ -23,7 +23,7 @@ SET @SUB_QUALITY    := 'bbbb7004-1111-4111-8111-bbbbbbbb7004';
 SET @IMG_QUALITY_MAIN :=
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1757875082/uploads/ensotek/about-images/russia-cooling-tower-1757875080869-645546842.webp';
 
--- 6 Sertifika görselleri (LOCAL örnek)  ✅ (değiştirme / CDN yap)
+-- 6 Sertifika görselleri (ensotek.de — admin panelinden Cloudinary'ye taşınmalı)
 SET @IMG_CERT_1 := 'https://www.ensotek.de/uploads/zertifika/14001_1.jpg';
 SET @IMG_CERT_2 := 'https://www.ensotek.de/uploads/zertifika/45001_1.jpg';
 SET @IMG_CERT_3 := 'https://www.ensotek.de/uploads/zertifika/ce-belgesi-ce-declaration.jpg';
@@ -31,14 +31,6 @@ SET @IMG_CERT_4 := 'https://www.ensotek.de/uploads/zertifika/eac-ensotek.jpg';
 SET @IMG_CERT_5 := 'https://www.ensotek.de/uploads/zertifika/iso-9001.jpg';
 SET @IMG_CERT_6 := 'https://www.ensotek.de/uploads/zertifika/iso-10002.jpg';
 
--- Cache-bust (deterministik)
-SET @IMG_QUALITY_MAIN := CONCAT(@IMG_QUALITY_MAIN, '?v=1');
-SET @IMG_CERT_1 := CONCAT(@IMG_CERT_1, '?v=1');
-SET @IMG_CERT_2 := CONCAT(@IMG_CERT_2, '?v=1');
-SET @IMG_CERT_3 := CONCAT(@IMG_CERT_3, '?v=1');
-SET @IMG_CERT_4 := CONCAT(@IMG_CERT_4, '?v=1');
-SET @IMG_CERT_5 := CONCAT(@IMG_CERT_5, '?v=1');
-SET @IMG_CERT_6 := CONCAT(@IMG_CERT_6, '?v=1');
 
 -- LONGTEXT JSON-string alanlarına güvenli şekilde yaz
 -- ✅ Gallery: main + 6 sertifika (toplam 7)
@@ -91,18 +83,12 @@ VALUES
     NOW(3)
   )
 ON DUPLICATE KEY UPDATE
+  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten by re-seeding
   `module_key`              = VALUES(`module_key`),
   `is_published`            = VALUES(`is_published`),
   `featured`                = VALUES(`featured`),
   `display_order`           = VALUES(`display_order`),
-  `order_num`               = VALUES(`order_num`),
-  `featured_image`          = VALUES(`featured_image`),
-  `featured_image_asset_id` = VALUES(`featured_image_asset_id`),
-  `image_url`               = VALUES(`image_url`),
-  `storage_asset_id`        = VALUES(`storage_asset_id`),
-  `images`                  = VALUES(`images`),
-  `storage_image_ids`       = VALUES(`storage_image_ids`),
-  `category_id`             = VALUES(`category_id`),
+  `order_num`               = VALUES(`order_num`),  `category_id`             = VALUES(`category_id`),
   `sub_category_id`         = VALUES(`sub_category_id`),
   `updated_at`              = VALUES(`updated_at`);
 
@@ -175,6 +161,7 @@ VALUES
   NOW(3)
 )
 ON DUPLICATE KEY UPDATE
+  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten by re-seeding
   `title`              = VALUES(`title`),
   `slug`               = VALUES(`slug`),
   `content`            = VALUES(`content`),
