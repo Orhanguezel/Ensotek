@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -41,13 +41,31 @@ export async function generateMetadata({
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ?? 'https://www.kuhlturm.com';
 
+  const [seoRow, faviconRow] = await Promise.all([
+    fetchSetting('seo', locale, { revalidate: 300 }),
+    fetchSetting('site_favicon', locale, { revalidate: 300 }),
+  ]);
+
+  const seo = seoRow?.value as Record<string, any> | null;
+  const faviconUrl =
+    (faviconRow?.value as Record<string, any> | null)?.url ?? '/favicon.ico';
+
+  const title: string = seo?.title_default ?? 'Kühlturm';
+  const description: string =
+    seo?.description ?? 'Professionelle Kühltürme und Kühllösungen für Industrie und Gewerbe.';
+  const siteName: string = seo?.site_name ?? 'Kühlturm';
+  const titleTemplate: string = seo?.title_template ?? '%s | Kühlturm';
+
+  const ogImages: string[] = Array.isArray(seo?.open_graph?.images)
+    ? seo.open_graph.images.filter((u: unknown): u is string => typeof u === 'string')
+    : [];
+
   return {
     metadataBase: new URL(siteUrl),
-    title: {
-      default: 'Kühlturm',
-      template: '%s | Kühlturm',
-    },
-    description: 'Professionelle Kühltürme und Kühllösungen für Industrie und Gewerbe.',
+    title: { default: title, template: titleTemplate },
+    description,
+    authors: [{ name: siteName }],
+    publisher: siteName,
     alternates: {
       canonical: `${siteUrl}/${locale}`,
       languages: Object.fromEntries(
@@ -56,12 +74,40 @@ export async function generateMetadata({
     },
     openGraph: {
       type: 'website',
-      siteName: 'Kühlturm',
-      locale,
+      url: `/${locale}`,
+      siteName,
+      title,
+      description,
+      images: ogImages,
+      locale: `${locale}_${locale.toUpperCase()}`,
     },
-    robots: { index: true, follow: true },
+    ...(seo?.facebook?.app_id
+      ? { other: { 'fb:app_id': String(seo.facebook.app_id) } }
+      : {}),
+    twitter: {
+      card: (seo?.twitter?.card as any) ?? 'summary_large_image',
+      site: seo?.twitter?.site ?? undefined,
+      creator: seo?.twitter?.creator ?? undefined,
+      title,
+      description,
+      images: ogImages,
+    },
+    robots:
+      seo?.robots != null
+        ? {
+            index: seo.robots.index !== false,
+            follow: seo.robots.follow !== false,
+          }
+        : { index: true, follow: true },
+    icons: { icon: faviconUrl },
   };
 }
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+};
 
 export default async function LocaleLayout({
   children,
