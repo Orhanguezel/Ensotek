@@ -1,9 +1,7 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { getSliders } from '@ensotek/core/services';
 import { API_BASE_URL } from '@/lib/utils';
-import { HeroSliderClient } from './HeroSliderClient';
-import type { Slider } from '@ensotek/core/types';
+import { HeroSliderClient, type HeroSlide } from './HeroSliderClient';
 
 interface HeroSliderProps {
   locale: string;
@@ -14,6 +12,53 @@ interface HeroSliderProps {
   ctaSecondaryLabel?: string;
 }
 
+type SliderApiItem = {
+  id?: string | number;
+  uuid?: string;
+  is_active?: boolean;
+  isActive?: boolean;
+  display_order?: number;
+  order?: number;
+  image_url?: string | null;
+  image?: string | null;
+  name?: string | null;
+  title?: string | null;
+  description?: string | null;
+  alt?: string | null;
+  button_text?: string | null;
+  buttonText?: string | null;
+  button_link?: string | null;
+  buttonLink?: string | null;
+};
+
+function asText(v: unknown): string | null {
+  if (typeof v !== 'string') return null;
+  const t = v.trim();
+  return t.length ? t : null;
+}
+
+function asNum(v: unknown): number {
+  return typeof v === 'number' && Number.isFinite(v) ? v : 0;
+}
+
+function normalizeSlides(rows: unknown[]): HeroSlide[] {
+  return rows
+    .filter((row): row is SliderApiItem => typeof row === 'object' && row !== null)
+    .filter((row) => row.is_active !== false && row.isActive !== false)
+    .map((row, index) => ({
+      id: String(row.uuid ?? row.id ?? `slide-${index}`),
+      imageUrl: asText(row.image_url ?? row.image),
+      title: asText(row.name ?? row.title),
+      description: asText(row.description),
+      alt: asText(row.alt),
+      buttonText: asText(row.button_text ?? row.buttonText),
+      buttonLink: asText(row.button_link ?? row.buttonLink),
+      order: asNum(row.display_order ?? row.order),
+    }))
+    .sort((a, b) => a.order - b.order)
+    .map(({ order: _order, ...slide }) => slide);
+}
+
 export async function HeroSlider({
   locale,
   title = 'Professionelle Kühllösungen',
@@ -21,16 +66,22 @@ export async function HeroSlider({
   ctaLabel = 'Produkte entdecken',
   ctaSecondaryLabel = 'Kontakt aufnehmen',
 }: HeroSliderProps) {
-  let slides: Slider[] = [];
+  let slides: HeroSlide[] = [];
   try {
-    slides = await getSliders(API_BASE_URL, locale);
+    const url = `${API_BASE_URL}/sliders?locale=${encodeURIComponent(locale)}`;
+    const res = await fetch(url, { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      const rawRows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      slides = normalizeSlides(rawRows);
+    }
   } catch {
     // API not available — fall through to static hero
   }
 
   // If slides exist → dynamic carousel
   if (slides.length > 0) {
-    return <HeroSliderClient slides={slides} locale={locale} />;
+    return <HeroSliderClient slides={slides} />;
   }
 
   // Static hero fallback

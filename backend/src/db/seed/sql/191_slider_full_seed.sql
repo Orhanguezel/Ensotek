@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS `slider` (
 
   `image_url`         TEXT,
   `image_asset_id`    CHAR(36),
+  `site_id`           CHAR(36)     DEFAULT NULL COMMENT 'NULL = global (all sites)',
 
   `featured`          TINYINT(1) UNSIGNED NOT NULL DEFAULT 0,
   `is_active`         TINYINT(1) UNSIGNED NOT NULL DEFAULT 1,
@@ -38,6 +39,7 @@ CREATE TABLE IF NOT EXISTS `slider` (
   PRIMARY KEY (`id`),
 
   UNIQUE KEY `uniq_slider_uuid`        (`uuid`),
+  KEY `idx_slider_site`                (`site_id`),
   KEY `idx_slider_active`              (`is_active`),
   KEY `idx_slider_order`               (`display_order`),
   KEY `idx_slider_image_asset`         (`image_asset_id`)
@@ -75,42 +77,42 @@ CREATE TABLE IF NOT EXISTS `slider_i18n` (
 
 INSERT INTO `slider`
 (`uuid`,
- `image_url`,`image_asset_id`,
+ `image_url`,`image_asset_id`,`site_id`,
  `featured`,`is_active`,`display_order`,
  `created_at`,`updated_at`)
 VALUES
 (
   '99990001-1111-4111-8111-999999990001',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771273/uploads/metahub/gallery/1-1752771270894-986291286.webp',
-  NULL,
+  NULL, NULL,
   1, 1, 1,
   '2024-01-20 00:00:00.000','2024-01-20 00:00:00.000'
 ),
 (
   '99990002-1111-4111-8111-999999990002',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771255/uploads/metahub/gallery/2-1752771253118-97352961.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 2,
   '2024-01-21 00:00:00.000','2024-01-21 00:00:00.000'
 ),
 (
   '99990003-1111-4111-8111-999999990003',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771220/uploads/metahub/gallery/3-1752771216789-111437706.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 3,
   '2024-01-22 00:00:00.000','2024-01-22 00:00:00.000'
 ),
 (
   '99990004-1111-4111-8111-999999990004',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771195/uploads/metahub/gallery/4-1752771191653-812677165.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 4,
   '2024-01-23 00:00:00.000','2024-01-23 00:00:00.000'
 ),
 (
   '99990005-1111-4111-8111-999999990005',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771156/uploads/metahub/gallery/5-1752771151250-964450161.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 5,
   '2024-01-24 00:00:00.000','2024-01-24 00:00:00.000'
 ),
@@ -119,55 +121,56 @@ VALUES
 (
   '99990006-1111-4111-8111-999999990006',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771124/uploads/metahub/gallery/6-1752771119350-50918009.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 6,
   '2024-01-25 00:00:00.000','2024-01-25 00:00:00.000'
 ),
 (
   '99990007-1111-4111-8111-999999990007',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771102/uploads/metahub/gallery/7-1752771097801-678897496.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 7,
   '2024-01-26 00:00:00.000','2024-01-26 00:00:00.000'
 ),
 (
   '99990008-1111-4111-8111-999999990008',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771064/uploads/metahub/gallery/8-1752771062653-586545826.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 8,
   '2024-01-27 00:00:00.000','2024-01-27 00:00:00.000'
 ),
 (
   '99990009-1111-4111-8111-999999990009',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771032/uploads/metahub/gallery/9-1752771029999-123456789.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 9,
   '2024-01-28 00:00:00.000','2024-01-28 00:00:00.000'
 ),
 (
   '99990010-1111-4111-8111-999999990010',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752771000/uploads/metahub/gallery/10-1752770999876-123456789.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 10,
   '2024-01-29 00:00:00.000','2024-01-29 00:00:00.000'
 ),
 (
   '99990011-1111-4111-8111-999999990011',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752770975/uploads/metahub/gallery/11-1752770975123-123456789.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 11,
   '2024-01-30 00:00:00.000','2024-01-30 00:00:00.000'
 ),
 (
   '99990012-1111-4111-8111-999999990012',
   'https://res.cloudinary.com/dbozv7wqd/image/upload/v1752770940/uploads/metahub/gallery/12-1752770939876-123456789.webp',
-  NULL,
+  NULL, NULL,
   0, 1, 12,
   '2024-01-31 00:00:00.000','2024-01-31 00:00:00.000'
 )
 ON DUPLICATE KEY UPDATE
   `image_url`      = VALUES(`image_url`),
   `image_asset_id` = VALUES(`image_asset_id`),
+  `site_id`        = VALUES(`site_id`),
   `featured`       = VALUES(`featured`),
   `is_active`      = VALUES(`is_active`),
   `display_order`  = VALUES(`display_order`),

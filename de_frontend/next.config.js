@@ -57,6 +57,13 @@ const nextConfig = {
         destination: '/service/:path*',
         permanent: true,
       },
+      // Eski legal route'larını /legal/[slug] altına yönlendir
+      { source: '/:locale/privacy-notice', destination: '/:locale/legal/privacy-notice', permanent: true },
+      { source: '/:locale/privacy-policy', destination: '/:locale/legal/privacy-policy', permanent: true },
+      { source: '/:locale/cookie-policy',  destination: '/:locale/legal/cookie-policy',  permanent: true },
+      { source: '/:locale/terms',          destination: '/:locale/legal/terms',          permanent: true },
+      { source: '/:locale/kvkk',           destination: '/:locale/legal/kvkk',           permanent: true },
+      { source: '/:locale/legal-notice',   destination: '/:locale/legal/legal-notice',   permanent: true },
     ];
   },
 

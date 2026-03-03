@@ -3,14 +3,22 @@
 import Link from 'next/link';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
-import type { Slider } from '@ensotek/core/types';
 
-interface HeroSliderClientProps {
-  slides: Slider[];
-  locale: string;
+export interface HeroSlide {
+  id: string;
+  imageUrl: string | null;
+  title: string | null;
+  description: string | null;
+  alt: string | null;
+  buttonText: string | null;
+  buttonLink: string | null;
 }
 
-export function HeroSliderClient({ slides, locale: _locale }: HeroSliderClientProps) {
+interface HeroSliderClientProps {
+  slides: HeroSlide[];
+}
+
+export function HeroSliderClient({ slides }: HeroSliderClientProps) {
   const [current, setCurrent] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -95,53 +103,59 @@ export function HeroSliderClient({ slides, locale: _locale }: HeroSliderClientPr
         >
           {slides.map((slide, i) => (
             <div
-              key={slide.uuid}
-              className="relative flex w-full shrink-0 items-center"
-              style={{ minHeight: 'clamp(400px, 55vw, 680px)' }}
+              key={slide.id}
+              className="relative w-full shrink-0"
+              style={{ height: 'clamp(520px, 65vw, 760px)' }}
             >
-              {/* Background image */}
-              {slide.image_url ? (
-                <img
-                  src={slide.image_url}
-                  alt={slide.alt ?? slide.name ?? ''}
-                  className="absolute inset-0 h-full w-full object-cover"
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                />
-              ) : (
-                <div
-                  className="absolute inset-0 opacity-5"
-                  style={{
-                    backgroundImage:
-                      'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)',
-                    backgroundSize: '60px 60px',
-                  }}
-                />
-              )}
-
-              {/* Dark overlay */}
-              <div className="absolute inset-0 bg-linear-to-r from-slate-900/80 via-slate-900/50 to-transparent" />
+              <div
+                className="absolute inset-0 opacity-5"
+                style={{
+                  backgroundImage:
+                    'linear-gradient(#94a3b8 1px, transparent 1px), linear-gradient(90deg, #94a3b8 1px, transparent 1px)',
+                  backgroundSize: '60px 60px',
+                }}
+              />
 
               {/* Content */}
-              <div className="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 md:py-32 lg:px-8">
-                <div className="max-w-2xl text-white">
-                  {slide.name && (
-                    <h2 className="font-display mb-5 text-4xl font-bold leading-tight md:text-5xl lg:text-6xl">
-                      {slide.name}
-                    </h2>
-                  )}
-                  {slide.description && (
-                    <p className="mb-8 max-w-lg text-lg leading-relaxed text-slate-300 md:text-xl">
-                      {slide.description}
-                    </p>
-                  )}
-                  {slide.button_text && slide.button_link && (
-                    <Link
-                      href={slide.button_link}
-                      className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
-                    >
-                      {slide.button_text}
-                      <ArrowRight className="h-4 w-4" />
-                    </Link>
+              <div className="relative z-10 mx-auto grid h-full w-full max-w-7xl grid-cols-1 items-center gap-8 px-4 py-8 sm:px-6 md:py-10 lg:grid-cols-2 lg:gap-12 lg:px-8">
+                {/* Mobile: image first, text below. Desktop: text left, image right */}
+                <div className="order-2 text-white lg:order-1">
+                  <div className="max-w-2xl">
+                    {slide.title && (
+                      <h2 className="font-display mb-5 text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">
+                        {slide.title}
+                      </h2>
+                    )}
+                    {slide.description && (
+                      <p className="mb-8 max-w-lg text-base leading-relaxed text-slate-300 md:text-lg">
+                        {slide.description}
+                      </p>
+                    )}
+                    {slide.buttonText && slide.buttonLink && (
+                      <Link
+                        href={slide.buttonLink}
+                        className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-6 py-3 font-semibold text-white transition-colors hover:bg-blue-700"
+                      >
+                        {slide.buttonText}
+                        <ArrowRight className="h-4 w-4" />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+
+                <div className="order-1 lg:order-2">
+                  {slide.imageUrl ? (
+                    <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
+                      <img
+                        src={slide.imageUrl}
+                        alt={slide.alt ?? slide.title ?? ''}
+                        className="h-[240px] w-full object-cover sm:h-[300px] md:h-[360px] lg:h-[460px]"
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                      />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/35 via-transparent to-slate-900/10" />
+                    </div>
+                  ) : (
+                    <div className="h-[240px] w-full rounded-2xl border border-white/10 bg-slate-800/40 sm:h-[300px] md:h-[360px] lg:h-[460px]" />
                   )}
                 </div>
               </div>
