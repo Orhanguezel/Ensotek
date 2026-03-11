@@ -1,0 +1,59 @@
+{
+  "title": "Ensotek",
+  "slug": "ensotek",
+  "summary": "B2B platform for cooling tower solutions with multilingual frontend variants, catalog management, customer document flows and Fastify backend.",
+  "category": "B2B PLATFORM",
+  "services": [
+    "Frontend Development",
+    "Backend Development",
+    "Architecture & Optimization",
+    "DevOps & Deployment"
+  ],
+  "techs": [
+    "Next.js",
+    "TypeScript",
+    "Fastify",
+    "Drizzle ORM",
+    "MySQL",
+    "Bun",
+    "Zod",
+    "Cloudinary",
+    "JWT",
+    "Tailwind CSS",
+    "Radix UI",
+    "i18n",
+    "SEO",
+    "Swagger",
+    "Docker",
+    "Nginx",
+    "CI/CD"
+  ],
+  "features": [
+    "Admin panel",
+    "Multiple frontend variants",
+    "Catalog management",
+    "Customer document handling",
+    "Multi-language (TR/EN/DE)",
+    "Swagger API docs"
+  ],
+  "designHighlights": [
+    "Shared packages across frontends",
+    "Locale-aware content flows",
+    "Production deployed at ensotek.de"
+  ],
+  "featured": true,
+  "displayOrder": 2,
+  "clientName": "Own Project",
+  "status": "active",
+  "startDate": "2025-01-01",
+  "completeDate": null,
+  "completionTimeLabel": "Ongoing",
+  "repoUrl": null,
+  "websiteUrl": "https://www.ensotek.de",
+  "demoUrl": "https://www.ensotek.de",
+  "featuredImage": "/assets/imgs/work/img-2.png",
+  "featuredImageAlt": "Ensotek B2B Platform",
+  "resumeTitle": "Ensotek",
+  "resumeSubtitle": "B2B Cooling Tower Platform",
+  "excludeFromPortfolio": false
+}
