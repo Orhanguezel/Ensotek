@@ -19,7 +19,7 @@
     "audit:lighthouse": "npx @lhci/cli autorun --config=./lighthouserc.js"
   },
   "dependencies": {
-    "@ensotek/core": "workspace:*",
+    "@ensotek/core": "file:../packages/core",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-dialog": "^1.1.15",
     "@tailwindcss/typography": "^0.5.19",
