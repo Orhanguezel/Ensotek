@@ -1,0 +1,265 @@
+{
+  "nav": {
+    "home": "Home",
+    "products": "Products",
+    "about": "About",
+    "gallery": "Gallery",
+    "blog": "Blog",
+    "contact": "Contact",
+    "offer": "Get Quote",
+    "catalog": "Request Catalog"
+  },
+  "footer": {
+    "description": "Industrial solutions in carbon fiber, FRP and fiberglass composite manufacturing.",
+    "rights": "All rights reserved",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "sections": {
+      "explore": "Explore",
+      "company": "Company",
+      "legal": "Legal",
+      "quickLinks": "Quick Links"
+    }
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "readMore": "Read More",
+    "viewAll": "View All",
+    "contactUs": "Contact Us",
+    "backToTop": "Back to Top",
+    "requestOffer": "Get Quote",
+    "offerCtaTitle": "Request a Technical Quote for Your Composite Project",
+    "offerCtaDescription": "Let us align material choice, production route, quantity and lead time, then prepare a project-specific quote for your carbon fiber, FRP or fiberglass application.",
+    "freeOfObligation": "Free and non-binding",
+    "send": "Send",
+    "name": "Full Name",
+    "email": "Email",
+    "phone": "Phone",
+    "company": "Company",
+    "message": "Message",
+    "subject": "Subject",
+    "required": "Required field",
+    "success": "Success",
+    "noResults": "No results found",
+    "relatedProducts": "Related Products",
+    "relatedGallery": "Related Galleries",
+    "relatedArticles": "Related Articles"
+  },
+  "home": {
+    "hero": {
+      "title": "Carbon Fiber and FRP Composite Solutions",
+      "subtitle": "We align engineering, sample validation and production planning for carbon fiber, FRP and fiberglass composite parts within a single B2B project workflow.",
+      "cta": "Explore Products",
+      "ctaSecondary": "Get Quote",
+      "badge": "B2B Composite Manufacturing",
+      "workflowLabel": "Composite Workflow",
+      "workflowTitle": "Material and production flow aligned to your project",
+      "workflowBadgeTitle": "Fast",
+      "workflowBadgeSubtitle": "Quotation and planning",
+      "metrics": {
+        "prototypeTitle": "Prototype",
+        "prototypeDesc": "Sampling, revision and first validation stage",
+        "productionTitle": "Series Production",
+        "productionDesc": "Repeatable process, quality and lead-time control",
+        "engineeringTitle": "Engineering",
+        "engineeringDesc": "Support on material, layup and process selection"
+      },
+      "steps": {
+        "oneTitle": "1. Technical requirement review",
+        "oneDesc": "We clarify the operating environment, dimensions, strength, weight and surface expectations.",
+        "twoTitle": "2. Material and process selection",
+        "twoDesc": "We define the right route with carbon fiber, FRP or fiberglass reinforcement.",
+        "threeTitle": "3. Sample, quote and production transition",
+        "threeDesc": "After sample validation, we define the production plan around quantity, lead time and quality requirements."
+      },
+      "stats": {
+        "stepsValue": "3+",
+        "stepsLabel": "Core process stages",
+        "b2bValue": "B2B",
+        "b2bLabel": "Project-based collaboration"
+      }
+    },
+    "products": {
+      "title": "Our Products",
+      "subtitle": "Composite product groups developed around strength, lightweight design, chemical resistance and process needs"
+    },
+    "whyUs": {
+      "title": "Why MOE Kompozit?",
+      "subtitle": "An application-focused production approach that keeps material selection, process discipline and project communication aligned",
+      "quality": "High Quality",
+      "qualityDesc": "Production flow focused on finish quality, tolerance and repeatability",
+      "experience": "Experience",
+      "experienceDesc": "Technical team that understands composite application needs at requirement level",
+      "custom": "Custom Manufacturing",
+      "customDesc": "Project-specific solutions for parts, panels, housings and structural components",
+      "delivery": "Fast Delivery",
+      "deliveryDesc": "Workflow that clarifies sample, revision and delivery planning from the start"
+    },
+    "gallery": {
+      "title": "Gallery",
+      "subtitle": "Selected images from our production setup, molding workflow and completed applications"
+    },
+    "blog": {
+      "title": "Featured Content",
+      "subtitle": "Technical content that explains material choice, process logic and application scenarios in composite projects",
+      "featuredLabel": "Featured Insight",
+      "spotlightTitle": "What Is Carbon Fiber? Properties and Application Areas",
+      "spotlightBodyPrimary": "Carbon fiber is a reinforcement material used in composite structures that require high strength, low weight and dimensional stability. It is widely preferred in aerospace, automotive, defense, industrial equipment and custom machine components where lightweighting and durability must work together.",
+      "spotlightBodySecondary": "Its theoretical advantages do not translate into field performance unless resin choice, layup structure, finish expectation and production method are aligned correctly. In practice, carbon fiber is not only a material choice but also an application and process decision.",
+      "insightLabel": "What this covers",
+      "insightText": "Technical scope, application impact and the checkpoints that shape a sound decision",
+      "archiveLabel": "More Content",
+      "archiveSubtitle": "Additional technical content that supports material, process and application decisions"
+    },
+    "newsletter": {
+      "title": "Subscribe to Our Newsletter",
+      "subtitle": "Stay informed about new products and industry developments.",
+      "placeholder": "Your email address",
+      "subscribe": "Subscribe",
+      "success": "Successfully subscribed!",
+      "error": "An error occurred, please try again."
+    },
+    "contact": {
+      "title": "Get in Touch",
+      "subtitle": "Direct communication for feasibility, sampling and quotation processes"
+    }
+  },
+  "products": {
+    "title": "Our Products",
+    "description": "Carbon fiber, FRP and fiberglass composite products prepared for B2B applications that require lightweighting, durability, surface quality and repeatable production.",
+    "categories": "Categories",
+    "allCategories": "All Categories",
+    "search": "Search Products...",
+    "noProducts": "No products found in this category.",
+    "specs": "Technical Specifications",
+    "requestOffer": "Get Quote for This Product"
+  },
+  "gallery": {
+    "title": "Gallery",
+    "description": "Images from our production facility, molding and assembly workflow, completed projects and application details.",
+    "viewAll": "View All Images",
+    "noGalleries": "No galleries found."
+  },
+  "blog": {
+    "title": "Blog",
+    "description": "Technical content on composite materials, production methods, surface quality, tooling approaches and real-world industrial applications.",
+    "noPosts": "No posts found.",
+    "readMore": "Read More",
+    "publishedAt": "Published",
+    "categories": "Categories",
+    "engagement": {
+      "title": "Engagement",
+      "subtitle": "Feedback on this article",
+      "likeButton": "Like",
+      "emptyTitle": "No comments yet",
+      "emptyText": "You can leave the first comment and add your perspective.",
+      "formLabel": "Leave a Comment",
+      "formTitle": "What do you think about this article?",
+      "formDescription": "You can share your technical opinion, application experience or an additional note.",
+      "namePlaceholder": "Full Name",
+      "emailPlaceholder": "example@company.com",
+      "commentPlaceholder": "Write your comment...",
+      "moderationNote": "Submitted comments are reviewed before publication.",
+      "submit": "Submit Comment",
+      "submitSuccess": "Your comment has been received and will be published after review.",
+      "submitError": "Comment could not be submitted. Please try again."
+    },
+    "share": {
+      "label": "Share",
+      "copyLink": "Copy Link",
+      "copied": "Blog link copied.",
+      "copyError": "Link could not be copied.",
+      "buttonTitle": "Share on"
+    }
+  },
+  "contact": {
+    "title": "Contact",
+    "description": "Contact our team for product selection, technical feasibility, sampling and project planning, and align the right material, process and lead-time route for your application.",
+    "form": {
+      "title": "Send a Message",
+      "namePlaceholder": "Your Full Name",
+      "emailPlaceholder": "example@company.com",
+      "phonePlaceholder": "+90 5XX XXX XX XX",
+      "companyPlaceholder": "Company Name",
+      "subjectPlaceholder": "Subject",
+      "messagePlaceholder": "Write your message here...",
+      "submit": "Send",
+      "success": "Your message has been sent successfully. We will get back to you shortly.",
+      "error": "Failed to send message. Please try again."
+    },
+    "info": {
+      "title": "Contact Information",
+      "address": "Address",
+      "phone": "Phone",
+      "email": "Email",
+      "hours": "Working Hours"
+    },
+    "response": {
+      "title": "How We Respond",
+      "items": {
+        "one": "We review your request and clarify technical scope, operating environment, quantity and critical performance expectations.",
+        "two": "If needed, we request additional details around material, process, tolerance, drawings or sampling needs.",
+        "three": "We then share the right product, sample or quotation path together with a clear lead-time expectation."
+      }
+    }
+  },
+  "offer": {
+    "title": "Quote Request",
+    "description": "Let us prepare a project-specific quote, process recommendation and production approach based on your material type, dimensions, quantity, target delivery and application conditions.",
+    "benefits": {
+      "title": "What We Clarify in the Quote",
+      "items": {
+        "one": "Material selection: carbon fiber, FRP, fiberglass or hybrid solutions",
+        "two": "Manufacturing route: molded part, panel, profile, tube or custom component process",
+        "three": "Quantity, lead time, finish expectations, quality and logistics planning"
+      }
+    },
+    "form": {
+      "productInterest": "Product/Service of Interest",
+      "quantity": "Quantity",
+      "deadline": "Deadline",
+      "details": "Project Details",
+      "detailsPlaceholder": "Tell us about your project (material, dimensions, quantity, etc.)",
+      "attachFile": "Attach File (technical drawing, specification, etc.)",
+      "submit": "Request Quote",
+      "success": "Your quote request has been received. Our team will contact you shortly.",
+      "error": "Failed to submit request. Please try again."
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "description": "MOE Kompozit delivers application-focused solutions in carbon fiber, FRP and fiberglass composites from concept and sample validation to repeatable production.",
+    "intro": "Our team develops composite components by evaluating lightweighting, durability, chemical resistance, surface quality and process efficiency targets together across multiple industries.",
+    "sections": {
+      "expertiseTitle": "What We Do",
+      "expertiseItems": {
+        "one": "Custom product and sub-component development with carbon fiber and fiberglass reinforcement",
+        "two": "Panels, profiles, covers, housings and industrial structural parts",
+        "three": "Process setup from tooling and prototypes to repeatable production"
+      },
+      "processTitle": "How We Work",
+      "processItems": {
+        "one": "Define the technical need and operating conditions",
+        "two": "Select the right material stack and production method",
+        "three": "Plan sample, revision and production stages"
+      },
+      "sectorsTitle": "Sectors We Support",
+      "sectorsItems": {
+        "one": "Machinery and equipment manufacturers",
+        "two": "Defense, automotive and rail supply chains",
+        "three": "Infrastructure, energy and special project teams"
+      }
+    }
+  },
+  "legal": {
+    "title": "Legal",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
+  },
+  "seo": {
+    "defaultTitle": "MOE Kompozit | Carbon Fiber, FRP and Fiberglass Composite Solutions",
+    "defaultDescription": "B2B composite solutions in carbon fiber, FRP and fiberglass manufacturing with engineering, sample validation and production planning support.",
+    "keywords": "carbon fiber, FRP, fiberglass, composite, industrial manufacturing, custom production"
+  }
+}

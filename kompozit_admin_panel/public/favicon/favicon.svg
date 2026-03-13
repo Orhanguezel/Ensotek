@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Favicon">
+  <defs>
+    <!-- Damla gövde gradyanı -->
+    <linearGradient id="dropGrad" x1="160" y1="80" x2="360" y2="460" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#a9f0ee"/>
+      <stop offset="0.45" stop-color="#53cfc9"/>
+      <stop offset="1" stop-color="#46c6c0"/>
+    </linearGradient>
+
+    <!-- Sol taraftaki parlak vurgu -->
+    <linearGradient id="shineGrad" x1="140" y1="120" x2="260" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.9"/>
+      <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+    <!-- Hafif gölge -->
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.25"/>
+    </filter>
+  </defs>
+
+  <!-- Damla gövde -->
+  <path filter="url(#softShadow)"
+        d="M256 40
+           C256 40 196 132 154 205
+           C124 257 110 302 110 350
+           C110 444 186 492 256 492
+           C326 492 402 444 402 350
+           C402 302 388 257 358 205
+           C316 132 256 40 256 40
+           Z"
+        fill="url(#dropGrad)"/>
+
+  <!-- Sol parlaklık (ikonun solundaki beyaz ışık hissi) -->
+  <path d="M244 78
+           C220 120 188 170 166 214
+           C144 256 134 296 134 342
+           C134 410 184 452 240 468
+           C170 432 162 350 190 286
+           C210 240 232 190 260 140
+           C274 114 268 92 244 78
+           Z"
+        fill="url(#shineGrad)"/>
+
+  <!-- Merkez iç daire -->
+  <circle cx="256" cy="338" r="92" fill="#53cfc9"/>
+
+  <!-- Lacivert halka -->
+  <circle cx="256" cy="338" r="124"
+          fill="none"
+          stroke="#1f4f86"
+          stroke-width="44"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+</svg>

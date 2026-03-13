@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">MOE Kompozit gallery placeholder</title>
+  <desc id="desc">Industrial composite gallery placeholder with abstract panels and grid background.</desc>
+  <rect width="1200" height="800" fill="#0f172a"/>
+  <rect width="1200" height="800" fill="url(#grid)" opacity=".18"/>
+  <rect x="92" y="96" width="410" height="272" rx="28" fill="#1e293b"/>
+  <rect x="548" y="134" width="560" height="336" rx="34" fill="#334155"/>
+  <rect x="176" y="428" width="864" height="196" rx="30" fill="#1d4ed8"/>
+  <rect x="204" y="456" width="248" height="20" rx="10" fill="#bfdbfe" opacity=".9"/>
+  <rect x="204" y="494" width="468" height="16" rx="8" fill="#dbeafe" opacity=".75"/>
+  <rect x="204" y="526" width="386" height="16" rx="8" fill="#dbeafe" opacity=".55"/>
+  <path d="M193 327 278 238l80 90 59-65 126 137H193Z" fill="#60a5fa"/>
+  <circle cx="418" cy="176" r="32" fill="#f8fafc" opacity=".95"/>
+  <path d="M634 382c53-66 104-113 153-141 50-27 100-40 151-40 73 0 129 20 170 61v152H634V382Z" fill="#93c5fd" opacity=".78"/>
+  <path d="M642 422h398v16H642zM642 458h272v16H642z" fill="#eff6ff" opacity=".8"/>
+  <text x="92" y="724" fill="#e2e8f0" font-family="Verdana, sans-serif" font-size="54" font-weight="700">MOE KOMPOZIT</text>
+  <text x="92" y="766" fill="#94a3b8" font-family="Verdana, sans-serif" font-size="28">Gallery preview placeholder</text>
+  <defs>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" stroke="#cbd5e1" stroke-opacity=".35"/>
+    </pattern>
+  </defs>
+</svg>

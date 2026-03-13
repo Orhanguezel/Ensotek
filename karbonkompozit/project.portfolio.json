@@ -1,0 +1,35 @@
+{
+  "title": "Karbonkompozit",
+  "fullName": "MOE Kompozit — Kurumsal Web Sitesi",
+  "category": "CORPORATE WEBSITE",
+  "summary": "MOE Kompozit markasi icin gelistirilen Next.js tabanli kurumsal tanitim ve teklif toplama platformu. TR/EN cok dilli yapi, teknik SEO altyapisi, urun katalogu, galeri, blog ve iletisim/teklif formu icermektedir.",
+  "techs": [
+    "Next.js",
+    "TypeScript",
+    "Tailwind CSS",
+    "next-intl",
+    "React Query",
+    "Zod",
+    "React Hook Form",
+    "Zustand",
+    "Embla Carousel",
+    "Radix UI"
+  ],
+  "features": [
+    "TR/EN multilingual (next-intl)",
+    "Product catalog with categories",
+    "Gallery system",
+    "Blog",
+    "Contact and offer form",
+    "Technical SEO (canonical, hreflang, JSON-LD, sitemap)",
+    "Token-based theme system (moe-carbon-industrial)",
+    "SEO monitoring (SeoIssueBeacon)",
+    "Newsletter"
+  ],
+  "websiteUrl": null,
+  "domainTarget": "https://www.karbonkompozit.com.tr",
+  "devPort": 3020,
+  "status": "in-development",
+  "relation": "Independent brand under Ensotek workspace; uses Ensotek backend via @ensotek/core",
+  "featured": false
+}

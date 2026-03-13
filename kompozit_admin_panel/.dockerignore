@@ -1,0 +1,12 @@
+.git
+.gitignore
+.next
+node_modules
+tsconfig.tsbuildinfo
+README.md
+CLAUDE.md
+LEARNING.md
+QUICK_FIX.md
+TURBOPACK_FIX.md
+frontend_admin_panel.md
+restart-dev.sh
