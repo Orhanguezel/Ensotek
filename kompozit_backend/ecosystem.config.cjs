@@ -9,7 +9,7 @@
 module.exports = {
   apps: [
     {
-      name: 'ensotek-backend',
+      name: 'kompozit-backend',
       cwd: '/var/www/Ensotek/kompozit_backend',
 
       // ✅ run bun directly (deterministic)

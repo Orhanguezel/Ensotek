@@ -15,6 +15,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'karbonkompozit.com.tr' },
       { protocol: 'https', hostname: 'www.karbonkompozit.com.tr' },
+      { protocol: 'https', hostname: 'example.guezelwebdesig.com' },
       ...(process.env.NODE_ENV === 'development'
         ? [
             { protocol: 'http' as const, hostname: 'localhost' },
