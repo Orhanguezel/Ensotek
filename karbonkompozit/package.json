@@ -6,7 +6,7 @@
     "dev": "next dev --port 3020",
     "build": "next build",
     "start": "next start --port 3020",
-    "start:standalone": "node scripts/prepare-standalone.mjs && PORT=${PORT:-3020} HOSTNAME=${HOSTNAME:-127.0.0.1} node .next/standalone/karbonkompozit/server.js",
+    "start:standalone": "PORT=${PORT:-3020} HOSTNAME=${HOSTNAME:-127.0.0.1} node .next/standalone/server.js",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "test:theme": "node scripts/check-theme-tokens.mjs",
