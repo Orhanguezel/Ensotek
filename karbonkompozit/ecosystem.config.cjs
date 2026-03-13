@@ -9,7 +9,7 @@ module.exports = {
       name: 'karbonkompozit',
       cwd: '/var/www/Ensotek/karbonkompozit',
       script: '/home/orhan/.bun/bin/bun',
-      args: 'run start -- -p 3020 -H 127.0.0.1',
+      args: 'run start:standalone',
       exec_mode: 'fork',
       instances: 1,
       watch: false,
