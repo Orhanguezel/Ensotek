@@ -502,8 +502,7 @@ const Header = () => {
                 </div>
               </div>
               <div
-                className={`col d-none d-xl-flex align-items-center justify-content-end header__nav-desktop${menuFits ? "" : " header__nav-hidden"}`}
-                style={{ minWidth: 0 }}
+                className={`d-none d-xl-flex align-items-center header__nav-desktop${menuFits ? "" : " header__nav-hidden"}`}
               >
                 <div className="main-menu main-menu-3">
                   <nav id="mobile-menu" ref={navRef}>

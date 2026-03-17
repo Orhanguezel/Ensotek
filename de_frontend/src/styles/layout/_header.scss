@@ -208,6 +208,13 @@
   }
 }
 
+// Desktop nav: auto-width, push right, no extra spread
+.header__nav-desktop {
+  flex: 0 1 auto !important;
+  margin-left: auto !important;
+  min-width: 0 !important;
+}
+
 // Hide desktop nav when menu doesn't fit (JS-driven)
 .header__nav-desktop.header__nav-hidden {
   position: absolute !important;
