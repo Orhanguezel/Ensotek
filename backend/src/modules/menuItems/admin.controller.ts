@@ -16,7 +16,6 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
-import { DEFAULT_LOCALE } from "@/core/i18n";
 import {
   menuItems,
   menuItemsI18n,
@@ -220,8 +219,8 @@ export const adminListMenuItems: RouteHandler = async (req, reply) => {
   const locale =
     queryLocale ||
     ((req as any).locale as string | undefined) ||
-    DEFAULT_LOCALE;
-  const defaultLocale = DEFAULT_LOCALE;
+    req.defaultLocale;
+  const defaultLocale = req.defaultLocale;
 
   const i18nReq = alias(menuItemsI18n, "mi_req");
   const i18nDef = alias(menuItemsI18n, "mi_def");
@@ -366,8 +365,8 @@ export const adminGetMenuItemById: RouteHandler = async (
   const locale =
     queryLocale ||
     ((req as any).locale as string | undefined) ||
-    DEFAULT_LOCALE;
-  const defaultLocale = DEFAULT_LOCALE;
+    req.defaultLocale;
+  const defaultLocale = req.defaultLocale;
 
   const i18nReq = alias(menuItemsI18n, "mi_req");
   const i18nDef = alias(menuItemsI18n, "mi_def");
@@ -417,7 +416,7 @@ export const adminCreateMenuItem: RouteHandler = async (
     const locale =
       bodyLocale ||
       ((req as any).locale as string | undefined) ||
-      DEFAULT_LOCALE;
+      req.defaultLocale;
 
     const id = randomUUID();
 
@@ -474,7 +473,7 @@ export const adminCreateMenuItem: RouteHandler = async (
         i18nDef,
         and(
           eq(i18nDef.menu_item_id, menuItems.id),
-          eq(i18nDef.locale, DEFAULT_LOCALE),
+          eq(i18nDef.locale, req.defaultLocale),
         ),
       )
       .where(eq(menuItems.id, id))
@@ -513,7 +512,7 @@ export const adminUpdateMenuItem: RouteHandler = async (
     const locale =
       patchLocale ||
       ((req as any).locale as string | undefined) ||
-      DEFAULT_LOCALE;
+      req.defaultLocale;
 
     const parentPatch: Partial<NewMenuItemRow> = {};
 
@@ -624,7 +623,7 @@ export const adminUpdateMenuItem: RouteHandler = async (
         i18nDef,
         and(
           eq(i18nDef.menu_item_id, menuItems.id),
-          eq(i18nDef.locale, DEFAULT_LOCALE),
+          eq(i18nDef.locale, req.defaultLocale),
         ),
       )
       .where(eq(menuItems.id, id))

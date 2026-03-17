@@ -17,6 +17,7 @@ import { db } from '@/db/client';
 import { siteSettings } from './schema';
 import { and, eq, inArray } from 'drizzle-orm';
 import { env } from '@/core/env';
+import { LOCALES } from '@/core/i18n';
 
 // ---------------------------------------------------------------------------
 // KEY LISTS
@@ -103,10 +104,12 @@ export const SITE_MEDIA_KEYS = [
 const GLOBAL_LOCALE = '*' as const;
 
 /**
- * Ensotek için pratik preferred fallback.
- * İstersen ileride 'de' yaparsın ama default akış için 'de' mantıklı.
+ * Preferred fallback locale — derived from the i18n config (LOCALES[0]).
+ * Backend does NOT hardcode a default language; that responsibility belongs
+ * to the frontend. This value is only used as a last-resort fallback in the
+ * locale chain.
  */
-export const PREFERRED_FALLBACK_LOCALE = 'de' as const;
+export const PREFERRED_FALLBACK_LOCALE = LOCALES[0] as string;
 
 const toBool = (v: string | null | undefined): boolean => {
   if (!v) return false;
@@ -356,12 +359,13 @@ function parseAppLocalesValueToMeta(v: unknown): AppLocaleMeta[] {
 export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
   const raw = await getGlobalSettingValue('app_locales');
   if (!raw) {
-    // minimum fallback
-    return [
-      { code: 'tr', label: 'Türkçe', is_default: true, is_active: true },
-      { code: 'en', label: 'English', is_default: false, is_active: true },
-      { code: 'de', label: 'Deutsch', is_default: false, is_active: true },
-    ];
+    // LOCALES'den dinamik fallback — hardcoded dil yok
+    return LOCALES.map((code, i) => ({
+      code,
+      label: code,
+      is_default: i === 0,
+      is_active: true,
+    }));
   }
 
   const v: unknown = (() => {
@@ -375,11 +379,12 @@ export async function getAppLocalesMeta(): Promise<AppLocaleMeta[]> {
   const metas = parseAppLocalesValueToMeta(v);
   if (metas.length) return metas;
 
-  return [
-    { code: 'tr', label: 'Türkçe', is_default: true, is_active: true },
-    { code: 'en', label: 'English', is_default: false, is_active: true },
-    { code: 'de', label: 'Deutsch', is_default: false, is_active: true },
-  ];
+  return LOCALES.map((code, i) => ({
+    code,
+    label: code,
+    is_default: i === 0,
+    is_active: true,
+  }));
 }
 
 
@@ -391,7 +396,7 @@ export async function getAppLocales(_locale?: string | null): Promise<string[]> 
 export async function getDefaultLocale(_locale?: string | null): Promise<string> {
   const raw = await getGlobalSettingValue('default_locale');
   const s = normalizeLocaleLoose(raw);
-  return s || 'de';
+  return s || LOCALES[0];
 }
 
 export async function getEffectiveDefaultLocale(): Promise<string> {
@@ -402,7 +407,7 @@ export async function getEffectiveDefaultLocale(): Promise<string> {
   if (active.some((m) => m.code === def)) return def;
 
   const fromMeta = active.find((m) => m.is_default)?.code;
-  return (fromMeta || active[0]?.code || def || 'de').trim().toLowerCase();
+  return (fromMeta || active[0]?.code || def || LOCALES[0]).trim().toLowerCase();
 }
 
 /**

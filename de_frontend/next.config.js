@@ -1,3 +1,5 @@
+const path = require('node:path');
+
 /** @type {import('next').NextConfig} */
 const createNextIntlPlugin = require('next-intl/plugin');
 const withBundleAnalyzer = require('@next/bundle-analyzer')({
@@ -9,6 +11,11 @@ const withNextIntl = createNextIntlPlugin();
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+
+  // Workspace root — bun hoisting nedeniyle paketler üst dizinde çözümlenir
+  turbopack: {
+    root: path.resolve(__dirname, '..'),
+  },
 
   // Image optimization
   images: {

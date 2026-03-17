@@ -58,7 +58,7 @@ function normalizeLooseLocale(v: unknown): string | null {
 async function getDbDefaultLocale(): Promise<string> {
   const raw = await getDefaultLocaleFromSiteSettings(null);
   const norm = normalizeLooseLocale(raw);
-  return norm || PREFERRED_FALLBACK_LOCALE || "de";
+  return norm || PREFERRED_FALLBACK_LOCALE;
 }
 
 /**

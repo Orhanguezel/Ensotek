@@ -14,7 +14,6 @@ import {
   type SQL,
 } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
-import { DEFAULT_LOCALE } from "@/core/i18n";
 import {
   menuItems,
   menuItemsI18n,
@@ -159,7 +158,7 @@ export const listMenuItems: RouteHandler = async (req, reply) => {
   }
   const q = parsed.data as MenuItemListQuery;
 
-  // locale: query.locale → req.locale → DEFAULT_LOCALE
+  // locale: query.locale → req.locale → req.defaultLocale
   const queryLocale =
     typeof q.locale === "string" && q.locale.trim()
       ? q.locale.trim().toLowerCase()
@@ -167,9 +166,9 @@ export const listMenuItems: RouteHandler = async (req, reply) => {
   const locale =
     queryLocale ||
     ((req as any).locale as string | undefined) ||
-    DEFAULT_LOCALE;
+    req.defaultLocale;
 
-  const defaultLocale = DEFAULT_LOCALE;
+  const defaultLocale = req.defaultLocale;
 
   const i18nReq = alias(menuItemsI18n, "mi_req");
   const i18nDef = alias(menuItemsI18n, "mi_def");
@@ -299,8 +298,8 @@ export const getMenuItemById: RouteHandler = async (req, reply) => {
   const locale =
     queryLocale ||
     ((req as any).locale as string | undefined) ||
-    DEFAULT_LOCALE;
-  const defaultLocale = DEFAULT_LOCALE;
+    req.defaultLocale;
+  const defaultLocale = req.defaultLocale;
 
   const i18nReq = alias(menuItemsI18n, "mi_req");
   const i18nDef = alias(menuItemsI18n, "mi_def");

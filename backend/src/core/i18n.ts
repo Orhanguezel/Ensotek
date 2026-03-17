@@ -36,14 +36,17 @@ for (const l of initialLocaleCodes) {
   if (!uniqueInitial.includes(l)) uniqueInitial.push(l);
 }
 
-export const LOCALES: string[] = uniqueInitial.length ? uniqueInitial : ['de'];
+export const LOCALES: string[] = uniqueInitial.length ? uniqueInitial : ['tr', 'en', 'de'];
 export type Locale = (typeof LOCALES)[number];
 
-// Build-time default (koru)
+/**
+ * Build-time fallback. Sadece LOCALES[0] kullanılır — hardcoded dil yok.
+ * Default dil mantığı frontend'de olmalıdır; backend sadece desteklenen
+ * dilleri bilir ve frontend'in gönderdiği X-Locale header'ına güvenir.
+ */
 export const DEFAULT_LOCALE: Locale =
   (normalizeLocale(process.env.DEFAULT_LOCALE) as Locale) ||
-  (LOCALES[0] as Locale) ||
-  ('de' as Locale);
+  (LOCALES[0] as Locale);
 
 export function isSupported(l?: string | null): l is Locale {
   if (!l) return false;
@@ -79,36 +82,45 @@ export function bestFromAcceptLanguage(header?: string | null): Locale | undefin
 
 export function resolveLocaleFromHeaders(headers: Record<string, unknown>): {
   locale: Locale;
+  defaultLocale: Locale;
   selectedBy: 'x-locale' | 'accept-language' | 'default';
 } {
+  // Frontend'in default dili — her frontend kendi default dilini gönderir
+  const rawXDL = (headers['x-default-locale'] ??
+    (headers as any)['X-Default-Locale']) as string | undefined;
+  const xdlNorm = normalizeLocale(rawXDL);
+  const defaultLocale = (xdlNorm && isSupported(xdlNorm) ? xdlNorm : LOCALES[0]) as Locale;
+
   const rawXL = (headers['x-locale'] ??
     (headers as any)['X-Locale'] ??
     (headers as any)['x_locale']) as string | undefined;
 
   const xlNorm = normalizeLocale(rawXL);
   if (xlNorm && isSupported(xlNorm)) {
-    return { locale: xlNorm as Locale, selectedBy: 'x-locale' };
+    return { locale: xlNorm as Locale, defaultLocale, selectedBy: 'x-locale' };
   }
 
   const al = bestFromAcceptLanguage(
     (headers['accept-language'] ?? (headers as any)['Accept-Language']) as string | undefined,
   );
   if (al && isSupported(al)) {
-    return { locale: al as Locale, selectedBy: 'accept-language' };
+    return { locale: al as Locale, defaultLocale, selectedBy: 'accept-language' };
   }
 
-  // ✅ runtime default varsa onu kullan
-  return { locale: (getRuntimeDefaultLocale() as Locale) || DEFAULT_LOCALE, selectedBy: 'default' };
+  // Frontend'den locale gelmedi — frontend'in default dili kullanılır
+  return { locale: defaultLocale, defaultLocale, selectedBy: 'default' };
 }
 
-/** Runtime default (DB’den yüklenir). Yüklenmemişse build-time DEFAULT_LOCALE döner. */
+/**
+ * Runtime default — DB’den yüklenir, sadece admin/seed işlemlerinde kullanılır.
+ * Request locale çözümlemesinde kullanılmaz; o sorumluluk frontend’dedir.
+ */
 let __runtimeDefaultLocale: string | null = null;
 
 export function getRuntimeDefaultLocale(): Locale {
   const n = normalizeLocale(__runtimeDefaultLocale) as Locale | undefined;
   if (n && LOCALES.includes(n)) return n;
-  // fallback: LOCALES[0] > DEFAULT_LOCALE
-  return (LOCALES[0] as Locale) || DEFAULT_LOCALE;
+  return LOCALES[0] as Locale;
 }
 
 /** Fallback zinciri: primary -> runtime default -> LOCALES */
@@ -277,8 +289,7 @@ export async function loadLocalesFromSiteSettings() {
     const candidate =
       (defNorm && LOCALES.includes(defNorm) ? defNorm : undefined) ||
       (defaultFromList && LOCALES.includes(defaultFromList) ? defaultFromList : undefined) ||
-      LOCALES[0] ||
-      DEFAULT_LOCALE;
+      LOCALES[0];
 
     __runtimeDefaultLocale = candidate || null;
 
@@ -306,6 +317,7 @@ export async function ensureLocalesLoadedFromSettings() {
 declare module 'fastify' {
   interface FastifyRequest {
     locale: Locale;
+    defaultLocale: Locale;
     localeFallbacks: Locale[];
   }
 }

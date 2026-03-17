@@ -4,7 +4,6 @@
 
 import type { RouteHandler } from "fastify";
 import { randomUUID } from "crypto";
-import { DEFAULT_LOCALE } from "@/core/i18n";
 import {
   listFaqs,
   getFaqMergedById,
@@ -55,7 +54,7 @@ export const listFaqsAdmin: RouteHandler<{
     category_id: q.category_id,
     sub_category_id: q.sub_category_id,
     locale: (req as any).locale,
-    defaultLocale: DEFAULT_LOCALE,
+    defaultLocale: req.defaultLocale,
   });
 
   reply.header("x-total-count", String(total ?? 0));
@@ -68,7 +67,7 @@ export const getFaqAdmin: RouteHandler<{
 }> = async (req, reply) => {
   const row = await getFaqMergedById(
     (req as any).locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
     req.params.id,
   );
   if (!row) {
@@ -85,7 +84,7 @@ export const getFaqBySlugAdmin: RouteHandler<{
 }> = async (req, reply) => {
   const row = await getFaqMergedBySlug(
     (req as any).locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
     req.params.slug,
   );
   if (!row) {
@@ -146,7 +145,7 @@ export const createFaqAdmin: RouteHandler<{
 
     const row = await getFaqMergedById(
       locale,
-      DEFAULT_LOCALE,
+      req.defaultLocale,
       id,
     );
     return reply.code(201).send(row);
@@ -262,7 +261,7 @@ export const updateFaqAdmin: RouteHandler<{
 
     const row = await getFaqMergedById(
       locale,
-      DEFAULT_LOCALE,
+      req.defaultLocale,
       req.params.id,
     );
     if (!row) {

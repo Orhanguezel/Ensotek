@@ -34,10 +34,12 @@ function normalizeLooseLocale(v: unknown): string | null {
   return normalizeLocale(s) || s.toLowerCase();
 }
 
-function pickSafeDefault(): string {
-  const base = normalizeLocale(getRuntimeDefaultLocale()) || getRuntimeDefaultLocale() || 'de';
-  if (LOCALES.includes(base)) return base;
-  return LOCALES[0] || 'de';
+function pickSafeDefault(req?: any): string {
+  // Öncelik: req.defaultLocale (frontend X-Default-Locale header) > DB runtime > LOCALES[0]
+  if (req?.defaultLocale && LOCALES.includes(req.defaultLocale)) return req.defaultLocale;
+  const base = normalizeLocale(getRuntimeDefaultLocale()) || getRuntimeDefaultLocale();
+  if (base && LOCALES.includes(base)) return base;
+  return LOCALES[0];
 }
 
 export async function resolveRequestLocales(req: any, query?: LocaleQueryLike): Promise<ResolvedLocales> {
@@ -47,7 +49,7 @@ export async function resolveRequestLocales(req: any, query?: LocaleQueryLike): 
   const reqRaw = normalizeLooseLocale(q.locale) ?? normalizeLooseLocale(req.locale);
   const defRawFromQuery = normalizeLooseLocale(q.default_locale);
 
-  const safeDefault = pickSafeDefault();
+  const safeDefault = pickSafeDefault(req);
   const safeLocale = reqRaw && isSupported(reqRaw) ? reqRaw : safeDefault;
   const safeDef = defRawFromQuery && isSupported(defRawFromQuery) ? defRawFromQuery : safeDefault;
 
@@ -59,11 +61,10 @@ export async function resolveRequestLocales(req: any, query?: LocaleQueryLike): 
  * ENV'den veya LOCALES array'inden locale listesi alınır
  */
 export function getLocalesForCreate(baseLocale: string): string[] {
-  const FALLBACK_LOCALES = ['de'];
-  const base = normalizeLocale(baseLocale) || 'de';
+  const base = normalizeLocale(baseLocale) || LOCALES[0];
 
   // LOCALES array'i mevcut mu kontrol et
-  let list = LOCALES && LOCALES.length > 0 ? [...LOCALES] : [...FALLBACK_LOCALES];
+  let list = LOCALES && LOCALES.length > 0 ? [...LOCALES] : [base];
 
   // Base locale listede yoksa ekle
   if (!list.includes(base)) list.unshift(base);

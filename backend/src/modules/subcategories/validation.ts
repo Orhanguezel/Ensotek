@@ -2,6 +2,7 @@
 // FILE: src/modules/subcategories/validation.ts
 // =============================================================
 import { z } from 'zod';
+import { LOCALES } from '@/core/i18n';
 
 const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (v === '' ? null : v), schema);
@@ -25,8 +26,8 @@ const baseSubCategorySchema = z
     id: z.string().uuid().optional(),
     category_id: z.string().uuid(),
 
-    // 🌍 Çok dilli – yoksa "de"
-    locale: z.string().min(2).max(8).default('de'),
+    // 🌍 Çok dilli – yoksa ilk locale
+    locale: z.string().min(2).max(8).default(LOCALES[0]),
 
     name: z.string().min(1).max(255),
     slug: z.string().min(1).max(255),

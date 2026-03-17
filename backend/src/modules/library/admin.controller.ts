@@ -149,7 +149,7 @@ async function resolveLocales(
     return isSupported(n) ? n : null;
   };
 
-  const fallback = (LOCALES[0] as string) || (getRuntimeDefaultLocale() as string) || 'de';
+  const fallback = (LOCALES[0] as string) || (getRuntimeDefaultLocale() as string);
 
   const q = query ?? req?.query ?? {};
   const qLocale = pick(q.locale);

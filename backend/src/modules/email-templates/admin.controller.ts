@@ -27,7 +27,6 @@ import {
   now,
   normalizeVariablesInput,
 } from './utils';
-import { DEFAULT_LOCALE } from '@/core/i18n';
 import { z } from 'zod';
 
 type ListQuery = {
@@ -256,7 +255,7 @@ export const createEmailTemplateAdmin: RouteHandler = async (req, reply) => {
 
     await db.insert(emailTemplates).values(parent);
 
-    const baseLocale = (input.locale || DEFAULT_LOCALE) as string;
+    const baseLocale = (input.locale || req.defaultLocale) as string;
 
     await upsertEmailTemplateI18n(id, baseLocale, {
       template_name: input.template_name,
@@ -343,7 +342,7 @@ export const updateEmailTemplateAdmin: RouteHandler = async (req, reply) => {
       typeof patch.content !== 'undefined';
 
     if (anyI18n) {
-      const loc = (patch.locale || DEFAULT_LOCALE) as string;
+      const loc = (patch.locale || req.defaultLocale) as string;
       await upsertEmailTemplateI18n(id, loc, {
         template_name: patch.template_name,
         subject: patch.subject,

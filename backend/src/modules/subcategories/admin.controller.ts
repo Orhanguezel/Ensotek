@@ -15,6 +15,7 @@ import {
   type SubCategorySetImageInput,
 } from './validation';
 import { buildPublicUrl } from '@/modules/storage/_util';
+import { LOCALES } from '@/core/i18n';
 import { randomUUID } from 'crypto';
 
 /* ---------- VIEW FIELDS (Base + i18n) ---------- */
@@ -64,7 +65,7 @@ const isFk = (e: any) =>
   (e?.code ?? e?.errno) === 'ER_NO_REFERENCED_ROW_2' || (e?.code ?? e?.errno) === 1452;
 
 // 🌍 Çoklu dil oluşturma için yardımcılar
-const FALLBACK_LOCALES = ['de'];
+const FALLBACK_LOCALES = LOCALES;
 
 function normalizeLocale(loc: unknown): string | null {
   if (!loc) return null;
@@ -82,7 +83,7 @@ function normalizeLocale(loc: unknown): string | null {
  *   3) Base locale listede yoksa başa eklenir
  */
 function getLocalesForCreate(baseLocale: string): string[] {
-  const base = normalizeLocale(baseLocale) ?? 'de';
+  const base = normalizeLocale(baseLocale) ?? LOCALES[0];
 
   const envLocalesRaw =
     process.env.APP_LOCALES || process.env.NEXT_PUBLIC_APP_LOCALES || process.env.LOCALES || '';
@@ -173,7 +174,7 @@ export const adminCreateSubCategory: RouteHandler<{
   const data = parsed.data;
 
   const baseId = data.id ?? randomUUID();
-  const baseLocale = normalizeLocale(data.locale) ?? 'de';
+  const baseLocale = normalizeLocale(data.locale) ?? LOCALES[0];
   const locales = getLocalesForCreate(baseLocale);
 
   const basePayload = {
@@ -242,7 +243,7 @@ export const adminPutSubCategory: RouteHandler<{
     });
 
   const patch = parsed.data;
-  const targetLocale = normalizeLocale(patch.locale) ?? 'de';
+  const targetLocale = normalizeLocale(patch.locale) ?? LOCALES[0];
 
   const baseSet: Record<string, unknown> = {
     updated_at: sql`CURRENT_TIMESTAMP(3)`,
@@ -349,7 +350,7 @@ export const adminPatchSubCategory: RouteHandler<{
     });
 
   const patch = parsed.data;
-  const targetLocale = normalizeLocale(patch.locale) ?? 'de';
+  const targetLocale = normalizeLocale(patch.locale) ?? LOCALES[0];
 
   const baseSet: Record<string, unknown> = {
     updated_at: sql`CURRENT_TIMESTAMP(3)`,
@@ -484,7 +485,7 @@ export const adminToggleSubActive: RouteHandler<{
     } as any)
     .where(eq(subCategories.id, id));
 
-  const row = await fetchSubCategoryViewByIdAndLocale(id, 'de');
+  const row = await fetchSubCategoryViewByIdAndLocale(id, LOCALES[0]);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
@@ -505,7 +506,7 @@ export const adminToggleSubFeatured: RouteHandler<{
     } as any)
     .where(eq(subCategories.id, id));
 
-  const row = await fetchSubCategoryViewByIdAndLocale(id, 'de');
+  const row = await fetchSubCategoryViewByIdAndLocale(id, LOCALES[0]);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
@@ -541,7 +542,7 @@ export const adminSetSubCategoryImage: RouteHandler<{
       .set(patch as any)
       .where(eq(subCategories.id, id));
 
-    const row = await fetchSubCategoryViewByIdAndLocale(id, 'de');
+    const row = await fetchSubCategoryViewByIdAndLocale(id, LOCALES[0]);
     if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
     return reply.send(row);
   }
@@ -573,7 +574,7 @@ export const adminSetSubCategoryImage: RouteHandler<{
     .set(patch as any)
     .where(eq(subCategories.id, id));
 
-  const row = await fetchSubCategoryViewByIdAndLocale(id, 'de');
+  const row = await fetchSubCategoryViewByIdAndLocale(id, LOCALES[0]);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
@@ -595,7 +596,7 @@ export const adminListSubCategories: RouteHandler<{
   } = req.query ?? {};
   const conds: any[] = [];
 
-  const effectiveLocale = normalizeLocale(locale) ?? 'de';
+  const effectiveLocale = normalizeLocale(locale) ?? LOCALES[0];
   conds.push(eq(subCategoryI18n.locale, effectiveLocale));
 
   if (q && q.trim()) {
@@ -640,7 +641,7 @@ export const adminGetSubCategoryById: RouteHandler<{
   Querystring: { locale?: string };
 }> = async (req, reply) => {
   const { id } = req.params;
-  const effectiveLocale = normalizeLocale(req.query?.locale) ?? 'de';
+  const effectiveLocale = normalizeLocale(req.query?.locale) ?? LOCALES[0];
 
   const row = await fetchSubCategoryViewByIdAndLocale(id, effectiveLocale);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
@@ -654,7 +655,7 @@ export const adminGetSubCategoryBySlug: RouteHandler<{
 }> = async (req, reply) => {
   const { slug } = req.params;
   const { category_id, locale } = req.query ?? {};
-  const effectiveLocale = normalizeLocale(locale) ?? 'de';
+  const effectiveLocale = normalizeLocale(locale) ?? LOCALES[0];
 
   const conds: any[] = [
     eq(subCategoryI18n.slug, slug),

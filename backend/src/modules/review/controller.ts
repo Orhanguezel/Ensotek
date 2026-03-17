@@ -15,7 +15,7 @@ import {
   repoCreateReviewPublic,
   repoAddReactionPublic,
 } from "./repository";
-import { DEFAULT_LOCALE, type Locale } from "@/core/i18n";
+import { type Locale } from "@/core/i18n";
 
 export async function listReviewsPublic(req: FastifyRequest) {
   const q = ReviewListParamsSchema.parse(req.query);
@@ -23,13 +23,13 @@ export async function listReviewsPublic(req: FastifyRequest) {
   const locale: Locale =
     (q.locale as Locale) ??
     ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
+    req.defaultLocale;
 
   return await repoListReviewsPublic(
     req.server,
     q,
     locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
   );
 }
 
@@ -37,13 +37,13 @@ export async function getReviewPublic(req: FastifyRequest) {
   const { id } = IdParamSchema.parse(req.params);
 
   const locale: Locale =
-    ((req as any).locale as Locale | undefined) ?? DEFAULT_LOCALE;
+    ((req as any).locale as Locale | undefined) ?? req.defaultLocale;
 
   return await repoGetReviewPublic(
     req.server,
     id,
     locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
   );
 }
 
@@ -54,7 +54,7 @@ export async function createReviewPublic(req: FastifyRequest) {
   const locale: Locale =
     (body.locale as Locale) ??
     ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
+    req.defaultLocale;
 
   return await repoCreateReviewPublic(req.server, body, locale);
 }
@@ -68,12 +68,12 @@ export async function addReviewReactionPublic(req: FastifyRequest) {
   // parse edip repoAddReactionPublic'e type geçirirsin.
 
   const locale: Locale =
-    ((req as any).locale as Locale | undefined) ?? DEFAULT_LOCALE;
+    ((req as any).locale as Locale | undefined) ?? req.defaultLocale;
 
   return await repoAddReactionPublic(
     req.server,
     id,
     locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
   );
 }

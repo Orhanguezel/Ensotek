@@ -32,6 +32,7 @@ import { telegramNotify } from '@/modules/telegram/telegram.notifier';
 import { products, productI18n } from '@/modules/products/schema';
 import { services, servicesI18n } from '@/modules/services/schema';
 
+import { LOCALES } from '@/core/i18n';
 import type { OfferListItem } from './repository';
 
 // -------------------------------------------------------------
@@ -87,7 +88,7 @@ function buildLocaleCandidates(rawLocale?: string | null): string[] {
   // - offer locale (de-DE)
   // - prefix (de)
   // - de → en → tr fallback
-  return uniq([lc, langPart, 'de', 'en', 'tr'].map((x) => x?.trim()).filter(Boolean));
+  return uniq([lc, langPart, ...LOCALES].map((x) => x?.trim()).filter(Boolean));
 }
 
 // -------------------------------------------------------------

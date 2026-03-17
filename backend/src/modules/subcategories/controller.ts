@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { db } from '@/db/client';
 import { subCategories, subCategoryI18n } from './schema';
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
+import { LOCALES } from '@/core/i18n';
 import type { SubCategoryCreateInput, SubCategoryUpdateInput } from './validation';
 
 const nullIfEmpty = (v: unknown) => (v === '' ? null : v);
@@ -82,7 +83,7 @@ export const listSubCategories: RouteHandler<{
   const q = req.query ?? {};
   const conds: any[] = [];
 
-  const locale = typeof q.locale === 'string' && q.locale.trim() ? q.locale.trim() : 'de';
+  const locale = typeof q.locale === 'string' && q.locale.trim() ? q.locale.trim() : LOCALES[0];
   conds.push(eq(subCategoryI18n.locale, locale));
 
   if (q.q) {
@@ -138,7 +139,7 @@ export const getSubCategoryById: RouteHandler<{
   Params: { id: string };
 }> = async (req, reply) => {
   const { id } = req.params;
-  const locale = 'de'; // public by-id için default locale
+  const locale = LOCALES[0]; // public by-id için default locale
 
   const rows = await db
     .select(subCategorySelectFields)
@@ -167,7 +168,7 @@ export const getSubCategoryBySlug: RouteHandler<{
 
   const conds: any[] = [
     eq(subCategoryI18n.slug, slug),
-    eq(subCategoryI18n.locale, (locale ?? 'de').trim() || 'de'),
+    eq(subCategoryI18n.locale, (locale ?? LOCALES[0]).trim() || LOCALES[0]),
   ];
 
   if (category_id) {

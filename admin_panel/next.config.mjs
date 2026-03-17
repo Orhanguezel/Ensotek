@@ -1,11 +1,13 @@
+import path from 'node:path';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactCompiler: true,
   compiler: { removeConsole: process.env.NODE_ENV === 'production' },
 
-  // Silence "multiple lockfiles" workspace root warning
+  // Workspace root — bun hoisting nedeniyle next paketi üst dizinde çözümlenir
   turbopack: {
-    root: '.',
+    root: path.resolve(import.meta.dirname, '..'),
   },
 
   // ✅ Image optimization config

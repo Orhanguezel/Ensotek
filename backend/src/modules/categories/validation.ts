@@ -13,7 +13,7 @@ const baseCategorySchema = z
     id: z.string().uuid().optional(),
 
     /** Çoklu dil (i18n tablosu için) */
-    locale: z.string().min(2).max(8).default('de'),
+    locale: z.string().min(2).max(8),
 
     /** Hangi modül / domain için bu kategori? */
     module_key: z.string().min(1).max(64).default('general'),

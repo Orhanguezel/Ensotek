@@ -6,6 +6,7 @@ import { db } from '@/db/client';
 import { categories, categoryI18n } from './schema';
 import { and, asc, eq, sql, or, like } from 'drizzle-orm';
 import { toBool, toBoolOrUndefined, toInt, normalizeLocale } from '@/modules/_shared';
+import { LOCALES } from '@/core/i18n';
 import { CATEGORY_VIEW_FIELDS, parseOrder } from './helpers';
 
 /** GET /categories (public) — çok dilli + module_key destekli */
@@ -26,7 +27,7 @@ export const listCategories: RouteHandler<{
   const conds: any[] = [];
 
   const rawLocale = typeof q.locale === 'string' && q.locale.trim() ? q.locale.trim() : undefined;
-  const effectiveLocale = normalizeLocale(rawLocale) ?? 'de';
+  const effectiveLocale = normalizeLocale(rawLocale) ?? LOCALES[0];
 
   if (q.q) {
     const pattern = `%${String(q.q).trim()}%`;
@@ -95,7 +96,7 @@ export const getCategoryById: RouteHandler<{
     typeof req.query?.locale === 'string' && req.query.locale.trim()
       ? req.query.locale.trim()
       : undefined;
-  const effectiveLocale = normalizeLocale(rawLocale) ?? 'de';
+  const effectiveLocale = normalizeLocale(rawLocale) ?? LOCALES[0];
 
   const rows = await db
     .select(CATEGORY_VIEW_FIELDS)
@@ -118,7 +119,7 @@ export const getCategoryBySlug: RouteHandler<{
     typeof req.query?.locale === 'string' && req.query.locale.trim()
       ? req.query.locale.trim()
       : undefined;
-  const effectiveLocale = normalizeLocale(rawLocale) ?? 'de';
+  const effectiveLocale = normalizeLocale(rawLocale) ?? LOCALES[0];
 
   const moduleKey =
     typeof req.query?.module_key === 'string' && req.query.module_key.trim()

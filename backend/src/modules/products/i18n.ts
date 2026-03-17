@@ -5,12 +5,14 @@
 //  - Default locale + app_locales are expected to be provided from DB via Fastify decorate
 // =============================================================
 
+import { LOCALES } from '@/core/i18n';
+
 export type SiteI18nConfig = {
   defaultLocale?: string; // e.g. "de"
   appLocales?: string[]; // e.g. ["de","en","de"]
 };
 
-const FALLBACK_DEFAULT = 'de';
+const FALLBACK_DEFAULT = LOCALES[0];
 
 export function normalizeLocale(raw: unknown): string | null {
   if (raw === null || raw === undefined) return null;

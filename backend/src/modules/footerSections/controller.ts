@@ -3,7 +3,6 @@
 // ===================================================================
 
 import type { RouteHandler } from 'fastify';
-import { DEFAULT_LOCALE } from '@/core/i18n';
 import {
   listFooterSections,
   getFooterSectionMergedById,
@@ -11,7 +10,7 @@ import {
 } from './repository';
 import { footerSectionListQuerySchema, type FooterSectionListQuery } from './validation';
 
-/** Yardımcı: istekten locale çıkar (query > req.locale > DEFAULT_LOCALE) */
+/** Yardımcı: istekten locale çıkar (query > req.locale > req.defaultLocale) */
 function resolveLocale(req: any, qLocale?: string | null): string {
   const fromQuery = (qLocale || (req.query as any)?.locale) as string | undefined;
 
@@ -21,7 +20,7 @@ function resolveLocale(req: any, qLocale?: string | null): string {
   const fromReq = (req as any).locale as string | undefined;
   if (fromReq && fromReq.trim()) return fromReq.trim().toLowerCase();
 
-  return (DEFAULT_LOCALE || 'de').toLowerCase();
+  return req.defaultLocale.toLowerCase();
 }
 
 /** LIST (public) */
@@ -37,7 +36,7 @@ export const listFooterSectionsPublic: RouteHandler<{
   const q = parsed.data;
 
   const effectiveLocale = resolveLocale(req, (q as any).locale);
-  const defaultLocale = (DEFAULT_LOCALE || 'de').toLowerCase();
+  const defaultLocale = req.defaultLocale.toLowerCase();
 
   const { items, total } = await listFooterSections({
     ...q,
@@ -55,7 +54,7 @@ export const getFooterSectionPublic: RouteHandler<{
   Querystring: { locale?: string };
 }> = async (req, reply) => {
   const effectiveLocale = resolveLocale(req, (req.query as any)?.locale);
-  const defaultLocale = (DEFAULT_LOCALE || 'de').toLowerCase();
+  const defaultLocale = req.defaultLocale.toLowerCase();
 
   const row = await getFooterSectionMergedById(effectiveLocale, defaultLocale, req.params.id);
   if (!row) {
@@ -70,7 +69,7 @@ export const getFooterSectionBySlugPublic: RouteHandler<{
   Querystring: { locale?: string };
 }> = async (req, reply) => {
   const effectiveLocale = resolveLocale(req, (req.query as any)?.locale);
-  const defaultLocale = (DEFAULT_LOCALE || 'de').toLowerCase();
+  const defaultLocale = req.defaultLocale.toLowerCase();
 
   const row = await getFooterSectionMergedBySlug(effectiveLocale, defaultLocale, req.params.slug);
   if (!row) {

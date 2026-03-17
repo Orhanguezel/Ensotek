@@ -3,7 +3,6 @@
 // FINAL — FE Project type ile uyumlu response (card/detail)
 // ---------------------------------------------------------------------
 import type { RouteHandler } from 'fastify';
-import { DEFAULT_LOCALE } from '@/core/i18n';
 import {
   listProjects,
   getProjectMergedById,
@@ -47,7 +46,7 @@ export const listProjectsPublic: RouteHandler<{ Querystring: ListQuery }> = asyn
     client: q.client,
 
     locale: (req as any).locale,
-    defaultLocale: DEFAULT_LOCALE,
+    defaultLocale: req.defaultLocale,
   });
 
   reply.header('x-total-count', String(total ?? 0));
@@ -58,7 +57,7 @@ export const listProjectsPublic: RouteHandler<{ Querystring: ListQuery }> = asyn
 
 /** GET BY ID (public) */
 export const getProjectPublic: RouteHandler<{ Params: { id: string } }> = async (req, reply) => {
-  const row = await getProjectMergedById((req as any).locale, DEFAULT_LOCALE, req.params.id);
+  const row = await getProjectMergedById((req as any).locale, req.defaultLocale, req.params.id);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(toDetail(row));
 };
@@ -68,13 +67,13 @@ export const getProjectBySlugPublic: RouteHandler<{
   Params: { slug: string };
   Querystring: { include?: string };
 }> = async (req, reply) => {
-  const row = await getProjectMergedBySlug((req as any).locale, DEFAULT_LOCALE, req.params.slug);
+  const row = await getProjectMergedBySlug((req as any).locale, req.defaultLocale, req.params.slug);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
 
   const detail = toDetail(row);
 
   if ((req.query as any)?.include === 'images') {
-    const images = await listProjectImagesMerged(row.id, (req as any).locale, DEFAULT_LOCALE);
+    const images = await listProjectImagesMerged(row.id, (req as any).locale, req.defaultLocale);
     return reply.send({ ...detail, images });
   }
 
@@ -86,6 +85,6 @@ export const listProjectImagesPublic: RouteHandler<{ Params: { id: string } }> =
   req,
   reply,
 ) => {
-  const items = await listProjectImagesMerged(req.params.id, (req as any).locale, DEFAULT_LOCALE);
+  const items = await listProjectImagesMerged(req.params.id, (req as any).locale, req.defaultLocale);
   return reply.send(items);
 };

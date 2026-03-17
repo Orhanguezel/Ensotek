@@ -13,7 +13,7 @@ import { siteSettings } from './schema';
 import { and, asc, desc, eq, inArray, like, ne, or } from 'drizzle-orm';
 
 import { siteSettingUpsertSchema, siteSettingBulkUpsertSchema, type JsonLike } from './validation';
-import { normalizeLocale } from '@/core/i18n';
+import { normalizeLocale, LOCALES } from '@/core/i18n';
 
 import {
   getAppLocales as getAppLocalesFromService,
@@ -64,12 +64,12 @@ function normalizeLooseLocale(v: unknown): string | null {
 
 async function getAppLocales(): Promise<LocaleCode[]> {
   const list = await getAppLocalesFromService(null);
-  return list?.length ? list : ['de'];
+  return list?.length ? list : [LOCALES[0]];
 }
 
 async function getDefaultLocale(): Promise<LocaleCode> {
   const v = normalizeLooseLocale(await getDefaultLocaleFromService(null));
-  return v && v !== '*' ? v : 'de';
+  return v && v !== '*' ? v : LOCALES[0];
 }
 
 async function upsertOne(key: string, locale: LocaleCode, value: JsonLike) {
@@ -228,7 +228,7 @@ export const adminListSiteSettings: RouteHandler = async (req, reply) => {
     if (!k) return false;
 
     // 1) policy tabanlı
-    const coerced = coerceLocaleByKey(k, 'de');
+    const coerced = coerceLocaleByKey(k, LOCALES[0]);
     if (coerced === '*') return true;
 
     // 2) explicit + prefix emniyet

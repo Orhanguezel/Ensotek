@@ -58,7 +58,7 @@ async function resolveLocalesPublic(
   const safeDefault =
     defCandidate ||
     (LOCALES.includes(DEFAULT_LOCALE) ? DEFAULT_LOCALE : null) ||
-    (LOCALES[0] ?? 'de');
+    LOCALES[0];
 
   const safeLocale = reqCandidate || safeDefault;
 

@@ -32,7 +32,7 @@ async function resolveLocalesPublic(
   // ✅ runtime locales load (site_settings.app_locales + default_locale)
   await ensureLocalesLoadedFromSettings();
 
-  const fallback = (LOCALES[0] as string) || (getRuntimeDefaultLocale() as string) || 'de';
+  const fallback = (LOCALES[0] as string) || (getRuntimeDefaultLocale() as string);
 
   const pick = (raw?: string | null): string | null => {
     const n = normalizeLocale(raw);

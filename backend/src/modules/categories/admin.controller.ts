@@ -16,6 +16,7 @@ import {
 import { storageAssets } from '@/modules/storage/schema';
 import { buildPublicUrl } from '@/modules/storage/_util';
 import { randomUUID } from 'crypto';
+import { LOCALES } from '@/core/i18n';
 import {
   toBool,
   toBoolOrUndefined,
@@ -59,7 +60,7 @@ export const adminCreateCategory: RouteHandler<{
   const data = parsed.data;
 
   const baseId = data.id ?? randomUUID();
-  const baseLocale = normalizeLocale(data.locale) ?? 'de';
+  const baseLocale = normalizeLocale(data.locale) ?? LOCALES[0];
   const locales = getLocalesForCreate(baseLocale);
 
   const basePayload = {
@@ -110,7 +111,7 @@ export const adminPutCategory: RouteHandler<{
   }
 
   const patch = parsed.data;
-  const targetLocale = normalizeLocale(patch.locale) ?? 'de';
+  const targetLocale = normalizeLocale(patch.locale) ?? LOCALES[0];
 
   const baseSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
   const i18nSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
@@ -217,7 +218,7 @@ export const adminPatchCategory: RouteHandler<{
   }
 
   const patch = parsed.data;
-  const targetLocale = normalizeLocale(patch.locale) ?? 'de';
+  const targetLocale = normalizeLocale(patch.locale) ?? LOCALES[0];
 
   const baseSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
   const i18nSet: Record<string, unknown> = { updated_at: sql`CURRENT_TIMESTAMP(3)` };
@@ -344,7 +345,7 @@ export const adminToggleActive: RouteHandler<{
     .set({ is_active: v, updated_at: sql`CURRENT_TIMESTAMP(3)` } as any)
     .where(eq(categories.id, id));
 
-  const loc = normalizeLocale((req.query as any)?.locale) ?? 'de';
+  const loc = normalizeLocale((req.query as any)?.locale) ?? LOCALES[0];
   const row = await fetchCategoryViewByIdAndLocale(id, loc);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
@@ -364,7 +365,7 @@ export const adminToggleFeatured: RouteHandler<{
     .set({ is_featured: v, updated_at: sql`CURRENT_TIMESTAMP(3)` } as any)
     .where(eq(categories.id, id));
 
-  const loc = normalizeLocale((req.query as any)?.locale) ?? 'de';
+  const loc = normalizeLocale((req.query as any)?.locale) ?? LOCALES[0];
   const row = await fetchCategoryViewByIdAndLocale(id, loc);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
@@ -393,7 +394,7 @@ export const adminSetCategoryImage: RouteHandler<{
   const assetId = (parsed.data as any).storage_asset_id ?? null;
   const alt = (parsed.data as any).alt; // null | string | undefined
 
-  const targetLocale = normalizeLocale(req.query?.locale) ?? 'de';
+  const targetLocale = normalizeLocale(req.query?.locale) ?? LOCALES[0];
 
   // Görseli kaldır
   if (!assetId) {
@@ -491,7 +492,7 @@ export const adminListCategories: RouteHandler<{ Querystring: AdminListCategorie
 
   const conds: any[] = [];
 
-  const effectiveLocale = normalizeLocale(locale) ?? 'de';
+  const effectiveLocale = normalizeLocale(locale) ?? LOCALES[0];
   conds.push(eq(categoryI18n.locale, effectiveLocale));
 
   if (q && q.trim()) {
@@ -548,7 +549,7 @@ export const adminGetCategoryById: RouteHandler<{
   Querystring: { locale?: string };
 }> = async (req, reply) => {
   const { id } = req.params;
-  const effectiveLocale = normalizeLocale(req.query?.locale) ?? 'de';
+  const effectiveLocale = normalizeLocale(req.query?.locale) ?? LOCALES[0];
 
   const row = await fetchCategoryViewByIdAndLocale(id, effectiveLocale);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
@@ -560,7 +561,7 @@ export const adminGetCategoryBySlug: RouteHandler<{
   Querystring: { locale?: string; module_key?: string };
 }> = async (req, reply) => {
   const { slug } = req.params;
-  const effectiveLocale = normalizeLocale(req.query?.locale) ?? 'de';
+  const effectiveLocale = normalizeLocale(req.query?.locale) ?? LOCALES[0];
   const moduleKey =
     typeof req.query?.module_key === 'string' && req.query.module_key.trim()
       ? req.query.module_key.trim()

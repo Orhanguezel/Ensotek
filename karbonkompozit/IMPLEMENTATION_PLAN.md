@@ -378,6 +378,160 @@ SEO ile birlikte buyuyecek sayfa ve section setinde gorsel tutarliligi token-fir
 - `prime-frontend-nextjs` tasarim prensibi ile uyumlu neutral/primary/accent yapisi korunur.
 - SEO pattern ve theme pattern ayni repo kurali altinda dokumante edilir.
 
+## Phase 10: On-Page Trust, Readability and Link Annotation
+
+### Goal
+
+Sayfa ici guven sinyallerini, okunabilirligi ve link acikligini teknik SEO denetimlerinde eksiksiz hale getirmek.
+
+### Current Problems
+
+- Meta author bilgisi tanimli degil.
+- Meta publisher bilgisi tanimli degil.
+- Favicon sinyali audit araclarinda pasif veya tutarsiz gorunuyor.
+- Font-size hiyerarsisi okunabilirlik acisindan yeterli sinyal vermiyor.
+- Navigation, CTA, listing ve footer linklerinde `title` veya esdeger aciklayici annotation eksigi var.
+- `robots.txt` icindeki kural ve sitemap sinyalleri audit araclarinda yetersiz gorunuyor.
+- `www` yonlendirmesi pasif; URL kanoniklestirme zinciri eksik gorunuyor.
+- Title pixel width bazi landing'lerde onerilen siniri asiyor.
+- Meta baslik bazi denetimlerde istenmeyen karakter politikalarina takiliyor.
+- H1 basligindaki ana kelimeler body text icinde yeterince tekrar edilmiyor.
+- Apple Touch icon sinyali eksik veya audit araclari tarafinda algilanmiyor.
+- Social sharing secenekleri sayfa tiplerine gore yetersiz gorunuyor.
+- Bazi anchor text'ler fazla tekrarli veya fazla uzun.
+- External link sinyali hic yok veya cok zayif.
+- Web server version bilgisi HTTP header'da acik ediliyor.
+- Ozel 404 sayfasi audit araclarina gore dogru status/code sinyali vermiyor.
+- Google Search Console baglantisi kayit altinda degil.
+- Google Analytics entegrasyonu yok.
+- Facebook Pixel sinyali yok.
+- Kurumsal sosyal profil linkleri eksik veya tanimli degil.
+
+### Tasks
+
+- [ ] `author` ve `publisher` metadata stratejisini ortak helper katmanina ekle.
+- [ ] Publisher sinyalini Organization/Article schema ile hizala.
+- [ ] Favicon, icon, apple-touch ve related icon output'unu route bazli tekrar dogrula.
+- [ ] `robots.txt` icine acik sitemap adresi ve gerekli crawl kurallarini tekrar degerlendir.
+- [ ] `https` + non-`www`/`www` redirect politikasini netlestir ve production redirect matrix'ini uygula.
+- [ ] `www` varyanti indexlenmeyecekse tek adimda kanonik host'a yonlendir.
+- [ ] Title helper'inda pixel-width odakli kisaltma ve CTR dengesi icin ek kontrol uygula.
+- [ ] Meta title sanitization kurali ekle; problemli karakterleri ve separator politikasini standardize et.
+- [ ] H1 ile body copy arasindaki ana kavram eslesmesini landing bazinda guclendir.
+- [ ] Apple Touch icon output'unun her route'ta dogru servis edildigini tekrar dogrula.
+- [ ] Blog/detail ve gerekirse landing sayfalarinda social sharing coverage standardi tanimla.
+- [ ] Tekrarlanan anchor text'leri ve asiri uzun link metinlerini yeniden duzenle.
+- [ ] Uygun yerlerde sinyal bozmayacak sekilde sinirli ve baglamsal external link stratejisi degerlendir.
+- [ ] Nginx/server katmaninda `Server` veya version disclosure header'ini minimize et.
+- [ ] Gercek status code donduren, branded ve crawl-friendly bir ozel 404 sayfasi davranisini production'da tekrar dogrula.
+- [ ] Search Console teslim/checklist adimini proje rollout checklist'ine dahil et.
+- [ ] Google Analytics veya alternatif analytics baglantisi kararini netlestir; en azindan plan karari dokumante et.
+- [ ] Facebook Pixel kullanilacaksa event/consent stratejisiyle birlikte planla; kullanilmayacaksa bunu bilincli karar olarak not et.
+- [ ] Facebook, Twitter/X, Instagram, YouTube ve LinkedIn kurumsal profil URL'lerini site settings / footer / schema katmanina bagla.
+- [ ] Body, excerpt, utility text ve footer copy alanlari icin minimum okunabilir font-size standardi tanimla.
+- [ ] Global nav, footer, CTA, product/gallery/blog card ve featured content linklerine `title` veya uygun aciklayici annotation strategy ekle.
+- [ ] `Devamini Oku`, `Tumunu Gor`, `Teklif Al`, `Urunleri Kesfet` gibi generic anchor text kullanimlarini context-aware hale getir veya annotation ile destekle.
+- [ ] Home page ve global layout icin link annotation smoke checklist'i ekle.
+
+### Audit Inputs To Address
+
+- [ ] Meta Author Kullanimi: pasif, author kullanilmiyor.
+- [ ] Meta Publisher Etiketi: pasif, publisher kullanilmiyor.
+- [ ] Font Boyutlari: dokumanda okunabilir yazı tipi boyutlari sinyali yetersiz.
+- [ ] Favicon Kullanimi: pasif veya tutarsiz sinyal.
+- [ ] Robots Txt Dosyasi:
+  - Dizine Eklenebilirlik: etkin
+  - Dosya Durumu: etkin
+  - Kural Kullanimi: pasif
+  - Sitemap Adresi: pasif
+- [ ] Yönlendirme Doğrulaması:
+  - Https Kullanımı: aktif
+  - Https Yönlendirme: aktif
+  - www Yönlendirme: pasif
+- [ ] Title:
+  - `Karbon Fiber, CTP ve Cam Elyaf Kompozit Uretimi | MOE Kompo...`
+  - Pixel width onerilen siniri asiyor (`599px`)
+  - Istenmeyen karakter politikasi uyarisi var
+- [ ] İçerik:
+  - H1 kelimeleri body text icinde yeterince kullanilmiyor
+  - Apple Touch icon belirtilmemis
+  - Social-sharing imkanlari az
+  - Bazi anker text'ler birden fazla kez kullaniliyor
+  - Bazi ic link metinleri fazla uzun
+  - External link yok
+  - Incelenen sayfa kendisi baska URL'ye yonlenmiyor
+  - `www` ve non-`www` URL'leri tutarli yonlenmiyor
+  - Webserver version bilgisi HTTP header'da gonderiliyor
+- [ ] Özel 404 sayfası:
+  - Ozel 404 sayfasi bulunamadi
+  - Sunucu yaniti `200`
+- [ ] Arama konsolu:
+  - Google Search Console bagli degil
+- [ ] Google analizi:
+  - Google Analytics bagli degil
+- [ ] Facebook pikseli:
+  - Facebook Pixel bulunamadi
+- [ ] Sosyal profil sinyalleri:
+  - Facebook sayfasi bulunamadi
+  - Twitter sayfasi bulunamadi
+  - Instagram sayfasi bulunamadi
+  - YouTube sayfasi bulunamadi
+  - LinkedIn sayfasi bulunamadi
+- [ ] Title Etiketi Olmayan Linkler: asagidaki bulgular kapsama alinacak.
+
+### Link Annotation Findings Queue
+
+- [ ] `tr` Yazı: `MOE Kompozit`
+- [ ] `tr` Yazı: `Ana Sayfa`
+- [ ] `products` Yazı: `Ürünler`
+- [ ] `gallery` Yazı: `Galeri`
+- [ ] `blog` Yazı: `Blog`
+- [ ] `about` Yazı: `Hakkımızda`
+- [ ] `contact` Yazı: `İletişim`
+- [ ] `offer` Yazı: `Teklif Al`
+- [ ] `products` Yazı: `Ürünleri Keşfet`
+- [ ] `offer` Yazı: `Teklif Al`
+- [ ] `products` Yazı: `Tümünü Gör`
+- [ ] `karbon-fiber-panel-prototipi` Yazı: `Karbon Fiber Panel PrototipiKarbon fiber takviyeli panel prototipi; hafiflik, rijitlik ve seri uretim oncesi dogrulama ihtiyaclari icin ornek bir kompozit urun kaydidir.`
+- [ ] `ctp-koruyucu-govde-paneli` Yazı: `CTP Koruyucu Govde PaneliCam takviyeli polyester tabanli koruyucu govde paneli; saha dayanimı, kimyasal direnç ve proses tekrarlanabilirligi odakli ornek urun kaydidir.`
+- [ ] `cam-elyaf-servis-kapagi` Yazı: `Cam Elyaf Servis KapagiCam elyaf esasli servis kapagi; dis ortam dayanimı ve kolay montaj gerektiren saha ekipmanlari icin ornek bir galeri ve urun destek kaydidir.`
+- [ ] `gallery` Yazı: `Tümünü Gör`
+- [ ] `karbon-fiber-panel-uygulama-galerisi` Yazı: `Karbon Fiber Panel Uygulama GalerisiKarbon fiber panel prototipinden nihai yuzey kontrolune uzanan ornek uygulama galerisi.`
+- [ ] `ctp-govde-paneli-uretim-galerisi` Yazı: `CTP Govde Paneli Uretim GalerisiCTP govde panelinde kalip, laminasyon ve son trim surecini gosteren ornek galeri.`
+- [ ] `karbon-fiber-nedir` Yazı: `Devamını Oku`
+- [ ] `blog` Yazı: `Tümünü Gör`
+- [ ] `ctp-fiberglass-farklari` Yazı: `Devamını Oku`
+- [ ] `kompozit-kalite-kontrol` Yazı: `Devamını Oku`
+- [ ] `offer` Yazı: `Teklif Al`
+- [ ] `products` Yazı: `Ürünler`
+- [ ] `gallery` Yazı: `Galeri`
+- [ ] `blog` Yazı: `Blog`
+- [ ] `offer` Yazı: `Teklif Al`
+- [ ] `about` Yazı: `Hakkımızda`
+- [ ] `contact` Yazı: `İletişim`
+- [ ] `privacy` Yazı: `Gizlilik Politikası`
+- [ ] `terms` Yazı: `Kullanım Koşulları`
+- [ ] `privacy` Yazı: `Gizlilik Politikası`
+- [ ] `terms` Yazı: `Kullanım Koşulları`
+
+### Acceptance Criteria
+
+- Author ve publisher sinyalleri metadata ve schema katmaninda tanimli olur.
+- Favicon sinyali kritik route'larda tutarli servis edilir.
+- `robots.txt` kurallari ve sitemap bildirimi audit araclarinda gecerli sinyal verir.
+- `www` ve non-`www` varyantlari tek bir kanonik host uzerine yonlenir.
+- Title uzunluklari sadece karakterle degil pixel-width seviyesinde de guvenli aralikta olur.
+- Meta title karakter politikasi ortak helper ile temiz ve tutarli hale gelir.
+- H1 ana kavramlari body copy ile anlamsal olarak desteklenir.
+- Apple Touch icon ve social sharing sinyalleri kritik sayfalarda eksiksiz olur.
+- Tekrarlanan veya asiri uzun anchor text sorunlari anlamli seviyeye iner.
+- Uygun oldugu yerlerde baglamsal external link sinyali degerlendirilmis olur.
+- Server version disclosure sinyali minimize edilir.
+- Ozel 404 sayfasi dogru status code ve branded UX ile servis edilir.
+- Search Console / analytics / pixel / sosyal profil sinyalleri bilincli karar veya uygulama olarak kayda baglanir.
+- Okunabilir tipografi standardi body ve supporting copy alanlarinda saglanir.
+- Generic veya aciklayici title/annotation eksigi olan link problemi global layout ve ana landing'lerde kapanir.
+
 ## Recommended Execution Order
 
 1. Phase 1
@@ -389,6 +543,7 @@ SEO ile birlikte buyuyecek sayfa ve section setinde gorsel tutarliligi token-fir
 7. Phase 7
 8. Phase 8
 9. Phase 9
+10. Phase 10
 
 ## Suggested Delivery Breakdown
 

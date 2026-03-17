@@ -17,6 +17,18 @@ Ensotek, sogutma kulesi cozumleri icin gelistirilen bir B2B platformdur. Mevcut 
 - Frontend varyantlari, domain, stack veya servis kapsaminda degisiklik varsa once repo icinden teyit et.
 - Calistirma komutlari yazilirken `package.json` scriptleri esas alinir.
 
+## Server / Deploy
+
+- **VPS**: `ssh vps-Ensotek` (187.124.8.172, Hostinger, Ubuntu)
+- **Deploy dizinleri**:
+  - Backend: `/var/www/Ensotek/backend` (PM2: `ensotek-backend`, port 8086)
+  - Frontend (de): `/var/www/Ensotek/frontend` (PM2: `ensotek-frontend`, port 3011)
+  - Admin Panel: `/var/www/Ensotek/admin_panel` (PM2: `ensotek-admin-panel`, port 3022)
+  - Karbonkompozit: `/var/www/Ensotek/karbonkompozit` (PM2: `karbonkompozit`, port 3020)
+- **Domain**: ensotek.de (nginx reverse proxy)
+- **CI/CD**: `.github/workflows/deploy.yml` — push to main triggers build + deploy
+- **GitHub Secrets**: `VPS_HOST`, `VPS_USER`, `VPS_KEY`
+
 ## Portfolio Metadata Rule
 
 - Proje kokunde `project.portfolio.json` dosyasi zorunludur.

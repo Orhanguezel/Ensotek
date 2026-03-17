@@ -29,18 +29,20 @@ export interface RenderedEmailTemplate {
 /**
  * DB'den template'i (key + locale) bulur, params ile render eder.
  *  - Önce istenen locale satırı (email_templates_i18n)
- *  - Bulamazsa DEFAULT_LOCALE satırı
+ *  - Bulamazsa defaultLocale (parametre) veya DEFAULT_LOCALE satırı
  *  - Parent kaydın is_active = 1 olması zorunlu
  */
 export async function renderEmailTemplateByKey(
   key: string,
   params: Record<string, unknown> = {},
   locale?: string | null,
+  defaultLocale?: string,
 ): Promise<RenderedEmailTemplate | null> {
   const iReq = alias(emailTemplatesI18n, "eti_req");
   const iDef = alias(emailTemplatesI18n, "eti_def");
 
-  const desiredLocale = (locale || DEFAULT_LOCALE) as string;
+  const fallbackLocale = defaultLocale || DEFAULT_LOCALE;
+  const desiredLocale = (locale || fallbackLocale) as string;
 
   const rows = await db
     .select({
@@ -55,7 +57,7 @@ export async function renderEmailTemplateByKey(
         COALESCE(${iReq.content}, ${iDef.content})
       `.as("content"),
       locale_resolved: sql<string>`
-        CASE 
+        CASE
           WHEN ${iReq.id} IS NOT NULL THEN ${iReq.locale}
           ELSE ${iDef.locale}
         END
@@ -73,7 +75,7 @@ export async function renderEmailTemplateByKey(
       iDef,
       and(
         eq(iDef.template_id, emailTemplates.id),
-        eq(iDef.locale, DEFAULT_LOCALE),
+        eq(iDef.locale, fallbackLocale),
       ),
     )
     .where(

@@ -21,7 +21,7 @@ import {
   repoUpdateReviewAdmin,
   repoDeleteReviewAdmin,
 } from "./repository";
-import { DEFAULT_LOCALE, type Locale } from "@/core/i18n";
+import { type Locale } from "@/core/i18n";
 
 export async function listReviewsAdmin(req: FastifyRequest) {
   const q = ReviewListParamsSchema.parse(req.query);
@@ -29,13 +29,13 @@ export async function listReviewsAdmin(req: FastifyRequest) {
   const locale: Locale =
     (q.locale as Locale) ??
     ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
+    req.defaultLocale;
 
   return await repoListReviewsAdmin(
     req.server,
     q,
     locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
   );
 }
 
@@ -43,13 +43,13 @@ export async function getReviewAdmin(req: FastifyRequest) {
   const { id } = IdParamSchema.parse(req.params);
 
   const locale: Locale =
-    ((req as any).locale as Locale | undefined) ?? DEFAULT_LOCALE;
+    ((req as any).locale as Locale | undefined) ?? req.defaultLocale;
 
   return await repoGetReviewAdmin(
     req.server,
     id,
     locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
   );
 }
 
@@ -59,7 +59,7 @@ export async function createReviewAdmin(req: FastifyRequest) {
   const locale: Locale =
     (body.locale as Locale) ??
     ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
+    req.defaultLocale;
 
   return await repoCreateReviewAdmin(req.server, body, locale);
 }
@@ -71,14 +71,14 @@ export async function updateReviewAdmin(req: FastifyRequest) {
   const locale: Locale =
     (body.locale as Locale) ??
     ((req as any).locale as Locale | undefined) ??
-    DEFAULT_LOCALE;
+    req.defaultLocale;
 
   return await repoUpdateReviewAdmin(
     req.server,
     id,
     body,
     locale,
-    DEFAULT_LOCALE,
+    req.defaultLocale,
   );
 }
 

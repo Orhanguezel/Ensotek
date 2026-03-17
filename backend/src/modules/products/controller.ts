@@ -6,6 +6,7 @@ import type { FastifyRequest, FastifyReply } from 'fastify';
 import { and, asc, desc, eq, like, sql } from 'drizzle-orm';
 
 import { db } from '@/db/client';
+import { LOCALES } from '@/core/i18n';
 import { products, productFaqs, productSpecs, product_reviews, productI18n } from './schema';
 import { categories, categoryI18n } from '@/modules/categories/schema';
 import { subCategories, subCategoryI18n } from '@/modules/subcategories/schema';
@@ -108,7 +109,7 @@ const safeLimit = (v: unknown, def = 100, max = 500): number => {
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-const normalizeLocaleFromString = (raw?: string | null, fallback = 'de') => {
+const normalizeLocaleFromString = (raw?: string | null, fallback = LOCALES[0]) => {
   if (!raw) return fallback;
   const trimmed = raw.trim();
   if (!trimmed) return fallback;
@@ -134,7 +135,7 @@ const normalizeItemType = (raw?: unknown, fallback: ItemType = 'product'): ItemT
 export const listProducts: RouteHandler = async (req, reply) => {
   const q = (req.query || {}) as ListProductsQuery;
 
-  const locale = normalizeLocaleFromString(q.locale, 'de');
+  const locale = normalizeLocaleFromString(q.locale);
   const itemType = normalizeItemType(q.item_type, 'product');
 
   // shortcut: by slug (+ locale + item_type)
@@ -338,7 +339,7 @@ export const getProductByIdOrSlug: RouteHandler = async (req, reply) => {
   const { idOrSlug } = req.params as { idOrSlug: string };
   const { locale: localeParam, item_type } = (req.query || {}) as DetailQuery;
 
-  const locale = normalizeLocaleFromString(localeParam, 'de');
+  const locale = normalizeLocaleFromString(localeParam);
   const itemType = normalizeItemType(item_type, 'product');
   const isUuid = UUID_RE.test(idOrSlug);
 
@@ -424,7 +425,7 @@ export const getProductById: RouteHandler = async (req, reply) => {
   const { id } = req.params as { id: string };
   const { locale: localeParam, item_type } = (req.query || {}) as DetailQuery;
 
-  const locale = normalizeLocaleFromString(localeParam, 'de');
+  const locale = normalizeLocaleFromString(localeParam);
   const itemType = normalizeItemType(item_type, 'product');
 
   const rows = await db
@@ -503,7 +504,7 @@ export const getProductBySlug: RouteHandler<{
   Querystring: { locale?: string; item_type?: ItemType };
 }> = async (req, reply) => {
   const { slug } = req.params;
-  const requestedLocale = normalizeLocaleFromString(req.query?.locale, 'de');
+  const requestedLocale = normalizeLocaleFromString(req.query?.locale);
   const itemType = normalizeItemType(req.query?.item_type, 'product');
 
   // 1) Resolve product_id by slug in ANY locale (active + item_type)
@@ -671,7 +672,7 @@ export const listProductFaqs: RouteHandler = async (req, reply) => {
     locale?: string;
   };
 
-  const locale = normalizeLocaleFromString(q.locale, 'de');
+  const locale = normalizeLocaleFromString(q.locale);
   const conds: any[] = [eq(productFaqs.locale, locale)];
 
   if (q.product_id) conds.push(eq(productFaqs.product_id, q.product_id));
@@ -692,7 +693,7 @@ export const listProductFaqs: RouteHandler = async (req, reply) => {
 export const listProductSpecs: RouteHandler = async (req, reply) => {
   const q = (req.query || {}) as { product_id?: string; locale?: string };
 
-  const locale = normalizeLocaleFromString(q.locale, 'de');
+  const locale = normalizeLocaleFromString(q.locale);
   const conds: any[] = [eq(productSpecs.locale, locale)];
 
   if (q.product_id) conds.push(eq(productSpecs.product_id, q.product_id));

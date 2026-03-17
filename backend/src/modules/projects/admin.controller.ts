@@ -4,7 +4,6 @@
 // ---------------------------------------------------------------------
 import type { RouteHandler } from 'fastify';
 import { randomUUID } from 'crypto';
-import { DEFAULT_LOCALE } from '@/core/i18n';
 import {
   projectListQuerySchema,
   upsertProjectBodySchema,
@@ -69,7 +68,7 @@ export const listProjectsAdmin: RouteHandler<{ Querystring: ProjectListQuery }> 
     client: q.client,
 
     locale: (req as any).locale,
-    defaultLocale: DEFAULT_LOCALE,
+    defaultLocale: req.defaultLocale,
   });
 
   reply.header('x-total-count', String(total ?? 0));
@@ -77,7 +76,7 @@ export const listProjectsAdmin: RouteHandler<{ Querystring: ProjectListQuery }> 
 };
 
 export const getProjectAdmin: RouteHandler<{ Params: { id: string } }> = async (req, reply) => {
-  const row = await getProjectMergedById((req as any).locale, DEFAULT_LOCALE, req.params.id);
+  const row = await getProjectMergedById((req as any).locale, req.defaultLocale, req.params.id);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
@@ -86,7 +85,7 @@ export const getProjectBySlugAdmin: RouteHandler<{ Params: { slug: string } }> =
   req,
   reply,
 ) => {
-  const row = await getProjectMergedBySlug((req as any).locale, DEFAULT_LOCALE, req.params.slug);
+  const row = await getProjectMergedBySlug((req as any).locale, req.defaultLocale, req.params.slug);
   if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
   return reply.send(row);
 };
@@ -153,7 +152,7 @@ export const createProjectAdmin: RouteHandler<{ Body: UpsertProjectBody }> = asy
           : (b.meta_description ?? null),
     });
 
-    const row = await getProjectMergedById(locale, DEFAULT_LOCALE, id);
+    const row = await getProjectMergedById(locale, req.defaultLocale, id);
     return reply.code(201).send(row);
   } catch (err: any) {
     if (err?.code === 'ER_DUP_ENTRY') {
@@ -313,7 +312,7 @@ export const updateProjectAdmin: RouteHandler<{
       }
     }
 
-    const row = await getProjectMergedById(locale, DEFAULT_LOCALE, req.params.id);
+    const row = await getProjectMergedById(locale, req.defaultLocale, req.params.id);
     if (!row) return reply.code(404).send({ error: { message: 'not_found' } });
     return reply.send(row);
   } catch (err: any) {
@@ -337,7 +336,7 @@ export const listProjectImagesAdmin: RouteHandler<{ Params: { id: string } }> = 
   req,
   reply,
 ) => {
-  const items = await listProjectImagesMerged(req.params.id, (req as any).locale, DEFAULT_LOCALE);
+  const items = await listProjectImagesMerged(req.params.id, (req as any).locale, req.defaultLocale);
   return reply.send(items);
 };
 
@@ -372,7 +371,7 @@ export const createProjectImageAdmin: RouteHandler<{
     caption: typeof b.caption === 'string' ? b.caption.trim() : (b.caption ?? null),
   });
 
-  const items = await listProjectImagesMerged(req.params.id, locale, DEFAULT_LOCALE);
+  const items = await listProjectImagesMerged(req.params.id, locale, req.defaultLocale);
   return reply.code(201).send(items);
 };
 
@@ -421,7 +420,7 @@ export const updateProjectImageAdmin: RouteHandler<{
     });
   }
 
-  const items = await listProjectImagesMerged(req.params.id, locale, DEFAULT_LOCALE);
+  const items = await listProjectImagesMerged(req.params.id, locale, req.defaultLocale);
   return reply.send(items);
 };
 

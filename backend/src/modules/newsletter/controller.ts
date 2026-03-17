@@ -5,7 +5,6 @@
 import type { RouteHandler } from "fastify";
 import { randomUUID } from "crypto";
 import { db } from "@/db/client";
-import { DEFAULT_LOCALE } from "@/core/i18n";
 import { eq } from "drizzle-orm";
 import { telegramNotify } from "@/modules/telegram/telegram.notifier";
 import {
@@ -65,7 +64,7 @@ export const subscribeNewsletterPublic: RouteHandler = async (req, reply) => {
   const body = parsed.data;
   const email = body.email.trim().toLowerCase();
   const requestLocale = (req as any).locale as string | undefined;
-  const finalLocale = body.locale ?? requestLocale ?? DEFAULT_LOCALE;
+  const finalLocale = body.locale ?? requestLocale ?? req.defaultLocale;
   const metaStr = body.meta ? JSON.stringify(body.meta) : "{}";
   const now = new Date();
 

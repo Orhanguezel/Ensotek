@@ -1,0 +1,194 @@
+# GitHub Actions — Ensotek CI/CD
+# Triggers on push to main branch
+# Builds backend + de_frontend + admin_panel, deploys via SSH to VPS
+#
+# Required GitHub Secrets:
+#   VPS_HOST       — server IP (e.g. 187.124.8.172)
+#   VPS_USER       — SSH user (e.g. root)
+#   VPS_KEY        — private SSH key (ed25519)
+#   VPS_DB_PASS    — MySQL password (optional, for seed)
+
+name: Deploy Ensotek
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-ensotek
+  cancel-in-progress: true
+
+env:
+  NODE_ENV: production
+  NEXT_TELEMETRY_DISABLED: "1"
+
+jobs:
+  # ──────────────────────────────────────────────
+  # 1) Build
+  # ──────────────────────────────────────────────
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # ── Backend ──
+      - name: Install & build backend
+        working-directory: backend
+        run: |
+          bun install --frozen-lockfile || bun install
+          bun run build
+
+      # ── de_frontend ──
+      - name: Install & build de_frontend
+        working-directory: de_frontend
+        run: |
+          bun install --frozen-lockfile || bun install
+          bun run build
+
+      # ── Admin Panel ──
+      - name: Install & build admin_panel
+        working-directory: admin_panel
+        run: |
+          bun install --frozen-lockfile || bun install
+          bun run build
+
+      # ── Upload artifacts ──
+      - name: Upload backend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-dist
+          path: |
+            backend/dist/
+            backend/package.json
+            backend/ecosystem.config.cjs
+          retention-days: 1
+
+      - name: Upload de_frontend artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: |
+            de_frontend/.next/standalone/
+            de_frontend/.next/static/
+            de_frontend/public/
+            de_frontend/package.json
+            de_frontend/ecosystem.config.cjs
+          retention-days: 1
+
+      - name: Upload admin_panel artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-dist
+          path: |
+            admin_panel/.next/standalone/
+            admin_panel/.next/static/
+            admin_panel/public/
+            admin_panel/package.json
+            admin_panel/ecosystem.config.cjs
+          retention-days: 1
+
+  # ──────────────────────────────────────────────
+  # 2) Deploy
+  # ──────────────────────────────────────────────
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.VPS_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
+
+      - name: Deploy backend
+        env:
+          SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
+          RSYNC_SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key
+        run: |
+          rsync -avz --delete \
+            --exclude=node_modules --exclude=.env \
+            -e "$RSYNC_SSH" \
+            backend-dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/Ensotek/backend/
+
+          $SSH "cd /var/www/Ensotek/backend && bun install --production --frozen-lockfile || bun install --production"
+
+      - name: Deploy de_frontend
+        env:
+          RSYNC_SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key
+        run: |
+          rsync -avz --delete \
+            --exclude=node_modules --exclude=.env \
+            -e "$RSYNC_SSH" \
+            frontend-dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/Ensotek/frontend/
+
+      - name: Deploy admin_panel
+        env:
+          RSYNC_SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key
+        run: |
+          rsync -avz --delete \
+            --exclude=node_modules --exclude=.env \
+            -e "$RSYNC_SSH" \
+            admin-dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/Ensotek/admin_panel/
+
+      # ── DB seed (no-drop) ──
+      - name: Run DB seed (no-drop)
+        env:
+          SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
+        run: |
+          $SSH "cd /var/www/Ensotek/backend && bun run db:seed:nodrop" || echo "Seed skipped or failed (non-blocking)"
+
+      # ── PM2 restart ──
+      - name: Restart services
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_KEY }}
+          timeout: 60s
+          command_timeout: 180s
+          script: |
+            set -e
+
+            echo "=== Backend ==="
+            cd /var/www/Ensotek/backend
+            if pm2 describe ensotek-backend > /dev/null 2>&1; then
+              pm2 restart ensotek-backend
+            else
+              pm2 start ecosystem.config.cjs
+            fi
+
+            echo "=== Frontend (de) ==="
+            cd /var/www/Ensotek/frontend
+            if pm2 describe ensotek-frontend > /dev/null 2>&1; then
+              pm2 restart ensotek-frontend
+            else
+              pm2 start ecosystem.config.cjs
+            fi
+
+            echo "=== Admin Panel ==="
+            cd /var/www/Ensotek/admin_panel
+            if pm2 describe ensotek-admin-panel > /dev/null 2>&1; then
+              pm2 restart ensotek-admin-panel
+            else
+              pm2 start ecosystem.config.cjs
+            fi
+
+            pm2 save
+            echo "=== Health check ==="
+            sleep 3
+            ss -ltnp | grep -E "127\.0\.0\.1:(8086|3011|3022)" || true

@@ -14,7 +14,6 @@ import {
   renderTextWithParams,
 } from "./utils";
 import { renderByKeySchema } from "./validation";
-import { DEFAULT_LOCALE } from "@/core/i18n";
 import { siteSettings } from "@/modules/siteSettings/schema";
 
 type ListQuery = {
@@ -96,7 +95,7 @@ export async function listEmailTemplatesPublic(
     const desiredLocale =
       (typeof locale === "string" && locale.length > 0
         ? locale
-        : (req as any).locale || DEFAULT_LOCALE) ?? DEFAULT_LOCALE;
+        : (req as any).locale || req.defaultLocale) ?? req.defaultLocale;
 
     const iReq = alias(emailTemplatesI18n, "eti_req");
     const iDef = alias(emailTemplatesI18n, "eti_def");
@@ -162,7 +161,7 @@ export async function listEmailTemplatesPublic(
         iDef,
         and(
           eq(iDef.template_id, emailTemplates.id),
-          eq(iDef.locale, DEFAULT_LOCALE),
+          eq(iDef.locale, req.defaultLocale),
         ),
       )
       .orderBy(desc(emailTemplates.updated_at));
@@ -195,7 +194,7 @@ export async function listEmailTemplatesPublic(
   }
 }
 
-/** GET by key with locale preference (exact → DEFAULT_LOCALE fallback) */
+/** GET by key with locale preference (exact → req.defaultLocale fallback) */
 export async function getEmailTemplateByKeyPublic(
   req: FastifyRequest<{
     Params: { key: string };
@@ -208,7 +207,7 @@ export async function getEmailTemplateByKeyPublic(
     const desiredLocale =
       (req.query?.locale as string | undefined) ||
       (req as any).locale ||
-      DEFAULT_LOCALE;
+      req.defaultLocale;
 
     const iReq = alias(emailTemplatesI18n, "eti_req");
     const iDef = alias(emailTemplatesI18n, "eti_def");
@@ -249,7 +248,7 @@ export async function getEmailTemplateByKeyPublic(
       )
       .leftJoin(
         iDef,
-        and(eq(iDef.template_id, emailTemplates.id), eq(iDef.locale, DEFAULT_LOCALE)),
+        and(eq(iDef.template_id, emailTemplates.id), eq(iDef.locale, req.defaultLocale)),
       )
       .where(where)
       .limit(1);
@@ -307,7 +306,7 @@ export async function renderTemplateByKeyPublic(
     const desiredLocale =
       (parsed.locale as string | null | undefined) ||
       (req as any).locale ||
-      DEFAULT_LOCALE;
+      req.defaultLocale;
 
     const where = and(
       eq(emailTemplates.template_key, parsed.key),
@@ -344,7 +343,7 @@ export async function renderTemplateByKeyPublic(
       )
       .leftJoin(
         iDef,
-        and(eq(iDef.template_id, emailTemplates.id), eq(iDef.locale, DEFAULT_LOCALE)),
+        and(eq(iDef.template_id, emailTemplates.id), eq(iDef.locale, req.defaultLocale)),
       )
       .where(where)
       .limit(1);
