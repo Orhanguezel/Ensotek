@@ -15,11 +15,12 @@ export async function localeMiddleware(
   // 🔄 Her istekte (veya 60sn cache süresi dolduysa) siteSettings.app_locales'i kontrol et
   await ensureLocalesLoadedFromSettings();
 
-  const { locale } = resolveLocaleFromHeaders(
+  const { locale, defaultLocale } = resolveLocaleFromHeaders(
     req.headers as Record<string, unknown>,
   );
 
   (req as any).locale = locale as Locale;
+  (req as any).defaultLocale = defaultLocale as Locale;
   (req as any).localeFallbacks = fallbackChain(locale as Locale);
 
   // İstersen debug log:
