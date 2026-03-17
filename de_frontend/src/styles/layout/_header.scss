@@ -148,35 +148,40 @@
   50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.1); }
   100% { opacity: 0.3; transform: translate(-50%, -50%) scale(1); }
 }
-// Global menu: prevent wrapping, fit in one line
+// Global menu: compact, no extra spacing
+.menu__main-wrapper-3 {
+  justify-content: flex-end !important;
+}
+
 .main-menu.main-menu-3 nav > ul {
   display: flex !important;
   flex-wrap: nowrap !important;
   justify-content: flex-end !important;
   align-items: center !important;
   gap: 0 !important;
-  margin: 0;
-  padding: 0;
+  margin: 0 !important;
+  padding: 0 !important;
 
   > li {
     margin-right: 0 !important;
+    margin-left: 0 !important;
+    display: flex !important;
+    align-items: center !important;
   }
 }
 
 .main-menu.main-menu-3 nav > ul > li > a,
 .main-menu.main-menu-3 nav > ul > li > button {
-  padding-left: 8px !important;
-  padding-right: 8px !important;
-  font-size: 14px !important;
+  padding: 0 10px !important;
+  font-size: 15px !important;
   white-space: nowrap !important;
 }
 
-@media only screen and (min-width: 1400px) {
+@media only screen and (max-width: 1399px) {
   .main-menu.main-menu-3 nav > ul > li > a,
   .main-menu.main-menu-3 nav > ul > li > button {
-    padding-left: 10px !important;
-    padding-right: 10px !important;
-    font-size: 15px !important;
+    padding: 0 7px !important;
+    font-size: 14px !important;
   }
 }
 
