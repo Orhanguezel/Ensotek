@@ -502,15 +502,13 @@ const Header = () => {
                 </div>
               </div>
               <div
-                className={`col d-none d-xl-block header__nav-desktop${menuFits ? "" : " header__nav-hidden"}`}
+                className={`col d-none d-xl-flex align-items-center justify-content-end header__nav-desktop${menuFits ? "" : " header__nav-hidden"}`}
                 style={{ minWidth: 0 }}
               >
-                <div className="menu__main-wrapper-3 d-flex justify-content-center">
-                  <div className="main-menu main-menu-3">
-                    <nav id="mobile-menu" ref={navRef}>
-                      {renderDesktopMenu(displayMenu)}
-                    </nav>
-                  </div>
+                <div className="main-menu main-menu-3">
+                  <nav id="mobile-menu" ref={navRef}>
+                    {renderDesktopMenu(displayMenu)}
+                  </nav>
                 </div>
               </div>
               <div className="col-auto">
