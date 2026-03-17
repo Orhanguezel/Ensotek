@@ -156,3 +156,4 @@ frontend/dist/
 backend/dist/
 
 .lighthouseci
+prime-frontend-nextjs/

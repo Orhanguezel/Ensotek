@@ -115,6 +115,12 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
+      - name: Ensure deploy directories exist
+        env:
+          SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
+        run: |
+          $SSH "mkdir -p /var/www/Ensotek/backend /var/www/Ensotek/frontend /var/www/Ensotek/admin_panel"
+
       - name: Deploy backend
         env:
           SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
