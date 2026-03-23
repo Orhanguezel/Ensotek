@@ -368,9 +368,11 @@ export const adminUpdateProduct: RouteHandler = async (req, reply) => {
         : curMerged.image_url;
 
     const images =
-      patch.storage_image_ids !== undefined || patch.images !== undefined
+      patch.storage_image_ids !== undefined
         ? (galleryIds.map((aid: string) => urlMap[aid]).filter(Boolean) as string[])
-        : (curMerged.images as string[]);
+        : patch.images !== undefined
+          ? (patch.images as string[])
+          : (curMerged.images as string[]);
 
     const now = new Date();
 

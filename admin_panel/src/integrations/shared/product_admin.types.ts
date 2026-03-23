@@ -66,6 +66,7 @@ export interface AdminProductCreatePayload {
   category_id: string;
   sub_category_id?: string | null;
   image_url?: string | null;
+  images?: string[];
   storage_asset_id?: string | null;
   is_active?: boolean;
   is_featured?: boolean;

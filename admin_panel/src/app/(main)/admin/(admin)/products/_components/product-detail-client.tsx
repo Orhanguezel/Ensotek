@@ -219,6 +219,7 @@ export default function ProductDetailClient({ id, itemType }: Props) {
       category_id: formData.category_id || "",
       sub_category_id: formData.sub_category_id || null,
       image_url: formData.image_url || null,
+      images: formData.images || [],
       storage_asset_id: formData.image_asset_id || null,
       is_active: formData.is_active,
       is_featured: formData.is_featured,
