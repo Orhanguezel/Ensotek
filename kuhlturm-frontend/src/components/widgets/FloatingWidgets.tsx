@@ -17,7 +17,10 @@ interface FloatingWidgetsProps {
     address?: string;
     city?: string;
     phone?: string;
+    phone_2?: string;
     email?: string;
+    email_2?: string;
+    whatsapp?: string;
   };
 }
 
@@ -160,10 +163,22 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
                         <span>{contactInfo.phone}</span>
                       </a>
                     )}
+                    {contactInfo.phone_2 && (
+                      <a href={`tel:${contactInfo.phone_2}`} className="flex items-center gap-3 text-gray-600 hover:text-[var(--color-brand)] transition-colors font-medium">
+                        <Phone size={18} />
+                        <span>{contactInfo.phone_2}</span>
+                      </a>
+                    )}
                     {contactInfo.email && (
                       <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-3 text-gray-600 hover:text-[var(--color-brand)] transition-colors font-medium">
                         <Mail size={18} />
                         <span>{contactInfo.email}</span>
+                      </a>
+                    )}
+                    {contactInfo.email_2 && (
+                      <a href={`mailto:${contactInfo.email_2}`} className="flex items-center gap-3 text-gray-600 hover:text-[var(--color-brand)] transition-colors font-medium">
+                        <Mail size={18} />
+                        <span>{contactInfo.email_2}</span>
                       </a>
                     )}
                   </div>

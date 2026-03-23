@@ -11,6 +11,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
 import { FloatingWidgets } from '@/components/widgets/FloatingWidgets';
+import { WhatsAppFloating } from '@/components/widgets/WhatsAppFloating';
 import { getMenuItems, getFooterSections } from '@ensotek/core/services';
 import { API_BASE_URL } from '@/lib/utils';
 import { fetchSetting } from '@/i18n/server';
@@ -165,6 +166,7 @@ export default async function LocaleLayout({
             contactInfo={contactInfo}
             socials={socials}
           />
+          <WhatsAppFloating number={contactInfo.whatsapp || contactInfo.phone_2} />
           <ScrollToTop />
           <Toaster position="bottom-right" richColors />
         </NextIntlClientProvider>

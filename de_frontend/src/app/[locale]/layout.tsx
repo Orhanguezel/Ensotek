@@ -9,6 +9,7 @@ import { fetchSetting } from "../../i18n/server";
 import JsonLd from '@/seo/JsonLd';
 import { graph, org, website } from '@/seo/jsonld';
 
+import { WhatsAppFloating } from '@/components/widgets/WhatsAppFloating';
 import { AosProvider } from '@/providers/AosProvider';
 import { AppProviders } from '@/providers/AppProviders';
 import { FontAwesomeLoader } from '@/components/FontAwesomeLoader';
@@ -144,15 +145,17 @@ export default async function LocaleLayout({
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
     'https://ensotek.de';
 
-  const [seoRow, socialsRow, logoRow] = await Promise.all([
+  const [seoRow, socialsRow, logoRow, contactRow] = await Promise.all([
     fetchSetting('seo', locale, { revalidate: 300 }),
     fetchSetting('socials', locale, { revalidate: 3600 }),
     fetchSetting('site_logo', locale, { revalidate: 3600 }),
+    fetchSetting('contact_info', locale, { revalidate: 3600 }),
   ]);
 
   const seo = seoRow?.value as Record<string, any> | null;
   const socials = socialsRow?.value as Record<string, unknown> | null;
   const logoUrl = (logoRow?.value as Record<string, any> | null)?.url;
+  const contactInfo = contactRow?.value as Record<string, any> | null;
   const siteName: string = seo?.site_name ?? 'Ensotek';
 
   const sameAs: string[] = [];
@@ -192,6 +195,7 @@ export default async function LocaleLayout({
               <AosProvider>
                 <FontAwesomeLoader />
                 {children}
+                <WhatsAppFloating number={contactInfo?.whatsapp || contactInfo?.phone_2} />
                 <StackableWidgetsLoader />
               </AosProvider>
            </AppProviders>
