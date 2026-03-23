@@ -57,12 +57,12 @@ export default async function HomePage({ params }: Props) {
       : [];
 
   const featuredServices: Service[] =
-    servicesResult.status === 'fulfilled'
+    servicesResult.status === 'fulfilled' && servicesResult.value
       ? (servicesResult.value as Service[]).slice(0, 4)
       : [];
 
   const featuredRefs: Reference[] =
-    refsResult.status === 'fulfilled'
+    refsResult.status === 'fulfilled' && refsResult.value
       ? (refsResult.value as Reference[]).slice(0, 8)
       : [];
 
@@ -75,7 +75,7 @@ export default async function HomePage({ params }: Props) {
       : [];
 
   const featuredLibrary: LibraryItem[] =
-    libraryResult.status === 'fulfilled'
+    libraryResult.status === 'fulfilled' && libraryResult.value
       ? (libraryResult.value as LibraryItem[]).slice(0, 6)
       : [];
 

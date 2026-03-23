@@ -76,7 +76,7 @@ export default async function BlogDetailPage({ params }: Props) {
   });
 
   const tags = post.tags
-    ? post.tags.split(',').map((t) => t.trim()).filter(Boolean)
+    ? post.tags.split(',').map((tag: string) => tag.trim()).filter(Boolean)
     : [];
 
   // Related posts (same category, excluding current)
@@ -170,7 +170,7 @@ export default async function BlogDetailPage({ params }: Props) {
                 <div className="mt-10 pt-8 border-t border-slate-100">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Tag size={14} className="text-slate-400" />
-                    {tags.map((tag) => (
+                    {tags.map((tag: string) => (
                       <span
                         key={tag}
                         className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full"

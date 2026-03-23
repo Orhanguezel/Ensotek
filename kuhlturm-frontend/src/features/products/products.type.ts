@@ -5,7 +5,21 @@
 //          + product_images
 // =============================================================
 
-import type { PaginatedResponse, PaginationParams } from '@/lib/api';
+// Pagination helpers (defined locally)
+export interface PaginationParams {
+  page?: number;
+  limit?: number;
+  sort?: string;
+  order?: 'asc' | 'desc';
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
 
 export type ProductItemType = 'product' | 'sparepart';
 
