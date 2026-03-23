@@ -95,16 +95,16 @@ const PageDetail = ({ item }: PageDetailProps) => {
                 </div>
 
                 {/* Featured Image */}
-                {(item.image_url || item.featured_image) && (
+                {(item.featured_image || item.image_url) && (
                   <div className="technical__thumb mb-40">
-                    <Image 
-                        src={item.featured_image || item.image_url || ""}
-                        alt={item.title} 
-                        width={1200} 
-                        height={600} 
-                        layout="responsive"
+                    <Image
+                        src={item.featured_image || item.image_url!}
+                        alt={item.featured_image_alt || item.title}
+                        width={1200}
+                        height={600}
                         priority
-                        style={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
+                        sizes="(max-width: 768px) 100vw, 800px"
+                        style={{ width: '100%', height: 'auto', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
                     />
                   </div>
                 )}
@@ -161,13 +161,13 @@ const PageDetail = ({ item }: PageDetailProps) => {
                                     {item.images.map((img, idx) => (
                                         <div key={idx} className="col-xl-4 col-lg-4 col-md-6 mb-30">
                                             <div className="technical__gallery-item" style={{ borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-                                                <Image 
-                                                    src={img} 
-                                                    alt={`${item.title} gallery ${idx + 1}`} 
-                                                    width={400} 
+                                                <Image
+                                                    src={img}
+                                                    alt={`${item.title} gallery ${idx + 1}`}
+                                                    width={400}
                                                     height={300}
-                                                    layout="responsive"
-                                                    style={{ objectFit: 'cover' }}
+                                                    sizes="(max-width: 768px) 100vw, 33vw"
+                                                    style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                                                 />
                                             </div>
                                         </div>
@@ -268,17 +268,7 @@ const PageDetail = ({ item }: PageDetailProps) => {
                     </div>
                 </div>
 
-                {/* Sidebar Image Placeholder */}
-                <div className="sideber__widget-item">
-                    <div className="slideber__thumb w-img" style={{ borderRadius: '15px', overflow: 'hidden' }}>
-                        <Image 
-                            src="/img/project/03.webp" 
-                            alt={t("sidebarAlt")} 
-                            width={400} 
-                            height={500}
-                        />
-                    </div>
-                </div>
+                {/* Sidebar placeholder removed — no hardcoded images */}
             </div>
           </div>
         </div>

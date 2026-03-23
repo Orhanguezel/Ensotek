@@ -48,14 +48,22 @@ const ServiceSection: React.FC = () => {
               <div className="col-xl-4 col-lg-6 col-md-6" key={item.id}>
                 <div className="service__item mb-30">
                   <div className="service__thumb include__bg service-two-cmn">
+                    {(item.image_url || item.featured_image) ? (
                     <Image
-                      src={item.image_url || item.featured_image || "/img/project/project-thumb.jpg"}
+                      src={(item.image_url || item.featured_image)!}
                       alt={item.image_alt || item.name}
                       width={640}
                       height={420}
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
                       style={{ width: '100%', height: 'auto' }}
                     />
+                    ) : (
+                      <div style={{ width: '100%', height: '280px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '3rem', fontWeight: 700, color: '#94a3b8' }}>
+                          {item.name?.charAt(0)?.toUpperCase() || 'S'}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="service__icon transition-3">

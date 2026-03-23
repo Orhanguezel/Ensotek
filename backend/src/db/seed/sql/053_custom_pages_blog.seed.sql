@@ -41,24 +41,11 @@ SET @MODULE_KEY_BLOG := 'blog';
 -- IMAGES (featured + random gallery)
 -- -------------------------------------------------------------
 SET @IMG_BLOG_MAINT_1 :=
-  'https://images.unsplash.com/photo-1581090700227-1e37b190418e?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1772144154/custom_pages/cover/ensotek_blog_wartung.png';
 SET @IMG_BLOG_DESIGN_1 :=
-  'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1772143590/custom_pages/cover/ensotek_layout_blog.png';
 SET @IMG_BLOG_TECH_1 :=
-  'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1400&q=80';
-
-SET @IMG_BLOG_COMMON_1 :=
-  'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=1400&q=80';
-SET @IMG_BLOG_COMMON_2 :=
-  'https://images.unsplash.com/photo-1531297484001-80022131f5a1?auto=format&fit=crop&w=1400&q=80';
-SET @IMG_BLOG_COMMON_3 :=
-  'https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&w=1400&q=80';
-SET @IMG_BLOG_COMMON_4 :=
-  'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1400&q=80';
-SET @IMG_BLOG_COMMON_5 :=
-  'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1400&q=80';
-SET @IMG_BLOG_COMMON_6 :=
-  'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80';
+  'https://res.cloudinary.com/dbozv7wqd/image/upload/v1772143680/custom_pages/cover/ensotek_waerme_blog.png';
 
 -- -------------------------------------------------------------
 -- I18N IDS (deterministik)
@@ -112,13 +99,7 @@ VALUES
     NULL,
     @IMG_BLOG_MAINT_1,
     NULL,
-    JSON_ARRAY(
-      @IMG_BLOG_MAINT_1,
-      @IMG_BLOG_COMMON_1,
-      @IMG_BLOG_COMMON_2,
-      @IMG_BLOG_COMMON_5,
-      @IMG_BLOG_COMMON_6
-    ),
+    JSON_ARRAY(),
     JSON_ARRAY(),
     @CAT_BLOG_GENERAL,
     @SUB_BLOG_MAINT,
@@ -136,13 +117,7 @@ VALUES
     NULL,
     @IMG_BLOG_DESIGN_1,
     NULL,
-    JSON_ARRAY(
-      @IMG_BLOG_DESIGN_1,
-      @IMG_BLOG_COMMON_1,
-      @IMG_BLOG_COMMON_3,
-      @IMG_BLOG_COMMON_4,
-      @IMG_BLOG_COMMON_6
-    ),
+    JSON_ARRAY(),
     JSON_ARRAY(),
     @CAT_BLOG_GENERAL,
     @SUB_BLOG_DESIGN,
@@ -160,13 +135,7 @@ VALUES
     NULL,
     @IMG_BLOG_TECH_1,
     NULL,
-    JSON_ARRAY(
-      @IMG_BLOG_TECH_1,
-      @IMG_BLOG_COMMON_2,
-      @IMG_BLOG_COMMON_3,
-      @IMG_BLOG_COMMON_4,
-      @IMG_BLOG_COMMON_5
-    ),
+    JSON_ARRAY(),
     JSON_ARRAY(),
     @CAT_BLOG_TECH,
     @SUB_BLOG_TECH_G,
@@ -174,14 +143,17 @@ VALUES
     @DT_NOW
   )
 ON DUPLICATE KEY UPDATE
-  -- NOTE: image fields intentionally omitted — admin changes must not be overwritten by re-seeding
   `module_key`              = VALUES(`module_key`),
   `is_published`            = VALUES(`is_published`),
   `featured`                = VALUES(`featured`),
   `display_order`           = VALUES(`display_order`),
   `order_num`               = VALUES(`order_num`),
+  `featured_image`          = VALUES(`featured_image`),
+  `image_url`               = VALUES(`image_url`),
+  `images`                  = VALUES(`images`),
   `category_id`             = VALUES(`category_id`),
-  `sub_category_id`         = VALUES(`sub_category_id`),  `updated_at`              = VALUES(`updated_at`);
+  `sub_category_id`         = VALUES(`sub_category_id`),
+  `updated_at`              = VALUES(`updated_at`);
 
 -- =============================================================
 -- I18N UPSERT – BLOG_MAINT_1  ✅ module_key YOK

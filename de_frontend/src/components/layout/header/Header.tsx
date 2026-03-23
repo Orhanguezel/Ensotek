@@ -14,7 +14,7 @@ import { AVAILABLE_LOCALES } from "@/i18n/locales";
 import LanguageSwitcher from "./LanguageSwitcher";
 import SiteLogo from "../SiteLogo";
 
-import UserAvatarFallback from "public/img/blog/blog-author-1.png";
+const UserAvatarFallback = "/img/user-placeholder.svg";
 
 const Header = () => {
   const locale = useLocale();

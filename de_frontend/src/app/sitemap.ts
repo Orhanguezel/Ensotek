@@ -3,7 +3,7 @@ import { AVAILABLE_LOCALES } from '@/i18n/locales';
 import { API_BASE_URL } from '@/i18n/locale-settings';
 
 const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://www.ensotek.de';
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') || 'https://ensotek.de';
 
 // Static public routes (relative to /{locale})
 const STATIC_ROUTES: Array<{ path: string; priority: number; changeFreq: MetadataRoute.Sitemap[number]['changeFrequency'] }> = [

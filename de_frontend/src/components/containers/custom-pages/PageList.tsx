@@ -36,18 +36,28 @@ const PageList = ({ moduleKey, title, basePath }: PageListProps) => {
           <h2 className="section__title-3">{title}</h2>
         </div>
         <div className="row">
-          {items.map((item: CustomPage) => (
+          {items.map((item: CustomPage) => {
+            const imgSrc = item.featured_image || item.image_url;
+            return (
             <div key={item.id} className="col-xl-4 col-lg-4 col-md-6">
               <div className="blog__item-3 mb-30 p-relative fix" style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
                 <div className="blog__thumb-3 w-img">
                   <Link href={`${listPath}/${encodeURIComponent(item.slug)}`}>
-                    <Image 
-                      src={item.featured_image || item.image_url || "/img/blog/blog-1.jpg"}
-                      alt={item.title} 
-                      width={400} 
+                    {imgSrc ? (
+                    <Image
+                      src={imgSrc}
+                      alt={item.title}
+                      width={400}
                       height={250}
                       style={{ objectFit: 'cover', height: '250px' }}
                     />
+                    ) : (
+                      <div style={{ width: '100%', height: '250px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '3rem', fontWeight: 700, color: '#94a3b8' }}>
+                          {item.title?.charAt(0)?.toUpperCase() || '?'}
+                        </span>
+                      </div>
+                    )}
                   </Link>
                 </div>
                 <div className="blog__content-3 p-4 bg-white">
@@ -71,7 +81,8 @@ const PageList = ({ moduleKey, title, basePath }: PageListProps) => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
           {items.length === 0 && (
             <div className="col-12 text-center py-5">
               <p>{t("noItems")}</p>

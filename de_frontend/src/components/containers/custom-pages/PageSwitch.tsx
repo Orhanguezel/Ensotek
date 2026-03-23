@@ -86,16 +86,17 @@ const TeamDetail = ({ item }: { item: any }) => {
                                     {t("backToTeam")}
                                 </Link>
                             </div>
+                            {(item.image_url || item.featured_image) && (
                             <div className="blog__thumb w-img mb-45">
-                                <Image 
-                                    src={item.image_url || item.featured_image || "/img/team/team-1.jpg"} 
-                                    alt={item.title} 
-                                    width={800} 
-                                    height={500} 
-                                    layout="responsive"
-                                    style={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
+                                <Image
+                                    src={item.image_url || item.featured_image!}
+                                    alt={item.title}
+                                    width={800}
+                                    height={500}
+                                    style={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', width: '100%', height: 'auto' }}
                                 />
                             </div>
+                            )}
                             <div className="technical__content">
                                 <div className="technical__title">
                                     <h2 className="postbox__title" style={{ fontSize: '42px', fontWeight: '700' }}>{item.title}</h2>

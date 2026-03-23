@@ -103,16 +103,7 @@ const MissionVisionContent = ({ mission, vision, title }: MissionVisionContentPr
                 </div>
               </div>
 
-              <div className="sideber__widget-item">
-                <div className="slideber__thumb w-img" style={{ borderRadius: '15px', overflow: 'hidden' }}>
-                    <Image 
-                        src="/img/project/03.webp" 
-                        alt={t("sidebarAlt")} 
-                        width={400} 
-                        height={500}
-                    />
-                </div>
-              </div>
+              {/* Sidebar placeholder removed — no hardcoded images */}
             </div>
           </div>
         </div>

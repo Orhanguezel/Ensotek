@@ -67,13 +67,21 @@ const MissionVisionList = ({ title }: MissionVisionListProps) => {
               >
                 <div className="blog__thumb-3 w-img">
                   <Link href={`/mission-vision/${encodeURIComponent(item.slug)}`}>
+                    {(item.image_url || item.featured_image) ? (
                     <Image
-                      src={item.image_url || item.featured_image || "/img/blog/blog-1.jpg"}
+                      src={(item.image_url || item.featured_image)!}
                       alt={item.title}
                       width={400}
                       height={250}
                       style={{ objectFit: "cover", height: "250px" }}
                     />
+                    ) : (
+                      <div style={{ width: "100%", height: "250px", background: "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <span style={{ fontSize: "3rem", fontWeight: 700, color: "#94a3b8" }}>
+                          {item.title?.charAt(0)?.toUpperCase() || "?"}
+                        </span>
+                      </div>
+                    )}
                   </Link>
                 </div>
                 <div className="blog__content-3 p-4 bg-white">

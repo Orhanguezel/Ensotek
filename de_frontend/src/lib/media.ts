@@ -45,7 +45,7 @@ export function getFileBase(): string {
   }
   
   // 4. Ultimate fallback (Production domain)
-  return "https://www.ensotek.de";
+  return "https://ensotek.de";
 }
 
 export function normalizeMediaPath(url: string): string {

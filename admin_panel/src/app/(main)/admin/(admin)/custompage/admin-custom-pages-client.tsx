@@ -11,6 +11,7 @@
 
 import * as React from "react";
 
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { toast } from "sonner";
 
 import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
@@ -50,18 +51,32 @@ function labelOfModuleKey(k: string, t: any) {
 
 export default function AdminCustomPagesClient() {
   const t = useAdminT();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
     return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
+  // Read module_key from URL on mount and when URL changes
+  const urlModuleKey = searchParams.get("module_key") ?? "";
+
   const [filters, setFilters] = React.useState<Filters>({
     search: "",
-    moduleKey: "",
+    moduleKey: urlModuleKey,
     publishedFilter: "all",
     locale: "",
   });
+
+  // Sync filters.moduleKey when URL search param changes (e.g. sidebar navigation)
+  React.useEffect(() => {
+    setFilters((prev) => {
+      if (prev.moduleKey === urlModuleKey) return prev;
+      return { ...prev, moduleKey: urlModuleKey };
+    });
+  }, [urlModuleKey]);
 
   // initial locale in state (no URL sync)
   React.useEffect(() => {
@@ -149,6 +164,16 @@ export default function AdminCustomPagesClient() {
       publishedFilter: next.publishedFilter as any,
       locale: next.locale,
     }));
+
+    // Sync URL with module_key filter
+    const params = new URLSearchParams(searchParams.toString());
+    if (next.moduleKey) {
+      params.set("module_key", next.moduleKey);
+    } else {
+      params.delete("module_key");
+    }
+    const qs = params.toString();
+    router.replace(`${pathname}${qs ? `?${qs}` : ""}`, { scroll: false });
   };
 
   function moveRow(from: number, to: number) {

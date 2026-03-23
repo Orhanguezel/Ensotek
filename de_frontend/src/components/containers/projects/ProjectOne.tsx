@@ -13,6 +13,8 @@ import FallbackTwo from "public/img/recent/slider/2.png";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation } from "swiper";
 import "swiper/css";
+import { resolveMediaUrl } from "@/lib/media";
+
 
 const fallbackSlides = [FallbackOne, FallbackTwo, FallbackOne, FallbackTwo, FallbackOne, FallbackTwo];
 
@@ -127,7 +129,7 @@ const ProjectOne = () => {
                             <div className="recent__slider-thumb w-img">
                               {product.image_url ? (
                                 <Image
-                                  src={product.image_url}
+                                  src={resolveMediaUrl(product.image_url)}
                                   alt={product.alt || product.title}
                                   width={400}
                                   height={300}

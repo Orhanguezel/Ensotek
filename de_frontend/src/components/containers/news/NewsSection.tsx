@@ -6,6 +6,8 @@ import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useCustomPages } from "@/features/custom-pages/customPages.action";
 import type { CustomPage } from "@/features/custom-pages/customPages.type";
+import { resolveMediaUrl } from "@/lib/media";
+
 
 const NewsSection = () => {
   const t = useTranslations("ensotek.news");
@@ -49,19 +51,29 @@ const NewsSection = () => {
               <p>{t("empty")}</p>
             </div>
           ) : (
-            items.map((item) => (
+            items.map((item) => {
+              const imgSrc = resolveMediaUrl(item.featured_image || item.image_url);
+              return (
               <div key={item.id} className="col-xl-6 col-lg-6">
                 <div className="blog__item-3 mb-30">
                   <div className="blog__thumb-3 w-img">
                     <Link href={`/news/${item.slug}`} title={item.title}>
+                      {imgSrc ? (
                       <Image
-                        src={item.image_url || item.featured_image || "/img/blog/3/1.jpg"}
+                        src={imgSrc}
                         alt={item.featured_image_alt || item.title}
                         width={700}
                         height={420}
                         sizes="(max-width: 768px) 100vw, 50vw"
                         style={{ width: "100%", height: "auto" }}
                       />
+                      ) : (
+                        <div style={{ width: '100%', height: '280px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '3rem', fontWeight: 700, color: '#94a3b8' }}>
+                            {item.title?.charAt(0)?.toUpperCase() || 'N'}
+                          </span>
+                        </div>
+                      )}
                     </Link>
                   </div>
 
@@ -76,7 +88,8 @@ const NewsSection = () => {
                   </div>
                 </div>
               </div>
-            ))
+              );
+            })
           )}
         </div>
 

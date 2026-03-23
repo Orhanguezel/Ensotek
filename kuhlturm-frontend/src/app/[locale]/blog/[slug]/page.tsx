@@ -165,6 +165,22 @@ export default async function BlogDetailPage({ params }: Props) {
                 <p className="text-slate-400">{t('noContent')}</p>
               )}
 
+              {/* Gallery images */}
+              {Array.isArray(post.images) && post.images.length > 0 && (
+                <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {post.images.map((img: string, idx: number) => (
+                    <div key={idx} className="rounded-xl overflow-hidden">
+                      <img
+                        src={img}
+                        alt={`${post.title} – ${idx + 1}`}
+                        className="w-full h-auto object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Tags */}
               {tags.length > 0 && (
                 <div className="mt-10 pt-8 border-t border-slate-100">

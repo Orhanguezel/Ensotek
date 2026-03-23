@@ -52,7 +52,7 @@ export async function generateMetadata({
 
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
-    'https://www.ensotek.de';
+    'https://ensotek.de';
 
   return {
     metadataBase: new URL(siteUrl),
@@ -142,7 +142,7 @@ export default async function LocaleLayout({
 
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
-    'https://www.ensotek.de';
+    'https://ensotek.de';
 
   const [seoRow, socialsRow, logoRow] = await Promise.all([
     fetchSetting('seo', locale, { revalidate: 300 }),

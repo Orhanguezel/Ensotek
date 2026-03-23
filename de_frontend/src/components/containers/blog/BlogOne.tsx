@@ -4,14 +4,16 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useCustomPages } from "@/features/custom-pages/customPages.action";
+import { resolveMediaUrl } from "@/lib/media";
 import type { CustomPage } from "@/features/custom-pages/customPages.type";
+
 
 const BlogOne = () => {
   const t = useTranslations("ensotek.blog");
-  const { data: blogData } = useCustomPages({ 
-    module_key: 'blog', 
-    limit: 3, 
-    is_published: true 
+  const { data: blogData } = useCustomPages({
+    module_key: 'blog',
+    limit: 3,
+    is_published: true
   });
 
   const blogs = blogData?.data || [];
@@ -31,38 +33,46 @@ const BlogOne = () => {
           </div>
         </div>
         <div className="row" data-aos="fade-up" data-aos-delay="300">
-          {blogs.map((blog: CustomPage) => (
-            <div key={blog.id} className="col-xl-4 col-lg-6 col-md-6">
-              <div className="blog__item-3 mb-30" style={{ borderRadius: '12px', overflow: 'hidden' }}>
-                <div className="blog__thumb-3 w-img">
-                  <Link href={`/blog/${blog.slug}`} title={blog.title}>
-                    <Image
-                      src={blog.image_url || blog.featured_image || "/img/blog/3/1.jpg"}
-                      alt={blog.title}
-                      width={400}
-                      height={250}
-                      style={{ objectFit: 'cover', height: '250px' }}
-                    />
-                  </Link>
-                </div>
-                <div className="blog__content-3 p-4 bg-white">
-                  {/* <div className="blog__meta mb-10">
-                    <div className="blog__meta-author">
+          {blogs.map((blog: CustomPage) => {
+            const imgSrc = resolveMediaUrl(blog.featured_image || blog.image_url);
+            return (
+              <div key={blog.id} className="col-xl-4 col-lg-6 col-md-6">
+                <div className="blog__item-3 mb-30" style={{ borderRadius: '12px', overflow: 'hidden' }}>
+                  <div className="blog__thumb-3 w-img">
+                    <Link href={`/blog/${blog.slug}`} title={blog.title}>
+                      {imgSrc ? (
+                        <Image
+                          src={imgSrc}
+                          alt={blog.featured_image_alt || blog.title}
+                          width={400}
+                          height={250}
+                          style={{ objectFit: 'cover', height: '250px' }}
+                        />
+                      ) : (
+                        <div style={{ width: '100%', height: '250px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <span style={{ fontSize: '3rem', fontWeight: 700, color: '#94a3b8' }}>
+                            {blog.title?.charAt(0)?.toUpperCase() || 'B'}
+                          </span>
+                        </div>
+                      )}
+                    </Link>
+                  </div>
+                  <div className="blog__content-3 p-4 bg-white">
+                    <div className="blog__meta mb-10">
                       <span className="text-muted" style={{ fontSize: '13px' }}>
-                        <i className="fal fa-calendar-alt mr-5"></i>
                         {new Date(blog.created_at).toLocaleDateString()}
                       </span>
                     </div>
-                  </div> */}
-                  <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>
-                    <Link href={`/blog/${blog.slug}`} title={blog.title}>
-                      {blog.title}
-                    </Link>
-                  </h3>
+                    <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>
+                      <Link href={`/blog/${blog.slug}`} title={blog.title}>
+                        {blog.title}
+                      </Link>
+                    </h3>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
           {blogs.length === 0 && (
             <div className="col-12 text-center">
               <p>{t("empty")}</p>

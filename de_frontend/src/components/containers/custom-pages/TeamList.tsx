@@ -32,13 +32,21 @@ const TeamList = () => {
             <div key={item.id} className="col-xl-4 col-lg-6 col-md-6 text-center">
               <div className="team__item mb-40 bg-white" style={{ borderRadius: '20px', padding: '30px', transition: 'all 0.3s ease-in-out', border: '1px solid rgba(0,0,0,0.05)' }}>
                 <div className="team__thumb mb-25 mx-auto" style={{ width: '200px', height: '200px', borderRadius: '50%', overflow: 'hidden' }}>
-                  <Image 
-                    src={item.image_url || item.featured_image || "/img/team/team-1.jpg"} 
-                    alt={item.title} 
-                    width={200} 
+                  {(item.image_url || item.featured_image) ? (
+                  <Image
+                    src={(item.image_url || item.featured_image)!}
+                    alt={item.title}
+                    width={200}
                     height={200}
                     style={{ objectFit: 'cover' }}
                   />
+                  ) : (
+                    <div style={{ width: '200px', height: '200px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '50%' }}>
+                      <span style={{ fontSize: '3rem', fontWeight: 700, color: '#94a3b8' }}>
+                        {item.title?.charAt(0)?.toUpperCase() || '?'}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <div className="team__content">
                   <h3 style={{ fontSize: '22px', marginBottom: '8px' }}>

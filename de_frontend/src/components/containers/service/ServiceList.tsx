@@ -31,13 +31,21 @@ const ServiceList = () => {
               <div className="blog__item-3 mb-30 p-relative fix" style={{ borderRadius: '12px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
                 <div className="blog__thumb-3 w-img">
                   <Link href={`/service/${item.slug}`} title={item.name}>
+                    {(item.image_url || item.featured_image) ? (
                     <Image
-                      src={item.image_url || item.featured_image || "/img/blog/blog-1.jpg"}
+                      src={(item.image_url || item.featured_image)!}
                       alt={item.name}
                       width={400}
                       height={250}
                       style={{ objectFit: 'cover', height: '250px' }}
                     />
+                    ) : (
+                      <div style={{ width: '100%', height: '250px', background: '#e2e8f0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: '3rem', fontWeight: 700, color: '#94a3b8' }}>
+                          {item.name?.charAt(0)?.toUpperCase() || 'S'}
+                        </span>
+                      </div>
+                    )}
                   </Link>
                 </div>
                 <div className="blog__content-3 p-4 bg-white">

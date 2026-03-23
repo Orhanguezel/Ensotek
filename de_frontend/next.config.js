@@ -138,33 +138,10 @@ const nextConfig = {
     return config;
   },
 
+  // CSP headers are managed by nginx in production.
+  // Adding them here would cause duplicate headers and stricter-than-intended policy.
   async headers() {
-    const isDev = process.env.NODE_ENV === 'development';
-
-    const csp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' blob: data: https://res.cloudinary.com https://images.unsplash.com https://cdn.ensotek.de https://www.ensotek.de https://ensotek.de",
-      "font-src 'self' https://fonts.gstatic.com data:",
-      `connect-src 'self' ${
-        isDev
-          ? 'http://127.0.0.1:8086 http://localhost:8086 ws://127.0.0.1:8086 ws://localhost:8086'
-          : ''
-      } https://www.googletagmanager.com https://www.google-analytics.com https://region1.google-analytics.com https://ensotek.de https://www.ensotek.de https://cdn.ensotek.de https://cdn.jsdelivr.net`,
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "frame-ancestors 'none'",
-      'block-all-mixed-content',
-    ].join('; ');
-
-    return [
-      {
-        source: '/((?!api/).*)',
-        headers: [{ key: 'Content-Security-Policy', value: csp }],
-      },
-    ];
+    return [];
   },
 };
 

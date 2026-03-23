@@ -33,9 +33,14 @@ export function SmtpTestSection({ busy }: SmtpTestSectionProps) {
     setResult(null);
 
     try {
-      const res = await fetch("/api/admin/site_settings/smtp-test", {
+      const { BASE_URL } = await import("@/integrations/apiBase");
+      const token = (await import("@/integrations/core/token")).tokenStore.get();
+      const res = await fetch(`${BASE_URL}/mail/test`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
         credentials: "include",
         body: JSON.stringify({ to: testEmail.trim() }),
       });
