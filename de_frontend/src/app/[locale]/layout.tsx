@@ -11,13 +11,8 @@ import { graph, org, website } from '@/seo/jsonld';
 
 import { AosProvider } from '@/providers/AosProvider';
 import { AppProviders } from '@/providers/AppProviders';
-import dynamic from 'next/dynamic';
 import { FontAwesomeLoader } from '@/components/FontAwesomeLoader';
-
-const StackableWidgets = dynamic(
-  () => import('@/features/catalog').then((m) => m.StackableWidgets),
-  { ssr: false }
-);
+import StackableWidgetsLoader from '@/components/StackableWidgetsLoader';
 
 // Global Styles
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -197,7 +192,7 @@ export default async function LocaleLayout({
               <AosProvider>
                 <FontAwesomeLoader />
                 {children}
-                <StackableWidgets />
+                <StackableWidgetsLoader />
               </AosProvider>
            </AppProviders>
         </NextIntlClientProvider>
