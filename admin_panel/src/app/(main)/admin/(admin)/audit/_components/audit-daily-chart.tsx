@@ -5,12 +5,13 @@
 //  - tolerate alternate keys: day, dt, ts, created_at
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { useMemo, useState } from 'react';
+import type React from "react";
+import { useMemo, useState } from "react";
 
-import type { AuditMetricsDailyRowDto } from '@/integrations/shared';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import type { AuditMetricsDailyRowDto } from "@/integrations/shared";
 
 type Props = {
   rows: AuditMetricsDailyRowDto[];
@@ -19,13 +20,13 @@ type Props = {
 };
 
 function n(v: unknown, fallback = 0) {
-  const x = typeof v === 'number' ? v : Number(v);
+  const x = typeof v === "number" ? v : Number(v);
   return Number.isFinite(x) ? x : fallback;
 }
 
 function toYmd(input: unknown): string {
-  const s = String(input ?? '').trim();
-  if (!s) return '';
+  const s = String(input ?? "").trim();
+  if (!s) return "";
   // already YYYY-MM-DD
   if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
   // ISO datetime -> take first 10 chars
@@ -39,19 +40,19 @@ function toYmd(input: unknown): string {
 function fmtDayLabel(isoOrDate: string) {
   const ymd = toYmd(isoOrDate);
   const m = String(ymd).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) return String(isoOrDate || '');
+  if (!m) return String(isoOrDate || "");
   return `${m[3]}.${m[2]}`;
 }
 
 function fmtIsoNice(isoOrDate: string) {
   const ymd = toYmd(isoOrDate);
   const m = String(ymd).match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!m) return String(isoOrDate || '');
+  if (!m) return String(isoOrDate || "");
   return `${m[3]}.${m[2]}.${m[1]}`;
 }
 
 export const AuditDailyChart: React.FC<Props> = ({ rows, loading, height = 220 }) => {
-  const t = useAdminT('admin.audit.chart');
+  const t = useAdminT("admin.audit.chart");
   const [showUnique, setShowUnique] = useState(true);
   const [showErrors, setShowErrors] = useState(true);
 
@@ -60,12 +61,7 @@ export const AuditDailyChart: React.FC<Props> = ({ rows, loading, height = 220 }
     return [...a]
       .map((r) => {
         const rawDate =
-          (r as any).date ??
-          (r as any).day ??
-          (r as any).dt ??
-          (r as any).ts ??
-          (r as any).created_at ??
-          '';
+          (r as any).date ?? (r as any).day ?? (r as any).dt ?? (r as any).ts ?? (r as any).created_at ?? "";
         const date = toYmd(rawDate);
 
         return {
@@ -99,9 +95,7 @@ export const AuditDailyChart: React.FC<Props> = ({ rows, loading, height = 220 }
   }, [data]);
 
   const yTicks = 4;
-  const tickVals = Array.from({ length: yTicks + 1 }).map((_, i) =>
-    Math.round((maxRequests * (yTicks - i)) / yTicks),
-  );
+  const tickVals = Array.from({ length: yTicks + 1 }).map((_, i) => Math.round((maxRequests * (yTicks - i)) / yTicks));
 
   const barGap = 6;
   const barCount = Math.max(1, data.length);
@@ -112,52 +106,36 @@ export const AuditDailyChart: React.FC<Props> = ({ rows, loading, height = 220 }
   return (
     <div>
       <div className="mb-2 flex flex-wrap items-center gap-3">
-        <div className="text-sm text-muted-foreground">
-          {t('summary', {
+        <div className="text-muted-foreground text-sm">
+          {t("summary", {
             days: String(data.length || 0),
-            requests: t('labels.requests'),
-            uniqueSuffix: showUnique ? t('summaryUniqueSuffix') : '',
-            errorsSuffix: showErrors ? t('summaryErrorsSuffix') : '',
+            requests: t("labels.requests"),
+            uniqueSuffix: showUnique ? t("summaryUniqueSuffix") : "",
+            errorsSuffix: showErrors ? t("summaryErrorsSuffix") : "",
           })}
         </div>
 
         <div className="ml-auto flex items-center gap-3">
           <label className="mb-0 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={showUnique}
-              onChange={(e) => setShowUnique(e.target.checked)}
-            />
-            {t('labels.uniqueIps')}
+            <input type="checkbox" checked={showUnique} onChange={(e) => setShowUnique(e.target.checked)} />
+            {t("labels.uniqueIps")}
           </label>
 
           <label className="mb-0 flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={showErrors}
-              onChange={(e) => setShowErrors(e.target.checked)}
-            />
-            {t('labels.errors')}
+            <input type="checkbox" checked={showErrors} onChange={(e) => setShowErrors(e.target.checked)} />
+            {t("labels.errors")}
           </label>
 
-          {loading && <span className="text-sm text-muted-foreground">{t('loading')}</span>}
+          {loading && <span className="text-muted-foreground text-sm">{t("loading")}</span>}
         </div>
       </div>
 
       {!hasAny && !loading && (
-        <div className="rounded-md border border-muted bg-muted/40 px-3 py-2 text-sm">
-          {t('empty')}
-        </div>
+        <div className="rounded-md border border-muted bg-muted/40 px-3 py-2 text-sm">{t("empty")}</div>
       )}
 
       <div className="overflow-hidden rounded border bg-card">
-        <svg
-          viewBox={`0 0 ${W} ${H}`}
-          width="100%"
-          height={H}
-          role="img"
-          aria-label={t('ariaLabel')}
-        >
+        <svg viewBox={`0 0 ${W} ${H}`} width="100%" height={H} role="img" aria-label={t("ariaLabel")}>
           <rect x="0" y="0" width={W} height={H} fill="white" />
 
           {tickVals.map((tv, i) => {
@@ -179,28 +157,18 @@ export const AuditDailyChart: React.FC<Props> = ({ rows, loading, height = 220 }
             const isHover = hoverIdx === idx;
 
             return (
-              <g
-                key={`${r.date}-${idx}`}
-                onMouseEnter={() => setHoverIdx(idx)}
-                onMouseLeave={() => setHoverIdx(null)}
-              >
+              <g key={`${r.date}-${idx}`} onMouseEnter={() => setHoverIdx(idx)} onMouseLeave={() => setHoverIdx(null)}>
                 <rect
                   x={x}
                   y={y}
                   width={barW}
                   height={h}
                   rx="3"
-                  fill={isHover ? '#0b5ed7' : '#0d6efd'}
+                  fill={isHover ? "#0b5ed7" : "#0d6efd"}
                   opacity={r.requests === 0 ? 0.25 : 0.9}
                 />
                 {(data.length <= 14 || idx % 2 === 0) && (
-                  <text
-                    x={x + barW / 2}
-                    y={H - 10}
-                    textAnchor="middle"
-                    fontSize="11"
-                    fill="#6c757d"
-                  >
+                  <text x={x + barW / 2} y={H - 10} textAnchor="middle" fontSize="11" fill="#6c757d">
                     {r.label}
                   </text>
                 )}
@@ -221,32 +189,24 @@ export const AuditDailyChart: React.FC<Props> = ({ rows, loading, height = 220 }
 
               return (
                 <g>
-                  <rect
-                    x={px}
-                    y={py}
-                    width={boxW}
-                    height={boxH}
-                    rx="8"
-                    fill="white"
-                    stroke="#dee2e6"
-                  />
+                  <rect x={px} y={py} width={boxW} height={boxH} rx="8" fill="white" stroke="#dee2e6" />
                   <text x={px + 12} y={py + 20} fontSize="12" fill="#212529">
                     <tspan fontWeight="600">{fmtIsoNice(r.date)}</tspan>
                   </text>
                   <text x={px + 12} y={py + 40} fontSize="12" fill="#212529">
-                    {t('labels.requests')}: <tspan fontWeight="600">{r.requests}</tspan>
+                    {t("labels.requests")}: <tspan fontWeight="600">{r.requests}</tspan>
                   </text>
                   {(showUnique || showErrors) && (
                     <text x={px + 12} y={py + 58} fontSize="12" fill="#212529">
                       {showUnique ? (
                         <>
-                          {t('labels.unique')}: <tspan fontWeight="600">{r.unique_ips}</tspan>
+                          {t("labels.unique")}: <tspan fontWeight="600">{r.unique_ips}</tspan>
                         </>
                       ) : null}
                       {showUnique && showErrors ? <tspan> · </tspan> : null}
                       {showErrors ? (
                         <>
-                          {t('labels.errors')}: <tspan fontWeight="600">{r.errors}</tspan>
+                          {t("labels.errors")}: <tspan fontWeight="600">{r.errors}</tspan>
                         </>
                       ) : null}
                     </text>
@@ -255,35 +215,26 @@ export const AuditDailyChart: React.FC<Props> = ({ rows, loading, height = 220 }
               );
             })()}
 
-          <line
-            x1={padL}
-            y1={padT + chartH}
-            x2={W - padR}
-            y2={padT + chartH}
-            stroke="#dee2e6"
-            strokeWidth="1"
-          />
+          <line x1={padL} y1={padT + chartH} x2={W - padR} y2={padT + chartH} stroke="#dee2e6" strokeWidth="1" />
         </svg>
 
         {hasAny && (
-          <div className="flex items-center justify-between border-t px-3 py-2 text-sm text-muted-foreground">
-            <div>{data[data.length - 1]?.date ? fmtIsoNice(data[data.length - 1].date) : '-'}</div>
+          <div className="flex items-center justify-between border-t px-3 py-2 text-muted-foreground text-sm">
+            <div>{data[data.length - 1]?.date ? fmtIsoNice(data[data.length - 1].date) : "-"}</div>
             <div className="flex gap-3">
               <span>
-                {t('labels.requests')}:{' '}
+                {t("labels.requests")}:{" "}
                 <strong className="text-foreground">{data[data.length - 1]?.requests ?? 0}</strong>
               </span>
               {showUnique && (
                 <span>
-                  {t('labels.unique')}:{' '}
-                  <strong className="text-foreground">
-                    {data[data.length - 1]?.unique_ips ?? 0}
-                  </strong>
+                  {t("labels.unique")}:{" "}
+                  <strong className="text-foreground">{data[data.length - 1]?.unique_ips ?? 0}</strong>
                 </span>
               )}
               {showErrors && (
                 <span>
-                  {t('labels.errors')}:{' '}
+                  {t("labels.errors")}:{" "}
                   <strong className="text-foreground">{data[data.length - 1]?.errors ?? 0}</strong>
                 </span>
               )}

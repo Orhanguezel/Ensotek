@@ -3,41 +3,38 @@
 // FINAL — Offers (ADMIN) RTK (auth+admin)
 // ===================================================================
 
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
+  ApiOk,
+  OfferAdminPatchBody,
+  OfferAdminUpsertBody,
   OfferListQuery,
   OfferView,
-  OfferAdminUpsertBody,
-  OfferAdminPatchBody,
-  ApiOk,
-} from '@/integrations/shared';
+} from "@/integrations/shared";
 import {
   normalizeOffer,
   normalizeOfferList,
-  toOfferListQueryParams,
-  toOfferAdminUpsertBody,
   toOfferAdminPatchBody,
-} from '@/integrations/shared';
+  toOfferAdminUpsertBody,
+  toOfferListQueryParams,
+} from "@/integrations/shared";
 
-const BASE = '/admin/offers';
+const BASE = "/admin/offers";
 
 export const offersAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     /** GET /offers */
-    listOffersAdmin: b.query<OfferView[], OfferListQuery | void>({
+    listOffersAdmin: b.query<OfferView[], OfferListQuery | undefined>({
       query: (q) => ({
         url: BASE,
-        method: 'GET',
+        method: "GET",
         params: q ? toOfferListQueryParams(q) : undefined,
       }),
       transformResponse: (res: unknown): OfferView[] => normalizeOfferList(res),
       providesTags: (result) =>
-        result && result.length
-          ? [
-              ...result.map((x) => ({ type: 'Offer' as const, id: x.id })),
-              { type: 'Offers' as const, id: 'LIST' },
-            ]
-          : [{ type: 'Offers' as const, id: 'LIST' }],
+        result?.length
+          ? [...result.map((x) => ({ type: "Offer" as const, id: x.id })), { type: "Offers" as const, id: "LIST" }]
+          : [{ type: "Offers" as const, id: "LIST" }],
       keepUnusedDataFor: 20,
     }),
 
@@ -45,10 +42,10 @@ export const offersAdminApi = baseApi.injectEndpoints({
     getOfferAdmin: b.query<OfferView, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'GET',
+        method: "GET",
       }),
       transformResponse: (res: unknown): OfferView => normalizeOffer(res),
-      providesTags: (_r, _e, arg) => [{ type: 'Offer' as const, id: arg.id }],
+      providesTags: (_r, _e, arg) => [{ type: "Offer" as const, id: arg.id }],
       keepUnusedDataFor: 30,
     }),
 
@@ -56,24 +53,24 @@ export const offersAdminApi = baseApi.injectEndpoints({
     createOfferAdmin: b.mutation<OfferView, OfferAdminUpsertBody>({
       query: (body) => ({
         url: BASE,
-        method: 'POST',
+        method: "POST",
         body: toOfferAdminUpsertBody(body),
       }),
       transformResponse: (res: unknown): OfferView => normalizeOffer(res),
-      invalidatesTags: [{ type: 'Offers' as const, id: 'LIST' }],
+      invalidatesTags: [{ type: "Offers" as const, id: "LIST" }],
     }),
 
     /** PATCH /offers/:id */
     updateOfferAdmin: b.mutation<OfferView, { id: string; body: OfferAdminPatchBody }>({
       query: ({ id, body }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: toOfferAdminPatchBody(body),
       }),
       transformResponse: (res: unknown): OfferView => normalizeOffer(res),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Offer' as const, id: arg.id },
-        { type: 'Offers' as const, id: 'LIST' },
+        { type: "Offer" as const, id: arg.id },
+        { type: "Offers" as const, id: "LIST" },
       ],
     }),
 
@@ -81,12 +78,12 @@ export const offersAdminApi = baseApi.injectEndpoints({
     deleteOfferAdmin: b.mutation<ApiOk, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       transformResponse: (_res: unknown): ApiOk => ({ ok: true as const }),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Offer' as const, id: arg.id },
-        { type: 'Offers' as const, id: 'LIST' },
+        { type: "Offer" as const, id: arg.id },
+        { type: "Offers" as const, id: "LIST" },
       ],
     }),
 
@@ -94,14 +91,14 @@ export const offersAdminApi = baseApi.injectEndpoints({
     generateOfferPdfAdmin: b.mutation<OfferView, { id: string; force?: boolean }>({
       query: ({ id, force }) => ({
         url: `${BASE}/${encodeURIComponent(id)}/pdf`,
-        method: 'POST',
-        params: force ? { force: '1' } : undefined,
+        method: "POST",
+        params: force ? { force: "1" } : undefined,
         body: {}, // backend reads force from body too; sending {} safe
       }),
       transformResponse: (res: unknown): OfferView => normalizeOffer(res),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Offer' as const, id: arg.id },
-        { type: 'Offers' as const, id: 'LIST' },
+        { type: "Offer" as const, id: arg.id },
+        { type: "Offers" as const, id: "LIST" },
       ],
     }),
 
@@ -109,14 +106,14 @@ export const offersAdminApi = baseApi.injectEndpoints({
     sendOfferEmailAdmin: b.mutation<OfferView, { id: string; force?: boolean }>({
       query: ({ id, force }) => ({
         url: `${BASE}/${encodeURIComponent(id)}/email`,
-        method: 'POST',
-        params: force ? { force: '1' } : undefined,
+        method: "POST",
+        params: force ? { force: "1" } : undefined,
         body: {}, // backend reads force from body too; sending {} safe
       }),
       transformResponse: (res: unknown): OfferView => normalizeOffer(res),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Offer' as const, id: arg.id },
-        { type: 'Offers' as const, id: 'LIST' },
+        { type: "Offer" as const, id: arg.id },
+        { type: "Offers" as const, id: "LIST" },
       ],
     }),
 
@@ -124,14 +121,14 @@ export const offersAdminApi = baseApi.injectEndpoints({
     sendOfferAdmin: b.mutation<OfferView, { id: string; force?: boolean }>({
       query: ({ id, force }) => ({
         url: `${BASE}/${encodeURIComponent(id)}/send`,
-        method: 'POST',
-        params: force ? { force: '1' } : undefined,
+        method: "POST",
+        params: force ? { force: "1" } : undefined,
         body: {}, // backend reads force from body too; sending {} safe
       }),
       transformResponse: (res: unknown): OfferView => normalizeOffer(res),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Offer' as const, id: arg.id },
-        { type: 'Offers' as const, id: 'LIST' },
+        { type: "Offer" as const, id: arg.id },
+        { type: "Offers" as const, id: "LIST" },
       ],
     }),
   }),

@@ -1,46 +1,35 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import { ArrowLeft, Save, RefreshCcw } from 'lucide-react';
+import * as React from "react";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, RefreshCcw, Save } from "lucide-react";
+import { toast } from "sonner";
 
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { AdminJsonEditor } from "@/app/(main)/admin/_components/common/AdminJsonEditor";
+import RichContentEditor from "@/app/(main)/admin/_components/common/RichContentEditor";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClient, localeShortClientOr } from "@/i18n/localeShortClient";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import { AdminJsonEditor } from '@/app/(main)/admin/_components/common/AdminJsonEditor';
-import RichContentEditor from '@/app/(main)/admin/_components/common/RichContentEditor';
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
-
-import type {
-  ReferenceDto,
-  ReferenceUpsertPayload,
-} from '@/integrations/shared';
-import {
-  useGetReferenceAdminQuery,
   useCreateReferenceAdminMutation,
+  useGetReferenceAdminQuery,
   useUpdateReferenceAdminMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/hooks";
+import type { ReferenceDto, ReferenceUpsertPayload } from "@/integrations/shared";
 
 function isUuidLike(v?: string) {
   if (!v) return false;
@@ -48,41 +37,36 @@ function isUuidLike(v?: string) {
 }
 
 const normalizeLocale = (v: unknown): string =>
-  String(v ?? '')
+  String(v ?? "")
     .trim()
     .toLowerCase();
 
-const norm = (v: unknown) => String(v ?? '').trim();
+const norm = (v: unknown) => String(v ?? "").trim();
 const toNull = (v: unknown) => {
   const s = norm(v);
   return s || null;
 };
 
-const isTruthyBoolLike = (v: unknown) => v === true || v === 1 || v === '1' || v === 'true';
+const isTruthyBoolLike = (v: unknown) => v === true || v === 1 || v === "1" || v === "true";
 
 function slugify(text: string): string {
   return text
     .toLowerCase()
-    .replace(/[çÇ]/g, 'c')
-    .replace(/[ğĞ]/g, 'g')
-    .replace(/[ıİ]/g, 'i')
-    .replace(/[öÖ]/g, 'o')
-    .replace(/[şŞ]/g, 's')
-    .replace(/[üÜ]/g, 'u')
-    .replace(/[äÄ]/g, 'ae')
-    .replace(/[ß]/g, 'ss')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/(^-|-$)+/g, '');
+    .replace(/[çÇ]/g, "c")
+    .replace(/[ğĞ]/g, "g")
+    .replace(/[ıİ]/g, "i")
+    .replace(/[öÖ]/g, "o")
+    .replace(/[şŞ]/g, "s")
+    .replace(/[üÜ]/g, "u")
+    .replace(/[äÄ]/g, "ae")
+    .replace(/[ß]/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 }
 
 function getErrMessage(err: unknown, fallback: string): string {
   const anyErr = err as any;
-  return (
-    anyErr?.data?.error?.message ||
-    anyErr?.data?.message ||
-    anyErr?.error ||
-    fallback
-  );
+  return anyErr?.data?.error?.message || anyErr?.data?.message || anyErr?.error || fallback;
 }
 
 type FormValues = {
@@ -109,24 +93,24 @@ const emptyForm = (locale: string): FormValues => ({
   locale,
   is_published: true,
   is_featured: false,
-  display_order: '0',
-  featured_image: '',
-  featured_image_asset_id: '',
-  website_url: '',
-  title: '',
-  slug: '',
-  summary: '',
-  content: '',
-  featured_image_alt: '',
-  meta_title: '',
-  meta_description: '',
+  display_order: "0",
+  featured_image: "",
+  featured_image_asset_id: "",
+  website_url: "",
+  title: "",
+  slug: "",
+  summary: "",
+  content: "",
+  featured_image_alt: "",
+  meta_title: "",
+  meta_description: "",
   replicate_all_locales: false,
   apply_all_locales: false,
 });
 
 const dtoToForm = (dto: ReferenceDto): FormValues => ({
-  id: String((dto as any).id ?? ''),
-  locale: normalizeLocale((dto as any).locale_resolved ?? (dto as any).locale ?? 'de'),
+  id: String((dto as any).id ?? ""),
+  locale: normalizeLocale((dto as any).locale_resolved ?? (dto as any).locale ?? "de"),
   is_published: isTruthyBoolLike((dto as any).is_published),
   is_featured: isTruthyBoolLike((dto as any).is_featured),
   display_order: String((dto as any).display_order ?? 0),
@@ -149,31 +133,24 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   const router = useRouter();
   const sp = useSearchParams();
 
-  const isCreateMode = String(id) === 'new';
+  const isCreateMode = String(id) === "new";
 
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocaleFromDb = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'de');
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const localeSet = React.useMemo(() => {
-    return new Set(
-      (localeOptions ?? []).map((x: any) => localeShortClient(x.value)).filter(Boolean),
-    );
+    return new Set((localeOptions ?? []).map((x: any) => localeShortClient(x.value)).filter(Boolean));
   }, [localeOptions]);
 
   const urlLocale = React.useMemo(() => {
-    const q = sp?.get('locale');
-    return localeShortClient(q) || '';
+    const q = sp?.get("locale");
+    return localeShortClient(q) || "";
   }, [sp]);
 
-  const [activeLocale, setActiveLocale] = React.useState<string>('');
+  const [activeLocale, setActiveLocale] = React.useState<string>("");
 
   React.useEffect(() => {
     if (!localeOptions || localeOptions.length === 0) return;
@@ -181,7 +158,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
     setActiveLocale((prev) => {
       const p = localeShortClient(prev);
       const u = localeShortClient(urlLocale);
-      const def = localeShortClientOr(apiLocaleFromDb, 'de');
+      const def = localeShortClientOr(apiLocaleFromDb, "de");
 
       const canUse = (l: string) => !!l && (localeSet.size === 0 || localeSet.has(l));
 
@@ -190,14 +167,14 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
       if (def && canUse(def)) return def;
 
       const first = localeShortClient((localeOptions as any)?.[0]?.value);
-      return first || 'de';
+      return first || "de";
     });
   }, [localeOptions, localeSet, urlLocale, apiLocaleFromDb]);
 
   const queryLocale = React.useMemo(() => {
     const l = localeShortClient(activeLocale);
     if (l && (localeSet.size === 0 || localeSet.has(l))) return l;
-    return localeShortClientOr(apiLocaleFromDb, 'de');
+    return localeShortClientOr(apiLocaleFromDb, "de");
   }, [activeLocale, localeSet, apiLocaleFromDb]);
 
   React.useEffect(() => {
@@ -205,8 +182,8 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
     if (!l) return;
     if (l === urlLocale) return;
 
-    const params = new URLSearchParams(sp?.toString() || '');
-    params.set('locale', l);
+    const params = new URLSearchParams(sp?.toString() || "");
+    params.set("locale", l);
 
     if (isCreateMode) {
       router.replace(`/admin/references/new?${params.toString()}`);
@@ -214,12 +191,12 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
       router.replace(`/admin/references/${encodeURIComponent(String(id))}?${params.toString()}`);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLocale]);
+  }, [activeLocale, id, isCreateMode, router.replace, sp?.toString, urlLocale]);
 
   const localesReady = !localesLoading && !localesFetching;
   const hasLocales = (localeOptions?.length ?? 0) > 0;
 
-  const shouldSkipDetail = isCreateMode || !isUuidLike(String(id || '')) || !queryLocale;
+  const shouldSkipDetail = isCreateMode || !isUuidLike(String(id || "")) || !queryLocale;
 
   const {
     data: reference,
@@ -227,10 +204,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
     isFetching: isFetchingRef,
     error: refError,
     refetch,
-  } = useGetReferenceAdminQuery(
-    { id: String(id), locale: queryLocale } as any,
-    { skip: shouldSkipDetail } as any,
-  );
+  } = useGetReferenceAdminQuery({ id: String(id), locale: queryLocale } as any, { skip: shouldSkipDetail } as any);
 
   const [createReference, createState] = useCreateReferenceAdminMutation();
   const [updateReference, updateState] = useUpdateReferenceAdminMutation();
@@ -239,14 +213,12 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   const saving = createState.isLoading || updateState.isLoading;
   const busy = loading || saving;
 
-  const [values, setValues] = React.useState<FormValues>(() =>
-    emptyForm(queryLocale || 'de'),
-  );
+  const [values, setValues] = React.useState<FormValues>(() => emptyForm(queryLocale || "de"));
   const [slugTouched, setSlugTouched] = React.useState(false);
 
   React.useEffect(() => {
     if (isCreateMode) {
-      setValues(emptyForm(queryLocale || 'de'));
+      setValues(emptyForm(queryLocale || "de"));
       return;
     }
     if (reference) {
@@ -262,10 +234,10 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   const handleLocaleChange = (nextLocaleRaw: string) => {
     const next = normalizeLocale(nextLocaleRaw);
     const list = (localeOptions ?? []).map((x: any) => localeShortClient(x.value));
-    const resolved = next && list.includes(next) ? next : localeShortClientOr(queryLocale, 'de');
+    const resolved = next && list.includes(next) ? next : localeShortClientOr(queryLocale, "de");
 
     if (!resolved) {
-      toast.error(t('admin.references.form.localeRequired'));
+      toast.error(t("admin.references.form.localeRequired"));
       return;
     }
 
@@ -274,7 +246,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   };
 
   function onCancel() {
-    router.push(`/admin/references?locale=${encodeURIComponent(queryLocale || 'de')}`);
+    router.push(`/admin/references?locale=${encodeURIComponent(queryLocale || "de")}`);
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -283,12 +255,12 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
 
     const loc = normalizeLocale(values.locale || queryLocale || apiLocaleFromDb);
     if (!loc || (localeSet.size > 0 && !localeSet.has(localeShortClient(loc)))) {
-      toast.error(t('admin.references.formHeader.localeError'));
+      toast.error(t("admin.references.formHeader.localeError"));
       return;
     }
 
     if (!values.title.trim() || !values.slug.trim()) {
-      toast.error(t('admin.references.formHeader.titleSlugRequired'));
+      toast.error(t("admin.references.formHeader.titleSlugRequired"));
       return;
     }
 
@@ -313,43 +285,41 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
       if (isCreateMode) {
         const payload = { ...common, replicate_all_locales: values.replicate_all_locales };
         const created = await createReference(payload as any).unwrap();
-        const nextId = String((created as any)?.id ?? '').trim();
+        const nextId = String((created as any)?.id ?? "").trim();
 
         if (!isUuidLike(nextId)) {
-          toast.error(t('admin.references.formHeader.createdNoId'));
+          toast.error(t("admin.references.formHeader.createdNoId"));
           return;
         }
 
-        toast.success(t('admin.references.formHeader.created'));
-        router.replace(
-          `/admin/references/${encodeURIComponent(nextId)}?locale=${encodeURIComponent(loc)}`,
-        );
+        toast.success(t("admin.references.formHeader.created"));
+        router.replace(`/admin/references/${encodeURIComponent(nextId)}?locale=${encodeURIComponent(loc)}`);
         router.refresh();
         return;
       }
 
       const currentId = String((reference as any)?.id ?? id);
       if (!isUuidLike(currentId)) {
-        toast.error(t('admin.references.formHeader.idNotFound'));
+        toast.error(t("admin.references.formHeader.idNotFound"));
         return;
       }
 
       const patch = { ...common, apply_all_locales: values.apply_all_locales };
       await updateReference({ id: currentId, patch } as any).unwrap();
-      toast.success(t('admin.references.formHeader.updated'));
+      toast.success(t("admin.references.formHeader.updated"));
 
       const short = localeShortClient(loc);
       if (short && short !== queryLocale) setActiveLocale(short);
     } catch (err) {
-      toast.error(getErrMessage(err, t('admin.references.formHeader.defaultError')));
+      toast.error(getErrMessage(err, t("admin.references.formHeader.defaultError")));
     }
   }
 
   const imageMetadata = React.useMemo(
     () => ({
-      module_key: 'references',
+      module_key: "references",
       locale: queryLocale,
-      reference_slug: values.slug || values.title || '',
+      reference_slug: values.slug || values.title || "",
       ...(values.id ? { reference_id: values.id } : {}),
     }),
     [queryLocale, values.slug, values.title, values.id],
@@ -360,15 +330,13 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{t('admin.references.formHeader.noLocalesTitle')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('admin.references.formHeader.noLocalesDescription')}
-          </p>
+          <h1 className="font-semibold text-lg">{t("admin.references.formHeader.noLocalesTitle")}</h1>
+          <p className="text-muted-foreground text-sm">{t("admin.references.formHeader.noLocalesDescription")}</p>
         </div>
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
-            <Button variant="outline" onClick={() => router.push('/admin/site-settings')}>
-              {t('admin.references.formHeader.goToSettings')}
+            <Button variant="outline" onClick={() => router.push("/admin/site-settings")}>
+              {t("admin.references.formHeader.goToSettings")}
             </Button>
           </CardContent>
         </Card>
@@ -376,21 +344,20 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
     );
   }
 
-  if (!isCreateMode && !isUuidLike(String(id || ''))) {
+  if (!isCreateMode && !isUuidLike(String(id || ""))) {
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{t('admin.references.formHeader.invalidIdTitle')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('admin.references.formHeader.invalidIdDescription')}{' '}
-            <code>{String(id || '-')}</code>
+          <h1 className="font-semibold text-lg">{t("admin.references.formHeader.invalidIdTitle")}</h1>
+          <p className="text-muted-foreground text-sm">
+            {t("admin.references.formHeader.invalidIdDescription")} <code>{String(id || "-")}</code>
           </p>
         </div>
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <Button variant="outline" onClick={onCancel}>
               <ArrowLeft className="mr-2 size-4" />
-              {t('admin.references.formHeader.backToList')}
+              {t("admin.references.formHeader.backToList")}
             </Button>
           </CardContent>
         </Card>
@@ -402,21 +369,20 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
     return (
       <div className="space-y-6">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{t('admin.references.formHeader.notFoundTitle')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('admin.references.formHeader.notFoundDescription')}{' '}
-            <code>{String(id)}</code>
+          <h1 className="font-semibold text-lg">{t("admin.references.formHeader.notFoundTitle")}</h1>
+          <p className="text-muted-foreground text-sm">
+            {t("admin.references.formHeader.notFoundDescription")} <code>{String(id)}</code>
           </p>
         </div>
         <Card>
           <CardContent className="flex items-center justify-between pt-6">
             <Button variant="outline" onClick={onCancel}>
               <ArrowLeft className="mr-2 size-4" />
-              {t('admin.references.formHeader.backToList')}
+              {t("admin.references.formHeader.backToList")}
             </Button>
             <Button variant="outline" onClick={() => refetch()}>
               <RefreshCcw className="mr-2 size-4" />
-              {t('admin.references.formHeader.retryButton')}
+              {t("admin.references.formHeader.retryButton")}
             </Button>
           </CardContent>
         </Card>
@@ -425,8 +391,8 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   }
 
   const pageTitle = isCreateMode
-    ? t('admin.references.formHeader.createTitle')
-    : (reference as any)?.title || t('admin.references.formHeader.editTitle');
+    ? t("admin.references.formHeader.createTitle")
+    : (reference as any)?.title || t("admin.references.formHeader.editTitle");
 
   return (
     <div className="space-y-6">
@@ -435,27 +401,25 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
           <div className="flex flex-wrap items-center gap-2">
             <Button variant="outline" onClick={() => router.back()} disabled={busy}>
               <ArrowLeft className="mr-2 size-4" />
-              {t('admin.references.formHeader.backButton')}
+              {t("admin.references.formHeader.backButton")}
             </Button>
-            <h1 className="text-lg font-semibold">{pageTitle}</h1>
+            <h1 className="font-semibold text-lg">{pageTitle}</h1>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {t('admin.references.formHeader.description')}
-          </p>
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span>{t('admin.references.formHeader.activeLocale')}</span>
-            <Badge variant="secondary">{queryLocale || '-'}</Badge>
+          <p className="text-muted-foreground text-sm">{t("admin.references.formHeader.description")}</p>
+          <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm">
+            <span>{t("admin.references.formHeader.activeLocale")}</span>
+            <Badge variant="secondary">{queryLocale || "-"}</Badge>
             {isCreateMode ? <Badge>CREATE</Badge> : <Badge variant="secondary">EDIT</Badge>}
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={onCancel} disabled={busy}>
-            {t('admin.references.formHeader.cancelButton')}
+            {t("admin.references.formHeader.cancelButton")}
           </Button>
           <Button form="reference-form" type="submit" disabled={busy}>
             <Save className="mr-2 size-4" />
-            {t('admin.references.formHeader.saveButton')}
+            {t("admin.references.formHeader.saveButton")}
           </Button>
         </div>
       </div>
@@ -464,18 +428,16 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
         <Card>
           <CardHeader className="gap-2">
             <CardTitle className="text-base">
-              {isCreateMode
-                ? t('admin.references.form.createTitle')
-                : t('admin.references.form.editTitle')}
+              {isCreateMode ? t("admin.references.form.createTitle") : t("admin.references.form.editTitle")}
             </CardTitle>
-            <CardDescription>{t('admin.references.form.description')}</CardDescription>
+            <CardDescription>{t("admin.references.form.description")}</CardDescription>
           </CardHeader>
 
           <CardContent className="space-y-4">
             <Tabs defaultValue="form">
               <TabsList>
-                <TabsTrigger value="form">{t('admin.references.form.formTab')}</TabsTrigger>
-                <TabsTrigger value="json">{t('admin.references.form.jsonTab')}</TabsTrigger>
+                <TabsTrigger value="form">{t("admin.references.form.formTab")}</TabsTrigger>
+                <TabsTrigger value="json">{t("admin.references.form.jsonTab")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="json" className="mt-4">
@@ -483,8 +445,8 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                   value={values}
                   disabled={disabled}
                   onChange={(next) => setValues(next as FormValues)}
-                  label={t('admin.references.form.jsonLabel')}
-                  helperText={t('admin.references.form.jsonHelperText')}
+                  label={t("admin.references.form.jsonLabel")}
+                  helperText={t("admin.references.form.jsonHelperText")}
                 />
               </TabsContent>
 
@@ -495,23 +457,18 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                     {/* Locale + flags */}
                     <div className="grid gap-4 md:grid-cols-3">
                       <div className="space-y-2">
-                        <Label>{t('admin.references.form.localeLabel')}</Label>
+                        <Label>{t("admin.references.form.localeLabel")}</Label>
                         <Select
-                          value={normalizeLocale(values.locale) || ''}
+                          value={normalizeLocale(values.locale) || ""}
                           onValueChange={handleLocaleChange}
                           disabled={localeDisabled}
                         >
                           <SelectTrigger>
-                            <SelectValue
-                              placeholder={t('admin.references.form.localePlaceholder')}
-                            />
+                            <SelectValue placeholder={t("admin.references.form.localePlaceholder")} />
                           </SelectTrigger>
                           <SelectContent>
                             {(localeOptions ?? []).map((opt: any) => (
-                              <SelectItem
-                                key={`${opt.value}:${opt.label}`}
-                                value={String(opt.value)}
-                              >
+                              <SelectItem key={`${opt.value}:${opt.label}`} value={String(opt.value)}>
                                 {String(opt.label ?? opt.value)}
                               </SelectItem>
                             ))}
@@ -524,28 +481,20 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                           <Checkbox
                             id="ref_is_published"
                             checked={!!values.is_published}
-                            onCheckedChange={(v) =>
-                              setValues((prev) => ({ ...prev, is_published: v === true }))
-                            }
+                            onCheckedChange={(v) => setValues((prev) => ({ ...prev, is_published: v === true }))}
                             disabled={disabled}
                           />
-                          <Label htmlFor="ref_is_published">
-                            {t('admin.references.form.publishedLabel')}
-                          </Label>
+                          <Label htmlFor="ref_is_published">{t("admin.references.form.publishedLabel")}</Label>
                         </div>
 
                         <div className="flex items-center gap-2">
                           <Checkbox
                             id="ref_is_featured"
                             checked={!!values.is_featured}
-                            onCheckedChange={(v) =>
-                              setValues((prev) => ({ ...prev, is_featured: v === true }))
-                            }
+                            onCheckedChange={(v) => setValues((prev) => ({ ...prev, is_featured: v === true }))}
                             disabled={disabled}
                           />
-                          <Label htmlFor="ref_is_featured">
-                            {t('admin.references.form.featuredLabel')}
-                          </Label>
+                          <Label htmlFor="ref_is_featured">{t("admin.references.form.featuredLabel")}</Label>
                         </div>
                       </div>
                     </div>
@@ -555,7 +504,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                     {/* title + slug */}
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label>{t('admin.references.form.titleLabel')}</Label>
+                        <Label>{t("admin.references.form.titleLabel")}</Label>
                         <Input
                           value={values.title}
                           onChange={(e) => {
@@ -571,7 +520,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                       </div>
 
                       <div className="space-y-2">
-                        <Label>{t('admin.references.form.slugLabel')}</Label>
+                        <Label>{t("admin.references.form.slugLabel")}</Label>
                         <Input
                           value={values.slug}
                           onFocus={() => setSlugTouched(true)}
@@ -586,12 +535,10 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
 
                     {/* website_url */}
                     <div className="space-y-2">
-                      <Label>{t('admin.references.form.websiteUrlLabel')}</Label>
+                      <Label>{t("admin.references.form.websiteUrlLabel")}</Label>
                       <Input
                         value={values.website_url}
-                        onChange={(e) =>
-                          setValues((prev) => ({ ...prev, website_url: e.target.value }))
-                        }
+                        onChange={(e) => setValues((prev) => ({ ...prev, website_url: e.target.value }))}
                         disabled={disabled}
                         placeholder="https://..."
                       />
@@ -599,26 +546,22 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
 
                     {/* summary */}
                     <div className="space-y-2">
-                      <Label>{t('admin.references.form.summaryLabel')}</Label>
+                      <Label>{t("admin.references.form.summaryLabel")}</Label>
                       <Textarea
                         rows={2}
                         value={values.summary}
-                        onChange={(e) =>
-                          setValues((prev) => ({ ...prev, summary: e.target.value }))
-                        }
+                        onChange={(e) => setValues((prev) => ({ ...prev, summary: e.target.value }))}
                         disabled={disabled}
                       />
                     </div>
 
                     {/* content (rich) */}
                     <div className="space-y-2">
-                      <Label>{t('admin.references.form.contentLabel')}</Label>
+                      <Label>{t("admin.references.form.contentLabel")}</Label>
                       <RichContentEditor
                         label=""
-                        value={values.content || ''}
-                        onChange={(next) =>
-                          setValues((prev) => ({ ...prev, content: next }))
-                        }
+                        value={values.content || ""}
+                        onChange={(next) => setValues((prev) => ({ ...prev, content: next }))}
                         disabled={disabled}
                         height="280px"
                       />
@@ -628,35 +571,29 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                     <Separator />
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
-                        <Label>{t('admin.references.form.metaTitleLabel')}</Label>
+                        <Label>{t("admin.references.form.metaTitleLabel")}</Label>
                         <Input
                           value={values.meta_title}
-                          onChange={(e) =>
-                            setValues((p) => ({ ...p, meta_title: e.target.value }))
-                          }
+                          onChange={(e) => setValues((p) => ({ ...p, meta_title: e.target.value }))}
                           disabled={disabled}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>{t('admin.references.form.imageAltLabel')}</Label>
+                        <Label>{t("admin.references.form.imageAltLabel")}</Label>
                         <Input
                           value={values.featured_image_alt}
-                          onChange={(e) =>
-                            setValues((p) => ({ ...p, featured_image_alt: e.target.value }))
-                          }
+                          onChange={(e) => setValues((p) => ({ ...p, featured_image_alt: e.target.value }))}
                           disabled={disabled}
                         />
                       </div>
                     </div>
 
                     <div className="space-y-2">
-                      <Label>{t('admin.references.form.metaDescriptionLabel')}</Label>
+                      <Label>{t("admin.references.form.metaDescriptionLabel")}</Label>
                       <Textarea
                         rows={2}
                         value={values.meta_description}
-                        onChange={(e) =>
-                          setValues((p) => ({ ...p, meta_description: e.target.value }))
-                        }
+                        onChange={(e) => setValues((p) => ({ ...p, meta_description: e.target.value }))}
                         disabled={disabled}
                       />
                     </div>
@@ -665,54 +602,46 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                   {/* RIGHT */}
                   <div className="space-y-4 lg:col-span-4">
                     <div className="space-y-2">
-                      <Label>{t('admin.references.form.displayOrderLabel')}</Label>
+                      <Label>{t("admin.references.form.displayOrderLabel")}</Label>
                       <Input
                         type="number"
                         min={0}
                         value={values.display_order}
-                        onChange={(e) =>
-                          setValues((p) => ({ ...p, display_order: e.target.value }))
-                        }
+                        onChange={(e) => setValues((p) => ({ ...p, display_order: e.target.value }))}
                         disabled={disabled}
                       />
                     </div>
 
                     <AdminImageUploadField
-                      label={t('admin.references.formImage.coverLabel')}
-                      helperText={t('admin.references.formImage.coverHelperText')}
+                      label={t("admin.references.formImage.coverLabel")}
+                      helperText={t("admin.references.formImage.coverHelperText")}
                       bucket="public"
                       folder="references"
                       metadata={imageMetadata}
                       value={norm(values.featured_image)}
-                      onChange={(url) =>
-                        setValues((prev) => ({ ...prev, featured_image: norm(url) }))
-                      }
+                      onChange={(url) => setValues((prev) => ({ ...prev, featured_image: norm(url) }))}
                       disabled={disabled}
                       openLibraryHref="/admin/storage"
-                      onOpenLibraryClick={() => router.push('/admin/storage')}
+                      onOpenLibraryClick={() => router.push("/admin/storage")}
                     />
 
                     <Separator />
 
                     <div className="space-y-3">
-                      <div className="text-sm font-medium">
-                        {t('admin.references.form.multiLocaleTitle')}
-                      </div>
+                      <div className="font-medium text-sm">{t("admin.references.form.multiLocaleTitle")}</div>
 
                       <div className="flex items-start gap-2">
                         <Checkbox
                           id="ref_replicate_all"
                           checked={!!values.replicate_all_locales}
-                          onCheckedChange={(v) =>
-                            setValues((p) => ({ ...p, replicate_all_locales: v === true }))
-                          }
+                          onCheckedChange={(v) => setValues((p) => ({ ...p, replicate_all_locales: v === true }))}
                           disabled={disabled}
                         />
                         <div className="space-y-1">
                           <Label htmlFor="ref_replicate_all" className="leading-none">
-                            {t('admin.references.form.replicateAllLocales')}
+                            {t("admin.references.form.replicateAllLocales")}
                           </Label>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             <code>replicate_all_locales</code>
                           </p>
                         </div>
@@ -722,16 +651,14 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
                         <Checkbox
                           id="ref_apply_all"
                           checked={!!values.apply_all_locales}
-                          onCheckedChange={(v) =>
-                            setValues((p) => ({ ...p, apply_all_locales: v === true }))
-                          }
+                          onCheckedChange={(v) => setValues((p) => ({ ...p, apply_all_locales: v === true }))}
                           disabled={disabled}
                         />
                         <div className="space-y-1">
                           <Label htmlFor="ref_apply_all" className="leading-none">
-                            {t('admin.references.form.applyAllLocales')}
+                            {t("admin.references.form.applyAllLocales")}
                           </Label>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-muted-foreground text-xs">
                             <code>apply_all_locales</code>
                           </p>
                         </div>

@@ -3,7 +3,7 @@
 // FINAL — Admin Brands Page
 // =============================================================
 
-import AdminBrandsClient from './_components/admin-brands-client';
+import AdminBrandsClient from "./_components/admin-brands-client";
 
 export default function Page() {
   return <AdminBrandsClient />;

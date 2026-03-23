@@ -108,11 +108,11 @@ export type ProjectListParams = {
    * Not: backend kodunda q.order string olarak parse ediliyor.
    * Bu yüzden en neti `order` stringi üretmek.
    */
-  orderBy?: 'created_at' | 'updated_at' | 'display_order';
-  orderDir?: 'asc' | 'desc';
+  orderBy?: "created_at" | "updated_at" | "display_order";
+  orderDir?: "asc" | "desc";
 
   // optional projections
-  view?: 'card' | 'detail';
+  view?: "card" | "detail";
   select?: string;
 
   // locale (opsiyonel)
@@ -193,14 +193,14 @@ export function toAdminProjectQuery(p?: ProjectListParams) {
   if (p.q) q.q = p.q;
   if (p.slug) q.slug = p.slug;
 
-  if (typeof p.is_published === 'boolean') q.is_published = p.is_published;
-  if (typeof p.is_featured === 'boolean') q.is_featured = p.is_featured;
+  if (typeof p.is_published === "boolean") q.is_published = p.is_published;
+  if (typeof p.is_featured === "boolean") q.is_featured = p.is_featured;
 
   if (p.category) q.category = p.category;
   if (p.client) q.client = p.client;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   // backend: order string
   if (p.orderBy && p.orderDir) q.order = `${p.orderBy}.${p.orderDir}`;
@@ -214,7 +214,7 @@ export function toAdminProjectQuery(p?: ProjectListParams) {
 }
 
 // Public: default published = true (senin public route config public)
-export function toPublicProjectQuery(p?: ProjectListParams | void | null) {
+export function toPublicProjectQuery(p?: ProjectListParams | undefined | null) {
   const q: Record<string, any> = {};
 
   // Public default: published olanlar
@@ -227,14 +227,14 @@ export function toPublicProjectQuery(p?: ProjectListParams | void | null) {
 
   // Public'ta is_published override edilebilir mi?
   // İstersen kapat; şimdilik izin veriyorum:
-  if (typeof p.is_published === 'boolean') q.is_published = p.is_published;
+  if (typeof p.is_published === "boolean") q.is_published = p.is_published;
 
-  if (typeof p.is_featured === 'boolean') q.is_featured = p.is_featured;
+  if (typeof p.is_featured === "boolean") q.is_featured = p.is_featured;
   if (p.category) q.category = p.category;
   if (p.client) q.client = p.client;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   if (p.orderBy && p.orderDir) q.order = `${p.orderBy}.${p.orderDir}`;
 
@@ -284,33 +284,20 @@ export type NormalizedProjectDetail = {
   content: NormalizedProjectContent;
 };
 
-export type GetProjectBySlugArgs = { slug: string; include?: 'images' };
+export type GetProjectBySlugArgs = { slug: string; include?: "images" };
 
 // ---------- primitives ----------
 export function asStr(v: unknown): string {
-  return typeof v === 'string' ? v : '';
+  return typeof v === "string" ? v : "";
 }
 
 export function fmtDateISOToPretty(isoLike?: unknown): string {
   const s = asStr(isoLike).slice(0, 10);
-  if (!s) return '';
-  const [y, m, d] = s.split('-');
+  if (!s) return "";
+  const [y, m, d] = s.split("-");
   if (!y || !m || !d) return s;
 
-  const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
-  ];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const mi = Number(m) - 1;
   return `${d} ${monthNames[mi] ?? m} ${y}`;
 }
@@ -324,20 +311,18 @@ export function fmtDateISOToPretty(isoLike?: unknown): string {
  */
 export function parseStringArray(input: unknown): string[] {
   if (Array.isArray(input)) {
-    return input.filter((x) => typeof x === 'string' && x.trim()).map((x) => String(x).trim());
+    return input.filter((x) => typeof x === "string" && x.trim()).map((x) => String(x).trim());
   }
 
-  if (typeof input === 'string') {
+  if (typeof input === "string") {
     const s = input.trim();
     if (!s) return [];
 
-    if (s.startsWith('[') && s.endsWith(']')) {
+    if (s.startsWith("[") && s.endsWith("]")) {
       try {
         const parsed = JSON.parse(s);
         if (Array.isArray(parsed)) {
-          return parsed
-            .filter((x) => typeof x === 'string' && String(x).trim())
-            .map((x) => String(x).trim());
+          return parsed.filter((x) => typeof x === "string" && String(x).trim()).map((x) => String(x).trim());
         }
       } catch {
         // fallthrough
@@ -345,7 +330,7 @@ export function parseStringArray(input: unknown): string[] {
     }
 
     return s
-      .split(',')
+      .split(",")
       .map((x) => x.trim())
       .filter(Boolean);
   }
@@ -355,10 +340,10 @@ export function parseStringArray(input: unknown): string[] {
 
 export function stripHtml(html: string): string {
   return html
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<\/?[^>]+>/g, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<\/?[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
@@ -367,9 +352,9 @@ export function stripHtml(html: string): string {
  * - string (JSON-string or raw html string)
  * - or object (ProjectContentJson)
  */
-export function parseProjectContent(input: Project['content']): NormalizedProjectContent {
+export function parseProjectContent(input: Project["content"]): NormalizedProjectContent {
   const empty: NormalizedProjectContent = {
-    html: '',
+    html: "",
     description: null,
     key_features: [],
     technologies_used: [],
@@ -379,33 +364,33 @@ export function parseProjectContent(input: Project['content']): NormalizedProjec
   if (!input) return empty;
 
   // object
-  if (typeof input === 'object') {
+  if (typeof input === "object") {
     const obj = input as ProjectContentJson;
     return {
-      html: typeof obj.html === 'string' ? obj.html : '',
-      description: typeof obj.description === 'string' ? obj.description : null,
+      html: typeof obj.html === "string" ? obj.html : "",
+      description: typeof obj.description === "string" ? obj.description : null,
       key_features: Array.isArray(obj.key_features)
-        ? obj.key_features.filter((x) => typeof x === 'string' && x.trim())
+        ? obj.key_features.filter((x) => typeof x === "string" && x.trim())
         : [],
       technologies_used: Array.isArray(obj.technologies_used)
-        ? obj.technologies_used.filter((x) => typeof x === 'string' && x.trim())
+        ? obj.technologies_used.filter((x) => typeof x === "string" && x.trim())
         : [],
       design_highlights: Array.isArray(obj.design_highlights)
-        ? obj.design_highlights.filter((x) => typeof x === 'string' && x.trim())
+        ? obj.design_highlights.filter((x) => typeof x === "string" && x.trim())
         : [],
     };
   }
 
   // string
-  if (typeof input === 'string') {
+  if (typeof input === "string") {
     const s = input.trim();
     if (!s) return empty;
 
     // JSON-string?
-    if (s.startsWith('{') && s.endsWith('}')) {
+    if (s.startsWith("{") && s.endsWith("}")) {
       try {
         const obj = JSON.parse(s) as ProjectContentJson;
-        if (obj && typeof obj === 'object') return parseProjectContent(obj as any);
+        if (obj && typeof obj === "object") return parseProjectContent(obj as any);
       } catch {
         // fallthrough -> treat as html
       }
@@ -427,32 +412,30 @@ export function parseProjectContent(input: Project['content']): NormalizedProjec
 export function normalizeProjectDetail(p: Project): NormalizedProjectDetail {
   const content = parseProjectContent(p.content);
 
-  const title = (p.title ?? '').trim();
-  const category = (p.category ?? '').trim();
+  const title = (p.title ?? "").trim();
+  const category = (p.category ?? "").trim();
 
-  const client = (p.client_name ?? '').trim();
+  const client = (p.client_name ?? "").trim();
 
   const startPretty = fmtDateISOToPretty(p.start_date);
   const completePretty = fmtDateISOToPretty(p.complete_date);
 
   const servicesArr = parseStringArray(p.services ?? null);
 
-  const website = (p.website_url ?? '').trim();
+  const website = (p.website_url ?? "").trim();
 
   const toolsArr = parseStringArray(p.techs ?? null);
 
-  const cover = (p.featured_image ?? '').trim() || '/assets/imgs/work/img-background.png';
-  const coverAlt = (p.featured_image_alt ?? '').trim() || title;
+  const cover = (p.featured_image ?? "").trim() || "/assets/imgs/work/img-background.png";
+  const coverAlt = (p.featured_image_alt ?? "").trim() || title;
 
-  const htmlText = content.html ? stripHtml(content.html) : '';
+  const htmlText = content.html ? stripHtml(content.html) : "";
 
   // Header altı metin: summary > content.description > htmlText
-  const summaryTop =
-    (p.summary ?? '').trim() || (content.description ?? '').trim() || htmlText || '';
+  const summaryTop = (p.summary ?? "").trim() || (content.description ?? "").trim() || htmlText || "";
 
   // Description: content.description > summary > htmlText
-  const descriptionText =
-    (content.description ?? '').trim() || (p.summary ?? '').trim() || htmlText || '';
+  const descriptionText = (content.description ?? "").trim() || (p.summary ?? "").trim() || htmlText || "";
 
   return {
     id: p.id,
@@ -474,20 +457,18 @@ export function normalizeProjectDetail(p: Project): NormalizedProjectDetail {
 }
 
 export function normalizeStringArray(input: unknown): string[] {
-  if (Array.isArray(input))
-    return input.filter((x) => typeof x === 'string' && x.trim()) as string[];
-  if (typeof input === 'string') {
+  if (Array.isArray(input)) return input.filter((x) => typeof x === "string" && x.trim()) as string[];
+  if (typeof input === "string") {
     const s = input.trim();
     if (!s) return [];
-    if (s.startsWith('[') && s.endsWith(']')) {
+    if (s.startsWith("[") && s.endsWith("]")) {
       try {
         const parsed = JSON.parse(s);
-        if (Array.isArray(parsed))
-          return parsed.filter((x) => typeof x === 'string' && x.trim()) as string[];
+        if (Array.isArray(parsed)) return parsed.filter((x) => typeof x === "string" && x.trim()) as string[];
       } catch {}
     }
     return s
-      .split(',')
+      .split(",")
       .map((x) => x.trim())
       .filter(Boolean);
   }
@@ -495,30 +476,30 @@ export function normalizeStringArray(input: unknown): string[] {
 }
 
 export function contentToSummary(p: Project): string {
-  if (typeof p.summary === 'string' && p.summary.trim()) return p.summary;
-  if (p.content && typeof p.content === 'object') {
+  if (typeof p.summary === "string" && p.summary.trim()) return p.summary;
+  if (p.content && typeof p.content === "object") {
     const d = (p.content as any).description;
-    if (typeof d === 'string' && d.trim()) return d;
+    if (typeof d === "string" && d.trim()) return d;
   }
-  return '';
+  return "";
 }
 
 export function slugifyClass(input: unknown): string {
-  const s = typeof input === 'string' ? input : '';
+  const s = typeof input === "string" ? input : "";
   const t = s.trim().toLowerCase();
-  if (!t) return 'other';
+  if (!t) return "other";
   // keep ascii safe: ui/ux -> ui-ux, "APP DESIGN" -> app-design
   return (
     t
-      .replace(/&/g, ' and ')
-      .replace(/[^a-z0-9]+/g, '-') // spaces, slashes, etc.
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '') || 'other'
+      .replace(/&/g, " and ")
+      .replace(/[^a-z0-9]+/g, "-") // spaces, slashes, etc.
+      .replace(/-+/g, "-")
+      .replace(/^-|-$/g, "") || "other"
   );
 }
 
 export function localeFromPathname(pathname: string): string {
   // "/de/work" -> "de"
-  const seg = pathname.split('?')[0].split('#')[0].split('/').filter(Boolean);
-  return seg[0] || 'de';
+  const seg = pathname.split("?")[0].split("#")[0].split("/").filter(Boolean);
+  return seg[0] || "de";
 }

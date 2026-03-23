@@ -3,7 +3,7 @@
 // Ürün Admin Tipleri — backend products + product_i18n schema ile uyumlu
 // =============================================================
 
-export type ProductItemType = 'product' | 'sparepart';
+export type ProductItemType = "product" | "sparepart";
 
 export interface AdminProductDto {
   id: string;
@@ -44,8 +44,8 @@ export interface AdminProductListParams {
   is_featured?: boolean | string;
   limit?: number;
   offset?: number;
-  sort?: 'price' | 'title' | 'created_at' | 'updated_at' | 'order_num';
-  order?: 'asc' | 'desc';
+  sort?: "price" | "title" | "created_at" | "updated_at" | "order_num";
+  order?: "asc" | "desc";
 }
 
 export interface AdminProductListResult {

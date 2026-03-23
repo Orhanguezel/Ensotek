@@ -11,38 +11,37 @@
 // - DnD reorders full dataset (items) based on drag/drop
 // =============================================================
 
-import React, { useEffect, useMemo, useState } from 'react';
-import type {
-  SubCategoryDto,
-  CategoryDto
- } from '@/integrations/shared';
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-  PaginationPrevious,
   PaginationNext,
-  PaginationEllipsis,
-} from '@/components/ui/pagination';
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import type { CategoryDto, SubCategoryDto } from "@/integrations/shared";
 
 /* ---------------- Helpers ---------------- */
 
-const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+const safeText = (v: unknown) => (v === null || v === undefined ? "" : String(v));
 
 const normLocale = (v: unknown) =>
-  String(v ?? '')
+  String(v ?? "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 
 const formatText = (v: unknown, max = 90): string => {
   const s = safeText(v);
-  if (!s) return '';
+  if (!s) return "";
   if (s.length <= max) return s;
-  return s.slice(0, max - 3) + '...';
+  return `${s.slice(0, max - 3)}...`;
 };
 
 export type SubCategoriesListProps = {
@@ -128,7 +127,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
   /* ---------------- Pagination ---------------- */
 
   const pages = useMemo(() => {
-    const out: Array<number | 'ellipsis-left' | 'ellipsis-right'> = [];
+    const out: Array<number | "ellipsis-left" | "ellipsis-right"> = [];
     if (pageCount <= 7) {
       for (let i = 1; i <= pageCount; i += 1) out.push(i);
       return out;
@@ -140,12 +139,12 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
     let left = Math.max(2, currentPage - siblings);
     let right = Math.min(pageCount - 1, currentPage + siblings);
 
-    if (left > 2) out.push('ellipsis-left');
+    if (left > 2) out.push("ellipsis-left");
     else left = 2;
 
     for (let i = left; i <= right; i += 1) out.push(i);
 
-    if (right < pageCount - 1) out.push('ellipsis-right');
+    if (right < pageCount - 1) out.push("ellipsis-right");
     else right = pageCount - 1;
 
     out.push(pageCount);
@@ -163,55 +162,48 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
     const c = categoriesMap[item.category_id];
     if (!c) return item.category_id;
 
-    const name =
-      safeText((c as any).name) || safeText((c as any).title) || safeText((c as any).slug) || c.id;
-    const loc = safeText((c as any).locale) || '-';
+    const name = safeText((c as any).name) || safeText((c as any).title) || safeText((c as any).slug) || c.id;
+    const loc = safeText((c as any).locale) || "-";
     return `${name} (${loc})`;
   };
 
   const renderBadges = (item: SubCategoryDto) => {
-    const loc = normLocale((item as any).locale) || '-';
+    const loc = normLocale((item as any).locale) || "-";
     return (
       <div className="d-flex flex-wrap gap-2">
-        <span className="badge bg-light text-dark border small">
+        <span className="badge small border bg-light text-dark">
           Dil: <code>{loc}</code>
         </span>
-        <span className="badge bg-light text-dark border small">
+        <span className="badge small border bg-light text-dark">
           Sıra: <strong>{(item as any).display_order ?? 0}</strong>
         </span>
         {(item as any).is_featured ? (
-          <span className="badge bg-warning-subtle text-warning border border-warning-subtle small">
-            Öne çıkan
-          </span>
+          <span className="badge small border border-warning-subtle bg-warning-subtle text-warning">Öne çıkan</span>
         ) : null}
         {(item as any).is_active ? (
-          <span className="badge bg-success-subtle text-success border border-success-subtle small">
-            Aktif
-          </span>
+          <span className="badge small border border-success-subtle bg-success-subtle text-success">Aktif</span>
         ) : (
-          <span className="badge bg-secondary-subtle text-secondary border border-secondary-subtle small">
-            Pasif
-          </span>
+          <span className="badge small border border-secondary-subtle bg-secondary-subtle text-secondary">Pasif</span>
         )}
       </div>
     );
   };
 
   const captionText = (
-    <span className="text-muted small">
-      Sıralama değişikliği (DnD) sadece çok büyük ekranlarda (xxl+) tabloda aktiftir. Kalıcı yapmak
-      için <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullan.
+    <span className="small text-muted">
+      Sıralama değişikliği (DnD) sadece çok büyük ekranlarda (xxl+) tabloda aktiftir. Kalıcı yapmak için{" "}
+      <strong>&quot;Sıralamayı Kaydet&quot;</strong> butonunu kullan.
     </span>
   );
 
   return (
     <div className="card">
       <div className="card-header py-2">
-        <div className="d-flex align-items-start align-items-md-center justify-content-between gap-2 flex-wrap">
+        <div className="d-flex justify-content-between flex-wrap gap-2 align-items-md-center align-items-start">
           <div className="small fw-semibold">Alt Kategori Listesi</div>
 
-          <div className="d-flex align-items-center gap-2 flex-wrap">
-            {busy && <span className="badge bg-secondary small">İşlem yapılıyor...</span>}
+          <div className="d-flex flex-wrap gap-2 align-items-center">
+            {busy && <span className="badge small bg-secondary">İşlem yapılıyor...</span>}
 
             <button
               type="button"
@@ -219,10 +211,10 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
               onClick={onSaveOrder}
               disabled={!hasData || savingOrder || loading}
             >
-              {savingOrder ? 'Sıralama kaydediliyor...' : 'Sıralamayı Kaydet'}
+              {savingOrder ? "Sıralama kaydediliyor..." : "Sıralamayı Kaydet"}
             </button>
 
-            <span className="text-muted small">
+            <span className="small text-muted">
               Toplam: <strong>{totalItems}</strong>
             </span>
           </div>
@@ -233,12 +225,12 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
         {/* ===================== XXL+ TABLE (DnD only) ===================== */}
         <div className="d-none d-xxl-block">
           <div className="table-responsive">
-            <table className="table table-sm table-hover align-middle mb-0">
+            <table className="table-sm table-hover mb-0 table align-middle">
               <thead className="table-light">
                 <tr>
                   <th style={{ width: 56 }} />
-                  <th style={{ width: '34%' }}>Alt Kategori</th>
-                  <th style={{ width: '26%' }}>Kategori</th>
+                  <th style={{ width: "34%" }}>Alt Kategori</th>
+                  <th style={{ width: "26%" }}>Kategori</th>
                   <th style={{ width: 120 }}>Dil</th>
                   <th className="text-center" style={{ width: 90 }}>
                     Aktif
@@ -249,7 +241,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                   <th className="text-center" style={{ width: 90 }}>
                     Sıra
                   </th>
-                  <th style={{ width: 170 }} className="text-end text-nowrap">
+                  <th style={{ width: 170 }} className="text-nowrap text-end">
                     İşlemler
                   </th>
                 </tr>
@@ -258,17 +250,17 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
               <tbody>
                 {!hasData ? (
                   <tr>
-                    <td colSpan={8} className="text-center py-4 small text-muted">
-                      {loading ? 'Alt kategoriler yükleniyor...' : 'Henüz alt kategori bulunmuyor.'}
+                    <td colSpan={8} className="small py-4 text-center text-muted">
+                      {loading ? "Alt kategoriler yükleniyor..." : "Henüz alt kategori bulunmuyor."}
                     </td>
                   </tr>
                 ) : (
                   pageRows.map((item, index) => {
                     const globalIndex = startIndex + index;
 
-                    const name = safeText((item as any).name) || '(Ad yok)';
-                    const slug = safeText((item as any).slug) || '-';
-                    const locale = safeText((item as any).locale) || '-';
+                    const name = safeText((item as any).name) || "(Ad yok)";
+                    const slug = safeText((item as any).slug) || "-";
+                    const locale = safeText((item as any).locale) || "-";
 
                     return (
                       <tr
@@ -278,33 +270,33 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                         onDragEnd={canReorderXxl ? handleDragEnd : undefined}
                         onDragOver={canReorderXxl ? (e) => e.preventDefault() : undefined}
                         onDrop={canReorderXxl ? () => handleDropOn(item.id) : undefined}
-                        className={draggingId === item.id ? 'table-active' : undefined}
-                        style={canReorderXxl ? { cursor: 'move' } : { cursor: 'default' }}
+                        className={draggingId === item.id ? "table-active" : undefined}
+                        style={canReorderXxl ? { cursor: "move" } : { cursor: "default" }}
                       >
-                        <td className="text-muted small text-nowrap">
+                        <td className="small text-nowrap text-muted">
                           {canReorderXxl && <span className="me-1">≡</span>}
                           {globalIndex + 1}
                         </td>
 
                         <td className="align-middle">
-                          <div className="d-flex align-items-center gap-2">
+                          <div className="d-flex gap-2 align-items-center">
                             {(item as any).image_url ? (
                               <div
-                                className="border rounded bg-light"
+                                className="rounded border bg-light"
                                 style={{
                                   width: 64,
                                   height: 40,
-                                  overflow: 'hidden',
-                                  flex: '0 0 auto',
+                                  overflow: "hidden",
+                                  flex: "0 0 auto",
                                 }}
                               >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
                                 <img
                                   src={(item as any).image_url}
                                   alt={safeText((item as any).alt) || name}
-                                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                   onError={(e) => {
-                                    (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                    (e.currentTarget as HTMLImageElement).style.display = "none";
                                   }}
                                 />
                               </div>
@@ -314,24 +306,24 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                               <div className="fw-semibold small text-truncate" title={name}>
                                 {name}
                               </div>
-                              <div className="text-muted small text-truncate" title={slug}>
+                              <div className="small text-muted text-truncate" title={slug}>
                                 <code>{slug}</code>
                               </div>
                             </div>
                           </div>
                         </td>
 
-                        <td className="align-middle small">
+                        <td className="small align-middle">
                           <div className="text-truncate" title={getCategoryLabel(item)}>
                             {getCategoryLabel(item)}
                           </div>
                         </td>
 
-                        <td className="align-middle small text-nowrap">
+                        <td className="small text-nowrap align-middle">
                           <code>{locale}</code>
                         </td>
 
-                        <td className="align-middle text-center">
+                        <td className="text-center align-middle">
                           <div className="form-check form-switch d-inline-flex m-0">
                             <input
                               className="form-check-input"
@@ -343,7 +335,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                           </div>
                         </td>
 
-                        <td className="align-middle text-center">
+                        <td className="text-center align-middle">
                           <div className="form-check form-switch d-inline-flex m-0">
                             <input
                               className="form-check-input"
@@ -355,11 +347,9 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                           </div>
                         </td>
 
-                        <td className="align-middle text-center small">
-                          {(item as any).display_order ?? 0}
-                        </td>
+                        <td className="small text-center align-middle">{(item as any).display_order ?? 0}</td>
 
-                        <td className="align-middle text-end text-nowrap">
+                        <td className="text-nowrap text-end align-middle">
                           <div className="btn-group btn-group-sm">
                             <button
                               type="button"
@@ -393,73 +383,62 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
         {/* ===================== < XXL : CARDS (tablet + mobile) ===================== */}
         <div className="d-block d-xxl-none">
           {loading ? (
-            <div className="px-3 py-3 text-center text-muted small">
-              Alt kategoriler yükleniyor...
-            </div>
+            <div className="small px-3 py-3 text-center text-muted">Alt kategoriler yükleniyor...</div>
           ) : hasData ? (
             <div className="p-3">
               <div className="row g-3">
                 {pageRows.map((item, index) => {
                   const globalIndex = startIndex + index;
 
-                  const name = safeText((item as any).name) || '(Ad yok)';
-                  const slug = safeText((item as any).slug) || '-';
+                  const name = safeText((item as any).name) || "(Ad yok)";
+                  const slug = safeText((item as any).slug) || "-";
                   const desc = safeText((item as any).description);
                   const img = safeText((item as any).image_url);
 
                   return (
                     <div key={item.id} className="col-12 col-lg-6">
-                      <div className="border rounded-3 p-3 bg-white h-100">
-                        <div className="d-flex justify-content-between align-items-start gap-2">
-                          <div className="d-flex align-items-center gap-2 flex-wrap">
-                            <span className="badge bg-light text-dark border">
-                              #{globalIndex + 1}
-                            </span>
-                            <span className="badge bg-light text-dark border small">
+                      <div className="h-100 rounded-3 border bg-white p-3">
+                        <div className="d-flex justify-content-between gap-2 align-items-start">
+                          <div className="d-flex flex-wrap gap-2 align-items-center">
+                            <span className="badge border bg-light text-dark">#{globalIndex + 1}</span>
+                            <span className="badge small border bg-light text-dark">
                               Kategori: {formatText(getCategoryLabel(item), 40)}
                             </span>
                           </div>
                         </div>
 
-                        <div className="mt-2 d-flex gap-2">
+                        <div className="d-flex mt-2 gap-2">
                           {img ? (
                             <div
-                              className="border rounded bg-light"
+                              className="rounded border bg-light"
                               style={{
                                 width: 88,
                                 height: 56,
-                                overflow: 'hidden',
-                                flex: '0 0 auto',
+                                overflow: "hidden",
+                                flex: "0 0 auto",
                               }}
                             >
                               {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img
                                 src={img}
                                 alt={safeText((item as any).alt) || name}
-                                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                style={{ width: "100%", height: "100%", objectFit: "cover" }}
                                 onError={(e) => {
-                                  (e.currentTarget as HTMLImageElement).style.display = 'none';
+                                  (e.currentTarget as HTMLImageElement).style.display = "none";
                                 }}
                               />
                             </div>
                           ) : null}
 
                           <div style={{ minWidth: 0 }}>
-                            <div
-                              className="fw-semibold"
-                              style={{ wordBreak: 'break-word' }}
-                              title={name}
-                            >
+                            <div className="fw-semibold" style={{ wordBreak: "break-word" }} title={name}>
                               {name}
                             </div>
-                            <div className="text-muted small" style={{ wordBreak: 'break-word' }}>
+                            <div className="small text-muted" style={{ wordBreak: "break-word" }}>
                               Slug: <code>{slug}</code>
                             </div>
                             {desc ? (
-                              <div
-                                className="text-muted small mt-1"
-                                style={{ wordBreak: 'break-word' }}
-                              >
+                              <div className="small mt-1 text-muted" style={{ wordBreak: "break-word" }}>
                                 {formatText(desc, 120)}
                               </div>
                             ) : null}
@@ -468,7 +447,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
 
                         <div className="mt-3">{renderBadges(item)}</div>
 
-                        <div className="mt-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <div className="d-flex justify-content-between mt-3 flex-wrap gap-2 align-items-center">
                           <div className="d-flex flex-wrap gap-3">
                             <div className="form-check form-switch m-0">
                               <input
@@ -521,9 +500,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
               <div className="pt-3">{captionText}</div>
             </div>
           ) : (
-            <div className="px-3 py-3 text-center text-muted small">
-              Henüz alt kategori bulunmuyor.
-            </div>
+            <div className="small px-3 py-3 text-center text-muted">Henüz alt kategori bulunmuyor.</div>
           )}
         </div>
 
@@ -543,7 +520,7 @@ export const SubCategoriesList: React.FC<SubCategoriesListProps> = ({
                 </PaginationItem>
 
                 {pages.map((p, idx) =>
-                  typeof p === 'number' ? (
+                  typeof p === "number" ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

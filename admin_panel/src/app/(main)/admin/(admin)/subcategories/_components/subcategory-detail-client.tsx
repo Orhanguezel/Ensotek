@@ -6,38 +6,35 @@
 // Ensotek Admin Panel Standartı
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import * as React from "react";
+
+import { useRouter } from "next/navigation";
+
+import { ArrowLeft, FileJson, Save } from "lucide-react";
+import { toast } from "sonner";
+
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { AdminJsonEditor } from "@/app/(main)/admin/_components/common/AdminJsonEditor";
+import { AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useListCategoriesAdminQuery } from "@/integrations/endpoints/admin/categories_admin.endpoints";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { ArrowLeft, Save, FileJson } from 'lucide-react';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
-import { AdminLocaleSelect } from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { AdminJsonEditor } from '@/app/(main)/admin/_components/common/AdminJsonEditor';
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { toast } from 'sonner';
-import {
-  useGetSubCategoryAdminQuery,
   useCreateSubCategoryAdminMutation,
+  useGetSubCategoryAdminQuery,
   useUpdateSubCategoryAdminMutation,
-} from '@/integrations/endpoints/admin/subcategories_admin.endpoints';
-import { useListCategoriesAdminQuery } from '@/integrations/endpoints/admin/categories_admin.endpoints';
+} from "@/integrations/endpoints/admin/subcategories_admin.endpoints";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 // ─── Props ───────────────────────────────────────────────────
 
@@ -48,24 +45,23 @@ interface Props {
 // ─── Bileşen ─────────────────────────────────────────────────
 
 export default function SubcategoryDetailClient({ id }: Props) {
-  const t = useAdminT('admin.subcategories');
+  const t = useAdminT("admin.subcategories");
   const router = useRouter();
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
-  const isNew = id === 'new';
+  const isNew = id === "new";
 
   const { localeOptions } = useAdminLocales();
-  const [activeLocale, setActiveLocale] = React.useState<string>(adminLocale || 'tr');
-  const [activeTab, setActiveTab] = React.useState<'form' | 'json'>('form');
+  const [activeLocale, setActiveLocale] = React.useState<string>(adminLocale || "tr");
+  const [activeTab, setActiveTab] = React.useState<"form" | "json">("form");
 
   // ── RTK Query ──
-  const { data: item, isFetching, refetch } = useGetSubCategoryAdminQuery(
-    { id, locale: activeLocale },
-    { skip: isNew },
-  );
+  const {
+    data: item,
+    isFetching,
+    refetch,
+  } = useGetSubCategoryAdminQuery({ id, locale: activeLocale }, { skip: isNew });
 
-  const { data: categories = [] } = useListCategoriesAdminQuery(
-    { locale: activeLocale || 'tr', limit: 200 } as any,
-  );
+  const { data: categories = [] } = useListCategoriesAdminQuery({ locale: activeLocale || "tr", limit: 200 } as any);
 
   const [createSubCategory, { isLoading: isCreating }] = useCreateSubCategoryAdminMutation();
   const [updateSubCategory, { isLoading: isUpdating }] = useUpdateSubCategoryAdminMutation();
@@ -73,14 +69,14 @@ export default function SubcategoryDetailClient({ id }: Props) {
   // ── Form state ──
   const [formData, setFormData] = React.useState({
     locale: activeLocale,
-    name: '',
-    slug: '',
-    description: '',
-    category_id: '',
-    icon: '',
-    alt: '',
-    image_url: '',
-    storage_asset_id: '',
+    name: "",
+    slug: "",
+    description: "",
+    category_id: "",
+    icon: "",
+    alt: "",
+    image_url: "",
+    storage_asset_id: "",
     is_active: true,
     is_featured: false,
     display_order: 0,
@@ -91,25 +87,25 @@ export default function SubcategoryDetailClient({ id }: Props) {
     if (item && !isNew) {
       setFormData({
         locale: item.locale || activeLocale,
-        name: item.name || '',
-        slug: item.slug || '',
-        description: item.description || '',
-        category_id: item.category_id ? String(item.category_id) : '',
-        icon: item.icon || '',
-        alt: item.alt || '',
-        image_url: item.image_url || '',
-        storage_asset_id: item.storage_asset_id || '',
+        name: item.name || "",
+        slug: item.slug || "",
+        description: item.description || "",
+        category_id: item.category_id ? String(item.category_id) : "",
+        icon: item.icon || "",
+        alt: item.alt || "",
+        image_url: item.image_url || "",
+        storage_asset_id: item.storage_asset_id || "",
         is_active: item.is_active ?? true,
         is_featured: item.is_featured ?? false,
         display_order: item.display_order ?? 0,
       });
     }
-  }, [item, isNew]); // activeLocale kasıtlı olarak dışarıda — locale değişince formData sıfırlanmasın
+  }, [item, isNew, activeLocale]); // activeLocale kasıtlı olarak dışarıda — locale değişince formData sıfırlanmasın
 
   // ── Locale değişince yeniden çek ──
   React.useEffect(() => {
     if (!isNew && id) refetch();
-  }, [activeLocale, id, isNew, refetch]);
+  }, [id, isNew, refetch]);
 
   // ── Auto-slug ──
   const [slugTouched, setSlugTouched] = React.useState(false);
@@ -117,43 +113,44 @@ export default function SubcategoryDetailClient({ id }: Props) {
     if (!isNew || slugTouched) return;
     const slug = formData.name
       .toLowerCase()
-      .replace(/ç/g, 'c').replace(/ğ/g, 'g').replace(/ı/g, 'i')
-      .replace(/ö/g, 'o').replace(/ş/g, 's').replace(/ü/g, 'u')
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/^-+|-+$/g, '');
+      .replace(/ç/g, "c")
+      .replace(/ğ/g, "g")
+      .replace(/ı/g, "i")
+      .replace(/ö/g, "o")
+      .replace(/ş/g, "s")
+      .replace(/ü/g, "u")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
     setFormData((prev) => ({ ...prev, slug }));
   }, [formData.name, isNew, slugTouched]);
 
   // ── Handler'lar ──
-  const handleBack = () => router.push('/admin/subcategories');
+  const handleBack = () => router.push("/admin/subcategories");
 
   const handleLocaleChange = (next: string) => {
     setActiveLocale(next);
     setFormData((prev) => ({ ...prev, locale: next }));
   };
 
-  const handleChange = (field: string, value: unknown) =>
-    setFormData((prev) => ({ ...prev, [field]: value }));
+  const handleChange = (field: string, value: unknown) => setFormData((prev) => ({ ...prev, [field]: value }));
 
-  const handleJsonChange = (json: Record<string, any>) =>
-    setFormData((prev) => ({ ...prev, ...json }));
+  const handleJsonChange = (json: Record<string, any>) => setFormData((prev) => ({ ...prev, ...json }));
 
-  const handleImageChange = (url: string) =>
-    setFormData((prev) => ({ ...prev, image_url: url }));
+  const handleImageChange = (url: string) => setFormData((prev) => ({ ...prev, image_url: url }));
 
   const handleSubmit = async (e?: React.FormEvent) => {
     e?.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error(t('messages.nameRequired'));
+      toast.error(t("messages.nameRequired"));
       return;
     }
     if (!formData.slug.trim()) {
-      toast.error(t('messages.slugRequired'));
+      toast.error(t("messages.slugRequired"));
       return;
     }
     if (!formData.category_id) {
-      toast.error(t('messages.categoryRequired'));
+      toast.error(t("messages.categoryRequired"));
       return;
     }
 
@@ -175,17 +172,17 @@ export default function SubcategoryDetailClient({ id }: Props) {
     try {
       if (isNew) {
         const result = await createSubCategory(payload).unwrap();
-        toast.success(t('messages.createdSuccess'));
+        toast.success(t("messages.createdSuccess"));
         if (result?.id) {
           router.push(`/admin/subcategories/${result.id}`);
         }
       } else {
         await updateSubCategory({ id, patch: payload }).unwrap();
-        toast.success(t('messages.updatedSuccess'));
+        toast.success(t("messages.updatedSuccess"));
       }
     } catch (error: any) {
-      const msg = error?.data?.error?.message || error?.message || t('messages.error', { error: '' });
-      toast.error(t('messages.error', { error: msg }));
+      const msg = error?.data?.error?.message || error?.message || t("messages.error", { error: "" });
+      toast.error(t("messages.error", { error: msg }));
     }
   };
 
@@ -193,8 +190,8 @@ export default function SubcategoryDetailClient({ id }: Props) {
 
   const localesForSelect = React.useMemo(() => {
     return (localeOptions || []).map((l: any) => ({
-      value: String(l.value || ''),
-      label: String(l.label || l.value || ''),
+      value: String(l.value || ""),
+      label: String(l.label || l.value || ""),
     }));
   }, [localeOptions]);
 
@@ -209,11 +206,9 @@ export default function SubcategoryDetailClient({ id }: Props) {
                 <ArrowLeft className="h-4 w-4" />
               </Button>
               <div>
-                <CardTitle className="text-base">
-                  {isNew ? t('form.createTitle') : t('form.editTitle')}
-                </CardTitle>
+                <CardTitle className="text-base">{isNew ? t("form.createTitle") : t("form.editTitle")}</CardTitle>
                 <CardDescription>
-                  {isNew ? t('form.createDesc') : t('form.editDesc', { name: item?.name || '' })}
+                  {isNew ? t("form.createDesc") : t("form.editDesc", { name: item?.name || "" })}
                 </CardDescription>
               </div>
             </div>
@@ -228,11 +223,11 @@ export default function SubcategoryDetailClient({ id }: Props) {
       </Card>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'form' | 'json')}>
+      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "form" | "json")}>
         <TabsList>
           <TabsTrigger value="form">Form</TabsTrigger>
           <TabsTrigger value="json">
-            <FileJson className="h-4 w-4 mr-2" />
+            <FileJson className="mr-2 h-4 w-4" />
             JSON
           </TabsTrigger>
         </TabsList>
@@ -241,26 +236,24 @@ export default function SubcategoryDetailClient({ id }: Props) {
         <TabsContent value="form">
           <form onSubmit={handleSubmit}>
             <Card>
-              <CardContent className="pt-6 space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
+              <CardContent className="space-y-6 pt-6">
+                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                   {/* Main Column */}
-                  <div className="lg:col-span-2 space-y-5">
-
+                  <div className="space-y-5 lg:col-span-2">
                     {/* Üst Kategori */}
                     <div className="space-y-2">
-                      <Label htmlFor="category_id">{t('form.category')} *</Label>
+                      <Label htmlFor="category_id">{t("form.category")} *</Label>
                       <Select
-                        key={`cat-${formData.category_id || 'empty'}-${categories.length > 0 ? 'loaded' : 'loading'}`}
-                        value={formData.category_id || 'none'}
-                        onValueChange={(v) => handleChange('category_id', v === 'none' ? '' : v)}
+                        key={`cat-${formData.category_id || "empty"}-${categories.length > 0 ? "loaded" : "loading"}`}
+                        value={formData.category_id || "none"}
+                        onValueChange={(v) => handleChange("category_id", v === "none" ? "" : v)}
                         disabled={isLoading}
                       >
                         <SelectTrigger id="category_id">
-                          <SelectValue placeholder={t('form.selectCategory')} />
+                          <SelectValue placeholder={t("form.selectCategory")} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">{t('form.selectNone')}</SelectItem>
+                          <SelectItem value="none">{t("form.selectNone")}</SelectItem>
                           {categories.map((cat: any) => (
                             <SelectItem key={cat.id} value={String(cat.id)}>
                               {cat.name || cat.slug}
@@ -272,13 +265,13 @@ export default function SubcategoryDetailClient({ id }: Props) {
 
                     {/* Ad */}
                     <div className="space-y-2">
-                      <Label htmlFor="name">{t('form.name')} *</Label>
+                      <Label htmlFor="name">{t("form.name")} *</Label>
                       <Input
                         id="name"
                         value={formData.name}
-                        onChange={(e) => handleChange('name', e.target.value)}
+                        onChange={(e) => handleChange("name", e.target.value)}
                         disabled={isLoading}
-                        placeholder={t('form.namePlaceholder')}
+                        placeholder={t("form.namePlaceholder")}
                       />
                     </div>
 
@@ -290,44 +283,44 @@ export default function SubcategoryDetailClient({ id }: Props) {
                         value={formData.slug}
                         onChange={(e) => {
                           setSlugTouched(true);
-                          handleChange('slug', e.target.value);
+                          handleChange("slug", e.target.value);
                         }}
                         disabled={isLoading}
-                        placeholder={t('form.slugPlaceholder')}
+                        placeholder={t("form.slugPlaceholder")}
                       />
                     </div>
 
                     {/* Açıklama */}
                     <div className="space-y-2">
-                      <Label htmlFor="description">{t('form.description')}</Label>
+                      <Label htmlFor="description">{t("form.description")}</Label>
                       <Textarea
                         id="description"
                         value={formData.description}
-                        onChange={(e) => handleChange('description', e.target.value)}
+                        onChange={(e) => handleChange("description", e.target.value)}
                         disabled={isLoading}
                         rows={3}
-                        placeholder={t('form.descriptionPlaceholder')}
+                        placeholder={t("form.descriptionPlaceholder")}
                       />
                     </div>
 
                     {/* İkon + Alt */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="icon">{t('form.icon')}</Label>
+                        <Label htmlFor="icon">{t("form.icon")}</Label>
                         <Input
                           id="icon"
                           value={formData.icon}
-                          onChange={(e) => handleChange('icon', e.target.value)}
+                          onChange={(e) => handleChange("icon", e.target.value)}
                           disabled={isLoading}
                           placeholder="fa-cube"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="alt">{t('form.alt')}</Label>
+                        <Label htmlFor="alt">{t("form.alt")}</Label>
                         <Input
                           id="alt"
                           value={formData.alt}
-                          onChange={(e) => handleChange('alt', e.target.value)}
+                          onChange={(e) => handleChange("alt", e.target.value)}
                           disabled={isLoading}
                         />
                       </div>
@@ -335,12 +328,12 @@ export default function SubcategoryDetailClient({ id }: Props) {
 
                     {/* Sıralama */}
                     <div className="space-y-2">
-                      <Label htmlFor="display_order">{t('form.displayOrder')}</Label>
+                      <Label htmlFor="display_order">{t("form.displayOrder")}</Label>
                       <Input
                         id="display_order"
                         type="number"
                         value={formData.display_order}
-                        onChange={(e) => handleChange('display_order', Number(e.target.value))}
+                        onChange={(e) => handleChange("display_order", Number(e.target.value))}
                         disabled={isLoading}
                       />
                     </div>
@@ -351,22 +344,22 @@ export default function SubcategoryDetailClient({ id }: Props) {
                         <Switch
                           id="is_active"
                           checked={formData.is_active}
-                          onCheckedChange={(v) => handleChange('is_active', v)}
+                          onCheckedChange={(v) => handleChange("is_active", v)}
                           disabled={isLoading}
                         />
                         <Label htmlFor="is_active" className="cursor-pointer">
-                          {t('form.isActive')}
+                          {t("form.isActive")}
                         </Label>
                       </div>
                       <div className="flex items-center gap-2">
                         <Switch
                           id="is_featured"
                           checked={formData.is_featured}
-                          onCheckedChange={(v) => handleChange('is_featured', v)}
+                          onCheckedChange={(v) => handleChange("is_featured", v)}
                           disabled={isLoading}
                         />
                         <Label htmlFor="is_featured" className="cursor-pointer">
-                          {t('form.isFeatured')}
+                          {t("form.isFeatured")}
                         </Label>
                       </div>
                     </div>
@@ -375,7 +368,7 @@ export default function SubcategoryDetailClient({ id }: Props) {
                   {/* Sidebar – Görsel */}
                   <div className="space-y-4">
                     <AdminImageUploadField
-                      label={t('form.image')}
+                      label={t("form.image")}
                       value={formData.image_url}
                       onChange={handleImageChange}
                       disabled={isLoading}
@@ -384,13 +377,13 @@ export default function SubcategoryDetailClient({ id }: Props) {
                 </div>
 
                 {/* Actions */}
-                <div className="flex justify-end gap-3 pt-4 border-t">
+                <div className="flex justify-end gap-3 border-t pt-4">
                   <Button type="button" variant="outline" onClick={handleBack} disabled={isLoading}>
-                    {t('actions.cancel')}
+                    {t("actions.cancel")}
                   </Button>
                   <Button type="submit" disabled={isLoading}>
-                    <Save className="h-4 w-4 mr-2" />
-                    {t('actions.save')}
+                    <Save className="mr-2 h-4 w-4" />
+                    {t("actions.save")}
                   </Button>
                 </div>
               </CardContent>
@@ -402,37 +395,30 @@ export default function SubcategoryDetailClient({ id }: Props) {
         <TabsContent value="json">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t('form.jsonTitle')}</CardTitle>
-              <CardDescription>
-                {t('form.jsonDesc')}
-              </CardDescription>
+              <CardTitle className="text-base">{t("form.jsonTitle")}</CardTitle>
+              <CardDescription>{t("form.jsonDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2">
-                  <AdminJsonEditor
-                    value={formData}
-                    onChange={handleJsonChange}
-                    disabled={isLoading}
-                    height={500}
-                  />
+                  <AdminJsonEditor value={formData} onChange={handleJsonChange} disabled={isLoading} height={500} />
                 </div>
                 <div className="space-y-4">
                   <AdminImageUploadField
-                    label={t('form.image')}
+                    label={t("form.image")}
                     value={formData.image_url}
                     onChange={handleImageChange}
                     disabled={isLoading}
                   />
                 </div>
               </div>
-              <div className="flex justify-end gap-3 pt-4 border-t">
+              <div className="flex justify-end gap-3 border-t pt-4">
                 <Button type="button" variant="outline" onClick={handleBack} disabled={isLoading}>
-                  {t('actions.cancel')}
+                  {t("actions.cancel")}
                 </Button>
                 <Button onClick={handleSubmit} disabled={isLoading}>
-                  <Save className="h-4 w-4 mr-2" />
-                  {t('actions.save')}
+                  <Save className="mr-2 h-4 w-4" />
+                  {t("actions.save")}
                 </Button>
               </div>
             </CardContent>

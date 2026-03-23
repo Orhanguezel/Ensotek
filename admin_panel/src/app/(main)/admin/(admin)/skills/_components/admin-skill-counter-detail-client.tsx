@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/skills/counters/[id]/admin-skill-counter-detail-client.tsx
@@ -6,18 +6,16 @@
 // ✅ All TypeScript errors fixed
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { ArrowLeft, Save, Trash2, Loader2 } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from "next/navigation";
 
+import { ArrowLeft, Loader2, Save, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,49 +25,45 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import { AdminLocaleSelect, type AdminLocaleOption } from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-
-import type { SkillCounterMerged, CreateSkillCounterInput } from '@/integrations/shared';
-import { isUuidLike } from '@/integrations/shared';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
-  useListSkillCountersAdminQuery,
   useCreateSkillCounterAdminMutation,
-  useUpdateSkillCounterAdminMutation,
+  useListSkillCountersAdminQuery,
   useRemoveSkillCounterAdminMutation,
-} from '@/integrations/hooks';
+  useUpdateSkillCounterAdminMutation,
+} from "@/integrations/hooks";
+import type { CreateSkillCounterInput } from "@/integrations/shared";
+import { isUuidLike } from "@/integrations/shared";
 
 type FormData = CreateSkillCounterInput & { id?: string };
 
 const emptyForm: FormData = {
   percent: 0,
-  image_url: '',
-  image_asset_id: '',
+  image_url: "",
+  image_asset_id: "",
   is_active: true,
   display_order: 0,
-  locale: '',
-  title: '',
-  slug: '',
+  locale: "",
+  title: "",
+  slug: "",
 };
 
 function getErrMsg(e: unknown): string {
   const anyErr = e as any;
-  return (
-    anyErr?.data?.error?.message ||
-    anyErr?.data?.message ||
-    anyErr?.message ||
-    'İşlem başarısız'
-  );
+  return anyErr?.data?.error?.message || anyErr?.data?.message || anyErr?.message || "İşlem başarısız";
 }
 
 export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
   const router = useRouter();
   const { copy } = useAdminUiCopy();
   const page = copy.pages?.skills ?? {};
-  const common = copy.common;
+  const _common = copy.common;
 
   const { localeOptions, defaultLocaleFromDb, loading: localesLoading } = useAdminLocales();
 
@@ -77,19 +71,20 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
   const safeLocaleOptions: AdminLocaleOption[] = React.useMemo(() => {
     if (!Array.isArray(localeOptions)) return [];
     return localeOptions.map((opt) => ({
-      value: opt.value || '',
-      label: opt.label || opt.value || '',
+      value: opt.value || "",
+      label: opt.label || opt.value || "",
     }));
   }, [localeOptions]);
 
-  const isNew = id === 'new';
+  const isNew = id === "new";
   const canLoad = !isNew && isUuidLike(id);
 
   // ✅ FIX: Use listSkillCountersAdminQuery to get all counters, then find the one we need
-  const { data: allCounters, isLoading: loadingItem, error: loadError } = useListSkillCountersAdminQuery(
-    { limit: 200 },
-    { skip: !canLoad }
-  );
+  const {
+    data: allCounters,
+    isLoading: loadingItem,
+    error: loadError,
+  } = useListSkillCountersAdminQuery({ limit: 200 }, { skip: !canLoad });
 
   // ✅ FIX: Find the specific counter from the list
   const existingItem = React.useMemo(() => {
@@ -103,7 +98,7 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
 
   const [formData, setFormData] = React.useState<FormData>(() => ({
     ...emptyForm,
-    locale: '',
+    locale: "",
   }));
 
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -121,8 +116,8 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
       setFormData({
         id: existingItem.id,
         percent: existingItem.percent,
-        image_url: existingItem.image_url ?? '',
-        image_asset_id: existingItem.image_asset_id ?? '',
+        image_url: existingItem.image_url ?? "",
+        image_asset_id: existingItem.image_asset_id ?? "",
         is_active: existingItem.is_active,
         display_order: existingItem.display_order,
         locale: existingItem.locale,
@@ -138,7 +133,7 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
     e.preventDefault();
 
     if (!formData.title.trim() || !formData.slug.trim()) {
-      toast.error(page?.counter_required || 'Başlık ve slug gerekli');
+      toast.error(page?.counter_required || "Başlık ve slug gerekli");
       return;
     }
 
@@ -156,11 +151,11 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
 
       if (isNew) {
         await createCounter(payload).unwrap();
-        toast.success('Kayıt oluşturuldu');
-        router.push('/admin/skills?tab=counters');
+        toast.success("Kayıt oluşturuldu");
+        router.push("/admin/skills?tab=counters");
       } else if (formData.id) {
         await updateCounter({ id: formData.id, patch: payload }).unwrap();
-        toast.success('Kayıt güncellendi');
+        toast.success("Kayıt güncellendi");
       }
     } catch (err) {
       toast.error(getErrMsg(err));
@@ -176,8 +171,8 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
 
     try {
       await removeCounter({ id: formData.id }).unwrap();
-      toast.success('Kayıt silindi');
-      router.push('/admin/skills?tab=counters');
+      toast.success("Kayıt silindi");
+      router.push("/admin/skills?tab=counters");
     } catch (err) {
       toast.error(getErrMsg(err));
     }
@@ -188,14 +183,8 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
       <div className="space-y-6">
         <Card>
           <CardContent className="py-12 text-center">
-            <div className="text-destructive">
-              Kayıt yüklenemedi: {getErrMsg(loadError)}
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/admin/skills?tab=counters')}
-              className="mt-4"
-            >
+            <div className="text-destructive">Kayıt yüklenemedi: {getErrMsg(loadError)}</div>
+            <Button variant="outline" onClick={() => router.push("/admin/skills?tab=counters")} className="mt-4">
               <ArrowLeft className="mr-2 size-4" />
               Listeye Dön
             </Button>
@@ -228,19 +217,15 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
           <CardHeader>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1.5">
-                <CardTitle>
-                  {isNew ? page?.counter_create_title : page?.counter_edit_title}
-                </CardTitle>
+                <CardTitle>{isNew ? page?.counter_create_title : page?.counter_edit_title}</CardTitle>
                 <CardDescription>
-                  {isNew
-                    ? 'Yeni skill counter oluşturun'
-                    : 'Mevcut skill counter düzenleyin'}
+                  {isNew ? "Yeni skill counter oluşturun" : "Mevcut skill counter düzenleyin"}
                 </CardDescription>
               </div>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/admin/skills?tab=counters')}
+                onClick={() => router.push("/admin/skills?tab=counters")}
                 disabled={busy}
                 className="gap-2"
               >
@@ -262,7 +247,7 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
               {/* Locale - ✅ FIXED: Always has a value */}
               <div>
                 <AdminLocaleSelect
-                  value={formData.locale || defaultLocaleFromDb || ''}
+                  value={formData.locale || defaultLocaleFromDb || ""}
                   onChange={(v) => setFormData((prev) => ({ ...prev, locale: v }))}
                   options={safeLocaleOptions}
                   loading={localesLoading}
@@ -299,9 +284,7 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
                   <Switch
                     id="is_active"
                     checked={Boolean(formData.is_active)}
-                    onCheckedChange={(checked: boolean) =>
-                      setFormData((prev) => ({ ...prev, is_active: checked }))
-                    }
+                    onCheckedChange={(checked: boolean) => setFormData((prev) => ({ ...prev, is_active: checked }))}
                     disabled={busy}
                   />
                   <Label htmlFor="is_active" className="cursor-pointer text-sm">
@@ -325,9 +308,7 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
                 <Input
                   id="title"
                   value={formData.title}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, title: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
                   placeholder="Örn: React Development"
                   disabled={busy}
                   required
@@ -342,16 +323,12 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
                 <Input
                   id="slug"
                   value={formData.slug}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, slug: e.target.value }))
-                  }
+                  onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value }))}
                   placeholder="Örn: react-development"
                   disabled={busy}
                   required
                 />
-                <p className="text-xs text-muted-foreground">
-                  URL dostu format (küçük harf, tire ile ayrılmış)
-                </p>
+                <p className="text-muted-foreground text-xs">URL dostu format (küçük harf, tire ile ayrılmış)</p>
               </div>
             </div>
 
@@ -387,10 +364,8 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
                 </Label>
                 <Input
                   id="image_url"
-                  value={formData.image_url ?? ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, image_url: e.target.value }))
-                  }
+                  value={formData.image_url ?? ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, image_url: e.target.value }))}
                   placeholder="https://example.com/image.png"
                   disabled={busy}
                 />
@@ -402,10 +377,8 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
                 </Label>
                 <Input
                   id="image_asset_id"
-                  value={formData.image_asset_id ?? ''}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, image_asset_id: e.target.value }))
-                  }
+                  value={formData.image_asset_id ?? ""}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, image_asset_id: e.target.value }))}
                   placeholder="asset-id-123"
                   disabled={busy}
                 />
@@ -444,7 +417,7 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/admin/skills?tab=counters')}
+                onClick={() => router.push("/admin/skills?tab=counters")}
                 disabled={busy}
               >
                 İptal
@@ -473,8 +446,7 @@ export default function AdminSkillCounterDetailClient({ id }: { id: string }) {
           <AlertDialogHeader>
             <AlertDialogTitle>Silmek istediğinizden emin misiniz?</AlertDialogTitle>
             <AlertDialogDescription>
-              <strong>{formData.title || 'Bu kayıt'}</strong> silinecek. Bu işlem geri
-              alınamaz.
+              <strong>{formData.title || "Bu kayıt"}</strong> silinecek. Bu işlem geri alınamaz.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

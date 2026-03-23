@@ -6,10 +6,10 @@
 // - Admin: /admin/brands
 // ===================================================================
 
-import type { BoolLike } from '@/integrations/shared';
-import { unwrap } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
+import { unwrap } from "@/integrations/shared";
 
-export type BrandTrack = 'right' | 'left';
+export type BrandTrack = "right" | "left";
 
 export interface BrandLogoMerged {
   id: string;
@@ -83,7 +83,7 @@ export type PatchBrandLogoInput = {
 // Helpers
 // -----------------------------------------------------
 
-export function toPublicBrandQuery(p?: BrandListParams | void | null) {
+export function toPublicBrandQuery(p?: BrandListParams | undefined | null) {
   const q: Record<string, any> = {};
   q.is_active = true; // public default
 
@@ -91,10 +91,10 @@ export function toPublicBrandQuery(p?: BrandListParams | void | null) {
 
   if (p.locale) q.locale = p.locale;
 
-  if (typeof p.active === 'boolean') q.is_active = p.active;
+  if (typeof p.active === "boolean") q.is_active = p.active;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   if (p.track) q.track = p.track;
 
@@ -102,16 +102,16 @@ export function toPublicBrandQuery(p?: BrandListParams | void | null) {
 }
 
 // Admin list query (no default is_active)
-export function toAdminBrandQuery(p?: BrandListParams | void | null) {
+export function toAdminBrandQuery(p?: BrandListParams | undefined | null) {
   const q: Record<string, any> = {};
   if (!p) return q;
 
   if (p.locale) q.locale = p.locale;
 
-  if (typeof p.active === 'boolean') q.is_active = p.active;
+  if (typeof p.active === "boolean") q.is_active = p.active;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   if (p.track) q.track = p.track;
 
@@ -122,20 +122,16 @@ export function toAdminBrandQuery(p?: BrandListParams | void | null) {
 // Splitters (tolerant)
 // -----------------------------------------------------
 function isBrandTrack(v: any): v is BrandTrack {
-  return v === 'right' || v === 'left';
+  return v === "right" || v === "left";
 }
 
 export function splitBrands(raw: any): BrandsGroupedResponse {
   const r = unwrap<any>(raw);
 
   // case A: grouped response from backend
-  if (
-    r &&
-    typeof r === 'object' &&
-    (Array.isArray(r.logos_right) || Array.isArray(r.logos_left))
-  ) {
+  if (r && typeof r === "object" && (Array.isArray(r.logos_right) || Array.isArray(r.logos_left))) {
     return {
-      locale: typeof r.locale === 'string' ? r.locale : 'en',
+      locale: typeof r.locale === "string" ? r.locale : "en",
       logos_right: Array.isArray(r.logos_right) ? r.logos_right : [],
       logos_left: Array.isArray(r.logos_left) ? r.logos_left : [],
     };
@@ -144,14 +140,12 @@ export function splitBrands(raw: any): BrandsGroupedResponse {
   // case B: list-ish response (best-effort)
   const arr: any[] = Array.isArray(r) ? r : Array.isArray(r?.items) ? r.items : [];
 
-  const logos: BrandLogoMerged[] = arr.filter(
-    (x) => x && typeof x === 'object' && isBrandTrack(x.track),
-  );
+  const logos: BrandLogoMerged[] = arr.filter((x) => x && typeof x === "object" && isBrandTrack(x.track));
 
   return {
-    locale: typeof r?.locale === 'string' ? r.locale : 'en',
-    logos_right: logos.filter((x) => x.track === 'right'),
-    logos_left: logos.filter((x) => x.track === 'left'),
+    locale: typeof r?.locale === "string" ? r.locale : "en",
+    logos_right: logos.filter((x) => x.track === "right"),
+    logos_left: logos.filter((x) => x.track === "left"),
   };
 }
 

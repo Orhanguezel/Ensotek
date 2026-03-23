@@ -1,4 +1,4 @@
-import SubcategoryDetailClient from '../_components/subcategory-detail-client';
+import SubcategoryDetailClient from "../_components/subcategory-detail-client";
 
 interface Props {
   params: Promise<{ id: string }>;

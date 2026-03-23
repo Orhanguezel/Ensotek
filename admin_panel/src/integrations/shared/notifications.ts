@@ -13,16 +13,10 @@
 // - type DB: free string; DX union provided
 // ===================================================================
 
-import type { BoolLike } from '@/integrations/shared';
-import { toBool } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
+import { toBool } from "@/integrations/shared";
 
-export type NotificationType =
-  | 'order_created'
-  | 'order_paid'
-  | 'order_failed'
-  | 'system'
-  | 'custom'
-  | (string & {});
+export type NotificationType = "order_created" | "order_paid" | "order_failed" | "system" | "custom" | (string & {});
 
 /** DB/API ham satır (tolerant) */
 export type NotificationRow = {
@@ -87,11 +81,11 @@ export type OkResp = { ok: true };
 export const toNotificationsListQuery = (p: NotificationsListParams = {}): Record<string, any> => {
   const out: Record<string, any> = {};
 
-  if (typeof p.is_read !== 'undefined') out.is_read = toBool(p.is_read) ? '1' : '0';
+  if (typeof p.is_read !== "undefined") out.is_read = toBool(p.is_read) ? "1" : "0";
   if (p.type) out.type = p.type;
 
-  if (typeof p.limit === 'number') out.limit = p.limit;
-  if (typeof p.offset === 'number') out.offset = p.offset;
+  if (typeof p.limit === "number") out.limit = p.limit;
+  if (typeof p.offset === "number") out.offset = p.offset;
 
   return out;
 };
@@ -105,6 +99,6 @@ export const toCreateNotificationBody = (b: CreateNotificationBody): Record<stri
 
 export const toUpdateNotificationBody = (b: UpdateNotificationBody): Record<string, any> => {
   const out: Record<string, any> = {};
-  if (typeof b.is_read !== 'undefined') out.is_read = b.is_read;
+  if (typeof b.is_read !== "undefined") out.is_read = b.is_read;
   return out;
 };

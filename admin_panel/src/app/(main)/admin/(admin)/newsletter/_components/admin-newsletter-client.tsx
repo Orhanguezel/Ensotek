@@ -1,66 +1,43 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/newsletter/admin-newsletter-client.tsx
 // FINAL — Admin Newsletter Subscribers
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { RefreshCcw, Search, Trash2, Pencil } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pencil, RefreshCcw, Search, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
-import { Switch } from '@/components/ui/switch';
-import { AdminJsonEditor } from '@/app/(main)/admin/_components/common/AdminJsonEditor';
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-
-import type {
-  NewsletterAdminSubscriber,
-  NewsletterAdminListParams,
-  NewsletterAdminUpdateBody,
-} from '@/integrations/shared';
+import { AdminJsonEditor } from "@/app/(main)/admin/_components/common/AdminJsonEditor";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   useListNewsletterAdminQuery,
-  useUpdateNewsletterAdminMutation,
   useRemoveNewsletterAdminMutation,
-} from '@/integrations/hooks';
+  useUpdateNewsletterAdminMutation,
+} from "@/integrations/hooks";
+import type {
+  NewsletterAdminListParams,
+  NewsletterAdminSubscriber,
+  NewsletterAdminUpdateBody,
+} from "@/integrations/shared";
 
 type Filters = {
   q: string;
-  verified: 'all' | 'yes' | 'no';
-  subscribed: 'all' | 'yes' | 'no';
-  orderBy: 'created_at' | 'updated_at' | 'email' | 'verified';
-  order: 'asc' | 'desc';
+  verified: "all" | "yes" | "no";
+  subscribed: "all" | "yes" | "no";
+  orderBy: "created_at" | "updated_at" | "email" | "verified";
+  order: "asc" | "desc";
 };
 
 type EditState = {
@@ -76,11 +53,11 @@ export default function AdminNewsletterClient() {
   const common = copy.common;
 
   const [filters, setFilters] = React.useState<Filters>({
-    q: '',
-    verified: 'all',
-    subscribed: 'all',
-    orderBy: 'created_at',
-    order: 'desc',
+    q: "",
+    verified: "all",
+    subscribed: "all",
+    orderBy: "created_at",
+    order: "desc",
   });
 
   const listParams = React.useMemo(() => {
@@ -91,8 +68,8 @@ export default function AdminNewsletterClient() {
       limit: 200,
       offset: 0,
     };
-    if (filters.verified !== 'all') p.verified = filters.verified === 'yes';
-    if (filters.subscribed !== 'all') p.subscribed = filters.subscribed === 'yes';
+    if (filters.verified !== "all") p.verified = filters.verified === "yes";
+    if (filters.subscribed !== "all") p.subscribed = filters.subscribed === "yes";
     return p;
   }, [filters]);
 
@@ -134,22 +111,22 @@ export default function AdminNewsletterClient() {
 
     try {
       await updateSub({ id: edit.id, body }).unwrap();
-      toast.success(common?.actions?.save || '');
+      toast.success(common?.actions?.save || "");
       closeModal();
       listQ.refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   }
 
   async function onDelete(item: NewsletterAdminSubscriber) {
-    if (!window.confirm(page?.delete_confirm || '')) return;
+    if (!window.confirm(page?.delete_confirm || "")) return;
     try {
       await removeSub({ id: item.id }).unwrap();
-      toast.success(common?.actions?.delete || '');
+      toast.success(common?.actions?.delete || "");
       listQ.refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   }
 
@@ -157,8 +134,8 @@ export default function AdminNewsletterClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{page?.title}</h1>
-          <p className="text-sm text-muted-foreground">{page?.subtitle}</p>
+          <h1 className="font-semibold text-lg">{page?.title}</h1>
+          <p className="text-muted-foreground text-sm">{page?.subtitle}</p>
         </div>
 
         <Button variant="outline" size="sm" onClick={() => listQ.refetch()} disabled={busy}>
@@ -176,7 +153,7 @@ export default function AdminNewsletterClient() {
           <div className="space-y-2">
             <Label>{common?.actions?.search}</Label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" />
               <Input
                 value={filters.q}
                 onChange={(e) => setFilters((p) => ({ ...p, q: e.target.value }))}
@@ -190,7 +167,7 @@ export default function AdminNewsletterClient() {
             <Label>{page?.verified_label}</Label>
             <Select
               value={filters.verified}
-              onValueChange={(v) => setFilters((p) => ({ ...p, verified: v as Filters['verified'] }))}
+              onValueChange={(v) => setFilters((p) => ({ ...p, verified: v as Filters["verified"] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -207,9 +184,7 @@ export default function AdminNewsletterClient() {
             <Label>{page?.subscribed_label}</Label>
             <Select
               value={filters.subscribed}
-              onValueChange={(v) =>
-                setFilters((p) => ({ ...p, subscribed: v as Filters['subscribed'] }))
-              }
+              onValueChange={(v) => setFilters((p) => ({ ...p, subscribed: v as Filters["subscribed"] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -226,7 +201,7 @@ export default function AdminNewsletterClient() {
             <Label>{page?.order_label}</Label>
             <Select
               value={filters.order}
-              onValueChange={(v) => setFilters((p) => ({ ...p, order: v as Filters['order'] }))}
+              onValueChange={(v) => setFilters((p) => ({ ...p, order: v as Filters["order"] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -259,7 +234,7 @@ export default function AdminNewsletterClient() {
             <TableBody>
               {rows.length === 0 && !busy && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground text-sm">
                     {common?.states?.empty}
                   </TableCell>
                 </TableRow>
@@ -268,12 +243,12 @@ export default function AdminNewsletterClient() {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.email}</TableCell>
                   <TableCell>
-                    <Badge variant={item.is_verified ? 'secondary' : 'outline'}>
+                    <Badge variant={item.is_verified ? "secondary" : "outline"}>
                       {item.is_verified ? page?.filter_yes : page?.filter_no}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={item.is_subscribed ? 'secondary' : 'outline'}>
+                    <Badge variant={item.is_subscribed ? "secondary" : "outline"}>
                       {item.is_subscribed ? page?.filter_yes : page?.filter_no}
                     </Badge>
                   </TableCell>

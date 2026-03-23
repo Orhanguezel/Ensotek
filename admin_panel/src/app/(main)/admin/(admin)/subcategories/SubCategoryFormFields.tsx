@@ -3,8 +3,9 @@
 // Ensotek – Alt Kategori Form Alanları
 // =============================================================
 
-import React from 'react';
-import type { LocaleOption, CategoryOption } from './SubCategoriesHeader';
+import type React from "react";
+
+import type { CategoryOption, LocaleOption } from "./SubCategoriesHeader";
 
 export type SubCategoryFormStateLike = {
   category_id: string;
@@ -68,11 +69,11 @@ export const SubCategoryFormFields: React.FC<SubCategoryFormFieldsProps> = ({
         <select
           className="form-select form-select-sm"
           value={formState.category_id}
-          onChange={(e) => onFieldChange('category_id', e.target.value)}
+          onChange={(e) => onFieldChange("category_id", e.target.value)}
           disabled={disabled}
         >
           {categoryOptions.map((opt) => (
-            <option key={opt.value || 'all'} value={opt.value}>
+            <option key={opt.value || "all"} value={opt.value}>
               {opt.label}
             </option>
           ))}
@@ -86,7 +87,7 @@ export const SubCategoryFormFields: React.FC<SubCategoryFormFieldsProps> = ({
           type="number"
           className="form-control form-control-sm"
           value={formState.display_order}
-          onChange={(e) => onFieldChange('display_order', Number(e.target.value) || 0)}
+          onChange={(e) => onFieldChange("display_order", Number(e.target.value) || 0)}
           disabled={disabled}
         />
       </div>
@@ -113,9 +114,7 @@ export const SubCategoryFormFields: React.FC<SubCategoryFormFieldsProps> = ({
           onChange={(e) => onSlugChange(e.target.value)}
           disabled={disabled}
         />
-        <div className="form-text small">
-          URL için kullanılacak kısa ad. Dil başına farklı olabilir.
-        </div>
+        <div className="form-text small">URL için kullanılacak kısa ad. Dil başına farklı olabilir.</div>
       </div>
 
       {/* Icon */}
@@ -125,21 +124,21 @@ export const SubCategoryFormFields: React.FC<SubCategoryFormFieldsProps> = ({
           type="text"
           className="form-control form-control-sm"
           value={formState.icon}
-          onChange={(e) => onFieldChange('icon', e.target.value)}
+          onChange={(e) => onFieldChange("icon", e.target.value)}
           disabled={disabled}
         />
       </div>
 
       {/* Switchler */}
-      <div className="col-md-6 d-flex align-items-end">
-        <div className="d-flex flex-wrap gap-3 small">
+      <div className="d-flex col-md-6 align-items-end">
+        <div className="d-flex small flex-wrap gap-3">
           <div className="form-check form-switch">
             <input
               className="form-check-input"
               type="checkbox"
               id="subcat-active"
               checked={formState.is_active}
-              onChange={(e) => onFieldChange('is_active', e.target.checked)}
+              onChange={(e) => onFieldChange("is_active", e.target.checked)}
               disabled={disabled}
             />
             <label className="form-check-label" htmlFor="subcat-active">
@@ -152,7 +151,7 @@ export const SubCategoryFormFields: React.FC<SubCategoryFormFieldsProps> = ({
               type="checkbox"
               id="subcat-featured"
               checked={formState.is_featured}
-              onChange={(e) => onFieldChange('is_featured', e.target.checked)}
+              onChange={(e) => onFieldChange("is_featured", e.target.checked)}
               disabled={disabled}
             />
             <label className="form-check-label" htmlFor="subcat-featured">
@@ -169,7 +168,7 @@ export const SubCategoryFormFields: React.FC<SubCategoryFormFieldsProps> = ({
           className="form-control form-control-sm"
           rows={4}
           value={formState.description}
-          onChange={(e) => onFieldChange('description', e.target.value)}
+          onChange={(e) => onFieldChange("description", e.target.value)}
           disabled={disabled}
         />
       </div>

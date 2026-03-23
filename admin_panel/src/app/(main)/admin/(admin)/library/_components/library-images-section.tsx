@@ -1,24 +1,23 @@
-'use client';
+"use client";
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, Trash2, Image as ImageIcon, Copy, CheckCircle2, Star } from 'lucide-react';
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
-import type {
-  LibraryImageDto,
-  LibraryImageCreatePayload,
-  LibraryImageUpdatePayload,
-} from '@/integrations/shared';
+import type React from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+
+import { CheckCircle2, Copy, Image as ImageIcon, Loader2, Star, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  useListLibraryImagesAdminQuery,
   useCreateLibraryImageAdminMutation,
-  useUpdateLibraryImageAdminMutation,
+  useListLibraryImagesAdminQuery,
   useRemoveLibraryImageAdminMutation,
-} from '@/integrations/hooks';
+  useUpdateLibraryImageAdminMutation,
+} from "@/integrations/hooks";
+import type { LibraryImageCreatePayload, LibraryImageDto, LibraryImageUpdatePayload } from "@/integrations/shared";
 
 export type LibraryImagesSectionProps = {
   libraryId: string;
@@ -29,14 +28,14 @@ export type LibraryImagesSectionProps = {
   metadata?: Record<string, string | number | boolean>;
 };
 
-const toStr = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+const toStr = (v: unknown) => (v === null || v === undefined ? "" : String(v));
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8086';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace("/api", "") || "http://localhost:8086";
 
 function resolveUrl(url: string) {
-  if (!url) return '';
-  if (url.startsWith('http')) return url;
-  if (url.startsWith('/uploads') || url.startsWith('/storage')) {
+  if (!url) return "";
+  if (url.startsWith("http")) return url;
+  if (url.startsWith("/uploads") || url.startsWith("/storage")) {
     // Frontend rewrite works for /uploads and /storage
     // but we can also use absolute for reliability in preview
     return url;
@@ -59,11 +58,11 @@ function orderOf(r: any): number {
 
 function imageIdOf(r: any): string {
   const v = r?.id ?? r?.image_id ?? r?.imageId ?? r?.imageID;
-  return v ? String(v) : '';
+  return v ? String(v) : "";
 }
 
 const UrlInline: React.FC<{ url: string; disabled?: boolean }> = ({ url, disabled }) => {
-  const safe = (url || '').trim();
+  const safe = (url || "").trim();
 
   const handleCopy = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,18 +71,15 @@ const UrlInline: React.FC<{ url: string; disabled?: boolean }> = ({ url, disable
 
     try {
       await navigator.clipboard.writeText(safe);
-      toast.success('URL kopyalandı.');
+      toast.success("URL kopyalandı.");
     } catch {
-      toast.error('URL kopyalanamadı.');
+      toast.error("URL kopyalanamadı.");
     }
   };
 
   return (
-    <div className="flex items-center gap-2 mt-1 min-w-0">
-      <div
-        className="text-[10px] text-muted-foreground truncate flex-1"
-        title={safe}
-      >
+    <div className="mt-1 flex min-w-0 items-center gap-2">
+      <div className="flex-1 truncate text-[10px] text-muted-foreground" title={safe}>
         {safe}
       </div>
       <Button
@@ -108,10 +104,9 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
   coverUrl,
   metadata,
 }) => {
-  const { data, isLoading, isFetching, refetch } = useListLibraryImagesAdminQuery(
-    { id: libraryId, locale } as any,
-    { skip: !libraryId },
-  );
+  const { data, isLoading, isFetching, refetch } = useListLibraryImagesAdminQuery({ id: libraryId, locale } as any, {
+    skip: !libraryId,
+  });
 
   const [createImg, { isLoading: creating }] = useCreateLibraryImageAdminMutation();
   const [updateImg, { isLoading: updating }] = useUpdateLibraryImageAdminMutation();
@@ -120,14 +115,10 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
   const busy = !!disabled || creating || updating || deleting;
   const rows: LibraryImageDto[] = useMemo(() => normalizeRows(data), [data]);
   const inflightUrlsRef = useRef<Set<string>>(new Set());
-  const [lastUploadedUrl, setLastUploadedUrl] = useState<string>('');
+  const [lastUploadedUrl, setLastUploadedUrl] = useState<string>("");
 
   const sortedRows = useMemo(() => {
-    return rows
-      .slice()
-      .sort(
-        (a: any, b: any) => orderOf(a) - orderOf(b) || String(a.id).localeCompare(String(b.id)),
-      );
+    return rows.slice().sort((a: any, b: any) => orderOf(a) - orderOf(b) || String(a.id).localeCompare(String(b.id)));
   }, [rows]);
 
   const getNextOrder = () => {
@@ -139,7 +130,7 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
     const safeUrl = url.trim();
     if (!safeUrl) return;
 
-    const exists = rows.some((r: any) => (r.image_url || '').trim() === safeUrl);
+    const exists = rows.some((r: any) => (r.image_url || "").trim() === safeUrl);
     if (exists) return;
 
     if (inflightUrlsRef.current.has(safeUrl)) return;
@@ -158,10 +149,10 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
       };
 
       await createImg({ id: libraryId, payload } as any).unwrap();
-      toast.success('Galeri görseli eklendi.');
+      toast.success("Galeri görseli eklendi.");
       await refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || 'Resim kaydı oluşturulamadı.');
+      toast.error(err?.data?.error?.message || err?.message || "Resim kaydı oluşturulamadı.");
     } finally {
       inflightUrlsRef.current.delete(safeUrl);
     }
@@ -180,10 +171,10 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
       try {
         const patch: LibraryImageUpdatePayload = { display_order, locale };
         await updateImg({ id: libraryId, imageId, patch } as any).unwrap();
-        toast.success('Sıralama güncellendi.');
+        toast.success("Sıralama güncellendi.");
         await refetch();
       } catch (err: any) {
-        toast.error(err?.data?.error?.message || err?.message || 'Sıralama güncellenemedi.');
+        toast.error(err?.data?.error?.message || err?.message || "Sıralama güncellenemedi.");
       }
     },
     [libraryId, locale, updateImg, refetch],
@@ -193,14 +184,14 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
     async (r: LibraryImageDto) => {
       const imageId = imageIdOf(r);
       if (!imageId) return;
-      if (!confirm('Bu görseli silmek istiyor musun?')) return;
+      if (!confirm("Bu görseli silmek istiyor musun?")) return;
 
       try {
         await removeImg({ id: libraryId, imageId } as any).unwrap();
-        toast.success('Görsel silindi.');
+        toast.success("Görsel silindi.");
         await refetch();
       } catch (err: any) {
-        toast.error(err?.data?.error?.message || err?.message || 'Silme hatası.');
+        toast.error(err?.data?.error?.message || err?.message || "Silme hatası.");
       }
     },
     [libraryId, removeImg, refetch],
@@ -208,9 +199,9 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="py-3 bg-muted/30 border-b">
+      <CardHeader className="border-b bg-muted/30 py-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-semibold text-sm">
             <ImageIcon className="h-4 w-4 text-primary" />
             Galeri Görselleri
           </CardTitle>
@@ -236,67 +227,71 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
           <div className="space-y-3">
             {sortedRows.map((r: any) => {
               const id = imageIdOf(r);
-              const url = (r.image_url || '').trim();
+              const url = (r.image_url || "").trim();
               const isCover = !!coverUrl && coverUrl === url;
               const resolved = resolveUrl(url);
 
               return (
                 <div
                   key={id || String(url)}
-                  className={`group relative border rounded-lg p-3 transition-all hover:shadow-sm ${
-                    isCover ? 'border-primary bg-primary/5 ring-1 ring-primary/10' : 'bg-card'
+                  className={`group relative rounded-lg border p-3 transition-all hover:shadow-sm ${
+                    isCover ? "border-primary bg-primary/5 ring-1 ring-primary/10" : "bg-card"
                   }`}
                 >
                   <div className="flex gap-4">
-                    <div className="w-20 h-20 shrink-0 bg-white rounded-md border overflow-hidden relative group/img">
+                    <div className="group/img relative h-20 w-20 shrink-0 overflow-hidden rounded-md border bg-white">
                       <img
                         src={resolved}
                         alt={toStr(r.alt)}
-                        className="w-full h-full object-cover transition-transform group-hover/img:scale-105"
+                        className="h-full w-full object-cover transition-transform group-hover/img:scale-105"
                         onError={(e) => {
                           const img = e.currentTarget as HTMLImageElement;
                           if (!img.dataset.triedFallback) {
-                            img.dataset.triedFallback = '1';
+                            img.dataset.triedFallback = "1";
                             // If relative fails, try absolute backend URL directly
-                            if (url.startsWith('/')) {
-                               img.src = `${API_BASE}${url}`;
-                               return;
+                            if (url.startsWith("/")) {
+                              img.src = `${API_BASE}${url}`;
+                              return;
                             }
                           }
-                          img.src = 'https://placehold.co/100x100?text=Error';
+                          img.src = "https://placehold.co/100x100?text=Error";
                         }}
                       />
                       {isCover && (
                         <div className="absolute top-0 right-0 p-1">
-                           <div className="bg-primary text-primary-foreground rounded-full p-0.5 shadow-sm">
-                             <CheckCircle2 className="h-3 w-3" />
-                           </div>
+                          <div className="rounded-full bg-primary p-0.5 text-primary-foreground shadow-sm">
+                            <CheckCircle2 className="h-3 w-3" />
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    <div className="flex-1 min-w-0 flex flex-col justify-between">
-                      <div className="flex justify-between items-start gap-2">
+                    <div className="flex min-w-0 flex-1 flex-col justify-between">
+                      <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] bg-muted px-1.5 py-0.5 rounded font-mono text-muted-foreground">
+                            <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">
                               #{orderOf(r)}
                             </span>
-                            {isCover && <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Kapak Görseli</span>}
+                            {isCover && (
+                              <span className="font-bold text-[10px] text-primary uppercase tracking-wider">
+                                Kapak Görseli
+                              </span>
+                            )}
                           </div>
                           <UrlInline url={url} disabled={busy} />
                         </div>
 
-                        <div className="flex gap-1 shrink-0">
+                        <div className="flex shrink-0 gap-1">
                           {onSelectAsCover && url && !isCover && (
                             <Button
                               variant="outline"
                               size="sm"
-                              className="h-7 px-2 text-[10px] hover:bg-primary hover:text-primary-foreground transition-colors"
+                              className="h-7 px-2 text-[10px] transition-colors hover:bg-primary hover:text-primary-foreground"
                               disabled={busy}
                               onClick={() => onSelectAsCover(url)}
                             >
-                              <Star className="h-3 w-3 mr-1" /> Kapak Yap
+                              <Star className="mr-1 h-3 w-3" /> Kapak Yap
                             </Button>
                           )}
                           <Button
@@ -311,17 +306,19 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-3 pt-2 mt-2 border-t border-dashed">
-                        <Label className="text-[10px] text-muted-foreground font-medium uppercase tracking-tight">Görüntüleme Sırası:</Label>
+                      <div className="mt-2 flex items-center gap-3 border-t border-dashed pt-2">
+                        <Label className="font-medium text-[10px] text-muted-foreground uppercase tracking-tight">
+                          Görüntüleme Sırası:
+                        </Label>
                         <div className="flex items-center gap-1">
                           <Input
                             type="number"
-                            className="h-7 w-16 text-[10px] text-center"
+                            className="h-7 w-16 text-center text-[10px]"
                             disabled={busy}
                             defaultValue={orderOf(r)}
                             onBlur={(e) => {
-                               const val = Number(e.target.value) || 0;
-                               if (val !== orderOf(r)) handleSetOrder(r, val);
+                              const val = Number(e.target.value) || 0;
+                              if (val !== orderOf(r)) handleSetOrder(r, val);
                             }}
                           />
                         </div>
@@ -336,7 +333,7 @@ export const LibraryImagesSection: React.FC<LibraryImagesSectionProps> = ({
         )}
 
         {sortedRows.length === 0 && !isLoading && (
-          <div className="text-xs text-muted-foreground italic text-center py-8 border-2 border-dashed rounded-lg bg-muted/10">
+          <div className="rounded-lg border-2 border-dashed bg-muted/10 py-8 text-center text-muted-foreground text-xs italic">
             Galeri görseli bulunmuyor.
           </div>
         )}

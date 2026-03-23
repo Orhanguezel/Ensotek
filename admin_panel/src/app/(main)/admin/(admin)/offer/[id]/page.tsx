@@ -3,7 +3,7 @@
 // Admin Offer Detail Page
 // =============================================================
 
-import AdminOfferDetailClient from '../_components/admin-offer-detail-client';
+import AdminOfferDetailClient from "../_components/admin-offer-detail-client";
 
 type Params = { id: string };
 

@@ -40,8 +40,8 @@ export interface CategoryListQueryParams {
   is_featured?: boolean | string;
   limit?: number;
   offset?: number;
-  sort?: 'display_order' | 'name' | 'created_at' | 'updated_at';
-  order?: 'asc' | 'desc';
+  sort?: "display_order" | "name" | "created_at" | "updated_at";
+  order?: "asc" | "desc";
   locale?: string;
   module_key?: string;
 }
@@ -65,8 +65,8 @@ export interface CategoryCreatePayload {
   icon?: string | null;
 
   // boolLike ile uyumlu tip
-  is_active?: boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
-  is_featured?: boolean | 0 | 1 | '0' | '1' | 'true' | 'false';
+  is_active?: boolean | 0 | 1 | "0" | "1" | "true" | "false";
+  is_featured?: boolean | 0 | 1 | "0" | "1" | "true" | "false";
 
   display_order?: number;
 }
@@ -75,7 +75,7 @@ export interface CategoryCreatePayload {
  * Update payload – categoryUpdateSchema.partial()
  *  - id body’de beklenmediği için hariç tutuldu
  */
-export type CategoryUpdatePayload = Partial<Omit<CategoryCreatePayload, 'id'>>;
+export type CategoryUpdatePayload = Partial<Omit<CategoryCreatePayload, "id">>;
 
 /**
  * Sıralama endpoint’i için payload

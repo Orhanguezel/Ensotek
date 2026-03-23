@@ -38,7 +38,7 @@ export type TelegramInboundListResult = {
   next_cursor?: string | null;
 };
 
-export type TelegramAutoReplyMode = 'simple' | 'ai';
+export type TelegramAutoReplyMode = "simple" | "ai";
 
 export type TelegramAutoReplyConfig = {
   enabled: boolean;

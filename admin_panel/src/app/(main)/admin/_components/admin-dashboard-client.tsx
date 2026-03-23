@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/_components/admin-dashboard-client.tsx
@@ -8,61 +8,62 @@
 // - Cards link to their respective admin pages
 // =============================================================
 
-import * as React from 'react';
-import Link from 'next/link';
-import { toast } from 'sonner';
-import { RefreshCcw } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
+import Link from "next/link";
 
-import { useGetDashboardSummaryAdminQuery } from '@/integrations/hooks';
-import type { DashboardSummaryItem } from '@/integrations/shared';
+import { RefreshCcw } from "lucide-react";
+import { toast } from "sonner";
 
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { useAdminSettings } from './admin-settings-provider';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetDashboardSummaryAdminQuery } from "@/integrations/hooks";
+import type { DashboardSummaryItem } from "@/integrations/shared";
+
+import { useAdminSettings } from "./admin-settings-provider";
 
 // dashboard key → admin route
 // Keys must match backend GET /admin/dashboard/summary response
 const ROUTE_MAP: Record<string, string> = {
-  products: '/admin/products',
-  categories: '/admin/categories',
-  subcategories: '/admin/subcategories',
-  services: '/admin/services',
-  faqs: '/admin/faqs',
-  contacts: '/admin/contacts',
-  newsletter: '/admin/newsletter',
-  email_templates: '/admin/email-templates',
-  site_settings: '/admin/site-settings',
-  custom_pages: '/admin/custompage',
-  menu_items: '/admin/menuitem',
-  sliders: '/admin/slider',
-  footer_sections: '/admin/footer-sections',
-  library: '/admin/library',
-  reviews: '/admin/reviews',
-  support: '/admin/support',
-  users: '/admin/users',
-  offers: '/admin/offer',
-  storage: '/admin/storage',
-  references: '/admin/references',
-  catalog_requests: '/admin/catalog',
-  audit: '/admin/audit',
-  db: '/admin/db',
-  chat: '/admin/chat',
-  telegram: '/admin/telegram',
+  products: "/admin/products",
+  categories: "/admin/categories",
+  subcategories: "/admin/subcategories",
+  services: "/admin/services",
+  faqs: "/admin/faqs",
+  contacts: "/admin/contacts",
+  newsletter: "/admin/newsletter",
+  email_templates: "/admin/email-templates",
+  site_settings: "/admin/site-settings",
+  custom_pages: "/admin/custompage",
+  menu_items: "/admin/menuitem",
+  sliders: "/admin/slider",
+  footer_sections: "/admin/footer-sections",
+  library: "/admin/library",
+  reviews: "/admin/reviews",
+  support: "/admin/support",
+  users: "/admin/users",
+  offers: "/admin/offer",
+  storage: "/admin/storage",
+  references: "/admin/references",
+  catalog_requests: "/admin/catalog",
+  audit: "/admin/audit",
+  db: "/admin/db",
+  chat: "/admin/chat",
+  telegram: "/admin/telegram",
 };
 
 function getErrMessage(err: unknown): string {
   const anyErr = err as any;
   const m1 = anyErr?.data?.error?.message;
-  if (typeof m1 === 'string' && m1.trim()) return m1;
+  if (typeof m1 === "string" && m1.trim()) return m1;
   const m2 = anyErr?.data?.message;
-  if (typeof m2 === 'string' && m2.trim()) return m2;
+  if (typeof m2 === "string" && m2.trim()) return m2;
   const m3 = anyErr?.error;
-  if (typeof m3 === 'string' && m3.trim()) return m3;
-  return '';
+  if (typeof m3 === "string" && m3.trim()) return m3;
+  return "";
 }
 
 export default function AdminDashboardClient() {
@@ -77,11 +78,11 @@ export default function AdminDashboardClient() {
 
   React.useEffect(() => {
     if (!q.isError) return;
-    toast.error(getErrMessage(q.error) || copy.common?.states?.error || t('admin.common.error'));
+    toast.error(getErrMessage(q.error) || copy.common?.states?.error || t("admin.common.error"));
   }, [q.isError, q.error, copy.common?.states?.error, t]);
 
   const items = React.useMemo(() => {
-    let data = [...(q.data?.items ?? [])] as DashboardSummaryItem[];
+    const data = [...(q.data?.items ?? [])] as DashboardSummaryItem[];
     if (dashboardMeta?.metrics && Array.isArray(dashboardMeta.metrics) && dashboardMeta.metrics.length > 0) {
       const metricsSet = new Set(dashboardMeta.metrics);
       data.sort((a, b) => {
@@ -101,7 +102,7 @@ export default function AdminDashboardClient() {
         page[item.key] ||
         t(`admin.dashboard.items.${item.key}` as any) ||
         item.label ||
-        item.key.replace(/_/g, ' '),
+        item.key.replace(/_/g, " "),
       href: ROUTE_MAP[item.key] ?? null,
     }));
   }, [q.data, copy.nav?.items, page, t, dashboardMeta]);
@@ -110,23 +111,13 @@ export default function AdminDashboardClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">
-            {dashboardMeta?.title || page?.title || t('admin.dashboard.title')}
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {page?.subtitle || t('admin.dashboard.subtitle')}
-          </p>
+          <h1 className="font-semibold text-lg">{dashboardMeta?.title || page?.title || t("admin.dashboard.title")}</h1>
+          <p className="text-muted-foreground text-sm">{page?.subtitle || t("admin.dashboard.subtitle")}</p>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => q.refetch()}
-          disabled={q.isFetching}
-        >
-          <RefreshCcw className={`mr-2 size-4${q.isFetching ? ' animate-spin' : ''}`} />
-          {copy.common?.actions?.refresh || t('admin.common.refresh')}
+        <Button type="button" variant="outline" size="sm" onClick={() => q.refetch()} disabled={q.isFetching}>
+          <RefreshCcw className={`mr-2 size-4${q.isFetching ? "animate-spin" : ""}`} />
+          {copy.common?.actions?.refresh || t("admin.common.refresh")}
         </Button>
       </div>
 
@@ -151,14 +142,12 @@ export default function AdminDashboardClient() {
         <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {items.map((item) => {
             const card = (
-              <Card className={item.href ? 'transition-colors hover:border-primary/50' : ''}>
+              <Card className={item.href ? "transition-colors hover:border-primary/50" : ""}>
                 <CardHeader className="gap-2 pb-2">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">
-                    {item.label}
-                  </CardTitle>
+                  <CardTitle className="font-medium text-muted-foreground text-sm">{item.label}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-semibold tabular-nums">{item.count}</div>
+                  <div className="font-semibold text-2xl tabular-nums">{item.count}</div>
                 </CardContent>
               </Card>
             );
@@ -174,8 +163,8 @@ export default function AdminDashboardClient() {
 
           {items.length === 0 && !q.isFetching && (
             <Card className="sm:col-span-2 xl:col-span-4">
-              <CardContent className="py-6 text-sm text-muted-foreground">
-                {copy.common?.states?.empty || t('admin.common.noData')}
+              <CardContent className="py-6 text-muted-foreground text-sm">
+                {copy.common?.states?.empty || t("admin.common.noData")}
               </CardContent>
             </Card>
           )}

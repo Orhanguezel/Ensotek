@@ -1,11 +1,12 @@
 // src/stores/preferences/preferences-provider.tsx
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useStore } from 'zustand';
+import * as React from "react";
 
-import type { PreferencesState } from './preferences-store';
-import { createPreferencesStore } from './preferences-store';
+import { useStore } from "zustand";
+
+import type { PreferencesState } from "./preferences-store";
+import { createPreferencesStore } from "./preferences-store";
 
 type PreferencesStoreApi = ReturnType<typeof createPreferencesStore>;
 
@@ -24,17 +25,13 @@ export function PreferencesStoreProvider({
     storeRef.current = createPreferencesStore(init);
   }
 
-  return (
-    <PreferencesStoreContext.Provider value={storeRef.current}>
-      {children}
-    </PreferencesStoreContext.Provider>
-  );
+  return <PreferencesStoreContext.Provider value={storeRef.current}>{children}</PreferencesStoreContext.Provider>;
 }
 
 export function usePreferencesStore<T>(selector: (state: PreferencesState) => T): T {
   const store = React.useContext(PreferencesStoreContext);
   if (!store) {
-    throw new Error('usePreferencesStore must be used within PreferencesStoreProvider');
+    throw new Error("usePreferencesStore must be used within PreferencesStoreProvider");
   }
   return useStore(store, selector);
 }

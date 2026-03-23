@@ -16,8 +16,8 @@
 // - is_subscribed only exists in admin outputs
 // ===================================================================
 
-import type { BoolLike } from '@/integrations/shared';
-import { toBool } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
+import { toBool } from "@/integrations/shared";
 // ----------------------------- Public Types -----------------------------
 
 export type NewsletterPublicSubscribeBody = {
@@ -58,8 +58,8 @@ export type NewsletterAdminListParams = {
   limit?: number;
   offset?: number;
 
-  orderBy?: 'created_at' | 'updated_at' | 'email' | 'verified';
-  order?: 'asc' | 'desc';
+  orderBy?: "created_at" | "updated_at" | "email" | "verified";
+  order?: "asc" | "desc";
 };
 
 export type NewsletterAdminUpdateBody = {
@@ -93,19 +93,17 @@ export type NewsletterAdminListResp = {
  * Map admin list params to backend query.
  * Backend accepts verified/subscribed as boolLike, but we send 1/0 for stability.
  */
-export const toNewsletterAdminListQuery = (
-  p: NewsletterAdminListParams = {},
-): Record<string, any> => {
+export const toNewsletterAdminListQuery = (p: NewsletterAdminListParams = {}): Record<string, any> => {
   const out: Record<string, any> = {};
 
   if (p.q) out.q = p.q;
   if (p.email) out.email = p.email;
 
-  if (typeof p.verified !== 'undefined') out.verified = toBool(p.verified) ? '1' : '0';
-  if (typeof p.subscribed !== 'undefined') out.subscribed = toBool(p.subscribed) ? '1' : '0';
+  if (typeof p.verified !== "undefined") out.verified = toBool(p.verified) ? "1" : "0";
+  if (typeof p.subscribed !== "undefined") out.subscribed = toBool(p.subscribed) ? "1" : "0";
 
-  if (typeof p.limit !== 'undefined') out.limit = p.limit;
-  if (typeof p.offset !== 'undefined') out.offset = p.offset;
+  if (typeof p.limit !== "undefined") out.limit = p.limit;
+  if (typeof p.offset !== "undefined") out.offset = p.offset;
 
   if (p.orderBy) out.orderBy = p.orderBy;
   if (p.order) out.order = p.order;
@@ -120,9 +118,9 @@ export const toNewsletterAdminListQuery = (
 export const toNewsletterAdminUpdateBody = (b: NewsletterAdminUpdateBody): Record<string, any> => {
   const out: Record<string, any> = {};
 
-  if (typeof b.verified !== 'undefined') out.verified = toBool(b.verified);
-  if (typeof b.subscribed !== 'undefined') out.subscribed = toBool(b.subscribed);
-  if (typeof b.meta !== 'undefined') out.meta = b.meta;
+  if (typeof b.verified !== "undefined") out.verified = toBool(b.verified);
+  if (typeof b.subscribed !== "undefined") out.subscribed = toBool(b.subscribed);
+  if (typeof b.meta !== "undefined") out.meta = b.meta;
 
   return out;
 };
@@ -131,15 +129,11 @@ export const toNewsletterAdminUpdateBody = (b: NewsletterAdminUpdateBody): Recor
  * Public subscribe body mapper:
  * normalize email on client side is optional; backend already normalizes toLowerCase.
  */
-export const toNewsletterSubscribeBody = (
-  b: NewsletterPublicSubscribeBody,
-): Record<string, any> => ({
+export const toNewsletterSubscribeBody = (b: NewsletterPublicSubscribeBody): Record<string, any> => ({
   email: b.email,
-  ...(typeof b.meta !== 'undefined' ? { meta: b.meta } : {}),
+  ...(typeof b.meta !== "undefined" ? { meta: b.meta } : {}),
 });
 
-export const toNewsletterUnsubscribeBody = (
-  b: NewsletterPublicUnsubscribeBody,
-): Record<string, any> => ({
+export const toNewsletterUnsubscribeBody = (b: NewsletterPublicUnsubscribeBody): Record<string, any> => ({
   email: b.email,
 });

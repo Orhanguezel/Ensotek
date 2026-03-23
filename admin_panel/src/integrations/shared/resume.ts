@@ -5,9 +5,9 @@
 // - FIX: splitResume wrapper tolerant
 // =============================================================
 
-import type { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
-export type ResumeType = 'education' | 'experience';
+export type ResumeType = "education" | "experience";
 
 export interface ResumeMerged {
   id: string;
@@ -54,8 +54,8 @@ export type ResumeListParams = {
   limit?: number;
   offset?: number;
 
-  orderBy?: 'created_at' | 'updated_at' | 'display_order' | 'start_date';
-  order?: 'asc' | 'desc';
+  orderBy?: "created_at" | "updated_at" | "display_order" | "start_date";
+  order?: "asc" | "desc";
 };
 
 // --------------------------------------------------
@@ -94,18 +94,18 @@ export type GetResumeEntryParams = { id: string; locale?: string; default_locale
 export type GetResumeBySlugParams = { slug: string; locale?: string; default_locale?: string };
 
 export function safeLocale(v?: string) {
-  const s = (v || '').trim().toLowerCase();
-  return s || 'en';
+  const s = (v || "").trim().toLowerCase();
+  return s || "en";
 }
 
 export function yearRange(item: ResumeMerged) {
-  const sY = item.start_date?.slice(0, 4) || '';
-  const eY = item.is_current ? 'Present' : item.end_date?.slice(0, 4) || '';
-  if (!sY && !eY) return '';
+  const sY = item.start_date?.slice(0, 4) || "";
+  const eY = item.is_current ? "Present" : item.end_date?.slice(0, 4) || "";
+  if (!sY && !eY) return "";
   return eY ? `${sY} - ${eY}` : sY;
 }
 
-export function toPublicQuery(p?: ResumeListParams | void | null) {
+export function toPublicQuery(p?: ResumeListParams | undefined | null) {
   const q: Record<string, any> = {};
 
   // ✅ public default: active only (as number)
@@ -121,10 +121,10 @@ export function toPublicQuery(p?: ResumeListParams | void | null) {
   if (p.type) q.type = p.type;
 
   // ✅ IMPORTANT: always send as 1/0
-  if (typeof p.active === 'boolean') q.is_active = p.active ? 1 : 0;
+  if (typeof p.active === "boolean") q.is_active = p.active ? 1 : 0;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   if (p.orderBy && p.order) q.order = `${p.orderBy}.${p.order}`;
 
@@ -132,7 +132,7 @@ export function toPublicQuery(p?: ResumeListParams | void | null) {
 }
 
 // Admin query mapper (no default is_active)
-export function toAdminResumeQuery(p?: ResumeListParams | void | null) {
+export function toAdminResumeQuery(p?: ResumeListParams | undefined | null) {
   const q: Record<string, any> = {};
   if (!p) return q;
 
@@ -143,10 +143,10 @@ export function toAdminResumeQuery(p?: ResumeListParams | void | null) {
   if (p.slug) q.slug = p.slug;
   if (p.type) q.type = p.type;
 
-  if (typeof p.active === 'boolean') q.is_active = p.active;
+  if (typeof p.active === "boolean") q.is_active = p.active;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   if (p.orderBy && p.order) q.order = `${p.orderBy}.${p.order}`;
 
@@ -163,7 +163,7 @@ export function toAdminResumeQuery(p?: ResumeListParams | void | null) {
 export function splitResume(raw: any): { education: ResumeMerged[]; experience: ResumeMerged[] } {
   const r = raw?.data ?? raw?.result ?? raw?.payload ?? raw;
 
-  if (r && typeof r === 'object' && (Array.isArray(r.education) || Array.isArray(r.experience))) {
+  if (r && typeof r === "object" && (Array.isArray(r.education) || Array.isArray(r.experience))) {
     return {
       education: Array.isArray(r.education) ? r.education : [],
       experience: Array.isArray(r.experience) ? r.experience : [],
@@ -173,7 +173,7 @@ export function splitResume(raw: any): { education: ResumeMerged[]; experience: 
   const arr: ResumeMerged[] = Array.isArray(r) ? r : Array.isArray(r?.items) ? r.items : [];
 
   return {
-    education: arr.filter((x) => x?.type === 'education'),
-    experience: arr.filter((x) => x?.type === 'experience'),
+    education: arr.filter((x) => x?.type === "education"),
+    experience: arr.filter((x) => x?.type === "experience"),
   };
 }

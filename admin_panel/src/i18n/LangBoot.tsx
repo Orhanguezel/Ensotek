@@ -1,21 +1,22 @@
 // =============================================================
 // FILE: src/i18n/LangBoot.tsx  (DYNAMIC via META endpoints)
 // =============================================================
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { useRouter } from 'next/router';
+import { useMemo } from "react";
 
-import HtmlLangSync from './HtmlLangSync';
-import { KNOWN_RTL } from './config';
-import { FALLBACK_LOCALE } from './config';
-import { normLocaleTag } from './localeUtils';
-import { computeActiveLocales } from './app-locales-meta';
-import { useGetAppLocalesAdminQuery, useGetDefaultLocaleAdminQuery } from '@/integrations/hooks';
+import { useRouter } from "next/router";
+
+import { useGetAppLocalesAdminQuery, useGetDefaultLocaleAdminQuery } from "@/integrations/hooks";
+
+import { computeActiveLocales } from "./app-locales-meta";
+import { FALLBACK_LOCALE, KNOWN_RTL } from "./config";
+import HtmlLangSync from "./HtmlLangSync";
+import { normLocaleTag } from "./localeUtils";
 
 function readLocaleFromPath(asPath?: string): string {
-  const p = String(asPath || '/').trim();
-  const seg = p.replace(/^\/+/, '').split('/')[0] || '';
+  const p = String(asPath || "/").trim();
+  const seg = p.replace(/^\/+/, "").split("/")[0] || "";
   return normLocaleTag(seg);
 }
 
@@ -25,10 +26,7 @@ export default function LangBoot() {
   const { data: appLocalesMeta } = useGetAppLocalesAdminQuery();
   const { data: defaultLocaleMeta } = useGetDefaultLocaleAdminQuery();
 
-  const activeLocales = useMemo(
-    () => computeActiveLocales(appLocalesMeta as any, FALLBACK_LOCALE),
-    [appLocalesMeta],
-  );
+  const activeLocales = useMemo(() => computeActiveLocales(appLocalesMeta as any, FALLBACK_LOCALE), [appLocalesMeta]);
 
   const runtimeDefault = useMemo(() => {
     const activeSet = new Set(activeLocales.map(normLocaleTag));
@@ -39,7 +37,7 @@ export default function LangBoot() {
     const first = normLocaleTag(activeLocales[0]);
     if (first) return first;
 
-    return normLocaleTag(FALLBACK_LOCALE) || 'de';
+    return normLocaleTag(FALLBACK_LOCALE) || "de";
   }, [defaultLocaleMeta, activeLocales]);
 
   const resolved = useMemo(() => {
@@ -48,10 +46,10 @@ export default function LangBoot() {
 
     // ✅ active değilse path’i asla lang diye basma
     const lang = fromPath && activeSet.has(fromPath) ? fromPath : runtimeDefault;
-    const dir = KNOWN_RTL.has(lang) ? 'rtl' : 'ltr';
+    const dir = KNOWN_RTL.has(lang) ? "rtl" : "ltr";
 
     return { lang, dir };
   }, [router.asPath, activeLocales, runtimeDefault]);
 
-  return <HtmlLangSync lang={resolved.lang} dir={resolved.dir as 'ltr' | 'rtl'} />;
+  return <HtmlLangSync lang={resolved.lang} dir={resolved.dir as "ltr" | "rtl"} />;
 }

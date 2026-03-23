@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/services/_components/serviceForm/ServiceForm.tsx
@@ -11,47 +11,37 @@
 // - Gallery: ServiceFormImageColumn (DB-backed)
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import type { ServiceDto, ServiceFormProps, ServiceFormValues } from '@/integrations/shared';
+import { toast } from "sonner";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { AdminJsonEditor } from "@/app/(main)/admin/_components/common/AdminJsonEditor";
+import RichContentEditor from "@/app/(main)/admin/_components/common/RichContentEditor";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import type { ServiceDto, ServiceFormProps, ServiceFormValues } from "@/integrations/shared";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ServiceFormImageColumn } from "./ServiceFormImageColumn";
+import { buildInitialValues, normalizeLocale, slugify } from "./serviceForm.utils";
+import { useServiceEditorImageUpload } from "./useServiceEditorImageUpload";
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import { AdminJsonEditor } from '@/app/(main)/admin/_components/common/AdminJsonEditor';
-import RichContentEditor from '@/app/(main)/admin/_components/common/RichContentEditor';
-
-import { buildInitialValues, normalizeLocale, slugify } from './serviceForm.utils';
-import { ServiceFormImageColumn } from './ServiceFormImageColumn';
-import { useServiceEditorImageUpload } from './useServiceEditorImageUpload';
-
-const norm = (v: unknown) => String(v ?? '').trim();
+const norm = (v: unknown) => String(v ?? "").trim();
 const toNull = (v: unknown) => {
   const s = norm(v);
   return s ? s : null;
 };
 const toInt = (v: unknown, fallback = 0) => {
-  const n = Number(String(v ?? '').trim());
+  const n = Number(String(v ?? "").trim());
   return Number.isFinite(n) ? n : fallback;
 };
 
@@ -73,11 +63,10 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const adminLocales = useAdminLocales() as any;
   const t = useAdminT();
 
-  const localesLoading: boolean =
-    !!adminLocales?.loading || !!adminLocales?.isLoading || !!adminLocales?.isFetching;
+  const localesLoading: boolean = !!adminLocales?.loading || !!adminLocales?.isLoading || !!adminLocales?.isFetching;
 
   const defaultLocaleFromHook = normalizeLocale(
-    adminLocales?.defaultLocale ?? adminLocales?.default_locale ?? adminLocales?.default ?? '',
+    adminLocales?.defaultLocale ?? adminLocales?.default_locale ?? adminLocales?.default ?? "",
   );
 
   const localeOptions: LocaleOption[] = React.useMemo(() => {
@@ -92,17 +81,15 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     return raw
       .map((x: any) => ({
         value: normalizeLocale(x?.value ?? x?.code ?? x),
-        label: String(x?.label ?? x?.name ?? x?.value ?? x?.code ?? x ?? '').trim(),
+        label: String(x?.label ?? x?.name ?? x?.value ?? x?.code ?? x ?? "").trim(),
       }))
       .filter((x: LocaleOption) => !!x.value)
       .map((x: LocaleOption) => ({ value: x.value, label: x.label || x.value.toUpperCase() }));
   }, [adminLocales]);
 
   const fallbackLocale = React.useMemo(() => {
-    const def = normalizeLocale(
-      defaultLocale || defaultLocaleFromHook || localeOptions?.[0]?.value || '',
-    );
-    return def || '';
+    const def = normalizeLocale(defaultLocale || defaultLocaleFromHook || localeOptions?.[0]?.value || "");
+    return def || "";
   }, [defaultLocale, defaultLocaleFromHook, localeOptions]);
 
   const [values, setValues] = React.useState<ServiceFormValues>(() =>
@@ -112,18 +99,12 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
   const [slugTouched, setSlugTouched] = React.useState(false);
 
   React.useEffect(() => {
-    const next = buildInitialValues(
-      initialData as ServiceDto | undefined,
-      defaultLocale,
-      fallbackLocale,
-    );
+    const next = buildInitialValues(initialData as ServiceDto | undefined, defaultLocale, fallbackLocale);
 
     // cover single source
-    const coverFromDb =
-      norm((initialData as any)?.image_url) || norm((initialData as any)?.featured_image) || '';
-    const coverFromNext =
-      norm((next as any)?.image_url) || norm((next as any)?.featured_image) || '';
-    const cover = coverFromNext || coverFromDb || '';
+    const coverFromDb = norm((initialData as any)?.image_url) || norm((initialData as any)?.featured_image) || "";
+    const coverFromNext = norm((next as any)?.image_url) || norm((next as any)?.featured_image) || "";
+    const cover = coverFromNext || coverFromDb || "";
 
     setValues({
       ...next,
@@ -132,10 +113,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
       tags: norm((next as any)?.tags) || norm((initialData as any)?.tags),
       meta_title: norm((next as any)?.meta_title) || norm((initialData as any)?.meta_title),
-      meta_description:
-        norm((next as any)?.meta_description) || norm((initialData as any)?.meta_description),
-      meta_keywords:
-        norm((next as any)?.meta_keywords) || norm((initialData as any)?.meta_keywords),
+      meta_description: norm((next as any)?.meta_description) || norm((initialData as any)?.meta_description),
+      meta_keywords: norm((next as any)?.meta_keywords) || norm((initialData as any)?.meta_keywords),
     });
 
     setSlugTouched(false);
@@ -151,21 +130,20 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     if (localesLoading) return;
     const list = localeOptions.map((x) => x.value);
     const cur = normalizeLocale(values.locale);
-    const next =
-      (cur && list.includes(cur) ? cur : normalizeLocale(fallbackLocale)) || list[0] || '';
+    const next = (cur && list.includes(cur) ? cur : normalizeLocale(fallbackLocale)) || list[0] || "";
 
     if (next && next !== cur) {
       setValues((prev) => ({ ...prev, locale: next }));
       onLocaleChange?.(next);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localesLoading, localeOptions, fallbackLocale]);
+  }, [localesLoading, localeOptions, fallbackLocale, onLocaleChange, values.locale]);
 
   const imageMetadata = React.useMemo(
     () => ({
-      module_key: 'service',
+      module_key: "service",
       locale: effectiveLocale,
-      service_slug: values.slug || values.name || '',
+      service_slug: values.slug || values.name || "",
       ...(values.id ? { service_id: values.id } : {}),
     }),
     [effectiveLocale, values.slug, values.name, values.id],
@@ -181,7 +159,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
     const resolved = next && list.includes(next) ? next : normalizeLocale(fallbackLocale);
 
     if (!resolved) {
-      toast.error(t('admin.services.form.localeRequired'));
+      toast.error(t("admin.services.form.localeRequired"));
       return;
     }
 
@@ -195,12 +173,12 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
     const loc = normalizeLocale(values.locale || fallbackLocale);
     if (!loc) {
-      toast.error(t('admin.services.form.localeRequired'));
+      toast.error(t("admin.services.form.localeRequired"));
       return;
     }
 
     if (!values.name.trim() || !values.slug.trim()) {
-      toast.error(t('admin.services.form.nameSlugRequired'));
+      toast.error(t("admin.services.form.nameSlugRequired"));
       return;
     }
 
@@ -212,7 +190,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
       locale: loc,
       name: values.name.trim(),
       slug: values.slug.trim(),
-      description: String(values.description || ''),
+      description: String(values.description || ""),
 
       featured: !!values.featured,
       is_active: !!values.is_active,
@@ -253,24 +231,28 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
               <CardTitle className="text-base">
-                {mode === 'create' ? t('admin.services.form.createTitle') : t('admin.services.form.editTitle')}
+                {mode === "create" ? t("admin.services.form.createTitle") : t("admin.services.form.editTitle")}
               </CardTitle>
-              <CardDescription>
-                {t('admin.services.form.description')}
-              </CardDescription>
+              <CardDescription>{t("admin.services.form.description")}</CardDescription>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 md:justify-end">
-              {loading ? <Badge variant="secondary">{t('admin.services.form.loading')}</Badge> : null}
+              {loading ? <Badge variant="secondary">{t("admin.services.form.loading")}</Badge> : null}
 
               {onCancel ? (
                 <Button type="button" variant="outline" onClick={onCancel} disabled={disabled}>
-                  {t('admin.services.form.backButton')}
+                  {t("admin.services.form.backButton")}
                 </Button>
               ) : null}
 
               <Button type="submit" disabled={disabled}>
-                {saving ? (mode === 'create' ? t('admin.services.form.creating') : t('admin.services.form.saving')) : (mode === 'create' ? t('admin.services.form.createButton') : t('admin.services.form.saveButton'))}
+                {saving
+                  ? mode === "create"
+                    ? t("admin.services.form.creating")
+                    : t("admin.services.form.saving")
+                  : mode === "create"
+                    ? t("admin.services.form.createButton")
+                    : t("admin.services.form.saveButton")}
               </Button>
             </div>
           </div>
@@ -279,8 +261,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
         <CardContent className="space-y-4">
           <Tabs defaultValue="form">
             <TabsList>
-              <TabsTrigger value="form">{t('admin.services.form.formTab')}</TabsTrigger>
-              <TabsTrigger value="json">{t('admin.services.form.jsonTab')}</TabsTrigger>
+              <TabsTrigger value="form">{t("admin.services.form.formTab")}</TabsTrigger>
+              <TabsTrigger value="json">{t("admin.services.form.jsonTab")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="json" className="mt-4">
@@ -288,8 +270,8 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 value={values}
                 disabled={disabled}
                 onChange={(next) => setValues(next as ServiceFormValues)}
-                label={t('admin.services.form.jsonLabel')}
-                helperText={t('admin.services.form.jsonHelperText')}
+                label={t("admin.services.form.jsonLabel")}
+                helperText={t("admin.services.form.jsonHelperText")}
               />
             </TabsContent>
 
@@ -300,14 +282,14 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   {/* Locale + flags */}
                   <div className="grid gap-4 md:grid-cols-3">
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.localeLabel')}</Label>
+                      <Label>{t("admin.services.form.localeLabel")}</Label>
                       <Select
-                        value={normalizeLocale(values.locale) || ''}
+                        value={normalizeLocale(values.locale) || ""}
                         onValueChange={handleLocaleChange}
                         disabled={localeDisabled}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder={t('admin.services.form.localePlaceholder')} />
+                          <SelectValue placeholder={t("admin.services.form.localePlaceholder")} />
                         </SelectTrigger>
                         <SelectContent>
                           {localeOptions.map((opt) => (
@@ -319,9 +301,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       </Select>
 
                       {!localesLoading && localeOptions.length === 0 ? (
-                        <p className="text-xs text-destructive">
-                          {t('admin.services.form.localeEmptyError')}
-                        </p>
+                        <p className="text-destructive text-xs">{t("admin.services.form.localeEmptyError")}</p>
                       ) : null}
                     </div>
 
@@ -330,24 +310,20 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                         <Checkbox
                           id="svc_is_active"
                           checked={!!values.is_active}
-                          onCheckedChange={(v) =>
-                            setValues((prev) => ({ ...prev, is_active: v === true }))
-                          }
+                          onCheckedChange={(v) => setValues((prev) => ({ ...prev, is_active: v === true }))}
                           disabled={disabled}
                         />
-                        <Label htmlFor="svc_is_active">{t('admin.services.form.activeLabel')}</Label>
+                        <Label htmlFor="svc_is_active">{t("admin.services.form.activeLabel")}</Label>
                       </div>
 
                       <div className="flex items-center gap-2">
                         <Checkbox
                           id="svc_featured"
                           checked={!!values.featured}
-                          onCheckedChange={(v) =>
-                            setValues((prev) => ({ ...prev, featured: v === true }))
-                          }
+                          onCheckedChange={(v) => setValues((prev) => ({ ...prev, featured: v === true }))}
                           disabled={disabled}
                         />
-                        <Label htmlFor="svc_featured">{t('admin.services.form.featuredLabel')}</Label>
+                        <Label htmlFor="svc_featured">{t("admin.services.form.featuredLabel")}</Label>
                       </div>
                     </div>
                   </div>
@@ -357,7 +333,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   {/* name + slug */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.nameLabel')}</Label>
+                      <Label>{t("admin.services.form.nameLabel")}</Label>
                       <Input
                         value={values.name}
                         onChange={(e) => {
@@ -373,7 +349,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                     </div>
 
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.slugLabel')}</Label>
+                      <Label>{t("admin.services.form.slugLabel")}</Label>
                       <Input
                         value={values.slug}
                         onFocus={() => setSlugTouched(true)}
@@ -388,10 +364,10 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
                   {/* rich content */}
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.descriptionLabel')}</Label>
+                    <Label>{t("admin.services.form.descriptionLabel")}</Label>
                     <RichContentEditor
                       label=""
-                      value={values.description || ''}
+                      value={values.description || ""}
                       onChange={(next) => setValues((prev) => ({ ...prev, description: next }))}
                       disabled={disabled}
                       height="280px"
@@ -402,7 +378,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   {/* i18n fields */}
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.materialLabel')}</Label>
+                      <Label>{t("admin.services.form.materialLabel")}</Label>
                       <Input
                         value={values.material}
                         onChange={(e) => setValues((p) => ({ ...p, material: e.target.value }))}
@@ -410,7 +386,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.priceLabel')}</Label>
+                      <Label>{t("admin.services.form.priceLabel")}</Label>
                       <Input
                         value={values.price}
                         onChange={(e) => setValues((p) => ({ ...p, price: e.target.value }))}
@@ -421,23 +397,21 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
                   {/* Price Numeric (for GA4 tracking) */}
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.priceNumericLabel')}</Label>
+                    <Label>{t("admin.services.form.priceNumericLabel")}</Label>
                     <Input
                       type="number"
                       step="0.01"
                       min="0"
                       placeholder="80.00"
-                      value={values.price_numeric ?? ''}
+                      value={values.price_numeric ?? ""}
                       onChange={(e) => setValues((p) => ({ ...p, price_numeric: e.target.value }))}
                       disabled={disabled}
                     />
-                    <p className="text-xs text-muted-foreground">
-                      {t('admin.services.form.priceNumericHelp')}
-                    </p>
+                    <p className="text-muted-foreground text-xs">{t("admin.services.form.priceNumericHelp")}</p>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.includesLabel')}</Label>
+                    <Label>{t("admin.services.form.includesLabel")}</Label>
                     <Textarea
                       rows={2}
                       value={values.includes}
@@ -447,7 +421,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.warrantyLabel')}</Label>
+                    <Label>{t("admin.services.form.warrantyLabel")}</Label>
                     <Textarea
                       rows={2}
                       value={values.warranty}
@@ -459,19 +433,20 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   {/* tags + meta */}
                   <div className="space-y-2">
                     <Label>
-                      {t('admin.services.form.tagsLabel')} <span className="text-muted-foreground">{t('admin.services.form.tagsHelp')}</span>
+                      {t("admin.services.form.tagsLabel")}{" "}
+                      <span className="text-muted-foreground">{t("admin.services.form.tagsHelp")}</span>
                     </Label>
                     <Input
                       value={values.tags}
                       onChange={(e) => setValues((p) => ({ ...p, tags: e.target.value }))}
                       disabled={disabled}
-                      placeholder={t('admin.services.form.tagsPlaceholder')}
+                      placeholder={t("admin.services.form.tagsPlaceholder")}
                     />
                   </div>
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.metaTitleLabel')}</Label>
+                      <Label>{t("admin.services.form.metaTitleLabel")}</Label>
                       <Input
                         value={values.meta_title}
                         onChange={(e) => setValues((p) => ({ ...p, meta_title: e.target.value }))}
@@ -479,25 +454,21 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.metaKeywordsLabel')}</Label>
+                      <Label>{t("admin.services.form.metaKeywordsLabel")}</Label>
                       <Input
                         value={values.meta_keywords}
-                        onChange={(e) =>
-                          setValues((p) => ({ ...p, meta_keywords: e.target.value }))
-                        }
+                        onChange={(e) => setValues((p) => ({ ...p, meta_keywords: e.target.value }))}
                         disabled={disabled}
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.metaDescriptionLabel')}</Label>
+                    <Label>{t("admin.services.form.metaDescriptionLabel")}</Label>
                     <Textarea
                       rows={2}
                       value={values.meta_description}
-                      onChange={(e) =>
-                        setValues((p) => ({ ...p, meta_description: e.target.value }))
-                      }
+                      onChange={(e) => setValues((p) => ({ ...p, meta_description: e.target.value }))}
                       disabled={disabled}
                     />
                   </div>
@@ -506,7 +477,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   <Separator />
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.areaLabel')}</Label>
+                      <Label>{t("admin.services.form.areaLabel")}</Label>
                       <Input
                         value={values.area}
                         onChange={(e) => setValues((p) => ({ ...p, area: e.target.value }))}
@@ -514,7 +485,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.durationLabel')}</Label>
+                      <Label>{t("admin.services.form.durationLabel")}</Label>
                       <Input
                         value={values.duration}
                         onChange={(e) => setValues((p) => ({ ...p, duration: e.target.value }))}
@@ -525,7 +496,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
 
                   <div className="grid gap-4 md:grid-cols-2">
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.maintenanceLabel')}</Label>
+                      <Label>{t("admin.services.form.maintenanceLabel")}</Label>
                       <Input
                         value={values.maintenance}
                         onChange={(e) => setValues((p) => ({ ...p, maintenance: e.target.value }))}
@@ -533,7 +504,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label>{t('admin.services.form.seasonLabel')}</Label>
+                      <Label>{t("admin.services.form.seasonLabel")}</Label>
                       <Input
                         value={values.season}
                         onChange={(e) => setValues((p) => ({ ...p, season: e.target.value }))}
@@ -543,7 +514,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   </div>
 
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.equipmentLabel')}</Label>
+                    <Label>{t("admin.services.form.equipmentLabel")}</Label>
                     <Input
                       value={values.equipment}
                       onChange={(e) => setValues((p) => ({ ...p, equipment: e.target.value }))}
@@ -555,7 +526,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                 {/* RIGHT */}
                 <div className="space-y-4 lg:col-span-4">
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.displayOrderLabel')}</Label>
+                    <Label>{t("admin.services.form.displayOrderLabel")}</Label>
                     <Input
                       type="number"
                       min={0}
@@ -578,7 +549,7 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   />
 
                   <div className="space-y-2">
-                    <Label>{t('admin.services.form.imageAltLabel')}</Label>
+                    <Label>{t("admin.services.form.imageAltLabel")}</Label>
                     <Input
                       value={values.image_alt}
                       onChange={(e) => setValues((p) => ({ ...p, image_alt: e.target.value }))}
@@ -589,22 +560,20 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                   <Separator />
 
                   <div className="space-y-3">
-                    <div className="text-sm font-medium">{t('admin.services.form.multiLocaleTitle')}</div>
+                    <div className="font-medium text-sm">{t("admin.services.form.multiLocaleTitle")}</div>
 
                     <div className="flex items-start gap-2">
                       <Checkbox
                         id="svc_replicate_all"
                         checked={!!values.replicate_all_locales}
-                        onCheckedChange={(v) =>
-                          setValues((p) => ({ ...p, replicate_all_locales: v === true }))
-                        }
+                        onCheckedChange={(v) => setValues((p) => ({ ...p, replicate_all_locales: v === true }))}
                         disabled={disabled}
                       />
                       <div className="space-y-1">
                         <Label htmlFor="svc_replicate_all" className="leading-none">
-                          {t('admin.services.form.replicateAllLocales')}
+                          {t("admin.services.form.replicateAllLocales")}
                         </Label>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           <code>replicate_all_locales</code>
                         </p>
                       </div>
@@ -614,16 +583,14 @@ export const ServiceForm: React.FC<ServiceFormProps> = ({
                       <Checkbox
                         id="svc_apply_all"
                         checked={!!values.apply_all_locales}
-                        onCheckedChange={(v) =>
-                          setValues((p) => ({ ...p, apply_all_locales: v === true }))
-                        }
+                        onCheckedChange={(v) => setValues((p) => ({ ...p, apply_all_locales: v === true }))}
                         disabled={disabled}
                       />
                       <div className="space-y-1">
                         <Label htmlFor="svc_apply_all" className="leading-none">
-                          {t('admin.services.form.applyAllLocales')}
+                          {t("admin.services.form.applyAllLocales")}
                         </Label>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           <code>apply_all_locales</code>
                         </p>
                       </div>

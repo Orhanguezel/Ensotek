@@ -1,6 +1,6 @@
 // src/app/(main)/admin/users/[id]/page.tsx
 
-import UserDetailClient from '../_components/user-detail-client';
+import UserDetailClient from "../_components/user-detail-client";
 
 type Params = { id: string };
 

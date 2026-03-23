@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/services/admin-site_services-client.tsx
@@ -9,51 +9,35 @@
 // - Reorder: up/down + "Sıralamayı Kaydet"
 // =============================================================
 
-import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import { Plus, RefreshCcw, ArrowUp, ArrowDown, Save, Search, Trash2, Pencil } from 'lucide-react';
+import * as React from "react";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { cn } from '@/lib/utils';
+import { ArrowDown, ArrowUp, Pencil, Plus, RefreshCcw, Save, Search, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClient, localeShortClientOr } from "@/i18n/localeShortClient";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import type { ServiceDto, ServiceListAdminQueryParams } from '@/integrations/shared';
-import {
-  useListServicesAdminQuery,
-  useUpdateServiceAdminMutation,
   useDeleteServiceAdminMutation,
+  useListServicesAdminQuery,
   useReorderServicesAdminMutation,
-} from '@/integrations/hooks';
+  useUpdateServiceAdminMutation,
+} from "@/integrations/hooks";
+import type { ServiceDto, ServiceListAdminQueryParams } from "@/integrations/shared";
+import { cn } from "@/lib/utils";
 
-type PublishedFilter = 'all' | 'active' | 'inactive';
+type PublishedFilter = "all" | "active" | "inactive";
 
 type Filters = {
   search: string;
@@ -72,26 +56,21 @@ export default function AdminServicesClient() {
   const router = useRouter();
   const sp = useSearchParams();
 
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'de');
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const urlLocale = React.useMemo(() => {
-    const q = sp?.get('locale');
-    return localeShortClient(q) || '';
+    const q = sp?.get("locale");
+    return localeShortClient(q) || "";
   }, [sp]);
 
   const [filters, setFilters] = React.useState<Filters>({
-    search: '',
-    publishedFilter: 'all',
-    locale: '',
+    search: "",
+    publishedFilter: "all",
+    locale: "",
     featuredOnly: false,
   });
 
@@ -102,10 +81,9 @@ export default function AdminServicesClient() {
     setFilters((prev) => {
       const prevLoc = localeShortClient(prev.locale);
       const urlLoc = localeShortClient(urlLocale);
-      const defLoc = localeShortClientOr(apiLocale, 'de');
+      const defLoc = localeShortClientOr(apiLocale, "de");
 
-      const canUse = (l: string) =>
-        !!l && (localeOptions ?? []).some((x: any) => localeShortClient(x.value) === l);
+      const canUse = (l: string) => !!l && (localeOptions ?? []).some((x: any) => localeShortClient(x.value) === l);
 
       if (prevLoc && canUse(prevLoc)) return prev;
 
@@ -113,7 +91,7 @@ export default function AdminServicesClient() {
 
       if (defLoc && canUse(defLoc)) return { ...prev, locale: defLoc };
 
-      return { ...prev, locale: localeShortClient((localeOptions as any)?.[0]?.value) || 'de' };
+      return { ...prev, locale: localeShortClient((localeOptions as any)?.[0]?.value) || "de" };
     });
   }, [localeOptions, urlLocale, apiLocale]);
 
@@ -128,15 +106,15 @@ export default function AdminServicesClient() {
     if (!l) return;
     if (l === urlLocale) return;
 
-    const params = new URLSearchParams(sp?.toString() || '');
-    params.set('locale', l);
+    const params = new URLSearchParams(sp?.toString() || "");
+    params.set("locale", l);
     router.replace(`/admin/services?${params.toString()}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.locale]);
+  }, [filters.locale, router.replace, sp?.toString, urlLocale]);
 
   const is_active = React.useMemo(() => {
-    if (filters.publishedFilter === 'all') return undefined;
-    return filters.publishedFilter === 'active' ? 1 : 0;
+    if (filters.publishedFilter === "all") return undefined;
+    return filters.publishedFilter === "active" ? 1 : 0;
   }, [filters.publishedFilter]);
 
   const queryParams = React.useMemo(() => {
@@ -164,7 +142,7 @@ export default function AdminServicesClient() {
 
   const total: number = React.useMemo(() => {
     const t = (listQ.data as any)?.total;
-    return typeof t === 'number' ? t : items.length;
+    return typeof t === "number" ? t : items.length;
   }, [listQ.data, items.length]);
 
   const [rows, setRows] = React.useState<ServiceDto[]>([]);
@@ -197,80 +175,72 @@ export default function AdminServicesClient() {
     try {
       const payload = { items: rows.map((p, idx) => ({ id: (p as any).id, display_order: idx })) };
       await reorderServices(payload as any).unwrap();
-      toast.success(t('admin.services.list.orderSaved'));
+      toast.success(t("admin.services.list.orderSaved"));
       listQ.refetch();
     } catch (err: any) {
-      toast.error(
-        err?.data?.error?.message || err?.message || t('admin.services.list.orderSaveError'),
-      );
+      toast.error(err?.data?.error?.message || err?.message || t("admin.services.list.orderSaveError"));
     }
   }
 
   function onCreate() {
-    const l = localeShortClientOr(effectiveLocale, 'de');
+    const l = localeShortClientOr(effectiveLocale, "de");
     router.push(`/admin/services/new?locale=${encodeURIComponent(l)}`);
   }
 
   function onEdit(id: string) {
-    const l = localeShortClientOr(effectiveLocale, 'de');
+    const l = localeShortClientOr(effectiveLocale, "de");
     router.push(`/admin/services/${encodeURIComponent(id)}?locale=${encodeURIComponent(l)}`);
   }
 
   async function onToggleActive(item: ServiceDto, next: boolean) {
-    const id = String((item as any)?.id ?? '');
+    const id = String((item as any)?.id ?? "");
     if (!isUuidLike(id)) return;
 
     try {
       await updateService({ id, patch: { is_active: next } } as any).unwrap();
-      toast.success(t('admin.services.list.statusUpdated'));
+      toast.success(t("admin.services.list.statusUpdated"));
       setRows((prev) => prev.map((r: any) => (r.id === id ? { ...r, is_active: next } : r)));
     } catch (err: any) {
-      toast.error(
-        err?.data?.error?.message || err?.message || t('admin.services.list.statusUpdateError'),
-      );
+      toast.error(err?.data?.error?.message || err?.message || t("admin.services.list.statusUpdateError"));
     }
   }
 
   async function onToggleFeatured(item: ServiceDto, next: boolean) {
-    const id = String((item as any)?.id ?? '');
+    const id = String((item as any)?.id ?? "");
     if (!isUuidLike(id)) return;
 
     try {
       await updateService({ id, patch: { featured: next } } as any).unwrap();
-      toast.success(t('admin.services.list.featuredUpdated'));
+      toast.success(t("admin.services.list.featuredUpdated"));
       setRows((prev) => prev.map((r: any) => (r.id === id ? { ...r, featured: next } : r)));
     } catch (err: any) {
-      toast.error(
-        err?.data?.error?.message || err?.message || t('admin.services.list.statusUpdateError'),
-      );
+      toast.error(err?.data?.error?.message || err?.message || t("admin.services.list.statusUpdateError"));
     }
   }
 
   async function onDelete(item: ServiceDto) {
-    const id = String((item as any)?.id ?? '');
+    const id = String((item as any)?.id ?? "");
     if (!isUuidLike(id)) return;
 
     const ok = window.confirm(
-      t('admin.services.list.deleteConfirm', { name: String((item as any)?.name ?? 'Hizmet') }),
+      t("admin.services.list.deleteConfirm", { name: String((item as any)?.name ?? "Hizmet") }),
     );
     if (!ok) return;
 
     try {
       await deleteService({ id } as any).unwrap();
-      toast.success(t('admin.services.list.deleted'));
+      toast.success(t("admin.services.list.deleted"));
       listQ.refetch();
     } catch (err: any) {
-      toast.error(
-        err?.data?.error?.message || err?.message || t('admin.services.list.deleteError'),
-      );
+      toast.error(err?.data?.error?.message || err?.message || t("admin.services.list.deleteError"));
     }
   }
 
   function resetFilters() {
     setFilters((p) => ({
       ...p,
-      search: '',
-      publishedFilter: 'all',
+      search: "",
+      publishedFilter: "all",
       featuredOnly: false,
     }));
   }
@@ -280,30 +250,29 @@ export default function AdminServicesClient() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-lg font-semibold">{t('admin.services.header.title')}</h1>
-        <p className="text-sm text-muted-foreground">{t('admin.services.header.description')}</p>
+        <h1 className="font-semibold text-lg">{t("admin.services.header.title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("admin.services.header.description")}</p>
       </div>
 
       <Card>
         <CardHeader className="gap-2">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-base">{t('admin.services.header.filterLabel')}</CardTitle>
+              <CardTitle className="text-base">{t("admin.services.header.filterLabel")}</CardTitle>
               <CardDescription>
-                {t('admin.services.header.totalLabel')} <span className="font-medium">{total}</span>{' '}
-                • {t('admin.services.header.activeLocale')}{' '}
-                <Badge variant="secondary">{effectiveLocale || '—'}</Badge>
+                {t("admin.services.header.totalLabel")} <span className="font-medium">{total}</span> •{" "}
+                {t("admin.services.header.activeLocale")} <Badge variant="secondary">{effectiveLocale || "—"}</Badge>
               </CardDescription>
             </div>
 
             <div className="flex items-center gap-2">
               <Button onClick={onCreate} disabled={busy}>
                 <Plus className="mr-2 size-4" />
-                {t('admin.services.header.createButton')}
+                {t("admin.services.header.createButton")}
               </Button>
               <Button variant="outline" onClick={() => listQ.refetch()} disabled={busy}>
                 <RefreshCcw className="mr-2 size-4" />
-                {t('admin.services.header.refreshButton')}
+                {t("admin.services.header.refreshButton")}
               </Button>
             </div>
           </div>
@@ -312,14 +281,14 @@ export default function AdminServicesClient() {
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="q">{t('admin.services.header.searchLabel')}</Label>
+              <Label htmlFor="q">{t("admin.services.header.searchLabel")}</Label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" />
                 <Input
                   id="q"
                   value={filters.search}
                   onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
-                  placeholder={t('admin.services.header.searchPlaceholder')}
+                  placeholder={t("admin.services.header.searchPlaceholder")}
                   className="pl-9"
                   disabled={busy}
                 />
@@ -327,34 +296,32 @@ export default function AdminServicesClient() {
             </div>
 
             <div className="space-y-2">
-              <Label>{t('admin.services.header.statusLabel')}</Label>
+              <Label>{t("admin.services.header.statusLabel")}</Label>
               <Select
                 value={filters.publishedFilter}
                 onValueChange={(v) => setFilters((p) => ({ ...p, publishedFilter: v as any }))}
                 disabled={busy}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t('admin.services.header.statusAll')} />
+                  <SelectValue placeholder={t("admin.services.header.statusAll")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('admin.services.header.statusAll')}</SelectItem>
-                  <SelectItem value="active">{t('admin.services.header.statusActive')}</SelectItem>
-                  <SelectItem value="inactive">
-                    {t('admin.services.header.statusInactive')}
-                  </SelectItem>
+                  <SelectItem value="all">{t("admin.services.header.statusAll")}</SelectItem>
+                  <SelectItem value="active">{t("admin.services.header.statusActive")}</SelectItem>
+                  <SelectItem value="inactive">{t("admin.services.header.statusInactive")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <Label>{t('admin.services.header.localeLabel')}</Label>
+              <Label>{t("admin.services.header.localeLabel")}</Label>
               <Select
-                value={filters.locale || ''}
+                value={filters.locale || ""}
                 onValueChange={(v) => setFilters((p) => ({ ...p, locale: v }))}
                 disabled={busy || (localeOptions?.length ?? 0) === 0}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t('admin.services.header.localePlaceholder')} />
+                  <SelectValue placeholder={t("admin.services.header.localePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {(localeOptions ?? []).map((l: any) => (
@@ -364,9 +331,7 @@ export default function AdminServicesClient() {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                {t('admin.services.header.localeUrlSync')}
-              </p>
+              <p className="text-muted-foreground text-xs">{t("admin.services.header.localeUrlSync")}</p>
             </div>
 
             <div className="flex items-center gap-2 pt-6 md:pt-7">
@@ -375,14 +340,12 @@ export default function AdminServicesClient() {
                 onCheckedChange={(v) => setFilters((p) => ({ ...p, featuredOnly: !!v }))}
                 disabled={busy}
               />
-              <span className="text-sm text-muted-foreground">
-                {t('admin.services.header.featuredOnly')}
-              </span>
+              <span className="text-muted-foreground text-sm">{t("admin.services.header.featuredOnly")}</span>
             </div>
 
             <div className="flex items-center gap-2 pt-6 md:pt-7">
               <Button variant="outline" onClick={resetFilters} disabled={busy}>
-                {t('admin.services.header.resetButton')}
+                {t("admin.services.header.resetButton")}
               </Button>
             </div>
           </div>
@@ -393,18 +356,16 @@ export default function AdminServicesClient() {
         <CardHeader className="gap-2">
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
             <div className="space-y-1">
-              <CardTitle className="text-base">{t('admin.services.list.listTitle')}</CardTitle>
+              <CardTitle className="text-base">{t("admin.services.list.listTitle")}</CardTitle>
               <CardDescription>
-                {busy
-                  ? t('admin.services.list.loading')
-                  : t('admin.services.list.recordCount', { count: rows.length })}
+                {busy ? t("admin.services.list.loading") : t("admin.services.list.recordCount", { count: rows.length })}
               </CardDescription>
             </div>
 
             <div className="flex items-center gap-2">
               <Button variant="outline" onClick={onSaveOrder} disabled={busy || rows.length === 0}>
                 <Save className="mr-2 size-4" />
-                {t('admin.services.list.saveOrderButton')}
+                {t("admin.services.list.saveOrderButton")}
               </Button>
             </div>
           </div>
@@ -413,16 +374,16 @@ export default function AdminServicesClient() {
         <CardContent className="space-y-4">
           {listQ.isError ? (
             <div className="rounded-md border p-4 text-sm">
-              {t('admin.services.list.listLoadError')}{' '}
+              {t("admin.services.list.listLoadError")}{" "}
               <Button
                 variant="link"
                 className="px-1"
                 onClick={() => {
-                  toast.error(t('admin.services.list.listLoadErrorToast'));
+                  toast.error(t("admin.services.list.listLoadErrorToast"));
                   listQ.refetch();
                 }}
               >
-                {t('admin.services.list.retryButton')}
+                {t("admin.services.list.retryButton")}
               </Button>
             </div>
           ) : null}
@@ -433,21 +394,19 @@ export default function AdminServicesClient() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-14" />
-                  <TableHead>{t('admin.services.list.nameColumn')}</TableHead>
-                  <TableHead>{t('admin.services.list.slugColumn')}</TableHead>
-                  <TableHead>{t('admin.services.list.featuredColumn')}</TableHead>
-                  <TableHead>{t('admin.services.list.statusColumn')}</TableHead>
-                  <TableHead className="text-right">
-                    {t('admin.services.list.actionsColumn')}
-                  </TableHead>
+                  <TableHead>{t("admin.services.list.nameColumn")}</TableHead>
+                  <TableHead>{t("admin.services.list.slugColumn")}</TableHead>
+                  <TableHead>{t("admin.services.list.featuredColumn")}</TableHead>
+                  <TableHead>{t("admin.services.list.statusColumn")}</TableHead>
+                  <TableHead className="text-right">{t("admin.services.list.actionsColumn")}</TableHead>
                 </TableRow>
               </TableHeader>
 
               <TableBody>
                 {rows.map((p: any, idx) => {
-                  const id = String(p?.id ?? '');
-                  const name = String(p?.name ?? '').trim() || '—';
-                  const slug = String(p?.slug ?? '').trim() || '—';
+                  const id = String(p?.id ?? "");
+                  const name = String(p?.name ?? "").trim() || "—";
+                  const slug = String(p?.slug ?? "").trim() || "—";
                   const active = !!p?.is_active;
                   const featured = !!p?.featured;
 
@@ -455,7 +414,11 @@ export default function AdminServicesClient() {
                     <TableRow key={id || `${idx}`}>
                       <TableCell className="p-1">
                         {p?.image_url || p?.featured_image ? (
-                          <img src={p.image_url || p.featured_image} alt="" className="h-10 w-10 rounded object-cover" />
+                          <img
+                            src={p.image_url || p.featured_image}
+                            alt=""
+                            className="h-10 w-10 rounded object-cover"
+                          />
                         ) : (
                           <div className="flex h-10 w-10 items-center justify-center rounded bg-muted text-muted-foreground">
                             <span className="text-[10px]">—</span>
@@ -473,9 +436,7 @@ export default function AdminServicesClient() {
                             disabled={busy || !isUuidLike(id)}
                           />
                           <Badge variant="secondary">
-                            {featured
-                              ? t('admin.services.list.featuredYes')
-                              : t('admin.services.list.featuredNo')}
+                            {featured ? t("admin.services.list.featuredYes") : t("admin.services.list.featuredNo")}
                           </Badge>
                         </div>
                       </TableCell>
@@ -488,13 +449,9 @@ export default function AdminServicesClient() {
                             disabled={busy || !isUuidLike(id)}
                           />
                           {active ? (
-                            <Badge variant="secondary">
-                              {t('admin.services.list.activeStatus')}
-                            </Badge>
+                            <Badge variant="secondary">{t("admin.services.list.activeStatus")}</Badge>
                           ) : (
-                            <Badge variant="destructive">
-                              {t('admin.services.list.inactiveStatus')}
-                            </Badge>
+                            <Badge variant="destructive">{t("admin.services.list.inactiveStatus")}</Badge>
                           )}
                         </div>
                       </TableCell>
@@ -506,7 +463,7 @@ export default function AdminServicesClient() {
                             size="sm"
                             onClick={() => moveRow(idx, idx - 1)}
                             disabled={busy || idx === 0}
-                            title={t('admin.services.list.upButton')}
+                            title={t("admin.services.list.upButton")}
                           >
                             <ArrowUp className="size-4" />
                           </Button>
@@ -515,7 +472,7 @@ export default function AdminServicesClient() {
                             size="sm"
                             onClick={() => moveRow(idx, idx + 1)}
                             disabled={busy || idx === rows.length - 1}
-                            title={t('admin.services.list.downButton')}
+                            title={t("admin.services.list.downButton")}
                           >
                             <ArrowDown className="size-4" />
                           </Button>
@@ -525,24 +482,22 @@ export default function AdminServicesClient() {
                             size="sm"
                             onClick={() => onEdit(id)}
                             disabled={busy || !isUuidLike(id)}
-                            title={t('admin.services.list.editButton')}
+                            title={t("admin.services.list.editButton")}
                           >
                             <Pencil className="mr-2 size-4" />
-                            {t('admin.services.list.editButton')}
+                            {t("admin.services.list.editButton")}
                           </Button>
 
                           <Button
                             variant="outline"
                             size="sm"
-                            className={cn(
-                              'border-destructive text-destructive hover:text-destructive',
-                            )}
+                            className={cn("border-destructive text-destructive hover:text-destructive")}
                             onClick={() => onDelete(p)}
                             disabled={busy || !isUuidLike(id)}
-                            title={t('admin.services.list.deleteButton')}
+                            title={t("admin.services.list.deleteButton")}
                           >
                             <Trash2 className="mr-2 size-4" />
-                            {t('admin.services.list.deleteButton')}
+                            {t("admin.services.list.deleteButton")}
                           </Button>
                         </div>
                       </TableCell>
@@ -553,7 +508,7 @@ export default function AdminServicesClient() {
                 {showEmpty ? (
                   <TableRow>
                     <TableCell colSpan={5} className="py-10 text-center text-muted-foreground">
-                      {t('admin.services.list.noRecords')}
+                      {t("admin.services.list.noRecords")}
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -565,9 +520,9 @@ export default function AdminServicesClient() {
           <div className="rounded-md border md:hidden">
             <div className="divide-y">
               {rows.map((p: any, idx) => {
-                const id = String(p?.id ?? '');
-                const name = String(p?.name ?? '').trim() || '—';
-                const slug = String(p?.slug ?? '').trim() || '—';
+                const id = String(p?.id ?? "");
+                const name = String(p?.name ?? "").trim() || "—";
+                const slug = String(p?.slug ?? "").trim() || "—";
                 const active = !!p?.is_active;
                 const featured = !!p?.featured;
 
@@ -576,34 +531,26 @@ export default function AdminServicesClient() {
                     <div className="flex flex-wrap items-center gap-2">
                       <div className="font-medium">{name}</div>
                       {active ? (
-                        <Badge variant="secondary">{t('admin.services.list.activeStatus')}</Badge>
+                        <Badge variant="secondary">{t("admin.services.list.activeStatus")}</Badge>
                       ) : (
-                        <Badge variant="destructive">
-                          {t('admin.services.list.inactiveStatus')}
-                        </Badge>
+                        <Badge variant="destructive">{t("admin.services.list.inactiveStatus")}</Badge>
                       )}
                       <Badge variant="secondary">
-                        {featured
-                          ? t('admin.services.list.featuredBadge')
-                          : t('admin.services.list.normalStatus')}
+                        {featured ? t("admin.services.list.featuredBadge") : t("admin.services.list.normalStatus")}
                       </Badge>
                     </div>
 
                     <div className="mt-2 space-y-2 text-sm">
                       <div className="text-muted-foreground">
-                        <span className="font-medium text-foreground">
-                          {t('admin.services.list.slugLabel')}
-                        </span>{' '}
+                        <span className="font-medium text-foreground">{t("admin.services.list.slugLabel")}</span>{" "}
                         <span className="wrap-break-word">{slug}</span>
                       </div>
 
                       <div className="flex items-center justify-between rounded-md border p-3">
                         <div className="space-y-0.5">
-                          <div className="text-sm font-medium">
-                            {t('admin.services.list.featuredMobileLabel')}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {t('admin.services.list.featuredMobileHelp')}
+                          <div className="font-medium text-sm">{t("admin.services.list.featuredMobileLabel")}</div>
+                          <div className="text-muted-foreground text-xs">
+                            {t("admin.services.list.featuredMobileHelp")}
                           </div>
                         </div>
                         <Switch
@@ -615,11 +562,9 @@ export default function AdminServicesClient() {
 
                       <div className="flex items-center justify-between rounded-md border p-3">
                         <div className="space-y-0.5">
-                          <div className="text-sm font-medium">
-                            {t('admin.services.list.activeMobileLabel')}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {t('admin.services.list.activeMobileHelp')}
+                          <div className="font-medium text-sm">{t("admin.services.list.activeMobileLabel")}</div>
+                          <div className="text-muted-foreground text-xs">
+                            {t("admin.services.list.activeMobileHelp")}
                           </div>
                         </div>
                         <Switch
@@ -638,7 +583,7 @@ export default function AdminServicesClient() {
                         disabled={busy || idx === 0}
                       >
                         <ArrowUp className="mr-2 size-4" />
-                        {t('admin.services.list.upButton')}
+                        {t("admin.services.list.upButton")}
                       </Button>
                       <Button
                         variant="outline"
@@ -647,28 +592,23 @@ export default function AdminServicesClient() {
                         disabled={busy || idx === rows.length - 1}
                       >
                         <ArrowDown className="mr-2 size-4" />
-                        {t('admin.services.list.downButton')}
+                        {t("admin.services.list.downButton")}
                       </Button>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(id)}
-                        disabled={busy || !isUuidLike(id)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => onEdit(id)} disabled={busy || !isUuidLike(id)}>
                         <Pencil className="mr-2 size-4" />
-                        {t('admin.services.list.editButton')}
+                        {t("admin.services.list.editButton")}
                       </Button>
 
                       <Button
                         variant="outline"
                         size="sm"
-                        className={cn('border-destructive text-destructive hover:text-destructive')}
+                        className={cn("border-destructive text-destructive hover:text-destructive")}
                         onClick={() => onDelete(p)}
                         disabled={busy || !isUuidLike(id)}
                       >
                         <Trash2 className="mr-2 size-4" />
-                        {t('admin.services.list.deleteButton')}
+                        {t("admin.services.list.deleteButton")}
                       </Button>
                     </div>
                   </div>
@@ -676,15 +616,15 @@ export default function AdminServicesClient() {
               })}
 
               {showEmpty ? (
-                <div className="p-6 text-center text-sm text-muted-foreground">
-                  {t('admin.services.list.noRecords')}
+                <div className="p-6 text-center text-muted-foreground text-sm">
+                  {t("admin.services.list.noRecords")}
                 </div>
               ) : null}
             </div>
           </div>
 
           {rows.length > 0 ? (
-            <p className="text-xs text-muted-foreground">{t('admin.services.list.reorderHelp')}</p>
+            <p className="text-muted-foreground text-xs">{t("admin.services.list.reorderHelp")}</p>
           ) : null}
         </CardContent>
       </Card>

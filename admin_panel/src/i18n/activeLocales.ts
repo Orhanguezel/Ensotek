@@ -3,20 +3,20 @@
 // (DYNAMIC LOCALES) - FIXED (/api tolerant + stable normalization)
 // =============================================================
 
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { FALLBACK_LOCALE } from './config';
-import { normLocaleTag } from './localeUtils';
-import { computeActiveLocales, normalizeAppLocalesMeta, type AppLocaleMeta } from './app-locales-meta';
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { type AppLocaleMeta, computeActiveLocales, normalizeAppLocalesMeta } from "./app-locales-meta";
+import { FALLBACK_LOCALE } from "./config";
 
 function getApiBase(): string {
   const raw =
-    (process.env.NEXT_PUBLIC_API_BASE_URL || '').trim() ||
-    (process.env.NEXT_PUBLIC_API_URL || '').trim() ||
-    (process.env.API_BASE_URL || '').trim();
+    (process.env.NEXT_PUBLIC_API_BASE_URL || "").trim() ||
+    (process.env.NEXT_PUBLIC_API_URL || "").trim() ||
+    (process.env.API_BASE_URL || "").trim();
 
-  const base = raw.replace(/\/+$/, '');
+  const base = raw.replace(/\/+$/, "");
 
   // ✅ Senin projede RTK çağrıları /api/... gidiyor.
   // Env yanlışlıkla https://www.guezelwebdesign.de verildiyse burada /api ekleyerek tolere ediyoruz.
@@ -28,7 +28,7 @@ function getApiBase(): string {
 
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
-    const res = await fetch(url, { credentials: 'omit', cache: 'no-store' });
+    const res = await fetch(url, { credentials: "omit", cache: "no-store" });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
@@ -82,7 +82,10 @@ export function useActiveLocales() {
     })();
   }, []);
 
-  const locales = useMemo<string[]>(() => computeActiveLocales(meta as AppLocaleMeta[] | null, FALLBACK_LOCALE), [meta]);
+  const locales = useMemo<string[]>(
+    () => computeActiveLocales(meta as AppLocaleMeta[] | null, FALLBACK_LOCALE),
+    [meta],
+  );
 
   return { locales, isLoading };
 }

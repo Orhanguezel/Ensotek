@@ -3,32 +3,32 @@
 // Telegram admin endpoints (Ensotek)
 // ===================================================================
 
-import { baseApi } from '@/integrations/baseApi';
-import type { FetchArgs } from '@reduxjs/toolkit/query';
+import type { FetchArgs } from "@reduxjs/toolkit/query";
 
+import { baseApi } from "@/integrations/baseApi";
 import type {
   SimpleSuccessResp,
-  TelegramAdminSendBody,
   TelegramAdminEventBody,
+  TelegramAdminSendBody,
   TelegramAdminTestBody,
   TelegramAdminTestResp,
   TelegramNotificationBody,
-} from '@/integrations/shared/telegram';
+} from "@/integrations/shared/telegram";
 
-const TG_ADMIN_BASE = '/admin/telegram';
+const TG_ADMIN_BASE = "/admin/telegram";
 
 function toTrimmedString(v: unknown): string {
-  if (typeof v !== 'string') return '';
+  if (typeof v !== "string") return "";
   return v.trim();
 }
 
 export const telegramAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     /** POST /admin/telegram/test */
-    telegramTest: b.mutation<TelegramAdminTestResp, TelegramAdminTestBody | void>({
+    telegramTest: b.mutation<TelegramAdminTestResp, TelegramAdminTestBody | undefined>({
       query: (body): FetchArgs => ({
         url: `${TG_ADMIN_BASE}/test`,
-        method: 'POST',
+        method: "POST",
         body: body ?? {}, // chat_id opsiyonel
       }),
     }),
@@ -37,7 +37,7 @@ export const telegramAdminApi = baseApi.injectEndpoints({
     telegramSend: b.mutation<SimpleSuccessResp, TelegramAdminSendBody>({
       query: (body): FetchArgs => ({
         url: `${TG_ADMIN_BASE}/send`,
-        method: 'POST',
+        method: "POST",
         body,
       }),
     }),
@@ -46,7 +46,7 @@ export const telegramAdminApi = baseApi.injectEndpoints({
     telegramEvent: b.mutation<SimpleSuccessResp, TelegramAdminEventBody>({
       query: (body): FetchArgs => ({
         url: `${TG_ADMIN_BASE}/event`,
-        method: 'POST',
+        method: "POST",
         body,
       }),
     }),
@@ -63,20 +63,18 @@ export const telegramAdminApi = baseApi.injectEndpoints({
       query: (body): FetchArgs => {
         const bdy = (body ?? {}) as Record<string, unknown>;
 
-        const eventRaw = bdy.event ?? bdy.type ?? 'new_booking';
-        const event = toTrimmedString(eventRaw) || 'new_booking';
+        const eventRaw = bdy.event ?? bdy.type ?? "new_booking";
+        const event = toTrimmedString(eventRaw) || "new_booking";
 
         const chatRaw = bdy.chat_id ?? bdy.chatId ?? bdy.chatID ?? null;
         const chat_id = toTrimmedString(chatRaw);
 
         // exactOptionalPropertyTypes: chat_id boşsa alanı ekleme
-        const payload: TelegramAdminEventBody = chat_id
-          ? { event, chat_id, data: bdy }
-          : { event, data: bdy };
+        const payload: TelegramAdminEventBody = chat_id ? { event, chat_id, data: bdy } : { event, data: bdy };
 
         return {
           url: `${TG_ADMIN_BASE}/event`,
-          method: 'POST',
+          method: "POST",
           body: payload,
         };
       },

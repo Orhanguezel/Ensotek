@@ -4,66 +4,53 @@
 // Ensotek Admin Panel Standartı
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import * as React from "react";
+
+import { useRouter } from "next/navigation";
+
+import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { RefreshCw, Plus, Pencil, Trash2 } from 'lucide-react';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { toast } from 'sonner';
-import {
-  useListProductsAdminQuery,
   useDeleteProductAdminMutation,
-  useUpdateProductAdminMutation,
   useListProductCategoriesAdminQuery,
-} from '@/integrations/endpoints/admin/products_admin.endpoints';
-import type { AdminProductDto, ProductItemType } from '@/integrations/shared/product_admin.types';
+  useListProductsAdminQuery,
+  useUpdateProductAdminMutation,
+} from "@/integrations/endpoints/admin/products_admin.endpoints";
+import type { AdminProductDto, ProductItemType } from "@/integrations/shared/product_admin.types";
 
-const isTruthy = (v: unknown) => v === 1 || v === true || v === '1' || v === 'true';
+const isTruthy = (v: unknown) => v === 1 || v === true || v === "1" || v === "true";
 
 interface Props {
   itemType?: ProductItemType;
 }
 
 export default function ProductsListPanel({ itemType }: Props) {
-  const t = useAdminT('admin.products');
+  const t = useAdminT("admin.products");
   const router = useRouter();
 
-  const isSparepart = itemType === 'sparepart';
-  const newUrl = isSparepart ? '/admin/products/new?type=sparepart' : '/admin/products/new';
+  const isSparepart = itemType === "sparepart";
+  const newUrl = isSparepart ? "/admin/products/new?type=sparepart" : "/admin/products/new";
 
   const { localeOptions, defaultLocaleFromDb } = useAdminLocales();
 
   // Filters
-  const [search, setSearch] = React.useState('');
-  const [locale, setLocale] = React.useState('');
-  const [categoryFilter, setCategoryFilter] = React.useState('');
+  const [search, setSearch] = React.useState("");
+  const [locale, setLocale] = React.useState("");
+  const [categoryFilter, setCategoryFilter] = React.useState("");
   const [showOnlyActive, setShowOnlyActive] = React.useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = React.useState(false);
 
@@ -72,7 +59,7 @@ export default function ProductsListPanel({ itemType }: Props) {
     if (!localeOptions?.length) return;
     setLocale((prev) => {
       if (prev) return prev;
-      const def = (defaultLocaleFromDb as string) || localeOptions[0]?.value || 'tr';
+      const def = (defaultLocaleFromDb as string) || localeOptions[0]?.value || "tr";
       return String(def);
     });
   }, [localeOptions, defaultLocaleFromDb]);
@@ -95,10 +82,7 @@ export default function ProductsListPanel({ itemType }: Props) {
     { skip: !locale },
   );
 
-  const { data: categories = [] } = useListProductCategoriesAdminQuery(
-    { locale: locale || 'tr' },
-    { skip: !locale },
-  );
+  const { data: categories = [] } = useListProductCategoriesAdminQuery({ locale: locale || "tr" }, { skip: !locale });
 
   const items: AdminProductDto[] = productData?.items ?? [];
 
@@ -107,8 +91,8 @@ export default function ProductsListPanel({ itemType }: Props) {
 
   const localesForSelect = React.useMemo<AdminLocaleOption[]>(() => {
     return (localeOptions || []).map((l: any) => ({
-      value: String(l.value || ''),
-      label: String(l.label || l.value || ''),
+      value: String(l.value || ""),
+      label: String(l.label || l.value || ""),
     }));
   }, [localeOptions]);
 
@@ -116,7 +100,7 @@ export default function ProductsListPanel({ itemType }: Props) {
     try {
       await updateProduct({ id: item.id, patch: { is_active: value } }).unwrap();
     } catch {
-      toast.error(t('messages.toggleActiveError'));
+      toast.error(t("messages.toggleActiveError"));
     }
   };
 
@@ -124,18 +108,18 @@ export default function ProductsListPanel({ itemType }: Props) {
     try {
       await updateProduct({ id: item.id, patch: { is_featured: value } }).unwrap();
     } catch {
-      toast.error(t('messages.toggleFeaturedError'));
+      toast.error(t("messages.toggleFeaturedError"));
     }
   };
 
   const handleDelete = async (item: AdminProductDto) => {
-    if (!confirm(t('messages.confirmDelete', { title: item.title || item.slug || '' }))) return;
+    if (!confirm(t("messages.confirmDelete", { title: item.title || item.slug || "" }))) return;
     try {
       await deleteProduct({ id: item.id }).unwrap();
-      toast.success(t('messages.deleted'));
+      toast.success(t("messages.deleted"));
       refetch();
     } catch {
-      toast.error(t('messages.deleteError'));
+      toast.error(t("messages.deleteError"));
     }
   };
 
@@ -148,20 +132,20 @@ export default function ProductsListPanel({ itemType }: Props) {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-base font-semibold">
-                {isSparepart ? t('header.title_sparepart') : t('header.title')}
+              <h2 className="font-semibold text-base">
+                {isSparepart ? t("header.title_sparepart") : t("header.title")}
               </h2>
-              <p className="text-sm text-muted-foreground">
-                {isSparepart ? t('header.description_sparepart') : t('header.description')}
+              <p className="text-muted-foreground text-sm">
+                {isSparepart ? t("header.description_sparepart") : t("header.description")}
               </p>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-                <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               </Button>
               <Button onClick={() => router.push(newUrl)}>
-                <Plus className="h-4 w-4 mr-2" />
-                {t('actions.create')}
+                <Plus className="mr-2 h-4 w-4" />
+                {t("actions.create")}
               </Button>
             </div>
           </div>
@@ -173,9 +157,9 @@ export default function ProductsListPanel({ itemType }: Props) {
         <CardContent className="pt-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             {/* Search */}
-            <div className="flex-1 min-w-[180px]">
+            <div className="min-w-[180px] flex-1">
               <Input
-                placeholder={t('filters.search')}
+                placeholder={t("filters.search")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 disabled={isLoading}
@@ -184,26 +168,21 @@ export default function ProductsListPanel({ itemType }: Props) {
 
             {/* Locale */}
             <div className="w-[140px]">
-              <AdminLocaleSelect
-                options={localesForSelect}
-                value={locale}
-                onChange={setLocale}
-                disabled={isLoading}
-              />
+              <AdminLocaleSelect options={localesForSelect} value={locale} onChange={setLocale} disabled={isLoading} />
             </div>
 
             {/* Category */}
             <div className="w-[180px]">
               <Select
-                value={categoryFilter || 'all'}
-                onValueChange={(v) => setCategoryFilter(v === 'all' ? '' : v)}
+                value={categoryFilter || "all"}
+                onValueChange={(v) => setCategoryFilter(v === "all" ? "" : v)}
                 disabled={isLoading}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t('list.allCategories')} />
+                  <SelectValue placeholder={t("list.allCategories")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('list.allCategories')}</SelectItem>
+                  <SelectItem value="all">{t("list.allCategories")}</SelectItem>
                   {categories.map((cat: any) => (
                     <SelectItem key={cat.id} value={String(cat.id)}>
                       {cat.name || cat.slug}
@@ -223,7 +202,7 @@ export default function ProductsListPanel({ itemType }: Props) {
                   disabled={isLoading}
                 />
                 <Label htmlFor="active-filter" className="cursor-pointer text-sm">
-                  {t('list.columns.active')}
+                  {t("list.columns.active")}
                 </Label>
               </div>
               <div className="flex items-center gap-2">
@@ -234,7 +213,7 @@ export default function ProductsListPanel({ itemType }: Props) {
                   disabled={isLoading}
                 />
                 <Label htmlFor="featured-filter" className="cursor-pointer text-sm">
-                  {t('list.columns.featured')}
+                  {t("list.columns.featured")}
                 </Label>
               </div>
             </div>
@@ -249,28 +228,28 @@ export default function ProductsListPanel({ itemType }: Props) {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[48px]">#</TableHead>
-                <TableHead className="w-14"></TableHead>
-                <TableHead>{t('list.columns.title')}</TableHead>
-                <TableHead className="w-[80px]">{t('list.columns.locale')}</TableHead>
-                <TableHead className="w-[140px]">{t('list.columns.category')}</TableHead>
-                <TableHead className="w-[90px] text-right">{t('list.columns.price')}</TableHead>
-                <TableHead className="w-[70px] text-center">{t('list.columns.stock')}</TableHead>
-                <TableHead className="w-[80px] text-center">{t('list.columns.active')}</TableHead>
-                <TableHead className="w-[90px] text-center">{t('list.columns.featured')}</TableHead>
-                <TableHead className="w-[110px] text-right">{t('list.columns.actions')}</TableHead>
+                <TableHead className="w-14" />
+                <TableHead>{t("list.columns.title")}</TableHead>
+                <TableHead className="w-[80px]">{t("list.columns.locale")}</TableHead>
+                <TableHead className="w-[140px]">{t("list.columns.category")}</TableHead>
+                <TableHead className="w-[90px] text-right">{t("list.columns.price")}</TableHead>
+                <TableHead className="w-[70px] text-center">{t("list.columns.stock")}</TableHead>
+                <TableHead className="w-[80px] text-center">{t("list.columns.active")}</TableHead>
+                <TableHead className="w-[90px] text-center">{t("list.columns.featured")}</TableHead>
+                <TableHead className="w-[110px] text-right">{t("list.columns.actions")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isFetching && items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={10} className="py-8 text-center text-muted-foreground text-sm">
-                    {t('list.loading')}
+                    {t("list.loading")}
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={10} className="py-8 text-center text-muted-foreground text-sm">
-                    {t('list.empty')}
+                    {t("list.empty")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -279,7 +258,7 @@ export default function ProductsListPanel({ itemType }: Props) {
                   const isFeatured = isTruthy(item.is_featured);
 
                   return (
-                    <TableRow key={item.id} className={!isActive ? 'opacity-50' : ''}>
+                    <TableRow key={item.id} className={!isActive ? "opacity-50" : ""}>
                       <TableCell className="text-muted-foreground text-sm">{idx + 1}</TableCell>
 
                       <TableCell className="p-1">
@@ -293,41 +272,32 @@ export default function ProductsListPanel({ itemType }: Props) {
                       </TableCell>
 
                       <TableCell>
-                        <div
-                          className="font-medium text-sm truncate max-w-[260px]"
-                          title={item.title || ''}
-                        >
-                          {item.title || (
-                            <span className="text-muted-foreground italic">(adsız)</span>
-                          )}
+                        <div className="max-w-[260px] truncate font-medium text-sm" title={item.title || ""}>
+                          {item.title || <span className="text-muted-foreground italic">(adsız)</span>}
                         </div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[260px]">
-                          <code>{item.slug || '—'}</code>
+                        <div className="max-w-[260px] truncate text-muted-foreground text-xs">
+                          <code>{item.slug || "—"}</code>
                           {item.product_code && (
-                            <span className="ml-2 text-muted-foreground">
-                              [{item.product_code}]
-                            </span>
+                            <span className="ml-2 text-muted-foreground">[{item.product_code}]</span>
                           )}
                         </div>
                       </TableCell>
 
                       <TableCell>
                         <Badge variant="outline" className="text-xs">
-                          {item.locale || '—'}
+                          {item.locale || "—"}
                         </Badge>
                       </TableCell>
 
-                      <TableCell className="text-sm text-muted-foreground truncate max-w-[140px]">
-                        {(item as any).category_name || item.category_id || '—'}
+                      <TableCell className="max-w-[140px] truncate text-muted-foreground text-sm">
+                        {(item as any).category_name || item.category_id || "—"}
                       </TableCell>
 
                       <TableCell className="text-right text-sm">
-                        {item.price != null ? Number(item.price).toLocaleString('tr-TR') : '—'}
+                        {item.price != null ? Number(item.price).toLocaleString("tr-TR") : "—"}
                       </TableCell>
 
-                      <TableCell className="text-center text-sm">
-                        {item.stock_quantity ?? '—'}
-                      </TableCell>
+                      <TableCell className="text-center text-sm">{item.stock_quantity ?? "—"}</TableCell>
 
                       <TableCell className="text-center">
                         <Switch
@@ -351,16 +321,13 @@ export default function ProductsListPanel({ itemType }: Props) {
                             variant="ghost"
                             size="icon"
                             disabled={isLoading}
-                            onClick={() => router.push(`/admin/products/${item.id}?type=${item.item_type || 'product'}`)}
+                            onClick={() =>
+                              router.push(`/admin/products/${item.id}?type=${item.item_type || "product"}`)
+                            }
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={isLoading}
-                            onClick={() => handleDelete(item)}
-                          >
+                          <Button variant="ghost" size="icon" disabled={isLoading} onClick={() => handleDelete(item)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>

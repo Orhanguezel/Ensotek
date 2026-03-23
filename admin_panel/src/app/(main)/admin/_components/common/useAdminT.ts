@@ -1,8 +1,9 @@
-'use client';
+"use client";
 
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
-import { useMemo } from 'react';
-import { useAdminTranslations, type TranslateFn } from '@/i18n';
+import { useMemo } from "react";
+
+import { type TranslateFn, useAdminTranslations } from "@/i18n";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 /**
  * Convenience hook: reads admin locale from preferences store
@@ -15,12 +16,12 @@ export function useAdminT(prefix?: string): TranslateFn {
   const t = useAdminTranslations(adminLocale || undefined);
 
   return useMemo(() => {
-    const p = String(prefix || 'admin').trim();
+    const p = String(prefix || "admin").trim();
     if (!p) return t;
 
     return (key, params, fallback) => {
-      const k = String(key || '').trim();
-      const fullKey = k && !k.startsWith('admin.') ? `${p}.${k}` : k;
+      const k = String(key || "").trim();
+      const fullKey = k && !k.startsWith("admin.") ? `${p}.${k}` : k;
       return t(fullKey, params, fallback);
     };
   }, [t, prefix]);

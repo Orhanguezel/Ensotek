@@ -4,48 +4,38 @@
 // Ensotek
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
+import * as React from "react";
 
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { useListTelegramInboundQuery } from '@/integrations/hooks';
-import type {
-  TelegramInboundListParams,
-  TelegramInboundMessage,
-} from '@/integrations/shared';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useListTelegramInboundQuery } from "@/integrations/hooks";
+import type { TelegramInboundListParams, TelegramInboundMessage } from "@/integrations/shared";
 
 function toLocalDate(iso: string | null | undefined): string {
-  if (!iso) return '';
+  if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
   return d.toLocaleString();
 }
 
 function formatFromName(m: TelegramInboundMessage): string {
-  const fn = (m.from_first_name ?? '').trim();
-  const ln = (m.from_last_name ?? '').trim();
-  const full = [fn, ln].filter(Boolean).join(' ').trim();
-  return full || '-';
+  const fn = (m.from_first_name ?? "").trim();
+  const ln = (m.from_last_name ?? "").trim();
+  const full = [fn, ln].filter(Boolean).join(" ").trim();
+  return full || "-";
 }
 
 export default function TelegramInboundPanel() {
-  const t = useAdminT('admin.telegram');
+  const t = useAdminT("admin.telegram");
 
-  const [q, setQ] = React.useState('');
-  const [chatId, setChatId] = React.useState('');
+  const [q, setQ] = React.useState("");
+  const [chatId, setChatId] = React.useState("");
   const [limit, setLimit] = React.useState(50);
 
   const [cursor, setCursor] = React.useState<string | undefined>(undefined);
@@ -84,18 +74,14 @@ export default function TelegramInboundPanel() {
   return (
     <Card>
       <CardHeader className="space-y-2">
-        <CardTitle>{t('inbound.title')}</CardTitle>
+        <CardTitle>{t("inbound.title")}</CardTitle>
 
         <div className="flex flex-col gap-3 md:flex-row md:items-center">
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t('inbound.searchPlaceholder')}
-          />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("inbound.searchPlaceholder")} />
           <Input
             value={chatId}
             onChange={(e) => setChatId(e.target.value)}
-            placeholder={t('inbound.chatIdPlaceholder')}
+            placeholder={t("inbound.chatIdPlaceholder")}
           />
           <Input
             value={String(limit)}
@@ -103,44 +89,44 @@ export default function TelegramInboundPanel() {
               const n = Number(e.target.value || 50) || 50;
               setLimit(Math.max(10, Math.min(200, n)));
             }}
-            placeholder={t('inbound.limitPlaceholder')}
+            placeholder={t("inbound.limitPlaceholder")}
           />
 
           <div className="flex gap-2">
             <Button variant="outline" onClick={handleRefresh} disabled={isFetching}>
-              {isFetching ? t('inbound.refreshing') : t('inbound.refresh')}
+              {isFetching ? t("inbound.refreshing") : t("inbound.refresh")}
             </Button>
 
             <Button
               variant="secondary"
               onClick={handleLoadMore}
               disabled={isFetching || !nextCursor}
-              title={!nextCursor ? t('inbound.noMoreRecords') : undefined}
+              title={!nextCursor ? t("inbound.noMoreRecords") : undefined}
             >
-              {isFetching ? t('inbound.loading') : t('inbound.loadMore')}
+              {isFetching ? t("inbound.loading") : t("inbound.loadMore")}
             </Button>
           </div>
         </div>
       </CardHeader>
 
       <CardContent>
-        <div className="rounded-md border border-border overflow-hidden">
+        <div className="overflow-hidden rounded-md border border-border">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[160px]">{t('inbound.table.date')}</TableHead>
-                <TableHead className="w-[140px]">{t('inbound.table.chat')}</TableHead>
-                <TableHead className="w-[240px]">{t('inbound.table.sender')}</TableHead>
-                <TableHead>{t('inbound.table.message')}</TableHead>
-                <TableHead className="w-[140px]">{t('inbound.table.source')}</TableHead>
+                <TableHead className="w-[160px]">{t("inbound.table.date")}</TableHead>
+                <TableHead className="w-[140px]">{t("inbound.table.chat")}</TableHead>
+                <TableHead className="w-[240px]">{t("inbound.table.sender")}</TableHead>
+                <TableHead>{t("inbound.table.message")}</TableHead>
+                <TableHead className="w-[140px]">{t("inbound.table.source")}</TableHead>
               </TableRow>
             </TableHeader>
 
             <TableBody>
               {items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-sm text-muted-foreground">
-                    {t('inbound.noRecords')}
+                  <TableCell colSpan={5} className="text-muted-foreground text-sm">
+                    {t("inbound.noRecords")}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -151,14 +137,14 @@ export default function TelegramInboundPanel() {
                     <TableCell className="text-xs">
                       <div className="space-y-1">
                         <div>{formatFromName(m)}</div>
-                        <div className="text-muted-foreground">@{m.from_username ?? '-'}</div>
+                        <div className="text-muted-foreground">@{m.from_username ?? "-"}</div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm whitespace-pre-wrap">
-                      {(m.text ?? '').trim() || t('inbound.noText')}
+                    <TableCell className="whitespace-pre-wrap text-sm">
+                      {(m.text ?? "").trim() || t("inbound.noText")}
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{m.chat_type ?? 'telegram'}</Badge>
+                      <Badge variant="secondary">{m.chat_type ?? "telegram"}</Badge>
                     </TableCell>
                   </TableRow>
                 ))
@@ -167,9 +153,7 @@ export default function TelegramInboundPanel() {
           </Table>
         </div>
 
-        {nextCursor ? (
-          <p className="mt-3 text-xs text-muted-foreground">{t('inbound.nextPage')}</p>
-        ) : null}
+        {nextCursor ? <p className="mt-3 text-muted-foreground text-xs">{t("inbound.nextPage")}</p> : null}
       </CardContent>
     </Card>
   );

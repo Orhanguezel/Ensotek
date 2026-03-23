@@ -3,7 +3,7 @@
 // FINAL — Static page copy (site_settings) normalizers
 // =============================================================
 
-import { parseJsonObject, uiText } from './common';
+import { parseJsonObject, uiText } from "./common";
 
 // -----------------------------
 // Services Page
@@ -25,19 +25,19 @@ export function normalizeServicesPageCopy(val: unknown): ServicesPageCopy {
   const o = parseJsonObject(val);
 
   return {
-    badge: uiText(o.badge) || 'My Services',
+    badge: uiText(o.badge) || "My Services",
     title_html:
       uiText(o.title_html) ||
       'Transforming Ideas <span class="text-300">into Intuitive Designs for</span> Engaging User <span class="text-300">Experiences</span>',
     intro_html:
       uiText(o.intro_html) ||
-      'With expertise in mobile app and web design, I transform ideas into visually <br /> stunning and user-friendly interfaces that captivate and retain users. <br /> Explore my work and see design in action.',
-    cta_label: uiText(o.cta_label) || 'Get a Quote',
-    loading: uiText(o.loading) || 'Loading...',
-    error: uiText(o.error) || 'Failed to load services.',
-    empty: uiText(o.empty) || 'No services found.',
-    highlight_label: uiText(o.highlight_label) || 'Highlight',
-    details_label: uiText(o.details_label) || 'Details',
+      "With expertise in mobile app and web design, I transform ideas into visually <br /> stunning and user-friendly interfaces that captivate and retain users. <br /> Explore my work and see design in action.",
+    cta_label: uiText(o.cta_label) || "Get a Quote",
+    loading: uiText(o.loading) || "Loading...",
+    error: uiText(o.error) || "Failed to load services.",
+    empty: uiText(o.empty) || "No services found.",
+    highlight_label: uiText(o.highlight_label) || "Highlight",
+    details_label: uiText(o.details_label) || "Details",
   };
 }
 
@@ -62,20 +62,20 @@ export function normalizeWorkPageCopy(val: unknown): WorkPageCopy {
   const o = parseJsonObject(val);
 
   return {
-    badge: uiText(o.badge) || 'Recent Work',
+    badge: uiText(o.badge) || "Recent Work",
     title_html:
       uiText(o.title_html) ||
       'Explore <span class="text-300">My Latest Work and Discover the</span> Craftsmanship Behind <span class="text-300">Each Design</span>',
     intro_html:
       uiText(o.intro_html) ||
-      'Explore my latest work and discover the craftsmanship behind each design: <br />a detailed look into how I bring innovation and creativity to life',
-    loading_title: uiText(o.loading_title) || 'Loading...',
-    label_client: uiText(o.label_client) || 'Client',
-    label_completion_time: uiText(o.label_completion_time) || 'Completion Time',
-    label_tools: uiText(o.label_tools) || 'Tools',
-    updating: uiText(o.updating) || 'Updating...',
-    empty_title: uiText(o.empty_title) || 'No projects found',
-    empty_text: uiText(o.empty_text) || 'Please add projects from admin panel.',
+      "Explore my latest work and discover the craftsmanship behind each design: <br />a detailed look into how I bring innovation and creativity to life",
+    loading_title: uiText(o.loading_title) || "Loading...",
+    label_client: uiText(o.label_client) || "Client",
+    label_completion_time: uiText(o.label_completion_time) || "Completion Time",
+    label_tools: uiText(o.label_tools) || "Tools",
+    updating: uiText(o.updating) || "Updating...",
+    empty_title: uiText(o.empty_title) || "No projects found",
+    empty_text: uiText(o.empty_text) || "Please add projects from admin panel.",
   };
 }
 
@@ -100,19 +100,18 @@ export function normalizePricingPageCopy(val: unknown): PricingPageCopy {
   const o = parseJsonObject(val);
 
   return {
-    badge: uiText(o.badge) || 'My Pricing',
-    title_html:
-      uiText(o.title_html) || 'Affordable <span class="text-300">Solutions for Every</span> Budget',
+    badge: uiText(o.badge) || "My Pricing",
+    title_html: uiText(o.title_html) || 'Affordable <span class="text-300">Solutions for Every</span> Budget',
     intro_html:
       uiText(o.intro_html) ||
-      'Flexible Plans Tailored to Meet Your Unique Needs, Ensuring High-Quality Services <br /> Without Breaking the Bank',
-    loading: uiText(o.loading) || 'Loading...',
-    error: uiText(o.error) || 'Failed to load pricing/faq data.',
-    empty: uiText(o.empty) || 'No pricing plans found.',
-    cta_default_label: uiText(o.cta_default_label) || 'Order Now',
-    faq_title: uiText(o.faq_title) || 'Common Questions',
-    faq_empty: uiText(o.faq_empty) || 'No FAQs found.',
-    faq_error: uiText(o.faq_error) || 'Failed to load FAQs.',
+      "Flexible Plans Tailored to Meet Your Unique Needs, Ensuring High-Quality Services <br /> Without Breaking the Bank",
+    loading: uiText(o.loading) || "Loading...",
+    error: uiText(o.error) || "Failed to load pricing/faq data.",
+    empty: uiText(o.empty) || "No pricing plans found.",
+    cta_default_label: uiText(o.cta_default_label) || "Order Now",
+    faq_title: uiText(o.faq_title) || "Common Questions",
+    faq_empty: uiText(o.faq_empty) || "No FAQs found.",
+    faq_error: uiText(o.faq_error) || "Failed to load FAQs.",
   };
 }
 
@@ -134,16 +133,15 @@ export function normalizeBlogPageCopy(val: unknown): BlogPageCopy {
   const o = parseJsonObject(val);
 
   return {
-    badge: uiText(o.badge) || 'Recent blog',
+    badge: uiText(o.badge) || "Recent blog",
     title_html:
-      uiText(o.title_html) ||
-      'Explore the <span class="text-dark">insights and trends shaping</span> our industry',
+      uiText(o.title_html) || 'Explore the <span class="text-dark">insights and trends shaping</span> our industry',
     intro_html:
       uiText(o.intro_html) ||
-      'Discover key insights and emerging trends shaping the future of design: a detailed <br /> examination of how these innovations are reshaping our industry',
-    loading: uiText(o.loading) || 'Loading...',
-    error: uiText(o.error) || 'Failed to load posts.',
-    read_time: uiText(o.read_time) || '3 min read',
-    default_category: uiText(o.default_category) || 'Blog',
+      "Discover key insights and emerging trends shaping the future of design: a detailed <br /> examination of how these innovations are reshaping our industry",
+    loading: uiText(o.loading) || "Loading...",
+    error: uiText(o.error) || "Failed to load posts.",
+    read_time: uiText(o.read_time) || "3 min read",
+    default_category: uiText(o.default_category) || "Blog",
   };
 }

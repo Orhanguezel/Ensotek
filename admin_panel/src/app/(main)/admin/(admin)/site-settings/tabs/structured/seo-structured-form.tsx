@@ -3,37 +3,32 @@
 // SEO Structured Form — supports both simple and advanced modes
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import type React from "react";
+import { useMemo } from "react";
 
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminTranslations } from "@/i18n";
 import {
-  type SettingValue,
-  type SiteSettingsAdvancedSeo,
-  type SiteSettingsSimpleSeo,
-  SITE_SETTINGS_SEO_OG_TYPE_OPTIONS,
-  SITE_SETTINGS_SEO_TWITTER_CARD_OPTIONS,
   coerceSiteSettingsStructuredValue,
   isSiteSettingsSimpleSeoValue,
   normalizeSiteSettingsAdvancedSeo,
   normalizeSiteSettingsSimpleSeo,
+  type SettingValue,
+  SITE_SETTINGS_SEO_OG_TYPE_OPTIONS,
+  SITE_SETTINGS_SEO_TWITTER_CARD_OPTIONS,
+  type SiteSettingsAdvancedSeo,
+  type SiteSettingsSimpleSeo,
   toSiteSettingsAdvancedSeoObject,
-} from '@/integrations/shared';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 /* ── props ── */
 
@@ -55,7 +50,7 @@ export const SeoStructuredForm: React.FC<SeoStructuredFormProps> = ({
   disabled,
 }) => {
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
-  const t = useAdminTranslations(adminLocale || undefined);
+  const _t = useAdminTranslations(adminLocale || undefined);
 
   const raw = useMemo(() => coerceSiteSettingsStructuredValue(value) ?? {}, [value]);
   const simple = isSiteSettingsSimpleSeoValue(raw);
@@ -81,7 +76,7 @@ export const SeoStructuredForm: React.FC<SeoStructuredFormProps> = ({
   );
 };
 
-SeoStructuredForm.displayName = 'SeoStructuredForm';
+SeoStructuredForm.displayName = "SeoStructuredForm";
 
 /* ── Simple SEO Form (paketjet__seo) ── */
 
@@ -101,25 +96,27 @@ function SimpleSeoForm({
   return (
     <div className="space-y-4">
       <Alert variant="default" className="py-2">
-        <AlertDescription className="text-sm">
-          {t('admin.siteSettings.structured.seo.description')}
-        </AlertDescription>
+        <AlertDescription className="text-sm">{t("admin.siteSettings.structured.seo.description")}</AlertDescription>
       </Alert>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="seo-title" className="text-sm">{t('admin.siteSettings.structured.seo.fields.siteTitle')}</Label>
+          <Label htmlFor="seo-title" className="text-sm">
+            {t("admin.siteSettings.structured.seo.fields.siteTitle")}
+          </Label>
           <Input
             id="seo-title"
             value={v.site_title}
             onChange={(e) => set({ site_title: e.target.value })}
             disabled={disabled}
-            placeholder={t('admin.siteSettings.structured.seo.placeholders.siteTitle')}
+            placeholder={t("admin.siteSettings.structured.seo.placeholders.siteTitle")}
           />
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="seo-desc" className="text-sm">{t('admin.siteSettings.structured.seo.fields.siteDescription')}</Label>
+          <Label htmlFor="seo-desc" className="text-sm">
+            {t("admin.siteSettings.structured.seo.fields.siteDescription")}
+          </Label>
           <Textarea
             id="seo-desc"
             rows={3}
@@ -127,29 +124,29 @@ function SimpleSeoForm({
             onChange={(e) => set({ site_description: e.target.value })}
             disabled={disabled}
             className="text-sm"
-            placeholder={t('admin.siteSettings.structured.seo.placeholders.siteDescription')}
+            placeholder={t("admin.siteSettings.structured.seo.placeholders.siteDescription")}
           />
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="seo-keywords" className="text-sm">{t('admin.siteSettings.structured.seo.fields.keywords')}</Label>
+          <Label htmlFor="seo-keywords" className="text-sm">
+            {t("admin.siteSettings.structured.seo.fields.keywords")}
+          </Label>
           <Input
             id="seo-keywords"
             value={v.keywords}
             onChange={(e) => set({ keywords: e.target.value })}
             disabled={disabled}
-            placeholder={t('admin.siteSettings.structured.seo.placeholders.keywords')}
+            placeholder={t("admin.siteSettings.structured.seo.placeholders.keywords")}
           />
-          <p className="text-xs text-muted-foreground">{t('admin.siteSettings.structured.seo.keywordsHelp')}</p>
+          <p className="text-muted-foreground text-xs">{t("admin.siteSettings.structured.seo.keywordsHelp")}</p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="seo-og-type" className="text-sm">{t('admin.siteSettings.structured.seo.fields.ogType')}</Label>
-          <Select
-            value={v.og_type || 'website'}
-            onValueChange={(val) => set({ og_type: val })}
-            disabled={disabled}
-          >
+          <Label htmlFor="seo-og-type" className="text-sm">
+            {t("admin.siteSettings.structured.seo.fields.ogType")}
+          </Label>
+          <Select value={v.og_type || "website"} onValueChange={(val) => set({ og_type: val })} disabled={disabled}>
             <SelectTrigger id="seo-og-type" className="h-8">
               <SelectValue />
             </SelectTrigger>
@@ -164,13 +161,15 @@ function SimpleSeoForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="seo-og-image" className="text-sm">{t('admin.siteSettings.structured.seo.fields.ogImage')}</Label>
+          <Label htmlFor="seo-og-image" className="text-sm">
+            {t("admin.siteSettings.structured.seo.fields.ogImage")}
+          </Label>
           <Input
             id="seo-og-image"
             value={v.og_image}
             onChange={(e) => set({ og_image: e.target.value })}
             disabled={disabled}
-            placeholder={t('admin.siteSettings.structured.seo.placeholders.ogImage')}
+            placeholder={t("admin.siteSettings.structured.seo.placeholders.ogImage")}
           />
         </div>
       </div>
@@ -201,13 +200,15 @@ function AdvancedSeoForm({
     <div className="space-y-4">
       <Alert variant="default" className="py-2">
         <AlertDescription className="text-sm">
-          {t('admin.siteSettings.structured.seoAdvanced.description')}
+          {t("admin.siteSettings.structured.seoAdvanced.description")}
         </AlertDescription>
       </Alert>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="seo-site-name" className="text-sm">{t('admin.siteSettings.structured.seoAdvanced.fields.siteName')}</Label>
+          <Label htmlFor="seo-site-name" className="text-sm">
+            {t("admin.siteSettings.structured.seoAdvanced.fields.siteName")}
+          </Label>
           <Input
             id="seo-site-name"
             value={v.site_name}
@@ -217,7 +218,9 @@ function AdvancedSeoForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="seo-title-default" className="text-sm">{t('admin.siteSettings.structured.seoAdvanced.fields.titleDefault')}</Label>
+          <Label htmlFor="seo-title-default" className="text-sm">
+            {t("admin.siteSettings.structured.seoAdvanced.fields.titleDefault")}
+          </Label>
           <Input
             id="seo-title-default"
             value={v.title_default}
@@ -227,24 +230,26 @@ function AdvancedSeoForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="seo-title-template" className="text-sm">{t('admin.siteSettings.structured.seoAdvanced.fields.titleTemplate')}</Label>
+          <Label htmlFor="seo-title-template" className="text-sm">
+            {t("admin.siteSettings.structured.seoAdvanced.fields.titleTemplate")}
+          </Label>
           <Input
             id="seo-title-template"
             value={v.title_template}
             onChange={(e) => set({ title_template: e.target.value })}
             disabled={disabled}
-            placeholder={t('admin.siteSettings.structured.seoAdvanced.placeholders.titleTemplate')}
+            placeholder={t("admin.siteSettings.structured.seoAdvanced.placeholders.titleTemplate")}
           />
-          <p className="text-xs text-muted-foreground">{t('admin.siteSettings.structured.seoAdvanced.titleTemplateHelp')}</p>
+          <p className="text-muted-foreground text-xs">
+            {t("admin.siteSettings.structured.seoAdvanced.titleTemplateHelp")}
+          </p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="seo-og-type" className="text-sm">{t('admin.siteSettings.structured.seoAdvanced.fields.ogType')}</Label>
-          <Select
-            value={v.og_type || 'website'}
-            onValueChange={(val) => set({ og_type: val })}
-            disabled={disabled}
-          >
+          <Label htmlFor="seo-og-type" className="text-sm">
+            {t("admin.siteSettings.structured.seoAdvanced.fields.ogType")}
+          </Label>
+          <Select value={v.og_type || "website"} onValueChange={(val) => set({ og_type: val })} disabled={disabled}>
             <SelectTrigger id="seo-og-type" className="h-8">
               <SelectValue />
             </SelectTrigger>
@@ -259,7 +264,9 @@ function AdvancedSeoForm({
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="seo-description" className="text-sm">{t('admin.siteSettings.structured.seoAdvanced.fields.description')}</Label>
+          <Label htmlFor="seo-description" className="text-sm">
+            {t("admin.siteSettings.structured.seoAdvanced.fields.description")}
+          </Label>
           <Textarea
             id="seo-description"
             rows={3}
@@ -272,10 +279,10 @@ function AdvancedSeoForm({
 
         <div className="space-y-2 md:col-span-2">
           <AdminImageUploadField
-            label={t('admin.siteSettings.structured.seoAdvanced.fields.ogImage')}
+            label={t("admin.siteSettings.structured.seoAdvanced.fields.ogImage")}
             folder="seo"
             bucket="public"
-            metadata={{ module_key: 'seo', locale, key: settingKey }}
+            metadata={{ module_key: "seo", locale, key: settingKey }}
             value={v.og_image}
             onChange={(url) => set({ og_image: url })}
             disabled={disabled}
@@ -283,9 +290,11 @@ function AdvancedSeoForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="seo-twitter-card" className="text-sm">{t('admin.siteSettings.structured.seoAdvanced.fields.twitterCard')}</Label>
+          <Label htmlFor="seo-twitter-card" className="text-sm">
+            {t("admin.siteSettings.structured.seoAdvanced.fields.twitterCard")}
+          </Label>
           <Select
-            value={v.twitter_card || 'summary_large_image'}
+            value={v.twitter_card || "summary_large_image"}
             onValueChange={(val) => set({ twitter_card: val })}
             disabled={disabled}
           >
@@ -309,7 +318,9 @@ function AdvancedSeoForm({
             onCheckedChange={(checked) => set({ noindex: checked })}
             disabled={disabled}
           />
-          <Label htmlFor="seo-noindex" className="text-sm">{t('admin.siteSettings.structured.seoAdvanced.fields.noIndex')}</Label>
+          <Label htmlFor="seo-noindex" className="text-sm">
+            {t("admin.siteSettings.structured.seoAdvanced.fields.noIndex")}
+          </Label>
         </div>
       </div>
     </div>

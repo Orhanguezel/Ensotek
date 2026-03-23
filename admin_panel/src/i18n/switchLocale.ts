@@ -5,25 +5,26 @@
 //  - activeLocales verilirse strip işlemi strict olur
 // =============================================================
 
-'use client';
+"use client";
 
-import type { NextRouter } from 'next/router';
-import { stripLocalePrefix, type RuntimeLocale } from './url';
-import { normLocaleTag } from './localeUtils';
+import type { NextRouter } from "next/router";
+
+import { normLocaleTag } from "./localeUtils";
+import { type RuntimeLocale, stripLocalePrefix } from "./url";
 
 function safeAsPath(asPath?: string) {
-  const v = String(asPath || '/').trim();
-  return v.startsWith('/') ? v : `/${v}`;
+  const v = String(asPath || "/").trim();
+  return v.startsWith("/") ? v : `/${v}`;
 }
 
 function splitAsPath(asPath: string) {
-  const s = String(asPath || '/');
-  const [pathAndQuery, hash = ''] = s.split('#');
-  const [pathname = '/', query = ''] = pathAndQuery.split('?');
+  const s = String(asPath || "/");
+  const [pathAndQuery, hash = ""] = s.split("#");
+  const [pathname = "/", query = ""] = pathAndQuery.split("?");
   return {
-    pathname: pathname || '/',
-    query: query ? `?${query}` : '',
-    hash: hash ? `#${hash}` : '',
+    pathname: pathname || "/",
+    query: query ? `?${query}` : "",
+    hash: hash ? `#${hash}` : "",
   };
 }
 
@@ -35,30 +36,26 @@ function splitAsPath(asPath: string) {
  * defaultLocale belirlemek için:
  * - activeLocales[0] (useActiveLocales zaten default’u başa alıyor)
  */
-export async function switchLocale(
-  router: NextRouter,
-  next: RuntimeLocale,
-  activeLocales?: string[],
-) {
+export async function switchLocale(router: NextRouter, next: RuntimeLocale, activeLocales?: string[]) {
   const asPath = safeAsPath(router.asPath);
   const { pathname, query, hash } = splitAsPath(asPath);
 
-  const nextLoc = normLocaleTag(next) || 'de';
+  const nextLoc = normLocaleTag(next) || "de";
   const actives = Array.isArray(activeLocales) ? activeLocales : [];
-  const defaultLocale = normLocaleTag(actives[0]) || 'de';
+  const defaultLocale = normLocaleTag(actives[0]) || "de";
 
   // Mevcut path’i locale prefix’ten arındır (strict: activeLocales varsa)
   const cleanPath = stripLocalePrefix(pathname, actives);
-  const base = cleanPath === '/' ? '' : cleanPath;
+  const base = cleanPath === "/" ? "" : cleanPath;
 
   // ✅ target üret
   const target =
     nextLoc === defaultLocale
-      ? `${base || '/'}${query}${hash}` // prefixless
+      ? `${base || "/"}${query}${hash}` // prefixless
       : `/${nextLoc}${base}${query}${hash}`;
 
   // normalize: "/" garantisi
-  const finalTarget = target.startsWith('/') ? target : `/${target}`;
+  const finalTarget = target.startsWith("/") ? target : `/${target}`;
 
   if (finalTarget === asPath) return;
 

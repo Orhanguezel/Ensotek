@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/notifications/admin-notifications-client.tsx
@@ -6,45 +6,30 @@
 // ✅ Select error fixed + Tailwind warnings fixed
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { Plus, RefreshCcw, Search, Trash2, Pencil, CheckCheck, Bell, BellOff } from 'lucide-react';
+import * as React from "react";
 
-import { cn } from '@/lib/utils';
+import { useRouter } from "next/navigation";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Bell, BellOff, CheckCheck, Pencil, Plus, RefreshCcw, Search, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import type { NotificationView, NotificationsListParams } from '@/integrations/shared';
-import {
-  useListNotificationsQuery,
   useDeleteNotificationMutation,
+  useListNotificationsQuery,
   useMarkAllReadMutation,
   useUpdateNotificationMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/hooks";
+import type { NotificationsListParams, NotificationView } from "@/integrations/shared";
+import { cn } from "@/lib/utils";
 
-type ReadFilter = 'all' | 'read' | 'unread';
+type ReadFilter = "all" | "read" | "unread";
 
 type Filters = {
   search: string;
@@ -53,8 +38,8 @@ type Filters = {
 };
 
 // function getErrMsg(e: unknown): string { ... } moved inside or adapted
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 function getErrMsg(e: unknown, t: (k: string) => string): string {
   const anyErr = e as any;
@@ -62,28 +47,28 @@ function getErrMsg(e: unknown, t: (k: string) => string): string {
     anyErr?.data?.error?.message ||
     anyErr?.data?.message ||
     anyErr?.message ||
-    t('notifications.messages.operationFailed')
+    t("notifications.messages.operationFailed")
   );
 }
 
 const localeMapping: Record<string, string> = {
-  tr: 'tr-TR',
-  en: 'en-US',
-  de: 'de-DE',
+  tr: "tr-TR",
+  en: "en-US",
+  de: "de-DE",
 };
 
 function fmtDate(val: string | null | undefined, localeStr: string) {
-  if (!val) return '-';
+  if (!val) return "-";
   try {
     const d = new Date(val);
     if (Number.isNaN(d.getTime())) return String(val);
-    const loc = localeMapping[localeStr] || 'tr-TR';
+    const loc = localeMapping[localeStr] || "tr-TR";
     return d.toLocaleString(loc, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch {
     return String(val);
@@ -92,7 +77,7 @@ function fmtDate(val: string | null | undefined, localeStr: string) {
 
 function truncate(text: string, max = 60) {
   if (text.length <= max) return text;
-  return text.slice(0, max - 1) + '…';
+  return `${text.slice(0, max - 1)}…`;
 }
 
 export default function AdminNotificationsClient() {
@@ -101,32 +86,27 @@ export default function AdminNotificationsClient() {
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
 
   const [filters, setFilters] = React.useState<Filters>({
-    search: '',
-    readFilter: 'all',
-    type: 'all', // ✅ FIX: Changed from '' to 'all'
+    search: "",
+    readFilter: "all",
+    type: "all", // ✅ FIX: Changed from '' to 'all'
   });
 
   const is_read = React.useMemo(() => {
-    if (filters.readFilter === 'all') return undefined;
-    return filters.readFilter === 'read' ? 1 : 0;
+    if (filters.readFilter === "all") return undefined;
+    return filters.readFilter === "read" ? 1 : 0;
   }, [filters.readFilter]);
 
   const queryParams = React.useMemo(() => {
     const qp: NotificationsListParams = {
       is_read,
-      type: filters.type === 'all' ? undefined : filters.type, // ✅ FIX: Check for 'all'
+      type: filters.type === "all" ? undefined : filters.type, // ✅ FIX: Check for 'all'
       limit: 200,
       offset: 0,
     };
     return qp;
   }, [is_read, filters.type]);
 
-  const {
-    data: items = [],
-    isLoading,
-    isFetching,
-    refetch,
-  } = useListNotificationsQuery(queryParams);
+  const { data: items = [], isLoading, isFetching, refetch } = useListNotificationsQuery(queryParams);
 
   const [deleteNotification, { isLoading: isDeleting }] = useDeleteNotificationMutation();
   const [markAllRead, { isLoading: isMarkingAll }] = useMarkAllReadMutation();
@@ -140,9 +120,7 @@ export default function AdminNotificationsClient() {
     const q = filters.search.toLowerCase();
     return items.filter(
       (n) =>
-        n.title.toLowerCase().includes(q) ||
-        n.message.toLowerCase().includes(q) ||
-        n.type.toLowerCase().includes(q)
+        n.title.toLowerCase().includes(q) || n.message.toLowerCase().includes(q) || n.type.toLowerCase().includes(q),
     );
   }, [items, filters.search]);
 
@@ -152,8 +130,8 @@ export default function AdminNotificationsClient() {
 
   const handleMarkAllRead = async () => {
     try {
-      await markAllRead().unwrap();
-      toast.success(t('notifications.messages.markAllSuccess'));
+      await markAllRead(undefined).unwrap();
+      toast.success(t("notifications.messages.markAllSuccess"));
     } catch (err) {
       toast.error(getErrMsg(err, t));
     }
@@ -162,34 +140,25 @@ export default function AdminNotificationsClient() {
   const handleToggleRead = async (item: NotificationView) => {
     try {
       await updateNotification({ id: item.id, body: { is_read: !item.is_read } }).unwrap();
-      toast.success(
-        item.is_read
-          ? t('notifications.messages.markedUnread')
-          : t('notifications.messages.markedRead')
-      );
+      toast.success(item.is_read ? t("notifications.messages.markedUnread") : t("notifications.messages.markedRead"));
     } catch (err) {
       toast.error(getErrMsg(err, t));
     }
   };
 
   const handleDelete = async (item: NotificationView) => {
-    if (
-      !confirm(
-        t('notifications.messages.deleteConfirm').replace('{title}', item.title)
-      )
-    )
-      return;
+    if (!confirm(t("notifications.messages.deleteConfirm").replace("{title}", item.title))) return;
 
     try {
       await deleteNotification({ id: item.id }).unwrap();
-      toast.success(t('notifications.messages.deleteSuccess'));
+      toast.success(t("notifications.messages.deleteSuccess"));
     } catch (err) {
       toast.error(getErrMsg(err, t));
     }
   };
 
   const handleCreate = () => {
-    router.push('/admin/notifications/new');
+    router.push("/admin/notifications/new");
   };
 
   const handleEdit = (item: NotificationView) => {
@@ -211,25 +180,25 @@ export default function AdminNotificationsClient() {
         <CardHeader className="pb-3">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold">{t('notifications.title')}</CardTitle>
+              <CardTitle className="font-bold text-2xl">{t("notifications.title")}</CardTitle>
               <CardDescription>
-                {t('notifications.description')
-                  .replace('{count}', String(filteredItems.length))
-                  .replace('{unread}', String(unreadCount))}
+                {t("notifications.description")
+                  .replace("{count}", String(filteredItems.length))
+                  .replace("{unread}", String(unreadCount))}
               </CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button onClick={handleMarkAllRead} disabled={busy || unreadCount === 0} size="sm">
                 <CheckCheck className="mr-2 size-4" />
-                {t('notifications.actions.markAllRead')}
+                {t("notifications.actions.markAllRead")}
               </Button>
               <Button onClick={handleRefresh} disabled={busy} variant="outline" size="sm">
-                <RefreshCcw className={cn('mr-2 size-4', busy && 'animate-spin')} />
-                {t('notifications.actions.refresh')}
+                <RefreshCcw className={cn("mr-2 size-4", busy && "animate-spin")} />
+                {t("notifications.actions.refresh")}
               </Button>
               <Button onClick={handleCreate} size="sm">
                 <Plus className="mr-2 size-4" />
-                {t('notifications.actions.create')}
+                {t("notifications.actions.create")}
               </Button>
             </div>
           </div>
@@ -239,19 +208,19 @@ export default function AdminNotificationsClient() {
       {/* Filters */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold">{t('notifications.filters.title')}</CardTitle>
+          <CardTitle className="font-semibold text-base">{t("notifications.filters.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             {/* Search */}
             <div className="space-y-2">
-              <Label htmlFor="search">{t('notifications.filters.search')}</Label>
+              <Label htmlFor="search">{t("notifications.filters.search")}</Label>
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
                 <Input
                   id="search"
                   className="pl-9"
-                  placeholder={t('notifications.filters.searchPlaceholder')}
+                  placeholder={t("notifications.filters.searchPlaceholder")}
                   value={filters.search}
                   onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
                 />
@@ -260,7 +229,7 @@ export default function AdminNotificationsClient() {
 
             {/* Read Filter */}
             <div className="space-y-2">
-              <Label htmlFor="readFilter">{t('notifications.filters.status')}</Label>
+              <Label htmlFor="readFilter">{t("notifications.filters.status")}</Label>
               <Select
                 value={filters.readFilter}
                 onValueChange={(v) => setFilters((p) => ({ ...p, readFilter: v as ReadFilter }))}
@@ -269,25 +238,22 @@ export default function AdminNotificationsClient() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('notifications.filters.all')}</SelectItem>
-                  <SelectItem value="read">{t('notifications.filters.read')}</SelectItem>
-                  <SelectItem value="unread">{t('notifications.filters.unread')}</SelectItem>
+                  <SelectItem value="all">{t("notifications.filters.all")}</SelectItem>
+                  <SelectItem value="read">{t("notifications.filters.read")}</SelectItem>
+                  <SelectItem value="unread">{t("notifications.filters.unread")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Type Filter - ✅ FIXED: No empty string value */}
             <div className="space-y-2">
-              <Label htmlFor="type">{t('notifications.filters.type')}</Label>
-              <Select
-                value={filters.type}
-                onValueChange={(v) => setFilters((p) => ({ ...p, type: v }))}
-              >
+              <Label htmlFor="type">{t("notifications.filters.type")}</Label>
+              <Select value={filters.type} onValueChange={(v) => setFilters((p) => ({ ...p, type: v }))}>
                 <SelectTrigger id="type">
-                  <SelectValue placeholder={t('notifications.filters.typePlaceholder')} />
+                  <SelectValue placeholder={t("notifications.filters.typePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('notifications.filters.all')}</SelectItem>
+                  <SelectItem value="all">{t("notifications.filters.all")}</SelectItem>
                   {typeOptions.map((tVal) => (
                     <SelectItem key={tVal} value={tVal}>
                       {t(`notifications.types.${tVal}`, {}, tVal)}
@@ -308,19 +274,19 @@ export default function AdminNotificationsClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-12">{t('notifications.table.status')}</TableHead>
-                  <TableHead className="w-52">{t('notifications.table.title')}</TableHead>
-                  <TableHead className="w-80">{t('notifications.table.message')}</TableHead>
-                  <TableHead className="w-32">{t('notifications.table.type')}</TableHead>
-                  <TableHead className="w-48">{t('notifications.table.date')}</TableHead>
-                  <TableHead className="w-52 text-right">{t('notifications.table.actions')}</TableHead>
+                  <TableHead className="w-12">{t("notifications.table.status")}</TableHead>
+                  <TableHead className="w-52">{t("notifications.table.title")}</TableHead>
+                  <TableHead className="w-80">{t("notifications.table.message")}</TableHead>
+                  <TableHead className="w-32">{t("notifications.table.type")}</TableHead>
+                  <TableHead className="w-48">{t("notifications.table.date")}</TableHead>
+                  <TableHead className="w-52 text-right">{t("notifications.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredItems.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                      {busy ? t('notifications.table.loading') : t('notifications.table.noRecords')}
+                      {busy ? t("notifications.table.loading") : t("notifications.table.noRecords")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -328,8 +294,8 @@ export default function AdminNotificationsClient() {
                   <TableRow
                     key={item.id}
                     className={cn(
-                      'cursor-pointer hover:bg-muted/50',
-                      !item.is_read && 'bg-blue-50/50 dark:bg-blue-950/20'
+                      "cursor-pointer hover:bg-muted/50",
+                      !item.is_read && "bg-blue-50/50 dark:bg-blue-950/20",
                     )}
                     onClick={() => handleEdit(item)}
                   >
@@ -340,16 +306,12 @@ export default function AdminNotificationsClient() {
                         <Bell className="size-4 text-blue-600" />
                       )}
                     </TableCell>
-                    <TableCell className="font-medium">
-                      {truncate(item.title, 40)}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {truncate(item.message, 60)}
-                    </TableCell>
+                    <TableCell className="font-medium">{truncate(item.title, 40)}</TableCell>
+                    <TableCell className="text-muted-foreground">{truncate(item.message, 60)}</TableCell>
                     <TableCell>
                       <Badge variant="outline">{t(`notifications.types.${item.type}`, {}, item.type)}</Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-muted-foreground text-sm">
                       {fmtDate(item.created_at, adminLocale)}
                     </TableCell>
                     <TableCell className="text-right">
@@ -363,9 +325,7 @@ export default function AdminNotificationsClient() {
                           }}
                           disabled={busy}
                         >
-                          {item.is_read
-                            ? t('notifications.actions.markUnread')
-                            : t('notifications.actions.markRead')}
+                          {item.is_read ? t("notifications.actions.markUnread") : t("notifications.actions.markRead")}
                         </Button>
                         <Button
                           size="sm"
@@ -401,15 +361,15 @@ export default function AdminNotificationsClient() {
           <div className="flex flex-col gap-3 p-4 xl:hidden">
             {filteredItems.length === 0 && (
               <div className="py-12 text-center text-muted-foreground">
-                {busy ? t('notifications.table.loading') : t('notifications.table.noRecords')}
+                {busy ? t("notifications.table.loading") : t("notifications.table.noRecords")}
               </div>
             )}
             {filteredItems.map((item) => (
               <Card
                 key={item.id}
                 className={cn(
-                  'cursor-pointer transition-colors hover:bg-muted/50',
-                  !item.is_read && 'border-l-4 border-l-blue-600'
+                  "cursor-pointer transition-colors hover:bg-muted/50",
+                  !item.is_read && "border-l-4 border-l-blue-600",
                 )}
                 onClick={() => handleEdit(item)}
               >
@@ -424,8 +384,8 @@ export default function AdminNotificationsClient() {
                         )}
                         <p className="font-semibold">{item.title}</p>
                       </div>
-                      <p className="text-sm text-muted-foreground">{item.message}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-sm">{item.message}</p>
+                      <div className="flex items-center gap-2 text-muted-foreground text-xs">
                         <Badge variant="outline" className="text-xs">
                           {t(`notifications.types.${item.type}`, {}, item.type)}
                         </Badge>
@@ -446,9 +406,7 @@ export default function AdminNotificationsClient() {
                       disabled={busy}
                       className="flex-1"
                     >
-                      {item.is_read
-                        ? t('notifications.actions.markUnread')
-                        : t('notifications.actions.markRead')}
+                      {item.is_read ? t("notifications.actions.markUnread") : t("notifications.actions.markRead")}
                     </Button>
                     <Button
                       size="sm"

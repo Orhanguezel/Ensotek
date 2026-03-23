@@ -2,14 +2,14 @@
 // FILE: src/integrations/shared/footer.ts
 // ----------------------------------------------------------------------
 
+import type { FooterSectionDto, PublicMenuItemDto } from "@/integrations/shared";
 import {
-  SiteSettingLike,
+  isActiveFooterSection,
   nonEmpty,
   parseJsonArray,
-  isActiveFooterSection,
+  type SiteSettingLike,
   sortFooterSections,
-} from '@/integrations/shared';
-import type { FooterSectionDto, PublicMenuItemDto } from '@/integrations/shared';
+} from "@/integrations/shared";
 
 export type FooterLink = {
   label: string;
@@ -23,8 +23,8 @@ export type FooterSectionListParams = {
   limit?: number;
   offset?: number;
   /** Admin backend'e uygun sort alanları */
-  sort?: 'display_order' | 'created_at' | 'title';
-  order?: 'asc' | 'desc';
+  sort?: "display_order" | "created_at" | "title";
+  order?: "asc" | "desc";
 };
 
 export type FooterPublicListParams = {
@@ -32,7 +32,7 @@ export type FooterPublicListParams = {
   is_active?: boolean;
   limit?: number;
   offset?: number;
-  order?: 'asc' | 'desc'; // public'te sort alanı yok; order_num yönü
+  order?: "asc" | "desc"; // public'te sort alanı yok; order_num yönü
 };
 
 export type ReorderFooterSectionItem = {
@@ -46,7 +46,7 @@ export type ApiFooterSection = {
   title: string | null;
   links?: string | FooterLink[] | null;
   display_order?: number | null;
-  is_active?: boolean | number | '0' | '1' | 'true' | 'false' | null;
+  is_active?: boolean | number | "0" | "1" | "true" | "false" | null;
   created_at?: string | null;
   updated_at?: string | null;
 };
@@ -84,16 +84,14 @@ export function normalizeQuickLinks(x: unknown): Array<{ name: string; url: stri
     .filter((it) => !!it.name && !!it.url);
 }
 
-export function normalizeSocialLinks(
-  x: unknown,
-): Array<{ url: string; icon: string; alt: string }> {
+export function normalizeSocialLinks(x: unknown): Array<{ url: string; icon: string; alt: string }> {
   const arr = parseJsonArray<FooterSocialLink>(x);
   if (!arr.length) return [];
   return arr
     .map((it) => ({
       url: nonEmpty(it?.url),
       icon: nonEmpty(it?.icon),
-      alt: nonEmpty(it?.alt) || 'Social',
+      alt: nonEmpty(it?.alt) || "Social",
     }))
     .filter((it) => !!it.url && !!it.icon);
 }
@@ -120,36 +118,33 @@ export function pickSettingValue(data?: SiteSettingLike): unknown {
   return d?.value ?? d?.data?.value ?? (Array.isArray(d?.items) ? d.items[0]?.value : undefined);
 }
 
-export function pickTextFromSettingValue(v: unknown, fallback = ''): string {
-  if (typeof v === 'string') return v.trim() || fallback;
+export function pickTextFromSettingValue(v: unknown, fallback = ""): string {
+  if (typeof v === "string") return v.trim() || fallback;
 
-  if (v && typeof v === 'object') {
+  if (v && typeof v === "object") {
     const o: any = v;
     // company_brand JSON: { name, shortName, website, ... }
-    const name =
-      typeof o?.shortName === 'string' ? o.shortName : typeof o?.name === 'string' ? o.name : '';
+    const name = typeof o?.shortName === "string" ? o.shortName : typeof o?.name === "string" ? o.name : "";
     return name.trim() || fallback;
   }
 
   return fallback;
 }
 
-export function pickBrandName(v: unknown, fallback = 'guezelwebdesign'): string {
-  if (typeof v === 'string') return v.trim() || fallback;
-  if (v && typeof v === 'object') {
+export function pickBrandName(v: unknown, fallback = "guezelwebdesign"): string {
+  if (typeof v === "string") return v.trim() || fallback;
+  if (v && typeof v === "object") {
     const o: any = v;
-    const s =
-      (typeof o?.shortName === 'string' ? o.shortName : '') ||
-      (typeof o?.name === 'string' ? o.name : '');
-    return (s || '').trim() || fallback;
+    const s = (typeof o?.shortName === "string" ? o.shortName : "") || (typeof o?.name === "string" ? o.name : "");
+    return (s || "").trim() || fallback;
   }
   return fallback;
 }
 
 export function pickSocialUrl(v: unknown, key: string): string {
-  if (!v || typeof v !== 'object') return '';
+  if (!v || typeof v !== "object") return "";
   const o: any = v;
-  const s = typeof o?.[key] === 'string' ? o[key].trim() : '';
+  const s = typeof o?.[key] === "string" ? o[key].trim() : "";
   return s;
 }
 
@@ -174,7 +169,7 @@ export function flattenMenuItems(
       if (!item) continue;
       const resolvedSectionId = item.section_id || sectionId || null;
       out.push({ ...item, section_id: resolvedSectionId });
-      if (item.children && item.children.length) {
+      if (item.children?.length) {
         walk(item.children, resolvedSectionId);
       }
     }

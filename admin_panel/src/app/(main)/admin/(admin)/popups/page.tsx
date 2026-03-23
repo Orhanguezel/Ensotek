@@ -3,7 +3,7 @@
 // FINAL — Admin Popups Page
 // =============================================================
 
-import AdminPopupsClient from './_components/admin-popups-client';
+import AdminPopupsClient from "./_components/admin-popups-client";
 
 export default function Page() {
   return <AdminPopupsClient />;

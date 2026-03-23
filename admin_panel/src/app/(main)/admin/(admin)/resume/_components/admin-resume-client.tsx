@@ -1,50 +1,35 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/resume/admin-resume-client.tsx
 // FINAL — Admin Resume List
 // =============================================================
 
-import * as React from 'react';
-import Link from 'next/link';
-import { RefreshCcw, Plus, Search } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import Link from "next/link";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Plus, RefreshCcw, Search } from "lucide-react";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import { AdminLocaleSelect } from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-
-import type { ResumeMerged, ResumeType } from '@/integrations/shared';
-import { useListResumeAdminQuery } from '@/integrations/hooks';
+import { AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useListResumeAdminQuery } from "@/integrations/hooks";
+import type { ResumeMerged, ResumeType } from "@/integrations/shared";
 
 type Filters = {
   locale: string;
   q: string;
-  type: 'all' | ResumeType;
-  active: 'all' | 'yes' | 'no';
-  orderDir: 'asc' | 'desc';
+  type: "all" | ResumeType;
+  active: "all" | "yes" | "no";
+  orderDir: "asc" | "desc";
 };
 
 export default function AdminResumeClient() {
@@ -55,18 +40,18 @@ export default function AdminResumeClient() {
   const { localeOptions, defaultLocaleFromDb, loading: localesLoading } = useAdminLocales();
 
   const [filters, setFilters] = React.useState<Filters>({
-    locale: '',
-    q: '',
-    type: 'all',
-    active: 'all',
-    orderDir: 'desc',
+    locale: "",
+    q: "",
+    type: "all",
+    active: "all",
+    orderDir: "desc",
   });
 
   React.useEffect(() => {
     if (!localeOptions?.length) return;
     setFilters((p) => {
       if (p.locale) return p;
-      return { ...p, locale: defaultLocaleFromDb || localeOptions[0]?.value || '' };
+      return { ...p, locale: defaultLocaleFromDb || localeOptions[0]?.value || "" };
     });
   }, [localeOptions, defaultLocaleFromDb]);
 
@@ -74,9 +59,9 @@ export default function AdminResumeClient() {
     () => ({
       locale: filters.locale || undefined,
       search: filters.q.trim() || undefined,
-      type: filters.type === 'all' ? undefined : (filters.type as ResumeType),
-      active: filters.active === 'all' ? undefined : filters.active === 'yes',
-      orderBy: 'start_date' as const,
+      type: filters.type === "all" ? undefined : (filters.type as ResumeType),
+      active: filters.active === "all" ? undefined : filters.active === "yes",
+      orderBy: "start_date" as const,
       order: filters.orderDir,
       limit: 200,
       offset: 0,
@@ -91,8 +76,8 @@ export default function AdminResumeClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{page?.title}</h1>
-          <p className="text-sm text-muted-foreground">{page?.subtitle}</p>
+          <h1 className="font-semibold text-lg">{page?.title}</h1>
+          <p className="text-muted-foreground text-sm">{page?.subtitle}</p>
         </div>
 
         <div className="flex gap-2">
@@ -126,7 +111,7 @@ export default function AdminResumeClient() {
           <div className="space-y-2">
             <Label>{common?.actions?.search}</Label>
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" />
               <Input
                 value={filters.q}
                 onChange={(e) => setFilters((p) => ({ ...p, q: e.target.value }))}
@@ -140,7 +125,7 @@ export default function AdminResumeClient() {
             <Label>{page?.type_label}</Label>
             <Select
               value={filters.type}
-              onValueChange={(v) => setFilters((p) => ({ ...p, type: v as Filters['type'] }))}
+              onValueChange={(v) => setFilters((p) => ({ ...p, type: v as Filters["type"] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -157,7 +142,7 @@ export default function AdminResumeClient() {
             <Label>{page?.active_label}</Label>
             <Select
               value={filters.active}
-              onValueChange={(v) => setFilters((p) => ({ ...p, active: v as Filters['active'] }))}
+              onValueChange={(v) => setFilters((p) => ({ ...p, active: v as Filters["active"] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -191,7 +176,7 @@ export default function AdminResumeClient() {
             <TableBody>
               {rows.length === 0 && !listQ.isFetching && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground text-sm">
                     {common?.states?.empty}
                   </TableCell>
                 </TableRow>
@@ -201,18 +186,16 @@ export default function AdminResumeClient() {
                   <TableCell className="font-medium">{item.title}</TableCell>
                   <TableCell>{item.type}</TableCell>
                   <TableCell>
-                    {item.start_date} → {item.is_current ? page?.present_label : item.end_date || '-'}
+                    {item.start_date} → {item.is_current ? page?.present_label : item.end_date || "-"}
                   </TableCell>
                   <TableCell>
-                    <Badge variant={item.is_active ? 'secondary' : 'outline'}>
+                    <Badge variant={item.is_active ? "secondary" : "outline"}>
                       {item.is_active ? page?.filter_yes : page?.filter_no}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <Button variant="outline" size="sm" asChild>
-                      <Link href={`/admin/resume/${encodeURIComponent(item.id)}`}>
-                        {common?.actions?.edit}
-                      </Link>
+                      <Link href={`/admin/resume/${encodeURIComponent(item.id)}`}>{common?.actions?.edit}</Link>
                     </Button>
                   </TableCell>
                 </TableRow>

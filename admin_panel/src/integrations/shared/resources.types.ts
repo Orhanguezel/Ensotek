@@ -3,7 +3,7 @@
 // Resources types & helpers
 // =============================================================
 
-export type ResourceType = 'therapist' | 'doctor' | 'table' | 'room' | 'staff' | 'other';
+export type ResourceType = "therapist" | "doctor" | "table" | "room" | "staff" | "other";
 
 export interface ResourceRowDto {
   id: string;
@@ -30,8 +30,8 @@ export interface ResourceAdminListItemDto {
 
 export interface ResourcesAdminListQueryParams {
   q?: string;
-  type?: ResourceType | '';
-  status?: 'active' | 'inactive' | 'all';
+  type?: ResourceType | "";
+  status?: "active" | "inactive" | "all";
   limit?: number;
   offset?: number;
 }
@@ -56,15 +56,17 @@ export interface ResourceUpdatePayload {
 export function normalizeResource(raw: unknown): ResourceAdminListItemDto {
   const r = (raw ?? {}) as any;
   return {
-    id: String(r.id ?? ''),
-    title: String(r.title ?? ''),
-    label: String(r.label ?? r.title ?? ''),
-    type: (r.type as ResourceType) || 'other',
+    id: String(r.id ?? ""),
+    title: String(r.title ?? ""),
+    label: String(r.label ?? r.title ?? ""),
+    type: (r.type as ResourceType) || "other",
     is_active: Boolean(r.is_active === true || r.is_active === 1),
     capacity: Number(r.capacity ?? 1),
     external_ref_id: r.external_ref_id ?? null,
-    created_at: typeof r.created_at === 'string' ? r.created_at : (r.created_at?.toISOString?.() ?? new Date().toISOString()),
-    updated_at: typeof r.updated_at === 'string' ? r.updated_at : (r.updated_at?.toISOString?.() ?? new Date().toISOString()),
+    created_at:
+      typeof r.created_at === "string" ? r.created_at : (r.created_at?.toISOString?.() ?? new Date().toISOString()),
+    updated_at:
+      typeof r.updated_at === "string" ? r.updated_at : (r.updated_at?.toISOString?.() ?? new Date().toISOString()),
   };
 }
 

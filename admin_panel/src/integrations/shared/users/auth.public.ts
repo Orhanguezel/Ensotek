@@ -1,5 +1,5 @@
 // src/integrations/shared/auth.public.ts
-import type { UserRoleName } from './users';
+import type { UserRoleName } from "./users";
 
 export interface AuthUser {
   id: string;
@@ -72,7 +72,7 @@ export interface AuthSignupBody {
 export interface AuthTokenBody {
   email: string;
   password: string;
-  grant_type?: 'password';
+  grant_type?: "password";
 }
 
 export interface AuthUpdateBody {
@@ -89,20 +89,22 @@ export interface PasswordResetConfirmBody {
   password: string;
 }
 
-const roleList: UserRoleName[] = ['admin', 'moderator', 'user'];
+const roleList: UserRoleName[] = ["admin", "moderator", "user"];
 
 const coerceRole = (v: unknown): UserRoleName => {
-  const s = String(v ?? '').trim().toLowerCase();
-  return (roleList as string[]).includes(s) ? (s as UserRoleName) : 'user';
+  const s = String(v ?? "")
+    .trim()
+    .toLowerCase();
+  return (roleList as string[]).includes(s) ? (s as UserRoleName) : "user";
 };
 
 export function normalizeMeFromStatus(res?: AuthStatusResponse | null): AuthMeNormalized | null {
   if (!res || res.authenticated !== true) return null;
   const user = (res as any).user ?? {};
-  const id = String(user.id ?? '').trim();
+  const id = String(user.id ?? "").trim();
   if (!id) return null;
   const role = coerceRole(user.role);
-  const isAdmin = (res as any).is_admin === true || role === 'admin';
+  const isAdmin = (res as any).is_admin === true || role === "admin";
   return {
     id,
     email: user.email ?? null,

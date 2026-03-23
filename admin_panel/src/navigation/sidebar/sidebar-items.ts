@@ -13,9 +13,9 @@ import {
   Bot,
   ClipboardList,
   Cog,
-  DollarSign,
   Contact2,
   Database,
+  DollarSign,
   FileSearch,
   FileText,
   FolderOpen,
@@ -25,6 +25,7 @@ import {
   HelpCircle,
   Images,
   LayoutDashboard,
+  type LucideIcon,
   Mail,
   Menu,
   MessageCircle,
@@ -37,9 +38,9 @@ import {
   Settings,
   Users,
   Wrench,
-  type LucideIcon,
-} from 'lucide-react';
-import type { TranslateFn } from '@/i18n';
+} from "lucide-react";
+
+import type { TranslateFn } from "@/i18n";
 
 export interface NavSubItem {
   title: string;
@@ -67,41 +68,40 @@ export interface NavGroup {
 }
 
 export type AdminNavItemKey =
-  | 'dashboard'
-  | 'site_settings'
-  | 'custom_pages'
-  | 'categories'
-  | 'subcategories'
-  | 'library'
-  | 'products'
-  | 'sparepart'
-  | 'services'
-  | 'sliders'
-  | 'menu_items'
-  | 'footer_sections'
-  | 'faqs'
-  | 'contacts'
-  | 'reviews'
-  | 'mail'
-  | 'users'
-  | 'email_templates'
-  | 'notifications'
-  | 'storage'
-  | 'db'
-  | 'audit'
+  | "dashboard"
+  | "site_settings"
+  | "custom_pages"
+  | "categories"
+  | "subcategories"
+  | "library"
+  | "products"
+  | "sparepart"
+  | "services"
+  | "sliders"
+  | "menu_items"
+  | "footer_sections"
+  | "faqs"
+  | "contacts"
+  | "reviews"
+  | "mail"
+  | "users"
+  | "email_templates"
+  | "notifications"
+  | "storage"
+  | "db"
+  | "audit"
+  | "reports"
+  | "offers"
+  | "catalog_requests"
+  | "support"
+  | "telegram"
+  | "chat"
+  | "references"
+  | "cache"
+  | "blog"
+  | "news";
 
-  | 'reports'
-  | 'offers'
-  | 'catalog_requests'
-  | 'support'
-  | 'telegram'
-  | 'chat'
-  | 'references'
-  | 'cache'
-  | 'blog'
-  | 'news';
-
-export type AdminNavGroupKey = 'general' | 'content' | 'marketing' | 'communication' | 'system';
+export type AdminNavGroupKey = "general" | "content" | "marketing" | "communication" | "system";
 
 export type AdminNavConfigItem = {
   key: AdminNavItemKey;
@@ -118,57 +118,56 @@ export type AdminNavConfigGroup = {
 export const adminNavConfig: AdminNavConfigGroup[] = [
   {
     id: 1,
-    key: 'general',
-    items: [{ key: 'dashboard', url: '/admin/dashboard', icon: LayoutDashboard }],
+    key: "general",
+    items: [{ key: "dashboard", url: "/admin/dashboard", icon: LayoutDashboard }],
   },
   {
     id: 2,
-    key: 'content',
+    key: "content",
     items: [
-      { key: 'site_settings', url: '/admin/site-settings', icon: Settings },
-      { key: 'custom_pages', url: '/admin/custompage', icon: FileText },
-      { key: 'blog', url: '/admin/custompage?module_key=blog', icon: PenSquare },
-      { key: 'news', url: '/admin/custompage?module_key=news', icon: Newspaper },
-      { key: 'categories', url: '/admin/categories', icon: Folders },
-      { key: 'subcategories', url: '/admin/subcategories', icon: FolderOpen },
-      { key: 'library', url: '/admin/library', icon: BookOpen },
-      { key: 'products', url: '/admin/products', icon: Package },
-      { key: 'sparepart', url: '/admin/products?type=sparepart', icon: Cog },
-      { key: 'services', url: '/admin/services', icon: Wrench },
-      { key: 'sliders', url: '/admin/slider', icon: Images },
-      { key: 'menu_items', url: '/admin/menuitem', icon: Menu },
-      { key: 'footer_sections', url: '/admin/footer-sections', icon: FileText },
-      { key: 'faqs', url: '/admin/faqs', icon: HelpCircle },
-      { key: 'references', url: '/admin/references', icon: Award },
-
+      { key: "site_settings", url: "/admin/site-settings", icon: Settings },
+      { key: "custom_pages", url: "/admin/custompage", icon: FileText },
+      { key: "blog", url: "/admin/custompage?module_key=blog", icon: PenSquare },
+      { key: "news", url: "/admin/custompage?module_key=news", icon: Newspaper },
+      { key: "categories", url: "/admin/categories", icon: Folders },
+      { key: "subcategories", url: "/admin/subcategories", icon: FolderOpen },
+      { key: "library", url: "/admin/library", icon: BookOpen },
+      { key: "products", url: "/admin/products", icon: Package },
+      { key: "sparepart", url: "/admin/products?type=sparepart", icon: Cog },
+      { key: "services", url: "/admin/services", icon: Wrench },
+      { key: "sliders", url: "/admin/slider", icon: Images },
+      { key: "menu_items", url: "/admin/menuitem", icon: Menu },
+      { key: "footer_sections", url: "/admin/footer-sections", icon: FileText },
+      { key: "faqs", url: "/admin/faqs", icon: HelpCircle },
+      { key: "references", url: "/admin/references", icon: Award },
     ],
   },
   {
     id: 4,
-    key: 'communication',
+    key: "communication",
     items: [
-      { key: 'offers', url: '/admin/offer', icon: DollarSign },
-      { key: 'catalog_requests', url: '/admin/catalog', icon: ClipboardList },
-      { key: 'contacts', url: '/admin/contacts', icon: Contact2 },
-      { key: 'support', url: '/admin/support', icon: Headphones },
-      { key: 'reviews', url: '/admin/reviews', icon: MessageSquare },
-      { key: 'mail', url: '/admin/mail', icon: Send },
-      { key: 'telegram', url: '/admin/telegram', icon: MessageCircle },
-      { key: 'chat', url: '/admin/chat', icon: Bot },
+      { key: "offers", url: "/admin/offer", icon: DollarSign },
+      { key: "catalog_requests", url: "/admin/catalog", icon: ClipboardList },
+      { key: "contacts", url: "/admin/contacts", icon: Contact2 },
+      { key: "support", url: "/admin/support", icon: Headphones },
+      { key: "reviews", url: "/admin/reviews", icon: MessageSquare },
+      { key: "mail", url: "/admin/mail", icon: Send },
+      { key: "telegram", url: "/admin/telegram", icon: MessageCircle },
+      { key: "chat", url: "/admin/chat", icon: Bot },
     ],
   },
   {
     id: 5,
-    key: 'system',
+    key: "system",
     items: [
-      { key: 'users', url: '/admin/users', icon: Users },
-      { key: 'email_templates', url: '/admin/email-templates', icon: Mail },
-      { key: 'notifications', url: '/admin/notifications', icon: Bell },
-      { key: 'storage', url: '/admin/storage', icon: HardDrive },
-      { key: 'db', url: '/admin/db', icon: Database },
-      { key: 'audit', url: '/admin/audit', icon: FileSearch },
-      { key: 'reports', url: '/admin/reports', icon: BarChart },
-      { key: 'cache', url: '/admin/cache', icon: RefreshCcw },
+      { key: "users", url: "/admin/users", icon: Users },
+      { key: "email_templates", url: "/admin/email-templates", icon: Mail },
+      { key: "notifications", url: "/admin/notifications", icon: Bell },
+      { key: "storage", url: "/admin/storage", icon: HardDrive },
+      { key: "db", url: "/admin/db", icon: Database },
+      { key: "audit", url: "/admin/audit", icon: FileSearch },
+      { key: "reports", url: "/admin/reports", icon: BarChart },
+      { key: "cache", url: "/admin/cache", icon: RefreshCcw },
     ],
   },
 ];
@@ -180,54 +179,50 @@ export type AdminNavCopy = {
 
 // Fallback titles for when translations are missing
 const FALLBACK_TITLES: Record<AdminNavItemKey, string> = {
-  dashboard: 'Dashboard',
-  site_settings: 'Site Settings',
-  custom_pages: 'Custom Pages',
-  categories: 'Categories',
-  subcategories: 'Subcategories',
-  library: 'Library',
-  products: 'Products',
-  sparepart: 'Spare Parts',
-  services: 'Services',
-  sliders: 'Sliders',
-  menu_items: 'Menu Items',
-  footer_sections: 'Footer Sections',
-  faqs: 'FAQs',
-  offers: 'Offers',
-  catalog_requests: 'Catalog Requests',
-  contacts: 'Contacts',
-  reviews: 'Reviews',
-  mail: 'Mail',
-  users: 'Users',
-  email_templates: 'Email Templates',
-  notifications: 'Notifications',
-  support: 'Support Tickets',
-  storage: 'Storage',
-  db: 'Database',
-  audit: 'Audit',
+  dashboard: "Dashboard",
+  site_settings: "Site Settings",
+  custom_pages: "Custom Pages",
+  categories: "Categories",
+  subcategories: "Subcategories",
+  library: "Library",
+  products: "Products",
+  sparepart: "Spare Parts",
+  services: "Services",
+  sliders: "Sliders",
+  menu_items: "Menu Items",
+  footer_sections: "Footer Sections",
+  faqs: "FAQs",
+  offers: "Offers",
+  catalog_requests: "Catalog Requests",
+  contacts: "Contacts",
+  reviews: "Reviews",
+  mail: "Mail",
+  users: "Users",
+  email_templates: "Email Templates",
+  notifications: "Notifications",
+  support: "Support Tickets",
+  storage: "Storage",
+  db: "Database",
+  audit: "Audit",
 
-  reports: 'Reports',
-  telegram: 'Telegram',
-  chat: 'Chat & AI',
-  references: 'References',
-  cache: 'Cache',
-  blog: 'Blog',
-  news: 'News',
+  reports: "Reports",
+  telegram: "Telegram",
+  chat: "Chat & AI",
+  references: "References",
+  cache: "Cache",
+  blog: "Blog",
+  news: "News",
 };
 
-export function buildAdminSidebarItems(
-  copy?: Partial<AdminNavCopy> | null,
-  t?: TranslateFn,
-): NavGroup[] {
-  const labels = copy?.labels ?? ({} as AdminNavCopy['labels']);
-  const items = copy?.items ?? ({} as AdminNavCopy['items']);
+export function buildAdminSidebarItems(copy?: Partial<AdminNavCopy> | null, t?: TranslateFn): NavGroup[] {
+  const labels = copy?.labels ?? ({} as AdminNavCopy["labels"]);
+  const items = copy?.items ?? ({} as AdminNavCopy["items"]);
 
   return adminNavConfig.map((group) => {
     // 1. Try copy.labels[group.key]
     // 2. Try t(`admin.sidebar.groups.${group.key}`)
     // 3. Fallback to empty (or key)
-    const label =
-      labels[group.key] || (t ? t(`admin.sidebar.groups.${group.key}` as any) : '') || '';
+    const label = labels[group.key] || (t ? t(`admin.sidebar.groups.${group.key}` as any) : "") || "";
 
     return {
       id: group.id,
@@ -239,7 +234,7 @@ export function buildAdminSidebarItems(
         // 4. Fallback to key
         const title =
           items[item.key] ||
-          (t ? t(`admin.dashboard.items.${item.key}` as any) : '') ||
+          (t ? t(`admin.dashboard.items.${item.key}` as any) : "") ||
           FALLBACK_TITLES[item.key] ||
           item.key;
 

@@ -3,7 +3,7 @@
 // Admin Chat & AI Support Page (Ensotek)
 // =============================================================
 
-import ChatAdminPage from './Chat';
+import ChatAdminPage from "./Chat";
 
 export default function Page() {
   return <ChatAdminPage />;

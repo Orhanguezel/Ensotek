@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ADMIN_LOCALE_OPTIONS, useAdminTranslations } from "@/i18n";
 import { type FontKey, fontOptions } from "@/lib/fonts/registry";
 import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } from "@/lib/preferences/layout";
 import {
@@ -23,8 +24,8 @@ import { persistPreference } from "@/lib/preferences/preferences-storage";
 import { THEME_PRESET_OPTIONS, type ThemeMode, type ThemePreset } from "@/lib/preferences/theme";
 import { applyThemeMode, applyThemePreset } from "@/lib/preferences/theme-utils";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
-import { useAdminSettings } from '../admin-settings-provider';
-import { useAdminTranslations, ADMIN_LOCALE_OPTIONS } from '@/i18n';
+
+import { useAdminSettings } from "../admin-settings-provider";
 
 export function LayoutControls() {
   const { saveAdminConfig } = useAdminSettings();
@@ -102,7 +103,7 @@ export function LayoutControls() {
   };
 
   const onAdminLocaleChange = (value: string) => {
-    const next = String(value || '').trim();
+    const next = String(value || "").trim();
     if (!next) return;
     setAdminLocale(next);
     persistPreference("admin_locale", next);
@@ -130,15 +131,15 @@ export function LayoutControls() {
       <PopoverContent align="end">
         <div className="flex flex-col gap-5">
           <div className="space-y-1.5">
-            <h4 className="font-medium text-sm leading-none">{t('admin.sidebar.preferences.title')}</h4>
-            <p className="text-muted-foreground text-xs">{t('admin.sidebar.preferences.description')}</p>
+            <h4 className="font-medium text-sm leading-none">{t("admin.sidebar.preferences.title")}</h4>
+            <p className="text-muted-foreground text-xs">{t("admin.sidebar.preferences.description")}</p>
           </div>
           <div className="space-y-3 **:data-[slot=toggle-group]:w-full **:data-[slot=toggle-group-item]:flex-1 **:data-[slot=toggle-group-item]:text-xs">
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.themePreset')}</Label>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.themePreset")}</Label>
               <Select value={themePreset} onValueChange={onThemePresetChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue placeholder={t('admin.sidebar.preferences.themePresetPlaceholder')} />
+                  <SelectValue placeholder={t("admin.sidebar.preferences.themePresetPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {THEME_PRESET_OPTIONS.map((preset) => (
@@ -157,10 +158,10 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.fonts')}</Label>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.fonts")}</Label>
               <Select value={font} onValueChange={onFontChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue placeholder={t('admin.sidebar.preferences.fontsPlaceholder')} />
+                  <SelectValue placeholder={t("admin.sidebar.preferences.fontsPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {fontOptions.map((font) => (
@@ -173,10 +174,10 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.language')}</Label>
-              <Select value={adminLocale || 'tr'} onValueChange={onAdminLocaleChange}>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.language")}</Label>
+              <Select value={adminLocale || "tr"} onValueChange={onAdminLocaleChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue placeholder={t('admin.sidebar.preferences.languagePlaceholder')} />
+                  <SelectValue placeholder={t("admin.sidebar.preferences.languagePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
                   {ADMIN_LOCALE_OPTIONS.map((opt) => (
@@ -189,7 +190,7 @@ export function LayoutControls() {
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.themeMode')}</Label>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.themeMode")}</Label>
               <ToggleGroup
                 size="sm"
                 variant="outline"
@@ -198,16 +199,16 @@ export function LayoutControls() {
                 onValueChange={onThemeModeChange}
               >
                 <ToggleGroupItem value="light" aria-label="Toggle inset">
-                  {t('admin.sidebar.theme.light')}
+                  {t("admin.sidebar.theme.light")}
                 </ToggleGroupItem>
                 <ToggleGroupItem value="dark" aria-label="Toggle sidebar">
-                  {t('admin.sidebar.theme.dark')}
+                  {t("admin.sidebar.theme.dark")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.pageLayout')}</Label>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.pageLayout")}</Label>
               <ToggleGroup
                 size="sm"
                 variant="outline"
@@ -216,16 +217,16 @@ export function LayoutControls() {
                 onValueChange={onContentLayoutChange}
               >
                 <ToggleGroupItem value="centered" aria-label="Toggle centered">
-                  {t('admin.sidebar.preferences.layout.centered')}
+                  {t("admin.sidebar.preferences.layout.centered")}
                 </ToggleGroupItem>
                 <ToggleGroupItem value="full-width" aria-label="Toggle full-width">
-                  {t('admin.sidebar.preferences.layout.fullWidth')}
+                  {t("admin.sidebar.preferences.layout.fullWidth")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.navbarBehavior')}</Label>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.navbarBehavior")}</Label>
               <ToggleGroup
                 size="sm"
                 variant="outline"
@@ -234,16 +235,16 @@ export function LayoutControls() {
                 onValueChange={onNavbarStyleChange}
               >
                 <ToggleGroupItem value="sticky" aria-label="Toggle sticky">
-                  {t('admin.sidebar.preferences.navbar.sticky')}
+                  {t("admin.sidebar.preferences.navbar.sticky")}
                 </ToggleGroupItem>
                 <ToggleGroupItem value="scroll" aria-label="Toggle scroll">
-                  {t('admin.sidebar.preferences.navbar.scroll')}
+                  {t("admin.sidebar.preferences.navbar.scroll")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.sidebarStyle')}</Label>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.sidebarStyle")}</Label>
               <ToggleGroup
                 size="sm"
                 variant="outline"
@@ -252,19 +253,19 @@ export function LayoutControls() {
                 onValueChange={onSidebarStyleChange}
               >
                 <ToggleGroupItem value="inset" aria-label="Toggle inset">
-                  {t('admin.sidebar.preferences.sidebarVariant.inset')}
+                  {t("admin.sidebar.preferences.sidebarVariant.inset")}
                 </ToggleGroupItem>
                 <ToggleGroupItem value="sidebar" aria-label="Toggle sidebar">
-                  {t('admin.sidebar.preferences.sidebarVariant.sidebar')}
+                  {t("admin.sidebar.preferences.sidebarVariant.sidebar")}
                 </ToggleGroupItem>
                 <ToggleGroupItem value="floating" aria-label="Toggle floating">
-                  {t('admin.sidebar.preferences.sidebarVariant.floating')}
+                  {t("admin.sidebar.preferences.sidebarVariant.floating")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <div className="space-y-1">
-              <Label className="font-medium text-xs">{t('admin.sidebar.preferences.sidebarCollapseMode')}</Label>
+              <Label className="font-medium text-xs">{t("admin.sidebar.preferences.sidebarCollapseMode")}</Label>
               <ToggleGroup
                 size="sm"
                 variant="outline"
@@ -273,16 +274,16 @@ export function LayoutControls() {
                 onValueChange={onSidebarCollapseModeChange}
               >
                 <ToggleGroupItem value="icon" aria-label="Toggle icon">
-                  {t('admin.sidebar.preferences.sidebarCollapsible.icon')}
+                  {t("admin.sidebar.preferences.sidebarCollapsible.icon")}
                 </ToggleGroupItem>
                 <ToggleGroupItem value="offcanvas" aria-label="Toggle offcanvas">
-                  {t('admin.sidebar.preferences.sidebarCollapsible.offcanvas')}
+                  {t("admin.sidebar.preferences.sidebarCollapsible.offcanvas")}
                 </ToggleGroupItem>
               </ToggleGroup>
             </div>
 
             <Button type="button" size="sm" variant="outline" className="w-full" onClick={handleRestore}>
-              {t('admin.sidebar.preferences.restoreDefaults')}
+              {t("admin.sidebar.preferences.restoreDefaults")}
             </Button>
           </div>
         </div>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/services/_components/serviceForm/ServiceFormImageColumn.tsx
@@ -8,21 +8,21 @@
 // - Gallery state: instant UI update
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import * as React from "react";
 
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { useRouter } from "next/navigation";
 
-import type { ServiceImageDto, ServiceImageCreatePayload } from '@/integrations/shared';
+import { toast } from "sonner";
 
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import {
-  useListServiceImagesAdminQuery,
   useCreateServiceImageAdminMutation,
   useDeleteServiceImageAdminMutation,
+  useListServiceImagesAdminQuery,
   useUpdateServiceAdminMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/hooks";
+import type { ServiceImageCreatePayload, ServiceImageDto } from "@/integrations/shared";
 
 type Props = {
   serviceId?: string;
@@ -36,7 +36,7 @@ type Props = {
   onGalleryChange?: (items: ServiceImageDto[]) => void;
 };
 
-const norm = (v: unknown) => String(v ?? '').trim();
+const norm = (v: unknown) => String(v ?? "").trim();
 
 const sortImages = (items: ServiceImageDto[]) =>
   [...items].sort((a: any, b: any) => {
@@ -44,8 +44,8 @@ const sortImages = (items: ServiceImageDto[]) =>
     const bo = Number(b?.display_order ?? 0);
     if (ao !== bo) return ao - bo;
 
-    const ac = String(a?.created_at ?? '');
-    const bc = String(b?.created_at ?? '');
+    const ac = String(a?.created_at ?? "");
+    const bc = String(b?.created_at ?? "");
     if (ac < bc) return -1;
     if (ac > bc) return 1;
     return 0;
@@ -83,10 +83,7 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
     refetch,
   } = useListServiceImagesAdminQuery(serviceId as string, { skip: !serviceId });
 
-  const imageItems = React.useMemo(
-    () => sortImages((imageItemsRaw ?? []) as ServiceImageDto[]),
-    [imageItemsRaw],
-  );
+  const imageItems = React.useMemo(() => sortImages((imageItemsRaw ?? []) as ServiceImageDto[]), [imageItemsRaw]);
 
   const [createImage, { isLoading: isCreating }] = useCreateServiceImageAdminMutation();
   const [deleteImage, { isLoading: isDeleting }] = useDeleteServiceImageAdminMutation();
@@ -199,13 +196,13 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
         await persistCover(url);
         await refetch();
 
-        toast.success(t('admin.services.formImage.coverSaved'));
+        toast.success(t("admin.services.formImage.coverSaved"));
       } catch (err: any) {
         const msg =
           err?.data?.error?.message ||
           err?.data?.message ||
           err?.message ||
-          t('admin.services.formImage.coverSaveError');
+          t("admin.services.formImage.coverSaveError");
         toast.error(msg);
       }
     })();
@@ -228,13 +225,13 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
         await persistCover(url);
         await refetch();
 
-        toast.success(t('admin.services.formImage.coverSaved'));
+        toast.success(t("admin.services.formImage.coverSaved"));
       } catch (err: any) {
         const msg =
           err?.data?.error?.message ||
           err?.data?.message ||
           err?.message ||
-          t('admin.services.formImage.coverSaveError');
+          t("admin.services.formImage.coverSaveError");
         toast.error(msg);
       }
     })();
@@ -258,7 +255,7 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
 
     if (removed.length > 0 && removedSafe.length !== removed.length) {
       setUiGalleryUrls((prev) => uniq([coverUrl, ...(prev ?? [])]));
-      toast.error(t('admin.services.formImage.coverDeleteError'));
+      toast.error(t("admin.services.formImage.coverDeleteError"));
     }
 
     if (added.length > 0) {
@@ -276,7 +273,7 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
             err?.data?.error?.message ||
             err?.data?.message ||
             err?.message ||
-            t('admin.services.formImage.galleryAddError');
+            t("admin.services.formImage.galleryAddError");
           toast.error(msg);
           await refetch();
         }
@@ -295,7 +292,7 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
             err?.data?.error?.message ||
             err?.data?.message ||
             err?.message ||
-            t('admin.services.formImage.galleryDeleteError');
+            t("admin.services.formImage.galleryDeleteError");
           toast.error(msg);
           await refetch();
         }
@@ -308,35 +305,35 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
   return (
     <div className="space-y-3">
       <AdminImageUploadField
-        label={t('admin.services.formImage.coverLabel')}
+        label={t("admin.services.formImage.coverLabel")}
         helperText={
           <>
-            {t('admin.services.formImage.coverHelperPrefix')} <code>services.image_url</code> {t('admin.services.formImage.coverHelperField')}{' '}
-            {t('admin.services.formImage.coverHelperSuffix')}
+            {t("admin.services.formImage.coverHelperPrefix")} <code>services.image_url</code>{" "}
+            {t("admin.services.formImage.coverHelperField")} {t("admin.services.formImage.coverHelperSuffix")}
           </>
         }
         bucket="public"
         folder="services/cover"
-        metadata={{ ...(metadata || {}), section: 'cover' }}
+        metadata={{ ...(metadata || {}), section: "cover" }}
         value={cover}
         onChange={handleCoverChange}
         disabled={disabled}
         openLibraryHref="/admin/storage"
-        onOpenLibraryClick={() => router.push('/admin/storage')}
+        onOpenLibraryClick={() => router.push("/admin/storage")}
       />
 
       {serviceId ? (
         <AdminImageUploadField
-          label={t('admin.services.formImage.galleryLabel')}
+          label={t("admin.services.formImage.galleryLabel")}
           helperText={
             <>
-              {t('admin.services.formImage.galleryHelperPrefix')} (<code>service_images</code>).{' '}
-              {t('admin.services.formImage.galleryHelperSuffix')}
+              {t("admin.services.formImage.galleryHelperPrefix")} (<code>service_images</code>).{" "}
+              {t("admin.services.formImage.galleryHelperSuffix")}
             </>
           }
           bucket="public"
           folder="services/gallery"
-          metadata={{ ...(metadata || {}), section: 'gallery' }}
+          metadata={{ ...(metadata || {}), section: "gallery" }}
           multiple
           values={uiGalleryUrls}
           onChangeMultiple={handleGalleryUrlsChange}
@@ -344,11 +341,11 @@ export const ServiceFormImageColumn: React.FC<Props> = ({
           coverValue={cover}
           disabled={uploadingDisabled}
           openLibraryHref="/admin/storage"
-          onOpenLibraryClick={() => router.push('/admin/storage')}
+          onOpenLibraryClick={() => router.push("/admin/storage")}
         />
       ) : (
-        <div className="rounded-md border p-3 text-sm text-muted-foreground">
-          {t('admin.services.formImage.galleryPlaceholder')}
+        <div className="rounded-md border p-3 text-muted-foreground text-sm">
+          {t("admin.services.formImage.galleryPlaceholder")}
         </div>
       )}
     </div>

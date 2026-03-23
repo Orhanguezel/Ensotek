@@ -4,31 +4,29 @@
 // Base URL: /api/admin (baseApi üzerinden)
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
+  CategoryCreatePayload,
   CategoryDto,
   CategoryListQueryParams,
-  CategoryCreatePayload,
-  CategoryUpdatePayload,
   CategoryReorderPayload,
   CategorySetImagePayload,
-} from '@/integrations/shared';
+  CategoryUpdatePayload,
+} from "@/integrations/shared";
 
 /**
  * Query paramlarından undefined / boş stringleri temizlemek için
  */
-const cleanParams = (
-  params?: Record<string, unknown>,
-): Record<string, string | number | boolean> | undefined => {
+const cleanParams = (params?: Record<string, unknown>): Record<string, string | number | boolean> | undefined => {
   if (!params) return undefined;
   const out: Record<string, string | number | boolean> = {};
 
   for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '' || (typeof v === 'number' && Number.isNaN(v))) {
+    if (v === undefined || v === null || v === "" || (typeof v === "number" && Number.isNaN(v))) {
       continue;
     }
 
-    if (typeof v === 'boolean' || typeof v === 'number' || typeof v === 'string') {
+    if (typeof v === "boolean" || typeof v === "number" || typeof v === "string") {
       out[k] = v;
     } else {
       out[k] = String(v);
@@ -43,10 +41,10 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     /* LIST – GET /api/admin/categories/list                     */
     /* --------------------------------------------------------- */
-    listCategoriesAdmin: build.query<CategoryDto[], CategoryListQueryParams | void>({
+    listCategoriesAdmin: build.query<CategoryDto[], CategoryListQueryParams | undefined>({
       query: (params) => ({
-        url: '/admin/categories/list',
-        method: 'GET',
+        url: "/admin/categories/list",
+        method: "GET",
         params: cleanParams(params as Record<string, unknown> | undefined),
       }),
     }),
@@ -57,7 +55,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     getCategoryAdmin: build.query<CategoryDto, { id: string; locale?: string }>({
       query: ({ id, locale }) => ({
         url: `/admin/categories/${encodeURIComponent(id)}`,
-        method: 'GET',
+        method: "GET",
         params: cleanParams(locale ? { locale } : undefined),
       }),
     }),
@@ -67,8 +65,8 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     createCategoryAdmin: build.mutation<CategoryDto, CategoryCreatePayload>({
       query: (body) => ({
-        url: '/admin/categories',
-        method: 'POST',
+        url: "/admin/categories",
+        method: "POST",
         body,
       }),
     }),
@@ -79,7 +77,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     updateCategoryAdmin: build.mutation<CategoryDto, { id: string; patch: CategoryUpdatePayload }>({
       query: ({ id, patch }) => ({
         url: `/admin/categories/${encodeURIComponent(id)}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: patch,
       }),
     }),
@@ -90,7 +88,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     deleteCategoryAdmin: build.mutation<void, string>({
       query: (id) => ({
         url: `/admin/categories/${encodeURIComponent(id)}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
     }),
 
@@ -99,8 +97,8 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     reorderCategoriesAdmin: build.mutation<{ ok: boolean }, CategoryReorderPayload>({
       query: (payload) => ({
-        url: '/admin/categories/reorder',
-        method: 'POST',
+        url: "/admin/categories/reorder",
+        method: "POST",
         body: payload,
       }),
     }),
@@ -111,7 +109,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     toggleCategoryActiveAdmin: build.mutation<CategoryDto, { id: string; is_active: boolean }>({
       query: ({ id, is_active }) => ({
         url: `/admin/categories/${encodeURIComponent(id)}/active`,
-        method: 'PATCH',
+        method: "PATCH",
         body: { is_active },
       }),
     }),
@@ -122,7 +120,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     toggleCategoryFeaturedAdmin: build.mutation<CategoryDto, { id: string; is_featured: boolean }>({
       query: ({ id, is_featured }) => ({
         url: `/admin/categories/${encodeURIComponent(id)}/featured`,
-        method: 'PATCH',
+        method: "PATCH",
         body: { is_featured },
       }),
     }),
@@ -133,7 +131,7 @@ export const categoriesAdminApi = baseApi.injectEndpoints({
     setCategoryImageAdmin: build.mutation<CategoryDto, CategorySetImagePayload>({
       query: ({ id, asset_id, alt }) => ({
         url: `/admin/categories/${encodeURIComponent(id)}/image`,
-        method: 'PATCH',
+        method: "PATCH",
         body: {
           asset_id: asset_id ?? null,
           alt: alt ?? null,

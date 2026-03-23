@@ -26,5 +26,5 @@ export interface AdminProductReviewCreatePayload {
 
 export interface AdminProductReviewListParams {
   productId: string;
-  order?: 'asc' | 'desc';
+  order?: "asc" | "desc";
 }

@@ -3,7 +3,7 @@
 // Admin Telegram Page (Ensotek)
 // =============================================================
 
-import TelegramAdminPage from './Telegram';
+import TelegramAdminPage from "./Telegram";
 
 export default function Page() {
   return <TelegramAdminPage />;

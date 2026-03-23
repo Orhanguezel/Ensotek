@@ -3,7 +3,7 @@
 // FINAL — Admin Storage Page
 // =============================================================
 
-import AdminStorageClient from './_components/admin-storage-client';
+import AdminStorageClient from "./_components/admin-storage-client";
 
 export default function Page() {
   return <AdminStorageClient />;

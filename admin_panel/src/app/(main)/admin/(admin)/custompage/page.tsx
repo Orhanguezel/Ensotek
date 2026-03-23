@@ -3,7 +3,7 @@
 // FINAL — Admin Site Settings Page
 // =============================================================
 
-import AdminCustomPagesClient from './admin-custom-pages-client';
+import AdminCustomPagesClient from "./admin-custom-pages-client";
 
 export default function Page() {
   return <AdminCustomPagesClient />;

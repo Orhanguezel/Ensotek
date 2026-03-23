@@ -3,7 +3,8 @@
 // Ensotek – Alt Kategori JSON Editör Bölümü
 // =============================================================
 
-import React, { useEffect, useState } from "react";
+import type React from "react";
+import { useEffect, useState } from "react";
 
 export type SubCategoryFormJsonSectionProps = {
   jsonModel: any;
@@ -12,9 +13,12 @@ export type SubCategoryFormJsonSectionProps = {
   onErrorChange: (error: string | null) => void;
 };
 
-export const SubCategoryFormJsonSection: React.FC<
-  SubCategoryFormJsonSectionProps
-> = ({ jsonModel, disabled, onChangeJson, onErrorChange }) => {
+export const SubCategoryFormJsonSection: React.FC<SubCategoryFormJsonSectionProps> = ({
+  jsonModel,
+  disabled,
+  onChangeJson,
+  onErrorChange,
+}) => {
   const [text, setText] = useState("");
 
   useEffect(() => {
@@ -25,9 +29,7 @@ export const SubCategoryFormJsonSection: React.FC<
     }
   }, [jsonModel]);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLTextAreaElement>,
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;
     setText(value);
 
@@ -56,8 +58,7 @@ export const SubCategoryFormJsonSection: React.FC<
         onChange={handleChange}
       />
       <div className="form-text small">
-        Bu alan, formun backend’e giden JSON payload’ını doğrudan
-        düzenlemeni sağlar.
+        Bu alan, formun backend’e giden JSON payload’ını doğrudan düzenlemeni sağlar.
       </div>
     </div>
   );

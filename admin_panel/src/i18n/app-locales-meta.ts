@@ -1,4 +1,4 @@
-import { normLocaleTag, uniqKeepOrder } from './localeUtils';
+import { normLocaleTag, uniqKeepOrder } from "./localeUtils";
 
 export type AppLocaleMeta = {
   code?: unknown;
@@ -9,14 +9,14 @@ export type AppLocaleMeta = {
 
 export function normalizeAppLocalesMeta(v: unknown): AppLocaleMeta[] {
   if (Array.isArray(v)) return v as AppLocaleMeta[];
-  if (v && typeof v === 'object' && 'data' in v && Array.isArray((v as any).data)) {
+  if (v && typeof v === "object" && "data" in v && Array.isArray((v as any).data)) {
     return (v as any).data as AppLocaleMeta[];
   }
   return [];
 }
 
 export function normalizeDefaultLocaleValue(v: unknown): string {
-  if (v && typeof v === 'object' && 'data' in v) return normLocaleTag((v as any).data);
+  if (v && typeof v === "object" && "data" in v) return normLocaleTag((v as any).data);
   return normLocaleTag(v);
 }
 
@@ -31,11 +31,10 @@ export function computeActiveLocales(meta: AppLocaleMeta[] | null | undefined, f
   const uniq = uniqKeepOrder(active);
 
   const def = arr.find((x) => (x as any)?.is_default === true && (x as any)?.is_active !== false);
-  const defCode = def ? normLocaleTag((def as any).code) : '';
+  const defCode = def ? normLocaleTag((def as any).code) : "";
 
   const out = defCode ? [defCode, ...uniq.filter((x) => x !== defCode)] : uniq;
 
-  const fb = normLocaleTag(fallback) || 'de';
+  const fb = normLocaleTag(fallback) || "de";
   return out.length ? out : [fb];
 }
-

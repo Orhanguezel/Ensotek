@@ -1,11 +1,7 @@
-'use client';
+"use client";
 
-import { Input } from '@/components/ui/input';
-import {
-  COLOR_TOKEN_LABELS,
-  THEME_COLOR_HEX_PLACEHOLDER,
-  type ColorTokens,
-} from '@/integrations/shared';
+import { Input } from "@/components/ui/input";
+import { COLOR_TOKEN_LABELS, type ColorTokens, THEME_COLOR_HEX_PLACEHOLDER } from "@/integrations/shared";
 
 export type ColorFieldProps = {
   tokenKey: keyof ColorTokens;
@@ -18,10 +14,7 @@ export function ColorField({ tokenKey, value, onChange }: ColorFieldProps) {
 
   return (
     <div className="flex items-center gap-3">
-      <label
-        className="relative size-10 shrink-0 cursor-pointer overflow-hidden rounded-md border"
-        title={meta.label}
-      >
+      <label className="relative size-10 shrink-0 cursor-pointer overflow-hidden rounded-md border" title={meta.label}>
         <input
           type="color"
           value={value}
@@ -31,7 +24,7 @@ export function ColorField({ tokenKey, value, onChange }: ColorFieldProps) {
         <span className="block size-full rounded-md" style={{ backgroundColor: value }} />
       </label>
       <div className="min-w-0 flex-1">
-        <div className="truncate text-sm font-medium">{meta.label}</div>
+        <div className="truncate font-medium text-sm">{meta.label}</div>
         <Input
           value={value}
           onChange={(e) => onChange(tokenKey, e.target.value)}

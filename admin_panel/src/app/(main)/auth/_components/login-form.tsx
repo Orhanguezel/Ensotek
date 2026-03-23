@@ -1,26 +1,19 @@
-'use client';
+"use client";
 
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
 
-import { useAuthTokenMutation } from '@/integrations/hooks';
-import { useAdminTranslations } from '@/i18n';
-import { useLocaleShort } from '@/i18n/useLocaleShort';
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { useAdminTranslations } from "@/i18n";
+import { useLocaleShort } from "@/i18n/useLocaleShort";
+import { useAuthTokenMutation } from "@/integrations/hooks";
 
 type FormValues = {
   email: string;
@@ -29,9 +22,9 @@ type FormValues = {
 };
 
 function safeNext(next: string | null | undefined, fallback: string): string {
-  const v = String(next ?? '').trim();
-  if (!v || !v.startsWith('/')) return fallback;
-  if (v.startsWith('//')) return fallback;
+  const v = String(next ?? "").trim();
+  if (!v || !v.startsWith("/")) return fallback;
+  if (v.startsWith("//")) return fallback;
   return v;
 }
 
@@ -39,16 +32,16 @@ function getErrMessage(err: unknown, fallback: string): string {
   const anyErr = err as any;
 
   const m1 = anyErr?.data?.error?.message;
-  if (typeof m1 === 'string' && m1.trim()) return m1;
+  if (typeof m1 === "string" && m1.trim()) return m1;
 
   const m1b = anyErr?.data?.error;
-  if (typeof m1b === 'string' && m1b.trim()) return m1b;
+  if (typeof m1b === "string" && m1b.trim()) return m1b;
 
   const m2 = anyErr?.data?.message;
-  if (typeof m2 === 'string' && m2.trim()) return m2;
+  if (typeof m2 === "string" && m2.trim()) return m2;
 
   const m3 = anyErr?.error;
-  if (typeof m3 === 'string' && m3.trim()) return m3;
+  if (typeof m3 === "string" && m3.trim()) return m3;
 
   return fallback;
 }
@@ -62,36 +55,36 @@ export function LoginForm() {
   const [login, loginState] = useAuthTokenMutation();
 
   const FormSchema = z.object({
-    email: z.string().email({ message: t('admin.auth.login.emailRequired') }),
-    password: z.string().min(6, { message: t('admin.auth.login.passwordMinLength') }),
+    email: z.string().email({ message: t("admin.auth.login.emailRequired") }),
+    password: z.string().min(6, { message: t("admin.auth.login.passwordMinLength") }),
     remember: z.boolean().optional(),
   });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      email: '',
-      password: '',
+      email: "",
+      password: "",
       remember: false,
     },
-    mode: 'onSubmit',
+    mode: "onSubmit",
   });
 
   const onSubmit = async (values: FormValues) => {
     try {
       await login({
-        grant_type: 'password',
+        grant_type: "password",
         email: values.email.trim().toLowerCase(),
         password: values.password,
       }).unwrap();
 
-      toast.success(t('admin.auth.login.loginSuccess'));
+      toast.success(t("admin.auth.login.loginSuccess"));
 
-      const next = safeNext(sp?.get('next'), '/admin');
+      const next = safeNext(sp?.get("next"), "/admin");
       router.replace(next);
       router.refresh();
     } catch (err) {
-      toast.error(getErrMessage(err, t('admin.auth.login.loginFailed')));
+      toast.error(getErrMessage(err, t("admin.auth.login.loginFailed")));
     }
   };
 
@@ -105,12 +98,12 @@ export function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('admin.auth.login.emailLabel')}</FormLabel>
+              <FormLabel>{t("admin.auth.login.emailLabel")}</FormLabel>
               <FormControl>
                 <Input
                   id="email"
                   type="email"
-                  placeholder={t('admin.auth.login.emailPlaceholder')}
+                  placeholder={t("admin.auth.login.emailPlaceholder")}
                   autoComplete="email"
                   disabled={isBusy}
                   {...field}
@@ -126,12 +119,12 @@ export function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>{t('admin.auth.login.passwordLabel')}</FormLabel>
+              <FormLabel>{t("admin.auth.login.passwordLabel")}</FormLabel>
               <FormControl>
                 <Input
                   id="password"
                   type="password"
-                  placeholder={t('admin.auth.login.passwordPlaceholder')}
+                  placeholder={t("admin.auth.login.passwordPlaceholder")}
                   autoComplete="current-password"
                   disabled={isBusy}
                   {...field}
@@ -157,18 +150,15 @@ export function LoginForm() {
                   className="size-4"
                 />
               </FormControl>
-              <FormLabel
-                htmlFor="login-remember"
-                className="ml-1 font-medium text-muted-foreground text-sm"
-              >
-                {t('admin.auth.login.rememberMe')}
+              <FormLabel htmlFor="login-remember" className="ml-1 font-medium text-muted-foreground text-sm">
+                {t("admin.auth.login.rememberMe")}
               </FormLabel>
             </FormItem>
           )}
         />
 
         <Button className="w-full" type="submit" disabled={isBusy}>
-          {isBusy ? t('admin.auth.login.loggingIn') : t('admin.auth.login.loginButton')}
+          {isBusy ? t("admin.auth.login.loggingIn") : t("admin.auth.login.loginButton")}
         </Button>
       </form>
     </Form>

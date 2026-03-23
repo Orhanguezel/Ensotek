@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/custompage/admin-custom_pages-client.tsx
@@ -9,25 +9,22 @@
 // - Reorder: up/down + Save (via CustomPageList)
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
+import { toast } from "sonner";
 
-import type { CustomPageDto } from '@/integrations/shared';
-import {
-  useListCustomPagesAdminQuery,
-  useReorderCustomPagesAdminMutation,
-} from '@/integrations/hooks';
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClient, localeShortClientOr } from "@/i18n/localeShortClient";
+import { useListCustomPagesAdminQuery, useReorderCustomPagesAdminMutation } from "@/integrations/hooks";
+import type { CustomPageDto } from "@/integrations/shared";
 
-import type { CustomPageFilters, ModuleOption } from './_components/custom-page-header';
-import { CustomPageHeader } from './_components/custom-page-header';
-import { CustomPageList } from './_components/custom-page-list';
+import type { CustomPageFilters, ModuleOption } from "./_components/custom-page-header";
+import { CustomPageHeader } from "./_components/custom-page-header";
+import { CustomPageList } from "./_components/custom-page-list";
 
-type PublishedFilter = 'all' | 'published' | 'draft';
+type PublishedFilter = "all" | "published" | "draft";
 
 type Filters = {
   search: string;
@@ -38,37 +35,32 @@ type Filters = {
 
 function labelOfModuleKey(k: string, t: any) {
   const map: Record<string, string> = {
-    blog: t('admin.customPage.moduleLabels.blog'),
-    news: t('admin.customPage.moduleLabels.news'),
-    about: t('admin.customPage.moduleLabels.about'),
-    services: t('admin.customPage.moduleLabels.services'),
-    products: t('admin.customPage.moduleLabels.products'),
-    solutions: t('admin.customPage.moduleLabels.solutions'),
-    library: t('admin.customPage.moduleLabels.library'),
-    faq: t('admin.customPage.moduleLabels.faq'),
-    contact: t('admin.customPage.moduleLabels.contact'),
+    blog: t("admin.customPage.moduleLabels.blog"),
+    news: t("admin.customPage.moduleLabels.news"),
+    about: t("admin.customPage.moduleLabels.about"),
+    services: t("admin.customPage.moduleLabels.services"),
+    products: t("admin.customPage.moduleLabels.products"),
+    solutions: t("admin.customPage.moduleLabels.solutions"),
+    library: t("admin.customPage.moduleLabels.library"),
+    faq: t("admin.customPage.moduleLabels.faq"),
+    contact: t("admin.customPage.moduleLabels.contact"),
   };
   return map[k] || k;
 }
 
 export default function AdminCustomPagesClient() {
   const t = useAdminT();
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'tr');
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const [filters, setFilters] = React.useState<Filters>({
-    search: '',
-    moduleKey: '',
-    publishedFilter: 'all',
-    locale: '',
+    search: "",
+    moduleKey: "",
+    publishedFilter: "all",
+    locale: "",
   });
 
   // initial locale in state (no URL sync)
@@ -77,7 +69,7 @@ export default function AdminCustomPagesClient() {
 
     setFilters((prev) => {
       if (prev.locale) return prev;
-      return { ...prev, locale: localeShortClientOr(apiLocale, 'tr') };
+      return { ...prev, locale: localeShortClientOr(apiLocale, "tr") };
     });
   }, [localeOptions, apiLocale]);
 
@@ -87,8 +79,8 @@ export default function AdminCustomPagesClient() {
   }, [filters.locale, apiLocale]);
 
   const is_published = React.useMemo(() => {
-    if (filters.publishedFilter === 'all') return undefined;
-    if (filters.publishedFilter === 'published') return 1;
+    if (filters.publishedFilter === "all") return undefined;
+    if (filters.publishedFilter === "published") return 1;
     return 0;
   }, [filters.publishedFilter]);
 
@@ -125,7 +117,7 @@ export default function AdminCustomPagesClient() {
   const moduleOptions: ModuleOption[] = React.useMemo(() => {
     const set = new Set<string>();
     for (const it of items) {
-      const key = String(it.module_key ?? '').trim();
+      const key = String(it.module_key ?? "").trim();
       if (key) set.add(key);
     }
     if (filters.moduleKey && !set.has(filters.moduleKey)) set.add(filters.moduleKey);
@@ -137,12 +129,7 @@ export default function AdminCustomPagesClient() {
 
   const [reorder, reorderState] = useReorderCustomPagesAdminMutation();
 
-  const busy =
-    pagesQ.isLoading ||
-    pagesQ.isFetching ||
-    localesLoading ||
-    localesFetching ||
-    reorderState.isLoading;
+  const busy = pagesQ.isLoading || pagesQ.isFetching || localesLoading || localesFetching || reorderState.isLoading;
 
   const headerFilters: CustomPageFilters = React.useMemo(
     () => ({
@@ -178,15 +165,15 @@ export default function AdminCustomPagesClient() {
     try {
       const payload = { items: rows.map((p, idx) => ({ id: p.id, display_order: idx })) };
       await reorder(payload as any).unwrap();
-      toast.success(t('admin.common.updated', { item: t('admin.customPage.list.saveOrder') }));
+      toast.success(t("admin.common.updated", { item: t("admin.customPage.list.saveOrder") }));
       pagesQ.refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || t('admin.customPage.list.deleteError'));
+      toast.error(err?.data?.error?.message || err?.message || t("admin.customPage.list.deleteError"));
     }
   }
 
   return (
-    <div className="min-w-0 w-full max-w-full overflow-hidden space-y-4">
+    <div className="w-full min-w-0 max-w-full space-y-4 overflow-hidden">
       <CustomPageHeader
         filters={headerFilters}
         total={total}

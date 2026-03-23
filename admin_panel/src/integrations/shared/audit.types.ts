@@ -3,7 +3,7 @@
 // Ensotek – Audit Types (Frontend DTO + Query Params)
 // =============================================================
 
-import type { BoolLike } from '@/integrations/shared/common';
+import type { BoolLike } from "@/integrations/shared/common";
 
 export type AuditRequestLogDto = {
   id: number;
@@ -29,7 +29,7 @@ export type AuditRequestLogDto = {
   created_at: string; // ISO
 };
 
-export const AUDIT_AUTH_EVENTS = ['login_success', 'login_failed', 'logout'] as const;
+export const AUDIT_AUTH_EVENTS = ["login_success", "login_failed", "logout"] as const;
 export type AuditAuthEvent = (typeof AUDIT_AUTH_EVENTS)[number];
 
 export type AuditAuthEventDto = {
@@ -62,8 +62,8 @@ export type AuditRequestLogsListQueryParams = {
   created_from?: string; // "2025-12-24 10:00:00.000" gibi
   created_to?: string;
 
-  sort?: 'created_at' | 'response_time_ms' | 'status_code';
-  orderDir?: 'asc' | 'desc';
+  sort?: "created_at" | "response_time_ms" | "status_code";
+  orderDir?: "asc" | "desc";
 
   limit?: number;
   offset?: number;
@@ -79,8 +79,8 @@ export type AuditAuthEventsListQueryParams = {
   created_from?: string;
   created_to?: string;
 
-  sort?: 'created_at';
-  orderDir?: 'asc' | 'desc';
+  sort?: "created_at";
+  orderDir?: "asc" | "desc";
 
   limit?: number;
   offset?: number;
@@ -139,7 +139,7 @@ export type AuditGeoStatsQueryParams = {
   days?: number;
   only_admin?: BoolLike;
   exclude_localhost?: BoolLike;
-  source?: 'requests' | 'auth';
+  source?: "requests" | "auth";
 };
 
 export type AuditGeoStatsRowDto = {

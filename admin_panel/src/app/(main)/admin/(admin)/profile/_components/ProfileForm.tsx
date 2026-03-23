@@ -1,20 +1,24 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { Camera, Loader2, Save } from 'lucide-react';
+import * as React from "react";
 
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { useStatusQuery, useAuthUpdateMutation } from '@/integrations/hooks';
-import { useGetMyProfileQuery, useUpsertMyProfileMutation } from '@/integrations/hooks';
-import { useCreateAssetAdminMutation } from '@/integrations/endpoints/admin/storage_admin.endpoints';
+import { Camera, Loader2, Save } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { getInitials } from '@/lib/utils';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useCreateAssetAdminMutation } from "@/integrations/endpoints/admin/storage_admin.endpoints";
+import {
+  useAuthUpdateMutation,
+  useGetMyProfileQuery,
+  useStatusQuery,
+  useUpsertMyProfileMutation,
+} from "@/integrations/hooks";
+import { getInitials } from "@/lib/utils";
 
 export function ProfileForm() {
   const t = useAdminT();
@@ -24,20 +28,20 @@ export function ProfileForm() {
   const [updateAuthUser, { isLoading: isUpdatingAuth }] = useAuthUpdateMutation();
   const [createAsset, { isLoading: isUploading }] = useCreateAssetAdminMutation();
 
-  const [fullName, setFullName] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [avatarUrl, setAvatarUrl] = React.useState('');
+  const [fullName, setFullName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [avatarUrl, setAvatarUrl] = React.useState("");
 
   React.useEffect(() => {
     if (profileData) {
-      setFullName(profileData.full_name || '');
-      setAvatarUrl(profileData.avatar_url || '');
+      setFullName(profileData.full_name || "");
+      setAvatarUrl(profileData.avatar_url || "");
     }
   }, [profileData]);
 
   React.useEffect(() => {
     if (statusData?.user) {
-      setEmail(statusData.user.email || '');
+      setEmail(statusData.user.email || "");
     }
   }, [statusData]);
 
@@ -48,16 +52,16 @@ export function ProfileForm() {
     try {
       const asset = await createAsset({
         file,
-        bucket: 'avatars',
-        folder: 'profiles',
+        bucket: "avatars",
+        folder: "profiles",
       }).unwrap();
 
       if (asset.url) {
         setAvatarUrl(asset.url);
-        toast.success(t('admin.profile.avatarUploaded') || 'Profil resmi yüklendi.');
+        toast.success(t("admin.profile.avatarUploaded") || "Profil resmi yüklendi.");
       }
-    } catch (err) {
-      toast.error(t('admin.profile.avatarUploadFailed') || 'Resim yüklenemedi.');
+    } catch (_err) {
+      toast.error(t("admin.profile.avatarUploadFailed") || "Resim yüklenemedi.");
     }
   };
 
@@ -70,7 +74,7 @@ export function ProfileForm() {
         profile: {
           full_name: fullName,
           avatar_url: avatarUrl,
-        }
+        },
       }).unwrap();
 
       // 2. Update Auth User (Email)
@@ -80,9 +84,9 @@ export function ProfileForm() {
         }).unwrap();
       }
 
-      toast.success(t('admin.profile.updated') || 'Profil başarıyla güncellendi.');
-    } catch (err) {
-      toast.error(t('admin.profile.updateFailed') || 'Profil güncellenemedi.');
+      toast.success(t("admin.profile.updated") || "Profil başarıyla güncellendi.");
+    } catch (_err) {
+      toast.error(t("admin.profile.updateFailed") || "Profil güncellenemedi.");
     }
   };
 
@@ -92,44 +96,46 @@ export function ProfileForm() {
     <form onSubmit={handleSubmit}>
       <Card>
         <CardHeader>
-          <CardTitle>{t('admin.profile.personalInfo') || 'Kişisel Bilgiler'}</CardTitle>
+          <CardTitle>{t("admin.profile.personalInfo") || "Kişisel Bilgiler"}</CardTitle>
           <CardDescription>
-            {t('admin.profile.personalInfoDesc') || 'Adınız, e-posta adresiniz ve profil resminiz.'}
+            {t("admin.profile.personalInfoDesc") || "Adınız, e-posta adresiniz ve profil resminiz."}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col items-center gap-4 sm:flex-row">
-            <div className="relative group">
+            <div className="group relative">
               <Avatar className="h-20 w-20 border-2 border-muted">
                 <AvatarImage src={avatarUrl || undefined} alt={fullName} />
-                <AvatarFallback className="text-xl">{getInitials(fullName || email || 'A')}</AvatarFallback>
+                <AvatarFallback className="text-xl">{getInitials(fullName || email || "A")}</AvatarFallback>
               </Avatar>
-              <label 
-                htmlFor="avatar-upload" 
-                className="absolute inset-0 flex items-center justify-center bg-black/40 text-white rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+              <label
+                htmlFor="avatar-upload"
+                className="absolute inset-0 flex cursor-pointer items-center justify-center rounded-full bg-black/40 text-white opacity-0 transition-opacity group-hover:opacity-100"
               >
                 {isUploading ? <Loader2 className="h-6 w-6 animate-spin" /> : <Camera className="h-6 w-6" />}
               </label>
-              <input 
-                id="avatar-upload" 
-                type="file" 
-                className="hidden" 
-                accept="image/*" 
+              <input
+                id="avatar-upload"
+                type="file"
+                className="hidden"
+                accept="image/*"
                 onChange={handleFileChange}
                 disabled={isAnyLoading}
               />
             </div>
             <div className="flex-1 space-y-1 text-center sm:text-left">
-              <h4 className="font-semibold">{fullName || email || 'Admin'}</h4>
-              <p className="text-sm text-muted-foreground">
-                {avatarUrl ? (t('admin.profile.avatarSet') || 'Özel profil resmi ayarlandı') : (t('admin.profile.noAvatar') || 'Varsayılan avatar kullanılıyor')}
+              <h4 className="font-semibold">{fullName || email || "Admin"}</h4>
+              <p className="text-muted-foreground text-sm">
+                {avatarUrl
+                  ? t("admin.profile.avatarSet") || "Özel profil resmi ayarlandı"
+                  : t("admin.profile.noAvatar") || "Varsayılan avatar kullanılıyor"}
               </p>
             </div>
           </div>
 
           <div className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="full-name">{t('admin.profile.name') || 'Tam Ad'}</Label>
+              <Label htmlFor="full-name">{t("admin.profile.name") || "Tam Ad"}</Label>
               <Input
                 id="full-name"
                 value={fullName}
@@ -139,7 +145,7 @@ export function ProfileForm() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="email">{t('admin.profile.email') || 'E-posta'}</Label>
+              <Label htmlFor="email">{t("admin.profile.email") || "E-posta"}</Label>
               <Input
                 id="email"
                 type="email"
@@ -156,12 +162,12 @@ export function ProfileForm() {
             {isUpdatingProfile || isUpdatingAuth ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                {t('admin.common.saving') || 'Kaydediliyor...'}
+                {t("admin.common.saving") || "Kaydediliyor..."}
               </>
             ) : (
               <>
                 <Save className="mr-2 h-4 w-4" />
-                {t('admin.common.save') || 'Kaydet'}
+                {t("admin.common.save") || "Kaydet"}
               </>
             )}
           </Button>

@@ -1,9 +1,11 @@
 "use client";
 
-import { CircleUser, CreditCard, EllipsisVertical, LogOut, MessageSquareDot } from "lucide-react";
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
+import { CircleUser, CreditCard, EllipsisVertical, LogOut, MessageSquareDot } from "lucide-react";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -15,9 +17,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/components/ui/sidebar";
+import { useLogoutMutation } from "@/integrations/hooks";
 import { getInitials } from "@/lib/utils";
-import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
-import { useLogoutMutation } from '@/integrations/hooks';
 
 export function NavUser({
   user,
@@ -39,7 +40,7 @@ export function NavUser({
     } catch {
       // logout fail olsa bile login'e gönder
     } finally {
-      router.replace('/auth/login');
+      router.replace("/auth/login");
       router.refresh();
     }
   }
@@ -87,22 +88,22 @@ export function NavUser({
               <DropdownMenuItem asChild>
                 <Link href="/admin/profile">
                   <CircleUser />
-                  {t('admin.sidebar.user.account')}
+                  {t("admin.sidebar.user.account")}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />
-                {t('admin.sidebar.user.billing')}
+                {t("admin.sidebar.user.billing")}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <MessageSquareDot />
-                {t('admin.sidebar.user.notifications')}
+                {t("admin.sidebar.user.notifications")}
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={onLogout} disabled={isLoading}>
               <LogOut />
-              {t('admin.sidebar.user.logout')}
+              {t("admin.sidebar.user.logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -4,15 +4,16 @@
 // FINAL — TR UI
 // =============================================================
 
-import React from 'react';
-import type { ResourceType } from '@/integrations/shared/resources.types';
+import type React from "react";
+
+import type { ResourceType } from "@/integrations/shared/resources.types";
 
 export type ResourcesFilters = {
   q: string;
-  type: '' | ResourceType;
-  status: 'all' | 'active' | 'inactive';
-  sort: 'updated_at' | 'created_at' | 'title' | 'type';
-  order: 'desc' | 'asc';
+  type: "" | ResourceType;
+  status: "all" | "active" | "inactive";
+  sort: "updated_at" | "created_at" | "title" | "type";
+  order: "desc" | "asc";
 };
 
 export type ResourcesHeaderProps = {
@@ -24,15 +25,15 @@ export type ResourcesHeaderProps = {
 };
 
 const TYPE_LABEL: Record<string, string> = {
-  therapist: 'Terapist',
-  doctor: 'Doktor',
-  table: 'Masa',
-  room: 'Oda',
-  staff: 'Personel',
-  other: 'Diğer',
+  therapist: "Terapist",
+  doctor: "Doktor",
+  table: "Masa",
+  room: "Oda",
+  staff: "Personel",
+  other: "Diğer",
 };
 
-const ALL = '__all__' as const;
+const ALL = "__all__" as const;
 
 export const ResourcesHeader: React.FC<ResourcesHeaderProps> = ({
   filters,
@@ -44,11 +45,11 @@ export const ResourcesHeader: React.FC<ResourcesHeaderProps> = ({
   return (
     <div className="card mb-3">
       <div className="card-body py-3">
-        <div className="d-flex flex-column flex-lg-row justify-content-between gap-3">
+        <div className="d-flex justify-content-between flex-column flex-lg-row gap-3">
           <div style={{ minWidth: 0, flex: 2 }}>
             <div className="mb-2">
-              <h5 className="mb-0 small fw-semibold">Kaynaklar</h5>
-              <div className="text-muted small">Kaynakları filtrele ve yönet.</div>
+              <h5 className="small fw-semibold mb-0">Kaynaklar</h5>
+              <div className="small text-muted">Kaynakları filtrele ve yönet.</div>
             </div>
 
             <div className="row g-2 align-items-end">
@@ -68,9 +69,7 @@ export const ResourcesHeader: React.FC<ResourcesHeaderProps> = ({
                 <select
                   className="form-select form-select-sm"
                   value={filters.type}
-                  onChange={(e) =>
-                    onFiltersChange({ ...filters, type: (e.target.value as any) || '' })
-                  }
+                  onChange={(e) => onFiltersChange({ ...filters, type: (e.target.value as any) || "" })}
                 >
                   <option value={ALL}>Tümü</option>
                   {(Object.keys(TYPE_LABEL) as Array<ResourceType>).map((k) => (
@@ -125,10 +124,10 @@ export const ResourcesHeader: React.FC<ResourcesHeaderProps> = ({
           </div>
 
           <div
-            className="border-start ps-lg-3 ms-lg-3 d-flex flex-column justify-content-between"
+            className="d-flex justify-content-between ms-lg-3 flex-column border-start ps-lg-3"
             style={{ minWidth: 0, flex: 1 }}
           >
-            <div className="d-flex align-items-center justify-content-between mb-2">
+            <div className="d-flex justify-content-between mb-2 align-items-center">
               <div>
                 <div className="small fw-semibold">Toplam</div>
                 <div className="display-6 fs-4 fw-bold">{total}</div>
@@ -146,7 +145,7 @@ export const ResourcesHeader: React.FC<ResourcesHeaderProps> = ({
               ) : null}
             </div>
 
-            <div className="text-muted small">
+            <div className="small text-muted">
               {loading ? <span className="badge bg-secondary">Yükleniyor...</span> : null}
             </div>
           </div>

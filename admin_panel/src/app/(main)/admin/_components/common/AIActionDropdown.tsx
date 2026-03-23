@@ -3,17 +3,23 @@
 // full | enhance | translate | generate_meta
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Button } from '@/components/ui/button';
+import type * as React from "react";
+
+import { FileText, Languages, Loader2, Search, Sparkles, Wand2 } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Sparkles, Loader2, FileText, Wand2, Languages, Search } from 'lucide-react';
-import { useAdminT } from './useAdminT';
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-export type AIAction = 'full' | 'enhance' | 'translate' | 'generate_meta';
+import { useAdminT } from "./useAdminT";
+
+export type AIAction = "full" | "enhance" | "translate" | "generate_meta";
 
 interface AIActionDropdownProps {
   onAction: (action: AIAction) => void;
@@ -29,22 +35,26 @@ const ACTION_ICONS: Record<AIAction, React.ElementType> = {
 };
 
 export function AIActionDropdown({ onAction, loading, disabled }: AIActionDropdownProps) {
-  const t = useAdminT('admin.common.ai');
+  const t = useAdminT("admin.common.ai");
 
   const actions: { key: AIAction; label: string }[] = [
-    { key: 'full', label: t('full', undefined, 'Tam İçerik Oluştur') },
-    { key: 'enhance', label: t('enhance', undefined, 'İçeriği Geliştir') },
-    { key: 'translate', label: t('translate', undefined, 'Çevir') },
-    { key: 'generate_meta', label: t('generateMeta', undefined, 'SEO Meta Oluştur') },
+    { key: "full", label: t("full", undefined, "Tam İçerik Oluştur") },
+    { key: "enhance", label: t("enhance", undefined, "İçeriği Geliştir") },
+    { key: "translate", label: t("translate", undefined, "Çevir") },
+    { key: "generate_meta", label: t("generateMeta", undefined, "SEO Meta Oluştur") },
   ];
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" disabled={disabled || loading}
-          className="border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 dark:border-purple-700 dark:bg-purple-950/30 dark:text-purple-300 dark:hover:bg-purple-900/40">
-          {loading ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <Sparkles className="h-4 w-4 mr-1.5" />}
-          {loading ? t('working', undefined, 'AI çalışıyor...') : 'AI'}
+        <Button
+          variant="outline"
+          size="sm"
+          disabled={disabled || loading}
+          className="border-purple-300 bg-purple-50 text-purple-700 hover:bg-purple-100 dark:border-purple-700 dark:bg-purple-950/30 dark:text-purple-300 dark:hover:bg-purple-900/40"
+        >
+          {loading ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Sparkles className="mr-1.5 h-4 w-4" />}
+          {loading ? t("working", undefined, "AI çalışıyor...") : "AI"}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-52">
@@ -52,7 +62,7 @@ export function AIActionDropdown({ onAction, loading, disabled }: AIActionDropdo
           const Icon = ACTION_ICONS[key];
           return (
             <DropdownMenuItem key={key} onClick={() => onAction(key)} disabled={loading}>
-              <Icon className="h-4 w-4 mr-2 text-purple-600 dark:text-purple-400" />
+              <Icon className="mr-2 h-4 w-4 text-purple-600 dark:text-purple-400" />
               {label}
             </DropdownMenuItem>
           );

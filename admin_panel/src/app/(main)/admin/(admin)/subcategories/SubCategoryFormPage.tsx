@@ -8,36 +8,30 @@
 // - ✅ Hook deps warning fixed: localeOptions is memoized (stable reference)
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { FormEvent, useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/router';
-import { toast } from 'sonner';
+import type React from "react";
+import { type FormEvent, useEffect, useMemo, useState } from "react";
 
-import type {
-  SubCategoryDto,
-  CategoryDto
-} from '@/integrations/shared';
-import type { LocaleOption, CategoryOption } from './SubCategoriesHeader';
+import { useRouter } from "next/router";
 
-import { useAdminLocales } from '@/components/common/useAdminLocales';
+import { toast } from "sonner";
 
+import { useAdminLocales } from "@/components/common/useAdminLocales";
 import {
   useCreateSubCategoryAdminMutation,
-  useUpdateSubCategoryAdminMutation,
   useLazyGetSubCategoryAdminQuery,
   useListCategoriesAdminQuery,
-} from '@/integrations/hooks';
+  useUpdateSubCategoryAdminMutation,
+} from "@/integrations/hooks";
+import type { CategoryDto, SubCategoryDto } from "@/integrations/shared";
 
-import { SubCategoryFormFields, type SubCategoryFormStateLike } from './SubCategoryFormFields';
-import { SubCategoryFormJsonSection } from './SubCategoryFormJsonSection';
-import { SubCategoryFormImageColumn } from './SubCategoryFormImageColumn';
-import {
-  SubCategoryFormHeader,
-  type SubCategoryFormMode,
-  type SubCategoryEditMode,
-} from './SubCategoryFormHeader';
-import { SubCategoryFormFooter } from './SubCategoryFormFooter';
+import type { CategoryOption, LocaleOption } from "./SubCategoriesHeader";
+import { SubCategoryFormFields, type SubCategoryFormStateLike } from "./SubCategoryFormFields";
+import { SubCategoryFormFooter } from "./SubCategoryFormFooter";
+import { type SubCategoryEditMode, SubCategoryFormHeader, type SubCategoryFormMode } from "./SubCategoryFormHeader";
+import { SubCategoryFormImageColumn } from "./SubCategoryFormImageColumn";
+import { SubCategoryFormJsonSection } from "./SubCategoryFormJsonSection";
 
 /* ------------------------------------------------------------- */
 
@@ -54,15 +48,15 @@ type SubCategoryFormPageProps = {
 
 /* ------------------------------------------------------------- */
 
-const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+const safeStr = (v: unknown) => (v === null || v === undefined ? "" : String(v).trim());
 
 const mapDtoToFormState = (item: SubCategoryDto): SubCategoryFormState => ({
   id: item.id,
   category_id: item.category_id,
-  locale: (item.locale || '').toLowerCase(),
+  locale: (item.locale || "").toLowerCase(),
   name: item.name,
   slug: item.slug,
-  description: item.description || '',
+  description: item.description || "",
   icon: safeStr((item as any).icon),
   is_active: !!item.is_active,
   is_featured: !!item.is_featured,
@@ -70,40 +64,40 @@ const mapDtoToFormState = (item: SubCategoryDto): SubCategoryFormState => ({
 });
 
 const slugify = (value: string): string => {
-  if (!value) return '';
+  if (!value) return "";
   let s = value.trim();
 
   const trMap: Record<string, string> = {
-    ç: 'c',
-    Ç: 'c',
-    ğ: 'g',
-    Ğ: 'g',
-    ı: 'i',
-    I: 'i',
-    İ: 'i',
-    ö: 'o',
-    Ö: 'o',
-    ş: 's',
-    Ş: 's',
-    ü: 'u',
-    Ü: 'u',
+    ç: "c",
+    Ç: "c",
+    ğ: "g",
+    Ğ: "g",
+    ı: "i",
+    I: "i",
+    İ: "i",
+    ö: "o",
+    Ö: "o",
+    ş: "s",
+    Ş: "s",
+    ü: "u",
+    Ü: "u",
   };
 
   s = s
-    .split('')
+    .split("")
     .map((ch) => trMap[ch] ?? ch)
-    .join('');
+    .join("");
 
-  s = s.replace(/ß/g, 'ss').replace(/ẞ/g, 'ss');
+  s = s.replace(/ß/g, "ss").replace(/ẞ/g, "ss");
 
   return s
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 };
 
 const buildJsonModelFromForm = (state: SubCategoryFormState) => ({
@@ -111,8 +105,8 @@ const buildJsonModelFromForm = (state: SubCategoryFormState) => ({
   locale: state.locale,
   name: state.name,
   slug: state.slug,
-  description: state.description || '',
-  icon: state.icon || '',
+  description: state.description || "",
+  icon: state.icon || "",
   is_active: state.is_active,
   is_featured: state.is_featured,
   display_order: state.display_order,
@@ -130,7 +124,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
 
   const [formState, setFormState] = useState<SubCategoryFormState | null>(null);
   const [slugTouched, setSlugTouched] = useState(false);
-  const [editMode, setEditMode] = useState<SubCategoryEditMode>('form');
+  const [editMode, setEditMode] = useState<SubCategoryEditMode>("form");
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   /* -------------------- locales (DB) -------------------- */
@@ -154,18 +148,14 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
 
   // ✅ Form / queries için “effective locale”
   const effectiveLocale = useMemo(() => {
-    const base =
-      coerceLocale(routerLocale, defaultLocaleFromDb) ||
-      defaultLocaleFromDb ||
-      firstLocaleValue ||
-      'de';
+    const base = coerceLocale(routerLocale, defaultLocaleFromDb) || defaultLocaleFromDb || firstLocaleValue || "de";
 
-    return (base || 'de').toLowerCase();
+    return (base || "de").toLowerCase();
   }, [coerceLocale, routerLocale, defaultLocaleFromDb, firstLocaleValue]);
 
   /* -------------------- Categories (locale-dependent) -------------------- */
   // ✅ KRİTİK: locale arg ver -> dil değişince query arg değişsin -> refetch
-  const categoriesLocale = (formState?.locale || effectiveLocale || 'de').toLowerCase();
+  const categoriesLocale = (formState?.locale || effectiveLocale || "de").toLowerCase();
 
   const { data: categoryRows, isLoading: isCategoriesLoading } = useListCategoriesAdminQuery(
     {
@@ -202,7 +192,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
 
   // ✅ Edit modunda initialData değişirse formState’i güncelle (sadece ilk mount değil)
   useEffect(() => {
-    if (mode !== 'edit') return;
+    if (mode !== "edit") return;
     if (!initialData) return;
 
     setFormState((prev) => {
@@ -232,23 +222,23 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
 
   // ✅ Create init: locale + categoryOptions hazırsa
   useEffect(() => {
-    if (mode !== 'create') return;
+    if (mode !== "create") return;
     if (formState) return;
     if (loading) return;
     if (!localeOptions.length) return;
     if (!categoryOptions.length) return;
 
     const nextLocale = effectiveLocale;
-    const nextCategoryId = categoryOptions[0]?.value || '';
+    const nextCategoryId = categoryOptions[0]?.value || "";
 
     setFormState({
       id: undefined,
       category_id: nextCategoryId,
       locale: nextLocale,
-      name: '',
-      slug: '',
-      description: '',
-      icon: '',
+      name: "",
+      slug: "",
+      description: "",
+      icon: "",
       is_active: true,
       is_featured: false,
       display_order: 0,
@@ -276,26 +266,26 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
       if (!prev) return prev;
       const next: SubCategoryFormState = { ...prev };
 
-      if (typeof json.category_id === 'string') next.category_id = json.category_id;
+      if (typeof json.category_id === "string") next.category_id = json.category_id;
 
-      if (typeof json.locale === 'string') {
+      if (typeof json.locale === "string") {
         next.locale = coerceLocale(json.locale, prev.locale) || prev.locale;
       }
 
-      if (typeof json.name === 'string') next.name = json.name;
+      if (typeof json.name === "string") next.name = json.name;
 
-      if (typeof json.slug === 'string') {
+      if (typeof json.slug === "string") {
         next.slug = json.slug;
         setSlugTouched(true);
       }
 
-      if (typeof json.description === 'string') next.description = json.description;
-      if (typeof json.icon === 'string') next.icon = json.icon;
+      if (typeof json.description === "string") next.description = json.description;
+      if (typeof json.icon === "string") next.icon = json.icon;
 
-      if (typeof json.is_active === 'boolean') next.is_active = json.is_active;
-      if (typeof json.is_featured === 'boolean') next.is_featured = json.is_featured;
+      if (typeof json.is_active === "boolean") next.is_active = json.is_active;
+      if (typeof json.is_featured === "boolean") next.is_featured = json.is_featured;
 
-      if (typeof json.display_order === 'number' && Number.isFinite(json.display_order)) {
+      if (typeof json.display_order === "number" && Number.isFinite(json.display_order)) {
         next.display_order = json.display_order;
       }
 
@@ -305,10 +295,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
 
   /* -------------------- field handlers -------------------- */
 
-  const handleFieldChange = (
-    field: keyof SubCategoryFormStateLike,
-    value: string | boolean | number,
-  ) => {
+  const handleFieldChange = (field: keyof SubCategoryFormStateLike, value: string | boolean | number) => {
     setFormState((prev) => (prev ? { ...prev, [field]: value } : prev));
   };
 
@@ -331,11 +318,9 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
   const handleLocaleChange = async (nextLocaleRaw: string) => {
     if (!formState) return;
 
-    const nextLocale = (
-      coerceLocale(nextLocaleRaw, formState.locale) || formState.locale
-    ).toLowerCase();
+    const nextLocale = (coerceLocale(nextLocaleRaw, formState.locale) || formState.locale).toLowerCase();
 
-    if (mode === 'create') {
+    if (mode === "create") {
       setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
       setSlugTouched(false);
       return;
@@ -358,12 +343,12 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
         setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
         setSlugTouched(false);
         toast.info(
-          'Seçilen dil için alt kategori kaydı bulunamadı. Kaydettiğinde bu dil için yeni bir çeviri oluşturulacak (aynı alt kategori id ile).',
+          "Seçilen dil için alt kategori kaydı bulunamadı. Kaydettiğinde bu dil için yeni bir çeviri oluşturulacak (aynı alt kategori id ile).",
         );
       } else {
-        console.error('Locale change error (subcategory):', err);
+        console.error("Locale change error (subcategory):", err);
         setFormState((prev) => (prev ? { ...prev, locale: nextLocale } : prev));
-        toast.error('Seçilen dil için alt kategori yüklenirken bir hata oluştu.');
+        toast.error("Seçilen dil için alt kategori yüklenirken bir hata oluştu.");
       }
     }
   };
@@ -374,14 +359,14 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
     e.preventDefault();
     if (!formState) return;
 
-    if (editMode === 'json' && jsonError) {
-      toast.error('JSON geçerli değil. Lütfen JSON hatasını düzeltin.');
+    if (editMode === "json" && jsonError) {
+      toast.error("JSON geçerli değil. Lütfen JSON hatasını düzeltin.");
       return;
     }
 
     const payloadBase = {
       category_id: formState.category_id,
-      locale: (formState.locale || effectiveLocale || 'de').toLowerCase(),
+      locale: (formState.locale || effectiveLocale || "de").toLowerCase(),
       name: formState.name.trim(),
       slug: formState.slug.trim(),
       description: formState.description.trim() || undefined,
@@ -392,57 +377,52 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
     };
 
     if (!payloadBase.category_id) {
-      toast.error('Bir üst kategori seçmelisin.');
+      toast.error("Bir üst kategori seçmelisin.");
       return;
     }
     if (!payloadBase.name || !payloadBase.slug) {
-      toast.error('Ad ve slug alanları zorunludur.');
+      toast.error("Ad ve slug alanları zorunludur.");
       return;
     }
 
     try {
-      if (mode === 'create') {
-        const created = (await createSubCategory(payloadBase as any).unwrap()) as
-          | SubCategoryDto
-          | undefined;
-        toast.success('Alt kategori oluşturuldu.');
+      if (mode === "create") {
+        const created = (await createSubCategory(payloadBase as any).unwrap()) as SubCategoryDto | undefined;
+        toast.success("Alt kategori oluşturuldu.");
         if (created) setFormState(mapDtoToFormState(created)); // ✅ refresh gerekmesin
-      } else if (mode === 'edit' && formState.id) {
+      } else if (mode === "edit" && formState.id) {
         const updated = (await updateSubCategory({
           id: formState.id,
           patch: payloadBase as any,
         }).unwrap()) as SubCategoryDto | undefined;
-        toast.success('Alt kategori güncellendi.');
+        toast.success("Alt kategori güncellendi.");
         if (updated) setFormState(mapDtoToFormState(updated)); // ✅ refresh gerekmesin
       } else {
-        const created = (await createSubCategory(payloadBase as any).unwrap()) as
-          | SubCategoryDto
-          | undefined;
-        toast.success('Alt kategori oluşturuldu.');
+        const created = (await createSubCategory(payloadBase as any).unwrap()) as SubCategoryDto | undefined;
+        toast.success("Alt kategori oluşturuldu.");
         if (created) setFormState(mapDtoToFormState(created));
       }
 
       if (onDone) onDone();
-      else router.push('/admin/subcategories');
+      else router.push("/admin/subcategories");
     } catch (err: any) {
-      console.error('Subcategory save error:', err);
-      const msg =
-        err?.data?.error?.message || err?.message || 'Alt kategori kaydedilirken bir hata oluştu.';
+      console.error("Subcategory save error:", err);
+      const msg = err?.data?.error?.message || err?.message || "Alt kategori kaydedilirken bir hata oluştu.";
       toast.error(msg);
     }
   };
 
   const handleCancel = () => {
     if (onDone) onDone();
-    else router.push('/admin/subcategories');
+    else router.push("/admin/subcategories");
   };
 
   /* -------------------- render guards -------------------- */
 
-  if (mode === 'edit' && externalLoading && !initialData) {
+  if (mode === "edit" && externalLoading && !initialData) {
     return (
       <div className="container-fluid py-4">
-        <div className="text-center text-muted small py-5">
+        <div className="small py-5 text-center text-muted">
           <div className="spinner-border spinner-border-sm me-2" />
           Alt kategori yükleniyor...
         </div>
@@ -450,12 +430,10 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
     );
   }
 
-  if (mode === 'edit' && !externalLoading && !initialData) {
+  if (mode === "edit" && !externalLoading && !initialData) {
     return (
       <div className="container-fluid py-4">
-        <div className="alert alert-warning small">
-          Alt kategori bulunamadı veya silinmiş olabilir.
-        </div>
+        <div className="alert alert-warning small">Alt kategori bulunamadı veya silinmiş olabilir.</div>
         <button type="button" className="btn btn-outline-secondary btn-sm" onClick={handleCancel}>
           ← Listeye dön
         </button>
@@ -463,7 +441,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
     );
   }
 
-  if (mode === 'create' && !loading && categoryOptions.length === 0) {
+  if (mode === "create" && !loading && categoryOptions.length === 0) {
     return (
       <div className="container-fluid py-4">
         <div className="alert alert-warning small mb-3">
@@ -479,7 +457,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
   if (!formState) {
     return (
       <div className="container-fluid py-4">
-        <div className="text-center text-muted small py-5">
+        <div className="small py-5 text-center text-muted">
           <div className="spinner-border spinner-border-sm me-2" />
           Form hazırlanıyor...
         </div>
@@ -511,7 +489,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
           <div className="card-body">
             <div className="row g-3">
               <div className="col-md-7">
-                {editMode === 'form' ? (
+                {editMode === "form" ? (
                   <SubCategoryFormFields
                     formState={formState}
                     localeOptions={localeOptions}
@@ -541,9 +519,7 @@ const SubCategoryFormPage: React.FC<SubCategoryFormPageProps> = ({
                   metadata={imageMetadata}
                   iconValue={safeStr(formState.icon)}
                   disabled={saving || loading}
-                  onIconChange={(url) =>
-                    setFormState((prev) => (prev ? { ...prev, icon: safeStr(url) } : prev))
-                  }
+                  onIconChange={(url) => setFormState((prev) => (prev ? { ...prev, icon: safeStr(url) } : prev))}
                 />
               </div>
             </div>

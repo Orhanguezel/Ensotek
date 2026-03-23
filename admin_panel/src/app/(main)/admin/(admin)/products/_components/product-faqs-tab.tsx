@@ -4,31 +4,26 @@
 // Ensotek Admin Panel Standartı
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AdminJsonEditor } from '@/app/(main)/admin/_components/common/AdminJsonEditor';
-import { Plus, Trash2, RefreshCw, Save, FileJson } from 'lucide-react';
-import { toast } from 'sonner';
+import * as React from "react";
+
+import { FileJson, Plus, RefreshCw, Save, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { AdminJsonEditor } from "@/app/(main)/admin/_components/common/AdminJsonEditor";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
 import {
   useListProductFaqsAdminQuery,
   useReplaceProductFaqsAdminMutation,
-} from '@/integrations/endpoints/admin/products_admin.faqs.endpoints';
-import type { AdminProductFaqCreatePayload } from '@/integrations/shared/product_faqs_admin.types';
+} from "@/integrations/endpoints/admin/products_admin.faqs.endpoints";
+import type { AdminProductFaqCreatePayload } from "@/integrations/shared/product_faqs_admin.types";
 
 export type ProductFaqsTabProps = {
   productId: string;
@@ -38,14 +33,9 @@ export type ProductFaqsTabProps = {
 
 export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabProps) {
   const [items, setItems] = React.useState<AdminProductFaqCreatePayload[]>([]);
-  const [viewMode, setViewMode] = React.useState<'form' | 'json'>('form');
+  const [viewMode, setViewMode] = React.useState<"form" | "json">("form");
 
-  const {
-    data,
-    isLoading,
-    isFetching,
-    refetch,
-  } = useListProductFaqsAdminQuery(
+  const { data, isLoading, isFetching, refetch } = useListProductFaqsAdminQuery(
     { productId, locale },
     { skip: !productId || !locale },
   );
@@ -68,31 +58,35 @@ export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabPr
   const busy = isLoading || isFetching || isSaving || !!disabled;
 
   const handleSave = async () => {
-    if (!locale) { toast.error('Lütfen önce bir dil seçin.'); return; }
+    if (!locale) {
+      toast.error("Lütfen önce bir dil seçin.");
+      return;
+    }
     try {
       const normalized = (items ?? []).map((raw) => ({
         id: raw.id,
-        question: String(raw.question ?? '').trim(),
-        answer: String(raw.answer ?? ''),
-        display_order: typeof raw.display_order === 'number' ? raw.display_order : parseInt(String(raw.display_order ?? '0'), 10) || 0,
+        question: String(raw.question ?? "").trim(),
+        answer: String(raw.answer ?? ""),
+        display_order:
+          typeof raw.display_order === "number"
+            ? raw.display_order
+            : parseInt(String(raw.display_order ?? "0"), 10) || 0,
         is_active: raw.is_active !== false,
       }));
       await replaceFaqs({ productId, locale, payload: { items: normalized } }).unwrap();
-      toast.success('SSS kayıtları kaydedildi.');
+      toast.success("SSS kayıtları kaydedildi.");
       void refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || 'Kayıt sırasında hata oluştu.');
+      toast.error(err?.data?.error?.message || err?.message || "Kayıt sırasında hata oluştu.");
     }
   };
 
   const handleChange = (index: number, field: keyof AdminProductFaqCreatePayload, value: unknown) => {
-    setItems((prev) =>
-      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)),
-    );
+    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, [field]: value } : item)));
   };
 
   const handleAddRow = () => {
-    setItems((prev) => [...prev, { question: '', answer: '', display_order: prev.length, is_active: true }]);
+    setItems((prev) => [...prev, { question: "", answer: "", display_order: prev.length, is_active: true }]);
   };
 
   const handleRemoveRow = (index: number) => {
@@ -100,7 +94,10 @@ export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabPr
   };
 
   const handleJsonChange = (next: any) => {
-    if (!Array.isArray(next)) { toast.error('Geçersiz format. Array bekleniyor.'); return; }
+    if (!Array.isArray(next)) {
+      toast.error("Geçersiz format. Array bekleniyor.");
+      return;
+    }
     setItems(next);
   };
 
@@ -116,34 +113,36 @@ export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabPr
           </div>
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={() => refetch()} disabled={busy}>
-              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
             </Button>
             <Button onClick={handleSave} disabled={busy} size="sm">
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'Kaydediliyor...' : 'Kaydet'}
+              <Save className="mr-2 h-4 w-4" />
+              {isSaving ? "Kaydediliyor..." : "Kaydet"}
             </Button>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'form' | 'json')}>
+        <Tabs value={viewMode} onValueChange={(v) => setViewMode(v as "form" | "json")}>
           <div className="flex items-center justify-between">
             <TabsList>
               <TabsTrigger value="form">Form</TabsTrigger>
               <TabsTrigger value="json">
-                <FileJson className="h-4 w-4 mr-1" />JSON
+                <FileJson className="mr-1 h-4 w-4" />
+                JSON
               </TabsTrigger>
             </TabsList>
-            {viewMode === 'form' && (
+            {viewMode === "form" && (
               <Button variant="outline" size="sm" onClick={handleAddRow} disabled={busy}>
-                <Plus className="h-4 w-4 mr-2" />Soru Ekle
+                <Plus className="mr-2 h-4 w-4" />
+                Soru Ekle
               </Button>
             )}
           </div>
 
           <TabsContent value="form" className="mt-4">
             {items.length === 0 ? (
-              <p className="text-sm text-muted-foreground py-4 text-center">
+              <p className="py-4 text-center text-muted-foreground text-sm">
                 Henüz soru yok. "Soru Ekle" ile başlayın.
               </p>
             ) : (
@@ -162,8 +161,8 @@ export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabPr
                     <TableRow key={faq.id ?? index}>
                       <TableCell className="align-top">
                         <Input
-                          value={faq.question ?? ''}
-                          onChange={(e) => handleChange(index, 'question', e.target.value)}
+                          value={faq.question ?? ""}
+                          onChange={(e) => handleChange(index, "question", e.target.value)}
                           disabled={busy}
                           placeholder="Teslim süresi nedir?"
                           className="h-8 text-sm"
@@ -171,8 +170,8 @@ export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabPr
                       </TableCell>
                       <TableCell className="align-top">
                         <Textarea
-                          value={faq.answer ?? ''}
-                          onChange={(e) => handleChange(index, 'answer', e.target.value)}
+                          value={faq.answer ?? ""}
+                          onChange={(e) => handleChange(index, "answer", e.target.value)}
                           disabled={busy}
                           placeholder="Proje detayına göre 4-6 hafta..."
                           rows={2}
@@ -183,25 +182,20 @@ export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabPr
                         <Input
                           type="number"
                           value={faq.display_order ?? 0}
-                          onChange={(e) => handleChange(index, 'display_order', parseInt(e.target.value, 10) || 0)}
+                          onChange={(e) => handleChange(index, "display_order", parseInt(e.target.value, 10) || 0)}
                           disabled={busy}
-                          className="h-8 text-sm w-16 text-center"
+                          className="h-8 w-16 text-center text-sm"
                         />
                       </TableCell>
                       <TableCell className="text-center align-middle">
                         <Switch
                           checked={!!faq.is_active}
-                          onCheckedChange={(v) => handleChange(index, 'is_active', v)}
+                          onCheckedChange={(v) => handleChange(index, "is_active", v)}
                           disabled={busy}
                         />
                       </TableCell>
                       <TableCell className="align-top">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveRow(index)}
-                          disabled={busy}
-                        >
+                        <Button variant="ghost" size="icon" onClick={() => handleRemoveRow(index)} disabled={busy}>
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </TableCell>
@@ -213,12 +207,7 @@ export function ProductFaqsTab({ productId, locale, disabled }: ProductFaqsTabPr
           </TabsContent>
 
           <TabsContent value="json" className="mt-4">
-            <AdminJsonEditor
-              value={items}
-              onChange={handleJsonChange}
-              disabled={busy}
-              height={300}
-            />
+            <AdminJsonEditor value={items} onChange={handleJsonChange} disabled={busy} height={300} />
           </TabsContent>
         </Tabs>
       </CardContent>

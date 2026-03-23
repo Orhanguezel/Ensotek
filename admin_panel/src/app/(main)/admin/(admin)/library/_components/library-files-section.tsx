@@ -1,19 +1,22 @@
-'use client';
+"use client";
 
-import React, { useRef, useState, useMemo } from 'react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Loader2, FileText, Trash2, Upload, ExternalLink } from 'lucide-react';
-import type { LibraryFileDto } from '@/integrations/shared';
+import type React from "react";
+import { useMemo, useRef, useState } from "react";
+
+import { ExternalLink, FileText, Loader2, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  useListLibraryFilesAdminQuery,
-  useCreateLibraryFileAdminMutation,
-  useRemoveLibraryFileAdminMutation,
   useCreateAssetAdminMutation,
-} from '@/integrations/hooks';
+  useCreateLibraryFileAdminMutation,
+  useListLibraryFilesAdminQuery,
+  useRemoveLibraryFileAdminMutation,
+} from "@/integrations/hooks";
+import type { LibraryFileDto } from "@/integrations/shared";
 
 export type LibraryFilesSectionProps = {
   libraryId: string;
@@ -21,52 +24,39 @@ export type LibraryFilesSectionProps = {
   disabled?: boolean;
 };
 
-const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
-const norm = (v: unknown) => String(v ?? '').trim();
+const safeText = (v: unknown) => (v === null || v === undefined ? "" : String(v));
+const norm = (v: unknown) => String(v ?? "").trim();
 
-function normalizeLocale(raw?: string, fallback = 'tr') {
-  const s = String(raw ?? '').trim();
+function normalizeLocale(raw?: string, fallback = "tr") {
+  const s = String(raw ?? "").trim();
   if (!s) return fallback;
-  const [short] = s.split('-');
+  const [short] = s.split("-");
   return (short || fallback).toLowerCase();
 }
 
 function extractErrMsg(err: any): string {
   const data = err?.data;
-  return (
-    data?.error?.message ||
-    data?.message ||
-    err?.error ||
-    err?.message ||
-    'İşlem sırasında hata oluştu.'
-  );
+  return data?.error?.message || data?.message || err?.error || err?.message || "İşlem sırasında hata oluştu.";
 }
 
-export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
-  libraryId,
-  locale,
-  disabled = false,
-}) => {
-  const effectiveLocale = useMemo(() => normalizeLocale(locale, 'tr'), [locale]);
+export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({ libraryId, locale, disabled = false }) => {
+  const effectiveLocale = useMemo(() => normalizeLocale(locale, "tr"), [locale]);
 
   const {
     data: files,
     isLoading,
     isFetching,
     refetch,
-  } = useListLibraryFilesAdminQuery(
-    { id: libraryId, locale: effectiveLocale },
-    { skip: !libraryId },
-  );
+  } = useListLibraryFilesAdminQuery({ id: libraryId, locale: effectiveLocale }, { skip: !libraryId });
 
   const [createFile, { isLoading: isCreatingFile }] = useCreateLibraryFileAdminMutation();
   const [removeFile, { isLoading: isRemoving }] = useRemoveLibraryFileAdminMutation();
   const [createAsset, { isLoading: isUploadingAsset }] = useCreateAssetAdminMutation();
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [overrideName, setOverrideName] = useState('');
-  const [bucket, setBucket] = useState('public');
-  const [folder, setFolder] = useState('uploads/catalog');
+  const [overrideName, setOverrideName] = useState("");
+  const [bucket, setBucket] = useState("public");
+  const [folder, setFolder] = useState("uploads/catalog");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -77,7 +67,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
     if (!libraryId) return;
 
     if (!selectedFile) {
-      toast.error('Lütfen bir dosya seç.');
+      toast.error("Lütfen bir dosya seç.");
       return;
     }
 
@@ -87,22 +77,21 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
         bucket,
         folder: folder || undefined,
         metadata: {
-          module_key: 'library',
+          module_key: "library",
           library_id: libraryId,
           original_name: selectedFile.name,
-          mime: selectedFile.type || 'application/octet-stream',
+          mime: selectedFile.type || "application/octet-stream",
           locale: effectiveLocale,
         },
       } as any).unwrap();
 
       const storageId = norm((storage as any)?.id);
       const storageUrl = norm((storage as any)?.url);
-      const storageMime =
-        norm((storage as any)?.mime) || norm(selectedFile.type) || 'application/octet-stream';
+      const storageMime = norm((storage as any)?.mime) || norm(selectedFile.type) || "application/octet-stream";
       const storageSize = (storage as any)?.size;
 
-      if (!storageId) throw new Error('Upload başarılı ama asset_id alınamadı.');
-      if (!storageUrl) throw new Error('Upload başarılı ama public url alınamadı.');
+      if (!storageId) throw new Error("Upload başarılı ama asset_id alınamadı.");
+      if (!storageUrl) throw new Error("Upload başarılı ama public url alınamadı.");
 
       const displayName = overrideName.trim() || selectedFile.name;
 
@@ -113,16 +102,16 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
           asset_id: storageId,
           name: displayName,
           file_url: storageUrl,
-          size_bytes: typeof storageSize === 'number' ? storageSize : null,
+          size_bytes: typeof storageSize === "number" ? storageSize : null,
           mime_type: storageMime || null,
         },
       } as any).unwrap();
 
-      toast.success('Dosya yüklendi ve kaydedildi.');
+      toast.success("Dosya yüklendi ve kaydedildi.");
 
       setSelectedFile(null);
-      setOverrideName('');
-      if (fileInputRef.current) fileInputRef.current.value = '';
+      setOverrideName("");
+      if (fileInputRef.current) fileInputRef.current.value = "";
 
       void refetch();
     } catch (err: any) {
@@ -138,10 +127,10 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
     try {
       await removeFile({ id: libraryId, fileId, locale: effectiveLocale } as any).unwrap();
-      toast.success('Dosya silindi.');
+      toast.success("Dosya silindi.");
     } catch (err: any) {
       const status = err?.status ?? err?.originalStatus;
-      if (status === 404) toast.success('Dosya zaten silinmiş.');
+      if (status === 404) toast.success("Dosya zaten silinmiş.");
       else toast.error(extractErrMsg(err));
     } finally {
       void refetch();
@@ -152,9 +141,9 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
   return (
     <Card className="overflow-hidden">
-      <CardHeader className="py-3 bg-muted/30 border-b">
+      <CardHeader className="border-b bg-muted/30 py-3">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 font-semibold text-sm">
             <FileText className="h-4 w-4 text-primary" />
             PDF / Dosyalar
           </CardTitle>
@@ -164,28 +153,30 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
       <CardContent className="space-y-4 pt-4">
         {list.length === 0 && !loading && (
-          <div className="text-xs text-muted-foreground italic py-6 text-center border-2 border-dashed rounded-lg bg-muted/10">Henüz dosya eklenmemiş.</div>
+          <div className="rounded-lg border-2 border-dashed bg-muted/10 py-6 text-center text-muted-foreground text-xs italic">
+            Henüz dosya eklenmemiş.
+          </div>
         )}
 
         {list.length > 0 && (
           <div className="space-y-2">
             {list.map((f) => {
               const href = norm((f as any)?.file_url);
-              const label = safeText((f as any)?.name) || 'Dosya';
+              const label = safeText((f as any)?.name) || "Dosya";
 
               return (
                 <div
                   key={(f as any)?.id || `${label}-${href}`}
-                  className="p-3 flex items-center justify-between gap-3 text-xs border rounded-lg bg-card hover:shadow-sm transition-all"
+                  className="flex items-center justify-between gap-3 rounded-lg border bg-card p-3 text-xs transition-all hover:shadow-sm"
                 >
                   <div className="min-w-0 flex-1">
-                    <div className="font-medium truncate flex items-center gap-2" title={label}>
+                    <div className="flex items-center gap-2 truncate font-medium" title={label}>
                       {href ? (
                         <a
                           href={href}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-primary hover:underline flex items-center gap-1"
+                          className="flex items-center gap-1 text-primary hover:underline"
                         >
                           {label}
                           <ExternalLink className="h-3 w-3" />
@@ -194,9 +185,11 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
                         label
                       )}
                     </div>
-                    <div className="text-muted-foreground truncate text-[10px] mt-0.5 flex items-center gap-2">
-                      <span className="bg-muted px-1.5 py-0.5 rounded uppercase tracking-tighter">{(f as any)?.mime_type?.split('/')?.pop() || 'file'}</span>
-                      {typeof (f as any)?.size_bytes === 'number' && (f as any).size_bytes > 0 && (
+                    <div className="mt-0.5 flex items-center gap-2 truncate text-[10px] text-muted-foreground">
+                      <span className="rounded bg-muted px-1.5 py-0.5 uppercase tracking-tighter">
+                        {(f as any)?.mime_type?.split("/")?.pop() || "file"}
+                      </span>
+                      {typeof (f as any)?.size_bytes === "number" && (f as any).size_bytes > 0 && (
                         <span>• {(((f as any).size_bytes as number) / 1024).toFixed(1)} KB</span>
                       )}
                     </div>
@@ -205,7 +198,7 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 text-destructive hover:bg-destructive/10 shrink-0"
+                    className="h-8 w-8 shrink-0 text-destructive hover:bg-destructive/10"
                     disabled={disabled || isRemoving}
                     onClick={() => handleRemove(f)}
                   >
@@ -217,14 +210,16 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
           </div>
         )}
 
-        <div className="space-y-3 pt-4 border-t">
-          <div className="grid gap-3 p-4 rounded-lg bg-muted/20 border">
+        <div className="space-y-3 border-t pt-4">
+          <div className="grid gap-3 rounded-lg border bg-muted/20 p-4">
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">PDF / Dosya Seç</Label>
+              <Label className="font-bold text-[10px] text-muted-foreground uppercase tracking-wider">
+                PDF / Dosya Seç
+              </Label>
               <Input
                 ref={fileInputRef}
                 type="file"
-                className="h-9 text-xs cursor-pointer bg-background"
+                className="h-9 cursor-pointer bg-background text-xs"
                 accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/zip"
                 onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
                 disabled={disabled || uploading}
@@ -232,9 +227,9 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Görünen Ad</Label>
+              <Label className="font-bold text-[10px] text-muted-foreground uppercase tracking-wider">Görünen Ad</Label>
               <Input
-                className="h-9 text-xs bg-background"
+                className="h-9 bg-background text-xs"
                 value={overrideName}
                 onChange={(e) => setOverrideName(e.target.value)}
                 disabled={disabled || uploading}
@@ -244,18 +239,18 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Bucket</Label>
+                <Label className="font-bold text-[10px] text-muted-foreground uppercase tracking-wider">Bucket</Label>
                 <Input
-                  className="h-9 text-xs bg-background"
+                  className="h-9 bg-background text-xs"
                   value={bucket}
                   onChange={(e) => setBucket(e.target.value)}
                   disabled={disabled || uploading}
                 />
               </div>
               <div className="space-y-1.5">
-                <Label className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Folder</Label>
+                <Label className="font-bold text-[10px] text-muted-foreground uppercase tracking-wider">Folder</Label>
                 <Input
-                  className="h-9 text-xs bg-background"
+                  className="h-9 bg-background text-xs"
                   value={folder}
                   onChange={(e) => setFolder(e.target.value)}
                   disabled={disabled || uploading}
@@ -264,18 +259,18 @@ export const LibraryFilesSection: React.FC<LibraryFilesSectionProps> = ({
             </div>
 
             <Button
-              className="w-full h-9 text-xs mt-1"
+              className="mt-1 h-9 w-full text-xs"
               disabled={disabled || uploading || !selectedFile}
               onClick={handleUpload}
             >
               {uploading ? (
                 <>
-                  <Loader2 className="h-3 w-3 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-3 w-3 animate-spin" />
                   Yükleniyor...
                 </>
               ) : (
                 <>
-                  <Upload className="h-3 w-3 mr-2" />
+                  <Upload className="mr-2 h-3 w-3" />
                   Yükle ve Kaydet
                 </>
               )}

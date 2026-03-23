@@ -1,5 +1,5 @@
 // src/app/(main)/layout.tsx
-import type { ReactNode } from 'react';
+import type { ReactNode } from "react";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;

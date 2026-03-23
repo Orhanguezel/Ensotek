@@ -4,49 +4,45 @@
 // Ensotek
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Save } from 'lucide-react';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { Save } from "lucide-react";
+import { toast } from "sonner";
 
-import {
-  useGetTelegramAutoReplyQuery,
-  useUpdateTelegramAutoReplyMutation,
-} from '@/integrations/hooks';
-
-import type { TelegramAutoReplyMode, TelegramAutoReplyUpdateBody } from '@/integrations/shared';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useGetTelegramAutoReplyQuery, useUpdateTelegramAutoReplyMutation } from "@/integrations/hooks";
+import type { TelegramAutoReplyMode, TelegramAutoReplyUpdateBody } from "@/integrations/shared";
 
 const DEFAULT_TEMPLATE =
-  'Vielen Dank für Ihre Nachricht! Wir werden uns schnellstmöglich bei Ihnen melden.\n\nMesajınız için teşekkür ederiz. En kısa sürede size dönüş yapacağız.\n\n- Ensotek Team';
+  "Vielen Dank für Ihre Nachricht! Wir werden uns schnellstmöglich bei Ihnen melden.\n\nMesajınız için teşekkür ederiz. En kısa sürede size dönüş yapacağız.\n\n- Ensotek Team";
 
-const toStr = (v: unknown): string => (typeof v === 'string' ? v : v == null ? '' : String(v));
+const toStr = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
 
 const toBoolish = (v: unknown): boolean => {
-  if (typeof v === 'boolean') return v;
-  if (typeof v === 'number') return v !== 0;
-  if (typeof v === 'string') {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v !== 0;
+  if (typeof v === "string") {
     const s = v.trim().toLowerCase();
-    if (['true', '1', 'yes', 'y', 'on'].includes(s)) return true;
-    if (['false', '0', 'no', 'n', 'off'].includes(s)) return false;
+    if (["true", "1", "yes", "y", "on"].includes(s)) return true;
+    if (["false", "0", "no", "n", "off"].includes(s)) return false;
   }
   return false;
 };
 
 export default function TelegramAutoReplyPanel() {
-  const t = useAdminT('admin.telegram');
+  const t = useAdminT("admin.telegram");
   const { data, isLoading, isFetching } = useGetTelegramAutoReplyQuery();
   const [update, { isLoading: saving }] = useUpdateTelegramAutoReplyMutation();
 
   const [enabled, setEnabled] = React.useState(false);
-  const [mode, setMode] = React.useState<TelegramAutoReplyMode>('simple');
+  const [mode, setMode] = React.useState<TelegramAutoReplyMode>("simple");
   const [template, setTemplate] = React.useState(DEFAULT_TEMPLATE);
 
   React.useEffect(() => {
@@ -55,7 +51,7 @@ export default function TelegramAutoReplyPanel() {
     setEnabled(toBoolish((data as unknown as Record<string, unknown>).enabled));
 
     const rawMode = toStr((data as unknown as Record<string, unknown>).mode).trim();
-    const m: TelegramAutoReplyMode = rawMode === 'ai' ? 'ai' : 'simple';
+    const m: TelegramAutoReplyMode = rawMode === "ai" ? "ai" : "simple";
     setMode(m);
 
     const tpl = toStr((data as unknown as Record<string, unknown>).template).trim();
@@ -65,59 +61,55 @@ export default function TelegramAutoReplyPanel() {
   const handleSave = async () => {
     const tpl = template.trim();
     if (!tpl) {
-      toast.error(t('autoreply.emptyError'));
+      toast.error(t("autoreply.emptyError"));
       return;
     }
 
     const body: TelegramAutoReplyUpdateBody = {
       enabled,
-      mode: 'simple',
+      mode: "simple",
       template: tpl,
     };
 
     try {
       await update(body).unwrap();
-      toast.success(t('autoreply.saved'));
+      toast.success(t("autoreply.saved"));
     } catch (e) {
       console.error(e);
-      toast.error((e as { message?: string })?.message || t('autoreply.saveError'));
+      toast.error((e as { message?: string })?.message || t("autoreply.saveError"));
     }
   };
 
   if (isLoading || isFetching) {
-    return <div className="py-8 text-sm text-muted-foreground">{t('autoreply.loading')}</div>;
+    return <div className="py-8 text-muted-foreground text-sm">{t("autoreply.loading")}</div>;
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t('autoreply.title')}</CardTitle>
+        <CardTitle>{t("autoreply.title")}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-4">
         <div className="flex items-center justify-between gap-4 rounded-lg border border-border p-4">
           <div className="space-y-1">
-            <Label className="text-base font-medium">{t('autoreply.enable')}</Label>
-            <p className="text-xs text-muted-foreground">
-              {t('autoreply.enableDesc')}
-            </p>
+            <Label className="font-medium text-base">{t("autoreply.enable")}</Label>
+            <p className="text-muted-foreground text-xs">{t("autoreply.enableDesc")}</p>
           </div>
 
           <Switch checked={enabled} onCheckedChange={(v: boolean) => setEnabled(v)} />
         </div>
 
         <div className="space-y-2">
-          <Label>{t('autoreply.templateLabel')}</Label>
+          <Label>{t("autoreply.templateLabel")}</Label>
           <Textarea rows={6} value={template} onChange={(e) => setTemplate(e.target.value)} />
-          <p className="text-xs text-muted-foreground">
-            {t('autoreply.modeInfo', { mode })}
-          </p>
+          <p className="text-muted-foreground text-xs">{t("autoreply.modeInfo", { mode })}</p>
         </div>
 
         <div className="flex justify-end">
           <Button onClick={handleSave} disabled={saving} className="gap-2">
             <Save className="h-4 w-4" />
-            {saving ? t('autoreply.saving') : t('autoreply.save')}
+            {saving ? t("autoreply.saving") : t("autoreply.save")}
           </Button>
         </div>
       </CardContent>

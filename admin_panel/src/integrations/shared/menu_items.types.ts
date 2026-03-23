@@ -2,10 +2,10 @@
 // FILE: src/integrations/shared/menu_items.types.ts
 // Ensotek – Menu Items shared types (Admin + Public)
 // =============================================================
-import { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
-export type MenuLocation = 'header' | 'footer';
-export type MenuItemType = 'page' | 'custom';
+export type MenuLocation = "header" | "footer";
+export type MenuItemType = "page" | "custom";
 
 // ---------------- PUBLIC DTO ----------------
 
@@ -74,8 +74,8 @@ export interface AdminMenuItemListQueryParams {
   section_id?: string | null;
   parent_id?: string | null;
   is_active?: BoolLike;
-  sort?: 'display_order' | 'created_at' | 'title';
-  order?: 'asc' | 'desc';
+  sort?: "display_order" | "created_at" | "title";
+  order?: "asc" | "desc";
   limit?: number;
   offset?: number;
   locale?: string;
@@ -137,12 +137,9 @@ export type MetaWithHeaders = {
   };
 };
 
-export const parseTotalFromMeta = (
-  dataLength: number,
-  meta?: MetaWithHeaders | unknown,
-): number => {
+export const parseTotalFromMeta = (dataLength: number, meta?: MetaWithHeaders | unknown): number => {
   const m = meta as MetaWithHeaders | undefined;
-  const raw = m?.response?.headers?.get('x-total-count');
+  const raw = m?.response?.headers?.get("x-total-count");
   if (!raw) return dataLength;
   const n = Number(raw);
   return Number.isFinite(n) ? n : dataLength;

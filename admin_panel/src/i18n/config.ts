@@ -7,8 +7,6 @@
 export const FALLBACK_LOCALE = "de";
 
 /** RTL set sabit olabilir (bu bir “dil listesi yönetimi” değil, yazım yönü bilgisidir) */
-export const KNOWN_RTL = new Set([
-  "ar", "fa", "he", "ur", "ckb", "ps", "sd", "ug", "yi", "dv",
-]);
+export const KNOWN_RTL = new Set(["ar", "fa", "he", "ur", "ckb", "ps", "sd", "ug", "yi", "dv"]);
 
 export const isRTL = (l: string) => KNOWN_RTL.has(String(l || "").toLowerCase());

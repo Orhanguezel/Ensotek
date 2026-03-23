@@ -5,16 +5,16 @@
 // - Uses normLocaleTag
 // =============================================================
 
-import { normLocaleTag } from './localeUtils';
+import { normLocaleTag } from "./localeUtils";
 
-const safeStr = (v: unknown) => String(v ?? '').trim();
+const safeStr = (v: unknown) => String(v ?? "").trim();
 
 export function localeShortClient(v: unknown): string {
   const raw = safeStr(v);
-  if (!raw) return '';
-  return normLocaleTag(raw) || '';
+  if (!raw) return "";
+  return normLocaleTag(raw) || "";
 }
 
-export function localeShortClientOr(v: unknown, fallback = 'de'): string {
+export function localeShortClientOr(v: unknown, fallback = "de"): string {
   return localeShortClient(v) || fallback;
 }

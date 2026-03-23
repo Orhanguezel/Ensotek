@@ -6,26 +6,25 @@
 // ✅ shadcn Card / UI components
 // ✅ Correct import path for AdminDbAuthGate
 // =============================================================
-'use client';
+"use client";
 
-import React from 'react';
-import { Lightbulb } from 'lucide-react';
+import type React from "react";
 
-import { AdminDbAuthGate } from './admin-db-auth-gate';
+import { Lightbulb } from "lucide-react";
 
-import { FullDbHeader } from '../fullDb/full-db-header';
-import { FullDbImportPanel } from '../fullDb/full-db-import-panel';
-import { SnapshotsPanel } from '../fullDb/snapshots-panel';
-import { ModuleTabs } from '../modules/module-tabs';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
+import { FullDbHeader } from "../fullDb/full-db-header";
+import { FullDbImportPanel } from "../fullDb/full-db-import-panel";
+import { SnapshotsPanel } from "../fullDb/snapshots-panel";
+import { ModuleTabs } from "../modules/module-tabs";
+import { AdminDbAuthGate } from "./admin-db-auth-gate";
 
 export const AdminDbClient: React.FC = () => {
-  const t = useAdminT('admin.db');
+  const t = useAdminT("admin.db");
 
   return (
     <AdminDbAuthGate>
@@ -35,37 +34,33 @@ export const AdminDbClient: React.FC = () => {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold">{t('title')}</h1>
+                <h1 className="font-semibold text-lg">{t("title")}</h1>
 
                 {/* Help Popover */}
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="ghost" size="sm" className="size-8 p-0">
                       <Lightbulb className="size-4 text-muted-foreground" />
-                      <span className="sr-only">{t('help.pageTitle')}</span>
+                      <span className="sr-only">{t("help.pageTitle")}</span>
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent align="start" className="w-80">
                     <div className="space-y-3">
-                      <p className="text-sm font-semibold">{t('help.dbAdmin')}</p>
-                      <ul className="space-y-2 text-sm text-muted-foreground">
+                      <p className="font-semibold text-sm">{t("help.dbAdmin")}</p>
+                      <ul className="space-y-2 text-muted-foreground text-sm">
                         <li>
-                          <span className="font-medium text-foreground">Full DB</span>:{' '}
-                          {t('help.fullDbDesc')}
+                          <span className="font-medium text-foreground">Full DB</span>: {t("help.fullDbDesc")}
                         </li>
                         <li>
-                          <span className="font-medium text-foreground">Snapshot</span>:{' '}
-                          {t('help.snapshotDesc')}
+                          <span className="font-medium text-foreground">Snapshot</span>: {t("help.snapshotDesc")}
                         </li>
                         <li>
-                          <span className="font-medium text-foreground">Module Export/Import</span>:{' '}
-                          {t('help.moduleDesc')}
+                          <span className="font-medium text-foreground">Module Export/Import</span>:{" "}
+                          {t("help.moduleDesc")}
                         </li>
                         <li>
-                          <span className="font-medium text-foreground">
-                            UI (site_settings ui_*)
-                          </span>
-                          : {t('help.uiDesc')}
+                          <span className="font-medium text-foreground">UI (site_settings ui_*)</span>:{" "}
+                          {t("help.uiDesc")}
                         </li>
                       </ul>
                     </div>
@@ -73,7 +68,7 @@ export const AdminDbClient: React.FC = () => {
                 </Popover>
               </div>
 
-              <p className="text-sm text-muted-foreground">{t('description')}</p>
+              <p className="text-muted-foreground text-sm">{t("description")}</p>
             </div>
           </div>
 

@@ -3,7 +3,7 @@
 // Admin Offers Page (App Router wrapper)
 // =============================================================
 
-import AdminOfferClient from './_components/admin-offer-client';
+import AdminOfferClient from "./_components/admin-offer-client";
 
 export default function Page() {
   return <AdminOfferClient />;

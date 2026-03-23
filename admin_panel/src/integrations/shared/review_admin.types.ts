@@ -3,12 +3,7 @@
 // Admin Reviews
 // =============================================================
 
-import type {
-  ReviewDto,
-  ReviewListQueryParams,
-  ReviewCreatePayload,
-  ReviewUpdatePayload,
-} from '@/integrations/shared';
+import type { ReviewCreatePayload, ReviewDto, ReviewListQueryParams, ReviewUpdatePayload } from "@/integrations/shared";
 
 export type AdminReviewDto = ReviewDto;
 

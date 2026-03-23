@@ -6,37 +6,37 @@
 // =============================================================
 
 function trimSlash(x: string) {
-  return x.replace(/\/+$/, '');
+  return x.replace(/\/+$/, "");
 }
 function ensureLeadingSlash(x: string) {
-  return x.startsWith('/') ? x : `/${x}`;
+  return x.startsWith("/") ? x : `/${x}`;
 }
 function isAbsUrl(x: string) {
   return /^https?:\/\//i.test(x);
 }
 function joinOriginAndBase(origin?: string, base?: string) {
-  if (!origin) return '';
+  if (!origin) return "";
   const o = trimSlash(origin);
   if (!base) return o;
   const b = trimSlash(base);
   return o + ensureLeadingSlash(b);
 }
 
-const IS_DEV = process.env.NODE_ENV !== 'production';
+const IS_DEV = process.env.NODE_ENV !== "production";
 
 function guessDevBackend(): string {
   // Client'ta current host üzerinden tahmin, SSR'da localhost fallback
   try {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       const loc = window.location;
-      const host = loc?.hostname || 'localhost';
-      const proto = loc?.protocol || 'http:';
+      const host = loc?.hostname || "localhost";
+      const proto = loc?.protocol || "http:";
       return `${proto}//${host}:8086`;
     }
   } catch {
     // ignore
   }
-  return 'http://localhost:8086';
+  return "http://localhost:8086";
 }
 
 /**
@@ -49,9 +49,9 @@ function guessDevBackend(): string {
  * - PROD: /api
  */
 export function resolveBaseUrl(): string {
-  const apiUrl = (process.env.NEXT_PUBLIC_API_URL || '').trim();
-  const apiOrigin = (process.env.NEXT_PUBLIC_API_ORIGIN || '').trim();
-  const apiBase = (process.env.NEXT_PUBLIC_API_BASE || '').trim();
+  const apiUrl = (process.env.NEXT_PUBLIC_API_URL || "").trim();
+  const apiOrigin = (process.env.NEXT_PUBLIC_API_ORIGIN || "").trim();
+  const apiBase = (process.env.NEXT_PUBLIC_API_BASE || "").trim();
 
   // 1) Full URL preferred
   if (apiUrl && isAbsUrl(apiUrl)) return trimSlash(apiUrl);
@@ -67,7 +67,7 @@ export function resolveBaseUrl(): string {
 
   // 4) fallbacks
   if (IS_DEV) return guessDevBackend();
-  return '/api';
+  return "/api";
 }
 
 export const BASE_URL = resolveBaseUrl();

@@ -2,8 +2,8 @@
 // FILE: src/integrations/shared/email.ts
 // =============================================================
 
-import type { BoolLike } from '@/integrations/shared';
-import { toBool } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
+import { toBool } from "@/integrations/shared";
 
 export type EmailRow = {
   id: string;
@@ -32,24 +32,23 @@ export type EmailView = {
   updated_at: string | null;
 };
 
-export const isObj = (v: unknown): v is Record<string, unknown> =>
-  typeof v === 'object' && v !== null;
+export const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null;
 
 export const toArrayOfStrings = (v: unknown): string[] => {
   if (Array.isArray(v)) {
-    return v.filter((x): x is string => typeof x === 'string');
+    return v.filter((x): x is string => typeof x === "string");
   }
-  if (typeof v === 'string') {
+  if (typeof v === "string") {
     try {
       const parsed = JSON.parse(v) as unknown;
       if (Array.isArray(parsed)) {
-        return parsed.filter((x): x is string => typeof x === 'string');
+        return parsed.filter((x): x is string => typeof x === "string");
       }
     } catch {
       /* ignored */
     }
     return v
-      .split(',')
+      .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
   }
@@ -57,27 +56,27 @@ export const toArrayOfStrings = (v: unknown): string[] => {
 };
 
 export const extractHtml = (raw: unknown): string => {
-  if (typeof raw === 'string') return raw;
-  if (isObj(raw) && typeof raw['html'] === 'string') {
-    return raw['html'] as string;
+  if (typeof raw === "string") return raw;
+  if (isObj(raw) && typeof raw.html === "string") {
+    return raw.html as string;
   }
-  return '';
+  return "";
 };
 
 export const toView = (row: unknown): EmailView => {
   const r = (row ?? {}) as Partial<EmailRow>;
   const html = r.body_html ?? r.content;
 
-  const created_at = typeof r.created_at === 'string' ? r.created_at : null;
-  const updated_at = typeof r.updated_at === 'string' ? r.updated_at : null;
+  const created_at = typeof r.created_at === "string" ? r.created_at : null;
+  const updated_at = typeof r.updated_at === "string" ? r.updated_at : null;
 
-  const locale = typeof r.locale === 'string' || r.locale === null ? (r.locale ?? null) : null;
+  const locale = typeof r.locale === "string" || r.locale === null ? (r.locale ?? null) : null;
 
   return {
-    id: String(r.id ?? ''),
-    key: String(r.template_key ?? ''),
-    name: String(r.template_name ?? ''),
-    subject: String(r.subject ?? ''),
+    id: String(r.id ?? ""),
+    key: String(r.template_key ?? ""),
+    name: String(r.template_name ?? ""),
+    subject: String(r.subject ?? ""),
     content_html: extractHtml(html),
     variables: toArrayOfStrings(r.variables),
     is_active: toBool(r.is_active),

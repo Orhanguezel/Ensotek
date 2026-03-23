@@ -3,21 +3,22 @@
 // Menü başlıkları ve buton etiketleri
 // =============================================================
 
-'use client';
+"use client";
 
-import React from 'react';
-import { z } from 'zod';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import type React from "react";
+
+import { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAdminTranslations } from "@/i18n";
 import {
   SITE_SETTINGS_UI_HEADER_EMPTY,
   SITE_SETTINGS_UI_HEADER_FIELDS,
   toStructuredObjectSeed,
-} from '@/integrations/shared';
-
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 export const uiHeaderSchema = z
   .object({
@@ -52,7 +53,7 @@ export function uiHeaderObjToForm(v: any, seed: UiHeaderFormState): UiHeaderForm
 export function uiHeaderFormToObj(s: UiHeaderFormState) {
   const result: Record<string, string> = {};
   for (const [k, v] of Object.entries(s)) {
-    result[k] = typeof v === 'string' ? v.trim() : '';
+    result[k] = typeof v === "string" ? v.trim() : "";
   }
   return result;
 }
@@ -73,22 +74,24 @@ export const UiHeaderStructuredForm: React.FC<UiHeaderStructuredFormProps> = ({
     <div className="space-y-4">
       <Alert variant="default" className="py-2">
         <AlertDescription className="text-sm">
-          {t('admin.siteSettings.structured.uiHeader.description')}
+          {t("admin.siteSettings.structured.uiHeader.description")}
         </AlertDescription>
       </Alert>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         {SITE_SETTINGS_UI_HEADER_FIELDS.map((f) => (
           <div className="space-y-1" key={f.key}>
-            <Label htmlFor={`ui-header-${f.key}`} className="text-xs text-muted-foreground">{t(`admin.siteSettings.structured.uiHeader.labels.${f.labelKey}`)}</Label>
+            <Label htmlFor={`ui-header-${f.key}`} className="text-muted-foreground text-xs">
+              {t(`admin.siteSettings.structured.uiHeader.labels.${f.labelKey}`)}
+            </Label>
             <Input
               id={`ui-header-${f.key}`}
               className="h-8"
-              value={(form[f.key] as string) || ''}
+              value={(form[f.key] as string) || ""}
               onChange={(e) => onChange({ ...form, [f.key]: e.target.value })}
               disabled={disabled}
             />
-            {errors?.[f.key] && <p className="text-xs text-destructive">{errors[f.key]}</p>}
+            {errors?.[f.key] && <p className="text-destructive text-xs">{errors[f.key]}</p>}
           </div>
         ))}
       </div>
@@ -96,4 +99,4 @@ export const UiHeaderStructuredForm: React.FC<UiHeaderStructuredFormProps> = ({
   );
 };
 
-UiHeaderStructuredForm.displayName = 'UiHeaderStructuredForm';
+UiHeaderStructuredForm.displayName = "UiHeaderStructuredForm";

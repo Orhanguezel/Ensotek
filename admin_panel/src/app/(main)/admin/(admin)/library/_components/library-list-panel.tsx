@@ -4,66 +4,53 @@
 // Ensotek Admin Panel Standartı
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { RefreshCw, Plus, Pencil, Trash2 } from 'lucide-react';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { toast } from 'sonner';
+import * as React from "react";
+
+import { useRouter } from "next/navigation";
+
+import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
   useListLibraryAdminQuery,
-  useUpdateLibraryAdminMutation,
   useRemoveLibraryAdminMutation,
-} from '@/integrations/endpoints/admin/library_admin.endpoints';
-import type { LibraryDto } from '@/integrations/shared';
+  useUpdateLibraryAdminMutation,
+} from "@/integrations/endpoints/admin/library_admin.endpoints";
+import type { LibraryDto } from "@/integrations/shared";
 
 const LIBRARY_TYPES = [
-  { value: 'brochure', label: 'Broşür' },
-  { value: 'catalog', label: 'Katalog' },
-  { value: 'manual', label: 'Kılavuz' },
-  { value: 'technical', label: 'Teknik Döküman' },
-  { value: 'other', label: 'Diğer' },
+  { value: "brochure", label: "Broşür" },
+  { value: "catalog", label: "Katalog" },
+  { value: "manual", label: "Kılavuz" },
+  { value: "technical", label: "Teknik Döküman" },
+  { value: "other", label: "Diğer" },
 ];
 
-const isTruthy = (v: unknown) => v === 1 || v === true || v === '1' || v === 'true';
+const isTruthy = (v: unknown) => v === 1 || v === true || v === "1" || v === "true";
 
 export default function LibraryListPanel() {
-  const t = useAdminT('admin.library');
+  const t = useAdminT("admin.library");
   const router = useRouter();
 
   const { localeOptions, defaultLocaleFromDb } = useAdminLocales();
 
   // Filters
-  const [search, setSearch] = React.useState('');
-  const [locale, setLocale] = React.useState('');
-  const [typeFilter, setTypeFilter] = React.useState('');
+  const [search, setSearch] = React.useState("");
+  const [locale, setLocale] = React.useState("");
+  const [typeFilter, setTypeFilter] = React.useState("");
   const [showOnlyActive, setShowOnlyActive] = React.useState(false);
   const [showOnlyPublished, setShowOnlyPublished] = React.useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = React.useState(false);
@@ -73,7 +60,7 @@ export default function LibraryListPanel() {
     if (!localeOptions?.length) return;
     setLocale((prev) => {
       if (prev) return prev;
-      const def = (defaultLocaleFromDb as string) || localeOptions[0]?.value || 'tr';
+      const def = (defaultLocaleFromDb as string) || localeOptions[0]?.value || "tr";
       return String(def);
     });
   }, [localeOptions, defaultLocaleFromDb]);
@@ -101,8 +88,8 @@ export default function LibraryListPanel() {
 
   const localesForSelect = React.useMemo<AdminLocaleOption[]>(() => {
     return (localeOptions || []).map((l: any) => ({
-      value: String(l.value || ''),
-      label: String(l.label || l.value || ''),
+      value: String(l.value || ""),
+      label: String(l.label || l.value || ""),
     }));
   }, [localeOptions]);
 
@@ -110,7 +97,7 @@ export default function LibraryListPanel() {
     try {
       await updateLibrary({ id: item.id, patch: { is_active: value } }).unwrap();
     } catch {
-      toast.error('Aktiflik değiştirilemedi');
+      toast.error("Aktiflik değiştirilemedi");
     }
   };
 
@@ -118,7 +105,7 @@ export default function LibraryListPanel() {
     try {
       await updateLibrary({ id: item.id, patch: { is_published: value } }).unwrap();
     } catch {
-      toast.error('Yayın durumu değiştirilemedi');
+      toast.error("Yayın durumu değiştirilemedi");
     }
   };
 
@@ -126,7 +113,7 @@ export default function LibraryListPanel() {
     try {
       await updateLibrary({ id: item.id, patch: { featured: value } }).unwrap();
     } catch {
-      toast.error('Öne çıkarma değiştirilemedi');
+      toast.error("Öne çıkarma değiştirilemedi");
     }
   };
 
@@ -134,10 +121,10 @@ export default function LibraryListPanel() {
     if (!confirm(`"${item.name || item.slug}" silinsin mi?`)) return;
     try {
       await removeLibrary(item.id).unwrap();
-      toast.success('Silindi');
+      toast.success("Silindi");
       refetch();
     } catch {
-      toast.error('Silinemedi');
+      toast.error("Silinemedi");
     }
   };
 
@@ -150,16 +137,16 @@ export default function LibraryListPanel() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <h2 className="text-base font-semibold">{t('header.title')}</h2>
-              <p className="text-sm text-muted-foreground">{t('header.description')}</p>
+              <h2 className="font-semibold text-base">{t("header.title")}</h2>
+              <p className="text-muted-foreground text-sm">{t("header.description")}</p>
             </div>
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading}>
-                <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
               </Button>
-              <Button onClick={() => router.push('/admin/library/new')}>
-                <Plus className="h-4 w-4 mr-2" />
-                {t('actions.create')}
+              <Button onClick={() => router.push("/admin/library/new")}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("actions.create")}
               </Button>
             </div>
           </div>
@@ -171,9 +158,9 @@ export default function LibraryListPanel() {
         <CardContent className="pt-4">
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
             {/* Search */}
-            <div className="flex-1 min-w-[180px]">
+            <div className="min-w-[180px] flex-1">
               <Input
-                placeholder={t('filters.search')}
+                placeholder={t("filters.search")}
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 disabled={isLoading}
@@ -182,17 +169,16 @@ export default function LibraryListPanel() {
 
             {/* Locale */}
             <div className="w-[140px]">
-              <AdminLocaleSelect
-                options={localesForSelect}
-                value={locale}
-                onChange={setLocale}
-                disabled={isLoading}
-              />
+              <AdminLocaleSelect options={localesForSelect} value={locale} onChange={setLocale} disabled={isLoading} />
             </div>
 
             {/* Type */}
             <div className="w-[160px]">
-              <Select value={typeFilter || 'all'} onValueChange={(v) => setTypeFilter(v === 'all' ? '' : v)} disabled={isLoading}>
+              <Select
+                value={typeFilter || "all"}
+                onValueChange={(v) => setTypeFilter(v === "all" ? "" : v)}
+                disabled={isLoading}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Tüm Tipler" />
                 </SelectTrigger>
@@ -286,18 +272,15 @@ export default function LibraryListPanel() {
                   const typeMeta = LIBRARY_TYPES.find((t) => t.value === item.type);
 
                   return (
-                    <TableRow key={item.id} className={!isActive ? 'opacity-50' : ''}>
+                    <TableRow key={item.id} className={!isActive ? "opacity-50" : ""}>
                       <TableCell className="text-muted-foreground text-sm">{idx + 1}</TableCell>
 
                       <TableCell>
-                        <div
-                          className="font-medium text-sm truncate max-w-[280px]"
-                          title={item.name || ''}
-                        >
+                        <div className="max-w-[280px] truncate font-medium text-sm" title={item.name || ""}>
                           {item.name || <span className="text-muted-foreground italic">(adsız)</span>}
                         </div>
-                        <div className="text-xs text-muted-foreground truncate max-w-[280px]">
-                          <code>{item.slug || '—'}</code>
+                        <div className="max-w-[280px] truncate text-muted-foreground text-xs">
+                          <code>{item.slug || "—"}</code>
                         </div>
                       </TableCell>
 
@@ -307,7 +290,7 @@ export default function LibraryListPanel() {
                             {typeMeta.label}
                           </Badge>
                         ) : (
-                          <span className="text-xs text-muted-foreground">{item.type || '—'}</span>
+                          <span className="text-muted-foreground text-xs">{item.type || "—"}</span>
                         )}
                       </TableCell>
 
@@ -349,12 +332,7 @@ export default function LibraryListPanel() {
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            disabled={isLoading}
-                            onClick={() => handleDelete(item)}
-                          >
+                          <Button variant="ghost" size="icon" disabled={isLoading} onClick={() => handleDelete(item)}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>

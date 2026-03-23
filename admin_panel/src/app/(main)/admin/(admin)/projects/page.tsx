@@ -3,7 +3,7 @@
 // FINAL — Admin Projects Page
 // =============================================================
 
-import AdminProjectsClient from './_components/admin-projects-client';
+import AdminProjectsClient from "./_components/admin-projects-client";
 
 export default function Page() {
   return <AdminProjectsClient />;

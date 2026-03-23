@@ -1,26 +1,26 @@
 // =============================================================
 // FILE: src/integrations/endpoints/admin/db_admin.endpoints.ts
 // =============================================================
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
-  DbImportResponse,
-  SqlImportFileParams,
-  SqlImportTextParams,
-  SqlImportUrlParams,
-  DbSnapshot,
   CreateDbSnapshotBody,
+  DbImportResponse,
+  DbSnapshot,
   DeleteSnapshotResponse,
   ModuleExportParams,
   ModuleImportParams,
   ModuleValidateParams,
   ModuleValidateResponse,
-  SiteSettingsUiExportParams,
-  SiteSettingsUiExportResponse,
   SiteSettingsUiBootstrapParams,
   SiteSettingsUiBootstrapResponse,
-} from '@/integrations/shared';
+  SiteSettingsUiExportParams,
+  SiteSettingsUiExportResponse,
+  SqlImportFileParams,
+  SqlImportTextParams,
+  SqlImportUrlParams,
+} from "@/integrations/shared";
 
-const ADMIN_BASE = '/admin/db';
+const ADMIN_BASE = "/admin/db";
 
 export const dbAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
@@ -30,12 +30,12 @@ export const dbAdminApi = baseApi.injectEndpoints({
     exportSql: b.mutation<Blob, void>({
       query: () => ({
         url: `${ADMIN_BASE}/export`,
-        method: 'GET',
-        credentials: 'include',
+        method: "GET",
+        credentials: "include",
         // Blob'u TS uyumlu almak için arrayBuffer + transform
         responseHandler: (resp: Response) => resp.arrayBuffer(),
       }),
-      transformResponse: (ab: ArrayBuffer) => new Blob([ab], { type: 'application/sql' }),
+      transformResponse: (ab: ArrayBuffer) => new Blob([ab], { type: "application/sql" }),
     }),
 
     /* ---------------------------------------------------------
@@ -45,9 +45,9 @@ export const dbAdminApi = baseApi.injectEndpoints({
     importSqlText: b.mutation<DbImportResponse, SqlImportTextParams>({
       query: (body) => ({
         url: `${ADMIN_BASE}/import-sql`,
-        method: 'POST',
+        method: "POST",
         body,
-        credentials: 'include',
+        credentials: "include",
       }),
     }),
 
@@ -58,9 +58,9 @@ export const dbAdminApi = baseApi.injectEndpoints({
     importSqlUrl: b.mutation<DbImportResponse, SqlImportUrlParams>({
       query: (body) => ({
         url: `${ADMIN_BASE}/import-url`,
-        method: 'POST',
+        method: "POST",
         body,
-        credentials: 'include',
+        credentials: "include",
       }),
     }),
 
@@ -72,21 +72,20 @@ export const dbAdminApi = baseApi.injectEndpoints({
     importSqlFile: b.mutation<DbImportResponse, SqlImportFileParams>({
       query: ({ file, truncateBefore }) => {
         const form = new FormData();
-        form.append('file', file, file.name);
-        if (typeof truncateBefore !== 'undefined') {
-          form.append('truncateBefore', String(!!truncateBefore));
+        form.append("file", file, file.name);
+        if (typeof truncateBefore !== "undefined") {
+          form.append("truncateBefore", String(!!truncateBefore));
           // eski alan adına da yazalım (tam uyumluluk)
-          form.append('truncate_before_import', String(!!truncateBefore));
+          form.append("truncate_before_import", String(!!truncateBefore));
         }
         return {
           url: `${ADMIN_BASE}/import-file`,
-          method: 'POST',
+          method: "POST",
           body: form,
-          credentials: 'include',
+          credentials: "include",
         };
       },
     }),
-
 
     /* ---------------------------------------------------------
      * SNAPSHOT LİSTESİ: GET /admin/db/snapshots
@@ -94,8 +93,8 @@ export const dbAdminApi = baseApi.injectEndpoints({
     listDbSnapshots: b.query<DbSnapshot[], void>({
       query: () => ({
         url: `${ADMIN_BASE}/snapshots`,
-        method: 'GET',
-        credentials: 'include',
+        method: "GET",
+        credentials: "include",
       }),
     }),
 
@@ -103,12 +102,12 @@ export const dbAdminApi = baseApi.injectEndpoints({
      * SNAPSHOT OLUŞTUR: POST /admin/db/snapshots
      * body: { label?, note? }
      * --------------------------------------------------------- */
-    createDbSnapshot: b.mutation<DbSnapshot, CreateDbSnapshotBody | void>({
+    createDbSnapshot: b.mutation<DbSnapshot, CreateDbSnapshotBody | undefined>({
       query: (body) => ({
         url: `${ADMIN_BASE}/snapshots`,
-        method: 'POST',
+        method: "POST",
         body: body ?? {},
-        credentials: 'include',
+        credentials: "include",
       }),
     }),
 
@@ -117,18 +116,15 @@ export const dbAdminApi = baseApi.injectEndpoints({
      * POST /admin/db/snapshots/:id/restore
      * body: { truncateBefore?: boolean, dryRun?: boolean }
      * --------------------------------------------------------- */
-    restoreDbSnapshot: b.mutation<
-      DbImportResponse,
-      { id: string; dryRun?: boolean; truncateBefore?: boolean }
-    >({
+    restoreDbSnapshot: b.mutation<DbImportResponse, { id: string; dryRun?: boolean; truncateBefore?: boolean }>({
       query: ({ id, dryRun, truncateBefore }) => ({
         url: `${ADMIN_BASE}/snapshots/${encodeURIComponent(id)}/restore`,
-        method: 'POST',
+        method: "POST",
         body: {
           truncateBefore: truncateBefore ?? true,
           dryRun: dryRun ?? false,
         },
-        credentials: 'include',
+        credentials: "include",
       }),
     }),
 
@@ -138,8 +134,8 @@ export const dbAdminApi = baseApi.injectEndpoints({
     deleteDbSnapshot: b.mutation<DeleteSnapshotResponse, { id: string }>({
       query: ({ id }) => ({
         url: `${ADMIN_BASE}/snapshots/${encodeURIComponent(id)}`,
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
+        credentials: "include",
       }),
     }),
 
@@ -148,12 +144,12 @@ export const dbAdminApi = baseApi.injectEndpoints({
      * --------------------------------------------------------- */
     exportModuleSql: b.mutation<Blob, ModuleExportParams>({
       query: ({ module, upsert }) => ({
-        url: `${ADMIN_BASE}/export-module?module=${encodeURIComponent(module)}&upsert=${upsert ? '1' : '0'}`,
-        method: 'GET',
-        credentials: 'include',
+        url: `${ADMIN_BASE}/export-module?module=${encodeURIComponent(module)}&upsert=${upsert ? "1" : "0"}`,
+        method: "GET",
+        credentials: "include",
         responseHandler: (resp: Response) => resp.arrayBuffer(),
       }),
-      transformResponse: (ab: ArrayBuffer) => new Blob([ab], { type: 'application/sql' }),
+      transformResponse: (ab: ArrayBuffer) => new Blob([ab], { type: "application/sql" }),
     }),
 
     /* ---------------------------------------------------------
@@ -163,9 +159,9 @@ export const dbAdminApi = baseApi.injectEndpoints({
     importModuleSql: b.mutation<DbImportResponse, ModuleImportParams>({
       query: (body) => ({
         url: `${ADMIN_BASE}/import-module`,
-        method: 'POST',
+        method: "POST",
         body,
-        credentials: 'include',
+        credentials: "include",
       }),
     }),
 
@@ -175,12 +171,12 @@ export const dbAdminApi = baseApi.injectEndpoints({
     validateModuleManifest: b.query<ModuleValidateResponse, ModuleValidateParams>({
       query: ({ module, includeDbTables }) => {
         const params = new URLSearchParams();
-        module.forEach((m) => params.append('module', m));
-        if (includeDbTables) params.append('includeDbTables', '1');
+        module.forEach((m) => params.append("module", m));
+        if (includeDbTables) params.append("includeDbTables", "1");
         return {
           url: `${ADMIN_BASE}/modules/validate?${params.toString()}`,
-          method: 'GET',
-          credentials: 'include',
+          method: "GET",
+          credentials: "include",
         };
       },
     }),
@@ -188,15 +184,15 @@ export const dbAdminApi = baseApi.injectEndpoints({
     /* ---------------------------------------------------------
      * SITE SETTINGS UI EXPORT: GET /admin/db/site-settings/ui-export
      * --------------------------------------------------------- */
-    exportSiteSettingsUiJson: b.query<SiteSettingsUiExportResponse, SiteSettingsUiExportParams | void>({
+    exportSiteSettingsUiJson: b.query<SiteSettingsUiExportResponse, SiteSettingsUiExportParams | undefined>({
       query: (params) => {
         const qs = new URLSearchParams();
-        if (params?.fromLocale) qs.append('fromLocale', params.fromLocale);
-        if (params?.prefix) params.prefix.forEach((p) => qs.append('prefix', p));
+        if (params?.fromLocale) qs.append("fromLocale", params.fromLocale);
+        if (params?.prefix) params.prefix.forEach((p) => qs.append("prefix", p));
         return {
           url: `${ADMIN_BASE}/site-settings/ui-export?${qs.toString()}`,
-          method: 'GET',
-          credentials: 'include',
+          method: "GET",
+          credentials: "include",
         };
       },
     }),
@@ -207,9 +203,9 @@ export const dbAdminApi = baseApi.injectEndpoints({
     bootstrapSiteSettingsUiLocale: b.mutation<SiteSettingsUiBootstrapResponse, SiteSettingsUiBootstrapParams>({
       query: (body) => ({
         url: `${ADMIN_BASE}/site-settings/ui-bootstrap`,
-        method: 'POST',
+        method: "POST",
         body,
-        credentials: 'include',
+        credentials: "include",
       }),
     }),
   }),

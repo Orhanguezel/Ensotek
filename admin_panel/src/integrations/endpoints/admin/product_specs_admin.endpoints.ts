@@ -4,12 +4,12 @@
 // Routes: /admin/products/:id/specs
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
   AdminProductSpecDto,
   AdminProductSpecListParams,
   AdminProductSpecReplacePayload,
-} from '@/integrations/shared/product_specs_admin.types';
+} from "@/integrations/shared/product_specs_admin.types";
 
 export const productSpecsAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -17,15 +17,12 @@ export const productSpecsAdminApi = baseApi.injectEndpoints({
     listProductSpecsAdmin: build.query<AdminProductSpecDto[], AdminProductSpecListParams>({
       query: ({ productId, locale }) => ({
         url: `/admin/products/${encodeURIComponent(productId)}/specs`,
-        method: 'GET',
+        method: "GET",
         params: { locale },
-        credentials: 'include',
+        credentials: "include",
       }),
-      transformResponse: (response: AdminProductSpecDto[]) =>
-        Array.isArray(response) ? response : [],
-      providesTags: (result, error, { productId }) => [
-        { type: 'AdminProducts' as const, id: `SPECS_${productId}` },
-      ],
+      transformResponse: (response: AdminProductSpecDto[]) => (Array.isArray(response) ? response : []),
+      providesTags: (_result, _error, { productId }) => [{ type: "AdminProducts" as const, id: `SPECS_${productId}` }],
     }),
 
     // PUT /admin/products/:id/specs  (replace all)
@@ -35,21 +32,17 @@ export const productSpecsAdminApi = baseApi.injectEndpoints({
     >({
       query: ({ productId, locale, payload }) => ({
         url: `/admin/products/${encodeURIComponent(productId)}/specs`,
-        method: 'PUT',
+        method: "PUT",
         body: { ...payload, locale },
-        credentials: 'include',
+        credentials: "include",
       }),
-      transformResponse: (response: AdminProductSpecDto[]) =>
-        Array.isArray(response) ? response : [],
-      invalidatesTags: (result, error, { productId }) => [
-        { type: 'AdminProducts' as const, id: `SPECS_${productId}` },
+      transformResponse: (response: AdminProductSpecDto[]) => (Array.isArray(response) ? response : []),
+      invalidatesTags: (_result, _error, { productId }) => [
+        { type: "AdminProducts" as const, id: `SPECS_${productId}` },
       ],
     }),
   }),
   overrideExisting: false,
 });
 
-export const {
-  useListProductSpecsAdminQuery,
-  useReplaceProductSpecsAdminMutation,
-} = productSpecsAdminApi;
+export const { useListProductSpecsAdminQuery, useReplaceProductSpecsAdminMutation } = productSpecsAdminApi;

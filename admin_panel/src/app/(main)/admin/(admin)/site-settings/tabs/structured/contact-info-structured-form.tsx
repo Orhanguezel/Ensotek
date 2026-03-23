@@ -1,4 +1,3 @@
-
 // =============================================================
 // FILE: contact-info-structured-form.tsx
 // Bereket Fide — contact_info structured editor
@@ -6,20 +5,21 @@
 
 "use client";
 
-import React from "react";
+import type React from "react";
+
 import { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { useAdminTranslations } from "@/i18n";
-import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 import {
   SITE_SETTINGS_CONTACT_EMPTY,
   SITE_SETTINGS_CONTACT_FIELDS,
   toStructuredObjectSeed,
-} from '@/integrations/shared';
-
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 export const contactInfoSchema = z
   .object({
@@ -87,8 +87,10 @@ export const ContactInfoStructuredForm: React.FC<ContactInfoStructuredFormProps>
   const form = contactObjToForm(value, s);
 
   const field = (key: keyof ContactInfoFormState, label: string, opts?: { colSpan2?: boolean; textarea?: boolean }) => (
-    <div className={`space-y-2 ${opts?.colSpan2 ? 'md:col-span-2' : ''}`} key={key}>
-      <Label htmlFor={`contact-${key}`} className="text-sm">{label}</Label>
+    <div className={`space-y-2 ${opts?.colSpan2 ? "md:col-span-2" : ""}`} key={key}>
+      <Label htmlFor={`contact-${key}`} className="text-sm">
+        {label}
+      </Label>
       {opts?.textarea ? (
         <Textarea
           id={`contact-${key}`}
@@ -107,7 +109,7 @@ export const ContactInfoStructuredForm: React.FC<ContactInfoStructuredFormProps>
           disabled={disabled}
         />
       )}
-      {errors?.[key] && <p className="text-xs text-destructive">{errors[key]}</p>}
+      {errors?.[key] && <p className="text-destructive text-xs">{errors[key]}</p>}
     </div>
   );
 

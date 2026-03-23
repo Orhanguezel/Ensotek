@@ -5,18 +5,18 @@
 // - Provides: extractHtmlFromPost + sanitizeBlogHtml
 // =============================================================
 
-import type { CustomPageView } from '@/integrations/shared';
+import type { CustomPageView } from "@/integrations/shared";
 
-export const BLOG_MODULE_KEY = 'blog' as const;
+export const BLOG_MODULE_KEY = "blog" as const;
 
 export const formatIsoDate = (iso?: string) => {
-  if (!iso) return '—';
+  if (!iso) return "—";
   return iso.slice(0, 10);
 };
 
 export const pickCover = (p?: CustomPageView | null) => {
-  const fallback = '/assets/imgs/blog/blog-1/img-background.png';
-  if (!p) return { src: fallback, alt: 'Blog cover' };
+  const fallback = "/assets/imgs/blog/blog-1/img-background.png";
+  if (!p) return { src: fallback, alt: "Blog cover" };
 
   const src =
     p.featured_image_effective_url ||
@@ -27,7 +27,7 @@ export const pickCover = (p?: CustomPageView | null) => {
     (p.images as any)?.[0] ||
     fallback;
 
-  const alt = p.alt || p.title || 'Blog cover';
+  const alt = p.alt || p.title || "Blog cover";
   return { src, alt };
 };
 
@@ -51,18 +51,17 @@ export const isNotFoundError = (err: unknown) => {
 // ----------------------------- Content Helpers -----------------------------
 
 export function isRecord(v: unknown): v is Record<string, any> {
-  return !!v && typeof v === 'object' && !Array.isArray(v);
+  return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
-export const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+export const safeStr = (v: unknown) => (v === null || v === undefined ? "" : String(v).trim());
 
 export const tryParseJson = (v: unknown): unknown => {
-  if (typeof v !== 'string') return v;
+  if (typeof v !== "string") return v;
   const s0 = v.trim();
   if (!s0) return v;
 
-  const looksJson =
-    (s0.startsWith('{') && s0.endsWith('}')) || (s0.startsWith('[') && s0.endsWith(']'));
+  const looksJson = (s0.startsWith("{") && s0.endsWith("}")) || (s0.startsWith("[") && s0.endsWith("]"));
   if (!looksJson) return v;
 
   try {
@@ -80,15 +79,15 @@ export const tryParseJson = (v: unknown): unknown => {
  * It will return only the inner HTML if it can detect it.
  */
 export const unwrapHtmlJsonLike = (raw: string): string => {
-  const s = (raw || '').trim();
-  if (!s) return '';
+  const s = (raw || "").trim();
+  if (!s) return "";
 
   // fast path: proper JSON parse
-  if (s.startsWith('{') && s.includes('"html"')) {
+  if (s.startsWith("{") && s.includes('"html"')) {
     try {
       const parsed = JSON.parse(s);
       const html = (parsed as any)?.html;
-      if (typeof html === 'string' && html.trim()) return html.trim();
+      if (typeof html === "string" && html.trim()) return html.trim();
     } catch {
       // fallback below
     }
@@ -104,10 +103,10 @@ export const unwrapHtmlJsonLike = (raw: string): string => {
 
       // unescape common JSON escapes
       inner = inner.replace(/\\"/g, '"');
-      inner = inner.replace(/\\n/g, '\n');
-      inner = inner.replace(/\\r/g, '\r');
-      inner = inner.replace(/\\t/g, '\t');
-      inner = inner.replace(/\\\\/g, '\\');
+      inner = inner.replace(/\\n/g, "\n");
+      inner = inner.replace(/\\r/g, "\r");
+      inner = inner.replace(/\\t/g, "\t");
+      inner = inner.replace(/\\\\/g, "\\");
 
       return inner.trim();
     }
@@ -118,22 +117,22 @@ export const unwrapHtmlJsonLike = (raw: string): string => {
 
 export const extractHtmlFromContent = (raw: unknown): string => {
   // object {html:"..."}
-  if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+  if (raw && typeof raw === "object" && !Array.isArray(raw)) {
     const html = (raw as any)?.html;
-    if (typeof html === 'string' && html.trim()) return html.trim();
+    if (typeof html === "string" && html.trim()) return html.trim();
   }
 
   // string (may be JSON-string or broken JSON-string or raw html)
-  if (typeof raw === 'string') return unwrapHtmlJsonLike(raw);
+  if (typeof raw === "string") return unwrapHtmlJsonLike(raw);
 
   // parsed object already?
   const parsed = tryParseJson(raw);
-  if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+  if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
     const html = (parsed as any)?.html;
-    if (typeof html === 'string' && html.trim()) return html.trim();
+    if (typeof html === "string" && html.trim()) return html.trim();
   }
 
-  return '';
+  return "";
 };
 
 /**
@@ -145,10 +144,10 @@ export const extractHtmlFromContent = (raw: unknown): string => {
  * 4) post.content (raw HTML string)
  */
 export const extractHtmlFromPost = (post: CustomPageView | null): string => {
-  if (!post) return '';
+  if (!post) return "";
 
   const cHtml = (post as any)?.content_html;
-  if (typeof cHtml === 'string' && cHtml.trim()) return cHtml.trim();
+  if (typeof cHtml === "string" && cHtml.trim()) return cHtml.trim();
 
   const c = (post as any)?.content;
   return extractHtmlFromContent(c);
@@ -159,12 +158,12 @@ export const extractHtmlFromPost = (post: CustomPageView | null): string => {
  * (We DO NOT strip class="" or normal attributes.)
  */
 export const sanitizeBlogHtml = (input: string): string => {
-  if (!input) return '';
+  if (!input) return "";
   let out = input;
 
   // remove scripts/iframes
-  out = out.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-  out = out.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  out = out.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "");
+  out = out.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, "");
 
   // block javascript: in href/src
   out = out.replace(/\s(href|src)\s*=\s*(['"])\s*javascript:[^'"]*\2/gi, ' $1="#"');

@@ -1,9 +1,9 @@
 // =============================================================
 // FILE: src/components/admin/db/shared/HelpBlock.tsx
 // =============================================================
-'use client';
+"use client";
 
-import React from 'react';
+import type React from "react";
 
 export type HelpBlockProps = {
   headline?: string;

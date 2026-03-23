@@ -2,21 +2,22 @@
 // FILE: src/app/(main)/admin/(admin)/site-settings/tabs/structured/company-profile-structured-form.tsx
 // =============================================================
 
-'use client';
+"use client";
 
-import React from 'react';
-import { z } from 'zod';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import type React from "react";
+
+import { z } from "zod";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminTranslations } from "@/i18n";
 import {
   SITE_SETTINGS_COMPANY_PROFILE_EMPTY,
   SITE_SETTINGS_COMPANY_PROFILE_FIELDS,
   toStructuredObjectSeed,
-} from '@/integrations/shared';
-
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 export const companyProfileSchema = z
   .object({
@@ -44,9 +45,9 @@ export function companyObjToForm(v: any, seed: CompanyProfileFormState): Company
 
 export function companyFormToObj(s: CompanyProfileFormState) {
   return companyProfileSchema.parse({
-    company_name: s.company_name?.trim() || '',
-    slogan: s.slogan?.trim() || '',
-    about: s.about?.trim() || '',
+    company_name: s.company_name?.trim() || "",
+    slogan: s.slogan?.trim() || "",
+    about: s.about?.trim() || "",
   });
 }
 
@@ -66,36 +67,33 @@ export const CompanyProfileStructuredForm: React.FC<CompanyProfileStructuredForm
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {SITE_SETTINGS_COMPANY_PROFILE_FIELDS.map((field) => (
-        <div
-          key={field.key}
-          className={`space-y-2 ${field.colSpan2 ? 'md:col-span-2' : ''}`}
-        >
-          <Label htmlFor={`company-${field.key.replace('_', '-')}`} className="text-sm">
+        <div key={field.key} className={`space-y-2 ${field.colSpan2 ? "md:col-span-2" : ""}`}>
+          <Label htmlFor={`company-${field.key.replace("_", "-")}`} className="text-sm">
             {t(`admin.siteSettings.structured.companyProfile.labels.${field.labelKey}`)}
           </Label>
           {field.textarea ? (
             <Textarea
-              id={`company-${field.key.replace('_', '-')}`}
+              id={`company-${field.key.replace("_", "-")}`}
               rows={6}
-              value={(form[field.key as keyof CompanyProfileFormState] as string) || ''}
+              value={(form[field.key as keyof CompanyProfileFormState] as string) || ""}
               onChange={(e) => onChange({ ...form, [field.key]: e.target.value })}
               disabled={disabled}
               className="text-sm"
             />
           ) : (
             <Input
-              id={`company-${field.key.replace('_', '-')}`}
+              id={`company-${field.key.replace("_", "-")}`}
               className="h-8"
-              value={(form[field.key as keyof CompanyProfileFormState] as string) || ''}
+              value={(form[field.key as keyof CompanyProfileFormState] as string) || ""}
               onChange={(e) => onChange({ ...form, [field.key]: e.target.value })}
               disabled={disabled}
             />
           )}
-          {errors?.[field.key] && <p className="text-xs text-destructive">{errors[field.key]}</p>}
+          {errors?.[field.key] && <p className="text-destructive text-xs">{errors[field.key]}</p>}
         </div>
       ))}
     </div>
   );
 };
 
-CompanyProfileStructuredForm.displayName = 'CompanyProfileStructuredForm';
+CompanyProfileStructuredForm.displayName = "CompanyProfileStructuredForm";

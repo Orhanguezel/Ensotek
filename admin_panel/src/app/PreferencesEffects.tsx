@@ -1,18 +1,17 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
-import { useAppSelector } from '@/stores/hooks';
-import { persistPreference } from '@/lib/preferences/preferences-storage';
-
-import { applyThemeMode, applyThemePreset } from '@/lib/preferences/theme-utils';
 import {
   applyContentLayout,
+  applyFont,
   applyNavbarStyle,
   applySidebarCollapsible,
   applySidebarVariant,
-  applyFont,
-} from '@/lib/preferences/layout-utils';
+} from "@/lib/preferences/layout-utils";
+import { persistPreference } from "@/lib/preferences/preferences-storage";
+import { applyThemeMode, applyThemePreset } from "@/lib/preferences/theme-utils";
+import { useAppSelector } from "@/stores/hooks";
 
 export function PreferencesEffects() {
   const prefs = useAppSelector((s) => s.preferences);
@@ -41,13 +40,13 @@ export function PreferencesEffects() {
     }
 
     // persist (key names config ile uyumlu)
-    void persistPreference('theme_mode', prefs.themeMode);
-    void persistPreference('theme_preset', prefs.themePreset);
-    void persistPreference('font', prefs.font);
-    void persistPreference('content_layout', prefs.contentLayout);
-    void persistPreference('navbar_style', prefs.navbarStyle);
-    void persistPreference('sidebar_variant', prefs.sidebarVariant);
-    void persistPreference('sidebar_collapsible', prefs.sidebarCollapsible);
+    void persistPreference("theme_mode", prefs.themeMode);
+    void persistPreference("theme_preset", prefs.themePreset);
+    void persistPreference("font", prefs.font);
+    void persistPreference("content_layout", prefs.contentLayout);
+    void persistPreference("navbar_style", prefs.navbarStyle);
+    void persistPreference("sidebar_variant", prefs.sidebarVariant);
+    void persistPreference("sidebar_collapsible", prefs.sidebarCollapsible);
   }, [
     prefs.themeMode,
     prefs.themePreset,

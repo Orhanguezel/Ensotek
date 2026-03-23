@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/site-settings/_components/site-settings-form.tsx
@@ -11,32 +11,32 @@
 // - App Router safe (next/navigation)
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import * as React from "react";
 
+import { useRouter } from "next/navigation";
+
+import { toast } from "sonner";
+
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminTranslations } from "@/i18n";
 import {
   coerceSiteSettingsValue,
   getSiteSettingsActionErrorMessage,
   parseSiteSettingsRawValue,
   prettyStringifySiteSettingValue,
-  type SiteSetting,
   type SettingValue,
-} from '@/integrations/shared';
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
-
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+  type SiteSetting,
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 /* ----------------------------- types ----------------------------- */
 
-export type SiteSettingsFormMode = 'structured' | 'raw';
+export type SiteSettingsFormMode = "structured" | "raw";
 
 export type SiteSettingsFormProps = {
   settingKey: string;
@@ -80,7 +80,7 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
   locale,
   row,
   disabled,
-  initialMode = 'structured',
+  initialMode = "structured",
   onSave,
   onDelete,
   renderStructured,
@@ -91,68 +91,60 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
 
-  const canStructured = typeof renderStructured === 'function';
+  const canStructured = typeof renderStructured === "function";
 
   // Mode
   const [mode, setMode] = React.useState<SiteSettingsFormMode>(
-    initialMode === 'structured' && !canStructured ? 'raw' : initialMode,
+    initialMode === "structured" && !canStructured ? "raw" : initialMode,
   );
 
   // structured
   const [structuredValue, setStructuredValue] = React.useState<any>({});
 
   // raw
-  const [rawText, setRawText] = React.useState<string>('');
+  const [rawText, setRawText] = React.useState<string>("");
 
   const coercedInitial = React.useMemo(() => coerceSiteSettingsValue(row?.value), [row?.value]);
 
   // sync on key/locale/row change
   React.useEffect(() => {
     setStructuredValue(coercedInitial ?? {});
-    if (typeof row?.value === 'string') setRawText(row.value ?? '');
+    if (typeof row?.value === "string") setRawText(row.value ?? "");
     else setRawText(prettyStringifySiteSettingValue(coercedInitial));
-  }, [coercedInitial, row?.value, settingKey, locale]);
+  }, [coercedInitial, row?.value]);
 
   // guard: if structured renderer missing, force raw
   React.useEffect(() => {
-    if (mode === 'structured' && !canStructured) setMode('raw');
+    if (mode === "structured" && !canStructured) setMode("raw");
   }, [mode, canStructured]);
 
-  const openLibraryHref = imageUpload?.openLibraryHref ?? '/admin/storage';
-  const onOpenLibraryClick =
-    imageUpload?.onOpenLibraryClick ?? (() => router.push(openLibraryHref));
+  const openLibraryHref = imageUpload?.openLibraryHref ?? "/admin/storage";
+  const onOpenLibraryClick = imageUpload?.onOpenLibraryClick ?? (() => router.push(openLibraryHref));
 
   const handleSave = async () => {
     if (disabled) return;
 
     try {
-      const valueToSave: SettingValue =
-        mode === 'raw' ? parseSiteSettingsRawValue(rawText) : (structuredValue as any);
+      const valueToSave: SettingValue = mode === "raw" ? parseSiteSettingsRawValue(rawText) : (structuredValue as any);
 
       await onSave({ key: settingKey, locale, value: valueToSave });
-      toast.success(t('admin.siteSettings.form.saved', { key: settingKey, locale }));
+      toast.success(t("admin.siteSettings.form.saved", { key: settingKey, locale }));
     } catch (err: any) {
-      toast.error(
-        getSiteSettingsActionErrorMessage(err, t('admin.siteSettings.form.saveError')),
-      );
+      toast.error(getSiteSettingsActionErrorMessage(err, t("admin.siteSettings.form.saveError")));
     }
   };
 
   const handleDelete = async () => {
     if (!onDelete || disabled) return;
 
-    const ok = window.confirm(
-      t('admin.siteSettings.form.deleteConfirm', { key: settingKey, locale }),
-    );
+    const ok = window.confirm(t("admin.siteSettings.form.deleteConfirm", { key: settingKey, locale }));
     if (!ok) return;
 
     try {
       await onDelete({ key: settingKey, locale });
-      toast.success(t('admin.siteSettings.form.deleted', { key: settingKey, locale }));
+      toast.success(t("admin.siteSettings.form.deleted", { key: settingKey, locale }));
     } catch (err: any) {
-      toast.error(
-        getSiteSettingsActionErrorMessage(err, t('admin.siteSettings.form.deleteError')),
-      );
+      toast.error(getSiteSettingsActionErrorMessage(err, t("admin.siteSettings.form.deleteError")));
     }
   };
 
@@ -163,12 +155,12 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             {onDelete ? (
               <Button type="button" variant="outline" size="sm" onClick={handleDelete} disabled={disabled}>
-                {t('admin.siteSettings.actions.delete')}
+                {t("admin.siteSettings.actions.delete")}
               </Button>
             ) : null}
 
             <Button type="button" size="sm" onClick={handleSave} disabled={disabled}>
-              {t('admin.siteSettings.actions.save')}
+              {t("admin.siteSettings.actions.save")}
             </Button>
           </div>
         </div>
@@ -177,10 +169,10 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
         <Tabs value={mode} onValueChange={(v) => setMode(v as SiteSettingsFormMode)}>
           <TabsList className="w-fit">
             <TabsTrigger value="structured" disabled={!canStructured || !!disabled}>
-              {t('admin.siteSettings.form.modes.structured')}
+              {t("admin.siteSettings.form.modes.structured")}
             </TabsTrigger>
             <TabsTrigger value="raw" disabled={!!disabled}>
-              {t('admin.siteSettings.form.modes.raw')}
+              {t("admin.siteSettings.form.modes.raw")}
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -190,12 +182,12 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
         {showImageUpload ? (
           <div>
             <AdminImageUploadField
-              label={imageUpload?.label ?? t('admin.siteSettings.form.imageLabel')}
+              label={imageUpload?.label ?? t("admin.siteSettings.form.imageLabel")}
               helperText={imageUpload?.helperText}
-              bucket={imageUpload?.bucket ?? 'public'}
-              folder={imageUpload?.folder ?? 'uploads'}
+              bucket={imageUpload?.bucket ?? "public"}
+              folder={imageUpload?.folder ?? "uploads"}
               metadata={imageUpload?.metadata}
-              value={(imageUpload?.value ?? '') as any}
+              value={(imageUpload?.value ?? "") as any}
               onChange={(url) => imageUpload?.onChange?.(url)}
               disabled={disabled}
               openLibraryHref={openLibraryHref}
@@ -204,7 +196,7 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
           </div>
         ) : null}
 
-        {mode === 'structured' ? (
+        {mode === "structured" ? (
           canStructured ? (
             <div className="space-y-4">
               <div>
@@ -219,17 +211,13 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
             </div>
           ) : (
             <Alert>
-              <AlertTitle>{t('admin.siteSettings.form.structuredMissingTitle')}</AlertTitle>
-              <AlertDescription>
-                {t('admin.siteSettings.form.structuredMissingDesc')}
-              </AlertDescription>
+              <AlertTitle>{t("admin.siteSettings.form.structuredMissingTitle")}</AlertTitle>
+              <AlertDescription>{t("admin.siteSettings.form.structuredMissingDesc")}</AlertDescription>
             </Alert>
           )
         ) : (
           <div className="space-y-3">
-            <div className="text-sm text-muted-foreground">
-              {t('admin.siteSettings.form.rawHelp')}
-            </div>
+            <div className="text-muted-foreground text-sm">{t("admin.siteSettings.form.rawHelp")}</div>
 
             <Textarea
               value={rawText}
@@ -238,12 +226,10 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
               disabled={disabled}
               spellCheck={false}
               className="font-mono"
-              placeholder={t('admin.siteSettings.form.rawPlaceholder')}
+              placeholder={t("admin.siteSettings.form.rawPlaceholder")}
             />
 
-            <div className="text-xs text-muted-foreground">
-              {t('admin.siteSettings.form.rawTip')}
-            </div>
+            <div className="text-muted-foreground text-xs">{t("admin.siteSettings.form.rawTip")}</div>
           </div>
         )}
       </CardContent>
@@ -251,4 +237,4 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
   );
 };
 
-SiteSettingsForm.displayName = 'SiteSettingsForm';
+SiteSettingsForm.displayName = "SiteSettingsForm";

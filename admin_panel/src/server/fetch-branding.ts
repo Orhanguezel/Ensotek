@@ -3,20 +3,20 @@
 // Server-only utility — SSR'da branding config'i backend'den çeker
 // =============================================================
 
-import { DEFAULT_BRANDING, type AdminBrandingConfig } from '@/config/app-config';
+import { type AdminBrandingConfig, DEFAULT_BRANDING } from "@/config/app-config";
 
 /**
  * Backend API base URL (server-side only).
  * PANEL_API_URL > NEXT_PUBLIC_API_URL > fallback
  */
 function getServerApiUrl(): string {
-  const panel = (process.env.PANEL_API_URL || '').trim().replace(/\/+$/, '');
+  const panel = (process.env.PANEL_API_URL || "").trim().replace(/\/+$/, "");
   if (panel) return `${panel}/api`;
 
-  const pub = (process.env.NEXT_PUBLIC_API_URL || '').trim().replace(/\/+$/, '');
+  const pub = (process.env.NEXT_PUBLIC_API_URL || "").trim().replace(/\/+$/, "");
   if (pub) return pub;
 
-  return 'http://localhost:8093/api';
+  return "http://localhost:8093/api";
 }
 
 /**
@@ -34,7 +34,7 @@ export async function fetchBrandingConfig(): Promise<AdminBrandingConfig> {
     if (!res.ok) return DEFAULT_BRANDING;
 
     const data = await res.json();
-    const value = typeof data.value === 'string' ? JSON.parse(data.value) : data.value;
+    const value = typeof data.value === "string" ? JSON.parse(data.value) : data.value;
     const branding = value?.branding;
 
     if (!branding?.meta?.title) return DEFAULT_BRANDING;

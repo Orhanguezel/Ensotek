@@ -6,10 +6,11 @@
 // - Produces AdminLocaleOption[]
 // =============================================================
 
-import { useMemo } from 'react';
-import { useListSiteSettingsAdminQuery } from '@/integrations/hooks';
+import { useMemo } from "react";
 
-import type { AdminLocaleOption } from './AdminLocaleSelect';
+import { useListSiteSettingsAdminQuery } from "@/integrations/hooks";
+
+import type { AdminLocaleOption } from "./AdminLocaleSelect";
 
 type AppLocaleItem = {
   code: string;
@@ -19,11 +20,11 @@ type AppLocaleItem = {
 };
 
 const toShortLocale = (v: unknown): string =>
-  String(v || '')
+  String(v || "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 
 function uniqByCode(items: AppLocaleItem[]): AppLocaleItem[] {
@@ -41,16 +42,16 @@ function uniqByCode(items: AppLocaleItem[]): AppLocaleItem[] {
 
 function buildLocaleLabel(item: AppLocaleItem): string {
   const code = toShortLocale(item.code);
-  const label = String(item.label || '').trim();
+  const label = String(item.label || "").trim();
   if (label) return `${label} (${code})`;
 
   let dn: Intl.DisplayNames | null = null;
   try {
-    dn = new Intl.DisplayNames(['de'], { type: 'language' });
+    dn = new Intl.DisplayNames(["de"], { type: "language" });
   } catch {
     dn = null;
   }
-  const name = dn?.of(code) ?? '';
+  const name = dn?.of(code) ?? "";
   return name ? `${name} (${code})` : `${code.toUpperCase()} (${code})`;
 }
 
@@ -62,7 +63,7 @@ function parseAppLocalesValue(raw: unknown): AppLocaleItem[] {
     return raw
       .map((x: any) => ({
         code: toShortLocale(x?.code ?? x),
-        label: typeof x?.label === 'string' ? x.label : undefined,
+        label: typeof x?.label === "string" ? x.label : undefined,
         is_active: x?.is_active,
         is_default: x?.is_default,
       }))
@@ -70,7 +71,7 @@ function parseAppLocalesValue(raw: unknown): AppLocaleItem[] {
   }
 
   // DB stringified JSON
-  if (typeof raw === 'string') {
+  if (typeof raw === "string") {
     const s = raw.trim();
     if (!s) return [];
     try {
@@ -82,7 +83,7 @@ function parseAppLocalesValue(raw: unknown): AppLocaleItem[] {
   }
 
   // DB object: { locales: [...] }
-  if (typeof raw === 'object' && raw !== null) {
+  if (typeof raw === "object" && raw !== null) {
     const anyObj = raw as any;
     if (Array.isArray(anyObj.locales)) return parseAppLocalesValue(anyObj.locales);
   }
@@ -106,18 +107,18 @@ export function useAdminLocales(): UseAdminLocalesResult {
     isLoading,
     isFetching,
   } = useListSiteSettingsAdminQuery({
-    keys: ['app_locales', 'default_locale'],
+    keys: ["app_locales", "default_locale"],
   });
 
   const computed = useMemo(() => {
     const list = rows ?? [];
-    const appRow = list.find((r: any) => r.key === 'app_locales');
-    const defRow = list.find((r: any) => r.key === 'default_locale');
+    const appRow = list.find((r: any) => r.key === "app_locales");
+    const defRow = list.find((r: any) => r.key === "default_locale");
 
     const itemsRaw = parseAppLocalesValue(appRow?.value);
 
     // active filter: default true unless explicitly false
-    const active = itemsRaw.filter((x) => x && x.code && x.is_active !== false);
+    const active = itemsRaw.filter((x) => x?.code && x.is_active !== false);
     const uniq = uniqByCode(active);
 
     const codes = uniq.map((x) => toShortLocale(x.code)).filter(Boolean);
@@ -128,12 +129,12 @@ export function useAdminLocales(): UseAdminLocalesResult {
     // if default_locale empty -> try app_locales is_default
     if (!def) {
       const flagged = uniq.find((x) => x.is_default === true);
-      def = flagged ? toShortLocale(flagged.code) : '';
+      def = flagged ? toShortLocale(flagged.code) : "";
     }
 
     // if default still not in active list -> pick first active
     if (def && !codes.includes(def)) {
-      def = codes[0] ?? '';
+      def = codes[0] ?? "";
     }
 
     const options: AdminLocaleOption[] = uniq.map((it) => ({
@@ -156,7 +157,7 @@ export function useAdminLocales(): UseAdminLocalesResult {
 
       // last resort: default or first active
       if (def && set.has(def)) return def;
-      return codes[0] ?? '';
+      return codes[0] ?? "";
     };
 
     return {

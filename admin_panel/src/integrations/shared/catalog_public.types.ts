@@ -4,7 +4,7 @@
 // - DTO & Status single source: ./catalog.types
 // =============================================================
 
-import type { BoolLike,CatalogRequestDto } from '@/integrations/shared';
+import type { BoolLike, CatalogRequestDto } from "@/integrations/shared";
 
 export type CreateCatalogRequestPublicBody = {
   locale?: string;

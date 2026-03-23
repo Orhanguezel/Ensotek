@@ -3,7 +3,7 @@
 // FINAL — Admin Reviews Page
 // =============================================================
 
-import AdminReviewsClient from './_components/admin-reviews-client';
+import AdminReviewsClient from "./_components/admin-reviews-client";
 
 export default function Page() {
   return <AdminReviewsClient />;

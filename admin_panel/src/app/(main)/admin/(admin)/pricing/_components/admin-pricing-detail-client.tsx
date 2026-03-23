@@ -1,42 +1,42 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/pricing/admin-pricing-detail-client.tsx
 // FINAL — Admin Pricing Create/Edit
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter } from "next/navigation";
 
-import { AdminJsonEditor } from '@/app/(main)/admin/_components/common/AdminJsonEditor';
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
+import { toast } from "sonner";
 
-import type { PricingPlanAdmin, UpsertPricingPlanInput } from '@/integrations/shared';
-import { isUuidLike } from '@/integrations/shared';
+import { AdminJsonEditor } from "@/app/(main)/admin/_components/common/AdminJsonEditor";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
-  useGetPricingPlanAdminQuery,
   useCreatePricingPlanAdminMutation,
+  useGetPricingPlanAdminQuery,
   useUpdatePricingPlanAdminMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/hooks";
+import type { PricingPlanAdmin, UpsertPricingPlanInput } from "@/integrations/shared";
+import { isUuidLike } from "@/integrations/shared";
 
 type FormState = UpsertPricingPlanInput & { id?: string };
 
 const emptyForm: FormState = {
-  code: '',
-  price_amount: '',
-  price_unit: 'month',
-  currency: 'EUR',
+  code: "",
+  price_amount: "",
+  price_unit: "month",
+  currency: "EUR",
   is_active: true,
   is_featured: false,
   display_order: 0,
-  cta_href: '',
+  cta_href: "",
   i18n: [],
 };
 
@@ -46,7 +46,7 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
   const page = copy.pages?.pricing_detail ?? {};
   const common = copy.common;
 
-  const isCreate = String(id) === 'new';
+  const isCreate = String(id) === "new";
   const canLoad = !isCreate && isUuidLike(id);
 
   const planQ = useGetPricingPlanAdminQuery(id, { skip: !canLoad, refetchOnMountOrArgChange: true });
@@ -67,7 +67,7 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
         is_active: plan.is_active,
         is_featured: plan.is_featured,
         display_order: plan.display_order,
-        cta_href: plan.cta_href ?? '',
+        cta_href: plan.cta_href ?? "",
         i18n: plan.i18n ?? [],
       });
     }
@@ -76,11 +76,11 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
 
   async function onSave() {
     if (!form.code.trim()) {
-      toast.error(page?.code_required || '');
+      toast.error(page?.code_required || "");
       return;
     }
     if (!form.i18n || form.i18n.length === 0) {
-      toast.error(page?.i18n_required || '');
+      toast.error(page?.i18n_required || "");
       return;
     }
 
@@ -88,8 +88,8 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
       const payload: UpsertPricingPlanInput = {
         code: form.code.trim(),
         price_amount: form.price_amount,
-        price_unit: form.price_unit ?? 'month',
-        currency: form.currency ?? 'EUR',
+        price_unit: form.price_unit ?? "month",
+        currency: form.currency ?? "EUR",
         is_active: !!form.is_active,
         is_featured: !!form.is_featured,
         display_order: Number(form.display_order ?? 0),
@@ -100,16 +100,16 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
       if (isCreate) {
         const created = await createPlan(payload).unwrap();
         if (created?.id) {
-          toast.success(common?.actions?.save || '');
+          toast.success(common?.actions?.save || "");
           router.replace(`/admin/pricing/${encodeURIComponent(created.id)}`);
           return;
         }
       } else if (form.id) {
         await updatePlan({ id: form.id, patch: payload }).unwrap();
-        toast.success(common?.actions?.save || '');
+        toast.success(common?.actions?.save || "");
       }
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   }
 
@@ -117,13 +117,11 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">
-            {isCreate ? page?.create_title : page?.edit_title}
-          </h1>
-          <p className="text-sm text-muted-foreground">{page?.subtitle}</p>
+          <h1 className="font-semibold text-lg">{isCreate ? page?.create_title : page?.edit_title}</h1>
+          <p className="text-muted-foreground text-sm">{page?.subtitle}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => router.push('/admin/pricing')}>
+          <Button variant="outline" onClick={() => router.push("/admin/pricing")}>
             {common?.actions?.back}
           </Button>
           <Button onClick={onSave} disabled={createState.isLoading || updateState.isLoading}>
@@ -145,23 +143,32 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
             </div>
             <div className="space-y-2">
               <Label>{page?.currency_label}</Label>
-              <Input value={form.currency ?? ''} onChange={(e) => setForm((p) => ({ ...p, currency: e.target.value }))} />
+              <Input
+                value={form.currency ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, currency: e.target.value }))}
+              />
             </div>
             <div className="space-y-2">
               <Label>{page?.price_amount_label}</Label>
               <Input
                 type="number"
-                value={form.price_amount ?? ''}
+                value={form.price_amount ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, price_amount: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
               <Label>{page?.price_unit_label}</Label>
-              <Input value={form.price_unit ?? ''} onChange={(e) => setForm((p) => ({ ...p, price_unit: e.target.value }))} />
+              <Input
+                value={form.price_unit ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, price_unit: e.target.value }))}
+              />
             </div>
             <div className="space-y-2">
               <Label>{page?.cta_href_label}</Label>
-              <Input value={form.cta_href ?? ''} onChange={(e) => setForm((p) => ({ ...p, cta_href: e.target.value }))} />
+              <Input
+                value={form.cta_href ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, cta_href: e.target.value }))}
+              />
             </div>
             <div className="space-y-2">
               <Label>{page?.order_label}</Label>
@@ -176,7 +183,10 @@ export default function AdminPricingDetailClient({ id }: { id: string }) {
               <Label>{page?.active_label}</Label>
             </div>
             <div className="flex items-center gap-2 pt-6">
-              <Switch checked={!!form.is_featured} onCheckedChange={(v) => setForm((p) => ({ ...p, is_featured: v }))} />
+              <Switch
+                checked={!!form.is_featured}
+                onCheckedChange={(v) => setForm((p) => ({ ...p, is_featured: v }))}
+              />
               <Label>{page?.featured_label}</Label>
             </div>
           </CardContent>

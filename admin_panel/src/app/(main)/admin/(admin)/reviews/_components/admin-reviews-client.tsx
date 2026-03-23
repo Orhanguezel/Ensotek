@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/reviews/admin-reviews-client.tsx
@@ -7,57 +7,16 @@
 // ✅ FIXED - resolveAdminApiLocale usage corrected
 // =============================================================
 
-import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import {
-  Plus,
-  RefreshCcw,
-  Search,
-  Trash2,
-  Pencil,
-  Loader2,
-  Star,
-  CheckCircle2,
-  XCircle,
-} from 'lucide-react';
+import * as React from "react";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { cn } from '@/lib/utils';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import { CheckCircle2, Loader2, Pencil, Plus, RefreshCcw, Search, Star, Trash2, XCircle } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -67,17 +26,28 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import type { AdminReviewDto, AdminReviewListQueryParams } from '@/integrations/shared';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClient, localeShortClientOr } from "@/i18n/localeShortClient";
 import {
+  useDeleteReviewAdminMutation,
   useListReviewsAdminQuery,
   useUpdateReviewAdminMutation,
-  useDeleteReviewAdminMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/hooks";
+import type { AdminReviewDto, AdminReviewListQueryParams } from "@/integrations/shared";
+import { cn } from "@/lib/utils";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
-type ApprovedFilter = 'all' | 'approved' | 'unapproved';
-type ActiveFilter = 'all' | 'active' | 'inactive';
+type ApprovedFilter = "all" | "approved" | "unapproved";
+type ActiveFilter = "all" | "active" | "inactive";
 
 type Filters = {
   search: string;
@@ -89,16 +59,16 @@ type Filters = {
 };
 
 function fmtDate(val: string | null | undefined, locale?: string) {
-  if (!val) return '-';
+  if (!val) return "-";
   try {
     const d = new Date(val);
     if (Number.isNaN(d.getTime())) return String(val);
     return d.toLocaleString(locale || undefined, {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   } catch {
     return String(val);
@@ -106,9 +76,9 @@ function fmtDate(val: string | null | undefined, locale?: string) {
 }
 
 function truncate(text: string | null | undefined, max = 60) {
-  const t = text || '';
-  if (t.length <= max) return t || '-';
-  return t.slice(0, max - 1) + '…';
+  const t = text || "";
+  if (t.length <= max) return t || "-";
+  return `${t.slice(0, max - 1)}…`;
 }
 
 function getErrMsg(e: unknown, fallback: string): string {
@@ -123,10 +93,7 @@ function RatingStars({ rating }: { rating: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <Star
           key={i}
-          className={cn(
-            'size-3.5',
-            i < stars ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground',
-          )}
+          className={cn("size-3.5", i < stars ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")}
         />
       ))}
     </div>
@@ -136,38 +103,31 @@ function RatingStars({ rating }: { rating: number }) {
 export default function AdminReviewsClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const t = useAdminT('admin.reviews');
+  const t = useAdminT("admin.reviews");
   const adminUiLocale = usePreferencesStore((s) => s.adminLocale);
 
   // Locale management
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    coerceLocale,
-    loading: localesLoading,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, coerceLocale, loading: localesLoading } = useAdminLocales();
 
   // ✅ FIX: Ensure localeOptions has correct type
   const safeLocaleOptions: AdminLocaleOption[] = React.useMemo(() => {
     if (!Array.isArray(localeOptions)) return [];
     return localeOptions.map((opt) => ({
-      value: opt.value || '',
-      label: opt.label || opt.value || '',
+      value: opt.value || "",
+      label: opt.label || opt.value || "",
     }));
   }, [localeOptions]);
 
-  const urlLocale = localeShortClient(searchParams.get('locale') || '');
+  const urlLocale = localeShortClient(searchParams.get("locale") || "");
   const initialLocale =
-    urlLocale ||
-    defaultLocaleFromDb ||
-    localeShortClientOr(typeof window !== 'undefined' ? navigator.language : 'de');
+    urlLocale || defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "de");
 
   const [filters, setFilters] = React.useState<Filters>({
-    search: '',
-    approvedFilter: 'all',
-    activeFilter: 'all',
-    minRating: '',
-    maxRating: '',
+    search: "",
+    approvedFilter: "all",
+    activeFilter: "all",
+    minRating: "",
+    maxRating: "",
     locale: initialLocale,
   });
 
@@ -175,10 +135,10 @@ export default function AdminReviewsClient() {
   React.useEffect(() => {
     const next = localeShortClient(filters.locale);
     if (!next) return;
-    const cur = localeShortClient(searchParams.get('locale') || '');
+    const cur = localeShortClient(searchParams.get("locale") || "");
     if (cur === next) return;
     const params = new URLSearchParams(searchParams.toString());
-    params.set('locale', next);
+    params.set("locale", next);
     router.replace(`?${params.toString()}`, { scroll: false });
   }, [filters.locale, router, searchParams]);
 
@@ -186,28 +146,18 @@ export default function AdminReviewsClient() {
   const queryParams = React.useMemo((): AdminReviewListQueryParams => {
     // ✅ FIXED: Correct usage of resolveAdminApiLocale with all parameters
     const apiLocale =
-      localeShortClient(filters.locale) ||
-      resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, 'de');
+      localeShortClient(filters.locale) || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "de");
 
     return {
       search: filters.search || undefined,
       approved:
-        filters.approvedFilter === 'approved'
-          ? true
-          : filters.approvedFilter === 'unapproved'
-            ? false
-            : undefined,
-      active:
-        filters.activeFilter === 'active'
-          ? true
-          : filters.activeFilter === 'inactive'
-            ? false
-            : undefined,
+        filters.approvedFilter === "approved" ? true : filters.approvedFilter === "unapproved" ? false : undefined,
+      active: filters.activeFilter === "active" ? true : filters.activeFilter === "inactive" ? false : undefined,
       minRating: filters.minRating ? Number(filters.minRating) : undefined,
       maxRating: filters.maxRating ? Number(filters.maxRating) : undefined,
       locale: apiLocale,
-      orderBy: 'created_at',
-      order: 'desc',
+      orderBy: "created_at",
+      order: "desc",
     };
   }, [filters, localeOptions, defaultLocaleFromDb]);
 
@@ -247,10 +197,10 @@ export default function AdminReviewsClient() {
         id: item.id,
         patch: { is_active: !item.is_active },
       }).unwrap();
-      toast.success(item.is_active ? t('messages.deactivated') : t('messages.activated'));
+      toast.success(item.is_active ? t("messages.deactivated") : t("messages.activated"));
       refetch();
     } catch (err) {
-      toast.error(getErrMsg(err, t('messages.genericError')));
+      toast.error(getErrMsg(err, t("messages.genericError")));
     }
   };
 
@@ -260,10 +210,10 @@ export default function AdminReviewsClient() {
         id: item.id,
         patch: { is_approved: !item.is_approved },
       }).unwrap();
-      toast.success(item.is_approved ? t('messages.approvalRemoved') : t('messages.approved'));
+      toast.success(item.is_approved ? t("messages.approvalRemoved") : t("messages.approved"));
       refetch();
     } catch (err) {
-      toast.error(getErrMsg(err, t('messages.genericError')));
+      toast.error(getErrMsg(err, t("messages.genericError")));
     }
   };
 
@@ -281,12 +231,12 @@ export default function AdminReviewsClient() {
 
     try {
       await deleteReview({ id: itemToDelete.id }).unwrap();
-      toast.success(t('messages.deleted'));
+      toast.success(t("messages.deleted"));
       setDeleteDialogOpen(false);
       setItemToDelete(null);
       refetch();
     } catch (err) {
-      toast.error(getErrMsg(err, t('messages.genericError')));
+      toast.error(getErrMsg(err, t("messages.genericError")));
     }
   };
 
@@ -300,16 +250,12 @@ export default function AdminReviewsClient() {
           <CardHeader>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1.5">
-                <CardTitle>{t('header.title')}</CardTitle>
-                <CardDescription>{t('header.description')}</CardDescription>
+                <CardTitle>{t("header.title")}</CardTitle>
+                <CardDescription>{t("header.description")}</CardDescription>
               </div>
-              <Button
-                onClick={() => router.push('/admin/reviews/new')}
-                disabled={busy}
-                className="gap-2"
-              >
+              <Button onClick={() => router.push("/admin/reviews/new")} disabled={busy} className="gap-2">
                 <Plus className="size-4" />
-                {t('actions.create')}
+                {t("actions.create")}
               </Button>
             </div>
           </CardHeader>
@@ -320,13 +266,13 @@ export default function AdminReviewsClient() {
               {/* Search */}
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="search" className="text-sm">
-                  {t('filters.searchLabel')}
+                  {t("filters.searchLabel")}
                 </Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
                   <Input
                     id="search"
-                    placeholder={t('filters.searchPlaceholder')}
+                    placeholder={t("filters.searchPlaceholder")}
                     value={filters.search}
                     onChange={(e) => handleSearch(e.target.value)}
                     disabled={busy}
@@ -338,20 +284,16 @@ export default function AdminReviewsClient() {
               {/* Approved Filter */}
               <div className="space-y-2">
                 <Label htmlFor="approvedFilter" className="text-sm">
-                  {t('filters.approvedLabel')}
+                  {t("filters.approvedLabel")}
                 </Label>
-                <Select
-                  value={filters.approvedFilter}
-                  onValueChange={handleApprovedFilterChange}
-                  disabled={busy}
-                >
+                <Select value={filters.approvedFilter} onValueChange={handleApprovedFilterChange} disabled={busy}>
                   <SelectTrigger id="approvedFilter">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('filters.options.all')}</SelectItem>
-                    <SelectItem value="approved">{t('filters.options.approved')}</SelectItem>
-                    <SelectItem value="unapproved">{t('filters.options.unapproved')}</SelectItem>
+                    <SelectItem value="all">{t("filters.options.all")}</SelectItem>
+                    <SelectItem value="approved">{t("filters.options.approved")}</SelectItem>
+                    <SelectItem value="unapproved">{t("filters.options.unapproved")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -359,20 +301,16 @@ export default function AdminReviewsClient() {
               {/* Active Filter */}
               <div className="space-y-2">
                 <Label htmlFor="activeFilter" className="text-sm">
-                  {t('filters.activeLabel')}
+                  {t("filters.activeLabel")}
                 </Label>
-                <Select
-                  value={filters.activeFilter}
-                  onValueChange={handleActiveFilterChange}
-                  disabled={busy}
-                >
+                <Select value={filters.activeFilter} onValueChange={handleActiveFilterChange} disabled={busy}>
                   <SelectTrigger id="activeFilter">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('filters.options.all')}</SelectItem>
-                    <SelectItem value="active">{t('filters.options.active')}</SelectItem>
-                    <SelectItem value="inactive">{t('filters.options.inactive')}</SelectItem>
+                    <SelectItem value="all">{t("filters.options.all")}</SelectItem>
+                    <SelectItem value="active">{t("filters.options.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("filters.options.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -383,7 +321,7 @@ export default function AdminReviewsClient() {
               {/* Min Rating */}
               <div className="space-y-2">
                 <Label htmlFor="minRating" className="text-sm">
-                  {t('filters.minRatingLabel')}
+                  {t("filters.minRatingLabel")}
                 </Label>
                 <Input
                   id="minRating"
@@ -392,7 +330,7 @@ export default function AdminReviewsClient() {
                   max={5}
                   value={filters.minRating}
                   onChange={(e) => setFilters((prev) => ({ ...prev, minRating: e.target.value }))}
-                  placeholder={t('filters.minRatingPlaceholder')}
+                  placeholder={t("filters.minRatingPlaceholder")}
                   disabled={busy}
                 />
               </div>
@@ -400,7 +338,7 @@ export default function AdminReviewsClient() {
               {/* Max Rating */}
               <div className="space-y-2">
                 <Label htmlFor="maxRating" className="text-sm">
-                  {t('filters.maxRatingLabel')}
+                  {t("filters.maxRatingLabel")}
                 </Label>
                 <Input
                   id="maxRating"
@@ -409,7 +347,7 @@ export default function AdminReviewsClient() {
                   max={5}
                   value={filters.maxRating}
                   onChange={(e) => setFilters((prev) => ({ ...prev, maxRating: e.target.value }))}
-                  placeholder={t('filters.maxRatingPlaceholder')}
+                  placeholder={t("filters.maxRatingPlaceholder")}
                   disabled={busy}
                 />
               </div>
@@ -422,31 +360,26 @@ export default function AdminReviewsClient() {
                   options={safeLocaleOptions}
                   loading={localesLoading}
                   disabled={busy}
-                  label={t('filters.localeLabel')}
+                  label={t("filters.localeLabel")}
                 />
               </div>
 
               {/* Refresh */}
               <div className="flex items-end">
-                <Button
-                  variant="outline"
-                  onClick={() => refetch()}
-                  disabled={busy}
-                  className="w-full gap-2"
-                >
-                  <RefreshCcw className={cn('size-4', isFetching && 'animate-spin')} />
-                  {t('admin.common.refresh')}
+                <Button variant="outline" onClick={() => refetch()} disabled={busy} className="w-full gap-2">
+                  <RefreshCcw className={cn("size-4", isFetching && "animate-spin")} />
+                  {t("admin.common.refresh")}
                 </Button>
               </div>
             </div>
 
             {/* Info */}
-            <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
-              <span>{t('summary.total', { total })}</span>
+            <div className="flex items-center justify-between gap-2 text-muted-foreground text-sm">
+              <span>{t("summary.total", { total })}</span>
               {isFetching && (
                 <div className="flex items-center gap-2">
                   <Loader2 className="size-4 animate-spin" />
-                  <span>{t('admin.common.loading')}</span>
+                  <span>{t("admin.common.loading")}</span>
                 </div>
               )}
             </div>
@@ -459,14 +392,14 @@ export default function AdminReviewsClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('table.columns.nameEmail')}</TableHead>
-                  <TableHead className="w-32">{t('table.columns.rating')}</TableHead>
-                  <TableHead>{t('table.columns.comment')}</TableHead>
-                  <TableHead className="w-24 text-center">{t('table.columns.approved')}</TableHead>
-                  <TableHead className="w-24 text-center">{t('table.columns.active')}</TableHead>
-                  <TableHead className="w-32">{t('table.columns.locale')}</TableHead>
-                  <TableHead className="w-44">{t('table.columns.date')}</TableHead>
-                  <TableHead className="w-44 text-right">{t('admin.common.actions')}</TableHead>
+                  <TableHead>{t("table.columns.nameEmail")}</TableHead>
+                  <TableHead className="w-32">{t("table.columns.rating")}</TableHead>
+                  <TableHead>{t("table.columns.comment")}</TableHead>
+                  <TableHead className="w-24 text-center">{t("table.columns.approved")}</TableHead>
+                  <TableHead className="w-24 text-center">{t("table.columns.active")}</TableHead>
+                  <TableHead className="w-32">{t("table.columns.locale")}</TableHead>
+                  <TableHead className="w-44">{t("table.columns.date")}</TableHead>
+                  <TableHead className="w-44 text-right">{t("admin.common.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -475,14 +408,14 @@ export default function AdminReviewsClient() {
                     <TableCell colSpan={8} className="h-24 text-center">
                       <div className="flex items-center justify-center gap-2">
                         <Loader2 className="size-5 animate-spin" />
-                        <span>{t('admin.common.loading')}</span>
+                        <span>{t("admin.common.loading")}</span>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : items.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="h-24 text-center">
-                      {t('table.empty')}
+                      {t("table.empty")}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -490,14 +423,14 @@ export default function AdminReviewsClient() {
                     <TableRow key={item.id}>
                       <TableCell>
                         <div className="space-y-1">
-                          <div className="font-medium">{item.name || '-'}</div>
-                          <div className="text-xs text-muted-foreground">{item.email || '-'}</div>
+                          <div className="font-medium">{item.name || "-"}</div>
+                          <div className="text-muted-foreground text-xs">{item.email || "-"}</div>
                         </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
                           <RatingStars rating={item.rating} />
-                          <span className="text-xs text-muted-foreground">({item.rating})</span>
+                          <span className="text-muted-foreground text-xs">({item.rating})</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -526,17 +459,15 @@ export default function AdminReviewsClient() {
                       </TableCell>
                       <TableCell>
                         {item.locale_resolved || item.submitted_locale ? (
-                          <Badge variant="outline">
-                            {item.locale_resolved || item.submitted_locale}
-                          </Badge>
+                          <Badge variant="outline">{item.locale_resolved || item.submitted_locale}</Badge>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-xs text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-xs">
                         <div>{fmtDate(item.created_at, adminUiLocale)}</div>
                         <div className="text-[10px]">
-                          {t('table.updatedAt')}: {fmtDate(item.updated_at, adminUiLocale)}
+                          {t("table.updatedAt")}: {fmtDate(item.updated_at, adminUiLocale)}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
@@ -549,7 +480,7 @@ export default function AdminReviewsClient() {
                             className="gap-2"
                           >
                             <Pencil className="size-3.5" />
-                            {t('admin.common.edit')}
+                            {t("admin.common.edit")}
                           </Button>
                           <Button
                             variant="outline"
@@ -559,7 +490,7 @@ export default function AdminReviewsClient() {
                             className="gap-2"
                           >
                             <Trash2 className="size-3.5" />
-                            {t('admin.common.delete')}
+                            {t("admin.common.delete")}
                           </Button>
                         </div>
                       </TableCell>
@@ -578,15 +509,13 @@ export default function AdminReviewsClient() {
               <CardContent className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-2">
                   <Loader2 className="size-5 animate-spin" />
-                  <span>{t('admin.common.loading')}</span>
+                  <span>{t("admin.common.loading")}</span>
                 </div>
               </CardContent>
             </Card>
           ) : items.length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                {t('table.empty')}
-              </CardContent>
+              <CardContent className="py-12 text-center text-muted-foreground">{t("table.empty")}</CardContent>
             </Card>
           ) : (
             items.map((item) => (
@@ -594,18 +523,16 @@ export default function AdminReviewsClient() {
                 <CardContent className="space-y-4 pt-6">
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
-                      <h3 className="font-semibold">{item.name || '-'}</h3>
-                      <p className="text-xs text-muted-foreground">{item.email || '-'}</p>
+                      <h3 className="font-semibold">{item.name || "-"}</h3>
+                      <p className="text-muted-foreground text-xs">{item.email || "-"}</p>
                       <div className="flex items-center gap-2">
                         <RatingStars rating={item.rating} />
-                        <span className="text-xs text-muted-foreground">({item.rating})</span>
+                        <span className="text-muted-foreground text-xs">({item.rating})</span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
                       {item.locale_resolved || item.submitted_locale ? (
-                        <Badge variant="outline">
-                          {item.locale_resolved || item.submitted_locale}
-                        </Badge>
+                        <Badge variant="outline">{item.locale_resolved || item.submitted_locale}</Badge>
                       ) : null}
                       <div className="flex items-center gap-2">
                         <Button
@@ -613,7 +540,7 @@ export default function AdminReviewsClient() {
                           size="icon-sm"
                           onClick={() => handleToggleApproved(item)}
                           disabled={busy}
-                          title={item.is_approved ? t('labels.approved') : t('labels.unapproved')}
+                          title={item.is_approved ? t("labels.approved") : t("labels.unapproved")}
                         >
                           {item.is_approved ? (
                             <CheckCircle2 className="size-4 text-green-600" />
@@ -630,15 +557,15 @@ export default function AdminReviewsClient() {
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <Label className="text-xs text-muted-foreground">{t('labels.comment')}</Label>
+                    <Label className="text-muted-foreground text-xs">{t("labels.comment")}</Label>
                     <p className="text-sm">{truncate(item.comment, 120)}</p>
                   </div>
-                  <div className="space-y-1 text-xs text-muted-foreground">
+                  <div className="space-y-1 text-muted-foreground text-xs">
                     <div>
-                      {t('labels.createdAt')}: {fmtDate(item.created_at, adminUiLocale)}
+                      {t("labels.createdAt")}: {fmtDate(item.created_at, adminUiLocale)}
                     </div>
                     <div>
-                      {t('labels.updatedAt')}: {fmtDate(item.updated_at, adminUiLocale)}
+                      {t("labels.updatedAt")}: {fmtDate(item.updated_at, adminUiLocale)}
                     </div>
                   </div>
                   <div className="flex gap-2">
@@ -650,7 +577,7 @@ export default function AdminReviewsClient() {
                       className="flex-1 gap-2"
                     >
                       <Pencil className="size-3.5" />
-                      {t('admin.common.edit')}
+                      {t("admin.common.edit")}
                     </Button>
                     <Button
                       variant="outline"
@@ -660,7 +587,7 @@ export default function AdminReviewsClient() {
                       className="flex-1 gap-2"
                     >
                       <Trash2 className="size-3.5" />
-                      {t('admin.common.delete')}
+                      {t("admin.common.delete")}
                     </Button>
                   </div>
                 </CardContent>
@@ -674,18 +601,16 @@ export default function AdminReviewsClient() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteDialog.title')}</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('deleteDialog.description', {
-                name: itemToDelete?.name || t('deleteDialog.fallbackName'),
+              {t("deleteDialog.description", {
+                name: itemToDelete?.name || t("deleteDialog.fallbackName"),
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('admin.common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
-              {t('admin.common.delete')}
-            </AlertDialogAction>
+            <AlertDialogCancel>{t("admin.common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>{t("admin.common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -4,7 +4,7 @@
 // Route: /admin/categories/:id  (id: "new" | UUID)
 // =============================================================
 
-import CategoryDetailClient from '../_components/category-detail-client';
+import CategoryDetailClient from "../_components/category-detail-client";
 
 type Params = { id: string };
 

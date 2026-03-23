@@ -119,18 +119,18 @@ export type PatchPricingPlanInput = Partial<UpsertPricingPlanInput>;
 export function toAdminPricingQuery(p?: PricingPlanListParams) {
   if (!p) return undefined;
   const q: Record<string, any> = {};
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
   return q;
 }
 
 // Public: /pricing?locale=en&plans_limit=10
-export const toPublicPricingQuery = (p?: PricingPublicParams | void | null) => {
+export const toPublicPricingQuery = (p?: PricingPublicParams | undefined | null) => {
   const q: Record<string, any> = {};
   if (!p) return q;
 
   if (p.locale) q.locale = p.locale;
-  if (typeof p.plans_limit === 'number') q.plans_limit = p.plans_limit;
+  if (typeof p.plans_limit === "number") q.plans_limit = p.plans_limit;
 
   return q;
 };
@@ -140,15 +140,15 @@ export type Props = { locale: string };
 export const safeArr = <T>(v: unknown): T[] => (Array.isArray(v) ? (v as T[]) : []);
 
 export const money = (amount?: string, currency?: string) => {
-  const a = (amount ?? '0.00').toString();
-  const symbol = currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '$';
+  const a = (amount ?? "0.00").toString();
+  const symbol = currency === "EUR" ? "€" : currency === "GBP" ? "£" : "$";
   return `${symbol}${a}`;
 };
 
 export const unitText = (unit?: string) => {
-  const u = (unit || 'hour').toLowerCase();
-  if (u === 'hour' || u === 'hr') return '/H';
-  if (u === 'day') return '/Day';
-  if (u === 'month') return '/Month';
+  const u = (unit || "hour").toLowerCase();
+  if (u === "hour" || u === "hr") return "/H";
+  if (u === "day") return "/Day";
+  if (u === "month") return "/Month";
   return `/${u}`;
 };

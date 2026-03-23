@@ -2,17 +2,14 @@
 // FILE: src/integrations/baseApi.ts
 // Next.js FINAL (App Router compatible)
 // =============================================================
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type {
-  BaseQueryFn,
-  FetchArgs,
-  FetchBaseQueryError,
-  FetchBaseQueryMeta,
-} from '@reduxjs/toolkit/query';
 
-import { tags } from './tags';
-import { tokenStore } from '@/integrations/core/token';
-import { BASE_URL } from '@/integrations/apiBase';
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query";
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+import { BASE_URL } from "@/integrations/apiBase";
+import { tokenStore } from "@/integrations/core/token";
+
+import { tags } from "./tags";
 
 /* -------------------- helpers -------------------- */
 
@@ -20,10 +17,10 @@ function isAbsUrl(x: string) {
   return /^https?:\/\//i.test(x);
 }
 
-const DEBUG_API = String(process.env.NEXT_PUBLIC_DEBUG_API || '') === '1';
+const DEBUG_API = String(process.env.NEXT_PUBLIC_DEBUG_API || "") === "1";
 if (DEBUG_API) {
   // eslint-disable-next-line no-console
-  console.info('[gzl] BASE_URL =', BASE_URL);
+  console.info("[gzl] BASE_URL =", BASE_URL);
 }
 
 /* -------------------- guards -------------------- */
@@ -31,52 +28,52 @@ if (DEBUG_API) {
 type AnyArgs = string | FetchArgs;
 
 function isRecord(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 // Cross-realm FormData guard (SSR-safe)
 function isProbablyFormData(b: unknown): boolean {
-  return !!b && typeof b === 'object' && typeof (b as any).append === 'function';
+  return !!b && typeof b === "object" && typeof (b as any).append === "function";
 }
 
 // JSON body tespiti (FormData/Blob/ArrayBuffer hariç)
 function isJsonLikeBody(b: unknown): b is Record<string, unknown> {
-  if (typeof FormData !== 'undefined' && b instanceof FormData) return false;
-  if (typeof Blob !== 'undefined' && b instanceof Blob) return false;
-  if (typeof ArrayBuffer !== 'undefined' && b instanceof ArrayBuffer) return false;
+  if (typeof FormData !== "undefined" && b instanceof FormData) return false;
+  if (typeof Blob !== "undefined" && b instanceof Blob) return false;
+  if (typeof ArrayBuffer !== "undefined" && b instanceof ArrayBuffer) return false;
   if (isProbablyFormData(b)) return false;
   return isRecord(b);
 }
 
 const AUTH_SKIP_REAUTH = new Set<string>([
-  '/auth/token',
-  '/auth/signup',
-  '/auth/google',
-  '/auth/google/start',
-  '/auth/token/refresh',
-  '/auth/logout',
+  "/auth/token",
+  "/auth/signup",
+  "/auth/google",
+  "/auth/google/start",
+  "/auth/token/refresh",
+  "/auth/logout",
 ]);
 
 function extractPath(u: string): string {
   try {
     if (isAbsUrl(u)) {
       const url = new URL(u);
-      return url.pathname.replace(/\/+$/, '');
+      return url.pathname.replace(/\/+$/, "");
     }
-    return u.replace(/^https?:\/\/[^/]+/i, '').replace(/\/+$/, '');
+    return u.replace(/^https?:\/\/[^/]+/i, "").replace(/\/+$/, "");
   } catch {
-    return u.replace(/\/+$/, '');
+    return u.replace(/\/+$/, "");
   }
 }
 
 /** Göreli url'leri '/foo' formatına normalize et */
 function normalizeUrlArg(arg: AnyArgs): AnyArgs {
-  if (typeof arg === 'string') {
-    if (isAbsUrl(arg) || arg.startsWith('/')) return arg;
+  if (typeof arg === "string") {
+    if (isAbsUrl(arg) || arg.startsWith("/")) return arg;
     return `/${arg}`;
   }
-  const url = arg.url ?? '';
-  if (url && !isAbsUrl(url) && !url.startsWith('/')) {
+  const url = arg.url ?? "";
+  if (url && !isAbsUrl(url) && !url.startsWith("/")) {
     return { ...arg, url: `/${url}` };
   }
   return arg;
@@ -85,27 +82,27 @@ function normalizeUrlArg(arg: AnyArgs): AnyArgs {
 /* -------------------- defaults -------------------- */
 
 function getDefaultLocale(): string {
-  const envLocale = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE || '').trim();
+  const envLocale = (process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "").trim();
   if (envLocale) return envLocale;
 
-  if (typeof navigator !== 'undefined') {
-    return (navigator.language || 'tr').trim() || 'tr';
+  if (typeof navigator !== "undefined") {
+    return (navigator.language || "tr").trim() || "tr";
   }
-  return 'tr';
+  return "tr";
 }
 
 function safeGetLocalStorageItem(key: string): string {
   try {
-    if (typeof window === 'undefined') return '';
-    return localStorage.getItem(key) || '';
+    if (typeof window === "undefined") return "";
+    return localStorage.getItem(key) || "";
   } catch {
-    return '';
+    return "";
   }
 }
 
 function safeSetLocalStorageItem(key: string, value: string) {
   try {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     localStorage.setItem(key, value);
   } catch {
     // ignore
@@ -114,7 +111,7 @@ function safeSetLocalStorageItem(key: string, value: string) {
 
 function safeRemoveLocalStorageItem(key: string) {
   try {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
     localStorage.removeItem(key);
   } catch {
     // ignore
@@ -123,41 +120,35 @@ function safeRemoveLocalStorageItem(key: string) {
 
 /* -------------------- Base Query -------------------- */
 
-type RBQ = BaseQueryFn<
-  string | FetchArgs,
-  unknown,
-  FetchBaseQueryError,
-  unknown,
-  FetchBaseQueryMeta
->;
+type RBQ = BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, unknown, FetchBaseQueryMeta>;
 
 const rawBaseQuery: RBQ = fetchBaseQuery({
   baseUrl: BASE_URL,
-  credentials: 'include',
+  credentials: "include",
   prepareHeaders: (headers) => {
-    if (headers.get('x-skip-auth') === '1') {
-      headers.delete('x-skip-auth');
-      if (!headers.has('Accept')) headers.set('Accept', 'application/json');
-      if (!headers.has('Accept-Language')) headers.set('Accept-Language', getDefaultLocale());
+    if (headers.get("x-skip-auth") === "1") {
+      headers.delete("x-skip-auth");
+      if (!headers.has("Accept")) headers.set("Accept", "application/json");
+      if (!headers.has("Accept-Language")) headers.set("Accept-Language", getDefaultLocale());
       return headers;
     }
 
-    const token = tokenStore.get() || safeGetLocalStorageItem('mh_access_token');
+    const token = tokenStore.get() || safeGetLocalStorageItem("mh_access_token");
 
-    if (token && !headers.has('authorization')) {
-      headers.set('authorization', `Bearer ${token}`);
+    if (token && !headers.has("authorization")) {
+      headers.set("authorization", `Bearer ${token}`);
     }
 
-    if (!headers.has('Accept')) headers.set('Accept', 'application/json');
-    if (!headers.has('Accept-Language')) headers.set('Accept-Language', getDefaultLocale());
+    if (!headers.has("Accept")) headers.set("Accept", "application/json");
+    if (!headers.has("Accept-Language")) headers.set("Accept-Language", getDefaultLocale());
 
     return headers;
   },
 
   responseHandler: async (response) => {
-    const ct = response.headers.get('content-type') || '';
-    if (ct.includes('application/json')) return response.json();
-    if (ct.includes('text/')) return response.text();
+    const ct = response.headers.get("content-type") || "";
+    if (ct.includes("application/json")) return response.json();
+    if (ct.includes("text/")) return response.text();
 
     try {
       const t = await response.text();
@@ -177,18 +168,18 @@ async function coerceSerializableError(result: Awaited<ReturnType<typeof rawBase
 
   const d: any = (err as any).data;
   try {
-    if (typeof Blob !== 'undefined' && d instanceof Blob) {
-      let text = '';
+    if (typeof Blob !== "undefined" && d instanceof Blob) {
+      let text = "";
       try {
         text = await d.text();
       } catch {}
-      (err as any).data = text || `[binary ${d.type || 'unknown'} ${d.size ?? ''}B]`;
-    } else if (typeof ArrayBuffer !== 'undefined' && d instanceof ArrayBuffer) {
+      (err as any).data = text || `[binary ${d.type || "unknown"} ${d.size ?? ""}B]`;
+    } else if (typeof ArrayBuffer !== "undefined" && d instanceof ArrayBuffer) {
       const dec = new TextDecoder();
       (err as any).data = dec.decode(new Uint8Array(d));
     }
   } catch {
-    (err as any).data = String(d ?? '');
+    (err as any).data = String(d ?? "");
   }
   return result;
 }
@@ -199,10 +190,10 @@ function ensureProperHeaders(fa: FetchArgs): FetchArgs {
   const hdr = (next.headers as Record<string, string>) ?? {};
 
   if (isJsonLikeBody(next.body)) {
-    next.headers = { ...hdr, 'Content-Type': 'application/json' };
+    next.headers = { ...hdr, "Content-Type": "application/json" };
   } else {
-    if (hdr['Content-Type']) {
-      const { ['Content-Type']: _omit, ...rest } = hdr;
+    if (hdr["Content-Type"]) {
+      const { "Content-Type": _omit, ...rest } = hdr;
       next.headers = rest;
     }
   }
@@ -213,13 +204,13 @@ function ensureProperHeaders(fa: FetchArgs): FetchArgs {
 
 const baseQueryWithReauth: RBQ = async (args, api, extra) => {
   let req: AnyArgs = normalizeUrlArg(args);
-  const path = typeof req === 'string' ? req : req.url || '';
+  const path = typeof req === "string" ? req : req.url || "";
   const cleanPath = extractPath(path);
 
-  if (typeof req !== 'string') {
+  if (typeof req !== "string") {
     if (AUTH_SKIP_REAUTH.has(cleanPath)) {
       const orig = (req.headers as Record<string, string> | undefined) ?? {};
-      req.headers = { ...orig, 'x-skip-auth': '1' };
+      req.headers = { ...orig, "x-skip-auth": "1" };
     }
     req = ensureProperHeaders(req);
   }
@@ -230,9 +221,9 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
   if (result.error?.status === 401 && !AUTH_SKIP_REAUTH.has(cleanPath)) {
     const refreshRes = await rawBaseQuery(
       {
-        url: '/auth/token/refresh',
-        method: 'POST',
-        headers: { 'x-skip-auth': '1', Accept: 'application/json' },
+        url: "/auth/token/refresh",
+        method: "POST",
+        headers: { "x-skip-auth": "1", Accept: "application/json" },
       },
       api,
       extra,
@@ -243,10 +234,10 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
 
       if (access_token) {
         tokenStore.set(access_token);
-        safeSetLocalStorageItem('mh_access_token', access_token);
+        safeSetLocalStorageItem("mh_access_token", access_token);
 
         let retry: AnyArgs = normalizeUrlArg(args);
-        if (typeof retry !== 'string') {
+        if (typeof retry !== "string") {
           retry = ensureProperHeaders(retry);
         }
 
@@ -254,13 +245,13 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
         result = await coerceSerializableError(result);
       } else {
         tokenStore.set(null);
-        safeRemoveLocalStorageItem('mh_access_token');
-        safeRemoveLocalStorageItem('mh_refresh_token');
+        safeRemoveLocalStorageItem("mh_access_token");
+        safeRemoveLocalStorageItem("mh_refresh_token");
       }
     } else {
       tokenStore.set(null);
-      safeRemoveLocalStorageItem('mh_access_token');
-      safeRemoveLocalStorageItem('mh_refresh_token');
+      safeRemoveLocalStorageItem("mh_access_token");
+      safeRemoveLocalStorageItem("mh_refresh_token");
     }
   }
 
@@ -270,7 +261,7 @@ const baseQueryWithReauth: RBQ = async (args, api, extra) => {
 /* -------------------- API -------------------- */
 
 export const baseApi = createApi({
-  reducerPath: 'gwdApi',
+  reducerPath: "gwdApi",
   baseQuery: baseQueryWithReauth,
   endpoints: () => ({}),
   tagTypes: tags,

@@ -11,21 +11,21 @@
 /* Ensotek Brand Colors */
 :root {
   /* Logo Primary Colors */
-  --logo-coral-light: #F4BDB3;      /* Highlights, light bg text */
-  --logo-coral: #E8A598;            /* Main brand color */
-  --logo-coral-medium: #D88D7E;     /* Default logo on light */
-  --logo-coral-dark: #C77665;       /* Logo on very light bg */
-  --logo-coral-darkest: #A6604F;    /* Text, details */
-  
+  --logo-coral-light: #f4bdb3; /* Highlights, light bg text */
+  --logo-coral: #e8a598; /* Main brand color */
+  --logo-coral-medium: #d88d7e; /* Default logo on light */
+  --logo-coral-dark: #c77665; /* Logo on very light bg */
+  --logo-coral-darkest: #a6604f; /* Text, details */
+
   /* Background Colors for Logo */
-  --logo-bg-light: #FDFCFB;         /* Light mode primary */
-  --logo-bg-white: #FFFFFF;         /* Pure white */
-  --logo-bg-dark: #1A1512;          /* Dark mode */
-  --logo-bg-black: #0A0806;         /* Pure black */
-  
+  --logo-bg-light: #fdfcfb; /* Light mode primary */
+  --logo-bg-white: #ffffff; /* Pure white */
+  --logo-bg-dark: #1a1512; /* Dark mode */
+  --logo-bg-black: #0a0806; /* Pure black */
+
   /* Logo Accents */
-  --logo-gold: #E8C57A;             /* Accent touch */
-  --logo-shadow: rgba(232, 165, 152, 0.15);  /* Soft glow */
+  --logo-gold: #e8c57a; /* Accent touch */
+  --logo-shadow: rgba(232, 165, 152, 0.15); /* Soft glow */
 }
 
 @custom-variant dark (&:is(.dark *));

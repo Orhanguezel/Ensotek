@@ -3,7 +3,7 @@
 // Ensotek — Admin Categories Page
 // =============================================================
 
-import CategoriesPage from './categories';
+import CategoriesPage from "./categories";
 
 export default function Page() {
   return <CategoriesPage />;

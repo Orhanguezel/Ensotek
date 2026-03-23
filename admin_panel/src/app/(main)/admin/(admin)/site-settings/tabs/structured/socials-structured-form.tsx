@@ -1,19 +1,19 @@
-
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/site-settings/tabs/structured/socials-structured-form.tsx
 // =============================================================
 
 "use client";
 
-import React from "react";
-import { z } from "zod";
-import { useAdminTranslations } from "@/i18n";
-import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
-import { SITE_SETTINGS_SOCIAL_KEYS, toStructuredObjectSeed } from '@/integrations/shared';
+import type React from "react";
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAdminTranslations } from "@/i18n";
+import { SITE_SETTINGS_SOCIAL_KEYS, toStructuredObjectSeed } from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 export const socialsSchema = z
   .object({
@@ -61,14 +61,12 @@ export const SocialsStructuredForm: React.FC<SocialsStructuredFormProps> = ({
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
 
-  const s =
-    (seed || { instagram: "", facebook: "", linkedin: "", youtube: "", x: "" }) as SocialsFormState;
+  const s = (seed || { instagram: "", facebook: "", linkedin: "", youtube: "", x: "" }) as SocialsFormState;
   const form = socialsObjToForm(value, s);
 
-  const fields = SITE_SETTINGS_SOCIAL_KEYS.map((key) => [
-    key,
-    t(`admin.siteSettings.structured.socials.labels.${key}`),
-  ] as const);
+  const fields = SITE_SETTINGS_SOCIAL_KEYS.map(
+    (key) => [key, t(`admin.siteSettings.structured.socials.labels.${key}`)] as const,
+  );
 
   return (
     <div className="space-y-4">
@@ -81,7 +79,9 @@ export const SocialsStructuredForm: React.FC<SocialsStructuredFormProps> = ({
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {fields.map(([k, label]) => (
           <div className="space-y-2" key={k}>
-            <Label htmlFor={`social-${k}`} className="text-sm">{label}</Label>
+            <Label htmlFor={`social-${k}`} className="text-sm">
+              {label}
+            </Label>
             <Input
               id={`social-${k}`}
               className="h-8"
@@ -89,7 +89,7 @@ export const SocialsStructuredForm: React.FC<SocialsStructuredFormProps> = ({
               onChange={(e) => onChange({ ...(form as any), [k]: e.target.value })}
               disabled={disabled}
             />
-            {errors?.[k] && <p className="text-xs text-destructive">{errors[k]}</p>}
+            {errors?.[k] && <p className="text-destructive text-xs">{errors[k]}</p>}
           </div>
         ))}
       </div>

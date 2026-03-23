@@ -13,22 +13,22 @@ export type SiteSettingsInlineSeoPage = {
 };
 
 export type SiteSettingsInlineSeoPageKey =
-  | 'home'
-  | 'product'
-  | 'sparepart'
-  | 'service'
-  | 'solutions'
-  | 'about'
-  | 'team'
-  | 'mission_vision'
-  | 'quality'
-  | 'news'
-  | 'blog'
-  | 'library'
-  | 'faqs'
-  | 'contact'
-  | 'offer'
-  | 'legal';
+  | "home"
+  | "product"
+  | "sparepart"
+  | "service"
+  | "solutions"
+  | "about"
+  | "team"
+  | "mission_vision"
+  | "quality"
+  | "news"
+  | "blog"
+  | "library"
+  | "faqs"
+  | "contact"
+  | "offer"
+  | "legal";
 
 export type SiteSettingsInlineSeoPages = Record<SiteSettingsInlineSeoPageKey, SiteSettingsInlineSeoPage>;
 
@@ -40,64 +40,62 @@ export type SiteSettingsInlineSeoPageConfig = {
 };
 
 export const SITE_SETTINGS_INLINE_SEO_PAGES: SiteSettingsInlineSeoPageConfig[] = [
-  { key: 'home', path: '/' },
-  { key: 'product', path: '/products' },
-  { key: 'sparepart', path: '/spare-parts' },
-  { key: 'service', path: '/services' },
-  { key: 'solutions', path: '/solutions' },
-  { key: 'about', path: '/about' },
-  { key: 'team', path: '/about/team' },
-  { key: 'mission_vision', path: '/about/mission-vision' },
-  { key: 'quality', path: '/about/quality' },
-  { key: 'news', path: '/news' },
-  { key: 'blog', path: '/blog' },
-  { key: 'library', path: '/library' },
-  { key: 'faqs', path: '/faqs' },
-  { key: 'contact', path: '/contact' },
-  { key: 'offer', path: '/offer' },
-  { key: 'legal', path: '/legal' },
+  { key: "home", path: "/" },
+  { key: "product", path: "/products" },
+  { key: "sparepart", path: "/spare-parts" },
+  { key: "service", path: "/services" },
+  { key: "solutions", path: "/solutions" },
+  { key: "about", path: "/about" },
+  { key: "team", path: "/about/team" },
+  { key: "mission_vision", path: "/about/mission-vision" },
+  { key: "quality", path: "/about/quality" },
+  { key: "news", path: "/news" },
+  { key: "blog", path: "/blog" },
+  { key: "library", path: "/library" },
+  { key: "faqs", path: "/faqs" },
+  { key: "contact", path: "/contact" },
+  { key: "offer", path: "/offer" },
+  { key: "legal", path: "/legal" },
 ];
 
 export const SITE_SETTINGS_INLINE_SEO_DEFAULT_EXPANDED_KEYS: SiteSettingsInlineSeoPageKey[] = [
-  'home',
-  'product',
-  'service',
+  "home",
+  "product",
+  "service",
 ];
 
-export const SITE_SETTINGS_INLINE_SEO_PREVIEW_HOST = 'ensotek.de';
-export const SITE_SETTINGS_INLINE_SEO_PREVIEW_HOST_WWW = 'www.ensotek.de';
+export const SITE_SETTINGS_INLINE_SEO_PREVIEW_HOST = "ensotek.de";
+export const SITE_SETTINGS_INLINE_SEO_PREVIEW_HOST_WWW = "www.ensotek.de";
 
 // ── Helpers ──
 
 export function createEmptySiteSettingsInlineSeoPage(): SiteSettingsInlineSeoPage {
-  return { title: '', description: '', og_image: '', no_index: false };
+  return { title: "", description: "", og_image: "", no_index: false };
 }
 
-export function extractSiteSettingsInlineSeoPages(
-  raw: unknown,
-): SiteSettingsInlineSeoPages {
+export function extractSiteSettingsInlineSeoPages(raw: unknown): SiteSettingsInlineSeoPages {
   const empty = () => createEmptySiteSettingsInlineSeoPage();
   const result = {} as Record<string, SiteSettingsInlineSeoPage>;
 
   let obj: Record<string, unknown> | null = null;
 
-  if (raw && typeof raw === 'object' && 'value' in (raw as Record<string, unknown>)) {
+  if (raw && typeof raw === "object" && "value" in (raw as Record<string, unknown>)) {
     const val = (raw as Record<string, unknown>).value;
-    if (val && typeof val === 'object' && !Array.isArray(val)) {
+    if (val && typeof val === "object" && !Array.isArray(val)) {
       obj = val as Record<string, unknown>;
     }
-  } else if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+  } else if (raw && typeof raw === "object" && !Array.isArray(raw)) {
     obj = raw as Record<string, unknown>;
   }
 
   for (const cfg of SITE_SETTINGS_INLINE_SEO_PAGES) {
     const src = obj?.[cfg.key];
-    if (src && typeof src === 'object' && !Array.isArray(src)) {
+    if (src && typeof src === "object" && !Array.isArray(src)) {
       const s = src as Record<string, unknown>;
       result[cfg.key] = {
-        title: typeof s.title === 'string' ? s.title : '',
-        description: typeof s.description === 'string' ? s.description : '',
-        og_image: typeof s.og_image === 'string' ? s.og_image : '',
+        title: typeof s.title === "string" ? s.title : "",
+        description: typeof s.description === "string" ? s.description : "",
+        og_image: typeof s.og_image === "string" ? s.og_image : "",
         no_index: s.no_index === true,
       };
     } else {
@@ -109,21 +107,21 @@ export function extractSiteSettingsInlineSeoPages(
 }
 
 export function buildSiteSettingsInlineSeoPreviewPath(locale: string, path: string): string {
-  const clean = path.startsWith('/') ? path : `/${path}`;
+  const clean = path.startsWith("/") ? path : `/${path}`;
   return `${locale}${clean}`;
 }
 
 export function getErrorMessage(err: unknown, fallback?: string): string {
-  if (!err) return fallback || '';
-  if (typeof err === 'string') return err;
+  if (!err) return fallback || "";
+  if (typeof err === "string") return err;
   if (err instanceof Error) return err.message;
-  if (typeof err === 'object') {
+  if (typeof err === "object") {
     const e = err as Record<string, unknown>;
-    if (typeof e.message === 'string') return e.message;
-    if (e.data && typeof e.data === 'object') {
+    if (typeof e.message === "string") return e.message;
+    if (e.data && typeof e.data === "object") {
       const d = e.data as Record<string, unknown>;
-      if (typeof d.message === 'string') return d.message;
+      if (typeof d.message === "string") return d.message;
     }
   }
-  return fallback || 'Unknown error';
+  return fallback || "Unknown error";
 }

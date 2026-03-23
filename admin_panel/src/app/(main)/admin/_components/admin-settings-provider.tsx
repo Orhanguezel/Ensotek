@@ -1,25 +1,27 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useRef, useCallback } from 'react';
+import type React from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef } from "react";
+
+import { type AdminBrandingConfig, DEFAULT_BRANDING } from "@/config/app-config";
 import {
   useGetSiteSettingAdminByKeyQuery,
   useUpdateSiteSettingAdminMutation,
-} from '@/integrations/endpoints/admin/site_settings_admin.endpoints';
-import { useAppDispatch } from '@/stores/hooks';
-import { preferencesActions } from '@/stores/preferencesSlice';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
-import type { ThemeMode, ThemePreset } from '@/lib/preferences/theme';
-import type { SidebarVariant, SidebarCollapsible, NavbarStyle, ContentLayout } from '@/lib/preferences/layout';
-import type { FontKey } from '@/lib/fonts/registry';
-import { applyThemeMode, applyThemePreset } from '@/lib/preferences/theme-utils';
+} from "@/integrations/endpoints/admin/site_settings_admin.endpoints";
+import type { FontKey } from "@/lib/fonts/registry";
+import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } from "@/lib/preferences/layout";
 import {
   applyContentLayout,
+  applyFont,
   applyNavbarStyle,
   applySidebarCollapsible,
   applySidebarVariant,
-  applyFont,
-} from '@/lib/preferences/layout-utils';
-import { DEFAULT_BRANDING, type AdminBrandingConfig } from '@/config/app-config';
+} from "@/lib/preferences/layout-utils";
+import type { ThemeMode, ThemePreset } from "@/lib/preferences/theme";
+import { applyThemeMode, applyThemePreset } from "@/lib/preferences/theme-utils";
+import { useAppDispatch } from "@/stores/hooks";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
+import { preferencesActions } from "@/stores/preferencesSlice";
 
 export type AdminPageMeta = Record<string, { title: string; description?: string; metrics?: string[] }>;
 
@@ -64,31 +66,56 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
   const sidebarCollapsible = usePreferencesStore((s) => s.sidebarCollapsible);
 
   // Ref: save sırasında güncel değerleri oku (stale closure önleme)
-  const prefsRef = useRef({ themeMode, themePreset, font, contentLayout, navbarStyle, sidebarVariant, sidebarCollapsible, adminLocale });
-  prefsRef.current = { themeMode, themePreset, font, contentLayout, navbarStyle, sidebarVariant, sidebarCollapsible, adminLocale };
+  const prefsRef = useRef({
+    themeMode,
+    themePreset,
+    font,
+    contentLayout,
+    navbarStyle,
+    sidebarVariant,
+    sidebarCollapsible,
+    adminLocale,
+  });
+  prefsRef.current = {
+    themeMode,
+    themePreset,
+    font,
+    contentLayout,
+    navbarStyle,
+    sidebarVariant,
+    sidebarCollapsible,
+    adminLocale,
+  };
 
   // 1. Fetch Global Config
-  const { data: configRow, isLoading: configLoading } = useGetSiteSettingAdminByKeyQuery('ui_admin_config');
+  const { data: configRow, isLoading: configLoading } = useGetSiteSettingAdminByKeyQuery("ui_admin_config");
 
   const config = useMemo(() => {
     if (!configRow?.value) return null;
     try {
-      return typeof configRow.value === 'string' ? JSON.parse(configRow.value) : configRow.value;
-    } catch { return null; }
+      return typeof configRow.value === "string" ? JSON.parse(configRow.value) : configRow.value;
+    } catch {
+      return null;
+    }
   }, [configRow]);
 
   const configRef = useRef(config);
   configRef.current = config;
 
   // 2. Fetch Page Meta
-  const locale = adminLocale || config?.default_locale || 'de';
-  const { data: pagesRow, isLoading: pagesLoading } = useGetSiteSettingAdminByKeyQuery({ key: 'ui_admin_pages', locale });
+  const locale = adminLocale || config?.default_locale || "de";
+  const { data: pagesRow, isLoading: pagesLoading } = useGetSiteSettingAdminByKeyQuery({
+    key: "ui_admin_pages",
+    locale,
+  });
 
   const pageMeta = useMemo(() => {
     if (!pagesRow?.value) return {};
     try {
-      return typeof pagesRow.value === 'string' ? JSON.parse(pagesRow.value) : pagesRow.value;
-    } catch { return {}; }
+      return typeof pagesRow.value === "string" ? JSON.parse(pagesRow.value) : pagesRow.value;
+    } catch {
+      return {};
+    }
   }, [pagesRow]);
 
   // 3. Extract branding from config
@@ -114,10 +141,14 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
       if (config.theme.font) dispatch(preferencesActions.setFont(config.theme.font as FontKey));
     }
     if (config.layout) {
-      if (config.layout.sidebar_variant) dispatch(preferencesActions.setSidebarVariant(config.layout.sidebar_variant as SidebarVariant));
-      if (config.layout.sidebar_collapsible) dispatch(preferencesActions.setSidebarCollapsible(config.layout.sidebar_collapsible as SidebarCollapsible));
-      if (config.layout.navbar_style) dispatch(preferencesActions.setNavbarStyle(config.layout.navbar_style as NavbarStyle));
-      if (config.layout.content_layout) dispatch(preferencesActions.setContentLayout(config.layout.content_layout as ContentLayout));
+      if (config.layout.sidebar_variant)
+        dispatch(preferencesActions.setSidebarVariant(config.layout.sidebar_variant as SidebarVariant));
+      if (config.layout.sidebar_collapsible)
+        dispatch(preferencesActions.setSidebarCollapsible(config.layout.sidebar_collapsible as SidebarCollapsible));
+      if (config.layout.navbar_style)
+        dispatch(preferencesActions.setNavbarStyle(config.layout.navbar_style as NavbarStyle));
+      if (config.layout.content_layout)
+        dispatch(preferencesActions.setContentLayout(config.layout.content_layout as ContentLayout));
     }
     // Mark redux as synced so PreferencesEffects knows DB data is loaded
     dispatch(preferencesActions.syncFromDom({}));
@@ -133,27 +164,34 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
     }
     if (config.layout) {
       if (config.layout.sidebar_variant) setSidebarVariant(config.layout.sidebar_variant as SidebarVariant);
-      if (config.layout.sidebar_collapsible) setSidebarCollapsible(config.layout.sidebar_collapsible as SidebarCollapsible);
+      if (config.layout.sidebar_collapsible)
+        setSidebarCollapsible(config.layout.sidebar_collapsible as SidebarCollapsible);
       if (config.layout.navbar_style) setNavbarStyle(config.layout.navbar_style as NavbarStyle);
       if (config.layout.content_layout) setContentLayout(config.layout.content_layout as ContentLayout);
     }
 
     // ✅ DOM Apply — DB'den gelen değerleri DOM'a uygula
     if (config.theme) {
-      if (config.theme.mode) applyThemeMode(config.theme.mode as 'light' | 'dark');
+      if (config.theme.mode) applyThemeMode(config.theme.mode as "light" | "dark");
       if (config.theme.preset) applyThemePreset(config.theme.preset);
       if (config.theme.font) applyFont(config.theme.font);
     }
     if (config.layout) {
-      if (config.layout.content_layout) applyContentLayout(config.layout.content_layout as 'centered' | 'full-width');
-      if (config.layout.navbar_style) applyNavbarStyle(config.layout.navbar_style as 'sticky' | 'scroll');
+      if (config.layout.content_layout) applyContentLayout(config.layout.content_layout as "centered" | "full-width");
+      if (config.layout.navbar_style) applyNavbarStyle(config.layout.navbar_style as "sticky" | "scroll");
       if (config.layout.sidebar_variant) applySidebarVariant(config.layout.sidebar_variant);
       if (config.layout.sidebar_collapsible) applySidebarCollapsible(config.layout.sidebar_collapsible);
     }
   }, [
-    config, dispatch,
-    setThemeMode, setThemePreset, setFont,
-    setContentLayout, setNavbarStyle, setSidebarVariant, setSidebarCollapsible,
+    config,
+    dispatch,
+    setThemeMode,
+    setThemePreset,
+    setFont,
+    setContentLayout,
+    setNavbarStyle,
+    setSidebarVariant,
+    setSidebarCollapsible,
     setAdminLocale,
   ]);
 
@@ -188,23 +226,27 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
         },
       };
 
-      updateSetting({ key: 'ui_admin_config', value: newValue, locale: '*' });
+      updateSetting({ key: "ui_admin_config", value: newValue, locale: "*" });
     }, 1000);
   }, [updateSetting]);
 
   // Cleanup timer on unmount
-  useEffect(() => () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); }, []);
-
-  const ctxValue = useMemo<AdminSettingsContextValue>(() => ({
-    pageMeta: pageMeta as AdminPageMeta,
-    branding,
-    loading: configLoading || pagesLoading,
-    saveAdminConfig,
-  }), [pageMeta, branding, configLoading, pagesLoading, saveAdminConfig]);
-
-  return (
-    <AdminSettingsContext.Provider value={ctxValue}>
-      {children}
-    </AdminSettingsContext.Provider>
+  useEffect(
+    () => () => {
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+    },
+    [],
   );
+
+  const ctxValue = useMemo<AdminSettingsContextValue>(
+    () => ({
+      pageMeta: pageMeta as AdminPageMeta,
+      branding,
+      loading: configLoading || pagesLoading,
+      saveAdminConfig,
+    }),
+    [pageMeta, branding, configLoading, pagesLoading, saveAdminConfig],
+  );
+
+  return <AdminSettingsContext.Provider value={ctxValue}>{children}</AdminSettingsContext.Provider>;
 }

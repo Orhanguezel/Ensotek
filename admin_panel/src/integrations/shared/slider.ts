@@ -6,12 +6,12 @@
 
 /* -------------------- Helper'lar -------------------- */
 
-const asStr = (v: unknown): string => (typeof v === 'string' ? v : String(v ?? ''));
+const asStr = (v: unknown): string => (typeof v === "string" ? v : String(v ?? ""));
 
-const asBool = (v: unknown): boolean => v === true || v === 1 || v === '1' || v === 'true';
+const asBool = (v: unknown): boolean => v === true || v === 1 || v === "1" || v === "true";
 
 const asNum = (v: unknown): number => {
-  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
   const n = Number(v);
   return Number.isFinite(n) ? n : 0;
 };
@@ -78,7 +78,7 @@ export interface ApiSliderPublic {
   buttonLink: string;
   isActive: boolean;
   order: number;
-  priority?: 'low' | 'medium' | 'high';
+  priority?: "low" | "medium" | "high";
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
   locale: string;
@@ -132,7 +132,7 @@ export interface SliderPublicDto {
   buttonLink: string;
   isActive: boolean;
   order: number;
-  priority?: 'low' | 'medium' | 'high';
+  priority?: "low" | "medium" | "high";
   showOnMobile?: boolean;
   showOnDesktop?: boolean;
   locale: string;
@@ -140,9 +140,9 @@ export interface SliderPublicDto {
 
 /* -------------------- Query param tipleri -------------------- */
 
-export type SliderSortField = 'display_order' | 'name' | 'created_at' | 'updated_at';
+export type SliderSortField = "display_order" | "name" | "created_at" | "updated_at";
 
-export type SliderSortOrder = 'asc' | 'desc';
+export type SliderSortOrder = "asc" | "desc";
 
 /**
  * Admin list query (adminListQuerySchema ile uyumlu)
@@ -261,7 +261,7 @@ export interface SliderSetImagePayload {
 export const normalizeSliderAdmin = (api: ApiSliderAdmin): SliderAdminDto => ({
   id: asStr(api.id),
   uuid: asStr(api.uuid),
-  locale: asStr(api.locale || 'tr'),
+  locale: asStr(api.locale || "tr"),
   name: asStr(api.name),
   slug: asStr(api.slug),
   description: api.description ?? null,
@@ -287,18 +287,18 @@ export const normalizeSliderAdmin = (api: ApiSliderAdmin): SliderAdminDto => ({
 export const normalizeSliderPublic = (api: ApiSliderPublic): SliderPublicDto => ({
   id: asStr(api.id),
   title: asStr(api.title),
-  description: asStr(api.description ?? ''),
-  image: asStr(api.image ?? ''),
+  description: asStr(api.description ?? ""),
+  image: asStr(api.image ?? ""),
   alt: api.alt ?? undefined,
-  buttonText: asStr(api.buttonText ?? 'İncele'),
-  buttonLink: asStr(api.buttonLink ?? ''),
+  buttonText: asStr(api.buttonText ?? "İncele"),
+  buttonLink: asStr(api.buttonLink ?? ""),
 
   isActive: asBool(api.isActive),
   order: asNum(api.order),
   priority: api.priority,
   showOnMobile: api.showOnMobile,
   showOnDesktop: api.showOnDesktop,
-  locale: asStr(api.locale || 'tr'),
+  locale: asStr(api.locale || "tr"),
 });
 
 /* -------------------- Helper fonksiyonlar (endpoint'ler için) -------------------- */
@@ -315,7 +315,7 @@ export function buildSliderParams(params?: SliderAdminListQueryParams): Record<s
   if (!params) return undefined;
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(params)) {
-    if (value !== undefined && value !== null && value !== '') {
+    if (value !== undefined && value !== null && value !== "") {
       result[key] = value;
     }
   }

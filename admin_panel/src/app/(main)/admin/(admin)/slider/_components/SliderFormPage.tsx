@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/slider/_components/SliderFormPage.tsx
@@ -8,23 +8,24 @@
 // - No stuck loading: uses `loading` from detail-client (skip not counted)
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import type { SliderAdminDto } from '@/integrations/shared';
-import { useCreateSliderAdminMutation, useUpdateSliderAdminMutation } from '@/integrations/hooks';
+import { useRouter } from "next/navigation";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { toast } from "sonner";
 
-import { SliderFormHeader } from './SliderFormHeader';
-import { SliderForm, type SliderFormValues } from './SliderForm';
-import { SliderFormImageColumn } from './SliderFormImageColumn';
-import { SliderFormJsonSection } from './SliderFormJsonSection';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useCreateSliderAdminMutation, useUpdateSliderAdminMutation } from "@/integrations/hooks";
+import type { SliderAdminDto } from "@/integrations/shared";
 
-const norm = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+import { SliderForm, type SliderFormValues } from "./SliderForm";
+import { SliderFormHeader } from "./SliderFormHeader";
+import { SliderFormImageColumn } from "./SliderFormImageColumn";
+import { SliderFormJsonSection } from "./SliderFormJsonSection";
+
+const norm = (v: unknown) => (v === null || v === undefined ? "" : String(v).trim());
 const normLocale = (v: unknown) => norm(v).toLowerCase();
 const toNull = (v: unknown) => {
   const s = norm(v);
@@ -39,7 +40,7 @@ function buildValuesFromDto(dto: SliderAdminDto | null, locale: string): SliderF
   const d: any = dto || {};
   const loc = normLocale(locale || d?.locale);
   return {
-    locale: loc || '',
+    locale: loc || "",
 
     name: norm(d.name),
     slug: norm(d.slug),
@@ -58,7 +59,7 @@ function buildValuesFromDto(dto: SliderAdminDto | null, locale: string): SliderF
 }
 
 export type SliderFormPageProps = {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
 
   locale: string;
   localeOptions: { value: string; label: string }[];
@@ -88,11 +89,9 @@ export function SliderFormPage({
   const saving = isCreating || isUpdating;
   const disabled = loading || localesLoading || saving;
 
-  const [viewMode, setViewMode] = React.useState<'form' | 'json'>('form');
+  const [viewMode, setViewMode] = React.useState<"form" | "json">("form");
 
-  const [values, setValues] = React.useState<SliderFormValues>(() =>
-    buildValuesFromDto(initialData, locale),
-  );
+  const [values, setValues] = React.useState<SliderFormValues>(() => buildValuesFromDto(initialData, locale));
 
   // sync when dto/locale changes
   React.useEffect(() => {
@@ -123,10 +122,10 @@ export function SliderFormPage({
 
   const validate = () => {
     const loc = normLocale(values.locale || locale);
-    if (!loc) return t('admin.slider.form.localeRequired');
-    if (!norm(values.name)) return t('admin.slider.form.titleRequired');
-    if (!norm(values.slug)) return t('admin.slider.form.slugRequired');
-    return '';
+    if (!loc) return t("admin.slider.form.localeRequired");
+    if (!norm(values.name)) return t("admin.slider.form.titleRequired");
+    if (!norm(values.slug)) return t("admin.slider.form.slugRequired");
+    return "";
   };
 
   const persist = async () => {
@@ -136,14 +135,14 @@ export function SliderFormPage({
       return;
     }
 
-    const id = String((initialData as any)?.id || '');
+    const id = String((initialData as any)?.id || "");
 
     const payload: any = {
       locale: normLocale(values.locale || locale),
 
       name: norm(values.name),
       slug: norm(values.slug),
-      description: String(values.description || ''),
+      description: String(values.description || ""),
 
       image_url: toNull(values.image_url),
       alt: toNull(values.alt),
@@ -157,7 +156,7 @@ export function SliderFormPage({
     };
 
     try {
-      if (mode === 'create') {
+      if (mode === "create") {
         const tries = [
           () => createSlider(payload as any).unwrap(),
           () => createSlider({ payload } as any).unwrap(),
@@ -178,8 +177,8 @@ export function SliderFormPage({
         }
         if (lastErr) throw lastErr;
 
-        const newId = String(created?.id || created?.data?.id || '');
-        toast.success(t('admin.slider.form.created'));
+        const newId = String(created?.id || created?.data?.id || "");
+        toast.success(t("admin.slider.form.created"));
 
         if (newId) {
           const loc = payload.locale;
@@ -192,7 +191,7 @@ export function SliderFormPage({
         }
       } else {
         if (!id) {
-          toast.error(t('admin.slider.form.idNotFound'));
+          toast.error(t("admin.slider.form.idNotFound"));
           return;
         }
 
@@ -218,18 +217,19 @@ export function SliderFormPage({
         }
         if (lastErr) throw lastErr;
 
-        toast.success(t('admin.slider.form.updated'));
+        toast.success(t("admin.slider.form.updated"));
         onDone?.();
       }
     } catch (e: any) {
-      const msg =
-        e?.data?.error?.message || e?.data?.message || e?.message || t('admin.slider.form.saveError');
+      const msg = e?.data?.error?.message || e?.data?.message || e?.message || t("admin.slider.form.saveError");
       toast.error(msg);
     }
   };
 
   const title =
-    mode === 'edit' ? norm((initialData as any)?.name) || t('admin.slider.form.editTitle') : t('admin.slider.form.createTitle');
+    mode === "edit"
+      ? norm((initialData as any)?.name) || t("admin.slider.form.editTitle")
+      : t("admin.slider.form.createTitle");
 
   const effectiveLoc = normLocale(values.locale || locale);
 
@@ -245,27 +245,27 @@ export function SliderFormPage({
       />
 
       <Card>
-        <CardContent className="pt-6 space-y-4">
+        <CardContent className="space-y-4 pt-6">
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
-              variant={viewMode === 'form' ? 'default' : 'outline'}
-              onClick={() => setViewMode('form')}
+              variant={viewMode === "form" ? "default" : "outline"}
+              onClick={() => setViewMode("form")}
               disabled={disabled}
             >
-              {t('admin.slider.form.formMode')}
+              {t("admin.slider.form.formMode")}
             </Button>
             <Button
               type="button"
-              variant={viewMode === 'json' ? 'default' : 'outline'}
-              onClick={() => setViewMode('json')}
+              variant={viewMode === "json" ? "default" : "outline"}
+              onClick={() => setViewMode("json")}
               disabled={disabled}
             >
-              {t('admin.slider.form.jsonMode')}
+              {t("admin.slider.form.jsonMode")}
             </Button>
           </div>
 
-          {viewMode === 'json' ? (
+          {viewMode === "json" ? (
             <SliderFormJsonSection
               value={values as any}
               disabled={disabled}
@@ -273,7 +273,7 @@ export function SliderFormPage({
             />
           ) : (
             <div className="grid gap-4 lg:grid-cols-3">
-              <div className="lg:col-span-2 space-y-4">
+              <div className="space-y-4 lg:col-span-2">
                 <SliderForm
                   mode={mode}
                   values={values}
@@ -291,17 +291,16 @@ export function SliderFormPage({
                   locale={effectiveLoc}
                   value={{ image_url: values.image_url, alt: values.alt }}
                   metadata={{
-                    module_key: 'slider',
+                    module_key: "slider",
                     locale: effectiveLoc,
-                    ...(mode === 'edit' && (initialData as any)?.id
+                    ...(mode === "edit" && (initialData as any)?.id
                       ? { slider_id: String((initialData as any).id) }
                       : {}),
-                    slug: values.slug || values.name || '',
+                    slug: values.slug || values.name || "",
                   }}
                   onChange={(patch) => {
-                    if (typeof patch.image_url === 'string')
-                      handleChange('image_url', patch.image_url);
-                    if (typeof patch.alt === 'string') handleChange('alt', patch.alt);
+                    if (typeof patch.image_url === "string") handleChange("image_url", patch.image_url);
+                    if (typeof patch.alt === "string") handleChange("alt", patch.alt);
                   }}
                 />
               </div>

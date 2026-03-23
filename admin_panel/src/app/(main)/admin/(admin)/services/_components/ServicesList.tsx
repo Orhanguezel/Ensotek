@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/services/_components/ServicesList.tsx
@@ -6,66 +6,56 @@
 // - NO arbitrary width classes (w-[...]) => canonical only
 // =============================================================
 
-import * as React from 'react';
-import type { ServiceDto } from '@/integrations/shared';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ArrowDown, ArrowUp, Pencil, Trash2 } from "lucide-react";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-  PaginationPrevious,
   PaginationNext,
-  PaginationEllipsis,
-} from '@/components/ui/pagination';
-
-import { ArrowUp, ArrowDown, Pencil, Trash2 } from 'lucide-react';
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import type { ServiceDto } from "@/integrations/shared";
 
 const PAGE_SIZE = 20;
 
 function formatDate(value: string | null | undefined): string {
-  if (!value) return '-';
+  if (!value) return "-";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return value;
   return d.toLocaleDateString();
 }
 
-function formatType(type: ServiceDto['type'], t: (key: string) => string): string {
+function formatType(type: ServiceDto["type"], t: (key: string) => string): string {
   switch (type) {
-    case 'maintenance_repair':
-      return t('admin.services.types.maintenance_repair');
-    case 'modernization':
-      return t('admin.services.types.modernization');
-    case 'spare_parts_components':
-      return t('admin.services.types.spare_parts_components');
-    case 'applications_references':
-      return t('admin.services.types.applications_references');
-    case 'engineering_support':
-      return t('admin.services.types.engineering_support');
-    case 'production':
-      return t('admin.services.types.production');
-    case 'other':
+    case "maintenance_repair":
+      return t("admin.services.types.maintenance_repair");
+    case "modernization":
+      return t("admin.services.types.modernization");
+    case "spare_parts_components":
+      return t("admin.services.types.spare_parts_components");
+    case "applications_references":
+      return t("admin.services.types.applications_references");
+    case "engineering_support":
+      return t("admin.services.types.engineering_support");
+    case "production":
+      return t("admin.services.types.production");
     default:
-      return t('admin.services.types.other');
+      return t("admin.services.types.other");
   }
 }
 
 function formatPrice(price: string | number | null | undefined): string {
-  return price != null ? String(price) : '-';
+  return price != null ? String(price) : "-";
 }
 
 export type ServicesListProps = {
@@ -124,29 +114,24 @@ export const ServicesList: React.FC<ServicesListProps> = ({
 
   const buildPages = () => {
     if (pageCount <= 5) return Array.from({ length: pageCount }, (_, i) => i + 1);
-    return [1, '...', currentPage, '...', pageCount] as const;
+    return [1, "...", currentPage, "...", pageCount] as const;
   };
 
   return (
     <Card>
       <CardHeader className="gap-2">
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <CardTitle className="text-base">{t('admin.services.list.title')}</CardTitle>
+          <CardTitle className="text-base">{t("admin.services.list.title")}</CardTitle>
 
           <div className="flex flex-wrap items-center gap-2">
-            {loading ? <Badge variant="secondary">{t('admin.services.list.loading')}</Badge> : null}
-            <span className="text-sm text-muted-foreground">
-              {t('admin.services.list.totalLabel')} <span className="font-medium text-foreground">{totalItems}</span>
+            {loading ? <Badge variant="secondary">{t("admin.services.list.loading")}</Badge> : null}
+            <span className="text-muted-foreground text-sm">
+              {t("admin.services.list.totalLabel")} <span className="font-medium text-foreground">{totalItems}</span>
             </span>
 
             {onSaveOrder ? (
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!hasData || !!savingOrder}
-                onClick={onSaveOrder}
-              >
-                {savingOrder ? t('admin.services.list.savingOrder') : t('admin.services.list.saveOrderButton')}
+              <Button variant="outline" size="sm" disabled={!hasData || !!savingOrder} onClick={onSaveOrder}>
+                {savingOrder ? t("admin.services.list.savingOrder") : t("admin.services.list.saveOrderButton")}
               </Button>
             ) : null}
           </div>
@@ -161,11 +146,11 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               <TableRow>
                 <TableHead className="min-w-14" />
                 <TableHead className="w-14" />
-                <TableHead>{t('admin.services.list.serviceColumn')}</TableHead>
-                <TableHead className="min-w-32">{t('admin.services.list.typeColumn')}</TableHead>
-                <TableHead className="min-w-40">{t('admin.services.list.statusColumn')}</TableHead>
-                <TableHead className="min-w-44">{t('admin.services.list.priceColumn')}</TableHead>
-                <TableHead className="min-w-56 text-right">{t('admin.services.list.actionsColumnPlural')}</TableHead>
+                <TableHead>{t("admin.services.list.serviceColumn")}</TableHead>
+                <TableHead className="min-w-32">{t("admin.services.list.typeColumn")}</TableHead>
+                <TableHead className="min-w-40">{t("admin.services.list.statusColumn")}</TableHead>
+                <TableHead className="min-w-44">{t("admin.services.list.priceColumn")}</TableHead>
+                <TableHead className="min-w-56 text-right">{t("admin.services.list.actionsColumnPlural")}</TableHead>
               </TableRow>
             </TableHeader>
 
@@ -176,7 +161,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
 
                   return (
                     <TableRow key={s.id}>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-sm">
                         {canReorder ? (
                           <div className="flex items-center gap-1">
                             <Button
@@ -185,7 +170,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                               className="h-7 w-7"
                               onClick={() => moveGlobal(globalIdx, -1)}
                               disabled={loading || globalIdx === 0}
-                              title={t('admin.services.list.upButton')}
+                              title={t("admin.services.list.upButton")}
                             >
                               <ArrowUp className="size-4" />
                             </Button>
@@ -195,7 +180,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                               className="h-7 w-7"
                               onClick={() => moveGlobal(globalIdx, 1)}
                               disabled={loading || globalIdx === rows.length - 1}
-                              title={t('admin.services.list.downButton')}
+                              title={t("admin.services.list.downButton")}
                             >
                               <ArrowDown className="size-4" />
                             </Button>
@@ -207,7 +192,11 @@ export const ServicesList: React.FC<ServicesListProps> = ({
 
                       <TableCell className="p-1">
                         {(s as any).image_url || (s as any).featured_image ? (
-                          <img src={(s as any).image_url || (s as any).featured_image} alt="" className="h-10 w-10 rounded object-cover" />
+                          <img
+                            src={(s as any).image_url || (s as any).featured_image}
+                            alt=""
+                            className="h-10 w-10 rounded object-cover"
+                          />
                         ) : (
                           <div className="flex h-10 w-10 items-center justify-center rounded bg-muted text-muted-foreground">
                             <span className="text-[10px]">—</span>
@@ -216,19 +205,19 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                       </TableCell>
 
                       <TableCell>
-                        <div className="text-sm font-medium">{s.name || '—'}</div>
-                        <div className="text-xs text-muted-foreground">
+                        <div className="font-medium text-sm">{s.name || "—"}</div>
+                        <div className="text-muted-foreground text-xs">
                           {s.slug ? (
                             <>
-                              {t('admin.services.list.slugLabel')} <code className="text-xs">{s.slug}</code>
+                              {t("admin.services.list.slugLabel")} <code className="text-xs">{s.slug}</code>
                             </>
                           ) : (
-                            '—'
+                            "—"
                           )}
                         </div>
                         {s.locale_resolved ? (
-                          <div className="text-xs text-muted-foreground">
-                            {t('admin.services.list.localeLabel')} <code className="text-xs">{s.locale_resolved}</code>
+                          <div className="text-muted-foreground text-xs">
+                            {t("admin.services.list.localeLabel")} <code className="text-xs">{s.locale_resolved}</code>
                           </div>
                         ) : null}
                       </TableCell>
@@ -237,17 +226,25 @@ export const ServicesList: React.FC<ServicesListProps> = ({
 
                       <TableCell className="text-sm">
                         <div className="flex flex-col gap-2">
-                          <Badge variant={s.is_active ? 'secondary' : 'destructive'}>
-                            {s.is_active ? t('admin.services.list.activeStatus') : t('admin.services.list.inactiveStatus')}
+                          <Badge variant={s.is_active ? "secondary" : "destructive"}>
+                            {s.is_active
+                              ? t("admin.services.list.activeStatus")
+                              : t("admin.services.list.inactiveStatus")}
                           </Badge>
-                          <Badge variant="secondary">{s.featured ? t('admin.services.list.featuredStatus') : t('admin.services.list.normalStatus')}</Badge>
+                          <Badge variant="secondary">
+                            {s.featured
+                              ? t("admin.services.list.featuredStatus")
+                              : t("admin.services.list.normalStatus")}
+                          </Badge>
                         </div>
                       </TableCell>
 
                       <TableCell className="text-sm">
-                        <div>{t('admin.services.list.priceLabel')} {formatPrice(s.price)}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {t('admin.services.list.dateLabel')} {formatDate(s.created_at)}
+                        <div>
+                          {t("admin.services.list.priceLabel")} {formatPrice(s.price)}
+                        </div>
+                        <div className="text-muted-foreground text-xs">
+                          {t("admin.services.list.dateLabel")} {formatDate(s.created_at)}
                         </div>
                       </TableCell>
 
@@ -260,7 +257,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                               onClick={() => onToggleFeatured(s, !s.featured)}
                               disabled={loading}
                             >
-                              {s.featured ? t('admin.services.list.makeNormal') : t('admin.services.list.makeFeatured')}
+                              {s.featured ? t("admin.services.list.makeNormal") : t("admin.services.list.makeFeatured")}
                             </Button>
                           ) : null}
 
@@ -271,19 +268,16 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                               onClick={() => onToggleActive(s, !s.is_active)}
                               disabled={loading}
                             >
-                              {s.is_active ? t('admin.services.list.inactiveStatus') : t('admin.services.list.activeStatus')}
+                              {s.is_active
+                                ? t("admin.services.list.inactiveStatus")
+                                : t("admin.services.list.activeStatus")}
                             </Button>
                           ) : null}
 
                           {onEdit ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => onEdit(s)}
-                              disabled={loading}
-                            >
+                            <Button variant="outline" size="sm" onClick={() => onEdit(s)} disabled={loading}>
                               <Pencil className="mr-2 size-4" />
-                              {t('admin.services.list.editButton')}
+                              {t("admin.services.list.editButton")}
                             </Button>
                           ) : null}
 
@@ -296,7 +290,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                               className="border-destructive text-destructive hover:text-destructive"
                             >
                               <Trash2 className="mr-2 size-4" />
-                              {t('admin.services.list.deleteButton')}
+                              {t("admin.services.list.deleteButton")}
                             </Button>
                           ) : null}
                         </div>
@@ -306,11 +300,8 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                 })
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={6}
-                    className="py-10 text-center text-sm text-muted-foreground"
-                  >
-                    {t('admin.services.list.noRecords')}
+                  <TableCell colSpan={6} className="py-10 text-center text-muted-foreground text-sm">
+                    {t("admin.services.list.noRecords")}
                   </TableCell>
                 </TableRow>
               )}
@@ -327,30 +318,36 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               return (
                 <div key={s.id} className="space-y-3 p-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <div className="text-sm font-medium">
-                      #{globalIdx + 1} {s.name || '—'}
+                    <div className="font-medium text-sm">
+                      #{globalIdx + 1} {s.name || "—"}
                     </div>
-                    <Badge variant={s.is_active ? 'secondary' : 'destructive'}>
-                      {s.is_active ? t('admin.services.list.activeStatus') : t('admin.services.list.inactiveStatus')}
+                    <Badge variant={s.is_active ? "secondary" : "destructive"}>
+                      {s.is_active ? t("admin.services.list.activeStatus") : t("admin.services.list.inactiveStatus")}
                     </Badge>
-                    <Badge variant="secondary">{s.featured ? t('admin.services.list.featuredStatus') : t('admin.services.list.normalStatus')}</Badge>
+                    <Badge variant="secondary">
+                      {s.featured ? t("admin.services.list.featuredStatus") : t("admin.services.list.normalStatus")}
+                    </Badge>
                   </div>
 
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-muted-foreground text-xs">
                     {s.slug ? (
                       <>
-                        {t('admin.services.list.slugLabel')} <code className="text-xs">{s.slug}</code>
+                        {t("admin.services.list.slugLabel")} <code className="text-xs">{s.slug}</code>
                       </>
                     ) : (
-                      '—'
+                      "—"
                     )}
                   </div>
 
                   <div className="text-sm">
-                    <div>{t('admin.services.list.typeLabel')} {formatType(s.type, t)}</div>
-                    <div>{t('admin.services.list.priceLabel')} {formatPrice(s.price)}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {t('admin.services.list.dateLabel')} {formatDate(s.created_at)}
+                    <div>
+                      {t("admin.services.list.typeLabel")} {formatType(s.type, t)}
+                    </div>
+                    <div>
+                      {t("admin.services.list.priceLabel")} {formatPrice(s.price)}
+                    </div>
+                    <div className="text-muted-foreground text-xs">
+                      {t("admin.services.list.dateLabel")} {formatDate(s.created_at)}
                     </div>
                   </div>
 
@@ -363,7 +360,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                         disabled={loading || globalIdx === 0}
                       >
                         <ArrowUp className="mr-2 size-4" />
-                        {t('admin.services.list.upButton')}
+                        {t("admin.services.list.upButton")}
                       </Button>
                       <Button
                         variant="outline"
@@ -372,21 +369,16 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                         disabled={loading || globalIdx === rows.length - 1}
                       >
                         <ArrowDown className="mr-2 size-4" />
-                        {t('admin.services.list.downButton')}
+                        {t("admin.services.list.downButton")}
                       </Button>
                     </div>
                   ) : null}
 
                   <div className="flex flex-wrap gap-2">
                     {onEdit ? (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(s)}
-                        disabled={loading}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => onEdit(s)} disabled={loading}>
                         <Pencil className="mr-2 size-4" />
-                        {t('admin.services.list.editButton')}
+                        {t("admin.services.list.editButton")}
                       </Button>
                     ) : null}
 
@@ -399,7 +391,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                         className="border-destructive text-destructive hover:text-destructive"
                       >
                         <Trash2 className="mr-2 size-4" />
-                        {t('admin.services.list.deleteButton')}
+                        {t("admin.services.list.deleteButton")}
                       </Button>
                     ) : null}
                   </div>
@@ -407,7 +399,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
               );
             })
           ) : (
-            <div className="p-6 text-center text-sm text-muted-foreground">{t('admin.services.list.noRecords')}</div>
+            <div className="p-6 text-center text-muted-foreground text-sm">{t("admin.services.list.noRecords")}</div>
           )}
         </div>
 
@@ -427,7 +419,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                 </PaginationItem>
 
                 {buildPages().map((p, i) =>
-                  typeof p === 'number' ? (
+                  typeof p === "number" ? (
                     <PaginationItem key={p}>
                       <PaginationLink
                         href="#"

@@ -4,12 +4,14 @@
 // FINAL — TR UI + NO external_ref_id (Availability standard)
 // =============================================================
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { toast } from 'sonner';
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import type { ResourceRowDto, ResourceType } from '@/integrations/shared/resources.types';
+import { toast } from "sonner";
 
-export type ResourceFormMode = 'create' | 'edit';
+import type { ResourceRowDto, ResourceType } from "@/integrations/shared/resources.types";
+
+export type ResourceFormMode = "create" | "edit";
 
 export type ResourceFormValues = {
   title: string;
@@ -27,33 +29,33 @@ export type ResourceFormProps = {
 };
 
 const toType = (v: unknown): ResourceType => {
-  const s = String(v ?? 'other').trim() as ResourceType;
-  const ok: ResourceType[] = ['therapist', 'doctor', 'table', 'room', 'staff', 'other'];
-  return (ok.includes(s) ? s : 'other') as ResourceType;
+  const s = String(v ?? "other").trim() as ResourceType;
+  const ok: ResourceType[] = ["therapist", "doctor", "table", "room", "staff", "other"];
+  return (ok.includes(s) ? s : "other") as ResourceType;
 };
 
 const buildInitial = (dto?: ResourceRowDto | null): ResourceFormValues => {
   if (!dto) {
     return {
-      title: '',
-      type: 'therapist',
+      title: "",
+      type: "therapist",
       is_active: true,
     };
   }
   return {
-    title: String(dto.title ?? ''),
+    title: String(dto.title ?? ""),
     type: toType(dto.type),
     is_active: Number(dto.is_active ?? 0) === 1 || (dto as any).is_active === true,
   };
 };
 
 const TYPE_LABEL: Record<ResourceType, string> = {
-  therapist: 'Terapist',
-  doctor: 'Doktor',
-  table: 'Masa',
-  room: 'Oda',
-  staff: 'Personel',
-  other: 'Diğer',
+  therapist: "Terapist",
+  doctor: "Doktor",
+  table: "Masa",
+  room: "Oda",
+  staff: "Personel",
+  other: "Diğer",
 };
 
 export const ResourceForm: React.FC<ResourceFormProps> = ({
@@ -73,8 +75,8 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
   const disabled = loading || saving;
 
   const titleHelp = useMemo(() => {
-    if (values.title.trim().length >= 2) return '';
-    return 'Ad en az 2 karakter olmalı.';
+    if (values.title.trim().length >= 2) return "";
+    return "Ad en az 2 karakter olmalı.";
   }, [values.title]);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -83,7 +85,7 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
 
     const title = values.title.trim();
     if (!title || title.length < 2) {
-      toast.error('Lütfen geçerli bir ad gir.');
+      toast.error("Lütfen geçerli bir ad gir.");
       return;
     }
 
@@ -100,18 +102,16 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
         <div className="guezelwebdesign-admin-page__inner">
           <form onSubmit={handleSubmit}>
             <div className="card guezelwebdesign-admin-card">
-              <div className="card-header py-2 guezelwebdesign-admin-card__header">
-                <div className="d-flex flex-column flex-lg-row align-items-start justify-content-between gap-2">
+              <div className="card-header guezelwebdesign-admin-card__header py-2">
+                <div className="d-flex justify-content-between flex-column flex-lg-row gap-2 align-items-start">
                   <div style={{ minWidth: 0 }}>
-                    <h5 className="mb-1 small fw-semibold text-truncate">
-                      {mode === 'create' ? 'Yeni Kaynak' : 'Kaynak Düzenle'}
+                    <h5 className="small fw-semibold mb-1 text-truncate">
+                      {mode === "create" ? "Yeni Kaynak" : "Kaynak Düzenle"}
                     </h5>
-                    <div className="text-muted small text-truncate">
-                      Kaynak adı, tipi ve aktiflik durumunu yönet.
-                    </div>
+                    <div className="small text-muted text-truncate">Kaynak adı, tipi ve aktiflik durumunu yönet.</div>
                   </div>
 
-                  <div className="d-flex flex-wrap align-items-center justify-content-lg-end gap-2">
+                  <div className="d-flex justify-content-lg-end flex-wrap gap-2 align-items-center">
                     {onCancel ? (
                       <button
                         type="button"
@@ -125,17 +125,15 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
 
                     <button type="submit" className="btn btn-primary btn-sm" disabled={disabled}>
                       {saving
-                        ? mode === 'create'
-                          ? 'Oluşturuluyor...'
-                          : 'Kaydediliyor...'
-                        : mode === 'create'
-                          ? 'Oluştur'
-                          : 'Kaydet'}
+                        ? mode === "create"
+                          ? "Oluşturuluyor..."
+                          : "Kaydediliyor..."
+                        : mode === "create"
+                          ? "Oluştur"
+                          : "Kaydet"}
                     </button>
 
-                    {loading ? (
-                      <span className="badge bg-secondary small">Yükleniyor...</span>
-                    ) : null}
+                    {loading ? <span className="badge small bg-secondary">Yükleniyor...</span> : null}
                   </div>
                 </div>
               </div>
@@ -151,9 +149,7 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
                       placeholder="Örn: Anna (Terapist)"
                       disabled={disabled}
                     />
-                    {titleHelp ? (
-                      <div className="form-text small text-muted">{titleHelp}</div>
-                    ) : null}
+                    {titleHelp ? <div className="form-text small text-muted">{titleHelp}</div> : null}
                   </div>
 
                   <div className="col-12 col-lg-3">
@@ -185,19 +181,16 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
                         id="resource-is-active"
                       />
                       <label className="form-check-label small" htmlFor="resource-is-active">
-                        {values.is_active ? 'Aktif' : 'Pasif'}
+                        {values.is_active ? "Aktif" : "Pasif"}
                       </label>
                     </div>
-                    <div className="form-text small">
-                      Pasif kaynak rezervasyonda listelenmez (backend kuralı).
-                    </div>
+                    <div className="form-text small">Pasif kaynak rezervasyonda listelenmez (backend kuralı).</div>
                   </div>
                 </div>
 
-                {mode === 'create' ? (
-                  <div className="alert alert-info mt-3 mb-0 small">
-                    Kaynak oluşturulduktan sonra gerekirse ilgili modüllerde (ör. müsaitlik/slot)
-                    planlama yapılabilir.
+                {mode === "create" ? (
+                  <div className="alert alert-info small mt-3 mb-0">
+                    Kaynak oluşturulduktan sonra gerekirse ilgili modüllerde (ör. müsaitlik/slot) planlama yapılabilir.
                   </div>
                 ) : null}
               </div>

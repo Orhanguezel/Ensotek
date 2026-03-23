@@ -1,19 +1,18 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/slider/_components/SliderForm.tsx
 // FINAL — Slug auto ONLY in create mode
 // =============================================================
 
-import * as React from 'react';
+import * as React from "react";
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-
-import RichContentEditor from '@/app/(main)/admin/_components/common/RichContentEditor';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import RichContentEditor from "@/app/(main)/admin/_components/common/RichContentEditor";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 export type AdminLocaleOption = { value: string; label: string };
 
@@ -36,7 +35,7 @@ export type SliderFormValues = {
 };
 
 export type SliderFormProps = {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   values: SliderFormValues;
   onChange: <K extends keyof SliderFormValues>(field: K, value: SliderFormValues[K]) => void;
   onLocaleChange?: (locale: string) => void;
@@ -45,21 +44,21 @@ export type SliderFormProps = {
   localesLoading?: boolean;
 };
 
-const norm = (v: unknown) => (typeof v === 'string' ? v.trim() : '');
+const norm = (v: unknown) => (typeof v === "string" ? v.trim() : "");
 const normLocale = (v: unknown) => norm(v).toLowerCase();
 
 function slugify(v: string) {
-  const s = (v || '').trim();
-  if (!s) return '';
+  const s = (v || "").trim();
+  if (!s) return "";
   return s
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/ß/g, 'ss')
-    .replace(/[^a-z0-9\s-]/g, '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 }
 
 export function SliderForm({
@@ -75,7 +74,7 @@ export function SliderForm({
   const options = React.useMemo(
     () =>
       (localeOptions ?? [])
-        .map((x) => ({ value: normLocale(x.value), label: String(x.label || '').trim() }))
+        .map((x) => ({ value: normLocale(x.value), label: String(x.label || "").trim() }))
         .filter((x) => !!x.value),
     [localeOptions],
   );
@@ -84,30 +83,30 @@ export function SliderForm({
     const cur = normLocale(values.locale);
     const set = new Set(options.map((o) => o.value));
     if (cur && set.has(cur)) return cur;
-    return options?.[0]?.value || '';
+    return options?.[0]?.value || "";
   }, [values.locale, options]);
 
   const [slugTouched, setSlugTouched] = React.useState(false);
 
   React.useEffect(() => {
-    if (mode !== 'create') return;
+    if (mode !== "create") return;
     if (saving) return;
     if (!values.name) return;
     if (slugTouched) return;
-    onChange('slug', slugify(values.name));
+    onChange("slug", slugify(values.name));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values.name, mode, saving, slugTouched]);
+  }, [values.name, mode, saving, slugTouched, onChange]);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base">{t('admin.slider.form.contentTitle')}</CardTitle>
+        <CardTitle className="text-base">{t("admin.slider.form.contentTitle")}</CardTitle>
       </CardHeader>
 
       <CardContent className="space-y-5">
         <div className="grid gap-4 md:grid-cols-3">
           <div className="space-y-2">
-            <Label>{t('admin.slider.form.localeLabel')}</Label>
+            <Label>{t("admin.slider.form.localeLabel")}</Label>
             <select
               className="h-10 w-full rounded-md border bg-background px-3 text-sm"
               disabled={saving || !!localesLoading || options.length === 0}
@@ -123,12 +122,12 @@ export function SliderForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="slider-order">{t('admin.slider.form.orderLabel')}</Label>
+            <Label htmlFor="slider-order">{t("admin.slider.form.orderLabel")}</Label>
             <Input
               id="slider-order"
               type="number"
               value={Number(values.display_order) || 0}
-              onChange={(e) => onChange('display_order', Number(e.target.value) || 0)}
+              onChange={(e) => onChange("display_order", Number(e.target.value) || 0)}
               disabled={saving}
             />
           </div>
@@ -136,24 +135,24 @@ export function SliderForm({
           <div className="space-y-3">
             <div className="flex items-center justify-between rounded-md border px-3 py-2">
               <div className="space-y-0.5">
-                <div className="text-sm font-medium">{t('admin.slider.form.activeLabel')}</div>
-                <div className="text-xs text-muted-foreground">{t('admin.slider.form.activeHelp')}</div>
+                <div className="font-medium text-sm">{t("admin.slider.form.activeLabel")}</div>
+                <div className="text-muted-foreground text-xs">{t("admin.slider.form.activeHelp")}</div>
               </div>
               <Switch
                 checked={!!values.is_active}
-                onCheckedChange={(v) => onChange('is_active', !!v)}
+                onCheckedChange={(v) => onChange("is_active", !!v)}
                 disabled={saving}
               />
             </div>
 
             <div className="flex items-center justify-between rounded-md border px-3 py-2">
               <div className="space-y-0.5">
-                <div className="text-sm font-medium">{t('admin.slider.form.featuredLabel')}</div>
-                <div className="text-xs text-muted-foreground">{t('admin.slider.form.featuredHelp')}</div>
+                <div className="font-medium text-sm">{t("admin.slider.form.featuredLabel")}</div>
+                <div className="text-muted-foreground text-xs">{t("admin.slider.form.featuredHelp")}</div>
               </div>
               <Switch
                 checked={!!values.featured}
-                onCheckedChange={(v) => onChange('featured', !!v)}
+                onCheckedChange={(v) => onChange("featured", !!v)}
                 disabled={saving}
               />
             </div>
@@ -162,39 +161,37 @@ export function SliderForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="slider-name">{t('admin.slider.form.titleLabel')}</Label>
+            <Label htmlFor="slider-name">{t("admin.slider.form.titleLabel")}</Label>
             <Input
               id="slider-name"
-              value={values.name || ''}
-              onChange={(e) => onChange('name', e.target.value)}
+              value={values.name || ""}
+              onChange={(e) => onChange("name", e.target.value)}
               disabled={saving}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="slider-slug">{t('admin.slider.form.slugLabel')}</Label>
+            <Label htmlFor="slider-slug">{t("admin.slider.form.slugLabel")}</Label>
             <Input
               id="slider-slug"
-              value={values.slug || ''}
+              value={values.slug || ""}
               onFocus={() => setSlugTouched(true)}
               onChange={(e) => {
                 setSlugTouched(true);
-                onChange('slug', e.target.value);
+                onChange("slug", e.target.value);
               }}
               disabled={saving}
             />
-            <p className="text-xs text-muted-foreground">
-              {t('admin.slider.form.slugHelp')}
-            </p>
+            <p className="text-muted-foreground text-xs">{t("admin.slider.form.slugHelp")}</p>
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>{t('admin.slider.form.descriptionLabel')}</Label>
+          <Label>{t("admin.slider.form.descriptionLabel")}</Label>
           <RichContentEditor
             label=""
-            value={values.description || ''}
-            onChange={(next) => onChange('description', String(next || ''))}
+            value={values.description || ""}
+            onChange={(next) => onChange("description", String(next || ""))}
             disabled={saving}
             height="240px"
           />
@@ -202,32 +199,32 @@ export function SliderForm({
 
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="slider-btn-text">{t('admin.slider.form.buttonTextLabel')}</Label>
+            <Label htmlFor="slider-btn-text">{t("admin.slider.form.buttonTextLabel")}</Label>
             <Input
               id="slider-btn-text"
-              value={values.buttonText || ''}
-              onChange={(e) => onChange('buttonText', e.target.value)}
+              value={values.buttonText || ""}
+              onChange={(e) => onChange("buttonText", e.target.value)}
               disabled={saving}
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="slider-btn-link">{t('admin.slider.form.buttonLinkLabel')}</Label>
+            <Label htmlFor="slider-btn-link">{t("admin.slider.form.buttonLinkLabel")}</Label>
             <Input
               id="slider-btn-link"
-              value={values.buttonLink || ''}
-              onChange={(e) => onChange('buttonLink', e.target.value)}
+              value={values.buttonLink || ""}
+              onChange={(e) => onChange("buttonLink", e.target.value)}
               disabled={saving}
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="slider-alt">{t('admin.slider.form.altLabel')}</Label>
+          <Label htmlFor="slider-alt">{t("admin.slider.form.altLabel")}</Label>
           <Input
             id="slider-alt"
-            value={values.alt || ''}
-            onChange={(e) => onChange('alt', e.target.value)}
+            value={values.alt || ""}
+            onChange={(e) => onChange("alt", e.target.value)}
             disabled={saving}
           />
         </div>

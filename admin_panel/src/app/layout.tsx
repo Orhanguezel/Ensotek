@@ -6,44 +6,45 @@
 // - suppressHydrationWarning on html + body to tolerate extension-added attrs
 // =============================================================
 
-import type { ReactNode } from 'react';
-import type { Metadata } from 'next';
-import Script from 'next/script';
+import type { ReactNode } from "react";
 
-import { Toaster } from '@/components/ui/sonner';
-import { fontVars } from '@/lib/fonts/registry';
-import { PREFERENCE_DEFAULTS } from '@/lib/preferences/preferences-config';
-import { fetchBrandingConfig } from '@/server/fetch-branding';
+import Script from "next/script";
 
-import StoreProvider from '@/stores/Provider';
-import { PreferencesStoreProvider } from '@/stores/preferences/preferences-provider';
-import { LocaleProvider } from '@/i18n';
+import type { Metadata } from "next";
 
-import './globals.css';
+import { Toaster } from "@/components/ui/sonner";
+import { LocaleProvider } from "@/i18n";
+import { fontVars } from "@/lib/fonts/registry";
+import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
+import { fetchBrandingConfig } from "@/server/fetch-branding";
+import StoreProvider from "@/stores/Provider";
+import { PreferencesStoreProvider } from "@/stores/preferences/preferences-provider";
+
+import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const branding = await fetchBrandingConfig();
 
   return {
-    metadataBase: new URL(branding.meta.og_url || 'https://ensotek.de'),
+    metadataBase: new URL(branding.meta.og_url || "https://ensotek.de"),
     title: branding.meta.title,
     description: branding.meta.description,
     icons: {
       icon: [
-        { url: branding.favicon_16, sizes: '16x16', type: 'image/svg+xml' },
-        { url: branding.favicon_32, sizes: '32x32', type: 'image/svg+xml' },
+        { url: branding.favicon_16, sizes: "16x16", type: "image/svg+xml" },
+        { url: branding.favicon_32, sizes: "32x32", type: "image/svg+xml" },
       ],
       apple: branding.apple_touch_icon,
     },
     openGraph: {
-      type: 'website',
+      type: "website",
       url: branding.meta.og_url,
       title: branding.meta.og_title,
       description: branding.meta.og_description,
       images: [branding.meta.og_image],
     },
     twitter: {
-      card: 'summary_large_image',
+      card: "summary_large_image",
       title: branding.meta.og_title,
       description: branding.meta.og_description,
       images: [branding.meta.og_image],
@@ -60,15 +61,8 @@ export async function generateViewport() {
 }
 
 function ThemeBootInlineScript() {
-  const {
-    theme_mode,
-    theme_preset,
-    content_layout,
-    navbar_style,
-    sidebar_variant,
-    sidebar_collapsible,
-    font,
-  } = PREFERENCE_DEFAULTS;
+  const { theme_mode, theme_preset, content_layout, navbar_style, sidebar_variant, sidebar_collapsible, font } =
+    PREFERENCE_DEFAULTS;
 
   const code = `
 (function () {

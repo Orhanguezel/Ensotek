@@ -5,98 +5,95 @@
 // - unwrap tolerant
 // ===================================================================
 
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
-  SkillCounterMerged,
-  SkillLogoMerged,
-  SkillListParams,
   CreateSkillCounterInput,
-  PatchSkillCounterInput,
   CreateSkillLogoInput,
+  PatchSkillCounterInput,
   PatchSkillLogoInput,
-} from '@/integrations/shared/skill';
-import { unwrap, toAdminSkillQuery } from '@/integrations/shared/skill';
+  SkillCounterMerged,
+  SkillListParams,
+  SkillLogoMerged,
+} from "@/integrations/shared/skill";
+import { toAdminSkillQuery, unwrap } from "@/integrations/shared/skill";
 
-const COUNTERS = '/admin/skill-counters';
-const LOGOS = '/admin/skill-logos';
+const COUNTERS = "/admin/skill-counters";
+const LOGOS = "/admin/skill-logos";
 
 export const skillAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     // ---------------- Counters ----------------
-    listSkillCountersAdmin: b.query<SkillCounterMerged[], SkillListParams | void>({
+    listSkillCountersAdmin: b.query<SkillCounterMerged[], SkillListParams | undefined>({
       query: (p) => ({ url: COUNTERS, params: toAdminSkillQuery(p) }),
       transformResponse: (raw: any) => unwrap<SkillCounterMerged[]>(raw),
       providesTags: (res) =>
         res
           ? [
-              { type: 'Skill' as const, id: 'COUNTERS' },
-              ...res.map((x) => ({ type: 'Skill' as const, id: `counter:${x.id}` })),
+              { type: "Skill" as const, id: "COUNTERS" },
+              ...res.map((x) => ({ type: "Skill" as const, id: `counter:${x.id}` })),
             ]
-          : [{ type: 'Skill' as const, id: 'COUNTERS' }],
+          : [{ type: "Skill" as const, id: "COUNTERS" }],
     }),
 
     createSkillCounterAdmin: b.mutation<SkillCounterMerged, CreateSkillCounterInput>({
-      query: (body) => ({ url: COUNTERS, method: 'POST', body }),
+      query: (body) => ({ url: COUNTERS, method: "POST", body }),
       transformResponse: (raw: any) => unwrap<SkillCounterMerged>(raw),
-      invalidatesTags: (_res) => [{ type: 'Skill' as const, id: 'COUNTERS' }],
+      invalidatesTags: (_res) => [{ type: "Skill" as const, id: "COUNTERS" }],
     }),
 
-    updateSkillCounterAdmin: b.mutation<
-      SkillCounterMerged,
-      { id: string; patch: PatchSkillCounterInput }
-    >({
-      query: ({ id, patch }) => ({ url: `${COUNTERS}/${id}`, method: 'PATCH', body: patch }),
+    updateSkillCounterAdmin: b.mutation<SkillCounterMerged, { id: string; patch: PatchSkillCounterInput }>({
+      query: ({ id, patch }) => ({ url: `${COUNTERS}/${id}`, method: "PATCH", body: patch }),
       transformResponse: (raw: any) => unwrap<SkillCounterMerged>(raw),
       invalidatesTags: (_res, _e, arg) => [
-        { type: 'Skill' as const, id: 'COUNTERS' },
-        { type: 'Skill' as const, id: `counter:${arg.id}` },
+        { type: "Skill" as const, id: "COUNTERS" },
+        { type: "Skill" as const, id: `counter:${arg.id}` },
       ],
     }),
 
-    removeSkillCounterAdmin: b.mutation<{ ok: true } | void, { id: string }>({
-      query: ({ id }) => ({ url: `${COUNTERS}/${id}`, method: 'DELETE' }),
+    removeSkillCounterAdmin: b.mutation<{ ok: true } | undefined, { id: string }>({
+      query: ({ id }) => ({ url: `${COUNTERS}/${id}`, method: "DELETE" }),
       // backend returns 204 typically
       transformResponse: (raw: any) => unwrap<any>(raw),
       invalidatesTags: (_res, _e, arg) => [
-        { type: 'Skill' as const, id: 'COUNTERS' },
-        { type: 'Skill' as const, id: `counter:${arg.id}` },
+        { type: "Skill" as const, id: "COUNTERS" },
+        { type: "Skill" as const, id: `counter:${arg.id}` },
       ],
     }),
 
     // ---------------- Logos ----------------
-    listSkillLogosAdmin: b.query<SkillLogoMerged[], SkillListParams | void>({
+    listSkillLogosAdmin: b.query<SkillLogoMerged[], SkillListParams | undefined>({
       query: (p) => ({ url: LOGOS, params: toAdminSkillQuery(p) }),
       transformResponse: (raw: any) => unwrap<SkillLogoMerged[]>(raw),
       providesTags: (res) =>
         res
           ? [
-              { type: 'Skill' as const, id: 'LOGOS' },
-              ...res.map((x) => ({ type: 'Skill' as const, id: `logo:${x.id}` })),
+              { type: "Skill" as const, id: "LOGOS" },
+              ...res.map((x) => ({ type: "Skill" as const, id: `logo:${x.id}` })),
             ]
-          : [{ type: 'Skill' as const, id: 'LOGOS' }],
+          : [{ type: "Skill" as const, id: "LOGOS" }],
     }),
 
     createSkillLogoAdmin: b.mutation<SkillLogoMerged, CreateSkillLogoInput>({
-      query: (body) => ({ url: LOGOS, method: 'POST', body }),
+      query: (body) => ({ url: LOGOS, method: "POST", body }),
       transformResponse: (raw: any) => unwrap<SkillLogoMerged>(raw),
-      invalidatesTags: () => [{ type: 'Skill' as const, id: 'LOGOS' }],
+      invalidatesTags: () => [{ type: "Skill" as const, id: "LOGOS" }],
     }),
 
     updateSkillLogoAdmin: b.mutation<SkillLogoMerged, { id: string; patch: PatchSkillLogoInput }>({
-      query: ({ id, patch }) => ({ url: `${LOGOS}/${id}`, method: 'PATCH', body: patch }),
+      query: ({ id, patch }) => ({ url: `${LOGOS}/${id}`, method: "PATCH", body: patch }),
       transformResponse: (raw: any) => unwrap<SkillLogoMerged>(raw),
       invalidatesTags: (_res, _e, arg) => [
-        { type: 'Skill' as const, id: 'LOGOS' },
-        { type: 'Skill' as const, id: `logo:${arg.id}` },
+        { type: "Skill" as const, id: "LOGOS" },
+        { type: "Skill" as const, id: `logo:${arg.id}` },
       ],
     }),
 
-    removeSkillLogoAdmin: b.mutation<{ ok: true } | void, { id: string }>({
-      query: ({ id }) => ({ url: `${LOGOS}/${id}`, method: 'DELETE' }),
+    removeSkillLogoAdmin: b.mutation<{ ok: true } | undefined, { id: string }>({
+      query: ({ id }) => ({ url: `${LOGOS}/${id}`, method: "DELETE" }),
       transformResponse: (raw: any) => unwrap<any>(raw),
       invalidatesTags: (_res, _e, arg) => [
-        { type: 'Skill' as const, id: 'LOGOS' },
-        { type: 'Skill' as const, id: `logo:${arg.id}` },
+        { type: "Skill" as const, id: "LOGOS" },
+        { type: "Skill" as const, id: `logo:${arg.id}` },
       ],
     }),
   }),

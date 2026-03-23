@@ -1,9 +1,11 @@
 // src/store/Provider.ts
-'use client';
+"use client";
 
-import React from 'react';
-import { Provider } from 'react-redux';
-import { makeStore } from './makeStore';
+import type React from "react";
+
+import { Provider } from "react-redux";
+
+import { makeStore } from "./makeStore";
 
 // Uygulama için tek store instance
 const store = makeStore();

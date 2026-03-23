@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/faqs/_components/FaqsForm.tsx
@@ -9,17 +9,18 @@
 // - ✅ No shadcn / no bootstrap
 // =============================================================
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { toast } from 'sonner';
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-import type { FaqDto } from '@/integrations/shared';
-import { useLazyGetFaqAdminQuery } from '@/integrations/hooks';
+import { toast } from "sonner";
 
-import { AdminLocaleSelect } from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import type { LocaleOption } from './FaqsHeader';
+import { AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { useLazyGetFaqAdminQuery } from "@/integrations/hooks";
+import type { FaqDto } from "@/integrations/shared";
 
-import { FaqsFormJsonSection } from './FaqsFormJsonSection';
+import { FaqsFormJsonSection } from "./FaqsFormJsonSection";
+import type { LocaleOption } from "./FaqsHeader";
 
 /* ------------------------------------------------------------- */
 /* Types                                                         */
@@ -38,7 +39,7 @@ export type FaqsFormValues = {
 };
 
 export type FaqsFormProps = {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   initialData?: FaqDto;
   loading: boolean;
   saving: boolean;
@@ -58,68 +59,65 @@ export type FaqsFormProps = {
 /* ------------------------------------------------------------- */
 
 const norm = (v: unknown) =>
-  String(v ?? '')
+  String(v ?? "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 
-const getLocaleFromDto = (dto?: FaqDto, fallback = 'de') => {
+const getLocaleFromDto = (dto?: FaqDto, fallback = "de") => {
   const raw = (dto as any)?.locale_resolved ?? (dto as any)?.locale ?? fallback;
-  return norm(raw) || norm(fallback) || 'de';
+  return norm(raw) || norm(fallback) || "de";
 };
 
 const toBool = (v: any) => !!Number(v ?? 0);
 
 const toNum = (v: any, fallback = 0) => {
-  const n = typeof v === 'number' ? v : Number(String(v ?? ''));
+  const n = typeof v === "number" ? v : Number(String(v ?? ""));
   return Number.isFinite(n) ? n : fallback;
 };
 
 /** basit slugify (TR/DE uyumlu) */
 const slugify = (value: string): string => {
-  if (!value) return '';
+  if (!value) return "";
   let s = value.trim();
 
   const trMap: Record<string, string> = {
-    ç: 'c',
-    Ç: 'c',
-    ğ: 'g',
-    Ğ: 'g',
-    ı: 'i',
-    I: 'i',
-    İ: 'i',
-    ö: 'o',
-    Ö: 'o',
-    ş: 's',
-    Ş: 's',
-    ü: 'u',
-    Ü: 'u',
+    ç: "c",
+    Ç: "c",
+    ğ: "g",
+    Ğ: "g",
+    ı: "i",
+    I: "i",
+    İ: "i",
+    ö: "o",
+    Ö: "o",
+    ş: "s",
+    Ş: "s",
+    ü: "u",
+    Ü: "u",
   };
 
   s = s
-    .split('')
+    .split("")
     .map((ch) => trMap[ch] ?? ch)
-    .join('');
+    .join("");
 
-  s = s.replace(/ß/g, 'ss').replace(/ẞ/g, 'ss');
+  s = s.replace(/ß/g, "ss").replace(/ẞ/g, "ss");
 
   return s
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 };
 
-const buildInitialValues = (
-  initial: FaqDto | undefined,
-  fallbackLocale: string,
-): FaqsFormValues => {
-  const safeLocale = norm(fallbackLocale || 'de') || 'de';
+const buildInitialValues = (initial: FaqDto | undefined, fallbackLocale: string): FaqsFormValues => {
+  const safeLocale = norm(fallbackLocale || "de") || "de";
 
   if (!initial) {
     return {
@@ -127,9 +125,9 @@ const buildInitialValues = (
       locale: safeLocale,
       is_active: true,
       display_order: 0,
-      question: '',
-      answer: '',
-      slug: '',
+      question: "",
+      answer: "",
+      slug: "",
     };
   }
 
@@ -140,9 +138,9 @@ const buildInitialValues = (
     locale: resolvedLocale,
     is_active: toBool(initial.is_active),
     display_order: toNum(initial.display_order, 0),
-    question: initial.question ?? '',
-    answer: initial.answer ?? '',
-    slug: initial.slug ?? '',
+    question: initial.question ?? "",
+    answer: initial.answer ?? "",
+    slug: initial.slug ?? "",
   };
 };
 
@@ -168,12 +166,8 @@ const valuesToPayloadJson = (values: FaqsFormValues): FaqPayloadJson => ({
   display_order: values.display_order,
 });
 
-const payloadJsonToValues = (
-  json: any,
-  fallbackLocale: string,
-  base?: FaqsFormValues,
-): FaqsFormValues => {
-  const safeLocale = norm(fallbackLocale || 'de') || 'de';
+const payloadJsonToValues = (json: any, fallbackLocale: string, base?: FaqsFormValues): FaqsFormValues => {
+  const safeLocale = norm(fallbackLocale || "de") || "de";
 
   const out: FaqsFormValues = {
     ...(base ?? {
@@ -181,9 +175,9 @@ const payloadJsonToValues = (
       locale: safeLocale,
       is_active: true,
       display_order: 0,
-      question: '',
-      answer: '',
-      slug: '',
+      question: "",
+      answer: "",
+      slug: "",
     }),
   };
 
@@ -193,12 +187,12 @@ const payloadJsonToValues = (
   const loc = norm(j.locale ?? out.locale ?? safeLocale) || safeLocale;
   out.locale = loc;
 
-  if (typeof j.is_active !== 'undefined') out.is_active = !!(j.is_active as any);
-  if (typeof j.display_order !== 'undefined') out.display_order = toNum(j.display_order, 0);
+  if (typeof j.is_active !== "undefined") out.is_active = !!(j.is_active as any);
+  if (typeof j.display_order !== "undefined") out.display_order = toNum(j.display_order, 0);
 
-  if (typeof j.question !== 'undefined') out.question = String(j.question ?? '');
-  if (typeof j.answer !== 'undefined') out.answer = String(j.answer ?? '');
-  if (typeof j.slug !== 'undefined') out.slug = String(j.slug ?? '');
+  if (typeof j.question !== "undefined") out.question = String(j.question ?? "");
+  if (typeof j.answer !== "undefined") out.answer = String(j.answer ?? "");
+  if (typeof j.slug !== "undefined") out.slug = String(j.slug ?? "");
 
   return out;
 };
@@ -219,12 +213,10 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const t = useAdminT('admin.faqs');
-  const safeDefaultLocale = norm(defaultLocale || 'de') || 'de';
+  const t = useAdminT("admin.faqs");
+  const safeDefaultLocale = norm(defaultLocale || "de") || "de";
 
-  const [values, setValues] = useState<FaqsFormValues>(
-    buildInitialValues(initialData, safeDefaultLocale),
-  );
+  const [values, setValues] = useState<FaqsFormValues>(buildInitialValues(initialData, safeDefaultLocale));
 
   const [slugTouched, setSlugTouched] = useState(false);
 
@@ -235,7 +227,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
   const localeReqSeq = useRef(0);
 
   // editor mode
-  const [editorMode, setEditorMode] = useState<'form' | 'json'>('form');
+  const [editorMode, setEditorMode] = useState<"form" | "json">("form");
 
   // json editor model + errors
   const [jsonModel, setJsonModel] = useState<any>(() => valuesToPayloadJson(values));
@@ -260,7 +252,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
 
   // keep JSON in sync when in form mode (avoid overwriting user's json edits)
   useEffect(() => {
-    if (editorMode !== 'form') return;
+    if (editorMode !== "form") return;
     setJsonModel(valuesToPayloadJson(values));
     setJsonError(null);
   }, [values, editorMode]);
@@ -276,7 +268,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
     onLocaleChange?.(nextLocale);
 
     // create mode: only set state
-    if (mode === 'create' || !initialData?.id) {
+    if (mode === "create" || !initialData?.id) {
       setValues((prev) => ({ ...prev, locale: nextLocale }));
       // form mode ise json sync zaten effect’ten gelir
       return;
@@ -298,7 +290,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
       setSlugTouched(false);
 
       // json sync
-      if (editorMode === 'json') {
+      if (editorMode === "json") {
         setJsonModel(valuesToPayloadJson(nextValues));
         setJsonError(null);
       }
@@ -306,10 +298,10 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
       if (mySeq !== localeReqSeq.current) return;
       const status = err?.status ?? err?.originalStatus;
       if (status === 404) {
-        toast.info(t('messages.noRecordForLocale'));
+        toast.info(t("messages.noRecordForLocale"));
         // keep current values but locale updated
       } else {
-        toast.error(t('messages.loadForLocaleError'));
+        toast.error(t("messages.loadForLocaleError"));
       }
     }
   };
@@ -328,7 +320,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
     const s = v.slug.trim();
 
     if (!q || !a || !s) {
-      toast.error(t('form.validation.requiredFields'));
+      toast.error(t("form.validation.requiredFields"));
       return;
     }
 
@@ -346,21 +338,21 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
     e.preventDefault();
     if (disabled) return;
 
-    if (editorMode === 'form') {
+    if (editorMode === "form") {
       submitValues(values);
       return;
     }
 
     // json mode
     if (jsonError) {
-      toast.error(t('form.validation.invalidJson'));
+      toast.error(t("form.validation.invalidJson"));
       return;
     }
 
     const next = payloadJsonToValues(jsonModel, safeDefaultLocale, values);
 
     if (!validateRequired(next)) {
-      toast.error(t('form.validation.requiredFieldsInJson'));
+      toast.error(t("form.validation.requiredFieldsInJson"));
       return;
     }
 
@@ -386,39 +378,35 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
       <button
         type="button"
         className={[
-          'rounded-md border px-3 py-1 text-xs',
-          editorMode === 'form'
-            ? 'bg-muted text-foreground'
-            : 'bg-background text-muted-foreground',
-          !canSwitchToForm ? 'opacity-60' : '',
-        ].join(' ')}
-        onClick={() => setEditorMode('form')}
+          "rounded-md border px-3 py-1 text-xs",
+          editorMode === "form" ? "bg-muted text-foreground" : "bg-background text-muted-foreground",
+          !canSwitchToForm ? "opacity-60" : "",
+        ].join(" ")}
+        onClick={() => setEditorMode("form")}
         disabled={!canSwitchToForm}
       >
-        {t('form.editorModes.form')}
+        {t("form.editorModes.form")}
       </button>
       <button
         type="button"
         className={[
-          'rounded-md border px-3 py-1 text-xs',
-          editorMode === 'json'
-            ? 'bg-muted text-foreground'
-            : 'bg-background text-muted-foreground',
-          !canSwitchToJson ? 'opacity-60' : '',
-        ].join(' ')}
+          "rounded-md border px-3 py-1 text-xs",
+          editorMode === "json" ? "bg-muted text-foreground" : "bg-background text-muted-foreground",
+          !canSwitchToJson ? "opacity-60" : "",
+        ].join(" ")}
         onClick={() => {
           // json’e geçerken mevcut values → json (kullanıcı daha önce edit ettiyse, bilinçli olarak overwrite etme)
           setJsonModel(valuesToPayloadJson(values));
           setJsonError(null);
-          setEditorMode('json');
+          setEditorMode("json");
         }}
         disabled={!canSwitchToJson}
       >
-        {t('form.editorModes.json')}
+        {t("form.editorModes.json")}
       </button>
-      {editorMode === 'json' ? (
+      {editorMode === "json" ? (
         <span className="ml-2 text-[11px] text-muted-foreground">
-          {jsonError ? t('form.editorStatus.jsonInvalid') : t('form.editorStatus.jsonReady')}
+          {jsonError ? t("form.editorStatus.jsonInvalid") : t("form.editorStatus.jsonReady")}
         </span>
       ) : null}
     </div>
@@ -430,20 +418,18 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
         <div className="border-b p-3">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div className="min-w-0">
-              <div className="text-sm font-semibold">
-                {mode === 'create' ? t('form.titles.create') : t('form.titles.edit')}
+              <div className="font-semibold text-sm">
+                {mode === "create" ? t("form.titles.create") : t("form.titles.edit")}
               </div>
-              <div className="text-xs text-muted-foreground">
-                {editorMode === 'form'
-                  ? t('form.descriptions.formMode')
-                  : t('form.descriptions.jsonMode')}
+              <div className="text-muted-foreground text-xs">
+                {editorMode === "form" ? t("form.descriptions.formMode") : t("form.descriptions.jsonMode")}
               </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2">
               {renderModeSwitch()}
 
-              <div className="h-4 w-px bg-border mx-1 hidden lg:block" />
+              <div className="mx-1 hidden h-4 w-px bg-border lg:block" />
 
               {onCancel ? (
                 <button
@@ -452,46 +438,44 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
                   onClick={onCancel}
                   disabled={disabled}
                 >
-                  {t('actions.back')}
+                  {t("actions.back")}
                 </button>
               ) : null}
 
               <button
                 type="submit"
-                className="rounded-md bg-primary px-3 py-1 text-xs text-primary-foreground disabled:opacity-60"
+                className="rounded-md bg-primary px-3 py-1 text-primary-foreground text-xs disabled:opacity-60"
                 disabled={disabled}
               >
                 {saving
-                  ? mode === 'create'
-                    ? t('actions.creating')
-                    : t('actions.saving')
-                  : mode === 'create'
-                    ? t('actions.create')
-                    : t('actions.save')}
+                  ? mode === "create"
+                    ? t("actions.creating")
+                    : t("actions.saving")
+                  : mode === "create"
+                    ? t("actions.create")
+                    : t("actions.save")}
               </button>
 
               {loading || switchingLocale ? (
                 <span className="rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
-                  {switchingLocale ? t('form.switchingLocale') : t('form.loading')}
+                  {switchingLocale ? t("form.switchingLocale") : t("form.loading")}
                 </span>
               ) : null}
             </div>
           </div>
         </div>
 
-        <div className="p-3 space-y-4">
+        <div className="space-y-4 p-3">
           <AdminLocaleSelect
             value={values.locale}
             onChange={handleLocaleChange}
             options={localeSelectOptions as any}
             loading={!!localesLoading}
-            disabled={
-              disabled || (!!localesLoading && !localeSelectOptions.length) || switchingLocale
-            }
-            label={t('form.fields.locale')}
+            disabled={disabled || (!!localesLoading && !localeSelectOptions.length) || switchingLocale}
+            label={t("form.fields.locale")}
           />
 
-          {editorMode === 'json' ? (
+          {editorMode === "json" ? (
             <FaqsFormJsonSection
               jsonModel={jsonModel}
               disabled={disabled || switchingLocale}
@@ -500,8 +484,8 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
             />
           ) : (
             <div className="grid gap-4 lg:grid-cols-12">
-              <div className="lg:col-span-8 space-y-4">
-                <div className="rounded-lg border bg-card p-3 space-y-4">
+              <div className="space-y-4 lg:col-span-8">
+                <div className="space-y-4 rounded-lg border bg-card p-3">
                   <div className="flex flex-col gap-3 md:flex-row md:items-end">
                     <label className="flex items-center gap-2 text-sm">
                       <input
@@ -512,29 +496,25 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
                         onChange={(e) => setValues((p) => ({ ...p, is_active: e.target.checked }))}
                         disabled={disabled}
                       />
-                      <span>{t('form.fields.active')}</span>
+                      <span>{t("form.fields.active")}</span>
                     </label>
 
-                    <div className="md:ml-auto w-full md:w-56">
-                      <label className="mb-1 block text-xs text-muted-foreground">
-                        {t('form.fields.displayOrder')}
+                    <div className="w-full md:ml-auto md:w-56">
+                      <label className="mb-1 block text-muted-foreground text-xs">
+                        {t("form.fields.displayOrder")}
                       </label>
                       <input
                         type="number"
                         className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                         value={values.display_order}
-                        onChange={(e) =>
-                          setValues((p) => ({ ...p, display_order: toNum(e.target.value, 0) }))
-                        }
+                        onChange={(e) => setValues((p) => ({ ...p, display_order: toNum(e.target.value, 0) }))}
                         disabled={disabled}
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs text-muted-foreground">
-                      {t('form.fields.question')}
-                    </label>
+                    <label className="mb-1 block text-muted-foreground text-xs">{t("form.fields.question")}</label>
                     <input
                       type="text"
                       className="w-full rounded-md border bg-background px-3 py-2 text-sm"
@@ -553,9 +533,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs text-muted-foreground">
-                      {t('form.fields.slug')}
-                    </label>
+                    <label className="mb-1 block text-muted-foreground text-xs">{t("form.fields.slug")}</label>
                     <input
                       type="text"
                       className="w-full rounded-md border bg-background px-3 py-2 text-sm"
@@ -571,9 +549,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
                   </div>
 
                   <div>
-                    <label className="mb-1 block text-xs text-muted-foreground">
-                      {t('form.fields.answer')}
-                    </label>
+                    <label className="mb-1 block text-muted-foreground text-xs">{t("form.fields.answer")}</label>
                     <textarea
                       className="w-full rounded-md border bg-background px-3 py-2 text-sm"
                       rows={8}
@@ -587,24 +563,20 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
               </div>
 
               <div className="lg:col-span-4">
-                <div className="rounded-lg border bg-card p-3 space-y-2">
-                  <div className="text-sm font-semibold">{t('form.notes.title')}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {t('form.notes.body')}
-                  </div>
+                <div className="space-y-2 rounded-lg border bg-card p-3">
+                  <div className="font-semibold text-sm">{t("form.notes.title")}</div>
+                  <div className="text-muted-foreground text-xs">{t("form.notes.body")}</div>
 
-                  <div className="text-xs text-muted-foreground">
-                    {t('form.notes.jsonTip')}
-                  </div>
+                  <div className="text-muted-foreground text-xs">{t("form.notes.jsonTip")}</div>
 
                   {initialData?.created_at ? (
-                    <div className="text-xs text-muted-foreground">
-                      {t('form.notes.createdAt')}: <code>{initialData.created_at}</code>
+                    <div className="text-muted-foreground text-xs">
+                      {t("form.notes.createdAt")}: <code>{initialData.created_at}</code>
                     </div>
                   ) : null}
                   {initialData?.updated_at ? (
-                    <div className="text-xs text-muted-foreground">
-                      {t('form.notes.updatedAt')}: <code>{initialData.updated_at}</code>
+                    <div className="text-muted-foreground text-xs">
+                      {t("form.notes.updatedAt")}: <code>{initialData.updated_at}</code>
                     </div>
                   ) : null}
                 </div>

@@ -3,15 +3,11 @@
 // FINAL — App Router wrapper (params Promise safe)
 // =============================================================
 
-import SiteSettingsDetailClient from '../_components/admin-site-settings-detail-client';
+import SiteSettingsDetailClient from "../_components/admin-site-settings-detail-client";
 
 type Params = { id: string };
 
-export default async function Page({
-  params,
-}: {
-  params: Promise<Params>;
-}) {
+export default async function Page({ params }: { params: Promise<Params> }) {
   const p = await params;
   return <SiteSettingsDetailClient id={p.id} />;
 }

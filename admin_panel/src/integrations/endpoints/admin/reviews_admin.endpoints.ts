@@ -3,23 +3,23 @@
 // Admin Reviews (LIST + CRUD)
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
+  AdminGetReviewParams,
+  AdminReviewCreatePayload,
   AdminReviewDto,
   AdminReviewListQueryParams,
   AdminReviewListResponse,
-  AdminGetReviewParams,
-  AdminReviewCreatePayload,
   AdminReviewUpdatePayload,
-} from '@/integrations/shared';
+} from "@/integrations/shared";
 
 export const reviewsAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // -------- LIST (admin) --------
     listReviewsAdmin: build.query<AdminReviewListResponse, AdminReviewListQueryParams | undefined>({
       query: (params) => ({
-        url: '/admin/reviews',
-        method: 'GET',
+        url: "/admin/reviews",
+        method: "GET",
         params,
       }),
       // Şu an backend X-Total-Count header set etmiyor; total = items.length
@@ -36,27 +36,24 @@ export const reviewsAdminApi = baseApi.injectEndpoints({
     getReviewAdmin: build.query<AdminReviewDto, AdminGetReviewParams>({
       query: ({ id }) => ({
         url: `/admin/reviews/${encodeURIComponent(id)}`,
-        method: 'GET',
+        method: "GET",
       }),
     }),
 
     // -------- CREATE (admin) --------
     createReviewAdmin: build.mutation<AdminReviewDto, AdminReviewCreatePayload>({
       query: (body) => ({
-        url: '/admin/reviews',
-        method: 'POST',
+        url: "/admin/reviews",
+        method: "POST",
         body,
       }),
     }),
 
     // -------- UPDATE (admin) --------
-    updateReviewAdmin: build.mutation<
-      AdminReviewDto,
-      { id: string; patch: AdminReviewUpdatePayload }
-    >({
+    updateReviewAdmin: build.mutation<AdminReviewDto, { id: string; patch: AdminReviewUpdatePayload }>({
       query: ({ id, patch }) => ({
         url: `/admin/reviews/${encodeURIComponent(id)}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: patch,
       }),
     }),
@@ -65,7 +62,7 @@ export const reviewsAdminApi = baseApi.injectEndpoints({
     deleteReviewAdmin: build.mutation<{ ok?: boolean }, { id: string }>({
       query: ({ id }) => ({
         url: `/admin/reviews/${encodeURIComponent(id)}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
     }),
   }),

@@ -1,7 +1,7 @@
 // src/app/(main)/admin/(admin)/page.tsx
 
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 export default function Page() {
-  redirect('/admin/dashboard');
+  redirect("/admin/dashboard");
 }

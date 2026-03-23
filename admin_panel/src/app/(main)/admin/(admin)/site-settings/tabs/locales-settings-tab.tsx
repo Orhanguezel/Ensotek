@@ -1,36 +1,34 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { RefreshCcw } from 'lucide-react';
-import {
-  useListSiteSettingsAdminQuery,
-  useUpdateSiteSettingAdminMutation,
-} from '@/integrations/hooks';
+import * as React from "react";
+
+import { RefreshCcw } from "lucide-react";
+import { toast } from "sonner";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { useListSiteSettingsAdminQuery, useUpdateSiteSettingAdminMutation } from "@/integrations/hooks";
 import {
   buildSiteSettingsLocalePayload,
   getErrorMessage,
   normalizeSiteSettingsLocaleRows,
   type SiteSettingsLocaleRow,
-} from '@/integrations/shared';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
+} from "@/integrations/shared";
 
 export function LocalesSettingsTab({ settingPrefix }: { settingPrefix?: string }) {
-  const t = useAdminT('admin.siteSettings.locales');
-  const appLocalesKey = `${settingPrefix || ''}app_locales`;
+  const t = useAdminT("admin.siteSettings.locales");
+  const appLocalesKey = `${settingPrefix || ""}app_locales`;
 
   const localesQ = useListSiteSettingsAdminQuery({
-    locale: '*',
+    locale: "*",
     keys: [appLocalesKey],
     limit: 20,
     offset: 0,
-    sort: 'key',
-    order: 'asc',
+    sort: "key",
+    order: "asc",
   });
 
   const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
@@ -48,10 +46,10 @@ export function LocalesSettingsTab({ settingPrefix }: { settingPrefix?: string }
   const persist = async (nextRows: SiteSettingsLocaleRow[]) => {
     const payload = buildSiteSettingsLocalePayload(nextRows);
     try {
-      await updateSetting({ key: appLocalesKey, locale: '*', value: payload }).unwrap();
-      toast.success(t('saved'));
+      await updateSetting({ key: appLocalesKey, locale: "*", value: payload }).unwrap();
+      toast.success(t("saved"));
     } catch (err) {
-      toast.error(getErrorMessage(err, t('saveError')));
+      toast.error(getErrorMessage(err, t("saveError")));
       throw err;
     }
   };
@@ -61,23 +59,22 @@ export function LocalesSettingsTab({ settingPrefix }: { settingPrefix?: string }
     setTouched(true);
     const next = rows.map((r) => (r.code === code ? { ...r, is_active: val } : r));
     setRows(next);
-    try { await persist(next); } catch { setRows(prev); setTouched(false); }
+    try {
+      await persist(next);
+    } catch {
+      setRows(prev);
+      setTouched(false);
+    }
   };
 
   return (
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
-          <CardTitle className="text-base">{t('title')}</CardTitle>
+          <CardTitle className="text-base">{t("title")}</CardTitle>
           <div className="flex items-center gap-2">
-            {busy && <Badge variant="outline">{t('loading')}</Badge>}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              disabled={busy}
-              onClick={() => localesQ.refetch()}
-            >
+            {busy && <Badge variant="outline">{t("loading")}</Badge>}
+            <Button variant="ghost" size="icon" className="h-8 w-8" disabled={busy} onClick={() => localesQ.refetch()}>
               <RefreshCcw className="h-4 w-4" />
             </Button>
           </div>
@@ -86,16 +83,13 @@ export function LocalesSettingsTab({ settingPrefix }: { settingPrefix?: string }
 
       <CardContent className="space-y-3">
         {rows.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t('emptyRows')}</p>
+          <p className="text-muted-foreground text-sm">{t("emptyRows")}</p>
         ) : (
           <div className="space-y-2">
             {rows.map((r) => (
-              <div
-                key={r.code}
-                className="flex items-center justify-between rounded-md border px-4 py-2.5"
-              >
+              <div key={r.code} className="flex items-center justify-between rounded-md border px-4 py-2.5">
                 <div className="flex items-center gap-3">
-                  <span className="w-8 text-center font-mono text-sm font-medium uppercase">{r.code}</span>
+                  <span className="w-8 text-center font-medium font-mono text-sm uppercase">{r.code}</span>
                   <span className="text-sm">{r.label}</span>
                 </div>
                 <Switch

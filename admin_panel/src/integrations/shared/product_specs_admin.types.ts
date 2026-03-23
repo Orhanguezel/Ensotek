@@ -3,7 +3,7 @@
 // product_specs tablo şemasına göre (backend admin.specs.controller)
 // =============================================================
 
-export type ProductSpecCategory = 'physical' | 'material' | 'service' | 'custom';
+export type ProductSpecCategory = "physical" | "material" | "service" | "custom";
 
 export interface AdminProductSpecDto {
   id: string;

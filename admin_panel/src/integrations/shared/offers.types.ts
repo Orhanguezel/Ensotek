@@ -16,26 +16,18 @@
 // - POST   /offers/:id/send
 // ===================================================================
 
-import type { BoolLike } from '@/integrations/shared';
-import { toBool, toNumber, parseJsonObject } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
+import { parseJsonObject, toBool, toNumber } from "@/integrations/shared";
 
-export const OFFER_STATUSES = [
-  'new',
-  'in_review',
-  'quoted',
-  'sent',
-  'accepted',
-  'rejected',
-  'cancelled',
-] as const;
+export const OFFER_STATUSES = ["new", "in_review", "quoted", "sent", "accepted", "rejected", "cancelled"] as const;
 
 export type OfferStatus = (typeof OFFER_STATUSES)[number];
 
 export type OfferListQuery = {
   // ordering
   order?: string; // e.g. created_at.desc
-  sort?: 'created_at' | 'updated_at';
-  orderDir?: 'asc' | 'desc';
+  sort?: "created_at" | "updated_at";
+  orderDir?: "asc" | "desc";
 
   limit?: number;
   offset?: number;
@@ -193,11 +185,11 @@ export type OfferAdminSendResult = OfferView; // controller returns final row
 
 // ----------------------------- helpers -----------------------------
 
-const s = (v: unknown) => String(v ?? '').trim();
+const s = (v: unknown) => String(v ?? "").trim();
 
 export const toStatus = (v: unknown): OfferStatus => {
   const x = s(v) as OfferStatus;
-  return (OFFER_STATUSES as readonly string[]).includes(x) ? x : 'new';
+  return (OFFER_STATUSES as readonly string[]).includes(x) ? x : "new";
 };
 
 export const toIso = (v: unknown): string | null => {
@@ -227,7 +219,7 @@ export const normalizeOffer = (raw: unknown): OfferView => {
     phone: r.phone == null ? null : s(r.phone),
 
     subject: r.subject == null ? null : s(r.subject),
-    message: r.message == null ? null : String(r.message ?? ''),
+    message: r.message == null ? null : String(r.message ?? ""),
 
     product_id: r.product_id == null ? null : s(r.product_id),
     service_id: r.service_id == null ? null : s(r.service_id),
@@ -247,20 +239,19 @@ export const normalizeOffer = (raw: unknown): OfferView => {
 
     valid_until: toIso(r.valid_until),
 
-    admin_notes: r.admin_notes == null ? null : String(r.admin_notes ?? ''),
+    admin_notes: r.admin_notes == null ? null : String(r.admin_notes ?? ""),
 
     pdf_url: r.pdf_url == null ? null : s(r.pdf_url),
     pdf_asset_id: r.pdf_asset_id == null ? null : s(r.pdf_asset_id),
 
     email_sent_at: toIso(r.email_sent_at),
 
-    created_at: toIso(r.created_at) ?? '',
-    updated_at: toIso(r.updated_at) ?? '',
+    created_at: toIso(r.created_at) ?? "",
+    updated_at: toIso(r.updated_at) ?? "",
   };
 };
 
-export const normalizeOfferList = (raw: unknown): OfferView[] =>
-  Array.isArray(raw) ? raw.map(normalizeOffer) : [];
+export const normalizeOfferList = (raw: unknown): OfferView[] => (Array.isArray(raw) ? raw.map(normalizeOffer) : []);
 
 // ----------------------------- request mappers -----------------------------
 
@@ -271,8 +262,8 @@ export const toOfferListQueryParams = (q: OfferListQuery = {}): Record<string, a
   if (q.sort) out.sort = q.sort;
   if (q.orderDir) out.orderDir = q.orderDir;
 
-  if (typeof q.limit === 'number') out.limit = q.limit;
-  if (typeof q.offset === 'number') out.offset = q.offset;
+  if (typeof q.limit === "number") out.limit = q.limit;
+  if (typeof q.offset === "number") out.offset = q.offset;
 
   if (q.status) out.status = q.status;
 
@@ -300,30 +291,29 @@ export const toOfferPublicCreateBody = (b: OfferPublicCreateBody): Record<string
   product_id: b.product_id ?? null,
   service_id: b.service_id ?? null,
   form_data: b.form_data ?? {},
-  ...(typeof b.consent_marketing !== 'undefined' ? { consent_marketing: b.consent_marketing } : {}),
-  ...(typeof b.consent_terms !== 'undefined' ? { consent_terms: b.consent_terms } : {}),
+  ...(typeof b.consent_marketing !== "undefined" ? { consent_marketing: b.consent_marketing } : {}),
+  ...(typeof b.consent_terms !== "undefined" ? { consent_terms: b.consent_terms } : {}),
 });
 
 export const toOfferAdminUpsertBody = (b: OfferAdminUpsertBody): Record<string, any> => ({
   ...toOfferPublicCreateBody(b),
   ...(b.status ? { status: b.status } : {}),
   ...(b.currency ? { currency: b.currency } : {}),
-  ...(typeof b.net_total !== 'undefined' ? { net_total: b.net_total } : {}),
-  ...(typeof b.vat_rate !== 'undefined' ? { vat_rate: b.vat_rate } : {}),
-  ...(typeof b.vat_total !== 'undefined' ? { vat_total: b.vat_total } : {}),
-  ...(typeof b.shipping_total !== 'undefined' ? { shipping_total: b.shipping_total } : {}),
-  ...(typeof b.gross_total !== 'undefined' ? { gross_total: b.gross_total } : {}),
-  ...(typeof b.offer_no !== 'undefined' ? { offer_no: b.offer_no } : {}),
-  ...(typeof b.valid_until !== 'undefined' ? { valid_until: b.valid_until } : {}),
-  ...(typeof b.admin_notes !== 'undefined' ? { admin_notes: b.admin_notes } : {}),
-  ...(typeof b.pdf_url !== 'undefined' ? { pdf_url: b.pdf_url } : {}),
-  ...(typeof b.pdf_asset_id !== 'undefined' ? { pdf_asset_id: b.pdf_asset_id } : {}),
-  ...(typeof b.email_sent_at !== 'undefined' ? { email_sent_at: b.email_sent_at } : {}),
+  ...(typeof b.net_total !== "undefined" ? { net_total: b.net_total } : {}),
+  ...(typeof b.vat_rate !== "undefined" ? { vat_rate: b.vat_rate } : {}),
+  ...(typeof b.vat_total !== "undefined" ? { vat_total: b.vat_total } : {}),
+  ...(typeof b.shipping_total !== "undefined" ? { shipping_total: b.shipping_total } : {}),
+  ...(typeof b.gross_total !== "undefined" ? { gross_total: b.gross_total } : {}),
+  ...(typeof b.offer_no !== "undefined" ? { offer_no: b.offer_no } : {}),
+  ...(typeof b.valid_until !== "undefined" ? { valid_until: b.valid_until } : {}),
+  ...(typeof b.admin_notes !== "undefined" ? { admin_notes: b.admin_notes } : {}),
+  ...(typeof b.pdf_url !== "undefined" ? { pdf_url: b.pdf_url } : {}),
+  ...(typeof b.pdf_asset_id !== "undefined" ? { pdf_asset_id: b.pdf_asset_id } : {}),
+  ...(typeof b.email_sent_at !== "undefined" ? { email_sent_at: b.email_sent_at } : {}),
   ...(b.service_title ? { service_title: b.service_title } : {}),
 });
 
-export const toOfferAdminPatchBody = (b: OfferAdminPatchBody): Record<string, any> =>
-  toOfferAdminUpsertBody(b as any);
+export const toOfferAdminPatchBody = (b: OfferAdminPatchBody): Record<string, any> => toOfferAdminUpsertBody(b as any);
 
 // ----------------------------- meta/header helpers -----------------------------
 
@@ -334,8 +324,8 @@ export type ListMeta = {
 
 export const readListMeta = (meta: any): ListMeta => {
   const headers = meta?.response?.headers;
-  const totalRaw = headers?.get?.('x-total-count') ?? headers?.get?.('X-Total-Count') ?? null;
-  const cr = headers?.get?.('content-range') ?? headers?.get?.('Content-Range') ?? null;
+  const totalRaw = headers?.get?.("x-total-count") ?? headers?.get?.("X-Total-Count") ?? null;
+  const cr = headers?.get?.("content-range") ?? headers?.get?.("Content-Range") ?? null;
   const total = totalRaw != null ? Number(totalRaw) : NaN;
   return {
     total: Number.isFinite(total) ? total : null,

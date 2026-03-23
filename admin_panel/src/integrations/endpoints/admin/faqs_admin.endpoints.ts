@@ -6,29 +6,23 @@
 // - Types tek noktadan: @/integrations/shared
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
-import type {
-  FaqDto,
-  FaqListQueryParams,
-  FaqCreatePayload,
-  FaqUpdatePayload,
-  WithLocale,
-} from '@/integrations/shared';
-import { cleanParams } from '@/integrations/shared';
+import { baseApi } from "@/integrations/baseApi";
+import type { FaqCreatePayload, FaqDto, FaqListQueryParams, FaqUpdatePayload, WithLocale } from "@/integrations/shared";
+import { cleanParams } from "@/integrations/shared";
 
 export const faqsAdminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     /* --------------------------------------------------------- */
     /* LIST – GET /admin/faqs                                    */
     /* --------------------------------------------------------- */
-    listFaqsAdmin: builder.query<FaqDto[], WithLocale<FaqListQueryParams> | void>({
+    listFaqsAdmin: builder.query<FaqDto[], WithLocale<FaqListQueryParams> | undefined>({
       query: (params) => {
         const p = (params || {}) as WithLocale<FaqListQueryParams>;
         const { locale, ...rest } = p;
 
         return {
-          url: '/admin/faqs',
-          method: 'GET',
+          url: "/admin/faqs",
+          method: "GET",
           params: cleanParams({ ...rest, locale }),
         };
       },
@@ -40,7 +34,7 @@ export const faqsAdminApi = baseApi.injectEndpoints({
     getFaqAdmin: builder.query<FaqDto, { id: string; locale?: string }>({
       query: ({ id, locale }) => ({
         url: `/admin/faqs/${encodeURIComponent(id)}`,
-        method: 'GET',
+        method: "GET",
         params: cleanParams({ locale }),
       }),
     }),
@@ -51,7 +45,7 @@ export const faqsAdminApi = baseApi.injectEndpoints({
     getFaqBySlugAdmin: builder.query<FaqDto, { slug: string; locale?: string }>({
       query: ({ slug, locale }) => ({
         url: `/admin/faqs/by-slug/${encodeURIComponent(slug)}`,
-        method: 'GET',
+        method: "GET",
         params: cleanParams({ locale }),
       }),
     }),
@@ -61,8 +55,8 @@ export const faqsAdminApi = baseApi.injectEndpoints({
     /* --------------------------------------------------------- */
     createFaqAdmin: builder.mutation<FaqDto, FaqCreatePayload>({
       query: (body) => ({
-        url: '/admin/faqs',
-        method: 'POST',
+        url: "/admin/faqs",
+        method: "POST",
         body,
       }),
     }),
@@ -73,7 +67,7 @@ export const faqsAdminApi = baseApi.injectEndpoints({
     updateFaqAdmin: builder.mutation<FaqDto, { id: string; patch: FaqUpdatePayload }>({
       query: ({ id, patch }) => ({
         url: `/admin/faqs/${encodeURIComponent(id)}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: patch,
       }),
     }),
@@ -84,7 +78,7 @@ export const faqsAdminApi = baseApi.injectEndpoints({
     deleteFaqAdmin: builder.mutation<void, string>({
       query: (id) => ({
         url: `/admin/faqs/${encodeURIComponent(id)}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
     }),
   }),

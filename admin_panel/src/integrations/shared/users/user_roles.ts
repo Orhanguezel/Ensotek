@@ -1,5 +1,5 @@
 // src/integrations/shared/user_roles.ts
-import type { UserRoleName } from './users';
+import type { UserRoleName } from "./users";
 
 export type UserRole = {
   id: string;
@@ -11,8 +11,8 @@ export type UserRole = {
 export type UserRolesListParams = {
   user_id?: string;
   role?: UserRoleName;
-  order?: 'created_at';
-  direction?: 'asc' | 'desc';
+  order?: "created_at";
+  direction?: "asc" | "desc";
   limit?: number;
   offset?: number;
 };

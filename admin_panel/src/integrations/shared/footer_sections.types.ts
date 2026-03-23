@@ -3,16 +3,16 @@
 // Ensotek – Footer Sections DTO & Payload Types
 // =============================================================
 
-import { BoolLike, asStr, toNum } from '@/integrations/shared';
-import type { ApiFooterSection } from '@/integrations/shared';
+import type { ApiFooterSection } from "@/integrations/shared";
+import { asStr, type BoolLike, toNum } from "@/integrations/shared";
 
 /**
  * LIST query params – backend'deki footerSectionListQuerySchema ile uyumlu
  */
 export interface FooterSectionListQueryParams {
   order?: string; // "display_order.asc" vb.
-  sort?: 'display_order' | 'created_at' | 'updated_at';
-  orderDir?: 'asc' | 'desc';
+  sort?: "display_order" | "created_at" | "updated_at";
+  orderDir?: "asc" | "desc";
   limit?: number;
   offset?: number;
   is_active?: BoolLike;
@@ -65,7 +65,7 @@ export interface FooterSectionCreatePayload {
  * UPDATE payload (PatchFooterSectionBody)
  */
 export type FooterSectionUpdatePayload = Partial<FooterSectionCreatePayload>;
-export const isTrue = (v: unknown): boolean => v === true || v === 1 || v === '1' || v === 'true';
+export const isTrue = (v: unknown): boolean => v === true || v === 1 || v === "1" || v === "true";
 
 export const normalizeFooterSection = (r: ApiFooterSection): FooterSectionDto => ({
   id: asStr((r as any).id),
@@ -73,28 +73,27 @@ export const normalizeFooterSection = (r: ApiFooterSection): FooterSectionDto =>
   display_order: toNum((r as any).display_order, 0),
   created_at: asStr((r as any).created_at),
   updated_at: asStr((r as any).updated_at),
-  title: (r as any).title ?? '',
-  slug: (r as any).slug ?? '',
+  title: (r as any).title ?? "",
+  slug: (r as any).slug ?? "",
   description: (r as any).description ?? null,
   locale: ((r as any).locale_resolved ?? (r as any).locale ?? null) as any,
 });
 
-export const isActiveFooterSection = (s?: FooterSectionDto | null): boolean =>
-  !!s && s.is_active !== false;
+export const isActiveFooterSection = (s?: FooterSectionDto | null): boolean => !!s && s.is_active !== false;
 
 export const sortFooterSections = (items: FooterSectionDto[]): FooterSectionDto[] =>
   (items || []).slice().sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0));
 
-export function stableKey(params?: FooterSectionListQueryParams | void) {
-  if (!params) return 'list:{}';
+export function stableKey(params?: FooterSectionListQueryParams | undefined) {
+  if (!params) return "list:{}";
   const p = params as FooterSectionListQueryParams;
 
-  const locale = (p as any).locale ?? '';
-  const q = (p as any).q ?? '';
-  const sort = (p as any).sort ?? '';
-  const orderDir = (p as any).orderDir ?? '';
-  const limit = typeof (p as any).limit === 'number' ? String((p as any).limit) : '';
-  const offset = typeof (p as any).offset === 'number' ? String((p as any).offset) : '';
+  const locale = (p as any).locale ?? "";
+  const q = (p as any).q ?? "";
+  const sort = (p as any).sort ?? "";
+  const orderDir = (p as any).orderDir ?? "";
+  const limit = typeof (p as any).limit === "number" ? String((p as any).limit) : "";
+  const offset = typeof (p as any).offset === "number" ? String((p as any).offset) : "";
 
   return `list:{locale=${locale}|q=${q}|sort=${sort}|orderDir=${orderDir}|limit=${limit}|offset=${offset}}`;
 }

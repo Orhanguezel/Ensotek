@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/storage/_components/admin-storage-detail-client.tsx
@@ -8,19 +8,14 @@
 // - Preview
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { ArrowLeft, Save, Trash2, Loader2, Upload, Image as ImageIcon, File } from 'lucide-react';
+import * as React from "react";
 
-import { cn } from '@/lib/utils';
+import { useRouter } from "next/navigation";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { ArrowLeft, File, Loader2, Save, Trash2, Upload } from "lucide-react";
+import { toast } from "sonner";
 
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,16 +25,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import type { StorageUpdateInput } from '@/integrations/shared';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
-  useGetAssetAdminQuery,
   useCreateAssetAdminMutation,
-  usePatchAssetAdminMutation,
   useDeleteAssetAdminMutation,
-} from '@/integrations/hooks';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+  useGetAssetAdminQuery,
+  usePatchAssetAdminMutation,
+} from "@/integrations/hooks";
+import type { StorageUpdateInput } from "@/integrations/shared";
 
 type FormData = {
   name: string;
@@ -48,26 +46,21 @@ type FormData = {
 };
 
 function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) return "0 B";
   const k = 1024;
-  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 }
 
 export default function AdminStorageDetailClient({ id }: { id: string }) {
   const router = useRouter();
-  const t = useAdminT('admin.storage');
-  const isNew = id === 'new';
+  const t = useAdminT("admin.storage");
+  const isNew = id === "new";
 
   function getErrMsg(e: unknown): string {
     const anyErr = e as any;
-    return (
-      anyErr?.data?.error?.message ||
-      anyErr?.data?.message ||
-      anyErr?.message ||
-      t('errorFallback')
-    );
+    return anyErr?.data?.error?.message || anyErr?.data?.message || anyErr?.message || t("errorFallback");
   }
 
   // RTK Query - only fetch if editing
@@ -75,10 +68,7 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
     data: existingItem,
     isLoading: loadingItem,
     error: loadError,
-  } = useGetAssetAdminQuery(
-    { id },
-    { skip: isNew }
-  );
+  } = useGetAssetAdminQuery({ id }, { skip: isNew });
 
   const [createAsset, { isLoading: isCreating }] = useCreateAssetAdminMutation();
   const [patchAsset, { isLoading: isUpdating }] = usePatchAssetAdminMutation();
@@ -86,9 +76,9 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
 
   // Form state
   const [formData, setFormData] = React.useState<FormData>({
-    name: '',
-    bucket: 'public',
-    folder: '',
+    name: "",
+    bucket: "public",
+    folder: "",
   });
 
   // File state (only for upload)
@@ -102,12 +92,12 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
   React.useEffect(() => {
     if (!isNew && existingItem) {
       setFormData({
-        name: existingItem.name || '',
-        bucket: existingItem.bucket || 'public',
-        folder: existingItem.folder || '',
+        name: existingItem.name || "",
+        bucket: existingItem.bucket || "public",
+        folder: existingItem.folder || "",
       });
 
-      if (existingItem.url && existingItem.mime.startsWith('image/')) {
+      if (existingItem.url && existingItem.mime.startsWith("image/")) {
         setPreviewUrl(existingItem.url);
       }
     }
@@ -126,7 +116,7 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
     }
 
     // Generate preview for images
-    if (file.type.startsWith('image/')) {
+    if (file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onloadend = () => {
         setPreviewUrl(reader.result as string);
@@ -146,12 +136,12 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
       if (isNew) {
         // Upload mode
         if (!selectedFile) {
-          toast.error(t('detail.selectFileError'));
+          toast.error(t("detail.selectFileError"));
           return;
         }
 
         if (!formData.bucket.trim()) {
-          toast.error(t('detail.bucketRequiredError'));
+          toast.error(t("detail.bucketRequiredError"));
           return;
         }
 
@@ -161,8 +151,8 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
           folder: formData.folder.trim() || undefined,
         }).unwrap();
 
-        toast.success(t('detail.fileUploaded'));
-        router.push('/admin/storage');
+        toast.success(t("detail.fileUploaded"));
+        router.push("/admin/storage");
       } else {
         // Edit mode
         const updateData: StorageUpdateInput = {
@@ -175,7 +165,7 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
           body: updateData,
         }).unwrap();
 
-        toast.success(t('detail.recordUpdated'));
+        toast.success(t("detail.recordUpdated"));
       }
     } catch (err) {
       toast.error(getErrMsg(err));
@@ -191,8 +181,8 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
 
     try {
       await deleteAsset({ id }).unwrap();
-      toast.success(t('list.fileDeleted'));
-      router.push('/admin/storage');
+      toast.success(t("list.fileDeleted"));
+      router.push("/admin/storage");
     } catch (err) {
       toast.error(getErrMsg(err));
     }
@@ -203,16 +193,10 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
       <div className="space-y-6">
         <Card>
           <CardContent className="py-12 text-center">
-            <div className="text-destructive">
-              {t('detail.loadError', { error: getErrMsg(loadError) })}
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/admin/storage')}
-              className="mt-4 gap-2"
-            >
+            <div className="text-destructive">{t("detail.loadError", { error: getErrMsg(loadError) })}</div>
+            <Button variant="outline" onClick={() => router.push("/admin/storage")} className="mt-4 gap-2">
               <ArrowLeft className="size-4" />
-              {t('detail.backToList')}
+              {t("detail.backToList")}
             </Button>
           </CardContent>
         </Card>
@@ -227,7 +211,7 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
           <CardContent className="flex items-center justify-center py-12">
             <div className="flex items-center gap-2">
               <Loader2 className="size-5 animate-spin" />
-              <span>{t('list.loading')}</span>
+              <span>{t("list.loading")}</span>
             </div>
           </CardContent>
         </Card>
@@ -243,24 +227,18 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
           <CardHeader>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1.5">
-                <CardTitle>
-                  {isNew ? t('detail.uploadTitle') : t('detail.editTitle')}
-                </CardTitle>
-                <CardDescription>
-                  {isNew
-                    ? t('detail.uploadDescription')
-                    : t('detail.editDescription')}
-                </CardDescription>
+                <CardTitle>{isNew ? t("detail.uploadTitle") : t("detail.editTitle")}</CardTitle>
+                <CardDescription>{isNew ? t("detail.uploadDescription") : t("detail.editDescription")}</CardDescription>
               </div>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/admin/storage')}
+                onClick={() => router.push("/admin/storage")}
                 disabled={busy}
                 className="gap-2"
               >
                 <ArrowLeft className="size-4" />
-                {t('detail.backButton')}
+                {t("detail.backButton")}
               </Button>
             </div>
           </CardHeader>
@@ -270,13 +248,13 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
         {(previewUrl || existingItem?.url) && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t('detail.previewTitle')}</CardTitle>
+              <CardTitle className="text-base">{t("detail.previewTitle")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-center rounded-lg border bg-muted p-8">
-                {(previewUrl || existingItem?.url) ? (
+                {previewUrl || existingItem?.url ? (
                   <img
-                    src={previewUrl || existingItem?.url || ''}
+                    src={previewUrl || existingItem?.url || ""}
                     alt="Preview"
                     className="max-h-96 rounded object-contain"
                   />
@@ -291,29 +269,31 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
               {existingItem && (
                 <div className="mt-4 space-y-2 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{t('detail.mimeLabel')}</span>
+                    <span className="text-muted-foreground">{t("detail.mimeLabel")}</span>
                     <Badge variant="secondary">{existingItem.mime}</Badge>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">{t('detail.sizeLabel')}</span>
+                    <span className="text-muted-foreground">{t("detail.sizeLabel")}</span>
                     <span>{formatBytes(existingItem.size)}</span>
                   </div>
                   {existingItem.width && existingItem.height && (
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('detail.dimensionsLabel')}</span>
-                      <span>{existingItem.width} × {existingItem.height}</span>
+                      <span className="text-muted-foreground">{t("detail.dimensionsLabel")}</span>
+                      <span>
+                        {existingItem.width} × {existingItem.height}
+                      </span>
                     </div>
                   )}
                   {existingItem.url && (
                     <div className="flex items-center justify-between">
-                      <span className="text-muted-foreground">{t('detail.urlLabel')}</span>
+                      <span className="text-muted-foreground">{t("detail.urlLabel")}</span>
                       <a
                         href={existingItem.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
                       >
-                        {t('detail.openLink')}
+                        {t("detail.openLink")}
                       </a>
                     </div>
                   )}
@@ -330,7 +310,7 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
               <CardTitle className="text-base">
                 <div className="flex items-center gap-2">
                   <Upload className="size-4" />
-                  {t('detail.selectFileTitle')}
+                  {t("detail.selectFileTitle")}
                 </div>
               </CardTitle>
             </CardHeader>
@@ -338,18 +318,12 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
               {/* File Input */}
               <div className="space-y-2">
                 <Label htmlFor="file" className="text-sm">
-                  {t('detail.fileLabel')} <span className="text-destructive">{t('detail.required')}</span>
+                  {t("detail.fileLabel")} <span className="text-destructive">{t("detail.required")}</span>
                 </Label>
-                <Input
-                  id="file"
-                  type="file"
-                  onChange={handleFileSelect}
-                  disabled={busy}
-                  required
-                />
+                <Input id="file" type="file" onChange={handleFileSelect} disabled={busy} required />
                 {selectedFile && (
-                  <div className="text-xs text-muted-foreground">
-                    {t('detail.selectedFile', { name: selectedFile.name, size: formatBytes(selectedFile.size) })}
+                  <div className="text-muted-foreground text-xs">
+                    {t("detail.selectedFile", { name: selectedFile.name, size: formatBytes(selectedFile.size) })}
                   </div>
                 )}
               </div>
@@ -357,15 +331,13 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
               {/* Bucket */}
               <div className="space-y-2">
                 <Label htmlFor="bucket" className="text-sm">
-                  {t('detail.bucketLabel')} <span className="text-destructive">{t('detail.required')}</span>
+                  {t("detail.bucketLabel")} <span className="text-destructive">{t("detail.required")}</span>
                 </Label>
                 <Input
                   id="bucket"
                   value={formData.bucket}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, bucket: e.target.value }))
-                  }
-                  placeholder={t('detail.bucketPlaceholder')}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, bucket: e.target.value }))}
+                  placeholder={t("detail.bucketPlaceholder")}
                   disabled={busy}
                   required
                 />
@@ -374,20 +346,16 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
               {/* Folder */}
               <div className="space-y-2">
                 <Label htmlFor="folder" className="text-sm">
-                  {t('detail.folderLabel')}
+                  {t("detail.folderLabel")}
                 </Label>
                 <Input
                   id="folder"
                   value={formData.folder}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, folder: e.target.value }))
-                  }
-                  placeholder={t('detail.folderPlaceholder')}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, folder: e.target.value }))}
+                  placeholder={t("detail.folderPlaceholder")}
                   disabled={busy}
                 />
-                <p className="text-xs text-muted-foreground">
-                  {t('detail.folderHelp')}
-                </p>
+                <p className="text-muted-foreground text-xs">{t("detail.folderHelp")}</p>
               </div>
             </CardContent>
           </Card>
@@ -397,21 +365,19 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
         {!isNew && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t('detail.fileInfoTitle')}</CardTitle>
+              <CardTitle className="text-base">{t("detail.fileInfoTitle")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
               {/* Name */}
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm">
-                  {t('detail.fileNameLabel')}
+                  {t("detail.fileNameLabel")}
                 </Label>
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, name: e.target.value }))
-                  }
-                  placeholder={t('detail.fileNamePlaceholder')}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                  placeholder={t("detail.fileNamePlaceholder")}
                   disabled={busy}
                 />
               </div>
@@ -419,31 +385,22 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
               {/* Bucket (readonly) */}
               <div className="space-y-2">
                 <Label htmlFor="bucket_readonly" className="text-sm">
-                  {t('detail.bucketLabel')}
+                  {t("detail.bucketLabel")}
                 </Label>
-                <Input
-                  id="bucket_readonly"
-                  value={formData.bucket}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('detail.bucketReadonlyHelp')}
-                </p>
+                <Input id="bucket_readonly" value={formData.bucket} disabled className="bg-muted" />
+                <p className="text-muted-foreground text-xs">{t("detail.bucketReadonlyHelp")}</p>
               </div>
 
               {/* Folder */}
               <div className="space-y-2">
                 <Label htmlFor="folder_edit" className="text-sm">
-                  {t('detail.folderLabel')}
+                  {t("detail.folderLabel")}
                 </Label>
                 <Input
                   id="folder_edit"
                   value={formData.folder}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, folder: e.target.value }))
-                  }
-                  placeholder={t('detail.folderPlaceholder')}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, folder: e.target.value }))}
+                  placeholder={t("detail.folderPlaceholder")}
                   disabled={busy}
                 />
               </div>
@@ -466,36 +423,31 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
                   {isDeleting ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      {t('detail.deleting')}
+                      {t("detail.deleting")}
                     </>
                   ) : (
                     <>
                       <Trash2 className="size-4" />
-                      {t('detail.deleteButton')}
+                      {t("detail.deleteButton")}
                     </>
                   )}
                 </Button>
               )}
             </div>
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push('/admin/storage')}
-                disabled={busy}
-              >
-                {t('detail.cancelButton')}
+              <Button type="button" variant="outline" onClick={() => router.push("/admin/storage")} disabled={busy}>
+                {t("detail.cancelButton")}
               </Button>
               <Button type="submit" disabled={busy} className="gap-2">
                 {isCreating || isUpdating ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    {isNew ? t('detail.uploading') : t('detail.saving')}
+                    {isNew ? t("detail.uploading") : t("detail.saving")}
                   </>
                 ) : (
                   <>
                     {isNew ? <Upload className="size-4" /> : <Save className="size-4" />}
-                    {isNew ? t('detail.uploadButton') : t('detail.saveButton')}
+                    {isNew ? t("detail.uploadButton") : t("detail.saveButton")}
                   </>
                 )}
               </Button>
@@ -508,14 +460,14 @@ export default function AdminStorageDetailClient({ id }: { id: string }) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('list.deleteConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogTitle>{t("list.deleteConfirmTitle")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('list.deleteConfirmDescription', { name: formData.name || t('list.defaultFileName') })}
+              {t("list.deleteConfirmDescription", { name: formData.name || t("list.defaultFileName") })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('detail.cancelButton')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>{t('detail.deleteButton')}</AlertDialogAction>
+            <AlertDialogCancel>{t("detail.cancelButton")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>{t("detail.deleteButton")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

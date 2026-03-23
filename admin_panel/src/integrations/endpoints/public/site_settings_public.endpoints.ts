@@ -3,13 +3,13 @@
 // Public site settings endpoints (read-only)
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
-import type { SiteSettingRow } from '@/integrations/shared';
-import { normalizeAdminSiteSettingRow } from '@/integrations/shared';
+import { baseApi } from "@/integrations/baseApi";
+import type { SiteSettingRow } from "@/integrations/shared";
+import { normalizeAdminSiteSettingRow } from "@/integrations/shared";
 
 export type PublicSiteSetting = SiteSettingRow;
 
-const PUBLIC_BASE = '/site_settings';
+const PUBLIC_BASE = "/site_settings";
 
 export const siteSettingsPublicApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
@@ -20,10 +20,10 @@ export const siteSettingsPublicApi = baseApi.injectEndpoints({
       providesTags: (result) =>
         result
           ? [
-              ...result.map((s) => ({ type: 'SiteSettings' as const, id: s.key })),
-              { type: 'SiteSettings' as const, id: 'PUBLIC_LIST' },
+              ...result.map((s) => ({ type: "SiteSettings" as const, id: s.key })),
+              { type: "SiteSettings" as const, id: "PUBLIC_LIST" },
             ]
-          : [{ type: 'SiteSettings' as const, id: 'PUBLIC_LIST' }],
+          : [{ type: "SiteSettings" as const, id: "PUBLIC_LIST" }],
       keepUnusedDataFor: 300, // 5 minutes cache for public
     }),
 
@@ -31,7 +31,7 @@ export const siteSettingsPublicApi = baseApi.injectEndpoints({
       query: (key) => ({ url: `${PUBLIC_BASE}/${encodeURIComponent(key)}` }),
       transformResponse: (res: unknown): PublicSiteSetting | null =>
         res ? normalizeAdminSiteSettingRow(res as SiteSettingRow) : null,
-      providesTags: (_r, _e, key) => [{ type: 'SiteSettings', id: key }],
+      providesTags: (_r, _e, key) => [{ type: "SiteSettings", id: key }],
       keepUnusedDataFor: 300, // 5 minutes cache
     }),
   }),

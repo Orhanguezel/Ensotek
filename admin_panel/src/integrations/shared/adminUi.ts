@@ -3,8 +3,8 @@
 // FINAL — Admin UI copy (site_settings.ui_admin) normalizer
 // =============================================================
 
-import { parseJsonObject, uiText } from '@/integrations/shared';
-import type { AdminNavCopy } from '@/navigation/sidebar/sidebar-items';
+import { parseJsonObject, uiText } from "@/integrations/shared";
+import type { AdminNavCopy } from "@/navigation/sidebar/sidebar-items";
 
 export type AdminUiCommonCopy = {
   actions: {
@@ -46,69 +46,69 @@ export type AdminUiCopy = {
 
 const emptyCommon: AdminUiCommonCopy = {
   actions: {
-    create: '',
-    edit: '',
-    delete: '',
-    save: '',
-    cancel: '',
-    refresh: '',
-    search: '',
-    filter: '',
-    close: '',
-    back: '',
-    confirm: '',
+    create: "",
+    edit: "",
+    delete: "",
+    save: "",
+    cancel: "",
+    refresh: "",
+    search: "",
+    filter: "",
+    close: "",
+    back: "",
+    confirm: "",
   },
   states: {
-    loading: '',
-    error: '',
-    empty: '',
-    updating: '',
-    saving: '',
+    loading: "",
+    error: "",
+    empty: "",
+    updating: "",
+    saving: "",
   },
 };
 
 const emptyNav: AdminNavCopy = {
   labels: {
-    general: '',
-    content: '',
-    marketing: '',
-    communication: '',
-    system: '',
+    general: "",
+    content: "",
+    marketing: "",
+    communication: "",
+    system: "",
   },
   items: {
-    dashboard: '',
-    site_settings: '',
-    custom_pages: '',
-    categories: '',
-    subcategories: '',
-    library: '',
-    products: '',
-    sparepart: '',
-    services: '',
-    sliders: '',
-    menu_items: '',
-    footer_sections: '',
-    faqs: '',
-    offers: '',
-    catalog_requests: '',
-    contacts: '',
-    reviews: '',
-    mail: '',
-    users: '',
-    email_templates: '',
-    notifications: '',
-    storage: '',
-    db: '',
-    audit: '',
+    dashboard: "",
+    site_settings: "",
+    custom_pages: "",
+    categories: "",
+    subcategories: "",
+    library: "",
+    products: "",
+    sparepart: "",
+    services: "",
+    sliders: "",
+    menu_items: "",
+    footer_sections: "",
+    faqs: "",
+    offers: "",
+    catalog_requests: "",
+    contacts: "",
+    reviews: "",
+    mail: "",
+    users: "",
+    email_templates: "",
+    notifications: "",
+    storage: "",
+    db: "",
+    audit: "",
 
-    reports: '',
-    support: '',
-    telegram: '',
-    chat: '',
-    references: '',
-    cache: '',
-    blog: '',
-    news: '',
+    reports: "",
+    support: "",
+    telegram: "",
+    chat: "",
+    references: "",
+    cache: "",
+    blog: "",
+    news: "",
   },
 };
 
@@ -118,7 +118,7 @@ export function normalizeAdminUiCopy(raw: unknown): AdminUiCopy {
   const labelsRaw = parseJsonObject(navRaw.labels);
   const itemsRaw = parseJsonObject(navRaw.items);
 
-  const labels: AdminNavCopy['labels'] = {
+  const labels: AdminNavCopy["labels"] = {
     general: uiText(labelsRaw.general),
     content: uiText(labelsRaw.content),
     marketing: uiText(labelsRaw.marketing),
@@ -126,7 +126,7 @@ export function normalizeAdminUiCopy(raw: unknown): AdminUiCopy {
     system: uiText(labelsRaw.system),
   };
 
-  const items: AdminNavCopy['items'] = {
+  const items: AdminNavCopy["items"] = {
     dashboard: uiText(itemsRaw.dashboard),
     site_settings: uiText(itemsRaw.site_settings),
     custom_pages: uiText(itemsRaw.custom_pages),
@@ -205,11 +205,13 @@ export function normalizeAdminUiCopy(raw: unknown): AdminUiCopy {
   return {
     app_name: uiText(o.app_name),
     app_version: uiText(o.app_version),
-    developer_branding: devRaw ? {
-      name: uiText(devRaw.name),
-      url: uiText(devRaw.url),
-      full_name: uiText(devRaw.full_name),
-    } : undefined,
+    developer_branding: devRaw
+      ? {
+          name: uiText(devRaw.name),
+          url: uiText(devRaw.url),
+          full_name: uiText(devRaw.full_name),
+        }
+      : undefined,
     nav: {
       labels: { ...emptyNav.labels, ...labels },
       items: { ...emptyNav.items, ...items },

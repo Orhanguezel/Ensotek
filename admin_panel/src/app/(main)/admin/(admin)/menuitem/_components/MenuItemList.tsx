@@ -3,20 +3,22 @@
 // guezelwebdesign – Admin Menu Items (Responsive + DnD + Pagination) (HEADER ONLY friendly)
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
-import type { AdminMenuItemDto } from '@/integrations/shared';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
-  PaginationPrevious,
   PaginationNext,
-  PaginationEllipsis,
-} from '@/components/ui/pagination';
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import type { AdminMenuItemDto } from "@/integrations/shared";
 
 /* ---------------- Constants ---------------- */
 
@@ -24,52 +26,51 @@ const PAGE_SIZE = 50;
 
 /* ---------------- Helpers ---------------- */
 
-const safeText = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+const safeText = (v: unknown) => (v === null || v === undefined ? "" : String(v));
 
 const toShortLocale = (v: unknown): string =>
-  String(v || '')
+  String(v || "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 
 const fmtDate = (value: unknown, locale: string) => {
-  if (!value) return '-';
+  if (!value) return "-";
   try {
     const d = new Date(value as any);
     if (Number.isNaN(d.getTime())) return String(value);
     return d.toLocaleString(locale);
   } catch {
-    return String(value ?? '-');
+    return String(value ?? "-");
   }
 };
 
 const fmtLocation = (loc: unknown, t: any) => {
   const v = safeText(loc).trim().toLowerCase();
-  if (v === 'header') return t('form.help.locationHeader');
-  if (v === 'footer') return t('form.help.locationFooter');
-  return t('form.help.locationUnknown');
+  if (v === "header") return t("form.help.locationHeader");
+  if (v === "footer") return t("form.help.locationFooter");
+  return t("form.help.locationUnknown");
 };
 
 const truncate = (v: unknown, max = 60) => {
   const s = safeText(v);
-  if (!s) return '-';
+  if (!s) return "-";
   return s.length <= max ? s : `${s.slice(0, max)}…`;
 };
 
 const noWrapEllipsis: React.CSSProperties = {
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 };
 
 const getTypeLabel = (raw: unknown, t: any): string => {
   const v = safeText(raw).trim().toLowerCase();
-  if (!v) return '-';
-  if (v === 'page' || v === 'internal_page' || v === 'route' || v === '1' || v === 'true')
-    return t('list.types.page');
-  return t('list.types.custom');
+  if (!v) return "-";
+  if (v === "page" || v === "internal_page" || v === "route" || v === "1" || v === "true") return t("list.types.page");
+  return t("list.types.custom");
 };
 
 /* ---------------- Props ---------------- */
@@ -105,10 +106,10 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
   onSaveOrder,
   savingOrder,
   localeLabelMap,
-  dateLocale = 'tr-TR',
+  dateLocale = "tr-TR",
   hideLocationColumn = false,
 }) => {
-  const t = useAdminT('admin.menuitem');
+  const t = useAdminT("admin.menuitem");
   const total = items.length;
   const hasData = total > 0;
 
@@ -127,17 +128,17 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
   const pageRows = items.slice(start, start + PAGE_SIZE);
 
   const pages = useMemo(() => {
-    const out: Array<number | 'ellipsis'> = [];
+    const out: Array<number | "ellipsis"> = [];
     if (pageCount <= 7) {
       for (let i = 1; i <= pageCount; i += 1) out.push(i);
       return out;
     }
     out.push(1);
-    if (page > 3) out.push('ellipsis');
+    if (page > 3) out.push("ellipsis");
     for (let i = Math.max(2, page - 1); i <= Math.min(pageCount - 1, page + 1); i += 1) {
       out.push(i);
     }
-    if (page < pageCount - 2) out.push('ellipsis');
+    if (page < pageCount - 2) out.push("ellipsis");
     out.push(pageCount);
     return out;
   }, [page, pageCount]);
@@ -159,7 +160,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
 
   const renderLocale = (raw: unknown) => {
     const code = toShortLocale(raw);
-    if (!code) return '-';
+    if (!code) return "-";
     return localeLabelMap?.[code] ?? code;
   };
 
@@ -167,15 +168,11 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
 
   return (
     <div className="card">
-      <div className="card-header py-2 d-flex justify-content-between align-items-center">
-        <span className="small fw-semibold">{t('list.title')}</span>
+      <div className="card-header d-flex justify-content-between py-2 align-items-center">
+        <span className="small fw-semibold">{t("list.title")}</span>
 
-        <div className="d-flex gap-2 align-items-center flex-wrap">
-          {loading && (
-            <span className="badge bg-secondary">
-              {t('header.loading')}
-            </span>
-          )}
+        <div className="d-flex flex-wrap gap-2 align-items-center">
+          {loading && <span className="badge bg-secondary">{t("header.loading")}</span>}
 
           {onSaveOrder && (
             <button
@@ -184,14 +181,12 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
               onClick={onSaveOrder}
               disabled={!hasData || savingOrder || loading}
             >
-              {savingOrder
-                ? t('list.savingOrder')
-                : t('list.saveOrder')}
+              {savingOrder ? t("list.savingOrder") : t("list.saveOrder")}
             </button>
           )}
 
-          <span className="text-muted small">
-            {t('list.totalLabel')} <strong>{total}</strong>
+          <span className="small text-muted">
+            {t("list.totalLabel")} <strong>{total}</strong>
           </span>
         </div>
       </div>
@@ -199,46 +194,46 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
       {/* ================= DESKTOP TABLE (lg+) ================= */}
       <div className="d-none d-lg-block">
         <div className="table-responsive">
-          <table className="table table-hover mb-0" style={{ tableLayout: 'fixed', width: '100%' }}>
+          <table className="table-hover mb-0 table" style={{ tableLayout: "fixed", width: "100%" }}>
             <thead className="table-light">
               <tr>
                 <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 90 }} />
                 <th
                   className="text-nowrap"
                   style={{ ...noWrapEllipsis, width: 240, minWidth: 200 }}
-                  title={t('list.columns.title')}
+                  title={t("list.columns.title")}
                 >
-                  {t('list.columns.title')}
+                  {t("list.columns.title")}
                 </th>
                 <th
                   className="text-nowrap"
                   style={{ ...noWrapEllipsis, width: 260, minWidth: 220 }}
-                  title={t('list.columns.url')}
+                  title={t("list.columns.url")}
                 >
-                  {t('list.columns.url')}
+                  {t("list.columns.url")}
                 </th>
                 <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 110 }}>
-                  {t('list.columns.type')}
+                  {t("list.columns.type")}
                 </th>
 
                 {/* ✅ Konum kolonunu opsiyonel gizle */}
                 {!hideLocationColumn && (
                   <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 110 }}>
-                    {t('list.columns.location')}
+                    {t("list.columns.location")}
                   </th>
                 )}
 
                 <th className="text-nowrap text-center" style={{ ...noWrapEllipsis, width: 86 }}>
-                  {t('list.columns.active')}
+                  {t("list.columns.active")}
                 </th>
                 <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 130 }}>
-                  {t('list.columns.locale')}
+                  {t("list.columns.locale")}
                 </th>
                 <th className="text-nowrap" style={{ ...noWrapEllipsis, width: 190 }}>
-                  {t('list.columns.date')}
+                  {t("list.columns.date")}
                 </th>
                 <th className="text-nowrap text-end" style={{ ...noWrapEllipsis, width: 170 }}>
-                  {t('list.columns.actions')}
+                  {t("list.columns.actions")}
                 </th>
               </tr>
             </thead>
@@ -258,57 +253,45 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                       onDragOver={(e) => !!onReorder && !busy && e.preventDefault()}
                       onDrop={() => handleDrop(item.id)}
                       onDragEnd={() => setDragId(null)}
-                      className={dragId === item.id ? 'table-active' : undefined}
+                      className={dragId === item.id ? "table-active" : undefined}
                       style={{
-                        cursor: onReorder && !busy ? 'move' : onEdit ? 'pointer' : 'default',
+                        cursor: onReorder && !busy ? "move" : onEdit ? "pointer" : "default",
                       }}
                       onClick={() => onEdit?.(item)}
                     >
-                      <td className="text-muted small text-nowrap align-middle">
+                      <td className="small text-nowrap align-middle text-muted">
                         {onReorder && !busy && <span className="me-1">≡</span>}#{globalIndex}
                         <div className="mt-1">
-                          <span className="badge bg-secondary-subtle text-muted border">
-                            {item.display_order ?? 0}
-                          </span>
+                          <span className="badge border bg-secondary-subtle text-muted">{item.display_order ?? 0}</span>
                         </div>
                       </td>
 
                       <td className="align-middle" style={{ minWidth: 0 }}>
-                        <div
-                          className="fw-semibold small text-truncate"
-                          title={safeText(item.title)}
-                        >
-                          {item.title || '-'}
+                        <div className="fw-semibold small text-truncate" title={safeText(item.title)}>
+                          {item.title || "-"}
                         </div>
                         {item.icon ? (
-                          <div
-                            className="text-muted small text-truncate"
-                            title={safeText(item.icon)}
-                          >
+                          <div className="small text-muted text-truncate" title={safeText(item.icon)}>
                             icon: <code>{truncate(item.icon, 26)}</code>
                           </div>
                         ) : null}
                       </td>
 
-                      <td className="align-middle text-muted small" style={{ minWidth: 0 }}>
+                      <td className="small align-middle text-muted" style={{ minWidth: 0 }}>
                         <div className="text-truncate" title={safeText(item.url)}>
-                          {item.url ? safeText(item.url) : '-'}
+                          {item.url ? safeText(item.url) : "-"}
                         </div>
                       </td>
 
-                      <td className="align-middle text-nowrap">
-                        <span className="badge bg-light border text-dark text-nowrap">
-                          {typeLabel}
-                        </span>
+                      <td className="text-nowrap align-middle">
+                        <span className="badge text-nowrap border bg-light text-dark">{typeLabel}</span>
                       </td>
 
                       {!hideLocationColumn && (
-                        <td className="align-middle small text-nowrap">
-                          {fmtLocation((item as any).location, t)}
-                        </td>
+                        <td className="small text-nowrap align-middle">{fmtLocation((item as any).location, t)}</td>
                       )}
 
-                      <td className="align-middle text-center" onClick={(e) => e.stopPropagation()}>
+                      <td className="text-center align-middle" onClick={(e) => e.stopPropagation()}>
                         <div className="form-check form-switch d-inline-flex m-0">
                           <input
                             className="form-check-input"
@@ -320,13 +303,13 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                         </div>
                       </td>
 
-                      <td className="align-middle small text-nowrap">
+                      <td className="small text-nowrap align-middle">
                         <code>{locale}</code>
                       </td>
 
-                      <td className="align-middle small text-muted text-nowrap">{created}</td>
+                      <td className="small text-nowrap align-middle text-muted">{created}</td>
 
-                      <td className="align-middle text-end" onClick={(e) => e.stopPropagation()}>
+                      <td className="text-end align-middle" onClick={(e) => e.stopPropagation()}>
                         <div className="btn-group btn-group-sm">
                           {onEdit && (
                             <button
@@ -335,7 +318,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                               onClick={() => onEdit(item)}
                               disabled={busy}
                             >
-                              {t('list.editButton')}
+                              {t("list.editButton")}
                             </button>
                           )}
                           {onDelete && (
@@ -345,7 +328,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                               onClick={() => onDelete(item)}
                               disabled={busy}
                             >
-                              {t('list.deleteButton')}
+                              {t("list.deleteButton")}
                             </button>
                           )}
                         </div>
@@ -355,16 +338,16 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                 })
               ) : (
                 <tr>
-                  <td colSpan={desktopColSpan} className="text-center py-3 text-muted small">
-                    {t('list.noData')}
+                  <td colSpan={desktopColSpan} className="small py-3 text-center text-muted">
+                    {t("list.noData")}
                   </td>
                 </tr>
               )}
 
               {loading && (
                 <tr>
-                  <td colSpan={desktopColSpan} className="text-center py-3 text-muted small">
-                    {t('list.loading')}
+                  <td colSpan={desktopColSpan} className="small py-3 text-center text-muted">
+                    {t("list.loading")}
                   </td>
                 </tr>
               )}
@@ -376,9 +359,9 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
       {/* ================= MOBILE / TABLET CARDS (< lg) ================= */}
       <div className="d-block d-lg-none">
         {!hasData && !loading ? (
-          <div className="px-3 py-3 text-center text-muted small">{t('list.noData')}</div>
+          <div className="small px-3 py-3 text-center text-muted">{t("list.noData")}</div>
         ) : loading ? (
-          <div className="px-3 py-3 text-center text-muted small">{t('list.loading')}</div>
+          <div className="small px-3 py-3 text-center text-muted">{t("list.loading")}</div>
         ) : (
           <div className="p-2">
             <div className="row g-2">
@@ -391,33 +374,30 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                 return (
                   <div key={item.id} className="col-12">
                     <div
-                      className="border rounded-3 p-3 bg-white"
-                      style={{ cursor: onEdit ? 'pointer' : 'default' }}
+                      className="rounded-3 border bg-white p-3"
+                      style={{ cursor: onEdit ? "pointer" : "default" }}
                       onClick={() => onEdit?.(item)}
                     >
-                      <div className="d-flex justify-content-between align-items-start gap-2">
-                        <div className="d-flex flex-wrap align-items-center gap-2">
-                          <span className="badge bg-light text-dark border">#{globalIndex}</span>
-                          <span className="badge bg-secondary-subtle text-muted border">
-                            {t('header.sortOrder')}: {item.display_order ?? 0}
+                      <div className="d-flex justify-content-between gap-2 align-items-start">
+                        <div className="d-flex flex-wrap gap-2 align-items-center">
+                          <span className="badge border bg-light text-dark">#{globalIndex}</span>
+                          <span className="badge border bg-secondary-subtle text-muted">
+                            {t("header.sortOrder")}: {item.display_order ?? 0}
                           </span>
-                          <span className="badge bg-light border text-dark">{typeLabel}</span>
+                          <span className="badge border bg-light text-dark">{typeLabel}</span>
 
                           {!hideLocationColumn && (
-                            <span className="badge bg-light text-dark border">
+                            <span className="badge border bg-light text-dark">
                               {fmtLocation((item as any).location, t)}
                             </span>
                           )}
 
-                          <span className="badge bg-light text-dark border">
+                          <span className="badge border bg-light text-dark">
                             <code>{locale}</code>
                           </span>
                         </div>
 
-                        <div
-                          className="form-check form-switch m-0"
-                          onClick={(e) => e.stopPropagation()}
-                        >
+                        <div className="form-check form-switch m-0" onClick={(e) => e.stopPropagation()}>
                           <input
                             className="form-check-input"
                             type="checkbox"
@@ -425,37 +405,34 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                             disabled={busy}
                             onChange={(e) => onToggleActive?.(item, e.target.checked)}
                           />
-                          <label className="form-check-label small">{t('header.active')}</label>
+                          <label className="form-check-label small">{t("header.active")}</label>
                         </div>
                       </div>
 
                       <div className="mt-2">
-                        <div className="fw-semibold" style={{ wordBreak: 'break-word' }}>
-                          {item.title || <span className="text-muted">{t('list.noTitle')}</span>}
+                        <div className="fw-semibold" style={{ wordBreak: "break-word" }}>
+                          {item.title || <span className="text-muted">{t("list.noTitle")}</span>}
                         </div>
 
                         {item.icon ? (
-                          <div
-                            className="text-muted small mt-1"
-                            style={{ wordBreak: 'break-word' }}
-                          >
+                          <div className="small mt-1 text-muted" style={{ wordBreak: "break-word" }}>
                             icon: <code>{safeText(item.icon)}</code>
                           </div>
                         ) : null}
                       </div>
 
-                      <div className="mt-2 text-muted small" style={{ wordBreak: 'break-word' }}>
-                        <div className="fw-semibold text-dark small">{t('list.columns.url')}</div>
+                      <div className="small mt-2 text-muted" style={{ wordBreak: "break-word" }}>
+                        <div className="fw-semibold small text-dark">{t("list.columns.url")}</div>
                         {item.url ? <code>{safeText(item.url)}</code> : <span>-</span>}
                       </div>
 
-                      <div className="mt-2 text-muted small">
-                        <div className="fw-semibold text-dark small">{t('header.sortCreated')}</div>
-                        <div style={{ wordBreak: 'break-word' }}>{created}</div>
+                      <div className="small mt-2 text-muted">
+                        <div className="fw-semibold small text-dark">{t("header.sortCreated")}</div>
+                        <div style={{ wordBreak: "break-word" }}>{created}</div>
                       </div>
 
                       {(onEdit || onDelete) && (
-                        <div className="mt-3 d-flex gap-2 flex-wrap justify-content-end">
+                        <div className="d-flex justify-content-end mt-3 flex-wrap gap-2">
                           {onEdit && (
                             <button
                               type="button"
@@ -466,7 +443,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                               }}
                               disabled={busy}
                             >
-                              {t('list.editButton')}
+                              {t("list.editButton")}
                             </button>
                           )}
                           {onDelete && (
@@ -479,7 +456,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
                               }}
                               disabled={busy}
                             >
-                              {t('list.deleteButton')}
+                              {t("list.deleteButton")}
                             </button>
                           )}
                         </div>
@@ -509,7 +486,7 @@ export const MenuItemList: React.FC<MenuItemListProps> = ({
               </PaginationItem>
 
               {pages.map((p, i) =>
-                p === 'ellipsis' ? (
+                p === "ellipsis" ? (
                   <PaginationItem key={`e-${i}`}>
                     <PaginationEllipsis />
                   </PaginationItem>

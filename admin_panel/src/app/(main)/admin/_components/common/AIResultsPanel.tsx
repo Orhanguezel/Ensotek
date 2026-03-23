@@ -2,12 +2,13 @@
 // AIResultsPanel — AI sonuclarini locale kartlari olarak gosterir
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
-import type { LocaleContent } from './useAIContentAssist';
+import { X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+
+import type { LocaleContent } from "./useAIContentAssist";
 
 interface AIResultsPanelProps {
   results: LocaleContent[];
@@ -17,7 +18,12 @@ interface AIResultsPanelProps {
 }
 
 const LOCALE_FLAGS: Record<string, string> = {
-  de: '🇩🇪', en: '🇬🇧', tr: '🇹🇷', fr: '🇫🇷', ar: '🇸🇦', ru: '🇷🇺',
+  de: "🇩🇪",
+  en: "🇬🇧",
+  tr: "🇹🇷",
+  fr: "🇫🇷",
+  ar: "🇸🇦",
+  ru: "🇷🇺",
 };
 
 export function AIResultsPanel({ results, currentLocale, onApply, onClose }: AIResultsPanelProps) {
@@ -27,7 +33,7 @@ export function AIResultsPanel({ results, currentLocale, onApply, onClose }: AIR
   return (
     <div className="border-b bg-purple-50/50 p-3 dark:bg-purple-950/20">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+        <span className="font-medium text-purple-700 text-sm dark:text-purple-300">
           AI — Diğer Diller ({others.length})
         </span>
         <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onClose}>
@@ -36,18 +42,22 @@ export function AIResultsPanel({ results, currentLocale, onApply, onClose }: AIR
       </div>
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
         {others.map((r) => (
-          <div key={r.locale} className="rounded-md border bg-background p-2.5 space-y-1.5">
+          <div key={r.locale} className="space-y-1.5 rounded-md border bg-background p-2.5">
             <div className="flex items-center justify-between">
-              <span className="font-mono text-xs font-bold uppercase">
-                {LOCALE_FLAGS[r.locale] || ''} {r.locale}
+              <span className="font-bold font-mono text-xs uppercase">
+                {LOCALE_FLAGS[r.locale] || ""} {r.locale}
               </span>
-              <Button variant="outline" size="sm" className="h-6 px-2 text-[10px] text-purple-700 dark:text-purple-300"
-                onClick={() => onApply(r)}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-6 px-2 text-[10px] text-purple-700 dark:text-purple-300"
+                onClick={() => onApply(r)}
+              >
                 Bu dile geç
               </Button>
             </div>
-            <p className="text-xs font-medium truncate">{r.title}</p>
-            {r.summary && <p className="text-[10px] text-muted-foreground line-clamp-2">{r.summary}</p>}
+            <p className="truncate font-medium text-xs">{r.title}</p>
+            {r.summary && <p className="line-clamp-2 text-[10px] text-muted-foreground">{r.summary}</p>}
           </div>
         ))}
       </div>

@@ -3,31 +3,27 @@
 // Logo & Favicon yönetimi
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { useMemo, useState } from 'react';
-import { toast } from 'sonner';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import React, { useMemo, useState } from "react";
 
+import { Copy, ExternalLink, RefreshCcw, Save } from "lucide-react";
+import { toast } from "sonner";
+
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAdminTranslations } from "@/i18n";
+import { useGetSiteSettingAdminByKeyQuery, useUpdateSiteSettingAdminMutation } from "@/integrations/hooks";
 import {
-  useGetSiteSettingAdminByKeyQuery,
-  useUpdateSiteSettingAdminMutation,
-} from '@/integrations/hooks';
-import {
-  SITE_SETTINGS_BRAND_MEDIA_ITEMS,
-  type SiteSettingsBrandMediaData,
   buildSiteSettingsBrandMediaLegacyValue,
   extractSiteSettingsBrandMediaData,
   getSiteSettingsBrandMediaErrorMessage,
-} from '@/integrations/shared';
-
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
-
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Save, RefreshCcw, Copy, ExternalLink } from 'lucide-react';
+  SITE_SETTINGS_BRAND_MEDIA_ITEMS,
+  type SiteSettingsBrandMediaData,
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 /* ── component ── */
 
@@ -39,11 +35,11 @@ export type BrandMediaTabProps = {
 export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPrefix }) => {
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
-  const fullKey = `${settingPrefix || ''}site_logo`;
-  const logoAlt = t('admin.siteSettings.brandMedia.inline.logoAlt');
+  const fullKey = `${settingPrefix || ""}site_logo`;
+  const logoAlt = t("admin.siteSettings.brandMedia.inline.logoAlt");
 
   const { data, isLoading, isFetching, refetch } = useGetSiteSettingAdminByKeyQuery(
-    { key: fullKey, locale: '*' },
+    { key: fullKey, locale: "*" },
     { refetchOnMountOrArgChange: true },
   );
 
@@ -66,18 +62,18 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
   const handleSave = async () => {
     if (!localData) return;
     try {
-      await updateSetting({ key: fullKey, locale: '*', value: localData as any }).unwrap();
+      await updateSetting({ key: fullKey, locale: "*", value: localData as any }).unwrap();
       // Also update legacy 'logo' key for backward compat
-      const legacyKey = `${settingPrefix || ''}logo`;
+      const legacyKey = `${settingPrefix || ""}logo`;
       await updateSetting({
         key: legacyKey,
-        locale: '*',
+        locale: "*",
         value: buildSiteSettingsBrandMediaLegacyValue(localData) as any,
       }).unwrap();
-      toast.success(t('admin.siteSettings.brandMedia.inline.saved'));
+      toast.success(t("admin.siteSettings.brandMedia.inline.saved"));
       await refetch();
     } catch (err: unknown) {
-      toast.error(getSiteSettingsBrandMediaErrorMessage(err, t('admin.siteSettings.brandMedia.inline.saveError')));
+      toast.error(getSiteSettingsBrandMediaErrorMessage(err, t("admin.siteSettings.brandMedia.inline.saveError")));
     }
   };
 
@@ -87,20 +83,22 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
     <Card>
       <CardHeader>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="text-base">{t('admin.siteSettings.brandMedia.inline.title')}</CardTitle>
+          <CardTitle className="text-base">{t("admin.siteSettings.brandMedia.inline.title")}</CardTitle>
           <div className="flex items-center gap-2">
-            {busy && <Badge variant="outline">{t('admin.siteSettings.brandMedia.inline.loading')}</Badge>}
-            {isDirty && <Badge variant="default">{t('admin.siteSettings.brandMedia.inline.dirty')}</Badge>}
+            {busy && <Badge variant="outline">{t("admin.siteSettings.brandMedia.inline.loading")}</Badge>}
+            {isDirty && <Badge variant="default">{t("admin.siteSettings.brandMedia.inline.dirty")}</Badge>}
+            <Button type="button" size="sm" onClick={handleSave} disabled={busy || !isDirty}>
+              <Save className="mr-2 h-3.5 w-3.5" />
+              {t("admin.siteSettings.brandMedia.inline.save")}
+            </Button>
             <Button
               type="button"
-              size="sm"
-              onClick={handleSave}
-              disabled={busy || !isDirty}
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => refetch()}
+              disabled={busy}
             >
-              <Save className="mr-2 h-3.5 w-3.5" />
-              {t('admin.siteSettings.brandMedia.inline.save')}
-            </Button>
-            <Button type="button" variant="ghost" size="icon" className="h-8 w-8" onClick={() => refetch()} disabled={busy}>
               <RefreshCcw className="h-4 w-4" />
             </Button>
           </div>
@@ -114,35 +112,37 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
             const label = t(`admin.siteSettings.brandMedia.inline.labels.${m.labelKey}`);
 
             return (
-              <div key={m.field} className="rounded-md border p-2 space-y-1.5">
+              <div key={m.field} className="space-y-1.5 rounded-md border p-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium">{label}</span>
+                  <span className="font-medium text-xs">{label}</span>
                   {value && (
                     <button
                       type="button"
                       className="text-[10px] text-destructive hover:underline"
-                      onClick={() => updateField(m.field, '')}
+                      onClick={() => updateField(m.field, "")}
                       disabled={busy}
                     >
-                      {t('admin.siteSettings.brandMedia.inline.remove')}
+                      {t("admin.siteSettings.brandMedia.inline.remove")}
                     </button>
                   )}
                 </div>
 
                 {value ? (
-                  <div className="relative aspect-square w-full max-w-30 mx-auto overflow-hidden rounded border bg-muted/20">
+                  <div className="relative mx-auto aspect-square w-full max-w-30 overflow-hidden rounded border bg-muted/20">
                     <img
                       src={value}
                       alt={label}
                       className="h-full w-full object-contain p-1"
                       onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
+                        (e.target as HTMLImageElement).style.display = "none";
                       }}
                     />
                   </div>
                 ) : (
-                  <div className="flex aspect-square w-full max-w-30 mx-auto items-center justify-center rounded border bg-muted/20">
-                    <span className="text-[10px] text-muted-foreground">{t('admin.siteSettings.brandMedia.inline.noImage')}</span>
+                  <div className="mx-auto flex aspect-square w-full max-w-30 items-center justify-center rounded border bg-muted/20">
+                    <span className="text-[10px] text-muted-foreground">
+                      {t("admin.siteSettings.brandMedia.inline.noImage")}
+                    </span>
                   </div>
                 )}
 
@@ -150,8 +150,8 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
                   label=""
                   bucket="public"
                   folder={m.folder}
-                  metadata={{ field: m.field, scope: 'logo' }}
-                  value={value || ''}
+                  metadata={{ field: m.field, scope: "logo" }}
+                  value={value || ""}
                   onChange={(url) => updateField(m.field, url)}
                   disabled={busy}
                   openLibraryHref="/admin/storage"
@@ -161,18 +161,21 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
 
                 {/* URL kopyalama + link */}
                 {value && (
-                  <div className="flex items-center gap-1 mt-1">
+                  <div className="mt-1 flex items-center gap-1">
                     <input
                       readOnly
                       value={value}
-                      className="flex-1 truncate rounded border bg-muted/30 px-1.5 py-0.5 text-[10px] font-mono text-muted-foreground"
+                      className="flex-1 truncate rounded border bg-muted/30 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground"
                       onClick={(e) => (e.target as HTMLInputElement).select()}
                     />
                     <button
                       type="button"
                       className="shrink-0 rounded p-0.5 hover:bg-muted"
-                      title={t('admin.siteSettings.brandMedia.inline.copy')}
-                      onClick={() => { navigator.clipboard.writeText(value); toast.success(t('admin.siteSettings.brandMedia.inline.urlCopied')); }}
+                      title={t("admin.siteSettings.brandMedia.inline.copy")}
+                      onClick={() => {
+                        navigator.clipboard.writeText(value);
+                        toast.success(t("admin.siteSettings.brandMedia.inline.urlCopied"));
+                      }}
                     >
                       <Copy className="size-3 text-muted-foreground" />
                     </button>
@@ -181,7 +184,7 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
                       target="_blank"
                       rel="noopener noreferrer"
                       className="shrink-0 rounded p-0.5 hover:bg-muted"
-                      title={t('admin.siteSettings.brandMedia.inline.openNewTab')}
+                      title={t("admin.siteSettings.brandMedia.inline.openNewTab")}
                     >
                       <ExternalLink className="size-3 text-muted-foreground" />
                     </a>
@@ -196,7 +199,7 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
           <div className="flex justify-end pt-4">
             <Button type="button" onClick={handleSave} disabled={busy}>
               <Save className="mr-2 h-3.5 w-3.5" />
-              {t('admin.siteSettings.brandMedia.inline.save')}
+              {t("admin.siteSettings.brandMedia.inline.save")}
             </Button>
           </div>
         )}
@@ -205,4 +208,4 @@ export const BrandMediaTab: React.FC<BrandMediaTabProps> = ({ locale, settingPre
   );
 };
 
-BrandMediaTab.displayName = 'BrandMediaTab';
+BrandMediaTab.displayName = "BrandMediaTab";

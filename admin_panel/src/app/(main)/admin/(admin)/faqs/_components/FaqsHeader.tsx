@@ -6,23 +6,21 @@
 // - ✅ NO inline styles
 // =============================================================
 
-import React from 'react';
-import Link from 'next/link';
+import React from "react";
 
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import Link from "next/link";
+
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 
 export type LocaleOption = { value: string; label: string };
 
 export type FaqsFilters = {
   q: string;
   slug: string;
-  isActive: 'all' | 'active' | 'inactive';
-  sort: 'created_at' | 'updated_at' | 'display_order';
-  orderDir: 'asc' | 'desc';
+  isActive: "all" | "active" | "inactive";
+  sort: "created_at" | "updated_at" | "display_order";
+  orderDir: "asc" | "desc";
   locale: string;
 };
 
@@ -47,12 +45,12 @@ export const FaqsHeader: React.FC<FaqsHeaderProps> = ({
   localesLoading,
   allowAllOption = false,
 }) => {
-  const t = useAdminT('admin.faqs');
+  const t = useAdminT("admin.faqs");
 
   const localeOptions: AdminLocaleOption[] = React.useMemo(() => {
     const base = (locales || [])
       .map((l) => ({
-        value: String(l.value || '')
+        value: String(l.value || "")
           .trim()
           .toLowerCase(),
         label: l.label,
@@ -60,7 +58,7 @@ export const FaqsHeader: React.FC<FaqsHeaderProps> = ({
       .filter((x) => x.value);
 
     if (!allowAllOption) return base;
-    return [{ value: '', label: t('header.filters.allLocalesOption') }, ...base];
+    return [{ value: "", label: t("header.filters.allLocalesOption") }, ...base];
   }, [locales, allowAllOption, t]);
 
   const disabledLocaleSelect = !!localesLoading || localeOptions.length === 0;
@@ -70,33 +68,27 @@ export const FaqsHeader: React.FC<FaqsHeaderProps> = ({
       <div className="border-b p-3">
         <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 flex-1">
-            <div className="text-sm font-semibold">{t('header.title')}</div>
-            <div className="text-xs text-muted-foreground">
-              {t('header.description')}
-            </div>
+            <div className="font-semibold text-sm">{t("header.title")}</div>
+            <div className="text-muted-foreground text-xs">{t("header.description")}</div>
 
             <div className="mt-3 grid gap-2 md:grid-cols-12 md:items-end">
               <div className="md:col-span-4">
-                <label className="mb-1 block text-xs text-muted-foreground">
-                  {t('header.filters.searchLabel')}
-                </label>
+                <label className="mb-1 block text-muted-foreground text-xs">{t("header.filters.searchLabel")}</label>
                 <input
                   type="search"
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                  placeholder={t('header.filters.searchPlaceholder')}
+                  placeholder={t("header.filters.searchPlaceholder")}
                   value={filters.q}
                   onChange={(e) => onFiltersChange({ ...filters, q: e.target.value })}
                 />
               </div>
 
               <div className="md:col-span-3">
-                <label className="mb-1 block text-xs text-muted-foreground">
-                  {t('header.filters.slugLabel')}
-                </label>
+                <label className="mb-1 block text-muted-foreground text-xs">{t("header.filters.slugLabel")}</label>
                 <input
                   type="text"
                   className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                  placeholder={t('header.filters.slugPlaceholder')}
+                  placeholder={t("header.filters.slugPlaceholder")}
                   value={filters.slug}
                   onChange={(e) => onFiltersChange({ ...filters, slug: e.target.value })}
                 />
@@ -105,69 +97,55 @@ export const FaqsHeader: React.FC<FaqsHeaderProps> = ({
               <div className="md:col-span-2">
                 <AdminLocaleSelect
                   value={filters.locale}
-                  onChange={(next) =>
-                    onFiltersChange({ ...filters, locale: (next || '').trim().toLowerCase() })
-                  }
+                  onChange={(next) => onFiltersChange({ ...filters, locale: (next || "").trim().toLowerCase() })}
                   options={localeOptions}
                   loading={!!localesLoading}
                   disabled={disabledLocaleSelect}
-                  label={t('header.filters.localeLabel')}
+                  label={t("header.filters.localeLabel")}
                 />
                 {localesLoading ? (
-                  <div className="mt-1 text-xs text-muted-foreground">
-                    {t('header.filters.localesLoading')}
-                  </div>
+                  <div className="mt-1 text-muted-foreground text-xs">{t("header.filters.localesLoading")}</div>
                 ) : null}
                 {!localesLoading && localeOptions.length === 0 ? (
-                  <div className="mt-1 text-xs text-destructive">
-                    {t('header.filters.noLocalesError')}
-                  </div>
+                  <div className="mt-1 text-destructive text-xs">{t("header.filters.noLocalesError")}</div>
                 ) : null}
               </div>
 
               <div className="md:col-span-1">
-                <label className="mb-1 block text-xs text-muted-foreground">
-                  {t('header.filters.statusLabel')}
-                </label>
+                <label className="mb-1 block text-muted-foreground text-xs">{t("header.filters.statusLabel")}</label>
                 <select
                   className="w-full rounded-md border bg-background px-2 py-2 text-sm"
                   value={filters.isActive}
                   onChange={(e) => onFiltersChange({ ...filters, isActive: e.target.value as any })}
                 >
-                  <option value="all">{t('header.filters.statusOptions.all')}</option>
-                  <option value="active">{t('header.filters.statusOptions.active')}</option>
-                  <option value="inactive">{t('header.filters.statusOptions.inactive')}</option>
+                  <option value="all">{t("header.filters.statusOptions.all")}</option>
+                  <option value="active">{t("header.filters.statusOptions.active")}</option>
+                  <option value="inactive">{t("header.filters.statusOptions.inactive")}</option>
                 </select>
               </div>
 
               <div className="md:col-span-1">
-                <label className="mb-1 block text-xs text-muted-foreground">
-                  {t('header.filters.sortLabel')}
-                </label>
+                <label className="mb-1 block text-muted-foreground text-xs">{t("header.filters.sortLabel")}</label>
                 <select
                   className="w-full rounded-md border bg-background px-2 py-2 text-sm"
                   value={filters.sort}
                   onChange={(e) => onFiltersChange({ ...filters, sort: e.target.value as any })}
                 >
-                  <option value="updated_at">{t('header.filters.sortOptions.updatedAt')}</option>
-                  <option value="created_at">{t('header.filters.sortOptions.createdAt')}</option>
-                  <option value="display_order">
-                    {t('header.filters.sortOptions.displayOrder')}
-                  </option>
+                  <option value="updated_at">{t("header.filters.sortOptions.updatedAt")}</option>
+                  <option value="created_at">{t("header.filters.sortOptions.createdAt")}</option>
+                  <option value="display_order">{t("header.filters.sortOptions.displayOrder")}</option>
                 </select>
               </div>
 
               <div className="md:col-span-1">
-                <label className="mb-1 block text-xs text-muted-foreground">
-                  {t('header.filters.dirLabel')}
-                </label>
+                <label className="mb-1 block text-muted-foreground text-xs">{t("header.filters.dirLabel")}</label>
                 <select
                   className="w-full rounded-md border bg-background px-2 py-2 text-sm"
                   value={filters.orderDir}
                   onChange={(e) => onFiltersChange({ ...filters, orderDir: e.target.value as any })}
                 >
-                  <option value="desc">{t('header.filters.dirOptions.desc')}</option>
-                  <option value="asc">{t('header.filters.dirOptions.asc')}</option>
+                  <option value="desc">{t("header.filters.dirOptions.desc")}</option>
+                  <option value="asc">{t("header.filters.dirOptions.asc")}</option>
                 </select>
               </div>
             </div>
@@ -176,29 +154,20 @@ export const FaqsHeader: React.FC<FaqsHeaderProps> = ({
           <div className="lg:w-72 lg:border-l lg:pl-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="text-xs text-muted-foreground">
-                  {t('header.summary.totalLabel')}
-                </div>
-                <div className="text-2xl font-bold">{total}</div>
+                <div className="text-muted-foreground text-xs">{t("header.summary.totalLabel")}</div>
+                <div className="font-bold text-2xl">{total}</div>
               </div>
 
               {onRefresh ? (
-                <button
-                  type="button"
-                  className="rounded-md border px-3 py-1 text-xs"
-                  onClick={onRefresh}
-                >
-                  {t('header.actions.refresh')}
+                <button type="button" className="rounded-md border px-3 py-1 text-xs" onClick={onRefresh}>
+                  {t("header.actions.refresh")}
                 </button>
               ) : null}
             </div>
 
             <div className="mt-3 flex justify-end">
-              <Link
-                href="/admin/faqs/new"
-                className="rounded-md bg-primary px-3 py-2 text-xs text-primary-foreground"
-              >
-                {t('header.actions.create')}
+              <Link href="/admin/faqs/new" className="rounded-md bg-primary px-3 py-2 text-primary-foreground text-xs">
+                {t("header.actions.create")}
               </Link>
             </div>
           </div>

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/_components/sidebar/app-sidebar.tsx
@@ -6,33 +6,25 @@
 // - NavMain: NavGroup[] alır (senin nav-main.tsx böyle)
 // =============================================================
 
-import Link from 'next/link';
-import { LayoutDashboard } from 'lucide-react';
+import { useMemo } from "react";
 
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar';
+import Link from "next/link";
 
-import { buildAdminSidebarItems } from '@/navigation/sidebar/sidebar-items';
-import type { NavGroup } from '@/navigation/sidebar/sidebar-items';
+import { LayoutDashboard } from "lucide-react";
 
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import type { TranslateFn } from '@/i18n';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader } from "@/components/ui/sidebar";
+import type { TranslateFn } from "@/i18n";
+import { useGetMyProfileQuery, useStatusQuery } from "@/integrations/hooks";
+import type { NavGroup } from "@/navigation/sidebar/sidebar-items";
+import { buildAdminSidebarItems } from "@/navigation/sidebar/sidebar-items";
 
-import { useMemo } from 'react';
-import { NavMain } from './nav-main';
-import { NavUser } from './nav-user';
-import { useAdminSettings } from '../admin-settings-provider';
-import { useStatusQuery, useGetMyProfileQuery } from '@/integrations/hooks';
+import { useAdminSettings } from "../admin-settings-provider";
+import { NavMain } from "./nav-main";
+import { NavUser } from "./nav-user";
 
-type Role = 'admin' | string;
+type Role = "admin" | string;
 
 type SidebarMe = {
   id: string;
@@ -61,7 +53,7 @@ export function AppSidebar({
 }) {
   const { copy } = useAdminUiCopy();
   const t = useAdminT();
-  const label = (copy.app_name || appName || '').trim();
+  const label = (copy.app_name || appName || "").trim();
 
   // Admin settings override for page titles
   const { pageMeta } = useAdminSettings();
@@ -73,19 +65,19 @@ export function AppSidebar({
   const currentUser = useMemo(() => {
     const s = statusData?.user;
     return {
-      id: s?.id || me?.id || 'me',
-      name: profileData?.full_name || s?.email?.split('@')[0] || me?.name || 'Admin',
-      email: s?.email || me?.email || 'admin',
-      role: s?.role || me?.role || 'admin',
-      avatar: profileData?.avatar_url || me?.avatar || '',
-      roles: me?.roles || [s?.role || 'admin'],
+      id: s?.id || me?.id || "me",
+      name: profileData?.full_name || s?.email?.split("@")[0] || me?.name || "Admin",
+      email: s?.email || me?.email || "admin",
+      role: s?.role || me?.role || "admin",
+      avatar: profileData?.avatar_url || me?.avatar || "",
+      roles: me?.roles || [s?.role || "admin"],
     };
   }, [statusData, profileData, me]);
 
   const wrappedT: TranslateFn = (key, params, fallback) => {
     // Check pageMeta override for sidebar items: admin.dashboard.items.{key}
-    if (typeof key === 'string' && key.startsWith('admin.dashboard.items.')) {
-      const itemKey = key.replace('admin.dashboard.items.', '');
+    if (typeof key === "string" && key.startsWith("admin.dashboard.items.")) {
+      const itemKey = key.replace("admin.dashboard.items.", "");
       // Check if pageMeta has this key and a title
       if (pageMeta?.[itemKey]?.title) {
         return pageMeta[itemKey].title;
@@ -95,16 +87,16 @@ export function AppSidebar({
   };
 
   // ✅ admin ise tüm menu, değilse sadece dashboard
-  const groupsForMe: NavGroup[] = hasRole(currentUser as any, 'admin')
+  const groupsForMe: NavGroup[] = hasRole(currentUser as any, "admin")
     ? buildAdminSidebarItems(copy.nav, wrappedT)
     : [
         {
           id: 1,
-          label: '',
+          label: "",
           items: [
             {
-              title: copy.nav?.items?.dashboard || '',
-              url: '/admin/dashboard',
+              title: copy.nav?.items?.dashboard || "",
+              url: "/admin/dashboard",
               icon: LayoutDashboard,
             },
           ],
@@ -114,13 +106,17 @@ export function AppSidebar({
   return (
     <Sidebar {...props} variant={variant} collapsible={collapsible}>
       <SidebarHeader>
-        <Link prefetch={false} href="/admin/dashboard" className="flex items-center gap-3 px-3 py-4 hover:bg-sidebar-accent/50 transition-colors">
+        <Link
+          prefetch={false}
+          href="/admin/dashboard"
+          className="flex items-center gap-3 px-3 py-4 transition-colors hover:bg-sidebar-accent/50"
+        >
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
             <LayoutDashboard className="size-5" />
           </div>
           <div className="flex flex-col gap-0.5 leading-none">
-            <span className="font-bold text-lg tracking-tight">{label || 'ENSOTEK'}</span>
-            <span className="text-[10px] font-medium tracking-widest text-muted-foreground uppercase">Admin Panel</span>
+            <span className="font-bold text-lg tracking-tight">{label || "ENSOTEK"}</span>
+            <span className="font-medium text-[10px] text-muted-foreground uppercase tracking-widest">Admin Panel</span>
           </div>
         </Link>
       </SidebarHeader>

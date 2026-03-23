@@ -2,20 +2,15 @@
 // FILE: src/i18n/locale-helpers.ts  (UPDATED)
 // =============================================================
 
-export { KNOWN_RTL } from './config';
+export { KNOWN_RTL } from "./config";
 
-export const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || 'guezelwebdesign.de').trim();
+export const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || "guezelwebdesign.de").trim();
 
 // ✅ test uyumu: localhost default port’suz
-export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost').replace(
-  /\/+$/,
-  '',
-);
+export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost").replace(/\/+$/, "");
 
 export const isRTL = (l: string) =>
-  new Set(['ar', 'fa', 'he', 'ur', 'ckb', 'ps', 'sd', 'ug', 'yi', 'dv']).has(
-    String(l || '').toLowerCase(),
-  );
+  new Set(["ar", "fa", "he", "ur", "ckb", "ps", "sd", "ug", "yi", "dv"]).has(String(l || "").toLowerCase());
 
 /**
  * <link rel="alternate" hreflang="..."> map’i
@@ -24,6 +19,6 @@ export const isRTL = (l: string) =>
  */
 export function languageAlternates(defaultLocale: string) {
   const map: Record<string, string> = {};
-  map['x-default'] = `/${defaultLocale}/`;
+  map["x-default"] = `/${defaultLocale}/`;
   return map;
 }

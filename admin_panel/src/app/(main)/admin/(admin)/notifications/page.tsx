@@ -3,7 +3,7 @@
 // FINAL — Admin Notifications Page
 // =============================================================
 
-import AdminNotificationsClient from './_components/admin-notifications-client';
+import AdminNotificationsClient from "./_components/admin-notifications-client";
 
 export default function Page() {
   return <AdminNotificationsClient />;

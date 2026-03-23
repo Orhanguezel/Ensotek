@@ -1,6 +1,5 @@
 // src/lib/preferences/theme-utils.ts
 
-
 export function applyThemeMode(value: "light" | "dark") {
   const doc = document.documentElement;
   doc.classList.add("disable-transitions");

@@ -5,7 +5,7 @@
 // - Endpoints: public + admin routes (router.ts / admin.routes.ts)
 // =============================================================
 
-import { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
 /* =============================================================
  * DTOs (response contracts)
@@ -104,14 +104,8 @@ export interface LibraryFileDto {
 
 export interface LibraryListQueryParams {
   order?: string;
-  sort?:
-    | 'created_at'
-    | 'updated_at'
-    | 'published_at'
-    | 'display_order'
-    | 'views'
-    | 'download_count';
-  orderDir?: 'asc' | 'desc';
+  sort?: "created_at" | "updated_at" | "published_at" | "display_order" | "views" | "download_count";
+  orderDir?: "asc" | "desc";
 
   limit?: number;
   offset?: number;
@@ -136,10 +130,7 @@ export interface LibraryListQueryParams {
   default_locale?: string;
 }
 
-export type LibraryPublicListQueryParams = Omit<
-  LibraryListQueryParams,
-  'is_published' | 'is_active'
->;
+export type LibraryPublicListQueryParams = Omit<LibraryListQueryParams, "is_published" | "is_active">;
 
 /* =============================================================
  * Payloads – Library (parent + i18n combined)
@@ -285,6 +276,3 @@ export interface LibraryFileUpdatePayload {
   display_order?: number;
   is_active?: BoolLike;
 }
-
-
-

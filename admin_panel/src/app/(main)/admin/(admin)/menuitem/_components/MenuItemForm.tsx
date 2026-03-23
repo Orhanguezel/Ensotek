@@ -3,11 +3,13 @@
 // guezelwebdesign – Admin Menu Item Create / Edit Form (HEADER ONLY)
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import type { MenuItemType } from '@/integrations/shared';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import type React from "react";
+import { useMemo } from "react";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import type { MenuItemType } from "@/integrations/shared";
 
 export type MenuItemFormValues = {
   title: string;
@@ -17,7 +19,7 @@ export type MenuItemFormValues = {
   parent_id: string | null;
 
   // ✅ still in state for payload consistency, but UI does not edit it
-  location: 'header';
+  location: "header";
 
   icon: string;
   section_id: string | null;
@@ -27,7 +29,7 @@ export type MenuItemFormValues = {
 };
 
 export type MenuItemFormProps = {
-  mode: 'create' | 'edit';
+  mode: "create" | "edit";
   values: MenuItemFormValues;
   saving: boolean;
   loading?: boolean;
@@ -37,15 +39,14 @@ export type MenuItemFormProps = {
 };
 
 const toShortLocale = (v: unknown): string =>
-  String(v || '')
+  String(v || "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 
-
-    const ALL = '__all__' as const;
+const ALL = "__all__" as const;
 
 export const MenuItemForm: React.FC<MenuItemFormProps> = ({
   values,
@@ -55,7 +56,7 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
   localesLoading,
   onChange,
 }) => {
-  const t = useAdminT('admin.menuitem');
+  const t = useAdminT("admin.menuitem");
   const disabled = !!saving || !!loading;
 
   const normalizedLocaleOptions = useMemo(() => {
@@ -70,7 +71,7 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
     const cur = toShortLocale(values.locale);
     if (cur && normalizedLocaleOptions.some((o) => o.value === cur)) return cur;
     const first = normalizedLocaleOptions[0]?.value;
-    return cur || first || '';
+    return cur || first || "";
   }, [values.locale, normalizedLocaleOptions]);
 
   const handleChange =
@@ -79,11 +80,11 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
       const target = e.target as HTMLInputElement;
       let value: any = target.value;
 
-      if (field === 'is_active') value = (target as HTMLInputElement).checked;
-      else if (field === 'display_order') {
+      if (field === "is_active") value = (target as HTMLInputElement).checked;
+      else if (field === "display_order") {
         const n = Number(value);
         value = Number.isFinite(n) ? n : 0;
-      } else if (field === 'locale') {
+      } else if (field === "locale") {
         value = toShortLocale(value);
       }
 
@@ -94,20 +95,20 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
     <div className="row g-3">
       <div className="col-12">
         <div
-          className="alert alert-light border small mb-0"
-          dangerouslySetInnerHTML={{ __html: t('form.headerHelp') }}
+          className="alert alert-light small mb-0 border"
+          dangerouslySetInnerHTML={{ __html: t("form.headerHelp") }}
         />
       </div>
 
       <div className="col-md-6">
         <label className="form-label form-label-sm">
-          {t('form.labels.title')} <span className="text-danger">*</span>
+          {t("form.labels.title")} <span className="text-danger">*</span>
         </label>
         <input
           type="text"
           className="form-control form-control-sm"
           value={values.title}
-          onChange={handleChange('title')}
+          onChange={handleChange("title")}
           disabled={disabled}
           required
         />
@@ -115,18 +116,15 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
       <div className="col-md-3">
         <label className="form-label form-label-sm">
-          {t('header.localeLabel')}{' '}
-          {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
+          {t("header.localeLabel")} {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
         </label>
         <select
           className="form-select form-select-sm"
           value={localeValue}
-          onChange={handleChange('locale')}
+          onChange={handleChange("locale")}
           disabled={disabled || !!localesLoading}
         >
-          {normalizedLocaleOptions.length === 0 ? (
-            <option value={ALL}>{t('list.loading')}</option>
-          ) : null}
+          {normalizedLocaleOptions.length === 0 ? <option value={ALL}>{t("list.loading")}</option> : null}
           {normalizedLocaleOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -136,12 +134,12 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
       </div>
 
       <div className="col-md-3">
-        <label className="form-label form-label-sm">{t('header.sortOrder')}</label>
+        <label className="form-label form-label-sm">{t("header.sortOrder")}</label>
         <input
           type="number"
           className="form-control form-control-sm"
           value={values.display_order}
-          onChange={handleChange('display_order')}
+          onChange={handleChange("display_order")}
           disabled={disabled}
           min={0}
         />
@@ -149,16 +147,16 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
       <div className="col-md-3">
         <label className="form-label form-label-sm">
-          {t('list.columns.type')} <span className="text-danger">*</span>
+          {t("list.columns.type")} <span className="text-danger">*</span>
         </label>
         <select
           className="form-select form-select-sm"
           value={values.type}
-          onChange={handleChange('type')}
+          onChange={handleChange("type")}
           disabled={disabled}
         >
-          <option value="custom">{t('list.types.custom')}</option>
-          <option value="page">{t('list.types.page')}</option>
+          <option value="custom">{t("list.types.custom")}</option>
+          <option value="page">{t("list.types.page")}</option>
         </select>
       </div>
 
@@ -166,59 +164,49 @@ export const MenuItemForm: React.FC<MenuItemFormProps> = ({
 
       <div className="col-md-9">
         <label className="form-label form-label-sm">
-          {t('form.labels.url')} {values.type === 'custom' && <span className="text-danger">*</span>}
+          {t("form.labels.url")} {values.type === "custom" && <span className="text-danger">*</span>}
         </label>
         <input
           type="text"
           className="form-control form-control-sm"
-          placeholder={
-            values.type === 'custom'
-              ? t('form.placeholders.url')
-              : t('form.placeholders.urlPage')
-          }
+          placeholder={values.type === "custom" ? t("form.placeholders.url") : t("form.placeholders.urlPage")}
           value={values.url}
-          onChange={handleChange('url')}
+          onChange={handleChange("url")}
           disabled={disabled}
         />
-        <div
-          className="form-text"
-          dangerouslySetInnerHTML={{ __html: t('form.urlCustomHelp') }}
-        />
+        <div className="form-text" dangerouslySetInnerHTML={{ __html: t("form.urlCustomHelp") }} />
       </div>
 
       <div className="col-md-6">
-        <label className="form-label form-label-sm">{t('form.labels.icon')}</label>
+        <label className="form-label form-label-sm">{t("form.labels.icon")}</label>
         <input
           type="text"
           className="form-control form-control-sm"
-          placeholder={t('form.placeholders.icon')}
+          placeholder={t("form.placeholders.icon")}
           value={values.icon}
-          onChange={handleChange('icon')}
+          onChange={handleChange("icon")}
           disabled={disabled}
         />
       </div>
 
-      <div className="col-md-3 d-flex align-items-end">
+      <div className="d-flex col-md-3 align-items-end">
         <div className="form-check form-switch">
           <input
             className="form-check-input"
             type="checkbox"
             id="menuitem-active-switch"
             checked={values.is_active}
-            onChange={handleChange('is_active')}
+            onChange={handleChange("is_active")}
             disabled={disabled}
           />
           <label className="form-check-label small" htmlFor="menuitem-active-switch">
-            {t('header.active')}
+            {t("header.active")}
           </label>
         </div>
       </div>
 
       <div className="col-12">
-        <div
-          className="form-text small text-muted"
-          dangerouslySetInnerHTML={{ __html: t('form.advancedUsageHelp') }}
-        />
+        <div className="form-text small text-muted" dangerouslySetInnerHTML={{ __html: t("form.advancedUsageHelp") }} />
       </div>
     </div>
   );

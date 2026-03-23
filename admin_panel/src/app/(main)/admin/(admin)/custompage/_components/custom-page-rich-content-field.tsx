@@ -3,10 +3,11 @@
 // FINAL — Rich content wrapper (optional)
 // =============================================================
 
-'use client';
+"use client";
 
-import React from 'react';
-import RichContentEditor from '@/app/(main)/admin/_components/common/RichContentEditor';
+import type React from "react";
+
+import RichContentEditor from "@/app/(main)/admin/_components/common/RichContentEditor";
 
 type Props = {
   value: string;
@@ -17,11 +18,11 @@ type Props = {
 export const CustomPageRichContentField: React.FC<Props> = ({ value, disabled, onChange }) => {
   return (
     <div className="space-y-1">
-      <label className="block text-xs text-muted-foreground">İçerik (zengin metin / HTML)</label>
+      <label className="block text-muted-foreground text-xs">İçerik (zengin metin / HTML)</label>
       <RichContentEditor value={value} onChange={onChange} disabled={disabled} />
-      <div className="text-xs text-muted-foreground">
-        Editör HTML üretir. Backend, bu alanı <code>packContent</code> ile{' '}
-        <code>{'{"html":"..."}'}</code> formatına çevirebilir.
+      <div className="text-muted-foreground text-xs">
+        Editör HTML üretir. Backend, bu alanı <code>packContent</code> ile <code>{'{"html":"..."}'}</code> formatına
+        çevirebilir.
       </div>
     </div>
   );

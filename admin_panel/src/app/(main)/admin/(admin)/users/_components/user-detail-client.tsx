@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/users/[id]/_components/user-detail-client.tsx
@@ -7,36 +7,35 @@
 // - mutations payload: AdminUpdateUserBody, AdminSetActiveBody, etc.
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { ArrowLeft, Save, ShieldCheck, KeyRound, Trash2 } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { useRouter } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
+import { ArrowLeft, KeyRound, Save, ShieldCheck, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
-import type { UserRoleName, AdminUserView } from '@/integrations/shared';
-
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import {
   useGetUserAdminQuery,
-  useUpdateUserAdminMutation,
-  useSetUserActiveAdminMutation,
-  useSetUserRolesAdminMutation,
-  useSetUserPasswordAdminMutation,
   useRemoveUserAdminMutation,
-} from '@/integrations/hooks';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+  useSetUserActiveAdminMutation,
+  useSetUserPasswordAdminMutation,
+  useSetUserRolesAdminMutation,
+  useUpdateUserAdminMutation,
+} from "@/integrations/hooks";
+import type { AdminUserView, UserRoleName } from "@/integrations/shared";
 
-const ALL_ROLES: UserRoleName[] = ['admin', 'moderator', 'user'];
+const ALL_ROLES: UserRoleName[] = ["admin", "moderator", "user"];
 
 function isAdminFromView(u: AdminUserView): boolean {
-  return u.roles.includes('admin');
+  return u.roles.includes("admin");
 }
 
 export default function UserDetailClient({ id }: { id: string }) {
@@ -46,18 +45,18 @@ export default function UserDetailClient({ id }: { id: string }) {
   function getErrMessage(err: unknown): string {
     const anyErr = err as any;
     const m1 = anyErr?.data?.error?.message;
-    if (typeof m1 === 'string' && m1.trim()) return m1;
+    if (typeof m1 === "string" && m1.trim()) return m1;
     const m2 = anyErr?.data?.message;
-    if (typeof m2 === 'string' && m2.trim()) return m2;
+    if (typeof m2 === "string" && m2.trim()) return m2;
     const m3 = anyErr?.error;
-    if (typeof m3 === 'string' && m3.trim()) return m3;
-    return t('admin.users.detail.errorFallback');
+    if (typeof m3 === "string" && m3.trim()) return m3;
+    return t("admin.users.detail.errorFallback");
   }
 
   function roleLabel(r: UserRoleName) {
-    if (r === 'admin') return t('admin.users.detail.roles.admin');
-    if (r === 'moderator') return t('admin.users.detail.roles.moderator');
-    return t('admin.users.detail.roles.user');
+    if (r === "admin") return t("admin.users.detail.roles.admin");
+    if (r === "moderator") return t("admin.users.detail.roles.moderator");
+    return t("admin.users.detail.roles.user");
   }
 
   const userQ = useGetUserAdminQuery({ id });
@@ -71,23 +70,23 @@ export default function UserDetailClient({ id }: { id: string }) {
   const u = userQ.data;
 
   // form state
-  const [fullName, setFullName] = React.useState('');
-  const [phone, setPhone] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [password, setPasswordLocal] = React.useState('');
+  const [fullName, setFullName] = React.useState("");
+  const [phone, setPhone] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPasswordLocal] = React.useState("");
   const [active, setActiveLocal] = React.useState(true);
 
   const [roles, setRolesLocal] = React.useState<UserRoleName[]>([]);
 
   React.useEffect(() => {
     if (!u) return;
-    setFullName(u.full_name ?? '');
-    setPhone(u.phone ?? '');
-    setEmail(u.email ?? '');
+    setFullName(u.full_name ?? "");
+    setPhone(u.phone ?? "");
+    setEmail(u.email ?? "");
     setActiveLocal(!!u.is_active);
 
-    setRolesLocal(u.roles.length > 0 ? u.roles : ['user']);
-  }, [u, id]);
+    setRolesLocal(u.roles.length > 0 ? u.roles : ["user"]);
+  }, [u]);
 
   const busy =
     userQ.isFetching ||
@@ -106,7 +105,7 @@ export default function UserDetailClient({ id }: { id: string }) {
         email: email.trim() || undefined,
       }).unwrap();
 
-      toast.success(t('admin.users.detail.profile.saved'));
+      toast.success(t("admin.users.detail.profile.saved"));
       userQ.refetch();
     } catch (err) {
       toast.error(getErrMessage(err));
@@ -118,7 +117,7 @@ export default function UserDetailClient({ id }: { id: string }) {
     try {
       setActiveLocal(next);
       await setActive({ id, is_active: next }).unwrap();
-      toast.success(next ? t('admin.users.detail.status.activated') : t('admin.users.detail.status.deactivated'));
+      toast.success(next ? t("admin.users.detail.status.activated") : t("admin.users.detail.status.deactivated"));
       userQ.refetch();
     } catch (err) {
       setActiveLocal(prev);
@@ -131,7 +130,7 @@ export default function UserDetailClient({ id }: { id: string }) {
     // UI'da single-select gibi davranıyoruz; yine de array gönderiyoruz.
     try {
       await setRoles({ id, roles }).unwrap();
-      toast.success(t('admin.users.detail.roles.saved'));
+      toast.success(t("admin.users.detail.roles.saved"));
       userQ.refetch();
     } catch (err) {
       toast.error(getErrMessage(err));
@@ -141,24 +140,24 @@ export default function UserDetailClient({ id }: { id: string }) {
   async function onSetPassword() {
     const p = password.trim();
     if (p.length < 8) {
-      toast.error(t('admin.users.detail.password.minLengthError'));
+      toast.error(t("admin.users.detail.password.minLengthError"));
       return;
     }
     try {
       await setPassword({ id, password: p }).unwrap();
-      toast.success(t('admin.users.detail.password.updated'));
-      setPasswordLocal('');
+      toast.success(t("admin.users.detail.password.updated"));
+      setPasswordLocal("");
     } catch (err) {
       toast.error(getErrMessage(err));
     }
   }
 
   async function onDeleteUser() {
-    if (!confirm(t('admin.users.detail.delete.confirm'))) return;
+    if (!confirm(t("admin.users.detail.delete.confirm"))) return;
     try {
       await removeUser({ id }).unwrap();
-      toast.success(t('admin.users.detail.delete.deleted'));
-      router.replace('/admin/users');
+      toast.success(t("admin.users.detail.delete.deleted"));
+      router.replace("/admin/users");
       router.refresh();
     } catch (err) {
       toast.error(getErrMessage(err));
@@ -175,12 +174,12 @@ export default function UserDetailClient({ id }: { id: string }) {
       <div className="space-y-3">
         <Button variant="outline" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 size-4" />
-          {t('admin.users.detail.backButton')}
+          {t("admin.users.detail.backButton")}
         </Button>
         <div className="rounded-md border p-4 text-sm">
-          {t('admin.users.detail.loadError')}{' '}
+          {t("admin.users.detail.loadError")}{" "}
           <Button variant="link" className="px-1" onClick={() => userQ.refetch()}>
-            {t('admin.users.detail.retryButton')}
+            {t("admin.users.detail.retryButton")}
           </Button>
         </div>
       </div>
@@ -192,14 +191,14 @@ export default function UserDetailClient({ id }: { id: string }) {
       <div className="space-y-3">
         <Button variant="outline" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 size-4" />
-          {t('admin.users.detail.backButton')}
+          {t("admin.users.detail.backButton")}
         </Button>
-        <div className="rounded-md border p-4 text-sm text-muted-foreground">{t('admin.users.detail.loading')}</div>
+        <div className="rounded-md border p-4 text-muted-foreground text-sm">{t("admin.users.detail.loading")}</div>
       </div>
     );
   }
 
-  const currentRole = (roles[0] ?? 'user') as UserRoleName;
+  const currentRole = (roles[0] ?? "user") as UserRoleName;
 
   return (
     <div className="space-y-6">
@@ -208,67 +207,54 @@ export default function UserDetailClient({ id }: { id: string }) {
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => router.back()} disabled={busy}>
               <ArrowLeft className="mr-2 size-4" />
-              {t('admin.users.detail.backButton')}
+              {t("admin.users.detail.backButton")}
             </Button>
-            <h1 className="text-lg font-semibold">{t('admin.users.detail.title')}</h1>
+            <h1 className="font-semibold text-lg">{t("admin.users.detail.title")}</h1>
           </div>
-          <p className="text-sm text-muted-foreground">
-            {u.full_name ? u.full_name : t('admin.users.detail.unknownUser')}
+          <p className="text-muted-foreground text-sm">
+            {u.full_name ? u.full_name : t("admin.users.detail.unknownUser")}
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          {isAdminFromView(u) ? <Badge>{t('admin.users.detail.roles.admin')}</Badge> : <Badge variant="secondary">{t('admin.users.detail.roles.user')}</Badge>}
-          {u.is_active ? (
-            <Badge variant="secondary">{t('admin.users.detail.statusActive')}</Badge>
+          {isAdminFromView(u) ? (
+            <Badge>{t("admin.users.detail.roles.admin")}</Badge>
           ) : (
-            <Badge variant="destructive">{t('admin.users.detail.statusInactive')}</Badge>
+            <Badge variant="secondary">{t("admin.users.detail.roles.user")}</Badge>
+          )}
+          {u.is_active ? (
+            <Badge variant="secondary">{t("admin.users.detail.statusActive")}</Badge>
+          ) : (
+            <Badge variant="destructive">{t("admin.users.detail.statusInactive")}</Badge>
           )}
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('admin.users.detail.profile.title')}</CardTitle>
-          <CardDescription>
-            {t('admin.users.detail.profile.description')}
-          </CardDescription>
+          <CardTitle className="text-base">{t("admin.users.detail.profile.title")}</CardTitle>
+          <CardDescription>{t("admin.users.detail.profile.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-3 md:grid-cols-3">
             <div className="space-y-2">
-              <Label htmlFor="email">{t('admin.users.detail.profile.emailLabel')}</Label>
-              <Input
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={busy}
-              />
+              <Label htmlFor="email">{t("admin.users.detail.profile.emailLabel")}</Label>
+              <Input id="email" value={email} onChange={(e) => setEmail(e.target.value)} disabled={busy} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="full_name">{t('admin.users.detail.profile.fullNameLabel')}</Label>
-              <Input
-                id="full_name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                disabled={busy}
-              />
+              <Label htmlFor="full_name">{t("admin.users.detail.profile.fullNameLabel")}</Label>
+              <Input id="full_name" value={fullName} onChange={(e) => setFullName(e.target.value)} disabled={busy} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">{t('admin.users.detail.profile.phoneLabel')}</Label>
-              <Input
-                id="phone"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                disabled={busy}
-              />
+              <Label htmlFor="phone">{t("admin.users.detail.profile.phoneLabel")}</Label>
+              <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} disabled={busy} />
             </div>
           </div>
 
           <div className="flex justify-end">
             <Button onClick={onSaveProfile} disabled={busy}>
               <Save className="mr-2 size-4" />
-              {t('admin.users.detail.profile.saveButton')}
+              {t("admin.users.detail.profile.saveButton")}
             </Button>
           </div>
 
@@ -276,12 +262,14 @@ export default function UserDetailClient({ id }: { id: string }) {
 
           <div className="flex items-center justify-between">
             <div className="space-y-1">
-              <div className="font-medium">{t('admin.users.detail.status.title')}</div>
-              <div className="text-sm text-muted-foreground">{t('admin.users.detail.status.description')}</div>
+              <div className="font-medium">{t("admin.users.detail.status.title")}</div>
+              <div className="text-muted-foreground text-sm">{t("admin.users.detail.status.description")}</div>
             </div>
 
             <div className="flex items-center gap-2">
-              <Label className="text-sm text-muted-foreground">{active ? t('admin.users.detail.status.active') : t('admin.users.detail.status.inactive')}</Label>
+              <Label className="text-muted-foreground text-sm">
+                {active ? t("admin.users.detail.status.active") : t("admin.users.detail.status.inactive")}
+              </Label>
               <Switch checked={active} onCheckedChange={onToggleActive} disabled={busy} />
             </div>
           </div>
@@ -290,8 +278,8 @@ export default function UserDetailClient({ id }: { id: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('admin.users.detail.roles.title')}</CardTitle>
-          <CardDescription>{t('admin.users.detail.roles.description')}</CardDescription>
+          <CardTitle className="text-base">{t("admin.users.detail.roles.title")}</CardTitle>
+          <CardDescription>{t("admin.users.detail.roles.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex flex-wrap gap-2">
@@ -301,7 +289,7 @@ export default function UserDetailClient({ id }: { id: string }) {
                 <Button
                   key={r}
                   type="button"
-                  variant={checked ? 'default' : 'outline'}
+                  variant={checked ? "default" : "outline"}
                   onClick={() => chooseRole(r)}
                   disabled={busy}
                 >
@@ -312,9 +300,9 @@ export default function UserDetailClient({ id }: { id: string }) {
             })}
           </div>
 
-          <div className="text-sm text-muted-foreground">
-            {t('admin.users.detail.roles.currentRole')}{' '}
-            <Badge className="ml-1" variant={currentRole === 'admin' ? 'default' : 'secondary'}>
+          <div className="text-muted-foreground text-sm">
+            {t("admin.users.detail.roles.currentRole")}{" "}
+            <Badge className="ml-1" variant={currentRole === "admin" ? "default" : "secondary"}>
               {roleLabel(currentRole)}
             </Badge>
           </div>
@@ -322,7 +310,7 @@ export default function UserDetailClient({ id }: { id: string }) {
           <div className="flex justify-end">
             <Button onClick={onSaveRoles} disabled={busy}>
               <Save className="mr-2 size-4" />
-              {t('admin.users.detail.roles.saveButton')}
+              {t("admin.users.detail.roles.saveButton")}
             </Button>
           </div>
         </CardContent>
@@ -330,17 +318,17 @@ export default function UserDetailClient({ id }: { id: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('admin.users.detail.password.title')}</CardTitle>
-          <CardDescription>{t('admin.users.detail.password.description')}</CardDescription>
+          <CardTitle className="text-base">{t("admin.users.detail.password.title")}</CardTitle>
+          <CardDescription>{t("admin.users.detail.password.description")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="grid gap-3 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="password">{t('admin.users.detail.password.label')}</Label>
+              <Label htmlFor="password">{t("admin.users.detail.password.label")}</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder={t('admin.users.detail.password.placeholder')}
+                placeholder={t("admin.users.detail.password.placeholder")}
                 value={password}
                 onChange={(e) => setPasswordLocal(e.target.value)}
                 disabled={busy}
@@ -351,7 +339,7 @@ export default function UserDetailClient({ id }: { id: string }) {
           <div className="flex justify-end">
             <Button onClick={onSetPassword} disabled={busy}>
               <KeyRound className="mr-2 size-4" />
-              {t('admin.users.detail.password.updateButton')}
+              {t("admin.users.detail.password.updateButton")}
             </Button>
           </div>
         </CardContent>
@@ -359,13 +347,13 @@ export default function UserDetailClient({ id }: { id: string }) {
 
       <Card className="border-destructive/40">
         <CardHeader>
-          <CardTitle className="text-base">{t('admin.users.detail.delete.title')}</CardTitle>
-          <CardDescription>{t('admin.users.detail.delete.description')}</CardDescription>
+          <CardTitle className="text-base">{t("admin.users.detail.delete.title")}</CardTitle>
+          <CardDescription>{t("admin.users.detail.delete.description")}</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-end">
           <Button variant="destructive" onClick={onDeleteUser} disabled={busy}>
             <Trash2 className="mr-2 size-4" />
-            {t('admin.users.detail.delete.button')}
+            {t("admin.users.detail.delete.button")}
           </Button>
         </CardContent>
       </Card>

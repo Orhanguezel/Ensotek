@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/skills/admin-skills-client.tsx
@@ -7,36 +7,16 @@
 // ✅ Fixed: Cannot read properties of undefined (reading 'label')
 // =============================================================
 
-import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import { Plus, RefreshCcw, Pencil, Trash2 } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useRouter, useSearchParams } from "next/navigation";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Pencil, Plus, RefreshCcw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -46,26 +26,26 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-
-import type { SkillCounterMerged, SkillLogoMerged, SkillTrack } from '@/integrations/shared';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   useListSkillCountersAdminQuery,
-  useRemoveSkillCounterAdminMutation,
   useListSkillLogosAdminQuery,
+  useRemoveSkillCounterAdminMutation,
   useRemoveSkillLogoAdminMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/hooks";
+import type { SkillCounterMerged, SkillLogoMerged, SkillTrack } from "@/integrations/shared";
 
 type Filters = {
   locale: string;
-  track: 'all' | SkillTrack;
+  track: "all" | SkillTrack;
   activeOnly: boolean;
 };
 
@@ -82,16 +62,16 @@ export default function AdminSkillsClient() {
   const safeLocaleOptions: AdminLocaleOption[] = React.useMemo(() => {
     if (!Array.isArray(localeOptions)) return [];
     return localeOptions.map((opt) => ({
-      value: opt.value || '',
-      label: opt.label || opt.value || '',
+      value: opt.value || "",
+      label: opt.label || opt.value || "",
     }));
   }, [localeOptions]);
 
-  const activeTab = searchParams.get('tab') || 'counters';
+  const activeTab = searchParams.get("tab") || "counters";
 
   const [filters, setFilters] = React.useState<Filters>({
-    locale: '',
-    track: 'all',
+    locale: "",
+    track: "all",
     activeOnly: false,
   });
 
@@ -105,7 +85,7 @@ export default function AdminSkillsClient() {
   const listParams = React.useMemo(
     () => ({
       locale: filters.locale || undefined,
-      track: filters.track === 'all' ? undefined : filters.track,
+      track: filters.track === "all" ? undefined : filters.track,
       active: filters.activeOnly ? true : undefined,
       limit: 200,
       offset: 0,
@@ -128,7 +108,7 @@ export default function AdminSkillsClient() {
     return [...items].sort((a, b) => {
       const d = (a.display_order ?? 0) - (b.display_order ?? 0);
       if (d !== 0) return d;
-      return String(a.title || '').localeCompare(String(b.title || ''));
+      return String(a.title || "").localeCompare(String(b.title || ""));
     });
   }, [countersQ.data]);
 
@@ -137,36 +117,29 @@ export default function AdminSkillsClient() {
     return [...items].sort((a, b) => {
       const d = (a.display_order ?? 0) - (b.display_order ?? 0);
       if (d !== 0) return d;
-      return String(a.label || '').localeCompare(String(b.label || ''));
+      return String(a.label || "").localeCompare(String(b.label || ""));
     });
   }, [logosQ.data]);
 
   const [removeCounter, removeCounterState] = useRemoveSkillCounterAdminMutation();
   const [removeLogo, removeLogoState] = useRemoveSkillLogoAdminMutation();
 
-  const busy =
-    countersQ.isFetching ||
-    logosQ.isFetching ||
-    removeCounterState.isLoading ||
-    removeLogoState.isLoading;
+  const busy = countersQ.isFetching || logosQ.isFetching || removeCounterState.isLoading || removeLogoState.isLoading;
 
   // Delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [itemToDelete, setItemToDelete] = React.useState<{
-    type: 'counter' | 'logo';
+    type: "counter" | "logo";
     item: SkillCounterMerged | SkillLogoMerged;
   } | null>(null);
 
   const handleTabChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('tab', value);
+    params.set("tab", value);
     router.replace(`?${params.toString()}`, { scroll: false });
   };
 
-  const handleDeleteClick = (
-    type: 'counter' | 'logo',
-    item: SkillCounterMerged | SkillLogoMerged,
-  ) => {
+  const handleDeleteClick = (type: "counter" | "logo", item: SkillCounterMerged | SkillLogoMerged) => {
     setItemToDelete({ type, item });
     setDeleteDialogOpen(true);
   };
@@ -175,28 +148,28 @@ export default function AdminSkillsClient() {
     if (!itemToDelete) return;
 
     try {
-      if (itemToDelete.type === 'counter') {
+      if (itemToDelete.type === "counter") {
         await removeCounter({ id: itemToDelete.item.id }).unwrap();
         countersQ.refetch();
       } else {
         await removeLogo({ id: itemToDelete.item.id }).unwrap();
         logosQ.refetch();
       }
-      toast.success(common?.actions?.delete || 'Silindi');
+      toast.success(common?.actions?.delete || "Silindi");
       setDeleteDialogOpen(false);
       setItemToDelete(null);
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   };
 
   // ✅ FIX: Safe helper to get the display name of the item to delete
-  const getDeleteItemName = (): string => {
-    if (!itemToDelete?.item) return '';
-    if (itemToDelete.type === 'counter') {
-      return (itemToDelete.item as SkillCounterMerged).title || '';
+  const _getDeleteItemName = (): string => {
+    if (!itemToDelete?.item) return "";
+    if (itemToDelete.type === "counter") {
+      return (itemToDelete.item as SkillCounterMerged).title || "";
     }
-    return (itemToDelete.item as SkillLogoMerged).label || '';
+    return (itemToDelete.item as SkillLogoMerged).label || "";
   };
 
   return (
@@ -204,8 +177,8 @@ export default function AdminSkillsClient() {
       <div className="space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-lg font-semibold">{page?.title}</h1>
-            <p className="text-sm text-muted-foreground">{page?.subtitle}</p>
+            <h1 className="font-semibold text-lg">{page?.title}</h1>
+            <p className="text-muted-foreground text-sm">{page?.subtitle}</p>
           </div>
           <Button
             variant="outline"
@@ -239,7 +212,7 @@ export default function AdminSkillsClient() {
               <Label>{page?.track_label}</Label>
               <Select
                 value={filters.track}
-                onValueChange={(v) => setFilters((p) => ({ ...p, track: v as Filters['track'] }))}
+                onValueChange={(v) => setFilters((p) => ({ ...p, track: v as Filters["track"] }))}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -274,12 +247,8 @@ export default function AdminSkillsClient() {
             <TabsContent value="counters" className="m-0">
               <CardContent>
                 <div className="mb-4 flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{page?.counters_desc}</p>
-                  <Button
-                    size="sm"
-                    onClick={() => router.push('/admin/skills/counters/new')}
-                    disabled={busy}
-                  >
+                  <p className="text-muted-foreground text-sm">{page?.counters_desc}</p>
+                  <Button size="sm" onClick={() => router.push("/admin/skills/counters/new")} disabled={busy}>
                     <Plus className="mr-2 size-4" />
                     {common?.actions?.create}
                   </Button>
@@ -300,22 +269,20 @@ export default function AdminSkillsClient() {
                     {counters.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                          {busy ? 'Yükleniyor...' : 'Kayıt bulunamadı'}
+                          {busy ? "Yükleniyor..." : "Kayıt bulunamadı"}
                         </TableCell>
                       </TableRow>
                     ) : (
                       counters.map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell className="font-medium text-muted-foreground">
-                            {item.display_order}
-                          </TableCell>
+                          <TableCell className="font-medium text-muted-foreground">{item.display_order}</TableCell>
                           <TableCell className="font-medium">{item.title}</TableCell>
                           <TableCell>{item.percent}%</TableCell>
                           <TableCell>
                             <Badge variant="outline">{item.locale}</Badge>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Badge variant={item.is_active ? 'secondary' : 'outline'}>
+                            <Badge variant={item.is_active ? "secondary" : "outline"}>
                               {item.is_active ? page?.active_yes : page?.active_no}
                             </Badge>
                           </TableCell>
@@ -332,7 +299,7 @@ export default function AdminSkillsClient() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDeleteClick('counter', item)}
+                                onClick={() => handleDeleteClick("counter", item)}
                                 disabled={busy}
                               >
                                 <Trash2 className="size-3.5 text-destructive" />
@@ -350,12 +317,8 @@ export default function AdminSkillsClient() {
             <TabsContent value="logos" className="m-0">
               <CardContent>
                 <div className="mb-4 flex items-center justify-between">
-                  <p className="text-sm text-muted-foreground">{page?.logos_desc}</p>
-                  <Button
-                    size="sm"
-                    onClick={() => router.push('/admin/skills/logos/new')}
-                    disabled={busy}
-                  >
+                  <p className="text-muted-foreground text-sm">{page?.logos_desc}</p>
+                  <Button size="sm" onClick={() => router.push("/admin/skills/logos/new")} disabled={busy}>
                     <Plus className="mr-2 size-4" />
                     {common?.actions?.create}
                   </Button>
@@ -376,15 +339,13 @@ export default function AdminSkillsClient() {
                     {logos.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                          {busy ? 'Yükleniyor...' : 'Kayıt bulunamadı'}
+                          {busy ? "Yükleniyor..." : "Kayıt bulunamadı"}
                         </TableCell>
                       </TableRow>
                     ) : (
                       logos.map((item) => (
                         <TableRow key={item.id}>
-                          <TableCell className="font-medium text-muted-foreground">
-                            {item.display_order}
-                          </TableCell>
+                          <TableCell className="font-medium text-muted-foreground">{item.display_order}</TableCell>
                           <TableCell className="font-medium">{item.label}</TableCell>
                           <TableCell>
                             <Badge variant="outline">{item.track}</Badge>
@@ -393,7 +354,7 @@ export default function AdminSkillsClient() {
                             <Badge variant="outline">{item.locale}</Badge>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Badge variant={item.is_active ? 'secondary' : 'outline'}>
+                            <Badge variant={item.is_active ? "secondary" : "outline"}>
                               {item.is_active ? page?.active_yes : page?.active_no}
                             </Badge>
                           </TableCell>
@@ -410,7 +371,7 @@ export default function AdminSkillsClient() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleDeleteClick('logo', item)}
+                                onClick={() => handleDeleteClick("logo", item)}
                                 disabled={busy}
                               >
                                 <Trash2 className="size-3.5 text-destructive" />
@@ -436,10 +397,10 @@ export default function AdminSkillsClient() {
               <AlertDialogTitle>Silmek istediğinizden emin misiniz?</AlertDialogTitle>
               <AlertDialogDescription>
                 <strong>
-                  {itemToDelete.type === 'counter'
+                  {itemToDelete.type === "counter"
                     ? (itemToDelete.item as SkillCounterMerged).title
                     : (itemToDelete.item as SkillLogoMerged).label}
-                </strong>{' '}
+                </strong>{" "}
                 silinecek. Bu işlem geri alınamaz.
               </AlertDialogDescription>
             </AlertDialogHeader>

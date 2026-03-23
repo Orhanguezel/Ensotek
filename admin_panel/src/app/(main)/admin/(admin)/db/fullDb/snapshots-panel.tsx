@@ -1,11 +1,13 @@
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/db/fullDb/snapshots-panel.tsx
 // =============================================================
-'use client';
+"use client";
 
-import React from 'react';
-import { useListDbSnapshotsQuery } from '@/integrations/hooks';
-import { SnapshotsTable } from './snapshots-table';
+import type React from "react";
+
+import { useListDbSnapshotsQuery } from "@/integrations/hooks";
+
+import { SnapshotsTable } from "./snapshots-table";
 
 export type SnapshotsPanelProps = {
   adminSkip: boolean;

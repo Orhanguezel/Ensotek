@@ -1,74 +1,51 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/brands/admin-brands-client.tsx
 // FINAL — Admin Brands (logos)
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { Plus, RefreshCcw, Pencil, Trash2 } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pencil, Plus, RefreshCcw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
-import { AdminLocaleSelect } from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-
-import type { BrandLogoMerged, BrandTrack, CreateBrandLogoInput } from '@/integrations/shared';
-import {
-  useListBrandsAdminQuery,
   useCreateBrandAdminMutation,
-  useUpdateBrandAdminMutation,
+  useListBrandsAdminQuery,
   useRemoveBrandAdminMutation,
-} from '@/integrations/hooks';
+  useUpdateBrandAdminMutation,
+} from "@/integrations/hooks";
+import type { BrandLogoMerged, BrandTrack, CreateBrandLogoInput } from "@/integrations/shared";
 
 type Filters = {
   locale: string;
-  track: 'all' | BrandTrack;
+  track: "all" | BrandTrack;
   activeOnly: boolean;
 };
 
 type FormState = CreateBrandLogoInput & { id?: string };
 
 const emptyForm: FormState = {
-  label: '',
-  track: 'left',
+  label: "",
+  track: "left",
   is_active: true,
   display_order: 0,
-  locale: '',
-  image_url: '',
-  image_asset_id: '',
+  locale: "",
+  image_url: "",
+  image_asset_id: "",
 };
 
 export default function AdminBrandsClient() {
@@ -79,8 +56,8 @@ export default function AdminBrandsClient() {
   const { localeOptions, defaultLocaleFromDb, loading: localesLoading } = useAdminLocales();
 
   const [filters, setFilters] = React.useState<Filters>({
-    locale: '',
-    track: 'all',
+    locale: "",
+    track: "all",
     activeOnly: false,
   });
 
@@ -88,14 +65,14 @@ export default function AdminBrandsClient() {
     if (!localeOptions?.length) return;
     setFilters((p) => {
       if (p.locale) return p;
-      return { ...p, locale: defaultLocaleFromDb || localeOptions[0]?.value || '' };
+      return { ...p, locale: defaultLocaleFromDb || localeOptions[0]?.value || "" };
     });
   }, [localeOptions, defaultLocaleFromDb]);
 
   const params = React.useMemo(
     () => ({
       locale: filters.locale || undefined,
-      track: filters.track === 'all' ? undefined : filters.track,
+      track: filters.track === "all" ? undefined : filters.track,
       active: filters.activeOnly ? true : undefined,
       limit: 200,
       offset: 0,
@@ -109,7 +86,7 @@ export default function AdminBrandsClient() {
     return [...items].sort((a, b) => {
       const d = (a.display_order ?? 0) - (b.display_order ?? 0);
       if (d !== 0) return d;
-      return String(a.label || '').localeCompare(String(b.label || ''));
+      return String(a.label || "").localeCompare(String(b.label || ""));
     });
   }, [listQ.data]);
 
@@ -125,7 +102,7 @@ export default function AdminBrandsClient() {
   function openCreate() {
     setForm({
       ...emptyForm,
-      locale: filters.locale || defaultLocaleFromDb || '',
+      locale: filters.locale || defaultLocaleFromDb || "",
     });
     setOpen(true);
   }
@@ -138,8 +115,8 @@ export default function AdminBrandsClient() {
       is_active: item.is_active,
       display_order: item.display_order,
       locale: item.locale,
-      image_url: item.image_url ?? '',
-      image_asset_id: item.image_asset_id ?? '',
+      image_url: item.image_url ?? "",
+      image_asset_id: item.image_asset_id ?? "",
     });
     setOpen(true);
   }
@@ -151,7 +128,7 @@ export default function AdminBrandsClient() {
 
   async function onSave() {
     if (!form.label.trim()) {
-      toast.error(page?.label_required || '');
+      toast.error(page?.label_required || "");
       return;
     }
 
@@ -181,22 +158,22 @@ export default function AdminBrandsClient() {
         }).unwrap();
       }
 
-      toast.success(common?.actions?.save || '');
+      toast.success(common?.actions?.save || "");
       closeModal();
       listQ.refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   }
 
   async function onDelete(item: BrandLogoMerged) {
-    if (!window.confirm(page?.delete_confirm || '')) return;
+    if (!window.confirm(page?.delete_confirm || "")) return;
     try {
       await removeBrand({ id: item.id }).unwrap();
-      toast.success(common?.actions?.delete || '');
+      toast.success(common?.actions?.delete || "");
       listQ.refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   }
 
@@ -204,8 +181,8 @@ export default function AdminBrandsClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{page?.title}</h1>
-          <p className="text-sm text-muted-foreground">{page?.subtitle}</p>
+          <h1 className="font-semibold text-lg">{page?.title}</h1>
+          <p className="text-muted-foreground text-sm">{page?.subtitle}</p>
         </div>
 
         <div className="flex gap-2">
@@ -238,7 +215,7 @@ export default function AdminBrandsClient() {
             <Label>{page?.track_label}</Label>
             <Select
               value={filters.track}
-              onValueChange={(v) => setFilters((p) => ({ ...p, track: v as Filters['track'] }))}
+              onValueChange={(v) => setFilters((p) => ({ ...p, track: v as Filters["track"] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -281,7 +258,7 @@ export default function AdminBrandsClient() {
             <TableBody>
               {rows.length === 0 && !busy && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={6} className="text-center text-muted-foreground text-sm">
                     {common?.states?.empty}
                   </TableCell>
                 </TableRow>
@@ -332,10 +309,7 @@ export default function AdminBrandsClient() {
 
             <div className="space-y-2">
               <Label>{page?.track_label}</Label>
-              <Select
-                value={form.track}
-                onValueChange={(v) => setForm((p) => ({ ...p, track: v as BrandTrack }))}
-              >
+              <Select value={form.track} onValueChange={(v) => setForm((p) => ({ ...p, track: v as BrandTrack }))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -347,7 +321,7 @@ export default function AdminBrandsClient() {
             </div>
 
             <AdminLocaleSelect
-              value={form.locale || ''}
+              value={form.locale || ""}
               onChange={(v) => setForm((p) => ({ ...p, locale: v }))}
               options={localeOptions}
               loading={localesLoading}
@@ -357,7 +331,7 @@ export default function AdminBrandsClient() {
             <div className="space-y-2">
               <Label>{page?.image_url_label}</Label>
               <Input
-                value={form.image_url || ''}
+                value={form.image_url || ""}
                 onChange={(e) => setForm((p) => ({ ...p, image_url: e.target.value }))}
                 placeholder={page?.image_url_ph}
               />
@@ -366,7 +340,7 @@ export default function AdminBrandsClient() {
             <div className="space-y-2">
               <Label>{page?.asset_id_label}</Label>
               <Input
-                value={form.image_asset_id || ''}
+                value={form.image_asset_id || ""}
                 onChange={(e) => setForm((p) => ({ ...p, image_asset_id: e.target.value }))}
                 placeholder={page?.asset_id_ph}
               />
@@ -382,10 +356,7 @@ export default function AdminBrandsClient() {
                 />
               </div>
               <div className="flex items-center gap-2 pt-6">
-                <Switch
-                  checked={!!form.is_active}
-                  onCheckedChange={(v) => setForm((p) => ({ ...p, is_active: v }))}
-                />
+                <Switch checked={!!form.is_active} onCheckedChange={(v) => setForm((p) => ({ ...p, is_active: v }))} />
                 <Label>{page?.active_label}</Label>
               </div>
             </div>

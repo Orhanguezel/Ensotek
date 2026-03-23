@@ -30,12 +30,12 @@ export type TelegramUpdate = {
     };
   };
 
-  edited_message?: TelegramUpdate['message'];
+  edited_message?: TelegramUpdate["message"];
 
   callback_query?: {
     id?: string;
     data?: string;
-    message?: TelegramUpdate['message'];
-    from?: TelegramUpdate['message'] extends { from?: infer F } ? F : unknown;
+    message?: TelegramUpdate["message"];
+    from?: TelegramUpdate["message"] extends { from?: infer F } ? F : unknown;
   };
 };

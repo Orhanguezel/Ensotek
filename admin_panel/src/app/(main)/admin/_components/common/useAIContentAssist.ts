@@ -2,10 +2,11 @@
 // useAIContentAssist — AI destekli icerik olusturma hook'u
 // =============================================================
 
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
-import { toast } from 'sonner';
+import { useCallback, useState } from "react";
+
+import { toast } from "sonner";
 
 type LocaleContent = {
   locale: string;
@@ -26,7 +27,7 @@ type AIRequest = {
   locale: string;
   target_locales?: string[];
   module_key?: string;
-  action: 'enhance' | 'translate' | 'generate_meta' | 'full';
+  action: "enhance" | "translate" | "generate_meta" | "full";
 };
 
 type AIResponse = {
@@ -43,30 +44,30 @@ export function useAIContentAssist() {
   const assist = useCallback(async (req: AIRequest): Promise<LocaleContent[] | null> => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/ai/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+      const res = await fetch("/api/admin/ai/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(req),
       });
 
       const data: AIResponse = await res.json();
 
       if (!res.ok || !data.ok) {
-        toast.error(data.error?.message || 'AI icerik hatasi');
+        toast.error(data.error?.message || "AI icerik hatasi");
         return null;
       }
 
       const locales = data.data?.locales;
       if (!locales?.length) {
-        toast.error('AI bos yanit dondurdu');
+        toast.error("AI bos yanit dondurdu");
         return null;
       }
 
       toast.success(`AI ${locales.length} dilde icerik hazirladi`);
       return locales;
     } catch (err: any) {
-      toast.error(err.message || 'AI baglanti hatasi');
+      toast.error(err.message || "AI baglanti hatasi");
       return null;
     } finally {
       setLoading(false);

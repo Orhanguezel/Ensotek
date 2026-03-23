@@ -1,27 +1,27 @@
-import type { CustomPageView } from '@/integrations/shared';
+import type { CustomPageView } from "@/integrations/shared";
 
 export function normalizeAssetPath(raw: string | null | undefined): string {
-  const s = String(raw ?? '').trim();
-  if (!s) return '';
-  if (/^https?:\/\//i.test(s) || s.startsWith('data:')) return s;
-  if (s.startsWith('/')) return s;
-  if (s.startsWith('assets/')) return `/${s}`;
+  const s = String(raw ?? "").trim();
+  if (!s) return "";
+  if (/^https?:\/\//i.test(s) || s.startsWith("data:")) return s;
+  if (s.startsWith("/")) return s;
+  if (s.startsWith("assets/")) return `/${s}`;
   return s;
 }
 
 export function toTelHref(phone?: string) {
-  if (!phone) return '#';
-  return phone.startsWith('tel:') ? phone : `tel:${phone}`;
+  if (!phone) return "#";
+  return phone.startsWith("tel:") ? phone : `tel:${phone}`;
 }
 
 export function toMailHref(email?: string) {
-  if (!email) return '#';
-  return email.startsWith('mailto:') ? email : `mailto:${email}`;
+  if (!email) return "#";
+  return email.startsWith("mailto:") ? email : `mailto:${email}`;
 }
 
 export function toSkypeHref(skype?: string) {
-  if (!skype) return '#';
-  return skype.startsWith('skype:') ? skype : `skype:${skype}`;
+  if (!skype) return "#";
+  return skype.startsWith("skype:") ? skype : `skype:${skype}`;
 }
 
 export function chunk<T>(arr: T[], size: number): T[][] {

@@ -6,7 +6,7 @@
 export type SubCategoryId = string;
 export type CategoryId = string;
 
-export type RawBool = boolean | 0 | 1 | '0' | '1' | 'true' | 'false' | null | undefined;
+export type RawBool = boolean | 0 | 1 | "0" | "1" | "true" | "false" | null | undefined;
 
 /**
  * API'den dönen ham sub-category satırı (DB row'a yakın)
@@ -60,7 +60,7 @@ export interface SubCategoryDto {
 /*  Yardımcı dönüştürücüler                                      */
 /* ------------------------------------------------------------- */
 
-const asStr = (v: unknown): string => (typeof v === 'string' ? v : v == null ? '' : String(v));
+const asStr = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
 
 const asNullableStr = (v: unknown): string | null => {
   if (v === null || v === undefined) return null;
@@ -71,13 +71,13 @@ const asNullableStr = (v: unknown): string | null => {
 const asBool = (v: RawBool): boolean => {
   if (v === true) return true;
   if (v === false) return false;
-  if (v === 1 || v === '1' || v === 'true') return true;
-  if (v === 0 || v === '0' || v === 'false') return false;
+  if (v === 1 || v === "1" || v === "true") return true;
+  if (v === 0 || v === "0" || v === "false") return false;
   return false;
 };
 
 const asNum = (v: unknown, def = 0): number => {
-  if (typeof v === 'number' && Number.isFinite(v)) return v;
+  if (typeof v === "number" && Number.isFinite(v)) return v;
   const n = Number(v);
   return Number.isFinite(n) ? n : def;
 };
@@ -90,7 +90,7 @@ export const normalizeSubCategory = (row: ApiSubCategory): SubCategoryDto => {
   return {
     id: asStr(row.id),
     category_id: asStr(row.category_id),
-    locale: asStr(row.locale || 'de').toLowerCase(),
+    locale: asStr(row.locale || "de").toLowerCase(),
     name: asStr(row.name),
     slug: asStr(row.slug),
 
@@ -124,8 +124,8 @@ export interface SubCategoryListQueryParams {
   is_featured?: boolean | number | string;
   limit?: number;
   offset?: number;
-  sort?: 'display_order' | 'name' | 'created_at' | 'updated_at';
-  order?: 'asc' | 'desc';
+  sort?: "display_order" | "name" | "created_at" | "updated_at";
+  order?: "asc" | "desc";
 }
 
 /**
@@ -148,8 +148,8 @@ export interface SubCategoryAdminListQueryParams {
   is_featured?: boolean | string;
   limit?: number;
   offset?: number;
-  sort?: 'display_order' | 'name' | 'created_at' | 'updated_at';
-  order?: 'asc' | 'desc';
+  sort?: "display_order" | "name" | "created_at" | "updated_at";
+  order?: "asc" | "desc";
 }
 
 /**
@@ -204,7 +204,6 @@ export interface SubCategorySetImagePayload {
   alt?: string | null;
 }
 
-
 /**
  * Query paramlarından undefined / boş stringleri temizlemek için
  * (Kategori endpoints ile bire bir aynı helper)
@@ -216,11 +215,11 @@ export const cleanParamsSubCategory = (
   const out: Record<string, string | number | boolean> = {};
 
   for (const [k, v] of Object.entries(params)) {
-    if (v === undefined || v === null || v === '' || (typeof v === 'number' && Number.isNaN(v))) {
+    if (v === undefined || v === null || v === "" || (typeof v === "number" && Number.isNaN(v))) {
       continue;
     }
 
-    if (typeof v === 'boolean' || typeof v === 'number' || typeof v === 'string') {
+    if (typeof v === "boolean" || typeof v === "number" || typeof v === "string") {
       out[k] = v;
     } else {
       out[k] = String(v);

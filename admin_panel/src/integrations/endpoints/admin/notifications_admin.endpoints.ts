@@ -3,55 +3,55 @@
 // FINAL — Notifications RTK (Auth-required, shared for admin+user)
 // ===================================================================
 
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
-  NotificationView,
-  NotificationsListParams,
-  UnreadCountResp,
   CreateNotificationBody,
-  UpdateNotificationBody,
   MarkAllReadBody,
+  NotificationsListParams,
+  NotificationView,
   OkResp,
-} from '@/integrations/shared';
+  UnreadCountResp,
+  UpdateNotificationBody,
+} from "@/integrations/shared";
 import {
   normalizeNotification,
   normalizeNotificationsList,
-  toNotificationsListQuery,
   toCreateNotificationBody,
+  toNotificationsListQuery,
   toUpdateNotificationBody,
-} from '@/integrations/shared';
+} from "@/integrations/shared";
 
-const BASE = '/notifications';
+const BASE = "/notifications";
 
 export const notificationsApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     /** GET /notifications */
-    listNotifications: b.query<NotificationView[], NotificationsListParams | void>({
+    listNotifications: b.query<NotificationView[], NotificationsListParams | undefined>({
       query: (params) => ({
         url: BASE,
-        method: 'GET',
+        method: "GET",
         params: params ? toNotificationsListQuery(params) : undefined,
       }),
       transformResponse: (res: unknown): NotificationView[] => normalizeNotificationsList(res),
       providesTags: (result) =>
-        result && result.length
+        result?.length
           ? [
-              ...result.map((n) => ({ type: 'Notification' as const, id: n.id })),
-              { type: 'Notifications' as const, id: 'LIST' },
+              ...result.map((n) => ({ type: "Notification" as const, id: n.id })),
+              { type: "Notifications" as const, id: "LIST" },
             ]
-          : [{ type: 'Notifications' as const, id: 'LIST' }],
+          : [{ type: "Notifications" as const, id: "LIST" }],
       keepUnusedDataFor: 30,
     }),
 
     /** GET /notifications/unread-count */
     getUnreadCount: b.query<UnreadCountResp, void>({
-      query: () => ({ url: `${BASE}/unread-count`, method: 'GET' }),
+      query: () => ({ url: `${BASE}/unread-count`, method: "GET" }),
       transformResponse: (res: unknown): UnreadCountResp => {
         const r = (res ?? {}) as any;
         const n = Number(r.count ?? 0);
         return { count: Number.isFinite(n) ? n : 0 };
       },
-      providesTags: [{ type: 'Notifications' as const, id: 'UNREAD_COUNT' }],
+      providesTags: [{ type: "Notifications" as const, id: "UNREAD_COUNT" }],
       keepUnusedDataFor: 10,
     }),
 
@@ -59,13 +59,13 @@ export const notificationsApi = baseApi.injectEndpoints({
     createNotification: b.mutation<NotificationView, CreateNotificationBody>({
       query: (body) => ({
         url: BASE,
-        method: 'POST',
+        method: "POST",
         body: toCreateNotificationBody(body),
       }),
       transformResponse: (res: unknown): NotificationView => normalizeNotification(res),
       invalidatesTags: [
-        { type: 'Notifications' as const, id: 'LIST' },
-        { type: 'Notifications' as const, id: 'UNREAD_COUNT' },
+        { type: "Notifications" as const, id: "LIST" },
+        { type: "Notifications" as const, id: "UNREAD_COUNT" },
       ],
     }),
 
@@ -73,32 +73,32 @@ export const notificationsApi = baseApi.injectEndpoints({
     updateNotification: b.mutation<NotificationView, { id: string; body: UpdateNotificationBody }>({
       query: ({ id, body }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: toUpdateNotificationBody(body),
       }),
       transformResponse: (res: unknown): NotificationView => normalizeNotification(res),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Notification' as const, id: arg.id },
-        { type: 'Notifications' as const, id: 'LIST' },
-        { type: 'Notifications' as const, id: 'UNREAD_COUNT' },
+        { type: "Notification" as const, id: arg.id },
+        { type: "Notifications" as const, id: "LIST" },
+        { type: "Notifications" as const, id: "UNREAD_COUNT" },
       ],
     }),
 
     /** POST /notifications/mark-all-read */
-    markAllRead: b.mutation<OkResp, MarkAllReadBody | void>({
+    markAllRead: b.mutation<OkResp, MarkAllReadBody | undefined>({
       query: (body) => ({
         url: `${BASE}/mark-all-read`,
-        method: 'POST',
+        method: "POST",
         body: body ?? {}, // backend accepts empty object
       }),
       transformResponse: (res: unknown): OkResp => {
         const r = (res ?? {}) as any;
-        if (r && (r.ok === true || r.ok === 1 || r.ok === '1')) return { ok: true as const };
+        if (r && (r.ok === true || r.ok === 1 || r.ok === "1")) return { ok: true as const };
         return { ok: true as const };
       },
       invalidatesTags: [
-        { type: 'Notifications' as const, id: 'LIST' },
-        { type: 'Notifications' as const, id: 'UNREAD_COUNT' },
+        { type: "Notifications" as const, id: "LIST" },
+        { type: "Notifications" as const, id: "UNREAD_COUNT" },
       ],
     }),
 
@@ -106,17 +106,17 @@ export const notificationsApi = baseApi.injectEndpoints({
     deleteNotification: b.mutation<OkResp, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       transformResponse: (res: unknown): OkResp => {
         const r = (res ?? {}) as any;
-        if (r && (r.ok === true || r.ok === 1 || r.ok === '1')) return { ok: true as const };
+        if (r && (r.ok === true || r.ok === 1 || r.ok === "1")) return { ok: true as const };
         return { ok: true as const };
       },
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Notification' as const, id: arg.id },
-        { type: 'Notifications' as const, id: 'LIST' },
-        { type: 'Notifications' as const, id: 'UNREAD_COUNT' },
+        { type: "Notification" as const, id: arg.id },
+        { type: "Notifications" as const, id: "LIST" },
+        { type: "Notifications" as const, id: "UNREAD_COUNT" },
       ],
     }),
   }),

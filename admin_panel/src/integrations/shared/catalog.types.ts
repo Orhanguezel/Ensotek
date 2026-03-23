@@ -3,7 +3,7 @@
 // Ensotek – Catalog Request Types (SINGLE SOURCE OF TRUTH)
 // =============================================================
 
-export const CATALOG_REQUEST_STATUSES = ['new', 'sent', 'failed', 'archived'] as const;
+export const CATALOG_REQUEST_STATUSES = ["new", "sent", "failed", "archived"] as const;
 
 export type CatalogRequestStatus = (typeof CATALOG_REQUEST_STATUSES)[number];
 
@@ -41,8 +41,8 @@ export type CatalogRequestDto = {
  */
 export type CatalogRequestListQueryParams = {
   order?: string;
-  sort?: 'created_at' | 'updated_at';
-  orderDir?: 'asc' | 'desc';
+  sort?: "created_at" | "updated_at";
+  orderDir?: "asc" | "desc";
   limit?: number;
   offset?: number;
 
@@ -70,4 +70,4 @@ export type ResendCatalogRequestResult = CatalogRequestDto;
 /**
  * DELETE /catalog-requests/:id returns 204 (no body)
  */
-export type DeleteCatalogRequestResult = void;
+export type DeleteCatalogRequestResult = undefined;

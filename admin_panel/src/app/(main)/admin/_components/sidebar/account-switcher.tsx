@@ -1,27 +1,28 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/dashboard/_components/sidebar/account-switcher.tsx
 // Panel – Account menu (minimal: user info + logout)
 // =============================================================
 
-import { useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { LogOut, User } from 'lucide-react';
-import Link from 'next/link';
+import { useMemo } from "react";
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+
+import { LogOut, User } from "lucide-react";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { getInitials } from '@/lib/utils';
-
-import { useLogoutMutation, useStatusQuery, useGetMyProfileQuery } from '@/integrations/hooks';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+} from "@/components/ui/dropdown-menu";
+import { useGetMyProfileQuery, useLogoutMutation, useStatusQuery } from "@/integrations/hooks";
+import { getInitials } from "@/lib/utils";
 
 type Me = {
   id: string;
@@ -40,11 +41,11 @@ export function AccountSwitcher({ me: propMe }: { me: Me }) {
   const me = useMemo(() => {
     const s = statusData?.user;
     return {
-      id: s?.id || propMe?.id || 'me',
-      email: s?.email || propMe?.email || 'admin',
-      role: s?.role || propMe?.role || 'admin',
-      displayName: profileData?.full_name || s?.email?.split('@')[0] || propMe?.email || 'Admin',
-      avatar: profileData?.avatar_url || '',
+      id: s?.id || propMe?.id || "me",
+      email: s?.email || propMe?.email || "admin",
+      role: s?.role || propMe?.role || "admin",
+      displayName: profileData?.full_name || s?.email?.split("@")[0] || propMe?.email || "Admin",
+      avatar: profileData?.avatar_url || "",
     };
   }, [statusData, profileData, propMe]);
 
@@ -56,7 +57,7 @@ export function AccountSwitcher({ me: propMe }: { me: Me }) {
     } catch {
       // logout fail olsa bile login'e gönder
     } finally {
-      router.replace('/auth/login');
+      router.replace("/auth/login");
       router.refresh();
     }
   }
@@ -72,8 +73,8 @@ export function AccountSwitcher({ me: propMe }: { me: Me }) {
 
       <DropdownMenuContent className="min-w-64 rounded-lg" side="bottom" align="end" sideOffset={4}>
         <div className="px-3 py-2">
-          <div className="text-sm font-semibold truncate">{displayName}</div>
-          <div className="text-xs text-muted-foreground truncate">{me.role}</div>
+          <div className="truncate font-semibold text-sm">{displayName}</div>
+          <div className="truncate text-muted-foreground text-xs">{me.role}</div>
         </div>
 
         <DropdownMenuSeparator />
@@ -81,7 +82,7 @@ export function AccountSwitcher({ me: propMe }: { me: Me }) {
         <DropdownMenuItem asChild>
           <Link href="/admin/profile">
             <User className="mr-2 size-4" />
-            <span className="truncate">{t('admin.sidebar.user.account')}</span>
+            <span className="truncate">{t("admin.sidebar.user.account")}</span>
           </Link>
         </DropdownMenuItem>
 
@@ -89,7 +90,7 @@ export function AccountSwitcher({ me: propMe }: { me: Me }) {
 
         <DropdownMenuItem onClick={onLogout} disabled={isLoading}>
           <LogOut className="mr-2 size-4" />
-          {t('admin.sidebar.user.logout')}
+          {t("admin.sidebar.user.logout")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

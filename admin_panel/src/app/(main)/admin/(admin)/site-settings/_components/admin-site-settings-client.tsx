@@ -1,57 +1,44 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/site-settings/_components/admin-site-settings-client.tsx
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { Search, RefreshCcw } from 'lucide-react';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { RefreshCcw, Search } from "lucide-react";
+import { toast } from "sonner";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAdminTranslations } from "@/i18n";
+import { useDeleteSiteSettingAdminMutation, useListSiteSettingsAdminQuery } from "@/integrations/hooks";
+import type { SiteSetting } from "@/integrations/shared";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import { SiteSettingsList } from './site-settings-list';
-
-// tabs (content sources)
-import { GeneralSettingsTab } from '../tabs/general-settings-tab';
-import { SeoSettingsTab } from '../tabs/seo-settings-tab';
-import { SmtpSettingsTab } from '../tabs/smtp-settings-tab';
-import { CloudinarySettingsTab } from '../tabs/cloudinary-settings-tab';
-import { BrandMediaTab } from '../tabs/brand-media-tab';
-import { ApiSettingsTab } from '../tabs/api-settings-tab';
-import { LocalesSettingsTab } from '../tabs/locales-settings-tab';
-import { BrandingSettingsTab } from '../tabs/branding-settings-tab';
-
-import type { SiteSetting } from '@/integrations/shared';
-import {
-  SITE_SETTINGS_BRAND,
-  SITE_SETTINGS_BRAND_PREFIX,
   buildSiteSettingsLocalesOptions,
   getErrorMessage,
   isSiteSettingsGlobalTab,
   pickInitialSiteSettingsLocale,
+  SITE_SETTINGS_BRAND,
+  SITE_SETTINGS_BRAND_PREFIX,
   type SiteSettingsLocaleOption,
   type SiteSettingsTab,
-} from '@/integrations/shared';
-import {
-  useListSiteSettingsAdminQuery,
-  useDeleteSiteSettingAdminMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
+
+import { ApiSettingsTab } from "../tabs/api-settings-tab";
+import { BrandMediaTab } from "../tabs/brand-media-tab";
+// tabs (content sources)
+import { GeneralSettingsTab } from "../tabs/general-settings-tab";
+import { LocalesSettingsTab } from "../tabs/locales-settings-tab";
+import { SeoSettingsTab } from "../tabs/seo-settings-tab";
+import { SmtpSettingsTab } from "../tabs/smtp-settings-tab";
+import { SiteSettingsList } from "./site-settings-list";
 
 /* ----------------------------- list panels ----------------------------- */
 
@@ -72,8 +59,8 @@ function ListPanel({
       locale,
       q,
       prefix: prefix || undefined,
-      sort: 'key' as const,
-      order: 'asc' as const,
+      sort: "key" as const,
+      order: "asc" as const,
       limit: 200,
       offset: 0,
     };
@@ -92,7 +79,9 @@ function ListPanel({
       loading={loading}
       selectedLocale={locale}
       onDelete={onDeleteRow}
-      getEditHref={(s) => `/admin/site-settings/${encodeURIComponent(String(s.key || ''))}?locale=${encodeURIComponent(locale)}`}
+      getEditHref={(s) =>
+        `/admin/site-settings/${encodeURIComponent(String(s.key || ""))}?locale=${encodeURIComponent(locale)}`
+      }
     />
   );
 }
@@ -100,17 +89,17 @@ function ListPanel({
 /* ----------------------------- main component ----------------------------- */
 
 export default function AdminSiteSettingsClient() {
-  const brand = SITE_SETTINGS_BRAND;
+  const _brand = SITE_SETTINGS_BRAND;
   const brandPrefix = SITE_SETTINGS_BRAND_PREFIX;
-  const isScopedBrand = true;
-  const appLocalesKey = `${brandPrefix || ''}app_locales`;
+  const _isScopedBrand = true;
+  const appLocalesKey = `${brandPrefix || ""}app_locales`;
   const localeSettingsQ = useListSiteSettingsAdminQuery({
-    locale: '*',
+    locale: "*",
     keys: [appLocalesKey],
     limit: 20,
     offset: 0,
-    sort: 'key',
-    order: 'asc',
+    sort: "key",
+    order: "asc",
   });
 
   const localeRows = React.useMemo(() => {
@@ -123,14 +112,11 @@ export default function AdminSiteSettingsClient() {
     [localeRows],
   );
 
-  const initialLocale = React.useMemo(
-    () => pickInitialSiteSettingsLocale(localeRows as any),
-    [localeRows],
-  );
+  const initialLocale = React.useMemo(() => pickInitialSiteSettingsLocale(localeRows as any), [localeRows]);
 
-  const [tab, setTab] = React.useState<SiteSettingsTab>('general');
-  const [search, setSearch] = React.useState('');
-  const [locale, setLocale] = React.useState<string>('');
+  const [tab, setTab] = React.useState<SiteSettingsTab>("general");
+  const [search, setSearch] = React.useState("");
+  const [locale, setLocale] = React.useState<string>("");
   const [localeTouched, setLocaleTouched] = React.useState<boolean>(false);
 
   const [deleteSetting, { isLoading: isDeleting }] = useDeleteSiteSettingAdminMutation();
@@ -146,69 +132,65 @@ export default function AdminSiteSettingsClient() {
     }
   }, [initialLocale, localeTouched]);
 
-  const headerLoading =
-    localeSettingsQ.isFetching ||
-    localeSettingsQ.isLoading;
+  const headerLoading = localeSettingsQ.isFetching || localeSettingsQ.isLoading;
 
   const disabled = headerLoading || isDeleting;
 
   const onRefresh = async () => {
     try {
       await localeSettingsQ.refetch();
-      toast.success(t('admin.siteSettings.filters.refreshed'));
+      toast.success(t("admin.siteSettings.filters.refreshed"));
     } catch (err) {
-      toast.error(getErrorMessage(err, t('admin.siteSettings.messages.error')));
+      toast.error(getErrorMessage(err, t("admin.siteSettings.messages.error")));
     }
   };
 
   const handleDeleteRow = async (row: SiteSetting) => {
-    const key = String(row?.key || '').trim();
+    const key = String(row?.key || "").trim();
     const rowLocale = row?.locale ? String(row.locale) : undefined;
     if (!key) return;
 
-    const ok = window.confirm(
-      t('admin.siteSettings.list.deleteConfirm', { key, locale: rowLocale || locale || '—' }),
-    );
+    const ok = window.confirm(t("admin.siteSettings.list.deleteConfirm", { key, locale: rowLocale || locale || "—" }));
     if (!ok) return;
 
     try {
       await deleteSetting({ key, locale: rowLocale ?? undefined }).unwrap();
-      toast.success(t('admin.siteSettings.messages.deleted'));
+      toast.success(t("admin.siteSettings.messages.deleted"));
     } catch (err) {
-      toast.error(getErrorMessage(err, t('admin.siteSettings.messages.error')));
+      toast.error(getErrorMessage(err, t("admin.siteSettings.messages.error")));
     }
   };
 
-  const localeReady = Boolean(locale && locale.trim());
+  const localeReady = Boolean(locale?.trim());
   const isGlobalTab = isSiteSettingsGlobalTab(tab);
 
   return (
     <div className="w-full min-w-0 space-y-4 overflow-hidden pb-6 sm:space-y-6">
       {/* PAGE HEAD */}
       <div className="space-y-1 px-1 sm:px-0">
-        <h1 className="text-lg font-semibold">{t('admin.siteSettings.title')}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t('admin.siteSettings.description')}
-        </p>
+        <h1 className="font-semibold text-lg">{t("admin.siteSettings.title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("admin.siteSettings.description")}</p>
       </div>
 
       {/* FILTERS */}
       <Card>
         <CardHeader className="px-3 py-3 sm:px-6 sm:py-4">
-          <CardTitle className="text-sm sm:text-base">{t('admin.siteSettings.filters.title')}</CardTitle>
+          <CardTitle className="text-sm sm:text-base">{t("admin.siteSettings.filters.title")}</CardTitle>
         </CardHeader>
 
         <CardContent className="space-y-3 px-3 pb-3 sm:space-y-4 sm:px-6 sm:pb-6">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-[1fr_180px_auto]">
             <div className="space-y-1.5 sm:col-span-2 lg:col-span-1">
-              <Label htmlFor="q" className="text-xs sm:text-sm">{t('admin.siteSettings.filters.search')}</Label>
+              <Label htmlFor="q" className="text-xs sm:text-sm">
+                {t("admin.siteSettings.filters.search")}
+              </Label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" />
                 <Input
                   id="q"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder={t('admin.siteSettings.filters.searchPlaceholder')}
+                  placeholder={t("admin.siteSettings.filters.searchPlaceholder")}
                   className="w-full pl-9"
                   disabled={disabled}
                 />
@@ -216,9 +198,9 @@ export default function AdminSiteSettingsClient() {
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-xs sm:text-sm">{t('admin.siteSettings.filters.language')}</Label>
+              <Label className="text-xs sm:text-sm">{t("admin.siteSettings.filters.language")}</Label>
               <Select
-                value={localeReady ? locale : ''}
+                value={localeReady ? locale : ""}
                 onValueChange={(v) => {
                   setLocaleTouched(true);
                   setLocale(v);
@@ -229,8 +211,8 @@ export default function AdminSiteSettingsClient() {
                   <SelectValue
                     placeholder={
                       isGlobalTab
-                        ? t('admin.siteSettings.filters.globalPlaceholder')
-                        : t('admin.siteSettings.filters.selectLanguage')
+                        ? t("admin.siteSettings.filters.globalPlaceholder")
+                        : t("admin.siteSettings.filters.selectLanguage")
                     }
                   />
                 </SelectTrigger>
@@ -242,8 +224,6 @@ export default function AdminSiteSettingsClient() {
                   ))}
                 </SelectContent>
               </Select>
-
-
             </div>
 
             <div className="flex items-end gap-2">
@@ -253,7 +233,7 @@ export default function AdminSiteSettingsClient() {
                 size="icon"
                 onClick={onRefresh}
                 disabled={disabled}
-                title={t('admin.siteSettings.filters.refreshButton')}
+                title={t("admin.siteSettings.filters.refreshButton")}
               >
                 <RefreshCcw className="size-4" />
               </Button>
@@ -263,7 +243,7 @@ export default function AdminSiteSettingsClient() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setSearch('');
+                  setSearch("");
                   if (!isGlobalTab) {
                     setLocaleTouched(false);
                     setLocale(initialLocale);
@@ -271,7 +251,7 @@ export default function AdminSiteSettingsClient() {
                 }}
                 disabled={disabled}
               >
-                {t('admin.siteSettings.filters.resetButton')}
+                {t("admin.siteSettings.filters.resetButton")}
               </Button>
             </div>
           </div>
@@ -282,47 +262,59 @@ export default function AdminSiteSettingsClient() {
       <Card className="overflow-hidden">
         <CardHeader className="px-3 py-3 sm:px-6 sm:py-4">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <CardTitle className="text-sm sm:text-base">{t('admin.siteSettings.management.title')}</CardTitle>
+            <CardTitle className="text-sm sm:text-base">{t("admin.siteSettings.management.title")}</CardTitle>
             <div className="flex flex-wrap items-center gap-1.5">
-              {isGlobalTab ? <Badge variant="secondary" className="text-xs">{t('admin.siteSettings.badges.global')}</Badge> : null}
-              {!isGlobalTab && localeReady ? <Badge variant="secondary" className="text-xs">{locale}</Badge> : null}
-              {disabled ? <Badge variant="outline" className="text-xs">{t('admin.siteSettings.messages.loading')}</Badge> : null}
+              {isGlobalTab ? (
+                <Badge variant="secondary" className="text-xs">
+                  {t("admin.siteSettings.badges.global")}
+                </Badge>
+              ) : null}
+              {!isGlobalTab && localeReady ? (
+                <Badge variant="secondary" className="text-xs">
+                  {locale}
+                </Badge>
+              ) : null}
+              {disabled ? (
+                <Badge variant="outline" className="text-xs">
+                  {t("admin.siteSettings.messages.loading")}
+                </Badge>
+              ) : null}
             </div>
           </div>
         </CardHeader>
 
         <CardContent className="min-w-0 space-y-4 px-3 pb-3 sm:px-6 sm:pb-6">
           {!localeReady ? (
-            <div className="rounded-md border p-4 text-sm text-muted-foreground">
-              {t('admin.siteSettings.management.loadingMeta')}
+            <div className="rounded-md border p-4 text-muted-foreground text-sm">
+              {t("admin.siteSettings.management.loadingMeta")}
             </div>
           ) : (
             <Tabs value={tab} onValueChange={(v) => setTab(v as SiteSettingsTab)}>
               <div className="overflow-x-auto">
                 <TabsList className="inline-flex h-auto w-max gap-1 p-1">
                   <TabsTrigger value="list" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.list')}
+                    {t("admin.siteSettings.tabs.list")}
                   </TabsTrigger>
                   <TabsTrigger value="global_list" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.globalList')}
+                    {t("admin.siteSettings.tabs.globalList")}
                   </TabsTrigger>
                   <TabsTrigger value="general" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.general')}
+                    {t("admin.siteSettings.tabs.general")}
                   </TabsTrigger>
                   <TabsTrigger value="seo" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.seo')}
+                    {t("admin.siteSettings.tabs.seo")}
                   </TabsTrigger>
                   <TabsTrigger value="smtp" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.smtp')}
+                    {t("admin.siteSettings.tabs.smtp")}
                   </TabsTrigger>
                   <TabsTrigger value="brand_media" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.brandMedia')}
+                    {t("admin.siteSettings.tabs.brandMedia")}
                   </TabsTrigger>
                   <TabsTrigger value="api" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.apiServices')}
+                    {t("admin.siteSettings.tabs.apiServices")}
                   </TabsTrigger>
                   <TabsTrigger value="locales" className="whitespace-nowrap text-xs sm:text-sm">
-                    {t('admin.siteSettings.tabs.locales')}
+                    {t("admin.siteSettings.tabs.locales")}
                   </TabsTrigger>
                 </TabsList>
               </div>
@@ -358,9 +350,6 @@ export default function AdminSiteSettingsClient() {
               <TabsContent value="locales" className="mt-3 sm:mt-4">
                 <LocalesSettingsTab settingPrefix={brandPrefix} />
               </TabsContent>
-
-
-
             </Tabs>
           )}
         </CardContent>

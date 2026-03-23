@@ -4,7 +4,7 @@
 // Backend: src/modules/references/*
 // =============================================================
 
-import type { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
 /* -------------------------------------------------------------
  * LIST QUERY (public + admin ortak)
@@ -89,7 +89,6 @@ export interface ReferenceDto {
   featured_image_url_resolved: string | null;
   featured_asset?: ReferenceAssetInfo | null;
 }
-
 
 /* -------------------------------------------------------------
  * CREATE / UPDATE gövdesi (admin)
@@ -185,8 +184,6 @@ export interface ReferenceListResponse {
   total: number;
 }
 
-
-
 /* ---------------- Helpers ---------------- */
 
 export const serializeListQuery = (q?: ReferenceListQueryParams): Record<string, any> => {
@@ -196,11 +193,11 @@ export const serializeListQuery = (q?: ReferenceListQueryParams): Record<string,
   if (q.order) params.order = q.order;
   if (q.sort) params.sort = q.sort;
   if (q.orderDir) params.orderDir = q.orderDir;
-  if (typeof q.limit === 'number') params.limit = q.limit;
-  if (typeof q.offset === 'number') params.offset = q.offset;
+  if (typeof q.limit === "number") params.limit = q.limit;
+  if (typeof q.offset === "number") params.offset = q.offset;
 
-  if (typeof q.is_published !== 'undefined') params.is_published = q.is_published;
-  if (typeof q.is_featured !== 'undefined') params.is_featured = q.is_featured;
+  if (typeof q.is_published !== "undefined") params.is_published = q.is_published;
+  if (typeof q.is_featured !== "undefined") params.is_featured = q.is_featured;
 
   if (q.q) params.q = q.q;
   if (q.slug) params.slug = q.slug;
@@ -210,7 +207,7 @@ export const serializeListQuery = (q?: ReferenceListQueryParams): Record<string,
   if (q.sub_category_id) params.sub_category_id = q.sub_category_id;
 
   if (q.module_key) params.module_key = q.module_key;
-  if (typeof q.has_website !== 'undefined') params.has_website = q.has_website;
+  if (typeof q.has_website !== "undefined") params.has_website = q.has_website;
 
   // ✅ locale param (dynamic server-side validation handled by backend)
   if (q.locale) params.locale = q.locale;

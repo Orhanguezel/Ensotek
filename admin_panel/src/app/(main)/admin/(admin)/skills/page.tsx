@@ -3,7 +3,7 @@
 // FINAL — Admin Skills Page
 // =============================================================
 
-import AdminSkillsClient from './_components/admin-skills-client';
+import AdminSkillsClient from "./_components/admin-skills-client";
 
 export default async function Page() {
   return <AdminSkillsClient />;

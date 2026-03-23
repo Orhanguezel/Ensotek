@@ -4,69 +4,51 @@
 // Ensotek
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import * as React from "react";
+
+import { useRouter } from "next/navigation";
+
+import { Pencil, Plus, RefreshCw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClient, localeShortClientOr } from "@/i18n/localeShortClient";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { RefreshCw, Plus, Pencil, Trash2 } from 'lucide-react';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
-import { toast } from 'sonner';
-import {
+  useDeleteCategoryAdminMutation,
   useListCategoriesAdminQuery,
   useToggleCategoryActiveAdminMutation,
   useToggleCategoryFeaturedAdminMutation,
-  useDeleteCategoryAdminMutation,
-} from '@/integrations/endpoints/admin/categories_admin.endpoints';
-import type { CategoryDto } from '@/integrations/shared';
+} from "@/integrations/endpoints/admin/categories_admin.endpoints";
+import type { CategoryDto } from "@/integrations/shared";
 
 export default function CategoriesListPanel() {
-  const t = useAdminT('admin.categories');
+  const t = useAdminT("admin.categories");
   const router = useRouter();
 
   // Locale management (like CustomPage)
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'tr');
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
   // Filters
-  const [search, setSearch] = React.useState('');
-  const [locale, setLocale] = React.useState('');
-  const [moduleKey, setModuleKey] = React.useState('');
+  const [search, setSearch] = React.useState("");
+  const [locale, setLocale] = React.useState("");
+  const [moduleKey, setModuleKey] = React.useState("");
   const [showOnlyActive, setShowOnlyActive] = React.useState(false);
   const [showOnlyFeatured, setShowOnlyFeatured] = React.useState(false);
 
@@ -76,7 +58,7 @@ export default function CategoriesListPanel() {
 
     setLocale((prev) => {
       if (prev) return prev;
-      return localeShortClientOr(apiLocale, 'tr');
+      return localeShortClientOr(apiLocale, "tr");
     });
   }, [localeOptions, apiLocale]);
 
@@ -99,7 +81,7 @@ export default function CategoriesListPanel() {
     const params: Record<string, string | boolean> = {};
 
     // Always include locale
-    params.locale = effectiveLocale || 'tr';
+    params.locale = effectiveLocale || "tr";
 
     if (search) params.q = search;
     if (moduleKey) params.module_key = moduleKey;
@@ -110,7 +92,11 @@ export default function CategoriesListPanel() {
   }, [search, effectiveLocale, moduleKey, showOnlyActive, showOnlyFeatured]);
 
   // RTK Query - Fetch categories
-  const { data: categories = [], isFetching, refetch } = useListCategoriesAdminQuery(queryParams, {
+  const {
+    data: categories = [],
+    isFetching,
+    refetch,
+  } = useListCategoriesAdminQuery(queryParams, {
     refetchOnMountOrArgChange: true,
   } as any);
 
@@ -122,12 +108,12 @@ export default function CategoriesListPanel() {
   const [deleteCategory] = useDeleteCategoryAdminMutation();
 
   const handleRefresh = () => {
-    toast.info(t('list.refreshing'));
+    toast.info(t("list.refreshing"));
     refetch();
   };
 
   const handleCreate = () => {
-    router.push('/admin/categories/new');
+    router.push("/admin/categories/new");
   };
 
   const handleEdit = (item: CategoryDto) => {
@@ -135,36 +121,36 @@ export default function CategoriesListPanel() {
   };
 
   const handleDelete = async (item: CategoryDto) => {
-    if (!confirm(t('messages.confirmDelete', { name: item.name }))) {
+    if (!confirm(t("messages.confirmDelete", { name: item.name }))) {
       return;
     }
 
     try {
       await deleteCategory(item.id).unwrap();
-      toast.success(t('messages.deleted', { name: item.name }));
+      toast.success(t("messages.deleted", { name: item.name }));
       refetch();
     } catch (error) {
-      toast.error(t('messages.deleteError', { error: String(error) }));
+      toast.error(t("messages.deleteError", { error: String(error) }));
     }
   };
 
   const handleToggleActive = async (item: CategoryDto, value: boolean) => {
     try {
       await toggleActive({ id: item.id, is_active: value }).unwrap();
-      toast.success(`${item.name}: ${value ? t('list.activated') : t('list.deactivated')}`);
+      toast.success(`${item.name}: ${value ? t("list.activated") : t("list.deactivated")}`);
       refetch();
     } catch (error) {
-      toast.error(t('messages.error', { error: String(error) }));
+      toast.error(t("messages.error", { error: String(error) }));
     }
   };
 
   const handleToggleFeatured = async (item: CategoryDto, value: boolean) => {
     try {
       await toggleFeatured({ id: item.id, is_featured: value }).unwrap();
-      toast.success(`${item.name}: ${value ? t('list.featured') : t('list.unfeatured')}`);
+      toast.success(`${item.name}: ${value ? t("list.featured") : t("list.unfeatured")}`);
       refetch();
     } catch (error) {
-      toast.error(t('messages.error', { error: String(error) }));
+      toast.error(t("messages.error", { error: String(error) }));
     }
   };
 
@@ -175,11 +161,11 @@ export default function CategoriesListPanel() {
         <CardHeader className="pb-4">
           <div className="flex flex-col gap-4">
             {/* Top Row: Search + Filters */}
-            <div className="flex flex-col lg:flex-row gap-3">
+            <div className="flex flex-col gap-3 lg:flex-row">
               {/* Search */}
               <div className="flex-1">
                 <Input
-                  placeholder={t('filters.searchPlaceholder')}
+                  placeholder={t("filters.searchPlaceholder")}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   disabled={isFetching}
@@ -194,30 +180,34 @@ export default function CategoriesListPanel() {
                   options={adminLocaleOptions}
                   loading={localesLoading || localesFetching}
                   disabled={busy}
-                  label={t('filters.locale')}
+                  label={t("filters.locale")}
                 />
               </div>
 
               {/* Module Filter */}
-              <Select value={moduleKey || 'all'} onValueChange={(v) => setModuleKey(v === 'all' ? '' : v)} disabled={busy}>
+              <Select
+                value={moduleKey || "all"}
+                onValueChange={(v) => setModuleKey(v === "all" ? "" : v)}
+                disabled={busy}
+              >
                 <SelectTrigger className="w-full lg:w-45">
-                  <SelectValue placeholder={t('filters.allModules')} />
+                  <SelectValue placeholder={t("filters.allModules")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('filters.allModules')}</SelectItem>
-                  <SelectItem value="product">{t('modules.product')}</SelectItem>
-                  <SelectItem value="services">{t('modules.services')}</SelectItem>
-                  <SelectItem value="news">{t('modules.news')}</SelectItem>
-                  <SelectItem value="library">{t('modules.library')}</SelectItem>
-                  <SelectItem value="about">{t('modules.about')}</SelectItem>
-                  <SelectItem value="sparepart">{t('modules.sparepart')}</SelectItem>
-                  <SelectItem value="references">{t('modules.references')}</SelectItem>
+                  <SelectItem value="all">{t("filters.allModules")}</SelectItem>
+                  <SelectItem value="product">{t("modules.product")}</SelectItem>
+                  <SelectItem value="services">{t("modules.services")}</SelectItem>
+                  <SelectItem value="news">{t("modules.news")}</SelectItem>
+                  <SelectItem value="library">{t("modules.library")}</SelectItem>
+                  <SelectItem value="about">{t("modules.about")}</SelectItem>
+                  <SelectItem value="sparepart">{t("modules.sparepart")}</SelectItem>
+                  <SelectItem value="references">{t("modules.references")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Bottom Row: Toggles + Actions */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+            <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
               {/* Toggles */}
               <div className="flex flex-wrap gap-4">
                 <div className="flex items-center gap-2">
@@ -227,8 +217,8 @@ export default function CategoriesListPanel() {
                     onCheckedChange={setShowOnlyActive}
                     disabled={busy}
                   />
-                  <Label htmlFor="active-filter" className="text-sm cursor-pointer">
-                    {t('filters.onlyActive')}
+                  <Label htmlFor="active-filter" className="cursor-pointer text-sm">
+                    {t("filters.onlyActive")}
                   </Label>
                 </div>
 
@@ -239,8 +229,8 @@ export default function CategoriesListPanel() {
                     onCheckedChange={setShowOnlyFeatured}
                     disabled={busy}
                   />
-                  <Label htmlFor="featured-filter" className="text-sm cursor-pointer">
-                    {t('filters.onlyFeatured')}
+                  <Label htmlFor="featured-filter" className="cursor-pointer text-sm">
+                    {t("filters.onlyFeatured")}
                   </Label>
                 </div>
               </div>
@@ -248,11 +238,11 @@ export default function CategoriesListPanel() {
               {/* Action Buttons */}
               <div className="flex gap-2">
                 <Button variant="outline" size="sm" onClick={handleRefresh} disabled={busy}>
-                  <RefreshCw className={`h-4 w-4 ${busy ? 'animate-spin' : ''}`} />
+                  <RefreshCw className={`h-4 w-4 ${busy ? "animate-spin" : ""}`} />
                 </Button>
                 <Button size="sm" onClick={handleCreate} disabled={busy}>
                   <Plus className="h-4 w-4" />
-                  {t('actions.create')}
+                  {t("actions.create")}
                 </Button>
               </div>
             </div>
@@ -264,51 +254,43 @@ export default function CategoriesListPanel() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">{t('list.title')}</span>
+            <span className="font-medium text-sm">{t("list.title")}</span>
             <Badge variant="secondary">
-              {t('list.total')}: {categories.length}
+              {t("list.total")}: {categories.length}
             </Badge>
           </div>
         </CardHeader>
 
         <CardContent className="p-0">
           {busy && categories.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              {t('list.loading')}
-            </div>
+            <div className="py-8 text-center text-muted-foreground text-sm">{t("list.loading")}</div>
           ) : categories.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              {t('list.noData')}
-            </div>
+            <div className="py-8 text-center text-muted-foreground text-sm">{t("list.noData")}</div>
           ) : (
             <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-12.5">#</TableHead>
-                    <TableHead>{t('table.name')}</TableHead>
-                    <TableHead>{t('table.slug')}</TableHead>
-                    <TableHead className="w-25">{t('table.locale')}</TableHead>
-                    <TableHead className="w-30">{t('table.module')}</TableHead>
-                    <TableHead className="w-20 text-center">{t('table.active')}</TableHead>
-                    <TableHead className="w-25 text-center">{t('table.featured')}</TableHead>
-                    <TableHead className="w-40 text-right">{t('table.actions')}</TableHead>
+                    <TableHead>{t("table.name")}</TableHead>
+                    <TableHead>{t("table.slug")}</TableHead>
+                    <TableHead className="w-25">{t("table.locale")}</TableHead>
+                    <TableHead className="w-30">{t("table.module")}</TableHead>
+                    <TableHead className="w-20 text-center">{t("table.active")}</TableHead>
+                    <TableHead className="w-25 text-center">{t("table.featured")}</TableHead>
+                    <TableHead className="w-40 text-right">{t("table.actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {categories.map((item, index) => (
                     <TableRow key={item.id}>
-                      <TableCell className="text-muted-foreground text-sm">
-                        {index + 1}
-                      </TableCell>
+                      <TableCell className="text-muted-foreground text-sm">{index + 1}</TableCell>
 
                       <TableCell>
                         <div className="space-y-1">
                           <div className="font-medium text-sm">{item.name}</div>
                           {item.description && (
-                            <div className="text-xs text-muted-foreground line-clamp-1">
-                              {item.description}
-                            </div>
+                            <div className="line-clamp-1 text-muted-foreground text-xs">{item.description}</div>
                           )}
                         </div>
                       </TableCell>
@@ -347,20 +329,10 @@ export default function CategoriesListPanel() {
 
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => handleEdit(item)}
-                            disabled={busy}
-                          >
+                          <Button variant="ghost" size="icon-sm" onClick={() => handleEdit(item)} disabled={busy}>
                             <Pencil className="h-4 w-4" />
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            onClick={() => handleDelete(item)}
-                            disabled={busy}
-                          >
+                          <Button variant="ghost" size="icon-sm" onClick={() => handleDelete(item)} disabled={busy}>
                             <Trash2 className="h-4 w-4 text-destructive" />
                           </Button>
                         </div>

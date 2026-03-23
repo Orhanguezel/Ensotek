@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/reviews/[id]/admin-reviews-detail-client.tsx
@@ -6,30 +6,16 @@
 // ✅ FULLY FIXED - All type safety issues resolved
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { ArrowLeft, Save, Trash2, Loader2, Star } from 'lucide-react';
+import * as React from "react";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClientOr } from '@/i18n/localeShortClient';
+import { useRouter } from "next/navigation";
 
-import { cn } from '@/lib/utils';
+import { ArrowLeft, Loader2, Save, Star, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import {
-  AdminLocaleSelect,
-  type AdminLocaleOption,
-} from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
-
+import { type AdminLocaleOption, AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -39,15 +25,24 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
-import type { AdminReviewCreatePayload } from '@/integrations/shared';
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClientOr } from "@/i18n/localeShortClient";
 import {
-  useGetReviewAdminQuery,
   useCreateReviewAdminMutation,
-  useUpdateReviewAdminMutation,
   useDeleteReviewAdminMutation,
-} from '@/integrations/hooks';
+  useGetReviewAdminQuery,
+  useUpdateReviewAdminMutation,
+} from "@/integrations/hooks";
+import type { AdminReviewCreatePayload } from "@/integrations/shared";
+import { cn } from "@/lib/utils";
 
 type FormData = {
   // Required
@@ -100,38 +95,28 @@ function RatingInput({
           disabled={disabled}
           className="transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <Star
-            className={cn(
-              'size-6',
-              i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground',
-            )}
-          />
+          <Star className={cn("size-6", i < rating ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground")} />
         </button>
       ))}
-      <span className="ml-2 text-sm text-muted-foreground">({rating}/5)</span>
+      <span className="ml-2 text-muted-foreground text-sm">({rating}/5)</span>
     </div>
   );
 }
 
 export default function AdminReviewsDetailClient({ id }: { id: string }) {
   const router = useRouter();
-  const isNew = id === 'new';
-  const t = useAdminT('admin.reviews');
+  const isNew = id === "new";
+  const t = useAdminT("admin.reviews");
 
   // Locale management
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    coerceLocale,
-    loading: localesLoading,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, coerceLocale, loading: localesLoading } = useAdminLocales();
 
   // ✅ FIX: Ensure localeOptions has correct type
   const safeLocaleOptions: AdminLocaleOption[] = React.useMemo(() => {
     if (!Array.isArray(localeOptions)) return [];
     return localeOptions.map((opt) => ({
-      value: opt.value || '',
-      label: opt.label || opt.value || '',
+      value: opt.value || "",
+      label: opt.label || opt.value || "",
     }));
   }, [localeOptions]);
 
@@ -149,27 +134,25 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
   // ✅ FIX: Initial locale with proper fallback
   const initialLocale = React.useMemo(() => {
     return (
-      defaultLocaleFromDb ||
-      localeShortClientOr(typeof window !== 'undefined' ? navigator.language : 'de') ||
-      'de'
+      defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "de") || "de"
     );
   }, [defaultLocaleFromDb]);
 
   // Form state
   const [formData, setFormData] = React.useState<FormData>({
-    target_type: 'testimonial',
-    target_id: '11111111-1111-1111-1111-111111111111',
-    name: '',
-    email: '',
+    target_type: "testimonial",
+    target_id: "11111111-1111-1111-1111-111111111111",
+    name: "",
+    email: "",
     rating: 5,
-    comment: '',
-    title: '',
-    role: '',
-    company: '',
-    avatar_url: '',
-    logo_url: '',
-    profile_href: '',
-    admin_reply: '',
+    comment: "",
+    title: "",
+    role: "",
+    company: "",
+    avatar_url: "",
+    logo_url: "",
+    profile_href: "",
+    admin_reply: "",
     is_active: true,
     is_approved: true,
     display_order: 0,
@@ -183,19 +166,19 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
   React.useEffect(() => {
     if (!isNew && existingItem) {
       setFormData({
-        target_type: existingItem.target_type || 'testimonial',
-        target_id: existingItem.target_id || '11111111-1111-1111-1111-111111111111',
-        name: existingItem.name || '',
-        email: existingItem.email || '',
+        target_type: existingItem.target_type || "testimonial",
+        target_id: existingItem.target_id || "11111111-1111-1111-1111-111111111111",
+        name: existingItem.name || "",
+        email: existingItem.email || "",
         rating: existingItem.rating || 5,
-        comment: existingItem.comment || '',
-        title: (existingItem as any).title || '',
-        role: (existingItem as any).role || '',
-        company: (existingItem as any).company || '',
-        avatar_url: (existingItem as any).avatar_url || '',
-        logo_url: (existingItem as any).logo_url || '',
-        profile_href: (existingItem as any).profile_href || '',
-        admin_reply: (existingItem as any).admin_reply || '',
+        comment: existingItem.comment || "",
+        title: (existingItem as any).title || "",
+        role: (existingItem as any).role || "",
+        company: (existingItem as any).company || "",
+        avatar_url: (existingItem as any).avatar_url || "",
+        logo_url: (existingItem as any).logo_url || "",
+        profile_href: (existingItem as any).profile_href || "",
+        admin_reply: (existingItem as any).admin_reply || "",
         is_active: existingItem.is_active,
         is_approved: existingItem.is_approved,
         display_order: existingItem.display_order || 0,
@@ -218,38 +201,37 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
 
     // Validation
     if (!formData.target_type.trim()) {
-      toast.error(t('form.validation.targetTypeRequired'));
+      toast.error(t("form.validation.targetTypeRequired"));
       return;
     }
 
     if (!formData.target_id.trim()) {
-      toast.error(t('form.validation.targetIdRequired'));
+      toast.error(t("form.validation.targetIdRequired"));
       return;
     }
 
     if (!formData.name.trim()) {
-      toast.error(t('form.validation.nameRequired'));
+      toast.error(t("form.validation.nameRequired"));
       return;
     }
 
     if (!formData.email.trim()) {
-      toast.error(t('form.validation.emailRequired'));
+      toast.error(t("form.validation.emailRequired"));
       return;
     }
 
     if (!formData.comment.trim()) {
-      toast.error(t('form.validation.commentRequired'));
+      toast.error(t("form.validation.commentRequired"));
       return;
     }
 
     if (formData.rating < 0 || formData.rating > 5) {
-      toast.error(t('form.validation.ratingRange'));
+      toast.error(t("form.validation.ratingRange"));
       return;
     }
 
     // ✅ FIXED: Correct usage of resolveAdminApiLocale
-    const apiLocale =
-      formData.locale || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, 'de');
+    const apiLocale = formData.locale || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "de");
 
     try {
       if (isNew) {
@@ -273,8 +255,8 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
         };
 
         await createReview(payload).unwrap();
-        toast.success(t('messages.created'));
-        router.push('/admin/reviews');
+        toast.success(t("messages.created"));
+        router.push("/admin/reviews");
       } else {
         await updateReview({
           id,
@@ -298,10 +280,10 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
             locale: apiLocale,
           },
         }).unwrap();
-        toast.success(t('messages.updated'));
+        toast.success(t("messages.updated"));
       }
     } catch (err) {
-      toast.error(getErrMsg(err, t('messages.genericError')));
+      toast.error(getErrMsg(err, t("messages.genericError")));
     }
   };
 
@@ -314,10 +296,10 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
 
     try {
       await deleteReview({ id }).unwrap();
-      toast.success(t('messages.deleted'));
-      router.push('/admin/reviews');
+      toast.success(t("messages.deleted"));
+      router.push("/admin/reviews");
     } catch (err) {
-      toast.error(getErrMsg(err, t('messages.genericError')));
+      toast.error(getErrMsg(err, t("messages.genericError")));
     }
   };
 
@@ -332,15 +314,11 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
         <Card>
           <CardContent className="py-12 text-center">
             <div className="text-destructive">
-              {t('messages.loadError')}: {getErrMsg(loadError, t('messages.genericError'))}
+              {t("messages.loadError")}: {getErrMsg(loadError, t("messages.genericError"))}
             </div>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/admin/reviews')}
-              className="mt-4 gap-2"
-            >
+            <Button variant="outline" onClick={() => router.push("/admin/reviews")} className="mt-4 gap-2">
               <ArrowLeft className="size-4" />
-              {t('actions.backToList')}
+              {t("actions.backToList")}
             </Button>
           </CardContent>
         </Card>
@@ -355,7 +333,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
           <CardContent className="flex items-center justify-center py-12">
             <div className="flex items-center gap-2">
               <Loader2 className="size-5 animate-spin" />
-              <span>{t('admin.common.loading')}</span>
+              <span>{t("admin.common.loading")}</span>
             </div>
           </CardContent>
         </Card>
@@ -371,20 +349,18 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
           <CardHeader>
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="space-y-1.5">
-                <CardTitle>{isNew ? t('form.titles.create') : t('form.titles.edit')}</CardTitle>
-                <CardDescription>
-                  {isNew ? t('form.descriptions.create') : t('form.descriptions.edit')}
-                </CardDescription>
+                <CardTitle>{isNew ? t("form.titles.create") : t("form.titles.edit")}</CardTitle>
+                <CardDescription>{isNew ? t("form.descriptions.create") : t("form.descriptions.edit")}</CardDescription>
               </div>
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => router.push('/admin/reviews')}
+                onClick={() => router.push("/admin/reviews")}
                 disabled={busy}
                 className="gap-2"
               >
                 <ArrowLeft className="size-4" />
-                {t('admin.common.back')}
+                {t("admin.common.back")}
               </Button>
             </div>
           </CardHeader>
@@ -393,7 +369,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
         {/* Section 1: Metadata */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('form.sections.meta')}</CardTitle>
+            <CardTitle className="text-base">{t("form.sections.meta")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-4">
@@ -405,14 +381,14 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
                   options={safeLocaleOptions}
                   loading={localesLoading}
                   disabled={busy}
-                  label={t('form.fields.locale')}
+                  label={t("form.fields.locale")}
                 />
               </div>
 
               {/* Display Order */}
               <div className="space-y-2">
                 <Label htmlFor="display_order" className="text-sm">
-                  {t('form.fields.displayOrder')}
+                  {t("form.fields.displayOrder")}
                 </Label>
                 <Input
                   id="display_order"
@@ -432,22 +408,20 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Approved */}
               <div className="space-y-2">
                 <Label htmlFor="is_approved" className="text-sm">
-                  {t('form.fields.approved')}
+                  {t("form.fields.approved")}
                 </Label>
                 <div className="flex items-center gap-3 rounded-md border px-3 py-2">
                   <Switch
                     id="is_approved"
                     checked={formData.is_approved}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, is_approved: checked }))
-                    }
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_approved: checked }))}
                     disabled={busy}
                   />
                   <Label htmlFor="is_approved" className="cursor-pointer text-sm">
                     {formData.is_approved ? (
-                      <Badge variant="default">{t('labels.approved')}</Badge>
+                      <Badge variant="default">{t("labels.approved")}</Badge>
                     ) : (
-                      <Badge variant="secondary">{t('labels.unapproved')}</Badge>
+                      <Badge variant="secondary">{t("labels.unapproved")}</Badge>
                     )}
                   </Label>
                 </div>
@@ -456,22 +430,20 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Active */}
               <div className="space-y-2">
                 <Label htmlFor="is_active" className="text-sm">
-                  {t('form.fields.active')}
+                  {t("form.fields.active")}
                 </Label>
                 <div className="flex items-center gap-3 rounded-md border px-3 py-2">
                   <Switch
                     id="is_active"
                     checked={formData.is_active}
-                    onCheckedChange={(checked) =>
-                      setFormData((prev) => ({ ...prev, is_active: checked }))
-                    }
+                    onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
                     disabled={busy}
                   />
                   <Label htmlFor="is_active" className="cursor-pointer text-sm">
                     {formData.is_active ? (
-                      <Badge variant="default">{t('labels.active')}</Badge>
+                      <Badge variant="default">{t("labels.active")}</Badge>
                     ) : (
-                      <Badge variant="secondary">{t('labels.inactive')}</Badge>
+                      <Badge variant="secondary">{t("labels.inactive")}</Badge>
                     )}
                   </Label>
                 </div>
@@ -483,22 +455,20 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
         {/* Section 2: Customer Info */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('form.sections.customer')}</CardTitle>
+            <CardTitle className="text-base">{t("form.sections.customer")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Target Type */}
               <div className="space-y-2">
                 <Label htmlFor="target_type" className="text-sm">
-                  {t('form.fields.targetType')} <span className="text-destructive">*</span>
+                  {t("form.fields.targetType")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="target_type"
                   value={formData.target_type}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, target_type: e.target.value }))
-                  }
-                  placeholder={t('form.placeholders.targetType')}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, target_type: e.target.value }))}
+                  placeholder={t("form.placeholders.targetType")}
                   disabled={busy}
                   required
                 />
@@ -507,13 +477,13 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Target ID */}
               <div className="space-y-2">
                 <Label htmlFor="target_id" className="text-sm">
-                  {t('form.fields.targetId')} <span className="text-destructive">*</span>
+                  {t("form.fields.targetId")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="target_id"
                   value={formData.target_id}
                   onChange={(e) => setFormData((prev) => ({ ...prev, target_id: e.target.value }))}
-                  placeholder={t('form.placeholders.targetId')}
+                  placeholder={t("form.placeholders.targetId")}
                   disabled={busy}
                   required
                 />
@@ -524,13 +494,13 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Name */}
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm">
-                  {t('form.fields.name')} <span className="text-destructive">*</span>
+                  {t("form.fields.name")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
-                  placeholder={t('form.placeholders.name')}
+                  placeholder={t("form.placeholders.name")}
                   disabled={busy}
                   required
                 />
@@ -539,14 +509,14 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm">
-                  {t('form.fields.email')} <span className="text-destructive">*</span>
+                  {t("form.fields.email")} <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="email"
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
-                  placeholder={t('form.placeholders.email')}
+                  placeholder={t("form.placeholders.email")}
                   disabled={busy}
                   required
                 />
@@ -556,7 +526,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
             {/* Rating */}
             <div className="space-y-2">
               <Label htmlFor="rating" className="text-sm">
-                {t('form.fields.rating')} <span className="text-destructive">*</span>
+                {t("form.fields.rating")} <span className="text-destructive">*</span>
               </Label>
               <RatingInput
                 value={formData.rating}
@@ -570,19 +540,19 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
         {/* Section 3: Review Content */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('form.sections.content')}</CardTitle>
+            <CardTitle className="text-base">{t("form.sections.content")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Title */}
             <div className="space-y-2">
               <Label htmlFor="title" className="text-sm">
-                {t('form.fields.title')}
+                {t("form.fields.title")}
               </Label>
               <Input
                 id="title"
                 value={formData.title}
                 onChange={(e) => setFormData((prev) => ({ ...prev, title: e.target.value }))}
-                placeholder={t('form.placeholders.title')}
+                placeholder={t("form.placeholders.title")}
                 disabled={busy}
               />
             </div>
@@ -590,13 +560,13 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
             {/* Comment */}
             <div className="space-y-2">
               <Label htmlFor="comment" className="text-sm">
-                {t('form.fields.comment')} <span className="text-destructive">*</span>
+                {t("form.fields.comment")} <span className="text-destructive">*</span>
               </Label>
               <Textarea
                 id="comment"
                 value={formData.comment}
                 onChange={(e) => setFormData((prev) => ({ ...prev, comment: e.target.value }))}
-                placeholder={t('form.placeholders.comment')}
+                placeholder={t("form.placeholders.comment")}
                 disabled={busy}
                 rows={5}
                 required
@@ -608,21 +578,21 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
         {/* Section 4: Testimonial Extras */}
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">{t('form.sections.extras')}</CardTitle>
-            <CardDescription>{t('form.sections.extrasDescription')}</CardDescription>
+            <CardTitle className="text-base">{t("form.sections.extras")}</CardTitle>
+            <CardDescription>{t("form.sections.extrasDescription")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Role */}
               <div className="space-y-2">
                 <Label htmlFor="role" className="text-sm">
-                  {t('form.fields.role')}
+                  {t("form.fields.role")}
                 </Label>
                 <Input
                   id="role"
                   value={formData.role}
                   onChange={(e) => setFormData((prev) => ({ ...prev, role: e.target.value }))}
-                  placeholder={t('form.placeholders.role')}
+                  placeholder={t("form.placeholders.role")}
                   disabled={busy}
                 />
               </div>
@@ -630,13 +600,13 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Company */}
               <div className="space-y-2">
                 <Label htmlFor="company" className="text-sm">
-                  {t('form.fields.company')}
+                  {t("form.fields.company")}
                 </Label>
                 <Input
                   id="company"
                   value={formData.company}
                   onChange={(e) => setFormData((prev) => ({ ...prev, company: e.target.value }))}
-                  placeholder={t('form.placeholders.company')}
+                  placeholder={t("form.placeholders.company")}
                   disabled={busy}
                 />
               </div>
@@ -646,7 +616,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Avatar URL */}
               <div className="space-y-2">
                 <Label htmlFor="avatar_url" className="text-sm">
-                  {t('form.fields.avatarUrl')}
+                  {t("form.fields.avatarUrl")}
                 </Label>
                 <Input
                   id="avatar_url"
@@ -660,7 +630,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
               {/* Logo URL */}
               <div className="space-y-2">
                 <Label htmlFor="logo_url" className="text-sm">
-                  {t('form.fields.logoUrl')}
+                  {t("form.fields.logoUrl")}
                 </Label>
                 <Input
                   id="logo_url"
@@ -675,7 +645,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
             {/* Profile Href */}
             <div className="space-y-2">
               <Label htmlFor="profile_href" className="text-sm">
-                {t('form.fields.profileHref')}
+                {t("form.fields.profileHref")}
               </Label>
               <Input
                 id="profile_href"
@@ -692,21 +662,19 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
         {!isNew && (
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">{t('form.sections.adminReply')}</CardTitle>
-              <CardDescription>{t('form.sections.adminReplyDescription')}</CardDescription>
+              <CardTitle className="text-base">{t("form.sections.adminReply")}</CardTitle>
+              <CardDescription>{t("form.sections.adminReplyDescription")}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="admin_reply" className="text-sm">
-                  {t('form.fields.adminReply')}
+                  {t("form.fields.adminReply")}
                 </Label>
                 <Textarea
                   id="admin_reply"
                   value={formData.admin_reply}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, admin_reply: e.target.value }))
-                  }
-                  placeholder={t('form.placeholders.adminReply')}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, admin_reply: e.target.value }))}
+                  placeholder={t("form.placeholders.adminReply")}
                   disabled={busy}
                   rows={4}
                 />
@@ -730,36 +698,31 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
                   {isDeleting ? (
                     <>
                       <Loader2 className="size-4 animate-spin" />
-                      {t('actions.deleting')}
+                      {t("actions.deleting")}
                     </>
                   ) : (
                     <>
                       <Trash2 className="size-4" />
-                      {t('admin.common.delete')}
+                      {t("admin.common.delete")}
                     </>
                   )}
                 </Button>
               )}
             </div>
             <div className="flex gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.push('/admin/reviews')}
-                disabled={busy}
-              >
-                {t('admin.common.cancel')}
+              <Button type="button" variant="outline" onClick={() => router.push("/admin/reviews")} disabled={busy}>
+                {t("admin.common.cancel")}
               </Button>
               <Button type="submit" disabled={busy} className="gap-2">
                 {isCreating || isUpdating ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    {t('admin.common.saving')}
+                    {t("admin.common.saving")}
                   </>
                 ) : (
                   <>
                     <Save className="size-4" />
-                    {t('admin.common.save')}
+                    {t("admin.common.save")}
                   </>
                 )}
               </Button>
@@ -772,18 +735,16 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{t('deleteDialog.title')}</AlertDialogTitle>
+            <AlertDialogTitle>{t("deleteDialog.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t('deleteDialog.description', {
-                name: formData.name || t('deleteDialog.fallbackName'),
+              {t("deleteDialog.description", {
+                name: formData.name || t("deleteDialog.fallbackName"),
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{t('admin.common.cancel')}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm}>
-              {t('admin.common.delete')}
-            </AlertDialogAction>
+            <AlertDialogCancel>{t("admin.common.cancel")}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConfirm}>{t("admin.common.delete")}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

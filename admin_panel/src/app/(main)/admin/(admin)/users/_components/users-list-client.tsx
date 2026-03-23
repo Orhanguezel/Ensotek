@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/users/_components/users-list-client.tsx
@@ -7,67 +7,53 @@
 // - roles: admin | moderator | user
 // =============================================================
 
-import * as React from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, Filter, RefreshCcw, ChevronLeft, ChevronRight } from 'lucide-react';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { ChevronLeft, ChevronRight, Filter, RefreshCcw, Search } from "lucide-react";
+import { toast } from "sonner";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-
-import type { UserRoleName, AdminUserView, AdminUsersListParams } from '@/integrations/shared';
-import { useListUsersAdminQuery } from '@/integrations/hooks';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useListUsersAdminQuery } from "@/integrations/hooks";
+import type { AdminUsersListParams, AdminUserView, UserRoleName } from "@/integrations/shared";
 
 function boolParam(v: string | null): boolean | undefined {
   if (v == null) return undefined;
   const s = v.trim();
-  if (s === '1' || s === 'true') return true;
-  if (s === '0' || s === 'false') return false;
+  if (s === "1" || s === "true") return true;
+  if (s === "0" || s === "false") return false;
   return undefined;
 }
 
 function safeInt(v: string | null, fb: number): number {
-  const n = Number(v ?? '');
+  const n = Number(v ?? "");
   return Number.isFinite(n) && n >= 0 ? n : fb;
 }
 
 function pickQuery(sp: URLSearchParams): AdminUsersListParams {
-  const q = sp.get('q') ?? undefined;
-  const role = (sp.get('role') ?? undefined) as UserRoleName | undefined;
-  const is_active = boolParam(sp.get('is_active'));
-  const limit = safeInt(sp.get('limit'), 20) || 20;
-  const offset = safeInt(sp.get('offset'), 0);
+  const q = sp.get("q") ?? undefined;
+  const role = (sp.get("role") ?? undefined) as UserRoleName | undefined;
+  const is_active = boolParam(sp.get("is_active"));
+  const limit = safeInt(sp.get("limit"), 20) || 20;
+  const offset = safeInt(sp.get("offset"), 0);
 
-  const sort = (sp.get('sort') ?? undefined) as AdminUsersListParams['sort'] | undefined;
-  const order = (sp.get('order') ?? undefined) as AdminUsersListParams['order'] | undefined;
+  const sort = (sp.get("sort") ?? undefined) as AdminUsersListParams["sort"] | undefined;
+  const order = (sp.get("order") ?? undefined) as AdminUsersListParams["order"] | undefined;
 
   return {
     ...(q ? { q } : {}),
     ...(role ? { role } : {}),
-    ...(typeof is_active === 'boolean' ? { is_active } : {}),
+    ...(typeof is_active === "boolean" ? { is_active } : {}),
     limit,
     offset,
     ...(sort ? { sort } : {}),
@@ -77,53 +63,51 @@ function pickQuery(sp: URLSearchParams): AdminUsersListParams {
 
 function toSearchParams(p: AdminUsersListParams): string {
   const sp = new URLSearchParams();
-  if (p.q) sp.set('q', p.q);
-  if (p.role) sp.set('role', p.role);
-  if (typeof p.is_active === 'boolean') sp.set('is_active', p.is_active ? '1' : '0');
-  if (p.limit != null) sp.set('limit', String(p.limit));
-  if (p.offset != null) sp.set('offset', String(p.offset));
-  if (p.sort) sp.set('sort', p.sort);
-  if (p.order) sp.set('order', p.order);
+  if (p.q) sp.set("q", p.q);
+  if (p.role) sp.set("role", p.role);
+  if (typeof p.is_active === "boolean") sp.set("is_active", p.is_active ? "1" : "0");
+  if (p.limit != null) sp.set("limit", String(p.limit));
+  if (p.offset != null) sp.set("offset", String(p.offset));
+  if (p.sort) sp.set("sort", p.sort);
+  if (p.order) sp.set("order", p.order);
   return sp.toString();
 }
 
 export default function UsersListClient() {
   const router = useRouter();
   const sp = useSearchParams();
-  const t = useAdminT('admin.users');
+  const t = useAdminT("admin.users");
 
   function roleLabel(r: UserRoleName) {
-    if (r === 'admin') return t('roles.admin');
-    if (r === 'moderator') return t('roles.moderator');
-    return t('roles.user');
+    if (r === "admin") return t("roles.admin");
+    if (r === "moderator") return t("roles.moderator");
+    return t("roles.user");
   }
 
   function statusBadge(u: AdminUserView) {
-    if (!u.is_active) return <Badge variant="destructive">{t('list.table.statusInactive')}</Badge>;
-    return <Badge variant="secondary">{t('list.table.statusActive')}</Badge>;
+    if (!u.is_active) return <Badge variant="destructive">{t("list.table.statusInactive")}</Badge>;
+    return <Badge variant="secondary">{t("list.table.statusActive")}</Badge>;
   }
 
-  function displayName(u: Pick<AdminUserView, 'full_name'>) {
-    const n = String(u.full_name ?? '').trim();
-    return n || t('list.table.unknownUser');
+  function displayName(u: Pick<AdminUserView, "full_name">) {
+    const n = String(u.full_name ?? "").trim();
+    return n || t("list.table.unknownUser");
   }
 
   const params = React.useMemo(() => pickQuery(sp), [sp]);
   const usersQ = useListUsersAdminQuery(params);
 
   // UI state (controlled) – URL ile senkron
-  const [q, setQ] = React.useState(params.q ?? '');
-  const [role, setRole] = React.useState<UserRoleName | 'all'>((params.role as any) ?? 'all');
-  const [onlyActive, setOnlyActive] = React.useState<boolean | 'all'>(
-    typeof params.is_active === 'boolean' ? (params.is_active ? true : false) : 'all',
+  const [q, setQ] = React.useState(params.q ?? "");
+  const [role, setRole] = React.useState<UserRoleName | "all">((params.role as any) ?? "all");
+  const [onlyActive, setOnlyActive] = React.useState<boolean | "all">(
+    typeof params.is_active === "boolean" ? !!params.is_active : "all",
   );
 
   React.useEffect(() => {
-    setQ(params.q ?? '');
-    setRole((params.role as any) ?? 'all');
-    setOnlyActive(
-      typeof params.is_active === 'boolean' ? (params.is_active ? true : false) : 'all',
-    );
+    setQ(params.q ?? "");
+    setRole((params.role as any) ?? "all");
+    setOnlyActive(typeof params.is_active === "boolean" ? !!params.is_active : "all");
   }, [params.q, params.role, params.is_active]);
 
   function apply(next: Partial<AdminUsersListParams>) {
@@ -135,7 +119,7 @@ export default function UsersListClient() {
 
     if (!merged.q) delete (merged as any).q;
     if (!merged.role) delete (merged as any).role;
-    if (typeof merged.is_active !== 'boolean') delete (merged as any).is_active;
+    if (typeof merged.is_active !== "boolean") delete (merged as any).is_active;
 
     const qs = toSearchParams(merged);
     router.push(qs ? `/admin/users?${qs}` : `/admin/users`);
@@ -155,63 +139,61 @@ export default function UsersListClient() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-lg font-semibold">{t('list.title')}</h1>
-        <p className="text-sm text-muted-foreground">
-          {t('list.description')}
-        </p>
+        <h1 className="font-semibold text-lg">{t("list.title")}</h1>
+        <p className="text-muted-foreground text-sm">{t("list.description")}</p>
       </div>
 
       <Card>
         <CardHeader className="gap-2">
-          <CardTitle className="text-base">{t('list.filters.title')}</CardTitle>
-          <CardDescription>{t('list.filters.description')}</CardDescription>
+          <CardTitle className="text-base">{t("list.filters.title")}</CardTitle>
+          <CardDescription>{t("list.filters.description")}</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
           <form onSubmit={onSearchSubmit} className="flex flex-col gap-3 lg:flex-row lg:items-end">
             <div className="flex-1 space-y-2">
-              <Label htmlFor="q">{t('list.filters.searchLabel')}</Label>
+              <Label htmlFor="q">{t("list.filters.searchLabel")}</Label>
               <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                <Search className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 size-4 text-muted-foreground" />
                 <Input
                   id="q"
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder={t('list.filters.searchPlaceholder')}
+                  placeholder={t("list.filters.searchPlaceholder")}
                   className="pl-9"
                 />
               </div>
             </div>
 
             <div className="w-full space-y-2 lg:w-56">
-              <Label>{t('list.filters.roleLabel')}</Label>
+              <Label>{t("list.filters.roleLabel")}</Label>
               <Select
                 value={role}
                 onValueChange={(v) => {
-                  const vv = v as UserRoleName | 'all';
+                  const vv = v as UserRoleName | "all";
                   setRole(vv);
-                  apply({ role: vv === 'all' ? undefined : (vv as UserRoleName) });
+                  apply({ role: vv === "all" ? undefined : (vv as UserRoleName) });
                 }}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder={t('list.filters.rolePlaceholder')} />
+                  <SelectValue placeholder={t("list.filters.rolePlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">{t('roles.all')}</SelectItem>
-                  <SelectItem value="admin">{t('roles.admin')}</SelectItem>
-                  <SelectItem value="moderator">{t('roles.moderator')}</SelectItem>
-                  <SelectItem value="user">{t('roles.user')}</SelectItem>
+                  <SelectItem value="all">{t("roles.all")}</SelectItem>
+                  <SelectItem value="admin">{t("roles.admin")}</SelectItem>
+                  <SelectItem value="moderator">{t("roles.moderator")}</SelectItem>
+                  <SelectItem value="user">{t("roles.user")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex items-center gap-2">
               <Filter className="size-4 text-muted-foreground" />
-              <Label className="text-sm">{t('list.filters.onlyActive')}</Label>
+              <Label className="text-sm">{t("list.filters.onlyActive")}</Label>
               <Switch
                 checked={onlyActive === true}
                 onCheckedChange={(v) => {
-                  const next = v ? true : 'all';
+                  const next = v ? true : "all";
                   setOnlyActive(next);
                   apply({ is_active: v ? true : undefined });
                 }}
@@ -220,27 +202,27 @@ export default function UsersListClient() {
 
             <div className="flex gap-2">
               <Button type="submit" disabled={usersQ.isFetching}>
-                {t('list.filters.searchButton')}
+                {t("list.filters.searchButton")}
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => {
-                  setQ('');
-                  setRole('all');
-                  setOnlyActive('all');
-                  router.push('/admin/users');
+                  setQ("");
+                  setRole("all");
+                  setOnlyActive("all");
+                  router.push("/admin/users");
                 }}
                 disabled={usersQ.isFetching}
               >
-                {t('list.filters.resetButton')}
+                {t("list.filters.resetButton")}
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 onClick={() => usersQ.refetch()}
                 disabled={usersQ.isFetching}
-                title={t('list.filters.refreshButton')}
+                title={t("list.filters.refreshButton")}
               >
                 <RefreshCcw className="size-4" />
               </Button>
@@ -251,27 +233,27 @@ export default function UsersListClient() {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{t('list.table.title')}</CardTitle>
+          <CardTitle className="text-base">{t("list.table.title")}</CardTitle>
           <CardDescription>
             {usersQ.isFetching
-              ? t('list.table.loading')
-              : t('list.table.totalRecords', { count: usersQ.data?.length ?? 0 })}
+              ? t("list.table.loading")
+              : t("list.table.totalRecords", { count: usersQ.data?.length ?? 0 })}
           </CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
           {usersQ.isError ? (
             <div className="rounded-md border p-4 text-sm">
-              {t('list.table.loadError')}{' '}
+              {t("list.table.loadError")}{" "}
               <Button
                 variant="link"
                 className="px-1"
                 onClick={() => {
-                  toast.error(t('list.table.loadError'));
+                  toast.error(t("list.table.loadError"));
                   usersQ.refetch();
                 }}
               >
-                {t('list.table.retryButton')}
+                {t("list.table.retryButton")}
               </Button>
             </div>
           ) : null}
@@ -280,12 +262,12 @@ export default function UsersListClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t('list.table.fullName')}</TableHead>
-                  <TableHead>{t('list.table.email')}</TableHead>
-                  <TableHead>{t('list.table.phone')}</TableHead>
-                  <TableHead>{t('list.table.status')}</TableHead>
-                  <TableHead>{t('list.table.role')}</TableHead>
-                  <TableHead className="text-right">{t('list.table.actions')}</TableHead>
+                  <TableHead>{t("list.table.fullName")}</TableHead>
+                  <TableHead>{t("list.table.email")}</TableHead>
+                  <TableHead>{t("list.table.phone")}</TableHead>
+                  <TableHead>{t("list.table.status")}</TableHead>
+                  <TableHead>{t("list.table.role")}</TableHead>
+                  <TableHead className="text-right">{t("list.table.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
 
@@ -293,18 +275,18 @@ export default function UsersListClient() {
                 {(usersQ.data ?? []).map((u) => (
                   <TableRow key={u.id}>
                     <TableCell className="font-medium">{displayName(u)}</TableCell>
-                    <TableCell>{u.email ?? '—'}</TableCell>
-                    <TableCell>{u.phone ?? '—'}</TableCell>
+                    <TableCell>{u.email ?? "—"}</TableCell>
+                    <TableCell>{u.phone ?? "—"}</TableCell>
                     <TableCell>{statusBadge(u)}</TableCell>
                     <TableCell>
-                      <Badge variant={u.roles.includes('admin') ? 'default' : 'secondary'}>
-                        {roleLabel(u.roles[0] ?? 'user')}
+                      <Badge variant={u.roles.includes("admin") ? "default" : "secondary"}>
+                        {roleLabel(u.roles[0] ?? "user")}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button asChild variant="outline" size="sm">
                         <Link prefetch={false} href={`/admin/users/${encodeURIComponent(u.id)}`}>
-                          {t('list.table.viewButton')}
+                          {t("list.table.viewButton")}
                         </Link>
                       </Button>
                     </TableCell>
@@ -314,7 +296,7 @@ export default function UsersListClient() {
                 {!usersQ.isFetching && (usersQ.data?.length ?? 0) === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-10 text-center text-muted-foreground">
-                      {t('list.table.noRecords')}
+                      {t("list.table.noRecords")}
                     </TableCell>
                   </TableRow>
                 ) : null}
@@ -323,8 +305,8 @@ export default function UsersListClient() {
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="text-xs text-muted-foreground">
-              {t('list.pagination.offset', { offset })} • {t('list.pagination.limit', { limit })}
+            <div className="text-muted-foreground text-xs">
+              {t("list.pagination.offset", { offset })} • {t("list.pagination.limit", { limit })}
             </div>
 
             <div className="flex gap-2">
@@ -335,7 +317,7 @@ export default function UsersListClient() {
                 onClick={() => apply({ offset: Math.max(0, offset - limit) })}
               >
                 <ChevronLeft className="mr-1 size-4" />
-                {t('list.pagination.previous')}
+                {t("list.pagination.previous")}
               </Button>
               <Button
                 variant="outline"
@@ -343,7 +325,7 @@ export default function UsersListClient() {
                 disabled={!canNext || usersQ.isFetching}
                 onClick={() => apply({ offset: offset + limit })}
               >
-                {t('list.pagination.next')}
+                {t("list.pagination.next")}
                 <ChevronRight className="ml-1 size-4" />
               </Button>
             </div>

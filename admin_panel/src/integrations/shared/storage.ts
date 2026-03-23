@@ -1,7 +1,7 @@
 // =============================================================
 // FILE: src/integrations/shared/storage.ts
 // =============================================================
-import type { FetchBaseQueryError } from '@reduxjs/toolkit/query';
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 export type StorageMeta = Record<string, string> | null;
 
 export type StorageAsset = {
@@ -22,7 +22,7 @@ export type StorageAsset = {
 
 export type ApiStorageAsset = Omit<
   StorageAsset,
-  'size' | 'width' | 'height' | 'metadata' | 'created_at' | 'updated_at'
+  "size" | "width" | "height" | "metadata" | "created_at" | "updated_at"
 > & {
   size: number | string;
   width?: number | string | null;
@@ -39,8 +39,8 @@ export type StorageListParams = {
   mime?: string;
   limit?: number;
   offset?: number;
-  sort?: 'created_at' | 'name' | 'size';
-  order?: 'asc' | 'desc';
+  sort?: "created_at" | "name" | "size";
+  order?: "asc" | "desc";
 };
 
 /** ---- Public endpoints tipleri ---- */
@@ -76,8 +76,8 @@ export type StorageListQuery = {
   mime?: string;
   limit?: number;
   offset?: number;
-  sort?: 'created_at' | 'name' | 'size';
-  order?: 'asc' | 'desc';
+  sort?: "created_at" | "name" | "size";
+  order?: "asc" | "desc";
 };
 export type StorageUpdateInput = {
   name?: string;
@@ -85,7 +85,7 @@ export type StorageUpdateInput = {
   metadata?: Record<string, string> | null;
 };
 
-export const sanitize = (name: string) => name.replace(/[^\w.\-]+/g, '_');
+export const sanitize = (name: string) => name.replace(/[^\w.-]+/g, "_");
 
 export type UploadManyResponse = { items: StoragePublicUploadResponse[] };
 
@@ -94,16 +94,16 @@ export function compactFiles(list: unknown[]): File[] {
   const out: File[] = [];
   for (const f of list) {
     if (!f) continue;
-    if (typeof File !== 'undefined' && f instanceof File) {
+    if (typeof File !== "undefined" && f instanceof File) {
       out.push(f);
       continue;
     }
-    if (typeof Blob !== 'undefined' && f instanceof Blob) {
+    if (typeof Blob !== "undefined" && f instanceof Blob) {
       try {
-        const name = (f as any)?.name || 'blob';
+        const name = (f as any)?.name || "blob";
         out.push(
           new File([f], name, {
-            type: (f as any).type || 'application/octet-stream',
+            type: (f as any).type || "application/octet-stream",
           }),
         );
       } catch {
@@ -132,12 +132,9 @@ export type BulkCreateResponse = {
 
 // NULL-güvenli tag helper
 export const StorageListTags = (items?: StorageAsset[]) =>
-  items && items.length
-    ? [
-        { type: 'Storage' as const, id: 'LIST' as const },
-        ...items.map((r) => ({ type: 'Storage' as const, id: r.id })),
-      ]
-    : [{ type: 'Storage' as const, id: 'LIST' as const }];
+  items?.length
+    ? [{ type: "Storage" as const, id: "LIST" as const }, ...items.map((r) => ({ type: "Storage" as const, id: r.id }))]
+    : [{ type: "Storage" as const, id: "LIST" as const }];
 
 // Backend query tipini Record<string, string | number>’e çevir
 export const toQueryParams = (q?: Partial<StorageListQuery>): Record<string, string | number> => {
@@ -149,8 +146,8 @@ export const toQueryParams = (q?: Partial<StorageListQuery>): Record<string, str
   if (q.bucket) params.bucket = q.bucket;
   if (q.folder != null) params.folder = q.folder;
   if (q.mime) params.mime = q.mime;
-  if (typeof q.limit === 'number') params.limit = q.limit;
-  if (typeof q.offset === 'number') params.offset = q.offset;
+  if (typeof q.limit === "number") params.limit = q.limit;
+  if (typeof q.offset === "number") params.offset = q.offset;
   if (q.sort) params.sort = q.sort;
   if (q.order) params.order = q.order;
 
@@ -159,7 +156,7 @@ export const toQueryParams = (q?: Partial<StorageListQuery>): Record<string, str
 
 // Hata helper (eslint no-explicit-any için: FetchBaseQueryError union'ı kullan)
 export const makeCustomError = (message: string, data?: unknown): FetchBaseQueryError => ({
-  status: 'CUSTOM_ERROR',
+  status: "CUSTOM_ERROR",
   error: message,
   data,
 });

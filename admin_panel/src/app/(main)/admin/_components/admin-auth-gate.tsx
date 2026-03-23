@@ -5,14 +5,15 @@
 // - Redirects to /auth/login when not admin
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
+import * as React from "react";
 
-import { useStatusQuery } from '@/integrations/hooks';
-import type { AuthStatusResponse } from '@/integrations/shared';
-import { normalizeMeFromStatus } from '@/integrations/shared';
+import { useRouter } from "next/navigation";
+
+import { useStatusQuery } from "@/integrations/hooks";
+import type { AuthStatusResponse } from "@/integrations/shared";
+import { normalizeMeFromStatus } from "@/integrations/shared";
 
 export default function AdminAuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -28,7 +29,7 @@ export default function AdminAuthGate({ children }: { children: React.ReactNode 
     const me = normalizeMeFromStatus(data);
 
     if (!me || me.isAdmin !== true) {
-      router.replace('/auth/login');
+      router.replace("/auth/login");
     }
   }, [q.isFetching, q.isUninitialized, q.data, router]);
 

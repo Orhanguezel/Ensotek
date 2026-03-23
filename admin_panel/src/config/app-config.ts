@@ -3,7 +3,7 @@
 // Admin Panel Config — DB'den gelen branding verileri için fallback
 // =============================================================
 
-import packageJson from '../../package.json';
+import packageJson from "../../package.json";
 
 const currentYear = new Date().getFullYear();
 
@@ -27,23 +27,23 @@ export type AdminBrandingConfig = {
 };
 
 export const DEFAULT_BRANDING: AdminBrandingConfig = {
-  app_name: 'Ensotek Admin Panel',
-  app_copyright: 'Ensotek GmbH',
-  html_lang: 'de',
-  theme_color: '#0066CC',
-  favicon_16: '/favicon/favicon.svg',
-  favicon_32: '/favicon/favicon.svg',
-  apple_touch_icon: '/favicon/apple-touch-icon.png',
+  app_name: "Ensotek Admin Panel",
+  app_copyright: "Ensotek GmbH",
+  html_lang: "de",
+  theme_color: "#0066CC",
+  favicon_16: "/favicon/favicon.svg",
+  favicon_32: "/favicon/favicon.svg",
+  apple_touch_icon: "/favicon/apple-touch-icon.png",
   meta: {
-    title: 'Ensotek - Industrielle Kühl- und Klimatechnik | HVAC Lösungen',
+    title: "Ensotek - Industrielle Kühl- und Klimatechnik | HVAC Lösungen",
     description:
-      'Ensotek: Führender Anbieter für industrielle Kühl- und Klimatechnik. Adiabate Kühlung, Verdunstungskühler und maßgeschneiderte HVAC-Lösungen für Industrie und Gewerbe.',
-    og_url: 'https://ensotek.de/',
-    og_title: 'Ensotek - Industrielle Kühl- und Klimatechnik',
+      "Ensotek: Führender Anbieter für industrielle Kühl- und Klimatechnik. Adiabate Kühlung, Verdunstungskühler und maßgeschneiderte HVAC-Lösungen für Industrie und Gewerbe.",
+    og_url: "https://ensotek.de/",
+    og_title: "Ensotek - Industrielle Kühl- und Klimatechnik",
     og_description:
-      'Professionelle HVAC-Lösungen für Industrie und Gewerbe. Adiabate Kühlung, Verdunstungskühler und energieeffiziente Klimatechnik.',
-    og_image: '/logo/png/ensotek_logo_512.png',
-    twitter_card: 'summary_large_image',
+      "Professionelle HVAC-Lösungen für Industrie und Gewerbe. Adiabate Kühlung, Verdunstungskühler und energieeffiziente Klimatechnik.",
+    og_image: "/logo/png/ensotek_logo_512.png",
+    twitter_card: "summary_large_image",
   },
 };
 

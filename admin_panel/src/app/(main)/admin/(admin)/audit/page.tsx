@@ -1,4 +1,4 @@
-import AuditPage from './audit';
+import AuditPage from "./audit";
 
 export default function Page() {
   return <AuditPage />;

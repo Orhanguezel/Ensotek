@@ -1,8 +1,8 @@
 // src/integrations/shared/users.ts
 
-import type { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
-export type UserRoleName = 'admin' | 'moderator' | 'user';
+export type UserRoleName = "admin" | "moderator" | "user";
 
 export type ProfileRow = {
   id: string;
@@ -71,8 +71,8 @@ export type AdminUsersListParams = {
   is_active?: boolean;
   limit?: number;
   offset?: number;
-  sort?: 'created_at' | 'email' | 'last_sign_in_at';
-  order?: 'asc' | 'desc';
+  sort?: "created_at" | "email" | "last_sign_in_at";
+  order?: "asc" | "desc";
 };
 
 export type AdminUpdateUserBody = {

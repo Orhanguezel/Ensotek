@@ -3,9 +3,9 @@
 // FINAL — Backend faqs modülü ile uyumlu tipler
 // =============================================================
 
-import type { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
-export type FaqSortable = 'created_at' | 'updated_at' | 'display_order';
+export type FaqSortable = "created_at" | "updated_at" | "display_order";
 
 export interface FaqDto {
   id: string;
@@ -39,27 +39,20 @@ export interface ApiFaqAdmin {
 }
 
 const toIsoString = (v: unknown): string => {
-  if (!v) return '';
-  if (typeof v === 'string') return v;
+  if (!v) return "";
+  if (typeof v === "string") return v;
   if (v instanceof Date) return v.toISOString();
   const d = new Date(String(v));
-  return Number.isNaN(d.getTime()) ? '' : d.toISOString();
+  return Number.isNaN(d.getTime()) ? "" : d.toISOString();
 };
 
 const toNumber = (v: unknown, fallback = 0): number => {
-  const n =
-    typeof v === 'number'
-      ? v
-      : typeof v === 'string'
-      ? Number(v)
-      : v == null
-      ? NaN
-      : Number(String(v));
+  const n = typeof v === "number" ? v : typeof v === "string" ? Number(v) : v == null ? NaN : Number(String(v));
   return Number.isFinite(n) ? n : fallback;
 };
 
 export const normalizeFaqAdmin = (row: ApiFaqAdmin): FaqDto => ({
-  id: String(row?.id ?? ''),
+  id: String(row?.id ?? ""),
   is_active: (row?.is_active ?? 0) as BoolLike,
   display_order: toNumber(row?.display_order, 0),
 
@@ -79,7 +72,7 @@ export const normalizeFaqAdmin = (row: ApiFaqAdmin): FaqDto => ({
  */
 export interface FaqListQueryParams {
   sort?: FaqSortable;
-  orderDir?: 'asc' | 'desc';
+  orderDir?: "asc" | "desc";
 
   limit?: number;
   offset?: number;

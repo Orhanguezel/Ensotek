@@ -3,11 +3,13 @@
 // guezelwebdesign – Admin Menu Items Header / Filters (HEADER ONLY)
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { useMemo } from 'react';
-import type { MenuLocation } from '@/integrations/shared';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import type React from "react";
+import { useMemo } from "react";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import type { MenuLocation } from "@/integrations/shared";
 
 export type LocaleOption = {
   value: string;
@@ -17,9 +19,9 @@ export type LocaleOption = {
 export type MenuItemFilters = {
   search: string;
   location: MenuLocation;
-  active: 'all' | 'active' | 'inactive';
-  sort: 'display_order' | 'created_at' | 'title';
-  order: 'asc' | 'desc';
+  active: "all" | "active" | "inactive";
+  sort: "display_order" | "created_at" | "title";
+  order: "asc" | "desc";
   locale: string; // "" => tüm diller, aksi => "de"/"en"...
 };
 
@@ -37,14 +39,14 @@ export type MenuItemHeaderProps = {
 
 /* -------------------- helpers -------------------- */
 const toShortLocale = (v: unknown): string =>
-  String(v || '')
+  String(v || "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 
-    const ALL = '__all__' as const;
+const ALL = "__all__" as const;
 
 export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
   filters,
@@ -57,11 +59,8 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
   onRefresh,
   onCreateClick,
 }) => {
-  const t = useAdminT('admin.menuitem');
-  const effectiveDefaultLocale = useMemo(
-    () => toShortLocale(defaultLocale ?? 'de'),
-    [defaultLocale],
-  );
+  const t = useAdminT("admin.menuitem");
+  const effectiveDefaultLocale = useMemo(() => toShortLocale(defaultLocale ?? "de"), [defaultLocale]);
 
   const localeSelectDisabled = loading || (!!localesLoading && (locales?.length ?? 0) === 0);
 
@@ -72,18 +71,17 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
     };
 
   const handleInputChange =
-    (field: keyof MenuItemFilters) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    (field: keyof MenuItemFilters) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
       setField(field as any)(e.target.value as any);
     };
 
   const handleLocaleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const raw = e.target.value;
-    setField('locale')(raw ? toShortLocale(raw) : '');
+    setField("locale")(raw ? toShortLocale(raw) : "");
   };
 
   const handleOrderToggle = () => {
-    setField('order')(filters.order === 'asc' ? 'desc' : 'asc');
+    setField("order")(filters.order === "asc" ? "desc" : "asc");
   };
 
   const totalSafe = Number.isFinite(total) ? total : 0;
@@ -97,24 +95,22 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
             <div className="row g-2">
               {/* Search */}
               <div className="col-12 col-md-6 col-xl-4">
-                <label className="form-label small mb-1">{t('header.searchLabel')}</label>
+                <label className="form-label small mb-1">{t("header.searchLabel")}</label>
                 <input
                   type="text"
                   className="form-control form-control-sm"
-                  placeholder={t('header.searchPlaceholder')}
+                  placeholder={t("header.searchPlaceholder")}
                   value={filters.search}
-                  onChange={handleInputChange('search')}
+                  onChange={handleInputChange("search")}
                   disabled={loading}
                 />
               </div>
 
               {/* Locale */}
               <div className="col-12 col-md-6 col-xl-3">
-                <label className="form-label small mb-1 d-flex align-items-center gap-2">
-                  <span>{t('header.localeLabel')}</span>
-                  {localesLoading && (
-                    <span className="spinner-border spinner-border-sm" role="status" />
-                  )}
+                <label className="form-label small d-flex mb-1 gap-2 align-items-center">
+                  <span>{t("header.localeLabel")}</span>
+                  {localesLoading && <span className="spinner-border spinner-border-sm" role="status" />}
                 </label>
 
                 <select
@@ -124,8 +120,8 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                   disabled={localeSelectDisabled}
                 >
                   <option value={ALL}>
-                    {t('header.allLocales')}
-                    {effectiveDefaultLocale ? ` (${t('header.defaultLabel')}: ${effectiveDefaultLocale})` : ''}
+                    {t("header.allLocales")}
+                    {effectiveDefaultLocale ? ` (${t("header.defaultLabel")}: ${effectiveDefaultLocale})` : ""}
                   </option>
 
                   {(locales ?? []).map((loc) => (
@@ -138,37 +134,37 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
 
               {/* Active */}
               <div className="col-6 col-md-4 col-xl-2">
-                <label className="form-label small mb-1">{t('header.activeLabel')}</label>
+                <label className="form-label small mb-1">{t("header.activeLabel")}</label>
                 <select
                   className="form-select form-select-sm"
                   value={filters.active}
-                  onChange={handleInputChange('active')}
+                  onChange={handleInputChange("active")}
                   disabled={loading}
                 >
-                  <option value="all">{t('header.allStats')}</option>
-                  <option value="active">{t('header.active')}</option>
-                  <option value="inactive">{t('header.inactive')}</option>
+                  <option value="all">{t("header.allStats")}</option>
+                  <option value="active">{t("header.active")}</option>
+                  <option value="inactive">{t("header.inactive")}</option>
                 </select>
               </div>
 
               {/* Sort */}
               <div className="col-6 col-md-4 col-xl-2">
-                <label className="form-label small mb-1">{t('header.sortLabel')}</label>
+                <label className="form-label small mb-1">{t("header.sortLabel")}</label>
                 <select
                   className="form-select form-select-sm"
                   value={filters.sort}
-                  onChange={handleInputChange('sort')}
+                  onChange={handleInputChange("sort")}
                   disabled={loading}
                 >
-                  <option value="display_order">{t('header.sortOrder')}</option>
-                  <option value="created_at">{t('header.sortCreated')}</option>
-                  <option value="title">{t('header.sortTitle')}</option>
+                  <option value="display_order">{t("header.sortOrder")}</option>
+                  <option value="created_at">{t("header.sortCreated")}</option>
+                  <option value="title">{t("header.sortTitle")}</option>
                 </select>
               </div>
 
               {/* Order */}
               <div className="col-12 col-md-4 col-xl-1">
-                <label className="form-label small mb-1 d-block">{t('header.orderLabel')}</label>
+                <label className="form-label small d-block mb-1">{t("header.orderLabel")}</label>
 
                 <div className="d-none d-md-block">
                   <button
@@ -177,7 +173,7 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                     disabled={loading}
                     onClick={handleOrderToggle}
                   >
-                    {filters.order === 'asc' ? '↑' : '↓'}
+                    {filters.order === "asc" ? "↑" : "↓"}
                   </button>
                 </div>
 
@@ -185,11 +181,11 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
                   <select
                     className="form-select form-select-sm"
                     value={filters.order}
-                    onChange={handleInputChange('order')}
+                    onChange={handleInputChange("order")}
                     disabled={loading}
                   >
-                    <option value="asc">{t('header.asc')}</option>
-                    <option value="desc">{t('header.desc')}</option>
+                    <option value="asc">{t("header.asc")}</option>
+                    <option value="desc">{t("header.desc")}</option>
                   </select>
                 </div>
               </div>
@@ -204,30 +200,23 @@ export const MenuItemHeader: React.FC<MenuItemHeaderProps> = ({
       <div className="col-12 col-lg-4">
         <div className="card h-100">
           <div className="card-body py-2">
-            <div className="d-flex flex-column flex-sm-row flex-lg-column justify-content-between align-items-start gap-2 h-100">
+            <div className="d-flex justify-content-between h-100 flex-column flex-lg-column flex-sm-row gap-2 align-items-start">
               <div className="small text-muted">
-                <div className="fw-semibold text-dark">{t('header.title')}</div>
-                <div>
-                  {t('header.total', { count: totalSafe })}
-                </div>
+                <div className="fw-semibold text-dark">{t("header.title")}</div>
+                <div>{t("header.total", { count: totalSafe })}</div>
               </div>
 
-              <div className="d-flex gap-2 flex-wrap justify-content-start">
+              <div className="d-flex justify-content-start flex-wrap gap-2">
                 <button
                   type="button"
                   className="btn btn-outline-secondary btn-sm"
                   disabled={loading}
                   onClick={onRefresh}
                 >
-                  {loading ? t('header.refreshing') : t('header.refresh')}
+                  {loading ? t("header.refreshing") : t("header.refresh")}
                 </button>
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm"
-                  disabled={loading}
-                  onClick={onCreateClick}
-                >
-                  + {t('header.create')}
+                <button type="button" className="btn btn-primary btn-sm" disabled={loading} onClick={onCreateClick}>
+                  + {t("header.create")}
                 </button>
               </div>
             </div>

@@ -3,7 +3,7 @@
 // Ensotek – Admin Users tipleri
 // =============================================================
 
-import type { UserRoleName } from '@/integrations/shared';
+import type { UserRoleName } from "@/integrations/shared";
 
 /**
  * Backend rolleri:
@@ -36,8 +36,8 @@ export type AdminUserListQueryParams = {
   q?: string;
   role?: AdminUserRoleName;
   is_active?: boolean; // backend boolean veya 0/1 kabul ediyor
-  sort?: 'created_at' | 'email' | 'last_login_at';
-  order?: 'asc' | 'desc';
+  sort?: "created_at" | "email" | "last_login_at";
+  order?: "asc" | "desc";
   limit?: number;
   offset?: number;
 };

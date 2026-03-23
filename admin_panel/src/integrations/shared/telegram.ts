@@ -4,11 +4,7 @@
 // ===================================================================
 
 /** Telegram event types for Ensotek */
-export type TelegramEventType =
-  | 'new_contact'
-  | 'new_catalog_request'
-  | 'new_offer_request'
-  | 'new_support_ticket';
+export type TelegramEventType = "new_contact" | "new_catalog_request" | "new_offer_request" | "new_support_ticket";
 
 /**
  * POST /admin/telegram/send

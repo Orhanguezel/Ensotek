@@ -2,43 +2,28 @@
 // FILE: src/app/(main)/admin/(admin)/site-settings/tabs/structured/business-hours-structured-form.tsx
 // =============================================================
 
-'use client';
+"use client";
 
-import React from 'react';
-import { z } from 'zod';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
-import {
-  SITE_SETTINGS_BUSINESS_HOURS_EMPTY,
-  SITE_SETTINGS_BUSINESS_HOUR_DAYS,
-} from '@/integrations/shared';
+import type React from "react";
 
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableHead,
-  TableCell,
-  TableRow,
-} from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
+import { z } from "zod";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { useAdminTranslations } from "@/i18n";
+import { SITE_SETTINGS_BUSINESS_HOUR_DAYS, SITE_SETTINGS_BUSINESS_HOURS_EMPTY } from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 const dayEnum = z.enum(SITE_SETTINGS_BUSINESS_HOUR_DAYS);
 const hhmm = z
   .string()
   .trim()
-  .refine((s) => /^\d{2}:\d{2}$/.test(s), 'HH:MM');
+  .refine((s) => /^\d{2}:\d{2}$/.test(s), "HH:MM");
 
 export const businessHourRowSchema = z
   .object({
@@ -61,10 +46,7 @@ export type BusinessHoursStructuredFormProps = {
   seed?: BusinessHoursFormState;
 };
 
-export function businessHoursObjToForm(
-  v: any,
-  seed: BusinessHoursFormState,
-): BusinessHoursFormState {
+export function businessHoursObjToForm(v: any, seed: BusinessHoursFormState): BusinessHoursFormState {
   const base = Array.isArray(v) ? v : seed;
   const parsed = businessHoursSchema.safeParse(base);
   return parsed.success ? parsed.data : seed;
@@ -91,8 +73,7 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
 
-  const s = (seed ||
-    ([...SITE_SETTINGS_BUSINESS_HOURS_EMPTY] as any)) as BusinessHoursFormState;
+  const s = (seed || ([...SITE_SETTINGS_BUSINESS_HOURS_EMPTY] as any)) as BusinessHoursFormState;
 
   const form = businessHoursObjToForm(value, s);
 
@@ -110,10 +91,7 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
   };
 
   const addRow = () => {
-    onChange([
-      ...(form || []),
-      { ...SITE_SETTINGS_BUSINESS_HOURS_EMPTY[0] } as any,
-    ]);
+    onChange([...(form || []), { ...SITE_SETTINGS_BUSINESS_HOURS_EMPTY[0] } as any]);
   };
 
   const removeRow = (idx: number) => {
@@ -126,7 +104,7 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
     <div className="space-y-4">
       <Alert variant="default" className="py-2">
         <AlertDescription className="text-sm">
-          {t('admin.siteSettings.structured.businessHours.description')}
+          {t("admin.siteSettings.structured.businessHours.description")}
         </AlertDescription>
       </Alert>
 
@@ -134,11 +112,11 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-40">{t('admin.siteSettings.structured.businessHours.columns.day')}</TableHead>
-              <TableHead className="w-40">{t('admin.siteSettings.structured.businessHours.columns.open')}</TableHead>
-              <TableHead className="w-40">{t('admin.siteSettings.structured.businessHours.columns.close')}</TableHead>
-              <TableHead className="w-32">{t('admin.siteSettings.structured.businessHours.columns.closed')}</TableHead>
-              <TableHead className="text-right w-24"> </TableHead>
+              <TableHead className="w-40">{t("admin.siteSettings.structured.businessHours.columns.day")}</TableHead>
+              <TableHead className="w-40">{t("admin.siteSettings.structured.businessHours.columns.open")}</TableHead>
+              <TableHead className="w-40">{t("admin.siteSettings.structured.businessHours.columns.close")}</TableHead>
+              <TableHead className="w-32">{t("admin.siteSettings.structured.businessHours.columns.closed")}</TableHead>
+              <TableHead className="w-24 text-right"> </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -161,9 +139,7 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
                       ))}
                     </SelectContent>
                   </Select>
-                  {errors?.[`${idx}.day`] && (
-                    <p className="text-xs text-destructive">{errors[`${idx}.day`]}</p>
-                  )}
+                  {errors?.[`${idx}.day`] && <p className="text-destructive text-xs">{errors[`${idx}.day`]}</p>}
                 </TableCell>
 
                 <TableCell>
@@ -171,12 +147,10 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
                     className="h-8 font-mono"
                     value={r.open}
                     onChange={(e) => setRow(idx, { open: e.target.value })}
-                    placeholder={t('admin.siteSettings.structured.businessHours.placeholders.open')}
+                    placeholder={t("admin.siteSettings.structured.businessHours.placeholders.open")}
                     disabled={disabled || !!r.closed}
                   />
-                  {errors?.[`${idx}.open`] && (
-                    <p className="text-xs text-destructive">{errors[`${idx}.open`]}</p>
-                  )}
+                  {errors?.[`${idx}.open`] && <p className="text-destructive text-xs">{errors[`${idx}.open`]}</p>}
                 </TableCell>
 
                 <TableCell>
@@ -184,12 +158,10 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
                     className="h-8 font-mono"
                     value={r.close}
                     onChange={(e) => setRow(idx, { close: e.target.value })}
-                    placeholder={t('admin.siteSettings.structured.businessHours.placeholders.close')}
+                    placeholder={t("admin.siteSettings.structured.businessHours.placeholders.close")}
                     disabled={disabled || !!r.closed}
                   />
-                  {errors?.[`${idx}.close`] && (
-                    <p className="text-xs text-destructive">{errors[`${idx}.close`]}</p>
-                  )}
+                  {errors?.[`${idx}.close`] && <p className="text-destructive text-xs">{errors[`${idx}.close`]}</p>}
                 </TableCell>
 
                 <TableCell>
@@ -201,7 +173,7 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
                       disabled={disabled}
                     />
                     <Label htmlFor={`closed-${idx}`} className="text-xs">
-                      {t('admin.siteSettings.structured.businessHours.closedLabel')}
+                      {t("admin.siteSettings.structured.businessHours.closedLabel")}
                     </Label>
                   </div>
                 </TableCell>
@@ -214,7 +186,7 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
                     onClick={() => removeRow(idx)}
                     disabled={disabled}
                   >
-                    {t('admin.siteSettings.structured.businessHours.removeRow')}
+                    {t("admin.siteSettings.structured.businessHours.removeRow")}
                   </Button>
                 </TableCell>
               </TableRow>
@@ -222,22 +194,16 @@ export const BusinessHoursStructuredForm: React.FC<BusinessHoursStructuredFormPr
           </TableBody>
         </Table>
 
-        {errors?.form && <p className="p-3 text-xs text-destructive">{errors.form}</p>}
+        {errors?.form && <p className="p-3 text-destructive text-xs">{errors.form}</p>}
       </div>
 
       <div className="flex justify-end">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={addRow}
-          disabled={disabled}
-        >
-          {t('admin.siteSettings.structured.businessHours.addRow')}
+        <Button type="button" variant="outline" size="sm" onClick={addRow} disabled={disabled}>
+          {t("admin.siteSettings.structured.businessHours.addRow")}
         </Button>
       </div>
     </div>
   );
 };
 
-BusinessHoursStructuredForm.displayName = 'BusinessHoursStructuredForm';
+BusinessHoursStructuredForm.displayName = "BusinessHoursStructuredForm";

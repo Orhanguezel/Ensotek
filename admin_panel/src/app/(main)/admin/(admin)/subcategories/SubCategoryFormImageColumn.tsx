@@ -4,10 +4,12 @@
 // - FIX: Upload sonrası anlık preview render (local state sync + key remount)
 // =============================================================
 
-'use client';
+"use client";
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
 
 export type SubCategoryImageMetadata = {
   category_id?: string;
@@ -22,7 +24,7 @@ export type SubCategoryFormImageColumnProps = {
   onIconChange: (url: string) => void;
 };
 
-const safeStr = (v: unknown) => (v === null || v === undefined ? '' : String(v).trim());
+const safeStr = (v: unknown) => (v === null || v === undefined ? "" : String(v).trim());
 
 export const SubCategoryFormImageColumn: React.FC<SubCategoryFormImageColumnProps> = ({
   metadata,
@@ -41,11 +43,9 @@ export const SubCategoryFormImageColumn: React.FC<SubCategoryFormImageColumnProp
   // ✅ Remount key: value veya metadata değişince alan kesin refresh
   const remountKey = useMemo(() => {
     const m = metadata
-      ? `${safeStr(metadata.category_id)}|${safeStr(metadata.locale)}|${safeStr(
-          metadata.sub_category_slug,
-        )}`
-      : 'no-meta';
-    return `${m}|${safeStr(localValue) || 'empty'}`;
+      ? `${safeStr(metadata.category_id)}|${safeStr(metadata.locale)}|${safeStr(metadata.sub_category_slug)}`
+      : "no-meta";
+    return `${m}|${safeStr(localValue) || "empty"}`;
   }, [metadata, localValue]);
 
   return (
@@ -54,9 +54,8 @@ export const SubCategoryFormImageColumn: React.FC<SubCategoryFormImageColumnProp
       label="Alt Kategori Görseli"
       helperText={
         <>
-          Storage modülü üzerinden alt kategori için bir görsel yükleyebilirsin. Yüklenen görselin
-          URL&apos;i anında burada önizleme olarak görünür ve formdaki{' '}
-          <strong>Icon / Görsel URL</strong> alanına da yansır.
+          Storage modülü üzerinden alt kategori için bir görsel yükleyebilirsin. Yüklenen görselin URL&apos;i anında
+          burada önizleme olarak görünür ve formdaki <strong>Icon / Görsel URL</strong> alanına da yansır.
         </>
       }
       bucket="public"

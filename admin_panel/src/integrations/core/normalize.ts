@@ -37,7 +37,11 @@ export function toIso(x: unknown): string {
 /** JSON-string ise parse; değilse olduğu gibi döndür */
 export function tryParse<T>(x: unknown): T {
   if (typeof x === "string") {
-    try { return JSON.parse(x) as T; } catch { /* fallthrough */ }
+    try {
+      return JSON.parse(x) as T;
+    } catch {
+      /* fallthrough */
+    }
   }
   return x as T;
 }
@@ -48,8 +52,8 @@ export function toBool(x: unknown): boolean | undefined {
   if (typeof x === "number") return x !== 0;
   if (typeof x === "string") {
     const s = x.trim().toLowerCase();
-    if (["1","true","yes","on"].includes(s)) return true;
-    if (["0","false","no","off"].includes(s)) return false;
+    if (["1", "true", "yes", "on"].includes(s)) return true;
+    if (["0", "false", "no", "off"].includes(s)) return false;
   }
   return undefined;
 }
@@ -57,7 +61,7 @@ export function toBool(x: unknown): boolean | undefined {
 /** boolean benzeri → 0/1 (anlaşılamazsa undefined) */
 export function boolTo01(v: unknown): 0 | 1 | undefined {
   const b = toBool(v);
-  return b === undefined ? undefined : (b ? 1 : 0);
+  return b === undefined ? undefined : b ? 1 : 0;
 }
 
 /** Tek öğe/array → her durumda array */

@@ -1,8 +1,8 @@
 // src/integrations/shared/profiles.normalize.ts
-import type { Profile } from './profiles';
+import type { Profile } from "./profiles";
 
 export const normalizeProfile = (x: any): Profile => ({
-  id: String(x?.id ?? ''),
+  id: String(x?.id ?? ""),
 
   full_name: x?.full_name ?? null,
   phone: x?.phone ?? null,

@@ -7,9 +7,9 @@
 // - NO default_locale requirement (per request)
 // ===================================================================
 
-import type { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
-export type SkillTrack = 'right' | 'left';
+export type SkillTrack = "right" | "left";
 
 export interface SkillCounterMerged {
   id: string;
@@ -133,7 +133,7 @@ export function unwrap<T>(raw: any): T {
   return (raw?.data ?? raw?.result ?? raw?.payload ?? raw) as T;
 }
 
-export function toPublicSkillQuery(p?: SkillListParams | void | null) {
+export function toPublicSkillQuery(p?: SkillListParams | undefined | null) {
   const q: Record<string, any> = {};
   q.is_active = true; // public default
 
@@ -141,10 +141,10 @@ export function toPublicSkillQuery(p?: SkillListParams | void | null) {
 
   if (p.locale) q.locale = p.locale;
 
-  if (typeof p.active === 'boolean') q.is_active = p.active;
+  if (typeof p.active === "boolean") q.is_active = p.active;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   // optional (if backend ever supports filtering logos by track via query)
   if (p.track) q.track = p.track;
@@ -153,16 +153,16 @@ export function toPublicSkillQuery(p?: SkillListParams | void | null) {
 }
 
 // Admin list query (no default is_active)
-export function toAdminSkillQuery(p?: SkillListParams | void | null) {
+export function toAdminSkillQuery(p?: SkillListParams | undefined | null) {
   const q: Record<string, any> = {};
   if (!p) return q;
 
   if (p.locale) q.locale = p.locale;
 
-  if (typeof p.active === 'boolean') q.is_active = p.active;
+  if (typeof p.active === "boolean") q.is_active = p.active;
 
-  if (typeof p.limit === 'number') q.limit = p.limit;
-  if (typeof p.offset === 'number') q.offset = p.offset;
+  if (typeof p.limit === "number") q.limit = p.limit;
+  if (typeof p.offset === "number") q.offset = p.offset;
 
   if (p.track) q.track = p.track;
 
@@ -173,7 +173,7 @@ export function toAdminSkillQuery(p?: SkillListParams | void | null) {
 // Splitters (tolerant)
 // -----------------------------------------------------
 function isSkillTrack(v: any): v is SkillTrack {
-  return v === 'right' || v === 'left';
+  return v === "right" || v === "left";
 }
 
 export function splitSkills(raw: any): SkillsGroupedResponse {
@@ -182,11 +182,11 @@ export function splitSkills(raw: any): SkillsGroupedResponse {
   // case A: grouped response from backend
   if (
     r &&
-    typeof r === 'object' &&
+    typeof r === "object" &&
     (Array.isArray(r.counters) || Array.isArray(r.logos_right) || Array.isArray(r.logos_left))
   ) {
     return {
-      locale: typeof r.locale === 'string' ? r.locale : 'en',
+      locale: typeof r.locale === "string" ? r.locale : "en",
       counters: Array.isArray(r.counters) ? r.counters : [],
       logos_right: Array.isArray(r.logos_right) ? r.logos_right : [],
       logos_left: Array.isArray(r.logos_left) ? r.logos_left : [],
@@ -197,18 +197,16 @@ export function splitSkills(raw: any): SkillsGroupedResponse {
   const arr: any[] = Array.isArray(r) ? r : Array.isArray(r?.items) ? r.items : [];
 
   const counters: SkillCounterMerged[] = arr.filter(
-    (x) => x && typeof x === 'object' && typeof x.percent !== 'undefined',
+    (x) => x && typeof x === "object" && typeof x.percent !== "undefined",
   );
 
-  const logos: SkillLogoMerged[] = arr.filter(
-    (x) => x && typeof x === 'object' && isSkillTrack(x.track),
-  );
+  const logos: SkillLogoMerged[] = arr.filter((x) => x && typeof x === "object" && isSkillTrack(x.track));
 
   return {
-    locale: typeof r?.locale === 'string' ? r.locale : 'en',
+    locale: typeof r?.locale === "string" ? r.locale : "en",
     counters,
-    logos_right: logos.filter((x) => x.track === 'right'),
-    logos_left: logos.filter((x) => x.track === 'left'),
+    logos_right: logos.filter((x) => x.track === "right"),
+    logos_left: logos.filter((x) => x.track === "left"),
   };
 }
 

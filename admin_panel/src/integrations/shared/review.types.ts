@@ -4,8 +4,8 @@
 // - Component içinde helper yok
 // =============================================================
 
-import type { BoolLike } from '@/integrations/shared';
-import { parseJsonObject, uiText } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
+import { parseJsonObject, uiText } from "@/integrations/shared";
 
 // ===============================
 // Reviews (Public)
@@ -60,8 +60,8 @@ export type ReviewListQueryParams = {
   maxRating?: number;
   limit?: number;
   offset?: number;
-  orderBy?: 'created_at' | 'updated_at' | 'display_order' | 'rating' | 'name';
-  order?: 'asc' | 'desc';
+  orderBy?: "created_at" | "updated_at" | "display_order" | "rating" | "name";
+  order?: "asc" | "desc";
 
   // Listeleme locale override
   locale?: string;
@@ -100,7 +100,7 @@ export type ReviewUpdatePayload = Partial<ReviewCreatePayload> & {
 };
 
 export type ReviewReactionPayload = {
-  type: 'like' | 'dislike';
+  type: "like" | "dislike";
 };
 
 // ===============================
@@ -133,23 +133,21 @@ export function normalizeTestimonialsSectionSettingValue(val: unknown): Testimon
   const headline = uiText(o.headline) || "Client's Testimonials";
 
   const intro_line_1 =
-    uiText(o.intro_line_1) ||
-    'I believe that working hard and trying to learn every day will make me';
-  const intro_line_2 = uiText(o.intro_line_2) || 'improve in satisfying my customers.';
+    uiText(o.intro_line_1) || "I believe that working hard and trying to learn every day will make me";
+  const intro_line_2 = uiText(o.intro_line_2) || "improve in satisfying my customers.";
 
-  const target_type = uiText((o as any).target_type) || 'testimonial';
-  const bucket = uiText(o.bucket) || '11111111-1111-1111-1111-111111111111';
+  const target_type = uiText((o as any).target_type) || "testimonial";
+  const bucket = uiText(o.bucket) || "11111111-1111-1111-1111-111111111111";
 
   const cta_label = uiText(o.cta_label);
   const cta_href = uiText(o.cta_href);
 
-  const loading = uiText(o.loading) || 'Loading...';
-  const error = uiText(o.error) || 'Failed to load testimonials.';
-  const empty = uiText(o.empty) || 'No testimonials yet.';
+  const loading = uiText(o.loading) || "Loading...";
+  const error = uiText(o.error) || "Failed to load testimonials.";
+  const empty = uiText(o.empty) || "No testimonials yet.";
 
-  const man_img = uiText(o.man_img) || '/assets/imgs/testimonials/testimonials-1/man.png';
-  const decorate_img =
-    uiText(o.decorate_img) || '/assets/imgs/testimonials/testimonials-1/decorate.png';
+  const man_img = uiText(o.man_img) || "/assets/imgs/testimonials/testimonials-1/man.png";
+  const decorate_img = uiText(o.decorate_img) || "/assets/imgs/testimonials/testimonials-1/decorate.png";
 
   return {
     headline,
@@ -186,27 +184,26 @@ export type TestimonialCard = {
 };
 
 const clampRating = (n: unknown): number => {
-  const x = typeof n === 'number' ? n : Number(String(n ?? '0'));
+  const x = typeof n === "number" ? n : Number(String(n ?? "0"));
   if (!Number.isFinite(x)) return 0;
   return Math.max(0, Math.min(5, Math.round(x)));
 };
 
 export function mapReviewToTestimonialCard(r: ReviewDto): TestimonialCard {
-  const name = uiText(r.name) || '—';
+  const name = uiText(r.name) || "—";
   const role = uiText((r as any).role);
   const company = uiText((r as any).company);
   let metaRaw = uiText((r as any).title);
-  if (!metaRaw) metaRaw = [role, company].filter(Boolean).join(', ');
-  const meta = metaRaw ? ` - ${metaRaw}` : '';
+  if (!metaRaw) metaRaw = [role, company].filter(Boolean).join(", ");
+  const meta = metaRaw ? ` - ${metaRaw}` : "";
 
-  const comment = uiText(r.comment) || '…';
+  const comment = uiText(r.comment) || "…";
 
-  const avatar =
-    uiText((r as any).avatar_url) || '/assets/imgs/testimonials/testimonials-1/avatar-1.png';
+  const avatar = uiText((r as any).avatar_url) || "/assets/imgs/testimonials/testimonials-1/avatar-1.png";
 
-  const logo = uiText((r as any).logo_url) || '/assets/imgs/testimonials/testimonials-1/logo-1.png';
+  const logo = uiText((r as any).logo_url) || "/assets/imgs/testimonials/testimonials-1/logo-1.png";
 
-  const href = uiText((r as any).profile_href) || '#';
+  const href = uiText((r as any).profile_href) || "#";
 
   return {
     id: uiText(r.id),

@@ -4,15 +4,15 @@
 // - POST /mail/test
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
-import type { SendTestMailBody, SendTestMailResponse } from '@/integrations/shared';
+import { baseApi } from "@/integrations/baseApi";
+import type { SendTestMailBody, SendTestMailResponse } from "@/integrations/shared";
 
 export const mailAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
-    sendTestMail: b.mutation<SendTestMailResponse, SendTestMailBody | void>({
+    sendTestMail: b.mutation<SendTestMailResponse, SendTestMailBody | undefined>({
       query: (body) => ({
-        url: '/mail/test',
-        method: 'POST',
+        url: "/mail/test",
+        method: "POST",
         body: body ?? {},
       }),
       transformResponse: () => ({ ok: true as const }),

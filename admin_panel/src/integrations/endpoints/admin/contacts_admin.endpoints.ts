@@ -2,36 +2,32 @@
 // FILE: src/integrations/rtk/endpoints/admin/contacts_admin.endpoints.ts
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
-import type {
-  ContactDto,
-  ContactListQueryParams,
-  ContactUpdatePayload,
-} from '@/integrations/shared';
+import { baseApi } from "@/integrations/baseApi";
+import type { ContactDto, ContactListQueryParams, ContactUpdatePayload } from "@/integrations/shared";
 
-const BASE = '/admin/contacts';
+const BASE = "/admin/contacts";
 
 export const contactsAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     /**
      * LIST (admin) – GET /contacts
      */
-    listContactsAdmin: build.query<ContactDto[], ContactListQueryParams | void>({
+    listContactsAdmin: build.query<ContactDto[], ContactListQueryParams | undefined>({
       query: (params?: ContactListQueryParams) => ({
         url: `${BASE}`,
-        method: 'GET',
+        method: "GET",
         params,
       }),
       providesTags: (result) =>
         result
           ? [
               ...result.map((c) => ({
-                type: 'Contacts' as const,
+                type: "Contacts" as const,
                 id: c.id,
               })),
-              { type: 'Contacts' as const, id: 'LIST' },
+              { type: "Contacts" as const, id: "LIST" },
             ]
-          : [{ type: 'Contacts' as const, id: 'LIST' }],
+          : [{ type: "Contacts" as const, id: "LIST" }],
     }),
 
     /**
@@ -40,12 +36,10 @@ export const contactsAdminApi = baseApi.injectEndpoints({
     getContactAdmin: build.query<ContactDto, string>({
       query: (id) => ({
         url: `${BASE}/${id}`,
-        method: 'GET',
+        method: "GET",
       }),
       providesTags: (result) =>
-        result
-          ? [{ type: 'Contacts' as const, id: result.id }]
-          : [{ type: 'Contacts' as const, id: 'LIST' }],
+        result ? [{ type: "Contacts" as const, id: result.id }] : [{ type: "Contacts" as const, id: "LIST" }],
     }),
 
     /**
@@ -55,12 +49,12 @@ export const contactsAdminApi = baseApi.injectEndpoints({
     updateContactAdmin: build.mutation<ContactDto, { id: string; patch: ContactUpdatePayload }>({
       query: ({ id, patch }) => ({
         url: `${BASE}/${id}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: patch,
       }),
-      invalidatesTags: (result, error, arg) => [
-        { type: 'Contacts' as const, id: arg.id },
-        { type: 'Contacts' as const, id: 'LIST' },
+      invalidatesTags: (_result, _error, arg) => [
+        { type: "Contacts" as const, id: arg.id },
+        { type: "Contacts" as const, id: "LIST" },
       ],
     }),
 
@@ -70,11 +64,11 @@ export const contactsAdminApi = baseApi.injectEndpoints({
     deleteContactAdmin: build.mutation<{ ok: boolean }, string>({
       query: (id) => ({
         url: `${BASE}/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: (result, error, id) => [
-        { type: 'Contacts' as const, id },
-        { type: 'Contacts' as const, id: 'LIST' },
+      invalidatesTags: (_result, _error, id) => [
+        { type: "Contacts" as const, id },
+        { type: "Contacts" as const, id: "LIST" },
       ],
     }),
   }),

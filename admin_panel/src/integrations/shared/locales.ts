@@ -3,7 +3,7 @@
 // FINAL — app_locales value model + parser
 // =============================================================
 
-import type { JsonLike } from '@/integrations/shared';
+import type { JsonLike } from "@/integrations/shared";
 
 export type AppLocale = {
   code: string; // 'tr' | 'en' | ...
@@ -13,7 +13,7 @@ export type AppLocale = {
 };
 
 function isObj(v: unknown): v is Record<string, unknown> {
-  return !!v && typeof v === 'object' && !Array.isArray(v);
+  return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
 export function parseAppLocales(value: JsonLike | unknown): AppLocale[] {
@@ -25,8 +25,8 @@ export function parseAppLocales(value: JsonLike | unknown): AppLocale[] {
   for (const item of v) {
     if (!isObj(item)) continue;
 
-    const code = String(item.code ?? '').trim();
-    const label = String(item.label ?? '').trim();
+    const code = String(item.code ?? "").trim();
+    const label = String(item.label ?? "").trim();
     if (!code || !label) continue;
 
     out.push({

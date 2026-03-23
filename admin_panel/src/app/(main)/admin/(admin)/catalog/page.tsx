@@ -3,7 +3,7 @@
 // Admin Catalog Requests Page (App Router wrapper)
 // =============================================================
 
-import AdminCatalogClient from './_components/admin-catalog-client';
+import AdminCatalogClient from "./_components/admin-catalog-client";
 
 export default function Page() {
   return <AdminCatalogClient />;

@@ -1,17 +1,16 @@
 // src/integrations/shared/normalizers.ts
 
 import {
-  NewsletterAdminSubscriber,
-  NewsletterPublicSubscriber,
-  NotificationType,
-  NotificationView,
-} from '@/integrations/shared';
-
-import { toBool } from '@/integrations/shared';
+  type NewsletterAdminSubscriber,
+  type NewsletterPublicSubscriber,
+  type NotificationType,
+  type NotificationView,
+  toBool,
+} from "@/integrations/shared";
 
 // ----------------------------- Helpers -----------------------------
 
-const safeStr = (v: unknown) => String(v ?? '').trim();
+const safeStr = (v: unknown) => String(v ?? "").trim();
 
 const asNullableString = (v: unknown): string | null => {
   const s = safeStr(v);
@@ -20,14 +19,14 @@ const asNullableString = (v: unknown): string | null => {
 
 const asMeta = (v: unknown): Record<string, any> | null => {
   if (!v) return null;
-  if (typeof v === 'object' && !Array.isArray(v)) return v as any;
+  if (typeof v === "object" && !Array.isArray(v)) return v as any;
   // tolerate string JSON (in case some endpoints return raw)
-  if (typeof v === 'string') {
+  if (typeof v === "string") {
     const s = v.trim();
     if (!s) return null;
     try {
       const parsed = JSON.parse(s);
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed as any;
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) return parsed as any;
       return null;
     } catch {
       return null;
@@ -53,10 +52,8 @@ export const normalizeNewsletterPublicSubscriber = (raw: unknown): NewsletterPub
     unsubscribed_at: asNullableString(r.unsubscribed_at),
 
     // backend includes these aliases; keep if present
-    ...(typeof r.subscribeDate !== 'undefined' ? { subscribeDate: safeStr(r.subscribeDate) } : {}),
-    ...(typeof r.unsubscribeDate !== 'undefined'
-      ? { unsubscribeDate: asNullableString(r.unsubscribeDate) }
-      : {}),
+    ...(typeof r.subscribeDate !== "undefined" ? { subscribeDate: safeStr(r.subscribeDate) } : {}),
+    ...(typeof r.unsubscribeDate !== "undefined" ? { unsubscribeDate: asNullableString(r.unsubscribeDate) } : {}),
   };
 };
 
@@ -85,7 +82,7 @@ export const normalizeNewsletterAdminList = (raw: unknown): NewsletterAdminSubsc
 
 const asType = (v: unknown): NotificationType => {
   const s = safeStr(v);
-  return (s || 'system') as NotificationType;
+  return (s || "system") as NotificationType;
 };
 
 // ----------------------------- Normalizers -----------------------------
@@ -98,7 +95,7 @@ export const normalizeNotification = (raw: unknown): NotificationView => {
     user_id: safeStr(r.user_id),
 
     title: safeStr(r.title),
-    message: String(r.message ?? ''),
+    message: String(r.message ?? ""),
 
     type: asType(r.type),
 

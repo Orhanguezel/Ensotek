@@ -3,7 +3,7 @@
 // FINAL — Admin Newsletter Page
 // =============================================================
 
-import AdminNewsletterClient from './_components/admin-newsletter-client';
+import AdminNewsletterClient from "./_components/admin-newsletter-client";
 
 export default function Page() {
   return <AdminNewsletterClient />;

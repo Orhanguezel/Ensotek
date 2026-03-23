@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/slider/admin-slider-client.tsx
@@ -8,28 +8,27 @@
 // - RTK hooks in client
 // =============================================================
 
-import * as React from 'react';
-import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
+import * as React from "react";
 
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import { toast } from "sonner";
+
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+// mevcut UI componentlerin
+import { SliderHeader } from "@/app/(main)/admin/(admin)/slider/_components/SliderHeader";
+import { SliderList } from "@/app/(main)/admin/(admin)/slider/_components/SliderList";
 import {
-  useListSlidersAdminQuery,
-  useUpdateSliderAdminMutation,
   useDeleteSliderAdminMutation,
+  useListSlidersAdminQuery,
   useReorderSlidersAdminMutation,
   useSetSliderStatusAdminMutation,
-} from '@/integrations/hooks';
+  useUpdateSliderAdminMutation,
+} from "@/integrations/hooks";
+import type { SliderAdminDto } from "@/integrations/shared";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-
-import type { SliderAdminDto } from '@/integrations/shared';
-
-// mevcut UI componentlerin
-import { SliderHeader } from '@/app/(main)/admin/(admin)/slider/_components/SliderHeader';
-import { SliderList } from '@/app/(main)/admin/(admin)/slider/_components/SliderList';
-
-const normLocale = (v: unknown) => (typeof v === 'string' ? v.trim().toLowerCase() : '');
+const normLocale = (v: unknown) => (typeof v === "string" ? v.trim().toLowerCase() : "");
 
 function pickFirst(v: string | string[] | null | undefined) {
   if (!v) return undefined;
@@ -44,7 +43,7 @@ function upsertSearchParams(
 ) {
   const next = new URLSearchParams(params.toString());
   for (const [k, val] of Object.entries(patch)) {
-    if (val === undefined || val === null || String(val).trim() === '') next.delete(k);
+    if (val === undefined || val === null || String(val).trim() === "") next.delete(k);
     else next.set(k, String(val));
   }
   const qs = next.toString();
@@ -58,23 +57,22 @@ export default function AdminSliderClient() {
   const t = useAdminT();
 
   // URL state (single source)
-  const qFromUrl = pickFirst(sp.get('q')) ?? '';
-  const localeFromUrl = normLocale(pickFirst(sp.get('locale')) ?? '');
-  const activeFromUrl = pickFirst(sp.get('active')) ?? '';
+  const qFromUrl = pickFirst(sp.get("q")) ?? "";
+  const localeFromUrl = normLocale(pickFirst(sp.get("locale")) ?? "");
+  const activeFromUrl = pickFirst(sp.get("active")) ?? "";
 
-  const showOnlyActive = activeFromUrl === '1';
+  const showOnlyActive = activeFromUrl === "1";
 
   // Locale options (DB’den)
   const localesHook: any = useAdminLocales();
-  const localesLoading: boolean =
-    !!localesHook?.loading || !!localesHook?.isLoading || !!localesHook?.isFetching;
+  const localesLoading: boolean = !!localesHook?.loading || !!localesHook?.isLoading || !!localesHook?.isFetching;
 
   const defaultLocaleFromDb = normLocale(
     localesHook?.defaultLocaleFromDb ??
       localesHook?.defaultLocale ??
       localesHook?.default_locale ??
       localesHook?.default ??
-      '',
+      "",
   );
 
   const localeOptions = React.useMemo(() => {
@@ -89,7 +87,7 @@ export default function AdminSliderClient() {
     return raw
       .map((x: any) => ({
         value: normLocale(x?.value ?? x?.code ?? x),
-        label: String(x?.label ?? x?.name ?? x?.value ?? x?.code ?? x ?? '').trim(),
+        label: String(x?.label ?? x?.name ?? x?.value ?? x?.code ?? x ?? "").trim(),
       }))
       .filter((x: any) => !!x.value)
       .map((x: any) => ({ value: x.value, label: x.label || x.value.toUpperCase() }));
@@ -99,7 +97,7 @@ export default function AdminSliderClient() {
     const list = new Set(localeOptions.map((o: any) => o.value));
     if (localeFromUrl && list.has(localeFromUrl)) return localeFromUrl;
     if (defaultLocaleFromDb && list.has(defaultLocaleFromDb)) return defaultLocaleFromDb;
-    return localeOptions?.[0]?.value || '';
+    return localeOptions?.[0]?.value || "";
   }, [localeFromUrl, defaultLocaleFromDb, localeOptions]);
 
   // URL repair: locale yoksa yaz
@@ -107,14 +105,14 @@ export default function AdminSliderClient() {
     if (localesLoading) return;
     if (!effectiveLocale) return;
 
-    const cur = normLocale(sp.get('locale') ?? '');
+    const cur = normLocale(sp.get("locale") ?? "");
     if (cur === effectiveLocale) return;
 
     router.replace(upsertSearchParams(pathname, sp, { locale: effectiveLocale }), {
       scroll: false,
     } as any);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [localesLoading, effectiveLocale]);
+  }, [localesLoading, effectiveLocale, pathname, router.replace, sp]);
 
   /* -------------------- RTK Query -------------------- */
 
@@ -128,17 +126,14 @@ export default function AdminSliderClient() {
       q: qFromUrl || undefined,
       locale: effectiveLocale || undefined,
       is_active: showOnlyActive ? true : undefined,
-      sort: 'display_order',
-      order: 'asc',
+      sort: "display_order",
+      order: "asc",
       offset: 0,
     } as any,
     { skip: localesLoading || !effectiveLocale } as any,
   );
 
-  const sliders = React.useMemo(
-    () => (Array.isArray(slidersRaw) ? slidersRaw : []) as SliderAdminDto[],
-    [slidersRaw],
-  );
+  const sliders = React.useMemo(() => (Array.isArray(slidersRaw) ? slidersRaw : []) as SliderAdminDto[], [slidersRaw]);
 
   const [rows, setRows] = React.useState<SliderAdminDto[]>([]);
   React.useEffect(() => setRows(sliders), [sliders]);
@@ -164,18 +159,18 @@ export default function AdminSliderClient() {
     setUrl({ locale: nl || undefined });
   };
 
-  const handleShowOnlyActiveChange = (next: boolean) => setUrl({ active: next ? '1' : undefined });
+  const handleShowOnlyActiveChange = (next: boolean) => setUrl({ active: next ? "1" : undefined });
 
   /* -------------------- Navigation -------------------- */
 
   const handleCreateClick = () => {
-    const loc = effectiveLocale || '';
-    const href = loc ? `/admin/slider/new?locale=${encodeURIComponent(loc)}` : '/admin/slider/new';
+    const loc = effectiveLocale || "";
+    const href = loc ? `/admin/slider/new?locale=${encodeURIComponent(loc)}` : "/admin/slider/new";
     router.push(href);
   };
 
   const handleEdit = (item: SliderAdminDto) => {
-    const loc = effectiveLocale || '';
+    const loc = effectiveLocale || "";
     const href = loc
       ? `/admin/slider/${encodeURIComponent(String(item.id))}?locale=${encodeURIComponent(loc)}`
       : `/admin/slider/${encodeURIComponent(String(item.id))}`;
@@ -185,21 +180,14 @@ export default function AdminSliderClient() {
   /* -------------------- Mutations -------------------- */
 
   const handleDelete = async (item: SliderAdminDto) => {
-    if (
-      !window.confirm(t('admin.slider.list.deleteConfirm', { name: item.name }))
-    )
-      return;
+    if (!window.confirm(t("admin.slider.list.deleteConfirm", { name: item.name }))) return;
 
     try {
       await deleteSlider(String(item.id) as any).unwrap();
-      toast.success(t('admin.slider.list.deleted', { name: item.name }));
+      toast.success(t("admin.slider.list.deleted", { name: item.name }));
       await refetch();
     } catch (err: any) {
-      const msg =
-        err?.data?.error?.message ||
-        err?.data?.message ||
-        err?.message ||
-        t('admin.slider.list.deleteError');
+      const msg = err?.data?.error?.message || err?.data?.message || err?.message || t("admin.slider.list.deleteError");
       toast.error(msg);
     }
   };
@@ -207,15 +195,10 @@ export default function AdminSliderClient() {
   const handleToggleActive = async (item: SliderAdminDto, value: boolean) => {
     try {
       await setStatus({ id: String(item.id), payload: { is_active: value } } as any).unwrap();
-      setRows((prev) =>
-        prev.map((r) => (String(r.id) === String(item.id) ? { ...r, is_active: value } : r)),
-      );
+      setRows((prev) => prev.map((r) => (String(r.id) === String(item.id) ? { ...r, is_active: value } : r)));
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.data?.message ||
-        err?.message ||
-        t('admin.slider.list.activeUpdateError');
+        err?.data?.error?.message || err?.data?.message || err?.message || t("admin.slider.list.activeUpdateError");
       toast.error(msg);
     }
   };
@@ -223,15 +206,10 @@ export default function AdminSliderClient() {
   const handleToggleFeatured = async (item: SliderAdminDto, value: boolean) => {
     try {
       await updateSlider({ id: String(item.id), patch: { featured: value } } as any).unwrap();
-      setRows((prev) =>
-        prev.map((r) => (String(r.id) === String(item.id) ? { ...r, featured: value } : r)),
-      );
+      setRows((prev) => prev.map((r) => (String(r.id) === String(item.id) ? { ...r, featured: value } : r)));
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.data?.message ||
-        err?.message ||
-        t('admin.slider.list.featuredUpdateError');
+        err?.data?.error?.message || err?.data?.message || err?.message || t("admin.slider.list.featuredUpdateError");
       toast.error(msg);
     }
   };
@@ -246,14 +224,11 @@ export default function AdminSliderClient() {
       if (!ids.length) return;
 
       await reorderSliders({ ids } as any).unwrap();
-      toast.success(t('admin.slider.list.orderSaved'));
+      toast.success(t("admin.slider.list.orderSaved"));
       await refetch();
     } catch (err: any) {
       const msg =
-        err?.data?.error?.message ||
-        err?.data?.message ||
-        err?.message ||
-        t('admin.slider.list.orderSaveError');
+        err?.data?.error?.message || err?.data?.message || err?.message || t("admin.slider.list.orderSaveError");
       toast.error(msg);
     }
   };

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/dashboard/_components/sidebar/search-dialog.tsx
@@ -7,11 +7,14 @@
 // - Projects/Servers/Jobs araması ileride Tavvuk'a göre eklenecek
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { Search } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
+import { useRouter } from "next/navigation";
+
+import { Search } from "lucide-react";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Button } from "@/components/ui/button";
 import {
   CommandDialog,
   CommandEmpty,
@@ -20,8 +23,7 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-} from '@/components/ui/command';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+} from "@/components/ui/command";
 
 type SearchHit = {
   group: string;
@@ -32,7 +34,7 @@ type SearchHit = {
 };
 
 function norm(s: unknown) {
-  return String(s ?? '')
+  return String(s ?? "")
     .toLowerCase()
     .trim();
 }
@@ -41,23 +43,23 @@ export function SearchDialog() {
   const router = useRouter();
   const t = useAdminT();
   const [open, setOpen] = React.useState(false);
-  const [q, setQ] = React.useState('');
+  const [q, setQ] = React.useState("");
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
-      if (e.key === 'j' && (e.metaKey || e.ctrlKey)) {
+      if (e.key === "j" && (e.metaKey || e.ctrlKey)) {
         e.preventDefault();
         setOpen((v) => !v);
       }
     };
-    document.addEventListener('keydown', down);
-    return () => document.removeEventListener('keydown', down);
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
   }, []);
 
   // ✅ Şimdilik sadece temel sayfa kısayolları (Tavvuk dışı içerikler kapalı)
   const hits = React.useMemo<SearchHit[]>(() => {
     return [
-      { group: 'Sayfalar', label: 'Dashboard', href: '/dashboard' },
+      { group: "Sayfalar", label: "Dashboard", href: "/dashboard" },
       // İleride Tavvuk modülleri:
       // { group: 'Sayfalar', label: 'Siparişler', href: '/dashboard/orders' },
       // { group: 'Sayfalar', label: 'Kullanıcılar', href: '/dashboard/users' },
@@ -69,7 +71,7 @@ export function SearchDialog() {
     if (!nq) return hits;
 
     return hits.filter((h) => {
-      const hay = `${h.label} ${h.keywords ?? ''} ${h.group}`.toLowerCase();
+      const hay = `${h.label} ${h.keywords ?? ""} ${h.group}`.toLowerCase();
       return hay.includes(nq);
     });
   }, [hits, q]);
@@ -82,7 +84,7 @@ export function SearchDialog() {
 
   function onSelect(href: string) {
     setOpen(false);
-    setQ('');
+    setQ("");
     router.push(href);
   }
 
@@ -94,16 +96,16 @@ export function SearchDialog() {
         onClick={() => setOpen(true)}
       >
         <Search className="size-4" />
-        {t('admin.sidebar.search')}
+        {t("admin.sidebar.search")}
         <kbd className="inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-medium text-[10px]">
           <span className="text-xs">⌘</span>J
         </kbd>
       </Button>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
-        <CommandInput placeholder={t('admin.sidebar.searchPlaceholder')} value={q} onValueChange={setQ} />
+        <CommandInput placeholder={t("admin.sidebar.searchPlaceholder")} value={q} onValueChange={setQ} />
         <CommandList>
-          <CommandEmpty>{t('admin.sidebar.noResults')}</CommandEmpty>
+          <CommandEmpty>{t("admin.sidebar.noResults")}</CommandEmpty>
 
           {groups.map((group, i) => (
             <React.Fragment key={group}>

@@ -3,7 +3,7 @@
 // FINAL — Admin FAQ List Page
 // =============================================================
 
-import AdminFaqsClient from './admin-faqs-client';
+import AdminFaqsClient from "./admin-faqs-client";
 
 export default function Page() {
   return <AdminFaqsClient />;

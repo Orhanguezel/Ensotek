@@ -8,20 +8,20 @@
 // - cover_url: backend resolved (asset/url/legacy)
 // =============================================================
 
-import type { BoolLike, SortOrder } from '@/integrations/shared';
+import type { BoolLike, SortOrder } from "@/integrations/shared";
 
 /** Backend ServiceTypeEnum ile uyumlu */
 export type ServiceType =
-  | 'maintenance_repair'
-  | 'modernization'
-  | 'spare_parts_components'
-  | 'applications_references'
-  | 'engineering_support'
-  | 'production'
-  | 'other';
+  | "maintenance_repair"
+  | "modernization"
+  | "spare_parts_components"
+  | "applications_references"
+  | "engineering_support"
+  | "production"
+  | "other";
 
 /** Sıralama alanları (serviceListQuerySchema.sort ile uyumlu) */
-export type ServiceSortField = 'created_at' | 'updated_at' | 'display_order';
+export type ServiceSortField = "created_at" | "updated_at" | "display_order";
 
 /* ------------------------------------------------------------------
  * LIST QUERY PARAMS (public + admin)
@@ -48,7 +48,7 @@ export interface ServiceListQueryParams {
 }
 
 export type ServiceListAdminQueryParams = ServiceListQueryParams;
-export type ServiceListPublicQueryParams = Omit<ServiceListQueryParams, 'is_active'>;
+export type ServiceListPublicQueryParams = Omit<ServiceListQueryParams, "is_active">;
 
 /* ------------------------------------------------------------------
  * API DTO – Service (backend repository ServiceMerged ile uyumlu)
@@ -431,10 +431,10 @@ export function safeParseServiceContent(raw: string | null): ServiceContentShape
   if (!s) return null;
 
   // JSON-string mi?
-  if (s.startsWith('{') || s.startsWith('[')) {
+  if (s.startsWith("{") || s.startsWith("[")) {
     try {
       const obj = JSON.parse(s);
-      if (obj && typeof obj === 'object') return obj as ServiceContentShape;
+      if (obj && typeof obj === "object") return obj as ServiceContentShape;
     } catch {
       // ignore
     }
@@ -461,7 +461,7 @@ export interface ServiceFormProps {
   isLoading?: boolean;
 
   // Form mode
-  mode?: 'create' | 'edit';
+  mode?: "create" | "edit";
   loading?: boolean;
   saving?: boolean;
 

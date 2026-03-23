@@ -6,21 +6,16 @@
 "use client";
 
 import React from "react";
-import { SITE_SETTINGS_SEO_PAGE_CONFIG, toStructuredObjectSeed } from '@/integrations/shared';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
 
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminTranslations } from "@/i18n";
+import { SITE_SETTINGS_SEO_PAGE_CONFIG, toStructuredObjectSeed } from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 /* ── types ── */
 
@@ -66,11 +61,7 @@ export function seoPagesFormToObj(v: SeoPages): SeoPages {
 
 /* ── component ── */
 
-export const SeoPagesStructuredForm: React.FC<SeoPagesStructuredFormProps> = ({
-  value,
-  onChange,
-  disabled,
-}) => {
+export const SeoPagesStructuredForm: React.FC<SeoPagesStructuredFormProps> = ({ value, onChange, disabled }) => {
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
   const pages = React.useMemo(() => toSeoPages(value), [value]);
@@ -85,7 +76,7 @@ export const SeoPagesStructuredForm: React.FC<SeoPagesStructuredFormProps> = ({
     <div className="space-y-4">
       <Alert variant="default" className="py-2">
         <AlertDescription className="text-sm">
-          {t('admin.siteSettings.structured.seoPages.description')}
+          {t("admin.siteSettings.structured.seoPages.description")}
         </AlertDescription>
       </Alert>
 
@@ -100,10 +91,10 @@ export const SeoPagesStructuredForm: React.FC<SeoPagesStructuredFormProps> = ({
                   <span className="font-medium">
                     {t(`admin.siteSettings.structured.seoPages.pages.${cfg.labelKey}`)}
                   </span>
-                  <span className="text-xs text-muted-foreground">{cfg.path}</span>
+                  <span className="text-muted-foreground text-xs">{cfg.path}</span>
                   {page.no_index && (
                     <span className="rounded bg-destructive/10 px-1.5 py-0.5 text-[10px] text-destructive">
-                      {t('admin.siteSettings.structured.seoPages.noIndexBadge')}
+                      {t("admin.siteSettings.structured.seoPages.noIndexBadge")}
                     </span>
                   )}
                 </div>
@@ -111,21 +102,21 @@ export const SeoPagesStructuredForm: React.FC<SeoPagesStructuredFormProps> = ({
               <AccordionContent className="space-y-3 pt-2">
                 <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                   <div className="space-y-1.5 md:col-span-2">
-                    <Label className="text-xs text-muted-foreground">
-                      {t('admin.siteSettings.structured.seoPages.fields.title')}
+                    <Label className="text-muted-foreground text-xs">
+                      {t("admin.siteSettings.structured.seoPages.fields.title")}
                     </Label>
                     <Input
                       value={page.title}
                       onChange={(e) => updatePage(cfg.key, { title: e.target.value })}
                       disabled={disabled}
                       className="h-8"
-                      placeholder={t('admin.siteSettings.structured.seoPages.placeholders.title')}
+                      placeholder={t("admin.siteSettings.structured.seoPages.placeholders.title")}
                     />
                   </div>
 
                   <div className="space-y-1.5 md:col-span-2">
-                    <Label className="text-xs text-muted-foreground">
-                      {t('admin.siteSettings.structured.seoPages.fields.description')}
+                    <Label className="text-muted-foreground text-xs">
+                      {t("admin.siteSettings.structured.seoPages.fields.description")}
                     </Label>
                     <Textarea
                       value={page.description}
@@ -133,25 +124,25 @@ export const SeoPagesStructuredForm: React.FC<SeoPagesStructuredFormProps> = ({
                       disabled={disabled}
                       rows={2}
                       className="text-sm"
-                      placeholder={t('admin.siteSettings.structured.seoPages.placeholders.description')}
+                      placeholder={t("admin.siteSettings.structured.seoPages.placeholders.description")}
                     />
                     <p className="text-[10px] text-muted-foreground">
-                      {t('admin.siteSettings.structured.seoPages.descriptionLength', {
+                      {t("admin.siteSettings.structured.seoPages.descriptionLength", {
                         count: String(page.description.length),
                       })}
                     </p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground">
-                      {t('admin.siteSettings.structured.seoPages.fields.ogImage')}
+                    <Label className="text-muted-foreground text-xs">
+                      {t("admin.siteSettings.structured.seoPages.fields.ogImage")}
                     </Label>
                     <Input
                       value={page.og_image}
                       onChange={(e) => updatePage(cfg.key, { og_image: e.target.value })}
                       disabled={disabled}
                       className="h-8"
-                      placeholder={t('admin.siteSettings.structured.seoPages.placeholders.ogImage')}
+                      placeholder={t("admin.siteSettings.structured.seoPages.placeholders.ogImage")}
                     />
                   </div>
 
@@ -161,9 +152,7 @@ export const SeoPagesStructuredForm: React.FC<SeoPagesStructuredFormProps> = ({
                       onCheckedChange={(v) => updatePage(cfg.key, { no_index: v })}
                       disabled={disabled}
                     />
-                    <Label className="text-xs">
-                      {t('admin.siteSettings.structured.seoPages.fields.noIndex')}
-                    </Label>
+                    <Label className="text-xs">{t("admin.siteSettings.structured.seoPages.fields.noIndex")}</Label>
                   </div>
                 </div>
               </AccordionContent>

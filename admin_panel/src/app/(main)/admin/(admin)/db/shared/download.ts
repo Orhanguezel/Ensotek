@@ -1,7 +1,7 @@
 // =============================================================
 // FILE: src/components/admin/db/shared/download.ts
 // =============================================================
-const pad = (n: number) => String(n).padStart(2, '0');
+const pad = (n: number) => String(n).padStart(2, "0");
 
 export function buildDownloadName(prefix: string, ext: string): string {
   const d = new Date();
@@ -13,7 +13,7 @@ export function buildDownloadName(prefix: string, ext: string): string {
 
 export function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);

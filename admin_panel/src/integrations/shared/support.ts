@@ -2,8 +2,8 @@
 // FILE: src/integrations/shared/support.ts
 // =============================================================
 
-export type SupportTicketStatus = 'open' | 'in_progress' | 'waiting_response' | 'closed';
-export type SupportTicketPriority = 'low' | 'medium' | 'high' | 'urgent';
+export type SupportTicketStatus = "open" | "in_progress" | "waiting_response" | "closed";
+export type SupportTicketPriority = "low" | "medium" | "high" | "urgent";
 
 export type SupportTicketView = {
   id: string;
@@ -32,8 +32,8 @@ export type SupportTicketListParams = {
   q?: string;
   status?: SupportTicketStatus;
   priority?: SupportTicketPriority;
-  sort?: 'created_at' | 'updated_at';
-  order?: 'asc' | 'desc';
+  sort?: "created_at" | "updated_at";
+  order?: "asc" | "desc";
   limit?: number;
   offset?: number;
 };

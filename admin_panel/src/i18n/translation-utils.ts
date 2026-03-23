@@ -1,15 +1,15 @@
 export type TranslationParams = Record<string, string | number>;
 
 export function getValueByPath(obj: unknown, path: string): unknown {
-  const p = String(path || '').trim();
+  const p = String(path || "").trim();
   if (!p) return undefined;
 
-  const keys = p.split('.').filter(Boolean);
+  const keys = p.split(".").filter(Boolean);
   if (!keys.length) return undefined;
 
   let current: unknown = obj;
   for (const key of keys) {
-    if (!current || typeof current !== 'object') return undefined;
+    if (!current || typeof current !== "object") return undefined;
     if (!(key in (current as Record<string, unknown>))) return undefined;
     current = (current as Record<string, unknown>)[key];
   }
@@ -18,7 +18,7 @@ export function getValueByPath(obj: unknown, path: string): unknown {
 
 export function getStringByPath(obj: unknown, path: string): string | undefined {
   const v = getValueByPath(obj, path);
-  return typeof v === 'string' ? v : undefined;
+  return typeof v === "string" ? v : undefined;
 }
 
 export function interpolate(template: string, params?: TranslationParams): string {
@@ -26,7 +26,7 @@ export function interpolate(template: string, params?: TranslationParams): strin
 
   let result = template;
   for (const [key, value] of Object.entries(params)) {
-    result = result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(value));
+    result = result.replace(new RegExp(`\\{${key}\\}`, "g"), String(value));
   }
   return result;
 }
@@ -57,8 +57,8 @@ export function buildTranslator<TLocale extends string>(opts: BuildTranslatorOpt
   const chain = uniqKeepOrder(fallbackChain).filter((l) => allowed.has(l));
 
   return (key: string, params?: TranslationParams, fallback?: string): string => {
-    const k = String(key || '').trim();
-    if (!k) return '';
+    const k = String(key || "").trim();
+    if (!k) return "";
 
     let text: string | undefined;
     for (const l of chain) {
@@ -70,4 +70,3 @@ export function buildTranslator<TLocale extends string>(opts: BuildTranslatorOpt
     return interpolate(finalText, params);
   };
 }
-

@@ -3,39 +3,34 @@
 // FINAL — Popups (ADMIN) RTK
 // ===================================================================
 
-import { baseApi } from '@/integrations/baseApi';
-import type {
-  PopupAdminView,
-  PopupAdminCreateBody,
-  PopupAdminUpdateBody,
-  ApiOk,
-} from '@/integrations/shared';
+import { baseApi } from "@/integrations/baseApi";
+import type { ApiOk, PopupAdminCreateBody, PopupAdminUpdateBody, PopupAdminView } from "@/integrations/shared";
 import {
   normalizePopupAdmin,
   normalizePopupAdminList,
   toPopupAdminCreateBody,
   toPopupAdminUpdateBody,
-} from '@/integrations/shared';
+} from "@/integrations/shared";
 
-const BASE = '/admin/popups';
+const BASE = "/admin/popups";
 
 export const popupsAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
     /** GET /admin/popups */
-    listPopupsAdmin: b.query<PopupAdminView[], { order?: string } | void>({
+    listPopupsAdmin: b.query<PopupAdminView[], { order?: string } | undefined>({
       query: (q) => ({
         url: BASE,
-        method: 'GET',
+        method: "GET",
         params: q?.order ? { order: q.order } : undefined,
       }),
       transformResponse: (res: unknown) => normalizePopupAdminList(res),
       providesTags: (result) =>
-        result && result.length
+        result?.length
           ? [
-              ...result.map((x) => ({ type: 'Popup' as const, id: x.id })),
-              { type: 'Popups' as const, id: 'ADMIN_LIST' },
+              ...result.map((x) => ({ type: "Popup" as const, id: x.id })),
+              { type: "Popups" as const, id: "ADMIN_LIST" },
             ]
-          : [{ type: 'Popups' as const, id: 'ADMIN_LIST' }],
+          : [{ type: "Popups" as const, id: "ADMIN_LIST" }],
       keepUnusedDataFor: 20,
     }),
 
@@ -43,10 +38,10 @@ export const popupsAdminApi = baseApi.injectEndpoints({
     getPopupAdmin: b.query<PopupAdminView, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'GET',
+        method: "GET",
       }),
       transformResponse: (res: unknown) => normalizePopupAdmin(res),
-      providesTags: (_r, _e, arg) => [{ type: 'Popup' as const, id: arg.id }],
+      providesTags: (_r, _e, arg) => [{ type: "Popup" as const, id: arg.id }],
       keepUnusedDataFor: 30,
     }),
 
@@ -54,24 +49,24 @@ export const popupsAdminApi = baseApi.injectEndpoints({
     createPopupAdmin: b.mutation<PopupAdminView, PopupAdminCreateBody>({
       query: (body) => ({
         url: BASE,
-        method: 'POST',
+        method: "POST",
         body: toPopupAdminCreateBody(body),
       }),
       transformResponse: (res: unknown) => normalizePopupAdmin(res),
-      invalidatesTags: [{ type: 'Popups' as const, id: 'ADMIN_LIST' }],
+      invalidatesTags: [{ type: "Popups" as const, id: "ADMIN_LIST" }],
     }),
 
     /** PATCH /admin/popups/:id */
     updatePopupAdmin: b.mutation<PopupAdminView, { id: string; body: PopupAdminUpdateBody }>({
       query: ({ id, body }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'PATCH',
+        method: "PATCH",
         body: toPopupAdminUpdateBody(body),
       }),
       transformResponse: (res: unknown) => normalizePopupAdmin(res),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Popup' as const, id: arg.id },
-        { type: 'Popups' as const, id: 'ADMIN_LIST' },
+        { type: "Popup" as const, id: arg.id },
+        { type: "Popups" as const, id: "ADMIN_LIST" },
       ],
     }),
 
@@ -79,12 +74,12 @@ export const popupsAdminApi = baseApi.injectEndpoints({
     deletePopupAdmin: b.mutation<ApiOk, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       transformResponse: () => ({ ok: true as const }),
       invalidatesTags: (_r, _e, arg) => [
-        { type: 'Popup' as const, id: arg.id },
-        { type: 'Popups' as const, id: 'ADMIN_LIST' },
+        { type: "Popup" as const, id: arg.id },
+        { type: "Popups" as const, id: "ADMIN_LIST" },
       ],
     }),
   }),

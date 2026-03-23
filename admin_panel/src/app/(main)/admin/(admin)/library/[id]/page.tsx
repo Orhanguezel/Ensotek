@@ -1,4 +1,4 @@
-import LibraryDetailClient from '../_components/library-detail-client';
+import LibraryDetailClient from "../_components/library-detail-client";
 
 interface Props {
   params: Promise<{ id: string }>;

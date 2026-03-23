@@ -9,13 +9,13 @@ export type TranslatedLabel = Record<string, string>;
 export type StrictTranslatedLabel = Record<string, string>;
 
 function norm(v: unknown): string {
-  return String(v || '')
+  return String(v || "")
     .trim()
     .toLowerCase()
-    .replace('_', '-');
+    .replace("_", "-");
 }
 function short(v: unknown): string {
-  return norm(v).split('-')[0] || '';
+  return norm(v).split("-")[0] || "";
 }
 
 /**
@@ -23,12 +23,12 @@ function short(v: unknown): string {
  * Bu liste karar mekanizması değildir; DB’den gelen label varsa onu kullanın.
  */
 const DISPLAY_LABELS: Record<string, string> = {
-  tr: 'Türkçe',
-  en: 'English',
-  de: 'Deutsch',
-  fr: 'Français',
-  es: 'Español',
-  it: 'Italiano',
+  tr: "Türkçe",
+  en: "English",
+  de: "Deutsch",
+  fr: "Français",
+  es: "Español",
+  it: "Italiano",
 };
 
 /**
@@ -36,9 +36,9 @@ const DISPLAY_LABELS: Record<string, string> = {
  * Bilinmeyen locale => ISO benzeri güvenli format.
  */
 const DISPLAY_DATE_FORMATS: Record<string, string> = {
-  tr: 'dd.MM.yyyy',
-  de: 'dd.MM.yyyy',
-  en: 'yyyy-MM-dd',
+  tr: "dd.MM.yyyy",
+  de: "dd.MM.yyyy",
+  en: "yyyy-MM-dd",
 };
 
 /**
@@ -48,27 +48,27 @@ const DISPLAY_DATE_FORMATS: Record<string, string> = {
  * yine yoksa "en-US".
  */
 const DISPLAY_INTL_MAP: Record<string, string> = {
-  tr: 'tr-TR',
-  en: 'en-US',
-  de: 'de-DE',
-  fr: 'fr-FR',
-  es: 'es-ES',
-  it: 'it-IT',
+  tr: "tr-TR",
+  en: "en-US",
+  de: "de-DE",
+  fr: "fr-FR",
+  es: "es-ES",
+  it: "it-IT",
 };
 
-export function getLanguageLabel(locale: SupportedLocale, fallback = 'English'): string {
+export function getLanguageLabel(locale: SupportedLocale, fallback = "English"): string {
   const lFull = norm(locale);
   const l = short(lFull);
   return DISPLAY_LABELS[lFull] || DISPLAY_LABELS[l] || fallback;
 }
 
-export function getDateFormatHint(locale: SupportedLocale, fallback = 'yyyy-MM-dd'): string {
+export function getDateFormatHint(locale: SupportedLocale, fallback = "yyyy-MM-dd"): string {
   const lFull = norm(locale);
   const l = short(lFull);
   return DISPLAY_DATE_FORMATS[lFull] || DISPLAY_DATE_FORMATS[l] || fallback;
 }
 
-export function getIntlLocale(locale: SupportedLocale, fallback = 'en-US'): string {
+export function getIntlLocale(locale: SupportedLocale, fallback = "en-US"): string {
   const lFull = norm(locale);
   const l = short(lFull);
 
@@ -91,11 +91,8 @@ export function getIntlLocale(locale: SupportedLocale, fallback = 'en-US'): stri
  *  4) en
  *  5) ilk değer
  */
-export function getMultiLang(
-  obj?: Record<string, string> | null,
-  lang?: SupportedLocale | null,
-): string {
-  if (!obj) return '—';
+export function getMultiLang(obj?: Record<string, string> | null, lang?: SupportedLocale | null): string {
+  if (!obj) return "—";
 
   const lFull = norm(lang);
   const l = short(lFull);
@@ -103,5 +100,5 @@ export function getMultiLang(
   if (lFull && obj[lFull]) return obj[lFull];
   if (l && obj[l]) return obj[l];
 
-  return obj.tr || obj.en || Object.values(obj)[0] || '—';
+  return obj.tr || obj.en || Object.values(obj)[0] || "—";
 }

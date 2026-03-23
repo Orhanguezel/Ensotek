@@ -1,12 +1,12 @@
 // src/integrations/shared/adminUsers.normalize.ts
-import type { AdminUserRaw, AdminUserView, UserRoleName } from './users';
+import type { AdminUserRaw, AdminUserView, UserRoleName } from "./users";
 
 const asRole = (v: unknown): UserRoleName | null => {
-  const s = String(v ?? '').toLowerCase();
-  return s === 'admin' || s === 'moderator' || s === 'user' ? (s as UserRoleName) : null;
+  const s = String(v ?? "").toLowerCase();
+  return s === "admin" || s === "moderator" || s === "user" ? (s as UserRoleName) : null;
 };
 
-const toBool = (v: unknown): boolean => (typeof v === 'boolean' ? v : Number(v ?? 0) === 1);
+const toBool = (v: unknown): boolean => (typeof v === "boolean" ? v : Number(v ?? 0) === 1);
 
 const coerceRoles = (raw: AdminUserRaw): UserRoleName[] => {
   if ((raw as any).role != null) {
@@ -18,7 +18,7 @@ const coerceRoles = (raw: AdminUserRaw): UserRoleName[] => {
 
   if (Array.isArray(src)) return src.map(asRole).filter(Boolean) as UserRoleName[];
 
-  if (typeof src === 'string' && src.trim()) {
+  if (typeof src === "string" && src.trim()) {
     try {
       const parsed = JSON.parse(src);
       if (Array.isArray(parsed)) return parsed.map(asRole).filter(Boolean) as UserRoleName[];

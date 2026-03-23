@@ -5,10 +5,10 @@
 // - ✅ category_id / sub_category_id REMOVED (and related names/slugs)
 // =============================================================
 
-import { BoolLike, SortOrder } from '@/integrations/shared/common';
+import type { BoolLike, SortOrder } from "@/integrations/shared/common";
 
 /** Sıralama alanları – backend customPageListQuerySchema ile uyumlu */
-export type CustomPageSortField = 'created_at' | 'updated_at' | 'display_order' | 'order_num';
+export type CustomPageSortField = "created_at" | "updated_at" | "display_order" | "order_num";
 
 /* ------------------------------------------------------------------
  * LIST QUERY PARAMS (public + admin)
@@ -146,10 +146,10 @@ export interface CustomPageDto {
 type ContentJson = { html?: string; [key: string]: unknown };
 
 const unpackContent = (raw: string | null): string => {
-  if (!raw) return '';
+  if (!raw) return "";
   try {
     const parsed = JSON.parse(raw) as ContentJson;
-    if (typeof parsed.html === 'string') return parsed.html;
+    if (typeof parsed.html === "string") return parsed.html;
     return raw;
   } catch {
     return raw;
@@ -177,25 +177,25 @@ const pickApiContentRaw = (api: ApiCustomPage): string | null => {
 
 const normalizeStringArray = (v: unknown): string[] => {
   if (Array.isArray(v)) {
-    return v.map((x) => String(x ?? '').trim()).filter((s) => s.length > 0);
+    return v.map((x) => String(x ?? "").trim()).filter((s) => s.length > 0);
   }
 
-  if (typeof v === 'string') {
+  if (typeof v === "string") {
     const s = v.trim();
     if (!s) return [];
 
-    if (s.startsWith('[') && s.endsWith(']')) {
+    if (s.startsWith("[") && s.endsWith("]")) {
       try {
         const parsed = JSON.parse(s);
         if (Array.isArray(parsed)) {
-          return parsed.map((x) => String(x ?? '').trim()).filter((t) => t.length > 0);
+          return parsed.map((x) => String(x ?? "").trim()).filter((t) => t.length > 0);
         }
       } catch {
         // ignore
       }
     }
 
-    if (s.includes(',') || s.includes(';')) {
+    if (s.includes(",") || s.includes(";")) {
       return s
         .split(/[;,]/)
         .map((x) => x.trim())
@@ -219,7 +219,7 @@ export const normalizeCustomPage = (api: ApiCustomPage): CustomPageDto => {
 
   return {
     id: api.id,
-    module_key: String((api as any).module_key ?? (api as any).moduleKey ?? ''),
+    module_key: String((api as any).module_key ?? (api as any).moduleKey ?? ""),
     is_published: toBoolFrom01(api.is_published),
     featured: toBoolFrom01(api.featured),
 

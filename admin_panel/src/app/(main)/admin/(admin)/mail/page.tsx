@@ -3,7 +3,7 @@
 // FINAL — Admin Mail Test Page
 // =============================================================
 
-import AdminMailClient from './_components/admin-mail-client';
+import AdminMailClient from "./_components/admin-mail-client";
 
 export default function Page() {
   return <AdminMailClient />;

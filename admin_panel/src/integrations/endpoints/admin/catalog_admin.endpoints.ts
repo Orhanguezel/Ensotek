@@ -3,13 +3,13 @@
 // Ensotek – Admin Catalog Requests (RTK Query)
 // =============================================================
 
-import { baseApi } from '@/integrations/baseApi';
+import { baseApi } from "@/integrations/baseApi";
 import type {
   CatalogRequestDto,
   CatalogRequestListQueryParams,
-  PatchCatalogRequestAdminBody,
   DeleteCatalogRequestResult,
-} from '@/integrations/shared';
+  PatchCatalogRequestAdminBody,
+} from "@/integrations/shared";
 
 /**
  * IMPORTANT:
@@ -23,54 +23,48 @@ import type {
  * If your server mounts admin routes under "/admin", change BASE to:
  *   const BASE = "admin/catalog-requests";
  */
-const BASE = 'admin/catalog-requests';
+const BASE = "admin/catalog-requests";
 
 export const catalogAdminApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     // LIST
-    listCatalogRequestsAdmin: build.query<
-      CatalogRequestDto[],
-      CatalogRequestListQueryParams | void
-    >({
+    listCatalogRequestsAdmin: build.query<CatalogRequestDto[], CatalogRequestListQueryParams | undefined>({
       query: (params) => ({
         url: `${BASE}`,
-        method: 'GET',
+        method: "GET",
         params: params ?? undefined,
       }),
       providesTags: (res) =>
-        res && res.length
+        res?.length
           ? [
-              { type: 'CatalogRequest' as const, id: 'LIST' },
+              { type: "CatalogRequest" as const, id: "LIST" },
               ...res.map((r) => ({
-                type: 'CatalogRequest' as const,
+                type: "CatalogRequest" as const,
                 id: r.id,
               })),
             ]
-          : [{ type: 'CatalogRequest' as const, id: 'LIST' }],
+          : [{ type: "CatalogRequest" as const, id: "LIST" }],
     }),
 
     // GET
     getCatalogRequestAdmin: build.query<CatalogRequestDto, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${id}`,
-        method: 'GET',
+        method: "GET",
       }),
-      providesTags: (_res, _err, arg) => [{ type: 'CatalogRequest' as const, id: arg.id }],
+      providesTags: (_res, _err, arg) => [{ type: "CatalogRequest" as const, id: arg.id }],
     }),
 
     // PATCH
-    patchCatalogRequestAdmin: build.mutation<
-      CatalogRequestDto,
-      { id: string; body: PatchCatalogRequestAdminBody }
-    >({
+    patchCatalogRequestAdmin: build.mutation<CatalogRequestDto, { id: string; body: PatchCatalogRequestAdminBody }>({
       query: ({ id, body }) => ({
         url: `${BASE}/${id}`,
-        method: 'PATCH',
+        method: "PATCH",
         body,
       }),
       invalidatesTags: (_res, _err, arg) => [
-        { type: 'CatalogRequest' as const, id: 'LIST' },
-        { type: 'CatalogRequest' as const, id: arg.id },
+        { type: "CatalogRequest" as const, id: "LIST" },
+        { type: "CatalogRequest" as const, id: arg.id },
       ],
     }),
 
@@ -78,11 +72,11 @@ export const catalogAdminApi = baseApi.injectEndpoints({
     removeCatalogRequestAdmin: build.mutation<DeleteCatalogRequestResult, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${id}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
       invalidatesTags: (_res, _err, arg) => [
-        { type: 'CatalogRequest' as const, id: 'LIST' },
-        { type: 'CatalogRequest' as const, id: arg.id },
+        { type: "CatalogRequest" as const, id: "LIST" },
+        { type: "CatalogRequest" as const, id: arg.id },
       ],
     }),
 
@@ -90,11 +84,11 @@ export const catalogAdminApi = baseApi.injectEndpoints({
     resendCatalogRequestAdmin: build.mutation<CatalogRequestDto, { id: string }>({
       query: ({ id }) => ({
         url: `${BASE}/${id}/resend`,
-        method: 'POST',
+        method: "POST",
       }),
       invalidatesTags: (_res, _err, arg) => [
-        { type: 'CatalogRequest' as const, id: 'LIST' },
-        { type: 'CatalogRequest' as const, id: arg.id },
+        { type: "CatalogRequest" as const, id: "LIST" },
+        { type: "CatalogRequest" as const, id: arg.id },
       ],
     }),
   }),

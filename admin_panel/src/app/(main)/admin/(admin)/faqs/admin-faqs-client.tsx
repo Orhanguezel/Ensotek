@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/faqs/admin-faqs-client.tsx
@@ -8,49 +8,44 @@
 // - Reorder: local up/down + Save (display_order patch approach placeholder)
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClientOr } from '@/i18n/localeShortClient';
+import { toast } from "sonner";
 
-import type { FaqDto, FaqUpdatePayload } from '@/integrations/shared';
-import { useListFaqsAdminQuery, useUpdateFaqAdminMutation } from '@/integrations/hooks';
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClientOr } from "@/i18n/localeShortClient";
+import { useListFaqsAdminQuery, useUpdateFaqAdminMutation } from "@/integrations/hooks";
+import type { FaqDto, FaqUpdatePayload } from "@/integrations/shared";
 
-import type { FaqsFilters } from './_components/FaqsHeader';
-import { FaqsHeader } from './_components/FaqsHeader';
-import { FaqsList } from './_components/FaqsList';
+import type { FaqsFilters } from "./_components/FaqsHeader";
+import { FaqsHeader } from "./_components/FaqsHeader";
+import { FaqsList } from "./_components/FaqsList";
 
 const normLocale = (v: unknown): string =>
-  String(v || '')
+  String(v || "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 
 export default function AdminFaqsClient() {
-  const t = useAdminT('admin.faqs');
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  const t = useAdminT("admin.faqs");
+  const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'de');
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const [filters, setFilters] = React.useState<FaqsFilters>({
-    q: '',
-    slug: '',
-    isActive: 'all',
-    sort: 'updated_at',
-    orderDir: 'desc',
-    locale: '',
+    q: "",
+    slug: "",
+    isActive: "all",
+    sort: "updated_at",
+    orderDir: "desc",
+    locale: "",
   });
 
   // initial locale in state
@@ -58,7 +53,7 @@ export default function AdminFaqsClient() {
     if (!localeOptions || localeOptions.length === 0) return;
     setFilters((prev) => {
       if (prev.locale) return prev;
-      return { ...prev, locale: localeShortClientOr(apiLocale, 'de') };
+      return { ...prev, locale: localeShortClientOr(apiLocale, "de") };
     });
   }, [localeOptions, apiLocale]);
 
@@ -68,8 +63,8 @@ export default function AdminFaqsClient() {
   }, [filters.locale, apiLocale]);
 
   const is_active = React.useMemo(() => {
-    if (filters.isActive === 'all') return undefined;
-    if (filters.isActive === 'active') return 1;
+    if (filters.isActive === "all") return undefined;
+    if (filters.isActive === "active") return 1;
     return 0;
   }, [filters.isActive]);
 
@@ -129,20 +124,15 @@ export default function AdminFaqsClient() {
         const patch: FaqUpdatePayload = { display_order: i } as any;
         await updateFaq({ id: it.id, patch } as any).unwrap();
       }
-      toast.success(t('messages.orderSaved'));
+      toast.success(t("messages.orderSaved"));
       listQ.refetch();
     } catch (err: any) {
-      const msg = err?.data?.error?.message || err?.message || t('messages.orderSaveError');
+      const msg = err?.data?.error?.message || err?.message || t("messages.orderSaveError");
       toast.error(msg);
     }
   }
 
-  const busy =
-    listQ.isLoading ||
-    listQ.isFetching ||
-    localesLoading ||
-    localesFetching ||
-    updateState.isLoading;
+  const busy = listQ.isLoading || listQ.isFetching || localesLoading || localesFetching || updateState.isLoading;
 
   return (
     <div className="space-y-4">

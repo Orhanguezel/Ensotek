@@ -3,7 +3,7 @@
 // Ensotek – SubCategory Header + Filtreler
 // =============================================================
 
-import React from 'react';
+import React from "react";
 
 export type LocaleOption = {
   value: string;
@@ -65,8 +65,8 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
   // “Tüm Diller” option’u her zaman tekil olsun
   const localeList = React.useMemo(() => {
     const list = Array.isArray(locales) ? locales : [];
-    if (list.some((x) => x.value === '')) return list;
-    return [{ value: '', label: 'Tüm Diller' }, ...list];
+    if (list.some((x) => x.value === "")) return list;
+    return [{ value: "", label: "Tüm Diller" }, ...list];
   }, [locales]);
 
   return (
@@ -74,15 +74,15 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
       {/* Sol: başlık */}
       <div className="col-12 col-lg-6 mb-2 mb-lg-0">
         <h1 className="h4 mb-1">Alt Kategoriler</h1>
-        <p className="text-muted small mb-0">
-          Kategorilere bağlı çok dilli alt kategori kayıtlarını listeler, sıralama (drag &amp;
-          drop), aktif/öne çıkan durumlarını ve temel bilgileri yönetebilirsin.
+        <p className="small mb-0 text-muted">
+          Kategorilere bağlı çok dilli alt kategori kayıtlarını listeler, sıralama (drag &amp; drop), aktif/öne çıkan
+          durumlarını ve temel bilgileri yönetebilirsin.
         </p>
       </div>
 
       {/* Sağ: filtreler (arama + locale + kategori) */}
-      <div className="col-12 col-lg-6 d-flex align-items-end justify-content-lg-end">
-        <div className="d-flex flex-column flex-sm-row gap-2 w-100 w-sm-auto">
+      <div className="d-flex justify-content-lg-end col-12 col-lg-6 align-items-end">
+        <div className="d-flex w-100 w-sm-auto flex-column flex-sm-row gap-2">
           {/* Arama */}
           <div className="input-group input-group-sm">
             <span className="input-group-text">Ara</span>
@@ -100,7 +100,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
           <div className="input-group input-group-sm">
             <span className="input-group-text">
               Dil
-              {localesLoading && <span className="ms-1 spinner-border spinner-border-sm" />}
+              {localesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
             </span>
             <select
               className="form-select"
@@ -109,7 +109,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
               disabled={loading || localesLoading}
             >
               {localeList.map((opt) => (
-                <option key={opt.value || 'all-locales'} value={opt.value}>
+                <option key={opt.value || "all-locales"} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
@@ -120,7 +120,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
           <div className="input-group input-group-sm">
             <span className="input-group-text">
               Kategori
-              {categoriesLoading && <span className="ms-1 spinner-border spinner-border-sm" />}
+              {categoriesLoading && <span className="spinner-border spinner-border-sm ms-1" />}
             </span>
             <select
               className="form-select"
@@ -129,7 +129,7 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
               disabled={loading || categoriesLoading}
             >
               {categories.map((opt) => (
-                <option key={opt.value || 'all-categories'} value={opt.value}>
+                <option key={opt.value || "all-categories"} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
@@ -139,8 +139,8 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
       </div>
 
       {/* Alt satır: toggle filtreler + aksiyonlar */}
-      <div className="col-12 mt-2 d-flex flex-column flex-md-row gap-2 align-items-md-center justify-content-md-between">
-        <div className="d-flex flex-wrap gap-3 small">
+      <div className="d-flex justify-content-md-between col-12 mt-2 flex-column flex-md-row gap-2 align-items-md-center">
+        <div className="d-flex small flex-wrap gap-3">
           <div className="form-check form-switch">
             <input
               id="sub-filter-active"
@@ -170,21 +170,11 @@ export const SubCategoriesHeader: React.FC<SubCategoriesHeaderProps> = ({
           </div>
         </div>
 
-        <div className="d-flex gap-2 justify-content-end mt-2 mt-md-0">
-          <button
-            type="button"
-            className="btn btn-outline-secondary btn-sm"
-            onClick={onRefresh}
-            disabled={loading}
-          >
+        <div className="d-flex justify-content-end mt-2 mt-md-0 gap-2">
+          <button type="button" className="btn btn-outline-secondary btn-sm" onClick={onRefresh} disabled={loading}>
             Yenile
           </button>
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={onCreateClick}
-            disabled={loading}
-          >
+          <button type="button" className="btn btn-primary btn-sm" onClick={onCreateClick} disabled={loading}>
             + Yeni Alt Kategori
           </button>
         </div>

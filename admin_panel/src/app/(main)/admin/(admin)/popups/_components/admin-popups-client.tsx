@@ -1,78 +1,51 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/popups/admin-popups-client.tsx
 // FINAL — Admin Popups
 // =============================================================
 
-import * as React from 'react';
-import { toast } from 'sonner';
-import { Plus, RefreshCcw, Pencil, Trash2 } from 'lucide-react';
+import * as React from "react";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Pencil, Plus, RefreshCcw, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { useAdminUiCopy } from "@/app/(main)/admin/_components/common/useAdminUiCopy";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
-import { useAdminUiCopy } from '@/app/(main)/admin/_components/common/useAdminUiCopy';
-
-import type {
-  PopupAdminView,
-  PopupAdminCreateBody,
-  PopupDisplayFrequency,
-} from '@/integrations/shared';
-import {
-  useListPopupsAdminQuery,
   useCreatePopupAdminMutation,
-  useUpdatePopupAdminMutation,
   useDeletePopupAdminMutation,
-} from '@/integrations/hooks';
+  useListPopupsAdminQuery,
+  useUpdatePopupAdminMutation,
+} from "@/integrations/hooks";
+import type { PopupAdminCreateBody, PopupAdminView, PopupDisplayFrequency } from "@/integrations/shared";
 
 type FormState = PopupAdminCreateBody & { id?: string };
 
 const emptyForm: FormState = {
-  title: '',
-  content: '',
-  image_url: '',
-  image_asset_id: '',
-  image_alt: '',
-  button_text: '',
-  button_link: '',
+  title: "",
+  content: "",
+  image_url: "",
+  image_asset_id: "",
+  image_alt: "",
+  button_text: "",
+  button_link: "",
   is_active: true,
-  display_frequency: 'always',
+  display_frequency: "always",
   delay_seconds: 0,
   start_date: null,
   end_date: null,
   services_id: null,
-  display_pages: 'all',
+  display_pages: "all",
   priority: null,
   duration_seconds: null,
 };
@@ -82,7 +55,7 @@ export default function AdminPopupsClient() {
   const page = copy.pages?.popups ?? {};
   const common = copy.common;
 
-  const listQ = useListPopupsAdminQuery({ order: 'created_at.desc' }, { refetchOnMountOrArgChange: true });
+  const listQ = useListPopupsAdminQuery({ order: "created_at.desc" }, { refetchOnMountOrArgChange: true });
   const rows = (listQ.data ?? []) as PopupAdminView[];
 
   const [createPopup, createState] = useCreatePopupAdminMutation();
@@ -102,20 +75,20 @@ export default function AdminPopupsClient() {
   function openEdit(item: PopupAdminView) {
     setForm({
       id: item.id,
-      title: item.title ?? '',
-      content: item.content ?? '',
-      image_url: item.image_url ?? '',
-      image_asset_id: item.image_asset_id ?? '',
-      image_alt: item.image_alt ?? '',
-      button_text: item.button_text ?? '',
-      button_link: item.button_link ?? '',
+      title: item.title ?? "",
+      content: item.content ?? "",
+      image_url: item.image_url ?? "",
+      image_asset_id: item.image_asset_id ?? "",
+      image_alt: item.image_alt ?? "",
+      button_text: item.button_text ?? "",
+      button_link: item.button_link ?? "",
       is_active: item.is_active,
-      display_frequency: item.display_frequency ?? 'always',
+      display_frequency: item.display_frequency ?? "always",
       delay_seconds: item.delay_seconds ?? 0,
       start_date: item.start_date ?? null,
       end_date: item.end_date ?? null,
       services_id: item.services_id ?? null,
-      display_pages: item.display_pages ?? 'all',
+      display_pages: item.display_pages ?? "all",
       priority: item.priority ?? null,
       duration_seconds: item.duration_seconds ?? null,
     });
@@ -129,13 +102,13 @@ export default function AdminPopupsClient() {
 
   async function onSave() {
     if (!form.title.trim()) {
-      toast.error(page?.title_required || '');
+      toast.error(page?.title_required || "");
       return;
     }
 
     const body: PopupAdminCreateBody = {
       title: form.title.trim(),
-      content: form.content ?? '',
+      content: form.content ?? "",
       image_url: form.image_url?.trim() || null,
       image_asset_id: form.image_asset_id?.trim() || null,
       image_alt: form.image_alt?.trim() || null,
@@ -147,7 +120,7 @@ export default function AdminPopupsClient() {
       start_date: form.start_date ?? null,
       end_date: form.end_date ?? null,
       services_id: form.services_id?.trim() || null,
-      display_pages: form.display_pages?.trim() || 'all',
+      display_pages: form.display_pages?.trim() || "all",
       priority: form.priority != null ? Number(form.priority) : null,
       duration_seconds: form.duration_seconds != null ? Number(form.duration_seconds) : null,
     };
@@ -158,22 +131,22 @@ export default function AdminPopupsClient() {
       } else {
         await createPopup(body).unwrap();
       }
-      toast.success(common?.actions?.save || '');
+      toast.success(common?.actions?.save || "");
       closeModal();
       listQ.refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   }
 
   async function onDelete(item: PopupAdminView) {
-    if (!window.confirm(page?.delete_confirm || '')) return;
+    if (!window.confirm(page?.delete_confirm || "")) return;
     try {
       await deletePopup({ id: item.id }).unwrap();
-      toast.success(common?.actions?.delete || '');
+      toast.success(common?.actions?.delete || "");
       listQ.refetch();
     } catch (err: any) {
-      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || '');
+      toast.error(err?.data?.error?.message || err?.message || common?.states?.error || "");
     }
   }
 
@@ -181,8 +154,8 @@ export default function AdminPopupsClient() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{page?.title}</h1>
-          <p className="text-sm text-muted-foreground">{page?.subtitle}</p>
+          <h1 className="font-semibold text-lg">{page?.title}</h1>
+          <p className="text-muted-foreground text-sm">{page?.subtitle}</p>
         </div>
 
         <div className="flex gap-2">
@@ -216,7 +189,7 @@ export default function AdminPopupsClient() {
             <TableBody>
               {rows.length === 0 && !busy && (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center text-sm text-muted-foreground">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground text-sm">
                     {common?.states?.empty}
                   </TableCell>
                 </TableRow>
@@ -225,13 +198,13 @@ export default function AdminPopupsClient() {
                 <TableRow key={item.id}>
                   <TableCell className="font-medium">{item.title}</TableCell>
                   <TableCell>
-                    <Badge variant={item.is_active ? 'secondary' : 'outline'}>
+                    <Badge variant={item.is_active ? "secondary" : "outline"}>
                       {item.is_active ? page?.active_yes : page?.active_no}
                     </Badge>
                   </TableCell>
                   <TableCell>{item.display_frequency}</TableCell>
                   <TableCell>
-                    {item.start_date || '-'} → {item.end_date || '-'}
+                    {item.start_date || "-"} → {item.end_date || "-"}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
@@ -271,7 +244,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2 md:col-span-2">
               <Label>{page?.content_label}</Label>
               <Textarea
-                value={form.content ?? ''}
+                value={form.content ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, content: e.target.value }))}
                 rows={5}
               />
@@ -280,7 +253,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2">
               <Label>{page?.frequency_label}</Label>
               <Select
-                value={form.display_frequency || 'always'}
+                value={form.display_frequency || "always"}
                 onValueChange={(v) => setForm((p) => ({ ...p, display_frequency: v as PopupDisplayFrequency }))}
               >
                 <SelectTrigger>
@@ -296,10 +269,7 @@ export default function AdminPopupsClient() {
             </div>
 
             <div className="flex items-center gap-2 pt-6">
-              <Switch
-                checked={!!form.is_active}
-                onCheckedChange={(v) => setForm((p) => ({ ...p, is_active: v }))}
-              />
+              <Switch checked={!!form.is_active} onCheckedChange={(v) => setForm((p) => ({ ...p, is_active: v }))} />
               <Label>{page?.active_label}</Label>
             </div>
 
@@ -307,7 +277,13 @@ export default function AdminPopupsClient() {
               <Label>{page?.start_date_label}</Label>
               <Input
                 type="date"
-                value={typeof form.start_date === 'string' ? form.start_date : (form.start_date instanceof Date ? form.start_date.toISOString().slice(0, 10) : '')}
+                value={
+                  typeof form.start_date === "string"
+                    ? form.start_date
+                    : form.start_date instanceof Date
+                      ? form.start_date.toISOString().slice(0, 10)
+                      : ""
+                }
                 onChange={(e) => setForm((p) => ({ ...p, start_date: e.target.value || null }))}
               />
             </div>
@@ -315,7 +291,13 @@ export default function AdminPopupsClient() {
               <Label>{page?.end_date_label}</Label>
               <Input
                 type="date"
-                value={typeof form.end_date === 'string' ? form.end_date : (form.end_date instanceof Date ? form.end_date.toISOString().slice(0, 10) : '')}
+                value={
+                  typeof form.end_date === "string"
+                    ? form.end_date
+                    : form.end_date instanceof Date
+                      ? form.end_date.toISOString().slice(0, 10)
+                      : ""
+                }
                 onChange={(e) => setForm((p) => ({ ...p, end_date: e.target.value || null }))}
               />
             </div>
@@ -332,7 +314,7 @@ export default function AdminPopupsClient() {
               <Label>{page?.duration_label}</Label>
               <Input
                 type="number"
-                value={form.duration_seconds ?? ''}
+                value={form.duration_seconds ?? ""}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, duration_seconds: e.target.value ? Number(e.target.value) : null }))
                 }
@@ -342,7 +324,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2 md:col-span-2">
               <Label>{page?.display_pages_label}</Label>
               <Input
-                value={form.display_pages ?? ''}
+                value={form.display_pages ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, display_pages: e.target.value }))}
                 placeholder={page?.display_pages_ph}
               />
@@ -352,17 +334,15 @@ export default function AdminPopupsClient() {
               <Label>{page?.priority_label}</Label>
               <Input
                 type="number"
-                value={form.priority ?? ''}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, priority: e.target.value ? Number(e.target.value) : null }))
-                }
+                value={form.priority ?? ""}
+                onChange={(e) => setForm((p) => ({ ...p, priority: e.target.value ? Number(e.target.value) : null }))}
               />
             </div>
 
             <div className="space-y-2">
               <Label>{page?.services_id_label}</Label>
               <Input
-                value={form.services_id ?? ''}
+                value={form.services_id ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, services_id: e.target.value }))}
                 placeholder={page?.services_id_ph}
               />
@@ -371,7 +351,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2 md:col-span-2">
               <Label>{page?.image_url_label}</Label>
               <Input
-                value={form.image_url ?? ''}
+                value={form.image_url ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, image_url: e.target.value }))}
                 placeholder={page?.image_url_ph}
               />
@@ -379,7 +359,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2 md:col-span-2">
               <Label>{page?.asset_id_label}</Label>
               <Input
-                value={form.image_asset_id ?? ''}
+                value={form.image_asset_id ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, image_asset_id: e.target.value }))}
                 placeholder={page?.asset_id_ph}
               />
@@ -387,7 +367,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2 md:col-span-2">
               <Label>{page?.image_alt_label}</Label>
               <Input
-                value={form.image_alt ?? ''}
+                value={form.image_alt ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, image_alt: e.target.value }))}
                 placeholder={page?.image_alt_ph}
               />
@@ -396,7 +376,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2 md:col-span-2">
               <Label>{page?.button_text_label}</Label>
               <Input
-                value={form.button_text ?? ''}
+                value={form.button_text ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, button_text: e.target.value }))}
                 placeholder={page?.button_text_ph}
               />
@@ -404,7 +384,7 @@ export default function AdminPopupsClient() {
             <div className="space-y-2 md:col-span-2">
               <Label>{page?.button_link_label}</Label>
               <Input
-                value={form.button_link ?? ''}
+                value={form.button_link ?? ""}
                 onChange={(e) => setForm((p) => ({ ...p, button_link: e.target.value }))}
                 placeholder={page?.button_link_ph}
               />

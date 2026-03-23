@@ -1,29 +1,26 @@
-'use client';
+"use client";
 
-import * as React from 'react';
-import Link from 'next/link';
-import { toast } from 'sonner';
-import { RefreshCcw, Plus, ChevronRight } from 'lucide-react';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import * as React from "react";
 
+import Link from "next/link";
+
+import { ChevronRight, Plus, RefreshCcw } from "lucide-react";
+import { toast } from "sonner";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { useAdminTranslations } from "@/i18n";
+import { useListSiteSettingsAdminQuery, useUpdateSiteSettingAdminMutation } from "@/integrations/hooks";
 import {
-  useListSiteSettingsAdminQuery,
-  useUpdateSiteSettingAdminMutation,
-} from '@/integrations/hooks';
-
-import {
-  SITE_SETTINGS_DEFAULTS_BY_KEY,
-  SITE_SETTINGS_GENERAL_KEYS,
   buildSiteSettingsEditHref,
   buildSiteSettingsGeneralRows,
   getErrorMessage,
-  summariseSiteSettingsValue,
+  SITE_SETTINGS_DEFAULTS_BY_KEY,
+  SITE_SETTINGS_GENERAL_KEYS,
   type SiteSetting,
-} from '@/integrations/shared';
-
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+  summariseSiteSettingsValue,
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 /* ----------------------------- component ----------------------------- */
 
@@ -35,17 +32,17 @@ export type GeneralSettingsTabProps = {
 export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({ locale, settingPrefix }) => {
   const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
 
-  const adminLocale = usePreferencesStore((s) => s.adminLocale) || 'tr';
+  const adminLocale = usePreferencesStore((s) => s.adminLocale) || "tr";
   const t = useAdminTranslations(adminLocale || undefined);
 
-  const withPrefix = React.useCallback((key: string) => `${settingPrefix || ''}${key}`, [settingPrefix]);
+  const withPrefix = React.useCallback((key: string) => `${settingPrefix || ""}${key}`, [settingPrefix]);
   const stripPrefix = React.useCallback(
     (key: string) => (settingPrefix && key.startsWith(settingPrefix) ? key.slice(settingPrefix.length) : key),
     [settingPrefix],
   );
 
   const listArgsGlobal = React.useMemo(
-    () => ({ locale: '*', keys: SITE_SETTINGS_GENERAL_KEYS.map((key) => withPrefix(key)) as unknown as string[] }),
+    () => ({ locale: "*", keys: SITE_SETTINGS_GENERAL_KEYS.map((key) => withPrefix(key)) as unknown as string[] }),
     [withPrefix],
   );
   const listArgsLocale = React.useMemo(
@@ -59,7 +56,7 @@ export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({ locale, 
   const rowsMerged = React.useMemo(() => {
     const g = Array.isArray(qGlobal.data) ? qGlobal.data : [];
     const l = Array.isArray(qLocale.data) ? qLocale.data : [];
-    return [...g, ...l].map((row) => ({ ...row, key: stripPrefix(String(row.key || '')) }));
+    return [...g, ...l].map((row) => ({ ...row, key: stripPrefix(String(row.key || "")) }));
   }, [qGlobal.data, qLocale.data, stripPrefix]);
 
   const rows = React.useMemo(
@@ -79,12 +76,16 @@ export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({ locale, 
     try {
       for (const r of rows) {
         if (r.hasValue) continue;
-        await updateSetting({ key: withPrefix(r.key), locale: '*', value: SITE_SETTINGS_DEFAULTS_BY_KEY[r.key] as any }).unwrap();
+        await updateSetting({
+          key: withPrefix(r.key),
+          locale: "*",
+          value: SITE_SETTINGS_DEFAULTS_BY_KEY[r.key] as any,
+        }).unwrap();
       }
-      toast.success(t('admin.siteSettings.general.globalBootstrapSuccess'));
+      toast.success(t("admin.siteSettings.general.globalBootstrapSuccess"));
       await refetchAll();
     } catch (err: unknown) {
-      toast.error(getErrorMessage(err) || t('admin.siteSettings.messages.error'));
+      toast.error(getErrorMessage(err) || t("admin.siteSettings.messages.error"));
     }
   };
 
@@ -92,10 +93,15 @@ export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({ locale, 
     <div className="space-y-3">
       {/* Header row */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {t('admin.siteSettings.general.description', { locale })}
-        </p>
-        <Button type="button" variant="ghost" size="icon" onClick={refetchAll} disabled={busy} title={t('admin.siteSettings.filters.refreshButton')}>
+        <p className="text-muted-foreground text-sm">{t("admin.siteSettings.general.description", { locale })}</p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          onClick={refetchAll}
+          disabled={busy}
+          title={t("admin.siteSettings.filters.refreshButton")}
+        >
           <RefreshCcw className="size-4" />
         </Button>
       </div>
@@ -103,31 +109,31 @@ export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({ locale, 
       {/* Settings list */}
       <div className="space-y-2">
         {rows.map((r) => {
-          const summary = summariseSiteSettingsValue(r.value, t('admin.siteSettings.general.recordCount'));
+          const summary = summariseSiteSettingsValue(r.value, t("admin.siteSettings.general.recordCount"));
 
           return (
             <Link
               key={r.key}
-              href={r.hasValue ? buildSiteSettingsEditHref(withPrefix(r.key), r.editLocale) : '#'}
+              href={r.hasValue ? buildSiteSettingsEditHref(withPrefix(r.key), r.editLocale) : "#"}
               prefetch={false}
               className={`group flex items-center gap-3 rounded-lg border p-3 transition-colors sm:p-4 ${
-                r.hasValue ? 'hover:bg-muted/50 cursor-pointer' : 'opacity-60'
+                r.hasValue ? "cursor-pointer hover:bg-muted/50" : "opacity-60"
               }`}
               onClick={r.hasValue ? undefined : (e) => e.preventDefault()}
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{t(`admin.siteSettings.general.keyLabels.${r.key}`)}</span>
+                  <span className="font-medium text-sm">{t(`admin.siteSettings.general.keyLabels.${r.key}`)}</span>
                   {!r.hasValue ? (
                     <Badge variant="outline" className="text-[10px] text-muted-foreground">
-                      {t('admin.siteSettings.general.sourceNone')}
+                      {t("admin.siteSettings.general.sourceNone")}
                     </Badge>
                   ) : null}
                 </div>
-                <p className="mt-0.5 text-xs text-muted-foreground">{t(`admin.siteSettings.general.keyDescriptions.${r.key}`)}</p>
-                {summary ? (
-                  <p className="mt-1 truncate text-xs text-foreground/70">{summary}</p>
-                ) : null}
+                <p className="mt-0.5 text-muted-foreground text-xs">
+                  {t(`admin.siteSettings.general.keyDescriptions.${r.key}`)}
+                </p>
+                {summary ? <p className="mt-1 truncate text-foreground/70 text-xs">{summary}</p> : null}
               </div>
 
               {r.hasValue ? (
@@ -140,13 +146,20 @@ export const GeneralSettingsTab: React.FC<GeneralSettingsTabProps> = ({ locale, 
 
       {/* Create missing button */}
       {hasAnyMissing ? (
-        <Button type="button" variant="outline" size="sm" onClick={createMissing} disabled={busy} className="w-full sm:w-auto">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={createMissing}
+          disabled={busy}
+          className="w-full sm:w-auto"
+        >
           <Plus className="mr-1.5 size-3.5" />
-          {t('admin.siteSettings.general.globalBootstrap')}
+          {t("admin.siteSettings.general.globalBootstrap")}
         </Button>
       ) : null}
     </div>
   );
 };
 
-GeneralSettingsTab.displayName = 'GeneralSettingsTab';
+GeneralSettingsTab.displayName = "GeneralSettingsTab";

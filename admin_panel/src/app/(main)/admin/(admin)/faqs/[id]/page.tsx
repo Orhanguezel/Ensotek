@@ -4,7 +4,7 @@
 // Route: /admin/faqs/:id  (id: "new" | UUID)
 // =============================================================
 
-import AdminFaqsDetailClient from '../admin-faqs-detail-client';
+import AdminFaqsDetailClient from "../admin-faqs-detail-client";
 
 type Params = { id: string };
 

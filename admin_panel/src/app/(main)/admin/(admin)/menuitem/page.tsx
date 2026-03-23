@@ -3,7 +3,7 @@
 // FINAL — Admin Menu Items Page
 // =============================================================
 
-import AdminMenuItemClient from './_components/admin-menuitem-client';
+import AdminMenuItemClient from "./_components/admin-menuitem-client";
 
 export default function Page() {
   return <AdminMenuItemClient />;

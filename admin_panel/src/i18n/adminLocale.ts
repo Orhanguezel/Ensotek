@@ -5,19 +5,17 @@
 // - API için güvenli locale seçer (db default > first option > 'tr').
 // =============================================================
 
-import { localeShortClient, localeShortClientOr } from './localeShortClient';
+import { localeShortClient, localeShortClientOr } from "./localeShortClient";
 
 export function resolveAdminApiLocale(
   localeOptions?: Array<{ value: string } | { value: string; label?: string }> | null,
   defaultLocaleFromDb?: string | null,
-  fallback = 'de',
+  fallback = "de",
 ): string {
   // ✅ Güvenlik kontrolü: localeOptions bir array mi?
   const safeOptions = Array.isArray(localeOptions) ? localeOptions : [];
 
-  const set = new Set(
-    safeOptions.map((x: any) => localeShortClient(x?.value)).filter(Boolean),
-  );
+  const set = new Set(safeOptions.map((x: any) => localeShortClient(x?.value)).filter(Boolean));
 
   const db = localeShortClient(defaultLocaleFromDb);
   if (db && set.has(db)) return db;

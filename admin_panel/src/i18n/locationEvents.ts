@@ -2,7 +2,7 @@
 // FILE: src/i18n/locationEvents.ts
 // guezelwebdesign – SPA navigation detector (no next/router)
 // =============================================================
-'use client';
+"use client";
 
 let patched = false;
 
@@ -11,7 +11,7 @@ function dispatchLocationChange() {
   // This ensures the event is dispatched after React finish its current update cycle
   setTimeout(() => {
     try {
-      window.dispatchEvent(new Event('locationchange'));
+      window.dispatchEvent(new Event("locationchange"));
     } catch {
       // ignore
     }
@@ -27,7 +27,7 @@ function dispatchLocationChange() {
  */
 export function ensureLocationEventsPatched() {
   if (patched) return;
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   patched = true;
 
@@ -46,6 +46,6 @@ export function ensureLocationEventsPatched() {
     return ret;
   } as any;
 
-  window.addEventListener('popstate', dispatchLocationChange);
-  window.addEventListener('hashchange', dispatchLocationChange);
+  window.addEventListener("popstate", dispatchLocationChange);
+  window.addEventListener("hashchange", dispatchLocationChange);
 }

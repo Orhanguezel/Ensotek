@@ -9,22 +9,22 @@
 export type RuntimeLocale = string;
 
 function toShortLocale(v: unknown): string {
-  return String(v || '')
+  return String(v || "")
     .trim()
     .toLowerCase()
-    .replace('_', '-')
-    .split('-')[0]
+    .replace("_", "-")
+    .split("-")[0]
     .trim();
 }
 
 function splitPath(asPath: string) {
-  const s = String(asPath || '/');
-  const [pathAndQuery, hash = ''] = s.split('#');
-  const [pathname = '/', query = ''] = pathAndQuery.split('?');
+  const s = String(asPath || "/");
+  const [pathAndQuery, hash = ""] = s.split("#");
+  const [pathname = "/", query = ""] = pathAndQuery.split("?");
   return {
-    pathname: pathname || '/',
-    query: query ? `?${query}` : '',
-    hash: hash ? `#${hash}` : '',
+    pathname: pathname || "/",
+    query: query ? `?${query}` : "",
+    hash: hash ? `#${hash}` : "",
   };
 }
 
@@ -40,10 +40,10 @@ function looksLikeLocale(seg: string): boolean {
 }
 
 function hasLcQuery(): boolean {
-  if (typeof window === 'undefined') return false;
+  if (typeof window === "undefined") return false;
   try {
-    const usp = new URLSearchParams(window.location.search || '');
-    return !!usp.get('__lc');
+    const usp = new URLSearchParams(window.location.search || "");
+    return !!usp.get("__lc");
   } catch {
     return false;
   }
@@ -55,21 +55,20 @@ function hasLcQuery(): boolean {
  * - Otherwise strips ONLY when "__lc" query exists (rewrite mode) and prefix looks like locale.
  */
 export function stripLocalePrefix(pathname: string, activeLocales?: string[]): string {
-  const p = pathname.startsWith('/') ? pathname : `/${pathname}`;
-  const seg = p.replace(/^\/+/, '').split('/')[0] || '';
+  const p = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const seg = p.replace(/^\/+/, "").split("/")[0] || "";
   const cand = toShortLocale(seg);
 
   if (!cand) return p;
 
   const activeSet = buildActiveSet(activeLocales);
 
-  const shouldStrip =
-    activeSet.size > 0 ? activeSet.has(cand) : hasLcQuery() ? looksLikeLocale(cand) : false;
+  const shouldStrip = activeSet.size > 0 ? activeSet.has(cand) : hasLcQuery() ? looksLikeLocale(cand) : false;
 
   if (!shouldStrip) return p;
 
-  const rest = p.replace(new RegExp(`^/${seg}(?=/|$)`), '');
-  return rest ? (rest.startsWith('/') ? rest : `/${rest}`) : '/';
+  const rest = p.replace(new RegExp(`^/${seg}(?=/|$)`), "");
+  return rest ? (rest.startsWith("/") ? rest : `/${rest}`) : "/";
 }
 
 export type LocalizePathOptions = {
@@ -90,18 +89,17 @@ export function localizePath(
   const { pathname, query, hash } = splitPath(asPath);
 
   const clean = stripLocalePrefix(pathname, activeLocales);
-  const base = clean === '/' ? '' : clean;
+  const base = clean === "/" ? "" : clean;
 
-  const target = toShortLocale(locale) || '';
+  const target = toShortLocale(locale) || "";
 
   const defFromOpts = toShortLocale(opts?.defaultLocale);
   const defFromActives = toShortLocale(activeLocales?.[0]);
-  const def = defFromOpts || defFromActives || 'de';
+  const def = defFromOpts || defFromActives || "de";
 
   const defaultPrefixless = opts?.defaultPrefixless !== false;
 
-  const path =
-    defaultPrefixless && target && target === def ? `${base || '/'}` : `/${target || def}${base}`;
+  const path = defaultPrefixless && target && target === def ? `${base || "/"}` : `/${target || def}${base}`;
 
   return `${path}${query}${hash}`;
 }

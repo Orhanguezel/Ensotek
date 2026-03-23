@@ -3,7 +3,7 @@
 // FINAL — Admin Resume Detail Page
 // =============================================================
 
-import AdminResumeDetailClient from '../_components/admin-resume-detail-client';
+import AdminResumeDetailClient from "../_components/admin-resume-detail-client";
 
 export default function Page({ params }: { params: { id: string } }) {
   return <AdminResumeDetailClient id={params.id} />;

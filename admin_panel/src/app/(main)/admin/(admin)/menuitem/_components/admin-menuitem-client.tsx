@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/menuitem/admin-menuitem-client.tsx
@@ -6,99 +6,69 @@
 // ✅ All TypeScript errors fixed
 // =============================================================
 
-import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
+import * as React from "react";
+
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { ArrowDown, ArrowUp, GripVertical, Pencil, Plus, RefreshCcw, Save, Search, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClient, localeShortClientOr } from "@/i18n/localeShortClient";
 import {
-  Plus,
-  RefreshCcw,
-  ArrowUp,
-  ArrowDown,
-  Save,
-  Search,
-  Trash2,
-  Pencil,
-  GripVertical,
-} from 'lucide-react';
-
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
-
-import { cn } from '@/lib/utils';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
-
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-
-import type {
-  AdminMenuItemDto,
-  AdminMenuItemListQueryParams,
-  MenuLocation,
-} from '@/integrations/shared';
-import {
-  useListMenuItemsAdminQuery,
-  useUpdateMenuItemAdminMutation,
   useDeleteMenuItemAdminMutation,
+  useListMenuItemsAdminQuery,
   useReorderMenuItemsAdminMutation,
-} from '@/integrations/hooks';
+  useUpdateMenuItemAdminMutation,
+} from "@/integrations/hooks";
+import type { AdminMenuItemDto, AdminMenuItemListQueryParams, MenuLocation } from "@/integrations/shared";
+import { cn } from "@/lib/utils";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
-type ActiveFilter = 'all' | 'active' | 'inactive';
-type TypeFilter = 'all' | 'page' | 'custom';
+type ActiveFilter = "all" | "active" | "inactive";
+type TypeFilter = "all" | "page" | "custom";
 
 type Filters = {
   search: string;
   activeFilter: ActiveFilter;
-  location: MenuLocation | 'all';
+  location: MenuLocation | "all";
   type: TypeFilter;
   locale: string;
 };
 
 function truncate(text: string | null | undefined, max = 40) {
-  const t = text || '';
-  if (t.length <= max) return t || '-';
-  return t.slice(0, max - 1) + '…';
+  const t = text || "";
+  if (t.length <= max) return t || "-";
+  return `${t.slice(0, max - 1)}…`;
 }
 
 export default function AdminMenuItemClient() {
-  const t = useAdminT('admin.menuitem');
+  const t = useAdminT("admin.menuitem");
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const router = useRouter();
   const sp = useSearchParams();
 
-  const fmtDate = React.useCallback(
+  const _fmtDate = React.useCallback(
     (val: string | null | undefined) => {
-      if (!val) return '-';
+      if (!val) return "-";
       try {
         const d = new Date(val);
         if (Number.isNaN(d.getTime())) return String(val);
         return d.toLocaleString(adminLocale || undefined, {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit',
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
         });
       } catch {
         return String(val);
@@ -110,38 +80,28 @@ export default function AdminMenuItemClient() {
   const getErrMsg = React.useCallback(
     (e: unknown): string => {
       const anyErr = e as any;
-      return (
-        anyErr?.data?.error?.message ||
-        anyErr?.data?.message ||
-        anyErr?.message ||
-        t('form.errors.generic')
-      );
+      return anyErr?.data?.error?.message || anyErr?.data?.message || anyErr?.message || t("form.errors.generic");
     },
     [t],
   );
 
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'de');
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const urlLocale = React.useMemo(() => {
-    const q = sp?.get('locale');
-    return localeShortClient(q) || '';
+    const q = sp?.get("locale");
+    return localeShortClient(q) || "";
   }, [sp]);
 
   const [filters, setFilters] = React.useState<Filters>({
-    search: '',
-    activeFilter: 'all',
-    location: 'all',
-    type: 'all',
-    locale: '',
+    search: "",
+    activeFilter: "all",
+    location: "all",
+    type: "all",
+    locale: "",
   });
 
   const [reorderMode, setReorderMode] = React.useState(false);
@@ -154,10 +114,9 @@ export default function AdminMenuItemClient() {
     setFilters((prev) => {
       const prevLoc = localeShortClient(prev.locale);
       const urlLoc = localeShortClient(urlLocale);
-      const defLoc = localeShortClientOr(apiLocale, 'de');
+      const defLoc = localeShortClientOr(apiLocale, "de");
 
-      const canUse = (l: string) =>
-        !!l && (localeOptions ?? []).some((x: any) => localeShortClient(x.value) === l);
+      const canUse = (l: string) => !!l && (localeOptions ?? []).some((x: any) => localeShortClient(x.value) === l);
 
       if (prevLoc && canUse(prevLoc)) return prev;
 
@@ -165,7 +124,7 @@ export default function AdminMenuItemClient() {
 
       if (defLoc && canUse(defLoc)) return { ...prev, locale: defLoc };
 
-      return { ...prev, locale: localeShortClient((localeOptions as any)?.[0]?.value) || 'de' };
+      return { ...prev, locale: localeShortClient((localeOptions as any)?.[0]?.value) || "de" };
     });
   }, [localeOptions, urlLocale, apiLocale]);
 
@@ -180,15 +139,15 @@ export default function AdminMenuItemClient() {
     if (!l) return;
     if (l === urlLocale) return;
 
-    const params = new URLSearchParams(sp?.toString() || '');
-    params.set('locale', l);
+    const params = new URLSearchParams(sp?.toString() || "");
+    params.set("locale", l);
     router.replace(`/admin/menuitem?${params.toString()}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.locale]);
+  }, [filters.locale, router.replace, sp?.toString, urlLocale]);
 
   const is_active = React.useMemo(() => {
-    if (filters.activeFilter === 'all') return undefined;
-    return filters.activeFilter === 'active' ? 1 : 0;
+    if (filters.activeFilter === "all") return undefined;
+    return filters.activeFilter === "active" ? 1 : 0;
   }, [filters.activeFilter]);
 
   const queryParams = React.useMemo(() => {
@@ -196,11 +155,11 @@ export default function AdminMenuItemClient() {
       q: filters.search.trim() || undefined,
       locale: effectiveLocale || undefined,
       is_active,
-      location: filters.location === 'all' ? undefined : filters.location,
+      location: filters.location === "all" ? undefined : filters.location,
       limit: 200,
       offset: 0,
-      sort: 'display_order',
-      order: 'asc',
+      sort: "display_order",
+      order: "asc",
     };
     return qp;
   }, [filters.search, effectiveLocale, is_active, filters.location]);
@@ -213,7 +172,7 @@ export default function AdminMenuItemClient() {
     // If result is already an array, use it directly
     if (Array.isArray(result)) return result;
     // If result has items property, use that
-    if ('items' in result && Array.isArray(result.items)) return result.items;
+    if ("items" in result && Array.isArray(result.items)) return result.items;
     return [];
   }, [result]);
 
@@ -225,7 +184,7 @@ export default function AdminMenuItemClient() {
 
   // Client-side type filter
   const filteredItems = React.useMemo(() => {
-    if (filters.type === 'all') return items;
+    if (filters.type === "all") return items;
     return items.filter((item: AdminMenuItemDto) => item.type === filters.type);
   }, [items, filters.type]);
 
@@ -238,7 +197,7 @@ export default function AdminMenuItemClient() {
   };
 
   const handleCreate = () => {
-    router.push('/admin/menuitem/new');
+    router.push("/admin/menuitem/new");
   };
 
   const handleEdit = (item: AdminMenuItemDto) => {
@@ -246,11 +205,11 @@ export default function AdminMenuItemClient() {
   };
 
   const handleDelete = async (item: AdminMenuItemDto) => {
-    if (!confirm(t('list.deleteConfirm', { title: item.title }))) return;
+    if (!confirm(t("list.deleteConfirm", { title: item.title }))) return;
 
     try {
       await deleteMenuItem({ id: item.id }).unwrap();
-      toast.success(t('list.deleted'));
+      toast.success(t("list.deleted"));
     } catch (err) {
       toast.error(getErrMsg(err));
     }
@@ -263,7 +222,7 @@ export default function AdminMenuItemClient() {
         id: item.id,
         data: { is_active: item.is_active ? 0 : 1 },
       }).unwrap();
-      toast.success(item.is_active ? t('list.statusPassive') : t('list.statusActive'));
+      toast.success(item.is_active ? t("list.statusPassive") : t("list.statusActive"));
     } catch (err) {
       toast.error(getErrMsg(err));
     }
@@ -293,7 +252,7 @@ export default function AdminMenuItemClient() {
 
     try {
       await reorderMenuItems(payload).unwrap();
-      toast.success(t('list.orderSaved'));
+      toast.success(t("list.orderSaved"));
       setReorderMode(false);
       refetch();
     } catch (err) {
@@ -315,18 +274,18 @@ export default function AdminMenuItemClient() {
         <CardHeader className="pb-3">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle className="text-2xl font-bold">{t('header.title')}</CardTitle>
-              <CardDescription>{t('header.total', { count: displayItems.length })}</CardDescription>
+              <CardTitle className="font-bold text-2xl">{t("header.title")}</CardTitle>
+              <CardDescription>{t("header.total", { count: displayItems.length })}</CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
               {reorderMode ? (
                 <>
                   <Button onClick={handleSaveOrder} disabled={busy} size="sm">
                     <Save className="mr-2 size-4" />
-                    {t('list.saveOrder')}
+                    {t("list.saveOrder")}
                   </Button>
                   <Button onClick={handleCancelReorder} variant="outline" size="sm">
-                    {t('admin.common.cancel')}
+                    {t("admin.common.cancel")}
                   </Button>
                 </>
               ) : (
@@ -338,15 +297,15 @@ export default function AdminMenuItemClient() {
                     disabled={busy || displayItems.length === 0}
                   >
                     <GripVertical className="mr-2 size-4" />
-                    {t('header.sortLabel')}
+                    {t("header.sortLabel")}
                   </Button>
                   <Button onClick={handleRefresh} disabled={busy} variant="outline" size="sm">
-                    <RefreshCcw className={cn('mr-2 size-4', busy && 'animate-spin')} />
-                    {t('header.refresh')}
+                    <RefreshCcw className={cn("mr-2 size-4", busy && "animate-spin")} />
+                    {t("header.refresh")}
                   </Button>
                   <Button onClick={handleCreate} size="sm">
                     <Plus className="mr-2 size-4" />
-                    {t('header.create')}
+                    {t("header.create")}
                   </Button>
                 </>
               )}
@@ -359,19 +318,19 @@ export default function AdminMenuItemClient() {
       {!reorderMode && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-base font-semibold">{t('header.filtersTitle')}</CardTitle>
+            <CardTitle className="font-semibold text-base">{t("header.filtersTitle")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-5">
               {/* Search */}
               <div className="space-y-2">
-                <Label htmlFor="search">{t('header.searchLabel')}</Label>
+                <Label htmlFor="search">{t("header.searchLabel")}</Label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+                  <Search className="-translate-y-1/2 absolute top-1/2 left-3 size-4 text-muted-foreground" />
                   <Input
                     id="search"
                     className="pl-9"
-                    placeholder={t('header.searchPlaceholder')}
+                    placeholder={t("header.searchPlaceholder")}
                     value={filters.search}
                     onChange={(e) => setFilters((p) => ({ ...p, search: e.target.value }))}
                   />
@@ -380,11 +339,8 @@ export default function AdminMenuItemClient() {
 
               {/* Locale */}
               <div className="space-y-2">
-                <Label htmlFor="locale">{t('header.localeLabel')}</Label>
-                <Select
-                  value={filters.locale}
-                  onValueChange={(v) => setFilters((p) => ({ ...p, locale: v }))}
-                >
+                <Label htmlFor="locale">{t("header.localeLabel")}</Label>
+                <Select value={filters.locale} onValueChange={(v) => setFilters((p) => ({ ...p, locale: v }))}>
                   <SelectTrigger id="locale">
                     <SelectValue />
                   </SelectTrigger>
@@ -400,7 +356,7 @@ export default function AdminMenuItemClient() {
 
               {/* Location */}
               <div className="space-y-2">
-                <Label htmlFor="location">{t('list.columns.location')}</Label>
+                <Label htmlFor="location">{t("list.columns.location")}</Label>
                 <Select
                   value={filters.location}
                   onValueChange={(v) => setFilters((p) => ({ ...p, location: v as any }))}
@@ -409,7 +365,7 @@ export default function AdminMenuItemClient() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('header.allStats')}</SelectItem>
+                    <SelectItem value="all">{t("header.allStats")}</SelectItem>
                     <SelectItem value="header">Header</SelectItem>
                     <SelectItem value="footer">Footer</SelectItem>
                   </SelectContent>
@@ -418,7 +374,7 @@ export default function AdminMenuItemClient() {
 
               {/* Type */}
               <div className="space-y-2">
-                <Label htmlFor="type">{t('list.columns.type')}</Label>
+                <Label htmlFor="type">{t("list.columns.type")}</Label>
                 <Select
                   value={filters.type}
                   onValueChange={(v) => setFilters((p) => ({ ...p, type: v as TypeFilter }))}
@@ -427,29 +383,27 @@ export default function AdminMenuItemClient() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('header.allStats')}</SelectItem>
-                    <SelectItem value="page">{t('list.types.page')}</SelectItem>
-                    <SelectItem value="custom">{t('list.types.custom')}</SelectItem>
+                    <SelectItem value="all">{t("header.allStats")}</SelectItem>
+                    <SelectItem value="page">{t("list.types.page")}</SelectItem>
+                    <SelectItem value="custom">{t("list.types.custom")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {/* Active Filter */}
               <div className="space-y-2">
-                <Label htmlFor="activeFilter">{t('header.activeLabel')}</Label>
+                <Label htmlFor="activeFilter">{t("header.activeLabel")}</Label>
                 <Select
                   value={filters.activeFilter}
-                  onValueChange={(v) =>
-                    setFilters((p) => ({ ...p, activeFilter: v as ActiveFilter }))
-                  }
+                  onValueChange={(v) => setFilters((p) => ({ ...p, activeFilter: v as ActiveFilter }))}
                 >
                   <SelectTrigger id="activeFilter">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">{t('header.allStats')}</SelectItem>
-                    <SelectItem value="active">{t('header.active')}</SelectItem>
-                    <SelectItem value="inactive">{t('header.inactive')}</SelectItem>
+                    <SelectItem value="all">{t("header.allStats")}</SelectItem>
+                    <SelectItem value="active">{t("header.active")}</SelectItem>
+                    <SelectItem value="inactive">{t("header.inactive")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -466,34 +420,28 @@ export default function AdminMenuItemClient() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  {reorderMode && <TableHead className="w-12"></TableHead>}
-                  <TableHead className="w-50">{t('list.columns.title')}</TableHead>
-                  <TableHead className="w-25">{t('list.columns.location')}</TableHead>
-                  <TableHead className="w-25">{t('list.columns.type')}</TableHead>
-                  <TableHead className="w-50">{t('list.columns.url')}</TableHead>
-                  <TableHead className="w-20">{t('list.columns.active')}</TableHead>
-                  <TableHead className="w-20">{t('header.sortOrder')}</TableHead>
-                  <TableHead className="w-50 text-right">{t('list.columns.actions')}</TableHead>
+                  {reorderMode && <TableHead className="w-12" />}
+                  <TableHead className="w-50">{t("list.columns.title")}</TableHead>
+                  <TableHead className="w-25">{t("list.columns.location")}</TableHead>
+                  <TableHead className="w-25">{t("list.columns.type")}</TableHead>
+                  <TableHead className="w-50">{t("list.columns.url")}</TableHead>
+                  <TableHead className="w-20">{t("list.columns.active")}</TableHead>
+                  <TableHead className="w-20">{t("header.sortOrder")}</TableHead>
+                  <TableHead className="w-50 text-right">{t("list.columns.actions")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {displayItems.length === 0 && (
                   <TableRow>
-                    <TableCell
-                      colSpan={reorderMode ? 8 : 7}
-                      className="h-24 text-center text-muted-foreground"
-                    >
-                      {busy ? t('list.loading') : t('list.noData')}
+                    <TableCell colSpan={reorderMode ? 8 : 7} className="h-24 text-center text-muted-foreground">
+                      {busy ? t("list.loading") : t("list.noData")}
                     </TableCell>
                   </TableRow>
                 )}
                 {displayItems.map((item: AdminMenuItemDto, index: number) => (
                   <TableRow
                     key={item.id}
-                    className={cn(
-                      !reorderMode && 'cursor-pointer hover:bg-muted/50',
-                      !item.is_active && 'opacity-50',
-                    )}
+                    className={cn(!reorderMode && "cursor-pointer hover:bg-muted/50", !item.is_active && "opacity-50")}
                     onClick={() => !reorderMode && handleEdit(item)}
                   >
                     {reorderMode && (
@@ -522,26 +470,20 @@ export default function AdminMenuItemClient() {
                     )}
                     <TableCell className="font-medium">{truncate(item.title, 40)}</TableCell>
                     <TableCell>
-                      <Badge variant="outline">
-                        {item.location === 'header' ? 'Header' : 'Footer'}
-                      </Badge>
+                      <Badge variant="outline">{item.location === "header" ? "Header" : "Footer"}</Badge>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={item.type === 'page' ? 'default' : 'secondary'}>
-                        {item.type === 'page' ? t('list.types.page') : t('list.types.custom')}
+                      <Badge variant={item.type === "page" ? "default" : "secondary"}>
+                        {item.type === "page" ? t("list.types.page") : t("list.types.custom")}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {truncate(item.url, 40)}
-                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{truncate(item.url, 40)}</TableCell>
                     <TableCell>
-                      <Badge variant={item.is_active ? 'default' : 'secondary'}>
-                        {item.is_active ? t('header.active') : t('header.inactive')}
+                      <Badge variant={item.is_active ? "default" : "secondary"}>
+                        {item.is_active ? t("header.active") : t("header.inactive")}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
-                      {item.display_order}
-                    </TableCell>
+                    <TableCell className="text-muted-foreground text-sm">{item.display_order}</TableCell>
                     <TableCell className="text-right">
                       {!reorderMode && (
                         <div className="flex items-center justify-end gap-2">
@@ -554,7 +496,7 @@ export default function AdminMenuItemClient() {
                             }}
                             disabled={busy}
                           >
-                            {item.is_active ? t('header.inactive') : t('header.active')}
+                            {item.is_active ? t("header.inactive") : t("header.active")}
                           </Button>
                           <Button
                             size="sm"
@@ -591,15 +533,15 @@ export default function AdminMenuItemClient() {
           <div className="flex flex-col gap-3 p-4 xl:hidden">
             {displayItems.length === 0 && (
               <div className="py-12 text-center text-muted-foreground">
-                {busy ? t('list.loading') : t('list.noData')}
+                {busy ? t("list.loading") : t("list.noData")}
               </div>
             )}
             {displayItems.map((item: AdminMenuItemDto, index: number) => (
               <Card
                 key={item.id}
                 className={cn(
-                  !reorderMode && 'cursor-pointer transition-colors hover:bg-muted/50',
-                  !item.is_active && 'opacity-50',
+                  !reorderMode && "cursor-pointer transition-colors hover:bg-muted/50",
+                  !item.is_active && "opacity-50",
                 )}
                 onClick={() => !reorderMode && handleEdit(item)}
               >
@@ -608,7 +550,7 @@ export default function AdminMenuItemClient() {
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1">
                         <p className="font-semibold">{item.title}</p>
-                        <p className="text-sm text-muted-foreground">{truncate(item.url, 50)}</p>
+                        <p className="text-muted-foreground text-sm">{truncate(item.url, 50)}</p>
                       </div>
                       {reorderMode && (
                         <div className="flex gap-1">
@@ -632,17 +574,15 @@ export default function AdminMenuItemClient() {
                       )}
                     </div>
                     <div className="flex flex-wrap gap-2 text-xs">
-                      <Badge variant="outline">
-                        {item.location === 'header' ? 'Header' : 'Footer'}
+                      <Badge variant="outline">{item.location === "header" ? "Header" : "Footer"}</Badge>
+                      <Badge variant={item.type === "page" ? "default" : "secondary"}>
+                        {item.type === "page" ? t("list.types.page") : t("list.types.custom")}
                       </Badge>
-                      <Badge variant={item.type === 'page' ? 'default' : 'secondary'}>
-                        {item.type === 'page' ? t('list.types.page') : t('list.types.custom')}
-                      </Badge>
-                      <Badge variant={item.is_active ? 'default' : 'secondary'}>
-                        {item.is_active ? t('header.active') : t('header.inactive')}
+                      <Badge variant={item.is_active ? "default" : "secondary"}>
+                        {item.is_active ? t("header.active") : t("header.inactive")}
                       </Badge>
                       <span className="text-muted-foreground">
-                        {t('header.sortOrder')}: {item.display_order}
+                        {t("header.sortOrder")}: {item.display_order}
                       </span>
                     </div>
                   </div>
@@ -658,7 +598,7 @@ export default function AdminMenuItemClient() {
                         disabled={busy}
                         className="flex-1"
                       >
-                        {item.is_active ? t('header.inactive') : t('header.active')}
+                        {item.is_active ? t("header.inactive") : t("header.active")}
                       </Button>
                       <Button
                         size="sm"

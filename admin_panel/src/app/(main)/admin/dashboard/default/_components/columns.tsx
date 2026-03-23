@@ -1,42 +1,33 @@
-import type { ColumnDef } from '@tanstack/react-table';
-import { CircleCheck, EllipsisVertical, Loader } from 'lucide-react';
-import { toast } from 'sonner';
-import type { z } from 'zod';
+import type { ColumnDef } from "@tanstack/react-table";
+import { CircleCheck, EllipsisVertical, Loader } from "lucide-react";
+import { toast } from "sonner";
+import type { z } from "zod";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-import { DataTableColumnHeader } from '../../../../../../components/data-table/data-table-column-header';
-import type { sectionSchema } from './schema';
-import { TableCellViewer } from './table-cell-viewer';
+import { DataTableColumnHeader } from "../../../../../../components/data-table/data-table-column-header";
+import type { sectionSchema } from "./schema";
+import { TableCellViewer } from "./table-cell-viewer";
 
 export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
   {
-    id: 'select',
+    id: "select",
     header: ({ table }) => (
       <div className="flex items-center justify-center">
         <Checkbox
-          checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && 'indeterminate')
-          }
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
@@ -55,7 +46,7 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'header',
+    accessorKey: "header",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Header" />,
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />;
@@ -63,7 +54,7 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'type',
+    accessorKey: "type",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Section Type" />,
     cell: ({ row }) => (
       <div className="w-32">
@@ -75,11 +66,11 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'status',
+    accessorKey: "status",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
     cell: ({ row }) => (
       <Badge variant="outline" className="px-1.5 text-muted-foreground">
-        {row.original.status === 'Done' ? (
+        {row.original.status === "Done" ? (
           <CircleCheck className="fill-green-500 stroke-border dark:fill-green-400" />
         ) : (
           <Loader />
@@ -90,18 +81,16 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'target',
-    header: ({ column }) => (
-      <DataTableColumnHeader className="w-full text-right" column={column} title="Target" />
-    ),
+    accessorKey: "target",
+    header: ({ column }) => <DataTableColumnHeader className="w-full text-right" column={column} title="Target" />,
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
           e.preventDefault();
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
             loading: `Saving ${row.original.header}`,
-            success: 'Done',
-            error: 'Error',
+            success: "Done",
+            error: "Error",
           });
         }}
       >
@@ -118,18 +107,16 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'limit',
-    header: ({ column }) => (
-      <DataTableColumnHeader className="w-full text-right" column={column} title="Limit" />
-    ),
+    accessorKey: "limit",
+    header: ({ column }) => <DataTableColumnHeader className="w-full text-right" column={column} title="Limit" />,
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
           e.preventDefault();
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
             loading: `Saving ${row.original.header}`,
-            success: 'Done',
-            error: 'Error',
+            success: "Done",
+            error: "Error",
           });
         }}
       >
@@ -146,10 +133,10 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     enableSorting: false,
   },
   {
-    accessorKey: 'reviewer',
+    accessorKey: "reviewer",
     header: ({ column }) => <DataTableColumnHeader column={column} title="Reviewer" />,
     cell: ({ row }) => {
-      const isAssigned = row.original.reviewer !== 'Assign reviewer';
+      const isAssigned = row.original.reviewer !== "Assign reviewer";
 
       if (isAssigned) {
         return row.original.reviewer;
@@ -179,15 +166,11 @@ export const dashboardColumns: ColumnDef<z.infer<typeof sectionSchema>>[] = [
     enableSorting: false,
   },
   {
-    id: 'actions',
+    id: "actions",
     cell: () => (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button
-            variant="ghost"
-            className="flex size-8 text-muted-foreground data-[state=open]:bg-muted"
-            size="icon"
-          >
+          <Button variant="ghost" className="flex size-8 text-muted-foreground data-[state=open]:bg-muted" size="icon">
             <EllipsisVertical />
             <span className="sr-only">Open menu</span>
           </Button>

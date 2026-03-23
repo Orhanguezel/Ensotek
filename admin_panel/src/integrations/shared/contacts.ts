@@ -2,7 +2,7 @@
 // FILE: src/integrations/types/contacts.types.ts
 // =============================================================
 
-export type ContactStatus = 'new' | 'in_progress' | 'closed';
+export type ContactStatus = "new" | "in_progress" | "closed";
 
 /**
  * Backend'in döndürdüğü model (ContactView / contact_messages row)
@@ -69,10 +69,8 @@ export const normalizeContact = (dto: ContactDto): Contact => ({
   user_agent: dto.user_agent ?? null,
   website: dto.website ?? null,
 
-  created_at:
-    typeof dto.created_at === 'string' ? dto.created_at : (dto.created_at?.toISOString?.() ?? ''),
-  updated_at:
-    typeof dto.updated_at === 'string' ? dto.updated_at : (dto.updated_at?.toISOString?.() ?? ''),
+  created_at: typeof dto.created_at === "string" ? dto.created_at : (dto.created_at?.toISOString?.() ?? ""),
+  updated_at: typeof dto.updated_at === "string" ? dto.updated_at : (dto.updated_at?.toISOString?.() ?? ""),
 });
 
 /**
@@ -84,8 +82,8 @@ export interface ContactListQueryParams {
   resolved?: boolean;
   limit?: number;
   offset?: number;
-  orderBy?: 'created_at' | 'updated_at' | 'status' | 'name';
-  order?: 'asc' | 'desc';
+  orderBy?: "created_at" | "updated_at" | "status" | "name";
+  order?: "asc" | "desc";
 }
 
 /**

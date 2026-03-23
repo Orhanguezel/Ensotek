@@ -30,21 +30,21 @@ export type Profile = {
 export type ProfileUpsertInput = Partial<
   Pick<
     Profile,
-    | 'full_name'
-    | 'phone'
-    | 'avatar_url'
-    | 'address_line1'
-    | 'address_line2'
-    | 'city'
-    | 'country'
-    | 'postal_code'
-    | 'website_url'
-    | 'instagram_url'
-    | 'facebook_url'
-    | 'x_url'
-    | 'linkedin_url'
-    | 'youtube_url'
-    | 'tiktok_url'
+    | "full_name"
+    | "phone"
+    | "avatar_url"
+    | "address_line1"
+    | "address_line2"
+    | "city"
+    | "country"
+    | "postal_code"
+    | "website_url"
+    | "instagram_url"
+    | "facebook_url"
+    | "x_url"
+    | "linkedin_url"
+    | "youtube_url"
+    | "tiktok_url"
   >
 >;
 
@@ -56,17 +56,11 @@ export type UpsertMyProfileReq = { profile: ProfileUpsertInput };
 export type UpsertMyProfileResp = Profile;
 
 /** RTK hooks (optional helper typings) */
-export type GetMyProfileArg = void;
+export type GetMyProfileArg = undefined;
 export type UpsertMyProfileArg = UpsertMyProfileReq;
 
 /** UI convenience (optional): social links bag */
 export type ProfileSocial = Pick<
   Profile,
-  | 'website_url'
-  | 'instagram_url'
-  | 'facebook_url'
-  | 'x_url'
-  | 'linkedin_url'
-  | 'youtube_url'
-  | 'tiktok_url'
+  "website_url" | "instagram_url" | "facebook_url" | "x_url" | "linkedin_url" | "youtube_url" | "tiktok_url"
 >;

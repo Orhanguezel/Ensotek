@@ -6,47 +6,46 @@
 // - ✅ slugify TR/DE safe
 // =============================================================
 
-import type { ServiceDto, ServiceFormValues } from '@/integrations/shared';
+import type { ServiceDto, ServiceFormValues } from "@/integrations/shared";
 
-export const normalizeLocale = (v: unknown): string =>
-  typeof v === 'string' ? v.trim().toLowerCase() : '';
+export const normalizeLocale = (v: unknown): string => (typeof v === "string" ? v.trim().toLowerCase() : "");
 
 export const slugify = (value: string): string => {
-  if (!value) return '';
+  if (!value) return "";
   let s = value.trim();
 
   const trMap: Record<string, string> = {
-    ç: 'c',
-    Ç: 'c',
-    ğ: 'g',
-    Ğ: 'g',
-    ı: 'i',
-    I: 'i',
-    İ: 'i',
-    ö: 'o',
-    Ö: 'o',
-    ş: 's',
-    Ş: 's',
-    ü: 'u',
-    Ü: 'u',
+    ç: "c",
+    Ç: "c",
+    ğ: "g",
+    Ğ: "g",
+    ı: "i",
+    I: "i",
+    İ: "i",
+    ö: "o",
+    Ö: "o",
+    ş: "s",
+    Ş: "s",
+    ü: "u",
+    Ü: "u",
   };
 
   s = s
-    .split('')
+    .split("")
     .map((ch) => trMap[ch] ?? ch)
-    .join('');
+    .join("");
 
   // German ß
-  s = s.replace(/ß/g, 'ss').replace(/ẞ/g, 'ss');
+  s = s.replace(/ß/g, "ss").replace(/ẞ/g, "ss");
 
   return s
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^a-z0-9\s-]/g, '')
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9\s-]/g, "")
     .trim()
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-');
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
 };
 
 export const resolveInitialLocale = (
@@ -54,13 +53,11 @@ export const resolveInitialLocale = (
   activeLocale: string | undefined,
   fallbackLocale: string,
 ): string => {
-  const candidate = normalizeLocale(
-    initial?.locale_resolved ?? activeLocale ?? fallbackLocale ?? '',
-  );
-  return candidate || normalizeLocale(fallbackLocale) || '';
+  const candidate = normalizeLocale(initial?.locale_resolved ?? activeLocale ?? fallbackLocale ?? "");
+  return candidate || normalizeLocale(fallbackLocale) || "";
 };
 
-const toStr = (v: unknown) => (v === null || v === undefined ? '' : String(v));
+const toStr = (v: unknown) => (v === null || v === undefined ? "" : String(v));
 
 export const buildInitialValues = (
   initial: ServiceDto | undefined,
@@ -75,41 +72,41 @@ export const buildInitialValues = (
       locale: loc,
 
       // i18n
-      name: '',
-      slug: '',
-      summary: '',
-      content: '',
-      description: '',
+      name: "",
+      slug: "",
+      summary: "",
+      content: "",
+      description: "",
 
-      material: '',
-      price: '',
-      includes: '',
-      warranty: '',
-      image_alt: '',
+      material: "",
+      price: "",
+      includes: "",
+      warranty: "",
+      image_alt: "",
 
       // flags + order
       is_active: true,
       featured: false,
-      display_order: '0',
-      type: 'other',
+      display_order: "0",
+      type: "other",
 
       // cover (UI keeps both mirrored)
-      featured_image: '',
-      image_url: '',
-      image_asset_id: '',
+      featured_image: "",
+      image_url: "",
+      image_asset_id: "",
 
       // technical
-      area: '',
-      duration: '',
-      maintenance: '',
-      season: '',
-      equipment: '',
+      area: "",
+      duration: "",
+      maintenance: "",
+      season: "",
+      equipment: "",
 
       // SEO + tags
-      tags: '',
-      meta_title: '',
-      meta_description: '',
-      meta_keywords: '',
+      tags: "",
+      meta_title: "",
+      meta_description: "",
+      meta_keywords: "",
 
       // i18n ops
       replicate_all_locales: true,
@@ -137,8 +134,8 @@ export const buildInitialValues = (
     // flags + order
     is_active: !!initial.is_active,
     featured: !!initial.featured,
-    display_order: Number.isFinite(initial.display_order) ? String(initial.display_order) : '0',
-    type: toStr(initial.type) || 'other',
+    display_order: Number.isFinite(initial.display_order) ? String(initial.display_order) : "0",
+    type: toStr(initial.type) || "other",
 
     // cover
     featured_image: toStr(initial.featured_image),

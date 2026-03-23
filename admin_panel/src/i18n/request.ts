@@ -10,6 +10,7 @@ function getRequestConfig<R = { locale: string; messages: Record<string, unknown
 ): RequestConfigFn<R> {
   return cb;
 }
+
 /* ------------------------------------------------------------------- */
 
 import { normLocaleTag } from "./localeUtils";
@@ -20,23 +21,43 @@ import { getServerI18nContext } from "./server";
  * NOT: Burada "fallback namespace yükleme" yok; istenen dil dosyası yoksa boş döneriz.
  */
 const NAMESPACES = [
-  "common","nav","navbar","footer","seo",
-  "home","about","contact",
-  "library","libraryDetail",
-  "references","referenceDetail",
-  "products","productDetail",
-  "spareParts","sparePartDetail",
-  "news","newsDetail",
-  "blog","blogDetail",
+  "common",
+  "nav",
+  "navbar",
+  "footer",
+  "seo",
+  "home",
+  "about",
+  "contact",
+  "library",
+  "libraryDetail",
+  "references",
+  "referenceDetail",
+  "products",
+  "productDetail",
+  "spareParts",
+  "sparePartDetail",
+  "news",
+  "newsDetail",
+  "blog",
+  "blogDetail",
   "search",
-  "comments","legal","notFound","tagPage","categories","tagLabels",
+  "comments",
+  "legal",
+  "notFound",
+  "tagPage",
+  "categories",
+  "tagLabels",
 ] as const;
 
 // "a.b.c": "val" -> {a:{b:{c:"val"}}}
 function undot(flat: Record<string, unknown>) {
   const out: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(flat)) {
-    if (!key.includes(".")) { out[key] = value; continue; }
+    if (!key.includes(".")) {
+      out[key] = value;
+      continue;
+    }
     const parts = key.split(".");
     let cur: Record<string, unknown> = out;
     for (let i = 0; i < parts.length; i++) {
@@ -73,9 +94,7 @@ async function loadNamespace(locale: string, ns: string): Promise<Record<string,
     };
     const raw = (mod?.default ?? {}) as Record<string, unknown>;
     const tree = Object.keys(raw).some((k) => k.includes(".")) ? undot(raw) : raw;
-    return tree && typeof tree === "object" && ns in tree
-      ? (tree as Record<string, unknown>)
-      : { [ns]: tree };
+    return tree && typeof tree === "object" && ns in tree ? (tree as Record<string, unknown>) : { [ns]: tree };
   } catch {
     return { [ns]: {} };
   }
@@ -87,7 +106,7 @@ export default getRequestConfig(async ({ requestLocale }: RequestCtx) => {
   const req = normLocaleTag(requestLocale);
   const activeSet = new Set((activeLocales || []).map(normLocaleTag));
 
-  const chosen = (req && activeSet.has(req)) ? req : defaultLocale;
+  const chosen = req && activeSet.has(req) ? req : defaultLocale;
 
   let messages: Record<string, unknown> = {};
   for (const ns of NAMESPACES) {

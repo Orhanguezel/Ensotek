@@ -3,25 +3,25 @@
 // Unified helper functions - Single source of truth
 // =============================================================
 
-export type BoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false' | null | undefined | unknown;
+export type BoolLike = boolean | 0 | 1 | "0" | "1" | "true" | "false" | null | undefined | unknown;
 
 // -------------------- Type Guards --------------------
 
 export function isObject(v: unknown): v is Record<string, unknown> {
-  return typeof v === 'object' && v !== null && !Array.isArray(v);
+  return typeof v === "object" && v !== null && !Array.isArray(v);
 }
 
 export function isPlainObject(v: unknown): v is Record<string, unknown> {
-  return !!v && typeof v === 'object' && !Array.isArray(v);
+  return !!v && typeof v === "object" && !Array.isArray(v);
 }
 
-export function assertIsObject(v: unknown, name = 'data'): asserts v is Record<string, unknown> {
+export function assertIsObject(v: unknown, name = "data"): asserts v is Record<string, unknown> {
   if (!isObject(v)) {
     throw new Error(`Invalid ${name}: expected object, got ${typeof v}`);
   }
 }
 
-export function assertIsArray(v: unknown, name = 'data'): asserts v is unknown[] {
+export function assertIsArray(v: unknown, name = "data"): asserts v is unknown[] {
   if (!Array.isArray(v)) {
     throw new Error(`Invalid ${name}: expected array, got ${typeof v}`);
   }
@@ -30,9 +30,9 @@ export function assertIsArray(v: unknown, name = 'data'): asserts v is unknown[]
 // -------------------- String Helpers --------------------
 
 export function toStr(v: unknown): string {
-  if (typeof v === 'string') return v;
-  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
-  return v == null ? '' : String(v);
+  if (typeof v === "string") return v;
+  if (typeof v === "number" || typeof v === "boolean") return String(v);
+  return v == null ? "" : String(v);
 }
 
 export function trimStr(v: unknown): string {
@@ -45,25 +45,24 @@ export function toNullStr(v: unknown): string | null {
 }
 
 export function trimOrUndef(v: unknown): string | undefined {
-  if (typeof v !== 'string') return undefined;
+  if (typeof v !== "string") return undefined;
   const s = v.trim();
   return s.length ? s : undefined;
 }
 
-export const text = (v: unknown): string =>
-  typeof v === 'string' ? v : v == null ? '' : String(v);
+export const text = (v: unknown): string => (typeof v === "string" ? v : v == null ? "" : String(v));
 
 export const nonEmpty = (v: unknown): string => {
   const s = text(v).trim();
-  return s ? s : '';
+  return s ? s : "";
 };
 
 // -------------------- Number Helpers --------------------
 
 export function toNumber(v: unknown, fallback = 0): number {
-  if (typeof v === 'number') return Number.isFinite(v) ? v : fallback;
-  if (typeof v === 'string') {
-    const n = Number(v.replace(',', '.'));
+  if (typeof v === "number") return Number.isFinite(v) ? v : fallback;
+  if (typeof v === "string") {
+    const n = Number(v.replace(",", "."));
     return Number.isFinite(n) ? n : fallback;
   }
   const n = Number(v);
@@ -71,8 +70,8 @@ export function toNumber(v: unknown, fallback = 0): number {
 }
 
 export function toNumOrNull(v: unknown): number | null {
-  if (v === null || v === undefined || v === '') return null;
-  const n = Number(String(v).replace(',', '.'));
+  if (v === null || v === undefined || v === "") return null;
+  const n = Number(String(v).replace(",", "."));
   return Number.isFinite(n) ? n : null;
 }
 
@@ -86,8 +85,7 @@ export function numOrNullish(v: unknown): NullableNumber {
   return v == null ? (v as null | undefined) : toNumber(v);
 }
 
-export const clamp = (n: number, min = 1, max = 200): number =>
-  Math.max(min, Math.min(max, n));
+export const clamp = (n: number, min = 1, max = 200): number => Math.max(min, Math.min(max, n));
 
 // -------------------- Boolean Helpers --------------------
 
@@ -97,13 +95,13 @@ export const clamp = (n: number, min = 1, max = 200): number =>
  * @param fallback - Default if conversion fails
  */
 export function toBool(v: BoolLike, fallback = false): boolean {
-  if (typeof v === 'boolean') return v;
-  if (typeof v === 'number') return v !== 0;
+  if (typeof v === "boolean") return v;
+  if (typeof v === "number") return v !== 0;
   if (v == null) return fallback;
 
   const s = toStr(v).trim().toLowerCase();
-  if (s === '1' || s === 'true' || s === 'yes' || s === 'on') return true;
-  if (s === '0' || s === 'false' || s === 'no' || s === 'off') return false;
+  if (s === "1" || s === "true" || s === "yes" || s === "on") return true;
+  if (s === "0" || s === "false" || s === "no" || s === "off") return false;
 
   return fallback;
 }
@@ -123,23 +121,23 @@ export function toBool01(v: unknown): boolean {
  */
 export function boolTo01(v: unknown): 0 | 1 | undefined {
   const b = toBool(v);
-  return b === undefined ? undefined : (b ? 1 : 0);
+  return b === undefined ? undefined : b ? 1 : 0;
 }
 
 // -------------------- Date/ISO Helpers --------------------
 
 export function toIso(v: unknown): string {
-  if (!v) return '';
-  if (typeof v === 'string') return v;
+  if (!v) return "";
+  if (typeof v === "string") return v;
   if (v instanceof Date) return v.toISOString();
 
   // Try date conversion
-  if (typeof v === 'number' || typeof v === 'string') {
+  if (typeof v === "number" || typeof v === "string") {
     const d = new Date(v as string | number);
     if (!Number.isNaN(d.getTime())) return d.toISOString();
   }
 
-  return String(v ?? '');
+  return String(v ?? "");
 }
 
 export function toNullIso(v: unknown): string | null {
@@ -150,16 +148,16 @@ export function toNullIso(v: unknown): string | null {
 // -------------------- JSON Parsing Helpers --------------------
 
 export function isJsonishString(v: unknown): boolean {
-  if (typeof v !== 'string') return false;
+  if (typeof v !== "string") return false;
   const t = v.trim();
-  return (t.startsWith('{') && t.endsWith('}')) || (t.startsWith('[') && t.endsWith(']'));
+  return (t.startsWith("{") && t.endsWith("}")) || (t.startsWith("[") && t.endsWith("]"));
 }
 
 export function tryParseJson<T = unknown>(val: unknown): T | null {
   if (val == null) return null;
-  if (typeof val === 'object') return val as T;
+  if (typeof val === "object") return val as T;
 
-  if (typeof val === 'string') {
+  if (typeof val === "string") {
     const s = val.trim();
     if (!s || !isJsonishString(s)) return null;
 
@@ -180,11 +178,11 @@ export function parseJsonArray<T = unknown>(val: unknown): T[] {
 
 export function parseJsonObject(val: unknown): Record<string, unknown> {
   const obj = tryParseJson<Record<string, unknown>>(val);
-  return obj && typeof obj === 'object' && !Array.isArray(obj) ? obj : {};
+  return obj && typeof obj === "object" && !Array.isArray(obj) ? obj : {};
 }
 
 export const safeJsonLd = (raw: string): object | null => {
-  const s = (raw || '').trim();
+  const s = (raw || "").trim();
   if (!s) return null;
   try {
     return JSON.parse(s) as object;
@@ -210,20 +208,13 @@ export const pickFirst = (src: Record<string, unknown>, keys: readonly string[])
   return undefined;
 };
 
-export const pickStr = (
-  src: Record<string, unknown>,
-  keys: readonly string[],
-  fallback = '',
-): string => {
+export const pickStr = (src: Record<string, unknown>, keys: readonly string[], fallback = ""): string => {
   const v = pickFirst(src, keys);
   const s = trimStr(v);
   return s ? s : fallback;
 };
 
-export const pickOptStr = (
-  src: Record<string, unknown>,
-  keys: readonly string[],
-): string | null => {
+export const pickOptStr = (src: Record<string, unknown>, keys: readonly string[]): string | null => {
   const v = pickFirst(src, keys);
   const s = trimStr(v);
   return s ? s : null;
@@ -251,7 +242,7 @@ export function unwrap<T>(raw: unknown): T {
   if (!isObject(raw)) return raw as T;
 
   // If response has a 'data' property, unwrap it
-  if ('data' in raw) {
+  if ("data" in raw) {
     return raw.data as T;
   }
 

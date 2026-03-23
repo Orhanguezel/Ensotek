@@ -4,42 +4,32 @@
 // Ensotek
 // =============================================================
 
-'use client';
+"use client";
 
-import * as React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Bot, Send, User, RefreshCw } from 'lucide-react';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { Bot, RefreshCw, Send, User } from "lucide-react";
+import { toast } from "sonner";
+
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-  useListChatThreadsAdminQuery,
   useListChatMessagesAdminQuery,
+  useListChatThreadsAdminQuery,
   usePostChatMessageAdminMutation,
-  useTakeOverChatThreadAdminMutation,
   useReleaseToAiChatThreadAdminMutation,
   useSetAiProviderChatThreadAdminMutation,
-} from '@/integrations/hooks';
-import type {
-  ChatThread,
-  ChatHandoffMode,
-  ChatAiProvider,
-  ChatListThreadsParams,
-} from '@/integrations/shared';
+  useTakeOverChatThreadAdminMutation,
+} from "@/integrations/hooks";
+import type { ChatAiProvider, ChatHandoffMode, ChatListThreadsParams, ChatThread } from "@/integrations/shared";
 
 function toLocalDate(iso: string | null | undefined): string {
-  if (!iso) return '';
+  if (!iso) return "";
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return String(iso);
   return d.toLocaleString();
@@ -47,38 +37,26 @@ function toLocalDate(iso: string | null | undefined): string {
 
 // ─── Thread list ────────────────────────────────────────────
 
-function ThreadItem({
-  thread,
-  isActive,
-  onClick,
-}: {
-  thread: ChatThread;
-  isActive: boolean;
-  onClick: () => void;
-}) {
-  const t = useAdminT('admin.chat');
+function ThreadItem({ thread, isActive, onClick }: { thread: ChatThread; isActive: boolean; onClick: () => void }) {
+  const t = useAdminT("admin.chat");
 
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`w-full text-left rounded-md border p-3 transition-colors ${
-        isActive
-          ? 'border-primary bg-primary/5'
-          : 'border-border hover:border-primary/40 hover:bg-muted/50'
+      className={`w-full rounded-md border p-3 text-left transition-colors ${
+        isActive ? "border-primary bg-primary/5" : "border-border hover:border-primary/40 hover:bg-muted/50"
       }`}
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="text-xs font-medium truncate">
+        <span className="truncate font-medium text-xs">
           {thread.context_type}/{thread.context_id?.slice(0, 8)}
         </span>
-        <Badge variant={thread.handoff_mode === 'admin' ? 'default' : 'secondary'} className="text-[10px]">
-          {thread.handoff_mode === 'admin' ? t('threads.modeAdmin') : t('threads.modeAi')}
+        <Badge variant={thread.handoff_mode === "admin" ? "default" : "secondary"} className="text-[10px]">
+          {thread.handoff_mode === "admin" ? t("threads.modeAdmin") : t("threads.modeAi")}
         </Badge>
       </div>
-      <p className="text-[11px] text-muted-foreground mt-1">
-        {toLocalDate(thread.updated_at)}
-      </p>
+      <p className="mt-1 text-[11px] text-muted-foreground">{toLocalDate(thread.updated_at)}</p>
     </button>
   );
 }
@@ -86,13 +64,13 @@ function ThreadItem({
 // ─── Message panel ──────────────────────────────────────────
 
 function MessagePanel({ thread }: { thread: ChatThread }) {
-  const t = useAdminT('admin.chat');
+  const t = useAdminT("admin.chat");
   const [tabVisible, setTabVisible] = React.useState(true);
 
   React.useEffect(() => {
-    const handler = () => setTabVisible(document.visibilityState === 'visible');
-    document.addEventListener('visibilitychange', handler);
-    return () => document.removeEventListener('visibilitychange', handler);
+    const handler = () => setTabVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", handler);
+    return () => document.removeEventListener("visibilitychange", handler);
   }, []);
 
   const { data, isFetching, refetch } = useListChatMessagesAdminQuery(
@@ -104,14 +82,14 @@ function MessagePanel({ thread }: { thread: ChatThread }) {
   const [releaseToAi] = useReleaseToAiChatThreadAdminMutation();
   const [setProvider] = useSetAiProviderChatThreadAdminMutation();
 
-  const [text, setText] = React.useState('');
+  const [text, setText] = React.useState("");
   const bottomRef = React.useRef<HTMLDivElement>(null);
 
   const messages = data?.items ?? [];
 
   React.useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages.length]);
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
 
   const handleSend = async () => {
     const trimmed = text.trim();
@@ -122,14 +100,14 @@ function MessagePanel({ thread }: { thread: ChatThread }) {
         threadId: thread.id,
         body: { text: trimmed, client_id: crypto.randomUUID() },
       }).unwrap();
-      setText('');
+      setText("");
     } catch {
-      toast.error(t('messages.sendError'));
+      toast.error(t("messages.sendError"));
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -138,18 +116,18 @@ function MessagePanel({ thread }: { thread: ChatThread }) {
   const handleTakeover = async () => {
     try {
       await takeover({ threadId: thread.id }).unwrap();
-      toast.success(t('threads.takeoverSuccess'));
+      toast.success(t("threads.takeoverSuccess"));
     } catch {
-      toast.error(t('threads.takeoverError'));
+      toast.error(t("threads.takeoverError"));
     }
   };
 
   const handleRelease = async () => {
     try {
       await releaseToAi({ threadId: thread.id }).unwrap();
-      toast.success(t('threads.releaseSuccess'));
+      toast.success(t("threads.releaseSuccess"));
     } catch {
-      toast.error(t('threads.releaseError'));
+      toast.error(t("threads.releaseError"));
     }
   };
 
@@ -159,41 +137,38 @@ function MessagePanel({ thread }: { thread: ChatThread }) {
         threadId: thread.id,
         body: { provider: provider as ChatAiProvider },
       }).unwrap();
-      toast.success(t('threads.providerChanged'));
+      toast.success(t("threads.providerChanged"));
     } catch {
-      toast.error(t('threads.providerError'));
+      toast.error(t("threads.providerError"));
     }
   };
 
   return (
-    <Card className="flex flex-col h-full">
+    <Card className="flex h-full flex-col">
       {/* Header with actions */}
-      <CardHeader className="pb-3 space-y-3">
+      <CardHeader className="space-y-3 pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">
             {thread.context_type}/{thread.context_id?.slice(0, 8)}
           </CardTitle>
           <Button variant="ghost" size="icon" onClick={() => refetch()} disabled={isFetching}>
-            <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
           </Button>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {thread.handoff_mode === 'ai' ? (
+          {thread.handoff_mode === "ai" ? (
             <Button size="sm" variant="outline" onClick={handleTakeover}>
-              {t('threads.takeover')}
+              {t("threads.takeover")}
             </Button>
           ) : (
             <Button size="sm" variant="outline" onClick={handleRelease}>
-              {t('threads.releaseToAi')}
+              {t("threads.releaseToAi")}
             </Button>
           )}
 
-          <Select
-            value={thread.ai_provider_preference}
-            onValueChange={handleProviderChange}
-          >
-            <SelectTrigger className="w-[130px] h-8 text-xs">
+          <Select value={thread.ai_provider_preference} onValueChange={handleProviderChange}>
+            <SelectTrigger className="h-8 w-[130px] text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -204,47 +179,38 @@ function MessagePanel({ thread }: { thread: ChatThread }) {
             </SelectContent>
           </Select>
 
-          <Badge variant={thread.handoff_mode === 'admin' ? 'default' : 'secondary'}>
-            {thread.handoff_mode === 'admin' ? t('threads.modeAdmin') : t('threads.modeAi')}
+          <Badge variant={thread.handoff_mode === "admin" ? "default" : "secondary"}>
+            {thread.handoff_mode === "admin" ? t("threads.modeAdmin") : t("threads.modeAi")}
           </Badge>
         </div>
       </CardHeader>
 
       {/* Messages */}
-      <CardContent className="flex-1 flex flex-col min-h-0 pt-0">
-        <ScrollArea className="flex-1 pr-3 mb-3" style={{ maxHeight: 'calc(100vh - 420px)' }}>
+      <CardContent className="flex min-h-0 flex-1 flex-col pt-0">
+        <ScrollArea className="mb-3 flex-1 pr-3" style={{ maxHeight: "calc(100vh - 420px)" }}>
           <div className="space-y-2">
             {messages.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                {t('messages.noMessages')}
-              </p>
+              <p className="py-8 text-center text-muted-foreground text-sm">{t("messages.noMessages")}</p>
             ) : (
               messages.map((msg) => {
-                const isSystem = msg.sender_user_id === 'system' || msg.sender_user_id === 'ai';
+                const isSystem = msg.sender_user_id === "system" || msg.sender_user_id === "ai";
                 return (
-                  <div
-                    key={msg.id}
-                    className={`flex gap-2 ${isSystem ? '' : 'justify-end'}`}
-                  >
+                  <div key={msg.id} className={`flex gap-2 ${isSystem ? "" : "justify-end"}`}>
                     {isSystem && (
-                      <div className="shrink-0 mt-1">
+                      <div className="mt-1 shrink-0">
                         <Bot className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
                     <div
-                      className={`rounded-lg px-3 py-2 text-sm max-w-[80%] ${
-                        isSystem
-                          ? 'bg-muted text-foreground'
-                          : 'bg-primary text-primary-foreground'
+                      className={`max-w-[80%] rounded-lg px-3 py-2 text-sm ${
+                        isSystem ? "bg-muted text-foreground" : "bg-primary text-primary-foreground"
                       }`}
                     >
                       <p className="whitespace-pre-wrap break-words">{msg.text}</p>
-                      <p className="text-[10px] opacity-60 mt-1">
-                        {toLocalDate(msg.created_at)}
-                      </p>
+                      <p className="mt-1 text-[10px] opacity-60">{toLocalDate(msg.created_at)}</p>
                     </div>
                     {!isSystem && (
-                      <div className="shrink-0 mt-1">
+                      <div className="mt-1 shrink-0">
                         <User className="h-4 w-4 text-muted-foreground" />
                       </div>
                     )}
@@ -262,7 +228,7 @@ function MessagePanel({ thread }: { thread: ChatThread }) {
             value={text}
             onChange={(e) => setText(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={t('messages.placeholder')}
+            placeholder={t("messages.placeholder")}
             disabled={sending}
           />
           <Button size="icon" onClick={handleSend} disabled={sending || !text.trim()}>
@@ -277,21 +243,21 @@ function MessagePanel({ thread }: { thread: ChatThread }) {
 // ─── Main ───────────────────────────────────────────────────
 
 export default function ChatThreadsPanel() {
-  const t = useAdminT('admin.chat');
+  const t = useAdminT("admin.chat");
 
-  const [handoffFilter, setHandoffFilter] = React.useState<ChatHandoffMode | 'all'>('all');
+  const [handoffFilter, setHandoffFilter] = React.useState<ChatHandoffMode | "all">("all");
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
   const [tabVisible, setTabVisible] = React.useState(true);
 
   React.useEffect(() => {
-    const handler = () => setTabVisible(document.visibilityState === 'visible');
-    document.addEventListener('visibilitychange', handler);
-    return () => document.removeEventListener('visibilitychange', handler);
+    const handler = () => setTabVisible(document.visibilityState === "visible");
+    document.addEventListener("visibilitychange", handler);
+    return () => document.removeEventListener("visibilitychange", handler);
   }, []);
 
   const params: ChatListThreadsParams = React.useMemo(() => {
     const p: ChatListThreadsParams = { limit: 50 };
-    if (handoffFilter !== 'all') p.handoff_mode = handoffFilter;
+    if (handoffFilter !== "all") p.handoff_mode = handoffFilter;
     return p;
   }, [handoffFilter]);
 
@@ -303,37 +269,32 @@ export default function ChatThreadsPanel() {
   const selected = threads.find((t) => t.id === selectedId) ?? null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-4" style={{ minHeight: '60vh' }}>
+    <div className="grid grid-cols-1 gap-4 lg:grid-cols-[320px_1fr]" style={{ minHeight: "60vh" }}>
       {/* Left — Thread list */}
       <Card className="flex flex-col">
-        <CardHeader className="pb-3 space-y-2">
+        <CardHeader className="space-y-2 pb-3">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm">{t('threads.title')}</CardTitle>
+            <CardTitle className="text-sm">{t("threads.title")}</CardTitle>
             <Button variant="ghost" size="icon" onClick={() => refetch()} disabled={isFetching}>
-              <RefreshCw className={`h-4 w-4 ${isFetching ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 ${isFetching ? "animate-spin" : ""}`} />
             </Button>
           </div>
 
-          <Select
-            value={handoffFilter}
-            onValueChange={(v) => setHandoffFilter(v as ChatHandoffMode | 'all')}
-          >
+          <Select value={handoffFilter} onValueChange={(v) => setHandoffFilter(v as ChatHandoffMode | "all")}>
             <SelectTrigger className="h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{t('threads.filterAll')}</SelectItem>
-              <SelectItem value="ai">{t('threads.filterAi')}</SelectItem>
-              <SelectItem value="admin">{t('threads.filterAdmin')}</SelectItem>
+              <SelectItem value="all">{t("threads.filterAll")}</SelectItem>
+              <SelectItem value="ai">{t("threads.filterAi")}</SelectItem>
+              <SelectItem value="admin">{t("threads.filterAdmin")}</SelectItem>
             </SelectContent>
           </Select>
         </CardHeader>
 
         <CardContent className="flex-1 overflow-auto">
           {threads.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              {t('threads.noThreads')}
-            </p>
+            <p className="py-8 text-center text-muted-foreground text-sm">{t("threads.noThreads")}</p>
           ) : (
             <div className="space-y-2">
               {threads.map((thread) => (
@@ -354,7 +315,7 @@ export default function ChatThreadsPanel() {
         <MessagePanel thread={selected} />
       ) : (
         <Card className="flex items-center justify-center">
-          <p className="text-sm text-muted-foreground">{t('threads.selectThread')}</p>
+          <p className="text-muted-foreground text-sm">{t("threads.selectThread")}</p>
         </Card>
       )}
     </div>

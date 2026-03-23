@@ -3,7 +3,7 @@
 // Ensotek – Admin Product Images types (product_images)
 // =============================================================
 
-import type { BoolLike } from '@/integrations/shared';
+import type { BoolLike } from "@/integrations/shared";
 
 export type ProductImageDto = {
   id: string;

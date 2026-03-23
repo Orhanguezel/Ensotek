@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/_components/common/useAdminUiCopy.ts
 // FINAL — Admin UI copy hook (site_settings.ui_admin)
 // =============================================================
 
-import { useMemo } from 'react';
+import { useMemo } from "react";
 
-import { useListSiteSettingsAdminQuery } from '@/integrations/hooks';
-import type { AdminUiCopy } from '@/integrations/shared';
-import { normalizeAdminUiCopy } from '@/integrations/shared';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import { useListSiteSettingsAdminQuery } from "@/integrations/hooks";
+import type { AdminUiCopy } from "@/integrations/shared";
+import { normalizeAdminUiCopy } from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 type UseAdminUiCopyResult = {
   copy: AdminUiCopy;
@@ -23,15 +23,15 @@ export function useAdminUiCopy(): UseAdminUiCopyResult {
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
 
   const q = useListSiteSettingsAdminQuery({
-    keys: ['ui_admin'],
+    keys: ["ui_admin"],
     locale: adminLocale,
     limit: 1,
-    sort: 'updated_at',
-    order: 'desc',
+    sort: "updated_at",
+    order: "desc",
   });
 
   const copy = useMemo(() => {
-    const row = (q.data ?? []).find((item) => item.key === 'ui_admin');
+    const row = (q.data ?? []).find((item) => item.key === "ui_admin");
     const val = row?.value;
     return normalizeAdminUiCopy(val);
   }, [q.data]);

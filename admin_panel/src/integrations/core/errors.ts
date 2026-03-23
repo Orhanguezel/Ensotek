@@ -1,5 +1,5 @@
-import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import type { SerializedError } from "@reduxjs/toolkit";
+import type { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 
 type MaybeMessage = { message?: unknown };
 type MaybeError = { error?: unknown };
@@ -67,7 +67,7 @@ function pickStr(obj: Record<string, unknown>, key: string): string | null {
 }
 
 function trimMsg(s: string, max = 280): string {
-  return s.length > max ? s.slice(0, max) + "…" : s;
+  return s.length > max ? `${s.slice(0, max)}…` : s;
 }
 
 // 🔹 RTK helper'larının beklediği ortak sonuç tipi

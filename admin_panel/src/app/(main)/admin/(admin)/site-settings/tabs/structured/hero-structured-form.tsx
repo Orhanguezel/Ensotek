@@ -5,19 +5,20 @@
 "use client";
 
 import React from "react";
+
+import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useAdminTranslations } from "@/i18n";
 import {
   SITE_SETTINGS_HERO_EMPTY,
   SITE_SETTINGS_HERO_MEDIA_FIELDS,
   SITE_SETTINGS_HERO_TEXT_FIELDS,
   toStructuredObjectSeed,
-} from '@/integrations/shared';
-import { useAdminTranslations } from '@/i18n';
-import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/AdminImageUploadField";
+} from "@/integrations/shared";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 /* ── types ── */
 
@@ -68,11 +69,7 @@ export function heroFormToObj(v: HeroData): HeroData {
 
 /* ── component ── */
 
-export const HeroStructuredForm: React.FC<HeroStructuredFormProps> = ({
-  value,
-  onChange,
-  disabled,
-}) => {
+export const HeroStructuredForm: React.FC<HeroStructuredFormProps> = ({ value, onChange, disabled }) => {
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
   const hero = React.useMemo(() => toHero(value), [value]);
@@ -81,14 +78,12 @@ export const HeroStructuredForm: React.FC<HeroStructuredFormProps> = ({
   return (
     <div className="space-y-4">
       <Alert variant="default" className="py-2">
-        <AlertDescription className="text-sm">
-          {t('admin.siteSettings.structured.hero.description')}
-        </AlertDescription>
+        <AlertDescription className="text-sm">{t("admin.siteSettings.structured.hero.description")}</AlertDescription>
       </Alert>
 
       {/* Video section */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium">{t('admin.siteSettings.structured.hero.sections.media')}</h3>
+        <h3 className="font-medium text-sm">{t("admin.siteSettings.structured.hero.sections.media")}</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="space-y-1.5">
             <AdminImageUploadField
@@ -107,7 +102,7 @@ export const HeroStructuredForm: React.FC<HeroStructuredFormProps> = ({
                 playsInline
                 loop
                 autoPlay
-                className="mt-2 w-full rounded-md border aspect-video object-cover"
+                className="mt-2 aspect-video w-full rounded-md border object-cover"
               />
             )}
           </div>
@@ -129,7 +124,7 @@ export const HeroStructuredForm: React.FC<HeroStructuredFormProps> = ({
                 playsInline
                 loop
                 autoPlay
-                className="mt-2 w-full max-w-[200px] rounded-md border aspect-[9/16] object-cover"
+                className="mt-2 aspect-[9/16] w-full max-w-[200px] rounded-md border object-cover"
               />
             )}
           </div>
@@ -150,19 +145,16 @@ export const HeroStructuredForm: React.FC<HeroStructuredFormProps> = ({
 
       {/* Text section */}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium">{t('admin.siteSettings.structured.hero.sections.content')}</h3>
+        <h3 className="font-medium text-sm">{t("admin.siteSettings.structured.hero.sections.content")}</h3>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {SITE_SETTINGS_HERO_TEXT_FIELDS.map((field) => (
-            <div
-              key={field.key}
-              className={`space-y-1.5 ${field.colSpan2 ? 'md:col-span-2' : ''}`}
-            >
-              <Label className="text-xs text-muted-foreground">
+            <div key={field.key} className={`space-y-1.5 ${field.colSpan2 ? "md:col-span-2" : ""}`}>
+              <Label className="text-muted-foreground text-xs">
                 {t(`admin.siteSettings.structured.hero.labels.${field.labelKey}`)}
               </Label>
               {field.textarea ? (
                 <Textarea
-                  value={(hero[field.key as keyof HeroData] as string) || ''}
+                  value={(hero[field.key as keyof HeroData] as string) || ""}
                   onChange={(e) => set({ [field.key]: e.target.value } as Partial<HeroData>)}
                   disabled={disabled}
                   rows={2}
@@ -170,7 +162,7 @@ export const HeroStructuredForm: React.FC<HeroStructuredFormProps> = ({
                 />
               ) : (
                 <Input
-                  value={(hero[field.key as keyof HeroData] as string) || ''}
+                  value={(hero[field.key as keyof HeroData] as string) || ""}
                   onChange={(e) => set({ [field.key]: e.target.value } as Partial<HeroData>)}
                   disabled={disabled}
                   className="h-8"

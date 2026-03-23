@@ -1,15 +1,10 @@
 // src/stores/preferencesSlice.ts
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-import type { FontKey } from '@/lib/fonts/registry';
-import type {
-  ContentLayout,
-  NavbarStyle,
-  SidebarCollapsible,
-  SidebarVariant,
-} from '@/lib/preferences/layout';
-import { PREFERENCE_DEFAULTS } from '@/lib/preferences/preferences-config';
-import type { ThemeMode, ThemePreset } from '@/lib/preferences/theme';
+import type { FontKey } from "@/lib/fonts/registry";
+import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } from "@/lib/preferences/layout";
+import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
+import type { ThemeMode, ThemePreset } from "@/lib/preferences/theme";
 
 export type PreferencesState = {
   themeMode: ThemeMode;
@@ -33,10 +28,10 @@ const initialState: PreferencesState = {
   isSynced: false,
 };
 
-type SyncPayload = Partial<Omit<PreferencesState, 'isSynced'>>;
+type SyncPayload = Partial<Omit<PreferencesState, "isSynced">>;
 
 export const preferencesSlice = createSlice({
-  name: 'preferences',
+  name: "preferences",
   initialState,
   reducers: {
     // DOM veya SSR defaults’tan ilk senkron

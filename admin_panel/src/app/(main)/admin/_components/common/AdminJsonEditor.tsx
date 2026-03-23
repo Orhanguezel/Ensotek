@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/components/common/AdminJsonEditor.tsx
@@ -8,13 +8,15 @@
 // - Error state + helper
 // =============================================================
 
-import React, { useEffect, useState } from 'react';
-import { Braces } from 'lucide-react';
+import type React from "react";
+import { useEffect, useState } from "react";
 
-import { cn } from '@/lib/utils';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
+import { Braces } from "lucide-react";
+
+import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
 
 type AdminJsonEditorProps = {
   label?: React.ReactNode;
@@ -30,7 +32,7 @@ const safeStringify = (value: unknown) => {
   try {
     return JSON.stringify(value ?? {}, null, 2);
   } catch {
-    return '';
+    return "";
   }
 };
 
@@ -67,7 +69,7 @@ export const AdminJsonEditor: React.FC<AdminJsonEditorProps> = ({
       setInternalError(null);
       onErrorChange?.(null);
     } catch (err: any) {
-      const msg = err?.message ? String(err.message) : 'Geçersiz JSON';
+      const msg = err?.message ? String(err.message) : "Geçersiz JSON";
       setInternalError(msg);
       onErrorChange?.(msg);
     }
@@ -93,24 +95,18 @@ export const AdminJsonEditor: React.FC<AdminJsonEditorProps> = ({
         onBlur={handleBlur}
         disabled={disabled}
         spellCheck={false}
-        className={cn(
-          'font-mono text-xs leading-5',
-          error && 'border-destructive focus-visible:ring-destructive',
-        )}
+        className={cn("font-mono text-xs leading-5", error && "border-destructive focus-visible:ring-destructive")}
         style={{
           minHeight: height,
-          whiteSpace: 'pre',
-          fontFamily:
-            "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
+          whiteSpace: "pre",
+          fontFamily: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
         }}
       />
 
-      {helperText && !error ? (
-        <div className="text-xs text-muted-foreground">{helperText}</div>
-      ) : null}
+      {helperText && !error ? <div className="text-muted-foreground text-xs">{helperText}</div> : null}
 
       {error ? (
-        <div className="text-xs text-destructive">
+        <div className="text-destructive text-xs">
           JSON hatası: <span className="font-medium">{error}</span>
         </div>
       ) : null}

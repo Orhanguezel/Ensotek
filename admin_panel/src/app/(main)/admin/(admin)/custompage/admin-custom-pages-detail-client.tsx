@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/custompage/admin-custom_pages-detail-client.tsx
@@ -8,26 +8,25 @@
 // - id: "new" => create mode; UUID => edit mode
 // =============================================================
 
-import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import * as React from "react";
 
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { useRouter } from "next/navigation";
 
-import type { CustomPageDto } from '@/integrations/shared';
-import type { CustomPageCreatePayload, CustomPageUpdatePayload } from '@/integrations/shared';
+import { toast } from "sonner";
 
+import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
+import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
+import { resolveAdminApiLocale } from "@/i18n/adminLocale";
+import { localeShortClient, localeShortClientOr } from "@/i18n/localeShortClient";
 import {
-  useLazyGetCustomPageAdminQuery,
   useCreateCustomPageAdminMutation,
+  useLazyGetCustomPageAdminQuery,
   useUpdateCustomPageAdminMutation,
-} from '@/integrations/hooks';
+} from "@/integrations/hooks";
+import type { CustomPageCreatePayload, CustomPageDto, CustomPageUpdatePayload } from "@/integrations/shared";
 
-import type { LocaleOption } from './_components/custom-page-header';
-import { CustomPageForm, type CustomPageFormValues } from './_components/custom-page-form';
+import { CustomPageForm, type CustomPageFormValues } from "./_components/custom-page-form";
+import type { LocaleOption } from "./_components/custom-page-header";
 
 function isUuidLike(v?: string) {
   if (!v) return false;
@@ -37,44 +36,37 @@ function isUuidLike(v?: string) {
 function getErrMessage(err: unknown, t: any): string {
   const anyErr = err as any;
   const m1 = anyErr?.data?.error?.message;
-  if (typeof m1 === 'string' && m1.trim()) return m1;
+  if (typeof m1 === "string" && m1.trim()) return m1;
   const m2 = anyErr?.data?.message;
-  if (typeof m2 === 'string' && m2.trim()) return m2;
+  if (typeof m2 === "string" && m2.trim()) return m2;
   const m3 = anyErr?.error;
-  if (typeof m3 === 'string' && m3.trim()) return m3;
-  return t('admin.customPage.detail.operationFailed');
+  if (typeof m3 === "string" && m3.trim()) return m3;
+  return t("admin.customPage.detail.operationFailed");
 }
 
 export default function AdminCustomPageDetailClient({
   id,
-  initialModuleKey = '',
+  initialModuleKey = "",
 }: {
   id: string;
   initialModuleKey?: string;
 }) {
   const router = useRouter();
   const t = useAdminT();
-  const isCreateMode = String(id) === 'new';
+  const isCreateMode = String(id) === "new";
 
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocaleFromDb = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'tr');
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const localeSet = React.useMemo(() => {
-    return new Set(
-      (localeOptions ?? []).map((x: any) => localeShortClient(x.value)).filter(Boolean),
-    );
+    return new Set((localeOptions ?? []).map((x: any) => localeShortClient(x.value)).filter(Boolean));
   }, [localeOptions]);
 
   // admin: activeLocale URL sync yok
-  const [activeLocale, setActiveLocale] = React.useState<string>('');
+  const [activeLocale, setActiveLocale] = React.useState<string>("");
 
   React.useEffect(() => {
     if (!localeOptions || localeOptions.length === 0) return;
@@ -82,14 +74,14 @@ export default function AdminCustomPageDetailClient({
     setActiveLocale((prev) => {
       const p = localeShortClient(prev);
       if (p && localeSet.has(p)) return p;
-      return localeShortClientOr(apiLocaleFromDb, 'tr');
+      return localeShortClientOr(apiLocaleFromDb, "tr");
     });
   }, [localeOptions, localeSet, apiLocaleFromDb]);
 
   const queryLocale = React.useMemo(() => {
     const l = localeShortClient(activeLocale);
     if (l && localeSet.has(l)) return l;
-    return localeShortClientOr(apiLocaleFromDb, 'tr');
+    return localeShortClientOr(apiLocaleFromDb, "tr");
   }, [activeLocale, localeSet, apiLocaleFromDb]);
 
   const localesReady = !localesLoading && !localesFetching;
@@ -109,7 +101,7 @@ export default function AdminCustomPageDetailClient({
         return;
       }
 
-      const routeId = String(id || '');
+      const routeId = String(id || "");
       if (!isUuidLike(routeId)) return;
 
       try {
@@ -137,36 +129,36 @@ export default function AdminCustomPageDetailClient({
 
   const localesForForm: LocaleOption[] = React.useMemo(() => {
     return (localeOptions ?? []).map((l: any) => ({
-      value: String(l.value ?? ''),
-      label: String(l.label ?? l.value ?? ''),
+      value: String(l.value ?? ""),
+      label: String(l.label ?? l.value ?? ""),
     }));
   }, [localeOptions]);
 
-  const mode = isCreateMode ? 'create' : 'edit';
+  const mode = isCreateMode ? "create" : "edit";
 
-  const onCancel = () => router.push('/admin/custompage');
+  const onCancel = () => router.push("/admin/custompage");
 
   const handleSubmit = async (values: CustomPageFormValues) => {
     try {
-      const loc = localeShortClientOr(values.locale || queryLocale || apiLocaleFromDb, 'tr');
+      const loc = localeShortClientOr(values.locale || queryLocale || apiLocaleFromDb, "tr");
 
       if (localeSet.size > 0 && !localeSet.has(localeShortClient(loc))) {
-        toast.error(t('admin.customPage.detail.invalidLocale'));
+        toast.error(t("admin.customPage.detail.invalidLocale"));
         return;
       }
 
       if (!values.module_key?.trim()) {
-        toast.error(t('admin.customPage.detail.moduleKeyRequired'));
+        toast.error(t("admin.customPage.detail.moduleKeyRequired"));
         return;
       }
 
-      if (mode === 'create') {
+      if (mode === "create") {
         const payload: CustomPageCreatePayload = {
           module_key: values.module_key.trim(),
           locale: loc,
           title: values.title.trim(),
           slug: values.slug.trim(),
-          content: values.content ?? '',
+          content: values.content ?? "",
           is_published: !!values.is_published,
           featured: !!values.featured,
 
@@ -182,20 +174,18 @@ export default function AdminCustomPageDetailClient({
 
           // parent gallery
           images: Array.isArray(values.images) ? values.images : [],
-          storage_image_ids: Array.isArray(values.storage_image_ids)
-            ? values.storage_image_ids
-            : [],
+          storage_image_ids: Array.isArray(values.storage_image_ids) ? values.storage_image_ids : [],
         };
 
         const created = await createCustomPage(payload).unwrap();
-        const nextId = String(created?.id ?? '').trim();
+        const nextId = String(created?.id ?? "").trim();
 
         if (!nextId || !isUuidLike(nextId)) {
-          toast.error(t('admin.customPage.detail.createIdError'));
+          toast.error(t("admin.customPage.detail.createIdError"));
           return;
         }
 
-        toast.success(t('admin.customPage.detail.createSuccess'));
+        toast.success(t("admin.customPage.detail.createSuccess"));
         router.replace(`/admin/custompage/${encodeURIComponent(nextId)}`);
         router.refresh();
         return;
@@ -203,7 +193,7 @@ export default function AdminCustomPageDetailClient({
 
       const baseId = page?.id || values.page_id || id;
       if (!baseId || !isUuidLike(String(baseId))) {
-        toast.error(t('admin.customPage.detail.noPageId'));
+        toast.error(t("admin.customPage.detail.noPageId"));
         return;
       }
 
@@ -212,7 +202,7 @@ export default function AdminCustomPageDetailClient({
         locale: loc,
         title: values.title.trim(),
         slug: values.slug.trim(),
-        content: values.content ?? '',
+        content: values.content ?? "",
         is_published: !!values.is_published,
         featured: !!values.featured,
 
@@ -231,7 +221,7 @@ export default function AdminCustomPageDetailClient({
       };
 
       await updateCustomPage({ id: baseId, patch }).unwrap();
-      toast.success(t('admin.customPage.detail.updateSuccess'));
+      toast.success(t("admin.customPage.detail.updateSuccess"));
 
       if (loc !== queryLocale) setActiveLocale(loc);
     } catch (err) {
@@ -243,24 +233,24 @@ export default function AdminCustomPageDetailClient({
   if (localesReady && !hasLocales) {
     return (
       <div className="rounded-lg border bg-card p-4">
-        <div className="text-sm font-semibold">{t('admin.customPage.detail.noLocales')}</div>
-        <div className="mt-1 text-sm text-muted-foreground">
-          <code>site_settings.app_locales</code> {t('admin.customPage.detail.noLocalesDesc')}
+        <div className="font-semibold text-sm">{t("admin.customPage.detail.noLocales")}</div>
+        <div className="mt-1 text-muted-foreground text-sm">
+          <code>site_settings.app_locales</code> {t("admin.customPage.detail.noLocalesDesc")}
         </div>
       </div>
     );
   }
 
-  if (!isCreateMode && !isUuidLike(String(id || ''))) {
+  if (!isCreateMode && !isUuidLike(String(id || ""))) {
     return (
       <div className="rounded-lg border bg-card p-4">
-        <div className="text-sm font-semibold">{t('admin.customPage.detail.invalidId')}</div>
-        <div className="mt-1 text-sm text-muted-foreground">
-          {t('admin.customPage.detail.invalidIdDesc')} <code>{String(id || '-')}</code>
+        <div className="font-semibold text-sm">{t("admin.customPage.detail.invalidId")}</div>
+        <div className="mt-1 text-muted-foreground text-sm">
+          {t("admin.customPage.detail.invalidIdDesc")} <code>{String(id || "-")}</code>
         </div>
         <div className="mt-3">
           <button className="rounded-md border px-3 py-2 text-xs" onClick={onCancel}>
-            {t('admin.customPage.detail.returnToList')}
+            {t("admin.customPage.detail.returnToList")}
           </button>
         </div>
       </div>
@@ -276,8 +266,8 @@ export default function AdminCustomPageDetailClient({
       saving={saving}
       locales={localesForForm}
       localesLoading={localesLoading || localesFetching}
-      defaultLocale={queryLocale || apiLocaleFromDb || 'tr'}
-      onLocaleChange={(l) => setActiveLocale(localeShortClientOr(l, 'tr'))}
+      defaultLocale={queryLocale || apiLocaleFromDb || "tr"}
+      onLocaleChange={(l) => setActiveLocale(localeShortClientOr(l, "tr"))}
       onSubmit={handleSubmit}
       onCancel={onCancel}
     />

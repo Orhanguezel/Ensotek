@@ -4,7 +4,7 @@
 // Route: /admin/custompage/:id  (id: "new" | UUID)
 // =============================================================
 
-import AdminCustomPageDetailClient from '../admin-custom-pages-detail-client';
+import AdminCustomPageDetailClient from "../admin-custom-pages-detail-client";
 
 type Params = { id: string };
 type SearchParams = { module?: string };
@@ -19,10 +19,5 @@ export default async function Page({
 }) {
   const p = (await params) as Params;
   const sp = (await searchParams) as SearchParams;
-  return (
-    <AdminCustomPageDetailClient
-      id={p.id}
-      initialModuleKey={sp.module || ''}
-    />
-  );
+  return <AdminCustomPageDetailClient id={p.id} initialModuleKey={sp.module || ""} />;
 }

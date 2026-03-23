@@ -1,44 +1,44 @@
 // =============================================================
 // FILE: src/i18n/locale.ts  (DYNAMIC via META endpoints) - PROVIDER SAFE
 // =============================================================
-'use client';
+"use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { FALLBACK_LOCALE } from './config';
-import { normLocaleTag } from './localeUtils';
-import { ensureLocationEventsPatched } from './locationEvents';
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import {
+  type AppLocaleMeta,
   computeActiveLocales,
   normalizeAppLocalesMeta,
   normalizeDefaultLocaleValue,
-  type AppLocaleMeta,
-} from './app-locales-meta';
+} from "./app-locales-meta";
+import { FALLBACK_LOCALE } from "./config";
+import { normLocaleTag } from "./localeUtils";
+import { ensureLocationEventsPatched } from "./locationEvents";
 
 function readLocaleFromCookie(): string {
-  if (typeof document === 'undefined') return '';
+  if (typeof document === "undefined") return "";
   const m = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/);
-  return m ? normLocaleTag(decodeURIComponent(m[1])) : '';
+  return m ? normLocaleTag(decodeURIComponent(m[1])) : "";
 }
 
 function readLocaleFromQuery(): string {
-  if (typeof window === 'undefined') return '';
+  if (typeof window === "undefined") return "";
   try {
-    const usp = new URLSearchParams(window.location.search || '');
-    return normLocaleTag(usp.get('__lc'));
+    const usp = new URLSearchParams(window.location.search || "");
+    return normLocaleTag(usp.get("__lc"));
   } catch {
-    return '';
+    return "";
   }
 }
 
 function getApiBase(): string {
-  const raw =
-    (process.env.NEXT_PUBLIC_API_BASE_URL || '').trim() || (process.env.API_BASE_URL || '').trim();
-  return raw.replace(/\/+$/, '');
+  const raw = (process.env.NEXT_PUBLIC_API_BASE_URL || "").trim() || (process.env.API_BASE_URL || "").trim();
+  return raw.replace(/\/+$/, "");
 }
 
 async function fetchJson<T>(url: string): Promise<T | null> {
   try {
-    const res = await fetch(url, { credentials: 'omit', cache: 'no-store' });
+    const res = await fetch(url, { credentials: "omit", cache: "no-store" });
     if (!res.ok) return null;
     return (await res.json()) as T;
   } catch {
@@ -48,7 +48,7 @@ async function fetchJson<T>(url: string): Promise<T | null> {
 
 export function useResolvedLocale(explicitLocale?: string | null): string {
   // pathname sadece SPA değişimini tetiklemek için tutuluyor
-  const [pathname, setPathname] = useState<string>('/');
+  const [_pathname, setPathname] = useState<string>("/");
 
   const [appLocalesMeta, setAppLocalesMeta] = useState<AppLocaleMeta[] | null>(null);
   const [defaultLocaleMeta, setDefaultLocaleMeta] = useState<string | null>(null);
@@ -56,22 +56,22 @@ export function useResolvedLocale(explicitLocale?: string | null): string {
   const didFetchRef = useRef(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === "undefined") return;
 
     ensureLocationEventsPatched();
 
-    const read = () => setPathname(window.location.pathname || '/');
+    const read = () => setPathname(window.location.pathname || "/");
 
     read();
 
-    window.addEventListener('locationchange', read);
-    window.addEventListener('popstate', read);
-    window.addEventListener('hashchange', read);
+    window.addEventListener("locationchange", read);
+    window.addEventListener("popstate", read);
+    window.addEventListener("hashchange", read);
 
     return () => {
-      window.removeEventListener('locationchange', read);
-      window.removeEventListener('popstate', read);
-      window.removeEventListener('hashchange', read);
+      window.removeEventListener("locationchange", read);
+      window.removeEventListener("popstate", read);
+      window.removeEventListener("hashchange", read);
     };
   }, []);
 
@@ -121,7 +121,7 @@ export function useResolvedLocale(explicitLocale?: string | null): string {
     if (firstActive) return firstActive;
 
     // ✅ 6) fallback
-    return normLocaleTag(FALLBACK_LOCALE) || 'de';
+    return normLocaleTag(FALLBACK_LOCALE) || "de";
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, explicitLocale, appLocalesMeta, defaultLocaleMeta]);
+  }, [explicitLocale, appLocalesMeta, defaultLocaleMeta]);
 }

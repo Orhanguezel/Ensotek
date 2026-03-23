@@ -5,10 +5,10 @@
 
 // ─── Enums ──────────────────────────────────────────────────
 
-export type ChatContextType = 'job' | 'request';
-export type ChatRole = 'buyer' | 'vendor' | 'admin';
-export type ChatHandoffMode = 'ai' | 'admin';
-export type ChatAiProvider = 'auto' | 'openai' | 'anthropic' | 'grok';
+export type ChatContextType = "job" | "request";
+export type ChatRole = "buyer" | "vendor" | "admin";
+export type ChatHandoffMode = "ai" | "admin";
+export type ChatAiProvider = "auto" | "openai" | "anthropic" | "grok";
 
 // ─── Entities ───────────────────────────────────────────────
 
@@ -138,15 +138,15 @@ export interface ChatAiKnowledgeListResponse {
 // ─── WebSocket types ────────────────────────────────────────
 
 export type ChatWsServerEvent =
-  | { type: 'hello'; thread_id: string }
-  | { type: 'message'; message: ChatMessage }
-  | { type: 'ack'; client_id: string; message_id: string; created_at: string }
-  | { type: 'ai_meta'; provider: string; model: string; thread_id: string }
-  | { type: 'handoff_requested'; thread_id: string; requested_by_user_id: string }
-  | { type: 'error'; code: string };
+  | { type: "hello"; thread_id: string }
+  | { type: "message"; message: ChatMessage }
+  | { type: "ack"; client_id: string; message_id: string; created_at: string }
+  | { type: "ai_meta"; provider: string; model: string; thread_id: string }
+  | { type: "handoff_requested"; thread_id: string; requested_by_user_id: string }
+  | { type: "error"; code: string };
 
 export type ChatWsClientMessage = {
-  type: 'message';
+  type: "message";
   text: string;
   client_id: string;
 };
