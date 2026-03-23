@@ -2918,10 +2918,19 @@
         "contact": {
           "description": "Kontaktinformationen. Leere Felder werden als leere Strings gespeichert.",
           "labels": {
+            "companyName": "Firmenname",
             "phone": "Telefon",
+            "phone2": "Telefon 2",
             "email": "E-Mail",
+            "email2": "E-Mail 2",
             "whatsapp": "WhatsApp",
-            "address": "Adresse"
+            "address": "Adresse",
+            "city": "Stadt",
+            "country": "Land",
+            "workingHours": "Arbeitszeiten",
+            "mapsEmbedUrl": "Google Maps Embed-URL",
+            "mapsLat": "Breitengrad (Lat)",
+            "mapsLng": "Längengrad (Lng)"
           }
         },
         "socials": {
@@ -2931,7 +2940,10 @@
             "facebook": "Facebook",
             "linkedin": "LinkedIn",
             "youtube": "YouTube",
-            "x": "X (Twitter)"
+            "x": "X (Twitter)",
+            "github": "GitHub",
+            "tiktok": "TikTok",
+            "pinterest": "Pinterest"
           }
         },
         "companyProfile": {

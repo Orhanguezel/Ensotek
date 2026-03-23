@@ -2918,10 +2918,19 @@
         "contact": {
           "description": "İletişim bilgileri. Boş bırakılan alanlar boş string olarak kaydedilir.",
           "labels": {
+            "companyName": "Şirket Adı",
             "phone": "Telefon",
+            "phone2": "Telefon 2",
             "email": "E-posta",
+            "email2": "E-posta 2",
             "whatsapp": "WhatsApp",
-            "address": "Adres"
+            "address": "Adres",
+            "city": "Şehir",
+            "country": "Ülke",
+            "workingHours": "Çalışma Saatleri",
+            "mapsEmbedUrl": "Google Maps Embed URL",
+            "mapsLat": "Enlem (Lat)",
+            "mapsLng": "Boylam (Lng)"
           }
         },
         "socials": {
@@ -2931,7 +2940,10 @@
             "facebook": "Facebook",
             "linkedin": "LinkedIn",
             "youtube": "YouTube",
-            "x": "X (Twitter)"
+            "x": "X (Twitter)",
+            "github": "GitHub",
+            "tiktok": "TikTok",
+            "pinterest": "Pinterest"
           }
         },
         "companyProfile": {

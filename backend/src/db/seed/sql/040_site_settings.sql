@@ -71,15 +71,18 @@ VALUES
   'contact_info',
   'tr',
   CAST(JSON_OBJECT(
-    'companyName','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti',
-    'phones',JSON_ARRAY('+90 212 613 33 01'),
+    'company_name','ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti.',
+    'phone','+90 212 613 33 01',
+    'phone_2','+90 531 880 31 51',
     'email','ensotek@ensotek.com.tr',
+    'email_2','export@ensotek.com.tr',
     'address','Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye',
-    'addressSecondary','Fabrika: Saray Mah. Gimat Cad. No:6A 06980 Kahramankazan / Ankara, Türkiye',
-    'whatsappNumber','+90 531 880 31 51',
-    'taxOffice','',
-    'taxNumber','',
-    'website','https://www.ensotek.de'
+    'city','İstanbul',
+    'country','Türkiye',
+    'working_hours','Pzt-Cum 08:00-18:00',
+    'maps_embed_url','',
+    'maps_lat','41.0436',
+    'maps_lng','28.8820'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -153,15 +156,18 @@ VALUES
   'contact_info',
   'en',
   CAST(JSON_OBJECT(
-    'companyName','ENSOTEK Cooling Towers & Technologies Engineering Ltd.',
-    'phones',JSON_ARRAY('+90 212 613 33 01'),
+    'company_name','ENSOTEK Cooling Towers & Technologies Engineering Ltd.',
+    'phone','+90 212 613 33 01',
+    'phone_2','+90 531 880 31 51',
     'email','ensotek@ensotek.com.tr',
+    'email_2','export@ensotek.com.tr',
     'address','Oruçreis District, Tekstilkent Site, A17 Block No:41, 34235 Esenler / Istanbul, Türkiye',
-    'addressSecondary','Factory: Saray District, Gimat St. No:6A, 06980 Kahramankazan / Ankara, Türkiye',
-    'whatsappNumber','+90 531 880 31 51',
-    'taxOffice','',
-    'taxNumber','',
-    'website','https://www.ensotek.de'
+    'city','Istanbul',
+    'country','Türkiye',
+    'working_hours','Mon-Fri 08:00-18:00',
+    'maps_embed_url','',
+    'maps_lat','41.0436',
+    'maps_lng','28.8820'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)
@@ -223,15 +229,18 @@ VALUES
   'contact_info',
   'de',
   CAST(JSON_OBJECT(
-    'companyName','ENSOTEK Kühltürme & Technologien Engineering GmbH (Ltd.)',
-    'phones',JSON_ARRAY('+90 212 613 33 01'),
+    'company_name','ENSOTEK Kühltürme & Technologien Engineering GmbH (Ltd.)',
+    'phone','+90 212 613 33 01',
+    'phone_2','+90 531 880 31 51',
     'email','ensotek@ensotek.com.tr',
+    'email_2','export@ensotek.com.tr',
     'address','Oruçreis Mah., Tekstilkent Sit., A17 Blok No:41, 34235 Esenler / Istanbul, Türkei',
-    'addressSecondary','Werk: Saray Mah., Gimat Cad. No:6A, 06980 Kahramankazan / Ankara, Türkei',
-    'whatsappNumber','+90 531 880 31 51',
-    'taxOffice','',
-    'taxNumber','',
-    'website','https://www.ensotek.de'
+    'city','Istanbul',
+    'country','Türkei',
+    'working_hours','Mo-Fr 08:00-18:00',
+    'maps_embed_url','',
+    'maps_lat','41.0436',
+    'maps_lng','28.8820'
   ) AS CHAR CHARACTER SET utf8mb4),
   NOW(3),
   NOW(3)

@@ -2586,10 +2586,19 @@
         "contact": {
           "description": "Contact information. Empty fields are stored as empty strings.",
           "labels": {
+            "companyName": "Company Name",
             "phone": "Phone",
+            "phone2": "Phone 2",
             "email": "Email",
+            "email2": "Email 2",
             "whatsapp": "WhatsApp",
-            "address": "Address"
+            "address": "Address",
+            "city": "City",
+            "country": "Country",
+            "workingHours": "Working Hours",
+            "mapsEmbedUrl": "Google Maps Embed URL",
+            "mapsLat": "Latitude",
+            "mapsLng": "Longitude"
           }
         },
         "socials": {
@@ -2599,7 +2608,10 @@
             "facebook": "Facebook",
             "linkedin": "LinkedIn",
             "youtube": "YouTube",
-            "x": "X (Twitter)"
+            "x": "X (Twitter)",
+            "github": "GitHub",
+            "tiktok": "TikTok",
+            "pinterest": "Pinterest"
           }
         },
         "companyProfile": {
