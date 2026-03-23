@@ -21,7 +21,7 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
-        port: '8093',
+        port: '8086',
         pathname: '/**',
       },
       {
@@ -49,7 +49,7 @@ const nextConfig = {
     const apiBase = (
       process.env.PANEL_API_URL ||
       process.env.NEXT_PUBLIC_PANEL_API_URL ||
-      'http://localhost:8093'
+      'http://localhost:8086'
     ).replace(/\/+$/, '');
 
     const csp = [
@@ -57,9 +57,10 @@ const nextConfig = {
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' blob: data: https://res.cloudinary.com https://www.ensotek.de https://ensotek.de",
-      `connect-src 'self' ${isDev ? apiBase : ''} https://cdn.jsdelivr.net https://api.cloudinary.com https://www.ensotek.de https://ensotek.de`.trim(),
+      `connect-src 'self' ${isDev ? apiBase : ''} ${(process.env.NEXT_PUBLIC_CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean).join(' ')} https://cdn.jsdelivr.net https://api.cloudinary.com`.trim(),
       "font-src 'self' https://fonts.gstatic.com data:",
       "object-src 'none'",
+      `frame-src 'self' ${isDev ? apiBase : ''} https://www.ensotek.de https://ensotek.de`.trim(),
       "base-uri 'self'",
       "form-action 'self'",
       "frame-ancestors 'none'",
@@ -75,7 +76,7 @@ const nextConfig = {
 
   async rewrites() {
     const origin =
-      process.env.PANEL_API_URL || process.env.NEXT_PUBLIC_PANEL_API_URL || 'http://localhost:8093';
+      process.env.PANEL_API_URL || process.env.NEXT_PUBLIC_PANEL_API_URL || 'http://localhost:8086';
 
     const base = String(origin).replace(/\/+$/, '');
 

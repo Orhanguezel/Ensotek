@@ -432,6 +432,7 @@ export default function AdminServicesClient() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-14" />
                   <TableHead>{t('admin.services.list.nameColumn')}</TableHead>
                   <TableHead>{t('admin.services.list.slugColumn')}</TableHead>
                   <TableHead>{t('admin.services.list.featuredColumn')}</TableHead>
@@ -452,6 +453,15 @@ export default function AdminServicesClient() {
 
                   return (
                     <TableRow key={id || `${idx}`}>
+                      <TableCell className="p-1">
+                        {p?.image_url || p?.featured_image ? (
+                          <img src={p.image_url || p.featured_image} alt="" className="h-10 w-10 rounded object-cover" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded bg-muted text-muted-foreground">
+                            <span className="text-[10px]">—</span>
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell className="font-medium">{name}</TableCell>
                       <TableCell className="wrap-break-word">{slug}</TableCell>
 

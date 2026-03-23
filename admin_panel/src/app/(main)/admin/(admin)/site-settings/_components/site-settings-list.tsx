@@ -1,7 +1,7 @@
 'use client';
 
 // =============================================================
-// FILE: src/app/(main)/admin/(admin)/site-settings/_components/SiteSettingsList.tsx
+// FILE: src/app/(main)/admin/(admin)/site-settings/_components/site-settings-list.tsx
 // guezelwebdesign – Site Ayarları Liste Bileşeni (shadcn/ui)
 // - FIX: Hide SEO keys in global(*) list.
 // - UI: Card + Table (desktop), Card list (mobile)
@@ -12,7 +12,12 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import type { SiteSetting, SettingValue } from '@/integrations/shared';
+import {
+  coerceSiteSettingsPreviewValue,
+  isSiteSettingsSeoKey,
+  type SiteSetting,
+  type SettingValue,
+} from '@/integrations/shared';
 import { useAdminTranslations } from '@/i18n';
 import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
 
@@ -27,54 +32,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-/* ----------------------------- helpers ----------------------------- */
-
-function isSeoKey(key: string): boolean {
-  const k = String(key || '')
-    .trim()
-    .toLowerCase();
-  if (!k) return false;
-
-  return (
-    k === 'seo' ||
-    k === 'site_seo' ||
-    k === 'site_meta_default' ||
-    k.startsWith('seo_') ||
-    k.startsWith('seo|') ||
-    k.startsWith('site_seo|') ||
-    k.startsWith('ui_seo') ||
-    k.startsWith('ui_seo_')
-  );
-}
-
-/**
- * Some rows may store JSON as string in DB.
- * For list preview, attempt to parse if it "looks like JSON".
- */
-function coercePreviewValue(input: SettingValue): SettingValue {
-  if (input === null || input === undefined) return input;
-
-  if (typeof input === 'object') return input;
-
-  if (typeof input === 'string') {
-    const s = input.trim();
-    if (!s) return input;
-
-    const looksJson =
-      (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'));
-
-    if (!looksJson) return input;
-
-    try {
-      return JSON.parse(s) as any;
-    } catch {
-      return input;
-    }
-  }
-
-  return input;
-}
 
 /* ----------------------------- types ----------------------------- */
 
@@ -109,7 +66,7 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
 
   const filtered = React.useMemo(() => {
     const arr = Array.isArray(settings) ? settings : [];
-    if (selectedLocale === '*') return arr.filter((s) => s && !isSeoKey(s.key));
+    if (selectedLocale === '*') return arr.filter((s) => s && !isSiteSettingsSeoKey(s.key));
     return arr;
   }, [settings, selectedLocale]);
 
@@ -118,7 +75,7 @@ export const SiteSettingsList: React.FC<SiteSettingsListProps> = ({
   const dash = t('admin.siteSettings.list.dash', undefined, '—');
 
   const formatValuePreviewI18n = (v: SettingValue): string => {
-    const vv = coercePreviewValue(v);
+    const vv = coerceSiteSettingsPreviewValue(v);
     if (vv === null || vv === undefined) return dash;
 
     if (typeof vv === 'string') {

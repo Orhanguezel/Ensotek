@@ -1,5 +1,5 @@
 // =============================================================
-// FILE: src/components/admin/site-settings/structured/CompanyProfileStructuredForm.tsx
+// FILE: src/app/(main)/admin/(admin)/site-settings/tabs/structured/company-profile-structured-form.tsx
 // =============================================================
 
 'use client';
@@ -8,6 +8,11 @@ import React from 'react';
 import { z } from 'zod';
 import { useAdminTranslations } from '@/i18n';
 import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import {
+  SITE_SETTINGS_COMPANY_PROFILE_EMPTY,
+  SITE_SETTINGS_COMPANY_PROFILE_FIELDS,
+  toStructuredObjectSeed,
+} from '@/integrations/shared';
 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,7 +24,7 @@ export const companyProfileSchema = z
     slogan: z.string().trim().optional(),
     about: z.string().trim().optional(),
   })
-  .strict();
+  .passthrough();
 
 export type CompanyProfileFormState = z.infer<typeof companyProfileSchema>;
 
@@ -31,10 +36,8 @@ export type CompanyProfileStructuredFormProps = {
   seed?: CompanyProfileFormState;
 };
 
-const safeObj = (v: any) => (v && typeof v === 'object' && !Array.isArray(v) ? v : null);
-
 export function companyObjToForm(v: any, seed: CompanyProfileFormState): CompanyProfileFormState {
-  const base = safeObj(v) || seed;
+  const base = toStructuredObjectSeed(v, seed);
   const parsed = companyProfileSchema.safeParse(base);
   return parsed.success ? parsed.data : seed;
 }
@@ -57,51 +60,40 @@ export const CompanyProfileStructuredForm: React.FC<CompanyProfileStructuredForm
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
 
-  const s = (seed || {
-    company_name: 'guezelwebdesign',
-    slogan: '',
-    about: '',
-  }) as CompanyProfileFormState;
+  const s = (seed || { ...SITE_SETTINGS_COMPANY_PROFILE_EMPTY }) as CompanyProfileFormState;
   const form = companyObjToForm(value, s);
 
   return (
     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-      <div className="space-y-2">
-        <Label htmlFor="company-name" className="text-sm">{t('admin.siteSettings.structured.companyProfile.labels.companyName')}</Label>
-        <Input
-          id="company-name"
-          className="h-8"
-          value={form.company_name || ''}
-          onChange={(e) => onChange({ ...form, company_name: e.target.value })}
-          disabled={disabled}
-        />
-        {errors?.company_name && <p className="text-xs text-destructive">{errors.company_name}</p>}
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="company-slogan" className="text-sm">{t('admin.siteSettings.structured.companyProfile.labels.slogan')}</Label>
-        <Input
-          id="company-slogan"
-          className="h-8"
-          value={form.slogan || ''}
-          onChange={(e) => onChange({ ...form, slogan: e.target.value })}
-          disabled={disabled}
-        />
-        {errors?.slogan && <p className="text-xs text-destructive">{errors.slogan}</p>}
-      </div>
-
-      <div className="space-y-2 md:col-span-2">
-        <Label htmlFor="company-about" className="text-sm">{t('admin.siteSettings.structured.companyProfile.labels.about')}</Label>
-        <Textarea
-          id="company-about"
-          rows={6}
-          value={form.about || ''}
-          onChange={(e) => onChange({ ...form, about: e.target.value })}
-          disabled={disabled}
-          className="text-sm"
-        />
-        {errors?.about && <p className="text-xs text-destructive">{errors.about}</p>}
-      </div>
+      {SITE_SETTINGS_COMPANY_PROFILE_FIELDS.map((field) => (
+        <div
+          key={field.key}
+          className={`space-y-2 ${field.colSpan2 ? 'md:col-span-2' : ''}`}
+        >
+          <Label htmlFor={`company-${field.key.replace('_', '-')}`} className="text-sm">
+            {t(`admin.siteSettings.structured.companyProfile.labels.${field.labelKey}`)}
+          </Label>
+          {field.textarea ? (
+            <Textarea
+              id={`company-${field.key.replace('_', '-')}`}
+              rows={6}
+              value={(form[field.key as keyof CompanyProfileFormState] as string) || ''}
+              onChange={(e) => onChange({ ...form, [field.key]: e.target.value })}
+              disabled={disabled}
+              className="text-sm"
+            />
+          ) : (
+            <Input
+              id={`company-${field.key.replace('_', '-')}`}
+              className="h-8"
+              value={(form[field.key as keyof CompanyProfileFormState] as string) || ''}
+              onChange={(e) => onChange({ ...form, [field.key]: e.target.value })}
+              disabled={disabled}
+            />
+          )}
+          {errors?.[field.key] && <p className="text-xs text-destructive">{errors[field.key]}</p>}
+        </div>
+      ))}
     </div>
   );
 };

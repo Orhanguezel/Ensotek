@@ -4,13 +4,22 @@ import Layout from "@/components/layout/Layout";
 import QualityDetailContent from "@/components/containers/custom-pages/QualityDetailContent";
 import Banner from "@/components/layout/banner/Banner";
 import { getTranslations } from "next-intl/server";
+import { fetchPageSeo } from "@/i18n/server";
 import { customPagesService } from "@/features/custom-pages/customPages.service";
 import { siteSettingsService } from "@/features/site-settings/siteSettings.service";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "seo" });
-  return { title: t("quality_title"), description: t("quality_description") };
+  const [pageSeo, t] = await Promise.all([
+    fetchPageSeo("quality", locale),
+    getTranslations({ locale, namespace: "seo" }),
+  ]);
+  return {
+    title: pageSeo?.title || t("quality_title"),
+    description: pageSeo?.description || t("quality_description"),
+    ...(pageSeo?.og_image ? { openGraph: { images: [pageSeo.og_image] } } : {}),
+    ...(pageSeo?.no_index ? { robots: { index: false, follow: true } } : {}),
+  };
 }
 
 const QualityListPage = async ({

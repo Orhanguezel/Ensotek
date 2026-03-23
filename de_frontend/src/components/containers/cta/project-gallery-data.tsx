@@ -1,6 +1,6 @@
 import One from "public/img/project/01.jpg";
 import Two from "public/img/project/02.jpg";
-import Three from "public/img/project/03.jpg";
+import Three from "public/img/project/03.webp";
 import Four from "public/img/project/04.jpg";
 import Five from "public/img/project/05.jpg";
 import Six from "public/img/project/06.jpg";

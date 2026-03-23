@@ -7,9 +7,22 @@
 import AdminCustomPageDetailClient from '../admin-custom-pages-detail-client';
 
 type Params = { id: string };
+type SearchParams = { module?: string };
 
-// Next.js bazı sürümlerde params'ı Promise olarak verir (sync-dynamic-apis hatası)
-export default async function Page({ params }: { params: Promise<Params> | Params }) {
+// Next.js bazı surumlerinde params'i Promise olarak verir (sync-dynamic-apis hatasi)
+export default async function Page({
+  params,
+  searchParams,
+}: {
+  params: Promise<Params> | Params;
+  searchParams: Promise<SearchParams> | SearchParams;
+}) {
   const p = (await params) as Params;
-  return <AdminCustomPageDetailClient id={p.id} />;
+  const sp = (await searchParams) as SearchParams;
+  return (
+    <AdminCustomPageDetailClient
+      id={p.id}
+      initialModuleKey={sp.module || ''}
+    />
+  );
 }

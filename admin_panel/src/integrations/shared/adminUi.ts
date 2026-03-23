@@ -106,6 +106,9 @@ const emptyNav: AdminNavCopy = {
     telegram: '',
     chat: '',
     references: '',
+    cache: '',
+    blog: '',
+    news: '',
   },
 };
 
@@ -154,6 +157,9 @@ export function normalizeAdminUiCopy(raw: unknown): AdminUiCopy {
     telegram: uiText(itemsRaw.telegram),
     chat: uiText(itemsRaw.chat),
     references: uiText(itemsRaw.references),
+    cache: uiText(itemsRaw.cache),
+    blog: uiText(itemsRaw.blog),
+    news: uiText(itemsRaw.news),
   };
 
   const commonRaw = parseJsonObject(o.common);

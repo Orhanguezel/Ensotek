@@ -11,7 +11,6 @@ import {
   Bell,
   BookOpen,
   Bot,
-
   ClipboardList,
   Cog,
   DollarSign,
@@ -30,7 +29,10 @@ import {
   Menu,
   MessageCircle,
   MessageSquare,
+  Newspaper,
   Package,
+  PenSquare,
+  RefreshCcw,
   Send,
   Settings,
   Users,
@@ -94,7 +96,10 @@ export type AdminNavItemKey =
   | 'support'
   | 'telegram'
   | 'chat'
-  | 'references';
+  | 'references'
+  | 'cache'
+  | 'blog'
+  | 'news';
 
 export type AdminNavGroupKey = 'general' | 'content' | 'marketing' | 'communication' | 'system';
 
@@ -122,6 +127,8 @@ export const adminNavConfig: AdminNavConfigGroup[] = [
     items: [
       { key: 'site_settings', url: '/admin/site-settings', icon: Settings },
       { key: 'custom_pages', url: '/admin/custompage', icon: FileText },
+      { key: 'blog', url: '/admin/custompage?module_key=blog', icon: PenSquare },
+      { key: 'news', url: '/admin/custompage?module_key=news', icon: Newspaper },
       { key: 'categories', url: '/admin/categories', icon: Folders },
       { key: 'subcategories', url: '/admin/subcategories', icon: FolderOpen },
       { key: 'library', url: '/admin/library', icon: BookOpen },
@@ -161,6 +168,7 @@ export const adminNavConfig: AdminNavConfigGroup[] = [
       { key: 'db', url: '/admin/db', icon: Database },
       { key: 'audit', url: '/admin/audit', icon: FileSearch },
       { key: 'reports', url: '/admin/reports', icon: BarChart },
+      { key: 'cache', url: '/admin/cache', icon: RefreshCcw },
     ],
   },
 ];
@@ -202,6 +210,9 @@ const FALLBACK_TITLES: Record<AdminNavItemKey, string> = {
   telegram: 'Telegram',
   chat: 'Chat & AI',
   references: 'References',
+  cache: 'Cache',
+  blog: 'Blog',
+  news: 'News',
 };
 
 export function buildAdminSidebarItems(

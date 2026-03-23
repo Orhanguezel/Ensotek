@@ -7,7 +7,7 @@ import One from "public/img/others/technical.jpg";
 import Two from "public/img/svg/call.svg";
 import Three from "public/img/svg/mail.svg";
 import Four from "public/img/svg/location.svg";
-import Five from "public/img/project/03.jpg";
+import Five from "public/img/project/03.webp";
 
 const TechnicalArea = () => {
   const [imgTab, setImgTab] = useState(0);

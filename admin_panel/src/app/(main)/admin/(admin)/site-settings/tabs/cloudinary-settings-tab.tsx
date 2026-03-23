@@ -1,7 +1,7 @@
 'use client';
 
 // =============================================================
-// FILE: src/components/admin/site-settings/tabs/CloudinarySettingsTab.tsx
+// FILE: src/app/(main)/admin/(admin)/site-settings/tabs/cloudinary-settings-tab.tsx
 // Cloudinary / Storage Ayarları Tab (GLOBAL) – shadcn/ui aligned
 // - NO bootstrap classes
 // - Uses Card + Label/Input + Buttons + Badge
@@ -19,7 +19,15 @@ import {
   useLazyDiagCloudinaryAdminQuery,
 } from '@/integrations/hooks';
 
-import type { SiteSetting } from '@/integrations/shared';
+import {
+  SITE_SETTINGS_CLOUDINARY_KEYS,
+  type SiteSettingsCloudinaryForm,
+  type SiteSettingsCloudinaryKey,
+  buildSiteSettingsCloudinaryUpdates,
+  createSiteSettingsCloudinaryForm,
+  getSiteSettingsCloudinaryErrorMessage,
+  mapSiteSettingsToCloudinaryForm,
+} from '@/integrations/shared';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,60 +39,6 @@ export type CloudinarySettingsTabProps = {
   locale: string; // UI badge için dursun
 };
 
-const STORAGE_KEYS = [
-  'storage_driver',
-  'storage_local_root',
-  'storage_local_base_url',
-  'storage_cdn_public_base',
-  'storage_public_api_base',
-  'cloudinary_cloud_name',
-  'cloudinary_api_key',
-  'cloudinary_api_secret',
-  'cloudinary_folder',
-  'cloudinary_unsigned_preset',
-] as const;
-
-type StorageKey = (typeof STORAGE_KEYS)[number];
-type StorageForm = Record<StorageKey, string>;
-
-const EMPTY_FORM: StorageForm = {
-  storage_driver: '',
-  storage_local_root: '',
-  storage_local_base_url: '',
-  storage_cdn_public_base: '',
-  storage_public_api_base: '',
-  cloudinary_cloud_name: '',
-  cloudinary_api_key: '',
-  cloudinary_api_secret: '',
-  cloudinary_folder: '',
-  cloudinary_unsigned_preset: '',
-};
-
-function valueToString(v: unknown): string {
-  if (v === null || v === undefined) return '';
-  if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') return String(v);
-  try {
-    return JSON.stringify(v);
-  } catch {
-    return String(v);
-  }
-}
-
-function toMap(settings?: any) {
-  const map = new Map<string, any>();
-  if (settings) for (const s of settings) map.set(String(s.key), s);
-  return map;
-}
-
-function errMsg(err: any, fallback: string): string {
-  return (
-    err?.data?.error?.message ||
-    err?.data?.message ||
-    err?.message ||
-    fallback
-  );
-}
-
 export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({ locale }) => {
   const {
     data: settings,
@@ -92,7 +46,7 @@ export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({ lo
     isFetching,
     refetch,
   } = useListSiteSettingsAdminQuery({
-    keys: STORAGE_KEYS as unknown as string[],
+    keys: SITE_SETTINGS_CLOUDINARY_KEYS as unknown as string[],
     // GLOBAL => locale yok
   });
 
@@ -101,22 +55,19 @@ export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({ lo
   const [runDiag, { data: diagResult, isFetching: isTesting, error: diagError }] =
     useLazyDiagCloudinaryAdminQuery();
 
-  const [form, setForm] = React.useState<StorageForm>(EMPTY_FORM);
+  const [form, setForm] = React.useState<SiteSettingsCloudinaryForm>(createSiteSettingsCloudinaryForm);
 
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
 
   React.useEffect(() => {
-    const map = toMap(settings);
-    const next: StorageForm = { ...EMPTY_FORM };
-    STORAGE_KEYS.forEach((k) => (next[k] = valueToString(map.get(k)?.value)));
-    setForm(next);
+    setForm(mapSiteSettingsToCloudinaryForm(settings));
   }, [settings]);
 
   const loading = isLoading || isFetching;
   const busy = loading || isSaving || isTesting;
 
-  const handleChange = (field: StorageKey, value: string) => {
+  const handleChange = (field: SiteSettingsCloudinaryKey, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -124,13 +75,13 @@ export const CloudinarySettingsTab: React.FC<CloudinarySettingsTabProps> = ({ lo
     if (busy) return;
 
     try {
-      for (const key of STORAGE_KEYS) {
-        await updateSetting({ key, locale: '*', value: form[key].trim() }).unwrap();
+      for (const update of buildSiteSettingsCloudinaryUpdates(form)) {
+        await updateSetting({ key: update.key, locale: '*', value: update.value }).unwrap();
       }
       toast.success(t('admin.siteSettings.cloudinary.saved'));
       await refetch();
-    } catch (err: any) {
-      toast.error(errMsg(err, t('admin.siteSettings.messages.error')));
+    } catch (err: unknown) {
+      toast.error(getSiteSettingsCloudinaryErrorMessage(err, t('admin.siteSettings.messages.error')));
     }
   };
 

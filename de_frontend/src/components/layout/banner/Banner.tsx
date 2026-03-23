@@ -1,10 +1,12 @@
-import React from "react";
-import Link from "next/link";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 
 import One from "public/img/shape/breadcrum-1.png.png";
 
 const Banner = ({ title }: any) => {
+  const t = useTranslations("common");
+
   return (
     <div className="breadcrumb__area">
       <Image
@@ -34,7 +36,7 @@ const Banner = ({ title }: any) => {
                   <ul className="trail-items">
                     <li className="trail-item trail-begin">
                       <span>
-                        <Link href="/">Home</Link>
+                        <Link href="/">{t("home")}</Link>
                       </span>
                     </li>
                     <li className="trail-item trail-end">

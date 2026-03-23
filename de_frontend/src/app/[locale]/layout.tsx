@@ -6,11 +6,18 @@ import { notFound } from 'next/navigation';
 import { AVAILABLE_LOCALES, getLocaleMessages } from "../../i18n/locales";
 import { getRuntimeLocaleSettings } from "../../i18n/locale-settings";
 import { fetchSetting } from "../../i18n/server";
+import JsonLd from '@/seo/JsonLd';
+import { graph, org, website } from '@/seo/jsonld';
 
 import { AosProvider } from '@/providers/AosProvider';
 import { AppProviders } from '@/providers/AppProviders';
-import { StackableWidgets } from '@/features/catalog';
+import dynamic from 'next/dynamic';
 import { FontAwesomeLoader } from '@/components/FontAwesomeLoader';
+
+const StackableWidgets = dynamic(
+  () => import('@/features/catalog').then((m) => m.StackableWidgets),
+  { ssr: false }
+);
 
 // Global Styles
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -138,12 +145,51 @@ export default async function LocaleLayout({
 
   const messages = getLocaleMessages(locale);
 
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, '') ||
+    'https://www.ensotek.de';
+
+  const [seoRow, socialsRow, logoRow] = await Promise.all([
+    fetchSetting('seo', locale, { revalidate: 300 }),
+    fetchSetting('socials', locale, { revalidate: 3600 }),
+    fetchSetting('site_logo', locale, { revalidate: 3600 }),
+  ]);
+
+  const seo = seoRow?.value as Record<string, any> | null;
+  const socials = socialsRow?.value as Record<string, unknown> | null;
+  const logoUrl = (logoRow?.value as Record<string, any> | null)?.url;
+  const siteName: string = seo?.site_name ?? 'Ensotek';
+
+  const sameAs: string[] = [];
+  if (socials) {
+    for (const v of Object.values(socials)) {
+      if (typeof v === 'string' && /^https?:\/\//i.test(v.trim())) sameAs.push(v.trim());
+    }
+  }
+
+  const jsonLdData = graph([
+    org({
+      id: `${siteUrl}/#org`,
+      name: siteName,
+      url: siteUrl,
+      logo: typeof logoUrl === 'string' ? logoUrl : undefined,
+      sameAs: sameAs.length ? sameAs : undefined,
+    }),
+    website({
+      id: `${siteUrl}/#website`,
+      name: siteName,
+      url: siteUrl,
+      publisherId: `${siteUrl}/#org`,
+    }),
+  ]);
+
   return (
     <html lang={locale} data-scroll-behavior="smooth">
       <head>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://cdn.ensotek.de" />
+        <JsonLd data={jsonLdData} id="org-website" />
       </head>
       <body suppressHydrationWarning={true}>
         <NextIntlClientProvider locale={locale} messages={messages}>

@@ -6,7 +6,7 @@ export function useMenuItems() {
   return useQuery({
     queryKey: queryKeys.menuItems.list(),
     queryFn: menuItemsService.getAll,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 15 * 60 * 1000,
   });
 }
 

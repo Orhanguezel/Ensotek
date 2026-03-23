@@ -6,7 +6,7 @@ export function useSliders() {
   return useQuery({
     queryKey: queryKeys.slider.list(),
     queryFn: sliderService.getAll,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 15 * 60 * 1000,
   });
 }
 

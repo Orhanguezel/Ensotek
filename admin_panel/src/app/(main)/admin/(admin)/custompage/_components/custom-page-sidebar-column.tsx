@@ -1,8 +1,6 @@
 // =============================================================
-// FILE: src/app/(main)/admin/(admin)/custompage/_components/CustomPageSidebarColumn.tsx
-// FINAL — Sidebar: tags, content-image insertion, SEO
-// - ✅ Uses AdminImageUploadField (new path)
-// - ✅ No category/subcategory
+// CustomPageSidebarColumn — Sadece icerik icine gorsel ekleme
+// SEO alanlari ayri tab'da (FormTabs > SEO)
 // =============================================================
 
 'use client';
@@ -16,25 +14,20 @@ import type { ContentImageSize, CustomPageFormValues } from './custom-page-form'
 type Props = {
   values: CustomPageFormValues;
   disabled: boolean;
-
   imageMetadata: Record<string, string | number | boolean>;
-
   contentImageSize: ContentImageSize;
   setContentImageSize: (s: ContentImageSize) => void;
   contentImagePreview: string;
   handleAddContentImage: (url: string, alt?: string) => void;
-
   manualImageUrl: string;
   manualImageAlt: string;
   setManualImageUrl: (v: string) => void;
   setManualImageAlt: (v: string) => void;
   handleAddManualImage: () => void;
-
   setValues: React.Dispatch<React.SetStateAction<CustomPageFormValues>>;
 };
 
 export const CustomPageSidebarColumn: React.FC<Props> = ({
-  values,
   disabled,
   imageMetadata,
   contentImageSize,
@@ -46,22 +39,12 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
   setManualImageUrl,
   setManualImageAlt,
   handleAddManualImage,
-  setValues,
 }) => {
   const t = useAdminT();
+
   return (
     <div className="rounded-lg border bg-card p-3 space-y-4">
-      <div>
-        <label className="mb-1 block text-xs text-muted-foreground">{t('admin.customPage.form.tags')}</label>
-        <input
-          type="text"
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-          placeholder="ör: guezelwebdesign, kampanya, blog"
-          value={values.tags}
-          onChange={(e) => setValues((prev) => ({ ...prev, tags: e.target.value }))}
-          disabled={disabled}
-        />
-      </div>
+      <div className="text-xs font-medium text-muted-foreground">Icerige Gorsel Ekle</div>
 
       <div>
         <label className="mb-1 block text-xs text-muted-foreground">{t('admin.customPage.form.imageSize')}</label>
@@ -79,12 +62,11 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
       </div>
 
       <AdminImageUploadField
-        label={t('admin.customPage.form.content') + ' ' + t('admin.common.upload')}
+        label="Gorsel Yukle"
         helperText={<>{t('admin.customPage.form.uploadHelperText')}</>}
         bucket="public"
         folder="custom_pages/content"
         metadata={{ ...(imageMetadata || {}), section: 'content' }}
-        multiple
         value={contentImagePreview}
         onChange={(url) => handleAddContentImage(url)}
         disabled={disabled}
@@ -106,7 +88,7 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
         <input
           type="text"
           className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-          placeholder={t('admin.customPage.form.altTextPlaceholder')}
+          placeholder="Alt metin"
           value={manualImageAlt}
           onChange={(e) => setManualImageAlt(e.target.value)}
           disabled={disabled}
@@ -117,30 +99,8 @@ export const CustomPageSidebarColumn: React.FC<Props> = ({
           onClick={handleAddManualImage}
           disabled={disabled}
         >
-          {t('admin.customPage.form.addManualUrl')}
+          Icerige Ekle
         </button>
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs text-muted-foreground">{t('admin.customPage.form.metaTitle')}</label>
-        <input
-          type="text"
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-          value={values.meta_title}
-          onChange={(e) => setValues((prev) => ({ ...prev, meta_title: e.target.value }))}
-          disabled={disabled}
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs text-muted-foreground">{t('admin.customPage.form.metaDescription')}</label>
-        <textarea
-          className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-          rows={3}
-          value={values.meta_description}
-          onChange={(e) => setValues((prev) => ({ ...prev, meta_description: e.target.value }))}
-          disabled={disabled}
-        />
       </div>
     </div>
   );

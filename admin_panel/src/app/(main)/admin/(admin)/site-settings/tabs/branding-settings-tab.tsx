@@ -17,6 +17,16 @@ import {
   useGetSiteSettingAdminByKeyQuery,
   useUpdateSiteSettingAdminMutation,
 } from '@/integrations/hooks';
+import {
+  EMPTY_SITE_SETTINGS_BRANDING_FORM,
+  SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS,
+  type SiteSettingsBrandingForm,
+  brandingToSiteSettingsForm,
+  getSiteSettingsBrandingErrorMessage,
+  mergeSiteSettingsBrandingConfig,
+  normalizeSiteSettingsBrandingConfig,
+  siteSettingsFormToBranding,
+} from '@/integrations/shared';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,82 +34,6 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-
-import { DEFAULT_BRANDING, type AdminBrandingConfig } from '@/config/app-config';
-
-type BrandingForm = {
-  app_name: string;
-  app_copyright: string;
-  html_lang: string;
-  theme_color: string;
-  favicon_16: string;
-  favicon_32: string;
-  apple_touch_icon: string;
-  meta_title: string;
-  meta_description: string;
-  og_url: string;
-  og_title: string;
-  og_description: string;
-  og_image: string;
-  twitter_card: string;
-};
-
-const EMPTY_FORM: BrandingForm = {
-  app_name: '',
-  app_copyright: '',
-  html_lang: '',
-  theme_color: '',
-  favicon_16: '',
-  favicon_32: '',
-  apple_touch_icon: '',
-  meta_title: '',
-  meta_description: '',
-  og_url: '',
-  og_title: '',
-  og_description: '',
-  og_image: '',
-  twitter_card: '',
-};
-
-function brandingToForm(b: AdminBrandingConfig): BrandingForm {
-  return {
-    app_name: b.app_name || '',
-    app_copyright: b.app_copyright || '',
-    html_lang: b.html_lang || '',
-    theme_color: b.theme_color || '',
-    favicon_16: b.favicon_16 || '',
-    favicon_32: b.favicon_32 || '',
-    apple_touch_icon: b.apple_touch_icon || '',
-    meta_title: b.meta?.title || '',
-    meta_description: b.meta?.description || '',
-    og_url: b.meta?.og_url || '',
-    og_title: b.meta?.og_title || '',
-    og_description: b.meta?.og_description || '',
-    og_image: b.meta?.og_image || '',
-    twitter_card: b.meta?.twitter_card || '',
-  };
-}
-
-function formToBranding(f: BrandingForm): AdminBrandingConfig {
-  return {
-    app_name: f.app_name.trim(),
-    app_copyright: f.app_copyright.trim(),
-    html_lang: f.html_lang.trim(),
-    theme_color: f.theme_color.trim(),
-    favicon_16: f.favicon_16.trim(),
-    favicon_32: f.favicon_32.trim(),
-    apple_touch_icon: f.apple_touch_icon.trim(),
-    meta: {
-      title: f.meta_title.trim(),
-      description: f.meta_description.trim(),
-      og_url: f.og_url.trim(),
-      og_title: f.og_title.trim(),
-      og_description: f.og_description.trim(),
-      og_image: f.og_image.trim(),
-      twitter_card: f.twitter_card.trim(),
-    },
-  };
-}
 
 export type BrandingSettingsTabProps = {
   locale: string;
@@ -122,16 +56,11 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
 
   const [updateSetting, { isLoading: isSaving }] = useUpdateSiteSettingAdminMutation();
 
-  const [form, setForm] = React.useState<BrandingForm>(EMPTY_FORM);
+  const [form, setForm] = React.useState<SiteSettingsBrandingForm>(EMPTY_SITE_SETTINGS_BRANDING_FORM);
 
   // Parse existing config and extract branding
   const fullConfig = React.useMemo(() => {
-    if (!configRow?.value) return null;
-    try {
-      return typeof configRow.value === 'string' ? JSON.parse(configRow.value) : configRow.value;
-    } catch {
-      return null;
-    }
+    return configRow?.value ?? null;
   }, [configRow]);
 
   const loading = isLoading || isFetching;
@@ -141,29 +70,21 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
     if (loading) return; // Wait during fetch
 
     if (!fullConfig) {
-       setForm(brandingToForm(DEFAULT_BRANDING));
+       setForm(brandingToSiteSettingsForm(normalizeSiteSettingsBrandingConfig(null)));
        return;
     }
 
-    const branding = fullConfig.branding;
-    if (branding) {
-      setForm(brandingToForm({ ...DEFAULT_BRANDING, ...branding, meta: { ...DEFAULT_BRANDING.meta, ...branding.meta } }));
-    } else {
-      setForm(brandingToForm(DEFAULT_BRANDING));
-    }
+    setForm(brandingToSiteSettingsForm(normalizeSiteSettingsBrandingConfig(fullConfig)));
   }, [fullConfig, loading, locale]); // ✅ Added locale to ensure it resets on lang change
 
-  const handleChange = (field: keyof BrandingForm, value: string) =>
+  const handleChange = (field: keyof SiteSettingsBrandingForm, value: string) =>
     setForm((p) => ({ ...p, [field]: value }));
 
   const handleSave = async () => {
     try {
       // Merge branding back into full config
-      const newBranding = formToBranding(form);
-      const merged = {
-        ...(fullConfig || {}),
-        branding: newBranding,
-      };
+      const newBranding = siteSettingsFormToBranding(form);
+      const merged = mergeSiteSettingsBrandingConfig(fullConfig, newBranding);
 
       await updateSetting({
         key: 'ui_admin_config',
@@ -173,10 +94,8 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
 
       toast.success(t('admin.siteSettings.branding.saved'));
       await refetch();
-    } catch (err: any) {
-      const msg =
-        err?.data?.error?.message || err?.message || t('admin.siteSettings.branding.saveError');
-      toast.error(msg);
+    } catch (err: unknown) {
+      toast.error(getSiteSettingsBrandingErrorMessage(err, t('admin.siteSettings.branding.saveError')));
     }
   };
 
@@ -236,39 +155,39 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
               <Label htmlFor="branding_app_name">
                 {t('admin.siteSettings.branding.fields.appName')}
               </Label>
-              <Input
-                id="branding_app_name"
-                value={form.app_name}
-                onChange={(e) => handleChange('app_name', e.target.value)}
-                placeholder="My Admin Panel"
-                disabled={busy}
-              />
+                <Input
+                  id="branding_app_name"
+                  value={form.app_name}
+                  onChange={(e) => handleChange('app_name', e.target.value)}
+                  placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.app_name}`)}
+                  disabled={busy}
+                />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="branding_app_copyright">
                 {t('admin.siteSettings.branding.fields.copyright')}
               </Label>
-              <Input
-                id="branding_app_copyright"
-                value={form.app_copyright}
-                onChange={(e) => handleChange('app_copyright', e.target.value)}
-                placeholder="Company Name"
-                disabled={busy}
-              />
+                <Input
+                  id="branding_app_copyright"
+                  value={form.app_copyright}
+                  onChange={(e) => handleChange('app_copyright', e.target.value)}
+                  placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.app_copyright}`)}
+                  disabled={busy}
+                />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="branding_html_lang">
                 {t('admin.siteSettings.branding.fields.htmlLang')}
               </Label>
-              <Input
-                id="branding_html_lang"
-                value={form.html_lang}
-                onChange={(e) => handleChange('html_lang', e.target.value)}
-                placeholder="de"
-                disabled={busy}
-              />
+                <Input
+                  id="branding_html_lang"
+                  value={form.html_lang}
+                  onChange={(e) => handleChange('html_lang', e.target.value)}
+                  placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.html_lang}`)}
+                  disabled={busy}
+                />
               <p className="text-xs text-muted-foreground">
                 {t('admin.siteSettings.branding.fields.htmlLangHelp')}
               </p>
@@ -292,7 +211,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                   id="branding_theme_color"
                   value={form.theme_color}
                   onChange={(e) => handleChange('theme_color', e.target.value)}
-                  placeholder="#FDFCFB"
+                  placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.theme_color}`)}
                   disabled={busy}
                   className="flex-1"
                 />
@@ -313,7 +232,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_og_image"
                 value={form.og_image}
                 onChange={(e) => handleChange('og_image', e.target.value)}
-                placeholder="/logo/icon.svg"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.og_image}`)}
                 disabled={busy}
               />
             </div>
@@ -326,7 +245,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_favicon_16"
                 value={form.favicon_16}
                 onChange={(e) => handleChange('favicon_16', e.target.value)}
-                placeholder="/favicon/favicon-16.svg"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.favicon_16}`)}
                 disabled={busy}
               />
             </div>
@@ -339,7 +258,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_favicon_32"
                 value={form.favicon_32}
                 onChange={(e) => handleChange('favicon_32', e.target.value)}
-                placeholder="/favicon/favicon-32.svg"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.favicon_32}`)}
                 disabled={busy}
               />
             </div>
@@ -352,7 +271,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_apple_touch_icon"
                 value={form.apple_touch_icon}
                 onChange={(e) => handleChange('apple_touch_icon', e.target.value)}
-                placeholder="/favicon/apple-touch-icon.svg"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.apple_touch_icon}`)}
                 disabled={busy}
               />
             </div>
@@ -374,7 +293,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_meta_title"
                 value={form.meta_title}
                 onChange={(e) => handleChange('meta_title', e.target.value)}
-                placeholder="Site Title"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.meta_title}`)}
                 disabled={busy}
               />
             </div>
@@ -387,7 +306,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_og_url"
                 value={form.og_url}
                 onChange={(e) => handleChange('og_url', e.target.value)}
-                placeholder="https://example.com/"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.og_url}`)}
                 disabled={busy}
               />
             </div>
@@ -402,7 +321,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
               rows={3}
               value={form.meta_description}
               onChange={(e) => handleChange('meta_description', e.target.value)}
-              placeholder="Site description..."
+              placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.meta_description}`)}
               disabled={busy}
             />
           </div>
@@ -416,7 +335,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_og_title"
                 value={form.og_title}
                 onChange={(e) => handleChange('og_title', e.target.value)}
-                placeholder="OG Title"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.og_title}`)}
                 disabled={busy}
               />
             </div>
@@ -429,7 +348,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
                 id="branding_twitter_card"
                 value={form.twitter_card}
                 onChange={(e) => handleChange('twitter_card', e.target.value)}
-                placeholder="summary_large_image"
+                placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.twitter_card}`)}
                 disabled={busy}
               />
             </div>
@@ -444,7 +363,7 @@ export const BrandingSettingsTab: React.FC<BrandingSettingsTabProps> = ({ locale
               rows={3}
               value={form.og_description}
               onChange={(e) => handleChange('og_description', e.target.value)}
-              placeholder="OG Description..."
+              placeholder={t(`admin.siteSettings.branding.placeholders.${SITE_SETTINGS_BRANDING_PLACEHOLDER_KEYS.og_description}`)}
               disabled={busy}
             />
           </div>

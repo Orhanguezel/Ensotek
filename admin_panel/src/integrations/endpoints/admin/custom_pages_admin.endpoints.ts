@@ -127,9 +127,9 @@ export const customPagesAdminApi = baseApi.injectEndpoints({
       query: (id) => ({
         url: `${BASE}/${encodeURIComponent(id)}`,
         method: 'DELETE',
+        responseHandler: (res) => res.text(),
       }),
-      invalidatesTags: (_result, _error, id) => [
-        { type: 'CustomPage' as const, id },
+      invalidatesTags: () => [
         { type: 'CustomPage' as const, id: 'ADMIN_LIST' },
       ],
     }),

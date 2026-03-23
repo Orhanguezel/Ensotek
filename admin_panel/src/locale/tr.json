@@ -392,7 +392,28 @@
       "total": "Toplam",
       "operationFailed": "İşlem başarısız. Lütfen tekrar deneyin.",
       "active": "Aktif",
-      "inactive": "Pasif"
+      "inactive": "Pasif",
+      "ai": {
+        "full": "Tam İçerik Oluştur",
+        "enhance": "İçeriği Geliştir",
+        "translate": "Çevir",
+        "generateMeta": "SEO Meta Oluştur",
+        "working": "AI çalışıyor...",
+        "otherLanguages": "AI — Diğer Diller",
+        "switchLocale": "Bu dile geç",
+        "close": "Kapat"
+      },
+      "googlePreview": "Google Önizleme",
+      "cover": "Kapak",
+      "coverImage": "Kapak Görseli",
+      "gallery": "Galeri",
+      "altText": "Alt Metin",
+      "seo": {
+        "metaTitle": "Meta Başlık",
+        "metaDescription": "Meta Açıklama",
+        "tags": "Etiketler"
+      },
+      "delete": "Delete"
     },
     "slider": {
       "header": {
@@ -699,6 +720,7 @@
         "localeHint": "Seçim; aynı zamanda düzenlediğin locale kaydını belirler.",
         "jsonHelperText": "Bu JSON, formdaki tüm alanların bire bir karşılığıdır.",
         "titleSlugRequired": "Başlık ve slug alanları zorunludur.",
+        "moduleKeyRequired": "Modul secimi zorunludur.",
         "imageAddedToContent": "Görsel içerik alanına eklendi.",
         "invalidImageUrl": "Lütfen geçerli bir görsel URL'i gir.",
         "localeRecordNotFound": "Seçilen dil için kayıt bulunamadı; bu dilde yeni içerik oluşturabilirsin.",
@@ -725,6 +747,7 @@
         "updateSuccess": "Sayfa güncellendi.",
         "noPageId": "Sayfa verisi yüklenemedi (id yok).",
         "operationFailed": "İşlem başarısız. Lütfen tekrar deneyin.",
+        "moduleKeyRequired": "Modul secimi zorunludur.",
         "localeListError": "Seçilen dil için kayıt listesi alınamadı."
       }
     },
@@ -844,7 +867,10 @@
         "catalog_requests": "Katalog Talepleri",
         "offers": "Teklifler",
         "references": "Referanslar",
-        "support": "Destek Talepleri"
+        "support": "Destek Talepleri",
+        "cache": "Cache Yonetimi",
+        "blog": "Blog",
+        "news": "Haberler"
       },
       "stats": {
         "deliveredOrders": "Teslim Edilen Sipariş",
@@ -859,7 +885,8 @@
         "avgIncentivePerOrderDescription": "Toplam prim / sipariş",
         "avgIncentivePerOrderHelp": "Basit KPI",
         "totalIncentivesLabel": "Prim toplamı",
-        "avgLabel": "Ortalama"
+        "avgLabel": "Ortalama",
+        "deliveredOrdersDescription": "Status: delivered"
       },
       "addSection": "Bölüm ekle",
       "detailView": "Detay görünüm",
@@ -871,6 +898,42 @@
       "type": {
         "driver": "Şoför",
         "seller": "Satıcı"
+      },
+      "range": {
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last3Months": "Last 3 months"
+      },
+      "chart": {
+        "title": "Delivery Chart",
+        "description": "Selected metrics — {range}",
+        "descriptionShort": "{range}",
+        "ordersLabel": "Orders",
+        "unitsLabel": "Units (Chicken)",
+        "selectRange": "Select range",
+        "note": "Note: Scales differ, so axes are separate (Orders: left, Units: right)."
+      },
+      "table": {
+        "viewSelector": "View",
+        "viewPlaceholder": "Select view",
+        "allTab": "All",
+        "driversTab": "Drivers",
+        "sellersTab": "Sellers",
+        "addSection": "Add section",
+        "detailView": "Detail view",
+        "columns": {
+          "units": "Units",
+          "orders": "Orders",
+          "incentives": "Incentives"
+        },
+        "type": {
+          "driver": "Driver",
+          "seller": "Seller"
+        }
+      },
+      "states": {
+        "loading": "Loading…",
+        "noRecords": "No records found."
       }
     },
     "states": {
@@ -1972,6 +2035,35 @@
         "custom": "Özel"
       }
     },
+    "cache": {
+      "title": "Cache Yonetimi",
+      "description": "Frontend sayfalarinin cache'ini temizleyin. Icerik guncellemelerinin aninda gorunmesini saglar.",
+      "quickClear": "Hizli Temizle",
+      "quickClearDesc": "Belirli bir sayfanin veya tum sitenin cache'ini temizleyin.",
+      "clearButton": "Temizle",
+      "cleared": "Cache temizlendi",
+      "clearedAll": "Tum site cache temizlendi",
+      "clearError": "Cache temizlenemedi",
+      "info": "Bilgi",
+      "infoText1": "Frontend sayfalari 5 dakika (300 saniye) boyunca cache'lenir. Cache temizlendiginde sayfalar bir sonraki ziyarette API'den taze veri ceker.",
+      "infoText2": "Admin panelden icerik guncelledikten sonra degisikliklerin hemen gorunmesini istiyorsaniz ilgili sayfanin cache'ini temizleyin.",
+      "actions": {
+        "allSite": "Tum Site Cache",
+        "allSiteDesc": "Tum sayfalarin cache'ini temizler.",
+        "home": "Ana Sayfa",
+        "homeDesc": "Ana sayfanin cache'ini temizler.",
+        "products": "Urunler",
+        "productsDesc": "Urunler sayfasinin cache'ini temizler.",
+        "services": "Hizmetler",
+        "servicesDesc": "Hizmetler sayfasinin cache'ini temizler.",
+        "news": "Haberler",
+        "newsDesc": "Haberler sayfasinin cache'ini temizler.",
+        "contact": "Iletisim",
+        "contactDesc": "Iletisim sayfasinin cache'ini temizler.",
+        "references": "Referanslar",
+        "referencesDesc": "Referanslar sayfasinin cache'ini temizler."
+      }
+    },
     "audit": {
       "header": {
         "title": "Denetim Kayıtları",
@@ -2564,6 +2656,49 @@
           "effective": "Effective (Özet)",
           "actions": "İşlemler"
         }
+      },
+      "inline": {
+        "title": "Sayfa Bazlı SEO",
+        "description": "Her sayfa için SEO başlık, açıklama, OG görseli ve indeksleme ayarlarını yapılandırın.",
+        "dirty": "Kaydedilmemiş",
+        "save": "Kaydet",
+        "saveAll": "Tüm Değişiklikleri Kaydet",
+        "saved": "Sayfa bazlı SEO başarıyla kaydedildi.",
+        "saveError": "Sayfa bazlı SEO kaydedilemedi.",
+        "loading": "Yükleniyor...",
+        "expandAll": "Tümünü Aç",
+        "collapseAll": "Tümünü Kapat",
+        "noindexBadge": "noindex",
+        "fieldTitle": "Başlık",
+        "fieldDescription": "Açıklama",
+        "placeholderTitle": "Arama motorları için sayfa başlığı",
+        "placeholderDescription": "Arama sonuçları için sayfa açıklaması",
+        "charCount": "{count} karakter",
+        "ogImage": "OG Görseli",
+        "noindex": "Arama motorlarından hariç tut (noindex)",
+        "googlePreview": "Google Arama Önizlemesi",
+        "siteName": "Ensotek",
+        "noDescription": "Açıklama belirlenmemiş.",
+        "socialPreview": "Sosyal Medya Önizlemesi",
+        "noOgImage": "OG görseli belirlenmemiş"
+      },
+      "pageLabels": {
+        "home": "Ana Sayfa",
+        "product": "Ürünler",
+        "sparepart": "Yedek Parçalar",
+        "service": "Hizmetler",
+        "solutions": "Çözümler",
+        "about": "Hakkımızda",
+        "team": "Ekip",
+        "mission_vision": "Misyon ve Vizyon",
+        "quality": "Kalite",
+        "news": "Haberler",
+        "blog": "Blog",
+        "library": "Kütüphane",
+        "faqs": "SSS",
+        "contact": "İletişim",
+        "offer": "Teklif İste",
+        "legal": "Yasal"
       },
       "structured": {
         "title": "Structured edit: SEO alanlarını form olarak yönetir. Kaydetme sırasında backend tarafında strict doğrulama uygulanıyorsa hatalı yapı kaydedilmez.",
@@ -3288,7 +3423,8 @@
         "updated": "Kayıt güncellendi.",
         "deleted": "Kayıt silindi.",
         "saveError": "Kaydetme başarısız.",
-        "deleteError": "Silme başarısız."
+        "deleteError": "Silme başarısız.",
+        "tagsPlaceholder": "kommagetrennt, z.B. preis,buchung"
       }
     },
     "subcategories": {
@@ -3299,6 +3435,7 @@
       "filters": {
         "searchPlaceholder": "İsim veya slug ile ara...",
         "allCategories": "Tüm Kategoriler",
+        "locale": "Dil",
         "onlyActive": "Sadece aktif",
         "onlyFeatured": "Sadece öne çıkan"
       },
@@ -3318,7 +3455,21 @@
         "activated": "Aktif edildi",
         "deactivated": "Pasif edildi",
         "featured": "Öne çıkarıldı",
-        "unfeatured": "Öne çıkarmaktan kaldırıldı"
+        "unfeatured": "Öne çıkarmaktan kaldırıldı",
+        "unnamed": "(adsız)"
+      },
+      "messages": {
+        "confirmDelete": "\"{name}\" silinsin mi?",
+        "deleted": "Alt kategori silindi",
+        "deleteError": "Silinemedi",
+        "toggleActiveError": "Aktiflik değiştirilemedi",
+        "toggleFeaturedError": "Öne çıkarma değiştirilemedi",
+        "error": "Hata: {error}",
+        "nameRequired": "Ad (name) zorunludur",
+        "slugRequired": "Slug zorunludur",
+        "categoryRequired": "Üst kategori seçilmelidir",
+        "createdSuccess": "Alt kategori oluşturuldu",
+        "updatedSuccess": "Alt kategori güncellendi"
       },
       "table": {
         "name": "Ad",
@@ -3331,6 +3482,10 @@
         "actions": "İşlemler"
       },
       "form": {
+        "createTitle": "Yeni Alt Kategori",
+        "editTitle": "Alt Kategori Düzenle",
+        "createDesc": "Yeni bir alt kategori kaydı oluşturun.",
+        "editDesc": "\"{name}\" alt kategorisini düzenleyin.",
         "name": "Ad",
         "slug": "Slug",
         "description": "Açıklama",
@@ -3343,7 +3498,11 @@
         "image": "Alt Kategori Görseli",
         "namePlaceholder": "Örn: Endüstriyel Soğutucular",
         "slugPlaceholder": "Örn: endustriyel-sogutucular",
-        "descriptionPlaceholder": "Alt kategori açıklaması"
+        "descriptionPlaceholder": "Alt kategori açıklaması",
+        "selectCategory": "Kategori seçin...",
+        "selectNone": "— Seçiniz —",
+        "jsonTitle": "Alt Kategori Verisi (JSON)",
+        "jsonDesc": "Tüm alt kategori alanlarını JSON olarak düzenleyebilirsiniz."
       }
     },
     "categories": {
@@ -3357,6 +3516,7 @@
       "filters": {
         "searchPlaceholder": "İsim veya slug ile ara...",
         "allLocales": "Tüm Diller",
+        "locale": "Dil",
         "allModules": "Tüm Modüller",
         "onlyActive": "Sadece aktif",
         "onlyFeatured": "Sadece öne çıkan"
@@ -3377,6 +3537,27 @@
         "save": "Kaydet",
         "cancel": "İptal"
       },
+      "form": {
+        "createTitle": "Yeni Kategori",
+        "editTitle": "Kategori Düzenle",
+        "createDesc": "Yeni bir kategori kaydı oluşturun.",
+        "editDesc": "\"{name}\" kategorisini düzenleyin.",
+        "description": "Açıklama",
+        "descriptionPlaceholder": "Kategori açıklaması girin...",
+        "icon": "İkon",
+        "iconPlaceholder": "Örn: fa-cube",
+        "alt": "Alt Text",
+        "order": "Sıralama",
+        "image": "Kategori Görseli",
+        "jsonTitle": "Kategori Verisi (JSON)",
+        "jsonDesc": "Tüm kategori alanlarını JSON olarak düzenleyebilirsiniz.",
+        "namePlaceholder": "Örn: Endüstriyel Soğutucular",
+        "slugPlaceholder": "Örn: endustriyel-sogutucular",
+        "requiredError": "Ad ve Slug alanları zorunludur.",
+        "createdSuccess": "Kategori başarıyla oluşturuldu.",
+        "updatedSuccess": "Kategori başarıyla güncellendi.",
+        "error": "İşlem sırasında hata oluştu."
+      },
       "list": {
         "title": "Kategori Listesi",
         "total": "Toplam",
@@ -3390,6 +3571,12 @@
         "deactivated": "Pasif edildi",
         "featured": "Öne çıkarıldı",
         "unfeatured": "Öne çıkarmaktan kaldırıldı"
+      },
+      "messages": {
+        "confirmDelete": "\"{name}\" kategorisini silmek istediğinize emin misiniz?",
+        "deleted": "\"{name}\" silindi.",
+        "deleteError": "Silme hatası: {error}",
+        "error": "Hata: {error}"
       },
       "table": {
         "name": "Ad",
@@ -3543,5 +3730,187 @@
     "title": "Sayfa bulunamadı.",
     "description": "Aradığınız sayfa mevcut olmayabilir veya taşınmış olabilir.",
     "goBack": "Anasayfaya dön"
+  },
+  "header": {
+    "title": "Slider Verwaltung",
+    "description": "Verwalten Sie hier Ihre Homepage-Slider.",
+    "searchLabel": "Suche",
+    "searchPlaceholder": "Nach Titel suchen...",
+    "searchPlaceholderLong": "Örn: bakım, modernizasyon…",
+    "localeLabel": "Sprache",
+    "localePlaceholder": "Sprache auswählen",
+    "localeEmptyError": "Keine Sprachen gefunden.",
+    "localeUrlSync": "Locale URL ile senkron çalışır.",
+    "statusLabel": "Durum",
+    "statusAll": "Tümü",
+    "statusAllAlt": "Hepsi",
+    "statusActive": "Aktif",
+    "statusInactive": "Pasif",
+    "statusOnlyActive": "Sadece aktif",
+    "statusOnlyInactive": "Sadece pasif",
+    "featuredLabel": "Öne çıkan",
+    "featuredOnly": "Sadece öne çıkanlar",
+    "featuredItems": "Öne çıkanlar",
+    "featuredOthers": "Diğerleri",
+    "filterLabel": "Aktiv-Filter",
+    "clearFilters": "Filtreleri temizle",
+    "resetButton": "Sıfırla",
+    "refreshButton": "Aktualisieren",
+    "createButton": "Slider erstellen",
+    "createButtonLong": "+ Yeni Hizmet Ekle",
+    "totalLabel": "Toplam:",
+    "activeLocale": "Aktif locale:",
+    "loading": "Lädt...",
+    "headerDescription": "guezelwebdesign hizmet kayıtlarını yönet."
+  },
+  "list": {
+    "title": "Slider Liste",
+    "listTitle": "Liste",
+    "totalLabel": "Gesamt Slider:",
+    "loading": "Daten werden geladen...",
+    "savingOrder": "Speichere...",
+    "saveOrderButton": "Reihenfolge speichern",
+    "recordCount": "{count} kayıt (sayfa)",
+    "noRecords": "Keine Slider gefunden, die den Kriterien entsprechen.",
+    "reorderHelp": "Verschieben Sie per Drag & Drop oder mit den Pfeiltasten (nur ohne Filter).",
+    "nameColumn": "Ad",
+    "serviceColumn": "Hizmet",
+    "slugColumn": "Slug",
+    "typeColumn": "Tip",
+    "statusColumn": "Durum",
+    "featuredColumn": "Hervorgehoben",
+    "priceColumn": "Fiyat / Tarih",
+    "actionsColumn": "Aktionen",
+    "actionsColumnPlural": "İşlemler",
+    "slugLabel": "Slug:",
+    "localeLabel": "Locale:",
+    "priceLabel": "Fiyat:",
+    "dateLabel": "Kayıt:",
+    "typeLabel": "Tip:",
+    "activeStatus": "Aktiv",
+    "inactiveStatus": "Inaktiv",
+    "featuredStatus": "Hervorgehoben",
+    "normalStatus": "Normal",
+    "featuredYes": "Evet",
+    "featuredNo": "Hayır",
+    "featuredBadge": "Featured",
+    "upButton": "Nach oben",
+    "downButton": "Nach unten",
+    "editButton": "Bearbeiten",
+    "deleteButton": "Löschen",
+    "makeFeatured": "Öne Çıkar",
+    "makeNormal": "Normal Yap",
+    "featuredMobileLabel": "Öne Çıkan",
+    "featuredMobileHelp": "Listede vurgula",
+    "activeMobileLabel": "Aktif",
+    "activeMobileHelp": "Yayın durumu",
+    "orderSaved": "Reihenfolge erfolgreich gespeichert.",
+    "orderSaveError": "Fehler beim Speichern der Reihenfolge.",
+    "statusUpdated": "Durum güncellendi.",
+    "statusUpdateError": "Güncellenemedi.",
+    "featuredUpdated": "Öne çıkan güncellendi.",
+    "deleteConfirm": "Sind Sie sicher, dass Sie den Slider '{name}' löschen möchten?",
+    "deleted": "Slider '{name}' gelöscht.",
+    "deleteError": "Fehler beim Löschen des Sliders.",
+    "listLoadError": "Liste yüklenemedi.",
+    "retryButton": "Yeniden dene",
+    "listLoadErrorToast": "Liste yüklenemedi. Tekrar deneyin."
+  },
+  "form": {
+    "createTitle": "Neuer Slider",
+    "editTitle": "Slider bearbeiten",
+    "description": "İsim, slug, içerik, teknik alanlar ve görsel bilgilerini doldur. Form veya JSON modunda çalışabilirsin.",
+    "loading": "Yükleniyor…",
+    "backButton": "Geri",
+    "creating": "Oluşturuluyor...",
+    "saving": "Kaydediliyor...",
+    "createButton": "Hizmeti Oluştur",
+    "saveButton": "Değişiklikleri Kaydet",
+    "formTab": "Form",
+    "jsonTab": "JSON",
+    "jsonLabel": "Service JSON",
+    "jsonHelperText": "Formdaki tüm alanların bire bir karşılığıdır.",
+    "localeLabel": "Sprache",
+    "localePlaceholder": "Locale seç",
+    "localeEmptyError": "app_locales boş. Site Settings → app_locales değerini kontrol et.",
+    "activeLabel": "Aktiv",
+    "featuredLabel": "Hervorgehoben",
+    "nameLabel": "Hizmet Adı",
+    "slugLabel": "Slug",
+    "descriptionLabel": "Beschreibung",
+    "materialLabel": "Malzeme / İçerik",
+    "priceLabel": "Fiyat",
+    "includesLabel": "Dahil Olanlar",
+    "warrantyLabel": "Garanti / Koşullar",
+    "tagsLabel": "Etiketler",
+    "tagsHelp": "(virgül ile ayır)",
+    "tagsPlaceholder": "bakım, onarım, retrofit, scada",
+    "metaTitleLabel": "Meta Title",
+    "metaKeywordsLabel": "Meta Keywords",
+    "metaDescriptionLabel": "Meta Description",
+    "durationLabel": "Süre",
+    "maintenanceLabel": "Bakım",
+    "seasonLabel": "Sezon",
+    "equipmentLabel": "Ekipman",
+    "displayOrderLabel": "Görüntüleme Sırası",
+    "imageAltLabel": "Görsel Alt Metni",
+    "multiLocaleTitle": "Çok Dilli İşlem",
+    "replicateAllLocales": "Oluştururken tüm dillere kopyala",
+    "applyAllLocales": "Güncellerken tüm dillere uygula",
+    "localeRequired": "Sprachauswahl ist erforderlich.",
+    "nameSlugRequired": "İsim ve slug alanları zorunludur."
+  },
+  "formHeader": {
+    "createTitle": "Neuen Slider erstellen",
+    "editTitle": "Slider bearbeiten",
+    "description": "Sie können die Slider-Details im untenstehenden Formular bearbeiten.",
+    "backButton": "Zurück",
+    "cancelButton": "Vazgeç",
+    "saveButton": "Speichern",
+    "activeLocale": "Active locale:",
+    "noLocalesTitle": "Dil listesi bulunamadı",
+    "noLocalesDescription": "site_settings.app_locales boş veya geçersiz. Önce Site Settings'ten dilleri ayarlayın.",
+    "goToSettings": "Site Ayarlarına git",
+    "invalidIdTitle": "Geçersiz ID",
+    "invalidIdDescription": "URL paramı UUID değil:",
+    "backToList": "Listeye dön",
+    "notFoundTitle": "Hizmet bulunamadı",
+    "notFoundDescription": "Bu id için kayıt yok:",
+    "retryButton": "Yeniden dene",
+    "localeError": "Geçerli bir locale seçilmedi. app_locales ve default_locale kontrol edin.",
+    "nameSlugRequired": "Name ve Slug zorunludur.",
+    "createdNoId": "Oluşturuldu ama id dönmedi/UUID değil. Backend response'u kontrol et.",
+    "created": "Hizmet oluşturuldu.",
+    "idNotFound": "Hizmet verisi yüklenemedi (id yok).",
+    "updated": "Hizmet güncellendi.",
+    "defaultError": "İşlem başarısız. Lütfen tekrar deneyin."
+  },
+  "formImage": {
+    "coverLabel": "Kapak Görseli",
+    "coverHelperPrefix": "Kapak görseli",
+    "coverHelperField": "alanına yazılır (legacy: featured_image). Kapak seçilen görsel",
+    "coverHelperSuffix": "galeriden silinmez, havuzda kalır.",
+    "galleryLabel": "Görsel Havuzu (Galeri)",
+    "galleryHelperPrefix": "Tüm görseller havuzda durur",
+    "galleryHelperSuffix": "Kapak seçince sadece pointer güncellenir.",
+    "coverSaved": "Kapak görseli kaydedildi.",
+    "coverSaveError": "Kapak kaydedilirken hata oluştu.",
+    "coverDeleteError": "Kapak görseli silinemez. Önce başka bir kapak seç.",
+    "galleryAddError": "Görseller eklenirken hata oluştu.",
+    "galleryDeleteError": "Görseller silinirken hata oluştu.",
+    "galleryPlaceholder": "Galeri/havuz için önce hizmeti kaydet (ID oluşmalı). Sonra görseller burada yönetilir."
+  },
+  "upload": {
+    "noUrl": "Upload başarılı ama URL alınamadı.",
+    "error": "Resim yüklenirken hata oluştu."
+  },
+  "types": {
+    "maintenance_repair": "Bakım & Onarım",
+    "modernization": "Modernizasyon",
+    "spare_parts_components": "Yedek Parça",
+    "applications_references": "Referanslar",
+    "engineering_support": "Mühendislik",
+    "production": "Üretim",
+    "other": "Diğer"
   }
 }

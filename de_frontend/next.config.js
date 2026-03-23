@@ -161,7 +161,7 @@ const nextConfig = {
 
     return [
       {
-        source: '/:path*',
+        source: '/((?!api/).*)',
         headers: [{ key: 'Content-Security-Policy', value: csp }],
       },
     ];

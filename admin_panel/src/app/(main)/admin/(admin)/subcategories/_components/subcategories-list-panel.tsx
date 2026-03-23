@@ -117,7 +117,7 @@ export default function SubcategoriesListPanel() {
     try {
       await toggleActive({ id: item.id, is_active: value }).unwrap();
     } catch {
-      toast.error('Aktiflik değiştirilemedi');
+      toast.error(t('messages.toggleActiveError'));
     }
   };
 
@@ -125,18 +125,18 @@ export default function SubcategoriesListPanel() {
     try {
       await toggleFeatured({ id: item.id, is_featured: value }).unwrap();
     } catch {
-      toast.error('Öne çıkarma değiştirilemedi');
+      toast.error(t('messages.toggleFeaturedError'));
     }
   };
 
   const handleDelete = async (item: SubCategoryDto) => {
-    if (!confirm(`"${item.name || item.slug}" silinsin mi?`)) return;
+    if (!confirm(t('messages.confirmDelete', { name: item.name || item.slug }))) return;
     try {
       await deleteSubCategory(item.id).unwrap();
-      toast.success('Silindi');
+      toast.success(t('messages.deleted'));
       refetch();
     } catch {
-      toast.error('Silinemedi');
+      toast.error(t('messages.deleteError'));
     }
   };
 
@@ -277,7 +277,7 @@ export default function SubcategoriesListPanel() {
                         title={item.name || ''}
                       >
                         {item.name || (
-                          <span className="text-muted-foreground italic">(adsız)</span>
+                          <span className="text-muted-foreground italic">{t('list.unnamed')}</span>
                         )}
                       </div>
                       <div className="text-xs text-muted-foreground">

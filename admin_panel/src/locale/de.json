@@ -392,7 +392,28 @@
       "total": "Gesamt",
       "operationFailed": "Vorgang fehlgeschlagen. Bitte versuchen Sie es erneut.",
       "active": "Aktiv",
-      "inactive": "Inaktiv"
+      "inactive": "Inaktiv",
+      "ai": {
+        "full": "Vollständigen Inhalt erstellen",
+        "enhance": "Inhalt verbessern",
+        "translate": "Übersetzen",
+        "generateMeta": "SEO-Meta erstellen",
+        "working": "AI arbeitet...",
+        "otherLanguages": "AI — Andere Sprachen",
+        "switchLocale": "Zu dieser Sprache wechseln",
+        "close": "Schließen"
+      },
+      "googlePreview": "Google-Vorschau",
+      "cover": "Cover",
+      "coverImage": "Titelbild",
+      "gallery": "Galerie",
+      "altText": "Alt-Text",
+      "seo": {
+        "metaTitle": "Meta-Titel",
+        "metaDescription": "Meta-Beschreibung",
+        "tags": "Tags"
+      },
+      "delete": "Delete"
     },
     "slider": {
       "header": {
@@ -699,6 +720,7 @@
         "localeHint": "Auswahl bestimmt auch den Locale-Datensatz, den Sie bearbeiten.",
         "jsonHelperText": "Dieses JSON ist eine direkte Darstellung aller Formularfelder.",
         "titleSlugRequired": "Titel und Slug sind erforderlich.",
+        "moduleKeyRequired": "Modulauswahl ist erforderlich.",
         "imageAddedToContent": "Bild zum Inhalt hinzugefügt.",
         "invalidImageUrl": "Bitte geben Sie eine gültige Bild-URL ein.",
         "localeRecordNotFound": "Kein Eintrag für die gewählte Sprache gefunden; Sie können neuen Inhalt in dieser Sprache erstellen.",
@@ -725,6 +747,7 @@
         "updateSuccess": "Seite aktualisiert.",
         "noPageId": "Seitendaten konnten nicht geladen werden (keine ID).",
         "operationFailed": "Vorgang fehlgeschlagen. Bitte versuchen Sie es erneut.",
+        "moduleKeyRequired": "Modulauswahl ist erforderlich.",
         "localeListError": "Eintragsliste für die gewählte Sprache konnte nicht geladen werden."
       }
     },
@@ -844,7 +867,10 @@
         "catalog_requests": "Kataloganfragen",
         "offers": "Angebote",
         "references": "Referenzen",
-        "support": "Support-Tickets"
+        "support": "Support-Tickets",
+        "cache": "Cache-Verwaltung",
+        "blog": "Blog",
+        "news": "Nachrichten"
       },
       "stats": {
         "deliveredOrders": "Gelieferte Bestellungen",
@@ -859,7 +885,8 @@
         "avgIncentivePerOrderDescription": "Gesamtprämie / Bestellung",
         "avgIncentivePerOrderHelp": "Einfacher KPI",
         "totalIncentivesLabel": "Gesamtprämien",
-        "avgLabel": "Durchschnitt"
+        "avgLabel": "Durchschnitt",
+        "deliveredOrdersDescription": "Status: delivered"
       },
       "addSection": "Abschnitt hinzufügen",
       "detailView": "Detailansicht",
@@ -871,6 +898,42 @@
       "type": {
         "driver": "Fahrer",
         "seller": "Verkäufer"
+      },
+      "range": {
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last3Months": "Last 3 months"
+      },
+      "chart": {
+        "title": "Delivery Chart",
+        "description": "Selected metrics — {range}",
+        "descriptionShort": "{range}",
+        "ordersLabel": "Orders",
+        "unitsLabel": "Units (Chicken)",
+        "selectRange": "Select range",
+        "note": "Note: Scales differ, so axes are separate (Orders: left, Units: right)."
+      },
+      "table": {
+        "viewSelector": "View",
+        "viewPlaceholder": "Select view",
+        "allTab": "All",
+        "driversTab": "Drivers",
+        "sellersTab": "Sellers",
+        "addSection": "Add section",
+        "detailView": "Detail view",
+        "columns": {
+          "units": "Units",
+          "orders": "Orders",
+          "incentives": "Incentives"
+        },
+        "type": {
+          "driver": "Driver",
+          "seller": "Seller"
+        }
+      },
+      "states": {
+        "loading": "Loading…",
+        "noRecords": "No records found."
       }
     },
     "states": {
@@ -1972,6 +2035,35 @@
         "custom": "Benutzerdefiniert"
       }
     },
+    "cache": {
+      "title": "Cache-Verwaltung",
+      "description": "Leeren Sie den Cache der Frontend-Seiten. Stellt sicher, dass Inhaltsaktualisierungen sofort sichtbar sind.",
+      "quickClear": "Schnell leeren",
+      "quickClearDesc": "Leeren Sie den Cache einer bestimmten Seite oder der gesamten Website.",
+      "clearButton": "Leeren",
+      "cleared": "Cache geleert",
+      "clearedAll": "Gesamter Website-Cache geleert",
+      "clearError": "Cache konnte nicht geleert werden",
+      "info": "Information",
+      "infoText1": "Frontend-Seiten werden 5 Minuten (300 Sekunden) lang zwischengespeichert. Wenn der Cache geleert wird, rufen die Seiten beim nachsten Besuch frische Daten von der API ab.",
+      "infoText2": "Nachdem Sie Inhalte im Admin-Panel aktualisiert haben, leeren Sie den Cache der entsprechenden Seite, um die Anderungen sofort zu sehen.",
+      "actions": {
+        "allSite": "Gesamter Website-Cache",
+        "allSiteDesc": "Leert den Cache aller Seiten.",
+        "home": "Startseite",
+        "homeDesc": "Leert den Cache der Startseite.",
+        "products": "Produkte",
+        "productsDesc": "Leert den Cache der Produktseite.",
+        "services": "Dienstleistungen",
+        "servicesDesc": "Leert den Cache der Dienstleistungsseite.",
+        "news": "Neuigkeiten",
+        "newsDesc": "Leert den Cache der Nachrichtenseite.",
+        "contact": "Kontakt",
+        "contactDesc": "Leert den Cache der Kontaktseite.",
+        "references": "Referenzen",
+        "referencesDesc": "Leert den Cache der Referenzenseite."
+      }
+    },
     "audit": {
       "header": {
         "title": "Audit-Protokolle",
@@ -2564,6 +2656,49 @@
           "effective": "Effektiv (Zusammenfassung)",
           "actions": "Aktionen"
         }
+      },
+      "inline": {
+        "title": "Seitenbasiertes SEO",
+        "description": "SEO-Titel, Beschreibung, OG-Bild und Indexierung pro Seite konfigurieren.",
+        "dirty": "Nicht gespeichert",
+        "save": "Speichern",
+        "saveAll": "Alle Änderungen speichern",
+        "saved": "Seitenbasiertes SEO erfolgreich gespeichert.",
+        "saveError": "Seitenbasiertes SEO konnte nicht gespeichert werden.",
+        "loading": "Laden...",
+        "expandAll": "Alle aufklappen",
+        "collapseAll": "Alle zuklappen",
+        "noindexBadge": "noindex",
+        "fieldTitle": "Titel",
+        "fieldDescription": "Beschreibung",
+        "placeholderTitle": "Seitentitel für Suchmaschinen",
+        "placeholderDescription": "Seitenbeschreibung für Suchergebnisse",
+        "charCount": "{count} Zeichen",
+        "ogImage": "OG-Bild",
+        "noindex": "Von Suchmaschinen ausschließen (noindex)",
+        "googlePreview": "Google-Suche Vorschau",
+        "siteName": "Ensotek",
+        "noDescription": "Keine Beschreibung festgelegt.",
+        "socialPreview": "Social-Media-Vorschau",
+        "noOgImage": "Kein OG-Bild festgelegt"
+      },
+      "pageLabels": {
+        "home": "Startseite",
+        "product": "Produkte",
+        "sparepart": "Ersatzteile",
+        "service": "Dienstleistungen",
+        "solutions": "Lösungen",
+        "about": "Über uns",
+        "team": "Team",
+        "mission_vision": "Mission & Vision",
+        "quality": "Qualität",
+        "news": "Neuigkeiten",
+        "blog": "Blog",
+        "library": "Bibliothek",
+        "faqs": "FAQ",
+        "contact": "Kontakt",
+        "offer": "Angebot anfordern",
+        "legal": "Rechtliches"
       },
       "structured": {
         "title": "Strukturierte Bearbeitung: Verwaltet SEO-Felder als Formular. Wenn strenge Validierung beim Speichern angewendet wird, wird ungültige Struktur nicht gespeichert.",
@@ -3300,6 +3435,7 @@
       "filters": {
         "searchPlaceholder": "Nach Name oder Slug suchen...",
         "allCategories": "Alle Kategorien",
+        "locale": "Sprache",
         "onlyActive": "Nur aktive",
         "onlyFeatured": "Nur hervorgehoben"
       },
@@ -3319,7 +3455,21 @@
         "activated": "Aktiviert",
         "deactivated": "Deaktiviert",
         "featured": "Hervorgehoben",
-        "unfeatured": "Hervorhebung entfernt"
+        "unfeatured": "Hervorhebung entfernt",
+        "unnamed": "(unbenannt)"
+      },
+      "messages": {
+        "confirmDelete": "\"{name}\" löschen?",
+        "deleted": "Unterkategorie gelöscht",
+        "deleteError": "Löschen fehlgeschlagen",
+        "toggleActiveError": "Aktivierung konnte nicht umgeschaltet werden",
+        "toggleFeaturedError": "Hervorhebung konnte nicht umgeschaltet werden",
+        "error": "Fehler: {error}",
+        "nameRequired": "Name ist erforderlich",
+        "slugRequired": "Slug ist erforderlich",
+        "categoryRequired": "Übergeordnete Kategorie muss ausgewählt werden",
+        "createdSuccess": "Unterkategorie erstellt",
+        "updatedSuccess": "Unterkategorie aktualisiert"
       },
       "table": {
         "name": "Name",
@@ -3332,6 +3482,10 @@
         "actions": "Aktionen"
       },
       "form": {
+        "createTitle": "Neue Unterkategorie",
+        "editTitle": "Unterkategorie bearbeiten",
+        "createDesc": "Erstellen Sie einen neuen Unterkategoriedatensatz.",
+        "editDesc": "Unterkategorie \"{name}\" bearbeiten.",
         "name": "Name",
         "slug": "Slug",
         "description": "Beschreibung",
@@ -3344,7 +3498,11 @@
         "image": "Unterkategoriebild",
         "namePlaceholder": "z. B. Industriekühler",
         "slugPlaceholder": "z. B. industriekuehler",
-        "descriptionPlaceholder": "Unterkategoriebeschreibung"
+        "descriptionPlaceholder": "Unterkategoriebeschreibung",
+        "selectCategory": "Kategorie auswählen...",
+        "selectNone": "— Auswählen —",
+        "jsonTitle": "Unterkategoriedaten (JSON)",
+        "jsonDesc": "Sie können alle Unterkategoriefelder als JSON bearbeiten."
       }
     },
     "categories": {
@@ -3358,6 +3516,7 @@
       "filters": {
         "searchPlaceholder": "Nach Name oder Slug suchen...",
         "allLocales": "Alle Sprachen",
+        "locale": "Sprache",
         "allModules": "Alle Module",
         "onlyActive": "Nur aktive",
         "onlyFeatured": "Nur hervorgehoben"
@@ -3378,6 +3537,27 @@
         "save": "Speichern",
         "cancel": "Abbrechen"
       },
+      "form": {
+        "createTitle": "Neue Kategorie",
+        "editTitle": "Kategorie bearbeiten",
+        "createDesc": "Erstellen Sie einen neuen Kategoriedatensatz.",
+        "editDesc": "Kategorie \"{name}\" bearbeiten.",
+        "description": "Beschreibung",
+        "descriptionPlaceholder": "Kategoriebeschreibung eingeben...",
+        "icon": "Symbol",
+        "iconPlaceholder": "z. B. fa-cube",
+        "alt": "Alt-Text",
+        "order": "Reihenfolge",
+        "image": "Kategoriebild",
+        "jsonTitle": "Kategoriedaten (JSON)",
+        "jsonDesc": "Sie können alle Kategoriefelder als JSON bearbeiten.",
+        "namePlaceholder": "z. B. Industriekühler",
+        "slugPlaceholder": "z. B. industriekuehler",
+        "requiredError": "Name und Slug sind Pflichtfelder.",
+        "createdSuccess": "Kategorie erfolgreich erstellt.",
+        "updatedSuccess": "Kategorie erfolgreich aktualisiert.",
+        "error": "Bei der Operation ist ein Fehler aufgetreten."
+      },
       "list": {
         "title": "Kategorieliste",
         "total": "Gesamt",
@@ -3391,6 +3571,12 @@
         "deactivated": "Deaktiviert",
         "featured": "Hervorgehoben",
         "unfeatured": "Hervorhebung entfernt"
+      },
+      "messages": {
+        "confirmDelete": "Sind Sie sicher, dass Sie die Kategorie \"{name}\" löschen möchten?",
+        "deleted": "\"{name}\" gelöscht.",
+        "deleteError": "Löschfehler: {error}",
+        "error": "Fehler: {error}"
       },
       "table": {
         "name": "Name",

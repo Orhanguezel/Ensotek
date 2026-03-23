@@ -62,8 +62,8 @@ import {
   ComposedChart,
 } from 'recharts';
 
-import { AuditDailyChart } from '@/components/admin/audit/AuditDailyChart';
-import { AuditGeoMap } from '../../audit/AuditGeoMap';
+import { AuditDailyChart } from '../../audit/_components/audit-daily-chart';
+import { AuditGeoMap } from '../../audit/_components/audit-geo-map';
 import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
 
 import type {

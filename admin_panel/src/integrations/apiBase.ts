@@ -31,12 +31,12 @@ function guessDevBackend(): string {
       const loc = window.location;
       const host = loc?.hostname || 'localhost';
       const proto = loc?.protocol || 'http:';
-      return `${proto}//${host}:8084`;
+      return `${proto}//${host}:8086`;
     }
   } catch {
     // ignore
   }
-  return 'http://localhost:8084';
+  return 'http://localhost:8086';
 }
 
 /**
@@ -45,7 +45,7 @@ function guessDevBackend(): string {
  * - NEXT_PUBLIC_API_ORIGIN   : origin only, e.g. https://api.domain.com
  * - NEXT_PUBLIC_API_BASE     : base path, e.g. /api  (or api)
  * Fallback:
- * - DEV: guessed http(s)://{host}:8083
+ * - DEV: guessed http(s)://{host}:8086
  * - PROD: /api
  */
 export function resolveBaseUrl(): string {

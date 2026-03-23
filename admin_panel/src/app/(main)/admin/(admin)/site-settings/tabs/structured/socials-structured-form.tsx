@@ -1,6 +1,6 @@
 
 // =============================================================
-// FILE: src/components/admin/site-settings/structured/SocialsStructuredForm.tsx
+// FILE: src/app/(main)/admin/(admin)/site-settings/tabs/structured/socials-structured-form.tsx
 // =============================================================
 
 "use client";
@@ -9,6 +9,7 @@ import React from "react";
 import { z } from "zod";
 import { useAdminTranslations } from "@/i18n";
 import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
+import { SITE_SETTINGS_SOCIAL_KEYS, toStructuredObjectSeed } from '@/integrations/shared';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
@@ -22,7 +23,7 @@ export const socialsSchema = z
     youtube: z.string().trim().optional(),
     x: z.string().trim().optional(),
   })
-  .strict();
+  .passthrough();
 
 export type SocialsFormState = z.infer<typeof socialsSchema>;
 
@@ -34,10 +35,8 @@ export type SocialsStructuredFormProps = {
   seed?: SocialsFormState;
 };
 
-const safeObj = (v: any) => (v && typeof v === "object" && !Array.isArray(v) ? v : null);
-
 export function socialsObjToForm(v: any, seed: SocialsFormState): SocialsFormState {
-  const base = safeObj(v) || seed;
+  const base = toStructuredObjectSeed(v, seed);
   const parsed = socialsSchema.safeParse(base);
   return parsed.success ? parsed.data : seed;
 }
@@ -66,13 +65,10 @@ export const SocialsStructuredForm: React.FC<SocialsStructuredFormProps> = ({
     (seed || { instagram: "", facebook: "", linkedin: "", youtube: "", x: "" }) as SocialsFormState;
   const form = socialsObjToForm(value, s);
 
-  const fields = [
-    ["instagram", t("admin.siteSettings.structured.socials.labels.instagram")],
-    ["facebook", t("admin.siteSettings.structured.socials.labels.facebook")],
-    ["linkedin", t("admin.siteSettings.structured.socials.labels.linkedin")],
-    ["youtube", t("admin.siteSettings.structured.socials.labels.youtube")],
-    ["x", t("admin.siteSettings.structured.socials.labels.x")],
-  ] as const;
+  const fields = SITE_SETTINGS_SOCIAL_KEYS.map((key) => [
+    key,
+    t(`admin.siteSettings.structured.socials.labels.${key}`),
+  ] as const);
 
   return (
     <div className="space-y-4">

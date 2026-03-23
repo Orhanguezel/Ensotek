@@ -1,7 +1,7 @@
 'use client';
 
 // =============================================================
-// FILE: src/components/admin/site-settings/SiteSettingsHeader.tsx
+// FILE: src/app/(main)/admin/(admin)/site-settings/_components/site-settings-header.tsx
 // FINAL — Site Settings Header (shadcn/ui)
 // - NO bootstrap classes
 // - Tabs + Filters (UsersListClient style)
@@ -26,21 +26,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-export type SettingsTab =
-  | 'list'
-  | 'global_list'
-  | 'general'
-  | 'seo'
-  | 'smtp'
-  | 'cloudinary'
-  | 'brand_media'
-  | 'api';
-
-export type LocaleOption = {
-  value: string;
-  label: string;
-};
+import {
+  SITE_SETTINGS_TABS,
+  isSiteSettingsGlobalTab,
+  type SiteSettingsLocaleOption,
+  type SiteSettingsTab,
+} from '@/integrations/shared';
 
 export type SiteSettingsHeaderProps = {
   search: string;
@@ -52,31 +43,12 @@ export type SiteSettingsHeaderProps = {
   loading: boolean;
   onRefresh: () => void;
 
-  activeTab: SettingsTab;
-  onTabChange: (tab: SettingsTab) => void;
+  activeTab: SiteSettingsTab;
+  onTabChange: (tab: SiteSettingsTab) => void;
 
-  locales: LocaleOption[];
+  locales: SiteSettingsLocaleOption[];
   localesLoading?: boolean;
 };
-
-type SettingsScope = 'localized' | 'global' | 'mixed';
-
-const TAB_ITEMS: { id: SettingsTab; scope: SettingsScope }[] = [
-  { id: 'list', scope: 'mixed' },
-  { id: 'global_list', scope: 'global' },
-  { id: 'general', scope: 'localized' },
-  { id: 'seo', scope: 'localized' },
-  { id: 'smtp', scope: 'global' },
-  { id: 'cloudinary', scope: 'global' },
-  { id: 'brand_media', scope: 'global' },
-  { id: 'api', scope: 'global' },
-];
-
-function isGlobalTab(t: SettingsTab) {
-  return (
-    t === 'global_list' || t === 'smtp' || t === 'cloudinary' || t === 'brand_media' || t === 'api'
-  );
-}
 
 export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
   search,
@@ -93,7 +65,7 @@ export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
 
-  const localeDisabled = loading || !!localesLoading || isGlobalTab(activeTab);
+  const localeDisabled = loading || !!localesLoading || isSiteSettingsGlobalTab(activeTab);
 
   return (
     <div className="space-y-6">
@@ -106,9 +78,9 @@ export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
       </div>
 
       {/* Tabs (no bootstrap) */}
-      <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as SettingsTab)}>
+      <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as SiteSettingsTab)}>
         <TabsList className="flex flex-wrap justify-start">
-          {TAB_ITEMS.map((tab) => (
+          {SITE_SETTINGS_TABS.map((tab) => (
             <TabsTrigger key={tab.id} value={tab.id}>
               {tab.id === 'list' ? t('admin.siteSettings.tabs.list') : null}
               {tab.id === 'global_list' ? t('admin.siteSettings.tabs.globalList') : null}
@@ -133,10 +105,10 @@ export const SiteSettingsHeader: React.FC<SiteSettingsHeaderProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
-              {isGlobalTab(activeTab) ? (
+              {isSiteSettingsGlobalTab(activeTab) ? (
                 <Badge variant="secondary">{t('admin.siteSettings.badges.global')}</Badge>
               ) : null}
-              {!isGlobalTab(activeTab) && locale ? (
+              {!isSiteSettingsGlobalTab(activeTab) && locale ? (
                 <Badge variant="secondary">{locale}</Badge>
               ) : null}
               {loading ? <Badge variant="outline">{t('admin.siteSettings.messages.loading')}</Badge> : null}

@@ -135,16 +135,16 @@ export default function CategoriesListPanel() {
   };
 
   const handleDelete = async (item: CategoryDto) => {
-    if (!confirm(`${item.name} kategorisini silmek istediğinize emin misiniz?`)) {
+    if (!confirm(t('messages.confirmDelete', { name: item.name }))) {
       return;
     }
 
     try {
       await deleteCategory(item.id).unwrap();
-      toast.success(`${item.name} silindi`);
+      toast.success(t('messages.deleted', { name: item.name }));
       refetch();
     } catch (error) {
-      toast.error(`Silme hatası: ${error}`);
+      toast.error(t('messages.deleteError', { error: String(error) }));
     }
   };
 
@@ -154,7 +154,7 @@ export default function CategoriesListPanel() {
       toast.success(`${item.name}: ${value ? t('list.activated') : t('list.deactivated')}`);
       refetch();
     } catch (error) {
-      toast.error(`Hata: ${error}`);
+      toast.error(t('messages.error', { error: String(error) }));
     }
   };
 
@@ -164,7 +164,7 @@ export default function CategoriesListPanel() {
       toast.success(`${item.name}: ${value ? t('list.featured') : t('list.unfeatured')}`);
       refetch();
     } catch (error) {
-      toast.error(`Hata: ${error}`);
+      toast.error(t('messages.error', { error: String(error) }));
     }
   };
 

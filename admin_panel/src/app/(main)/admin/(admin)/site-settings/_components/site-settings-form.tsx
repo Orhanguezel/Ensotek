@@ -1,7 +1,7 @@
 'use client';
 
 // =============================================================
-// FILE: src/components/admin/site-settings/SiteSettingsForm.tsx
+// FILE: src/app/(main)/admin/(admin)/site-settings/_components/site-settings-form.tsx
 // guezelwebdesign – Site Settings Unified Form (shadcn/ui)
 // - NO bootstrap classes
 // - Mode: Tabs (Structured / Raw)
@@ -15,7 +15,14 @@ import * as React from 'react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
-import type { SiteSetting, SettingValue } from '@/integrations/shared';
+import {
+  coerceSiteSettingsValue,
+  getSiteSettingsActionErrorMessage,
+  parseSiteSettingsRawValue,
+  prettyStringifySiteSettingValue,
+  type SiteSetting,
+  type SettingValue,
+} from '@/integrations/shared';
 import { AdminImageUploadField } from '@/app/(main)/admin/_components/common/AdminImageUploadField';
 import { useAdminTranslations } from '@/i18n';
 import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
@@ -66,59 +73,6 @@ export type SiteSettingsFormProps = {
   };
 };
 
-/* ----------------------------- helpers ----------------------------- */
-
-export function coerceSettingValue(input: any): any {
-  if (input === null || input === undefined) return input;
-  if (typeof input === 'object') return input;
-
-  if (typeof input === 'string') {
-    const s = input.trim();
-    if (!s) return input;
-
-    const looksJson =
-      (s.startsWith('{') && s.endsWith('}')) || (s.startsWith('[') && s.endsWith(']'));
-
-    if (!looksJson) return input;
-
-    try {
-      return JSON.parse(s);
-    } catch {
-      return input;
-    }
-  }
-
-  return input;
-}
-
-function prettyStringify(v: any) {
-  try {
-    return JSON.stringify(v ?? {}, null, 2);
-  } catch {
-    return '';
-  }
-}
-
-function parseRawOrString(text: string): SettingValue {
-  const trimmed = (text ?? '').trim();
-  if (!trimmed) return null;
-
-  try {
-    return JSON.parse(trimmed) as any;
-  } catch {
-    return trimmed;
-  }
-}
-
-function errMsg(err: any, fallback: string): string {
-  return (
-    err?.data?.error?.message ||
-    err?.data?.message ||
-    err?.message ||
-    fallback
-  );
-}
-
 /* ----------------------------- component ----------------------------- */
 
 export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
@@ -150,13 +104,13 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
   // raw
   const [rawText, setRawText] = React.useState<string>('');
 
-  const coercedInitial = React.useMemo(() => coerceSettingValue(row?.value), [row?.value]);
+  const coercedInitial = React.useMemo(() => coerceSiteSettingsValue(row?.value), [row?.value]);
 
   // sync on key/locale/row change
   React.useEffect(() => {
     setStructuredValue(coercedInitial ?? {});
     if (typeof row?.value === 'string') setRawText(row.value ?? '');
-    else setRawText(prettyStringify(coercedInitial));
+    else setRawText(prettyStringifySiteSettingValue(coercedInitial));
   }, [coercedInitial, row?.value, settingKey, locale]);
 
   // guard: if structured renderer missing, force raw
@@ -173,13 +127,13 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
 
     try {
       const valueToSave: SettingValue =
-        mode === 'raw' ? parseRawOrString(rawText) : (structuredValue as any);
+        mode === 'raw' ? parseSiteSettingsRawValue(rawText) : (structuredValue as any);
 
       await onSave({ key: settingKey, locale, value: valueToSave });
       toast.success(t('admin.siteSettings.form.saved', { key: settingKey, locale }));
     } catch (err: any) {
       toast.error(
-        errMsg(err, t('admin.siteSettings.form.saveError')),
+        getSiteSettingsActionErrorMessage(err, t('admin.siteSettings.form.saveError')),
       );
     }
   };
@@ -197,7 +151,7 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
       toast.success(t('admin.siteSettings.form.deleted', { key: settingKey, locale }));
     } catch (err: any) {
       toast.error(
-        errMsg(err, t('admin.siteSettings.form.deleteError')),
+        getSiteSettingsActionErrorMessage(err, t('admin.siteSettings.form.deleteError')),
       );
     }
   };
@@ -205,27 +159,15 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
   return (
     <Card>
       <CardHeader className="gap-3">
-        <div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-1">
-            <CardTitle className="text-base">
-              {t('admin.siteSettings.form.title')}: <code>{settingKey}</code>
-              <Badge variant="secondary" className="ml-2 align-middle">
-                {locale}
-              </Badge>
-            </CardTitle>
-            <CardDescription>
-              {t('admin.siteSettings.form.description')}
-            </CardDescription>
-          </div>
-
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-2">
             {onDelete ? (
-              <Button type="button" variant="outline" onClick={handleDelete} disabled={disabled}>
+              <Button type="button" variant="outline" size="sm" onClick={handleDelete} disabled={disabled}>
                 {t('admin.siteSettings.actions.delete')}
               </Button>
             ) : null}
 
-            <Button type="button" onClick={handleSave} disabled={disabled}>
+            <Button type="button" size="sm" onClick={handleSave} disabled={disabled}>
               {t('admin.siteSettings.actions.save')}
             </Button>
           </div>

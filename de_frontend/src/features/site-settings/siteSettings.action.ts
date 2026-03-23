@@ -6,7 +6,7 @@ export function useSiteSettings() {
   return useQuery({
     queryKey: queryKeys.siteSettings.list(),
     queryFn: siteSettingsService.getAll,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 60 * 1000,
   });
 }
 
@@ -15,6 +15,7 @@ export function useSiteSetting(key: string) {
     queryKey: queryKeys.siteSettings.byKey(key),
     queryFn: () => siteSettingsService.getByKey(key),
     enabled: !!key,
+    staleTime: 30 * 60 * 1000,
   });
 }
 

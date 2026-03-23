@@ -249,6 +249,7 @@ export default function ProductsListPanel({ itemType }: Props) {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-[48px]">#</TableHead>
+                <TableHead className="w-14"></TableHead>
                 <TableHead>{t('list.columns.title')}</TableHead>
                 <TableHead className="w-[80px]">{t('list.columns.locale')}</TableHead>
                 <TableHead className="w-[140px]">{t('list.columns.category')}</TableHead>
@@ -262,13 +263,13 @@ export default function ProductsListPanel({ itemType }: Props) {
             <TableBody>
               {isFetching && items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground text-sm">
+                  <TableCell colSpan={10} className="py-8 text-center text-muted-foreground text-sm">
                     {t('list.loading')}
                   </TableCell>
                 </TableRow>
               ) : items.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="py-8 text-center text-muted-foreground text-sm">
+                  <TableCell colSpan={10} className="py-8 text-center text-muted-foreground text-sm">
                     {t('list.empty')}
                   </TableCell>
                 </TableRow>
@@ -280,6 +281,16 @@ export default function ProductsListPanel({ itemType }: Props) {
                   return (
                     <TableRow key={item.id} className={!isActive ? 'opacity-50' : ''}>
                       <TableCell className="text-muted-foreground text-sm">{idx + 1}</TableCell>
+
+                      <TableCell className="p-1">
+                        {item.image_url ? (
+                          <img src={item.image_url} alt="" className="h-10 w-10 rounded object-cover" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded bg-muted text-muted-foreground">
+                            <span className="text-[10px]">—</span>
+                          </div>
+                        )}
+                      </TableCell>
 
                       <TableCell>
                         <div

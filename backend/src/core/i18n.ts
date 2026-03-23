@@ -26,7 +26,7 @@ export function normalizeLocale(input?: string | null): string | undefined {
 }
 
 // ENV başlangıç
-const initialLocaleCodes = (process.env.APP_LOCALES || 'tr,en,de')
+const initialLocaleCodes = (process.env.APP_LOCALES || 'de,en,tr')
   .split(',')
   .map((s) => normalizeLocale(s) || '')
   .filter(Boolean);

@@ -518,8 +518,7 @@ async function sendCustomerOfferMail(ctx: OfferEmailContext): Promise<boolean> {
   }
 
   if (rendered.missing_variables.length > 0) {
-    console.warn('offer_sent_customer missing variables:', rendered.missing_variables);
-    return false;
+    console.warn('offer_sent_customer missing variables (ignored):', rendered.missing_variables);
   }
 
   await sendMail({
@@ -568,8 +567,7 @@ async function sendAdminOfferMail(ctx: OfferEmailContext): Promise<boolean> {
   }
 
   if (rendered.missing_variables.length > 0) {
-    console.warn('offer_sent_admin missing variables:', rendered.missing_variables);
-    return false;
+    console.warn('offer_sent_admin missing variables (ignored):', rendered.missing_variables);
   }
 
   for (const to of adminEmails) {

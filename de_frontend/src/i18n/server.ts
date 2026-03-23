@@ -91,6 +91,35 @@ export async function fetchLibraryBySlug(slug: string, locale: string): Promise<
   return fetchContent(`library/by-slug/${encodeURIComponent(slug)}`, locale);
 }
 
+// ── Page-level SEO from seo_pages setting ──
+
+export type PageSeo = {
+  title: string;
+  description: string;
+  og_image: string;
+  no_index: boolean;
+};
+
+export async function fetchPageSeo(
+  pageKey: string,
+  locale: string,
+): Promise<PageSeo | null> {
+  const row = await fetchSetting('seo_pages', locale, { revalidate: 300 });
+  if (!row?.value || typeof row.value !== 'object') return null;
+  const pages = row.value as Record<string, unknown>;
+  const entry = pages[pageKey];
+  if (!entry || typeof entry !== 'object') return null;
+  const e = entry as Record<string, unknown>;
+  return {
+    title: typeof e.title === 'string' ? e.title : '',
+    description: typeof e.description === 'string' ? e.description : '',
+    og_image: typeof e.og_image === 'string' ? e.og_image : '',
+    no_index: e.no_index === true,
+  };
+}
+
+// ── Sliders ──
+
 export async function fetchSliders(locale?: string): Promise<Record<string, unknown>[]> {
   try {
     const url = `${API_BASE_URL}/sliders`;

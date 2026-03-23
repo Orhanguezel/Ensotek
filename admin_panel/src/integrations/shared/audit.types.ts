@@ -148,16 +148,26 @@ export type AuditGeoStatsRowDto = {
   unique_ips: number;
 };
 
+export type AuditGeoCityDto = {
+  country: string;
+  city: string;
+  lat: number;
+  lng: number;
+  count: number;
+  unique_ips: number;
+};
+
 export type AuditGeoStatsResponseDto = {
   items: AuditGeoStatsRowDto[];
+  cities?: AuditGeoCityDto[];
 };
 
 export function coerceAuditGeoStats(raw: unknown): AuditGeoStatsResponseDto {
   const r = raw as any;
   if (!r) return { items: [] };
   if (Array.isArray(r)) return { items: r };
-  if (Array.isArray(r.items)) return { items: r.items };
-  if (Array.isArray(r.data)) return { items: r.data };
+  if (Array.isArray(r.items)) return { items: r.items, cities: r.cities ?? [] };
+  if (Array.isArray(r.data)) return { items: r.data, cities: r.cities ?? [] };
   return { items: [] };
 }
 

@@ -59,6 +59,10 @@ async function getRuntimeBaseUrl(): Promise<string> {
   return 'http://localhost:3000';
 }
 
+const OG_REGION_MAP: Record<string, string> = {
+  en: 'US', ar: 'SA', ja: 'JP', ko: 'KR', zh: 'CN', vi: 'VN', he: 'IL', uk: 'UA', cs: 'CZ', da: 'DK', sv: 'SE', nb: 'NO', el: 'GR', fa: 'IR',
+};
+
 function toOgLocale(l: string): string {
   const raw = String(l || '').trim();
   if (!raw) return `${DEFAULT_LOCALE_FALLBACK}_${DEFAULT_LOCALE_FALLBACK.toUpperCase()}`;
@@ -69,7 +73,7 @@ function toOgLocale(l: string): string {
   const lang = (langRaw || DEFAULT_LOCALE_FALLBACK).toLowerCase().slice(0, 2);
   const region = (regionRaw || '').toUpperCase();
 
-  return `${lang}_${region || lang.toUpperCase()}`;
+  return `${lang}_${region || OG_REGION_MAP[lang] || lang.toUpperCase()}`;
 }
 
 async function resolveActiveLocales(provided?: string[]) {

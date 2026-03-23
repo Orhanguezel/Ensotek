@@ -127,8 +127,19 @@ export function Footer({ footerSections = [], footerLinks = [], logoSrc }: Foote
         )}
 
         {/* Copyright */}
-        <div className="pt-8 border-t border-slate-800 text-sm text-center">
-          © {year} Kühlturm. Alle Rechte vorbehalten.
+        <div className="pt-8 border-t border-slate-800 text-sm text-center flex flex-col md:flex-row items-center justify-between gap-4">
+          <p>© {year} Kühlturm. Alle Rechte vorbehalten.</p>
+          <p className="text-xs opacity-50 flex items-center gap-1">
+            Design & Build by 
+            <a 
+              href="https://guezelwebdesign.de" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-white hover:text-green-500 font-bold transition-colors"
+            >
+              GWD
+            </a>
+          </p>
         </div>
       </div>
     </footer>

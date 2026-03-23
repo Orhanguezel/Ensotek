@@ -18,7 +18,10 @@ import UserAvatarFallback from "public/img/blog/blog-author-1.png";
 
 const Header = () => {
   const locale = useLocale();
-  const t = useTranslations("common");
+  const tCommon = useTranslations("common");
+  const tNav = useTranslations("nav");
+  const tSeo = useTranslations("seo");
+  
   const pathname = usePathname();
   const [toggleMenu, setToggleMenu] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -176,12 +179,12 @@ const Header = () => {
 
   // Fallback static menu
   const staticMenu = [
-    { id: "home", title: "Home", url: "/", children: [] },
-    { id: "about", title: "About", url: "/about", children: [] },
-    { id: "services", title: "Services", url: "/service", children: [] },
-    { id: "products", title: "Products", url: "/product", children: [] },
-    { id: "offer", title: "Offer", url: "/offer", children: [] },
-    { id: "contact", title: "Contact", url: "/contact", children: [] },
+    { id: "home", title: tCommon("home"), url: "/", children: [] },
+    { id: "about", title: tNav("about"), url: "/about", children: [] },
+    { id: "services", title: tSeo("services_title"), url: "/service", children: [] },
+    { id: "products", title: tSeo("products_title"), url: "/product", children: [] },
+    { id: "offer", title: tSeo("offer_title"), url: "/offer", children: [] },
+    { id: "contact", title: tNav("contact"), url: "/contact", children: [] },
   ];
 
   const displayMenu = headerMenu.length > 0 ? headerMenu : staticMenu;
@@ -326,10 +329,10 @@ const Header = () => {
                 <form action={`/${locale}`}>
                   <input
                     type="text"
-                    placeholder={t("search")}
+                    placeholder={tCommon("search")}
                     required
                   />
-                  <button type="submit" aria-label={t("search")}>
+                  <button type="submit" aria-label={tCommon("search")}>
                     <i className="fa-regular fa-magnifying-glass" aria-hidden="true"></i>
                   </button>
                 </form>
@@ -360,7 +363,7 @@ const Header = () => {
                         onClick={() => setToggleMenu(false)}
                         style={{ flex: 1, paddingLeft: "12px", paddingRight: "12px", minWidth: 120 }}
                       >
-                        {t("dashboard")}
+                        {tCommon("dashboard")}
                       </Link>
                       <Link
                         className="border__btn text-center"
@@ -368,7 +371,7 @@ const Header = () => {
                         onClick={() => setToggleMenu(false)}
                         style={{ flex: 1, paddingLeft: "12px", paddingRight: "12px", minWidth: 120 }}
                       >
-                        {t("profile")}
+                        {tCommon("profile")}
                       </Link>
                     </div>
                   </div>
@@ -378,19 +381,19 @@ const Header = () => {
                       className="border__btn text-center"
                       href={toLocalizedHref("/login")}
                       onClick={() => setToggleMenu(false)}
-                      title={t("login")}
+                      title={tCommon("login")}
                       style={{ flex: 1, paddingLeft: "12px", paddingRight: "12px" }}
                     >
-                      {t("login")}
+                      {tCommon("login")}
                     </Link>
                     <Link
                       className="border__btn text-center"
                       href={toLocalizedHref("/register")}
                       onClick={() => setToggleMenu(false)}
-                      title={t("register")}
+                      title={tCommon("register")}
                       style={{ flex: 1, paddingLeft: "12px", paddingRight: "12px" }}
                     >
-                      {t("register")}
+                      {tCommon("register")}
                     </Link>
                   </div>
                 )}
@@ -517,7 +520,7 @@ const Header = () => {
                       <button
                         className="d-flex align-items-center justify-content-center border-0 bg-white shadow-sm p-0"
                         aria-label="Open account menu"
-                        onClick={() => setShowUserMenu((prev) => !prev)}
+                        onClick={() => setShowUserMenu((prev: any) => !prev)}
                         style={{
                           width: 44,
                           height: 44,
@@ -543,14 +546,14 @@ const Header = () => {
                             className="d-block px-3 py-2 rounded text-dark"
                             onClick={() => setShowUserMenu(false)}
                           >
-                            {t("dashboard")}
+                            {tCommon("dashboard")}
                           </Link>
                           <Link
                             href={toLocalizedHref("/profile")}
                             className="d-block px-3 py-2 rounded text-dark"
                             onClick={() => setShowUserMenu(false)}
                           >
-                            {t("profile")}
+                            {tCommon("profile")}
                           </Link>
                         </div>
                       )}

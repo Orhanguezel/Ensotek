@@ -42,8 +42,26 @@ function isPathActive(currentPath: string, targetUrl: string) {
   const p = String(currentPath || '/');
   const u = String(targetUrl || '/');
 
-  // exact match OR sub-route match
-  // /admin/site-settings -> active on /admin/site-settings and /admin/site-settings/xxx
+  // URL query parametresi varsa (orn: /admin/products?type=sparepart)
+  // sadece tam URL eslesmesi yap - alt route eslemesi yapma
+  if (u.includes('?')) {
+    const uPath = u.split('?')[0];
+    const uQuery = u.split('?')[1] || '';
+    if (p !== uPath) return false;
+    // query kontrolu icin window.location kullan (pathname query icermez)
+    if (typeof window !== 'undefined') {
+      return window.location.search.includes(uQuery);
+    }
+    return false;
+  }
+
+  // Query'siz URL'lerde: query parametreli path'leri esleme
+  // orn: /admin/products?type=sparepart aktifken /admin/products aktif gozukmemeli
+  if (typeof window !== 'undefined' && window.location.search) {
+    // Mevcut URL'de query var ama target'ta yok - esleme
+    if (p === u) return false;
+  }
+
   return p === u || p.startsWith(u + '/');
 }
 

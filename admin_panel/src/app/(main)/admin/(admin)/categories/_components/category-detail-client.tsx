@@ -115,7 +115,7 @@ export default function CategoryDetailClient({ id }: Props) {
     e.preventDefault();
 
     if (!formData.name || !formData.slug) {
-      toast.error('Name ve Slug zorunludur');
+      toast.error(t('form.requiredError'));
       return;
     }
 
@@ -124,15 +124,15 @@ export default function CategoryDetailClient({ id }: Props) {
 
       if (isNew) {
         await createCategory(payload).unwrap();
-        toast.success('Kategori oluşturuldu');
+        toast.success(t('form.createdSuccess'));
       } else {
         await updateCategory({ id, patch: payload }).unwrap();
-        toast.success('Kategori güncellendi');
+        toast.success(t('form.updatedSuccess'));
       }
       router.push('/admin/categories');
     } catch (error: any) {
-      const errMsg = error?.data?.error?.message || error?.message || 'Hata oluştu';
-      toast.error(`Hata: ${errMsg}`);
+      const errMsg = error?.data?.error?.message || error?.message || t('form.error');
+      toast.error(`${t('messages.error', { error: errMsg })}`);
     }
   };
 
@@ -169,10 +169,10 @@ export default function CategoryDetailClient({ id }: Props) {
               </Button>
               <div>
                 <CardTitle className="text-base">
-                  {isNew ? t('actions.create') : t('actions.edit')}
+                  {isNew ? t('form.createTitle') : t('form.editTitle')}
                 </CardTitle>
                 <CardDescription>
-                  {isNew ? 'Yeni kategori oluştur' : `${category?.name || ''} düzenle`}
+                  {isNew ? t('form.createDesc') : t('form.editDesc', { name: category?.name || '' })}
                 </CardDescription>
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function CategoryDetailClient({ id }: Props) {
                         value={formData.name}
                         onChange={(e) => handleChange('name', e.target.value)}
                         disabled={isLoading}
-                        placeholder="Örn: İndustrial Coolers"
+                        placeholder={t('form.namePlaceholder')}
                       />
                     </div>
 
@@ -226,20 +226,20 @@ export default function CategoryDetailClient({ id }: Props) {
                         value={formData.slug}
                         onChange={(e) => handleChange('slug', e.target.value)}
                         disabled={isLoading}
-                        placeholder="Örn: industrial-coolers"
+                        placeholder={t('form.slugPlaceholder')}
                       />
                     </div>
 
                     {/* Description */}
                     <div className="space-y-2">
-                      <Label htmlFor="description">Açıklama</Label>
+                      <Label htmlFor="description">{t('form.description')}</Label>
                       <Textarea
                         id="description"
                         value={formData.description}
                         onChange={(e) => handleChange('description', e.target.value)}
                         disabled={isLoading}
                         rows={4}
-                        placeholder="Kategori açıklaması"
+                        placeholder={t('form.descriptionPlaceholder')}
                       />
                     </div>
 
@@ -269,17 +269,17 @@ export default function CategoryDetailClient({ id }: Props) {
                     {/* Icon & Alt */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="icon">Icon</Label>
+                        <Label htmlFor="icon">{t('form.icon')}</Label>
                         <Input
                           id="icon"
                           value={formData.icon}
                           onChange={(e) => handleChange('icon', e.target.value)}
                           disabled={isLoading}
-                          placeholder="fa-cube"
+                          placeholder={t('form.iconPlaceholder')}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="alt">Alt Text</Label>
+                        <Label htmlFor="alt">{t('form.alt')}</Label>
                         <Input
                           id="alt"
                           value={formData.alt}
@@ -291,7 +291,7 @@ export default function CategoryDetailClient({ id }: Props) {
 
                     {/* Display Order */}
                     <div className="space-y-2">
-                      <Label htmlFor="display_order">Sıralama</Label>
+                      <Label htmlFor="display_order">{t('form.order')}</Label>
                       <Input
                         id="display_order"
                         type="number"
@@ -331,7 +331,7 @@ export default function CategoryDetailClient({ id }: Props) {
                   {/* Sidebar - Image */}
                   <div className="space-y-6">
                     <AdminImageUploadField
-                      label="Kategori Görseli"
+                      label={t('form.image')}
                       value={formData.image_url}
                       onChange={handleImageChange}
                       disabled={isLoading}
@@ -358,9 +358,9 @@ export default function CategoryDetailClient({ id }: Props) {
         <TabsContent value="json">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Kategori Verisi (JSON)</CardTitle>
+              <CardTitle className="text-base">{t('form.jsonTitle')}</CardTitle>
               <CardDescription>
-                Tüm kategori alanlarını JSON olarak düzenleyebilirsiniz.
+                {t('form.jsonDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -375,7 +375,7 @@ export default function CategoryDetailClient({ id }: Props) {
                 </div>
                 <div className="space-y-4">
                   <AdminImageUploadField
-                    label="Kategori Görseli"
+                    label={t('form.image')}
                     value={formData.image_url}
                     onChange={handleImageChange}
                     disabled={isLoading}

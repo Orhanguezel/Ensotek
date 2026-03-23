@@ -71,8 +71,14 @@ async function getRuntimeBaseUrl(): Promise<string> {
 /**
  * OpenGraph locale formatına çevir:
  * - "pt-br" -> "pt_BR"
- * - "de"    -> "tr_TR" (region yoksa LANG_LANG)
+ * - "de"    -> "de_DE"
+ * - "en"    -> "en_US" (not en_EN)
+ * - "tr"    -> "tr_TR"
  */
+const OG_REGION_MAP: Record<string, string> = {
+  en: 'US', ar: 'SA', ja: 'JP', ko: 'KR', zh: 'CN', vi: 'VN', he: 'IL', uk: 'UA', cs: 'CZ', da: 'DK', sv: 'SE', nb: 'NO', el: 'GR', fa: 'IR',
+};
+
 function toOgLocale(l: string): string {
   const raw = String(l || '').trim();
   if (!raw) return `${DEFAULT_LOCALE_FALLBACK}_${DEFAULT_LOCALE_FALLBACK.toUpperCase()}`;
@@ -83,7 +89,7 @@ function toOgLocale(l: string): string {
   const lang = (langRaw || DEFAULT_LOCALE_FALLBACK).toLowerCase().slice(0, 2);
   const region = (regionRaw || '').toUpperCase();
 
-  return `${lang}_${region || lang.toUpperCase()}`;
+  return `${lang}_${region || OG_REGION_MAP[lang] || lang.toUpperCase()}`;
 }
 
 /** Path normalizasyonu: başında / olsun; kök dışı ise sonda / olmasın */

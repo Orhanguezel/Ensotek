@@ -121,7 +121,11 @@ export const CustomPageHeader: React.FC<CustomPageHeaderProps> = ({
               </button>
             ) : null}
             <Link
-              href="/admin/custompage/new"
+              href={
+                filters.moduleKey
+                  ? `/admin/custompage/new?module=${encodeURIComponent(filters.moduleKey)}`
+                  : '/admin/custompage/new'
+              }
               className="rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground"
             >
               {t('admin.customPage.newPage')}

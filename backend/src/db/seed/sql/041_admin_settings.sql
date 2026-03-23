@@ -17,7 +17,7 @@ VALUES
   'ui_admin_config',
   '*',
   CAST(JSON_OBJECT(
-    'default_locale', 'tr',
+    'default_locale', 'de',
     'theme', JSON_OBJECT(
       'mode', 'light',
       'preset', 'zinc',

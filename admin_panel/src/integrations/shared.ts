@@ -67,4 +67,8 @@ export * from '@/integrations/shared/product_reviews_admin.types';
 export * from '@/integrations/shared/product_specs_admin.types';
 export * from '@/integrations/shared/library.types';
 export * from '@/integrations/shared/references.types';
+export * from '@/integrations/shared/seoInlinePages';
+export * from '@/integrations/shared/siteSettingsAdmin';
+export * from '@/integrations/shared/auditAdmin';
+export * from '@/integrations/shared/themeAdmin';
 

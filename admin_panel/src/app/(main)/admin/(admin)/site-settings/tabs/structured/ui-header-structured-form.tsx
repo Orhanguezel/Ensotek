@@ -1,5 +1,6 @@
 // =============================================================
-// FILE: src/components/admin/site-settings/structured/UiHeaderStructuredForm.tsx
+// FILE: ui-header-structured-form.tsx
+// Menü başlıkları ve buton etiketleri
 // =============================================================
 
 'use client';
@@ -8,6 +9,11 @@ import React from 'react';
 import { z } from 'zod';
 import { useAdminTranslations } from '@/i18n';
 import { usePreferencesStore } from '@/stores/preferences/preferences-provider';
+import {
+  SITE_SETTINGS_UI_HEADER_EMPTY,
+  SITE_SETTINGS_UI_HEADER_FIELDS,
+  toStructuredObjectSeed,
+} from '@/integrations/shared';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Input } from '@/components/ui/input';
@@ -18,10 +24,12 @@ export const uiHeaderSchema = z
     nav_home: z.string().trim().optional(),
     nav_products: z.string().trim().optional(),
     nav_services: z.string().trim().optional(),
+    nav_news: z.string().trim().optional(),
+    nav_about: z.string().trim().optional(),
     nav_contact: z.string().trim().optional(),
     cta_label: z.string().trim().optional(),
   })
-  .strict();
+  .passthrough();
 
 export type UiHeaderFormState = z.infer<typeof uiHeaderSchema>;
 
@@ -33,22 +41,20 @@ export type UiHeaderStructuredFormProps = {
   seed?: UiHeaderFormState;
 };
 
-const safeObj = (v: any) => (v && typeof v === 'object' && !Array.isArray(v) ? v : null);
+const EMPTY_SEED: UiHeaderFormState = { ...SITE_SETTINGS_UI_HEADER_EMPTY };
 
 export function uiHeaderObjToForm(v: any, seed: UiHeaderFormState): UiHeaderFormState {
-  const base = safeObj(v) || seed;
+  const base = toStructuredObjectSeed(v, seed);
   const parsed = uiHeaderSchema.safeParse(base);
   return parsed.success ? parsed.data : seed;
 }
 
 export function uiHeaderFormToObj(s: UiHeaderFormState) {
-  return uiHeaderSchema.parse({
-    nav_home: s.nav_home?.trim() || '',
-    nav_products: s.nav_products?.trim() || '',
-    nav_services: s.nav_services?.trim() || '',
-    nav_contact: s.nav_contact?.trim() || '',
-    cta_label: s.cta_label?.trim() || '',
-  });
+  const result: Record<string, string> = {};
+  for (const [k, v] of Object.entries(s)) {
+    result[k] = typeof v === 'string' ? v.trim() : '';
+  }
+  return result;
 }
 
 export const UiHeaderStructuredForm: React.FC<UiHeaderStructuredFormProps> = ({
@@ -60,24 +66,8 @@ export const UiHeaderStructuredForm: React.FC<UiHeaderStructuredFormProps> = ({
 }) => {
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
-
-  const s = (seed || {
-    nav_home: 'Home',
-    nav_products: 'Products',
-    nav_services: 'Services',
-    nav_contact: 'Contact',
-    cta_label: 'Get Offer',
-  }) as UiHeaderFormState;
-
+  const s = (seed || EMPTY_SEED) as UiHeaderFormState;
   const form = uiHeaderObjToForm(value, s);
-
-  const fields = [
-    ['nav_home', t('admin.siteSettings.structured.uiHeader.labels.navHome')],
-    ['nav_products', t('admin.siteSettings.structured.uiHeader.labels.navProducts')],
-    ['nav_services', t('admin.siteSettings.structured.uiHeader.labels.navServices')],
-    ['nav_contact', t('admin.siteSettings.structured.uiHeader.labels.navContact')],
-    ['cta_label', t('admin.siteSettings.structured.uiHeader.labels.ctaLabel')],
-  ] as const;
 
   return (
     <div className="space-y-4">
@@ -87,18 +77,18 @@ export const UiHeaderStructuredForm: React.FC<UiHeaderStructuredFormProps> = ({
         </AlertDescription>
       </Alert>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        {fields.map(([k, label]) => (
-          <div className="space-y-2" key={k}>
-            <Label htmlFor={`ui-header-${k}`} className="text-sm">{label}</Label>
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {SITE_SETTINGS_UI_HEADER_FIELDS.map((f) => (
+          <div className="space-y-1" key={f.key}>
+            <Label htmlFor={`ui-header-${f.key}`} className="text-xs text-muted-foreground">{t(`admin.siteSettings.structured.uiHeader.labels.${f.labelKey}`)}</Label>
             <Input
-              id={`ui-header-${k}`}
+              id={`ui-header-${f.key}`}
               className="h-8"
-              value={(form as any)[k] || ''}
-              onChange={(e) => onChange({ ...(form as any), [k]: e.target.value })}
+              value={(form[f.key] as string) || ''}
+              onChange={(e) => onChange({ ...form, [f.key]: e.target.value })}
               disabled={disabled}
             />
-            {errors?.[k] && <p className="text-xs text-destructive">{errors[k]}</p>}
+            {errors?.[f.key] && <p className="text-xs text-destructive">{errors[f.key]}</p>}
           </div>
         ))}
       </div>

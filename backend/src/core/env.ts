@@ -18,7 +18,7 @@ const toList = (v: string | undefined) =>
     .map((s) => s.trim())
     .filter(Boolean);
 
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 const CORS_LIST = toList(process.env.CORS_ORIGIN);
 const CORS_ORIGIN = CORS_LIST.length ? CORS_LIST : [FRONTEND_URL];
 
@@ -30,7 +30,7 @@ const STORAGE_DRIVER = (RAW_STORAGE_DRIVER === 'local' ? 'local' : 'cloudinary')
 
 export const env = {
   NODE_ENV: process.env.NODE_ENV ?? 'development',
-  PORT: toInt(process.env.PORT, 8083),
+  PORT: toInt(process.env.PORT, 8086),
 
   // Storage driver (fallback). Asıl driver site_settings.storage_driver ile gelebilir.
   STORAGE_DRIVER,

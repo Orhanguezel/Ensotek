@@ -732,13 +732,6 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
       <div class="muted" style="font-size: 10px; line-height: 1.4;">
         ${safeText(t.notesLegal(validUntilStr))}
       </div>
-      ${
-        (ctx as any).admin_notes
-          ? `<div class="text-block" style="margin-top: 8px; border-top: 1px dashed #d0d0d0; padding-top: 6px; font-size: 10px;">
-              ${safeText((ctx as any).admin_notes)}
-            </div>`
-          : ''
-      }
     </div>
 
     <div class="footer">

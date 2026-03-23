@@ -160,6 +160,7 @@ export const ServicesList: React.FC<ServicesListProps> = ({
             <TableHeader>
               <TableRow>
                 <TableHead className="min-w-14" />
+                <TableHead className="w-14" />
                 <TableHead>{t('admin.services.list.serviceColumn')}</TableHead>
                 <TableHead className="min-w-32">{t('admin.services.list.typeColumn')}</TableHead>
                 <TableHead className="min-w-40">{t('admin.services.list.statusColumn')}</TableHead>
@@ -201,6 +202,16 @@ export const ServicesList: React.FC<ServicesListProps> = ({
                           </div>
                         ) : (
                           <span>{globalIdx + 1}</span>
+                        )}
+                      </TableCell>
+
+                      <TableCell className="p-1">
+                        {(s as any).image_url || (s as any).featured_image ? (
+                          <img src={(s as any).image_url || (s as any).featured_image} alt="" className="h-10 w-10 rounded object-cover" />
+                        ) : (
+                          <div className="flex h-10 w-10 items-center justify-center rounded bg-muted text-muted-foreground">
+                            <span className="text-[10px]">—</span>
+                          </div>
                         )}
                       </TableCell>
 

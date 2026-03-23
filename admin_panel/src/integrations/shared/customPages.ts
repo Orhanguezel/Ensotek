@@ -265,6 +265,7 @@ export const mapApiCustomPageToDto = normalizeCustomPage;
  * ------------------------------------------------------------------ */
 
 export interface CustomPageCreatePayload {
+  module_key?: string;
   // i18n zorunlu alanlar
   locale?: string;
   title: string;
@@ -296,6 +297,7 @@ export interface CustomPageCreatePayload {
 }
 
 export interface CustomPageUpdatePayload {
+  module_key?: string;
   locale?: string;
 
   // parent

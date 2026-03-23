@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/seo/seoSchema.ts
-// konigsmassage – SEO Schema (STRICT) + DB-backed Defaults
+// Ensotek – SEO Schema (STRICT) + DB-backed Defaults
 // SINGLE SOURCE OF TRUTH: open_graph.images[]
 // =============================================================
 
@@ -87,11 +87,11 @@ export const DEFAULT_OG_IMAGE = '/img/og-default.jpg';
  * Asıl değerler site_settings.seo / site_settings.site_seo içinden gelir.
  */
 export const DEFAULT_SEO_GLOBAL: SeoObject = {
-  site_name: 'KÖNIG ENERGETIK',
-  title_default: 'KÖNIG ENERGETIK – Energetische Massage in Bonn',
-  title_template: '%s – KÖNIG ENERGETIK',
+  site_name: 'Ensotek',
+  title_default: 'Ensotek – Kühlturm-Lösungen für die Industrie',
+  title_template: '%s – Ensotek',
   description:
-    'Energetische Massage in Bonn – achtsame Berührung, klare Grenzen und tiefe Entspannung. Termine nach Vereinbarung.',
+    'Ensotek bietet innovative Kühlturm-Lösungen, Ersatzteile und technischen Service für industrielle Anwendungen. Ihr B2B-Partner für Kühltechnik.',
   open_graph: {
     type: 'website',
     images: [DEFAULT_OG_IMAGE],
@@ -109,30 +109,30 @@ export const DEFAULT_SEO_GLOBAL: SeoObject = {
 };
 
 /**
- * ✅ Locale bazlı meta fallback – DB’de locale karşılığı yoksa kullanılır.
+ * ✅ Locale bazlı meta fallback – DB'de locale karşılığı yoksa kullanılır.
  * Asıl değerler site_settings.site_meta_default içinden gelecektir.
  */
 export const DEFAULT_SITE_META_DEFAULT_BY_LOCALE: Record<string, SiteMetaDefaultObject> = {
   tr: {
-    title: 'KÖNIG ENERGETIK – Bonn’da Enerjetik Masaj',
+    title: 'Ensotek – Endüstriyel Soğutma Kulesi Çözümleri',
     description:
-      'Bonn’da enerjetik masaj: bilinçli dokunuş, net sınırlar ve derin gevşeme. Seanslar ön görüşme ile, randevuya göre.',
+      'Ensotek, endüstriyel soğutma kulesi çözümleri, yedek parça ve teknik servis hizmetleri sunan B2B platformunuzdur.',
     keywords:
-      'koenig energetik, enerjetik masaj, bonn, anastasia könig, rahatlama, beden farkındalığı, thai yoga, aroma, ayak refleks, randevu',
+      'ensotek, soğutma kulesi, endüstriyel soğutma, kühltechnik, yedek parça, teknik servis, B2B, kühlturm',
   },
   en: {
-    title: 'KÖNIG ENERGETIK – Energetic Massage in Bonn',
+    title: 'Ensotek – Industrial Cooling Tower Solutions',
     description:
-      'Energetic massage sessions in Bonn with mindful touch, clear boundaries, and deep relaxation. Appointments by arrangement.',
+      'Ensotek provides innovative cooling tower solutions, spare parts and technical services for industrial applications. Your B2B partner for cooling technology.',
     keywords:
-      'koenig energetik, energetic massage, bonn, anastasia könig, relaxation, body awareness, thai yoga massage, aroma energy, foot reflex, appointment',
+      'ensotek, cooling tower, industrial cooling, spare parts, technical service, B2B, cooling technology, kühlturm',
   },
   de: {
-    title: 'KÖNIG ENERGETIK – Energetische Massage in Bonn',
+    title: 'Ensotek – Kühlturm-Lösungen für die Industrie',
     description:
-      'Energetische Massage in Bonn – achtsame Berührung, klare Grenzen und tiefe Entspannung. Termine nach Vereinbarung.',
+      'Ensotek bietet innovative Kühlturm-Lösungen, Ersatzteile und technischen Service für industrielle Anwendungen. Ihr B2B-Partner für Kühltechnik.',
     keywords:
-      'könig energetik, energetische massage, bonn, anastasia könig, entspannung, körperwahrnehmung, thai yoga massage, aroma-energie, fußreflex, termin',
+      'ensotek, kühlturm, industrielle kühlung, ersatzteile, technischer service, B2B, kühltechnik, cooling tower',
   },
 };
 
@@ -156,7 +156,7 @@ function tryParseJson(input: unknown): unknown {
 
 /**
  * open_graph.images normalizer:
- * - DB’de bazen images: [{url:"..."}] veya {images:[...]} gibi karışık format gelebilir
+ * - DB'de bazen images: [{url:"..."}] veya {images:[...]} gibi karışık format gelebilir
  * - Bizim tek kabulümüz: string[]
  */
 function normalizeOgImages(input: unknown): string[] {
@@ -204,7 +204,7 @@ function normalizeOgImages(input: unknown): string[] {
 /**
  * site_settings.seo / site_seo için parse helper:
  *
- *  - input: DB’den gelen value (JSON string, object, vs.)
+ *  - input: DB'den gelen value (JSON string, object, vs.)
  *  - output: SeoObject
  *  - davranış:
  *      * Zod ile validate eder
@@ -248,11 +248,11 @@ export function parseSeoFromSettings(input: unknown): SeoObject {
 }
 
 /**
- * site_settings.site_meta_default parse helper (KÖNIG ENERGETIK uyumlu):
+ * site_settings.site_meta_default parse helper (Ensotek uyumlu):
  *
  * Desteklenen DB formatları:
  *
- * A) ✅ Yeni standart (senin seed’in): locale başına tek kayıt
+ * A) ✅ Yeni standart (senin seed'in): locale başına tek kayıt
  *    value = { "title":"...", "description":"...", "keywords":"..." }
  *
  * B) Eski/alternatif: tek kayıtta map
@@ -328,7 +328,7 @@ export function parseSiteMetaDefaultByLocale(
 }
 
 /**
- * ✅ site_settings.site_meta_default tek kayıt (locale’ye göre okunuyorsa) için pratik helper:
+ * ✅ site_settings.site_meta_default tek kayıt (locale'ye göre okunuyorsa) için pratik helper:
  * - input: o locale için value (tek obje)
  * - locale: 'tr' | 'en' | 'de' | ...
  */

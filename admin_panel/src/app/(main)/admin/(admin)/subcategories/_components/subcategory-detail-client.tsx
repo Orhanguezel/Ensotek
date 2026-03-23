@@ -145,15 +145,15 @@ export default function SubcategoryDetailClient({ id }: Props) {
     e?.preventDefault();
 
     if (!formData.name.trim()) {
-      toast.error('Ad (name) zorunludur');
+      toast.error(t('messages.nameRequired'));
       return;
     }
     if (!formData.slug.trim()) {
-      toast.error('Slug zorunludur');
+      toast.error(t('messages.slugRequired'));
       return;
     }
     if (!formData.category_id) {
-      toast.error('Üst kategori seçilmelidir');
+      toast.error(t('messages.categoryRequired'));
       return;
     }
 
@@ -175,17 +175,17 @@ export default function SubcategoryDetailClient({ id }: Props) {
     try {
       if (isNew) {
         const result = await createSubCategory(payload).unwrap();
-        toast.success('Alt kategori oluşturuldu');
+        toast.success(t('messages.createdSuccess'));
         if (result?.id) {
           router.push(`/admin/subcategories/${result.id}`);
         }
       } else {
         await updateSubCategory({ id, patch: payload }).unwrap();
-        toast.success('Alt kategori güncellendi');
+        toast.success(t('messages.updatedSuccess'));
       }
     } catch (error: any) {
-      const msg = error?.data?.error?.message || error?.message || 'Hata oluştu';
-      toast.error(`Hata: ${msg}`);
+      const msg = error?.data?.error?.message || error?.message || t('messages.error', { error: '' });
+      toast.error(t('messages.error', { error: msg }));
     }
   };
 
@@ -210,10 +210,10 @@ export default function SubcategoryDetailClient({ id }: Props) {
               </Button>
               <div>
                 <CardTitle className="text-base">
-                  {isNew ? t('actions.create') : t('actions.edit')}
+                  {isNew ? t('form.createTitle') : t('form.editTitle')}
                 </CardTitle>
                 <CardDescription>
-                  {isNew ? 'Yeni alt kategori oluştur' : `${item?.name || ''} düzenle`}
+                  {isNew ? t('form.createDesc') : t('form.editDesc', { name: item?.name || '' })}
                 </CardDescription>
               </div>
             </div>
@@ -257,10 +257,10 @@ export default function SubcategoryDetailClient({ id }: Props) {
                         disabled={isLoading}
                       >
                         <SelectTrigger id="category_id">
-                          <SelectValue placeholder="Kategori seçin..." />
+                          <SelectValue placeholder={t('form.selectCategory')} />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="none">— Seçiniz —</SelectItem>
+                          <SelectItem value="none">{t('form.selectNone')}</SelectItem>
                           {categories.map((cat: any) => (
                             <SelectItem key={cat.id} value={String(cat.id)}>
                               {cat.name || cat.slug}
@@ -402,9 +402,9 @@ export default function SubcategoryDetailClient({ id }: Props) {
         <TabsContent value="json">
           <Card>
             <CardHeader>
-              <CardTitle className="text-base">Alt Kategori Verisi (JSON)</CardTitle>
+              <CardTitle className="text-base">{t('form.jsonTitle')}</CardTitle>
               <CardDescription>
-                Tüm alt kategori alanlarını JSON olarak düzenleyebilirsiniz.
+                {t('form.jsonDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">

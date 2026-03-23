@@ -82,49 +82,34 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
     query: effectiveLocale ? { locale: effectiveLocale } : undefined,
   });
 
-  const renderStatus = (p: CustomPageDto) =>
-    p.is_published ? (
-      <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px]">
-        {t('admin.customPage.list.published')}
-      </span>
-    ) : (
-      <span className="inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] text-muted-foreground">
-        {t('admin.customPage.list.draft')}
-      </span>
-    );
+  const handleTogglePublished = async (page: CustomPageDto) => {
+    try {
+      await updatePage({ id: page.id, patch: { is_published: !page.is_published } }).unwrap();
+    } catch {}
+  };
 
   const handleToggleFeatured = async (page: CustomPageDto) => {
     try {
       await updatePage({ id: page.id, patch: { featured: !page.featured } }).unwrap();
-      toast.success(
-        page.featured
-          ? t('admin.customPage.list.unfeaturedSuccess')
-          : t('admin.customPage.list.featuredSuccess'),
-      );
-    } catch (err: unknown) {
-      const msg =
-        (err as { data?: { error?: { message?: string } } })?.data?.error?.message ??
-        t('admin.customPage.list.deleteError');
-      toast.error(msg);
-    }
+    } catch {}
   };
 
+  const renderStatus = (p: CustomPageDto) => (
+    <label className="flex items-center justify-center cursor-pointer">
+      <input type="checkbox" className="sr-only peer" checked={!!p.is_published} onChange={() => handleTogglePublished(p)} disabled={busy} />
+      <div className="relative w-8 h-4 bg-muted rounded-full peer-checked:bg-primary transition-colors">
+        <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-background rounded-full transition-transform ${p.is_published ? 'translate-x-4' : ''}`} />
+      </div>
+    </label>
+  );
+
   const renderFeatured = (p: CustomPageDto) => (
-    <button
-      type="button"
-      className={[
-        'inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] transition-colors disabled:opacity-60',
-        p.featured
-          ? 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
-          : 'border-gray-200 bg-gray-50 text-muted-foreground hover:bg-gray-100',
-      ].join(' ')}
-      disabled={busy}
-      onClick={() => handleToggleFeatured(p)}
-      title={p.featured ? t('admin.customPage.list.unfeatured') : t('admin.customPage.list.featured')}
-    >
-      <Star className={['size-3', p.featured ? 'fill-amber-400 stroke-amber-500' : 'stroke-muted-foreground'].join(' ')} />
-      {p.featured ? t('admin.customPage.list.featured') : t('admin.customPage.list.unfeatured')}
-    </button>
+    <label className="flex items-center justify-center cursor-pointer">
+      <input type="checkbox" className="sr-only peer" checked={!!p.featured} onChange={() => handleToggleFeatured(p)} disabled={busy} />
+      <div className="relative w-8 h-4 bg-muted rounded-full peer-checked:bg-primary transition-colors">
+        <div className={`absolute top-0.5 left-0.5 w-3 h-3 bg-background rounded-full transition-transform ${p.featured ? 'translate-x-4' : ''}`} />
+      </div>
+    </label>
   );
 
   const handleDelete = async (page: CustomPageDto) => {
@@ -141,10 +126,16 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
       await deletePage(page.id).unwrap();
       toast.success(t('admin.customPage.list.deleteSuccess'));
     } catch (err: unknown) {
-      const msg =
-        (err as { data?: { error?: { message?: string } } })?.data?.error?.message ??
-        t('admin.customPage.list.deleteError');
-      toast.error(msg);
+      const status = (err as any)?.status ?? (err as any)?.originalStatus;
+      if (status === 404) {
+        // Zaten silinmis - basarili say
+        toast.success(t('admin.customPage.list.deleteSuccess'));
+      } else {
+        const msg =
+          (err as { data?: { error?: { message?: string } } })?.data?.error?.message ??
+          t('admin.customPage.list.deleteError');
+        toast.error(msg);
+      }
     }
   };
 
@@ -269,8 +260,9 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
             <tr className="border-b bg-muted/30 text-left">
               <th className="w-8 px-2 py-1.5 text-[11px] text-muted-foreground">#</th>
               <th className="w-[25%] px-2 py-1.5 text-[11px]">{t('admin.customPage.form.title')}</th>
-              <th className="w-[25%] px-2 py-1.5 text-[11px]">Slug</th>
-              <th className="w-[8%] px-2 py-1.5 text-[11px] text-center">{t('admin.customPage.list.published')}</th>
+              <th className="w-[20%] px-2 py-1.5 text-[11px]">Slug</th>
+              <th className="w-[8%] px-2 py-1.5 text-[11px] text-center">Aktif</th>
+              <th className="w-[8%] px-2 py-1.5 text-[11px] text-center">One Cikan</th>
               <th className="w-[10%] px-2 py-1.5 text-[11px]">{t('admin.customPage.list.created')}</th>
               <th className="w-[100px] px-2 py-1.5 text-[11px] text-right">{t('admin.common.actions')}</th>
             </tr>
@@ -304,10 +296,10 @@ export const CustomPageList: React.FC<CustomPageListProps> = ({
                   </td>
 
                   <td className="px-2 py-1.5 text-center">
-                    <div className="inline-flex flex-wrap items-center justify-center gap-1">
-                      {renderStatus(p)}
-                      {renderFeatured(p)}
-                    </div>
+                    {renderStatus(p)}
+                  </td>
+                  <td className="px-2 py-1.5 text-center">
+                    {renderFeatured(p)}
                   </td>
 
                   <td className="px-2 py-1.5 text-[11px] text-muted-foreground" title={`${formatDate(p.created_at)}`}>

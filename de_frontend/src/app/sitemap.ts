@@ -22,9 +22,12 @@ const STATIC_ROUTES: Array<{ path: string; priority: number; changeFreq: Metadat
   { path: '/quality',          priority: 0.6, changeFreq: 'monthly' },
   { path: '/mission-vision',   priority: 0.6, changeFreq: 'monthly' },
   { path: '/sparepart',        priority: 0.7, changeFreq: 'weekly'  },
+  { path: '/legal',             priority: 0.3, changeFreq: 'monthly' },
 ];
 
-async function fetchSlugs(endpoint: string): Promise<string[]> {
+type SlugEntry = { slug: string; updatedAt: Date };
+
+async function fetchSlugs(endpoint: string): Promise<SlugEntry[]> {
   try {
     const url = `${API_BASE_URL}${endpoint}?limit=500&is_published=true`;
     const res = await fetch(url, { next: { revalidate: 3600 } });
@@ -36,8 +39,12 @@ async function fetchSlugs(endpoint: string): Promise<string[]> {
         ? (data as { data: unknown[] }).data
         : [];
     return items
-      .map((item) => (item as { slug?: string })?.slug)
-      .filter((s): s is string => typeof s === 'string' && s.length > 0);
+      .filter((item): item is Record<string, unknown> =>
+        typeof (item as Record<string, unknown>)?.slug === 'string')
+      .map((item) => ({
+        slug: item.slug as string,
+        updatedAt: item.updated_at ? new Date(item.updated_at as string) : new Date(),
+      }));
   } catch {
     return [];
   }
@@ -68,40 +75,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }
 
     // Dynamic: services
-    for (const slug of serviceSlugs) {
+    for (const { slug, updatedAt } of serviceSlugs) {
       entries.push({
         url: `${siteUrl}/${locale}/service/${slug}`,
-        lastModified: now,
+        lastModified: updatedAt,
         changeFrequency: 'weekly',
         priority: 0.7,
       });
     }
 
     // Dynamic: products
-    for (const slug of productSlugs) {
+    for (const { slug, updatedAt } of productSlugs) {
       entries.push({
         url: `${siteUrl}/${locale}/product/${slug}`,
-        lastModified: now,
+        lastModified: updatedAt,
         changeFrequency: 'weekly',
         priority: 0.7,
       });
     }
 
     // Dynamic: library
-    for (const slug of librarySlugs) {
+    for (const { slug, updatedAt } of librarySlugs) {
       entries.push({
         url: `${siteUrl}/${locale}/library/${slug}`,
-        lastModified: now,
+        lastModified: updatedAt,
         changeFrequency: 'monthly',
         priority: 0.6,
       });
     }
 
     // Dynamic: custom pages (about/[slug], solutions/[slug], etc.)
-    for (const slug of customPageSlugs) {
+    for (const { slug, updatedAt } of customPageSlugs) {
       entries.push({
         url: `${siteUrl}/${locale}/${slug}`,
-        lastModified: now,
+        lastModified: updatedAt,
         changeFrequency: 'monthly',
         priority: 0.6,
       });

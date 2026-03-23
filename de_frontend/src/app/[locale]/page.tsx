@@ -12,13 +12,21 @@ import AboutCounter from "@/components/containers/counter/AboutCounter";
 import Newsletter from "@/components/containers/newsletter/Newsletter";
 import LibrarySection from "@/components/containers/library/LibrarySection";
 import NewsSection from "@/components/containers/news/NewsSection";
-import { fetchSliders } from "@/i18n/server";
+import { fetchSliders, fetchPageSeo } from "@/i18n/server";
 import { resolveMediaUrl } from "@/lib/media";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "seo" });
-  return { title: t("home_title"), description: t("home_description") };
+  const [pageSeo, t] = await Promise.all([
+    fetchPageSeo("home", locale),
+    getTranslations({ locale, namespace: "seo" }),
+  ]);
+  return {
+    title: pageSeo?.title || t("home_title"),
+    description: pageSeo?.description || t("home_description"),
+    ...(pageSeo?.og_image ? { openGraph: { images: [pageSeo.og_image] } } : {}),
+    ...(pageSeo?.no_index ? { robots: { index: false, follow: true } } : {}),
+  };
 }
 
 const Home = async ({ params }: { params: Promise<{ locale: string }> }) => {

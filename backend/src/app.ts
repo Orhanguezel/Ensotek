@@ -268,6 +268,10 @@ export async function createApp() {
       await api.register(async (i) => registerProjectAdmin(i), { prefix: '/admin' });
       await api.register(async (i) => registerIpBlocklist(i), { prefix: '/admin' });
 
+      // AI Content Assist
+      const { aiContentAssist } = await import('@/modules/ai/content');
+      api.post('/admin/ai/content', aiContentAssist);
+
       // --- Public modüller: /api/...
       await registerAuth(api);
       await registerStorage(api);

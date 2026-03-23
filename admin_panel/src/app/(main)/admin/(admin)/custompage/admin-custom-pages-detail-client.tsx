@@ -45,7 +45,13 @@ function getErrMessage(err: unknown, t: any): string {
   return t('admin.customPage.detail.operationFailed');
 }
 
-export default function AdminCustomPageDetailClient({ id }: { id: string }) {
+export default function AdminCustomPageDetailClient({
+  id,
+  initialModuleKey = '',
+}: {
+  id: string;
+  initialModuleKey?: string;
+}) {
   const router = useRouter();
   const t = useAdminT();
   const isCreateMode = String(id) === 'new';
@@ -149,8 +155,14 @@ export default function AdminCustomPageDetailClient({ id }: { id: string }) {
         return;
       }
 
+      if (!values.module_key?.trim()) {
+        toast.error(t('admin.customPage.detail.moduleKeyRequired'));
+        return;
+      }
+
       if (mode === 'create') {
         const payload: CustomPageCreatePayload = {
+          module_key: values.module_key.trim(),
           locale: loc,
           title: values.title.trim(),
           slug: values.slug.trim(),
@@ -196,6 +208,7 @@ export default function AdminCustomPageDetailClient({ id }: { id: string }) {
       }
 
       const patch: CustomPageUpdatePayload = {
+        module_key: values.module_key?.trim() || undefined,
         locale: loc,
         title: values.title.trim(),
         slug: values.slug.trim(),
@@ -258,6 +271,7 @@ export default function AdminCustomPageDetailClient({ id }: { id: string }) {
     <CustomPageForm
       mode={mode}
       initialData={page}
+      initialModuleKey={initialModuleKey}
       loading={busy}
       saving={saving}
       locales={localesForForm}

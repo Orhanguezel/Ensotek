@@ -45,6 +45,8 @@ import {
   useUpdateOfferAdminMutation,
   useGenerateOfferPdfAdminMutation,
   useSendOfferEmailAdminMutation,
+  useListProductsAdminQuery,
+  useListServicesAdminQuery,
 } from '@/integrations/hooks';
 
 import { OfferPdfPreview } from './offer-pdf-preview';
@@ -254,8 +256,23 @@ export default function AdminOfferDetailClient({ id }: { id: string }) {
   const [generatePdf, pdfState] = useGenerateOfferPdfAdminMutation();
   const [sendEmail, emailState] = useSendOfferEmailAdminMutation();
 
+
   const [form, setForm] = React.useState<FormState>(EMPTY_FORM);
   const [editTab, setEditTab] = React.useState<string>('form');
+
+  // Urun ve hizmet listeleri
+  const { data: productsData } = useListProductsAdminQuery({ limit: 200, locale: form.locale || 'de' } as any);
+  const { data: servicesData } = useListServicesAdminQuery({ limit: 200, locale: form.locale || 'de' } as any);
+
+  const products = React.useMemo(() => {
+    const items = Array.isArray(productsData) ? productsData : (productsData as any)?.items ?? [];
+    return items.map((p: any) => ({ id: String(p.id || ''), name: p.title || p.name || p.slug || '—' }));
+  }, [productsData]);
+
+  const services = React.useMemo(() => {
+    const items = Array.isArray(servicesData) ? servicesData : (servicesData as any)?.items ?? [];
+    return items.map((s: any) => ({ id: String(s.id || ''), name: s.name || s.title || s.slug || '—' }));
+  }, [servicesData]);
 
   const saving = createState.isLoading || updateState.isLoading;
   const loading = offerQ.isFetching || saving;
@@ -480,340 +497,205 @@ export default function AdminOfferDetailClient({ id }: { id: string }) {
         </Card>
       )}
 
-      {/* PDF SECTION (edit only) */}
-      {!isCreate && form.id && (
-        <Card>
-          <CardHeader className="gap-2">
-            <CardTitle className="text-base">{t('detail.pdfTitle')}</CardTitle>
-            <CardDescription>{t('detail.pdfDesc')}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <OfferPdfPreview
-              pdfUrl={pdfHref}
-              emptyMessage={t('detail.pdfEmpty')}
-              fallbackLabel={t('detail.pdfFallback')}
-            />
+      {/* TABS */}
+      <Card>
+        <Tabs value={editTab} onValueChange={setEditTab}>
+          <div className="border-b px-3">
+            <TabsList className="h-auto bg-transparent p-0">
+              <TabsTrigger value="form" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
+                <FormInput className="mr-1.5 size-4" /> Musteri
+              </TabsTrigger>
+              <TabsTrigger value="pricing" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
+                Fiyatlandirma
+              </TabsTrigger>
+              <TabsTrigger value="pdf" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary" disabled={isCreate}>
+                <FileText className="mr-1.5 size-4" /> PDF & Email
+              </TabsTrigger>
+              <TabsTrigger value="json" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
+                <Code className="mr-1.5 size-4" /> JSON
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-            <div className="flex flex-wrap gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onGeneratePdf}
-                disabled={pdfState.isLoading || saving}
-              >
-                <FileText className="mr-2 size-4" />
-                {pdfState.isLoading
-                  ? t('actions.generatingPdf')
-                  : form.pdf_url
-                    ? t('actions.regeneratePdf')
-                    : t('actions.generatePdf')}
-              </Button>
-
-              <Button
-                size="sm"
-                onClick={onSendEmail}
-                disabled={emailState.isLoading || saving || !form.pdf_url}
-                title={!form.pdf_url ? t('messages.pdfRequired') : undefined}
-              >
-                <Mail className="mr-2 size-4" />
-                {emailState.isLoading ? t('actions.sendingEmail') : t('actions.sendEmail')}
-              </Button>
-
-              {pdfHref && (
-                <Button variant="secondary" size="sm" asChild>
-                  <a href={pdfHref} target="_blank" rel="noreferrer">
-                    <ExternalLink className="mr-2 size-4" />
-                    {t('actions.openPdf')}
-                  </a>
-                </Button>
-              )}
+          {/* Musteri Tab */}
+          <TabsContent value="form" className="p-4">
+            <div className="space-y-4 max-w-2xl">
+              <div className="space-y-2">
+                <Label>{t('fields.status')}</Label>
+                <Select value={form.status} onValueChange={(v) => setField('status', v as OfferStatus)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="new">{t('status.new')}</SelectItem>
+                    <SelectItem value="in_review">{t('status.in_review')}</SelectItem>
+                    <SelectItem value="quoted">{t('status.quoted')}</SelectItem>
+                    <SelectItem value="sent">{t('status.sent')}</SelectItem>
+                    <SelectItem value="accepted">{t('status.accepted')}</SelectItem>
+                    <SelectItem value="rejected">{t('status.rejected')}</SelectItem>
+                    <SelectItem value="cancelled">{t('status.cancelled')}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.customerName')} *</Label>
+                  <Input value={form.customer_name} onChange={(e) => setField('customer_name', e.target.value)} disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.companyName')}</Label>
+                  <Input value={form.company_name} onChange={(e) => setField('company_name', e.target.value)} disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.email')} *</Label>
+                  <Input type="email" value={form.email} onChange={(e) => setField('email', e.target.value)} disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.phone')}</Label>
+                  <Input value={form.phone} onChange={(e) => setField('phone', e.target.value)} disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.locale')}</Label>
+                  <Input value={form.locale} onChange={(e) => setField('locale', e.target.value)} placeholder="tr / en / de" disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.countryCode')}</Label>
+                  <Input value={form.country_code} onChange={(e) => setField('country_code', e.target.value.toUpperCase())} placeholder="TR / DE" disabled={busy} />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t('fields.subject')}</Label>
+                <Input value={form.subject} onChange={(e) => setField('subject', e.target.value)} disabled={busy} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t('fields.message')}</Label>
+                <Textarea value={form.message} onChange={(e) => setField('message', e.target.value)} rows={4} disabled={busy} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t('fields.adminNotes')}</Label>
+                <Textarea value={form.admin_notes} onChange={(e) => setField('admin_notes', e.target.value)} rows={3} disabled={busy} />
+              </div>
+              <div className="flex flex-wrap gap-6">
+                <div className="flex items-center gap-2">
+                  <Switch checked={form.consent_marketing} onCheckedChange={(v) => setField('consent_marketing', v)} />
+                  <Label className="text-xs">{t('fields.consentMarketing')}</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch checked={form.consent_terms} onCheckedChange={(v) => setField('consent_terms', v)} />
+                  <Label className="text-xs">{t('fields.consentTerms')}</Label>
+                </div>
+              </div>
             </div>
+          </TabsContent>
 
-            {form.email_sent_at && (
-              <p className="text-xs text-muted-foreground">
-                {t('detail.lastSent')}: <code>{form.email_sent_at}</code>
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* FORM / JSON TABS */}
-      <Tabs value={editTab} onValueChange={setEditTab}>
-        <TabsList>
-          <TabsTrigger value="form">
-            <FormInput className="mr-2 size-4" />
-            {t('detail.tabForm')}
-          </TabsTrigger>
-          <TabsTrigger value="json">
-            <Code className="mr-2 size-4" />
-            {t('detail.tabJson')}
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="form" className="mt-4">
-          <div className="grid gap-6 xl:grid-cols-3">
-            {/* LEFT — Main fields */}
-            <Card className="xl:col-span-2">
-              <CardHeader className="gap-2">
-                <CardTitle className="text-base">{t('detail.formTitle')}</CardTitle>
-                <CardDescription>{t('detail.formDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2 md:col-span-2">
-                  <Label>{t('fields.status')}</Label>
-                  <Select
-                    value={form.status}
-                    onValueChange={(v) => setField('status', v as OfferStatus)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
+          {/* Fiyatlandirma Tab */}
+          <TabsContent value="pricing" className="p-4">
+            <div className="space-y-4 max-w-lg">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.offerNo')}</Label>
+                  <Input value={form.offer_no} onChange={(e) => setField('offer_no', e.target.value)} placeholder="ENS-2025-0001" disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.validUntil')}</Label>
+                  <Input type="date" value={form.valid_until} onChange={(e) => setField('valid_until', e.target.value)} disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t('fields.currency')}</Label>
+                  <Input value={form.currency} onChange={(e) => setField('currency', e.target.value || 'EUR')} disabled={busy} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Urun</Label>
+                  <Select value={form.product_id || 'none'} onValueChange={(v) => setField('product_id', v === 'none' ? '' : v)} disabled={busy}>
+                    <SelectTrigger><SelectValue placeholder="Urun secin" /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="new">{t('status.new')}</SelectItem>
-                      <SelectItem value="in_review">{t('status.in_review')}</SelectItem>
-                      <SelectItem value="quoted">{t('status.quoted')}</SelectItem>
-                      <SelectItem value="sent">{t('status.sent')}</SelectItem>
-                      <SelectItem value="accepted">{t('status.accepted')}</SelectItem>
-                      <SelectItem value="rejected">{t('status.rejected')}</SelectItem>
-                      <SelectItem value="cancelled">{t('status.cancelled')}</SelectItem>
+                      <SelectItem value="none">— Urun secilmedi —</SelectItem>
+                      {products.map((p: any) => (
+                        <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  {form.product_id && <p className="text-[10px] text-muted-foreground font-mono">{form.product_id}</p>}
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Hizmet</Label>
+                  <Select value={form.service_id || 'none'} onValueChange={(v) => setField('service_id', v === 'none' ? '' : v)} disabled={busy}>
+                    <SelectTrigger><SelectValue placeholder="Hizmet secin" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">— Hizmet secilmedi —</SelectItem>
+                      {services.map((s: any) => (
+                        <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {form.service_id && <p className="text-[10px] text-muted-foreground font-mono">{form.service_id}</p>}
+                </div>
+              </div>
 
-                <div className="space-y-2">
-                  <Label>{t('fields.customerName')} *</Label>
-                  <Input
-                    value={form.customer_name}
-                    onChange={(e) => setField('customer_name', e.target.value)}
-                    disabled={busy}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.companyName')}</Label>
-                  <Input
-                    value={form.company_name}
-                    onChange={(e) => setField('company_name', e.target.value)}
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.email')} *</Label>
-                  <Input
-                    type="email"
-                    value={form.email}
-                    onChange={(e) => setField('email', e.target.value)}
-                    disabled={busy}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.phone')}</Label>
-                  <Input
-                    value={form.phone}
-                    onChange={(e) => setField('phone', e.target.value)}
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.locale')}</Label>
-                  <Input
-                    value={form.locale}
-                    onChange={(e) => setField('locale', e.target.value)}
-                    placeholder="tr / en / de"
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.countryCode')}</Label>
-                  <Input
-                    value={form.country_code}
-                    onChange={(e) => setField('country_code', e.target.value.toUpperCase())}
-                    placeholder="TR / DE"
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <Label>{t('fields.subject')}</Label>
-                  <Input
-                    value={form.subject}
-                    onChange={(e) => setField('subject', e.target.value)}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="space-y-2 md:col-span-2">
-                  <Label>{t('fields.message')}</Label>
-                  <Textarea
-                    value={form.message}
-                    onChange={(e) => setField('message', e.target.value)}
-                    rows={4}
-                    disabled={busy}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* RIGHT — Pricing & Meta */}
-            <Card>
-              <CardHeader className="gap-2">
-                <CardTitle className="text-base">{t('detail.pricingTitle')}</CardTitle>
-                <CardDescription>{t('detail.pricingDesc')}</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-4">
-                <div className="space-y-2">
-                  <Label>{t('fields.currency')}</Label>
-                  <Input
-                    value={form.currency}
-                    onChange={(e) => setField('currency', e.target.value || 'EUR')}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="space-y-2">
-                    <Label>{t('fields.netTotal')}</Label>
-                    <Input
-                      inputMode="decimal"
-                      value={form.net_total}
-                      onChange={(e) => setField('net_total', e.target.value)}
-                      disabled={busy}
-                    />
+              <div className="rounded-md border p-4 space-y-3">
+                <div className="text-xs font-medium">Fiyat Hesaplama</div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t('fields.netTotal')}</Label>
+                    <Input inputMode="decimal" value={form.net_total} onChange={(e) => setField('net_total', e.target.value)} disabled={busy} />
                   </div>
-                  <div className="space-y-2">
-                    <Label>{t('fields.vatRate')}</Label>
-                    <Input
-                      inputMode="decimal"
-                      value={form.vat_rate}
-                      onChange={(e) => setField('vat_rate', e.target.value)}
-                      disabled={busy}
-                    />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t('fields.vatRate')}</Label>
+                    <Input inputMode="decimal" value={form.vat_rate} onChange={(e) => setField('vat_rate', e.target.value)} disabled={busy} />
                   </div>
-                  <div className="space-y-2">
-                    <Label>{t('fields.shippingTotal')}</Label>
-                    <Input
-                      inputMode="decimal"
-                      value={form.shipping_total}
-                      onChange={(e) => setField('shipping_total', e.target.value)}
-                      disabled={busy}
-                    />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t('fields.shippingTotal')}</Label>
+                    <Input inputMode="decimal" value={form.shipping_total} onChange={(e) => setField('shipping_total', e.target.value)} disabled={busy} />
                   </div>
-                  <div className="space-y-2">
-                    <Label>{t('fields.vatTotal')}</Label>
-                    <Input value={form.vat_total} readOnly />
-                  </div>
-                  <div className="space-y-2 col-span-2">
-                    <Label>{t('fields.grossTotal')}</Label>
-                    <Input value={form.gross_total} readOnly className="font-semibold" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t('fields.vatTotal')}</Label>
+                    <Input value={form.vat_total} readOnly className="bg-muted" />
                   </div>
                 </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-semibold">{t('fields.grossTotal')}</Label>
+                  <Input value={form.gross_total} readOnly className="bg-muted font-semibold text-lg" />
+                </div>
+              </div>
+            </div>
+          </TabsContent>
 
-                <hr />
+          {/* PDF & Email Tab */}
+          <TabsContent value="pdf" className="p-4">
+            {form.id && (
+              <div className="space-y-4">
+                <OfferPdfPreview pdfUrl={pdfHref} emptyMessage={t('detail.pdfEmpty')} fallbackLabel={t('detail.pdfFallback')} />
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="outline" size="sm" onClick={onGeneratePdf} disabled={pdfState.isLoading || saving}>
+                    <FileText className="mr-2 size-4" />
+                    {pdfState.isLoading ? t('actions.generatingPdf') : form.pdf_url ? t('actions.regeneratePdf') : t('actions.generatePdf')}
+                  </Button>
+                  <Button size="sm" onClick={onSendEmail} disabled={emailState.isLoading || saving || !form.pdf_url} title={!form.pdf_url ? t('messages.pdfRequired') : undefined}>
+                    <Mail className="mr-2 size-4" />
+                    {emailState.isLoading ? t('actions.sendingEmail') : t('actions.sendEmail')}
+                  </Button>
+                  {pdfHref && (
+                    <Button variant="secondary" size="sm" asChild>
+                      <a href={pdfHref} target="_blank" rel="noreferrer">
+                        <ExternalLink className="mr-2 size-4" /> {t('actions.openPdf')}
+                      </a>
+                    </Button>
+                  )}
+                </div>
+                {form.email_sent_at && (
+                  <p className="text-xs text-muted-foreground">{t('detail.lastSent')}: <code>{form.email_sent_at}</code></p>
+                )}
+              </div>
+            )}
+          </TabsContent>
 
-                <div className="space-y-2">
-                  <Label>{t('fields.offerNo')}</Label>
-                  <Input
-                    value={form.offer_no}
-                    onChange={(e) => setField('offer_no', e.target.value)}
-                    placeholder="ENS-2025-0001"
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.validUntil')}</Label>
-                  <Input
-                    type="date"
-                    value={form.valid_until}
-                    onChange={(e) => setField('valid_until', e.target.value)}
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.productId')}</Label>
-                  <Input
-                    value={form.product_id}
-                    onChange={(e) => setField('product_id', e.target.value)}
-                    className="font-mono text-xs"
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.serviceId')}</Label>
-                  <Input
-                    value={form.service_id}
-                    onChange={(e) => setField('service_id', e.target.value)}
-                    className="font-mono text-xs"
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.adminNotes')}</Label>
-                  <Textarea
-                    value={form.admin_notes}
-                    onChange={(e) => setField('admin_notes', e.target.value)}
-                    rows={3}
-                    disabled={busy}
-                    placeholder={t('fields.adminNotesPlaceholder')}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>{t('fields.pdfUrl')}</Label>
-                  <Input
-                    value={form.pdf_url}
-                    onChange={(e) => setField('pdf_url', e.target.value)}
-                    disabled={busy}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>{t('fields.pdfAssetId')}</Label>
-                  <Input
-                    value={form.pdf_asset_id}
-                    onChange={(e) => setField('pdf_asset_id', e.target.value)}
-                    disabled={busy}
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.consent_marketing}
-                    onCheckedChange={(v) => setField('consent_marketing', v)}
-                  />
-                  <Label>{t('fields.consentMarketing')}</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={form.consent_terms}
-                    onCheckedChange={(v) => setField('consent_terms', v)}
-                  />
-                  <Label>{t('fields.consentTerms')}</Label>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="json" className="mt-4">
-          <Card>
-            <CardHeader className="gap-2">
-              <CardTitle className="text-base">{t('detail.jsonTitle')}</CardTitle>
-              <CardDescription>{t('detail.jsonDesc')}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <AdminJsonEditor
-                label={t('detail.jsonLabel')}
-                value={form.form_data ?? {}}
-                onChange={(next) => setField('form_data', next)}
-                onErrorChange={() => toast.error(t('messages.invalidJson'))}
-                disabled={busy}
-                height={420}
-              />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+          {/* JSON Tab */}
+          <TabsContent value="json" className="p-4">
+            <AdminJsonEditor label={t('detail.jsonLabel')} value={form.form_data ?? {}}
+              onChange={(next) => setField('form_data', next)}
+              onErrorChange={() => toast.error(t('messages.invalidJson'))}
+              disabled={busy} height={420} />
+          </TabsContent>
+        </Tabs>
+      </Card>
     </div>
   );
 }

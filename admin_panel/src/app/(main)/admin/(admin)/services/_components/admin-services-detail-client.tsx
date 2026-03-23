@@ -1,36 +1,30 @@
+// =============================================================
+// Service Detail — Tab yapisi + AI Content Assist (Standardized)
+// Icerik / Ozellikler / Gorseller / SEO ic tab'lar + JSON dis tab
+// =============================================================
+
 'use client';
 
-// =============================================================
-// FILE: src/app/(main)/admin/(admin)/services/admin-services-detail-client.tsx
-// FINAL — Admin Service Detail (Create/Edit) (App Router + shadcn)
-// - Bootstrap yok, inline style yok
-// - Locale: useAdminLocales + URL sync (?locale=)
-// - id: "new" => create
-// - ServiceForm şimdilik eski component (bir sonraki adımda refactor)
-// =============================================================
-
 import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { toast } from 'sonner';
-import { ArrowLeft, Save, RefreshCcw } from 'lucide-react';
-
-import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
-import { resolveAdminApiLocale } from '@/i18n/adminLocale';
-import { localeShortClient, localeShortClientOr } from '@/i18n/localeShortClient';
-import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
-
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-
-import { ServiceForm } from '@/app/(main)/admin/(admin)/services/serviceForm/ServiceForm';
-
-import type {
-  ServiceCreatePayload,
-  ServiceUpdatePayload,
-  ServiceFormValues,
-  ServiceDto,
-} from '@/integrations/shared';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import RichContentEditor from '@/app/(main)/admin/_components/common/RichContentEditor';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ArrowLeft, Save, FileJson } from 'lucide-react';
+import { useAdminT } from '@/app/(main)/admin/_components/common/useAdminT';
+import { useAIContentAssist, type LocaleContent } from '@/app/(main)/admin/_components/common/useAIContentAssist';
+import { AdminLocaleSelect } from '@/app/(main)/admin/_components/common/AdminLocaleSelect';
+import { AdminJsonEditor } from '@/app/(main)/admin/_components/common/AdminJsonEditor';
+import { useAdminLocales } from '@/app/(main)/admin/_components/common/useAdminLocales';
+import { AIActionDropdown, type AIAction } from '@/app/(main)/admin/_components/common/AIActionDropdown';
+import { AIResultsPanel } from '@/app/(main)/admin/_components/common/AIResultsPanel';
+import { GooglePreview } from '@/app/(main)/admin/_components/common/GooglePreview';
+import { ImagesGalleryTab } from '@/app/(main)/admin/_components/common/ImagesGalleryTab';
+import { toast } from 'sonner';
 import {
   useGetServiceAdminQuery,
   useCreateServiceAdminMutation,
@@ -38,346 +32,305 @@ import {
 } from '@/integrations/hooks';
 
 function isUuidLike(v?: string) {
-  if (!v) return false;
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v);
-}
-
-const normalizeLocale = (v: unknown): string =>
-  String(v ?? '')
-    .trim()
-    .toLowerCase();
-
-function getErrMessage(err: unknown, fallback: string): string {
-  const anyErr = err as any;
-  const m1 = anyErr?.data?.error?.message;
-  if (typeof m1 === 'string' && m1.trim()) return m1;
-  const m2 = anyErr?.data?.message;
-  if (typeof m2 === 'string' && m2.trim()) return m2;
-  const m3 = anyErr?.error;
-  if (typeof m3 === 'string' && m3.trim()) return m3;
-  return fallback;
+  return v ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v) : false;
 }
 
 export default function AdminServiceDetailClient({ id }: { id: string }) {
-  const t = useAdminT();
+  const t = useAdminT('admin.services');
   const router = useRouter();
-  const sp = useSearchParams();
+  const isNew = id === 'new';
 
-  const isCreateMode = String(id) === 'new';
+  const { localeOptions } = useAdminLocales();
+  const [activeLocale, setActiveLocale] = React.useState('de');
+  const [activeTab, setActiveTab] = React.useState<'form' | 'json'>('form');
 
-  const {
-    localeOptions,
-    defaultLocaleFromDb,
-    loading: localesLoading,
-    fetching: localesFetching,
-  } = useAdminLocales();
+  // AI
+  const { assist: aiAssist, loading: aiLoading } = useAIContentAssist();
+  const [aiResults, setAiResults] = React.useState<LocaleContent[] | null>(null);
 
-  const apiLocaleFromDb = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, 'de');
-  }, [localeOptions, defaultLocaleFromDb]);
+  // RTK Query
+  const { data: item, isFetching, refetch } = useGetServiceAdminQuery(
+    { id, locale: activeLocale } as any, { skip: isNew || !isUuidLike(id) } as any,
+  );
+  const [createService, { isLoading: isCreating }] = useCreateServiceAdminMutation();
+  const [updateService, { isLoading: isUpdating }] = useUpdateServiceAdminMutation();
 
-  const localeSet = React.useMemo(() => {
-    return new Set(
-      (localeOptions ?? []).map((x: any) => localeShortClient(x.value)).filter(Boolean),
-    );
-  }, [localeOptions]);
-
-  const urlLocale = React.useMemo(() => {
-    const q = sp?.get('locale');
-    return localeShortClient(q) || '';
-  }, [sp]);
-
-  // active locale (state, URL sync)
-  const [activeLocale, setActiveLocale] = React.useState<string>('');
+  // Form state
+  const [f, setF] = React.useState({
+    locale: 'de', name: '', slug: '', description: '',
+    image_url: '', image_alt: '', images: [] as string[],
+    is_active: true, featured: false,
+    area: '', duration: '', maintenance: '', equipment: '',
+    price: '', includes: '', warranty: '',
+    tags: '', meta_title: '', meta_description: '', meta_keywords: '',
+    display_order: 0,
+  });
 
   React.useEffect(() => {
-    if (!localeOptions || localeOptions.length === 0) return;
-
-    setActiveLocale((prev) => {
-      const p = localeShortClient(prev);
-      const u = localeShortClient(urlLocale);
-      const def = localeShortClientOr(apiLocaleFromDb, 'de');
-
-      const canUse = (l: string) => !!l && (localeSet.size === 0 || localeSet.has(l));
-
-      if (p && canUse(p)) return p;
-      if (u && canUse(u)) return u;
-      if (def && canUse(def)) return def;
-
-      const first = localeShortClient((localeOptions as any)?.[0]?.value);
-      return first || 'de';
-    });
-  }, [localeOptions, localeSet, urlLocale, apiLocaleFromDb]);
-
-  const queryLocale = React.useMemo(() => {
-    const l = localeShortClient(activeLocale);
-    if (l && (localeSet.size === 0 || localeSet.has(l))) return l;
-    return localeShortClientOr(apiLocaleFromDb, 'de');
-  }, [activeLocale, localeSet, apiLocaleFromDb]);
-
-  // locale -> URL sync
-  React.useEffect(() => {
-    const l = localeShortClient(activeLocale);
-    if (!l) return;
-    if (l === urlLocale) return;
-
-    const params = new URLSearchParams(sp?.toString() || '');
-    params.set('locale', l);
-
-    if (isCreateMode) {
-      router.replace(`/admin/services/new?${params.toString()}`);
-    } else {
-      router.replace(`/admin/services/${encodeURIComponent(String(id))}?${params.toString()}`);
+    if (item && !isNew) {
+      const s = item as any;
+      setF({
+        locale: s.locale || activeLocale, name: s.name || '', slug: s.slug || '',
+        description: s.description || '',
+        image_url: s.image_url || s.featured_image || '',
+        image_alt: s.image_alt || s.alt || '',
+        images: Array.isArray(s.images) ? s.images : [],
+        is_active: s.is_active === 1 || s.is_active === true,
+        featured: s.featured === 1 || s.featured === true,
+        area: s.area || '', duration: s.duration || '', maintenance: s.maintenance || '',
+        equipment: s.equipment || '',
+        price: s.price || '',
+        includes: s.includes || '', warranty: s.warranty || '',
+        tags: Array.isArray(s.tags) ? s.tags.join(', ') : (s.tags || ''),
+        meta_title: s.meta_title || '', meta_description: s.meta_description || '',
+        meta_keywords: s.meta_keywords || '',
+        display_order: s.display_order || 0,
+      });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeLocale]);
+  }, [item, isNew, activeLocale]);
 
-  const localesReady = !localesLoading && !localesFetching;
-  const hasLocales = (localeOptions?.length ?? 0) > 0;
+  React.useEffect(() => { if (!isNew && id) refetch(); }, [activeLocale]);
 
-  const shouldSkipDetail = isCreateMode || !isUuidLike(String(id || '')) || !queryLocale;
+  const set = (field: string, value: unknown) => setF((p) => ({ ...p, [field]: value }));
+  const isLoading = isFetching || isCreating || isUpdating;
 
-  const {
-    data: service,
-    isLoading: isLoadingService,
-    isFetching: isFetchingService,
-    error: serviceError,
-    refetch,
-  } = useGetServiceAdminQuery(
-    { id: String(id), locale: queryLocale } as any,
-    { skip: shouldSkipDetail } as any,
+  const localesForSelect = React.useMemo(() =>
+    (localeOptions || []).map((l: any) => ({ value: String(l.value || ''), label: String(l.label || l.value || '') })),
+    [localeOptions],
   );
 
-  const [createService, createState] = useCreateServiceAdminMutation();
-  const [updateService, updateState] = useUpdateServiceAdminMutation();
+  // AI handler — supports all 4 actions
+  const handleAIAction = async (action: AIAction) => {
+    const targets = localesForSelect.map((l) => l.value).filter(Boolean);
+    if (!targets.length) targets.push(activeLocale || 'de');
+    const result = await aiAssist({
+      title: f.name, summary: f.description, content: f.description,
+      tags: f.tags, locale: activeLocale, target_locales: targets,
+      module_key: 'services', action,
+    });
+    if (!result) return;
+    setAiResults(result);
+    const cur = result.find((r) => r.locale === activeLocale) || result[0];
+    if (cur) setF((p) => ({
+      ...p, name: cur.title || p.name, slug: cur.slug || p.slug,
+      description: cur.content || cur.summary || p.description,
+      meta_title: cur.meta_title || p.meta_title,
+      meta_description: cur.meta_description || p.meta_description,
+      tags: cur.tags || p.tags,
+    }));
+  };
 
-  const loading = localesLoading || localesFetching || isLoadingService || isFetchingService;
-  const saving = createState.isLoading || updateState.isLoading;
-  const busy = loading || saving;
+  const handleApplyAILocale = (lc: LocaleContent) => {
+    setActiveLocale(lc.locale);
+    setF((p) => ({ ...p, locale: lc.locale, name: lc.title, slug: lc.slug || p.slug,
+      description: lc.content || lc.summary,
+      meta_title: lc.meta_title, meta_description: lc.meta_description, tags: lc.tags }));
+  };
 
-  function onCancel() {
-    router.push(`/admin/services?locale=${encodeURIComponent(queryLocale || 'de')}`);
-  }
-
-  async function onSubmit(values: ServiceFormValues) {
+  const handleSubmit = async () => {
+    if (!f.name.trim()) { toast.error('Ad zorunludur'); return; }
+    const payload: any = {
+      locale: activeLocale, name: f.name.trim(),
+      slug: f.slug.trim() || f.name.trim().toLowerCase().replace(/\s+/g, '-'),
+      description: f.description || undefined,
+      image_url: f.image_url || null, featured_image: f.image_url || null,
+      image_alt: f.image_alt || undefined,
+      is_active: f.is_active, featured: f.featured,
+      area: f.area || null, duration: f.duration || null, maintenance: f.maintenance || null, equipment: f.equipment || null,
+      price: f.price || null, includes: f.includes || null, warranty: f.warranty || null,
+      tags: f.tags || null, meta_title: f.meta_title || null,
+      meta_description: f.meta_description || null, meta_keywords: f.meta_keywords || null,
+      display_order: f.display_order,
+    };
     try {
-      const loc = normalizeLocale(values.locale || queryLocale || apiLocaleFromDb);
-      if (!loc || (localeSet.size > 0 && !localeSet.has(localeShortClient(loc)))) {
-        toast.error(t('admin.services.formHeader.localeError'));
-        return;
+      if (isNew) {
+        const result = await createService(payload).unwrap();
+        toast.success('Hizmet olusturuldu');
+        if ((result as any)?.id) router.push(`/admin/services/${(result as any).id}?locale=${activeLocale}`);
+      } else {
+        await updateService({ id, patch: payload } as any).unwrap();
+        toast.success('Hizmet guncellendi');
       }
-
-      const common: any = {
-        featured: values.featured,
-        is_active: values.is_active,
-        display_order: values.display_order ? Number(values.display_order) : undefined,
-
-        featured_image: values.featured_image || null,
-        image_url: values.image_url || null,
-        image_asset_id: values.image_asset_id || null,
-
-        area: values.area || null,
-        duration: values.duration || null,
-        maintenance: values.maintenance || null,
-        season: values.season || null,
-        equipment: values.equipment || null,
-
-        locale: loc,
-        name: values.name?.trim() || '',
-        slug: values.slug?.trim() || '',
-
-        description: values.description || undefined,
-        material: values.material || undefined,
-        price: values.price || undefined,
-        price_numeric: values.price_numeric ? Number(values.price_numeric) : undefined,
-        includes: values.includes || undefined,
-        warranty: values.warranty || undefined,
-        image_alt: values.image_alt || undefined,
-
-        tags: values.tags || null,
-        meta_title: values.meta_title || null,
-        meta_description: values.meta_description || null,
-        meta_keywords: values.meta_keywords || null,
-      };
-
-      if (!common.name || !common.slug) {
-        toast.error(t('admin.services.formHeader.nameSlugRequired'));
-        return;
-      }
-
-      if (isCreateMode) {
-        const payload: ServiceCreatePayload = {
-          ...common,
-          replicate_all_locales: (values as any).replicate_all_locales,
-        };
-
-        const created = await createService(payload as any).unwrap();
-        const nextId = String((created as any)?.id ?? '').trim();
-
-        if (!isUuidLike(nextId)) {
-          toast.error(t('admin.services.formHeader.createdNoId'));
-          return;
-        }
-
-        toast.success(t('admin.services.formHeader.created'));
-        router.replace(
-          `/admin/services/${encodeURIComponent(nextId)}?locale=${encodeURIComponent(
-            localeShortClient(loc) || loc,
-          )}`,
-        );
-        router.refresh();
-        return;
-      }
-
-      const currentId = String((service as any)?.id ?? id);
-      if (!isUuidLike(currentId)) {
-        toast.error(t('admin.services.formHeader.idNotFound'));
-        return;
-      }
-
-      const patch: ServiceUpdatePayload = {
-        ...common,
-        apply_all_locales: (values as any).apply_all_locales,
-      };
-
-      await updateService({ id: currentId, patch } as any).unwrap();
-      toast.success(t('admin.services.formHeader.updated'));
-
-      const short = localeShortClient(loc);
-      if (short && short !== queryLocale) setActiveLocale(short);
-    } catch (err) {
-      toast.error(getErrMessage(err, t('admin.services.formHeader.defaultError')));
+    } catch (err: any) {
+      toast.error(err?.data?.error?.message || 'Hata');
     }
+  };
+
+  if (!isNew && !isUuidLike(id)) {
+    return <div className="p-8 text-center text-muted-foreground">Gecersiz ID</div>;
   }
-
-  // Guards
-  if (localesReady && !hasLocales) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{t('admin.services.formHeader.noLocalesTitle')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('admin.services.formHeader.noLocalesDescription')}
-          </p>
-        </div>
-
-        <Card>
-          <CardContent className="flex items-center justify-between pt-6">
-            <Button variant="outline" onClick={() => router.push('/admin/site-settings')}>
-              {t('admin.services.formHeader.goToSettings')}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!isCreateMode && !isUuidLike(String(id || ''))) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{t('admin.services.formHeader.invalidIdTitle')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('admin.services.formHeader.invalidIdDescription')}{' '}
-            <code className="wrap-break-word">{String(id || '-')}</code>
-          </p>
-        </div>
-
-        <Card>
-          <CardContent className="flex items-center justify-between pt-6">
-            <Button variant="outline" onClick={onCancel}>
-              <ArrowLeft className="mr-2 size-4" />
-              {t('admin.services.formHeader.backToList')}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!isCreateMode && !loading && !service && serviceError) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-1">
-          <h1 className="text-lg font-semibold">{t('admin.services.formHeader.notFoundTitle')}</h1>
-          <p className="text-sm text-muted-foreground">
-            {t('admin.services.formHeader.notFoundDescription')}{' '}
-            <code className="wrap-break-word">{String(id)}</code>
-          </p>
-        </div>
-
-        <Card>
-          <CardContent className="flex items-center justify-between pt-6">
-            <Button variant="outline" onClick={onCancel}>
-              <ArrowLeft className="mr-2 size-4" />
-              {t('admin.services.formHeader.backToList')}
-            </Button>
-            <Button variant="outline" onClick={() => refetch()}>
-              <RefreshCcw className="mr-2 size-4" />
-              {t('admin.services.formHeader.retryButton')}
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  const pageTitle = isCreateMode
-    ? t('admin.services.formHeader.createTitle')
-    : (service as any)?.name || t('admin.services.formHeader.editTitle');
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <Button variant="outline" onClick={() => router.back()} disabled={busy}>
-              <ArrowLeft className="mr-2 size-4" />
-              {t('admin.services.formHeader.backButton')}
-            </Button>
-            <h1 className="text-lg font-semibold">{pageTitle}</h1>
-          </div>
-
-          <p className="text-sm text-muted-foreground">
-            {t('admin.services.formHeader.description')}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-            <span>{t('admin.services.formHeader.activeLocale')}</span>
-            <Badge variant="secondary">{queryLocale || '-'}</Badge>
-            {isCreateMode ? <Badge>CREATE</Badge> : <Badge variant="secondary">EDIT</Badge>}
+    <div className="space-y-4">
+      <div className="rounded-lg border bg-card">
+        {/* Header */}
+        <div className="border-b p-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="flex items-center gap-3">
+              <Button variant="ghost" size="icon" onClick={() => router.push('/admin/services')}>
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <div>
+                <div className="text-sm font-semibold">{isNew ? 'Yeni Hizmet' : ((item as any)?.name || 'Hizmet Duzenle')}</div>
+                <div className="text-xs text-muted-foreground">{isNew ? 'Yeni hizmet olustur' : 'Hizmeti duzenle'}</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <AdminLocaleSelect options={localesForSelect} value={activeLocale}
+                onChange={(v) => { setActiveLocale(v); setF((p) => ({ ...p, locale: v })); }} disabled={isLoading} />
+              <AIActionDropdown onAction={handleAIAction} loading={aiLoading} disabled={isLoading || !f.name.trim()} />
+              <Button size="sm" onClick={handleSubmit} disabled={isLoading}>
+                <Save className="h-4 w-4 mr-1.5" /> Kaydet
+              </Button>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={onCancel} disabled={busy}>
-            {t('admin.services.formHeader.cancelButton')}
-          </Button>
-          <Button
-            onClick={() => (document.getElementById('service-form-submit') as any)?.click?.()}
-            disabled={busy}
-          >
-            <Save className="mr-2 size-4" />
-            {t('admin.services.formHeader.saveButton')}
-          </Button>
-        </div>
+        {/* AI Sonuclari */}
+        {aiResults && aiResults.length > 1 && (
+          <AIResultsPanel results={aiResults} currentLocale={activeLocale}
+            onApply={handleApplyAILocale} onClose={() => setAiResults(null)} />
+        )}
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as typeof activeTab)}>
+          <div className="border-b px-3">
+            <TabsList className="h-auto bg-transparent p-0">
+              <TabsTrigger value="form" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">Hizmet</TabsTrigger>
+              <TabsTrigger value="json" className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary">
+                <FileJson className="h-4 w-4 mr-1.5" /> JSON
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="form" className="p-0">
+            <ServiceFormTabs f={f} setF={setF} set={set} isLoading={isLoading} />
+          </TabsContent>
+
+          <TabsContent value="json" className="p-3">
+            <AdminJsonEditor value={f} onChange={(json) => setF((p) => ({ ...p, ...json }))} disabled={isLoading} height={500} />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+/* ── Ic Tab'lar: Icerik / Ozellikler / Gorseller / SEO ── */
+
+function ServiceFormTabs({ f, setF, set, isLoading }: { f: any; setF: any; set: any; isLoading: boolean }) {
+  const [tab, setTab] = React.useState<'content' | 'specs' | 'images' | 'seo'>('content');
+
+  return (
+    <div className="p-3 space-y-3">
+      <div className="flex gap-1 border-b pb-2">
+        {([
+          { key: 'content' as const, label: 'Icerik' },
+          { key: 'specs' as const, label: 'Ozellikler' },
+          { key: 'images' as const, label: 'Gorseller' },
+          { key: 'seo' as const, label: 'SEO' },
+        ]).map((t) => (
+          <button key={t.key} type="button"
+            className={`rounded-t-md px-4 py-1.5 text-xs font-medium transition-colors ${
+              tab === t.key ? 'border border-b-0 bg-background text-foreground' : 'text-muted-foreground hover:text-foreground'
+            }`} onClick={() => setTab(t.key)}>{t.label}</button>
+        ))}
       </div>
 
-      {/* ServiceForm: şimdilik mevcut bileşen (bir sonraki adımda shadcn refactor) */}
-      <ServiceForm
-        mode={isCreateMode ? 'create' : 'edit'}
-        initialData={!isCreateMode && service ? (service as unknown as ServiceDto) : undefined}
-        loading={loading}
-        saving={saving}
-        locales={(localeOptions ?? []) as any}
-        localesLoading={localesLoading || localesFetching}
-        defaultLocale={queryLocale || apiLocaleFromDb || 'de'}
-        onSubmit={onSubmit}
-        onCancel={onCancel}
-        onLocaleChange={(loc: string) =>
-          setActiveLocale(localeShortClientOr(loc, queryLocale || 'de'))
-        }
-      />
+      {/* Icerik */}
+      {tab === 'content' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Ad *</Label>
+              <Input value={f.name} onChange={(e) => set('name', e.target.value)} disabled={isLoading} placeholder="Hizmet adi" />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Slug</Label>
+              <Input value={f.slug} onChange={(e) => set('slug', e.target.value)} disabled={isLoading} placeholder="hizmet-slug" />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs">Aciklama</Label>
+            <RichContentEditor value={f.description} onChange={(v) => set('description', v)} disabled={isLoading} />
+          </div>
+
+          <div className="flex flex-wrap gap-6">
+            <div className="flex items-center gap-2">
+              <Switch checked={f.is_active} onCheckedChange={(v) => set('is_active', v)} disabled={isLoading} />
+              <Label className="text-xs cursor-pointer">Aktif</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={f.featured} onCheckedChange={(v) => set('featured', v)} disabled={isLoading} />
+              <Label className="text-xs cursor-pointer">One Cikan</Label>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Ozellikler */}
+      {tab === 'specs' && (
+        <div className="space-y-3 max-w-lg">
+          <p className="text-xs text-muted-foreground">Dile gore degisen hizmet ozellikleri.</p>
+          <div className="space-y-1.5"><Label className="text-xs">Hizmet Alani / Kapsami</Label><Input value={f.area} onChange={(e) => set('area', e.target.value)} disabled={isLoading} /></div>
+          <div className="space-y-1.5"><Label className="text-xs">Hizmet Suresi</Label><Input value={f.duration} onChange={(e) => set('duration', e.target.value)} disabled={isLoading} /></div>
+          <div className="space-y-1.5"><Label className="text-xs">Bakim Periyodu</Label><Input value={f.maintenance} onChange={(e) => set('maintenance', e.target.value)} disabled={isLoading} /></div>
+          <div className="space-y-1.5"><Label className="text-xs">Kullanilan Ekipman</Label><Input value={f.equipment} onChange={(e) => set('equipment', e.target.value)} disabled={isLoading} /></div>
+          <div className="space-y-1.5"><Label className="text-xs">Dahil Olan Hizmetler</Label><Textarea value={f.includes} onChange={(e) => set('includes', e.target.value)} disabled={isLoading} rows={3} /></div>
+          <div className="space-y-1.5"><Label className="text-xs">Fiyat / Fiyat Bilgisi</Label><Input value={f.price} onChange={(e) => set('price', e.target.value)} disabled={isLoading} /></div>
+          <div className="space-y-1.5"><Label className="text-xs">Garanti Kosullari</Label><Textarea value={f.warranty} onChange={(e) => set('warranty', e.target.value)} disabled={isLoading} rows={2} /></div>
+        </div>
+      )}
+
+      {/* Gorseller — ImagesGalleryTab */}
+      {tab === 'images' && (
+        <ImagesGalleryTab
+          coverUrl={f.image_url}
+          coverAlt={f.image_alt}
+          images={f.images}
+          onCoverChange={(url) => set('image_url', url)}
+          onCoverAltChange={(alt) => set('image_alt', alt)}
+          onImagesChange={(urls) => {
+            setF((p: any) => ({ ...p, images: urls }));
+            if (!f.image_url && urls.length > 0) set('image_url', urls[0]);
+          }}
+          disabled={isLoading}
+          folder="uploads/services"
+        />
+      )}
+
+      {/* SEO — GooglePreview */}
+      {tab === 'seo' && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Meta Baslik</label>
+              <Input value={f.meta_title} onChange={(e) => set('meta_title', e.target.value)} disabled={isLoading} placeholder="SEO basligi" />
+              <p className="text-[10px] text-muted-foreground">{(f.meta_title || '').length}/60</p>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs text-muted-foreground">Etiketler</label>
+              <Input value={f.tags} onChange={(e) => set('tags', e.target.value)} disabled={isLoading} placeholder="etiket1, etiket2" />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground">Meta Aciklama</label>
+            <Textarea value={f.meta_description} onChange={(e) => set('meta_description', e.target.value)} disabled={isLoading} rows={3} placeholder="max 155 karakter" />
+            <p className="text-[10px] text-muted-foreground">{(f.meta_description || '').length}/155</p>
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-xs text-muted-foreground">Meta Anahtar Kelimeler</label>
+            <Input value={f.meta_keywords} onChange={(e) => set('meta_keywords', e.target.value)} disabled={isLoading} />
+          </div>
+          <GooglePreview
+            title={f.meta_title || f.name}
+            url={`https://ensotek.de/dienstleistungen/${f.slug || 'hizmet-slug'}`}
+            description={f.meta_description || f.description?.replace(/<[^>]*>/g, '').slice(0, 155)}
+            titleFallback={f.name || 'Hizmet'}
+          />
+        </div>
+      )}
     </div>
   );
 }

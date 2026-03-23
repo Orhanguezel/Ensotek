@@ -1770,3 +1770,153 @@ export function normalizeDefaultLocalePublic(res: unknown): string {
 
   return '';
 }
+
+// =============================================================
+// Site Settings UI helpers (brand, locale options, tabs)
+// =============================================================
+
+export const SITE_SETTINGS_BRAND = 'ensotek';
+export const SITE_SETTINGS_BRAND_PREFIX: string = '';
+
+export type SiteSettingsTab =
+  | 'list'
+  | 'global_list'
+  | 'general'
+  | 'seo'
+  | 'smtp'
+  | 'cloudinary'
+  | 'brand_media'
+  | 'api'
+  | 'locales'
+  | 'branding';
+
+const GLOBAL_TABS: ReadonlySet<string> = new Set(['global_list', 'smtp', 'api', 'locales']);
+
+export function isSiteSettingsGlobalTab(tab: string): boolean {
+  return GLOBAL_TABS.has(tab);
+}
+
+export type SiteSettingsLocaleOption = {
+  value: string;
+  label: string;
+  isDefault?: boolean;
+  isActive?: boolean;
+};
+
+type AppLocaleLike = {
+  code?: string;
+  label?: string;
+  is_default?: boolean;
+  is_active?: boolean;
+};
+
+export function buildSiteSettingsLocalesOptions(
+  rows: AppLocaleLike[],
+): SiteSettingsLocaleOption[] {
+  if (!Array.isArray(rows) || rows.length === 0) return [];
+  return rows
+    .filter((r) => r && typeof r.code === 'string' && r.code.trim())
+    .map((r) => ({
+      value: r.code!.trim(),
+      label: r.label || r.code!.trim().toUpperCase(),
+      isDefault: r.is_default === true,
+      isActive: r.is_active !== false,
+    }));
+}
+
+export function pickInitialSiteSettingsLocale(rows: AppLocaleLike[]): string {
+  if (!Array.isArray(rows) || rows.length === 0) return 'de';
+  const def = rows.find((r) => r.is_default === true);
+  if (def?.code) return def.code.trim();
+  const active = rows.find((r) => r.is_active !== false && r.code);
+  if (active?.code) return active.code.trim();
+  return rows[0]?.code?.trim() || 'de';
+}
+
+// ── Detail page helpers ──
+
+export type SiteSettingsStructuredRendererKey =
+  | 'seo'
+  | 'seo_pages'
+  | 'app_locales'
+  | 'hero'
+  | 'home_backgrounds'
+  | 'contact_info'
+  | 'socials'
+  | 'company_profile'
+  | 'ui_header'
+  | 'businessHours'
+  | 'json';
+
+const STRUCTURED_KEY_MAP: Record<string, SiteSettingsStructuredRendererKey> = {
+  seo: 'seo',
+  site_seo: 'seo',
+  seo_pages: 'seo_pages',
+  app_locales: 'app_locales',
+  hero: 'hero',
+  hero_slider: 'hero',
+  home_backgrounds: 'home_backgrounds',
+  contact_info: 'contact_info',
+  socials: 'socials',
+  company_profile: 'company_profile',
+  ui_header: 'ui_header',
+  businessHours: 'businessHours',
+  business_hours: 'businessHours',
+};
+
+export function resolveSiteSettingsStructuredRendererKey(
+  settingKey: string,
+): SiteSettingsStructuredRendererKey {
+  const bare = settingKey.replace(/^[^_]*__/, ''); // strip brand prefix
+  return STRUCTURED_KEY_MAP[bare] ?? 'json';
+}
+
+export function buildSiteSettingsDetailLocaleOptions(
+  rows: AppLocaleLike[] | SiteSettingsLocaleOption[],
+  globalLabel?: string,
+): SiteSettingsLocaleOption[] {
+  // Accept both AppLocaleLike[] and already-built SiteSettingsLocaleOption[]
+  const opts = (rows as any[]).every?.((r: any) => 'value' in r && 'label' in r)
+    ? (rows as SiteSettingsLocaleOption[])
+    : buildSiteSettingsLocalesOptions(rows as AppLocaleLike[]);
+  return [{ value: '*', label: globalLabel || 'GLOBAL (*)' }, ...opts];
+}
+
+export function pickInitialSiteSettingsDetailLocale(
+  arg: AppLocaleLike[] | { localeFromQuery?: string; localeOptions?: SiteSettingsLocaleOption[]; defaultLocaleFromDb?: string },
+  paramLocale?: string | null,
+): string {
+  // Support object-style arg from detail client
+  if (arg && !Array.isArray(arg) && typeof arg === 'object') {
+    const { localeFromQuery, localeOptions, defaultLocaleFromDb } = arg as {
+      localeFromQuery?: string;
+      localeOptions?: SiteSettingsLocaleOption[];
+      defaultLocaleFromDb?: string;
+    };
+    if (localeFromQuery && localeFromQuery.trim()) return localeFromQuery.trim();
+    if (defaultLocaleFromDb && defaultLocaleFromDb.trim()) return defaultLocaleFromDb.trim();
+    const first = localeOptions?.find((o) => o.value !== '*');
+    return first?.value || 'de';
+  }
+  // Legacy array-style arg
+  if (paramLocale && paramLocale.trim()) return paramLocale.trim();
+  return pickInitialSiteSettingsLocale(arg as AppLocaleLike[]);
+}
+
+export function toShortSiteSettingsLocale(locale: string): string {
+  if (!locale) return '';
+  if (locale === '*') return '*';
+  return locale.split('-')[0].toLowerCase();
+}
+
+export function coerceSiteSettingsDetailValue(v: unknown): SettingValue {
+  if (v === null || v === undefined) return {};
+  if (typeof v === 'string') {
+    try {
+      return JSON.parse(v) as SettingValue;
+    } catch {
+      return v;
+    }
+  }
+  return v as SettingValue;
+}

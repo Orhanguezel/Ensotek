@@ -85,7 +85,19 @@ function buildIframeSrc(pdfUrl: string | null): string | null {
 }
 
 export function OfferPdfPreview({ pdfUrl, emptyMessage, fallbackLabel }: OfferPdfPreviewProps) {
-  const iframeSrc = React.useMemo(() => buildIframeSrc(pdfUrl), [pdfUrl]);
+  const [cacheBust, setCacheBust] = React.useState(() => Date.now());
+
+  // PDF URL degistiginde cache'i kir
+  React.useEffect(() => {
+    setCacheBust(Date.now());
+  }, [pdfUrl]);
+
+  const iframeSrc = React.useMemo(() => {
+    const base = buildIframeSrc(pdfUrl);
+    if (!base) return null;
+    const sep = base.includes('?') ? '&' : '?';
+    return `${base}${sep}t=${cacheBust}`;
+  }, [pdfUrl, cacheBust]);
 
   if (!iframeSrc) {
     return (

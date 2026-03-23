@@ -1,8 +1,6 @@
-// src/app/(main)/admin/(admin)/site-settings/tabs/index.ts
-
-export * from './general-settings-tab';
-export * from './seo-settings-tab';
-export * from './smtp-settings-tab';
-export * from './cloudinary-settings-tab';
-export * from './api-settings-tab';
-export * from './brand-media-tab';
+export { GeneralSettingsTab, type GeneralSettingsTabProps } from './general-settings-tab';
+export { SeoSettingsTab, type SeoSettingsTabProps } from './seo-settings-tab';
+export { SmtpSettingsTab, type SmtpSettingsTabProps } from './smtp-settings-tab';
+export { CloudinarySettingsTab, type CloudinarySettingsTabProps } from './cloudinary-settings-tab';
+export { ApiSettingsTab, type ApiSettingsTabProps } from './api-settings-tab';
+export { BrandMediaTab, type BrandMediaTabProps } from './brand-media-tab';

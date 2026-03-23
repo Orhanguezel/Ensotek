@@ -295,5 +295,75 @@ ON DUPLICATE KEY UPDATE
   `value`      = VALUES(`value`),
   `updated_at` = VALUES(`updated_at`);
 
+-- =============================================================
+-- seo_pages — Sayfa bazli SEO ayarlari (admin panelden duzenlenebilir)
+-- =============================================================
+
+SET @SEO_PAGES_DE := CAST(JSON_OBJECT(
+  'home', JSON_OBJECT('title', 'Ensotek - Industrielle Kuehl- und Klimatechnik', 'description', 'Fuehrender Anbieter fuer industrielle Kuehltuerme, Verdunstungskuehler und HVAC-Loesungen. Massgeschneiderte Technik fuer Industrie und Gewerbe.', 'og_image', '', 'no_index', false),
+  'product', JSON_OBJECT('title', 'Produkte - Kuehltuerme und HVAC Komponenten', 'description', 'Unser Produktprogramm: Offene und geschlossene Kuehltuerme, Verdunstungskuehler, Hybridkuehler und Zubehoer fuer industrielle Kuehlanwendungen.', 'og_image', '', 'no_index', false),
+  'sparepart', JSON_OBJECT('title', 'Ersatzteile - Kuehlturm Ersatzteile', 'description', 'Original-Ersatzteile fuer Kuehltuerme: Fuellkoerper, Duesen, Ventilatoren, Antriebe und weitere Komponenten.', 'og_image', '', 'no_index', false),
+  'service', JSON_OBJECT('title', 'Dienstleistungen - Engineering, Montage und Service', 'description', 'Umfassende Dienstleistungen: Planung, Fertigung, Montage, Modernisierung, Wartung, Leistungstests und Ersatzteilversorgung.', 'og_image', '', 'no_index', false),
+  'solutions', JSON_OBJECT('title', 'Loesungen - Industrielle Kuehlloesungen', 'description', 'Massgeschneiderte Kuehlloesungen fuer verschiedene Industriezweige. Energieeffiziente und nachhaltige Technologien.', 'og_image', '', 'no_index', false),
+  'about', JSON_OBJECT('title', 'Ueber uns - Ensotek GmbH', 'description', 'Erfahren Sie mehr ueber Ensotek: Unsere Geschichte, unser Team und unsere Mission in der industriellen Kuehl- und Klimatechnik.', 'og_image', '', 'no_index', false),
+  'team', JSON_OBJECT('title', 'Unser Team', 'description', 'Lernen Sie unser erfahrenes Team aus Ingenieuren, Technikern und Fachkraeften kennen.', 'og_image', '', 'no_index', false),
+  'mission_vision', JSON_OBJECT('title', 'Mission und Vision', 'description', 'Unsere Mission und Vision: Nachhaltige und effiziente Kuehlloesungen fuer die Industrie von morgen.', 'og_image', '', 'no_index', false),
+  'quality', JSON_OBJECT('title', 'Qualitaet und Zertifizierungen', 'description', 'Unsere Qualitaetsstandards, Zertifizierungen und Pruefverfahren fuer hoechste Produktqualitaet.', 'og_image', '', 'no_index', false),
+  'news', JSON_OBJECT('title', 'Neuigkeiten - Aktuelles von Ensotek', 'description', 'Neuigkeiten, Fachartikel und Updates aus der Welt der industriellen Kuehltechnik und HVAC.', 'og_image', '', 'no_index', false),
+  'blog', JSON_OBJECT('title', 'Blog - Fachartikel und Wissen', 'description', 'Technische Fachartikel, Branchenwissen und Einblicke in die industrielle Kuehltechnik.', 'og_image', '', 'no_index', false),
+  'library', JSON_OBJECT('title', 'Bibliothek - Dokumente und Downloads', 'description', 'Technische Dokumentation, Datenblaetter, Kataloge und Downloads rund um unsere Produkte.', 'og_image', '', 'no_index', false),
+  'faqs', JSON_OBJECT('title', 'Haeufig gestellte Fragen', 'description', 'Antworten auf die haeufigsten Fragen zu unseren Kuehltuermen, Dienstleistungen und Produkten.', 'og_image', '', 'no_index', false),
+  'contact', JSON_OBJECT('title', 'Kontakt - Ensotek erreichen', 'description', 'Nehmen Sie Kontakt mit uns auf. Wir beraten Sie gerne zu unseren Kuehltuermen, HVAC-Loesungen und Serviceangeboten.', 'og_image', '', 'no_index', false),
+  'offer', JSON_OBJECT('title', 'Angebot anfordern', 'description', 'Fordern Sie ein unverbindliches Angebot fuer Kuehltuerme, HVAC-Systeme oder Serviceleistungen an.', 'og_image', '', 'no_index', false),
+  'legal', JSON_OBJECT('title', 'Rechtliches - Datenschutz, AGB und Impressum', 'description', 'Rechtliche Informationen: Datenschutzerklaerung, Allgemeine Geschaeftsbedingungen und Impressum.', 'og_image', '', 'no_index', true)
+) AS CHAR CHARACTER SET utf8mb4);
+
+SET @SEO_PAGES_EN := CAST(JSON_OBJECT(
+  'home', JSON_OBJECT('title', 'Ensotek - Industrial Cooling and HVAC Solutions', 'description', 'Leading provider of industrial cooling towers, evaporative coolers and HVAC solutions. Custom engineered technology for industry.', 'og_image', '', 'no_index', false),
+  'product', JSON_OBJECT('title', 'Products - Cooling Towers and HVAC Components', 'description', 'Our product range: Open and closed circuit cooling towers, evaporative coolers, hybrid coolers and accessories for industrial cooling.', 'og_image', '', 'no_index', false),
+  'sparepart', JSON_OBJECT('title', 'Spare Parts - Cooling Tower Components', 'description', 'Original spare parts for cooling towers: Fill media, nozzles, fans, drives and other components.', 'og_image', '', 'no_index', false),
+  'service', JSON_OBJECT('title', 'Services - Engineering, Installation and Maintenance', 'description', 'Comprehensive services: Engineering, manufacturing, installation, modernization, maintenance, performance testing and spare parts.', 'og_image', '', 'no_index', false),
+  'solutions', JSON_OBJECT('title', 'Solutions - Industrial Cooling Solutions', 'description', 'Custom cooling solutions for various industries. Energy-efficient and sustainable technologies.', 'og_image', '', 'no_index', false),
+  'about', JSON_OBJECT('title', 'About Us - Ensotek', 'description', 'Learn more about Ensotek: Our history, team and mission in industrial cooling and HVAC technology.', 'og_image', '', 'no_index', false),
+  'team', JSON_OBJECT('title', 'Our Team', 'description', 'Meet our experienced team of engineers, technicians and specialists.', 'og_image', '', 'no_index', false),
+  'mission_vision', JSON_OBJECT('title', 'Mission and Vision', 'description', 'Our mission and vision: Sustainable and efficient cooling solutions for the industry of tomorrow.', 'og_image', '', 'no_index', false),
+  'quality', JSON_OBJECT('title', 'Quality and Certifications', 'description', 'Our quality standards, certifications and testing procedures for the highest product quality.', 'og_image', '', 'no_index', false),
+  'news', JSON_OBJECT('title', 'News - Updates from Ensotek', 'description', 'News, technical articles and updates from the world of industrial cooling and HVAC.', 'og_image', '', 'no_index', false),
+  'blog', JSON_OBJECT('title', 'Blog - Technical Articles and Knowledge', 'description', 'Technical articles, industry knowledge and insights into industrial cooling technology.', 'og_image', '', 'no_index', false),
+  'library', JSON_OBJECT('title', 'Library - Documents and Downloads', 'description', 'Technical documentation, datasheets, catalogs and downloads for our products.', 'og_image', '', 'no_index', false),
+  'faqs', JSON_OBJECT('title', 'Frequently Asked Questions', 'description', 'Answers to the most common questions about our cooling towers, services and products.', 'og_image', '', 'no_index', false),
+  'contact', JSON_OBJECT('title', 'Contact - Get in Touch', 'description', 'Contact us for consultation on cooling towers, HVAC solutions and service offerings.', 'og_image', '', 'no_index', false),
+  'offer', JSON_OBJECT('title', 'Request a Quote', 'description', 'Request a non-binding quote for cooling towers, HVAC systems or service solutions.', 'og_image', '', 'no_index', false),
+  'legal', JSON_OBJECT('title', 'Legal - Privacy, Terms and Imprint', 'description', 'Legal information: Privacy policy, terms and conditions and imprint.', 'og_image', '', 'no_index', true)
+) AS CHAR CHARACTER SET utf8mb4);
+
+SET @SEO_PAGES_TR := CAST(JSON_OBJECT(
+  'home', JSON_OBJECT('title', 'Ensotek - Endustriyel Sogutma ve Iklimlendirme', 'description', 'Endustriyel sogutma kulesi, evaporatif sogutma ve HVAC cozumlerinde lider. Sanayi ve ticaret icin ozel muhendislik cozumleri.', 'og_image', '', 'no_index', false),
+  'product', JSON_OBJECT('title', 'Urunler - Sogutma Kuleleri ve HVAC Bilesenleri', 'description', 'Urun yelpazemiz: Acik ve kapali devre sogutma kuleleri, evaporatif sogutucular, hibrit sogutucular ve endustriyel sogutma aksesuarlari.', 'og_image', '', 'no_index', false),
+  'sparepart', JSON_OBJECT('title', 'Yedek Parcalar - Sogutma Kulesi Bilesenleri', 'description', 'Sogutma kuleleri icin orijinal yedek parcalar: Dolgu gövdeleri, nozullar, fanlar, tahrikler ve diger bilesenler.', 'og_image', '', 'no_index', false),
+  'service', JSON_OBJECT('title', 'Hizmetler - Muhendislik, Montaj ve Servis', 'description', 'Kapsamli hizmetler: Tasarim, uretim, montaj, modernizasyon, bakim, performans testi ve yedek parca temini.', 'og_image', '', 'no_index', false),
+  'solutions', JSON_OBJECT('title', 'Cozumler - Endustriyel Sogutma Cozumleri', 'description', 'Farkli sektorler icin ozel sogutma cozumleri. Enerji verimli ve surdurulebilir teknolojiler.', 'og_image', '', 'no_index', false),
+  'about', JSON_OBJECT('title', 'Hakkimizda - Ensotek', 'description', 'Ensotek hakkinda: Tarihimiz, ekibimiz ve endustriyel sogutma ve iklimlendirme teknolojisindeki misyonumuz.', 'og_image', '', 'no_index', false),
+  'team', JSON_OBJECT('title', 'Ekibimiz', 'description', 'Deneyimli muhendis, teknisyen ve uzmanlardan olusan ekibimizle tanisin.', 'og_image', '', 'no_index', false),
+  'mission_vision', JSON_OBJECT('title', 'Misyon ve Vizyon', 'description', 'Misyonumuz ve vizyonumuz: Yarinin sanayisi icin surdurulebilir ve verimli sogutma cozumleri.', 'og_image', '', 'no_index', false),
+  'quality', JSON_OBJECT('title', 'Kalite ve Sertifikalar', 'description', 'Kalite standartlarimiz, sertifikalarimiz ve en yuksek urun kalitesi icin test prosedurlerimiz.', 'og_image', '', 'no_index', false),
+  'news', JSON_OBJECT('title', 'Haberler - Ensotek Guncel', 'description', 'Endustriyel sogutma ve HVAC dunyasindan haberler, teknik makaleler ve guncellemeler.', 'og_image', '', 'no_index', false),
+  'blog', JSON_OBJECT('title', 'Blog - Teknik Yazilar ve Bilgi', 'description', 'Teknik makaleler, sektor bilgisi ve endustriyel sogutma teknolojisine dair icgoruler.', 'og_image', '', 'no_index', false),
+  'library', JSON_OBJECT('title', 'Kutuphane - Dokumanlar ve Indirmeler', 'description', 'Teknik dokumantasyon, veri sayfalari, kataloglar ve urunlerimize ait indirmeler.', 'og_image', '', 'no_index', false),
+  'faqs', JSON_OBJECT('title', 'Sikca Sorulan Sorular', 'description', 'Sogutma kuleleri, hizmetlerimiz ve urunlerimiz hakkinda en sik sorulan sorularin yanitlari.', 'og_image', '', 'no_index', false),
+  'contact', JSON_OBJECT('title', 'Iletisim - Bize Ulasin', 'description', 'Sogutma kuleleri, HVAC cozumleri ve servis tekliflerimiz icin bizimle iletisime gecin.', 'og_image', '', 'no_index', false),
+  'offer', JSON_OBJECT('title', 'Teklif Isteyin', 'description', 'Sogutma kuleleri, HVAC sistemleri veya servis cozumleri icin baglayici olmayan teklif isteyin.', 'og_image', '', 'no_index', false),
+  'legal', JSON_OBJECT('title', 'Yasal - Gizlilik, Kosullar ve Kunye', 'description', 'Yasal bilgiler: Gizlilik politikasi, kullanim kosullari ve kunye.', 'og_image', '', 'no_index', true)
+) AS CHAR CHARACTER SET utf8mb4);
+
+INSERT INTO `site_settings` (`id`, `key`, `locale`, `value`, `created_at`, `updated_at`)
+VALUES
+(UUID(), 'seo_pages', 'de', @SEO_PAGES_DE, NOW(3), NOW(3)),
+(UUID(), 'seo_pages', 'en', @SEO_PAGES_EN, NOW(3), NOW(3)),
+(UUID(), 'seo_pages', 'tr', @SEO_PAGES_TR, NOW(3), NOW(3))
+ON DUPLICATE KEY UPDATE
+  `value`      = VALUES(`value`),
+  `updated_at` = VALUES(`updated_at`);
+
 COMMIT;
 SET FOREIGN_KEY_CHECKS = 1;
