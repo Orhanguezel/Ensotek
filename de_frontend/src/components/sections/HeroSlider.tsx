@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
-import { API_BASE_URL } from '@/lib/utils';
+import { API_BASE_URL } from '@/i18n/locale-settings';
 import { HeroSliderClient, type HeroSlide } from './HeroSliderClient';
 
 interface HeroSliderProps {

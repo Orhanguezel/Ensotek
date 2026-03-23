@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { ThumbsUp } from 'lucide-react';
 import { addReviewReaction } from '@ensotek/core/services';
-import { API_BASE_URL } from '@/lib/utils';
+import { API_BASE_URL } from '@/i18n/locale-settings';
 
 interface Props {
   reviewId: string;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Send } from 'lucide-react';
 import { createReview } from '@ensotek/core/services';
-import { API_BASE_URL } from '@/lib/utils';
+import { API_BASE_URL } from '@/i18n/locale-settings';
 
 interface Labels {
   formTitle: string;

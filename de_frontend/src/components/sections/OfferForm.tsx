@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Send, Wrench, Settings2, Box } from 'lucide-react';
 import { createOffer, getProducts, getServices } from '@ensotek/core/services';
-import { API_BASE_URL } from '@/lib/utils';
+import { API_BASE_URL } from '@/i18n/locale-settings';
 import type { Product, Service } from '@ensotek/core/types';
 
 type Tab = 'service' | 'product' | 'sparepart';

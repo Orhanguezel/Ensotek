@@ -57,12 +57,12 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   /* Gallery from `gallery` field */
   const galleryImages = (proj.gallery ?? [])
-    .filter((img) => img.image_url && img.is_published)
+    .filter((img) => img.image_url && img.is_active !== false)
     .sort((a, b) => a.display_order - b.display_order)
     .map((img) => ({
       src: img.image_url!,
       alt: img.alt ?? proj.title ?? '',
-      caption: img.title ?? undefined,
+      caption: img.caption ?? undefined,
     }));
 
   return (
@@ -119,19 +119,24 @@ export default async function ProjectDetailPage({ params }: Props) {
               )}
 
               {/* Highlights cards */}
-              {proj.features && proj.features.length > 0 && (
-                <div>
-                  <h2 className="font-display text-2xl font-bold text-slate-900 mb-6">{t('keyFeatures')}</h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {proj.features.map((feature, idx) => (
-                      <div key={idx} className="flex gap-3 p-4 bg-slate-50 border border-slate-100 rounded-xl">
-                        <CheckCircle2 className="text-blue-600 shrink-0 mt-0.5" size={18} />
-                        <span className="text-slate-700 font-medium">{feature.title}</span>
-                      </div>
-                    ))}
+              {(() => {
+                let servicesList: string[] = [];
+                try { servicesList = proj.services ? JSON.parse(proj.services) : []; } catch { /* ignore */ }
+                if (!Array.isArray(servicesList) || servicesList.length === 0) return null;
+                return (
+                  <div>
+                    <h2 className="font-display text-2xl font-bold text-slate-900 mb-6">{t('keyFeatures')}</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {servicesList.map((feature, idx) => (
+                        <div key={idx} className="flex gap-3 p-4 bg-slate-50 border border-slate-100 rounded-xl">
+                          <CheckCircle2 className="text-blue-600 shrink-0 mt-0.5" size={18} />
+                          <span className="text-slate-700 font-medium">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Gallery */}
               {galleryImages.length > 0 && (
@@ -178,14 +183,14 @@ export default async function ProjectDetailPage({ params }: Props) {
                         </div>
                       )}
 
-                      {proj.completion_date && (
+                      {proj.complete_date && (
                         <div className="flex gap-4 items-start">
                           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
                             <Calendar size={20} />
                           </div>
                           <div>
                             <span className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-0.5">{t('completionDate')}</span>
-                            <span className="font-bold text-slate-900">{proj.completion_date}</span>
+                            <span className="font-bold text-slate-900">{proj.complete_date}</span>
                           </div>
                         </div>
                       )}

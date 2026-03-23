@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Mail, ArrowRight } from 'lucide-react';
 import { subscribeNewsletter } from '@ensotek/core/services';
-import { API_BASE_URL } from '@/lib/utils';
+import { API_BASE_URL } from '@/i18n/locale-settings';
 
 interface Props {
   locale: string;

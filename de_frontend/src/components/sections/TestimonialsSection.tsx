@@ -6,7 +6,7 @@ import Autoplay from 'embla-carousel-autoplay';
 import { ChevronLeft, ChevronRight, Send, X, PenLine } from 'lucide-react';
 import { createReview } from '@ensotek/core/services';
 import type { Review } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { API_BASE_URL } from '@/i18n/locale-settings';
 
 interface Labels {
   writeReview: string;
