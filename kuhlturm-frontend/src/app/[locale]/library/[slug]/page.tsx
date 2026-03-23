@@ -7,6 +7,10 @@ import {
   FileText,
   Eye,
   Image as ImageIcon,
+  BookOpen,
+  Calendar,
+  ChevronLeft,
+  Printer,
 } from 'lucide-react';
 import {
   getLibraryItems,
@@ -16,6 +20,8 @@ import {
 } from '@ensotek/core/services';
 import type { LibraryItem, LibraryImage, LibraryFile } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
+import { PrintButton } from '@/components/ui/PrintButton';
+import { SocialShareCard } from '@/components/sections/SocialShareCard';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -34,9 +40,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const item = await getLibraryItemBySlug(API_BASE_URL, slug, locale).catch(() => null);
   if (!item) return { title: 'Wissensdatenbank' };
   return {
-    title: item.meta_title ?? item.name ?? 'Wissensdatenbank',
-    description: item.meta_description ?? undefined,
-    keywords: item.meta_keywords ?? undefined,
+    title: `${item.name} | Wissensdatenbank | Ensotek`,
+    description: (item as any).meta_description ?? (item as any).summary ?? undefined,
+    keywords: (item as any).meta_keywords ?? undefined,
   };
 }
 
@@ -45,31 +51,37 @@ export default async function LibraryDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('library');
+  const tCommon = await getTranslations('common');
 
+  // Fetch current item
   const item = await getLibraryItemBySlug(API_BASE_URL, slug, locale).catch(() => null);
 
   if (!item) {
     return (
-      <main>
-        <div className="min-h-[60vh] flex items-center justify-center">
-          <div className="text-center">
-            <p className="text-slate-400 text-lg mb-6">{t('noResults')}</p>
-            <Link
-              href={`/${locale}/library`}
-              className="inline-flex items-center gap-2 text-blue-600 hover:underline font-medium"
-            >
-              {t('backToLibrary')}
-            </Link>
+      <main className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <div className="w-20 h-20 bg-slate-100 rounded-3xl flex items-center justify-center mx-auto mb-6 text-slate-300">
+            <BookOpen size={40} />
           </div>
+          <h1 className="text-2xl font-bold text-slate-900 mb-2">Inhalt nicht gefunden</h1>
+          <p className="text-slate-500 mb-8">{t('noResults')}</p>
+          <Link
+            href={`/${locale}/library`}
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white font-bold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/20"
+          >
+            <ChevronLeft size={18} />
+            {t('backToLibrary')}
+          </Link>
         </div>
       </main>
     );
   }
 
-  // Fetch images and files in parallel
-  const [images, files] = await Promise.all([
+  // Fetch other library data for sidebar and detail assets in parallel
+  const [images, files, allItems] = await Promise.all([
     getLibraryImages(API_BASE_URL, item.id, locale).catch((): LibraryImage[] => []),
     getLibraryFiles(API_BASE_URL, item.id).catch((): LibraryFile[] => []),
+    getLibraryItems(API_BASE_URL, { locale, limit: 100, is_active: 1 }).catch((): LibraryItem[] => []),
   ]);
 
   const updatedAt = new Date(item.updated_at).toLocaleDateString('de-DE', {
@@ -78,221 +90,182 @@ export default async function LibraryDetailPage({ params }: Props) {
     year: 'numeric',
   });
 
-  // Related items (same type, excluding current)
-  const related = await getLibraryItems(API_BASE_URL, {
-    locale,
-    type: item.type !== 'other' ? item.type : undefined,
-    sort: 'display_order',
-    order: 'asc',
-    is_active: 1,
-    limit: 4,
-  })
-    .then((all) => all.filter((r) => r.id !== item.id).slice(0, 3))
-    .catch((): LibraryItem[] => []);
+  const sidebarItems = allItems.filter(i => i.id !== item.id).slice(0, 15);
 
   return (
-    <main>
-      {/* Banner */}
-      <div className="bg-slate-900 text-white py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4 flex-wrap">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} />
-            <Link href={`/${locale}/library`} className="hover:text-white transition-colors">
-              {t('title')}
-            </Link>
-            <ChevronRight size={14} />
-            <span className="text-white line-clamp-1">{item.name}</span>
+    <main className="bg-white min-h-screen">
+      {/* Article Header / Breadcrumbs */}
+      <div className="border-b border-slate-100 bg-slate-50/50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <nav className="flex items-center gap-2 text-sm text-slate-500 mb-0 whitespace-nowrap overflow-x-auto no-scrollbar">
+            <Link href={`/${locale}`} className="hover:text-blue-600 transition-colors">Startseite</Link>
+            <ChevronRight size={14} className="shrink-0" />
+            <Link href={`/${locale}/library`} className="hover:text-blue-600 transition-colors">{t('title')}</Link>
+            <ChevronRight size={14} className="shrink-0" />
+            <span className="text-slate-900 font-medium truncate">{item.name}</span>
           </nav>
-
-          <div className="flex items-center gap-3 mb-3">
-            {item.type && item.type !== 'other' && (
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue-400 bg-blue-900/40 px-2.5 py-1 rounded-full">
-                {item.type}
-              </span>
-            )}
-            <span className="text-xs text-slate-500">{t('lastUpdated')}: {updatedAt}</span>
-          </div>
-
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
-            {item.name}
-          </h1>
-
-          {/* Stats */}
-          <div className="mt-4 flex items-center gap-4 text-sm text-slate-400">
-            {item.views > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Eye size={14} />
-                {item.views} {t('views')}
-              </span>
-            )}
-            {files.length > 0 && (
-              <span className="flex items-center gap-1.5">
-                <Download size={14} />
-                {files.length} {t('filesAvailable')}
-              </span>
-            )}
-            {images.length > 0 && (
-              <span className="flex items-center gap-1.5">
-                <ImageIcon size={14} />
-                {images.length} {t('imagesAvailable')}
-              </span>
-            )}
-          </div>
         </div>
       </div>
 
-      {/* Featured image */}
-      {(item.featured_image || item.image_url) && (
-        <div className="bg-slate-800">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <img
-              src={(item.featured_image ?? item.image_url)!}
-              alt={item.image_alt ?? item.name ?? ''}
-              className="w-full max-h-[480px] object-cover rounded-2xl"
-            />
-          </div>
-        </div>
-      )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
+        <div className="flex flex-col lg:flex-row gap-12 xl:gap-20">
+          
+          {/* SIDEBAR (Desktop Left) - Mobile Bottom */}
+          <aside className="lg:w-80 shrink-0 order-2 lg:order-1">
+            <div className="sticky top-28 space-y-10">
+              
+              {/* Share Card */}
+              <SocialShareCard 
+                path={`/${locale}/library/${slug}`}
+                title={item.name ?? ''}
+                labels={{
+                  title: tCommon('shareTitle'),
+                  copyLink: tCommon('copyLink'),
+                  copied: tCommon('copied')
+                }}
+              />
 
-      {/* Main content */}
-      <div className="bg-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-10">
-
-            {/* Content */}
-            <div className="flex-1 min-w-0">
-              {item.description ? (
-                <div
-                  className="prose prose-slate prose-lg max-w-none prose-headings:font-display prose-a:text-blue-600 prose-h2:text-2xl prose-h3:text-xl"
-                  dangerouslySetInnerHTML={{ __html: item.description }}
-                />
-              ) : (
-                <p className="text-slate-400">{t('noContent')}</p>
-              )}
-
-              {/* Image gallery */}
-              {images.length > 0 && (
-                <div className="mt-12">
-                  <h2 className="font-display text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-                    <ImageIcon size={20} className="text-blue-500" />
-                    {t('gallery')}
-                  </h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                    {images.map((img) => (
-                      <div key={img.id} className="overflow-hidden rounded-xl aspect-4/3 bg-slate-100">
-                        {img.image_url ? (
-                          <img
-                            src={img.image_url}
-                            alt={img.alt ?? img.title ?? ''}
-                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <ImageIcon className="text-slate-300" size={32} />
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
+              {/* Other Articles List */}
+              <div className="bg-slate-50 border border-slate-200 rounded-3xl p-6 md:p-8">
+                <h3 className="font-display font-bold text-slate-900 mb-6 text-lg flex items-center gap-2">
+                  <BookOpen size={20} className="text-blue-600" />
+                  Weitere Artikel
+                </h3>
+                <nav className="space-y-1">
+                  {sidebarItems.map((sItem) => (
+                    <Link
+                      key={sItem.id}
+                      href={`/${locale}/library/${sItem.slug}`}
+                      className={`group flex items-start gap-3 p-3 rounded-xl transition-all ${
+                        sItem.slug === slug 
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' 
+                          : 'hover:bg-white border border-transparent hover:border-slate-200 text-slate-600 hover:text-blue-600'
+                      }`}
+                    >
+                      <div className={`mt-1 h-1.5 w-1.5 rounded-full shrink-0 ${sItem.slug === slug ? 'bg-white' : 'bg-slate-300 group-hover:bg-blue-600'}`} />
+                      <span className="text-sm font-semibold leading-snug line-clamp-2">{sItem.name}</span>
+                    </Link>
+                  ))}
+                </nav>
+                <div className="mt-8 pt-8 border-t border-slate-200">
+                   <Link href={`/${locale}/library`} className="flex items-center gap-2 text-sm font-bold text-slate-900 hover:text-blue-600 transition-colors">
+                      <ChevronLeft size={16} />
+                      Alle Beiträge ansehen
+                   </Link>
                 </div>
-              )}
-            </div>
+              </div>
 
-            {/* Sidebar */}
-            <aside className="lg:w-72 shrink-0">
-
-              {/* Downloads */}
+              {/* Downloads Sidebar */}
               {files.length > 0 && (
-                <div className="bg-slate-50 border border-slate-200 rounded-2xl p-5 mb-6">
-                  <h3 className="font-display font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                    <Download size={16} className="text-blue-500" />
-                    {t('downloads')}
+                <div className="bg-blue-50/50 border border-blue-100 rounded-3xl p-6 md:p-8">
+                  <h3 className="font-display font-bold text-blue-900 mb-6 text-lg flex items-center gap-2">
+                    <Download size={20} className="text-blue-600" />
+                    Dokumente
                   </h3>
-                  <ul className="space-y-2.5">
+                  <div className="space-y-4">
                     {files.map((file) => (
-                      <li key={file.id}>
-                        <a
-                          href={file.file_url ?? file.file_public_url ?? '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-start gap-3 group"
-                          download
-                        >
-                          <div className="mt-0.5 w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
-                            <FileText size={15} className="text-blue-500" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-slate-700 group-hover:text-blue-600 transition-colors leading-snug line-clamp-2">
-                              {file.name}
-                            </p>
-                            {file.size_bytes && (
-                              <p className="text-xs text-slate-400 mt-0.5">
-                                {formatBytes(file.size_bytes)}
-                              </p>
-                            )}
-                          </div>
-                        </a>
-                      </li>
+                      <a
+                        key={file.id}
+                        href={file.file_url ?? file.file_public_url ?? '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-4 group bg-white p-3 rounded-xl border border-blue-100/50 hover:border-blue-300 hover:shadow-md transition-all shadow-sm"
+                        download
+                      >
+                        <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center shrink-0 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                          <FileText size={20} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-bold text-slate-900 truncate">{file.name}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5 uppercase tracking-wider">{formatBytes(file.size_bytes ?? 0)} • PDF</p>
+                        </div>
+                      </a>
                     ))}
-                  </ul>
+                  </div>
                 </div>
               )}
+            </div>
+          </aside>
 
-              {/* Back link */}
-              <Link
-                href={`/${locale}/library`}
-                className="flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition-colors"
-              >
-                <ChevronRight size={14} className="rotate-180" />
-                {t('backToLibrary')}
-              </Link>
-            </aside>
+          {/* MAIN ARTICLE CONTENT */}
+          <article className="flex-1 min-w-0 order-1 lg:order-2">
+            {/* Category & Badge */}
+            <div className="flex flex-wrap items-center gap-4 mb-4">
+               <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-[10px] font-extrabold uppercase tracking-widest">
+                  {item.type || 'Dokumentation'}
+               </span>
+               <div className="flex items-center gap-1.5 text-slate-400 text-sm">
+                  <Calendar size={14} />
+                  <span>{updatedAt}</span>
+               </div>
+               <div className="h-4 w-px bg-slate-200 hidden sm:block" />
+               <div className="flex items-center gap-4 text-slate-400">
+                  <PrintButton />
+               </div>
+            </div>
 
-          </div>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-extrabold text-slate-900 leading-[1.15] mb-8">
+              {item.name}
+            </h1>
+
+            {/* Featured Image */}
+            {(item.featured_image || item.image_url) && (
+              <div className="relative mb-12 rounded-[2rem] overflow-hidden bg-slate-100 shadow-2xl shadow-slate-200">
+                 <img
+                  src={(item.featured_image ?? item.image_url)!}
+                  alt={item.image_alt ?? item.name ?? ''}
+                  className="w-full h-auto max-h-[600px] object-cover"
+                />
+              </div>
+            )}
+
+            {/* Rich Text Content */}
+            <div className="prose prose-slate prose-lg max-w-none prose-headings:font-display prose-headings:font-bold prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-li:text-slate-600 prose-img:rounded-3xl prose-strong:text-slate-900">
+              {item.description ? (
+                <div dangerouslySetInnerHTML={{ __html: item.description }} />
+              ) : (
+                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-8 text-center">
+                   <p className="text-slate-400 italic">Für diesen Artikel stehen derzeit nur die Basisinformationen zur Verfügung.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Image Gallery */}
+            {images.length > 0 && (
+              <div className="mt-20">
+                <div className="flex items-center justify-between mb-8">
+                   <h2 className="font-display text-2xl font-bold text-slate-900">{t('gallery')}</h2>
+                   <div className="h-px flex-1 bg-slate-100 ml-6" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {images.map((img) => (
+                    <div 
+                      key={img.id} 
+                      className="group relative cursor-pointer overflow-hidden rounded-[1.5rem] aspect-original bg-slate-100 ring-1 ring-slate-200 ring-inset"
+                    >
+                      {img.image_url ? (
+                        <img
+                          src={img.image_url}
+                          alt={img.alt ?? img.title ?? ''}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                          loading="lazy"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImageIcon className="text-slate-300" size={32} />
+                        </div>
+                      )}
+                      <div className="absolute inset-x-0 bottom-0 p-4 bg-linear-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                         <p className="text-white text-xs font-medium truncate">{img.title || 'Bild vergrößern'}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </article>
         </div>
       </div>
-
-      {/* Related items */}
-      {related.length > 0 && (
-        <section className="py-12 bg-slate-50 border-t border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 className="font-display text-2xl font-bold text-slate-900 mb-6">{t('related')}</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {related.map((r) => (
-                <Link
-                  key={r.id}
-                  href={`/${locale}/library/${r.slug}`}
-                  className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300"
-                >
-                  <div className="aspect-video overflow-hidden bg-slate-100">
-                    {r.featured_image || r.image_url ? (
-                      <img
-                        src={(r.featured_image ?? r.image_url)!}
-                        alt={r.image_alt ?? r.name ?? ''}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-blue-50 to-slate-100">
-                        <FileText className="text-blue-200" size={32} />
-                      </div>
-                    )}
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-display font-semibold text-slate-900 group-hover:text-blue-600 transition-colors text-sm leading-snug line-clamp-2">
-                      {r.name}
-                    </h3>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </main>
   );
 }
@@ -300,7 +273,9 @@ export default async function LibraryDetailPage({ params }: Props) {
 /* ── Helpers ──────────────────────────────────────────────────────────── */
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }

@@ -13,22 +13,13 @@ const nextConfig = {
   // ✅ Image optimization config
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '8086',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: '**.vercel.app',
-        pathname: '/**',
-      },
+      { protocol: 'https', hostname: 'res.cloudinary.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'images.unsplash.com', pathname: '/**' },
+      { protocol: 'https', hostname: 'www.ensotek.de', pathname: '/**' },
+      { protocol: 'https', hostname: 'ensotek.de', pathname: '/**' },
+      { protocol: 'https', hostname: 'cdn.ensotek.de', pathname: '/**' },
+      { protocol: 'http', hostname: 'localhost', port: '8086', pathname: '/**' },
+      { protocol: 'https', hostname: '**.vercel.app', pathname: '/**' },
     ],
     formats: ['image/avif', 'image/webp'],
     dangerouslyAllowSVG: true,
@@ -56,7 +47,7 @@ const nextConfig = {
       "default-src 'self'",
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "img-src 'self' blob: data: https://res.cloudinary.com https://www.ensotek.de https://ensotek.de",
+      "img-src 'self' blob: data: https://res.cloudinary.com https://images.unsplash.com https://www.ensotek.de https://ensotek.de https://cdn.ensotek.de",
       `connect-src 'self' ${isDev ? apiBase : ''} ${(process.env.NEXT_PUBLIC_CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean).join(' ')} https://cdn.jsdelivr.net https://api.cloudinary.com`.trim(),
       "font-src 'self' https://fonts.gstatic.com data:",
       "object-src 'none'",

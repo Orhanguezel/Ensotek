@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, Package, Hash } from 'lucide-react';
 import { getProducts, getCategories } from '@ensotek/core/services';
 import type { Product, Category } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { apiFetchWithLocale } from '@/lib/api';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -27,29 +27,29 @@ export default async function SparePartsPage({ params, searchParams }: Props) {
   const tCommon = await getTranslations('common');
 
   const [partsResult, categoriesResult] = await Promise.allSettled([
-    getProducts(API_BASE_URL, {
-      language: locale,
-      is_active: true,
-      item_type: 'sparepart',
-      ...(categorySlug ? { category_slug: categorySlug } : {}),
-      limit: 60,
+    apiFetchWithLocale<Product[]>('/products', locale, {
+      params: {
+        is_active: 1,
+        item_type: 'sparepart',
+        ...(categorySlug ? { category_slug: categorySlug } : {}),
+        limit: 60,
+      }
     }),
-    getCategories(API_BASE_URL, {
-      language: locale,
-      module_key: 'product',
-      is_active: true,
+    apiFetchWithLocale<Category[]>('/categories', locale, {
+      params: {
+        module_key: 'product',
+        is_active: 1,
+      }
     }),
   ]);
 
   const parts: Product[] =
-    partsResult.status === 'fulfilled'
-      ? Array.isArray(partsResult.value)
-        ? partsResult.value
-        : partsResult.value.data
+    partsResult.status === 'fulfilled' && partsResult.value
+      ? partsResult.value
       : [];
 
   const categories: Category[] =
-    categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
+    categoriesResult.status === 'fulfilled' && categoriesResult.value ? categoriesResult.value : [];
 
   return (
     <main>

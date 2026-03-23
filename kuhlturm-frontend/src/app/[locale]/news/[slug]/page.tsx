@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { ChevronRight, ArrowLeft, Calendar, Tag } from 'lucide-react';
 import { getCustomPages, getCustomPageBySlug, parseCustomPageContent, getSiteSetting } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { getCustomPageBySlugWithLocale, getCustomPagesWithLocale } from '@/lib/api';
+import { fetchSetting } from '@/i18n/server';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
 import { ReviewsSection } from '@/components/sections/ReviewsSection';
@@ -14,21 +15,21 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const articles = await getCustomPages(API_BASE_URL, {
+  const articles = await getCustomPagesWithLocale('de', {
     module_key: 'news',
-    is_published: true,
+    is_published: 1,
     limit: 200,
-  }).catch(() => []);
-  return articles.map((a) => ({ slug: a.slug }));
+  });
+  return (articles as any[] ?? []).map((a) => ({ slug: a.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
-  const article = await getCustomPageBySlug(API_BASE_URL, slug, locale).catch(() => null);
+  const article = await getCustomPageBySlugWithLocale(slug, locale);
   if (!article) return { title: 'Nachricht' };
   return {
-    title: article.meta_title ?? article.title,
-    description: article.meta_description ?? article.summary ?? undefined,
+    title: (article as any).meta_title ?? (article as any).title,
+    description: (article as any).meta_description ?? (article as any).summary ?? undefined,
     openGraph: article.featured_image
       ? { images: [{ url: article.featured_image }] }
       : undefined,
@@ -45,7 +46,7 @@ export default async function NewsDetailPage({ params }: Props) {
     getTranslations('reviews'),
   ]);
 
-  const article = await getCustomPageBySlug(API_BASE_URL, slug, locale).catch(() => null);
+  const article = await getCustomPageBySlugWithLocale(slug, locale);
 
   if (!article) {
     return (
@@ -75,29 +76,26 @@ export default async function NewsDetailPage({ params }: Props) {
   });
 
   const tags = article.tags
-    ? article.tags.split(',').map((t) => t.trim()).filter(Boolean)
+    ? (article.tags as string).split(',').map((t: string) => t.trim()).filter(Boolean)
     : [];
 
   // Related articles (same category, excluding current)
-  const related: CustomPage[] = await getCustomPages(API_BASE_URL, {
+  const relatedRaw = await getCustomPagesWithLocale(locale, {
     module_key: 'news',
-    language: locale,
-    is_published: true,
+    is_published: 1,
     category_id: article.category_id ?? undefined,
     sort: 'created_at',
     order: 'desc',
     limit: 4,
-  })
-    .then((all) => all.filter((a) => a.slug !== slug).slice(0, 3))
-    .catch(() => []);
+  });
+
+  const related: CustomPage[] = (relatedRaw as any[] ?? [])
+    .filter((a) => a.slug !== slug)
+    .slice(0, 3);
 
   // Contact info
-  const contactInfoRaw = await getSiteSetting(API_BASE_URL, 'contact_info', locale).catch(() => null);
-  const contactInfo: ContactInfo = contactInfoRaw?.value
-    ? (typeof contactInfoRaw.value === 'string'
-        ? (() => { try { return JSON.parse(contactInfoRaw.value); } catch { return {}; } })()
-        : contactInfoRaw.value as ContactInfo)
-    : {};
+  const contactInfoRaw = await fetchSetting('contact_info', locale, { revalidate: 3600 });
+  const contactInfo: any = contactInfoRaw?.value || {};
 
   return (
     <main>
@@ -106,7 +104,7 @@ export default async function NewsDetailPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
             <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
+              {tCommon('home')}
             </Link>
             <ChevronRight size={14} />
             <Link href={`/${locale}/news`} className="hover:text-white transition-colors">
@@ -172,7 +170,7 @@ export default async function NewsDetailPage({ params }: Props) {
                 <div className="mt-10 pt-8 border-t border-slate-100">
                   <div className="flex items-center gap-2 flex-wrap">
                     <Tag size={14} className="text-slate-400" />
-                    {tags.map((tag) => (
+                    {tags.map((tag: string) => (
                       <span
                         key={tag}
                         className="px-3 py-1 bg-slate-100 text-slate-600 text-xs font-medium rounded-full"

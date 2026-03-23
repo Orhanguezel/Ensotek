@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import { getServices } from '@ensotek/core/services';
 import type { Service } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { getServicesWithLocale } from '@/lib/api';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -25,10 +25,9 @@ export default async function ServicesPage({ params }: Props) {
   const t = await getTranslations('services');
   const tCommon = await getTranslations('common');
 
-  const services: Service[] = await getServices(API_BASE_URL, {
-    language: locale,
-    is_active: true,
-  }).catch(() => []);
+  const services: Service[] = await getServicesWithLocale(locale, {
+    is_active: 1,
+  }).then(d => d ?? []);
 
   return (
     <main>
@@ -37,7 +36,7 @@ export default async function ServicesPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
             <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
+              {tCommon('home')}
             </Link>
             <ChevronRight size={14} />
             <span className="text-white">{t('title')}</span>

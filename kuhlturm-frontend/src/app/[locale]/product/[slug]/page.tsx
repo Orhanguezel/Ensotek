@@ -5,7 +5,8 @@ import { notFound } from 'next/navigation';
 import { ChevronRight, Tag, Hash, ArrowLeft } from 'lucide-react';
 import { getProductBySlug, getProducts, getSiteSetting } from '@ensotek/core/services';
 import type { Product } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { getProductBySlugWithLocale, getProductsWithLocale } from '@/lib/api';
+import { fetchSetting } from '@/i18n/server';
 import { ProductOfferButton } from '@/components/sections/ProductOfferButton';
 import { WhatsAppButton } from '@/components/sections/WhatsAppButton';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
@@ -19,7 +20,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   try {
-    const raw = await getProductBySlug(API_BASE_URL, slug, locale);
+    const raw = await getProductBySlugWithLocale(slug, locale);
     const product = (raw as unknown as { data?: Product })?.data ?? raw;
     return {
       title: product.meta_title || product.title,
@@ -42,27 +43,22 @@ export default async function ProductDetailPage({ params }: Props) {
 
   let product: Product;
   try {
-    const raw = await getProductBySlug(API_BASE_URL, slug, locale);
-    // Backend may wrap in { data: Product }
+    const raw = await getProductBySlugWithLocale(slug, locale);
     product = (raw as unknown as { data?: Product })?.data ?? raw;
+    if (!product) notFound();
   } catch {
     notFound();
   }
 
   // Related products (same category, excluding current)
-  const relatedRaw = await getProducts(API_BASE_URL, {
-    language: locale,
-    is_active: true,
+  const relatedRaw = await getProductsWithLocale(locale, {
+    is_active: 1,
     item_type: 'product',
     ...(product.category_id ? { category_id: product.category_id } : {}),
     limit: 5,
-  }).catch(() => null);
+  });
 
-  const relatedAll: Product[] = relatedRaw
-    ? Array.isArray(relatedRaw)
-      ? relatedRaw
-      : relatedRaw.data
-    : [];
+  const relatedAll: Product[] = (relatedRaw as any) ?? [];
 
   const relatedProducts = relatedAll.filter((p) => p.id !== product.id).slice(0, 3);
 
@@ -70,12 +66,8 @@ export default async function ProductDetailPage({ params }: Props) {
   const hasTags = product.tags && product.tags.length > 0;
 
   // Contact info (for WhatsApp + ContactInfoCard)
-  const contactInfoRaw = await getSiteSetting(API_BASE_URL, 'contact_info', locale).catch(() => null);
-  const contactInfo: ContactInfo = contactInfoRaw?.value
-    ? (typeof contactInfoRaw.value === 'string'
-        ? (() => { try { return JSON.parse(contactInfoRaw.value); } catch { return {}; } })()
-        : contactInfoRaw.value as ContactInfo)
-    : {};
+  const contactInfoRaw = await fetchSetting('contact_info', locale, { revalidate: 3600 });
+  const contactInfo: any = contactInfoRaw?.value || {};
   const whatsappPhone = contactInfo.whatsappNumber || contactInfo.phones?.[0] || '';
   const waMessage = `Guten Tag! Ich interessiere mich für das Produkt: ${product.title}. Könnten Sie mir bitte mehr Informationen geben?`;
 

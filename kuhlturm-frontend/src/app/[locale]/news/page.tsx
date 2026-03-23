@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, Calendar, Tag } from 'lucide-react';
 import { getCustomPages } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { apiFetchWithLocale } from '@/lib/api';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -22,15 +22,17 @@ export default async function NewsPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('news');
+  const tCommon = await getTranslations('common');
 
-  const articles: CustomPage[] = await getCustomPages(API_BASE_URL, {
-    module_key: 'news',
-    language: locale,
-    is_published: true,
-    sort: 'created_at',
-    order: 'desc',
-    limit: 50,
-  }).catch(() => []);
+  const articles: CustomPage[] = await apiFetchWithLocale<CustomPage[]>('/custom_pages', locale, {
+    params: {
+      module_key: 'news',
+      is_published: 1,
+      sort: 'created_at',
+      order: 'desc',
+      limit: 50,
+    }
+  }).then(d => d ?? []);
 
   const featured = articles.filter((a) => a.featured === 1);
   const rest = articles.filter((a) => a.featured !== 1);
@@ -42,7 +44,7 @@ export default async function NewsPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
             <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
+              {tCommon('home')}
             </Link>
             <ChevronRight size={14} />
             <span className="text-white">{t('title')}</span>
@@ -72,7 +74,7 @@ export default async function NewsPage({ params }: Props) {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {featured.map((article) => (
-                    <ArticleCard key={article.id} article={article} locale={locale} large />
+                    <ArticleCard key={article.id} article={article} locale={locale} tCommon={tCommon} large />
                   ))}
                 </div>
               </div>
@@ -88,7 +90,7 @@ export default async function NewsPage({ params }: Props) {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {rest.map((article) => (
-                    <ArticleCard key={article.id} article={article} locale={locale} />
+                    <ArticleCard key={article.id} article={article} locale={locale} tCommon={tCommon} />
                   ))}
                 </div>
               </div>
@@ -106,10 +108,12 @@ export default async function NewsPage({ params }: Props) {
 function ArticleCard({
   article,
   locale,
+  tCommon,
   large = false,
 }: {
   article: CustomPage;
   locale: string;
+  tCommon: any;
   large?: boolean;
 }) {
   const date = new Date(article.created_at).toLocaleDateString('de-DE', {
@@ -166,7 +170,7 @@ function ArticleCard({
 
         <div className="mt-3 flex items-center justify-between">
           <span className="text-xs font-semibold text-blue-600 group-hover:underline">
-            Weiterlesen →
+            {tCommon('readMore')} →
           </span>
           {article.tags && (
             <span className="flex items-center gap-1 text-slate-300">

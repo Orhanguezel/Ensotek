@@ -15,6 +15,6 @@ export function localeShortClient(v: unknown): string {
   return normLocaleTag(raw) || "";
 }
 
-export function localeShortClientOr(v: unknown, fallback = "de"): string {
+export function localeShortClientOr(v: unknown, fallback = "tr"): string {
   return localeShortClient(v) || fallback;
 }

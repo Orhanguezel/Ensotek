@@ -207,10 +207,11 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   // Modal state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "library">("upload");
+  const [librarySelection, setLibrarySelection] = useState<string[]>([]);
 
   // Fetch library assets (show all folders, not filtered)
   const { data: assetsData, isLoading: isLoadingAssets } = useListAssetsAdminQuery(
-    { bucket, limit: 50, sort: "created_at", order: "desc" },
+    { limit: 200, sort: "created_at", order: "desc" },
     { skip: !isModalOpen || activeTab !== "library" },
   );
 
@@ -225,6 +226,7 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   const handlePickClick = () => {
     if (busy) return;
     setActiveTab("upload");
+    setLibrarySelection([]);
     setIsModalOpen(true);
   };
 
@@ -235,14 +237,39 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   const handleSelectFromLibrary = (url: string) => {
     if (!url) return;
 
-    if (multiple && onChangeMultiple) {
-      onChangeMultiple(uniqAppend(gallery, [url]));
-      toast.success("Görsel eklendi.");
-    } else if (onChange) {
+    // In multiple mode, toggle selection instead of immediately adding
+    if (multiple) {
+      setLibrarySelection((prev) => {
+        const normalized = norm(url);
+        if (prev.includes(normalized)) {
+          return prev.filter((u) => u !== normalized);
+        }
+        return [...prev, normalized];
+      });
+      return;
+    }
+
+    if (onChange) {
       onChange(url);
       toast.success("Görsel seçildi.");
     }
+    setIsModalOpen(false);
+  };
 
+  const handleAddSelectedFromLibrary = () => {
+    if (!librarySelection.length) return;
+
+    if (onChangeMultiple) {
+      onChangeMultiple(uniqAppend(gallery, librarySelection));
+      toast.success(
+        librarySelection.length === 1 ? "Görsel eklendi." : `${librarySelection.length} görsel eklendi.`,
+      );
+    } else if (onChange && librarySelection[0]) {
+      onChange(librarySelection[0]);
+      toast.success("Görsel seçildi.");
+    }
+
+    setLibrarySelection([]);
     setIsModalOpen(false);
   };
 
@@ -637,38 +664,93 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                    {assetsData.items.map((asset) => {
-                      const url = asset.url || "";
-                      const isSelected = multiple ? gallery.includes(url) : value === url;
+                  <>
+                    {multiple && librarySelection.length > 0 && (
+                      <div className="flex items-center justify-between rounded-lg border bg-primary/5 p-3">
+                        <span className="font-medium text-sm">
+                          {librarySelection.length} görsel seçildi
+                        </span>
+                        <div className="flex gap-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setLibrarySelection([])}
+                          >
+                            Temizle
+                          </Button>
+                          <Button
+                            type="button"
+                            size="sm"
+                            onClick={handleAddSelectedFromLibrary}
+                            disabled={busy}
+                          >
+                            <Upload className="mr-2 size-4" />
+                            Yükle ({librarySelection.length})
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+                      {assetsData.items.map((asset) => {
+                        const url = asset.url || "";
+                        const normalizedUrl = norm(url);
+                        const isInGallery = gallery.includes(normalizedUrl);
+                        const isInSelection = librarySelection.includes(normalizedUrl);
+                        const isSelected = multiple ? isInSelection : value === url;
 
-                      return (
-                        <button
-                          key={asset.id}
+                        return (
+                          <button
+                            key={asset.id}
+                            type="button"
+                            onClick={() => handleSelectFromLibrary(url)}
+                            disabled={busy || isInGallery}
+                            className={cn(
+                              "group relative overflow-hidden rounded-lg border transition-all hover:border-primary",
+                              isSelected && "border-primary ring-2 ring-primary/20",
+                              isInGallery && "opacity-50",
+                            )}
+                          >
+                            <AspectRatio ratio={1}>
+                              <img
+                                src={url}
+                                alt={asset.name || "Asset"}
+                                className="size-full object-cover transition-transform group-hover:scale-105"
+                              />
+                            </AspectRatio>
+                            {isInGallery && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                                <Badge variant="secondary">Eklendi</Badge>
+                              </div>
+                            )}
+                            {isSelected && !isInGallery && (
+                              <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
+                                <Badge>Seçildi</Badge>
+                              </div>
+                            )}
+                            {multiple && isInSelection && (
+                              <div className="absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                                ✓
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    {multiple && librarySelection.length > 0 && (
+                      <div className="flex justify-end pt-2">
+                        <Button
                           type="button"
-                          onClick={() => handleSelectFromLibrary(url)}
+                          size="default"
+                          onClick={handleAddSelectedFromLibrary}
                           disabled={busy}
-                          className={cn(
-                            "group relative overflow-hidden rounded-lg border transition-all hover:border-primary",
-                            isSelected && "border-primary ring-2 ring-primary/20",
-                          )}
                         >
-                          <AspectRatio ratio={1}>
-                            <img
-                              src={url}
-                              alt={asset.name || "Asset"}
-                              className="size-full object-cover transition-transform group-hover:scale-105"
-                            />
-                          </AspectRatio>
-                          {isSelected && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
-                              <Badge>Seçildi</Badge>
-                            </div>
-                          )}
-                        </button>
-                      );
-                    })}
-                  </div>
+                          <Upload className="mr-2 size-4" />
+                          Seçilenleri Ekle ({librarySelection.length})
+                        </Button>
+                      </div>
+                    )}
+                  </>
                 )}
               </TabsContent>
             </Tabs>

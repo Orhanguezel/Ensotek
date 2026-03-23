@@ -3,12 +3,13 @@ import type { FooterSection, MenuItem } from '@ensotek/core/types';
 import { SiteLogo } from './SiteLogo';
 
 interface FooterProps {
+  locale: string;
   footerSections?: FooterSection[];
   footerLinks?: MenuItem[];
   logoSrc?: string | null;
 }
 
-export function Footer({ footerSections = [], footerLinks = [], logoSrc }: FooterProps) {
+export function Footer({ locale, footerSections = [], footerLinks = [], logoSrc }: FooterProps) {
   const year = new Date().getFullYear();
 
   // Group footer menu links by section_id
@@ -23,6 +24,14 @@ export function Footer({ footerSections = [], footerLinks = [], logoSrc }: Foote
   const floatingLinks = (linksBySection['__none__'] ?? []).sort(
     (a, b) => a.order_num - b.order_num,
   );
+
+  // Helper to ensure links are prefixed with locale
+  const toHref = (url: string) => {
+    if (url.startsWith('http') || url.startsWith('//')) return url;
+    const clean = url.startsWith('/') ? url : `/${url}`;
+    if (clean.startsWith(`/${locale}/`) || clean === `/${locale}`) return clean;
+    return `/${locale}${clean}`;
+  };
 
   return (
     <footer className="bg-slate-900 text-slate-400">
@@ -42,6 +51,26 @@ export function Footer({ footerSections = [], footerLinks = [], logoSrc }: Foote
             <p className="mt-3 text-sm leading-relaxed">
               Professionelle Kühltürme und Kühllösungen für Industrie und Gewerbe.
             </p>
+            <div className="mt-6 space-y-3 text-xs md:text-sm leading-relaxed text-slate-500">
+              <p className="flex items-start gap-2">
+                <span className="shrink-0 font-bold text-slate-400 uppercase tracking-widest text-[10px]">Anschrift:</span>
+                <span>
+                  {locale === 'de' 
+                    ? 'Oruçreis Mah., Tekstilkent Sit., A17 Blok No:41, 34235 Esenler / Istanbul, Türkei'
+                    : 'Oruçreis Mah., Tekstilkent Sit., A17 Blok No:41, 34235 Esenler / İstanbul, Türkiye'
+                  }
+                </span>
+              </p>
+              <p className="flex items-start gap-2">
+                <span className="shrink-0 font-bold text-slate-400 uppercase tracking-widest text-[10px]">Werk:</span>
+                <span>
+                  {locale === 'de'
+                    ? 'Saray Mah., Gimat Cad. No:6A, 06980 Kahramankazan / Ankara, Türkei'
+                    : 'Saray Mah., Gimat Cad. No:6A, 06980 Kahramankazan / Ankara, Türkiye'
+                  }
+                </span>
+              </p>
+            </div>
           </div>
 
           {/* Dynamic footer sections from backend */}
@@ -57,7 +86,7 @@ export function Footer({ footerSections = [], footerLinks = [], logoSrc }: Foote
                         .sort((a, b) => a.order_num - b.order_num)
                         .map((link) => (
                           <li key={link.id}>
-                            <Link href={link.url} className="hover:text-white transition-colors">
+                            <Link href={toHref(link.url)} className="hover:text-white transition-colors">
                               {link.title}
                             </Link>
                           </li>
@@ -77,18 +106,46 @@ export function Footer({ footerSections = [], footerLinks = [], logoSrc }: Foote
                     Navigation
                   </h3>
                   <ul className="space-y-2 text-sm">
-                    {[
-                      { href: '/products', label: 'Produkte' },
-                      { href: '/services', label: 'Dienstleistungen' },
-                      { href: '/references', label: 'Referenzen' },
-                      { href: '/contact', label: 'Kontakt' },
-                    ].map((link) => (
-                      <li key={link.href}>
-                        <Link href={link.href} className="hover:text-white transition-colors">
-                          {link.label}
-                        </Link>
-                      </li>
-                    ))}
+                    <li>
+                      <Link href={`/${locale}/product`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Produkte' : 'Ürünler'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/service/maintenance-repair`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Wartung & Instandsetzung' : 'Bakım & Onarım'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/service/modernization-retrofit`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Modernisierung & Retrofit' : 'Modernizasyon'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/service/spare-parts-components`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Ersatzteile & Komponenten' : 'Yedek Parça'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/service/automation-scada`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Automation / SCADA' : 'Otomasyon'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/service/engineering-support`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Engineering & Support' : 'Mühendislik'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/service/site-survey-engineering`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Planung & Analyse' : 'Keşif & Proje'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/contact`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Kontakt' : 'İletişim'}
+                      </Link>
+                    </li>
                   </ul>
                 </div>
                 <div>
@@ -97,13 +154,23 @@ export function Footer({ footerSections = [], footerLinks = [], logoSrc }: Foote
                   </h3>
                   <ul className="space-y-2 text-sm">
                     <li>
-                      <Link href="/imprint" className="hover:text-white transition-colors">
-                        Impressum
+                      <Link href={`/${locale}/legal/impressum-rechtliche-hinweise`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Impressum & Rechtliche Hinweise' : 'Künye & Yasal Uyarılar'}
                       </Link>
                     </li>
                     <li>
-                      <Link href="/privacy-policy" className="hover:text-white transition-colors">
-                        Datenschutz
+                      <Link href={`/${locale}/legal/datenschutzerklaerung`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Datenschutzerklärung' : 'Gizlilik Politikası'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/legal/cookie-richtlinie`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Cookie-Richtlinie' : 'Çerez Politikası'}
+                      </Link>
+                    </li>
+                    <li>
+                      <Link href={`/${locale}/legal/informationspflicht`} className="hover:text-white transition-colors">
+                        {locale === 'de' ? 'Informationspflicht' : 'Bilgilendirme Yükümlülüğü'}
                       </Link>
                     </li>
                   </ul>
@@ -117,7 +184,7 @@ export function Footer({ footerSections = [], footerLinks = [], logoSrc }: Foote
             {floatingLinks.map((link) => (
               <Link
                 key={link.id}
-                href={link.url}
+                href={toHref(link.url)}
                 className="text-sm hover:text-white transition-colors"
               >
                 {link.title}

@@ -2336,7 +2336,8 @@
         "list": "Liste (Sprache)",
         "globalList": "Liste (Global *)",
         "locales": "Sprachen",
-        "branding": "Branding"
+        "branding": "Branding",
+        "apiServices": "API-Dienste"
       },
       "filters": {
         "title": "Filter",
@@ -2441,6 +2442,14 @@
           "noRenderer": "Für diesen Schlüssel ist kein spezielles Structured-Formular definiert. Structured-Modus arbeitet als JSON-Editor.",
           "label": "Structured JSON",
           "helperText": "Wird bei Blur geparst. Ungültiges JSON wird nicht gespeichert."
+        },
+        "inline": {
+          "loading": "Laden...",
+          "loadingLocale": "Sprache wird geladen...",
+          "noRecord": "Kein Eintrag gefunden",
+          "refresh": "Aktualisieren",
+          "fallbackInfo": "Globaler (*) Standardwert wird verwendet",
+          "selectLocale": "Sprache auswählen"
         }
       },
       "general": {
@@ -2478,7 +2487,36 @@
         "missingGlobalError": "GLOBAL (*) Datensatz nicht gefunden. Sie müssen zuerst einen globalen Wert erstellen.",
         "globalBootstrapSuccess": "Fehlende GLOBAL (*) Allgemein/UI Datensätze erstellt.",
         "loadingNote": "Globale + Locale Datensätze werden abgerufen.",
-        "deleteTooltip": "Tipp: \"Löschen*\" löscht GLOBAL (*) Datensatz. \"Löschen\" löscht ausgewählten Locale Override."
+        "deleteTooltip": "Tipp: \"Löschen*\" löscht GLOBAL (*) Datensatz. \"Löschen\" löscht ausgewählten Locale Override.",
+        "keyLabels": {
+          "site_name": "Seitenname",
+          "site_tagline": "Slogan",
+          "site_logo": "Logo",
+          "site_logo_dark": "Logo (Dunkelmodus)",
+          "site_favicon": "Favicon",
+          "contact_info": "Kontaktinformationen",
+          "socials": "Soziale Medien",
+          "company_profile": "Firmenprofil",
+          "businessHours": "Geschäftszeiten",
+          "hero": "Hero-Bereich",
+          "home_backgrounds": "Startseiten-Hintergründe",
+          "ui_header": "Kopfzeilen-Einstellungen"
+        },
+        "keyDescriptions": {
+          "site_name": "Der Name Ihrer Website (wird in Titeln und SEO verwendet)",
+          "site_tagline": "Kurzer Slogan oder Untertitel",
+          "site_logo": "Logo für helles Design",
+          "site_logo_dark": "Logo für dunkles Design",
+          "site_favicon": "Browser-Tab-Symbol",
+          "contact_info": "Adresse, Telefon, E-Mail usw.",
+          "socials": "Social-Media-Links",
+          "company_profile": "Unternehmensinformationen",
+          "businessHours": "Arbeitstage und -zeiten",
+          "hero": "Startseite Hero/Banner-Einstellungen",
+          "home_backgrounds": "Startseiten-Hintergrundbilder",
+          "ui_header": "Kopfzeilen- und Navigationseinstellungen"
+        },
+        "recordCount": "Insgesamt {count} Einträge"
       },
       "cloudinary": {
         "title": "Cloudinary / Storage Einstellungen",
@@ -2542,6 +2580,22 @@
           "ogTitle": "OG-Titel",
           "ogDescription": "OG-Beschreibung",
           "twitterCard": "Twitter Card Typ"
+        },
+        "placeholders": {
+          "appNamePlaceholder": "Ensotek Admin",
+          "appCopyrightPlaceholder": "2024 Ensotek. Alle Rechte vorbehalten.",
+          "htmlLangPlaceholder": "de",
+          "themeColorPlaceholder": "#E8A598",
+          "ogImagePlaceholder": "https://www.ensotek.de/og-image.jpg",
+          "favicon16Placeholder": "/favicon-16x16.png",
+          "favicon32Placeholder": "/favicon-32x32.png",
+          "appleTouchIconPlaceholder": "/apple-touch-icon.png",
+          "metaTitlePlaceholder": "Ensotek - Kühltürme",
+          "metaDescriptionPlaceholder": "B2B-Plattform für Kühlturm-Lösungen",
+          "ogTitlePlaceholder": "Ensotek",
+          "ogDescriptionPlaceholder": "Kühlturm-Lösungen",
+          "ogUrlPlaceholder": "https://www.ensotek.de",
+          "twitterCardPlaceholder": "summary_large_image"
         }
       },
       "brandMedia": {
@@ -2561,7 +2615,31 @@
         "updated": "{label} aktualisiert.",
         "updateError": "Fehler beim Speichern von {label}.",
         "deleteConfirm": "\"{key}\" ({locale}) löschen?",
-        "deleteError": "Fehler beim Löschen."
+        "deleteError": "Fehler beim Löschen.",
+        "inline": {
+          "title": "Logo- & Favicon-Verwaltung",
+          "save": "Speichern",
+          "saved": "Markenmedien gespeichert.",
+          "saveError": "Markenmedien konnten nicht gespeichert werden.",
+          "dirty": "Ungespeicherte Änderungen",
+          "loading": "Laden...",
+          "noImage": "Kein Bild",
+          "logoAlt": "Logo-Vorschau",
+          "copy": "Kopieren",
+          "urlCopied": "URL kopiert",
+          "openNewTab": "In neuem Tab öffnen",
+          "remove": "Entfernen",
+          "labels": {
+            "site_logo": "Website-Logo",
+            "site_logo_dark": "Logo (Dunkel)",
+            "site_favicon": "Favicon",
+            "siteLogo": "Website-Logo",
+            "siteLogoDark": "Logo (Dunkel)",
+            "siteFavicon": "Favicon",
+            "siteAppleTouchIcon": "Apple Touch Icon",
+            "ogImageDefault": "OG-Standardbild"
+          }
+        }
       },
       "api": {
         "title": "API & Integrations-Einstellungen",
@@ -2583,7 +2661,78 @@
         "cookieConsentPlaceholder": "{\"consent_version\":1,\"defaults\":{\"necessary\":true,\"analytics\":false,\"marketing\":false},\"ui\":{\"enabled\":true}}",
         "cookieConsentHelp": "Wenn Sie JSON eingeben, wird es als Objekt gespeichert. Wenn Sie einfachen Text eingeben, wird es als String gespeichert.",
         "saved": "API & Integrations-Einstellungen gespeichert.",
-        "saveError": "Beim Speichern der API-Einstellungen ist ein Fehler aufgetreten."
+        "saveError": "Beim Speichern der API-Einstellungen ist ein Fehler aufgetreten.",
+        "inline": {
+          "title": "API-Dienst-Einstellungen",
+          "save": "Speichern",
+          "saved": "API-Einstellungen gespeichert.",
+          "saveError": "API-Einstellungen konnten nicht gespeichert werden.",
+          "loading": "Laden...",
+          "test": "Test",
+          "testBusy": "Wird getestet...",
+          "testSuccess": "Verbindung erfolgreich!",
+          "testError": "Verbindungsfehler",
+          "connectionError": "Verbindung konnte nicht hergestellt werden",
+          "okShort": "OK",
+          "errorShort": "Fehler",
+          "providerOrderLabel": "Anbieter-Prioritätsreihenfolge",
+          "providerOrderHelp": "Kommagetrennte Anbieterreihenfolge (z.B. groq,openai)",
+          "sections": {
+            "ai": "KI-Einstellungen",
+            "groq": "Groq",
+            "openai": "OpenAI",
+            "anthropic": "Anthropic",
+            "analytics": "Analytics",
+            "recaptcha": "reCAPTCHA",
+            "smtp": "SMTP",
+            "cloudinary": "Cloudinary",
+            "iyzipay": "Iyzipay",
+            "stripe": "Stripe"
+          },
+          "fields": {
+            "aiProvider": "KI-Anbieter",
+            "aiProviderOrder": "Anbieter-Reihenfolge",
+            "openaiApiKey": "OpenAI API-Schlüssel",
+            "openaiModel": "OpenAI Modell",
+            "groqApiKey": "Groq API-Schlüssel",
+            "groqModel": "Groq Modell",
+            "anthropicApiKey": "Anthropic API-Schlüssel",
+            "anthropicModel": "Anthropic Modell",
+            "gaId": "Google Analytics ID",
+            "gtmId": "Google Tag Manager ID",
+            "recaptchaSiteKey": "reCAPTCHA Site Key",
+            "recaptchaSecretKey": "reCAPTCHA Secret Key",
+            "api_key": "API-Schlüssel",
+            "model": "Modell",
+            "host": "Server",
+            "port": "Port",
+            "user": "Benutzer",
+            "pass": "Passwort",
+            "from": "Absender",
+            "secure": "Sicher (SSL/TLS)",
+            "cloud_name": "Cloud-Name",
+            "api_secret": "API-Geheimschlüssel",
+            "secret_key": "Geheimschlüssel",
+            "publishable_key": "Veröffentlichungsschlüssel",
+            "webhook_secret": "Webhook-Geheimschlüssel"
+          },
+          "placeholders": {
+            "aiProviderOrderPlaceholder": "groq,openai,anthropic",
+            "openaiModelPlaceholder": "gpt-4o",
+            "groqModelPlaceholder": "llama-3.3-70b-versatile",
+            "anthropicModelPlaceholder": "claude-sonnet-4-20250514",
+            "gaIdPlaceholder": "G-XXXXXXXXXX",
+            "gtmIdPlaceholder": "GTM-XXXXXXX",
+            "api_key": "sk-...",
+            "model": "llama-3.3-70b-versatile",
+            "host": "smtp.gmail.com",
+            "port": "587",
+            "user": "user@example.com",
+            "pass": "••••",
+            "from": "noreply@ensotek.de",
+            "providerOrder": "groq,openai"
+          }
+        }
       },
       "actions": {
         "edit": "Bearbeiten",
@@ -2655,6 +2804,49 @@
           "source": "Quelle",
           "effective": "Effektiv (Zusammenfassung)",
           "actions": "Aktionen"
+        },
+        "inline": {
+          "title": "Seiten-SEO-Einstellungen",
+          "description": "Bearbeiten Sie Meta-Titel, Beschreibung und OG-Einstellungen für jede Seite.",
+          "save": "Speichern",
+          "saveAll": "Alle speichern",
+          "saved": "SEO-Einstellungen gespeichert.",
+          "saveError": "SEO-Einstellungen konnten nicht gespeichert werden.",
+          "dirty": "Ungespeicherte Änderungen",
+          "loading": "Laden...",
+          "expandAll": "Alle aufklappen",
+          "collapseAll": "Alle zuklappen",
+          "fieldTitle": "Meta-Titel",
+          "fieldDescription": "Meta-Beschreibung",
+          "placeholderTitle": "Seitentitel...",
+          "placeholderDescription": "Seitenbeschreibung...",
+          "charCount": "{count} Zeichen",
+          "ogImage": "OG-Bild",
+          "noindex": "Noindex",
+          "noindexBadge": "noindex",
+          "googlePreview": "Google-Vorschau",
+          "socialPreview": "Social-Media-Vorschau",
+          "siteName": "Ensotek",
+          "noDescription": "Keine Beschreibung angegeben.",
+          "noOgImage": "Kein OG-Bild"
+        },
+        "pageLabels": {
+          "home": "Startseite",
+          "product": "Produkte",
+          "sparepart": "Ersatzteile",
+          "service": "Dienstleistungen",
+          "solutions": "Lösungen",
+          "about": "Über uns",
+          "team": "Team",
+          "mission_vision": "Mission & Vision",
+          "quality": "Qualität",
+          "news": "Nachrichten",
+          "blog": "Blog",
+          "library": "Bibliothek",
+          "faqs": "FAQ",
+          "contact": "Kontakt",
+          "offer": "Angebot",
+          "legal": "Rechtliches"
         }
       },
       "inline": {
@@ -2778,6 +2970,144 @@
             "fri": "Fr",
             "sat": "Sa",
             "sun": "So"
+          },
+          "placeholders": {
+            "open": "09:00",
+            "close": "18:00"
+          }
+        },
+        "appLocales": {
+          "description": "Aktive Sprachen verwalten",
+          "addNew": "Neue Sprache hinzufügen",
+          "selectLocale": "Sprache auswählen",
+          "activeLabel": "Aktiv",
+          "defaultLabel": "Standard",
+          "delete": "Löschen",
+          "defaultCannotDelete": "Standardsprache kann nicht gelöscht werden"
+        },
+        "hero": {
+          "description": "Hero-Bereich-Einstellungen",
+          "sections": {
+            "content": "Inhalt",
+            "media": "Medien"
+          },
+          "labels": {
+            "title": "Titel",
+            "subtitle": "Untertitel",
+            "description": "Beschreibung",
+            "buttonText": "Button-Text",
+            "buttonUrl": "Button-URL",
+            "backgroundImage": "Hintergrundbild",
+            "videoUrl": "Video-URL"
+          },
+          "placeholders": {
+            "title": "Hero-Titel...",
+            "subtitle": "Untertitel...",
+            "description": "Beschreibung...",
+            "buttonText": "Mehr erfahren",
+            "buttonUrl": "/about"
+          },
+          "help": {
+            "title": "Startseite Hero-Titel",
+            "subtitle": "Hero-Untertitel-Text"
+          }
+        },
+        "backgrounds": {
+          "description": "Startseiten-Hintergrundbilder",
+          "add": "Hinzufügen",
+          "itemTitle": "Hintergrund {index}",
+          "labels": {
+            "file": "Bild",
+            "alt": "Alt-Text"
+          },
+          "placeholders": {
+            "alt": "Bildbeschreibung..."
+          }
+        },
+        "seo": {
+          "description": "SEO-Allgemeineinstellungen",
+          "fields": {
+            "siteTitle": "Seitentitel",
+            "siteDescription": "Seitenbeschreibung",
+            "keywords": "Schlüsselwörter",
+            "ogImage": "OG-Bild",
+            "ogType": "OG-Typ"
+          },
+          "placeholders": {
+            "siteTitle": "Ensotek - Kühlturm-Lösungen",
+            "siteDescription": "Seitenbeschreibung...",
+            "keywords": "Kühlung, Kühlturm, HVAC...",
+            "ogImage": "/img/og-default.jpg"
+          },
+          "keywordsHelp": "Kommagetrennte Schlüsselwörter",
+          "options": {
+            "ogType": {
+              "website": "Webseite",
+              "article": "Artikel",
+              "product": "Produkt"
+            }
+          }
+        },
+        "seoAdvanced": {
+          "description": "Erweiterte SEO-Einstellungen",
+          "fields": {
+            "siteName": "Seitenname",
+            "titleDefault": "Standardtitel",
+            "titleTemplate": "Titelvorlage",
+            "description": "Beschreibung",
+            "ogType": "OG-Typ",
+            "ogImage": "OG-Bild",
+            "noIndex": "Noindex",
+            "twitterCard": "Twitter-Kartentyp"
+          },
+          "options": {
+            "ogType": {
+              "website": "Webseite",
+              "article": "Artikel",
+              "product": "Produkt"
+            },
+            "twitterCard": {
+              "summary": "Zusammenfassung",
+              "summary_large_image": "Zusammenfassung mit großem Bild"
+            }
+          },
+          "placeholders": {
+            "titleTemplate": "%s | Ensotek"
+          },
+          "titleTemplateHelp": "%s wird durch den Seitentitel ersetzt"
+        },
+        "seoPages": {
+          "description": "Seitenbasierte SEO-Einstellungen",
+          "fields": {
+            "title": "Meta-Titel",
+            "description": "Meta-Beschreibung",
+            "ogImage": "OG-Bild",
+            "noIndex": "Noindex"
+          },
+          "placeholders": {
+            "title": "Seitentitel...",
+            "description": "Seitenbeschreibung...",
+            "ogImage": "/img/og-default.jpg"
+          },
+          "descriptionLength": "{count} Zeichen",
+          "noIndexBadge": "noindex",
+          "pages": {
+            "home": "Startseite",
+            "product": "Produkte",
+            "sparepart": "Ersatzteile",
+            "service": "Dienstleistungen",
+            "solutions": "Lösungen",
+            "about": "Über uns",
+            "team": "Team",
+            "mission_vision": "Mission & Vision",
+            "quality": "Qualität",
+            "news": "Nachrichten",
+            "blog": "Blog",
+            "library": "Bibliothek",
+            "faqs": "FAQ",
+            "contact": "Kontakt",
+            "offer": "Angebot",
+            "legal": "Rechtliches"
           }
         }
       },
@@ -2915,7 +3245,10 @@
         "sendTest": "Test-E-Mail senden",
         "sendingTest": "Test-E-Mail wird gesendet...",
         "saved": "SMTP-Einstellungen gespeichert.",
-        "testSent": "Test-E-Mail gesendet. Überprüfen Sie Ihren Posteingang (und Spam)."
+        "testSent": "Test-E-Mail gesendet. Überprüfen Sie Ihren Posteingang (und Spam).",
+        "saveError": "SMTP-Einstellungen konnten nicht gespeichert werden.",
+        "testEmailRequired": "Test-E-Mail-Adresse ist erforderlich.",
+        "testError": "SMTP-Testfehler."
       }
     },
     "services": {

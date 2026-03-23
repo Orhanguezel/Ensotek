@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { getProducts, getCategories } from '@ensotek/core/services';
 import type { Product, Category } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { apiFetchWithLocale } from '@/lib/api';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -27,29 +27,29 @@ export default async function ProductsPage({ params, searchParams }: Props) {
   const tCommon = await getTranslations('common');
 
   const [productsResult, categoriesResult] = await Promise.allSettled([
-    getProducts(API_BASE_URL, {
-      language: locale,
-      is_active: true,
-      item_type: 'product',
-      ...(categorySlug ? { category_slug: categorySlug } : {}),
-      limit: 60,
+    apiFetchWithLocale<Product[]>('/products', locale, {
+      params: {
+        is_active: true,
+        item_type: 'product',
+        ...(categorySlug ? { category_slug: categorySlug } : {}),
+        limit: 60,
+      }
     }),
-    getCategories(API_BASE_URL, {
-      language: locale,
-      module_key: 'product',
-      is_active: true,
+    apiFetchWithLocale<Category[]>('/categories', locale, {
+      params: {
+        module_key: 'product',
+        is_active: true,
+      }
     }),
   ]);
 
   const products: Product[] =
-    productsResult.status === 'fulfilled'
-      ? Array.isArray(productsResult.value)
-        ? productsResult.value
-        : productsResult.value.data
+    productsResult.status === 'fulfilled' && productsResult.value
+      ? productsResult.value
       : [];
 
   const categories: Category[] =
-    categoriesResult.status === 'fulfilled' ? categoriesResult.value : [];
+    categoriesResult.status === 'fulfilled' && categoriesResult.value ? categoriesResult.value : [];
 
   return (
     <main>

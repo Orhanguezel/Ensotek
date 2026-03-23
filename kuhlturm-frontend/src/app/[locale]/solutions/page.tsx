@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, Calendar, ArrowRight } from 'lucide-react';
 import { getCustomPages } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { apiFetchWithLocale } from '@/lib/api';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -22,15 +22,17 @@ export default async function SolutionsPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('solutions');
+  const tCommon = await getTranslations('common');
 
-  const items: CustomPage[] = await getCustomPages(API_BASE_URL, {
-    module_key: 'solutions',
-    language: locale,
-    is_published: true,
-    sort: 'display_order',
-    order: 'asc',
-    limit: 50,
-  }).catch(() => []);
+  const items: CustomPage[] = await apiFetchWithLocale<CustomPage[]>('/custom_pages', locale, {
+    params: {
+      module_key: 'solutions',
+      is_published: 1,
+      sort: 'display_order',
+      order: 'asc',
+      limit: 50,
+    }
+  }).then(d => d ?? []);
 
   const featured = items.filter((p) => p.featured === 1);
   const rest = items.filter((p) => p.featured !== 1);
@@ -42,7 +44,7 @@ export default async function SolutionsPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
             <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
+              {tCommon('home')}
             </Link>
             <ChevronRight size={14} />
             <span className="text-white">{t('title')}</span>
@@ -72,7 +74,7 @@ export default async function SolutionsPage({ params }: Props) {
                 )}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {featured.map((item) => (
-                    <SolutionCard key={item.id} item={item} locale={locale} large />
+                    <SolutionCard key={item.id} item={item} locale={locale} tCommon={tCommon} large />
                   ))}
                 </div>
               </div>
@@ -88,7 +90,7 @@ export default async function SolutionsPage({ params }: Props) {
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {rest.map((item) => (
-                    <SolutionCard key={item.id} item={item} locale={locale} />
+                    <SolutionCard key={item.id} item={item} locale={locale} tCommon={tCommon} />
                   ))}
                 </div>
               </div>
@@ -106,10 +108,12 @@ export default async function SolutionsPage({ params }: Props) {
 function SolutionCard({
   item,
   locale,
+  tCommon,
   large = false,
 }: {
   item: CustomPage;
   locale: string;
+  tCommon: any;
   large?: boolean;
 }) {
   const date = new Date(item.created_at).toLocaleDateString('de-DE', {
@@ -164,7 +168,7 @@ function SolutionCard({
         )}
 
         <div className="mt-4 flex items-center gap-1.5 text-xs font-semibold text-blue-600 group-hover:gap-2.5 transition-all">
-          <span>Mehr erfahren</span>
+          <span>{tCommon('readMore')}</span>
           <ArrowRight size={13} />
         </div>
       </div>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, FileText, ArrowRight } from 'lucide-react';
 import { getCustomPages } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { apiFetchWithLocale } from '@/lib/api';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -22,15 +22,17 @@ export default async function LegalIndexPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('legal');
+  const tCommon = await getTranslations('common');
 
-  const pages: CustomPage[] = await getCustomPages(API_BASE_URL, {
-    module_key: 'legal',
-    language: locale,
-    is_published: true,
-    sort: 'display_order',
-    order: 'asc',
-    limit: 50,
-  }).catch(() => []);
+  const pages: CustomPage[] = await apiFetchWithLocale<CustomPage[]>('/custom_pages', locale, {
+    params: {
+      module_key: 'legal',
+      is_published: 1,
+      sort: 'display_order',
+      order: 'asc',
+      limit: 50,
+    }
+  }).then(d => d ?? []);
 
   return (
     <main>
@@ -39,7 +41,7 @@ export default async function LegalIndexPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
             <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
+              {tCommon('home')}
             </Link>
             <ChevronRight size={14} />
             <span className="text-white">{t('title')}</span>

@@ -29,6 +29,7 @@ import {
   useGetSliderAdminQuery,
   useUpdateSliderAdminMutation,
 } from "@/integrations/hooks";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 const norm = (v: unknown) =>
   String(v ?? "")
@@ -42,10 +43,11 @@ export default function AdminSliderDetailClient(props: Props) {
   const sp = useSearchParams();
   const isNew = props.mode === "create";
   const id = isNew ? "" : String(props.id || "");
+  const adminLocale = usePreferencesStore((s) => s.adminLocale);
 
   const { localeOptions } = useAdminLocales();
   const urlLocale = norm(sp?.get("locale"));
-  const [activeLocale, setActiveLocale] = React.useState(urlLocale || "de");
+  const [activeLocale, setActiveLocale] = React.useState(urlLocale || adminLocale || "tr");
   const [activeTab, setActiveTab] = React.useState<"form" | "json">("form");
 
   // AI

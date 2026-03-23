@@ -15,6 +15,7 @@ import { getMenuItems, getFooterSections } from '@ensotek/core/services';
 import { API_BASE_URL } from '@/lib/utils';
 import { fetchSetting } from '@/i18n/server';
 import type { MenuItem, FooterSection } from '@ensotek/core/types';
+import { apiFetchWithLocale } from '@/lib/api';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -127,20 +128,13 @@ export default async function LocaleLayout({
 
   const messages = getLocaleMessages(locale);
 
-  // Fetch layout data — graceful fallback if API unavailable
   const [menuItems, footerSections, footerLinks, logoSetting, contactSetting, socialSetting, { activeLocales }] = await Promise.all([
-    getMenuItems(API_BASE_URL, { language: locale, location: 'header' }).catch(
-      (): MenuItem[] => [],
-    ),
-    getFooterSections(API_BASE_URL, { language: locale, is_active: true }).catch(
-      (): FooterSection[] => [],
-    ),
-    getMenuItems(API_BASE_URL, { language: locale, location: 'footer' }).catch(
-      (): MenuItem[] => [],
-    ),
+    apiFetchWithLocale<MenuItem[]>('/menu_items', locale, { params: { location: 'header' } }).then(d => d ?? []),
+    apiFetchWithLocale<FooterSection[]>('/footer_sections', locale, { params: { is_active: true } }).then(d => d ?? []),
+    apiFetchWithLocale<MenuItem[]>('/menu_items', locale, { params: { location: 'footer' } }).then(d => d ?? []),
     fetchSetting('site_logo', locale, { revalidate: 3600 }),
-    fetchSetting('site_contact', locale, { revalidate: 3600 }),
-    fetchSetting('site_social', locale, { revalidate: 3600 }),
+    fetchSetting('contact_info', locale, { revalidate: 3600 }),
+    fetchSetting('socials', locale, { revalidate: 3600 }),
     getLocaleSettings(),
   ]);
 
@@ -165,7 +159,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header menuItems={menuItems} logoSrc={logoSrc} />
           {children}
-          <Footer footerSections={footerSections} footerLinks={footerLinks} logoSrc={logoSrc} />
+          <Footer locale={locale} footerSections={footerSections} footerLinks={footerLinks} logoSrc={logoSrc} />
           <FloatingWidgets 
             activeLocales={activeLocales.map(code => ({ code, label: code.toUpperCase() }))}
             contactInfo={contactInfo}

@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { ChevronRight, ArrowLeft, Calendar, Tag } from 'lucide-react';
 import { getCustomPages, getCustomPageBySlug, parseCustomPageContent, getSiteSetting } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { getCustomPageBySlugWithLocale, getCustomPagesWithLocale } from '@/lib/api';
+import { fetchSetting } from '@/i18n/server';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
 import { ReviewsSection } from '@/components/sections/ReviewsSection';
@@ -14,21 +15,21 @@ interface Props {
 }
 
 export async function generateStaticParams() {
-  const posts = await getCustomPages(API_BASE_URL, {
+  const posts = await getCustomPagesWithLocale('de', {
     module_key: 'blog',
-    is_published: true,
+    is_published: 1,
     limit: 200,
-  }).catch(() => []);
-  return posts.map((p) => ({ slug: p.slug }));
+  });
+  return (posts as any[] ?? []).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
-  const post = await getCustomPageBySlug(API_BASE_URL, slug, locale).catch(() => null);
+  const post = await getCustomPageBySlugWithLocale(slug, locale);
   if (!post) return { title: 'Blog' };
   return {
-    title: post.meta_title ?? post.title,
-    description: post.meta_description ?? post.summary ?? undefined,
+    title: (post as any).meta_title ?? (post as any).title,
+    description: (post as any).meta_description ?? (post as any).summary ?? undefined,
     openGraph: post.featured_image
       ? { images: [{ url: post.featured_image }] }
       : undefined,
@@ -45,7 +46,7 @@ export default async function BlogDetailPage({ params }: Props) {
     getTranslations('reviews'),
   ]);
 
-  const post = await getCustomPageBySlug(API_BASE_URL, slug, locale).catch(() => null);
+  const post = await getCustomPageBySlugWithLocale(slug, locale);
 
   if (!post) {
     return (
@@ -79,25 +80,22 @@ export default async function BlogDetailPage({ params }: Props) {
     : [];
 
   // Related posts (same category, excluding current)
-  const related: CustomPage[] = await getCustomPages(API_BASE_URL, {
+  const relatedRaw = await getCustomPagesWithLocale(locale, {
     module_key: 'blog',
-    language: locale,
-    is_published: true,
+    is_published: 1,
     category_id: post.category_id ?? undefined,
     sort: 'created_at',
     order: 'desc',
     limit: 4,
-  })
-    .then((all) => all.filter((p) => p.slug !== slug).slice(0, 3))
-    .catch(() => []);
+  });
+
+  const related: CustomPage[] = (relatedRaw as any[] ?? [])
+    .filter((p) => p.slug !== slug)
+    .slice(0, 3);
 
   // Contact info
-  const contactInfoRaw = await getSiteSetting(API_BASE_URL, 'contact_info', locale).catch(() => null);
-  const contactInfo: ContactInfo = contactInfoRaw?.value
-    ? (typeof contactInfoRaw.value === 'string'
-        ? (() => { try { return JSON.parse(contactInfoRaw.value); } catch { return {}; } })()
-        : contactInfoRaw.value as ContactInfo)
-    : {};
+  const contactInfoRaw = await fetchSetting('contact_info', locale, { revalidate: 3600 });
+  const contactInfo: any = contactInfoRaw?.value || {};
 
   return (
     <main>

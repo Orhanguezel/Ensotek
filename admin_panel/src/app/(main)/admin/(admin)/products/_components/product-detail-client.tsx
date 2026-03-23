@@ -57,7 +57,7 @@ export default function ProductDetailClient({ id, itemType }: Props) {
   const backUrl = itemType === "sparepart" ? "/admin/products?type=sparepart" : "/admin/products";
 
   const { localeOptions } = useAdminLocales();
-  const [activeLocale, setActiveLocale] = React.useState<string>(adminLocale || "de");
+  const [activeLocale, setActiveLocale] = React.useState<string>(adminLocale || "tr");
   const [activeTab, setActiveTab] = React.useState<"form" | "specs" | "faqs" | "reviews" | "json">("form");
 
   // AI
@@ -152,7 +152,7 @@ export default function ProductDetailClient({ id, itemType }: Props) {
   // AI handler — supports all 4 actions
   const handleAIAction = async (action: AIAction) => {
     const targetLocales = (localesForSelect || []).map((l) => l.value).filter(Boolean);
-    if (!targetLocales.length) targetLocales.push(activeLocale || "de");
+    if (!targetLocales.length) targetLocales.push(activeLocale || "tr");
     const result = await aiAssist({
       title: formData.title,
       summary: formData.description,

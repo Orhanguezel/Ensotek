@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { Menu, ChevronDown } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { MobileNav } from './MobileNav';
@@ -149,6 +149,7 @@ function DropdownItem({ item }: { item: NavItem }) {
 
 export function Header({ menuItems = [], logoSrc }: HeaderProps) {
   const locale = useLocale();
+  const t = useTranslations('nav');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [catalogOpen, setCatalogOpen] = useState(false);
 
@@ -180,7 +181,7 @@ export function Header({ menuItems = [], logoSrc }: HeaderProps) {
                 onClick={() => setCatalogOpen(true)}
                 className="text-sm font-semibold px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
               >
-                Katalog anfordern
+                {t('catalog')}
               </button>
             </div>
 

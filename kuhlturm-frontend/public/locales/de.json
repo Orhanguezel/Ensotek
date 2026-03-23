@@ -6,7 +6,14 @@
     "references": "Referenzen",
     "about": "Über uns",
     "contact": "Kontakt",
-    "catalog": "Katalog anfragen"
+    "catalog": "Katalog anfragen",
+    "searchPlaceholder": "Suche nach Produkten, Dienstleistungen...",
+    "trendingSearches": "Beliebt:",
+    "trendCooling": "Kühlturm",
+    "trendService": "Wartung",
+    "trendParts": "Ersatzteile",
+    "offerWidgetLine1": "ANGEBOT",
+    "offerWidgetLine2": "ANFRAGEN"
   },
   "footer": {
     "rights": "Alle Rechte vorbehalten",
@@ -14,6 +21,7 @@
     "imprint": "Impressum"
   },
   "common": {
+    "home": "Startseite",
     "loading": "Wird geladen...",
     "error": "Ein Fehler ist aufgetreten",
     "readMore": "Mehr erfahren",
@@ -229,7 +237,13 @@
     "related": "Weitere Beiträge",
     "views": "Aufrufe",
     "filesAvailable": "Dateien",
-    "imagesAvailable": "Bilder"
+    "imagesAvailable": "Bilder",
+    "searchPlaceholder": "Nach Themen, Artikeln oder Anleitungen suchen...",
+    "allCategories": "Alle Kategorien",
+    "recentArticles": "Aktuelle Artikel",
+    "allArticles": "Alle Artikel",
+    "categories": "Kategorien",
+    "noItemsFound": "Keine passenden Einträge zu Ihrer Suche gefunden."
   },
   "solutions": {
     "title": "Lösungen",

@@ -5,7 +5,8 @@ import { notFound } from 'next/navigation';
 import { ChevronRight, Hash, Tag, ArrowLeft, Package } from 'lucide-react';
 import { getProductBySlug, getProducts, getSiteSetting } from '@ensotek/core/services';
 import type { Product } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { getProductBySlugWithLocale, getProductsWithLocale } from '@/lib/api';
+import { fetchSetting } from '@/i18n/server';
 import { SparePartOfferButton } from '@/components/sections/SparePartOfferButton';
 import { WhatsAppButton } from '@/components/sections/WhatsAppButton';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
@@ -19,7 +20,7 @@ interface Props {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   try {
-    const raw = await getProductBySlug(API_BASE_URL, slug, locale, 'sparepart');
+    const raw = await getProductBySlugWithLocale(slug, locale);
     const part = (raw as unknown as { data?: Product })?.data ?? raw;
     return {
       title: part.meta_title || part.title,
@@ -42,8 +43,9 @@ export default async function SparePartDetailPage({ params }: Props) {
 
   let part: Product;
   try {
-    const raw = await getProductBySlug(API_BASE_URL, slug, locale, 'sparepart');
+    const raw = await getProductBySlugWithLocale(slug, locale);
     part = (raw as unknown as { data?: Product })?.data ?? raw;
+    if (!part) notFound();
   } catch {
     notFound();
   }
@@ -52,19 +54,14 @@ export default async function SparePartDetailPage({ params }: Props) {
   if (part.item_type !== 'sparepart') notFound();
 
   // Related spare parts (same category, excluding current)
-  const relatedRaw = await getProducts(API_BASE_URL, {
-    language: locale,
-    is_active: true,
+  const relatedRaw = await getProductsWithLocale(locale, {
+    is_active: 1,
     item_type: 'sparepart',
     ...(part.category_id ? { category_id: part.category_id } : {}),
     limit: 5,
-  }).catch(() => null);
+  });
 
-  const relatedAll: Product[] = relatedRaw
-    ? Array.isArray(relatedRaw)
-      ? relatedRaw
-      : relatedRaw.data
-    : [];
+  const relatedAll: Product[] = (relatedRaw as any) ?? [];
 
   const relatedParts = relatedAll.filter((p) => p.id !== part.id).slice(0, 4);
 
@@ -72,12 +69,8 @@ export default async function SparePartDetailPage({ params }: Props) {
   const hasTags = part.tags && part.tags.length > 0;
 
   // Contact info
-  const contactInfoRaw = await getSiteSetting(API_BASE_URL, 'contact_info', locale).catch(() => null);
-  const contactInfo: ContactInfo = contactInfoRaw?.value
-    ? (typeof contactInfoRaw.value === 'string'
-        ? (() => { try { return JSON.parse(contactInfoRaw.value); } catch { return {}; } })()
-        : contactInfoRaw.value as ContactInfo)
-    : {};
+  const contactInfoRaw = await fetchSetting('contact_info', locale, { revalidate: 3600 });
+  const contactInfo: any = contactInfoRaw?.value || {};
   const whatsappPhone = contactInfo.whatsappNumber || contactInfo.phones?.[0] || '';
   const waMessage = `Guten Tag! Ich benötige ein Ersatzteil: ${part.title}${part.product_code ? ` (Art.-Nr.: ${part.product_code})` : ''}. Bitte um Angebot.`;
 

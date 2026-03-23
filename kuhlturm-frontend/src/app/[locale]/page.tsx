@@ -11,7 +11,7 @@ import { NewsletterSection } from '@/components/sections/NewsletterSection';
 import { getProducts, getServices, getReferences, getReviews, getLibraryItems } from '@ensotek/core/services';
 import type { Product, Service, Reference, Review } from '@ensotek/core/types';
 import type { LibraryItem } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { apiFetchWithLocale } from '@/lib/api';
 import { fetchSetting } from '@/i18n/server';
 
 export const metadata: Metadata = {
@@ -39,20 +39,20 @@ export default async function HomePage({ params }: Props) {
 
   const [[productsResult, servicesResult, refsResult, reviewsResult, libraryResult], contactInfoRaw] = await Promise.all([
     Promise.allSettled([
-      getProducts(API_BASE_URL, { language: locale, is_featured: true, limit: 9 }),
-      getServices(API_BASE_URL, { language: locale, featured: true }),
-      getReferences(API_BASE_URL, { language: locale, is_featured: true, limit: 8 }),
-      getReviews(API_BASE_URL, { language: locale, is_active: true, is_approved: true, limit: 9 }),
-      getLibraryItems(API_BASE_URL, { locale, featured: true, is_active: true, limit: 6 }),
+      apiFetchWithLocale<Product[]>('/products', locale, { params: { is_featured: true, limit: 9 } }),
+      apiFetchWithLocale<Service[]>('/services', locale, { params: { featured: true } }),
+      apiFetchWithLocale<Reference[]>('/references', locale, { params: { is_featured: true, limit: 8 } }),
+      apiFetchWithLocale<Review[]>('/reviews', locale, { params: { is_active: true, is_approved: true, limit: 9 } }),
+      apiFetchWithLocale<LibraryItem[]>('/library', locale, { params: { featured: true, is_active: true, limit: 6 } }),
     ]),
     fetchSetting('contact_info', locale),
   ]);
 
   const featuredProducts: Product[] =
-    productsResult.status === 'fulfilled'
+    productsResult.status === 'fulfilled' && productsResult.value
       ? (Array.isArray(productsResult.value)
           ? productsResult.value
-          : productsResult.value.data
+          : (productsResult.value as any).data ?? []
         ).slice(0, 9)
       : [];
 
@@ -67,10 +67,10 @@ export default async function HomePage({ params }: Props) {
       : [];
 
   const featuredReviews: Review[] =
-    reviewsResult.status === 'fulfilled'
+    reviewsResult.status === 'fulfilled' && reviewsResult.value
       ? (Array.isArray(reviewsResult.value)
           ? reviewsResult.value
-          : (reviewsResult.value.data ?? [])
+          : (reviewsResult.value as any).data ?? []
         ).slice(0, 9)
       : [];
 

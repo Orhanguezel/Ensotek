@@ -25,6 +25,10 @@ export async function fetchSetting(
     const url = `${API_BASE_URL}/site_settings/${encodeURIComponent(key)}?locale=${encodeURIComponent(locale)}`;
     const res = await fetch(url, {
       next: options?.revalidate != null ? { revalidate: options.revalidate } : undefined,
+      headers: {
+        'x-locale': locale,
+        'accept-language': locale,
+      },
     });
     if (!res.ok) return null;
     const data = await res.json();
@@ -65,7 +69,13 @@ type ContentMeta = {
 async function fetchContent(path: string, locale: string): Promise<ContentMeta> {
   try {
     const url = `${API_BASE_URL}/${path}?locale=${encodeURIComponent(locale)}`;
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url, { 
+      next: { revalidate: 300 },
+      headers: {
+        'x-locale': locale,
+        'accept-language': locale,
+      },
+    });
     if (!res.ok) return null;
     const data = await res.json();
     return data?.data ?? data ?? null;
@@ -114,7 +124,13 @@ export async function fetchCustomPagesByModuleKey(
       `&language=${encodeURIComponent(locale)}` +
       `&is_published=1` +
       `&limit=${limit}`;
-    const res = await fetch(url, { next: { revalidate: 300 } });
+    const res = await fetch(url, { 
+      next: { revalidate: 300 },
+      headers: {
+        'x-locale': locale,
+        'accept-language': locale,
+      },
+    });
     if (!res.ok) return [];
     const data = await res.json();
     return Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];

@@ -4,28 +4,29 @@ import Link from 'next/link';
 import { ChevronRight, FileText } from 'lucide-react';
 import { getCustomPages, getCustomPageBySlug, parseCustomPageContent } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { getCustomPageBySlugWithLocale, getCustomPagesWithLocale } from '@/lib/api';
+import { fetchSetting } from '@/i18n/server';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const pages = await getCustomPages(API_BASE_URL, {
+  const pages = await getCustomPagesWithLocale('de', {
     module_key: 'legal',
-    is_published: true,
+    is_published: 1,
     limit: 200,
-  }).catch(() => []);
-  return pages.map((p) => ({ slug: p.slug }));
+  });
+  return (pages as any[] ?? []).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
-  const page = await getCustomPageBySlug(API_BASE_URL, slug, locale).catch(() => null);
+  const page = await getCustomPageBySlugWithLocale(slug, locale);
   if (!page) return { title: 'Rechtliches' };
   return {
-    title: page.meta_title ?? page.title,
-    description: page.meta_description ?? page.summary ?? undefined,
+    title: (page as any).meta_title ?? (page as any).title,
+    description: (page as any).meta_description ?? (page as any).summary ?? undefined,
   };
 }
 
@@ -34,19 +35,21 @@ export default async function LegalDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const t = await getTranslations('legal');
+  const tCommon = await getTranslations('common');
 
   // Fetch current page and all legal pages in parallel
-  const [page, allPages] = await Promise.all([
-    getCustomPageBySlug(API_BASE_URL, slug, locale).catch(() => null),
-    getCustomPages(API_BASE_URL, {
+  const [page, allPagesRaw] = await Promise.all([
+    getCustomPageBySlugWithLocale(slug, locale),
+    getCustomPagesWithLocale(locale, {
       module_key: 'legal',
-      language: locale,
-      is_published: true,
+      is_published: 1,
       sort: 'display_order',
       order: 'asc',
       limit: 50,
-    }).catch((): CustomPage[] => []),
+    }),
   ]);
+
+  const allPages: CustomPage[] = (allPagesRaw as any[] ?? []);
 
   if (!page) {
     return (
@@ -81,7 +84,7 @@ export default async function LegalDetailPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
             <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
+              {tCommon('home')}
             </Link>
             <ChevronRight size={14} />
             <Link href={`/${locale}/legal`} className="hover:text-white transition-colors">

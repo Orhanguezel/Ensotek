@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { ChevronRight, Calendar, Tag } from 'lucide-react';
 import { getCustomPages } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { apiFetchWithLocale } from '@/lib/api';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -23,14 +23,15 @@ export default async function BlogPage({ params }: Props) {
 
   const t = await getTranslations('blog');
 
-  const posts: CustomPage[] = await getCustomPages(API_BASE_URL, {
-    module_key: 'blog',
-    language: locale,
-    is_published: true,
-    sort: 'created_at',
-    order: 'desc',
-    limit: 50,
-  }).catch(() => []);
+  const posts: CustomPage[] = await apiFetchWithLocale<CustomPage[]>('/custom_pages', locale, {
+    params: {
+      module_key: 'blog',
+      is_published: 1,
+      sort: 'created_at',
+      order: 'desc',
+      limit: 50,
+    }
+  }).then(d => d ?? []);
 
   const featured = posts.filter((p) => p.featured === 1);
   const rest = posts.filter((p) => p.featured !== 1);

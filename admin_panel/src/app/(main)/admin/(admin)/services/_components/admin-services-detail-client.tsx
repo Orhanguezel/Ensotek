@@ -33,6 +33,7 @@ import {
   useGetServiceAdminQuery,
   useUpdateServiceAdminMutation,
 } from "@/integrations/hooks";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 function isUuidLike(v?: string) {
   return v ? /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v) : false;
@@ -42,9 +43,10 @@ export default function AdminServiceDetailClient({ id }: { id: string }) {
   const _t = useAdminT("admin.services");
   const router = useRouter();
   const isNew = id === "new";
+  const adminLocale = usePreferencesStore((s) => s.adminLocale);
 
   const { localeOptions } = useAdminLocales();
-  const [activeLocale, setActiveLocale] = React.useState("de");
+  const [activeLocale, setActiveLocale] = React.useState(adminLocale || "tr");
   const [activeTab, setActiveTab] = React.useState<"form" | "json">("form");
 
   // AI
@@ -133,7 +135,7 @@ export default function AdminServiceDetailClient({ id }: { id: string }) {
   // AI handler — supports all 4 actions
   const handleAIAction = async (action: AIAction) => {
     const targets = localesForSelect.map((l) => l.value).filter(Boolean);
-    if (!targets.length) targets.push(activeLocale || "de");
+    if (!targets.length) targets.push(activeLocale || "tr");
     const result = await aiAssist({
       title: f.name,
       summary: f.description,

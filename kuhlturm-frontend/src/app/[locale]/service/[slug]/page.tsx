@@ -5,7 +5,8 @@ import { notFound } from 'next/navigation';
 import { ChevronRight, ArrowLeft, CheckCircle, Wrench, Shield, Tag } from 'lucide-react';
 import { getServiceBySlug, getServices, getSiteSetting } from '@ensotek/core/services';
 import type { Service } from '@ensotek/core/types';
-import { API_BASE_URL } from '@/lib/utils';
+import { getServiceBySlugWithLocale, getServicesWithLocale } from '@/lib/api';
+import { fetchSetting } from '@/i18n/server';
 import { ServiceOfferButton } from '@/components/sections/ServiceOfferButton';
 import { WhatsAppButton } from '@/components/sections/WhatsAppButton';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
@@ -18,16 +19,12 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
-  try {
-    const raw = await getServiceBySlug(API_BASE_URL, slug, locale);
-    const service = (raw as unknown as { data?: Service })?.data ?? raw;
-    return {
-      title: service.meta_title || service.name,
-      description: service.meta_description || service.description?.replace(/<[^>]*>/g, '').slice(0, 160) || undefined,
-    };
-  } catch {
-    return { title: 'Dienstleistung' };
-  }
+  const service = await getServiceBySlugWithLocale(slug, locale);
+  if (!service) return { title: 'Dienstleistung' };
+  return {
+    title: (service as any).meta_title || (service as any).name,
+    description: (service as any).meta_description || (service as any).description?.replace(/<[^>]*>/g, '').slice(0, 160) || undefined,
+  };
 }
 
 export default async function ServiceDetailPage({ params }: Props) {
@@ -40,37 +37,29 @@ export default async function ServiceDetailPage({ params }: Props) {
     getTranslations('reviews'),
   ]);
 
-  let service: Service;
-  try {
-    const raw = await getServiceBySlug(API_BASE_URL, slug, locale);
-    service = (raw as unknown as { data?: Service })?.data ?? raw;
-  } catch {
+  const service = await getServiceBySlugWithLocale(slug, locale);
+  if (!service) {
     notFound();
   }
 
   // Related services (excluding current)
-  const allServices = await getServices(API_BASE_URL, {
-    language: locale,
-    is_active: true,
-  }).catch(() => [] as Service[]);
+  const allServices = await getServicesWithLocale(locale, {
+    is_active: 1,
+  }).then(d => d ?? []);
 
-  const relatedServices = allServices.filter((s) => s.id !== service.id).slice(0, 3);
+  const relatedServices = allServices.filter((s: Service) => s.id !== service.id).slice(0, 3);
 
   // Parse tags (stored as comma-separated string)
   const tags = service.tags
-    ? service.tags
+    ? (service.tags as string)
         .split(',')
-        .map((t) => t.trim())
+        .map((t: string) => t.trim())
         .filter(Boolean)
     : [];
 
   // Contact info
-  const contactInfoRaw = await getSiteSetting(API_BASE_URL, 'contact_info', locale).catch(() => null);
-  const contactInfo: ContactInfo = contactInfoRaw?.value
-    ? (typeof contactInfoRaw.value === 'string'
-        ? (() => { try { return JSON.parse(contactInfoRaw.value); } catch { return {}; } })()
-        : contactInfoRaw.value as ContactInfo)
-    : {};
+  const contactInfoRaw = await fetchSetting('contact_info', locale, { revalidate: 3600 });
+  const contactInfo: any = contactInfoRaw?.value || {};
   const whatsappPhone = contactInfo.whatsappNumber || contactInfo.phones?.[0] || '';
   const waMessage = `Guten Tag! Ich möchte mehr über die Dienstleistung erfahren: ${service.name}. Bitte nehmen Sie Kontakt mit mir auf.`;
 
@@ -92,7 +81,7 @@ export default async function ServiceDetailPage({ params }: Props) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-sm text-slate-400 flex-wrap">
             <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
+              {tCommon('home')}
             </Link>
             <ChevronRight size={14} className="shrink-0" />
             <Link href={`/${locale}/service`} className="hover:text-white transition-colors">
@@ -208,7 +197,7 @@ export default async function ServiceDetailPage({ params }: Props) {
               {/* Tags */}
               {tags.length > 0 && (
                 <div className="mt-6 flex flex-wrap gap-2">
-                  {tags.map((tag) => (
+                  {tags.map((tag: string) => (
                     <span
                       key={tag}
                       className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-medium"

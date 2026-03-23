@@ -58,11 +58,11 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
   };
 
   const socialIcons = [
-    { key: 'instagram', icon: Instagram, url: socials.instagram },
-    { key: 'facebook', icon: Facebook, url: socials.facebook },
-    { key: 'linkedin', icon: Linkedin, url: socials.linkedin },
-    { key: 'youtube', icon: Youtube, url: socials.youtube },
-    { key: 'twitter', icon: Twitter, url: socials.twitter },
+    { key: 'instagram', icon: Instagram, url: socials?.instagram },
+    { key: 'facebook', icon: Facebook, url: socials?.facebook },
+    { key: 'linkedin', icon: Linkedin, url: socials?.linkedin },
+    { key: 'youtube', icon: Youtube, url: socials?.youtube },
+    { key: 'twitter', icon: Twitter, url: socials?.twitter },
   ].filter(s => s.url);
 
   return (
@@ -111,7 +111,7 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
             <button
               onClick={() => toggleTab('search')}
               aria-label="Ara"
-              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors ${activeTab === 'search' ? 'bg-[#319760] text-white' : 'text-white/70 hover:bg-white/5'}`}
+              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors ${activeTab === 'search' ? 'bg-[var(--color-brand)] text-white' : 'text-white/70 hover:bg-white/5'}`}
             >
               <Search size={22} />
             </button>
@@ -120,13 +120,13 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
           {/* Language Switcher */}
           <div className="relative">
             {activeTab === 'lang' && (
-              <div className="absolute right-full top-0 flex bg-[#333333] h-[60px] animate-in slide-in-from-right-10 duration-300 shadow-xl">
+              <div className="absolute right-full top-0 flex bg-[#2a2a2a] h-[60px] animate-in slide-in-from-right-10 duration-300 shadow-xl border-l border-white/5">
                 {activeLocales.map(loc => (
                   <Link 
                     key={loc.code} 
                     href={pathname.replace(`/${locale}`, `/${loc.code}`)}
                     onClick={() => setActiveTab('none')}
-                    className={`flex items-center justify-center min-w-[60px] px-4 text-xs font-bold uppercase hover:bg-white/10 transition-colors border-r border-white/5 ${locale === loc.code ? 'text-[#319760]' : 'text-white/60'}`}
+                    className={`flex items-center justify-center min-w-[60px] px-4 text-xs font-bold uppercase hover:bg-white/10 transition-colors border-r border-white/5 ${locale === loc.code ? 'text-[var(--color-brand)]' : 'text-white/60'}`}
                   >
                     {loc.code}
                   </Link>
@@ -135,7 +135,7 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
             )}
             <button 
               onClick={() => toggleTab('lang')}
-              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors border-t border-white/5 uppercase text-xs font-bold ${activeTab === 'lang' ? 'bg-[#319760] text-white' : 'text-white/70 hover:bg-white/5'}`}
+              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors border-t border-white/5 uppercase text-xs font-bold ${activeTab === 'lang' ? 'bg-[var(--color-brand)] text-white' : 'text-white/70 hover:bg-white/5'}`}
             >
               {locale}
             </button>
@@ -144,24 +144,28 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
           {/* Info Button */}
           <div className="relative">
             {activeTab === 'info' && (
-              <div className="absolute right-full top-0 w-[300px] bg-white p-8 shadow-2xl animate-in slide-in-from-right-10 duration-300">
+              <div className="absolute right-full top-0 w-[300px] bg-white p-8 shadow-2xl animate-in slide-in-from-right-10 duration-300 rounded-l-xl">
                 <div className="space-y-6">
                   <div>
-                    <h4 className="text-[#1a1a1a] font-bold text-lg mb-2">{contactInfo.company_name || 'Ensotek'}</h4>
+                    <h4 className="text-[#1a1a1a] font-bold text-lg mb-2">{contactInfo.company_name || 'Kühlturm'}</h4>
                     <div className="flex gap-3 text-gray-500 text-sm leading-relaxed">
-                      <MapPin size={18} className="shrink-0 text-[#319760]" />
+                      <MapPin size={18} className="shrink-0 text-[var(--color-brand)]" />
                       <span>{contactInfo.address}<br />{contactInfo.city}</span>
                     </div>
                   </div>
                   <div className="space-y-3 pt-4 border-t border-gray-100">
-                    <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-3 text-gray-600 hover:text-[#319760] transition-colors font-medium">
-                      <Phone size={18} />
-                      <span>{contactInfo.phone}</span>
-                    </a>
-                    <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-3 text-gray-600 hover:text-[#319760] transition-colors font-medium">
-                      <Mail size={18} />
-                      <span>{contactInfo.email}</span>
-                    </a>
+                    {contactInfo.phone && (
+                      <a href={`tel:${contactInfo.phone}`} className="flex items-center gap-3 text-gray-600 hover:text-[var(--color-brand)] transition-colors font-medium">
+                        <Phone size={18} />
+                        <span>{contactInfo.phone}</span>
+                      </a>
+                    )}
+                    {contactInfo.email && (
+                      <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-3 text-gray-600 hover:text-[var(--color-brand)] transition-colors font-medium">
+                        <Mail size={18} />
+                        <span>{contactInfo.email}</span>
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>
@@ -169,7 +173,7 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
             <button
               onClick={() => toggleTab('info')}
               aria-label="İletişim bilgileri"
-              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors border-t border-white/5 ${activeTab === 'info' ? 'bg-[#319760] text-white' : 'text-white/70 hover:bg-white/5'}`}
+              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors border-t border-white/5 ${activeTab === 'info' ? 'bg-[var(--color-brand)] text-white' : 'text-white/70 hover:bg-white/5'}`}
             >
               <User size={22} />
             </button>
@@ -178,7 +182,7 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
           {/* Social Share */}
           <div className="relative">
             {activeTab === 'social' && (
-              <div className="absolute right-full top-0 flex bg-[#333333] h-[60px] animate-in slide-in-from-right-10 duration-300 shadow-xl">
+              <div className="absolute right-full top-0 flex bg-[#2a2a2a] h-[60px] animate-in slide-in-from-right-10 duration-300 shadow-xl border-l border-white/5">
                 {socialIcons.map((s) => (
                   <a 
                     key={s.key} 
@@ -195,7 +199,7 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
             <button
               onClick={() => toggleTab('social')}
               aria-label="Sosyal medya"
-              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors border-t border-white/5 ${activeTab === 'social' ? 'bg-[#319760] text-white' : 'text-white/70 hover:bg-white/5'}`}
+              className={`w-[60px] h-[60px] flex items-center justify-center transition-colors border-t border-white/5 ${activeTab === 'social' ? 'bg-[var(--color-brand)] text-white' : 'text-white/70 hover:bg-white/5'}`}
             >
               <Share2 size={22} />
             </button>
@@ -203,11 +207,11 @@ export function FloatingWidgets({ activeLocales = [], socials = {}, contactInfo 
 
           {/* Teklif Al Widget */}
           <Link 
-            href={`/${locale}/teklif`}
-            className="w-[60px] h-[80px] bg-[#267a4e] text-white flex flex-col items-center justify-center hover:bg-[#1e6b40] transition-all border-t border-white/10 group overflow-hidden"
+            href={`/${locale}/offer`}
+            className="w-[60px] h-[85px] bg-[var(--color-brand)] text-white flex flex-col items-center justify-center hover:opacity-90 transition-all border-t border-white/10 group overflow-hidden"
           >
-            <ClipboardList size={22} className="group-hover:scale-110 transition-transform mb-1" />
-            <span className="text-[10px] font-bold uppercase tracking-tighter text-center leading-none">{t('offerWidgetLine1') || 'TEKLİF'}<br/>{t('offerWidgetLine2') || 'AL'}</span>
+            <ClipboardList size={22} className="group-hover:scale-110 transition-transform mb-1.5" />
+            <span className="text-[10px] font-bold uppercase tracking-tighter text-center leading-none opacity-90">{t('offerWidgetLine1') || 'OFFER'}<br/>{t('offerWidgetLine2') || 'REQUEST'}</span>
           </Link>
 
         </div>

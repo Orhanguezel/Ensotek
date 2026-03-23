@@ -222,6 +222,10 @@ VALUES
 -- ------------------------
 ('c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111', NULL, 'footer', 'a0e2b2a9-7f0d-4f30-9a64-3ed7bd1d3c10', 'custom', NULL, NULL, 0, 1),
 ('c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112', NULL, 'footer', 'a0e2b2a9-7f0d-4f30-9a64-3ed7bd1d3c10', 'custom', NULL, NULL, 1, 1),
+('c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111113', NULL, 'footer', 'a0e2b2a9-7f0d-4f30-9a64-3ed7bd1d3c10', 'custom', NULL, NULL, 2, 1),
+('c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111114', NULL, 'footer', 'a0e2b2a9-7f0d-4f30-9a64-3ed7bd1d3c10', 'custom', NULL, NULL, 3, 1),
+('c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111115', NULL, 'footer', 'a0e2b2a9-7f0d-4f30-9a64-3ed7bd1d3c10', 'custom', NULL, NULL, 4, 1),
+('c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111116', NULL, 'footer', 'a0e2b2a9-7f0d-4f30-9a64-3ed7bd1d3c10', 'custom', NULL, NULL, 5, 1),
 
 -- ------------------------
 -- FOOTER: CORPORATE / LEGAL
@@ -308,6 +312,10 @@ VALUES
 -- FOOTER: SERVICES (TR)
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','tr','Periyodik Bakım ve Onarım','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','tr','Modernizasyon ve Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111113','tr','Yedek Parça ve Bileşenler','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111114','tr','Otomasyon ve SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111115','tr','Mühendislik ve Destek','/service/engineering-support','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111116','tr','Keşif ve Projelendirme','/service/site-survey-engineering','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: CORPORATE / LEGAL (TR)
 (UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','tr','Gizlilik Politikası','/legal/gizlilik-politikasi','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -382,6 +390,10 @@ VALUES
 -- FOOTER: SERVICES (EN)
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','en','Periodic Maintenance','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','en','Modernization & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111113','en','Spare Parts & Components','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111114','en','Automation & SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111115','en','Engineering Support','/service/engineering-support','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111116','en','Site Survey & Design','/service/site-survey-engineering','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: CORPORATE / LEGAL (EN)
 (UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','en','Privacy Policy','/legal/privacy-policy','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -456,6 +468,10 @@ VALUES
 -- FOOTER: SERVICES (DE)
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','de','Wartung & Instandsetzung','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','de','Modernisierung & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111113','de','Ersatzteile & Komponenten','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111114','de','Automation / SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111115','de','Engineering & Support','/service/engineering-support','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111116','de','Planung & Analyse','/service/site-survey-engineering','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: CORPORATE / LEGAL (DE)
 (UUID(),'71c28444-7b6e-47ae-92be-f59206a1b820','de','Datenschutzerklärung','/legal/datenschutzerklaerung','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),

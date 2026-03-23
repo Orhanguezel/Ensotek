@@ -15,6 +15,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: 'kuhlturm.com' },
       { protocol: 'https', hostname: 'www.kuhlturm.com' },
+      { protocol: 'https', hostname: 'ensotek.de' },
+      { protocol: 'https', hostname: 'www.ensotek.de' },
+      { protocol: 'https', hostname: 'cdn.ensotek.de' },
       ...(process.env.NODE_ENV === 'development'
         ? [
             { protocol: 'http' as const, hostname: 'localhost' },

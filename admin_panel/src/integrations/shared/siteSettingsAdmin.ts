@@ -513,6 +513,7 @@ export const SITE_SETTINGS_BRAND_MEDIA_ITEMS: readonly {
   { field: "site_logo", labelKey: "siteLogo", folder: "uploads/brand" },
   { field: "site_logo_dark", labelKey: "siteLogoDark", folder: "uploads/brand" },
   { field: "site_favicon", labelKey: "siteFavicon", folder: "uploads/brand" },
+  { field: "site_apple_touch_icon", labelKey: "siteAppleTouchIcon", folder: "uploads/brand" },
   { field: "og_image_default", labelKey: "ogImageDefault", folder: "uploads/brand" },
 ] as const;
 
