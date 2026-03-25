@@ -155,7 +155,7 @@ export default async function LocaleLayout({
   const socials = socialSetting?.value as any || {};
 
   return (
-    <html lang={locale} className={`${inter.variable} ${syne.variable}`}>
+    <html lang={locale} className={`${inter.variable} ${syne.variable}`} suppressHydrationWarning>
       <body suppressHydrationWarning>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Header menuItems={menuItems} logoSrc={logoSrc} />

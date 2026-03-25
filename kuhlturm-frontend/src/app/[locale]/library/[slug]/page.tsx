@@ -170,7 +170,7 @@ export default async function LibraryDetailPage({ params }: Props) {
                     {files.map((file) => (
                       <a
                         key={file.id}
-                        href={file.file_url ?? file.file_public_url ?? '#'}
+                        href={resolveMediaUrl(file.file_url ?? file.file_public_url)}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="flex items-center gap-4 group bg-white p-3 rounded-xl border border-blue-100/50 hover:border-blue-300 hover:shadow-md transition-all shadow-sm"
