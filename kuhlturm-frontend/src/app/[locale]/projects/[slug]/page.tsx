@@ -64,12 +64,7 @@ function getYoutubeId(url: string): string | null {
   return match?.[1] ?? null;
 }
 
-/* ── Static params ─────────────────────────────────────────────────── */
-
-export async function generateStaticParams() {
-  const projects = await getProjects(API_BASE_URL, { is_published: true, limit: 200 }).catch(() => []);
-  return projects.map((p) => ({ slug: p.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 /* ── Metadata ──────────────────────────────────────────────────────── */
 

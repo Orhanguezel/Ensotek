@@ -25,16 +25,10 @@ import { resolveMediaUrl } from '@/lib/media';
 import { PrintButton } from '@/components/ui/PrintButton';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const items = await getLibraryItems(API_BASE_URL, {
-    is_active: 1,
-    limit: 500,
-  }).catch(() => []);
-  return items.map((item) => ({ slug: item.slug ?? '' })).filter((p) => p.slug);
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

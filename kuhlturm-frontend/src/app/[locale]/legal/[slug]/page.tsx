@@ -7,17 +7,10 @@ import type { CustomPage } from '@ensotek/core/types';
 import { getCustomPageBySlugWithLocale, getCustomPagesWithLocale } from '@/lib/api';
 import { fetchSetting } from '@/i18n/server';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const pages = await getCustomPagesWithLocale('de', {
-    module_key: 'legal',
-    is_published: 1,
-    limit: 200,
-  });
-  return (pages as any[] ?? []).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

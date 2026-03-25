@@ -26,10 +26,7 @@ async function fetchTeamMember(slug: string, locale: string): Promise<CustomPage
   }
 }
 
-export async function generateStaticParams() {
-  const members = await fetchCustomPagesByModuleKey('team', 'de', 100).catch(() => []);
-  return members.map((m) => ({ slug: m.slug }));
-}
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;

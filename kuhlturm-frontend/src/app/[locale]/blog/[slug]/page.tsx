@@ -12,17 +12,10 @@ import { ContactInfoCard, type ContactInfo } from '@/components/sections/Contact
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
 import { ReviewsSection } from '@/components/sections/ReviewsSection';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const posts = await getCustomPagesWithLocale('de', {
-    module_key: 'blog',
-    is_published: 1,
-    limit: 200,
-  });
-  return (posts as any[] ?? []).map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

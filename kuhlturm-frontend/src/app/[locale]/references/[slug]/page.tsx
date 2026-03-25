@@ -9,13 +9,10 @@ import { API_BASE_URL } from '@/lib/utils';
 import { resolveMediaUrl } from '@/lib/media';
 import { ReferenceGallery } from '@/components/sections/ReferenceGallery';
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
-}
-
-export async function generateStaticParams() {
-  const refs = await getReferences(API_BASE_URL, { is_published: true, limit: 200 }).catch(() => []);
-  return refs.map((r) => ({ slug: r.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
