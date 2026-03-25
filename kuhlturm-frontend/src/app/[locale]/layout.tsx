@@ -4,7 +4,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { Inter, Syne } from 'next/font/google';
-import { Toaster } from 'sonner';
+import { ClientToaster } from '@/components/ui/ClientToaster';
 import { AVAILABLE_LOCALES, getLocaleMessages } from '@/i18n/locales';
 import { getLocaleSettings } from '@/i18n/locale-settings';
 import { Header } from '@/components/layout/Header';
@@ -168,7 +168,7 @@ export default async function LocaleLayout({
           />
           <WhatsAppFloating number={contactInfo.whatsapp || contactInfo.phone_2} />
           <ScrollToTop />
-          <Toaster position="bottom-right" richColors />
+          <ClientToaster />
         </NextIntlClientProvider>
       </body>
     </html>
