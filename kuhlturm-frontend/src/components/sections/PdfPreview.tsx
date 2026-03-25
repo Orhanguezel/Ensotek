@@ -1,37 +1,17 @@
 'use client';
 
-import { useMemo } from 'react';
-import { FileText, ExternalLink } from 'lucide-react';
-import { resolveMediaUrl } from '@/lib/media';
+import { ExternalLink } from 'lucide-react';
 
 interface Props {
-  pdfUrl: string | null;
+  src: string;
   title?: string;
   height?: number;
 }
 
-function normalizeCloudinaryPdfUrl(input: string): string {
-  if (!input) return '';
-  const lower = input.toLowerCase();
-  if (!lower.includes('res.cloudinary.com')) return input;
-  const base = (lower.split('?')[0] ?? '').split('#')[0] ?? '';
-  if (!base.endsWith('.pdf')) return input;
-  if (lower.includes('/raw/upload/')) return input;
-  if (lower.includes('/image/upload/')) {
-    return input.replace('/image/upload/', '/raw/upload/');
-  }
-  return input;
-}
-
-function buildSrc(pdfUrl: string | null): string | null {
-  const resolved = resolveMediaUrl(pdfUrl);
-  if (!resolved) return null;
-  return normalizeCloudinaryPdfUrl(resolved);
-}
-
-export function PdfPreview({ pdfUrl, title = 'PDF', height = 700 }: Props) {
-  const src = useMemo(() => buildSrc(pdfUrl), [pdfUrl]);
+export function PdfPreview({ src, title = 'PDF', height = 700 }: Props) {
   if (!src) return null;
+
+  const iframeSrc = `${src}#toolbar=1&navpanes=0`;
 
   return (
     <div className="mb-10">
@@ -41,7 +21,7 @@ export function PdfPreview({ pdfUrl, title = 'PDF', height = 700 }: Props) {
       >
         <iframe
           title={title}
-          src={`${src}#toolbar=1&navpanes=0`}
+          src={iframeSrc}
           width="100%"
           height="100%"
           loading="lazy"

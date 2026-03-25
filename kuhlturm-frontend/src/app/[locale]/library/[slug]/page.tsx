@@ -229,7 +229,7 @@ export default async function LibraryDetailPage({ params }: Props) {
             {/* PDF Preview */}
             {pdfFile && (
               <PdfPreview
-                pdfUrl={pdfFile.file_url ?? pdfFile.file_public_url ?? null}
+                src={resolveMediaUrl(pdfFile.file_url ?? pdfFile.file_public_url)}
                 title={item.name ?? 'PDF'}
                 height={700}
               />
