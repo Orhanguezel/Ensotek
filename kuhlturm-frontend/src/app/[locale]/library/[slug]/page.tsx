@@ -24,6 +24,7 @@ import { API_BASE_URL } from '@/lib/utils';
 import { resolveMediaUrl } from '@/lib/media';
 import { PrintButton } from '@/components/ui/PrintButton';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
+import { PdfPreview } from '@/components/sections/PdfPreview';
 
 export const dynamic = 'force-dynamic';
 
@@ -87,6 +88,13 @@ export default async function LibraryDetailPage({ params }: Props) {
   });
 
   const sidebarItems = allItems.filter(i => i.id !== item.id).slice(0, 15);
+
+  // Find first PDF file for inline preview
+  const pdfFile = files.find((f) => {
+    const url = (f.file_url ?? f.file_public_url ?? '').toLowerCase();
+    const mime = ((f as any).mime_type ?? '').toLowerCase();
+    return mime.includes('pdf') || /\.pdf(\?|#|$)/.test(url);
+  });
 
   return (
     <main className="bg-white min-h-screen">
@@ -216,6 +224,15 @@ export default async function LibraryDetailPage({ params }: Props) {
                   priority
                 />
               </div>
+            )}
+
+            {/* PDF Preview */}
+            {pdfFile && (
+              <PdfPreview
+                pdfUrl={pdfFile.file_url ?? pdfFile.file_public_url ?? null}
+                title={item.name ?? 'PDF'}
+                height={700}
+              />
             )}
 
             {/* Rich Text Content */}
