@@ -131,7 +131,7 @@ export function pickTextFromSettingValue(v: unknown, fallback = ""): string {
   return fallback;
 }
 
-export function pickBrandName(v: unknown, fallback = "guezelwebdesign"): string {
+export function pickBrandName(v: unknown, fallback = "ensotek"): string {
   if (typeof v === "string") return v.trim() || fallback;
   if (v && typeof v === "object") {
     const o: any = v;

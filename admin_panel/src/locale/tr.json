@@ -2592,9 +2592,9 @@
         "localBaseUrl": "Local Base URL",
         "localBaseUrlPlaceholder": "/uploads veya https://cdn.site.com/uploads",
         "cdnPublicBase": "CDN Public Base",
-        "cdnPublicBasePlaceholder": "https://cdn.guezelwebdesign.com",
+        "cdnPublicBasePlaceholder": "https://cdn.ensotek.de",
         "publicApiBase": "Public API Base",
-        "publicApiBasePlaceholder": "https://api.guezelwebdesign.com",
+        "publicApiBasePlaceholder": "https://api.ensotek.de",
         "cloudName": "Cloudinary Cloud Name",
         "cloudNamePlaceholder": "cloud-name",
         "apiKey": "Cloudinary API Key",
@@ -2961,7 +2961,7 @@
         "siteName": "Site Name",
         "titleDefault": "Title Default",
         "titleTemplate": "Title Template",
-        "titleTemplatePlaceholder": "%s | guezelwebdesign",
+        "titleTemplatePlaceholder": "%s | ensotek",
         "description": "Description",
         "ogType": "OpenGraph Type",
         "ogImages": "OpenGraph Images (1 per line)",
@@ -2969,7 +2969,7 @@
         "twitterCard": "Twitter Card",
         "twitterCardRecommended": "Çoğu site için önerilen: {card}",
         "twitterSite": "Twitter Site",
-        "twitterSitePlaceholder": "@guezelwebdesign",
+        "twitterSitePlaceholder": "@ensotek",
         "twitterCreator": "Twitter Creator",
         "twitterCreatorPlaceholder": "@creator",
         "robots": "Robots",
@@ -3309,10 +3309,10 @@
         "password": "Şifre",
         "passwordPlaceholder": "••••••••",
         "fromEmail": "Gönderen E-posta",
-        "fromEmailPlaceholder": "no-reply@guezelwebdesign.com",
+        "fromEmailPlaceholder": "no-reply@ensotek.com",
         "fromEmailHelp": "Uygulamadaki e-postalar bu adresten gönderilir.",
         "fromName": "Gönderen İsim",
-        "fromNamePlaceholder": "guezelwebdesign",
+        "fromNamePlaceholder": "ensotek",
         "testEmail": "Test mail alıcısı",
         "testEmailPlaceholder": "ornek@ornek.com",
         "testEmailHelp": "Dolu ise test maili buraya gider. Boşsa önce gönderen e-posta, o da yoksa giriş yapan kullanıcının e-postası kullanılır.",
@@ -3356,7 +3356,7 @@
         "totalLabel": "Toplam:",
         "activeLocale": "Aktif locale:",
         "loading": "Yükleniyor…",
-        "headerDescription": "guezelwebdesign hizmet kayıtlarını yönet."
+        "headerDescription": "ensotek hizmet kayıtlarını yönet."
       },
       "list": {
         "title": "Hizmet Listesi",
@@ -4168,7 +4168,7 @@
     "totalLabel": "Toplam:",
     "activeLocale": "Aktif locale:",
     "loading": "Lädt...",
-    "headerDescription": "guezelwebdesign hizmet kayıtlarını yönet."
+    "headerDescription": "ensotek hizmet kayıtlarını yönet."
   },
   "list": {
     "title": "Slider Liste",

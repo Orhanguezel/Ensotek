@@ -97,12 +97,12 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
   };
 
   return (
-    <div className="guezelwebdesign-admin-page">
+    <div className="ensotek-admin-page">
       <div className="container-fluid px-2 px-lg-3">
-        <div className="guezelwebdesign-admin-page__inner">
+        <div className="ensotek-admin-page__inner">
           <form onSubmit={handleSubmit}>
-            <div className="card guezelwebdesign-admin-card">
-              <div className="card-header guezelwebdesign-admin-card__header py-2">
+            <div className="card ensotek-admin-card">
+              <div className="card-header ensotek-admin-card__header py-2">
                 <div className="d-flex justify-content-between flex-column flex-lg-row gap-2 align-items-start">
                   <div style={{ minWidth: 0 }}>
                     <h5 className="small fw-semibold mb-1 text-truncate">
@@ -138,7 +138,7 @@ export const ResourceForm: React.FC<ResourceFormProps> = ({
                 </div>
               </div>
 
-              <div className="card-body guezelwebdesign-admin-card__body">
+              <div className="card-body ensotek-admin-card__body">
                 <div className="row g-3">
                   <div className="col-12 col-lg-6">
                     <label className="form-label small mb-1">Ad</label>

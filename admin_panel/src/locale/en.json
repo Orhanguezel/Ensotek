@@ -2241,9 +2241,9 @@
         "localBaseUrl": "Local Base URL",
         "localBaseUrlPlaceholder": "/uploads or https://cdn.site.com/uploads",
         "cdnPublicBase": "CDN Public Base",
-        "cdnPublicBasePlaceholder": "https://cdn.guezelwebdesign.com",
+        "cdnPublicBasePlaceholder": "https://cdn.ensotek.de",
         "publicApiBase": "Public API Base",
-        "publicApiBasePlaceholder": "https://api.guezelwebdesign.com",
+        "publicApiBasePlaceholder": "https://api.ensotek.de",
         "cloudName": "Cloudinary Cloud Name",
         "cloudNamePlaceholder": "cloud-name",
         "apiKey": "Cloudinary API Key",
@@ -2610,7 +2610,7 @@
         "siteName": "Site Name",
         "titleDefault": "Title Default",
         "titleTemplate": "Title Template",
-        "titleTemplatePlaceholder": "%s | guezelwebdesign",
+        "titleTemplatePlaceholder": "%s | ensotek",
         "description": "Description",
         "ogType": "OpenGraph Type",
         "ogImages": "OpenGraph Images (1 per line)",
@@ -2618,7 +2618,7 @@
         "twitterCard": "Twitter Card",
         "twitterCardRecommended": "Recommended for most sites: {card}",
         "twitterSite": "Twitter Site",
-        "twitterSitePlaceholder": "@guezelwebdesign",
+        "twitterSitePlaceholder": "@ensotek",
         "twitterCreator": "Twitter Creator",
         "twitterCreatorPlaceholder": "@creator",
         "robots": "Robots",
@@ -2958,10 +2958,10 @@
         "password": "Password",
         "passwordPlaceholder": "••••••••",
         "fromEmail": "From Email",
-        "fromEmailPlaceholder": "no-reply@guezelwebdesign.com",
+        "fromEmailPlaceholder": "no-reply@ensotek.com",
         "fromEmailHelp": "Emails in the application are sent from this address.",
         "fromName": "From Name",
-        "fromNamePlaceholder": "guezelwebdesign",
+        "fromNamePlaceholder": "ensotek",
         "testEmail": "Test email recipient",
         "testEmailPlaceholder": "example@example.com",
         "testEmailHelp": "If filled, test email goes here. Otherwise, from email is used first, then the logged-in user's email.",
@@ -3005,7 +3005,7 @@
         "totalLabel": "Total:",
         "activeLocale": "Active locale:",
         "loading": "Loading…",
-        "headerDescription": "Manage guezelwebdesign service records."
+        "headerDescription": "Manage ensotek service records."
       },
       "list": {
         "title": "Service List",
@@ -4168,7 +4168,7 @@
     "totalLabel": "Toplam:",
     "activeLocale": "Aktif locale:",
     "loading": "Lädt...",
-    "headerDescription": "guezelwebdesign hizmet kayıtlarını yönet."
+    "headerDescription": "ensotek hizmet kayıtlarını yönet."
   },
   "list": {
     "title": "Slider Liste",

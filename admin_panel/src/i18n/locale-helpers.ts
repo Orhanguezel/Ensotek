@@ -4,7 +4,7 @@
 
 export { KNOWN_RTL } from "./config";
 
-export const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || "guezelwebdesign.de").trim();
+export const SITE_NAME = (process.env.NEXT_PUBLIC_SITE_NAME || "ensotek.de").trim();
 
 // ✅ test uyumu: localhost default port’suz
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL || "http://localhost").replace(/\/+$/, "");
