@@ -189,6 +189,7 @@ export const createServiceAdmin: RouteHandler<{ Body: UpsertServiceBody }> = asy
     image_url: coverImageUrl,
     featured_image: coverFeaturedImage,
     image_asset_id: typeof b.image_asset_id !== 'undefined' ? b.image_asset_id ?? null : null,
+    images: Array.isArray(b.images) ? b.images : [],
 
     created_at: now as any,
     updated_at: now as any,
@@ -266,7 +267,8 @@ export const updateServiceAdmin: RouteHandler<{
     typeof b.display_order !== 'undefined' ||
     typeof b.featured_image !== 'undefined' ||
     typeof b.image_url !== 'undefined' ||
-    typeof b.image_asset_id !== 'undefined';
+    typeof b.image_asset_id !== 'undefined' ||
+    typeof b.images !== 'undefined';
 
   if (hasParentPatch) {
     const parentPatch: any = {};
@@ -281,6 +283,8 @@ export const updateServiceAdmin: RouteHandler<{
 
     if (typeof b.image_asset_id !== 'undefined')
       parentPatch.image_asset_id = b.image_asset_id ?? null;
+    if (typeof b.images !== 'undefined')
+      parentPatch.images = Array.isArray(b.images) ? b.images : [];
 
     // ✅ cover mirror (fail-safe)
     const hasFeatured = typeof b.featured_image !== 'undefined';

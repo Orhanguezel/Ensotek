@@ -199,7 +199,7 @@ export function Footer({ locale, footerSections = [], footerLinks = [], logoSrc 
           <p className="text-xs opacity-50 flex items-center gap-1">
             Design & Build by 
             <a 
-              href="https://guezelwebdesign.de" 
+              href="https://guezelwebdesign.com" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-white hover:text-green-500 font-bold transition-colors"

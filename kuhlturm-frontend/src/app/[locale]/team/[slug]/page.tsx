@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ChevronRight, ArrowLeft, Tag } from 'lucide-react';
 import { fetchCustomPagesByModuleKey, parseCustomPageContent } from '@/i18n/server';
 import type { CustomPage } from '@/i18n/server';
 import { API_BASE_URL } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -37,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: member.meta_title ?? member.title,
     description: member.meta_description ?? member.summary ?? undefined,
     openGraph: member.featured_image
-      ? { images: [{ url: member.featured_image }] }
+      ? { images: [{ url: resolveMediaUrl(member.featured_image) }] }
       : undefined,
   };
 }
@@ -90,12 +92,15 @@ export default async function TeamDetailPage({ params }: Props) {
 
             {/* Photo + info card */}
             <div className="lg:col-span-1">
-              <div className="rounded-2xl overflow-hidden bg-slate-100 aspect-4/3 mb-6">
+              <div className="rounded-2xl overflow-hidden bg-slate-100 aspect-4/3 mb-6 relative">
                 {photo ? (
-                  <img
-                    src={photo}
+                  <Image
+                    src={resolveMediaUrl(photo)}
                     alt={member.featured_image_alt ?? member.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 33vw"
+                    className="object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
@@ -156,12 +161,13 @@ export default async function TeamDetailPage({ params }: Props) {
               {Array.isArray(member.images) && member.images.length > 0 && (
                 <div className="mt-10 grid grid-cols-2 md:grid-cols-3 gap-4">
                   {member.images.map((img, i) => (
-                    <div key={i} className="rounded-xl overflow-hidden aspect-4/3 bg-slate-100">
-                      <img
-                        src={img}
+                    <div key={i} className="rounded-xl overflow-hidden aspect-4/3 bg-slate-100 relative">
+                      <Image
+                        src={resolveMediaUrl(img)}
                         alt={`${member.title} ${i + 1}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        sizes="(max-width: 768px) 50vw, 33vw"
+                        className="object-cover"
                       />
                     </div>
                   ))}
@@ -188,13 +194,14 @@ export default async function TeamDetailPage({ params }: Props) {
                     href={`/${locale}/team/${m.slug}`}
                     className="group block bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-blue-200 hover:shadow-lg transition-all"
                   >
-                    <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                    <div className="aspect-4/3 overflow-hidden bg-slate-100 relative">
                       {p ? (
-                        <img
-                          src={p}
+                        <Image
+                          src={resolveMediaUrl(p)}
                           alt={m.featured_image_alt ?? m.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

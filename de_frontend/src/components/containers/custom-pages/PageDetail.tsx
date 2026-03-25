@@ -9,6 +9,7 @@ import PageComments from "./PageComments";
 import PageReaction from "./PageReaction";
 
 import { useTranslations } from "next-intl";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface PageDetailProps {
   item: CustomPage;
@@ -98,10 +99,11 @@ const PageDetail = ({ item }: PageDetailProps) => {
                 {(item.featured_image || item.image_url) && (
                   <div className="technical__thumb mb-40">
                     <Image
-                        src={item.featured_image || item.image_url!}
+                        src={resolveMediaUrl(item.featured_image || item.image_url)}
                         alt={item.featured_image_alt || item.title}
                         width={1200}
                         height={600}
+                        unoptimized
                         priority
                         sizes="(max-width: 768px) 100vw, 800px"
                         style={{ width: '100%', height: 'auto', borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
@@ -162,10 +164,11 @@ const PageDetail = ({ item }: PageDetailProps) => {
                                         <div key={idx} className="col-xl-4 col-lg-4 col-md-6 mb-30">
                                             <div className="technical__gallery-item" style={{ borderRadius: '15px', overflow: 'hidden', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
                                                 <Image
-                                                    src={img}
+                                                    src={resolveMediaUrl(img)}
                                                     alt={`${item.title} gallery ${idx + 1}`}
                                                     width={400}
                                                     height={300}
+                                                    unoptimized
                                                     sizes="(max-width: 768px) 100vw, 33vw"
                                                     style={{ width: '100%', height: 'auto', objectFit: 'cover' }}
                                                 />

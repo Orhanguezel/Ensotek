@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import type { Product } from '@ensotek/core/types';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   products: Product[];
@@ -78,13 +80,15 @@ export function ProductsCarousel({ products, locale, title, subtitle, viewAllLab
                   href={`/${locale}/product/${product.slug}`}
                   className="group block border border-slate-200 rounded-xl overflow-hidden hover:border-blue-200 hover:shadow-md transition-all duration-200 h-full"
                 >
-                  <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                  <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
                     {product.image_url ? (
-                      <img
-                        src={product.image_url}
+                      <Image
+                        src={resolveMediaUrl(product.image_url)}
                         alt={product.alt ?? product.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading={i < 3 ? 'eager' : 'lazy'}
+                        fill
+                        sizes="(max-width: 640px) 85vw, (max-width: 1024px) 50vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        priority={i < 3}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

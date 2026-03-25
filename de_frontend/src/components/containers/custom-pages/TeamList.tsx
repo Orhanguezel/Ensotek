@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useCustomPages } from "@/features/custom-pages/customPages.action";
 import type { CustomPage } from "@/features/custom-pages/customPages.type";
+import { resolveMediaUrl } from "@/lib/media";
 
 const TeamList = () => {
   const { data, isLoading } = useCustomPages({ module_key: 'team', is_published: true });
@@ -34,7 +35,7 @@ const TeamList = () => {
                 <div className="team__thumb mb-25 mx-auto" style={{ width: '200px', height: '200px', borderRadius: '50%', overflow: 'hidden' }}>
                   {(item.image_url || item.featured_image) ? (
                   <Image
-                    src={(item.image_url || item.featured_image)!}
+                    src={resolveMediaUrl(item.image_url || item.featured_image)}
                     alt={item.title}
                     width={200}
                     height={200}

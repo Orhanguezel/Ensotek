@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ChevronRight, ArrowLeft, Tag } from 'lucide-react';
 import { fetchCustomPage, fetchCustomPagesByModuleKey, parseCustomPageContent } from '@/i18n/server';
 import { API_BASE_URL } from '@/lib/utils';
 import type { CustomPage } from '@/i18n/server';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -66,10 +68,13 @@ export default async function AboutDetailPage({ params }: Props) {
       {/* Hero with cover image or dark banner */}
       {coverImage ? (
         <div className="relative h-64 md:h-96 overflow-hidden bg-slate-900">
-          <img
-            src={coverImage}
+          <Image
+            src={resolveMediaUrl(coverImage)}
             alt={page.featured_image_alt ?? page.title}
-            className="absolute inset-0 w-full h-full object-cover opacity-40"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover opacity-40"
           />
           <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-end pb-10">
             <nav className="flex items-center gap-2 text-sm text-slate-300 mb-4 flex-wrap">
@@ -128,12 +133,13 @@ export default async function AboutDetailPage({ params }: Props) {
           {Array.isArray(page.images) && page.images.length > 0 && (
             <div className="mt-12 grid grid-cols-2 md:grid-cols-3 gap-4">
               {page.images.map((img, i) => (
-                <div key={i} className="rounded-xl overflow-hidden aspect-4/3 bg-slate-100">
-                  <img
-                    src={img}
+                <div key={i} className="rounded-xl overflow-hidden aspect-4/3 bg-slate-100 relative">
+                  <Image
+                    src={resolveMediaUrl(img)}
                     alt={`${page.title} ${i + 1}`}
-                    className="w-full h-full object-cover"
-                    loading="lazy"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                    className="object-cover"
                   />
                 </div>
               ))}
@@ -183,12 +189,13 @@ export default async function AboutDetailPage({ params }: Props) {
                   className="group block bg-white rounded-xl border border-slate-200 overflow-hidden hover:border-blue-200 hover:shadow-md transition-all"
                 >
                   {(p.featured_image ?? p.image_url) && (
-                    <div className="aspect-video overflow-hidden bg-slate-100">
-                      <img
-                        src={(p.featured_image ?? p.image_url)!}
+                    <div className="aspect-video overflow-hidden bg-slate-100 relative">
+                      <Image
+                        src={resolveMediaUrl((p.featured_image ?? p.image_url)!)}
                         alt={p.featured_image_alt ?? p.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                   )}

@@ -2,7 +2,7 @@
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/site-settings/_components/site-settings-list.tsx
-// guezelwebdesign – Site Ayarları Liste Bileşeni (shadcn/ui)
+// Ensotek – Site Ayarları Liste Bileşeni (shadcn/ui)
 // - FIX: Hide SEO keys in global(*) list.
 // - UI: Card + Table (desktop), Card list (mobile)
 // - FIX: <a href> => next/link (no full reload)

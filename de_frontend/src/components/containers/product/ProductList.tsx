@@ -1,10 +1,12 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useLocale, useTranslations } from "next-intl";
 import { useProducts } from "@/features/products/products.action";
 import type { ProductItemType } from "@/features/products/products.type";
+import { resolveMediaUrl } from "@/lib/media";
 
 import FallbackCover from "public/img/recent/slider/1.png";
 
@@ -51,15 +53,14 @@ const ProductList = ({ itemType, basePath }: ProductListProps) => {
           {items.map((item) => (
             <div key={item.id} className="col-xl-4 col-lg-4 col-md-6">
               <div className="blog__item-3 mb-30 p-relative fix">
-                <div className="blog__thumb-3 w-img">
+                <div className="blog__thumb-3 w-img" style={{ position: 'relative', height: '250px' }}>
                   <Link href={`${basePath}/${item.slug}`} title={item.title}>
-                    <img
-                      src={item.image_url || fallbackSrc}
+                    <Image
+                      src={resolveMediaUrl(item.image_url || fallbackSrc)}
                       alt={item.alt || item.title}
-                      width={400}
-                      height={250}
-                      style={{ objectFit: "cover", height: "250px", width: "100%" }}
-                      loading="lazy"
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                      className="object-cover"
                     />
                   </Link>
                 </div>

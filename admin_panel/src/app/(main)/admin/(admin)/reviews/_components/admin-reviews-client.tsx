@@ -120,7 +120,7 @@ export default function AdminReviewsClient() {
 
   const urlLocale = localeShortClient(searchParams.get("locale") || "");
   const initialLocale =
-    urlLocale || defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "de");
+    urlLocale || defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "tr");
 
   const [filters, setFilters] = React.useState<Filters>({
     search: "",
@@ -146,7 +146,7 @@ export default function AdminReviewsClient() {
   const queryParams = React.useMemo((): AdminReviewListQueryParams => {
     // ✅ FIXED: Correct usage of resolveAdminApiLocale with all parameters
     const apiLocale =
-      localeShortClient(filters.locale) || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "de");
+      localeShortClient(filters.locale) || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "tr");
 
     return {
       search: filters.search || undefined,

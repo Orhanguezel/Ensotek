@@ -30,6 +30,7 @@ CREATE TABLE `services` (
   `featured_image`   VARCHAR(500)          DEFAULT NULL, -- legacy
   `image_url`        VARCHAR(500)          DEFAULT NULL,
   `image_asset_id`   CHAR(36)              DEFAULT NULL, -- storage_assets.id
+  `images`           JSON                  DEFAULT NULL,
 
   -- Teknik alanlar (non-i18n)
   `area`             VARCHAR(255)          DEFAULT NULL,

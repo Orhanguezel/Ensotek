@@ -2,7 +2,7 @@
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/slider/admin-slider-client.tsx
-// guezelwebdesign – Admin Slider Page (List + filters + reorder) (APP ROUTER)
+// Ensotek – Admin Slider Page (List + filters + reorder) (APP ROUTER)
 // - Locale: useAdminLocales
 // - URL sync: ?locale=... & ?q=... & ?active=1
 // - RTK hooks in client

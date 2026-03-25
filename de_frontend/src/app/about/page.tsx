@@ -8,6 +8,8 @@ import HomeThreeSponsor from "@/components/containers/sponsor/HomeThreeSponsor";
 import HomeThreeFeedback from "@/components/containers/feedback/HomeThreeFeedback";
 import { Metadata } from "next";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: "About Us | Digitek",
 };

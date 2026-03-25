@@ -85,9 +85,12 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
       ) : (
         <h2 className="hero-title-animate mb-25">{slider.title}</h2>
       )}
-      <p className="hero-desc-animate mb-45">
-        {slider.description}
-      </p>
+      {slider.description && (
+        <div
+          className="hero-desc-animate slider-description mb-45"
+          dangerouslySetInnerHTML={{ __html: slider.description }}
+        />
+      )}
       {(slider.buttonText || t("cta")) && (
         <div className="hero-btn-animate">
           <Link
@@ -207,9 +210,12 @@ const HomeBannerOne = ({ initialSliders }: HomeBannerOneProps) => {
                             <h2 className="hero-title-animate text-white mb-25">
                               {slider.title}
                             </h2>
-                            <p className="hero-desc-animate mb-45">
-                              {slider.description}
-                            </p>
+                            {slider.description && (
+                              <div
+                                className="hero-desc-animate slider-description mb-45"
+                                dangerouslySetInnerHTML={{ __html: slider.description }}
+                              />
+                            )}
                             {(slider.buttonText || t("cta")) && (
                               <div className="hero-btn-animate">
                                 <Link

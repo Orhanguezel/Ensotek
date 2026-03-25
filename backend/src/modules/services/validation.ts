@@ -88,9 +88,12 @@ export const upsertServiceParentBodySchema = z.object({
   display_order: z.coerce.number().int().min(0).optional().default(1),
 
   // ana görsel (legacy + storage)
-  featured_image: z.string().url().max(500).nullable().optional(),
-  image_url: z.string().url().max(500).nullable().optional(),
-  image_asset_id: z.string().length(36).nullable().optional(),
+  featured_image: z.union([z.string().max(500).refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+  image_url: z.union([z.string().max(500).refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+  image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+
+  // çoklu galeri resimleri
+  images: z.array(z.string().min(1)).optional(),
 });
 export type UpsertServiceParentBody = z.infer<typeof upsertServiceParentBodySchema>;
 
@@ -168,8 +171,8 @@ export type PatchServiceBody = z.infer<typeof patchServiceBodySchema>;
 /** Base obje → hem upsert hem patch için ortak */
 const upsertServiceImageBodyBase = z.object({
   // storage bağ(ı) → en az birisi zorunlu (yalnızca UPSERT’te kontrol edeceğiz)
-  image_asset_id: z.string().length(36).nullable().optional(),
-  image_url: z.string().url().max(500).nullable().optional(),
+  image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+  image_url: z.union([z.string().max(500).refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   is_active: boolLike.optional().default(true),
   display_order: z.coerce.number().int().min(0).optional().default(0),

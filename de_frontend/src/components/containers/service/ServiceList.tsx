@@ -4,6 +4,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useServices } from "@/features/services/services.action";
 import { useTranslations } from "next-intl";
+import { resolveMediaUrl } from "@/lib/media";
 
 const ServiceList = () => {
   const { data: items, isLoading } = useServices();
@@ -33,7 +34,7 @@ const ServiceList = () => {
                   <Link href={`/service/${item.slug}`} title={item.name}>
                     {(item.image_url || item.featured_image) ? (
                     <Image
-                      src={(item.image_url || item.featured_image)!}
+                      src={resolveMediaUrl(item.image_url || item.featured_image)}
                       alt={item.name}
                       width={400}
                       height={250}

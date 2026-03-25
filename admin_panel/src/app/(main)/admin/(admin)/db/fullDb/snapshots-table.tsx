@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/db/fullDb/snapshots-table.tsx
-// guezelwebdesign – Admin DB Snapshot Tablosu
+// Ensotek – Admin DB Snapshot Tablosu
 // =============================================================
 
 "use client";

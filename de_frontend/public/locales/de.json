@@ -396,7 +396,7 @@
     "home_description": "Ensotek ist ein führender Hersteller von Kühltürmen, Wärmetauschern und industriellen Kühlsystemen. Hohe Effizienz, zuverlässige Lösungen.",
     "services_title": "Dienstleistungen",
     "services_description": "Professionelle Wartungs-, Reparatur- und Beratungsdienstleistungen von Ensotek für industrielle Kühlsysteme.",
-    "products_title": "Produkte",
+    "products_title": "Wasserkühlturme",
     "products_description": "Entdecken Sie die breite Palette an Kühltürmen, Wärmetauschern und industriellen Kühlprodukten von Ensotek.",
     "blog_title": "Blog",
     "blog_description": "Die neuesten Artikel, technischen Einblicke und Branchennachrichten von Ensotek.",
@@ -457,7 +457,8 @@
       "companyName": "ENSOTEK Kühltürme & Technologien Engineering GmbH (Ltd.)"
     },
     "sponsor": {
-      "title": "Tausende Unternehmen vertrauen uns"
+      "title": "Tausende Unternehmen vertrauen uns",
+      "viewAll": "Alle Referenzen"
     },
     "choose": {
       "subtitle": "WARUM WIR",
@@ -701,6 +702,7 @@
       "downloads": "Downloads",
       "downloadFile": "Datei herunterladen",
       "gallery": "Galerie",
+      "otherArticles": "Weitere Artikel",
       "wbSubLabel": "Psychrometrische Werkzeuge",
       "wbTitle": "Feuchtkugeltemperatur-Rechner",
       "wbDescription": "Geben Sie Lufttemperatur und relative Luftfeuchte ein, um die Feuchtkugeltemperatur zu berechnen.",
@@ -724,7 +726,14 @@
       "teamTitle": "Team",
       "spare_parts_and_components": "Ersatzteile und Komponenten",
       "automation_scada": "Automatisierung und SCADA",
-      "site_survey_engineering": "Standortaufnahme und Engineering"
+      "site_survey_engineering": "Standortaufnahme und Engineering",
+      "maintenance_repair": "Wartung und Reparatur",
+      "modernization": "Modernisierung",
+      "spare_parts_components": "Ersatzteile und Komponenten",
+      "applications_references": "Anwendungen und Referenzen",
+      "engineering_support": "Technische Unterstützung",
+      "production": "Produktion",
+      "other": "Sonstiges"
     },
     "legalPages": {
       "cookiePolicyTitle": "Cookie-Richtlinie",

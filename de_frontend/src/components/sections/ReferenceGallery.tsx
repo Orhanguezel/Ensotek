@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface GalleryImage {
   src: string;
@@ -52,14 +54,15 @@ export function ReferenceGallery({ images }: Props) {
             key={i}
             type="button"
             onClick={() => open(i)}
-            className="group block rounded-xl overflow-hidden aspect-4/3 bg-slate-100 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+            className="group relative block rounded-xl overflow-hidden aspect-4/3 bg-slate-100 border border-slate-200 hover:border-blue-300 hover:shadow-md transition-all cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
             aria-label={`Bild vergrößern: ${img.alt}`}
           >
-            <img
-              src={img.src}
+            <Image
+              src={resolveMediaUrl(img.src)}
               alt={img.alt}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 300px"
+              className="object-cover group-hover:scale-105 transition-transform duration-300"
             />
           </button>
         ))}
@@ -86,12 +89,16 @@ export function ReferenceGallery({ images }: Props) {
             </button>
 
             {/* Image */}
-            <div className="rounded-2xl overflow-hidden bg-black shadow-2xl">
+            <div className="rounded-2xl overflow-hidden bg-black shadow-2xl flex items-center justify-center">
               {images[activeIndex] && (
-                <img
-                  src={images[activeIndex].src}
+                <Image
+                  src={resolveMediaUrl(images[activeIndex].src)}
                   alt={images[activeIndex].alt}
+                  width={1200}
+                  height={800}
+                  sizes="(max-width: 1024px) 100vw, 1200px"
                   className="w-full max-h-[80vh] object-contain"
+                  style={{ width: '100%', height: 'auto', maxHeight: '80vh' }}
                 />
               )}
             </div>

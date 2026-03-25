@@ -1,8 +1,10 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { resolveMediaUrl } from '@/lib/media';
 
 export interface HeroSlide {
   id: string;
@@ -127,9 +129,10 @@ export function HeroSliderClient({ slides }: HeroSliderClientProps) {
                       </h2>
                     )}
                     {slide.description && (
-                      <p className="mb-8 max-w-lg text-base leading-relaxed text-slate-300 md:text-lg">
-                        {slide.description}
-                      </p>
+                      <div
+                        className="slider-description mb-8 max-w-lg text-base leading-relaxed text-slate-300 md:text-lg"
+                        dangerouslySetInnerHTML={{ __html: slide.description }}
+                      />
                     )}
                     {slide.buttonText && slide.buttonLink && (
                       <Link
@@ -145,12 +148,14 @@ export function HeroSliderClient({ slides }: HeroSliderClientProps) {
 
                 <div className="order-1 lg:order-2">
                   {slide.imageUrl ? (
-                    <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl">
-                      <img
-                        src={slide.imageUrl}
+                    <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl h-[240px] sm:h-[300px] md:h-[360px] lg:h-[460px]">
+                      <Image
+                        src={resolveMediaUrl(slide.imageUrl)}
                         alt={slide.alt ?? slide.title ?? ''}
-                        className="h-[240px] w-full object-cover sm:h-[300px] md:h-[360px] lg:h-[460px]"
-                        loading={i === 0 ? 'eager' : 'lazy'}
+                        fill
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                        className="object-cover"
+                        priority={i === 0}
                       />
                       <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-900/35 via-transparent to-slate-900/10" />
                     </div>

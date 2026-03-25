@@ -22,9 +22,24 @@ export function WhatsAppFloating({ number }: { number?: string }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="WhatsApp"
-      className="fixed bottom-6 left-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg transition-transform hover:scale-110 active:scale-95 animate-pulse"
+      style={{
+        position: 'fixed',
+        bottom: '1.5rem',
+        left: '1.5rem',
+        zIndex: 50,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: '3.5rem',
+        height: '3.5rem',
+        borderRadius: '50%',
+        backgroundColor: '#25D366',
+        color: '#fff',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+        transition: 'transform 0.2s',
+      }}
     >
-      <MessageCircle className="size-6" />
+      <MessageCircle size={24} />
     </a>
   );
 }

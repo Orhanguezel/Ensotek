@@ -1,12 +1,14 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
+import Image from 'next/image';
 import { getReferenceBySlug, getReferences } from '@ensotek/core/services';
 import type { Reference } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/i18n/locale-settings';
 import Layout from '@/components/layout/Layout';
 import Banner from '@/components/layout/banner/Banner';
 import { ReferenceGallery } from '@/components/sections/ReferenceGallery';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -54,7 +56,7 @@ export default async function ReferenceDetailPage({ params }: Props) {
     .filter((img) => img.image_url && img.is_published)
     .sort((a, b) => a.display_order - b.display_order)
     .map((img) => ({
-      src: img.image_url!,
+      src: resolveMediaUrl(img.image_url),
       alt: img.alt ?? ref.title ?? '',
       caption: img.title ?? undefined,
     }));
@@ -85,11 +87,15 @@ export default async function ReferenceDetailPage({ params }: Props) {
 
                 {ref.featured_image && (
                   <div className="blog__thumb w-img mb-45">
-                    <img
-                      src={ref.featured_image}
+                    <Image
+                      src={resolveMediaUrl(ref.featured_image)}
                       alt={ref.title}
+                      width={900}
+                      height={500}
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 900px"
                       className="img-fluid"
-                      style={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}
+                      style={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', width: '100%', height: 'auto' }}
+                      priority
                     />
                   </div>
                 )}
@@ -164,9 +170,15 @@ export default async function ReferenceDetailPage({ params }: Props) {
                   {related.map((r) => (
                     <div key={r.id} className="col-lg-4 col-md-6 mb-30">
                        <div className="project__item transition-3" style={{ background: '#f8f9fa' }}>
-                          <div className="project__thumb w-img overflow-hidden" style={{ borderRadius: '20px 20px 0 0', height: '200px' }}>
+                          <div className="project__thumb w-img overflow-hidden" style={{ borderRadius: '20px 20px 0 0', height: '200px', position: 'relative' }}>
                              <Link href={`/references/${r.slug}`}>
-                                <img src={r.featured_image || ''} alt={r.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                <Image
+                                  src={resolveMediaUrl(r.featured_image || '')}
+                                  alt={r.title}
+                                  fill
+                                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 300px"
+                                  className="object-cover"
+                                />
                              </Link>
                           </div>
                           <div className="p-4">

@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, ArrowLeft, Calendar, Tag } from 'lucide-react';
 import { getCustomPages, getCustomPageBySlug, parseCustomPageContent, getSiteSetting } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
 import { getCustomPageBySlugWithLocale, getCustomPagesWithLocale } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media';
 import { fetchSetting } from '@/i18n/server';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: (post as any).meta_title ?? (post as any).title,
     description: (post as any).meta_description ?? (post as any).summary ?? undefined,
     openGraph: post.featured_image
-      ? { images: [{ url: post.featured_image }] }
+      ? { images: [{ url: resolveMediaUrl(post.featured_image) }] }
       : undefined,
   };
 }
@@ -148,10 +150,14 @@ export default async function BlogDetailPage({ params }: Props) {
             <div className="lg:col-span-2">
               {post.featured_image && (
                 <div className="mb-10 rounded-2xl overflow-hidden">
-                  <img
-                    src={post.featured_image}
+                  <Image
+                    src={resolveMediaUrl(post.featured_image)}
                     alt={post.featured_image_alt ?? post.title}
-                    className="w-full max-h-120 object-cover"
+                    width={1200}
+                    height={600}
+                    priority
+                    sizes="(max-width: 768px) 100vw, 800px"
+                    className="w-full h-auto object-cover"
                   />
                 </div>
               )}
@@ -170,11 +176,13 @@ export default async function BlogDetailPage({ params }: Props) {
                 <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   {post.images.map((img: string, idx: number) => (
                     <div key={idx} className="rounded-xl overflow-hidden">
-                      <img
-                        src={img}
+                      <Image
+                        src={resolveMediaUrl(img)}
                         alt={`${post.title} – ${idx + 1}`}
+                        width={600}
+                        height={400}
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         className="w-full h-auto object-cover"
-                        loading="lazy"
                       />
                     </div>
                   ))}
@@ -254,13 +262,14 @@ export default async function BlogDetailPage({ params }: Props) {
                     href={`/${locale}/blog/${rel.slug}`}
                     className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all"
                   >
-                    <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                    <div className="aspect-4/3 overflow-hidden bg-slate-100 relative">
                       {rel.featured_image ? (
-                        <img
-                          src={rel.featured_image}
+                        <Image
+                          src={resolveMediaUrl(rel.featured_image)}
                           alt={rel.featured_image_alt ?? rel.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

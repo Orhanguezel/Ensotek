@@ -144,6 +144,9 @@ export const SITE_SETTINGS_GENERAL_KEYS: readonly string[] = [
   "hero",
   "home_backgrounds",
   "ui_header",
+  "ui_about_stats",
+  "offers_admin_email",
+  "catalog_admin_email",
 ] as const;
 
 export const SITE_SETTINGS_DEFAULTS_BY_KEY: Record<string, SettingValue> = {
@@ -159,6 +162,21 @@ export const SITE_SETTINGS_DEFAULTS_BY_KEY: Record<string, SettingValue> = {
   hero: {},
   home_backgrounds: [],
   ui_header: {},
+  ui_about_stats: {
+    ui_about_stats_refs_value: "1500",
+    ui_about_stats_refs_title: "Referans",
+    ui_about_stats_refs_label: "Referans müşteri & tesis",
+    ui_about_stats_projects_value: "5000",
+    ui_about_stats_projects_title: "Proje",
+    ui_about_stats_projects_label: "Tamamlanan projeler",
+    ui_about_stats_years_value: "40",
+    ui_about_stats_years_title: "Yıl",
+    ui_about_stats_years_label: "Tecrübe",
+    ui_about_stats_suffix_plus: "+",
+    ui_about_stats_suffix_letter: "",
+  },
+  offers_admin_email: "info@ensotek.de",
+  catalog_admin_email: "info@ensotek.de",
 };
 
 export type GeneralSettingsRow = {
@@ -771,9 +789,9 @@ export const SITE_SETTINGS_BUSINESS_HOURS_EMPTY = SITE_SETTINGS_BUSINESS_HOUR_DA
 // ── Company profile ──
 
 export const SITE_SETTINGS_COMPANY_PROFILE_EMPTY = {
-  company_name: "",
-  slogan: "",
-  about: "",
+  headline: "",
+  subline: "",
+  body: "",
 };
 
 export const SITE_SETTINGS_COMPANY_PROFILE_FIELDS: {
@@ -782,9 +800,9 @@ export const SITE_SETTINGS_COMPANY_PROFILE_FIELDS: {
   colSpan2?: boolean;
   textarea?: boolean;
 }[] = [
-  { key: "company_name", labelKey: "companyName" },
-  { key: "slogan", labelKey: "slogan" },
-  { key: "about", labelKey: "about", colSpan2: true, textarea: true },
+  { key: "headline", labelKey: "headline", colSpan2: true },
+  { key: "subline", labelKey: "subline", colSpan2: true },
+  { key: "body", labelKey: "body", colSpan2: true, textarea: true },
 ];
 
 // ── Contact info ──

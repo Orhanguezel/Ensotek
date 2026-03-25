@@ -1226,6 +1226,7 @@
         "themePresetPlaceholder": "Preset",
         "fonts": "Fonts",
         "fontsPlaceholder": "Select font",
+        "language": "Language",
         "themeMode": "Theme Mode",
         "pageLayout": "Page Layout",
         "navbarBehavior": "Navbar Behavior",
@@ -1766,7 +1767,13 @@
         "sortDate": "Date",
         "sortResponseTime": "Response Time",
         "sortStatusCode": "Status Code",
-        "logsTitle": "Request Logs"
+        "logsTitle": "Request Logs",
+        "placeholders": {
+          "search": "/api/products, /admin/...",
+          "method": "GET, POST, PUT...",
+          "status": "200, 404, 500...",
+          "ip": "192.168.1.1"
+        }
       },
       "auth": {
         "filtersTitle": "Filters",
@@ -1782,7 +1789,10 @@
         "nDays": "{n} Days",
         "pathPrefix": "Path Prefix",
         "chartTitle": "Daily Chart",
-        "lastNDays": "Last {n} days"
+        "lastNDays": "Last {n} days",
+        "placeholders": {
+          "pathPrefix": "/api, /admin"
+        }
       },
       "map": {
         "title": "Geographic Distribution",
@@ -1868,6 +1878,27 @@
           "PE": "Peru",
           "LOCAL": "Localhost"
         }
+      },
+      "geoMap": {
+        "loading": "Loading...",
+        "empty": "No geo data available.",
+        "requestsLabel": "Requests",
+        "distributionTitle": "Request distribution — {total} total",
+        "topCountries": "Top Countries"
+      },
+      "chart": {
+        "summary": "{days} days of {requests} data{uniqueSuffix}{errorsSuffix}",
+        "summaryUniqueSuffix": " + unique IPs",
+        "summaryErrorsSuffix": " + errors",
+        "labels": {
+          "requests": "Requests",
+          "uniqueIps": "Unique IPs",
+          "unique": "Unique",
+          "errors": "Errors"
+        },
+        "loading": "Loading...",
+        "empty": "No data available.",
+        "ariaLabel": "Daily requests bar chart"
       },
       "analytics": {
         "title": "Analytics Dashboard",
@@ -2046,7 +2077,13 @@
         "presetDeEnTr": "Set de/en/tr preset",
         "presetTop20": "Add 20 common locales",
         "saved": "Locales updated.",
-        "saveError": "Failed to update locales."
+        "saveError": "Failed to update locales.",
+        "defaultLocale": "Default Language",
+        "defaultLocaleDesc": "All modules will use this language as default in language selectors.",
+        "selectDefault": "Select default language",
+        "default": "Default",
+        "emptyRows": "No locale configuration found.",
+        "loading": "Loading..."
       },
       "list": {
         "title": "Settings List",
@@ -2080,8 +2117,8 @@
         "deleted": "\"{key}\" ({locale}) deleted.",
         "deleteError": "Failed to delete setting.",
         "modes": {
-          "structured": "Structured",
-          "raw": "Raw"
+          "structured": "Form",
+          "raw": "JSON"
         },
         "structuredMissingTitle": "Structured renderer missing",
         "structuredMissingDesc": "No structured renderer is defined for this key. Use Raw mode.",
@@ -2168,7 +2205,10 @@
           "businessHours": "Business Hours",
           "hero": "Hero Section",
           "home_backgrounds": "Home Backgrounds",
-          "ui_header": "Header UI Settings"
+          "ui_header": "Header UI Settings",
+          "ui_about_stats": "Homepage Statistics",
+          "offers_admin_email": "Offer Notification Email",
+          "catalog_admin_email": "Catalog Notification Email"
         },
         "keyDescriptions": {
           "site_name": "The name of your site (used in titles and SEO)",
@@ -2182,7 +2222,10 @@
           "businessHours": "Working days and hours",
           "hero": "Homepage hero/banner settings",
           "home_backgrounds": "Homepage background images",
-          "ui_header": "Header and navigation settings"
+          "ui_header": "Header and navigation settings",
+          "ui_about_stats": "Reference, project & experience statistics on homepage",
+          "offers_admin_email": "Offer requests are sent to this email",
+          "catalog_admin_email": "Catalog requests are sent to this email"
         },
         "recordCount": "Total {count} records"
       },
@@ -2616,9 +2659,9 @@
         },
         "companyProfile": {
           "labels": {
-            "companyName": "Company Name",
-            "slogan": "Slogan",
-            "about": "About"
+            "headline": "Headline",
+            "subline": "Subline",
+            "body": "Description"
           }
         },
         "uiHeader": {
@@ -3359,6 +3402,25 @@
           "previous": "Previous",
           "next": "Next"
         }
+      },
+      "create": {
+        "button": "New User",
+        "title": "Create New User",
+        "description": "Enter email, password, and role information.",
+        "emailLabel": "Email",
+        "emailPlaceholder": "example@email.com",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "At least 8 characters",
+        "fullNameLabel": "Full Name",
+        "fullNamePlaceholder": "Full Name",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "+1 555 123 4567",
+        "roleLabel": "Role",
+        "submitButton": "Create",
+        "cancelButton": "Cancel",
+        "success": "User created successfully.",
+        "errorExists": "This email is already registered.",
+        "errorGeneric": "Failed to create user."
       },
       "detail": {
         "title": "User Details",

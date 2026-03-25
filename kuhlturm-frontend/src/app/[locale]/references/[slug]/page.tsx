@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, ExternalLink, ArrowLeft } from 'lucide-react';
 import { getReferenceBySlug, getReferences } from '@ensotek/core/services';
 import type { Reference } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 import { ReferenceGallery } from '@/components/sections/ReferenceGallery';
 
 interface Props {
@@ -104,11 +106,14 @@ export default async function ReferenceDetailPage({ params }: Props) {
             {/* Left — featured image + gallery */}
             <div className="lg:col-span-2 space-y-6">
               {ref.featured_image && (
-                <div className="rounded-2xl overflow-hidden aspect-video bg-slate-100">
-                  <img
-                    src={ref.featured_image}
+                <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-100">
+                  <Image
+                    src={resolveMediaUrl(ref.featured_image)}
                     alt={ref.featured_image_alt ?? ref.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    priority
                   />
                 </div>
               )}
@@ -186,13 +191,14 @@ export default async function ReferenceDetailPage({ params }: Props) {
                   href={`/${locale}/references/${r.slug}`}
                   className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                  <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
                     {r.featured_image ? (
-                      <img
-                        src={r.featured_image}
+                      <Image
+                        src={resolveMediaUrl(r.featured_image)}
                         alt={r.featured_image_alt ?? r.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

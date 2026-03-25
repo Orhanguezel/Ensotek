@@ -39,7 +39,12 @@ async function resolveLocales(
 
   const q = query ?? ((req.query ?? {}) as LocaleQueryLike);
 
-  const reqRaw = normalizeLooseLocale(q.locale) ?? normalizeLooseLocale(req.locale);
+  const headerLocale =
+    normalizeLooseLocale(req.headers?.['x-locale']) ??
+    normalizeLooseLocale(req.headers?.['accept-language']?.split(',')[0]);
+
+  const reqRaw =
+    normalizeLooseLocale(q.locale) ?? normalizeLooseLocale(req.locale) ?? headerLocale;
   const defRawFromQuery = normalizeLooseLocale(q.default_locale);
 
   const safeDefault = pickSafeDefault();

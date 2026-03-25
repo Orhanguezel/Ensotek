@@ -10,20 +10,26 @@ import { useSubmitContact } from "@/features/contact/contact.action";
 import { contactFormSchema } from "@/features/contact/contact.schema";
 import Banner from "@/components/layout/banner/Banner";
 
-type ContactInfo = {
-  companyName?: string;
+type ContactInfoRaw = {
+  company_name?: string;
   email?: string;
-  phones?: string[];
+  email_2?: string;
+  phone?: string;
+  phone_2?: string;
   address?: string;
-  addressSecondary?: string;
-  website?: string;
-};
-
-type ContactMap = {
-  title?: string;
-  height?: number;
-  query?: string;
-  embed_url?: string;
+  address_label?: string;
+  address_2?: string;
+  address_2_label?: string;
+  city?: string;
+  city_2?: string;
+  country?: string;
+  country_2?: string;
+  working_hours?: string;
+  maps_lat?: string;
+  maps_lng?: string;
+  maps_lat_2?: string;
+  maps_lng_2?: string;
+  maps_embed_url?: string;
 };
 
 type SocialLinks = {
@@ -52,6 +58,16 @@ const initialForm: FormState = {
   website: "",
 };
 
+function buildMapEmbedUrl(lat?: string, lng?: string, address?: string): string {
+  if (lat && lng) {
+    return `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  }
+  if (address) {
+    return `https://maps.google.com/maps?q=${encodeURIComponent(address)}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+  }
+  return "";
+}
+
 export default function ContactPage() {
   const t = useTranslations();
   const submitContact = useSubmitContact();
@@ -75,22 +91,11 @@ export default function ContactPage() {
     return map;
   }, [siteSettings]);
 
-  const companyBrand = (settingsByKey.get("company_brand") || {}) as {
-    shortName?: string;
-  };
-  const contactInfo = (settingsByKey.get("contact_info") || {}) as ContactInfo;
-  const contactMap = (settingsByKey.get("contact_map") || {}) as ContactMap;
+  const info = (settingsByKey.get("contact_info") || {}) as ContactInfoRaw;
   const socialLinks = (settingsByKey.get("socials") || {}) as SocialLinks;
 
-  const phones = Array.isArray(contactInfo.phones) ? contactInfo.phones : [];
-  const mapHeight = Number(contactMap.height || 420);
-  const mapEmbedUrl =
-    contactMap.embed_url ||
-    (contactMap.query
-      ? `https://www.google.com/maps?q=${encodeURIComponent(
-          contactMap.query,
-        )}&output=embed`
-      : "");
+  const map1Url = buildMapEmbedUrl(info.maps_lat, info.maps_lng, info.address);
+  const map2Url = buildMapEmbedUrl(info.maps_lat_2, info.maps_lng_2, info.address_2);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -133,13 +138,105 @@ export default function ContactPage() {
                   </h2>
                 </div>
 
-                <p>{contactInfo.companyName || companyBrand.shortName || "Ensotek"}</p>
-                {contactInfo.address && <p>{contactInfo.address}</p>}
-                {contactInfo.email && <p>{contactInfo.email}</p>}
-                {phones[0] && <p>{phones[0]}</p>}
-                {contactInfo.website && <p>{contactInfo.website}</p>}
+                {/* Company name */}
+                <h4 className="text-white mb-20">
+                  {info.company_name || "Ensotek"}
+                </h4>
 
-                <div className="touch__social">
+                {/* Contact details list */}
+                <div className="touch__info-list">
+                  {info.phone && (
+                    <div className="mb-15">
+                      <h6 className="text-uppercase text-white mb-5" style={{ letterSpacing: "1px", fontSize: "13px" }}>
+                        <i className="fa-brands fa-whatsapp me-2" />
+                        {t("auth.phone")} / WhatsApp
+                      </h6>
+                      <div className="d-flex align-items-center gap-2 mb-5">
+                        <a href={`tel:${info.phone.replace(/\s/g, "")}`} className="text-white">
+                          {info.phone}
+                        </a>
+                        <a
+                          href={`https://wa.me/${info.phone.replace(/[\s\-\(\)]/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-white"
+                          title="WhatsApp"
+                        >
+                          <i className="fa-brands fa-whatsapp" />
+                        </a>
+                      </div>
+                      {info.phone_2 && (
+                        <div className="d-flex align-items-center gap-2">
+                          <a href={`tel:${info.phone_2.replace(/\s/g, "")}`} className="text-white">
+                            {info.phone_2}
+                          </a>
+                          <a
+                            href={`https://wa.me/${info.phone_2.replace(/[\s\-\(\)]/g, "")}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-white"
+                            title="WhatsApp"
+                          >
+                            <i className="fa-brands fa-whatsapp" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {info.email && (
+                    <div className="d-flex align-items-center gap-2 mb-10">
+                      <i className="fa fa-envelope text-white" />
+                      <a href={`mailto:${info.email}`} className="text-white">
+                        {info.email}
+                      </a>
+                    </div>
+                  )}
+                  {info.email_2 && (
+                    <div className="d-flex align-items-center gap-2 mb-10">
+                      <i className="fa fa-envelope text-white" />
+                      <a href={`mailto:${info.email_2}`} className="text-white">
+                        {info.email_2}
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Address 1 */}
+                  {info.address && (
+                    <div className="mt-25 mb-15">
+                      <h6 className="text-uppercase text-white mb-5" style={{ letterSpacing: "1px", fontSize: "13px" }}>
+                        <i className="fa fa-map-marker-alt me-2" />
+                        {info.address_label || "Adresse"}
+                      </h6>
+                      <span className="text-white d-block">
+                        {info.address}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Address 2 */}
+                  {info.address_2 && (
+                    <div className="mb-15">
+                      <h6 className="text-uppercase text-white mb-5" style={{ letterSpacing: "1px", fontSize: "13px" }}>
+                        <i className="fa fa-industry me-2" />
+                        {info.address_2_label || "Werk"}
+                      </h6>
+                      <span className="text-white d-block">
+                        {info.address_2}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Working hours */}
+                  {info.working_hours && (
+                    <div className="d-flex align-items-center gap-2 mb-10">
+                      <i className="fa fa-clock text-white" />
+                      <span className="text-white">{info.working_hours}</span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="touch__social mt-25">
                   {socialLinks.facebook && (
                     <Link href={socialLinks.facebook} target="_blank" rel="nofollow noreferrer">
                       <i className="fa-brands fa-facebook-f"></i>
@@ -252,12 +349,12 @@ export default function ContactPage() {
                       }
                       autoComplete="off"
                       tabIndex={-1}
-                      style={{ display: "none" }}
+                      className="d-none"
                     />
 
                     <div className="col-12">
-                      {error && <p style={{ color: "#d9534f", marginBottom: "10px" }}>{error}</p>}
-                      {success && <p style={{ color: "#198754", marginBottom: "10px" }}>{success}</p>}
+                      {error && <p className="text-danger mb-10">{error}</p>}
+                      {success && <p className="text-success mb-10">{success}</p>}
 
                       <div className="touch__submit">
                         <button className="border__btn" type="submit" disabled={submitContact.isPending}>
@@ -273,15 +370,37 @@ export default function ContactPage() {
         </div>
       </section>
 
-      {mapEmbedUrl && (
+      {/* Maps */}
+      {(map1Url || map2Url) && (
         <section className="google__map-area pt-0">
-          <iframe
-            src={mapEmbedUrl}
-            title={contactMap.title || `${companyBrand.shortName || "Ensotek"} Map`}
-            style={{ width: "100%", height: `${mapHeight}px`, border: 0 }}
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-          />
+          <div className="container-fluid p-0">
+            <div className="row g-0">
+              {map1Url && (
+                <div className={map2Url ? "col-lg-6" : "col-12"}>
+                  <iframe
+                    src={map1Url}
+                    title={`${info.address_label || "Office"} - ${info.company_name || "Ensotek"}`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                    style={{ border: 0 }}
+                  />
+                </div>
+              )}
+              {map2Url && (
+                <div className={map1Url ? "col-lg-6" : "col-12"}>
+                  <iframe
+                    src={map2Url}
+                    title={`${info.address_2_label || "Factory"} - ${info.company_name || "Ensotek"}`}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                    allowFullScreen
+                    style={{ border: 0 }}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </section>
       )}
     </>

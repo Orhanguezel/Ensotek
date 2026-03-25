@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/routing";
-import { useLibraryItem, useLibraryFiles, useLibraryImages } from "@/features/library/library.action";
+import { useLibrary, useLibraryItem, useLibraryFiles, useLibraryImages } from "@/features/library/library.action";
 import { useTranslations } from "next-intl";
 import LibraryPdfPreview from "./LibraryPdfPreview";
 import { resolveMediaUrl } from "@/lib/media";
@@ -43,6 +43,12 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
 
   const { data: files } = useLibraryFiles(libraryId);
   const { data: images } = useLibraryImages(libraryId);
+  const { data: allLibraryItems } = useLibrary({ limit: 20 });
+
+  const otherArticles = useMemo(() => {
+    const items = Array.isArray(allLibraryItems) ? allLibraryItems : (allLibraryItems as any)?.data || [];
+    return items.filter((a: any) => a.slug !== slug);
+  }, [allLibraryItems, slug]);
 
   const html = useMemo(() => resolveHtml(item?.description), [item?.description]);
   
@@ -129,7 +135,17 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
                 </div>
 
                 {html ? (
-                  <div className="tp-postbox-details" dangerouslySetInnerHTML={{ __html: html }} />
+                  <div className="tp-postbox-details" style={{}} dangerouslySetInnerHTML={{ __html: html }} ref={(el) => {
+                    if (el) {
+                      el.querySelectorAll('img').forEach((img) => {
+                        img.style.maxWidth = '60%';
+                        img.style.height = 'auto';
+                        img.style.borderRadius = '8px';
+                        img.style.display = 'block';
+                        img.style.margin = '16px 0';
+                      });
+                    }
+                  }} />
                 ) : (
                   <p>{t("emptyDetail")}</p>
                 )}
@@ -139,6 +155,52 @@ const LibraryDetail = ({ slug }: LibraryDetailProps) => {
 
           <div className="col-xl-4 col-lg-4">
             <div className="sideber__widget">
+              {otherArticles.length > 0 && (
+                <div className="sideber__widget-item mb-40">
+                  <div className="sidebar__contact-title mb-25">
+                    <h3>{t("otherArticles") || "Diğer İçerikler"}</h3>
+                  </div>
+                  <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                    {otherArticles.map((article: any) => {
+                      const isActive = article.slug === slug;
+                      const thumbUrl = resolveMediaUrl(article.featured_image || article.image_url);
+                      return (
+                        <li key={article.id} style={{ marginBottom: 12 }}>
+                          <Link
+                            href={`/library/${article.slug}`}
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: 12,
+                              padding: "10px 12px",
+                              borderRadius: 8,
+                              backgroundColor: isActive ? "var(--clr-theme-1, #0d6efd)" : "#f8f9fa",
+                              color: isActive ? "#fff" : "inherit",
+                              textDecoration: "none",
+                              transition: "background-color 0.2s",
+                              border: "1px solid #e9ecef",
+                            }}
+                          >
+                            {thumbUrl && (
+                              <Image
+                                src={thumbUrl}
+                                alt={article.name || ""}
+                                width={60}
+                                height={45}
+                                style={{ borderRadius: 4, objectFit: "cover", flexShrink: 0 }}
+                              />
+                            )}
+                            <span style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.3 }}>
+                              {article.name}
+                            </span>
+                          </Link>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
+              )}
+
               {fileItems.length > 0 ? (
                 <div className="sideber__widget-item mb-40">
                   <div className="sidebar__contact-title mb-25">

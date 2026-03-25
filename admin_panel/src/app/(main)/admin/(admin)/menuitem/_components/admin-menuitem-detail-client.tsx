@@ -62,7 +62,7 @@ export default function AdminMenuItemDetailClient({ id }: { id: string }) {
   );
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
   // ✅ FIX: Extract items from response
@@ -92,7 +92,7 @@ export default function AdminMenuItemDetailClient({ id }: { id: string }) {
     section_id: "",
     is_active: true,
     display_order: 0,
-    locale: apiLocale || "de",
+    locale: apiLocale || "tr",
   });
 
   // Load existing data
@@ -109,7 +109,7 @@ export default function AdminMenuItemDetailClient({ id }: { id: string }) {
         section_id: item.section_id || "",
         is_active: item.is_active,
         display_order: item.display_order || 0,
-        locale: item.locale || apiLocale || "de",
+        locale: item.locale || apiLocale || "tr",
       });
     }
   }, [isNew, item, apiLocale]);

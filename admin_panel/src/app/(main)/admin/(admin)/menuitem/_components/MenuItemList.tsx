@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemList.tsx
-// guezelwebdesign – Admin Menu Items (Responsive + DnD + Pagination) (HEADER ONLY friendly)
+// Ensotek – Admin Menu Items (Responsive + DnD + Pagination) (HEADER ONLY friendly)
 // =============================================================
 
 "use client";

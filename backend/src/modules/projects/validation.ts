@@ -35,7 +35,7 @@ export const upsertProjectParentBodySchema = z.object({
   display_order: z.coerce.number().int().min(0).optional(),
 
   featured_image: REL_OR_URL.nullable().optional(),
-  featured_image_asset_id: z.string().length(36).nullable().optional(),
+  featured_image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   // Ensotek industrial fields
   category: z.string().max(100).nullable().optional(),          // "Su Soğutma Kulesi", "HVAC"
@@ -55,8 +55,8 @@ export const upsertProjectParentBodySchema = z.object({
     .nullable()
     .optional(),
   completion_time_label: z.string().max(100).nullable().optional(),
-  website_url: z.string().url().nullable().optional(),
-  youtube_url: z.string().url().nullable().optional(),
+  website_url: z.union([z.string().refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+  youtube_url: z.union([z.string().refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   services: z.array(z.string().min(1).max(200)).max(50).optional(),
   techs: z.array(z.string().min(1).max(100)).max(100).optional(),

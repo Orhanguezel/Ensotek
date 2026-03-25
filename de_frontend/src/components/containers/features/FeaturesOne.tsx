@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { servicesService } from "@/features/services/services.service";
+import { resolveMediaUrl } from "@/lib/media";
 
 import IconOne from "public/img/features/icon-1.png";
 import IconTwo from "public/img/features/icon-2.png";
@@ -73,7 +74,7 @@ const FeaturesOne = () => {
                 <div className="features__items-icon">
                   {item.icon ? (
                     <Image
-                      src={item.icon}
+                      src={resolveMediaUrl(item.icon)}
                       alt={item.name}
                       width={60}
                       height={60}

@@ -198,7 +198,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
       const url = window.prompt("Resim URL'si girin:");
       if (url?.trim()) {
         const safeUrl = url.trim();
-        const imgHtml = `<img src="${safeUrl}" alt="" style="max-width:100%; height:auto;" />`;
+        const imgHtml = `<img src="${safeUrl}" alt="" style="max-width:40%; height:auto; border-radius:8px; display:block; margin:8px 0;" />`;
         focusEditor();
         insertHtmlAtCursor(imgHtml);
         if (editorRef.current) propagateChange(editorRef.current.innerHTML);
@@ -217,7 +217,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
       if (!url) return;
 
       const safeAlt = file.name.replace(/"/g, "&quot;");
-      const imgHtml = `<img src="${url}" alt="${safeAlt}" style="max-width:100%; height:auto;" />`;
+      const imgHtml = `<img src="${url}" alt="${safeAlt}" style="max-width:40%; height:auto; border-radius:8px; display:block; margin:8px 0;" />`;
 
       focusEditor();
       insertHtmlAtCursor(imgHtml);
@@ -233,6 +233,15 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
 
   return (
     <Card>
+      <style>{`
+        .rich-editor-area img {
+          max-width: 40% !important;
+          height: auto !important;
+          border-radius: 8px;
+          display: block;
+          margin: 8px 0;
+        }
+      `}</style>
       <CardHeader className="space-y-2">
         <div className="flex items-center justify-between gap-2">
           <Label className="text-sm">{label}</Label>
@@ -363,7 +372,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
               <div
                 ref={editorRef}
                 className={cn(
-                  "px-3 py-2 text-sm outline-none",
+                  "px-3 py-2 text-sm outline-none rich-editor-area",
                   disabled ? "cursor-not-allowed bg-muted/20" : "bg-background",
                 )}
                 style={{
@@ -400,7 +409,7 @@ const RichContentEditor: React.FC<RichContentEditorProps> = ({
           <div className="text-muted-foreground text-xs">Önizleme</div>
           <div className="rounded-md border bg-background p-3">
             {html?.trim() ? (
-              <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: html }} />
+              <div className="prose prose-sm max-w-none rich-editor-area" dangerouslySetInnerHTML={{ __html: html }} />
             ) : (
               <div className="text-muted-foreground text-sm">
                 Henüz içerik yok. Yazdıkça burada anlık olarak gözükecek.

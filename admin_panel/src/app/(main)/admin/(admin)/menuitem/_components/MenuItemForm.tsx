@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/menuitem/MenuItemForm.tsx
-// guezelwebdesign – Admin Menu Item Create / Edit Form (HEADER ONLY)
+// Ensotek – Admin Menu Item Create / Edit Form (HEADER ONLY)
 // =============================================================
 
 "use client";

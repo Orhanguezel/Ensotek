@@ -11,16 +11,20 @@ type RelatedType = "general" | "product" | "service";
 interface OfferFormProps {
   productId?: string;
   productName?: string;
+  serviceId?: string;
+  serviceName?: string;
 }
 
-const OfferForm = ({ productId: initialProductId, productName }: OfferFormProps) => {
+const OfferForm = ({ productId: initialProductId, productName, serviceId: initialServiceId, serviceName }: OfferFormProps) => {
   const t = useTranslations("ensotek.offer");
   const locale = useLocale();
   const submitOffer = useSubmitOffer();
-  
-  const [relatedType, setRelatedType] = useState<RelatedType>(initialProductId ? "product" : "general");
+
+  const [relatedType, setRelatedType] = useState<RelatedType>(
+    initialServiceId ? "service" : initialProductId ? "product" : "general"
+  );
   const [selectedProductId, setSelectedProductId] = useState(initialProductId || "");
-  const [selectedServiceId, setSelectedServiceId] = useState("");
+  const [selectedServiceId, setSelectedServiceId] = useState(initialServiceId || "");
   
   // Basic Info
   const [companyName, setCompanyName] = useState("");
@@ -39,9 +43,7 @@ const OfferForm = ({ productId: initialProductId, productName }: OfferFormProps)
   const [capacity, setCapacity] = useState("");
   const [extraNotes, setExtraNotes] = useState("");
   
-  // Consent
-  const [consentTerms, setConsentTerms] = useState(false);
-  const [consentMarketing, setConsentMarketing] = useState(false);
+  // Consent removed per user request (no KVKK checkboxes)
   
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -63,11 +65,6 @@ const OfferForm = ({ productId: initialProductId, productName }: OfferFormProps)
     setError("");
     setSuccess("");
 
-    if (!consentTerms) {
-      setError(t("acceptTermsError") || "Please accept the privacy terms.");
-      return;
-    }
-
     const payload = {
       customer_name: customerName,
       company_name: companyName,
@@ -78,8 +75,6 @@ const OfferForm = ({ productId: initialProductId, productName }: OfferFormProps)
       subject: `Offer Request - ${relatedType.toUpperCase()}`,
       message: extraNotes,
       product_id: relatedType === "product" ? selectedProductId : undefined,
-      consent_marketing: consentMarketing,
-      consent_terms: consentTerms,
       form_data: {
         related_type: relatedType,
         service_id: relatedType === "service" ? selectedServiceId : undefined,
@@ -358,34 +353,8 @@ const OfferForm = ({ productId: initialProductId, productName }: OfferFormProps)
             </div>
           </div>
 
-          {/* Section 4: Consent & Submit */}
+          {/* Section 4: Submit */}
           <div className="col-12 mt-10">
-            <div className="sign__check mb-10">
-              <input 
-                className="e-check-input" 
-                type="checkbox" 
-                id="consent-terms" 
-                checked={consentTerms}
-                onChange={(e) => setConsentTerms(e.target.checked)}
-                required
-              />
-              <label className="ms-2 small" htmlFor="consent-terms">
-                {t("consentTerms") || "I have read and accept the privacy policy and terms of use."}
-              </label>
-            </div>
-            <div className="sign__check mb-30">
-              <input 
-                className="e-check-input" 
-                type="checkbox" 
-                id="consent-marketing" 
-                checked={consentMarketing}
-                onChange={(e) => setConsentMarketing(e.target.checked)}
-              />
-              <label className="ms-2 small" htmlFor="consent-marketing">
-                {t("consentMarketing") || "I would like to receive informational emails about new products."}
-              </label>
-            </div>
-
             {error && <div className="alert alert-danger mb-20">{error}</div>}
             {success && <div className="alert alert-success mb-20">{success}</div>}
 

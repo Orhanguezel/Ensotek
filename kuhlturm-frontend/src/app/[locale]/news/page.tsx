@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, Calendar, Tag } from 'lucide-react';
 import { getCustomPages } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
 import { apiFetchWithLocale } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -128,13 +130,14 @@ function ArticleCard({
       className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-200 hover:shadow-xl transition-all duration-300"
     >
       {/* Image */}
-      <div className={`overflow-hidden bg-slate-100 ${large ? 'aspect-video' : 'aspect-4/3'}`}>
+      <div className={`overflow-hidden bg-slate-100 relative ${large ? 'aspect-video' : 'aspect-4/3'}`}>
         {article.featured_image ? (
-          <img
-            src={article.featured_image}
+          <Image
+            src={resolveMediaUrl(article.featured_image)}
             alt={article.featured_image_alt ?? article.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
+            fill
+            sizes={large ? '(max-width: 768px) 100vw, 50vw' : '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw'}
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-slate-100">

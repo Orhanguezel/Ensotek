@@ -2,7 +2,7 @@
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/services/_components/ServicesHeader.tsx
-// guezelwebdesign – Admin Services Header (filters + locale + summary)
+// Ensotek – Admin Services Header (filters + locale + summary)
 // - shadcn/tailwind theme
 // - Locale source: useAdminLocales()
 // - NO Category/SubCategory

@@ -47,7 +47,7 @@ type FormState = {
 };
 
 const EMPTY_FORM: FormState = {
-  locale: "de",
+  locale: "tr",
   title: "",
   content: "",
   tags: "",

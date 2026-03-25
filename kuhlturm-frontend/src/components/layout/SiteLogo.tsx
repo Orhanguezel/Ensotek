@@ -1,4 +1,6 @@
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   src?: string | null;
@@ -10,15 +12,18 @@ interface Props {
   dark?: boolean;
 }
 
-export function SiteLogo({ src, alt = 'Kühlturm', className, height = 32, dark = false }: Props) {
+export function SiteLogo({ src, alt = 'Ensotek', className, height = 32, dark = false }: Props) {
   if (src) {
     return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={src}
+      <Image
+        src={resolveMediaUrl(src)}
         alt={alt}
-        style={{ height: `${height}px`, width: 'auto', display: 'block' }}
+        width={Math.round(height * 3)}
+        height={height}
+        sizes={`${Math.round(height * 3)}px`}
+        priority
         className={className}
+        style={{ height: `${height}px`, width: 'auto', display: 'block' }}
       />
     );
   }

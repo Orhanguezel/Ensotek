@@ -41,6 +41,17 @@ function unwrapUser(input: unknown): AdminUserRaw {
 
 export const authAdminApi = baseApi.injectEndpoints({
   endpoints: (b) => ({
+    /** POST /admin/users — create new user */
+    adminCreateUser: b.mutation<AdminUserView, { email: string; password: string; full_name?: string; phone?: string; role?: string }>({
+      query: (body) => ({
+        url: ADMIN_USERS_BASE,
+        method: "POST",
+        body,
+      }),
+      transformResponse: (res: unknown): AdminUserView => normalizeAdminUser(unwrapUser(res)),
+      invalidatesTags: [{ type: "AdminUsers" as const, id: "LIST" }],
+    }),
+
     /** GET /users */
     adminList: b.query<AdminUserView[], AdminUsersListParams | undefined>({
       query: (params) => {
@@ -151,6 +162,7 @@ export const authAdminApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useAdminCreateUserMutation,
   useAdminListQuery,
   useAdminGetQuery,
   useAdminUpdateUserMutation,
@@ -161,6 +173,7 @@ export const {
 } = authAdminApi;
 
 // Legacy/admin-panel aliases
+export const useCreateUserAdminMutation = useAdminCreateUserMutation;
 export const useListUsersAdminQuery = useAdminListQuery;
 export const useGetUserAdminQuery = useAdminGetQuery;
 export const useUpdateUserAdminMutation = useAdminUpdateUserMutation;

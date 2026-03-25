@@ -154,10 +154,10 @@ export function AdminSettingsProvider({ children }: { children: React.ReactNode 
     dispatch(preferencesActions.syncFromDom({}));
 
     // Zustand sync (UI kontrolleri Zustand okur)
-    // Only set adminLocale from DB if the user hasn't already chosen one
-    // (cookie or preference store). User's explicit choice takes priority.
-    if (config.default_locale && !adminLocale) {
-      setAdminLocale(config.default_locale);
+    // Admin panel UI is always Turkish. Content locale (for API queries)
+    // is separate and controlled by the locale switcher per module.
+    if (!adminLocale) {
+      setAdminLocale("tr");
     }
     if (config.theme) {
       if (config.theme.mode) setThemeMode(config.theme.mode as ThemeMode);

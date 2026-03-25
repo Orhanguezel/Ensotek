@@ -145,7 +145,7 @@ export default async function LocaleLayout({
     if (!v) return null;
     if (typeof v === 'string') return v || null;
     if (typeof v === 'object' && !Array.isArray(v)) {
-      const url = (v as Record<string, unknown>).url ?? (v as Record<string, unknown>).src;
+      const url = (v as Record<string, unknown>).url ?? (v as Record<string, unknown>).src ?? (v as Record<string, unknown>).site_logo;
       return typeof url === 'string' ? url || null : null;
     }
     return null;

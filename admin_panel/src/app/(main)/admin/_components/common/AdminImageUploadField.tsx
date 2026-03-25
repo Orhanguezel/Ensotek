@@ -13,7 +13,7 @@
 // =============================================================
 
 import type React from "react";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Copy, Image as ImageIcon, Library, Star, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -142,6 +142,29 @@ const displayUrl = (raw: string, max = 72) => {
   return `${head}…${tail}`;
 };
 
+/** Client-side image dimension resolver (for assets missing width/height from DB) */
+function useImageDimensions(assets: Array<{ id: string; url?: string | null; width?: number | null; height?: number | null }>) {
+  const [dims, setDims] = useState<Record<string, { w: number; h: number }>>({});
+
+  useEffect(() => {
+    for (const a of assets) {
+      if (a.width && a.height) continue;
+      const url = norm(a.url);
+      if (!url || dims[a.id]) continue;
+      const img = new window.Image();
+      img.onload = () => {
+        setDims((prev) => ({ ...prev, [a.id]: { w: img.naturalWidth, h: img.naturalHeight } }));
+      };
+      img.src = url;
+    }
+  }, [assets, dims]);
+
+  return (id: string, dbW?: number | null, dbH?: number | null) => {
+    if (dbW && dbH) return { w: dbW, h: dbH };
+    return dims[id] || null;
+  };
+}
+
 const ratioOf = (aspect: "16x9" | "4x3" | "1x1") => {
   if (aspect === "4x3") return 4 / 3;
   if (aspect === "1x1") return 1;
@@ -208,6 +231,20 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"upload" | "library">("upload");
   const [librarySelection, setLibrarySelection] = useState<string[]>([]);
+
+  // Auto-add selected images when modal closes without confirming
+  const handleModalOpenChange = (open: boolean) => {
+    if (!open && multiple && librarySelection.length > 0) {
+      if (onChangeMultiple) {
+        onChangeMultiple(uniqAppend(gallery, librarySelection));
+        toast.success(
+          librarySelection.length === 1 ? "Görsel eklendi." : `${librarySelection.length} görsel eklendi.`,
+        );
+      }
+      setLibrarySelection([]);
+    }
+    setIsModalOpen(open);
+  };
 
   // Fetch library assets (show all folders, not filtered)
   const { data: assetsData, isLoading: isLoadingAssets } = useListAssetsAdminQuery(
@@ -603,7 +640,7 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
         {!multiple ? <SinglePreview /> : <MultiPreview />}
 
         {/* Upload/Library Modal */}
-        <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <Dialog open={isModalOpen} onOpenChange={handleModalOpenChange}>
           <DialogContent className="max-h-[90vh] max-w-6xl overflow-y-auto">
             <DialogHeader>
               <DialogTitle>{multiple ? "Görseller Yükle" : "Görsel Yükle"}</DialogTitle>
@@ -691,52 +728,15 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
                         </div>
                       </div>
                     )}
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-                      {assetsData.items.map((asset) => {
-                        const url = asset.url || "";
-                        const normalizedUrl = norm(url);
-                        const isInGallery = gallery.includes(normalizedUrl);
-                        const isInSelection = librarySelection.includes(normalizedUrl);
-                        const isSelected = multiple ? isInSelection : value === url;
-
-                        return (
-                          <button
-                            key={asset.id}
-                            type="button"
-                            onClick={() => handleSelectFromLibrary(url)}
-                            disabled={busy || isInGallery}
-                            className={cn(
-                              "group relative overflow-hidden rounded-lg border transition-all hover:border-primary",
-                              isSelected && "border-primary ring-2 ring-primary/20",
-                              isInGallery && "opacity-50",
-                            )}
-                          >
-                            <AspectRatio ratio={1}>
-                              <img
-                                src={url}
-                                alt={asset.name || "Asset"}
-                                className="size-full object-cover transition-transform group-hover:scale-105"
-                              />
-                            </AspectRatio>
-                            {isInGallery && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                                <Badge variant="secondary">Eklendi</Badge>
-                              </div>
-                            )}
-                            {isSelected && !isInGallery && (
-                              <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
-                                <Badge>Seçildi</Badge>
-                              </div>
-                            )}
-                            {multiple && isInSelection && (
-                              <div className="absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-                                ✓
-                              </div>
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <LibraryGrid
+                      assets={assetsData.items}
+                      gallery={gallery}
+                      librarySelection={librarySelection}
+                      multiple={multiple}
+                      value={value}
+                      busy={busy}
+                      onSelect={handleSelectFromLibrary}
+                    />
                     {multiple && librarySelection.length > 0 && (
                       <div className="flex justify-end pt-2">
                         <Button
@@ -760,3 +760,79 @@ export const AdminImageUploadField: React.FC<AdminImageUploadFieldProps> = ({
     </Card>
   );
 };
+
+/** Library grid — extracted so useImageDimensions hook can be called */
+function LibraryGrid({
+  assets,
+  gallery,
+  librarySelection,
+  multiple,
+  value,
+  busy,
+  onSelect,
+}: {
+  assets: any[];
+  gallery: string[];
+  librarySelection: string[];
+  multiple: boolean;
+  value?: string;
+  busy: boolean;
+  onSelect: (url: string) => void;
+}) {
+  const getDims = useImageDimensions(assets);
+
+  return (
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+      {assets.map((asset) => {
+        const url = asset.url || "";
+        const normalizedUrl = norm(url);
+        const isInGallery = gallery.includes(normalizedUrl);
+        const isInSelection = librarySelection.includes(normalizedUrl);
+        const isSelected = multiple ? isInSelection : value === url;
+        const dims = getDims(asset.id, asset.width, asset.height);
+
+        return (
+          <button
+            key={asset.id}
+            type="button"
+            onClick={() => onSelect(url)}
+            disabled={busy || isInGallery}
+            className={cn(
+              "group relative overflow-hidden rounded-lg border transition-all hover:border-primary",
+              isSelected && "border-primary ring-2 ring-primary/20",
+              isInGallery && "opacity-50",
+            )}
+          >
+            <AspectRatio ratio={1}>
+              <img
+                src={url}
+                alt={asset.name || "Asset"}
+                className="size-full object-cover transition-transform group-hover:scale-105"
+              />
+            </AspectRatio>
+            {isInGallery && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <Badge variant="secondary">Eklendi</Badge>
+              </div>
+            )}
+            {isSelected && !isInGallery && (
+              <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
+                <Badge>Seçildi</Badge>
+              </div>
+            )}
+            {multiple && isInSelection && (
+              <div className="absolute top-1.5 right-1.5 flex size-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+                ✓
+              </div>
+            )}
+            {dims && (
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 text-[10px] text-white opacity-0 transition-opacity group-hover:opacity-100">
+                {dims.w}&times;{dims.h}px
+              </div>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}

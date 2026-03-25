@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, Users } from 'lucide-react';
 import { fetchCustomPagesByModuleKey } from '@/i18n/server';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -66,13 +68,14 @@ export default async function TeamPage({ params }: Props) {
                     className="group block bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-blue-200 hover:shadow-xl transition-all"
                   >
                     {/* Photo */}
-                    <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                    <div className="aspect-4/3 overflow-hidden bg-slate-100 relative">
                       {photo ? (
-                        <img
-                          src={photo}
+                        <Image
+                          src={resolveMediaUrl(photo)}
                           alt={member.featured_image_alt ?? member.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

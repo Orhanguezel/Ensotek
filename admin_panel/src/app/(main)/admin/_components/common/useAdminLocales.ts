@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/app/(main)/admin/_components/common/useAdminLocales.ts
-// guezelwebdesign – Admin Locales (Centralized)
+// Ensotek – Admin Locales (Centralized)
 // Source: site_settings.app_locales + site_settings.default_locale
 // - No static locale map
 // - Produces AdminLocaleOption[]
@@ -8,7 +8,9 @@
 
 import { useMemo } from "react";
 
+import { ADMIN_DEFAULT_LOCALE } from "@/i18n/adminLocale";
 import { useListSiteSettingsAdminQuery } from "@/integrations/hooks";
+import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 import type { AdminLocaleOption } from "./AdminLocaleSelect";
 
@@ -47,7 +49,7 @@ function buildLocaleLabel(item: AppLocaleItem): string {
 
   let dn: Intl.DisplayNames | null = null;
   try {
-    dn = new Intl.DisplayNames(["de"], { type: "language" });
+    dn = new Intl.DisplayNames(["tr"], { type: "language" });
   } catch {
     dn = null;
   }
@@ -102,6 +104,7 @@ export type UseAdminLocalesResult = {
 };
 
 export function useAdminLocales(): UseAdminLocalesResult {
+  const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const {
     data: rows,
     isLoading,
@@ -123,10 +126,15 @@ export function useAdminLocales(): UseAdminLocalesResult {
 
     const codes = uniq.map((x) => toShortLocale(x.code)).filter(Boolean);
 
-    // default locale
-    let def = toShortLocale(defRow?.value);
+    // default locale: admin UI tercihi > DB default > app_locales is_default flag
+    const adminPref = toShortLocale(adminLocale);
+    let def = adminPref && codes.includes(adminPref) ? adminPref : "";
 
-    // if default_locale empty -> try app_locales is_default
+    if (!def) {
+      const dbDef = toShortLocale(defRow?.value);
+      if (dbDef && codes.includes(dbDef)) def = dbDef;
+    }
+
     if (!def) {
       const flagged = uniq.find((x) => x.is_default === true);
       def = flagged ? toShortLocale(flagged.code) : "";
@@ -135,6 +143,10 @@ export function useAdminLocales(): UseAdminLocalesResult {
     // if default still not in active list -> pick first active
     if (def && !codes.includes(def)) {
       def = codes[0] ?? "";
+    }
+
+    if (!def) {
+      def = codes[0] ?? ADMIN_DEFAULT_LOCALE;
     }
 
     const options: AdminLocaleOption[] = uniq.map((it) => ({
@@ -167,7 +179,7 @@ export function useAdminLocales(): UseAdminLocalesResult {
       hasLocale,
       coerceLocale,
     };
-  }, [rows]);
+  }, [rows, adminLocale]);
 
   return {
     ...computed,

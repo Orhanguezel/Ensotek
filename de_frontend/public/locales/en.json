@@ -396,7 +396,7 @@
     "home_description": "Ensotek is a leading manufacturer of cooling towers, heat exchangers, and industrial cooling systems. High efficiency, reliable solutions.",
     "services_title": "Services",
     "services_description": "Professional maintenance, repair, and consulting services from Ensotek for industrial cooling systems.",
-    "products_title": "Products",
+    "products_title": "Water Cooling Towers",
     "products_description": "Explore Ensotek's wide range of cooling towers, heat exchangers, and industrial cooling products.",
     "blog_title": "Blog",
     "blog_description": "The latest articles, technical insights, and industry news from Ensotek.",
@@ -457,7 +457,8 @@
       "companyName": "ENSOTEK Cooling Towers & Technologies Engineering Ltd."
     },
     "sponsor": {
-      "title": "Thousands of companies trust us"
+      "title": "Thousands of companies trust us",
+      "viewAll": "All References"
     },
     "choose": {
       "subtitle": "WHY CHOOSE US",
@@ -608,6 +609,7 @@
       "downloads": "Downloads",
       "downloadFile": "Download file",
       "gallery": "Gallery",
+      "otherArticles": "Other Articles",
       "wbSubLabel": "Psychrometric Tools",
       "wbTitle": "Wet-Bulb Temperature Calculator",
       "wbDescription": "Enter air temperature and relative humidity to estimate wet-bulb temperature.",
@@ -631,7 +633,14 @@
       "teamTitle": "Team",
       "spare_parts_and_components": "Spare Parts and Components",
       "automation_scada": "Automation and SCADA",
-      "site_survey_engineering": "Site Survey and Engineering"
+      "site_survey_engineering": "Site Survey and Engineering",
+      "maintenance_repair": "Maintenance and Repair",
+      "modernization": "Modernization",
+      "spare_parts_components": "Spare Parts and Components",
+      "applications_references": "Applications and References",
+      "engineering_support": "Engineering Support",
+      "production": "Production",
+      "other": "Other"
     },
     "legalPages": {
       "cookiePolicyTitle": "Cookie Policy",
@@ -827,5 +836,39 @@
     "chat_view": "View Messages",
     "chat_messages_title": "Chat Messages",
     "chat_no_messages": "No messages for this request."
+  },
+  "references": {
+    "title": "References",
+    "subtitle": "Our successful projects and satisfied customers.",
+    "featured": "Featured",
+    "allReferences": "All References",
+    "noResults": "No references found.",
+    "gallery": "Gallery",
+    "visitWebsite": "Visit Website",
+    "backToReferences": "Back to References",
+    "relatedReferences": "Related References",
+    "ctaTitle": "Interested in our services?",
+    "ctaSubtitle": "Contact us for a consultation.",
+    "ctaButton": "Contact Us"
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Our completed projects and engineering solutions.",
+    "featured": "Featured",
+    "allProjects": "All Projects",
+    "noResults": "No projects found.",
+    "backToProjects": "Back to Projects",
+    "relatedProjects": "Related Projects",
+    "completionDate": "Completion Date",
+    "completionTime": "Completion Time",
+    "technologies": "Technologies",
+    "services": "Services",
+    "visitWebsite": "Visit Website",
+    "watchVideo": "Watch Video",
+    "keyFeatures": "Key Features",
+    "projectDetails": "Project Details",
+    "ctaTitle": "Have a project in mind?",
+    "ctaSubtitle": "Let us help you realize your vision.",
+    "ctaButton": "Get in Touch"
   }
 }

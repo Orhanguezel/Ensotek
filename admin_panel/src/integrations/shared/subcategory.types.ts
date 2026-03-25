@@ -90,7 +90,7 @@ export const normalizeSubCategory = (row: ApiSubCategory): SubCategoryDto => {
   return {
     id: asStr(row.id),
     category_id: asStr(row.category_id),
-    locale: asStr(row.locale || "de").toLowerCase(),
+    locale: asStr(row.locale || "tr").toLowerCase(),
     name: asStr(row.name),
     slug: asStr(row.slug),
 

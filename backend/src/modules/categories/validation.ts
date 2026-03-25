@@ -76,8 +76,8 @@ export type CategoryUpdateInput = z.infer<typeof categoryUpdateSchema>;
  */
 export const categorySetImageSchema = z
   .object({
-    storage_asset_id: UUID36.nullable().optional(),
-    asset_id: UUID36.nullable().optional(), // backward compatible
+    storage_asset_id: z.union([UUID36, z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+    asset_id: z.union([UUID36, z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(), // backward compatible
 
     alt: emptyToNull(z.string().max(255).optional().nullable()),
   })

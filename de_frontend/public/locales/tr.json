@@ -396,7 +396,7 @@
     "home_description": "Ensotek Su Soğutma Kuleleri ve Teknolojileri - Endüstriyel su soğutma çözümleri, bakım ve yedek parça hizmetleri.",
     "services_title": "Hizmetlerimiz",
     "services_description": "Ensotek endüstriyel su soğutma kulesi hizmetleri - kurulum, bakım, onarım ve modernizasyon.",
-    "products_title": "Ürünlerimiz",
+    "products_title": "Su Soğutma Kuleleri",
     "products_description": "Ensotek su soğutma kulesi ürün yelpazesi - kapalı devre, açık devre ve hibrit soğutma kuleleri.",
     "blog_title": "Blog",
     "blog_description": "Su soğutma teknolojileri ve endüstriyel çözümler hakkında güncel yazılar.",
@@ -457,7 +457,8 @@
       "companyName": "ENSOTEK Su Soğutma Kuleleri ve Teknolojileri Mühendislik San.Tic. Ltd. Şti"
     },
     "sponsor": {
-      "title": "Binlerce şirket bize güveniyor"
+      "title": "Binlerce şirket bize güveniyor",
+      "viewAll": "Tüm Referanslar"
     },
     "choose": {
       "subtitle": "NEDEN BİZİ SEÇMELİSİNİZ",
@@ -608,6 +609,7 @@
       "downloads": "İndirmeler",
       "downloadFile": "Dosyayı indir",
       "gallery": "Galeri",
+      "otherArticles": "Diğer İçerikler",
       "wbSubLabel": "Psikrometrik Araçlar",
       "wbTitle": "Yaş Termometre Sıcaklığı Hesaplayıcı",
       "wbDescription": "Hava sıcaklığı ve bağıl nem girerek yaş termometre sıcaklığını hesaplayın.",
@@ -631,7 +633,14 @@
       "teamTitle": "Ekip",
       "spare_parts_and_components": "Yedek Parça ve Bileşenler",
       "automation_scada": "Otomasyon ve SCADA",
-      "site_survey_engineering": "Saha İnceleme ve Mühendislik"
+      "site_survey_engineering": "Saha İnceleme ve Mühendislik",
+      "maintenance_repair": "Bakım ve Onarım",
+      "modernization": "Modernizasyon",
+      "spare_parts_components": "Yedek Parça ve Bileşenler",
+      "applications_references": "Uygulamalar ve Referanslar",
+      "engineering_support": "Mühendislik Desteği",
+      "production": "Üretim",
+      "other": "Diğer"
     },
     "legalPages": {
       "cookiePolicyTitle": "Çerez Politikası",
@@ -827,5 +836,39 @@
     "chat_view": "Mesajlari Gor",
     "chat_messages_title": "Sohbet Mesajlari",
     "chat_no_messages": "Bu istek icin mesaj bulunmuyor."
+  },
+  "references": {
+    "title": "Referanslar",
+    "subtitle": "Başarılı projelerimiz ve memnun müşterilerimiz.",
+    "featured": "Öne Çıkan",
+    "allReferences": "Tüm Referanslar",
+    "noResults": "Referans bulunamadı.",
+    "gallery": "Galeri",
+    "visitWebsite": "Web Sitesini Ziyaret Et",
+    "backToReferences": "Referanslara Dön",
+    "relatedReferences": "İlgili Referanslar",
+    "ctaTitle": "Hizmetlerimizle ilgileniyor musunuz?",
+    "ctaSubtitle": "Danışmanlık için bizimle iletişime geçin.",
+    "ctaButton": "İletişime Geç"
+  },
+  "projects": {
+    "title": "Projeler",
+    "subtitle": "Tamamlanan projelerimiz ve mühendislik çözümlerimiz.",
+    "featured": "Öne Çıkan",
+    "allProjects": "Tüm Projeler",
+    "noResults": "Proje bulunamadı.",
+    "backToProjects": "Projelere Dön",
+    "relatedProjects": "İlgili Projeler",
+    "completionDate": "Tamamlanma Tarihi",
+    "completionTime": "Tamamlanma Süresi",
+    "technologies": "Teknolojiler",
+    "services": "Hizmetler",
+    "visitWebsite": "Web Sitesini Ziyaret Et",
+    "watchVideo": "Videoyu İzle",
+    "keyFeatures": "Temel Özellikler",
+    "projectDetails": "Proje Detayları",
+    "ctaTitle": "Aklınızda bir proje mi var?",
+    "ctaSubtitle": "Vizyonunuzu gerçekleştirmenize yardımcı olalım.",
+    "ctaButton": "İletişime Geç"
   }
 }

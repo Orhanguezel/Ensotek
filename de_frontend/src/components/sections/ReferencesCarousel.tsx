@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
 import type { Reference } from '@ensotek/core/types';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   references: Reference[];
@@ -78,13 +80,15 @@ export function ReferencesCarousel({ references, locale, title, subtitle, viewAl
                   href={`/${locale}/references/${ref.slug}`}
                   className="group block h-full"
                 >
-                  <div className="aspect-3/2 rounded-xl overflow-hidden bg-slate-200 mb-3">
+                  <div className="relative aspect-3/2 rounded-xl overflow-hidden bg-slate-200 mb-3">
                     {ref.featured_image ? (
-                      <img
-                        src={ref.featured_image}
+                      <Image
+                        src={resolveMediaUrl(ref.featured_image)}
                         alt={ref.featured_image_alt ?? ref.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading={i < 4 ? 'eager' : 'lazy'}
+                        fill
+                        sizes="(max-width: 640px) 80vw, (max-width: 1024px) 50vw, 25vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        priority={i < 4}
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

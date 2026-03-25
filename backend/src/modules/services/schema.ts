@@ -9,6 +9,7 @@ import {
   int,
   datetime,
   text,
+  json,
   index,
   uniqueIndex,
   foreignKey,
@@ -38,6 +39,7 @@ export const services = mysqlTable(
     featured_image: varchar("featured_image", { length: 500 }), // legacy
     image_url: varchar("image_url", { length: 500 }), // legacy
     image_asset_id: char("image_asset_id", { length: 36 }), // storage_assets.id
+    images: json('images').$type<string[]>().default([]),
 
     created_at: datetime("created_at", { fsp: 3 })
       .notNull()

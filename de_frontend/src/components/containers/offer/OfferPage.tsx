@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { siteSettingsService } from "@/features/site-settings/siteSettings.service";
@@ -17,6 +18,9 @@ type ContactMap = {
 
 const OfferPage = () => {
   const t = useTranslations("ensotek.offer");
+  const searchParams = useSearchParams();
+  const qType = searchParams.get("type"); // "service" | "product"
+  const qId = searchParams.get("id");
   
   const { data: siteSettings } = useQuery({
     queryKey: queryKeys.siteSettings.list(),
@@ -60,7 +64,10 @@ const OfferPage = () => {
                 </p>
               </div>
               
-              <OfferForm />
+              <OfferForm
+                productId={qType === "product" && qId ? qId : undefined}
+                serviceId={qType === "service" && qId ? qId : undefined}
+              />
             </div>
           </div>
         </div>

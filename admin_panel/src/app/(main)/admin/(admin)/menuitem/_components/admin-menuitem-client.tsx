@@ -88,7 +88,7 @@ export default function AdminMenuItemClient() {
   const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const urlLocale = React.useMemo(() => {
@@ -114,7 +114,7 @@ export default function AdminMenuItemClient() {
     setFilters((prev) => {
       const prevLoc = localeShortClient(prev.locale);
       const urlLoc = localeShortClient(urlLocale);
-      const defLoc = localeShortClientOr(apiLocale, "de");
+      const defLoc = localeShortClientOr(apiLocale, "tr");
 
       const canUse = (l: string) => !!l && (localeOptions ?? []).some((x: any) => localeShortClient(x.value) === l);
 
@@ -124,7 +124,7 @@ export default function AdminMenuItemClient() {
 
       if (defLoc && canUse(defLoc)) return { ...prev, locale: defLoc };
 
-      return { ...prev, locale: localeShortClient((localeOptions as any)?.[0]?.value) || "de" };
+      return { ...prev, locale: localeShortClient((localeOptions as any)?.[0]?.value) || "tr" };
     });
   }, [localeOptions, urlLocale, apiLocale]);
 

@@ -5,6 +5,7 @@ import { Link } from "@/i18n/routing";
 import { CustomPage } from "@/features/custom-pages/customPages.type";
 import SocialShare from "./SocialShare";
 import { useTranslations } from "next-intl";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface MissionVisionContentProps {
   mission: CustomPage | null;
@@ -53,7 +54,7 @@ const MissionVisionContent = ({ mission, vision, title }: MissionVisionContentPr
           {(item.image_url || item.featured_image) && (
             <div className="technical__thumb mb-40">
               <Image 
-                src={item.image_url || item.featured_image || ""} 
+                src={resolveMediaUrl(item.image_url || item.featured_image)}
                 alt={item.title} 
                 width={1200} 
                 height={500} 

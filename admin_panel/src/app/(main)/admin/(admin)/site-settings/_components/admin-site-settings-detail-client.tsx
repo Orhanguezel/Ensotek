@@ -82,6 +82,7 @@ import {
   uiHeaderFormToObj,
   uiHeaderObjToForm,
 } from "../tabs/structured/ui-header-structured-form";
+import { AboutStatsStructuredForm } from "../tabs/structured/about-stats-structured-form";
 import { SiteSettingsForm } from "./site-settings-form";
 
 /* ----------------------------- structured renderers ----------------------------- */
@@ -230,7 +231,7 @@ const CompanyStructuredRenderer: React.FC<StructuredRenderProps> = ({ value, set
     return typeof v === "object" && v ? v : {};
   }, [value]);
 
-  const seed = React.useMemo(() => ({ company_name: "guezelwebdesign", slogan: "", about: "" }) as any, []);
+  const seed = React.useMemo(() => ({ headline: "", subline: "", body: "" }) as any, []);
 
   const [form, setForm] = React.useState<CompanyProfileFormState>(() => companyObjToForm(base, seed));
   React.useEffect(() => setForm(companyObjToForm(base, seed)), [base, seed]);
@@ -272,6 +273,45 @@ const UiHeaderStructuredRenderer: React.FC<StructuredRenderProps> = ({ value, se
   };
 
   return <UiHeaderStructuredForm value={form} onChange={handleChange} errors={{}} disabled={!!disabled} seed={seed} />;
+};
+
+const ABOUT_STATS_PREFIX = "ui_about_stats_";
+
+function stripAboutStatsPrefix(obj: Record<string, any>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    const short = k.startsWith(ABOUT_STATS_PREFIX) ? k.slice(ABOUT_STATS_PREFIX.length) : k;
+    out[short] = String(v ?? "");
+  }
+  return out;
+}
+
+function addAboutStatsPrefix(obj: Record<string, string>, original: Record<string, any>): Record<string, string> {
+  // If original keys had prefix, keep using prefix
+  const hasPrefix = Object.keys(original).some((k) => k.startsWith(ABOUT_STATS_PREFIX));
+  if (!hasPrefix) return obj;
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[`${ABOUT_STATS_PREFIX}${k}`] = v;
+  }
+  return out;
+}
+
+const AboutStatsStructuredRenderer: React.FC<StructuredRenderProps> = ({ value, setValue, disabled }) => {
+  const raw = React.useMemo(() => {
+    const v = coerceSiteSettingsDetailValue(value);
+    return (v && typeof v === "object" && !Array.isArray(v) ? v : {}) as Record<string, any>;
+  }, [value]);
+
+  const data = React.useMemo(() => stripAboutStatsPrefix(raw), [raw]);
+
+  return (
+    <AboutStatsStructuredForm
+      value={data}
+      onChange={(next) => setValue(addAboutStatsPrefix(next, raw))}
+      disabled={!!disabled}
+    />
+  );
 };
 
 const BusinessHoursStructuredRenderer: React.FC<StructuredRenderProps> = ({ value, setValue, disabled }) => {
@@ -615,6 +655,8 @@ export default function SiteSettingsDetailClient({ id }: { id: string }) {
                 return React.createElement(UiHeaderStructuredRenderer as any, commonProps);
               if (renderStructuredKey === "businessHours")
                 return React.createElement(BusinessHoursStructuredRenderer as any, commonProps);
+              if (renderStructuredKey === "ui_about_stats")
+                return React.createElement(AboutStatsStructuredRenderer as any, commonProps);
 
               return React.createElement(JsonStructuredRenderer as any, commonProps);
             }}

@@ -507,6 +507,8 @@ function LibraryFormTabs({
             onChange={(url) => setFormData((p: any) => ({ ...p, image_url: url }))}
             disabled={isLoading}
             folder="uploads/library"
+            previewAspect="4x3"
+            previewObjectFit="contain"
           />
 
           {!isNew && (

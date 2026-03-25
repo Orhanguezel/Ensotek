@@ -128,14 +128,16 @@ const QualityDetailContent = ({ items, ui }: QualityDetailContentProps) => {
                           justifyContent: 'space-between'
                         }}>
                           <div className="cert-img-wrapper mb-20" style={{ cursor: 'pointer' }} onClick={() => window.open(imgUrl, '_blank')}>
-                            {/* Using standard img tag to troubleshoot Next.js Image domain/loader issues */}
-                            <img 
-                              src={imgUrl} 
+                              <Image
+                              src={resolveMediaUrl(imgUrl)}
                               alt={`${ui?.ui_quality_certificate_label || 'Certificate'} ${idx+1}`}
-                              style={{ 
-                                borderRadius: '8px', 
-                                objectFit: 'contain', 
-                                width: '100%', 
+                              width={600}
+                              height={420}
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 400px"
+                              style={{
+                                borderRadius: '8px',
+                                objectFit: 'contain',
+                                width: '100%',
                                 height: 'auto',
                                 maxHeight: '420px',
                                 display: 'block'

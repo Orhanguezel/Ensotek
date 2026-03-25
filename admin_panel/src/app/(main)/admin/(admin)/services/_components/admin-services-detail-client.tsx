@@ -64,7 +64,7 @@ export default function AdminServiceDetailClient({ id }: { id: string }) {
 
   // Form state
   const [f, setF] = React.useState({
-    locale: "de",
+    locale: "tr",
     name: "",
     slug: "",
     description: "",
@@ -188,6 +188,7 @@ export default function AdminServiceDetailClient({ id }: { id: string }) {
       image_url: f.image_url || null,
       featured_image: f.image_url || null,
       image_alt: f.image_alt || undefined,
+      images: f.images || [],
       is_active: f.is_active,
       featured: f.featured,
       area: f.area || null,

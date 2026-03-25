@@ -110,7 +110,7 @@ const emptyForm = (locale: string): FormValues => ({
 
 const dtoToForm = (dto: ReferenceDto): FormValues => ({
   id: String((dto as any).id ?? ""),
-  locale: normalizeLocale((dto as any).locale_resolved ?? (dto as any).locale ?? "de"),
+  locale: normalizeLocale((dto as any).locale_resolved ?? (dto as any).locale ?? "tr"),
   is_published: isTruthyBoolLike((dto as any).is_published),
   is_featured: isTruthyBoolLike((dto as any).is_featured),
   display_order: String((dto as any).display_order ?? 0),
@@ -138,7 +138,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocaleFromDb = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const localeSet = React.useMemo(() => {
@@ -158,7 +158,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
     setActiveLocale((prev) => {
       const p = localeShortClient(prev);
       const u = localeShortClient(urlLocale);
-      const def = localeShortClientOr(apiLocaleFromDb, "de");
+      const def = localeShortClientOr(apiLocaleFromDb, "tr");
 
       const canUse = (l: string) => !!l && (localeSet.size === 0 || localeSet.has(l));
 
@@ -167,14 +167,14 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
       if (def && canUse(def)) return def;
 
       const first = localeShortClient((localeOptions as any)?.[0]?.value);
-      return first || "de";
+      return first || "tr";
     });
   }, [localeOptions, localeSet, urlLocale, apiLocaleFromDb]);
 
   const queryLocale = React.useMemo(() => {
     const l = localeShortClient(activeLocale);
     if (l && (localeSet.size === 0 || localeSet.has(l))) return l;
-    return localeShortClientOr(apiLocaleFromDb, "de");
+    return localeShortClientOr(apiLocaleFromDb, "tr");
   }, [activeLocale, localeSet, apiLocaleFromDb]);
 
   React.useEffect(() => {
@@ -213,12 +213,12 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   const saving = createState.isLoading || updateState.isLoading;
   const busy = loading || saving;
 
-  const [values, setValues] = React.useState<FormValues>(() => emptyForm(queryLocale || "de"));
+  const [values, setValues] = React.useState<FormValues>(() => emptyForm(queryLocale || "tr"));
   const [slugTouched, setSlugTouched] = React.useState(false);
 
   React.useEffect(() => {
     if (isCreateMode) {
-      setValues(emptyForm(queryLocale || "de"));
+      setValues(emptyForm(queryLocale || "tr"));
       return;
     }
     if (reference) {
@@ -234,7 +234,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   const handleLocaleChange = (nextLocaleRaw: string) => {
     const next = normalizeLocale(nextLocaleRaw);
     const list = (localeOptions ?? []).map((x: any) => localeShortClient(x.value));
-    const resolved = next && list.includes(next) ? next : localeShortClientOr(queryLocale, "de");
+    const resolved = next && list.includes(next) ? next : localeShortClientOr(queryLocale, "tr");
 
     if (!resolved) {
       toast.error(t("admin.references.form.localeRequired"));
@@ -246,7 +246,7 @@ export default function AdminReferenceDetailClient({ id }: { id: string }) {
   };
 
   function onCancel() {
-    router.push(`/admin/references?locale=${encodeURIComponent(queryLocale || "de")}`);
+    router.push(`/admin/references?locale=${encodeURIComponent(queryLocale || "tr")}`);
   }
 
   async function onSubmit(e: React.FormEvent) {

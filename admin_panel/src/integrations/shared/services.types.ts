@@ -70,6 +70,9 @@ export interface ApiServiceBase {
   /** backend resolved cover url (asset/url/legacy) */
   cover_url: string | null;
 
+  /** çoklu galeri resimleri (JSON array of URLs — backend may return string or array) */
+  images: string[] | string | null;
+
   created_at: string;
   updated_at: string;
 
@@ -120,6 +123,9 @@ export interface ServiceDto {
   image_asset_id: string | null;
 
   cover_url: string | null;
+
+  /** çoklu galeri resimleri (JSON array of URLs) */
+  images: string[] | null;
 
   created_at: string;
   updated_at: string;
@@ -215,6 +221,7 @@ export interface ServiceCreatePayload {
   featured_image?: string | null;
   image_url?: string | null;
   image_asset_id?: string | null;
+  images?: string[];
 
   // i18n
   locale?: string;
@@ -241,6 +248,7 @@ export interface ServiceUpdatePayload {
   featured_image?: string | null;
   image_url?: string | null;
   image_asset_id?: string | null;
+  images?: string[];
 
   locale?: string;
   name?: string;
@@ -368,6 +376,8 @@ export const normalizeService = (row: ApiServiceBase): ServiceDto => ({
   image_asset_id: row.image_asset_id,
 
   cover_url: row.cover_url,
+
+  images: Array.isArray(row.images) ? row.images : (typeof row.images === 'string' ? (() => { try { return JSON.parse(row.images); } catch { return []; } })() : []),
 
   created_at: row.created_at,
   updated_at: row.updated_at,

@@ -186,7 +186,7 @@ export default function AdminSliderDetailClient(props: Props) {
         toast.success("Slider olusturuldu");
         if ((result as any)?.id) router.push(`/admin/slider/${(result as any).id}?locale=${activeLocale}`);
       } else {
-        await updateSlider({ id, patch: payload } as any).unwrap();
+        await updateSlider({ id, body: payload } as any).unwrap();
         toast.success("Slider guncellendi");
       }
     } catch (err: any) {

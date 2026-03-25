@@ -17,6 +17,12 @@ import { ensureLocationEventsPatched } from "./locationEvents";
 
 function readLocaleFromCookie(): string {
   if (typeof document === "undefined") return "";
+  // Admin panel stores its own locale preference as "admin_locale" cookie
+  const adminM = document.cookie.match(/(?:^|;\s*)admin_locale=([^;]+)/);
+  if (adminM) {
+    const tag = normLocaleTag(decodeURIComponent(adminM[1]));
+    if (tag) return tag;
+  }
   const m = document.cookie.match(/(?:^|;\s*)NEXT_LOCALE=([^;]+)/);
   return m ? normLocaleTag(decodeURIComponent(m[1])) : "";
 }
@@ -112,16 +118,21 @@ export function useResolvedLocale(explicitLocale?: string | null): string {
     const fromExplicit = normLocaleTag(explicitLocale);
     if (fromExplicit && activeSet.has(fromExplicit)) return fromExplicit;
 
-    // ✅ 4) DB default
+    // ✅ 4) Admin panel fallback (PREFERENCE_DEFAULTS.admin_locale = "tr")
+    //    DB default-locale is the *frontend* default (de), not the admin panel's.
+    const adminFallback = normLocaleTag(FALLBACK_LOCALE);
+    if (adminFallback && activeSet.has(adminFallback)) return adminFallback;
+
+    // ✅ 5) DB default (frontend default-locale, last resort)
     const candDefault = normLocaleTag(defaultLocaleMeta);
     if (candDefault && activeSet.has(candDefault)) return candDefault;
 
-    // ✅ 5) first active
+    // ✅ 6) first active
     const firstActive = normLocaleTag(activeLocales[0]);
     if (firstActive) return firstActive;
 
-    // ✅ 6) fallback
-    return normLocaleTag(FALLBACK_LOCALE) || "de";
+    // ✅ 7) ultimate fallback
+    return adminFallback || "tr";
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [explicitLocale, appLocalesMeta, defaultLocaleMeta]);
 }

@@ -154,7 +154,8 @@ export default async function LocaleLayout({
 
   const seo = seoRow?.value as Record<string, any> | null;
   const socials = socialsRow?.value as Record<string, unknown> | null;
-  const logoUrl = (logoRow?.value as Record<string, any> | null)?.url;
+  const logoRaw = logoRow?.value as Record<string, any> | null;
+  const logoUrl = logoRaw?.url ?? logoRaw?.src ?? logoRaw?.site_logo;
   const contactInfo = contactRow?.value as Record<string, any> | null;
   const siteName: string = seo?.site_name ?? 'Ensotek';
 

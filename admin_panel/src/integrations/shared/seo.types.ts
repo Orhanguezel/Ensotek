@@ -400,7 +400,7 @@ async function resolveRequestLocale(input?: LocaleResolveInput): Promise<string>
     const env = envDefaultLocale();
     if (env && ALLOWED.has(env)) return env;
     // absolute last resort
-    return allowed[0] || "de";
+    return allowed[0] || "tr";
   }
 
   const { cookies, headers } = await import("next/headers");
@@ -423,7 +423,7 @@ async function resolveRequestLocale(input?: LocaleResolveInput): Promise<string>
   if (env && ALLOWED.has(env)) return env;
 
   // absolute last resort
-  return allowed[0] || "de";
+  return allowed[0] || "tr";
 }
 
 // ---------------------------

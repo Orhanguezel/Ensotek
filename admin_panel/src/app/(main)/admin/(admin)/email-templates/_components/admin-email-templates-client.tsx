@@ -103,7 +103,7 @@ export default function AdminEmailTemplatesClient() {
   const initialLocale =
     urlLocale ||
     defaultLocaleFromDb ||
-    localeShortClientOr(typeof window !== "undefined" ? navigator.language : "de", "de") ||
+    localeShortClientOr(typeof window !== "undefined" ? navigator.language : "tr", "tr") ||
     "";
 
   const [filters, setFilters] = React.useState<Filters>({

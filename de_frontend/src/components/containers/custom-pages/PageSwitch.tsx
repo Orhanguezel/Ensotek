@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import Banner from "@/components/layout/banner/Banner";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface PageSwitchProps {
   slug: string;
@@ -89,10 +90,11 @@ const TeamDetail = ({ item }: { item: any }) => {
                             {(item.image_url || item.featured_image) && (
                             <div className="blog__thumb w-img mb-45">
                                 <Image
-                                    src={item.image_url || item.featured_image!}
+                                    src={resolveMediaUrl(item.image_url || item.featured_image)}
                                     alt={item.title}
                                     width={800}
                                     height={500}
+                                    unoptimized
                                     style={{ borderRadius: '20px', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', width: '100%', height: 'auto' }}
                                 />
                             </div>

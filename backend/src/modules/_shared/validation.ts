@@ -22,7 +22,11 @@ export const LOCALE_LIKE = z
 
 export const UUID36 = z.string().length(36);
 
-export const URL2000 = z.string().trim().max(2000).url('Geçersiz URL');
+/** URL veya relative path (/uploads/...) kabul eder */
+export const URL2000 = z.string().trim().max(2000).refine(
+  (s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'),
+  'URL veya relative path olmalı (/, http://, https://)',
+);
 
 export const SLUG = z
   .string()
@@ -57,6 +61,35 @@ export const UuidArrayLike = z
  */
 export const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (v === '' ? null : v), schema);
+
+/**
+ * UUID or empty-string → null
+ * Admin panel sends "" when a UUID field is cleared.
+ */
+export const UUID36_OR_EMPTY = z
+  .union([z.string().length(36), z.literal('')])
+  .transform((v) => (v === '' ? null : v));
+
+/**
+ * URL or empty-string → null
+ * Admin panel sends "" when a URL field is cleared.
+ */
+export const URL2000_OR_EMPTY = z
+  .union([URL2000, z.literal('')])
+  .transform((v) => (v === '' ? null : v));
+
+/**
+ * URL/relative-path or empty-string → null (without max length constraint)
+ */
+export const URL_OR_EMPTY = z
+  .union([
+    z.string().refine(
+      (s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'),
+      'URL veya relative path olmalı',
+    ),
+    z.literal(''),
+  ])
+  .transform((v) => (v === '' ? null : v));
 
 /**
  * URL veya relative path kabul eden validator

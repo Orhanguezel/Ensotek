@@ -66,10 +66,10 @@ export const upsertReferenceParentBodySchema = z.object({
   is_featured: boolLike.optional().default(false),
   display_order: z.coerce.number().int().min(0).optional(),
 
-  featured_image: z.string().url().nullable().optional(),
-  featured_image_asset_id: z.string().length(36).nullable().optional(),
+  featured_image: z.union([z.string().refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+  featured_image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
-  website_url: z.string().max(500).url().nullable().optional(),
+  website_url: z.union([z.string().max(500).refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   category_id: z.string().uuid().nullable().optional(),
   sub_category_id: z.string().uuid().nullable().optional(),
@@ -124,12 +124,12 @@ export const upsertReferenceBodySchema = upsertReferenceI18nBodySchema.extend({
   is_featured: boolLike.optional().default(false),
   display_order: z.coerce.number().int().min(0).optional(),
 
-  featured_image: z.string().url().nullable().optional(),
-  featured_image_asset_id: z.string().length(36).nullable().optional(),
+  featured_image: z.union([z.string().refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+  featured_image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   category_id: z.string().uuid().nullable().optional(),
   sub_category_id: z.string().uuid().nullable().optional(),
-  website_url: z.string().max(500).url().nullable().optional(),
+  website_url: z.union([z.string().max(500).refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 });
 
 export type UpsertReferenceBody = z.infer<typeof upsertReferenceBodySchema>;
@@ -139,12 +139,12 @@ export const patchReferenceBodySchema = patchReferenceI18nBodySchema.extend({
   is_featured: boolLike.optional(),
   display_order: z.coerce.number().int().min(0).optional(),
 
-  featured_image: z.string().url().nullable().optional(),
-  featured_image_asset_id: z.string().length(36).nullable().optional(),
+  featured_image: z.union([z.string().refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
+  featured_image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   category_id: z.string().uuid().nullable().optional(),
   sub_category_id: z.string().uuid().nullable().optional(),
-  website_url: z.string().max(500).url().nullable().optional(),
+  website_url: z.union([z.string().max(500).refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı'), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 });
 
 export type PatchReferenceBody = z.infer<typeof patchReferenceBodySchema>;

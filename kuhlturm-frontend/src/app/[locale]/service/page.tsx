@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, ArrowRight } from 'lucide-react';
 import { getServices } from '@ensotek/core/services';
 import type { Service } from '@ensotek/core/types';
 import { getServicesWithLocale } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -62,13 +64,15 @@ export default async function ServicesPage({ params }: Props) {
                   className="group flex flex-col md:flex-row gap-0 border border-slate-200 rounded-2xl overflow-hidden hover:border-blue-200 hover:shadow-lg transition-all duration-300 bg-white"
                 >
                   {/* Image */}
-                  <div className="md:w-56 shrink-0 aspect-4/3 md:aspect-auto overflow-hidden bg-slate-100">
+                  <div className="md:w-56 shrink-0 aspect-4/3 md:aspect-auto overflow-hidden bg-slate-100 relative">
                     {service.image_url ? (
-                      <img
-                        src={service.image_url}
+                      <Image
+                        src={resolveMediaUrl(service.image_url)}
                         alt={service.image_alt ?? service.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading={index < 4 ? 'eager' : 'lazy'}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 224px"
+                        priority={index < 4}
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center bg-slate-100">

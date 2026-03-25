@@ -124,10 +124,7 @@ export function OfferForm({ locale, labels, initialTab, initialPartId, initialPa
   const [partNumber, setPartNumber] = useState(initialPartCode ?? '');
   const [quantity, setQuantity] = useState('');
   const [sparepartNotes, setSparepartNotes] = useState('');
-
-  // Consents
   const [consentTerms, setConsentTerms] = useState(false);
-  const [consentMarketing, setConsentMarketing] = useState(false);
 
   useEffect(() => {
     const fetchOptions = {
@@ -221,7 +218,6 @@ export function OfferForm({ locale, labels, initialTab, initialPartId, initialPa
         product_id,
         service_id,
         consent_terms: consentTerms,
-        consent_marketing: consentMarketing,
         form_data,
       });
       setStatus('success');
@@ -545,30 +541,17 @@ export function OfferForm({ locale, labels, initialTab, initialPartId, initialPa
           </div>
         )}
 
-        {/* Consents */}
-        <div className="flex flex-col gap-3 pt-1 border-t border-slate-100">
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              required
-              checked={consentTerms}
-              onChange={(e) => setConsentTerms(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 shrink-0"
-            />
-            <span className="text-xs text-slate-600 leading-snug">
-              {labels.consentTerms} <span className="text-red-500">*</span>
-            </span>
-          </label>
-          <label className="flex items-start gap-3 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={consentMarketing}
-              onChange={(e) => setConsentMarketing(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500 shrink-0"
-            />
-            <span className="text-xs text-slate-600 leading-snug">{labels.consentMarketing}</span>
-          </label>
-        </div>
+        {/* Consent */}
+        <label className="flex items-start gap-2 text-sm text-slate-600 cursor-pointer">
+          <input
+            type="checkbox"
+            required
+            checked={consentTerms}
+            onChange={(e) => setConsentTerms(e.target.checked)}
+            className="mt-0.5"
+          />
+          <span>{labels.consentTerms}</span>
+        </label>
 
         {status === 'error' && (
           <p className="text-sm text-red-600 bg-red-50 rounded-xl px-4 py-3">{labels.errorMessage}</p>

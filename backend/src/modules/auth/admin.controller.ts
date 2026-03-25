@@ -24,6 +24,14 @@ const toBool = (v: unknown): boolean =>
 const toNum = (v: unknown): number =>
   typeof v === "number" ? v : Number(v ?? 0);
 
+const createUserBody = z.object({
+  email: z.string().email(),
+  password: z.string().min(8).max(200),
+  full_name: z.string().trim().min(2).max(100).optional(),
+  phone: z.string().trim().min(6).max(50).optional(),
+  role: z.enum(["admin", "moderator", "user"]).default("user"),
+});
+
 /** Zod şemaları */
 const listQuery = z.object({
   q: z.string().optional(),
@@ -60,6 +68,57 @@ const setPasswordBody = z.object({
 
 export function makeAdminController(_app: FastifyInstance) {
   return {
+    /** POST /admin/users — create new user */
+    create: async (req: FastifyRequest, reply: FastifyReply) => {
+      const parsed = createUserBody.safeParse(req.body);
+      if (!parsed.success) {
+        return reply.status(400).send({ error: { message: "invalid_body", details: parsed.error.flatten() } });
+      }
+
+      const { email, password, full_name, phone, role } = parsed.data;
+
+      const exists = await db.select({ id: users.id }).from(users).where(eq(users.email, email));
+      if (exists.length > 0) {
+        return reply.status(409).send({ error: { message: "user_exists" } });
+      }
+
+      const id = randomUUID();
+      const password_hash = await argonHash(password);
+
+      await db.insert(users).values({
+        id,
+        email,
+        password_hash,
+        full_name: full_name || null,
+        phone: phone || null,
+        is_active: 1,
+        email_verified: 0,
+        created_at: new Date(),
+        updated_at: new Date(),
+      });
+
+      // Assign role
+      await db.insert(userRoles).values({
+        id: randomUUID(),
+        user_id: id,
+        role,
+      });
+
+      const primaryRole = await getPrimaryRole(id);
+
+      return reply.status(201).send({
+        id,
+        email,
+        full_name: full_name || null,
+        phone: phone || null,
+        email_verified: 0,
+        is_active: 1,
+        created_at: new Date(),
+        last_login_at: null,
+        role: primaryRole,
+      });
+    },
+
     /** GET /admin/users */
     list: async (req: FastifyRequest, reply: FastifyReply) => {
       const q = listQuery.parse(req.query ?? {});

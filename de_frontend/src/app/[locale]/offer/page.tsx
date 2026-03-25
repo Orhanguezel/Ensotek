@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { fetchPageSeo } from "@/i18n/server";
@@ -23,7 +23,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 export default function Page() {
     return (
         <Layout header={1} footer={1}>
-            <OfferPage />
+            <Suspense>
+                <OfferPage />
+            </Suspense>
         </Layout>
     );
 }

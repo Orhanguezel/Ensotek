@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/resources/ResourcesHeader.tsx
-// guezelwebdesign – Admin Resources Header (Filters + Summary)
+// Ensotek – Admin Resources Header (Filters + Summary)
 // FINAL — TR UI
 // =============================================================
 

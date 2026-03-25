@@ -146,7 +146,7 @@ export default function TelegramSettingsCard({ settings, setSettings }: Props) {
       category: "Technischer Support",
 
       // Newsletter
-      locale: "de",
+      locale: "tr",
     }),
     [],
   );

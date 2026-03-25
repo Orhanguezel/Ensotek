@@ -36,7 +36,7 @@ export default function AdminFaqsClient() {
   const { localeOptions, defaultLocaleFromDb, loading: localesLoading, fetching: localesFetching } = useAdminLocales();
 
   const apiLocale = React.useMemo(() => {
-    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "de");
+    return resolveAdminApiLocale(localeOptions as any, defaultLocaleFromDb, "tr");
   }, [localeOptions, defaultLocaleFromDb]);
 
   const [filters, setFilters] = React.useState<FaqsFilters>({
@@ -53,7 +53,7 @@ export default function AdminFaqsClient() {
     if (!localeOptions || localeOptions.length === 0) return;
     setFilters((prev) => {
       if (prev.locale) return prev;
-      return { ...prev, locale: localeShortClientOr(apiLocale, "de") };
+      return { ...prev, locale: localeShortClientOr(apiLocale, "tr") };
     });
   }, [localeOptions, apiLocale]);
 

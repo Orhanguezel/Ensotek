@@ -19,6 +19,7 @@ const nextConfig = {
 
   // Image optimization
   images: {
+    dangerouslyAllowLocalIP: true,
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
@@ -30,12 +31,11 @@ const nextConfig = {
       { protocol: 'https', hostname: 'www.ensotek.de' },
       { protocol: 'https', hostname: 'ensotek.de' },
 
-      ...(process.env.NODE_ENV === 'development'
-        ? [
-            { protocol: 'http', hostname: 'localhost' },
-            { protocol: 'http', hostname: '127.0.0.1' },
-          ]
-        : []),
+      { protocol: 'http', hostname: 'localhost', port: '' },
+      { protocol: 'http', hostname: 'localhost', port: '8086' },
+      { protocol: 'http', hostname: 'localhost', port: '3002' },
+      { protocol: 'http', hostname: '127.0.0.1', port: '' },
+      { protocol: 'http', hostname: '127.0.0.1', port: '8086' },
     ],
   },
 
@@ -48,7 +48,12 @@ const nextConfig = {
         { source: '/', destination: '/de' },
       ],
       afterFiles: [],
-      fallback: [],
+      fallback: [
+        // Dev: proxy /uploads/* to backend so next/image can resolve relative paths
+        ...(process.env.NODE_ENV === 'development'
+          ? [{ source: '/uploads/:path*', destination: 'http://127.0.0.1:8086/uploads/:path*' }]
+          : []),
+      ],
     };
   },
 

@@ -1,11 +1,13 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, ExternalLink, ArrowLeft, Calendar, Building, MapPin, CheckCircle2 } from 'lucide-react';
 import { getProjectBySlug, getProjects } from '@ensotek/core/services';
 import type { Project } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/i18n/locale-settings';
 import { ReferenceGallery } from '@/components/sections/ReferenceGallery';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -60,7 +62,7 @@ export default async function ProjectDetailPage({ params }: Props) {
     .filter((img) => img.image_url && img.is_active !== false)
     .sort((a, b) => a.display_order - b.display_order)
     .map((img) => ({
-      src: img.image_url!,
+      src: resolveMediaUrl(img.image_url),
       alt: img.alt ?? proj.title ?? '',
       caption: img.caption ?? undefined,
     }));
@@ -101,11 +103,14 @@ export default async function ProjectDetailPage({ params }: Props) {
             <div className="lg:col-span-2 space-y-10">
               {/* Featured image */}
               {proj.featured_image && (
-                <div className="rounded-2xl overflow-hidden aspect-video bg-slate-100 shadow-xl overflow-hidden group">
-                  <img
-                    src={proj.featured_image}
+                <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-100 shadow-xl group">
+                  <Image
+                    src={resolveMediaUrl(proj.featured_image)}
                     alt={proj.featured_image_alt ?? proj.title ?? ''}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 800px"
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    priority
                   />
                 </div>
               )}

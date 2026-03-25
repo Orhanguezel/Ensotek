@@ -799,6 +799,7 @@
         "themePresetPlaceholder": "Ön ayar",
         "fonts": "Yazı Tipleri",
         "fontsPlaceholder": "Yazı tipi seç",
+        "language": "Dil",
         "themeMode": "Tema Modu",
         "pageLayout": "Sayfa Düzeni",
         "navbarBehavior": "Navbar Davranışı",
@@ -1720,6 +1721,25 @@
           "next": "Sonraki"
         }
       },
+      "create": {
+        "button": "Yeni Kullanıcı",
+        "title": "Yeni Kullanıcı Ekle",
+        "description": "E-posta, şifre ve rol bilgilerini girin.",
+        "emailLabel": "E-posta",
+        "emailPlaceholder": "ornek@email.com",
+        "passwordLabel": "Şifre",
+        "passwordPlaceholder": "En az 8 karakter",
+        "fullNameLabel": "Ad Soyad",
+        "fullNamePlaceholder": "Ad Soyad",
+        "phoneLabel": "Telefon",
+        "phonePlaceholder": "+90 555 123 4567",
+        "roleLabel": "Rol",
+        "submitButton": "Oluştur",
+        "cancelButton": "İptal",
+        "success": "Kullanıcı başarıyla oluşturuldu.",
+        "errorExists": "Bu e-posta zaten kayıtlı.",
+        "errorGeneric": "Kullanıcı oluşturulamadı."
+      },
       "detail": {
         "title": "Kullanıcı Detay",
         "unknownUser": "İsimsiz Kullanıcı",
@@ -2098,7 +2118,13 @@
         "sortDate": "Tarih",
         "sortResponseTime": "Yanıt Süresi",
         "sortStatusCode": "Durum Kodu",
-        "logsTitle": "İstek Logları"
+        "logsTitle": "İstek Logları",
+        "placeholders": {
+          "search": "/api/products, /admin/...",
+          "method": "GET, POST, PUT...",
+          "status": "200, 404, 500...",
+          "ip": "192.168.1.1"
+        }
       },
       "auth": {
         "filtersTitle": "Filtreler",
@@ -2114,7 +2140,10 @@
         "nDays": "{n} Gün",
         "pathPrefix": "Yol Ön Eki",
         "chartTitle": "Günlük Grafik",
-        "lastNDays": "Son {n} gün"
+        "lastNDays": "Son {n} gün",
+        "placeholders": {
+          "pathPrefix": "/api, /admin"
+        }
       },
       "map": {
         "title": "Coğrafi Dağılım",
@@ -2200,6 +2229,27 @@
           "PE": "Peru",
           "LOCAL": "Localhost"
         }
+      },
+      "geoMap": {
+        "loading": "Yükleniyor...",
+        "empty": "Coğrafi veri bulunamadı.",
+        "requestsLabel": "İstekler",
+        "distributionTitle": "İstek dağılımı — toplam {total}",
+        "topCountries": "En Çok İstek Yapan Ülkeler"
+      },
+      "chart": {
+        "summary": "{days} günde {requests} istek{uniqueSuffix}{errorsSuffix}",
+        "summaryUniqueSuffix": " + benzersiz IP",
+        "summaryErrorsSuffix": " + hata",
+        "labels": {
+          "requests": "İstekler",
+          "uniqueIps": "Benzersiz IP",
+          "unique": "Benzersiz",
+          "errors": "Hatalar"
+        },
+        "loading": "Yükleniyor...",
+        "empty": "Veri bulunamadı.",
+        "ariaLabel": "Günlük istek çubuk grafiği"
       },
       "analytics": {
         "title": "Analitik Dashboard",
@@ -2378,7 +2428,13 @@
         "presetDeEnTr": "de/en/tr preset uygula",
         "presetTop20": "20 yaygın dil ekle",
         "saved": "Diller güncellendi.",
-        "saveError": "Diller güncellenemedi."
+        "saveError": "Diller güncellenemedi.",
+        "defaultLocale": "Varsayılan Dil",
+        "defaultLocaleDesc": "Tüm modüllerde dil seçici bu dili varsayılan olarak kullanır.",
+        "selectDefault": "Varsayılan dili seç",
+        "default": "Varsayılan",
+        "emptyRows": "Dil konfigürasyonu bulunamadı.",
+        "loading": "Yükleniyor..."
       },
       "list": {
         "title": "Ayar Listesi",
@@ -2412,8 +2468,8 @@
         "deleted": "\"{key}\" ({locale}) silindi.",
         "deleteError": "Silme sırasında hata oluştu.",
         "modes": {
-          "structured": "Structured",
-          "raw": "Raw"
+          "structured": "Form",
+          "raw": "JSON"
         },
         "structuredMissingTitle": "Structured renderer yok",
         "structuredMissingDesc": "Bu key için structured renderer tanımlı değil. Raw modunu kullanın.",
@@ -2500,7 +2556,10 @@
           "businessHours": "Çalışma Saatleri",
           "hero": "Hero Alanı",
           "home_backgrounds": "Ana Sayfa Arka Planları",
-          "ui_header": "Üst Menü Ayarları"
+          "ui_header": "Üst Menü Ayarları",
+          "ui_about_stats": "Ana Sayfa İstatistikler",
+          "offers_admin_email": "Teklif Bildirim E-postası",
+          "catalog_admin_email": "Katalog Bildirim E-postası"
         },
         "keyDescriptions": {
           "site_name": "Sitenin adı (başlıklarda ve SEO'da kullanılır)",
@@ -2514,7 +2573,10 @@
           "businessHours": "Çalışma günleri ve saatleri",
           "hero": "Ana sayfa hero/banner alanı ayarları",
           "home_backgrounds": "Ana sayfa arka plan görselleri",
-          "ui_header": "Üst menü ve navigasyon ayarları"
+          "ui_header": "Üst menü ve navigasyon ayarları",
+          "ui_about_stats": "Ana sayfadaki referans, proje ve tecrübe istatistikleri",
+          "offers_admin_email": "Teklif talepleri bu adrese bildirilir",
+          "catalog_admin_email": "Katalog talepleri bu adrese bildirilir"
         },
         "recordCount": "Toplam {count} kayıt"
       },
@@ -2948,9 +3010,9 @@
         },
         "companyProfile": {
           "labels": {
-            "companyName": "Şirket Adı",
-            "slogan": "Slogan",
-            "about": "Hakkımızda"
+            "headline": "Başlık",
+            "subline": "Alt Başlık",
+            "body": "Açıklama"
           }
         },
         "uiHeader": {

@@ -60,7 +60,7 @@ export const createSchema = z.object({
     .optional(),
   description: z.string().optional().nullable(),
 
-  image_url: z.string().url().optional().nullable(),
+  image_url: z.string().refine((s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'), 'URL veya relative path olmalı').optional().nullable(),
   image_asset_id: z.string().uuid().optional().nullable(),
 
   alt: z.string().max(255).optional().nullable(),

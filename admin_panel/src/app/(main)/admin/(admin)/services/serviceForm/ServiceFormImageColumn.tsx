@@ -2,7 +2,7 @@
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/services/_components/serviceForm/ServiceFormImageColumn.tsx
-// guezelwebdesign – Services Form Right Column (FINAL)
+// Ensotek – Services Form Right Column (FINAL)
 // - App Router: next/navigation
 // - Canonical cover: services.image_url (+ legacy featured_image mirror)
 // - Gallery state: instant UI update

@@ -29,7 +29,7 @@ export type AdminBrandingConfig = {
 export const DEFAULT_BRANDING: AdminBrandingConfig = {
   app_name: "Ensotek Admin Panel",
   app_copyright: "Ensotek GmbH",
-  html_lang: "de",
+  html_lang: "tr",
   theme_color: "#0066CC",
   favicon_16: "/favicon/favicon.svg",
   favicon_32: "/favicon/favicon.svg",

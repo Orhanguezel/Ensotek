@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface CertItem {
   src: string;
@@ -54,14 +56,15 @@ export function CertificateGallery({ items }: Props) {
             key={i}
             type="button"
             onClick={() => open(i)}
-            className="group bg-white border border-slate-200 rounded-xl overflow-hidden aspect-3/4 hover:border-amber-300 hover:shadow-md transition-all cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden aspect-3/4 hover:border-amber-300 hover:shadow-md transition-all cursor-zoom-in focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             aria-label={`Zertifikat vergrößern: ${item.alt}`}
           >
-            <img
-              src={item.src}
+            <Image
+              src={resolveMediaUrl(item.src)}
               alt={item.alt}
-              className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-300"
-              loading="lazy"
+              fill
+              className="object-contain p-2 group-hover:scale-105 transition-transform duration-300"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             />
           </button>
         ))}
@@ -91,9 +94,11 @@ export function CertificateGallery({ items }: Props) {
             {/* Image */}
             <div className="bg-slate-50 flex items-center justify-center min-h-64 max-h-[75vh]">
               {items[activeIndex] && (
-                <img
-                  src={items[activeIndex].src}
+                <Image
+                  src={resolveMediaUrl(items[activeIndex].src)}
                   alt={items[activeIndex].alt}
+                  width={800}
+                  height={1000}
                   className="max-w-full max-h-[75vh] object-contain p-4"
                 />
               )}

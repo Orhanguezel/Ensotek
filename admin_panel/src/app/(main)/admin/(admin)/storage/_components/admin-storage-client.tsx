@@ -512,7 +512,7 @@ export default function AdminStorageClient() {
               <CardContent className="flex items-center justify-center py-12">
                 <div className="flex items-center gap-2">
                   <Loader2 className="size-5 animate-spin" />
-                  <span>{t("admin.storage.list.loading")}</span>
+                  <span>{t("list.loading")}</span>
                 </div>
               </CardContent>
             </Card>

@@ -8,6 +8,8 @@ import { fetchPageSeo } from "@/i18n/server";
 import { customPagesService } from "@/features/custom-pages/customPages.service";
 import { siteSettingsService } from "@/features/site-settings/siteSettings.service";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const [pageSeo, t] = await Promise.all([

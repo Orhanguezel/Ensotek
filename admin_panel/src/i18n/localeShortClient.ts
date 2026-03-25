@@ -1,9 +1,12 @@
 // =============================================================
 // FILE: src/i18n/localeShortClient.ts
-// guezelwebdesign – Locale normalize helper (CLIENT SAFE, NO HOOKS)
+// Ensotek – Locale normalize helper (CLIENT SAFE, NO HOOKS)
 // - NO toShortLocale
 // - Uses normLocaleTag
+// - Fallback: PREFERENCE_DEFAULTS.admin_locale üzerinden merkezi
 // =============================================================
+
+import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
 
 import { normLocaleTag } from "./localeUtils";
 
@@ -15,6 +18,6 @@ export function localeShortClient(v: unknown): string {
   return normLocaleTag(raw) || "";
 }
 
-export function localeShortClientOr(v: unknown, fallback = "tr"): string {
-  return localeShortClient(v) || fallback;
+export function localeShortClientOr(v: unknown, fallback?: string): string {
+  return localeShortClient(v) || fallback || PREFERENCE_DEFAULTS.admin_locale;
 }

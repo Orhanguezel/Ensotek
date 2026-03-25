@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, Package, Hash } from 'lucide-react';
 import { getProducts, getCategories } from '@ensotek/core/services';
 import type { Product, Category } from '@ensotek/core/types';
 import { apiFetchWithLocale } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -122,13 +124,14 @@ export default async function SparePartsPage({ params, searchParams }: Props) {
                   className="group block border border-slate-200 rounded-xl overflow-hidden hover:border-blue-200 hover:shadow-lg transition-all duration-200 bg-white"
                 >
                   {/* Image */}
-                  <div className="aspect-4/3 overflow-hidden bg-slate-50">
+                  <div className="relative aspect-4/3 overflow-hidden bg-slate-50">
                     {part.image_url ? (
-                      <img
-                        src={part.image_url}
+                      <Image
+                        src={resolveMediaUrl(part.image_url)}
                         alt={part.alt ?? part.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

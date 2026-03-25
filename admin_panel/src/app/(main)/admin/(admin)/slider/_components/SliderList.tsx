@@ -147,7 +147,7 @@ export function SliderList({
                   const desc = safeText((item as any).description);
                   const btnText = safeText((item as any).buttonText);
                   const btnLink = safeText((item as any).buttonLink);
-                  const locale = normLocale((item as any).locale || "de") || "de";
+                  const locale = normLocale((item as any).locale || "tr") || "tr";
 
                   return (
                     <TableRow key={id}>
@@ -284,7 +284,7 @@ export function SliderList({
               const desc = safeText((item as any).description);
               const btnText = safeText((item as any).buttonText);
               const btnLink = safeText((item as any).buttonLink);
-              const locale = normLocale((item as any).locale || "de") || "de";
+              const locale = normLocale((item as any).locale || "tr") || "tr";
 
               return (
                 <div key={id} className="space-y-3 p-4">

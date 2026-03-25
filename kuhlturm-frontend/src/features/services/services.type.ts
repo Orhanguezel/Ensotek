@@ -10,6 +10,7 @@ export interface Service {
   featured_image: string | null;
   image_url: string | null;
   image_asset_id: string | null;
+  images: string[] | null;
   // i18n
   slug: string;
   name: string;

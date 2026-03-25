@@ -9,80 +9,6 @@ import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import type { AuditGeoStatsRowDto } from "@/integrations/shared";
 
-const COUNTRY_NAMES: Record<string, string> = {
-  TR: "Türkiye",
-  DE: "Almanya",
-  US: "ABD",
-  GB: "Birleşik Krallık",
-  FR: "Fransa",
-  NL: "Hollanda",
-  IT: "İtalya",
-  ES: "İspanya",
-  AT: "Avusturya",
-  CH: "İsviçre",
-  BE: "Belçika",
-  PL: "Polonya",
-  SE: "İsveç",
-  NO: "Norveç",
-  DK: "Danimarka",
-  FI: "Finlandiya",
-  RU: "Rusya",
-  UA: "Ukrayna",
-  CN: "Çin",
-  JP: "Japonya",
-  KR: "Güney Kore",
-  IN: "Hindistan",
-  BR: "Brezilya",
-  CA: "Kanada",
-  AU: "Avustralya",
-  MX: "Meksika",
-  SA: "Suudi Arabistan",
-  AE: "BAE",
-  EG: "Mısır",
-  ZA: "Güney Afrika",
-  IR: "İran",
-  IQ: "Irak",
-  SY: "Suriye",
-  GR: "Yunanistan",
-  PT: "Portekiz",
-  IE: "İrlanda",
-  CZ: "Çekya",
-  RO: "Romanya",
-  HU: "Macaristan",
-  BG: "Bulgaristan",
-  RS: "Sırbistan",
-  HR: "Hırvatistan",
-  SK: "Slovakya",
-  SI: "Slovenya",
-  BA: "Bosna",
-  AL: "Arnavutluk",
-  MK: "K. Makedonya",
-  XK: "Kosova",
-  ME: "Karadağ",
-  GE: "Gürcistan",
-  AZ: "Azerbaycan",
-  AM: "Ermenistan",
-  KZ: "Kazakistan",
-  UZ: "Özbekistan",
-  TM: "Türkmenistan",
-  KG: "Kırgızistan",
-  TJ: "Tacikistan",
-  PK: "Pakistan",
-  BD: "Bangladeş",
-  ID: "Endonezya",
-  MY: "Malezya",
-  TH: "Tayland",
-  VN: "Vietnam",
-  PH: "Filipinler",
-  SG: "Singapur",
-  NZ: "Yeni Zelanda",
-  AR: "Arjantin",
-  CL: "Şili",
-  CO: "Kolombiya",
-  PE: "Peru",
-  LOCAL: "Localhost",
-};
-
 const BAR_COLORS = [
   "#1e40af",
   "#1d4ed8",
@@ -103,6 +29,7 @@ type Props = {
 
 export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
   const t = useAdminT("admin.audit.geoMap");
+  const tMap = useAdminT("admin.audit.map");
   const countByCode = useMemo(() => {
     const map = new Map<string, { count: number; unique_ips: number }>();
     for (const r of items) {
@@ -123,7 +50,7 @@ export const AuditGeoMap: React.FC<Props> = ({ items, loading }) => {
     return [...countByCode.entries()]
       .map(([code, v]) => ({
         code,
-        name: COUNTRY_NAMES[code] || code,
+        name: tMap(`countries.${code}`, undefined, code),
         ...v,
       }))
       .sort((a, b) => b.count - a.count)

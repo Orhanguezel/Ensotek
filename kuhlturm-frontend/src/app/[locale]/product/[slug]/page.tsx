@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ChevronRight, Tag, Hash, ArrowLeft } from 'lucide-react';
 import { getProductBySlug, getProducts, getSiteSetting } from '@ensotek/core/services';
 import type { Product } from '@ensotek/core/types';
 import { getProductBySlugWithLocale, getProductsWithLocale } from '@/lib/api';
 import { fetchSetting } from '@/i18n/server';
+import { resolveMediaUrl } from '@/lib/media';
+import { ProductGallery } from '@/components/sections/ProductGallery';
 import { ProductOfferButton } from '@/components/sections/ProductOfferButton';
 import { WhatsAppButton } from '@/components/sections/WhatsAppButton';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
@@ -108,34 +111,13 @@ export default async function ProductDetailPage({ params }: Props) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16 items-start">
             {/* Image gallery */}
             <div className="sticky top-8">
-              <div className="rounded-2xl overflow-hidden border border-slate-200 aspect-4/3 bg-slate-50">
-                {galleryImages.length > 0 ? (
-                  <img
-                    src={galleryImages[0]}
-                    alt={product.alt ?? product.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
+              {galleryImages.length > 0 ? (
+                <ProductGallery images={galleryImages} alt={product.alt ?? product.title} />
+              ) : (
+                <div className="relative rounded-2xl overflow-hidden border border-slate-200 aspect-4/3 bg-slate-50">
                   <div className="w-full h-full flex items-center justify-center">
                     <span className="text-slate-200 text-9xl font-display font-bold">K</span>
                   </div>
-                )}
-              </div>
-              {galleryImages.length > 1 && (
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                  {galleryImages.slice(1).map((img, i) => (
-                    <div
-                      key={i}
-                      className="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-slate-200 bg-slate-50"
-                    >
-                      <img
-                        src={img}
-                        alt={`${product.title} ${i + 2}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))}
                 </div>
               )}
             </div>
@@ -274,13 +256,14 @@ export default async function ProductDetailPage({ params }: Props) {
                   href={`/${locale}/product/${p.slug}`}
                   className="group block border border-slate-200 rounded-xl overflow-hidden bg-white hover:border-blue-200 hover:shadow-md transition-all duration-200"
                 >
-                  <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                  <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
                     {p.image_url ? (
-                      <img
-                        src={p.image_url}
+                      <Image
+                        src={resolveMediaUrl(p.image_url)}
                         alt={p.alt ?? p.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        loading="lazy"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

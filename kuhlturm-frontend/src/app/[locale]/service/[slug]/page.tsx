@@ -1,17 +1,20 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { ChevronRight, ArrowLeft, CheckCircle, Wrench, Shield, Tag } from 'lucide-react';
 import { getServiceBySlug, getServices, getSiteSetting } from '@ensotek/core/services';
 import type { Service } from '@ensotek/core/types';
 import { getServiceBySlugWithLocale, getServicesWithLocale } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media';
 import { fetchSetting } from '@/i18n/server';
 import { ServiceOfferButton } from '@/components/sections/ServiceOfferButton';
 import { WhatsAppButton } from '@/components/sections/WhatsAppButton';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
 import { ReviewsSection } from '@/components/sections/ReviewsSection';
+import { ProductGallery } from '@/components/sections/ProductGallery';
 
 interface Props {
   params: Promise<{ locale: string; slug: string }>;
@@ -63,13 +66,14 @@ export default async function ServiceDetailPage({ params }: Props) {
   const whatsappPhone = contactInfo.whatsappNumber || contactInfo.phones?.[0] || '';
   const waMessage = `Guten Tag! Ich möchte mehr über die Dienstleistung erfahren: ${service.name}. Bitte nehmen Sie Kontakt mit mir auf.`;
 
-  // Build gallery
+  // Build gallery: cover image first, then images array (string[])
   const galleryImages: string[] = [];
   if (service.image_url) galleryImages.push(service.image_url);
   if (Array.isArray(service.images)) {
     for (const img of service.images) {
-      if (img.image_url && !galleryImages.includes(img.image_url)) {
-        galleryImages.push(img.image_url);
+      const url = typeof img === 'string' ? img : (img as any)?.image_url;
+      if (url && !galleryImages.includes(url)) {
+        galleryImages.push(url);
       }
     }
   }
@@ -97,36 +101,13 @@ export default async function ServiceDetailPage({ params }: Props) {
       <section className="py-12 md:py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-16 items-start">
-            {/* Image */}
+            {/* Image Gallery with Lightbox */}
             <div className="sticky top-8">
-              <div className="rounded-2xl overflow-hidden border border-slate-200 aspect-4/3 bg-slate-50">
-                {galleryImages.length > 0 ? (
-                  <img
-                    src={galleryImages[0]}
-                    alt={service.image_alt ?? service.name}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <span className="text-slate-200 text-9xl font-display font-bold">K</span>
-                  </div>
-                )}
-              </div>
-              {galleryImages.length > 1 && (
-                <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
-                  {galleryImages.slice(1).map((img, i) => (
-                    <div
-                      key={i}
-                      className="shrink-0 w-20 h-20 rounded-xl overflow-hidden border border-slate-200 bg-slate-50"
-                    >
-                      <img
-                        src={img}
-                        alt={`${service.name} ${i + 2}`}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </div>
-                  ))}
+              {galleryImages.length > 0 ? (
+                <ProductGallery images={galleryImages} alt={service.image_alt ?? service.name} />
+              ) : (
+                <div className="rounded-2xl overflow-hidden border border-slate-200 aspect-4/3 bg-slate-50 flex items-center justify-center">
+                  <span className="text-slate-200 text-9xl font-display font-bold">E</span>
                 </div>
               )}
             </div>
@@ -139,7 +120,7 @@ export default async function ServiceDetailPage({ params }: Props) {
 
               {service.description && (
                 <div
-                  className="mt-6 text-slate-600 leading-relaxed prose prose-sm max-w-none"
+                  className="mt-6 text-slate-600 leading-relaxed prose prose-sm max-w-none prose-img:rounded-xl prose-img:shadow-md"
                   dangerouslySetInnerHTML={{ __html: service.description }}
                 />
               )}
@@ -279,12 +260,13 @@ export default async function ServiceDetailPage({ params }: Props) {
                   className="group flex gap-4 p-6 bg-white rounded-xl border border-slate-200 hover:border-blue-200 hover:shadow-sm transition-all"
                 >
                   {s.image_url && (
-                    <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-slate-100">
-                      <img
-                        src={s.image_url}
+                    <div className="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-slate-100 relative">
+                      <Image
+                        src={resolveMediaUrl(s.image_url)}
                         alt={s.image_alt ?? s.name}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     </div>
                   )}

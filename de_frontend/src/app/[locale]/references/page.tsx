@@ -7,6 +7,7 @@ import { API_BASE_URL } from '@/i18n/locale-settings';
 import Layout from '@/components/layout/Layout';
 import Banner from '@/components/layout/banner/Banner';
 import Image from 'next/image';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -110,13 +111,16 @@ export default async function ReferencesPage({ params }: Props) {
 function ReferenceCard({ reference }: { reference: Reference }) {
   return (
     <div className="project__item transition-3 mb-30">
-      <div className="project__thumb w-img overflow-hidden" style={{ borderRadius: '20px 20px 0 0', height: '240px' }}>
+      <div className="project__thumb w-img overflow-hidden" style={{ borderRadius: '20px 20px 0 0', height: '240px', position: 'relative' }}>
         <Link href={`/references/${reference.slug}`}>
           {reference.featured_image ? (
-            <img 
-               src={reference.featured_image} 
-               alt={reference.title} 
-               style={{ width: '100%', height: '100%', objectFit: 'cover', transition: '0.5s' }}
+            <Image
+               src={resolveMediaUrl(reference.featured_image)}
+               alt={reference.title}
+               fill
+               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+               className="object-cover"
+               style={{ transition: '0.5s' }}
             />
           ) : (
             <div className="bg-light w-100 h-100 d-flex align-items-center justify-center">

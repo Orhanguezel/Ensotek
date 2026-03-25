@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useServices } from "@/features/services/services.action";
+import { resolveMediaUrl } from "@/lib/media";
 
 const ServiceSection: React.FC = () => {
   const t = useTranslations("ensotek.features");
@@ -50,7 +51,7 @@ const ServiceSection: React.FC = () => {
                   <div className="service__thumb include__bg service-two-cmn">
                     {(item.image_url || item.featured_image) ? (
                     <Image
-                      src={(item.image_url || item.featured_image)!}
+                      src={resolveMediaUrl(item.image_url || item.featured_image)}
                       alt={item.image_alt || item.name}
                       width={640}
                       height={420}

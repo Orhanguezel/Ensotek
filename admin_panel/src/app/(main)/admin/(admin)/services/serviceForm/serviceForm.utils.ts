@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/services/_components/serviceForm/serviceForm.utils.ts
-// guezelwebdesign – ServiceForm helpers (normalize/build) (FINAL)
+// Ensotek – ServiceForm helpers (normalize/build) (FINAL)
 // - ✅ category/sub_category removed
 // - ✅ safe locale resolve
 // - ✅ slugify TR/DE safe

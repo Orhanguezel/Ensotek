@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/components/admin/resources/ResourceForm.tsx
-// guezelwebdesign – Admin Resource Create/Edit Form
+// Ensotek – Admin Resource Create/Edit Form
 // FINAL — TR UI + NO external_ref_id (Availability standard)
 // =============================================================
 

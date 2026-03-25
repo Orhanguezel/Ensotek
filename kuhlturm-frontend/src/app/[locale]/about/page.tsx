@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, Target, Award, Users } from 'lucide-react';
 import { fetchCustomPagesByModuleKey } from '@/i18n/server';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -106,13 +108,14 @@ export default async function AboutPage({ params }: Props) {
                 className="group block bg-white rounded-2xl border border-slate-200 overflow-hidden hover:border-blue-200 hover:shadow-xl transition-all"
               >
                 {/* Image */}
-                <div className="aspect-video overflow-hidden bg-slate-100">
+                <div className="aspect-video overflow-hidden bg-slate-100 relative">
                   {sec.image ? (
-                    <img
-                      src={sec.image}
+                    <Image
+                      src={resolveMediaUrl(sec.image)}
                       alt={sec.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
+                      fill
+                      sizes="(max-width: 640px) 100vw, 50vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
@@ -170,13 +173,14 @@ export default async function AboutPage({ params }: Props) {
                     href={`/${locale}/team/${member.slug}`}
                     className="group block text-center"
                   >
-                    <div className="aspect-square rounded-2xl overflow-hidden bg-slate-200 mb-3">
+                    <div className="aspect-square rounded-2xl overflow-hidden bg-slate-200 mb-3 relative">
                       {photo ? (
-                        <img
-                          src={photo}
+                        <Image
+                          src={resolveMediaUrl(photo)}
                           alt={member.featured_image_alt ?? member.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
+                          fill
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 16vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

@@ -20,8 +20,8 @@ export function readLocaleFromPathname(pathname: string): string {
   return normLocaleTag(seg);
 }
 
-export function resolveLocaleForLinks(pathname: string, fallback = "de"): string {
-  return readLocaleFromPathname(pathname) || readHtmlLang() || normLocaleTag(fallback) || "de";
+export function resolveLocaleForLinks(pathname: string, fallback = "tr"): string {
+  return readLocaleFromPathname(pathname) || readHtmlLang() || normLocaleTag(fallback) || "tr";
 }
 
 export function resolveLocaleForApi(pathname: string): string | undefined {
@@ -41,8 +41,8 @@ function isSpecialScheme(url: string): boolean {
  * FE:
  * - "/{locale}/services" | "/{locale}/#contact" | "/{locale}"
  */
-export function withLocalePrefix(locale: string, rawUrl: unknown, fallback = "de"): string {
-  const loc = normLocaleTag(locale) || normLocaleTag(fallback) || "de";
+export function withLocalePrefix(locale: string, rawUrl: unknown, fallback = "tr"): string {
+  const loc = normLocaleTag(locale) || normLocaleTag(fallback) || "tr";
   const url = trimStr(rawUrl);
 
   if (!url || url === "/") return `/${loc}`;

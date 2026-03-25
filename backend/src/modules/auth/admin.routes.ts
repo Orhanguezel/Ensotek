@@ -21,6 +21,7 @@ export async function registerUserAdmin(app: FastifyInstance) {
     await requireAdmin(req, reply);
   };
 
+  app.post(`${BASE}`,              { preHandler: adminGuard }, c.create);
   app.get(`${BASE}`,               { preHandler: adminGuard }, c.list);
   app.get(`${BASE}/:id`,           { preHandler: adminGuard }, c.get);
   app.patch(`${BASE}/:id`,         { preHandler: adminGuard }, c.update);

@@ -75,7 +75,7 @@ export default function AdminFooterSectionsDetailClient({ id }: { id: string }) 
 
   const initialLocale = React.useMemo(() => {
     return (
-      defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "de") || "de"
+      defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "tr") || "tr"
     );
   }, [defaultLocaleFromDb]);
 
@@ -140,7 +140,7 @@ export default function AdminFooterSectionsDetailClient({ id }: { id: string }) 
       return;
     }
 
-    const apiLocale = formData.locale || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "de");
+    const apiLocale = formData.locale || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "tr");
 
     try {
       if (isNew) {

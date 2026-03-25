@@ -243,8 +243,8 @@ export default function AdminOfferDetailClient({ id }: { id: string }) {
   const [editTab, setEditTab] = React.useState<string>("form");
 
   // Urun ve hizmet listeleri
-  const { data: productsData } = useListProductsAdminQuery({ limit: 200, locale: form.locale || "de" } as any);
-  const { data: servicesData } = useListServicesAdminQuery({ limit: 200, locale: form.locale || "de" } as any);
+  const { data: productsData } = useListProductsAdminQuery({ limit: 200, locale: form.locale || "tr" } as any);
+  const { data: servicesData } = useListServicesAdminQuery({ limit: 200, locale: form.locale || "tr" } as any);
 
   const products = React.useMemo(() => {
     const items = Array.isArray(productsData) ? productsData : ((productsData as any)?.items ?? []);

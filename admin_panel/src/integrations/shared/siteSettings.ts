@@ -1610,13 +1610,20 @@ export function buildSiteSettingsLocalesOptions(rows: AppLocaleLike[]): SiteSett
     }));
 }
 
-export function pickInitialSiteSettingsLocale(rows: AppLocaleLike[]): string {
-  if (!Array.isArray(rows) || rows.length === 0) return "de";
+export function pickInitialSiteSettingsLocale(rows: AppLocaleLike[], preferredLocale?: string): string {
+  if (!Array.isArray(rows) || rows.length === 0) return preferredLocale || "tr";
+  // If a preferred locale exists among active rows, use it
+  if (preferredLocale) {
+    const pref = rows.find(
+      (r) => r.code?.trim().toLowerCase() === preferredLocale.toLowerCase() && r.is_active !== false,
+    );
+    if (pref?.code) return pref.code.trim();
+  }
   const def = rows.find((r) => r.is_default === true);
   if (def?.code) return def.code.trim();
   const active = rows.find((r) => r.is_active !== false && r.code);
   if (active?.code) return active.code.trim();
-  return rows[0]?.code?.trim() || "de";
+  return rows[0]?.code?.trim() || "tr";
 }
 
 // ── Detail page helpers ──
@@ -1632,6 +1639,7 @@ export type SiteSettingsStructuredRendererKey =
   | "company_profile"
   | "ui_header"
   | "businessHours"
+  | "ui_about_stats"
   | "json";
 
 const STRUCTURED_KEY_MAP: Record<string, SiteSettingsStructuredRendererKey> = {
@@ -1648,6 +1656,7 @@ const STRUCTURED_KEY_MAP: Record<string, SiteSettingsStructuredRendererKey> = {
   ui_header: "ui_header",
   businessHours: "businessHours",
   business_hours: "businessHours",
+  ui_about_stats: "ui_about_stats",
 };
 
 export function resolveSiteSettingsStructuredRendererKey(settingKey: string): SiteSettingsStructuredRendererKey {
@@ -1682,7 +1691,7 @@ export function pickInitialSiteSettingsDetailLocale(
     if (localeFromQuery?.trim()) return localeFromQuery.trim();
     if (defaultLocaleFromDb?.trim()) return defaultLocaleFromDb.trim();
     const first = localeOptions?.find((o) => o.value !== "*");
-    return first?.value || "de";
+    return first?.value || "tr";
   }
   // Legacy array-style arg
   if (paramLocale?.trim()) return paramLocale.trim();

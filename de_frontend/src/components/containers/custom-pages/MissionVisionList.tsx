@@ -6,6 +6,7 @@ import { Link } from "@/i18n/routing";
 import { useCustomPages } from "@/features/custom-pages/customPages.action";
 import type { CustomPage } from "@/features/custom-pages/customPages.type";
 import { useTranslations } from "next-intl";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface MissionVisionListProps {
   title: string;
@@ -69,7 +70,7 @@ const MissionVisionList = ({ title }: MissionVisionListProps) => {
                   <Link href={`/mission-vision/${encodeURIComponent(item.slug)}`}>
                     {(item.image_url || item.featured_image) ? (
                     <Image
-                      src={(item.image_url || item.featured_image)!}
+                      src={resolveMediaUrl(item.image_url || item.featured_image)}
                       alt={item.title}
                       width={400}
                       height={250}

@@ -799,6 +799,7 @@
         "themePresetPlaceholder": "Vorlage",
         "fonts": "Schriftarten",
         "fontsPlaceholder": "Schriftart auswählen",
+        "language": "Sprache",
         "themeMode": "Themenmodus",
         "pageLayout": "Seitenlayout",
         "navbarBehavior": "Navigationsleiste Verhalten",
@@ -1720,6 +1721,25 @@
           "next": "Weiter"
         }
       },
+      "create": {
+        "button": "Neuer Benutzer",
+        "title": "Neuen Benutzer erstellen",
+        "description": "E-Mail, Passwort und Rolle eingeben.",
+        "emailLabel": "E-Mail",
+        "emailPlaceholder": "beispiel@email.com",
+        "passwordLabel": "Passwort",
+        "passwordPlaceholder": "Mindestens 8 Zeichen",
+        "fullNameLabel": "Vollständiger Name",
+        "fullNamePlaceholder": "Vollständiger Name",
+        "phoneLabel": "Telefon",
+        "phonePlaceholder": "+49 170 123 4567",
+        "roleLabel": "Rolle",
+        "submitButton": "Erstellen",
+        "cancelButton": "Abbrechen",
+        "success": "Benutzer erfolgreich erstellt.",
+        "errorExists": "Diese E-Mail ist bereits registriert.",
+        "errorGeneric": "Benutzer konnte nicht erstellt werden."
+      },
       "detail": {
         "title": "Benutzerdetails",
         "unknownUser": "Unbekannter Benutzer",
@@ -2098,7 +2118,13 @@
         "sortDate": "Datum",
         "sortResponseTime": "Antwortzeit",
         "sortStatusCode": "Status-Code",
-        "logsTitle": "Anfrage-Logs"
+        "logsTitle": "Anfrage-Logs",
+        "placeholders": {
+          "search": "/api/products, /admin/...",
+          "method": "GET, POST, PUT...",
+          "status": "200, 404, 500...",
+          "ip": "192.168.1.1"
+        }
       },
       "auth": {
         "filtersTitle": "Filter",
@@ -2114,7 +2140,10 @@
         "nDays": "{n} Tage",
         "pathPrefix": "Pfad-Präfix",
         "chartTitle": "Tägliches Diagramm",
-        "lastNDays": "Letzte {n} Tage"
+        "lastNDays": "Letzte {n} Tage",
+        "placeholders": {
+          "pathPrefix": "/api, /admin"
+        }
       },
       "map": {
         "title": "Geografische Verteilung",
@@ -2200,6 +2229,27 @@
           "PE": "Peru",
           "LOCAL": "Localhost"
         }
+      },
+      "geoMap": {
+        "loading": "Wird geladen...",
+        "empty": "Keine Geodaten vorhanden.",
+        "requestsLabel": "Anfragen",
+        "distributionTitle": "Anfragenverteilung — {total} gesamt",
+        "topCountries": "Top-Länder"
+      },
+      "chart": {
+        "summary": "{days} Tage mit {requests} Anfragen{uniqueSuffix}{errorsSuffix}",
+        "summaryUniqueSuffix": " + eindeutige IPs",
+        "summaryErrorsSuffix": " + Fehler",
+        "labels": {
+          "requests": "Anfragen",
+          "uniqueIps": "Eindeutige IPs",
+          "unique": "Eindeutig",
+          "errors": "Fehler"
+        },
+        "loading": "Wird geladen...",
+        "empty": "Keine Daten verfügbar.",
+        "ariaLabel": "Tägliches Anfragen-Balkendiagramm"
       },
       "analytics": {
         "title": "Analytik-Dashboard",
@@ -2378,7 +2428,13 @@
         "presetDeEnTr": "Preset de/en/tr setzen",
         "presetTop20": "20 Sprachen hinzufügen",
         "saved": "Sprachen aktualisiert.",
-        "saveError": "Sprachen konnten nicht aktualisiert werden."
+        "saveError": "Sprachen konnten nicht aktualisiert werden.",
+        "defaultLocale": "Standardsprache",
+        "defaultLocaleDesc": "Alle Module verwenden diese Sprache als Standard in Sprachauswahlen.",
+        "selectDefault": "Standardsprache wählen",
+        "default": "Standard",
+        "emptyRows": "Keine Sprachkonfiguration gefunden.",
+        "loading": "Wird geladen..."
       },
       "list": {
         "title": "Einstellungsliste",
@@ -2412,8 +2468,8 @@
         "deleted": "\"{key}\" ({locale}) gelöscht.",
         "deleteError": "Einstellung konnte nicht gelöscht werden.",
         "modes": {
-          "structured": "Strukturiert",
-          "raw": "Raw"
+          "structured": "Form",
+          "raw": "JSON"
         },
         "structuredMissingTitle": "Structured Renderer fehlt",
         "structuredMissingDesc": "Für diesen Schlüssel ist kein Structured Renderer definiert. Verwenden Sie den Raw-Modus.",
@@ -2500,7 +2556,10 @@
           "businessHours": "Geschäftszeiten",
           "hero": "Hero-Bereich",
           "home_backgrounds": "Startseiten-Hintergründe",
-          "ui_header": "Kopfzeilen-Einstellungen"
+          "ui_header": "Kopfzeilen-Einstellungen",
+          "ui_about_stats": "Startseiten-Statistiken",
+          "offers_admin_email": "Angebot-Benachrichtigungs-E-Mail",
+          "catalog_admin_email": "Katalog-Benachrichtigungs-E-Mail"
         },
         "keyDescriptions": {
           "site_name": "Der Name Ihrer Website (wird in Titeln und SEO verwendet)",
@@ -2514,7 +2573,10 @@
           "businessHours": "Arbeitstage und -zeiten",
           "hero": "Startseite Hero/Banner-Einstellungen",
           "home_backgrounds": "Startseiten-Hintergrundbilder",
-          "ui_header": "Kopfzeilen- und Navigationseinstellungen"
+          "ui_header": "Kopfzeilen- und Navigationseinstellungen",
+          "ui_about_stats": "Referenz-, Projekt- und Erfahrungsstatistiken auf der Startseite",
+          "offers_admin_email": "Angebotsanfragen werden an diese E-Mail gesendet",
+          "catalog_admin_email": "Kataloganfragen werden an diese E-Mail gesendet"
         },
         "recordCount": "Insgesamt {count} Einträge"
       },
@@ -2948,9 +3010,9 @@
         },
         "companyProfile": {
           "labels": {
-            "companyName": "Firmenname",
-            "slogan": "Slogan",
-            "about": "Über uns"
+            "headline": "Überschrift",
+            "subline": "Unterzeile",
+            "body": "Beschreibung"
           }
         },
         "uiHeader": {

@@ -1,10 +1,12 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 import { useQuery } from "@tanstack/react-query";
 import { queryKeys } from "@/lib/query-client";
 import { referencesService } from "@/features/references/references.service";
+import { resolveMediaUrl } from "@/lib/media";
 
 import FallbackOne from "public/img/brand/1.png";
 import FallbackTwo from "public/img/brand/2.png";
@@ -33,8 +35,12 @@ const SponsorOne = () => {
   return (
     <div className="brand__area grey-bg-2 pt-0 pb-120">
       <div className="container">
-        <div className="brand__title">
+        <div className="brand__title d-flex align-items-center justify-content-between flex-wrap gap-3">
           <span>{t("title")}</span>
+          <Link href="/references" className="recent__btn" style={{ fontSize: 14, fontWeight: 600 }}>
+            {t("viewAll")}
+            <i className="fa-light fa-arrow-right-long ml-10"></i>
+          </Link>
         </div>
         <div
           className="row justify-content-center"
@@ -70,7 +76,7 @@ const SponsorOne = () => {
                             <div className="singel__brand">
                               {ref.featured_image ? (
                                 <Image
-                                  src={ref.featured_image}
+                                  src={resolveMediaUrl(ref.featured_image)}
                                   alt={ref.featured_image_alt || ref.title}
                                   width={150}
                                   height={50}

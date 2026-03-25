@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, Filter } from 'lucide-react';
 import { getProjects } from '@ensotek/core/services';
 import type { Project } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/i18n/locale-settings';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -137,13 +139,14 @@ function ProjectCard({
       }`}
     >
       {/* Image container */}
-      <div className={`overflow-hidden bg-slate-100 ${featured ? 'md:w-1/2 h-64 md:h-auto' : 'aspect-video'}`}>
+      <div className={`relative overflow-hidden bg-slate-100 ${featured ? 'md:w-1/2 h-64 md:h-auto' : 'aspect-video'}`}>
         {project.featured_image ? (
-          <img
-            src={project.featured_image}
+          <Image
+            src={resolveMediaUrl(project.featured_image)}
             alt={project.featured_image_alt ?? project.title ?? ''}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

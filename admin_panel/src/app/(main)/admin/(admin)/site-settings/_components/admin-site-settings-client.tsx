@@ -112,8 +112,6 @@ export default function AdminSiteSettingsClient() {
     [localeRows],
   );
 
-  const initialLocale = React.useMemo(() => pickInitialSiteSettingsLocale(localeRows as any), [localeRows]);
-
   const [tab, setTab] = React.useState<SiteSettingsTab>("general");
   const [search, setSearch] = React.useState("");
   const [locale, setLocale] = React.useState<string>("");
@@ -123,6 +121,11 @@ export default function AdminSiteSettingsClient() {
 
   const adminLocale = usePreferencesStore((s) => s.adminLocale);
   const t = useAdminTranslations(adminLocale || undefined);
+
+  const initialLocale = React.useMemo(
+    () => pickInitialSiteSettingsLocale(localeRows as any, adminLocale || "tr"),
+    [localeRows, adminLocale],
+  );
 
   // Otomatik dil seçimi: varsayılan aktif dili kullan
   React.useEffect(() => {

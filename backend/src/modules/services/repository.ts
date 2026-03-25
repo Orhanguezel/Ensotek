@@ -45,6 +45,7 @@ export type ServiceMerged = {
   featured_image: string | null;
   image_url: string | null;
   image_asset_id: string | null;
+  images: string[] | null;
 
   created_at: string | Date;
   updated_at: string | Date;
@@ -125,6 +126,7 @@ function baseSelect(iReq: any, iDef: any) {
     featured_image: services.featured_image,
     image_url: services.image_url,
     image_asset_id: services.image_asset_id,
+    images: services.images,
 
     created_at: services.created_at,
     updated_at: services.updated_at,

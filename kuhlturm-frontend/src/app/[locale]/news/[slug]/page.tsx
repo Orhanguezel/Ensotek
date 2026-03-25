@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, ArrowLeft, Calendar, Tag } from 'lucide-react';
 import { getCustomPages, getCustomPageBySlug, parseCustomPageContent, getSiteSetting } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
 import { getCustomPageBySlugWithLocale, getCustomPagesWithLocale } from '@/lib/api';
+import { resolveMediaUrl } from '@/lib/media';
 import { fetchSetting } from '@/i18n/server';
 import { ContactInfoCard, type ContactInfo } from '@/components/sections/ContactInfoCard';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
@@ -31,7 +33,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: (article as any).meta_title ?? (article as any).title,
     description: (article as any).meta_description ?? (article as any).summary ?? undefined,
     openGraph: article.featured_image
-      ? { images: [{ url: article.featured_image }] }
+      ? { images: [{ url: resolveMediaUrl(article.featured_image) }] }
       : undefined,
   };
 }
@@ -148,10 +150,14 @@ export default async function NewsDetailPage({ params }: Props) {
             <div className="lg:col-span-2">
               {article.featured_image && (
                 <div className="mb-10 rounded-2xl overflow-hidden">
-                  <img
-                    src={article.featured_image}
+                  <Image
+                    src={resolveMediaUrl(article.featured_image)}
                     alt={article.featured_image_alt ?? article.title}
-                    className="w-full max-h-120 object-cover"
+                    width={1200}
+                    height={600}
+                    priority
+                    sizes="(max-width: 768px) 100vw, 800px"
+                    className="w-full h-auto object-cover"
                   />
                 </div>
               )}
@@ -238,13 +244,14 @@ export default async function NewsDetailPage({ params }: Props) {
                     href={`/${locale}/news/${rel.slug}`}
                     className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all"
                   >
-                    <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                    <div className="aspect-4/3 overflow-hidden bg-slate-100 relative">
                       {rel.featured_image ? (
-                        <img
-                          src={rel.featured_image}
+                        <Image
+                          src={resolveMediaUrl(rel.featured_image)}
                           alt={rel.featured_image_alt ?? rel.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                          loading="lazy"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

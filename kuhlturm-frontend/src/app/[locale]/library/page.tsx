@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ChevronRight, BookOpen, ArrowRight, Download, Eye, Search, FileText, Video, HelpCircle } from 'lucide-react';
 import { getLibraryItems } from '@ensotek/core/services';
 import type { LibraryItem } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -208,11 +210,16 @@ function LibraryFeaturedCard({ item, locale }: { item: LibraryItem, locale: stri
     >
       <div className="absolute inset-0 z-0">
         {(item.featured_image || item.image_url) ? (
-          <img
-            src={(item.featured_image ?? item.image_url)!}
-            alt={item.image_alt ?? item.name ?? ''}
-            className="w-full h-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000"
-          />
+          <div className="relative w-full h-full">
+            <Image
+              src={resolveMediaUrl((item.featured_image ?? item.image_url)!)}
+              alt={item.image_alt ?? item.name ?? ''}
+              fill
+              className="object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
+            />
+          </div>
         ) : (
           <div className="w-full h-full bg-linear-to-br from-blue-900 to-slate-950" />
         )}
@@ -260,11 +267,12 @@ function LibraryCard({
     >
       <div className="aspect-16/10 relative overflow-hidden bg-slate-100 shrink-0">
         {(item.featured_image || item.image_url) ? (
-          <img
-            src={(item.featured_image ?? item.image_url)!}
+          <Image
+            src={resolveMediaUrl((item.featured_image ?? item.image_url)!)}
             alt={item.image_alt ?? item.name ?? ''}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            loading="lazy"
+            fill
+            className="object-cover group-hover:scale-110 transition-transform duration-700"
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-200">

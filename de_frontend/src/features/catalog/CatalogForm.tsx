@@ -24,10 +24,7 @@ export const CatalogForm: React.FC<CatalogFormProps> = ({ onSuccess }) => {
     formState: { errors },
   } = useForm<CatalogRequestFormData>({
     resolver: zodResolver(catalogRequestSchema),
-    defaultValues: {
-      consent_terms: false,
-      consent_marketing: false,
-    },
+    defaultValues: {},
   });
 
   const onSubmit = (data: CatalogRequestFormData) => {
@@ -113,38 +110,7 @@ export const CatalogForm: React.FC<CatalogFormProps> = ({ onSuccess }) => {
           </div>
         </div>
 
-        <div className="col-12 mb-10">
-          <div className="ens-form__check">
-            <input
-              {...register("consent_terms")}
-              type="checkbox"
-              id="cat-consent-terms"
-              className="ens-form__checkbox"
-            />
-            <label htmlFor="cat-consent-terms" className="ens-form__check-label">
-              {t("ensotek.offer.consentTerms")}
-            </label>
-            {errors.consent_terms && (
-              <div className="ens-form__error">{errors.consent_terms.message}</div>
-            )}
-          </div>
-        </div>
-
-        <div className="col-12 mb-30">
-          <div className="ens-form__check">
-            <input
-              {...register("consent_marketing")}
-              type="checkbox"
-              id="cat-consent-marketing"
-              className="ens-form__checkbox"
-            />
-            <label htmlFor="cat-consent-marketing" className="ens-form__check-label">
-              {t("ensotek.offer.consentMarketing")}
-            </label>
-          </div>
-        </div>
-
-        <div className="col-12">
+        <div className="col-12 mt-20">
           <button type="submit" className="ens-btn ens-btn--primary w-100" disabled={isPending}>
             {isPending ? (
               <>

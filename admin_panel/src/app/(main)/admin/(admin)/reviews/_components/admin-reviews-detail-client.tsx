@@ -134,7 +134,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
   // ✅ FIX: Initial locale with proper fallback
   const initialLocale = React.useMemo(() => {
     return (
-      defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "de") || "de"
+      defaultLocaleFromDb || localeShortClientOr(typeof window !== "undefined" ? navigator.language : "tr") || "tr"
     );
   }, [defaultLocaleFromDb]);
 
@@ -231,7 +231,7 @@ export default function AdminReviewsDetailClient({ id }: { id: string }) {
     }
 
     // ✅ FIXED: Correct usage of resolveAdminApiLocale
-    const apiLocale = formData.locale || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "de");
+    const apiLocale = formData.locale || resolveAdminApiLocale(localeOptions, defaultLocaleFromDb, "tr");
 
     try {
       if (isNew) {

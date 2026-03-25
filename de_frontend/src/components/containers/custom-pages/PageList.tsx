@@ -5,6 +5,7 @@ import { Link } from "@/i18n/routing";
 import { useCustomPages } from "@/features/custom-pages/customPages.action";
 import type { CustomPage } from "@/features/custom-pages/customPages.type";
 import { useTranslations } from "next-intl";
+import { resolveMediaUrl } from "@/lib/media";
 
 interface PageListProps {
   moduleKey: string;
@@ -45,7 +46,7 @@ const PageList = ({ moduleKey, title, basePath }: PageListProps) => {
                   <Link href={`${listPath}/${encodeURIComponent(item.slug)}`}>
                     {imgSrc ? (
                     <Image
-                      src={imgSrc}
+                      src={resolveMediaUrl(imgSrc)}
                       alt={item.title}
                       width={400}
                       height={250}

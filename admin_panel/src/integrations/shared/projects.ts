@@ -501,5 +501,5 @@ export function slugifyClass(input: unknown): string {
 export function localeFromPathname(pathname: string): string {
   // "/de/work" -> "de"
   const seg = pathname.split("?")[0].split("#")[0].split("/").filter(Boolean);
-  return seg[0] || "de";
+  return seg[0] || "tr";
 }

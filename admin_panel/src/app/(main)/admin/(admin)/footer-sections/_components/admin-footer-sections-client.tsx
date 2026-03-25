@@ -111,8 +111,8 @@ export default function AdminFooterSectionsClient() {
       const initialLocale =
         urlLocale ||
         defaultLocaleFromDb ||
-        localeShortClientOr(typeof window !== "undefined" ? navigator.language : "de") ||
-        "de";
+        localeShortClientOr(typeof window !== "undefined" ? navigator.language : "tr") ||
+        "tr";
 
       setFilters((prev) => ({ ...prev, locale: initialLocale }));
     }
@@ -132,7 +132,7 @@ export default function AdminFooterSectionsClient() {
 
   // Build query params
   const queryParams = React.useMemo((): FooterSectionListQueryParams => {
-    const apiLocale = filters.locale || defaultLocaleFromDb || "de";
+    const apiLocale = filters.locale || defaultLocaleFromDb || "tr";
 
     return {
       q: filters.search || undefined,

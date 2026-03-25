@@ -72,9 +72,9 @@ const norm = (v: unknown) =>
     .split("-")[0]
     .trim();
 
-const getLocaleFromDto = (dto?: CustomPageDto, fallback = "de") => {
+const getLocaleFromDto = (dto?: CustomPageDto, fallback = "tr") => {
   const raw = dto?.locale_resolved ?? fallback;
-  return norm(raw) || norm(fallback) || "de";
+  return norm(raw) || norm(fallback) || "tr";
 };
 
 const buildInitialValues = (
@@ -82,7 +82,7 @@ const buildInitialValues = (
   fallbackLocale: string | undefined,
   initialModuleKey = "",
 ): CustomPageFormValues => {
-  const safeLocale = norm(fallbackLocale || "de") || "de";
+  const safeLocale = norm(fallbackLocale || "tr") || "tr";
 
   if (!initial) {
     return {
@@ -166,7 +166,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
   onCancel,
 }) => {
   const t = useAdminT();
-  const safeDefaultLocale = norm(defaultLocale || "de") || "de";
+  const safeDefaultLocale = norm(defaultLocale || "tr") || "tr";
 
   const [values, setValues] = useState<CustomPageFormValues>(
     buildInitialValues(initialData, safeDefaultLocale, initialModuleKey),
@@ -257,13 +257,13 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
 
   const handleAIAction = async (action: AIAction) => {
     const targetLocales = (locales ?? []).map((l: any) => String(l.value ?? "")).filter(Boolean);
-    if (!targetLocales.length) targetLocales.push(values.locale || "de");
+    if (!targetLocales.length) targetLocales.push(values.locale || "tr");
     const result = await aiAssist({
       title: values.title,
       summary: values.summary,
       content: values.content,
       tags: values.tags,
-      locale: values.locale || "de",
+      locale: values.locale || "tr",
       target_locales: targetLocales,
       module_key: values.module_key,
       action,

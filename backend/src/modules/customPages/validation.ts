@@ -25,7 +25,21 @@ const LOCALE_LIKE = z
   .transform((s) => normalizeLocale(s) || s.toLowerCase());
 
 const UUID36 = z.string().length(36);
-const URL2000 = z.string().trim().max(2000).url('Geçersiz URL');
+/** URL veya relative path (/uploads/...) kabul eder */
+const URL2000 = z.string().trim().max(2000).refine(
+  (s) => s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/'),
+  'URL veya relative path olmalı (/, http://, https://)',
+);
+
+/** UUID or empty-string → null (admin panel sends "" when field is cleared) */
+const UUID36_OR_EMPTY = z
+  .union([z.string().length(36), z.literal('')])
+  .transform((v) => (v === '' ? null : v));
+
+/** URL/relative-path or empty-string → null */
+const URL2000_OR_EMPTY = z
+  .union([URL2000, z.literal('')])
+  .transform((v) => (v === '' ? null : v));
 
 const SLUG = z
   .string()
@@ -101,14 +115,14 @@ export const upsertCustomPageParentBodySchema = z.object({
   is_published: boolLike.optional().default(false),
   featured: boolLike.optional().default(false),
 
-  featured_image: URL2000.nullable().optional(),
-  featured_image_asset_id: UUID36.nullable().optional(),
+  featured_image: URL2000_OR_EMPTY.nullable().optional(),
+  featured_image_asset_id: UUID36_OR_EMPTY.nullable().optional(),
 
   display_order: z.coerce.number().int().min(0).optional(),
   order_num: z.coerce.number().int().min(0).optional(),
 
-  image_url: URL2000.nullable().optional(),
-  storage_asset_id: UUID36.nullable().optional(),
+  image_url: URL2000_OR_EMPTY.nullable().optional(),
+  storage_asset_id: UUID36_OR_EMPTY.nullable().optional(),
 
   /** ✅ array OR JSON-string OR null */
   images: UrlArrayLike.optional(),
@@ -170,8 +184,8 @@ export const upsertCustomPageBodySchema = upsertCustomPageI18nBodySchema.extend(
   is_published: boolLike.optional().default(false),
   featured: boolLike.optional().default(false),
 
-  featured_image: URL2000.nullable().optional(),
-  featured_image_asset_id: UUID36.nullable().optional(),
+  featured_image: URL2000_OR_EMPTY.nullable().optional(),
+  featured_image_asset_id: UUID36_OR_EMPTY.nullable().optional(),
 
   category_id: z.string().uuid().nullable().optional(),
   sub_category_id: z.string().uuid().nullable().optional(),
@@ -179,8 +193,8 @@ export const upsertCustomPageBodySchema = upsertCustomPageI18nBodySchema.extend(
   display_order: z.coerce.number().int().min(0).optional(),
   order_num: z.coerce.number().int().min(0).optional(),
 
-  image_url: URL2000.nullable().optional(),
-  storage_asset_id: UUID36.nullable().optional(),
+  image_url: URL2000_OR_EMPTY.nullable().optional(),
+  storage_asset_id: UUID36_OR_EMPTY.nullable().optional(),
 
   /** ✅ array OR JSON-string OR null */
   images: UrlArrayLike.optional(),
@@ -195,8 +209,8 @@ export const patchCustomPageBodySchema = patchCustomPageI18nBodySchema.extend({
   is_published: boolLike.optional(),
   featured: boolLike.optional(),
 
-  featured_image: URL2000.nullable().optional(),
-  featured_image_asset_id: UUID36.nullable().optional(),
+  featured_image: URL2000_OR_EMPTY.nullable().optional(),
+  featured_image_asset_id: UUID36_OR_EMPTY.nullable().optional(),
 
   category_id: z.string().uuid().nullable().optional(),
   sub_category_id: z.string().uuid().nullable().optional(),
@@ -204,8 +218,8 @@ export const patchCustomPageBodySchema = patchCustomPageI18nBodySchema.extend({
   display_order: z.coerce.number().int().min(0).optional(),
   order_num: z.coerce.number().int().min(0).optional(),
 
-  image_url: URL2000.nullable().optional(),
-  storage_asset_id: UUID36.nullable().optional(),
+  image_url: URL2000_OR_EMPTY.nullable().optional(),
+  storage_asset_id: UUID36_OR_EMPTY.nullable().optional(),
 
   /** ✅ array OR JSON-string OR null */
   images: UrlArrayLike.optional(),

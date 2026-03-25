@@ -6,6 +6,8 @@ import { getTranslations } from "next-intl/server";
 import { customPagesService } from "@/features/custom-pages/customPages.service";
 import { redirect } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 const AboutListPage = async ({
   params,
 }: {

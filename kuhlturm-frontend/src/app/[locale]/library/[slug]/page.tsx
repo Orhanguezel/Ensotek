@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   ChevronRight,
   Download,
@@ -20,6 +21,7 @@ import {
 } from '@ensotek/core/services';
 import type { LibraryItem, LibraryImage, LibraryFile } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 import { PrintButton } from '@/components/ui/PrintButton';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
 
@@ -210,17 +212,20 @@ export default async function LibraryDetailPage({ params }: Props) {
 
             {/* Featured Image */}
             {(item.featured_image || item.image_url) && (
-              <div className="relative mb-12 rounded-[2rem] overflow-hidden bg-slate-100 shadow-2xl shadow-slate-200">
-                 <img
-                  src={(item.featured_image ?? item.image_url)!}
+              <div className="relative mb-12 rounded-[2rem] overflow-hidden bg-slate-100 shadow-2xl shadow-slate-200 aspect-video max-h-150">
+                <Image
+                  src={resolveMediaUrl((item.featured_image ?? item.image_url)!)}
                   alt={item.image_alt ?? item.name ?? ''}
-                  className="w-full h-auto max-h-[600px] object-cover"
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 1280px) 100vw, 1024px"
+                  priority
                 />
               </div>
             )}
 
             {/* Rich Text Content */}
-            <div className="prose prose-slate prose-lg max-w-none prose-headings:font-display prose-headings:font-bold prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-li:text-slate-600 prose-img:rounded-3xl prose-strong:text-slate-900">
+            <div className="prose prose-slate prose-lg max-w-none prose-headings:font-display prose-headings:font-bold prose-headings:text-slate-900 prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline prose-li:text-slate-600 prose-img:rounded-3xl prose-img:max-w-[60%] prose-img:h-auto prose-strong:text-slate-900">
               {item.description ? (
                 <div dangerouslySetInnerHTML={{ __html: item.description }} />
               ) : (
@@ -239,16 +244,17 @@ export default async function LibraryDetailPage({ params }: Props) {
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   {images.map((img) => (
-                    <div 
-                      key={img.id} 
-                      className="group relative cursor-pointer overflow-hidden rounded-[1.5rem] aspect-original bg-slate-100 ring-1 ring-slate-200 ring-inset"
+                    <div
+                      key={img.id}
+                      className="group relative cursor-pointer overflow-hidden rounded-[1.5rem] aspect-square bg-slate-100 ring-1 ring-slate-200 ring-inset"
                     >
                       {img.image_url ? (
-                        <img
-                          src={img.image_url}
+                        <Image
+                          src={resolveMediaUrl(img.image_url)}
                           alt={img.alt ?? img.title ?? ''}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                          loading="lazy"
+                          fill
+                          className="object-cover group-hover:scale-110 transition-transform duration-700"
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">

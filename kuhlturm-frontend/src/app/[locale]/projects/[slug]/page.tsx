@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
+import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
@@ -18,6 +19,7 @@ import {
 import { getProjectBySlug, getProjects } from '@ensotek/core/services';
 import type { Project } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 import { ReferenceGallery } from '@/components/sections/ReferenceGallery';
 
 interface Props {
@@ -151,11 +153,14 @@ export default async function ProjectDetailPage({ params }: Props) {
 
               {/* Featured image */}
               {project.featured_image && (
-                <div className="rounded-2xl overflow-hidden aspect-video bg-slate-100">
-                  <img
-                    src={project.featured_image}
+                <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-100">
+                  <Image
+                    src={resolveMediaUrl(project.featured_image)}
                     alt={project.featured_image_alt ?? project.title}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 66vw"
+                    priority
                   />
                 </div>
               )}
@@ -407,13 +412,14 @@ export default async function ProjectDetailPage({ params }: Props) {
                   href={`/${locale}/projects/${p.slug}`}
                   className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-200 hover:shadow-lg transition-all duration-300"
                 >
-                  <div className="aspect-4/3 overflow-hidden bg-slate-100">
+                  <div className="relative aspect-4/3 overflow-hidden bg-slate-100">
                     {p.featured_image ? (
-                      <img
-                        src={p.featured_image}
+                      <Image
+                        src={resolveMediaUrl(p.featured_image)}
                         alt={p.featured_image_alt ?? p.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">

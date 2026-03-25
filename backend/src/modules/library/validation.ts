@@ -133,7 +133,7 @@ export const upsertLibraryParentBodySchema = z.object({
   // ✅ şimdi: absolute URL veya /uploads/... gibi relative kabul
   image_url: urlOrRelative.nullable().optional(),
 
-  image_asset_id: z.string().length(36).nullable().optional(),
+  image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   published_at: z.string().datetime().nullable().optional(),
 });
@@ -212,7 +212,7 @@ export type PatchLibraryBody = z.infer<typeof patchLibraryBodySchema>;
 
 const upsertLibraryImageBodyBase = z.object({
   // schema: library_images.image_asset_id / image_url
-  image_asset_id: z.string().length(36).nullable().optional(),
+  image_asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   // ✅ önceki: z.string().url()
   // ✅ şimdi: absolute veya relative
@@ -251,7 +251,7 @@ export type PatchLibraryImageBody = z.infer<typeof patchLibraryImageBodySchema>;
 
 const upsertLibraryFileBodyBase = z.object({
   // schema: library_files.asset_id / file_url
-  asset_id: z.string().length(36).nullable().optional(),
+  asset_id: z.union([z.string().length(36), z.literal('')]).transform(v => v === '' ? null : v).nullable().optional(),
 
   // ✅ önceki: z.string().url()
   // ✅ şimdi: absolute veya /uploads/... gibi relative

@@ -66,9 +66,9 @@ const norm = (v: unknown) =>
     .split("-")[0]
     .trim();
 
-const getLocaleFromDto = (dto?: FaqDto, fallback = "de") => {
+const getLocaleFromDto = (dto?: FaqDto, fallback = "tr") => {
   const raw = (dto as any)?.locale_resolved ?? (dto as any)?.locale ?? fallback;
-  return norm(raw) || norm(fallback) || "de";
+  return norm(raw) || norm(fallback) || "tr";
 };
 
 const toBool = (v: any) => !!Number(v ?? 0);
@@ -117,7 +117,7 @@ const slugify = (value: string): string => {
 };
 
 const buildInitialValues = (initial: FaqDto | undefined, fallbackLocale: string): FaqsFormValues => {
-  const safeLocale = norm(fallbackLocale || "de") || "de";
+  const safeLocale = norm(fallbackLocale || "tr") || "tr";
 
   if (!initial) {
     return {
@@ -167,7 +167,7 @@ const valuesToPayloadJson = (values: FaqsFormValues): FaqPayloadJson => ({
 });
 
 const payloadJsonToValues = (json: any, fallbackLocale: string, base?: FaqsFormValues): FaqsFormValues => {
-  const safeLocale = norm(fallbackLocale || "de") || "de";
+  const safeLocale = norm(fallbackLocale || "tr") || "tr";
 
   const out: FaqsFormValues = {
     ...(base ?? {
@@ -214,7 +214,7 @@ export const FaqsForm: React.FC<FaqsFormProps> = ({
   onCancel,
 }) => {
   const t = useAdminT("admin.faqs");
-  const safeDefaultLocale = norm(defaultLocale || "de") || "de";
+  const safeDefaultLocale = norm(defaultLocale || "tr") || "tr";
 
   const [values, setValues] = useState<FaqsFormValues>(buildInitialValues(initialData, safeDefaultLocale));
 

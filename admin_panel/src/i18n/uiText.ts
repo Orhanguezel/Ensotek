@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/i18n/uiText.ts
-// guezelwebdesign – UI text guards (shared)
+// Ensotek – UI text guards (shared)
 // =============================================================
 
 export function isValidUiText(value: unknown, key: string): boolean {

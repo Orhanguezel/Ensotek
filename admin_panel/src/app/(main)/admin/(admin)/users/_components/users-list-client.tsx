@@ -12,19 +12,28 @@ import * as React from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import { ChevronLeft, ChevronRight, Filter, RefreshCcw, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Filter, Plus, RefreshCcw, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { useAdminT } from "@/app/(main)/admin/_components/common/useAdminT";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useListUsersAdminQuery } from "@/integrations/hooks";
+import { useCreateUserAdminMutation, useListUsersAdminQuery } from "@/integrations/hooks";
 import type { AdminUsersListParams, AdminUserView, UserRoleName } from "@/integrations/shared";
 
 function boolParam(v: string | null): boolean | undefined {
@@ -136,11 +145,130 @@ export default function UsersListClient() {
   const canPrev = offset > 0;
   const canNext = (usersQ.data?.length ?? 0) >= limit;
 
+  // ─── Create User Dialog ───
+  const [createOpen, setCreateOpen] = React.useState(false);
+  const [createEmail, setCreateEmail] = React.useState("");
+  const [createPassword, setCreatePassword] = React.useState("");
+  const [createFullName, setCreateFullName] = React.useState("");
+  const [createPhone, setCreatePhone] = React.useState("");
+  const [createRole, setCreateRole] = React.useState<UserRoleName>("user");
+  const [createUser, createState] = useCreateUserAdminMutation();
+
+  const resetCreateForm = () => {
+    setCreateEmail("");
+    setCreatePassword("");
+    setCreateFullName("");
+    setCreatePhone("");
+    setCreateRole("user");
+  };
+
+  const onCreateSubmit = async () => {
+    try {
+      const result = await createUser({
+        email: createEmail.trim(),
+        password: createPassword,
+        full_name: createFullName.trim() || undefined,
+        phone: createPhone.trim() || undefined,
+        role: createRole,
+      }).unwrap();
+      toast.success(t("create.success"));
+      setCreateOpen(false);
+      resetCreateForm();
+      usersQ.refetch();
+      router.push(`/admin/users/${encodeURIComponent(result.id)}`);
+    } catch (err: any) {
+      const msg = err?.data?.error?.message;
+      if (msg === "user_exists") {
+        toast.error(t("create.errorExists"));
+      } else {
+        toast.error(t("create.errorGeneric"));
+      }
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <div className="space-y-1">
-        <h1 className="font-semibold text-lg">{t("list.title")}</h1>
-        <p className="text-muted-foreground text-sm">{t("list.description")}</p>
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h1 className="font-semibold text-lg">{t("list.title")}</h1>
+          <p className="text-muted-foreground text-sm">{t("list.description")}</p>
+        </div>
+        <Dialog open={createOpen} onOpenChange={(v) => { setCreateOpen(v); if (!v) resetCreateForm(); }}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 size-4" />
+              {t("create.button")}
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle>{t("create.title")}</DialogTitle>
+              <DialogDescription>{t("create.description")}</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label>{t("create.emailLabel")}</Label>
+                <Input
+                  type="email"
+                  placeholder={t("create.emailPlaceholder")}
+                  value={createEmail}
+                  onChange={(e) => setCreateEmail(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>{t("create.passwordLabel")}</Label>
+                <Input
+                  type="password"
+                  placeholder={t("create.passwordPlaceholder")}
+                  value={createPassword}
+                  onChange={(e) => setCreatePassword(e.target.value)}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>{t("create.fullNameLabel")}</Label>
+                  <Input
+                    placeholder={t("create.fullNamePlaceholder")}
+                    value={createFullName}
+                    onChange={(e) => setCreateFullName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>{t("create.phoneLabel")}</Label>
+                  <Input
+                    placeholder={t("create.phonePlaceholder")}
+                    value={createPhone}
+                    onChange={(e) => setCreatePhone(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("create.roleLabel")}</Label>
+                <Select value={createRole} onValueChange={(v) => setCreateRole(v as UserRoleName)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="admin">{t("roles.admin")}</SelectItem>
+                    <SelectItem value="moderator">{t("roles.moderator")}</SelectItem>
+                    <SelectItem value="user">{t("roles.user")}</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setCreateOpen(false)}>
+                {t("create.cancelButton")}
+              </Button>
+              <Button
+                onClick={onCreateSubmit}
+                disabled={createState.isLoading || !createEmail.trim() || createPassword.length < 8}
+              >
+                {t("create.submitButton")}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <Card>

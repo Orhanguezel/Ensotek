@@ -95,7 +95,7 @@ export function localizePath(
 
   const defFromOpts = toShortLocale(opts?.defaultLocale);
   const defFromActives = toShortLocale(activeLocales?.[0]);
-  const def = defFromOpts || defFromActives || "de";
+  const def = defFromOpts || defFromActives || "tr";
 
   const defaultPrefixless = opts?.defaultPrefixless !== false;
 

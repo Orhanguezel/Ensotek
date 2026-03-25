@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { ADMIN_LOCALE_OPTIONS, useAdminTranslations } from "@/i18n";
+import { useAdminTranslations } from "@/i18n";
 import { type FontKey, fontOptions } from "@/lib/fonts/registry";
 import type { ContentLayout, NavbarStyle, SidebarCollapsible, SidebarVariant } from "@/lib/preferences/layout";
 import {
@@ -102,11 +102,10 @@ export function LayoutControls() {
     saveAdminConfig();
   };
 
-  const onAdminLocaleChange = (value: string) => {
-    const next = String(value || "").trim();
-    if (!next) return;
-    setAdminLocale(next);
-    persistPreference("admin_locale", next);
+  const onAdminLocaleChange = (locale: string) => {
+    if (!locale) return;
+    setAdminLocale(locale);
+    persistPreference("admin_locale", locale);
     saveAdminConfig();
   };
 
@@ -177,14 +176,12 @@ export function LayoutControls() {
               <Label className="font-medium text-xs">{t("admin.sidebar.preferences.language")}</Label>
               <Select value={adminLocale || "tr"} onValueChange={onAdminLocaleChange}>
                 <SelectTrigger size="sm" className="w-full text-xs">
-                  <SelectValue placeholder={t("admin.sidebar.preferences.languagePlaceholder")} />
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ADMIN_LOCALE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} className="text-xs" value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
+                  <SelectItem className="text-xs" value="tr">Türkçe</SelectItem>
+                  <SelectItem className="text-xs" value="en">English</SelectItem>
+                  <SelectItem className="text-xs" value="de">Deutsch</SelectItem>
                 </SelectContent>
               </Select>
             </div>

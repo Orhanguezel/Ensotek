@@ -11,8 +11,10 @@ import { normLocaleTag, pickFromAcceptLanguage, pickFromCookie } from "./localeU
 
 const API = (process.env.API_BASE_URL || "").trim();
 
+import { PREFERENCE_DEFAULTS } from "@/lib/preferences/preferences-config";
+
 // Hard fallback only if DB/API not reachable or empty
-export const DEFAULT_LOCALE_FALLBACK = "de";
+export const DEFAULT_LOCALE_FALLBACK = PREFERENCE_DEFAULTS.admin_locale;
 
 export type JsonLike = null | boolean | number | string | JsonLike[] | { [k: string]: JsonLike };
 

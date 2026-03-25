@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
+import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronRight, ExternalLink } from 'lucide-react';
 import { getReferences } from '@ensotek/core/services';
 import type { Reference } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
+import { resolveMediaUrl } from '@/lib/media';
 
 interface Props {
   params: Promise<{ locale: string }>;
@@ -129,13 +131,14 @@ function ReferenceCard({
       className="group block bg-white rounded-2xl overflow-hidden border border-slate-200 hover:border-blue-200 hover:shadow-xl transition-all duration-300"
     >
       {/* Image */}
-      <div className="overflow-hidden bg-slate-100 aspect-4/3">
+      <div className="relative overflow-hidden bg-slate-100 aspect-4/3">
         {reference.featured_image ? (
-          <img
-            src={reference.featured_image}
+          <Image
+            src={resolveMediaUrl(reference.featured_image)}
             alt={reference.featured_image_alt ?? reference.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            loading="lazy"
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">

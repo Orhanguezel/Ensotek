@@ -1,6 +1,6 @@
 // =============================================================
 // FILE: src/i18n/locationEvents.ts
-// guezelwebdesign – SPA navigation detector (no next/router)
+// Ensotek – SPA navigation detector (no next/router)
 // =============================================================
 "use client";
 

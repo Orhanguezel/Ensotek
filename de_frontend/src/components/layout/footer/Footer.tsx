@@ -7,6 +7,7 @@ import { queryKeys } from "@/lib/query-client";
 import { footerSectionsService } from "@/features/footer-sections/footerSections.service";
 import { menuItemsService } from "@/features/menu-items/menuItems.service";
 import { siteSettingsService } from "@/features/site-settings/siteSettings.service";
+import { customPagesService } from "@/features/custom-pages/customPages.service";
 
 import FallbackLogo from "public/img/logo/logo.png";
 
@@ -29,6 +30,13 @@ const Footer = () => {
   const { data: siteSettings } = useQuery({
     queryKey: queryKeys.siteSettings.list(),
     queryFn: siteSettingsService.getAll,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  // Fetch legal pages for footer links
+  const { data: legalPagesData } = useQuery({
+    queryKey: queryKeys.customPages.list({ module_key: "legal", is_published: true, limit: 20 }),
+    queryFn: () => customPagesService.getAll({ module_key: "legal", is_published: true, limit: 20 }),
     staleTime: 10 * 60 * 1000,
   });
 
@@ -87,6 +95,10 @@ const Footer = () => {
     instagram: "fa-brands fa-instagram",
     tiktok: "fa-brands fa-tiktok",
   };
+
+  const legalPages = (legalPagesData?.data ?? [])
+    .slice()
+    .sort((a: any, b: any) => (a.order_num ?? a.display_order ?? 0) - (b.order_num ?? b.display_order ?? 0));
 
   const hasDynamicData = sortedFooterSections.length > 0;
 
@@ -235,6 +247,19 @@ const Footer = () => {
             <div className="row">
               <div className="col-12">
                 <div className="footer__copyright">
+                  {legalPages.length > 0 && (
+                    <div className="d-flex justify-content-center gap-3 flex-wrap mb-15">
+                      {legalPages.map((page: any) => (
+                        <Link
+                          key={page.id}
+                          href={`/legal/${page.slug}`}
+                          style={{ fontSize: 13, opacity: 0.85 }}
+                        >
+                          {page.title}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                   <div className="copyright__text text-center">
                     <p>
                       Copyright © {new Date().getFullYear()}{" "}

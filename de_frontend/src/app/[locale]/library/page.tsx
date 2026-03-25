@@ -7,6 +7,8 @@ import WetBulbCalculator from "@/components/containers/library/WetBulbCalculator
 import { getTranslations } from "next-intl/server";
 import { fetchPageSeo } from "@/i18n/server";
 
+export const dynamic = 'force-dynamic';
+
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const [pageSeo, t] = await Promise.all([

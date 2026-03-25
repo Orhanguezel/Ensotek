@@ -21,9 +21,9 @@ import { usePreferencesStore } from "@/stores/preferences/preferences-provider";
 
 export const companyProfileSchema = z
   .object({
-    company_name: z.string().trim().optional(),
-    slogan: z.string().trim().optional(),
-    about: z.string().trim().optional(),
+    headline: z.string().trim().optional(),
+    subline: z.string().trim().optional(),
+    body: z.string().trim().optional(),
   })
   .passthrough();
 
@@ -45,9 +45,9 @@ export function companyObjToForm(v: any, seed: CompanyProfileFormState): Company
 
 export function companyFormToObj(s: CompanyProfileFormState) {
   return companyProfileSchema.parse({
-    company_name: s.company_name?.trim() || "",
-    slogan: s.slogan?.trim() || "",
-    about: s.about?.trim() || "",
+    headline: s.headline?.trim() || "",
+    subline: s.subline?.trim() || "",
+    body: s.body?.trim() || "",
   });
 }
 

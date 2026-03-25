@@ -2,7 +2,7 @@
 
 // =============================================================
 // FILE: src/app/(main)/admin/(admin)/site-settings/_components/site-settings-form.tsx
-// guezelwebdesign – Site Settings Unified Form (shadcn/ui)
+// Ensotek – Site Settings Unified Form (shadcn/ui)
 // - NO bootstrap classes
 // - Mode: Tabs (Structured / Raw)
 // - Raw: single textarea, JSON parse fallback
@@ -113,6 +113,24 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
     else setRawText(prettyStringifySiteSettingValue(coercedInitial));
   }, [coercedInitial, row?.value]);
 
+  // Sync tabs: switching from structured → raw updates rawText from current structuredValue
+  const handleModeChange = React.useCallback(
+    (nextMode: SiteSettingsFormMode) => {
+      if (nextMode === "raw" && mode === "structured") {
+        setRawText(prettyStringifySiteSettingValue(structuredValue));
+      } else if (nextMode === "structured" && mode === "raw") {
+        try {
+          const parsed = parseSiteSettingsRawValue(rawText);
+          setStructuredValue(parsed ?? {});
+        } catch {
+          // keep structured as-is if raw is invalid JSON
+        }
+      }
+      setMode(nextMode);
+    },
+    [mode, structuredValue, rawText],
+  );
+
   // guard: if structured renderer missing, force raw
   React.useEffect(() => {
     if (mode === "structured" && !canStructured) setMode("raw");
@@ -166,7 +184,7 @@ export const SiteSettingsForm: React.FC<SiteSettingsFormProps> = ({
         </div>
 
         {/* Mode tabs */}
-        <Tabs value={mode} onValueChange={(v) => setMode(v as SiteSettingsFormMode)}>
+        <Tabs value={mode} onValueChange={(v) => handleModeChange(v as SiteSettingsFormMode)}>
           <TabsList className="w-fit">
             <TabsTrigger value="structured" disabled={!canStructured || !!disabled}>
               {t("admin.siteSettings.form.modes.structured")}

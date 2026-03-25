@@ -37,7 +37,7 @@ export default function LangBoot() {
     const first = normLocaleTag(activeLocales[0]);
     if (first) return first;
 
-    return normLocaleTag(FALLBACK_LOCALE) || "de";
+    return normLocaleTag(FALLBACK_LOCALE) || "tr";
   }, [defaultLocaleMeta, activeLocales]);
 
   const resolved = useMemo(() => {
