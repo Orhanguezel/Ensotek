@@ -131,7 +131,7 @@ jobs:
             -e "$RSYNC_SSH" \
             backend-dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/Ensotek/backend/
 
-          $SSH "cd /var/www/Ensotek/backend && bun install --production --frozen-lockfile || bun install --production"
+          $SSH "cd /var/www/Ensotek/backend && npm install --production"
 
       - name: Deploy de_frontend
         env:
@@ -156,7 +156,7 @@ jobs:
         env:
           SSH: ssh -o ConnectTimeout=30 -o ServerAliveInterval=15 -i ~/.ssh/deploy_key ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}
         run: |
-          $SSH "cd /var/www/Ensotek/backend && bun run db:seed:nodrop" || echo "Seed skipped or failed (non-blocking)"
+          $SSH "cd /var/www/Ensotek/backend && npm run db:seed:nodrop" || echo "Seed skipped or failed (non-blocking)"
 
       # ── PM2 restart ──
       - name: Restart services
