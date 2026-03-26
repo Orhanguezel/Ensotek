@@ -131,7 +131,7 @@ jobs:
             -e "$RSYNC_SSH" \
             backend-dist/ ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/Ensotek/backend/
 
-          $SSH "cd /var/www/Ensotek/backend && npm install --production"
+          $SSH "cd /var/www/Ensotek/backend && npm install --omit=dev --legacy-peer-deps"
 
       - name: Deploy de_frontend
         env:
