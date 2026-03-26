@@ -51,7 +51,7 @@ export function Footer({ locale, footerSections = [], footerLinks = [], logoSrc 
             <p className="mt-3 text-sm leading-relaxed">
               Professionelle Kühltürme und Kühllösungen für Industrie und Gewerbe.
             </p>
-            <div className="mt-6 space-y-3 text-xs md:text-sm leading-relaxed text-slate-500">
+            <div className="mt-6 space-y-3 text-xs md:text-sm leading-relaxed text-slate-300">
               <p className="flex items-start gap-2">
                 <span className="shrink-0 font-bold text-slate-400 uppercase tracking-widest text-[10px]">Anschrift:</span>
                 <span>
@@ -93,7 +93,7 @@ export function Footer({ locale, footerSections = [], footerLinks = [], logoSrc 
                         ))}
                     </ul>
                   ) : section.description ? (
-                    <p className="text-xs text-slate-500 leading-relaxed">
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       {section.description}
                     </p>
                   ) : null}
@@ -196,7 +196,7 @@ export function Footer({ locale, footerSections = [], footerLinks = [], logoSrc 
         {/* Copyright */}
         <div className="pt-8 border-t border-slate-800 text-sm text-center flex flex-col md:flex-row items-center justify-between gap-4">
           <p>© {year} Kühlturm. Alle Rechte vorbehalten.</p>
-          <p className="text-xs opacity-50 flex items-center gap-1">
+          <p className="text-xs text-slate-400 flex items-center gap-1">
             Design & Build by 
             <a 
               href="https://guezelwebdesign.com" 

@@ -15,7 +15,7 @@ import NewsSection from "@/components/containers/news/NewsSection";
 import { fetchSliders, fetchPageSeo } from "@/i18n/server";
 import { resolveMediaUrl } from "@/lib/media";
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;

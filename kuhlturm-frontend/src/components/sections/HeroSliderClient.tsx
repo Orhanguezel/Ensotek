@@ -194,10 +194,14 @@ export function HeroSliderClient({ slides }: HeroSliderClientProps) {
                 key={i}
                 onClick={() => goTo(i)}
                 aria-label={`Folie ${i + 1}`}
-                className={`mx-0.5 h-[3px] rounded-full transition-all duration-300 ${
-                  i === current ? 'w-6 bg-white' : 'w-[9px] bg-white/40 hover:bg-white/70'
-                }`}
-              />
+                className="relative mx-0.5 flex h-6 w-6 items-center justify-center"
+              >
+                <span
+                  className={`block h-[3px] rounded-full transition-all duration-300 ${
+                    i === current ? 'w-6 bg-white' : 'w-[9px] bg-white/40 group-hover:bg-white/70'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         </>

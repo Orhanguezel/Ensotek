@@ -2986,13 +2986,22 @@
             "email": "E-Mail",
             "email2": "E-Mail 2",
             "whatsapp": "WhatsApp",
+            "workingHours": "Arbeitszeiten",
+            "addressGroup1": "Adresse 1 (Hauptsitz)",
+            "addressLabel": "Adressbezeichnung",
             "address": "Adresse",
             "city": "Stadt",
             "country": "Land",
-            "workingHours": "Arbeitszeiten",
             "mapsEmbedUrl": "Google Maps Embed-URL",
             "mapsLat": "Breitengrad (Lat)",
-            "mapsLng": "Längengrad (Lng)"
+            "mapsLng": "Längengrad (Lng)",
+            "addressGroup2": "Adresse 2 (Werk / Filiale)",
+            "address2Label": "Adressbezeichnung 2",
+            "address2": "Adresse 2",
+            "city2": "Stadt 2",
+            "country2": "Land 2",
+            "mapsLat2": "Breitengrad 2 (Lat)",
+            "mapsLng2": "Längengrad 2 (Lng)"
           }
         },
         "socials": {

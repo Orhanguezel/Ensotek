@@ -2635,13 +2635,22 @@
             "email": "Email",
             "email2": "Email 2",
             "whatsapp": "WhatsApp",
+            "workingHours": "Working Hours",
+            "addressGroup1": "Address 1 (Headquarters)",
+            "addressLabel": "Address Label",
             "address": "Address",
             "city": "City",
             "country": "Country",
-            "workingHours": "Working Hours",
             "mapsEmbedUrl": "Google Maps Embed URL",
             "mapsLat": "Latitude",
-            "mapsLng": "Longitude"
+            "mapsLng": "Longitude",
+            "addressGroup2": "Address 2 (Factory / Branch)",
+            "address2Label": "Address 2 Label",
+            "address2": "Address 2",
+            "city2": "City 2",
+            "country2": "Country 2",
+            "mapsLat2": "Latitude 2",
+            "mapsLng2": "Longitude 2"
           }
         },
         "socials": {

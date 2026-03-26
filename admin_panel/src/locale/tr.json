@@ -2986,13 +2986,22 @@
             "email": "E-posta",
             "email2": "E-posta 2",
             "whatsapp": "WhatsApp",
+            "workingHours": "Çalışma Saatleri",
+            "addressGroup1": "Adres 1 (Merkez)",
+            "addressLabel": "Adres Etiketi",
             "address": "Adres",
             "city": "Şehir",
             "country": "Ülke",
-            "workingHours": "Çalışma Saatleri",
             "mapsEmbedUrl": "Google Maps Embed URL",
             "mapsLat": "Enlem (Lat)",
-            "mapsLng": "Boylam (Lng)"
+            "mapsLng": "Boylam (Lng)",
+            "addressGroup2": "Adres 2 (Fabrika / Şube)",
+            "address2Label": "Adres 2 Etiketi",
+            "address2": "Adres 2",
+            "city2": "Şehir 2",
+            "country2": "Ülke 2",
+            "mapsLat2": "Enlem 2 (Lat)",
+            "mapsLng2": "Boylam 2 (Lng)"
           }
         },
         "socials": {

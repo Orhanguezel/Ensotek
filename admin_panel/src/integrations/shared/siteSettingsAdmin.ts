@@ -813,33 +813,70 @@ export const SITE_SETTINGS_CONTACT_EMPTY = {
   phone_2: "",
   email: "",
   email_2: "",
+  address_label: "",
   address: "",
   city: "",
   country: "",
-  working_hours: "",
   maps_embed_url: "",
   maps_lat: "",
   maps_lng: "",
+  address_2_label: "",
+  address_2: "",
+  city_2: "",
+  country_2: "",
+  maps_lat_2: "",
+  maps_lng_2: "",
+  working_hours: "",
 };
 
-export const SITE_SETTINGS_CONTACT_FIELDS: {
+export const SITE_SETTINGS_CONTACT_FIELDS_1: {
   key: string;
   labelKey: string;
   colSpan2?: boolean;
   textarea?: boolean;
 }[] = [
-  { key: "company_name", labelKey: "companyName" },
+  { key: "company_name", labelKey: "companyName", colSpan2: true },
   { key: "phone", labelKey: "phone" },
   { key: "phone_2", labelKey: "phone2" },
   { key: "email", labelKey: "email" },
   { key: "email_2", labelKey: "email2" },
+  { key: "working_hours", labelKey: "workingHours", colSpan2: true },
+];
+
+export const SITE_SETTINGS_CONTACT_ADDR1_FIELDS: {
+  key: string;
+  labelKey: string;
+  colSpan2?: boolean;
+  textarea?: boolean;
+}[] = [
+  { key: "address_label", labelKey: "addressLabel", colSpan2: true },
   { key: "address", labelKey: "address", colSpan2: true, textarea: true },
   { key: "city", labelKey: "city" },
   { key: "country", labelKey: "country" },
-  { key: "working_hours", labelKey: "workingHours" },
   { key: "maps_embed_url", labelKey: "mapsEmbedUrl", colSpan2: true },
   { key: "maps_lat", labelKey: "mapsLat" },
   { key: "maps_lng", labelKey: "mapsLng" },
+];
+
+export const SITE_SETTINGS_CONTACT_ADDR2_FIELDS: {
+  key: string;
+  labelKey: string;
+  colSpan2?: boolean;
+  textarea?: boolean;
+}[] = [
+  { key: "address_2_label", labelKey: "address2Label", colSpan2: true },
+  { key: "address_2", labelKey: "address2", colSpan2: true, textarea: true },
+  { key: "city_2", labelKey: "city2" },
+  { key: "country_2", labelKey: "country2" },
+  { key: "maps_lat_2", labelKey: "mapsLat2" },
+  { key: "maps_lng_2", labelKey: "mapsLng2" },
+];
+
+/** @deprecated use FIELDS_1 + ADDR1 + ADDR2 */
+export const SITE_SETTINGS_CONTACT_FIELDS = [
+  ...SITE_SETTINGS_CONTACT_FIELDS_1,
+  ...SITE_SETTINGS_CONTACT_ADDR1_FIELDS,
+  ...SITE_SETTINGS_CONTACT_ADDR2_FIELDS,
 ];
 
 // ── Socials ──

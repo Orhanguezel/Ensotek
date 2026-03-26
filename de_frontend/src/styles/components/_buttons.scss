@@ -131,13 +131,16 @@
 	border-radius: 50%;
 }
 
-.ens-hero-btn {
+.ens-hero-btn,
+a.ens-hero-btn,
+a.ens-hero-btn:link,
+a.ens-hero-btn:visited {
   height: 56px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
-  background-color: var(--clr-theme-2, #303591);
+  background-color: #303591 !important;
   color: #fff !important;
   padding: 0 36px;
   font-size: 15px;
