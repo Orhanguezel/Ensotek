@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { ChevronRight, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { getCustomPages, getCustomPageBySlug, parseCustomPageContent } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
 import { getCustomPageBySlugWithLocale, getCustomPagesWithLocale } from '@/lib/api';
@@ -72,28 +73,21 @@ export default async function LegalDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Banner */}
-      <div className="bg-slate-900 text-white py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              {tCommon('home')}
-            </Link>
-            <ChevronRight size={14} />
-            <Link href={`/${locale}/legal`} className="hover:text-white transition-colors">
-              {t('title')}
-            </Link>
-            <ChevronRight size={14} />
-            <span className="text-white line-clamp-1">{page.title}</span>
-          </nav>
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
-            {page.title}
-          </h1>
-          <p className="mt-2 text-sm text-slate-400">
-            {t('lastUpdated')}: {updatedAt}
-          </p>
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        homeLabel={tCommon('home')}
+        breadcrumbs={[
+          { label: t('title'), href: `/${locale}/legal` },
+          { label: page.title },
+        ]}
+      >
+        <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
+          {page.title}
+        </h1>
+        <p className="mt-2 text-sm text-slate-400">
+          {t('lastUpdated')}: {updatedAt}
+        </p>
+      </PageBanner>
 
       {/* Content + Sidebar */}
       <div className="bg-white py-12">

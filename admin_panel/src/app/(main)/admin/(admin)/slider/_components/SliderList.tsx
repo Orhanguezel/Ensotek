@@ -18,6 +18,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import type { SliderAdminDto } from "@/integrations/shared";
 
 const safeText = (v: unknown) => (v === null || v === undefined ? "" : String(v));
+const stripHtml = (v: string) => v.replace(/<[^>]*>/g, "").trim();
 const normLocale = (v: unknown) =>
   String(v ?? "")
     .trim()
@@ -142,9 +143,9 @@ export function SliderList({
               {hasData ? (
                 rows.map((item, idx) => {
                   const id = String((item as any).id);
-                  const name = safeText((item as any).name) || t("admin.slider.list.noTitle");
+                  const name = stripHtml(safeText((item as any).name)) || t("admin.slider.list.noTitle");
                   const slug = safeText((item as any).slug) || "-";
-                  const desc = safeText((item as any).description);
+                  const desc = stripHtml(safeText((item as any).description));
                   const btnText = safeText((item as any).buttonText);
                   const btnLink = safeText((item as any).buttonLink);
                   const locale = normLocale((item as any).locale || "tr") || "tr";
@@ -279,9 +280,9 @@ export function SliderList({
           {hasData ? (
             rows.map((item, idx) => {
               const id = String((item as any).id);
-              const name = safeText((item as any).name) || t("admin.slider.list.noTitle");
+              const name = stripHtml(safeText((item as any).name)) || t("admin.slider.list.noTitle");
               const slug = safeText((item as any).slug) || "-";
-              const desc = safeText((item as any).description);
+              const desc = stripHtml(safeText((item as any).description));
               const btnText = safeText((item as any).buttonText);
               const btnLink = safeText((item as any).buttonLink);
               const locale = normLocale((item as any).locale || "tr") || "tr";

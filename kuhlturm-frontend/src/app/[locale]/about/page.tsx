@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, Target, Award, Users } from 'lucide-react';
+import { Target, Award, Users, ChevronRight } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { fetchCustomPagesByModuleKey } from '@/i18n/server';
 import { resolveMediaUrl } from '@/lib/media';
 
@@ -78,24 +79,12 @@ export default async function AboutPage({ params }: Props) {
 
   return (
     <main>
-      {/* Hero banner */}
-      <div className="bg-slate-900 text-white py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-6">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} />
-            <span className="text-white">{t('title')}</span>
-          </nav>
-          <h1 className="font-display text-4xl md:text-5xl lg:text-6xl font-bold max-w-3xl">
-            {t('heroTitle')}
-          </h1>
-          <p className="mt-4 text-slate-300 text-lg md:text-xl max-w-2xl">
-            {t('heroSubtitle')}
-          </p>
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        breadcrumbs={[{ label: t('title') }]}
+        title={t('heroTitle')}
+        subtitle={t('heroSubtitle')}
+      />
 
       {/* Overview cards */}
       <section className="py-16 md:py-24 bg-white">

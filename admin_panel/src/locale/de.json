@@ -3592,11 +3592,14 @@
         "imageAltLabel": "Bild-Alt-Text",
         "metaTitleLabel": "Meta Title",
         "metaDescriptionLabel": "Meta Description",
-        "multiLocaleTitle": "Mehrsprachige Operationen",
-        "replicateAllLocales": "Beim Erstellen in alle Sprachen kopieren",
-        "applyAllLocales": "Beim Aktualisieren auf alle Sprachen anwenden",
         "localeRequired": "Sprachauswahl ist erforderlich.",
         "titleSlugRequired": "Titel und Slug sind Pflichtfelder."
+      },
+      "tabs": {
+        "content": "Inhalt",
+        "images": "Bilder",
+        "seo": "SEO",
+        "tags": "Tags"
       },
       "formHeader": {
         "createTitle": "Neue Referenz erstellen",
@@ -3605,6 +3608,7 @@
         "backButton": "Zurück",
         "cancelButton": "Abbrechen",
         "saveButton": "Speichern",
+        "saving": "Wird gespeichert…",
         "activeLocale": "Aktive Sprache:",
         "noLocalesTitle": "Sprachliste nicht gefunden",
         "noLocalesDescription": "site_settings.app_locales ist leer oder ungültig.",
@@ -3621,7 +3625,10 @@
         "created": "Referenz erstellt.",
         "idNotFound": "Referenzdaten konnten nicht geladen werden.",
         "updated": "Referenz aktualisiert.",
-        "defaultError": "Vorgang fehlgeschlagen. Bitte erneut versuchen."
+        "defaultError": "Vorgang fehlgeschlagen. Bitte erneut versuchen.",
+        "aiSavedAll": "KI-Inhalte in alle Sprachen gespeichert",
+        "aiSavedAllSuffix": "Sprachen gespeichert",
+        "aiAutoSaved": "Alle Sprachen automatisch gespeichert. Wechseln Sie die Sprache, um den Inhalt zu überprüfen."
       },
       "formImage": {
         "coverLabel": "Referenzbild",

@@ -180,6 +180,45 @@ export default function LibraryDetailClient({ id }: Props) {
         tags: current.tags || prev.tags,
       }));
     }
+
+    // Auto-save all locale results to backend
+    if (!isNew && id && result.length > 0) {
+      let saved = 0;
+      for (const lc of result) {
+        if (!lc.locale) continue;
+        try {
+          await updateLibrary({
+            id,
+            patch: {
+              locale: lc.locale,
+              type: formData.type || "other",
+              name: (lc.title || formData.name).trim() || undefined,
+              slug: (lc.slug || formData.slug).trim() || (lc.title || formData.name).trim().toLowerCase().replace(/\s+/g, "-"),
+              description: lc.content || lc.summary || formData.description || undefined,
+              image_alt: formData.image_alt || undefined,
+              tags: lc.tags || formData.tags || undefined,
+              image_url: formData.image_url || null,
+              image_asset_id: formData.image_asset_id || null,
+              featured_image: formData.featured_image || null,
+              category_id: formData.category_id || null,
+              sub_category_id: formData.sub_category_id || null,
+              display_order: formData.display_order ?? 0,
+              is_active: formData.is_active,
+              is_published: formData.is_published,
+              featured: formData.featured,
+              published_at: formData.published_at || null,
+              meta_title: lc.meta_title || formData.meta_title || undefined,
+              meta_description: lc.meta_description || formData.meta_description || undefined,
+              meta_keywords: formData.meta_keywords || undefined,
+            },
+          }).unwrap();
+          saved++;
+        } catch {
+          // silent
+        }
+      }
+      if (saved > 0) toast.success(`AI: ${saved} dil otomatik kaydedildi`);
+    }
   };
 
   const handleApplyAILocale = (lc: LocaleContent) => {

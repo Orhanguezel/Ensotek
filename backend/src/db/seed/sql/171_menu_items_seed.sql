@@ -277,7 +277,7 @@ VALUES
 (UUID(),'aaaa1111-2222-3333-4444-999999999999','tr','SSS','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- Services submenu URLs = stable slugs
-(UUID(),'5a000001-1111-4111-8111-5a0000000001','tr','Bakım & Onarım','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'5a000001-1111-4111-8111-5a0000000001','tr','Bakım & Onarım','/service/periyodik-bakim-ve-onarim','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000002-1111-4111-8111-5a0000000002','tr','Modernizasyon','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000003-1111-4111-8111-5a0000000003','tr','Yedek Parçalar','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000004-1111-4111-8111-5a0000000004','tr','Otomasyon & SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -310,7 +310,7 @@ VALUES
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117','tr','İletişim','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: SERVICES (TR)
-(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','tr','Periyodik Bakım ve Onarım','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','tr','Periyodik Bakım ve Onarım','/service/periyodik-bakim-ve-onarim','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','tr','Modernizasyon ve Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111113','tr','Yedek Parça ve Bileşenler','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111114','tr','Otomasyon ve SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -356,7 +356,7 @@ VALUES
 (UUID(),'aaaa1111-2222-3333-4444-888888888888','en','Team','/team','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'aaaa1111-2222-3333-4444-999999999999','en','FAQs','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
-(UUID(),'5a000001-1111-4111-8111-5a0000000001','en','Maintenance','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'5a000001-1111-4111-8111-5a0000000001','en','Maintenance','/service/cooling-tower-maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000002-1111-4111-8111-5a0000000002','en','Modernization','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000003-1111-4111-8111-5a0000000003','en','Spare Parts','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000004-1111-4111-8111-5a0000000004','en','Automation / SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -388,7 +388,7 @@ VALUES
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117','en','Contact','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: SERVICES (EN)
-(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','en','Periodic Maintenance','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','en','Periodic Maintenance','/service/cooling-tower-maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','en','Modernization & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111113','en','Spare Parts & Components','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111114','en','Automation & SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -434,7 +434,7 @@ VALUES
 (UUID(),'aaaa1111-2222-3333-4444-888888888888','de','Team','/team','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'aaaa1111-2222-3333-4444-999999999999','de','FAQ','/faqs','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
-(UUID(),'5a000001-1111-4111-8111-5a0000000001','de','Wartung','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'5a000001-1111-4111-8111-5a0000000001','de','Wartung','/service/regelmaessige-wartung-reparatur-kuehltuerme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000002-1111-4111-8111-5a0000000002','de','Modernisierung','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000003-1111-4111-8111-5a0000000003','de','Ersatzteile','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'5a000004-1111-4111-8111-5a0000000004','de','Automation / SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
@@ -466,7 +466,7 @@ VALUES
 (UUID(),'b0d7d0c1-2c5d-4a9c-9d7f-0e2a6c6f1117','de','Kontakt','/contact','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 
 -- FOOTER: SERVICES (DE)
-(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','de','Wartung & Instandsetzung','/service/maintenance-repair','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
+(UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111111','de','Wartung & Instandsetzung','/service/regelmaessige-wartung-reparatur-kuehltuerme','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111112','de','Modernisierung & Retrofit','/service/modernization-retrofit','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111113','de','Ersatzteile & Komponenten','/service/spare-parts-components','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),
 (UUID(),'c9a7e2a1-0b6b-45e9-9b8c-3f6d2a111114','de','Automation / SCADA','/service/automation-scada','2024-01-01 00:00:00.000','2024-01-01 00:00:00.000'),

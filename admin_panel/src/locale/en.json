@@ -3241,11 +3241,14 @@
         "imageAltLabel": "Image Alt Text",
         "metaTitleLabel": "Meta Title",
         "metaDescriptionLabel": "Meta Description",
-        "multiLocaleTitle": "Multi-Language Operations",
-        "replicateAllLocales": "Copy to all languages on create",
-        "applyAllLocales": "Apply to all languages on update",
         "localeRequired": "Locale selection is required.",
         "titleSlugRequired": "Title and slug fields are required."
+      },
+      "tabs": {
+        "content": "Content",
+        "images": "Images",
+        "seo": "SEO",
+        "tags": "Tags"
       },
       "formHeader": {
         "createTitle": "Create New Reference",
@@ -3254,6 +3257,7 @@
         "backButton": "Back",
         "cancelButton": "Cancel",
         "saveButton": "Save",
+        "saving": "Saving…",
         "activeLocale": "Active locale:",
         "noLocalesTitle": "Language list not found",
         "noLocalesDescription": "site_settings.app_locales is empty or invalid.",
@@ -3270,7 +3274,10 @@
         "created": "Reference created.",
         "idNotFound": "Reference data could not be loaded.",
         "updated": "Reference updated.",
-        "defaultError": "Operation failed. Please try again."
+        "defaultError": "Operation failed. Please try again.",
+        "aiSavedAll": "AI content saved to all languages",
+        "aiSavedAllSuffix": "languages saved",
+        "aiAutoSaved": "All languages saved automatically. Switch languages to review content."
       },
       "formImage": {
         "coverLabel": "Reference Image",

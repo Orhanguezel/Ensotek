@@ -159,6 +159,47 @@ export default function AdminServiceDetailClient({ id }: { id: string }) {
         meta_description: cur.meta_description || p.meta_description,
         tags: cur.tags || p.tags,
       }));
+
+    // Auto-save all locale results to backend
+    if (!isNew && id && isUuidLike(id) && result.length > 0) {
+      let saved = 0;
+      for (const lc of result) {
+        if (!lc.locale) continue;
+        try {
+          await updateService({
+            id,
+            patch: {
+              locale: lc.locale,
+              name: (lc.title || f.name).trim(),
+              slug: (lc.slug || f.slug).trim() || (lc.title || f.name).trim().toLowerCase().replace(/\s+/g, "-"),
+              description: lc.content || lc.summary || f.description || undefined,
+              image_url: f.image_url || null,
+              featured_image: f.image_url || null,
+              image_alt: f.image_alt || undefined,
+              images: f.images || [],
+              is_active: f.is_active,
+              featured: f.featured,
+              area: f.area || null,
+              duration: f.duration || null,
+              maintenance: f.maintenance || null,
+              equipment: f.equipment || null,
+              price: f.price || null,
+              includes: f.includes || null,
+              warranty: f.warranty || null,
+              tags: lc.tags || f.tags || null,
+              meta_title: lc.meta_title || f.meta_title || null,
+              meta_description: lc.meta_description || f.meta_description || null,
+              meta_keywords: f.meta_keywords || null,
+              display_order: f.display_order,
+            },
+          } as any).unwrap();
+          saved++;
+        } catch {
+          // silent
+        }
+      }
+      if (saved > 0) toast.success(`AI: ${saved} dil otomatik kaydedildi`);
+    }
   };
 
   const handleApplyAILocale = (lc: LocaleContent) => {

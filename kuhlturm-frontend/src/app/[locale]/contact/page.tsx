@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
-import { ChevronRight, Mail, Phone, MapPin, Clock, Factory, MessageCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Clock, Factory, MessageCircle } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { fetchSetting } from '@/i18n/server';
 import { ContactForm } from '@/components/sections/ContactForm';
 
@@ -67,20 +68,12 @@ export default async function ContactPage({ params }: Props) {
 
   return (
     <main>
-      {/* Page banner */}
-      <div className="bg-slate-900 text-white py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} />
-            <span className="text-white">{t('title')}</span>
-          </nav>
-          <h1 className="font-display text-4xl md:text-5xl font-bold">{t('title')}</h1>
-          <p className="mt-3 text-slate-300 text-lg max-w-xl">{t('heroSubtitle')}</p>
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        breadcrumbs={[{ label: t('title') }]}
+        title={t('title')}
+        subtitle={t('heroSubtitle')}
+      />
 
       {/* Main content */}
       <section className="py-(--section-py) bg-white">

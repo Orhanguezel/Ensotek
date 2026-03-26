@@ -16,6 +16,8 @@ import { AdminImageUploadField } from "@/app/(main)/admin/_components/common/Adm
 import { AdminJsonEditor } from "@/app/(main)/admin/_components/common/AdminJsonEditor";
 import { AdminLocaleSelect } from "@/app/(main)/admin/_components/common/AdminLocaleSelect";
 import RichContentEditor from "@/app/(main)/admin/_components/common/RichContentEditor";
+import { type AIAction, AIActionDropdown } from "@/app/(main)/admin/_components/common/AIActionDropdown";
+import { AIResultsPanel } from "@/app/(main)/admin/_components/common/AIResultsPanel";
 import { useAdminLocales } from "@/app/(main)/admin/_components/common/useAdminLocales";
 import { type LocaleContent, useAIContentAssist } from "@/app/(main)/admin/_components/common/useAIContentAssist";
 import { Button } from "@/components/ui/button";
@@ -117,8 +119,9 @@ export default function AdminSliderDetailClient(props: Props) {
     [localeOptions],
   );
 
-  const handleAI = async () => {
+  const handleAI = async (action: AIAction = "full") => {
     const targets = localesForSelect.map((l) => l.value).filter(Boolean);
+    if (!targets.length) targets.push(activeLocale || "tr");
     const result = await aiAssist({
       title: f.title,
       summary: f.subtitle || f.description,
@@ -126,7 +129,7 @@ export default function AdminSliderDetailClient(props: Props) {
       locale: activeLocale,
       target_locales: targets,
       module_key: "slider",
-      action: "full",
+      action,
     });
     if (!result) return;
     setAiResults(result);
@@ -140,6 +143,41 @@ export default function AdminSliderDetailClient(props: Props) {
         meta_title: cur.meta_title || p.meta_title,
         meta_description: cur.meta_description || p.meta_description,
       }));
+
+    // Auto-save all locale results to backend
+    if (!isNew && id && result.length > 0) {
+      let saved = 0;
+      for (const lc of result) {
+        if (!lc.locale) continue;
+        try {
+          await updateSlider({
+            id,
+            body: {
+              locale: lc.locale,
+              name: (lc.title || f.title).trim(),
+              title: (lc.title || f.title).trim(),
+              subtitle: lc.summary || f.subtitle || null,
+              slug: (lc.slug || f.slug).trim() || (lc.title || f.title).trim().toLowerCase().replace(/\s+/g, "-"),
+              description: lc.content || f.description || null,
+              button_text: f.button_text || null,
+              button_link: f.button_url || null,
+              button_url: f.button_url || null,
+              image_url: f.image_url || null,
+              alt: f.image_alt || null,
+              image_alt: f.image_alt || null,
+              is_active: f.is_active,
+              display_order: f.display_order,
+              meta_title: lc.meta_title || f.meta_title || null,
+              meta_description: lc.meta_description || f.meta_description || null,
+            },
+          } as any).unwrap();
+          saved++;
+        } catch {
+          // silent
+        }
+      }
+      if (saved > 0) toast.success(`AI: ${saved} dil otomatik kaydedildi`);
+    }
   };
 
   const applyAILocale = (locale: string) => {
@@ -219,14 +257,11 @@ export default function AdminSliderDetailClient(props: Props) {
                 }}
                 disabled={isLoading}
               />
-              <button
-                type="button"
-                className="rounded-md border border-purple-300 bg-purple-50 px-3 py-1 text-purple-700 text-xs hover:bg-purple-100 disabled:opacity-60 dark:border-purple-700 dark:bg-purple-950/30 dark:text-purple-300"
-                disabled={isLoading || aiLoading || !f.title.trim()}
-                onClick={handleAI}
-              >
-                {aiLoading ? "AI calisiyor..." : "AI ile Icerik Olustur"}
-              </button>
+              <AIActionDropdown
+                onAction={handleAI}
+                loading={aiLoading}
+                disabled={isLoading || !f.title.trim()}
+              />
               <Button size="sm" onClick={handleSubmit} disabled={isLoading}>
                 <Save className="mr-1.5 h-4 w-4" /> Kaydet
               </Button>
@@ -234,39 +269,14 @@ export default function AdminSliderDetailClient(props: Props) {
           </div>
         </div>
 
-        {/* AI */}
+        {/* AI Results */}
         {aiResults && aiResults.length > 1 && (
-          <div className="border-b bg-purple-50/50 p-3 dark:bg-purple-950/20">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="font-medium text-purple-700 text-sm dark:text-purple-300">AI — Diger Diller</span>
-              <button
-                type="button"
-                className="text-[10px] text-muted-foreground hover:underline"
-                onClick={() => setAiResults(null)}
-              >
-                Kapat
-              </button>
-            </div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-              {aiResults
-                .filter((r) => r.locale !== activeLocale)
-                .map((r) => (
-                  <div key={r.locale} className="space-y-1 rounded-md border bg-background p-2">
-                    <div className="flex items-center justify-between">
-                      <span className="font-bold font-mono text-xs uppercase">{r.locale}</span>
-                      <button
-                        type="button"
-                        className="rounded border px-2 py-0.5 text-[10px] text-purple-700 hover:bg-purple-100 dark:text-purple-300"
-                        onClick={() => applyAILocale(r.locale)}
-                      >
-                        Bu dile gec
-                      </button>
-                    </div>
-                    <p className="truncate font-medium text-xs">{r.title}</p>
-                  </div>
-                ))}
-            </div>
-          </div>
+          <AIResultsPanel
+            results={aiResults}
+            currentLocale={activeLocale}
+            onApply={(lc) => applyAILocale(lc.locale)}
+            onClose={() => setAiResults(null)}
+          />
         )}
 
         {/* Tabs */}

@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronRight, ArrowLeft, Calendar, Tag } from 'lucide-react';
+import { ArrowLeft, Calendar, Tag } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { getCustomPages, getCustomPageBySlug, parseCustomPageContent, getSiteSetting } from '@ensotek/core/services';
 import type { CustomPage } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
@@ -96,45 +97,33 @@ export default async function SolutionDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Article header */}
-      <div className="bg-slate-900 text-white py-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} />
-            <Link href={`/${locale}/solutions`} className="hover:text-white transition-colors">
-              {t('title')}
-            </Link>
-            <ChevronRight size={14} />
-            <span className="text-white line-clamp-1">{item.title}</span>
-          </nav>
-
-          {/* Meta */}
-          <div className="flex items-center gap-4 text-sm text-slate-400 mb-4">
-            {item.category_name && (
-              <span className="uppercase font-semibold tracking-wide text-blue-400">
-                {item.category_name}
-              </span>
-            )}
-            <span className="flex items-center gap-1.5">
-              <Calendar size={13} />
-              {date}
+      <PageBanner
+        locale={locale}
+        breadcrumbs={[
+          { label: t('title'), href: `/${locale}/solutions` },
+          { label: item.title },
+        ]}
+      >
+        <div className="flex items-center gap-4 text-sm text-slate-400 mb-4">
+          {item.category_name && (
+            <span className="uppercase font-semibold tracking-wide text-blue-400">
+              {item.category_name}
             </span>
-          </div>
-
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
-            {item.title}
-          </h1>
-
-          {item.summary && (
-            <p className="mt-4 text-lg text-slate-300 leading-relaxed max-w-3xl">
-              {item.summary}
-            </p>
           )}
+          <span className="flex items-center gap-1.5">
+            <Calendar size={13} />
+            {date}
+          </span>
         </div>
-      </div>
+        <h1 className="font-display text-3xl md:text-4xl font-bold text-white leading-tight">
+          {item.title}
+        </h1>
+        {item.summary && (
+          <p className="mt-4 text-lg text-slate-300 leading-relaxed max-w-3xl">
+            {item.summary}
+          </p>
+        )}
+      </PageBanner>
 
       {/* Content + Sidebar */}
       <div className="bg-white py-12">

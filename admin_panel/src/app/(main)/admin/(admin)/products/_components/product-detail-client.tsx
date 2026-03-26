@@ -177,6 +177,49 @@ export default function ProductDetailClient({ id, itemType }: Props) {
         tags: current.tags || prev.tags,
       }));
     }
+
+    // Auto-save all locale results to backend
+    if (!isNew && id && result.length > 0) {
+      let saved = 0;
+      for (const lc of result) {
+        const loc = lc.locale;
+        if (!loc) continue;
+        const tagsArray = lc.tags
+          ? lc.tags.split(",").map((s) => s.trim()).filter(Boolean)
+          : [];
+        try {
+          await updateProduct({
+            id,
+            patch: {
+              locale: loc,
+              title: (lc.title || formData.title).trim(),
+              slug: (lc.slug || formData.slug).trim() || (lc.title || formData.title).trim().toLowerCase().replace(/\s+/g, "-"),
+              price: formData.price !== "" ? Number(formData.price) : 0,
+              stock_quantity: formData.stock_quantity !== "" ? Number(formData.stock_quantity) : undefined,
+              product_code: formData.product_code || undefined,
+              description: lc.content || lc.summary || formData.description || undefined,
+              alt: formData.image_alt || undefined,
+              tags: tagsArray,
+              category_id: formData.category_id || "",
+              sub_category_id: formData.sub_category_id || null,
+              image_url: formData.image_url || null,
+              images: formData.images || [],
+              storage_asset_id: formData.image_asset_id || null,
+              is_active: formData.is_active,
+              is_featured: formData.is_featured,
+              meta_title: lc.meta_title || undefined,
+              meta_description: lc.meta_description || undefined,
+            },
+          }).unwrap();
+          saved++;
+        } catch {
+          // silent — individual locale save failure
+        }
+      }
+      if (saved > 0) {
+        toast.success(`AI: ${saved} dil otomatik kaydedildi`);
+      }
+    }
   };
 
   const handleApplyAILocale = (lc: LocaleContent) => {

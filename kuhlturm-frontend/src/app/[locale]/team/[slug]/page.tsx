@@ -3,7 +3,8 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { ChevronRight, ArrowLeft, Tag } from 'lucide-react';
+import { ArrowLeft, Tag } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { fetchCustomPagesByModuleKey, parseCustomPageContent } from '@/i18n/server';
 import type { CustomPage } from '@/i18n/server';
 import { API_BASE_URL } from '@/lib/utils';
@@ -65,22 +66,14 @@ export default async function TeamDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Header */}
-      <div className="bg-slate-900 text-white py-10 md:py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-6 flex-wrap">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <Link href={`/${locale}/team`} className="hover:text-white transition-colors">
-              {t('title')}
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <span className="text-white truncate max-w-xs">{member.title}</span>
-          </nav>
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        variant="compact"
+        breadcrumbs={[
+          { label: t('title'), href: `/${locale}/team` },
+          { label: member.title },
+        ]}
+      />
 
       {/* Profile */}
       <section className="py-14 md:py-20 bg-white">

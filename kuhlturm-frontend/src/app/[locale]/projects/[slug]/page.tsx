@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import {
-  ChevronRight,
   ArrowLeft,
   MapPin,
   Building2,
@@ -16,6 +15,7 @@ import {
   ExternalLink,
   Play,
 } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { getProjectBySlug, getProjects } from '@ensotek/core/services';
 import type { Project } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
@@ -117,26 +117,15 @@ export default async function ProjectDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Page banner */}
-      <div className="bg-slate-900 text-white py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4 flex-wrap">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} />
-            <Link href={`/${locale}/projects`} className="hover:text-white transition-colors">
-              {t('title')}
-            </Link>
-            <ChevronRight size={14} />
-            <span className="text-white line-clamp-1">{project.title}</span>
-          </nav>
-          <h1 className="font-display text-4xl md:text-5xl font-bold">{project.title}</h1>
-          {project.summary && (
-            <p className="mt-3 text-slate-300 text-lg max-w-2xl">{project.summary}</p>
-          )}
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        breadcrumbs={[
+          { label: t('title'), href: `/${locale}/projects` },
+          { label: project.title },
+        ]}
+        title={project.title}
+        subtitle={project.summary ?? undefined}
+      />
 
       {/* Main content */}
       <section className="py-(--section-py) bg-white">

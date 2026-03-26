@@ -2,7 +2,8 @@ import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronRight, ExternalLink, ArrowLeft } from 'lucide-react';
+import { ExternalLink, ArrowLeft } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { getReferenceBySlug, getReferences } from '@ensotek/core/services';
 import type { Reference } from '@ensotek/core/types';
 import { API_BASE_URL } from '@/lib/utils';
@@ -74,26 +75,15 @@ export default async function ReferenceDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Page banner */}
-      <div className="bg-slate-900 text-white py-12 md:py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 mb-4 flex-wrap">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} />
-            <Link href={`/${locale}/references`} className="hover:text-white transition-colors">
-              {t('title')}
-            </Link>
-            <ChevronRight size={14} />
-            <span className="text-white line-clamp-1">{ref.title}</span>
-          </nav>
-          <h1 className="font-display text-4xl md:text-5xl font-bold">{ref.title}</h1>
-          {ref.summary && (
-            <p className="mt-3 text-slate-300 text-lg max-w-2xl">{ref.summary}</p>
-          )}
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        breadcrumbs={[
+          { label: t('title'), href: `/${locale}/references` },
+          { label: ref.title },
+        ]}
+        title={ref.title}
+        subtitle={ref.summary ?? undefined}
+      />
 
       {/* Content */}
       <section className="py-(--section-py) bg-white">

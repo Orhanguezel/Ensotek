@@ -3,7 +3,8 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { ChevronRight, Tag, Hash, ArrowLeft } from 'lucide-react';
+import { Tag, Hash, ArrowLeft } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { getProductBySlug, getProducts, getSiteSetting } from '@ensotek/core/services';
 import type { Product } from '@ensotek/core/types';
 import { getProductBySlugWithLocale, getProductsWithLocale } from '@/lib/api';
@@ -85,25 +86,14 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Breadcrumb banner */}
-      <div className="bg-slate-900 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 flex-wrap">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <Link
-              href={`/${locale}/product`}
-              className="hover:text-white transition-colors"
-            >
-              {tProducts('title')}
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <span className="text-white truncate max-w-xs">{product.title}</span>
-          </nav>
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        variant="compact"
+        breadcrumbs={[
+          { label: tProducts('title'), href: `/${locale}/product` },
+          { label: product.title },
+        ]}
+      />
 
       {/* Product detail */}
       <section className="py-12 md:py-16 bg-white">

@@ -3,7 +3,8 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { ChevronRight, Hash, Tag, ArrowLeft, Package } from 'lucide-react';
+import { Hash, Tag, ArrowLeft, Package } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { getProductBySlug, getProducts, getSiteSetting } from '@ensotek/core/services';
 import type { Product } from '@ensotek/core/types';
 import { getProductBySlugWithLocale, getProductsWithLocale } from '@/lib/api';
@@ -86,22 +87,14 @@ export default async function SparePartDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Breadcrumb banner */}
-      <div className="bg-slate-900 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 flex-wrap">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              Startseite
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <Link href={`/${locale}/sparepart`} className="hover:text-white transition-colors">
-              {t('title')}
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <span className="text-white truncate max-w-xs">{part.title}</span>
-          </nav>
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        variant="compact"
+        breadcrumbs={[
+          { label: t('title'), href: `/${locale}/sparepart` },
+          { label: part.title },
+        ]}
+      />
 
       {/* Detail */}
       <section className="py-12 md:py-16 bg-white">

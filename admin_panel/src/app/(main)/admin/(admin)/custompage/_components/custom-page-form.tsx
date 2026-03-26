@@ -57,6 +57,7 @@ export type CustomPageFormProps = {
   defaultLocale?: string;
   onLocaleChange?: (nextLocale: string) => void;
   onSubmit: (values: CustomPageFormValues) => void | Promise<void>;
+  onAISaveAll?: (localePayloads: CustomPageFormValues[]) => void | Promise<void>;
   onCancel?: () => void;
 };
 
@@ -163,6 +164,7 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
   defaultLocale,
   onLocaleChange,
   onSubmit,
+  onAISaveAll,
   onCancel,
 }) => {
   const t = useAdminT();
@@ -282,6 +284,23 @@ export const CustomPageForm: React.FC<CustomPageFormProps> = ({
         meta_description: current.meta_description || prev.meta_description,
         tags: current.tags || prev.tags,
       }));
+    }
+
+    // Auto-save all locale results to backend (edit mode only)
+    if (mode === "edit" && onAISaveAll && result.length > 0) {
+      const payloads = result.map((lc) => ({
+        ...values,
+        page_id: values.page_id ?? initialData?.id ?? undefined,
+        locale: norm(lc.locale) || values.locale,
+        title: (lc.title || values.title).trim(),
+        slug: (lc.slug || values.slug).trim(),
+        summary: (lc.summary || values.summary).trim(),
+        content: lc.content || values.content || "",
+        meta_title: (lc.meta_title || values.meta_title).trim(),
+        meta_description: (lc.meta_description || values.meta_description).trim(),
+        tags: (lc.tags || values.tags).trim(),
+      }));
+      await onAISaveAll(payloads);
     }
   };
 

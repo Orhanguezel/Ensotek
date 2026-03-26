@@ -3592,11 +3592,14 @@
         "imageAltLabel": "Görsel Alt Metni",
         "metaTitleLabel": "Meta Title",
         "metaDescriptionLabel": "Meta Description",
-        "multiLocaleTitle": "Çok Dilli İşlem",
-        "replicateAllLocales": "Oluştururken tüm dillere kopyala",
-        "applyAllLocales": "Güncellerken tüm dillere uygula",
         "localeRequired": "Locale seçimi zorunludur.",
         "titleSlugRequired": "Başlık ve slug alanları zorunludur."
+      },
+      "tabs": {
+        "content": "İçerik",
+        "images": "Görseller",
+        "seo": "SEO",
+        "tags": "Etiketler"
       },
       "formHeader": {
         "createTitle": "Yeni Referans Oluştur",
@@ -3605,6 +3608,7 @@
         "backButton": "Geri",
         "cancelButton": "Vazgeç",
         "saveButton": "Kaydet",
+        "saving": "Kaydediliyor…",
         "activeLocale": "Active locale:",
         "noLocalesTitle": "Dil listesi bulunamadı",
         "noLocalesDescription": "site_settings.app_locales boş veya geçersiz.",
@@ -3621,7 +3625,10 @@
         "created": "Referans oluşturuldu.",
         "idNotFound": "Referans verisi yüklenemedi.",
         "updated": "Referans güncellendi.",
-        "defaultError": "İşlem başarısız. Lütfen tekrar deneyin."
+        "defaultError": "İşlem başarısız. Lütfen tekrar deneyin.",
+        "aiSavedAll": "AI içerikleri tüm dillere kaydedildi",
+        "aiSavedAllSuffix": "dil kaydedildi",
+        "aiAutoSaved": "Tüm diller otomatik kaydedildi. Dil seçerek içeriği inceleyebilirsiniz."
       },
       "formImage": {
         "coverLabel": "Referans Görseli",

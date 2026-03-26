@@ -3,7 +3,8 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { ChevronRight, ArrowLeft, CheckCircle, Wrench, Shield, Tag } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Wrench, Shield, Tag } from 'lucide-react';
+import { PageBanner } from '@/components/ui/PageBanner';
 import { getServiceBySlug, getServices, getSiteSetting } from '@ensotek/core/services';
 import type { Service } from '@ensotek/core/types';
 import { getServiceBySlugWithLocale, getServicesWithLocale } from '@/lib/api';
@@ -80,22 +81,15 @@ export default async function ServiceDetailPage({ params }: Props) {
 
   return (
     <main>
-      {/* Breadcrumb banner */}
-      <div className="bg-slate-900 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <nav className="flex items-center gap-2 text-sm text-slate-400 flex-wrap">
-            <Link href={`/${locale}`} className="hover:text-white transition-colors">
-              {tCommon('home')}
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <Link href={`/${locale}/service`} className="hover:text-white transition-colors">
-              {tServices('title')}
-            </Link>
-            <ChevronRight size={14} className="shrink-0" />
-            <span className="text-white truncate max-w-xs">{service.name}</span>
-          </nav>
-        </div>
-      </div>
+      <PageBanner
+        locale={locale}
+        homeLabel={tCommon('home')}
+        variant="compact"
+        breadcrumbs={[
+          { label: tServices('title'), href: `/${locale}/service` },
+          { label: service.name },
+        ]}
+      />
 
       {/* Service detail */}
       <section className="py-12 md:py-16 bg-white">

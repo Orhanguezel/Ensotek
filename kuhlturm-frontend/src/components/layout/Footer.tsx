@@ -112,7 +112,7 @@ export function Footer({ locale, footerSections = [], footerLinks = [], logoSrc 
                       </Link>
                     </li>
                     <li>
-                      <Link href={`/${locale}/service/maintenance-repair`} className="hover:text-white transition-colors">
+                      <Link href={`/${locale}/service/${locale === 'de' ? 'regelmaessige-wartung-reparatur-kuehltuerme' : locale === 'en' ? 'cooling-tower-maintenance-repair' : 'periyodik-bakim-ve-onarim'}`} className="hover:text-white transition-colors">
                         {locale === 'de' ? 'Wartung & Instandsetzung' : 'Bakım & Onarım'}
                       </Link>
                     </li>

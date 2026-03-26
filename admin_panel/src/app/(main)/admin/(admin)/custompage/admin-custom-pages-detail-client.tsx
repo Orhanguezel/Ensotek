@@ -138,6 +138,47 @@ export default function AdminCustomPageDetailClient({
 
   const onCancel = () => router.push("/admin/custompage");
 
+  const handleAISaveAll = React.useCallback(
+    async (localePayloads: CustomPageFormValues[]) => {
+      const baseId = page?.id || id;
+      if (!baseId || !isUuidLike(String(baseId))) return;
+
+      let saved = 0;
+      for (const vals of localePayloads) {
+        const loc = localeShortClientOr(vals.locale, "tr");
+        if (!loc || (localeSet.size > 0 && !localeSet.has(localeShortClient(loc)))) continue;
+        try {
+          const patch: CustomPageUpdatePayload = {
+            module_key: vals.module_key?.trim() || undefined,
+            locale: loc,
+            title: vals.title.trim(),
+            slug: vals.slug.trim(),
+            content: vals.content ?? "",
+            is_published: !!vals.is_published,
+            featured: !!vals.featured,
+            summary: vals.summary?.trim() || null,
+            tags: vals.tags?.trim() || null,
+            featured_image: vals.featured_image?.trim() || null,
+            featured_image_asset_id: vals.featured_image_asset_id?.trim() || null,
+            featured_image_alt: vals.featured_image_alt?.trim() || null,
+            meta_title: vals.meta_title?.trim() || null,
+            meta_description: vals.meta_description?.trim() || null,
+            images: Array.isArray(vals.images) ? vals.images : [],
+            storage_image_ids: Array.isArray(vals.storage_image_ids) ? vals.storage_image_ids : [],
+          };
+          await updateCustomPage({ id: baseId, patch }).unwrap();
+          saved++;
+        } catch {
+          // silent
+        }
+      }
+      if (saved > 0) {
+        toast.success(`AI: ${saved} dil otomatik kaydedildi`);
+      }
+    },
+    [page, id, localeSet, updateCustomPage],
+  );
+
   const handleSubmit = async (values: CustomPageFormValues) => {
     try {
       const loc = localeShortClientOr(values.locale || queryLocale || apiLocaleFromDb, "tr");
@@ -269,6 +310,7 @@ export default function AdminCustomPageDetailClient({
       defaultLocale={queryLocale || apiLocaleFromDb || "tr"}
       onLocaleChange={(l) => setActiveLocale(localeShortClientOr(l, "tr"))}
       onSubmit={handleSubmit}
+      onAISaveAll={handleAISaveAll}
       onCancel={onCancel}
     />
   );

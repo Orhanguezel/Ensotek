@@ -75,6 +75,7 @@ async function callAI(config: { apiKey: string; model: string; base: string }, s
       ],
       max_tokens: 4000,
       temperature: 0.7,
+      response_format: { type: 'json_object' },
     }),
     signal: AbortSignal.timeout(30000),
   });
@@ -89,12 +90,36 @@ async function callAI(config: { apiKey: string; model: string; base: string }, s
 }
 
 function extractJSON(text: string): any {
-  try { return JSON.parse(text); } catch {}
-  const match = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (match) { try { return JSON.parse(match[1].trim()); } catch {} }
-  const jsonMatch = text.match(/(\{[\s\S]*\}|\[[\s\S]*\])/);
-  if (jsonMatch) { try { return JSON.parse(jsonMatch[1]); } catch {} }
-  throw new Error('AI yanitindan JSON cikarilamadi');
+  // 1. Direct parse
+  const trimmed = text.trim();
+  try { return JSON.parse(trimmed); } catch {}
+
+  // 2. Markdown code block
+  const mdMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/);
+  if (mdMatch) { try { return JSON.parse(mdMatch[1].trim()); } catch {} }
+
+  // 3. Find outermost { ... } or [ ... ]
+  const start = trimmed.search(/[{\[]/);
+  if (start >= 0) {
+    const opener = trimmed[start];
+    const closer = opener === '{' ? '}' : ']';
+    let depth = 0;
+    for (let i = start; i < trimmed.length; i++) {
+      if (trimmed[i] === opener) depth++;
+      else if (trimmed[i] === closer) depth--;
+      if (depth === 0) {
+        try { return JSON.parse(trimmed.slice(start, i + 1)); } catch { break; }
+      }
+    }
+  }
+
+  // 4. Try removing common LLM prefixes/suffixes
+  const cleaned = trimmed
+    .replace(/^[^{\[]*/, '')  // remove text before first { or [
+    .replace(/[^}\]]*$/, ''); // remove text after last } or ]
+  try { return JSON.parse(cleaned); } catch {}
+
+  throw new Error('AI yanitindan JSON cikarilamadi: ' + trimmed.slice(0, 200));
 }
 
 const SYSTEM_PROMPT = `Sen Ensotek firması icin profesyonel icerik yazarisin.
