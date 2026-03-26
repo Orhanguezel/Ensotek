@@ -48,7 +48,7 @@ const nextConfig = {
       "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' blob: data: https://res.cloudinary.com https://images.unsplash.com https://www.ensotek.de https://ensotek.de https://cdn.ensotek.de",
-      `connect-src 'self' ${apiBase} ${(process.env.NEXT_PUBLIC_CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean).join(' ')} https://cdn.jsdelivr.net https://api.cloudinary.com`.trim(),
+      `connect-src 'self' ${apiBase} https: http://127.0.0.1:8086 http://localhost:8086`.trim(),
       "font-src 'self' https://fonts.gstatic.com data:",
       "object-src 'none'",
       `frame-src 'self' ${apiBase} https://www.ensotek.de https://ensotek.de`.trim(),
