@@ -1,6 +1,6 @@
 // =============================================================
-// FILE: ecosystem.config.cjs
 // Ensotek - admin_panel PM2 config
+// cwd: /var/www/Ensotek/admin_panel (source + build live here)
 // =============================================================
 
 module.exports = {
@@ -8,7 +8,7 @@ module.exports = {
     {
       name: 'ensotek-admin-panel',
       cwd: '/var/www/Ensotek/admin_panel',
-      script: '/home/orhan/.bun/bin/bun',
+      script: '/usr/local/bin/bun',
       args: 'run start -- -p 3022 -H 127.0.0.1',
       exec_mode: 'fork',
       instances: 1,
@@ -26,8 +26,6 @@ module.exports = {
         HOSTNAME: '127.0.0.1',
         NEXT_TELEMETRY_DISABLED: '1',
       },
-      out_file: '/home/orhan/.pm2/logs/ensotek-admin-panel.out.log',
-      error_file: '/home/orhan/.pm2/logs/ensotek-admin-panel.err.log',
       combine_logs: true,
       time: true,
     },
