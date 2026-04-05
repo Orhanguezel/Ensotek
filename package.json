@@ -5,7 +5,8 @@
   "workspaces": [
     "packages/*",
     "kuhlturm-frontend",
-    "de_frontend"
+    "de_frontend",
+    "kompozit/backend"
   ],
   "scripts": {
     "dev:kuhlturm": "bun run --cwd kuhlturm-frontend dev",
