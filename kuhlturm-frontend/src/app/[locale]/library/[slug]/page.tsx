@@ -25,6 +25,7 @@ import { resolveMediaUrl } from '@/lib/media';
 import { PrintButton } from '@/components/ui/PrintButton';
 import { SocialShareCard } from '@/components/sections/SocialShareCard';
 import { PdfPreview } from '@/components/sections/PdfPreview';
+import { CoolingTowerAnimation } from '@/components/sections/CoolingTowerAnimation';
 
 export const dynamic = 'force-dynamic';
 
@@ -211,6 +212,13 @@ export default async function LibraryDetailPage({ params }: Props) {
             <h1 className="text-3xl md:text-4xl lg:text-5xl font-display font-extrabold text-slate-900 leading-[1.15] mb-8">
               {item.name}
             </h1>
+
+            {/* Premium Animation Override (Only for Principle related items) */}
+            {(slug.includes('prensib') || slug.includes('principle') || slug.includes('prinzip')) && (
+              <div className="mb-12">
+                 <CoolingTowerAnimation locale={locale} />
+              </div>
+            )}
 
             {/* Featured Image */}
             {(item.featured_image || item.image_url) && (

@@ -82,7 +82,7 @@ export async function repoListEmailTemplates(params: {
   offset: number;
 }) {
   let qb = db.select().from(emailTemplates).$dynamic();
-  const whereParts = [];
+  const whereParts: ReturnType<typeof like>[] = [];
   if (params.q) whereParts.push(like(emailTemplates.template_key, `%${params.q}%`));
   if (typeof params.is_active === 'boolean') {
     whereParts.push(eq(emailTemplates.is_active, params.is_active));

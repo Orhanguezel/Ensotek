@@ -6,7 +6,9 @@
     "packages/*",
     "kuhlturm-frontend",
     "de_frontend",
-    "kompozit/backend"
+    "kompozit/backend",
+    "ensotek_com_tr/backend",
+    "ensotek_com_tr/frontend"
   ],
   "scripts": {
     "dev:kuhlturm": "bun run --cwd kuhlturm-frontend dev",
@@ -14,6 +16,10 @@
     "dev:com-tr": "bun run --cwd com.tr-fronten dev",
     "build:com-tr": "bun run --cwd com.tr-fronten build",
     "dev:de": "bun run --cwd de_frontend dev",
-    "build:de": "bun run --cwd de_frontend build"
+    "build:de": "bun run --cwd de_frontend build",
+    "dev:ensotek-com-tr-backend": "bun run --cwd ensotek_com_tr/backend dev",
+    "build:ensotek-com-tr-backend": "bun run --cwd ensotek_com_tr/backend build",
+    "dev:ensotek-com-tr": "bun run --cwd ensotek_com_tr/frontend dev",
+    "build:ensotek-com-tr": "bun run --cwd ensotek_com_tr/frontend build"
   }
 }

@@ -12,7 +12,7 @@ export type UserRolesListParams = {
 };
 
 export function buildUserRolesWhere(params: UserRolesListParams) {
-  const conditions = [];
+  const conditions: ReturnType<typeof eq>[] = [];
 
   if (params.user_id) {
     conditions.push(eq(userRoles.user_id, params.user_id));

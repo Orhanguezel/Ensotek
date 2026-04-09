@@ -9,7 +9,7 @@ import type { MultipartFile, MultipartValue } from "@fastify/multipart";
 
 import { handleRouteError } from '../_shared';
 import { storageListQuerySchema, storageUpdateSchema } from "./validation";
-import { getCloudinaryConfig, uploadBufferAuto, destroyCloudinaryById, renameCloudinaryPublicId } from "./cloudinary";
+import { getCloudinaryConfig, uploadBufferAuto, destroyCloudinaryById, renameCloudinaryPublicId, type RenameResult } from "./cloudinary";
 import { buildPublicUrl, normalizeFolder } from "./util";
 import { repoListAndCount, repoGetById, repoGetByBucketPath, repoInsert, repoUpdateById, repoDeleteById, repoIsDup, type StorageInsertInput } from "./repository";
 import {
@@ -142,7 +142,7 @@ export async function adminPatchAsset(req: FastifyRequest, reply: FastifyReply) 
 
     const cfg = await getCloudinaryConfig();
     const { targetFolder, targetName, folderChanged, nameChanged } = resolveStoragePatchTargets(cur, patch);
-    let renamed = null;
+    let renamed: RenameResult | null = null;
 
     if (folderChanged || nameChanged) {
       if (cur.provider_public_id) {
