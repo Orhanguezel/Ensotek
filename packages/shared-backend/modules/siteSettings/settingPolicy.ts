@@ -97,6 +97,9 @@ export function coerceLocaleByKey(key: string, locale: string | null): string | 
 
   if (GLOBAL_ONLY_KEYS.has(k)) return '*';
 
+  /* Marka / site önekli locale kayıtları (örn. kompozit__app_locales) — seed ve admin’de locale='*' */
+  if (k.endsWith('__app_locales') || k.endsWith('__default_locale')) return '*';
+
   if (STRICT_SEO_KEYS.has(k)) {
     const effective = locale ?? '*';
     assertSeoLocaleRule(k, effective);
