@@ -227,6 +227,11 @@ export const listProducts: RouteHandler = async (req, reply) => {
     .select({ total: sql<number>`COUNT(*)` })
     .from(products)
     .innerJoin(productI18n, eq(productI18n.product_id, products.id))
+    .leftJoin(categories, eq(products.category_id, categories.id))
+    .leftJoin(
+      categoryI18n,
+      and(eq(categoryI18n.category_id, categories.id), eq(categoryI18n.locale, locale)),
+    )
     .where(whereExpr as any);
 
   const [{ total }] = await countBase;
