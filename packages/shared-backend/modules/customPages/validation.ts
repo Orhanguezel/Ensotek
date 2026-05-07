@@ -22,6 +22,7 @@ export const createSchema = z.object({
   is_published: boolLike.optional(),
   display_order: z.coerce.number().int().min(0).optional(),
   featured_image: emptyToNull(z.string().max(500).optional().nullable()),
+  image_url: emptyToNull(z.string().max(2000).optional().nullable()),
   storage_asset_id: emptyToNull(UUID36.optional().nullable()),
   images: z.array(z.string().min(1)).optional().default([]),
   storage_image_ids: z.array(z.string().min(1).max(64)).optional().default([]),
