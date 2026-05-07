@@ -9,7 +9,7 @@ export type ItemType = ProductItemType;
 
 export const normalizeItemType = (raw?: unknown, fallback: ItemType = 'product'): ItemType => {
   if (raw === 'sparepart') return 'sparepart';
-  if (raw === 'bereketfide') return 'bereketfide';
+  if (raw === 'kompozit') return 'kompozit';
   if (raw === 'product') return 'product';
   return fallback;
 };
