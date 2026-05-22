@@ -28,3 +28,6 @@ export const newsletterSubscribers = mysqlTable(
     index('newsletter_locale_idx').on(t.locale),
   ],
 );
+
+export type NewsletterRow = typeof newsletterSubscribers.$inferSelect;
+export type NewsletterInsert = typeof newsletterSubscribers.$inferInsert;

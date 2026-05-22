@@ -5,7 +5,10 @@ import { toBool } from '../../_shared';
 export type TelegramEvent =
   | 'new_user'
   | 'new_contact'
-  | 'new_ticket';
+  | 'new_ticket'
+  | 'ticket_replied'
+  | 'new_catalog_request'
+  | 'new_newsletter_subscription';
 
 export type TelegramSettings = {
   enabled: boolean;
@@ -21,6 +24,9 @@ export const TELEGRAM_EVENTS: TelegramEvent[] = [
   'new_user',
   'new_contact',
   'new_ticket',
+  'ticket_replied',
+  'new_catalog_request',
+  'new_newsletter_subscription',
 ];
 
 export function toTelegramBool(v: string | null | undefined, fallback = false): boolean {
