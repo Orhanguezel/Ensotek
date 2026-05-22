@@ -18,7 +18,7 @@ export const boolLike = z.union([
   z.literal('false'),
 ]);
 
-export const productItemType = z.enum(['product', 'sparepart', 'bereketfide']);
+export const productItemType = z.enum(['product', 'sparepart', 'kompozit']);
 export type ProductItemTypeInput = z.infer<typeof productItemType>;
 
 export const plantingSeason = z.enum(['ilkbahar', 'yaz', 'sonbahar', 'kis']);

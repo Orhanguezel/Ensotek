@@ -2,8 +2,10 @@ import type { Metadata } from 'next';
 import { SITE_URL } from '@/lib/utils';
 import { AVAILABLE_LOCALES, FALLBACK_LOCALE } from '@/i18n/locales';
 
-const DEFAULT_SITE_NAME = 'Bereket Fide';
-const DEFAULT_TITLE_SUFFIX = 'Bereket Fide';
+// Site adi: tuketici uygulamanin NEXT_PUBLIC_SITE_NAME env'inden gelir;
+// yoksa notr bir fallback kullanilir (onceden proje adi hardcode idi).
+const DEFAULT_SITE_NAME = process.env.NEXT_PUBLIC_SITE_NAME?.trim() || 'Ensotek';
+const DEFAULT_TITLE_SUFFIX = DEFAULT_SITE_NAME;
 const DEFAULT_OG_IMAGE = '/opengraph-image';
 
 export function stripTrailingSlash(s: string): string {

@@ -27,7 +27,7 @@ export const galleries = mysqlTable(
   {
     id: char('id', { length: 36 }).primaryKey().notNull(),
 
-    /** Hangi modüle ait: 'bereketfide', 'bereketfide', 'blog', 'products', ... */
+    /** Hangi modüle ait: 'gallery', 'blog', 'products', ... */
     module_key: varchar('module_key', { length: 64 }).notNull().default('general'),
 
     /** İlişkili kayıt (opsiyonel) — product_id, blog_id vb. */
