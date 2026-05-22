@@ -1,1 +1,0 @@
-chat widget dosyasini duzenle. dili jsondan cek. 

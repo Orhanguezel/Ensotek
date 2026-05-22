@@ -161,3 +161,10 @@ karbonkompozit/
 kompozit_admin_panel/
 kompozit_backend/
 technical-seo-skill/
+
+# Per-project repos (poly-repo — her biri kendi git reposu, root repo izlemez)
+ensotek_de/
+ensotek_com_tr/
+kompozit/
+kuhlturm/
+ensotek_com/

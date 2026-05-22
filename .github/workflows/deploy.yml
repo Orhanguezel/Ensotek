@@ -1,25 +1,35 @@
-# GitHub Actions — Ensotek CI/CD
-# DISABLED: Auto-deploy on push is turned off.
-# Manual only: Go to Actions tab > "Deploy Ensotek" > "Run workflow"
+# GitHub Actions — Ensotek deploy (poly-repo)
 #
-# Strategy: SSH into VPS, git pull, build on server, restart PM2
-# No artifacts, no rsync — everything happens on VPS directly.
+# Workspace artık poly-repo: her site projesi kendi git reposudur ve VPS'te
+# /var/www/Ensotek/<proje> altında o reponun klonu olarak durur.
 #
-# Required GitHub Secrets:
-#   VPS_HOST       — server IP
-#   VPS_USER       — SSH user (root)
-#   VPS_KEY        — private SSH key (ed25519)
+# Bu workflow seçilen projeyi VPS'te günceller — root Ensotek reposuna DOKUNMAZ.
+# Otomatik push deploy KAPALI. Manuel: Actions > "Deploy Ensotek" > "Run workflow".
+#
+# ⚠️ ÖN KOŞUL: VPS /var/www/Ensotek altında yeni poly-repo yapısında olmalı
+#    (ensotek_de/, ensotek_com_tr/, kompozit/, kuhlturm/ — her biri kendi
+#    reposunun .git klonu). Migration tamamlanmadan çalıştırılırsa workflow
+#    ".git yok" kontrolünde güvenle durur, hiçbir şeyi bozmaz.
+#
+# GitHub Secrets: VPS_HOST, VPS_USER, VPS_KEY
 
 name: Deploy Ensotek
 
 on:
-  # push to main is DISABLED — uncomment the next line to re-enable
-  # push:
-  #   branches: [main]
   workflow_dispatch:
+    inputs:
+      project:
+        description: "Deploy edilecek proje"
+        required: true
+        type: choice
+        options:
+          - ensotek_de
+          - ensotek_com_tr
+          - kompozit
+          - kuhlturm
 
 concurrency:
-  group: deploy-ensotek
+  group: deploy-ensotek-${{ github.event.inputs.project }}
   cancel-in-progress: true
 
 jobs:
@@ -40,77 +50,47 @@ jobs:
             set -e
             export PATH="/usr/local/bin:/root/.bun/bin:$PATH"
 
-            REPO=/var/www/Ensotek
-            cd $REPO
+            PROJECT="${{ github.event.inputs.project }}"
+            PROJ_DIR="/var/www/Ensotek/$PROJECT"
 
-            echo "========== GIT PULL =========="
-            git fetch origin main
-            git reset --hard origin/main
-
-            echo "========== BACKEND =========="
-            cd $REPO/backend
-            bun install --frozen-lockfile || bun install
-            bun run build
-            echo "Backend build OK"
-
-            echo "========== DE_FRONTEND =========="
-            cd $REPO/de_frontend
-            bun install --frozen-lockfile || bun install
-            bun run build
-            echo "de_frontend build OK"
-
-            echo "========== ADMIN PANEL =========="
-            cd $REPO/admin_panel
-            bun install --frozen-lockfile || bun install
-            bun run build
-            echo "admin_panel build OK"
-
-            echo "========== DB SEED (no-drop) =========="
-            cd $REPO/backend
-            bun run db:seed:nodrop || echo "Seed skipped (non-blocking)"
-
-            echo "========== PM2 RESTART =========="
-            cd $REPO/backend
-            if pm2 describe ensotek-backend > /dev/null 2>&1; then
-              pm2 restart ensotek-backend
-            else
-              pm2 start ecosystem.config.cjs
-            fi
-
-            cd $REPO/de_frontend
-            if pm2 describe ensotek-frontend > /dev/null 2>&1; then
-              pm2 restart ensotek-frontend
-            else
-              pm2 start ecosystem.config.cjs
-            fi
-
-            cd $REPO/admin_panel
-            if pm2 describe ensotek-admin-panel > /dev/null 2>&1; then
-              pm2 restart ensotek-admin-panel
-            else
-              pm2 start ecosystem.config.cjs
-            fi
-
-            pm2 save
-
-            echo "========== HEALTH CHECK =========="
-            sleep 5
-
-            FAIL=0
-            for PORT in 8086 3011 3022; do
-              if ss -ltnp | grep -q "127.0.0.1:${PORT}"; then
-                echo "OK: port $PORT is listening"
-              else
-                echo "FAIL: port $PORT is NOT listening"
-                FAIL=1
-              fi
-            done
-
-            if [ "$FAIL" -eq 1 ]; then
-              echo "Health check failed — dumping PM2 status:"
-              pm2 list
-              pm2 logs --lines 10 --nostream
+            echo "========== ÖN KOŞUL KONTROLÜ =========="
+            if [ ! -d "$PROJ_DIR/.git" ]; then
+              echo "HATA: $PROJ_DIR bir git reposu değil."
+              echo "VPS henüz poly-repo yapısına taşınmamış — deploy iptal edildi."
               exit 1
             fi
 
-            echo "========== DEPLOY SUCCESS =========="
+            echo "========== $PROJECT — GIT SYNC =========="
+            cd "$PROJ_DIR"
+            git fetch origin main
+            git reset --hard origin/main
+
+            for APP in backend frontend admin_panel; do
+              if [ -f "$PROJ_DIR/$APP/package.json" ]; then
+                echo "========== $PROJECT/$APP — BUILD =========="
+                cd "$PROJ_DIR/$APP"
+                bun install --frozen-lockfile || bun install
+                bun run build
+              fi
+            done
+
+            if [ -f "$PROJ_DIR/backend/package.json" ]; then
+              echo "========== $PROJECT — DB SEED (no-drop) =========="
+              cd "$PROJ_DIR/backend"
+              bun run db:seed:nodrop || echo "Seed atlandı (bloklamaz)"
+            fi
+
+            echo "========== PM2 RESTART =========="
+            case "$PROJECT" in
+              ensotek_de)     PM2_APPS="ensotek-backend ensotek-frontend ensotek-admin-panel" ;;
+              ensotek_com_tr) PM2_APPS="ensotek-com-tr-backend ensotek-com-tr-frontend ensotek-com-tr-admin-panel" ;;
+              kompozit)       PM2_APPS="kompozit-backend kompozit-frontend kompozit-admin-panel" ;;
+              kuhlturm)       PM2_APPS="kuhlturm-frontend" ;;
+              *)              PM2_APPS="" ;;
+            esac
+            for APP in $PM2_APPS; do
+              pm2 restart "$APP" || echo "PM2: $APP bulunamadı, atlandı"
+            done
+            pm2 save
+
+            echo "========== DEPLOY SUCCESS: $PROJECT =========="

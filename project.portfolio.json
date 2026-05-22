@@ -1,7 +1,7 @@
 {
   "title": "Ensotek",
   "slug": "ensotek",
-  "summary": "B2B platform for cooling tower solutions with multilingual frontend variants, catalog management, customer document flows and Fastify backend.",
+  "summary": "B2B cooling tower platform family — a poly-repo workspace of multiple site projects (ensotek.de, ensotek.com.tr, karbonkompozit.com.tr, kuhlturm.com) sharing common backend/UI packages, each with its own repository and database.",
   "category": "B2B PLATFORM",
   "services": [
     "Frontend Development",
@@ -48,7 +48,7 @@
   "startDate": "2025-01-01",
   "completeDate": null,
   "completionTimeLabel": "Ongoing",
-  "repoUrl": null,
+  "repoUrl": "https://github.com/Orhanguezel/Ensotek",
   "websiteUrl": "https://www.ensotek.de",
   "demoUrl": "https://www.ensotek.de",
   "featuredImage": "/assets/imgs/work/projects/ensotek.png",
