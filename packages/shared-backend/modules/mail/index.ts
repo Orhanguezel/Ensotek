@@ -8,7 +8,11 @@
  * NOT: Burasi eskiden sadece console.warn yapan bir stub idi; bu yuzden
  * iletisim formu / hos geldin / sifre maillleri hic gonderilmiyordu.
  */
-export { SITE_NAME } from './mail/helpers';
+export {
+  SITE_NAME,
+  escapeMailHtml,
+  wrapMailBody,
+} from './mail/helpers';
 
 export {
   sendMailRaw,
