@@ -8,7 +8,10 @@
     "ensotek_de/frontend",
     "kompozit/backend",
     "ensotek_com_tr/backend",
-    "ensotek_com_tr/frontend"
+    "ensotek_com_tr/frontend",
+    "ensotek_com_tr/admin_panel",
+    "kuhlturm/backend",
+    "kuhlturm/admin_panel"
   ],
   "scripts": {
     "dev:kuhlturm": "bun run --cwd kuhlturm/frontend dev",
