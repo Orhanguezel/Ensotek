@@ -3,10 +3,10 @@
 // =============================================================
 import type { RouteHandler } from 'fastify';
 import { randomUUID } from 'crypto';
-import { db } from '@/db/client';
+import { db } from '../../db/client';
 import { subCategories, subCategoryI18n } from './schema';
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
-import { LOCALES } from '@/core/i18n';
+import { LOCALES } from '../../core/i18n';
 import type { SubCategoryCreateInput, SubCategoryUpdateInput } from './validation';
 
 const nullIfEmpty = (v: unknown) => (v === '' ? null : v);

@@ -22,7 +22,7 @@ import { renderEmailTemplateByKey } from "@ensotek/shared-backend/modules/emailT
 import { emitAppEvent } from '../../core/events';
 
 // site_name fallback için site_settings
-import { db } from "@/db/client";
+import { db } from "../../db/client";
 import { siteSettings } from "@ensotek/shared-backend/modules/siteSettings/schema";
 import { eq } from "drizzle-orm";
 

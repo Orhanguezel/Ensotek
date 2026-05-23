@@ -2,7 +2,7 @@
 // FILE: src/modules/email-templates/mailer.ts
 // =============================================================
 import { renderEmailTemplateByKey } from "./service";
-import { sendMail } from "@/modules/mail/service";
+import { sendMail } from "../mail/service";
 
 export interface SendTemplatedEmailOptions {
   to: string;

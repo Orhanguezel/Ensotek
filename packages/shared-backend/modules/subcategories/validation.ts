@@ -2,7 +2,7 @@
 // FILE: src/modules/subcategories/validation.ts
 // =============================================================
 import { z } from 'zod';
-import { LOCALES } from '@/core/i18n';
+import { LOCALES } from '../../core/i18n';
 
 const emptyToNull = <T extends z.ZodTypeAny>(schema: T) =>
   z.preprocess((v) => (v === '' ? null : v), schema);

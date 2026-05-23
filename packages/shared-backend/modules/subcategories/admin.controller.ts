@@ -2,9 +2,9 @@
 // FILE: src/modules/subcategories/admin.controller.ts
 // =============================================================
 import type { RouteHandler } from 'fastify';
-import { db } from '@/db/client';
+import { db } from '../../db/client';
 import { subCategories, subCategoryI18n } from './schema';
-import { storageAssets } from '@/modules/storage/schema';
+import { storageAssets } from '../storage/schema';
 import { and, or, like, eq, sql, asc, desc } from 'drizzle-orm';
 import {
   subCategoryCreateSchema,
@@ -14,8 +14,8 @@ import {
   type SubCategoryUpdateInput,
   type SubCategorySetImageInput,
 } from './validation';
-import { buildPublicUrl } from '@/modules/storage/_util';
-import { LOCALES } from '@/core/i18n';
+import { buildPublicUrl } from '../storage/_util';
+import { LOCALES } from '../../core/i18n';
 import { randomUUID } from 'crypto';
 
 /* ---------- VIEW FIELDS (Base + i18n) ---------- */

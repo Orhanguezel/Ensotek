@@ -3,7 +3,7 @@
 // =============================================================
 import { and, eq, sql } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
-import { db } from "@/db/client";
+import { db } from "../../db/client";
 import {
   emailTemplates,
   emailTemplatesI18n,
@@ -14,7 +14,7 @@ import {
   parseVariablesColumn,
   renderTextWithParams,
 } from "./utils";
-import { DEFAULT_LOCALE } from "@/core/i18n";
+import { DEFAULT_LOCALE } from "../../core/i18n";
 
 // Render sonucu FE/BE tarafında kullanılabilir
 export interface RenderedEmailTemplate {

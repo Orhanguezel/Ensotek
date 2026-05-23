@@ -1,7 +1,7 @@
 // src/modules/services/repository.ts
 // =============================================================
 
-import { db } from '@/db/client';
+import { db } from '../../db/client';
 import { and, asc, desc, eq, sql, type SQL } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/mysql-core';
 import {
@@ -15,8 +15,8 @@ import {
   type NewServiceImageI18nRow,
 } from './schema';
 import { randomUUID } from 'crypto';
-import { storageAssets } from '@/modules/storage/schema';
-import { publicUrlOf } from '@/modules/storage/_util';
+import { storageAssets } from '../storage/schema';
+import { publicUrlOf } from '../storage/_util';
 
 // ✅ Dinamik locale listesi / default locale DB’den
 import { getAppLocales, getDefaultLocale } from '@ensotek/shared-backend/modules/siteSettings/service';

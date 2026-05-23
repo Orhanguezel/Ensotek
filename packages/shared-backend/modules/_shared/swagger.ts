@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
 
 type JsonSchema = Record<string, unknown>;
 
@@ -16,11 +15,6 @@ export const idParamsSchema = {
 export const authSecurity = [{ bearerAuth: [] }] as const;
 
 export function fromZodSchema(schema: z.ZodTypeAny, name: string): JsonSchema {
-  const jsonSchema = zodToJsonSchema(schema, {
-    target: 'jsonSchema7',
-    $refStrategy: 'none',
-    name,
-  }) as JsonSchema & { definitions?: Record<string, JsonSchema> };
-
-  return jsonSchema.definitions?.[name] ?? jsonSchema;
+  void name;
+  return schema as unknown as JsonSchema;
 }

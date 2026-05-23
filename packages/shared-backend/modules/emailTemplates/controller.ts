@@ -5,7 +5,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { and, desc, eq, like, or, sql, type SQL } from "drizzle-orm";
 import { alias } from "drizzle-orm/mysql-core";
-import { db } from "@/db/client";
+import { db } from "../../db/client";
 import { emailTemplates, emailTemplatesI18n } from "./schema";
 import {
   extractVariablesFromText,

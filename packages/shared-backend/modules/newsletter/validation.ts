@@ -3,7 +3,7 @@
 // ===================================================================
 
 import { z } from "zod";
-import { LOCALES } from "@/core/i18n";
+import { LOCALES } from "../../core/i18n";
 
 // Bool-like pattern (Kühlturm)
 export const boolLike = z.union([
