@@ -7,7 +7,7 @@ export const signupBody = z.object({
   // Top-level opsiyonel alanlar:
   full_name: z.string().trim().min(2).max(100).optional(),
   phone: z.string().trim().min(6).max(50).optional(),
-  rules_accepted: z.literal(true, { errorMap: () => ({ message: 'rules_accepted_required' }) }),
+  rules_accepted: z.boolean().refine((v) => v === true, { message: 'rules_accepted_required' }),
 
   // Supabase benzeri payload uyumu:
   options: z
