@@ -4,13 +4,17 @@
   "private": true,
   "workspaces": [
     "packages/*",
-    "kuhlturm/frontend",
+    "ensotek_de/backend",
     "ensotek_de/frontend",
-    "kompozit/backend",
+    "ensotek_de/admin_panel",
     "ensotek_com_tr/backend",
     "ensotek_com_tr/frontend",
     "ensotek_com_tr/admin_panel",
+    "kompozit/backend",
+    "kompozit/frontend",
+    "kompozit/admin_panel",
     "kuhlturm/backend",
+    "kuhlturm/frontend",
     "kuhlturm/admin_panel"
   ],
   "scripts": {
