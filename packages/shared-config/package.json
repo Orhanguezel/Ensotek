@@ -1,8 +1,8 @@
 {
-  "name": "@agro/shared-config",
+  "name": "@ensotek/shared-config",
   "version": "0.1.0",
   "private": true,
-  "description": "Tarim Dijital Ekosistem - Ortak Yapilandirma (TS, Tailwind, ESLint)",
+  "description": "Ensotek - Ortak Yapilandirma (TS, Tailwind, ESLint)",
   "type": "module",
   "exports": {
     "./tsconfig.base": "./tsconfig.base.json",
