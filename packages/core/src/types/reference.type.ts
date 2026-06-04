@@ -42,9 +42,12 @@ export interface ReferenceImage {
 
 export interface ReferenceListParams {
   language?: string;
+  locale?: string; // backend list endpoint `locale` query param'ı bekliyor
   is_featured?: boolean;
   is_published?: boolean;
   category_id?: string;
+  sub_category_id?: string;
   page?: number;
   limit?: number;
+  offset?: number;
 }
