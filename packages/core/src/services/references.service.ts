@@ -14,5 +14,6 @@ export function getReferenceBySlug(
   slug: string,
   locale: string,
 ): Promise<Reference> {
-  return apiFetch<Reference>(baseUrl, API_ENDPOINTS.PUBLIC.REFERENCES.BY_SLUG(slug), { language: locale });
+  // Backend by-slug endpoint'i `locale` query param'ı bekliyor (`language` değil).
+  return apiFetch<Reference>(baseUrl, API_ENDPOINTS.PUBLIC.REFERENCES.BY_SLUG(slug), { locale });
 }
