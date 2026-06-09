@@ -50,3 +50,10 @@ Her proje kendi klasöründe de çalıştırılabilir; ayrıntılar projenin ken
 - Mimari kararlar, planlar ve görseller: [`docs/`](docs/)
 - Portfolyo metadata: `project.portfolio.json` (workspace) + her projenin kendi `project.portfolio.json` dosyası
 - Bu dosya, `CLAUDE.md` ve `project.portfolio.json` birbiriyle uyumlu tutulur.
+
+## Ekran Görüntüleri
+<p align="center">
+  <img src="docs/assets/ensotek-cooling-tower-premium-base.png" width="600" alt="Ensotek platform preview" />
+  <img src="docs/assets/Screenshot from 2026-03-26 07-43-20.png" width="600" alt="Ensotek desktop screenshot" />
+  <img src="docs/assets/Screenshot from 2026-03-26 07-44-36.png" width="240" alt="Ensotek mobile screenshot" />
+</p>
