@@ -7,10 +7,10 @@ Ensotek workspace'inde paylasilan paketler. Root `package.json` `"packages/*"` g
 | Paket | NPM Adi | Amac |
 |-------|---------|------|
 | `core` | `@ensotek/core` | Frontend API katmani — servisler, tipler, endpoint sabitleri, i18n |
-| `shared-backend` | `@agro/shared-backend` | Ortak Fastify modulleri (auth, products, gallery vb.) |
-| `shared-types` | `@agro/shared-types` | Ekosistem TypeScript tipleri |
-| `shared-config` | `@agro/shared-config` | Paylasilan tsconfig, Tailwind token'lari |
-| `shared-ui` | `@agro/shared-ui` | Ortak React UI bilesenler |
+| `shared-backend` | `@ensotek/shared-backend` | Ortak Fastify modulleri (auth, products, gallery vb.) |
+| `shared-types` | `@ensotek/shared-types` | Ekosistem TypeScript tipleri |
+| `shared-config` | `@ensotek/shared-config` | Paylasilan tsconfig, Tailwind token'lari |
+| `shared-ui` | `@ensotek/shared-ui` | Ortak React UI bilesenler |
 
 ---
 
