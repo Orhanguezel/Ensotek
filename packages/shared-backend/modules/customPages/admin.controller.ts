@@ -9,6 +9,7 @@ import {
   repoReorderCustomPages,
   repoUpdateCustomPage,
 } from './repository';
+import { scoreCustomPageQuality } from './quality';
 
 function normalizePage(row: any) {
   if (!row) return row;
@@ -39,6 +40,18 @@ export async function adminGetPage(req: FastifyRequest, reply: FastifyReply) {
     return reply.send(normalizePage(row));
   } catch (e) {
     return handleRouteError(reply, req, e, 'admin_custom_page_get');
+  }
+}
+
+export async function adminGetPageQuality(req: FastifyRequest, reply: FastifyReply) {
+  try {
+    const { id } = req.params as { id: string };
+    const locale = (req.query as { locale?: string } | undefined)?.locale ?? 'tr';
+    const row = await repoGetCustomPageById(id, locale);
+    if (!row) return sendNotFound(reply);
+    return reply.send({ data: scoreCustomPageQuality(row as never) });
+  } catch (e) {
+    return handleRouteError(reply, req, e, 'admin_custom_page_quality');
   }
 }
 

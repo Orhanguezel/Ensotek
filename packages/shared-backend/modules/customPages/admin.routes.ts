@@ -3,6 +3,7 @@ import {
   adminCreatePage,
   adminDeletePage,
   adminGetPage,
+  adminGetPageQuality,
   adminListPages,
   adminReorderPages,
   adminUpdatePage,
@@ -11,6 +12,7 @@ import {
 export async function registerCustomPagesAdmin(app: FastifyInstance) {
   const B = '/custom-pages';
   app.get(B, adminListPages);
+  app.get(`${B}/:id/quality`, adminGetPageQuality);
   app.get(`${B}/:id`, adminGetPage);
   app.post(B, adminCreatePage);
   app.patch(`${B}/:id`, adminUpdatePage);
