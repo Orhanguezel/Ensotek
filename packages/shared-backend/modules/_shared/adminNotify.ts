@@ -16,14 +16,36 @@ function parseEmailList(value: string | null): string[] {
 }
 
 /**
- * Sıra: admin_notification_email (site_settings) → offers_admin_email (offer modülüyle paylaşılan
- * fallback) → smtp gönderim kutusu (son çare). İlk dolu olan kullanılır.
+ * Sıra: admin_notification_email (site_settings, elle girilmiş genel ayar) → contact_info.email
+ * (sitede zaten görünen, locale'e göre değişebilen gerçek iletişim adresi) → offers_admin_email
+ * (offer modülüyle paylaşılan fallback) → smtp gönderim kutusu (son çare). İlk dolu olan kullanılır.
+ *
+ * `locale`: isteği yapan sitenin/formun locale'i (örn. 'de','tr') — ensotek_de ve kuhlturm aynı DB'yi
+ * paylaştığı ve contact_info locale'e göre farklı marka/e-posta taşıdığı için (kuhlturm: de/en →
+ * info@kuhlturm.com, ensotek: tr → ensotek@ensotek.com.tr) bu parametre olmadan yanlış adrese
+ * bildirim gidebilir.
  */
-export async function getAdminNotificationEmails(): Promise<string[]> {
-  const { getGlobalSettingValue } = await import('../siteSettings/helpers');
+export async function getAdminNotificationEmails(locale?: string | null): Promise<string[]> {
+  const { getGlobalSettingValue, getFirstNonEmptySetting } = await import('../siteSettings/helpers');
 
   const direct = parseEmailList(await getGlobalSettingValue('admin_notification_email'));
   if (direct.length) return direct;
+
+  const { buildLocaleFallbackChain } = await import('../siteSettings');
+  const localeCandidates = await buildLocaleFallbackChain({ requested: locale ?? null });
+  // kompozit'in contact_info'su tarihsel olarak 'kompozit__contact_info' anahtarıyla seed edilmiş
+  // (sistematik bir prefix mekanizması yok, sadece o repoya özgü isimlendirme) — ikisini de dene.
+  for (const key of ['contact_info', 'kompozit__contact_info']) {
+    const contactInfoRaw = await getFirstNonEmptySetting({ key, localeCandidates });
+    if (!contactInfoRaw) continue;
+    try {
+      const parsed = JSON.parse(contactInfoRaw);
+      const email = typeof parsed?.email === 'string' ? parsed.email.trim() : '';
+      if (email) return [email];
+    } catch {
+      // contact_info JSON parse edilemedi — sıradaki key/fallback'e düş
+    }
+  }
 
   const offersFallback = parseEmailList(await getGlobalSettingValue('offers_admin_email'));
   if (offersFallback.length) return offersFallback;
@@ -31,5 +53,7 @@ export async function getAdminNotificationEmails(): Promise<string[]> {
   const { getSmtpSettings } = await import('../siteSettings');
   const smtp = await getSmtpSettings().catch(() => null);
   const fallback = smtp?.fromEmail || smtp?.username || '';
-  return fallback ? [fallback] : [];
+  // Bazı eski kayıtlarda değer yanlışlıkla JSON-string olarak saklanmış (örn. literal '""') —
+  // gerçek bir e-posta gibi görünmeyeni fallback olarak kullanma.
+  return fallback.includes('@') ? [fallback] : [];
 }

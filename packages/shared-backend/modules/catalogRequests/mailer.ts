@@ -19,7 +19,7 @@ export async function sendCatalogRequestMail(row: CatalogRequestRow) {
 }
 
 export async function sendCatalogRequestAdminMail(row: CatalogRequestRow) {
-  const adminEmails = await getAdminNotificationEmails();
+  const adminEmails = await getAdminNotificationEmails(row.locale);
   if (!adminEmails.length) return;
 
   const subject = `[Katalog Talebi] ${escapeMailHtml(row.customer_name || row.email)}`;

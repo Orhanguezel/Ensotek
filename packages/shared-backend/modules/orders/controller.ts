@@ -14,8 +14,9 @@ async function sendOrderAdminEmail(input: {
   total: string;
   itemCount: number;
   notes?: string | null;
+  locale?: string | null;
 }) {
-  const adminEmails = await getAdminNotificationEmails();
+  const adminEmails = await getAdminNotificationEmails(input.locale);
   if (!adminEmails.length) return;
 
   const subject = `[Yeni Sipariş] ${escapeMailHtml(input.customerName)} — ${input.itemCount} kalem`;
@@ -183,6 +184,7 @@ export async function dealerCreateOrder(req: FastifyRequest, reply: FastifyReply
       total: orderTotal.toFixed(2),
       itemCount: orderItemRows.length,
       notes,
+      locale: orderLocale(req),
     }).catch(() => {});
     return reply.code(201).send(created);
   } catch (e) {
