@@ -9,6 +9,9 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+# Google OAuth client secrets (downloaded from Cloud Console — never commit)
+client_secret*.json
+
 # Runtime data
 pids
 *.pid

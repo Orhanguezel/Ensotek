@@ -2,7 +2,7 @@
 // FILE: src/modules/contact/controller.ts (PUBLIC)
 // =============================================================
 import type { FastifyRequest, FastifyReply } from 'fastify';
-import { handleRouteError } from '../_shared';
+import { handleRouteError, getAdminNotificationEmails } from '../_shared';
 import { SITE_NAME } from '../mail';
 import {
   escapeContactHtml,
@@ -17,13 +17,11 @@ import { sendMailRaw } from '../mail';
 import { telegramNotify } from '../telegram';
 
 async function sendContactEmails(contact: ContactView, _locale: string | null) {
-  const { getSmtpSettings } = await import('../siteSettings');
-  const smtp = await getSmtpSettings().catch(() => null);
-  const adminEmail = smtp?.fromEmail || smtp?.username || '';
+  const adminEmails = await getAdminNotificationEmails().catch(() => []);
 
-  if (adminEmail) {
+  for (const to of adminEmails) {
     await sendMailRaw({
-      to: adminEmail,
+      to,
       subject: `[İletişim] ${escapeContactHtml(contact.subject)} — ${escapeContactHtml(contact.name)}`,
       html: `<p><strong>Ad:</strong> ${escapeContactHtml(contact.name)}</p>
              <p><strong>E-posta:</strong> ${escapeContactHtml(contact.email)}</p>

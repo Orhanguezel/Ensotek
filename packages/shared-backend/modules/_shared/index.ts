@@ -56,6 +56,7 @@ export {
 } from './http';
 
 export { setContentRange } from './contentRange';
+export { getAdminNotificationEmails } from './adminNotify';
 export { authSecurity, fromZodSchema, idParamsSchema, okResponseSchema } from './swagger';
 export {
   CACHE_TTL,

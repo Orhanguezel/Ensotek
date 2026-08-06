@@ -8,7 +8,7 @@ import {
   repoMarkCatalogEmailSent,
   resolveCatalogUrl,
 } from './repository';
-import { sendCatalogRequestMail } from './mailer';
+import { sendCatalogRequestMail, sendCatalogRequestAdminMail } from './mailer';
 
 function requestMeta(req: FastifyRequest) {
   return {
@@ -55,6 +55,12 @@ export async function createCatalogRequestPublic(req: FastifyRequest, reply: Fas
     } catch (err) {
       req.log.warn({ err, id: row.id }, 'catalog_email_send_failed');
       updated = (await repoMarkCatalogEmailFailed(row.id)) ?? row;
+    }
+
+    try {
+      await sendCatalogRequestAdminMail(row);
+    } catch (err) {
+      req.log.warn({ err, id: row.id }, 'catalog_admin_email_failed');
     }
 
     try {

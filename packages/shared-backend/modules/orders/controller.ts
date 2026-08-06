@@ -1,10 +1,34 @@
 // src/modules/orders/controller.ts
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { telegramNotify } from '../telegram/helpers/telegram.notifier';
+import { sendMailRaw, escapeMailHtml } from '../mail';
 
 function orderLocale(req: FastifyRequest): string {
   const h = req.headers['x-locale'];
   return typeof h === 'string' && h.length >= 2 ? h.slice(0, 8) : 'tr';
+}
+
+async function sendOrderAdminEmail(input: {
+  customerName: string;
+  orderId: string;
+  total: string;
+  itemCount: number;
+  notes?: string | null;
+}) {
+  const adminEmails = await getAdminNotificationEmails();
+  if (!adminEmails.length) return;
+
+  const subject = `[Yeni Sipariş] ${escapeMailHtml(input.customerName)} — ${input.itemCount} kalem`;
+  const html = `<p><strong>Bayi/Firma:</strong> ${escapeMailHtml(input.customerName)}</p>
+    <p><strong>Sipariş No:</strong> ${escapeMailHtml(input.orderId)}</p>
+    <p><strong>Kalem Sayısı:</strong> ${input.itemCount}</p>
+    <p><strong>Toplam:</strong> ${escapeMailHtml(input.total)}</p>
+    ${input.notes ? `<p><strong>Not:</strong><br/>${escapeMailHtml(input.notes).replace(/\n/g, '<br/>')}</p>` : ''}`;
+  const text = `Bayi/Firma: ${input.customerName}\nSipariş No: ${input.orderId}\nKalem Sayısı: ${input.itemCount}\nToplam: ${input.total}${input.notes ? `\nNot: ${input.notes}` : ''}`;
+
+  for (const to of adminEmails) {
+    await sendMailRaw({ to, subject, html, text });
+  }
 }
 import { randomUUID } from 'crypto';
 import { env } from '../../core/env';
@@ -15,6 +39,7 @@ import {
   sendValidationError,
   handleRouteError,
   setContentRange,
+  getAdminNotificationEmails,
 } from '../_shared';
 import {
   orderCreateSchema,
@@ -141,15 +166,23 @@ export async function dealerCreateOrder(req: FastifyRequest, reply: FastifyReply
     await repoCreateOrder(orderRow, orderItemRows);
 
     const created = await repoGetOrderById(orderId, orderLocale(req));
+    const customerName = profile?.company_name ?? dealerId;
     telegramNotify({
       event: 'new_order',
       data: {
-        customer_name: profile?.company_name ?? dealerId,
+        customer_name: customerName,
         order_id: orderId,
         total: String(orderTotal.toFixed(2)),
         item_count: String(orderItemRows.length),
         created_at: new Date().toISOString(),
       },
+    }).catch(() => {});
+    sendOrderAdminEmail({
+      customerName,
+      orderId,
+      total: orderTotal.toFixed(2),
+      itemCount: orderItemRows.length,
+      notes,
     }).catch(() => {});
     return reply.code(201).send(created);
   } catch (e) {
