@@ -3,6 +3,7 @@
 // Fail-safe: never throws; logs errors for debugging
 
 import { getTelegramSettings, type TelegramEvent } from '../settings';
+import { env } from '../../../core/env';
 
 type TelegramNotifyInput =
   | {
@@ -23,7 +24,10 @@ const escapeTelegramMarkdown = (text: string): string => {
 };
 
 const renderTemplate = (tpl: string, data: Record<string, unknown>): string => {
-  return tpl.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_m, key: string) => {
+  // Admin panelden/seed'den bazı şablonlar gerçek satır sonu yerine literal "\n" metniyle
+  // girilmiş olabiliyor — Telegram bunu render etmiyor, tek satır basıyor. Normalize et.
+  const normalized = tpl.replace(/\\n/g, '\n');
+  return normalized.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_m, key: string) => {
     const v = (data as Record<string, unknown>)[key];
     if (v === null || typeof v === 'undefined') return '';
     if (v instanceof Date) return escapeTelegramMarkdown(v.toISOString());
@@ -32,9 +36,10 @@ const renderTemplate = (tpl: string, data: Record<string, unknown>): string => {
 };
 
 const defaultFallbackMessage = (input: { title: string; message: string }): string => {
+  const siteName = escapeTelegramMarkdown(env.SITE_NAME);
   const title = escapeTelegramMarkdown(input.title);
   const message = escapeTelegramMarkdown(input.message);
-  return `*${title}*\n\n${message}`;
+  return `🌐 ${siteName}\n*${title}*\n\n${message}`;
 };
 
 async function sendTelegramMessage(opts: {
@@ -102,11 +107,15 @@ export async function telegramNotify(input: TelegramNotifyInput): Promise<void> 
       const chatId = input.chatId ?? cfg.defaultChatId ?? cfg.legacyChatId;
       if (!chatId) return;
 
+      // 4 site tek bota/chat'e bağlı olabiliyor (ör. ensotek_de + kuhlturm aynı DB'yi paylaşıyor) —
+      // hangi siteden geldiği belli olsun diye site_name'i otomatik ekle (caller'ın data'sı öncelikli).
+      const dataWithSite = { site_name: env.SITE_NAME, ...input.data };
+
       const tpl = (cfg.templates?.[event] ?? '').trim();
       const text = tpl
-        ? renderTemplate(tpl, input.data)
-        : renderTemplate(`*${event}*\n\n{{message}}`, {
-            ...input.data,
+        ? renderTemplate(tpl, dataWithSite)
+        : renderTemplate(`🌐 {{site_name}}\n*${event}*\n\n{{message}}`, {
+            ...dataWithSite,
             message: (input.data as Record<string, unknown>)?.message ?? '',
           });
 
