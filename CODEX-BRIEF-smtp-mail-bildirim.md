@@ -3,8 +3,12 @@
 > Kaynak: Claude Code analizi (2026-08-06). Kapsam: `packages/shared-backend` + 4 site backend'i
 > (`ensotek_com_tr/backend`, `ensotek_de/backend`, `kompozit/backend`, `kuhlturm/backend`).
 > Kullanıcı kararları (sorulup onaylandı):
-> - **SMTP yöntemi: Gmail App Password.** Mevcut nodemailer altyapısı zaten basic-auth (user/pass)
->   destekliyor — kod değişikliği gerekmiyor, sadece config + manuel Google Workspace adımı.
+> - **SMTP yöntemi: Hostinger mailbox (güncellendi — Gmail App Password DEĞİL).** 4 domain de
+>   (`dig MX` doğrulandı) Google Workspace değil, kendi hosting sağlayıcısının (Hostinger)
+>   mail sunucusunu kullanıyor (`mail.<domain>`). Google Workspace olmadığı için `no-reply@<domain>`
+>   bir Gmail App Password alamaz — Hostinger hPanel'den normal mailbox açılıp normal şifresi
+>   SMTP credential olarak kullanılıyor. Mevcut nodemailer altyapısı zaten basic-auth (user/pass)
+>   destekliyor — kod değişikliği gerekmiyor, sadece config + Hostinger'da mailbox açma adımı.
 > - **`client_secret_238474838433-....json` (workspace kökü) KULLANILMAYACAK.** OAuth2/Gmail API
 >   rotası seçilmedi. Bu dosya farklı bir OAuth client (`238474838433...`), `ensotek_com_tr/.env`
 >   içindeki mevcut Google-login client'ından (`440069309865...`) AYRI ve şu an hiçbir kodda
@@ -70,7 +74,7 @@ bloğunu (satır 321-331) referans al, şu satırları ekle:
 
 ```sql
 -- GLOBAL: SMTP (locale='*')
-(UUID(), 'smtp_host',       '*', 'smtp.gmail.com',              NOW(3), NOW(3)),
+(UUID(), 'smtp_host',       '*', 'smtp.hostinger.com',          NOW(3), NOW(3)),
 (UUID(), 'smtp_port',       '*', '465',                          NOW(3), NOW(3)),
 (UUID(), 'smtp_username',   '*', 'no-reply@ensotek.com.tr',      NOW(3), NOW(3)),  -- kompozit: no-reply@karbonkompozit.com.tr
 (UUID(), 'smtp_password',   '*', 'change-me-in-admin',           NOW(3), NOW(3)),
@@ -79,7 +83,7 @@ bloğunu (satır 321-331) referans al, şu satırları ekle:
 (UUID(), 'smtp_ssl',        '*', 'true',                         NOW(3), NOW(3))
 ```
 
-`smtp_password` her zaman `'change-me-in-admin'` placeholder kalsın — **gerçek App Password seed'e
+`smtp_password` her zaman `'change-me-in-admin'` placeholder kalsın — **gerçek mailbox şifresi seed'e
 YAZILMAZ**, prod DB'ye Admin Panel → Site Ayarları üzerinden elle girilecek (aşağıdaki "Manuel
 adımlar" bölümüne bak).
 
@@ -128,15 +132,17 @@ dokunmadan önce Claude/kullanıcıya haber ver (deploy sürecinin parçası, bu
   kapsıyor, template migrasyonu ayrı iş.
 
 ## Manuel adımlar (KULLANICI yapacak — Codex/Claude bu adımları otomatikleştiremez)
-1. Her domain için Google Workspace'te bir `no-reply@<domain>` kutusu olduğundan emin ol (yoksa
-   oluştur): `no-reply@ensotek.de`, `no-reply@ensotek.com.tr`, `no-reply@karbonkompozit.com.tr`,
-   `no-reply@kuhlturm.com`.
-2. Her kutuda 2 Adımlı Doğrulama'yı aç, bir **Uygulama Şifresi (App Password)** üret (16 hane).
-3. Prod DB'de Admin Panel → Site Ayarları → SMTP bölümünden (her site ayrı ayrı): `smtp_password`
-   alanına gerçek app password'ü gir; `smtp_host=smtp.gmail.com`, `port=465`, `ssl=true`,
+1. `dig MX <domain>` ile doğrulandı: 4 domain de Google Workspace değil, Hostinger'ın kendi mail
+   sunucusunu kullanıyor (`mail.<domain>`). Hostinger hPanel → Emails → Create Email Account'tan
+   her domain için `no-reply@<domain>` mailbox'ı aç, güçlü bir şifre üret ve not et:
+   `no-reply@ensotek.de`, `no-reply@ensotek.com.tr`, `no-reply@karbonkompozit.com.tr`,
+   `no-reply@kuhlturm.com`. Gmail'deki gibi ayrı bir "app password" adımı YOK — mailbox şifresi
+   direkt SMTP şifresi.
+2. Prod DB'de Admin Panel → Site Ayarları → SMTP bölümünden (her site ayrı ayrı): `smtp_password`
+   alanına gerçek mailbox şifresini gir; `smtp_host=smtp.hostinger.com`, `port=465`, `ssl=true`,
    `username=no-reply@<domain>`. Seed dosyasına gerçek şifre YAZILMAZ, sadece prod DB'ye admin
    panelden.
-4. `kompozit` ve `kuhlturm` için `admin_notification_email` / `AUTH_ADMIN_EMAILS` gerçek bir adrese
+3. `kompozit` ve `kuhlturm` için `admin_notification_email` / `AUTH_ADMIN_EMAILS` gerçek bir adrese
    çekilsin (şu an placeholder `admin@example.com`) — hangi adrese bildirim gitsin, karar senin.
 
 ## Doğrulama (teslim öncesi)
