@@ -467,6 +467,13 @@ type OfferMailContext = {
   offer_id?: string | null;
   country_code?: string | null;
   message?: string | null;
+  // Teklif TALEBI mailinde musterinin formda doldurdugu her alan gorunmeli:
+  subject?: string | null;
+  product_id?: string | null;
+  service_id?: string | null;
+  form_data?: string | null;
+  consent_marketing?: boolean | number | null;
+  consent_terms?: boolean | number | null;
 };
 
 function escapeMailHtml(str: string): string {
@@ -540,16 +547,65 @@ async function sendKompozitOfferAdminMail(input: OfferMailContext, to: string) {
   await sendMailRaw({ to, subject, html });
 }
 
+/** product_id -> okunabilir urun basligi. Cozulemezse id'yi dondurur (bilgi kaybolmasin). */
+async function resolveProductTitle(productId: string | null | undefined, locale: string | null | undefined): Promise<string | null> {
+  if (!productId) return null;
+  try {
+    const rows = await db
+      .select({ title: productI18n.title, locale: productI18n.locale })
+      .from(productI18n)
+      .where(eq(productI18n.product_id, productId));
+    if (!rows.length) return productId;
+    const wanted = (locale ?? 'tr').toLowerCase();
+    const hit = rows.find((r) => (r.locale ?? '').toLowerCase() === wanted) ?? rows[0];
+    return hit?.title ? `${hit.title}` : productId;
+  } catch {
+    return productId;
+  }
+}
+
+/**
+ * form_data serbest JSON: formun ek alanlari burada tasiniyor ve daha once maile
+ * HIC yansimiyordu. Duz anahtar/deger satirlarina acilir; JSON degilse ham metin.
+ */
+function expandFormData(raw: string | null | undefined): Array<[string, string]> {
+  if (!raw) return [];
+  const text = String(raw).trim();
+  if (!text) return [];
+  try {
+    const parsed = JSON.parse(text);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return Object.entries(parsed as Record<string, unknown>)
+        .filter(([, v]) => v !== null && v !== undefined && String(v).trim() !== '')
+        .map(([k, v]) => [k, typeof v === 'object' ? JSON.stringify(v) : String(v)] as [string, string]);
+    }
+  } catch {
+    // JSON degil — ham metin olarak goster
+  }
+  return [['Ek form verisi', text]];
+}
+
 async function sendKompozitOfferRequestAdminMail(input: OfferMailContext, to: string) {
   const siteName = await getOfferMailSiteName(input.locale);
   const subject = `[${siteName}] Yeni teklif talebi`;
+  const productTitle = await resolveProductTitle(input.product_id, input.locale);
+  const evet = (v: unknown) => (v === true || v === 1 || v === '1' ? 'Evet' : 'Hayır');
+
+  // Musterinin formda doldurdugu HER alan burada olmali; eksik alan = kaybolan bilgi.
   const rows = [
     ['Müşteri', input.customer_name],
     ['Firma', input.company_name ?? '-'],
     ['E-posta', input.email],
     ['Telefon', input.phone ?? '-'],
     ['Ülke', input.country_code ?? '-'],
+    ['Konu', input.subject ?? '-'],
     ['Mesaj', input.message ?? '-'],
+    ['Ürün', productTitle ?? '-'],
+    ['Hizmet', input.service_id ?? '-'],
+    ...expandFormData(input.form_data),
+    ['Pazarlama izni', evet(input.consent_marketing)],
+    ['Şartlar onayı', evet(input.consent_terms)],
+    ['Dil', input.locale ?? '-'],
     ['Teklif ID', input.offer_id ?? '-'],
   ]
     .map(([label, value]) => `<tr><td style="padding:6px 10px;font-weight:600">${label}</td><td style="padding:6px 10px">${escapeMailHtml(String(value))}</td></tr>`)
@@ -673,6 +729,12 @@ Teklif ID: ${offer.id}`;
           message: offer.message,
           country_code: (offer as any).country_code ?? null,
           locale: offer.locale ?? null,
+          subject: (offer as any).subject ?? null,
+          product_id: (offer as any).product_id ?? null,
+          service_id: (offer as any).service_id ?? null,
+          form_data: (offer as any).form_data ?? null,
+          consent_marketing: (offer as any).consent_marketing ?? null,
+          consent_terms: (offer as any).consent_terms ?? null,
         },
         to,
       );
