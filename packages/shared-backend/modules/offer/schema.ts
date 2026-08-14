@@ -25,8 +25,19 @@ const longtext = customType<{ data: string | null; driverData: string }>({
 });
 
 // -------------------- offers --------------------
+/**
+ * Tablo onegi — modul birlestirmesi icin.
+ *
+ * ensotek_com_tr tarihsel olarak `ensotek_com_tr__offers` / `..._offer_number_counters`
+ * adlarini kullaniyor (47 tablodan yalnizca bu ikisi onekli). Bu yuzden offer modulunun
+ * ayri bir kopyasi tutuluyordu. Onek env'den gelince tek modul yetiyor.
+ *
+ * Varsayilan BOS: mevcut siteler icin davranis degismez.
+ */
+const TP = process.env.OFFER_TABLE_PREFIX ?? '';
+
 export const offersTable = mysqlTable(
-  'offers',
+  `${TP}offers`,
   {
     id: char('id', { length: 36 }).primaryKey().notNull(),
 
@@ -146,7 +157,7 @@ export type OfferRow = typeof offersTable.$inferSelect;
 export type NewOfferRow = typeof offersTable.$inferInsert;
 
 // -------------------- offer_number_counters --------------------
-export const offerNumberCountersTable = mysqlTable('offer_number_counters', {
+export const offerNumberCountersTable = mysqlTable(`${TP}offer_number_counters`, {
   year: int('year').primaryKey().notNull(),
   last_seq: int('last_seq').notNull(),
   prefix: varchar('prefix', { length: 20 }).notNull().default('ENS'),
