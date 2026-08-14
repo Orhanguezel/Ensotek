@@ -46,12 +46,18 @@ async function sendTelegramMessage(opts: {
   botToken: string;
   chatId: string;
   text: string;
+  /**
+   * Varsayilan Markdown. Hata uyarilari duz metin gonderilir: bozuk Markdown
+   * yuzunden UYARININ KENDISI de basarisiz olursa hata tamamen gorunmez olur.
+   */
+  parseMode?: 'Markdown' | null;
 }): Promise<void> {
   const url = `https://api.telegram.org/bot${opts.botToken}/sendMessage`;
+  const parseMode = opts.parseMode === undefined ? 'Markdown' : opts.parseMode;
   const payload = {
     chat_id: opts.chatId,
     text: opts.text,
-    parse_mode: 'Markdown' as const,
+    ...(parseMode ? { parse_mode: parseMode } : {}),
     disable_web_page_preview: true,
   };
 
@@ -64,6 +70,54 @@ async function sendTelegramMessage(opts: {
   if (!r.ok) {
     const body = await r.text().catch(() => '');
     throw new Error(`telegram_send_failed status=${r.status} body=${body}`);
+  }
+}
+
+/**
+ * Asil hedefe (grup/kanal) gonderim basarisiz olursa yoneticinin ozel sohbetine uyarir.
+ *
+ * NEDEN: onceki davranista hata yalnizca console.error'a yaziliyordu — yani bildirim
+ * sessizce kayboluyordu. En sinsi senaryo: Telegram bir "basic group"u uye sayisi
+ * artinca otomatik SUPERGROUP'a yukseltir ve chat_id degisir; eski id'ye gonderim
+ * kalici olarak hata verir ama kimse fark etmez.
+ *
+ * Uyarinin icine ORIJINAL METIN de konur: boylece bildirim kaybolmaz, en azindan
+ * yonetici gorur ve elle isleyebilir.
+ */
+async function reportDeliveryFailure(opts: {
+  botToken: string;
+  errorChatId: string | null;
+  failedChatId: string;
+  label: string;
+  originalText: string;
+  error: unknown;
+}): Promise<void> {
+  const { errorChatId, failedChatId } = opts;
+  if (!errorChatId) return;
+  // Ayni hedefse uyari da ayni sebeple duser; tekrar denemenin anlami yok.
+  if (errorChatId === failedChatId) return;
+
+  const reason = String((opts.error as Error)?.message ?? opts.error).slice(0, 300);
+  const text =
+    `⚠️ Telegram bildirimi GONDERILEMEDI\n\n` +
+    `Site: ${env.SITE_NAME}\n` +
+    `Olay: ${opts.label}\n` +
+    `Hedef chat_id: ${failedChatId}\n` +
+    `Sebep: ${reason}\n\n` +
+    `--- gonderilemeyen mesaj ---\n` +
+    opts.originalText.slice(0, 2500);
+
+  try {
+    // Duz metin: bozuk Markdown yuzunden uyarinin kendisi dusmesin.
+    await sendTelegramMessage({
+      botToken: opts.botToken,
+      chatId: errorChatId,
+      text,
+      parseMode: null,
+    });
+  } catch (err) {
+    // Buradan sonrasi icin yapilacak bir sey yok; sonsuz dongu olmasin.
+    console.error('telegram_failure_report_failed', err);
   }
 }
 
@@ -119,7 +173,19 @@ export async function telegramNotify(input: TelegramNotifyInput): Promise<void> 
             message: (input.data as Record<string, unknown>)?.message ?? '',
           });
 
-      await sendTelegramMessage({ botToken: cfg.botToken, chatId, text });
+      try {
+        await sendTelegramMessage({ botToken: cfg.botToken, chatId, text });
+      } catch (err) {
+        await reportDeliveryFailure({
+          botToken: cfg.botToken,
+          errorChatId: cfg.errorChatId,
+          failedChatId: chatId,
+          label: event,
+          originalText: text,
+          error: err,
+        });
+        throw err;
+      }
       return;
     }
 
@@ -127,7 +193,19 @@ export async function telegramNotify(input: TelegramNotifyInput): Promise<void> 
     const chatId = input.chatId ?? cfg.defaultChatId ?? cfg.legacyChatId;
     if (!chatId) return;
     const text = defaultFallbackMessage({ title: input.title, message: input.message });
-    await sendTelegramMessage({ botToken: cfg.botToken, chatId, text });
+    try {
+      await sendTelegramMessage({ botToken: cfg.botToken, chatId, text });
+    } catch (err) {
+      await reportDeliveryFailure({
+        botToken: cfg.botToken,
+        errorChatId: cfg.errorChatId,
+        failedChatId: chatId,
+        label: input.title,
+        originalText: text,
+        error: err,
+      });
+      throw err;
+    }
   } catch (err) {
     console.error('telegram_notify_failed', err);
   }

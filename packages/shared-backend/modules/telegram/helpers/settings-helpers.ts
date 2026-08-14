@@ -16,6 +16,12 @@ export type TelegramSettings = {
   botToken: string;
   defaultChatId: string | null;
   legacyChatId: string | null;
+  /**
+   * Bildirim asil hedefe (grup/kanal) gonderilemezse uyarinin dusecegi ozel sohbet.
+   * Bos birakilirsa hata yalnizca log'a yazilir — yani sessizce kaybolur.
+   * site_settings anahtari: `telegram_error_chat_id`.
+   */
+  errorChatId: string | null;
   events: Partial<Record<TelegramEvent, boolean>>;
   templates: Partial<Record<TelegramEvent, string>>;
 };

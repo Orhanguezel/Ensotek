@@ -21,6 +21,7 @@ export async function getTelegramSettings(): Promise<TelegramSettings> {
     'telegram_bot_token',
     'telegram_default_chat_id',
     'telegram_chat_id',
+    'telegram_error_chat_id',
   ];
 
   const allKeys = [...baseKeys, ...eventEnableKeys, ...templateKeys];
@@ -34,6 +35,7 @@ export async function getTelegramSettings(): Promise<TelegramSettings> {
   const botToken = toTelegramText(map.get('telegram_bot_token'));
   const defaultChatId = toTelegramText(map.get('telegram_default_chat_id')) || null;
   const legacyChatId = toTelegramText(map.get('telegram_chat_id')) || null;
+  const errorChatId = toTelegramText(map.get('telegram_error_chat_id')) || null;
 
   const eventMap: Partial<Record<TelegramEvent, boolean>> = {};
   const templates: Partial<Record<TelegramEvent, string>> = {};
@@ -49,5 +51,14 @@ export async function getTelegramSettings(): Promise<TelegramSettings> {
     if (tpl) templates[event] = tpl;
   }
 
-  return { enabled, webhookEnabled, botToken, defaultChatId, legacyChatId, events: eventMap, templates };
+  return {
+    enabled,
+    webhookEnabled,
+    botToken,
+    defaultChatId,
+    legacyChatId,
+    errorChatId,
+    events: eventMap,
+    templates,
+  };
 }
