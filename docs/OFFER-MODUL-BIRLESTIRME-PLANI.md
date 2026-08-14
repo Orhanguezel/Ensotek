@@ -101,9 +101,40 @@ ile loglanır ve kod şablonuna düşülür — mail **hiç gitmemek** yerine gi
 1. ✅ **Tablo öneki env'e alındı** — `OFFER_TABLE_PREFIX`, varsayılan boş.
 2. ✅ **Mail iki modlu** — şablon varsa şablon, yoksa kod HTML'i; sessiz dönüş giderildi.
 3. ✅ **PDF şablonu enjekte edilebilir** — `setOfferPdfRenderer()`.
-4. ⬜ **`ensotek_com_tr`'yi geçir** (aşağıdaki kontrol listesi).
-5. ⬜ **`ensotek_de`'yi geçir** — aynı liste, de/en locale ile test.
-6. ⬜ Yerel `offer` klasörlerini sil, `.gitignore` sapmasını gözden geçir.
+4. ✅ **`ensotek_com_tr` geçirildi** — doğrulandı (ENS-2026-0010, PDF gözle kontrol).
+5. ✅ **`ensotek_de` geçirildi** — doğrulandı (ENS-2026-0008, Almanca PDF gözle kontrol).
+6. ⬜ `.gitignore` sapması: `ensotek_com_tr/`, `ensotek_de/`, `kuhlturm/` hâlâ
+   sürüm kontrolü dışında.
+
+## SONUÇ: offer modülü artık TEK
+
+Dört sitenin dördü de `@ensotek/shared-backend/modules/offer/*` kullanıyor.
+Sitelerde kalan tek şey marka teklif belgesi (`src/offer/pdf-template.ts`) ve
+onu kaydeden tek satır.
+
+### Geçiş sırasında bulunan üretim hataları
+
+1. **kuhlturm.com teklif formu 500 veriyordu.** Paylaşılan modül `offers.source`
+   kolonunu bekliyor, `ensotek` veritabanında bu kolon YOKTU. Yani kuhlturm'da
+   gönderilen her teklif talebi kayboluyordu. Kolon eklendi (seed'e de yazıldı),
+   form doğrulandı: 201.
+2. **ensotek.de PDF üretimi tamamen bozuktu.** `.env` içinde
+   `PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser` yazıyordu ama o dosya
+   sunucuda yok. Kapatıldı; puppeteer gömülü tarayıcıyı kullanıyor (ensotek_com_tr
+   zaten böyle çalışıyordu).
+3. **PDF logosu kırıktı.** `company_brand` ayarında `logo` alanı yoktu; yedek yol
+   `/logo-transparent.png` her iki sitede de 404. Sitenin gerçekten kullandığı
+   `/logo/ensotek-logo-main.png` ayara eklendi.
+
+İlk ikisi PDF üretimi hiç çalışmadığı için görünmüyordu — biri diğerini maskeliyordu.
+
+### Açık kalan (karar senin)
+
+`ensotek.de` ve `kuhlturm.com` aynı veritabanını paylaştığı için `de`/`en`
+locale'lerinde marka **Kühlturm** olarak çözülüyor: PDF alt bilgisinde
+"Kühlturm · kuhlturm.com" yazarken logo Ensotek logosu ve yasal not "Bestätigung
+durch Ensotek" diyor. Karışık marka. Aynı belirsizlik e-posta alıcısında da vardı.
+Çözümü site bazlı ayrım gerektirir; şu an veri düzeyinde bir tercih meselesi.
 
 ## Geçiş kontrol listesi (site başına)
 
