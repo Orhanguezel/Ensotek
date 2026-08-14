@@ -23,6 +23,13 @@ export const createOfferPublic: RouteHandler = async (req, reply) => {
 
   const b = parsed.data as OfferRequestBody;
 
+  // Honeypot doluysa bot kabul edilir: 201 dondurulur ama KAYIT ACILMAZ.
+  // Bota basarili gorunmesi, farkli davranistan hangi alanin tuzak oldugunu
+  // ogrenmesini engeller.
+  if (typeof b.website === 'string' && b.website.trim().length > 0) {
+    return reply.code(201).send({ ok: true });
+  }
+
   // ✅ country_code serbest metin: trim normalize
   const country_code =
     typeof b.country_code === 'string' && b.country_code.trim() ? b.country_code.trim() : null;
@@ -40,6 +47,9 @@ export const createOfferPublic: RouteHandler = async (req, reply) => {
       locale: b.locale ?? (req as any).locale ?? null,
       country_code,
       product_id: b.product_id ?? null,
+      // service_id semada kabul ediliyordu ama DB'ye HIC yazilmiyordu:
+      // hizmet uzerinden gelen teklif talebinde bu bilgi sessizce kayboluyordu.
+      service_id: b.service_id ?? null,
       form_data: packFormData(b.form_data),
 
       consent_marketing:

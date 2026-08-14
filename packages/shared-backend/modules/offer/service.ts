@@ -741,6 +741,29 @@ Teklif ID: ${offer.id}`;
     }
   } catch (err) {
     console.error('offer_request_admin_mail_failed', err);
+    // Teklif ticari olarak en degerli talep — mail dusmezse SESSIZ KALMAMALI.
+    // Telegram hatti ayakta oldugu icin alarm oradan verilir; telegramNotify
+    // kendi hatasini yutar, bu yuzden buradan yeni bir hata firlamaz.
+    try {
+      await telegramNotify({
+        title: '⚠️ Teklif talebi maili GONDERILEMEDI',
+        message: [
+          `Teklif ID: ${offer.id}`,
+          `Musteri: ${offer.customer_name}`,
+          `E-posta: ${offer.email}`,
+          `Telefon: ${offer.phone ?? '-'}`,
+          `Firma: ${offer.company_name ?? '-'}`,
+          `Konu: ${offer.subject ?? '-'}`,
+          '',
+          `Sebep: ${String((err as Error)?.message ?? err).slice(0, 300)}`,
+          '',
+          'Talep veritabaninda KAYITLI — panelden gorulebilir.',
+        ].join('\n'),
+        type: 'new_offer_request',
+      });
+    } catch (alarmErr) {
+      console.error('offer_request_mail_failure_alarm_failed', alarmErr);
+    }
   }
 }
 

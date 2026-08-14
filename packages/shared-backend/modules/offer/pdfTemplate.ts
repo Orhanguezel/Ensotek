@@ -349,7 +349,7 @@ const LABELS: Record<
     pricingEmpty: string;
 
     notes: string;
-    notesLegal: (validUntilStr: string) => string;
+    notesLegal: (validUntilStr: string, issuerName: string) => string;
     internalNotes: string;
 
     footerLeft: (siteName: string) => string;
@@ -389,10 +389,10 @@ const LABELS: Record<
     total: 'Genel Toplam',
     pricingEmpty: 'Fiyatlandırma henüz eklenmemiştir; bu belge ön teklif niteliğindedir.',
     notes: 'Notlar',
-    notesLegal: (validUntilStr) =>
+    notesLegal: (validUntilStr, issuerName) =>
       `Bu belge bilgilendirme amaçlıdır. Nihai fiyat ve ticari koşullar, ${
         validUntilStr ? `${validUntilStr} tarihine kadar geçerli olup ` : ''
-      }Ensotek tarafından yazılı olarak onaylandığında geçerli olacaktır.`,
+      }${issuerName} tarafından yazılı olarak onaylandığında geçerli olacaktır.`,
     internalNotes: 'İdari not (dahili kullanım)',
     footerLeft: (siteName) => `${siteName} – Otomatik Teklif Sistemi`,
     footerRight: 'Bu PDF sistem tarafından oluşturulmuştur, imza gerektirmez.',
@@ -432,8 +432,8 @@ const LABELS: Record<
     pricingEmpty:
       'Pricing has not been added yet; this document should be considered a preliminary offer.',
     notes: 'Notes',
-    notesLegal: (validUntilStr) =>
-      `This document is for information purposes only. Final prices and commercial terms become valid only after written confirmation by Ensotek${
+    notesLegal: (validUntilStr, issuerName) =>
+      `This document is for information purposes only. Final prices and commercial terms become valid only after written confirmation by ${issuerName}${
         validUntilStr ? ` and are valid until ${validUntilStr}.` : '.'
       }`,
     internalNotes: 'Internal note',
@@ -475,8 +475,8 @@ const LABELS: Record<
     pricingEmpty:
       'Preise wurden noch nicht hinterlegt; dieses Dokument ist ein unverbindlicher Vorab-Entwurf.',
     notes: 'Hinweise',
-    notesLegal: (validUntilStr) =>
-      `Dieses Dokument dient ausschließlich Informationszwecken. Endgültige Preise und Konditionen gelten erst nach schriftlicher Bestätigung durch Ensotek${
+    notesLegal: (validUntilStr, issuerName) =>
+      `Dieses Dokument dient ausschließlich Informationszwecken. Endgültige Preise und Konditionen gelten erst nach schriftlicher Bestätigung durch ${issuerName}${
         validUntilStr ? ` und sind bis zum ${validUntilStr} gültig.` : '.'
       }`,
     internalNotes: 'Interne Notiz',
@@ -495,7 +495,14 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
   const t = LABELS[labelLocale];
 
   const companyBrand = await getCompanyBrandSettings(runtimeLocale);
-  const siteName = companyBrand.name || ctx.site_name || 'Ensotek';
+  // The shared package historically defaults to Ensotek. The offer issuer must
+  // follow the active site (MOE Kompozit), while `company_name` remains the
+  // recipient/customer of the offer.
+  const siteName =
+    process.env.OFFER_PDF_BRAND_NAME?.trim() ||
+    ctx.site_name?.trim() ||
+    companyBrand.name ||
+    'MOE Kompozit';
 
   const offerNo = (ctx as any).offer_no || ctx.id;
   const createdAtStr = formatDate((ctx as any).created_at ?? null, labelLocale);
@@ -561,9 +568,22 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
   const vatLabel =
     vatRate != null && Number.isFinite(vatRate) ? `${t.vat} (${vatRate.toFixed(0)}%)` : `${t.vat}`;
 
-  const logoUrl = companyBrand.logoUrl;
-  const logoWidth = companyBrand.logoWidth || 160;
-  const logoHeight = companyBrand.logoHeight || 60;
+  const publicBaseUrl = (
+    process.env.PUBLIC_URL?.trim() ||
+    process.env.PUBLIC_BASE_URL?.trim() ||
+    'https://www.karbonkompozit.com.tr'
+  ).replace(/\/+$/, '');
+  const configuredLogoUrl =
+    process.env.OFFER_PDF_LOGO_URL?.trim() ||
+    (siteName.toLocaleLowerCase('tr-TR').includes('moe')
+      ? '/uploads/kompozit/brand/moe_logo_refined_v2.png'
+      : companyBrand.logoUrl);
+  const logoUrl =
+    configuredLogoUrl && configuredLogoUrl.startsWith('/')
+      ? `${publicBaseUrl}${configuredLogoUrl}`
+      : configuredLogoUrl;
+  const logoWidth = companyBrand.logoWidth || 190;
+  const logoHeight = companyBrand.logoHeight || 68;
 
   const countryDisplay = (ctx as any).country_code
     ? String((ctx as any).country_code).toUpperCase()
@@ -587,33 +607,38 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
   <title>${safeText(siteName)} – ${safeText(t.title)} ${safeText(offerNo)}</title>
   <style>
     * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; font-size: 12px; color: #222; }
-    body { padding: 24mm 18mm 20mm 18mm; background: #fff; }
+    html, body { margin: 0; padding: 0; font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; font-size: 11px; color: #202124; }
+    body { padding: 0; background: #fff; }
     .page { width: 100%; }
-    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 2px solid #0b5ed7; padding-bottom: 8px; }
+    .top-accent { height: 7px; background: linear-gradient(90deg, #8d651b 0%, #d5aa50 45%, #f0d58c 70%, #8d651b 100%); margin-bottom: 22px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid #ded8ca; }
     .header-left { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
-    .header-logo { max-height: 40px; max-width: 180px; display: block; }
-    .header-left-title { font-size: 18px; font-weight: 700; color: #0b5ed7; }
-    .header-left-sub { font-size: 12px; font-weight: 400; color: #444; }
-    .header-right { text-align: right; font-size: 11px; line-height: 1.4; }
-    .section-title { font-size: 13px; font-weight: 600; margin: 16px 0 6px; text-transform: uppercase; letter-spacing: 0.06em; color: #555; }
+    .header-logo { width: auto; max-height: 54px; max-width: 205px; object-fit: contain; display: block; margin-bottom: 6px; }
+    .header-left-title { font-size: 17px; font-weight: 800; color: #171717; letter-spacing: .02em; }
+    .header-left-sub { font-size: 10px; font-weight: 700; color: #a47720; text-transform: uppercase; letter-spacing: .18em; }
+    .header-right { min-width: 230px; text-align: right; font-size: 10.5px; line-height: 1.7; padding: 12px 14px; border-radius: 8px; background: #f7f4ed; border: 1px solid #e7dfcf; }
+    .document-title { font-size: 27px; line-height: 1; font-weight: 800; letter-spacing: -.02em; color: #1d1d1b; margin: 3px 0 7px; }
+    .document-kicker { color: #a47720; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: .2em; }
+    .section-title { font-size: 10px; font-weight: 800; margin: 18px 0 8px; padding-left: 9px; border-left: 3px solid #bd8e32; text-transform: uppercase; letter-spacing: 0.13em; color: #252525; }
     .details-grid { display: grid; grid-template-columns: 1.2fr 1.2fr; gap: 8px 32px; font-size: 11px; }
     .details-grid div { line-height: 1.4; }
-    .label { font-weight: 600; color: #555; display: inline-block; min-width: 110px; }
-    .muted { color: #777; }
-    .box { border: 1px solid #e0e0e0; border-radius: 4px; padding: 10px 12px; margin-top: 4px; background: #fafafa; }
-    .amounts { margin-top: 12px; width: 280px; margin-left: auto; font-size: 11px; }
+    .label { font-weight: 700; color: #6d6a63; display: inline-block; min-width: 105px; }
+    .muted { color: #77736b; }
+    .box { border: 1px solid #e3ded4; border-radius: 8px; padding: 13px 15px; margin-top: 4px; background: #fbfaf7; }
+    .customer-card { border: 1px solid #e3ded4; border-radius: 8px; padding: 13px 15px; background: #fff; }
+    .amounts { margin-top: 10px; width: 310px; margin-left: auto; font-size: 11px; border: 1px solid #e0d8c8; border-radius: 8px; padding: 10px 14px; background: #fbfaf7; }
     .amounts table { width: 100%; border-collapse: collapse; }
-    .amounts td { padding: 4px 0; vertical-align: top; }
+    .amounts td { padding: 5px 0; vertical-align: top; }
     .amounts td.label { text-align: left; }
     .amounts td.value { text-align: right; font-weight: 600; white-space: nowrap; }
-    .amounts tr.total-row td { border-top: 1px solid #ccc; padding-top: 6px; font-size: 12px; }
+    .amounts tr.total-row td { border-top: 1px solid #c9b990; padding-top: 9px; font-size: 14px; color: #8d651b; font-weight: 800; }
     .text-block { font-size: 11px; line-height: 1.5; margin-top: 8px; white-space: pre-wrap; }
-    .footer { margin-top: 24px; font-size: 9px; color: #888; border-top: 1px solid #e0e0e0; padding-top: 6px; display: flex; justify-content: space-between; }
+    .footer { margin-top: 25px; font-size: 8.5px; color: #8b877f; border-top: 1px solid #ded8ca; padding-top: 8px; display: flex; justify-content: space-between; }
   </style>
 </head>
 <body>
   <div class="page">
+    <div class="top-accent"></div>
     <div class="header">
       <div class="header-left">
         ${
@@ -627,10 +652,12 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
         }
         <div>
           <div class="header-left-title">${safeText(siteName)}</div>
-          <div class="header-left-sub">${safeText(t.title)}</div>
+          <div class="header-left-sub">Composite Solutions</div>
         </div>
       </div>
       <div class="header-right">
+        <div class="document-kicker">${safeText(siteName)}</div>
+        <div class="document-title">${safeText(t.title)}</div>
         <div><span class="label">${safeText(t.quoteNo)}:</span> ${safeText(offerNo)}</div>
         <div><span class="label">${safeText(t.date)}:</span> ${safeText(createdAtStr)}</div>
         ${
@@ -644,7 +671,7 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
     </div>
 
     <div class="section-title">${safeText(t.customerInfo)}</div>
-    <div class="details-grid">
+    <div class="details-grid customer-card">
       <div>
         <div><span class="label">${safeText(t.name)}:</span> ${safeText(
           (ctx as any).customer_name,
@@ -771,7 +798,7 @@ export async function renderOfferPdfHtml(ctx: PdfTemplateContext): Promise<strin
     <div class="section-title">${safeText(t.notes)}</div>
     <div class="box">
       <div class="muted" style="font-size: 10px; line-height: 1.4;">
-        ${safeText(t.notesLegal(validUntilStr))}
+        ${safeText(t.notesLegal(validUntilStr, siteName))}
       </div>
       ${
         (ctx as any).admin_notes

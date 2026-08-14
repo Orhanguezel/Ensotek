@@ -54,6 +54,10 @@ export const offerRequestBodySchema = z.object({
 
   consent_marketing: boolLike.optional(),
   consent_terms: boolLike.optional(),
+
+  // Antispam honeypot — contact ve catalogRequests ile ayni desen.
+  // Gercek kullanici bu alani gormez; doluysa istek sessizce reddedilir.
+  website: z.string().max(255).optional().nullable(),
 });
 
 export type OfferRequestBody = z.infer<typeof offerRequestBodySchema>;

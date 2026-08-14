@@ -10,9 +10,11 @@ const BASE = "/offers";
 
 export async function registerOffer(app: FastifyInstance) {
   // Public teklif talebi oluşturma
+  // Rate limit: /contacts ve /catalog-requests ile ayni (5/dk). Onceden teklif
+  // ucunda HIC limit yoktu — ticari olarak en degerli form, en korumasiz olani idi.
   app.post(
     `${BASE}`,
-    { config: { public: true } },
+    { config: { public: true, rateLimit: { max: 5, timeWindow: '1 minute' } } },
     createOfferPublic,
   );
 
