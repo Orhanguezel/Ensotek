@@ -61,6 +61,8 @@ export function shouldSkipAuditLog(req: FastifyRequest): boolean {
   const path = (rawUrl.split('?')[0] || '/').trim();
 
   if (path === '/api/health' || path === '/health') return true;
+  // Expired browser sessions routinely probe refresh; 401 here is not an application error.
+  if (path === '/api/auth/token/refresh') return true;
   if (path.startsWith('/uploads/')) return true;
   if (path.startsWith('/api/admin/audit/stream')) return true;
 

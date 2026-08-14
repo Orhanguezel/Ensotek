@@ -111,6 +111,16 @@ export async function getCloudinaryConfig(): Promise<Cfg | null> {
 type UpOpts = { folder?: string; publicId?: string; mime?: string };
 type FsErrorLike = { code?: string };
 
+function resolveLocalRoot(configuredRoot?: string | null): string {
+  const raw = String(configuredRoot || '').trim();
+  // `/uploads` is the public URL prefix used by older installations, not a
+  // suitable filesystem root. Resolve it inside the running application.
+  if (!raw || raw === '/uploads' || raw === 'uploads') {
+    return path.join(process.cwd(), 'uploads');
+  }
+  return path.resolve(raw);
+}
+
 function guessExt(mime?: string): string {
   if (!mime) return "";
   const m = mime.toLowerCase();
@@ -134,8 +144,7 @@ function guessExt(mime?: string): string {
  */
 async function uploadLocal(cfg: Cfg, buffer: Buffer, opts: UpOpts): Promise<UploadResult> {
   const fallbackRoot = path.join(process.cwd(), "uploads");
-
-  let root = cfg.localRoot || env.LOCAL_STORAGE_ROOT || fallbackRoot;
+  let root = resolveLocalRoot(cfg.localRoot || env.LOCAL_STORAGE_ROOT);
 
   const folder = (opts.folder ?? cfg.defaultFolder ?? "").replace(/^\/+|\/+$/g, "");
 
@@ -289,7 +298,7 @@ export async function destroyCloudinaryById(
   const driver: Driver = driverFromProvider ?? cfg?.driver ?? envDriver();
 
   if (driver === "local") {
-    const root = cfg?.localRoot || env.LOCAL_STORAGE_ROOT || path.join(process.cwd(), "uploads");
+    const root = resolveLocalRoot(cfg?.localRoot || env.LOCAL_STORAGE_ROOT);
     const rel = publicId.replace(/^\/+/, "");
     const abs = path.join(root, rel);
     try {
@@ -320,7 +329,7 @@ export async function renameCloudinaryPublicId(
   const driver: Driver = driverFromProvider ?? cfg?.driver ?? envDriver();
 
   if (driver === "local") {
-    const root = cfg?.localRoot || env.LOCAL_STORAGE_ROOT || path.join(process.cwd(), "uploads");
+    const root = resolveLocalRoot(cfg?.localRoot || env.LOCAL_STORAGE_ROOT);
     const oldRel = oldPublicId.replace(/^\/+/, "");
     const newRel = newPublicId.replace(/^\/+/, "");
     const oldAbs = path.join(root, oldRel);

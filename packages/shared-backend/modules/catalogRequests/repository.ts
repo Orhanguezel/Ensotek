@@ -30,7 +30,13 @@ export async function resolveCatalogUrl(locale?: string | null): Promise<string>
 }
 
 export async function repoCreateCatalogRequest(
-  body: CreateCatalogRequestInput & { ip?: string | null; user_agent?: string | null; catalog_url: string },
+  body: CreateCatalogRequestInput & {
+    ip?: string | null;
+    user_agent?: string | null;
+    catalog_url: string;
+    verification_token_hash: string;
+    verification_expires_at: Date;
+  },
 ): Promise<CatalogRequestRow> {
   const id = randomUUID();
   await db.insert(leadCatalogDownloads).values({
@@ -46,6 +52,8 @@ export async function repoCreateCatalogRequest(
     catalog_url: body.catalog_url,
     consent_marketing: body.consent_marketing,
     consent_terms: body.consent_terms,
+    verification_token_hash: body.verification_token_hash,
+    verification_expires_at: body.verification_expires_at,
     ip: body.ip || null,
     user_agent: body.user_agent || null,
   });
@@ -99,14 +107,48 @@ export async function repoMarkCatalogEmailSent(id: string): Promise<CatalogReque
   await db.update(leadCatalogDownloads).set({
     status: 'sent',
     email_sent_at: new Date(),
+    failure_reason: null,
+    last_attempt_at: new Date(),
     updated_at: new Date(),
   }).where(eq(leadCatalogDownloads.id, id));
   return repoGetCatalogRequest(id);
 }
 
-export async function repoMarkCatalogEmailFailed(id: string): Promise<CatalogRequestRow | null> {
+export async function repoMarkCatalogEmailFailed(id: string, reason: string): Promise<CatalogRequestRow | null> {
   await db.update(leadCatalogDownloads).set({
     status: 'failed',
+    failure_reason: reason.slice(0, 4000),
+    last_attempt_at: new Date(),
+    updated_at: new Date(),
+  }).where(eq(leadCatalogDownloads.id, id));
+  return repoGetCatalogRequest(id);
+}
+
+export async function repoGetCatalogRequestByVerificationHash(hash: string): Promise<CatalogRequestRow | null> {
+  const [row] = await db
+    .select()
+    .from(leadCatalogDownloads)
+    .where(eq(leadCatalogDownloads.verification_token_hash, hash))
+    .limit(1);
+  return (row ?? null) as CatalogRequestRow | null;
+}
+
+export async function repoMarkCatalogVerificationMailSent(id: string): Promise<CatalogRequestRow | null> {
+  await db.update(leadCatalogDownloads).set({
+    status: 'new',
+    failure_reason: null,
+    last_attempt_at: new Date(),
+    updated_at: new Date(),
+  }).where(eq(leadCatalogDownloads.id, id));
+  return repoGetCatalogRequest(id);
+}
+
+export async function repoMarkCatalogEmailVerified(id: string): Promise<CatalogRequestRow | null> {
+  await db.update(leadCatalogDownloads).set({
+    email_verified_at: new Date(),
+    verification_token_hash: null,
+    verification_expires_at: null,
+    failure_reason: null,
     updated_at: new Date(),
   }).where(eq(leadCatalogDownloads.id, id));
   return repoGetCatalogRequest(id);

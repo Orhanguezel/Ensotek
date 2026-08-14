@@ -7,7 +7,7 @@ import { db } from '../../db/client';
 import { auditRequestLogs } from './schema';
 import { users } from '../auth';
 import { and, eq, gte, lte, sql, type SQL } from 'drizzle-orm';
-import { excludeLocalhostCond } from './repository';
+import { excludeInternalRequestCond, excludeLocalhostCond } from './repository';
 import { isTruthyBoolLike } from './validation';
 
 type AuditBoolLike = boolean | 0 | 1 | '0' | '1' | 'true' | 'false' | undefined;
@@ -19,7 +19,7 @@ type AnalyticsDateRangeOpts = {
 
 /* ---- helper: date range conditions ---- */
 function dateRangeConds(opts: AnalyticsDateRangeOpts): SQL[] {
-  const conds: SQL[] = [];
+  const conds: SQL[] = [excludeInternalRequestCond()];
   if (opts.created_from?.trim()) {
     conds.push(gte(auditRequestLogs.created_at, sql`CAST(${opts.created_from.trim()} AS DATETIME(3))`));
   }
@@ -401,7 +401,10 @@ export type AuditSummary = {
 };
 
 export async function repoGetAuditSummary(opts?: { exclude_localhost?: AuditBoolLike }): Promise<AuditSummary> {
-  const baseConds: SQL[] = [sql`DATE(${auditRequestLogs.created_at}) = CURDATE()`];
+  const baseConds: SQL[] = [
+    sql`DATE(${auditRequestLogs.created_at}) = CURDATE()`,
+    excludeInternalRequestCond(),
+  ];
   if (opts?.exclude_localhost && isTruthyBoolLike(opts.exclude_localhost)) {
     baseConds.push(excludeLocalhostCond(auditRequestLogs));
   }
@@ -470,7 +473,10 @@ export async function repoGetMonthlyAggregation(opts: {
   exclude_localhost?: AuditBoolLike;
 }): Promise<MonthlyRow[]> {
   const monthCount = Math.min(Math.max(opts.months ?? 12, 1), 24);
-  const conds: SQL[] = [sql`${auditRequestLogs.created_at} >= DATE_SUB(CURDATE(), INTERVAL ${monthCount} MONTH)`];
+  const conds: SQL[] = [
+    sql`${auditRequestLogs.created_at} >= DATE_SUB(CURDATE(), INTERVAL ${monthCount} MONTH)`,
+    excludeInternalRequestCond(),
+  ];
   if (typeof opts.exclude_localhost !== 'undefined' && isTruthyBoolLike(opts.exclude_localhost)) {
     conds.push(excludeLocalhostCond(auditRequestLogs));
   }

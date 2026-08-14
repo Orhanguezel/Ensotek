@@ -16,7 +16,7 @@ const avatarUrlSchema = z
 export const profileUpsertSchema = z.object({
   full_name: z.string().min(1).max(191).optional(),
   phone: z.string().max(64).optional(),
-  avatar_url: avatarUrlSchema.optional(),
+  avatar_url: avatarUrlSchema.or(z.literal('')).optional(),
   address_line1: z.string().max(255).optional(),
   address_line2: z.string().max(255).optional(),
   city: z.string().max(128).optional(),

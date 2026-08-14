@@ -67,6 +67,7 @@ export const env = {
 
   // CORS
   CORS_ORIGIN,
+  AUDIT_EXCLUDE_IPS: parseEnvList(process.env.AUDIT_EXCLUDE_IPS),
 
   // Google OAuth
   GOOGLE: {

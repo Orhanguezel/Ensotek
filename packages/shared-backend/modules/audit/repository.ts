@@ -57,6 +57,14 @@ export function excludeLocalhostCond(table: AuditIpTable): SQL {
   return sql`${table.ip} NOT IN ('127.0.0.1', '::1', '::ffff:127.0.0.1')`;
 }
 
+/** Public analytics must not include admin API calls or server-to-server SSR/health traffic. */
+export function excludeInternalRequestCond(): SQL {
+  return sql`${auditRequestLogs.is_admin} = 0
+    AND ${auditRequestLogs.ip} NOT IN ('127.0.0.1', '::1', '::ffff:127.0.0.1')
+    AND ${auditRequestLogs.path} NOT LIKE '/api/admin/%'
+    AND ${auditRequestLogs.path} NOT IN ('/health', '/api/health', '/api/auth/token/refresh')`;
+}
+
 /* ---- Enriched types (with user info) ---- */
 export type AuditRequestLogEnriched = AuditRequestLogRow & {
   user_email: string | null;
