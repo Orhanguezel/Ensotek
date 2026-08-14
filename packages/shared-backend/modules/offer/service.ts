@@ -22,10 +22,36 @@ import { notifications, type NotificationType } from '../notifications/schema';
 import { users } from "../auth/schema";
 import { userRoles } from '../userRoles/schema';
 import { sendMailRaw } from '../mail';
+import { renderEmailTemplateByKey } from '../emailTemplates/service';
 
 import { offersTable, type OfferRow } from './schema';
 import { updateOffer } from './repository';
-import { renderOfferPdfHtml } from './pdfTemplate';
+import { renderOfferPdfHtml, type PdfTemplateContext } from './pdfTemplate';
+
+/**
+ * Teklif PDF sablonu — SITE BAZLI takilabilir.
+ *
+ * NEDEN KAYIT MEKANIZMASI: teklif PDF'i musteriye giden resmi ticari belge ve
+ * her markanin kendi tasarimi var (Ensotek ile MOE Kompozit sablonlari ~200
+ * satir farkli: farkli CSS siniflari, farkli baslik duzeni, farkli metinler).
+ * Bunlari tek dosyada birlestirmek yanlis soyutlama olurdu — biri digerinin
+ * ustkumesi degil, iki ayri tasarim.
+ *
+ * Cozum: MANTIK tek modulde (bu dosya), MARKA SABLONU disaridan enjekte edilir.
+ * Site kendi sablonunu acilista kaydeder:
+ *
+ *   import { setOfferPdfRenderer } from '@ensotek/shared-backend/modules/offer/service';
+ *   import { renderOfferPdfHtml } from './offer-pdf-template';
+ *   setOfferPdfRenderer(renderOfferPdfHtml);
+ *
+ * Kaydetmeyen site shared'daki varsayilan sablonu kullanir.
+ */
+type OfferPdfRenderer = (ctx: PdfTemplateContext) => Promise<string>;
+let offerPdfRenderer: OfferPdfRenderer = renderOfferPdfHtml;
+
+export function setOfferPdfRenderer(fn: OfferPdfRenderer): void {
+  offerPdfRenderer = fn;
+}
 
 import { telegramNotify } from '../telegram/helpers/telegram.notifier';
 
@@ -310,7 +336,7 @@ export async function generateOfferPdfBuffer(
     service_name?: string | null;
   },
 ): Promise<Uint8Array> {
-  const html = await renderOfferPdfHtml(offer);
+  const html = await offerPdfRenderer(offer);
 
   const execPath = resolvePuppeteerExecutable();
 
@@ -585,7 +611,63 @@ function expandFormData(raw: string | null | undefined): Array<[string, string]>
   return [['Ek form verisi', text]];
 }
 
+/**
+ * Teklif talebi admin maili — ONCE veritabani sablonu, YOKSA koddaki HTML.
+ *
+ * NEDEN IKI MOD: ensotek_de sablon tabanli (locale'e duyarli, panelden
+ * duzenlenebilir — daha iyi), diger siteler kodda sabit HTML kullaniyordu.
+ * Modulu tek kopyaya indirirken ikisi de desteklenmeli ki hicbir sitenin
+ * davranisi bozulmasin ve kimse sablon seed'i yapmak zorunda kalmasin.
+ *
+ * ensotek_de'nin eski kodunda su satir vardi:
+ *   if (!rendered || rendered.missing_variables.length > 0) return;
+ * Yani sablonda TEK bir degisken eksikse mail HIC gitmiyor ve loglanmiyordu —
+ * sessiz kayip. Burada eksik degisken kod HTML'ine DUSURUR, sessizce yutmaz.
+ */
+async function renderOfferRequestTemplate(
+  input: OfferMailContext,
+): Promise<{ subject: string; html: string } | null> {
+  try {
+    const rendered = await renderEmailTemplateByKey(
+      'offer_request_received_admin',
+      {
+        customer_name: input.customer_name,
+        company_name: input.company_name ?? '-',
+        email: input.email,
+        phone: input.phone ?? '-',
+        offer_id: input.offer_id ?? '-',
+        message: input.message ?? '-',
+        country_code: input.country_code ?? '-',
+        subject: input.subject ?? '-',
+        service_id: input.service_id ?? '-',
+        form_data: input.form_data ?? '-',
+        locale: input.locale ?? '-',
+      },
+      input.locale ?? null,
+    );
+    if (!rendered) return null;
+    if (rendered.missing_variables?.length) {
+      console.warn(
+        'offer_request_template_missing_variables',
+        rendered.missing_variables,
+        '— kod sablonuna dusuluyor',
+      );
+      return null;
+    }
+    return { subject: rendered.subject, html: rendered.html };
+  } catch (err) {
+    console.warn('offer_request_template_render_failed', err);
+    return null;
+  }
+}
+
 async function sendKompozitOfferRequestAdminMail(input: OfferMailContext, to: string) {
+  const fromTemplate = await renderOfferRequestTemplate(input);
+  if (fromTemplate) {
+    await sendMailRaw({ to, subject: fromTemplate.subject, html: fromTemplate.html });
+    return;
+  }
+
   const siteName = await getOfferMailSiteName(input.locale);
   const subject = `[${siteName}] Yeni teklif talebi`;
   const productTitle = await resolveProductTitle(input.product_id, input.locale);

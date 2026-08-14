@@ -42,22 +42,33 @@ davranışı değişmedi. `ensotek_com_tr` için `.env` içine şunu koymak yete
 OFFER_TABLE_PREFIX=ensotek_com_tr__
 ```
 
-### 2. PDF şablonu — KARAR GEREKİYOR
+### 2. PDF şablonu — ÇÖZÜLDÜ (kayıt mekanizması)
 
 `ensotek_com_tr/.../pdfTemplate.ts` shared sürümden **200 satır** farklı (849 vs 819).
 Bu gerçek bir özelleştirme (marka, düzen, Türkçe metin). Mekanik birleştirme bunu
 siler ve teklif PDF'leri bozulur.
 
-Seçenekler:
+İncelemede görüldü ki bu **iki ayrı marka tasarımı**: farklı CSS sınıfları
+(`top-accent` vs `top-rule`), farklı başlık düzeni (shared'da "Composite Solutions"
+alt başlığı), farklı metinler ve com_tr'de ek bir belge/onay bloğu
+(`documentLabel`, `issuerApproval`, `customerApproval`, `nameSignature`).
 
-- **(a) Site bazlı şablon kaydı:** shared modül, varsa site-özel şablonu kullanır.
-  Küçük bir arayüz (`getOfferPdfTemplate()`) ve site tarafında tek dosya.
-- **(b) Şablonu veritabanına taşı:** admin panelden düzenlenebilir olur, deploy
-  gerekmez. Daha büyük iş ama uzun vadede doğrusu.
-- **(c) Farkı shared'a koşullu olarak taşı** — şablon içinde `if (site === ...)`.
-  Tavsiye edilmez, shared'ı kirletir.
+Biri diğerinin üst kümesi **değil**. Tek dosyada birleştirmek, bir markanın
+müşteriye giden resmi teklif belgesinin görünümünü değiştirir — kabul edilemez.
 
-### 3. Mail stratejisi — KARAR GEREKİYOR
+**Çözüm uygulandı:** mantık tek modülde kalır, **marka şablonu dışarıdan enjekte
+edilir**. `service.ts` artık `setOfferPdfRenderer()` sunuyor:
+
+```ts
+import { setOfferPdfRenderer } from '@ensotek/shared-backend/modules/offer/service';
+import { renderOfferPdfHtml } from './offer-pdf-template';
+setOfferPdfRenderer(renderOfferPdfHtml);
+```
+
+Kaydetmeyen site shared'daki varsayılan şablonu kullanır. Böylece her sitede
+`offer/` klasörü yerine **tek bir şablon dosyası** kalır.
+
+### 3. Mail stratejisi — ÇÖZÜLDÜ (iki mod)
 
 `ensotek_de/.../service.ts` shared sürümden **445 satır** farklı. Sebep mimari:
 
@@ -78,24 +89,47 @@ if (!rendered || rendered.missing_variables.length > 0) return;
 Sessiz kayıp. Hangi yaklaşım seçilirse seçilsin bu satır düzeltilmeli — eksik
 değişken hâlinde ya boş basılmalı ya da hata loglanıp alarm üretilmeli.
 
-Seçenekler:
+**(b) seçeneği uygulandı.** `sendKompozitOfferRequestAdminMail` artık önce
+`offer_request_received_admin` şablonunu dener, bulamazsa koddaki HTML'e düşer.
+Migration gerekmiyor; şablonu olan site şablonunu kullanmaya devam eder.
 
-- **(a) shared şablon tabanlıya geçsin** (ensotek_de'nin deseni kazansın).
-  Karşılığı: kuhlturm, kompozit ve ensotek.com.tr veritabanlarına şablon seed'i
-  gerekir. Doğru yol ama migration işi.
-- **(b) shared iki modu da desteklesin:** şablon varsa onu kullan, yoksa koddaki
-  HTML'e düş. Geriye dönük uyumlu, migration gerektirmez. **Önerilen.**
+`missing_variables` sessiz dönüşü de düzeltildi: eksik değişken artık `console.warn`
+ile loglanır ve kod şablonuna düşülür — mail **hiç gitmemek** yerine gider.
 
 ## Önerilen sıra
 
-1. ✅ **Tablo öneki env'e alındı** (yapıldı, davranış değişmedi).
-2. **Mail stratejisinde (b) seçeneğini uygula:** shared'a "şablon varsa kullan,
-   yoksa koddaki HTML" mantığı. `missing_variables` sessiz dönüşü de burada düzelt.
-3. **PDF'te (a) seçeneğini uygula:** site-özel şablon kaydı.
-4. `ensotek_com_tr`'yi shared'a geçir: import değiştir, `.env`'e önek ekle,
-   yerel klasörü sil. **Test:** teklif oluştur → PDF üret → admin maili → Telegram.
-5. `ensotek_de`'yi shared'a geçir. **Test:** aynı zincir, de/en locale ile.
-6. Yerel `offer` klasörlerini sil, `.gitignore` sapmasını gözden geçir.
+1. ✅ **Tablo öneki env'e alındı** — `OFFER_TABLE_PREFIX`, varsayılan boş.
+2. ✅ **Mail iki modlu** — şablon varsa şablon, yoksa kod HTML'i; sessiz dönüş giderildi.
+3. ✅ **PDF şablonu enjekte edilebilir** — `setOfferPdfRenderer()`.
+4. ⬜ **`ensotek_com_tr`'yi geçir** (aşağıdaki kontrol listesi).
+5. ⬜ **`ensotek_de`'yi geçir** — aynı liste, de/en locale ile test.
+6. ⬜ Yerel `offer` klasörlerini sil, `.gitignore` sapmasını gözden geçir.
+
+## Geçiş kontrol listesi (site başına)
+
+Altyapı hazır; kalan iş her site için mekanik ve **test edilerek** yapılmalı.
+
+1. `pdfTemplate.ts` dosyasını `src/modules/offer/` dışına, örn.
+   `src/offer-pdf-template.ts` olarak taşı (marka belgesi sitede kalır).
+2. Uygulama açılışında şablonu kaydet:
+   `setOfferPdfRenderer(renderOfferPdfHtml)`.
+3. `.env`'e site değerlerini ekle:
+   - `ensotek_com_tr`: `OFFER_TABLE_PREFIX=ensotek_com_tr__`,
+     `OFFER_PDF_BRAND_NAME=Ensotek`, `PUBLIC_BASE_URL=https://www.ensotek.com.tr`
+   - `ensotek_de`: önek yok; marka/URL değerleri kendi sitesine göre
+4. `routes/shared.ts` (veya `app.ts`) içindeki offer import'larını
+   `@ensotek/shared-backend/modules/offer/...` olarak değiştir.
+5. `src/modules/offer/` klasörünü sil.
+6. `bun run build` → `pm2 restart` → **test zinciri:**
+   - teklif oluştur (tüm alanlar dolu, `form_data` dahil)
+   - admin maili geldi mi, **tüm alanlar var mı**
+   - Telegram bildirimi geldi mi
+   - **PDF üret ve GÖZLE KONTROL ET** — marka, logo, düzen bozulmamış olmalı
+   - honeypot ve rate limit hâlâ çalışıyor mu
+7. Test kayıtlarını sil.
+
+**PDF adımı atlanmamalı.** Teklif PDF'i müşteriye giden resmi ticari belge;
+bozulması sessiz olur ve haftalar sonra fark edilir.
 
 ## Neden aceleye gelmez
 

@@ -13,7 +13,7 @@ import { db } from '../../db/client';
 import { siteSettings } from '../siteSettings/schema';
 import { and, inArray, eq } from 'drizzle-orm';
 
-type PdfTemplateContext = OfferRow & {
+export type PdfTemplateContext = OfferRow & {
   site_name?: string | null;
   product_name?: string | null;
   service_name?: string | null;
