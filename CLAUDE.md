@@ -13,10 +13,12 @@ Ensotek, soğutma kulesi çözümleri için geliştirilen bir B2B platform ailes
 - `kuhlturm/` — kuhlturm.com — `frontend` (backend planlanıyor) — repo: `Orhanguezel/kuhlturm`
 - `ensotek_com/` — ensotek.com — planlanıyor
 - `docs/` — workspace dökümantasyonu, planlar, görseller
-- `ERP/` — **Ensotek ERP** analiz ve kapsam çalışması (kod yok). Kaynak: Hamdi Bey'in
-  süreç anlatımı. Durum: kapsam belirleme, fiyat verilmedi. Bkz. [ERP/README.md](ERP/README.md)
+- `ERP/` — **Ensotek ERP** — su soğutma kulesi üretim yönetim sistemi. **Kendi git
+  reposu** (`Orhanguezel/ensotek-erp`), kendi `project.portfolio.json` manifesti, kendi
+  veritabanı. Durum: teklif verildi (ERP-2026-001 · 24 bölüm · 3 faz · 4 ay), kod
+  geliştirme başlamadı. Bkz. [ERP/README.md](ERP/README.md)
 
-Her site projesi kendi git reposudur ve **kendi veritabanına** sahiptir. Eski flat yapı (`backend/`, `de_frontend/`, `admin_panel/`, `kuhlturm-frontend/`) kaldırıldı. Root `Ensotek` reposu yalnızca `packages/` + meta dosyaları izler; nested proje repoları `.gitignore` ile hariç tutulur.
+Her site projesi ve `ERP/` kendi git reposudur ve **kendi veritabanına** sahiptir. Eski flat yapı (`backend/`, `de_frontend/`, `admin_panel/`, `kuhlturm-frontend/`) kaldırıldı. Root `Ensotek` reposu yalnızca `packages/` + meta dosyaları izler; nested proje repoları `.gitignore` ile hariç tutulur.
 
 ## Çalışma Kuralları
 
