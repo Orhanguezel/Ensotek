@@ -61,6 +61,14 @@
 | IHT-217 | Teklif durum akışı (bekliyor / görüşmede / revize / kazanıldı / kaybedildi) + kazanma oranı | [Ö] | — |
 | IHT-218 | "Benzer projeden kopyala" | [Ö] | — |
 | IHT-219 | **Çok dilli teklif çıktısı** (TR/EN) | [Ö] | — |
+| IHT-220 | **Teklif durum makinesi** — draft → onay → gönderildi → görüntülendi → kabul/red/revizyon talebi → süresi doldu | [K] TeklifRota `state-machine` |
+| IHT-221 | **Müşteri teklif portalı** — teklif bağlantı (token) ile müşteriye açılır | [K] TeklifRota `public-link-service`, `/teklif/[token]` |
+| IHT-222 | Müşteri portal aksiyonları: **görüntüledi / kabul etti / revizyon istedi** sisteme düşer | [K] `quote_portal_actions` |
+| IHT-223 | Teklif olay zaman çizelgesi (kim, ne zaman, ne yaptı) | [K] `commercial_quote_events` |
+| IHT-224 | Teklif numarası sayaç yönetimi | [K] `commercial_quote_sequences` |
+| IHT-225 | **Proforma fatura** üretimi | [K] TeklifRota `proforma-document` |
+| IHT-226 | Teklif onay motoru (kural bazlı onay akışı) | [K] `approval-engine` → [S-06](04-acik-sorular.md) |
+| IHT-227 | Teklif/rapor **Excel dışa aktarma** ve akışlı büyük dışa aktarma | [K] `workbook-export`, `streaming-export` |
 
 ---
 
@@ -76,6 +84,8 @@
 | IHT-306 | **Euro kuru** otomatik okunması ve EUR bazlı fiyat | [H] | H-09 |
 | IHT-307 | **Teklif anı maliyetinin dondurulması (snapshot)** — teklif gönderildiği andaki maliyet sonradan değişmeden görülebilmeli | [H] | H-05 |
 | IHT-308 | Teklif anı maliyetin **tablo veya PDF olarak** saklanması | [H] | H-05 |
+| IHT-316 | Revizyon bazlı snapshot altyapısı (`snapshot JSON` + `totals_snapshot JSON`) | [K] TeklifRota `commercial_quote_revisions` |
+| IHT-317 | **Snapshot'a BOM maliyet kırılımının eklenmesi** — TeklifRota yalnız fiyat toplamını donduruyor, maliyet kalemlerini değil | [K] — *yeni iş* |
 | IHT-309 | **Güncel maliyet** ile teklif anı maliyetin karşılaştırılması | [H-ç] | H-05 |
 | IHT-310 | Tedarik siparişlerinden **güncel maliyetin beslenmesi** | [H] | H-03 |
 | IHT-311 | Kâr oranı belirleyip **teklif fiyatının hesaplanması** | [H] | H-03 |
@@ -193,7 +203,10 @@
 | IHT-1103 | **Sevkiyat öncesi tahsilat zorunluysa** uyarı/blok | [H] | H-10 |
 | IHT-1104 | **Fatura + irsaliye** kesim adımının süreçte yer alması | [H] | H-10 |
 | IHT-1105 | Vadeli satışta **ödeme sonradan takip** | [H] | H-10 |
-| IHT-1106 | Yükleme listesi, palet/koli sayısı, konteyner no, plaka, fotoğraf | [Ö] | — |
+| IHT-1106 | Yükleme listesi, palet/koli sayısı, konteyner no, plaka, fotoğraf | [Ö] |
+| IHT-1107 | **Packing list** üretimi ve belge anlık görüntüsü | [K] TeklifRota `packing-list`, `packing_document_snapshot` |
+| IHT-1108 | Paketleme ön ayarları (karton/palet ölçü, net/brüt ağırlık, dara) | [K] `packaging-preset-repository` |
+| IHT-1109 | Sipariş → sevkiyat bağı ve stok karşılama | [K] `311_orders_shipments.sql`, `315_inventory_fulfillment.sql` | — |
 
 ---
 
@@ -254,6 +267,15 @@
 | IHT-1506 | **Packing list** ve yükleme belgesi üretimi | [K] |
 | IHT-1507 | Nakliye kimde sorusunun (IHT-206) navlun hesabıyla bağlanması | [K] |
 | IHT-1508 | Taşıyıcı/nakliyeci kartları ve fiyat geçmişi | [K] |
+| IHT-1509 | **Çok modlu navlun tahmini** — kara / deniz / hava, deterministik | [K] `@teklifrota/freight-engine` |
+| IHT-1510 | Gerçek karayolu mesafeleri ve ülke bazlı otoyol/geçiş payları | [K] `road-distances`, `toll-shares` |
+| IHT-1511 | Navlun parametreleri: dizel, EUA karbon, otoyol tarifesi, IATA hacimsel katsayı, emisyon | [K] `parameters.ts` |
+| IHT-1512 | **Girdi-kanıt kaydı ve sapma tespiti** — kayıt girdilerle yeniden hesaplanır: `reproduced / drifted / manual` | [K] `record.ts` |
+| IHT-1513 | **Nakliyeciden fiyat isteme (RFQ)** ve gelen teklifleri karşılaştırma | [K] `/nakliyeci/rfq`, `freight-marketplace` |
+| IHT-1514 | Navlun borsası/besleme bağlantıları (OAuth, webhook, pazarlık akışı) | [K] `freight-exchange-*` |
+| IHT-1515 | Rate benchmark — pazar tahmini ile doğrulanmış taşıyıcı fiyatının ayrılması | [K] `freight-rate-benchmarks` |
+| IHT-1516 | Çok modlu sevk planı (multimodal) | [K] `289_multimodal_plans.sql` |
+| IHT-1517 | Navlun hesabının **teklife kalem olarak** ve **maliyete dolaylı gider olarak** bağlanması | [K] — *yeni iş* |
 
 ---
 
@@ -368,26 +390,26 @@
 
 ## Sayısal özet
 
-**Toplam 173 gereksinim satırı, 21 modül.**
+**Toplam 195 gereksinim satırı, 21 modül.**
 
 | Kaynak | Satır | Anlamı |
 |---|---:|---|
 | **[H]** Hamdi Bey teyitli | 83 | Ensotek'in kendi anlattığı süreç |
 | **[H-ç]** Anlatımdan çıkarım | 9 | Teyit edilecek |
-| **[Ö]** ChatGPT önerisi | 37 | v0.2 ile **kapsama alındı** (26'sı özgün, kalanı yeni modüllerden çapraz referans) |
-| **[K]** Orhan kapsam kararı | 52 | Firma bulma, navlun, personel, bakım, fabrika, satış, muhasebe |
+| **[Ö]** ChatGPT önerisi | 37 | v0.2 ile **kapsama alındı** |
+| **[K]** Orhan kapsam kararı | 74 | Firma bulma, navlun, personel, bakım, fabrika, satış, muhasebe + **TeklifRota'dan gelen 22 yetenek** |
 
 > Bir satır birden çok etiket taşıyabilir (örn. `[K] + [H]` — biz ekledik ama Ensotek'in
-> anlattığı bir ihtiyaca da denk geliyor). Bu yüzden sütun toplamı 173'ü aşar.
+> anlattığı bir ihtiyaca da denk geliyor). Bu yüzden sütun toplamı 195'i aşar.
 
 ### Modül dağılımı
 
 | Faz | Modüller | Gereksinim |
 |---|---|---:|
 | **0** | MOD-00 Altyapı | *(iskelet — [ANALİZ-06](06-mimari-iskelet.md))* |
-| **1** | MOD-01, 02, 03, 04 | 53 |
+| **1** | MOD-01, 02, 03, 04 | 63 |
 | **2** | MOD-05, 06, 07, 08 | 26 |
-| **3** | MOD-09, 10, 11, 15 | 26 |
+| **3** | MOD-09, 10, 11, 15 | 38 |
 | **4** | MOD-12, 16, 17, 18 | 26 |
 | **5** | MOD-14, 19, 20, 21 | 35 |
 | — | MOD-13 Sistem geneli | 7 |
@@ -404,6 +426,11 @@
 | **OUT-04** | **Termal seçim/hesap motorunun sıfırdan yazılması** | Mevcut seçim yazılımı entegre edilir → [S-01](04-acik-sorular.md) |
 | **OUT-05** | **Canlı taşıyıcı navlun fiyat borsası** | Navlun hesaplanır, dış fiyat servisi çekilmez |
 
+> **v0.3 notu:** Yeni eklenen 22 satırın tamamı **[K]** — TeklifRota'da hazır bulunan
+> ve Ensotek'in istemediği ama kapsamı güçlendiren yetenekler (teklif durum makinesi,
+> müşteri teklif portalı, proforma, çok modlu navlun motoru, nakliyeci RFQ, packing list).
+> Bunlar **yeni geliştirme değil, mevcut kodun devralınmasıdır**.
+>
 > **Fiyat aşaması** ([ANALİZ-03 §7](03-kapsam-taslagi.md)) en sona bırakıldı.
 > Etiket ayrımı orada tekrar işe yarayacak: Ensotek'in kendi talebi ile bizim
 > eklediğimiz kapsam ayrı ayrı gösterilebilir.

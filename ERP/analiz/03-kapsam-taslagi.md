@@ -1,9 +1,14 @@
-# ANALİZ-03 · Kapsam (SCOPE v0.2)
+# ANALİZ-03 · Kapsam (SCOPE v0.3)
 
 > **Durum:** Plan aşaması. Geliştirme başlamadı. **Fiyat en son aşama — şimdi konuşulmuyor.**
 >
-> **v0.1 → v0.2 değişikliği (2026-08-18, Orhan kararı):** Kapsam **genişletildi**.
-> Opsiyon listesi kaldırıldı — *"tamamını hatta fazlasıyla yapacağız"*.
+> **v0.1 → v0.2 (2026-08-18):** Kapsam **genişletildi**, opsiyon listesi kaldırıldı —
+> *"tamamını hatta fazlasıyla yapacağız"*.
+>
+> **v0.2 → v0.3 (2026-08-18):** **TeklifRota (`fuar-teklif`)** kaynak havuzuna eklendi.
+> Ticari omurga (teklif yaşam döngüsü, revizyon+snapshot, proforma, packing list,
+> müşteri teklif portalı) ve **çok modlu navlun motoru** hazır çıktı. OUT-05 kaldırıldı,
+> MOD-15 genişledi, Faz 3'ten Faz 1'e taşınabilir hale geldi.
 
 **Girdiler:** [Mevcut Durum](01-mevcut-durum-as-is.md) · [İhtiyaç Listesi](02-ihtiyac-listesi.md)
 · [Yeniden Kullanım](05-modul-envanteri-yeniden-kullanim.md) · [Mimari İskelet](06-mimari-iskelet.md)
@@ -31,7 +36,7 @@ değil, yerine geçmek.
 | # | Karar | Sonucu |
 |---|---|---|
 | **K-1** | **Kapsam tam** — teklif/maliyet/üretimin ötesinde firma bulma, navlun, personel, bakım, fabrika, satış, muhasebe da dahil | 21 modül. v0.1'deki 18 kalemlik "opsiyon listesi" **kapsama alındı** |
-| **K-2** | **Yeniden kullanım önceliklidir** — kod mümkün olduğunca sıfırdan yazılmaz, workspace'teki mevcut modüller birleştirilir | 21 modülün **19'u** mevcut koddan besleniyor → [ANALİZ-05](05-modul-envanteri-yeniden-kullanim.md) |
+| **K-2** | **Yeniden kullanım önceliklidir** — kod mümkün olduğunca sıfırdan yazılmaz, workspace'teki mevcut modüller birleştirilir | 21 modülün **19'u** mevcut koddan besleniyor. Ticari omurga **TeklifRota**'dan, üretim omurgası **transpalet-crm**'den → [ANALİZ-05](05-modul-envanteri-yeniden-kullanim.md) |
 | **K-3** | **İskelet baştan, modüller tek tek** — taban ilk gün kurulur, modüller sırayla açılır. **Hazır olmayan modül "yakında" denip gösterilmez; sistemde yoktur** | Modül kayıt defteri + `hidden/internal/ready` → [ANALİZ-06](06-mimari-iskelet.md) |
 | **K-4** | **Excel tamamen kapanır** — veriler ERP'ye taşınır, eski dosyalar bir daha kullanılmaz | Veri göçü zorunlu kapsam, paralel çalışma yok → [ANALİZ-07](07-excel-veri-gocu.md) |
 
@@ -48,7 +53,12 @@ Kapsam genişledi ama sınırsız değil:
 | ❌ **Prim/komisyon sistemi değil** | Hamdi Bey açıkça hariç tuttu (OUT-01) |
 | ❌ **Termal seçim motoru değil** | Mevcut seçim yazılımı **entegre edilir**, termal hesap sıfırdan yazılmaz → [S-01](04-acik-sorular.md) |
 | ❌ **CAD sistemi değil** | AutoCAD dosyaları projeye **bağlanır**, çizim yapılmaz |
-| ❌ **Gerçek zamanlı nakliye fiyat borsası değil** | Navlun **hesaplanır** (hacim, ağırlık, palet, konteyner, incoterm); canlı taşıyıcı fiyatı çekilmez |
+| ❌ **Kule mühendislik/termal hesap doğrulaması değil** | Seçim sonucunu ERP taşır ve saklar; termal hesabın doğruluğu Ensotek mühendisliğinin sorumluluğunda |
+
+> ✏️ **v0.3 düzeltmesi:** v0.2'de *"gerçek zamanlı nakliye fiyat borsası değil"* (OUT-05)
+> yazılmıştı. **Kaldırıldı** — TeklifRota'da navlun borsası/pazar yeri katmanı
+> (`freight-marketplace`, `freight-exchange-*`, RFQ ekranı, rate benchmark) zaten
+> yazılmış durumda. Kapsam dışı bırakmak için sebep kalmadı.
 
 ---
 
@@ -58,19 +68,19 @@ Kapsam genişledi ama sınırsız değil:
 |---|---|---|---|
 | **MOD-00** | Altyapı (auth, rol, audit, storage, mail, bildirim, ayarlar) | 🟢 | **0** |
 | MOD-01 | Talep ve CRM | 🟢 | 1 |
-| MOD-02 | Teklif | 🟡 | 1 |
+| MOD-02 | Teklif | 🟢→🟡 | 1 |
 | MOD-03 | Maliyet | 🟡 | 1 |
 | MOD-04 | **Ürün Ağacı (BOM)** — *projenin kalbi* | 🔴 | 1 |
 | MOD-05 | Ürün Kataloğu ve Stok | 🟢 | 2 |
 | MOD-06 | Satın Alma | 🟢 | 2 |
-| MOD-07 | Sipariş / Üretime Teslim | 🟡 | 2 |
+| MOD-07 | Sipariş / Üretime Teslim | 🟢→🟡 | 2 |
 | MOD-08 | Mühendislik | 🟡 | 2 |
 | MOD-09 | Üretim ve İş Emirleri | 🟢 | 3 |
 | MOD-10 | **Kalite** | 🔴 | 3 |
 | MOD-11 | Sevkiyat | 🟢 | 3 |
 | MOD-12 | Süpervizörlük ve Servis | 🟡 | 4 |
 | **MOD-14** | **Firma Bulma** *(yeni)* | 🟡 | 5 |
-| **MOD-15** | **Navlun ve Lojistik** *(yeni)* | 🟢 | 3 |
+| **MOD-15** | **Navlun ve Lojistik** *(yeni)* | 🟢 **hazır motor** | 3 · *(1'e çekilebilir)* |
 | **MOD-16** | **Personel Yönetimi** *(yeni)* | 🟢 | 4 |
 | **MOD-17** | **Bakım Yönetimi — fabrika ekipmanı** *(yeni)* | 🟡 | 4 |
 | **MOD-18** | **Fabrika Yönetimi** *(yeni)* | 🟡 | 4 |
@@ -203,7 +213,7 @@ FAZ 0  İskelet
 | Yeniden kullanım envanteri | ✅ 21 modül eşlendi |
 | Mimari iskelet + modül kayıt sistemi | ✅ |
 | Veri göçü planı | ✅ 13 göç işi |
-| Kapsam | ✅ v0.2 — **21 modül, 6 faz (0–5)** |
+| Kapsam | ✅ v0.3 — **21 modül, 6 faz (0–5)** |
 | Açık soruların cevaplanması | ⬜ |
 | Modül bazlı efor tahmini | ⬜ |
 | **Fiyat** | ⬜ **en son aşama** |

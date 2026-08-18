@@ -15,7 +15,8 @@
 |---|---|---|---|
 | **transpalet-crm** | Fastify backend, **48 modül** + admin_panel + shared-backend | Aktif | **En yakın eşleşme.** Üretim emri, reçete, stok, sevkiyat, satın alma, teklif, servis, personel, Logo entegrasyonu |
 | **paspas** (Paspas ERP) | Fastify backend, **41 modül**, teslim edildi | Bakım modu | Üretim emirleri, reçeteler, mal kabul, satış siparişleri, gantt, vardiya analizi |
-| **ihracatradari.com.tr** | `commercial` modülü: teklif+revizyon+proforma+**packing list**+**navlun/incoterm**+onay motoru; ayrıca `enrichment`, `decision-makers`, `scans`, `scoring`, `crm`, `customs` | Aktif | **Navlun ve firma bulma** için ana kaynak |
+| **fuar-teklif / TeklifRota** | 21.274 satır backend, **73 seed-SQL şeması**, 57 admin ekranı, ayrı **`@teklifrota/freight-engine`** paketi (5.515 satır) | Aktif | **En büyük tek kazanç.** *"Tekliften teslimata tek rota"* — teklif yaşam döngüsü, revizyon+snapshot, proforma, packing list, sipariş, sevkiyat, **çok modlu navlun motoru**, nakliyeci RFQ, müşteri teklif portalı |
+| **ihracatradari.com.tr** | `enrichment`, `decision-makers`, `scans`, `scoring`, `customs`, `export-profile`; `commercial` (TeklifRota'nın erken sürümü) | Aktif | **Firma bulma** için ana kaynak |
 | **osgb-yazilim** | `personel`, `calisan`, `evrak`, `atama`, `gorev`, `kpi`, `saglik`, `firma`, `taseron`, `teklif` | Aktif | **Personel yönetimi** için ana kaynak |
 | **e-fatura-service** | Ayrı servis: fatura şemaları, kuyruk, worker, admin | Aktif | **Muhasebe/e-fatura** entegrasyonu |
 | **Ensotek/packages/shared-backend** | 44 modül: auth, storage, mail, notifications, userRoles, offer, products, categories, db_admin, audit, theme, siteSettings… | Aktif | Ensotek'in kendi ortak paketi — **altyapı tabanı** |
@@ -33,19 +34,19 @@
 |---|---|---|---|---|
 | **MOD-00** Altyapı (auth, rol, yetki, audit, storage, mail, notification, db_admin, tema, ayarlar) | Ensotek shared-backend + transpalet | `auth`, `userRoles`, `profiles`, `audit`/`admin_audit`, `storage`, `mail`, `mailAccounts`, `notifications`, `db_admin`, `siteSettings`, `theme` | 🟢 | Marka/rol uyarlaması |
 | **MOD-01** Talep ve CRM | transpalet | `talepler`, `crm`, `musteriler`, `musteri_yetkilileri`, `iletisim` | 🟢 | Talep kanalı (e-posta/telefon/WhatsApp) + talep tipi (kule/yedek parça) alanları |
-| **MOD-02** Teklif | ihracatradari `commercial` + transpalet `teklifler` | `quote-revision-policy`, `proforma-document`, `document-service`, `approval-engine`, `public-link-service`, `email-delivery` | 🟡 | **Teknik/ticari/iç-maliyet olmak üzere 3 ayrı PDF**; standart dışı kalemlerin kırmızı işaretlenmesi; kule şablonu |
-| **MOD-03** Maliyet | ihracatradari `calculation-engine` + `fixed-decimal` | Ondalık güvenli hesap, çarpan, para birimi | 🟡 | **Teklif anı snapshot**, çarpan+pazarlık payı+EUR kuru zinciri, 3 katmanlı maliyet, işçilik (adam-gün/harcırah/SGK/yemek) |
+| **MOD-02** Teklif | **TeklifRota** `commercial` | `state-machine` (11 durumlu teklif akışı), `quote-revision-policy`, `commercial_quote_sequences` (teklif no), `commercial_quote_revisions` (**snapshot JSON + totals_snapshot**), `commercial_quote_events` (zaman çizelgesi), `approval-engine`, `document-service`, `public-link-service` (**müşteri teklif portalı /teklif/[token]**), `email-delivery`, `proforma-document` | 🟢→🟡 | **Teknik/ticari/iç-maliyet 3 ayrı PDF**; standart dışı kalemlerin kırmızı işaretlenmesi; kule şablonu. Yaşam döngüsü, numaralandırma ve revizyon **hazır** |
+| **MOD-03** Maliyet | TeklifRota `calculation-engine` + `fixed-decimal` + revizyon snapshot deseni | Ondalık güvenli hesap, çarpan, para birimi, `totals_snapshot JSON` | 🟡 | Snapshot **mekanizması** hazır, **içeriği yok**: TeklifRota ticari bir teklif aracı, üretim maliyeti hesaplamıyor. Çarpan+pazarlık payı+EUR kuru zinciri, 3 katmanlı maliyet, işçilik satırları eklenecek |
 | **MOD-04** Ürün Ağacı (BOM) | transpalet/paspas `receteler` | `receteler` + `recete_kalemleri` | 🔴 | Mevcut şema **tek seviyeli** ve maliyetsiz. Gerekli: **çok seviyeli patlatma + maliyet roll-up**, kg-bazlı kalem (CTP), işçilik satırı, parametrik model türetme, revizyon |
 | **MOD-05** Ürün Kataloğu ve Stok | transpalet | `urunler`, `stoklar`, `hareketler`, `categories`, `subCategories`, `mal_kabul`, `tanimlar` | 🟢 | **Stok kodu şeması sıfırdan kurulacak** (Ensotek'te yok); ürün tipi (mamul/yarı mamul/hammadde/ticari mal/hizmet) |
 | **MOD-06** Satın Alma | transpalet | `satin_alma`, `tedarikci` | 🟢 | Fiyat geçmişi → maliyeti besleme bağı |
-| **MOD-07** Sipariş / Üretime Teslim | transpalet + paspas | `satis_siparisleri`, `ihtiyac_formlari`, `gorevler` | 🟡 | **ENK/ENB numaralandırma**, **avans kontrolü bloğu**, Teklif İnceleme Formu'nun dijitali |
+| **MOD-07** Sipariş / Üretime Teslim | TeklifRota + transpalet + paspas | TeklifRota `order-service` + `311_orders_shipments.sql` + `315_inventory_fulfillment.sql`; transpalet `satis_siparisleri`, `ihtiyac_formlari` | 🟢→🟡 | **ENK/ENB numaralandırma**, **avans kontrolü bloğu**, Teklif İnceleme Formu'nun dijitali |
 | **MOD-08** Mühendislik | Ensotek shared `storage` + transpalet | Dosya yönetimi, `gorevler` | 🟡 | AutoCAD/DWG bağlama, müşteri teknik soru-cevap kaydı, **malzeme listesi üretimi**, seçim yazılımı entegrasyonu |
 | **MOD-09** Üretim ve İş Emirleri | transpalet + paspas | `uretim_emirleri`, `operator`, `is_yukler`, `gantt`, `vardiya_analizi`, `makine_havuzu` | 🟢 | Atölye yönlendirme mantığı (kaynak/polyester/montaj), atölye bazlı iş emri |
 | **MOD-10** Kalite | — | Yok | 🔴 | Basınç testi → galvaniz → tekrar test akışı; test formu, fotoğraf, rapor |
-| **MOD-11** Sevkiyat | transpalet + ihracatradari | `sevkiyat` + `packing-list`, `packaging-preset-repository`, `packing-document` | 🟢 | Palet/koli/konteyner hesabı hazır; TIR/konteyner/kamyon ayrımı eklenir |
+| **MOD-11** Sevkiyat | **TeklifRota** + transpalet | `packing-list`, `packing-document` (+snapshot), `packaging-preset-repository`, `281_packing_lists.sql`, `311_orders_shipments.sql`, `/ticari/sevkiyatlar` ekranı; transpalet `sevkiyat` | 🟢 | Palet/koli/konteyner hesabı hazır; TIR/konteyner/kamyon ayrımı ve **demonte kule paketleme** eklenir |
 | **MOD-12** Süpervizörlük ve Servis | transpalet + osgb | `servis`, `atama`, `gorev`, `personel` | 🟡 | Süpervizör seyahat/otel/harcırah, saha raporu, müşteri imzası, garanti |
 | **MOD-14** Firma Bulma | **ihracatradari** + Google-Maps-Scrapper | `enrichment`, `decision-makers`, `scans`, `scoring`, `crm`, `customs` | 🟡 | Ensotek sektörüne (soğutma kulesi kullanan tesisler) uyarlama |
-| **MOD-15** Navlun ve Lojistik | **ihracatradari `commercial`** | `calculation-engine` (karton/palet ölçü-ağırlık dönüşümü), `freight`, `defaultIncoterm` (EXW/FOB/CIF), `packing-list` | 🟢 | Kule boyutlarına uyarlama; TIR/konteyner sığdırma; demonte-paket ayrımı |
+| **MOD-15** Navlun ve Lojistik | **TeklifRota `@teklifrota/freight-engine`** (ayrı paket) + `commercial` navlun katmanı | Motor: `engine.ts` (kara/deniz/hava, deterministik, gerçek boğaz-kanal geçişleri), `road-distances.ts` (2.161 satır), `toll-shares.ts`, `parameters.ts` (dizel, EUA karbon, otoyol tarifeleri, IATA 166,67, emisyon), `record.ts` (girdi-kanıt + drift tespiti), `place-resolver`. Katman: `freight-repository`, `freight-marketplace`, `freight-exchange-*` (bağlantı/OAuth/webhook/pazarlık), `freight-rate-benchmarks`, `multimodal_plans`, `route-provider`; ekranlar `/navlun-hesaplama`, `/navlun-parametreleri`, `/nakliyeci/rfq`, `/lojistik` | 🟢 | **Neredeyse hazır.** Kule ölçülerini besleyip TIR/konteyner sığdırma ve demonte sevk senaryosunu eklemek yeterli |
 | **MOD-16** Personel Yönetimi | **osgb-yazilim** + transpalet | `personel`, `calisan`, `evrak`, `atama`, `kpi`, `saglik`; transpalet `personel`, `vardiya_analizi` | 🟢 | Atölye/vardiya bağlama, adam-gün maliyetine bağlanma |
 | **MOD-17** Bakım Yönetimi (fabrika ekipmanı) | transpalet + paspas | `makine_havuzu`, `makine_verileri`, `makine_kapali_araliklar` | 🟡 | Periyodik bakım planı, arıza kaydı |
 | **MOD-18** Fabrika Yönetimi | transpalet + paspas | `is_yukler`, `gantt`, `vardiya_analizi`, `operator`, `dashboard` | 🟡 | Atölye kapasitesi, yükleme, darboğaz görünümü |
@@ -57,7 +58,7 @@
 
 ## 3. Doğrulanmış tespitler
 
-### 3.1 En büyük kazanç — transpalet-crm
+### 3.1 Üretim tarafının omurgası — transpalet-crm
 48 modülün **çoğu** doğrudan karşılık buluyor: `uretim_emirleri`, `receteler`, `stoklar`,
 `satin_alma`, `tedarikci`, `sevkiyat`, `mal_kabul`, `teklifler`, `musteriler`, `servis`,
 `personel`, `gorevler`, `gantt`, `hareketler`, `tanimlar`, `operator`, `vardiya_analizi`.
@@ -85,13 +86,88 @@ Ensotek'in ihtiyacı (bkz. [AS-IS §3](01-mevcut-durum-as-is.md)):
 Hiçbir projede test/kalite modülü yok. Serpantin basınç testi → galvaniz → tekrar test
 akışı sıfırdan yazılacak. Küçük ama tamamen yeni.
 
-### 3.4 Sürpriz kazanç — Navlun 🟢
-`ihracatradari/commercial/calculation-engine.ts` içinde karton/palet dönüşümü,
-en-boy-yükseklik, net/brüt ağırlık, palet darası hazır; `schemas.ts` içinde
-`freight`, `freightEvidence`, `defaultIncoterm: EXW|FOB|CIF` mevcut.
-Ensotek'in TIR/konteyner sığdırma ve demonte sevk hesabı bunun üzerine kurulur.
+### 3.4 En büyük kazanç — TeklifRota 🟢
 
-### 3.5 Modül kayıt deseni zaten var
+**TeklifRota (`fuar-teklif`) Ensotek ERP'nin ticari omurgasını neredeyse hazır veriyor.**
+Sloganı bile örtüşüyor: *"Tekliften teslimata tek rota."*
+
+#### a) Teklif yaşam döngüsü — hazır
+`state-machine.ts` 11 durumlu, geçiş kuralları tanımlı bir akış içeriyor:
+```
+draft → approval_pending → approved → sent → viewed
+      → accepted | rejected | revision_requested → revised → …
+      → expired | cancelled
+```
+Ensotek'in bugün Excel'de not düşerek yaptığı teklif takibi ([AS-IS §1.11](01-mevcut-durum-as-is.md))
+bunun tam karşılığı. `commercial_quote_events` tablosu zaman çizelgesini zaten tutuyor.
+
+#### b) Revizyon + snapshot — mekanizma hazır, içerik eklenecek
+```sql
+commercial_quote_revisions (
+  quote_id, revision_no,
+  snapshot JSON,          -- teklifin o anki tam hali
+  totals_snapshot JSON,   -- toplamların o anki hali
+  created_by_user_id, created_at )
+```
+Hamdi Bey'in en çok üstünde durduğu istek (**IHT-307 teklif anı maliyetinin dondurulması**,
+H-05) tam olarak bu desen. **Ama:** TeklifRota ticari bir teklif aracıdır, **üretim maliyeti
+hesaplamaz**. `totals_snapshot` fiyat toplamlarını dondurur, **maliyet kırılımını değil**.
+Ensotek için snapshot'a BOM maliyet kırılımı eklenecek — mekanizma değil, içerik işi.
+
+#### c) Müşteri teklif portalı — hazır, beklenmedik kazanç
+`public-link-service.ts` + `/teklif/[token]` + `quote_portal_actions` +
+`quote_delivery_public_links`: müşteri kendisine gönderilen bağlantıdan teklifi görüyor,
+**görüntüledi / kabul etti / revizyon istedi** aksiyonları sisteme düşüyor.
+
+Ensotek bugün teklifi e-postayla gönderip *"ara ara"* telefonla takip ediyor. Bu modül
+tek başına takip darboğazını (D-3) çözer. **Hamdi Bey bunu istemedi — biz ekliyoruz.**
+
+#### d) Numaralandırma — hazır
+`commercial_quote_sequences` tablosu teklif numarası sayacını yönetiyor.
+ENK/ENB sayaçları ([I-03](06-mimari-iskelet.md)) bu desenin üzerine kurulur.
+
+#### e) Belge üretimi — hazır
+`document-service`, `proforma-document`, `packing-document`, `workbook-export`,
+`streaming-export` + `quote_documents` / `packing_document_snapshot` tabloları.
+Ensotek'in 3 PDF'i (teknik / ticari / iç maliyet) bu tabanın üzerine şablon eklemekle olur.
+
+---
+
+### 3.5 Navlun motoru — beklenenin çok ötesinde 🟢
+
+`packages/freight-engine/` **ayrı, bağımsız bir paket** — 5.515 satır, testli, belgeli.
+
+| Dosya | Satır | İçerik |
+|---|---:|---|
+| `road-distances.ts` | 2.161 | Gerçek karayolu mesafe tablosu |
+| `engine.ts` | 685 | **Çok modlu tahmin motoru**: kara / deniz / hava |
+| `toll-shares.ts` | 682 | Ülke bazlı otoyol/geçiş payları |
+| `parameters.ts` | 428 | Dizel fiyatı, EUA karbon fiyatı, otoyol tarifeleri, gemi/uçak hızı, **IATA hacimsel katsayısı 166,67**, emisyon katsayıları |
+| `record.ts` | 244 | **Girdi-kanıt kaydı + sapma (drift) tespiti** |
+| `locations.ts`, `place-resolver.ts`, `feeds.ts` | 514 | Yer çözümleme, besleme adaptörleri |
+
+Motorun kendi belgelediği iki ilke doğrudan Ensotek'in maliyet felsefesine uyuyor:
+
+> **"Hesap deterministiktir."** Aynı girdi her zaman aynı sonucu verir; `Math.random`
+> veya zaman bağımlılığı yoktur.
+
+> **"Kayıtta sonuç değil, girdi kanıttır."** Eski bir kayda tıklandığında motor girdilerle
+> **yeniden çalıştırılır**; kayıtlı tutarla karşılaştırılır ve sonuç
+> `reproduced | drifted | manual | unknown` olarak işaretlenir.
+
+Bu tam olarak Ensotek'in maliyet snapshot'ından beklediği davranışın navlun tarafındaki
+karşılığı: *"teklifi verdiğim andaki maliyeti de görmem lazım"* (H-05).
+
+Ayrıca navlun **borsa/pazar yeri** katmanı mevcut: `freight-marketplace`,
+`freight-exchange-connections` (626 satır), `freight-exchange-connectors`, OAuth, webhook,
+pazarlık akışı, `freight-rate-benchmarks`, `/nakliyeci/rfq` ekranı — nakliyeciden fiyat
+isteme (RFQ) ve gelen teklifleri karşılaştırma.
+
+> ⚠️ **Kapsam düzeltmesi:** v0.2'de *"canlı taşıyıcı navlun fiyat borsası değil"*
+> (OUT-05) yazılmıştı. Bu kod zaten var olduğu için **OUT-05 kaldırıldı** —
+> bkz. [ANALİZ-03 §3](03-kapsam-taslagi.md).
+
+### 3.6 Modül kayıt deseni zaten var
 `transpalet-crm/admin_panel/src/navigation/permissions.ts` — `AdminNavKey` union +
 `NAV_ROLES` (modül → rol) + `ROLE_HOME`. **"Hazır olmayan modül açılmaz"** kuralı
 bu desenin üzerine bir `status` alanı eklenerek kurulur — bkz.
@@ -99,17 +175,56 @@ bu desenin üzerine bir `status` alanı eklenerek kurulur — bkz.
 
 ---
 
+### 3.7 Tek gerçek uyarlama maliyeti — çok kiracılılık 🟡
+
+TeklifRota **çok kiracılı (multi-tenant) SaaS**. 73 seed-SQL dosyasının **45'inde**
+`tenant_key` var; ayrıca `tenants`, `tenant-settings`, `tenant-audit`, `entitlements`,
+`billing`, `payments`, `partner-api`, `tenant-isolation.test.ts` gibi tamamı SaaS'a ait
+modüller mevcut.
+
+**Ensotek ERP tek kiracılıdır.** İki yol var:
+
+| Yol | Ne demek | Değerlendirme |
+|---|---|---|
+| **(a) `tenant_key` korunur, tek sabit değere bağlanır** | Şema ve sorgular olduğu gibi alınır, `tenant_key='ensotek'` sabitlenir | ✅ **Önerilen.** Sıfır dönüştürme riski; testler çalışır durumda kalır; ileride Ensotek'in dört sitesi/şirketi ayrışırsa altyapı hazır |
+| (b) `tenant_key` sökülür | Her tablodan ve her sorgudan temizlenir | ❌ Yüzlerce dokunuş, testler kırılır, kazanç yok |
+
+**Alınmayacak SaaS modülleri:** `billing`, `payments`, `entitlements`, `tenants`,
+`tenant-settings`, `auth-onboarding`, `partner-api`, `cloud-costs` — bunlar
+abonelik/faturalandırma işidir, Ensotek'in iç ERP'sinde karşılığı yok.
+`tenant-audit` ve `privacy` **alınır** (denetim izi + KVKK).
+
+---
+
 ## 4. Kaba yeniden kullanım oranı
 
 | Kategori | Modül | Pay |
 |---|---|---|
-| 🟢 Doğrudan alınır | MOD-00, 01, 05, 06, 09, 11, 15, 16, 19, 21 | **10 / 21** |
+| 🟢 Doğrudan alınır | MOD-00, 01, 05, 06, 09, **11**, **15**, 16, 19, 21 | **10 / 21** |
 | 🟡 Alınır + genişletilir | MOD-02, 03, 07, 08, 12, 14, 17, 18, 20 | **9 / 21** |
 | 🔴 Büyük ölçüde yeni | MOD-04 (BOM), MOD-10 (Kalite) | **2 / 21** |
 
-> Eforun büyük kısmı **MOD-04 (Ürün Ağacı + Maliyet motoru)** ve **entegrasyon/uyumlama**
-> tarafında. "Modülü kopyaladık, bitti" değil: her modül tek bir veri modeline ve tek bir
-> yetki sistemine oturtulacak.
+TeklifRota eklendikten sonra **MOD-02 ve MOD-07** 🟡'nin üst ucuna çıktı (iskelet hazır,
+Ensotek'e özgü kısım eklenecek), **MOD-15 Navlun** ise fiilen 🟢'nin üst ucunda: motor,
+şema, ekranlar ve testler hazır.
+
+> Eforun büyük kısmı hâlâ **MOD-04 (Ürün Ağacı + Maliyet motoru)** ve
+> **entegrasyon/uyumlama** tarafında. "Modülü kopyaladık, bitti" değil: farklı
+> projelerden gelen modüller tek veri modeline, tek yetki sistemine ve tek
+> numaralandırmaya oturtulacak.
+
+### Kaynak dağılımı
+
+| Kaynak | Beslediği modüller |
+|---|---|
+| **TeklifRota** | MOD-02 Teklif · MOD-03 Maliyet (mekanizma) · MOD-07 Sipariş · MOD-11 Sevkiyat · **MOD-15 Navlun** |
+| **transpalet-crm** | MOD-01 · MOD-05 · MOD-06 · MOD-09 · MOD-12 · MOD-17 · MOD-18 · MOD-19 · MOD-21 |
+| **paspas ERP** | MOD-09 · MOD-18 (ikincil doğrulama kaynağı) |
+| **ihracatradari** | **MOD-14 Firma Bulma** |
+| **osgb-yazilim** | **MOD-16 Personel** |
+| **e-fatura-service** | MOD-20 Muhasebe |
+| **Ensotek shared-backend** | MOD-00 Altyapı |
+| *(yeni yazılacak)* | **MOD-04 Ürün Ağacı** · **MOD-10 Kalite** |
 
 ---
 

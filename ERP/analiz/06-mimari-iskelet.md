@@ -112,7 +112,7 @@ Kaynak: `sablon_proje/` + `Ensotek/packages/` deseni.
 | I-02 | Rol ve yetki matrisi | `userRoles` + registry | Modül açıldıkça genişler |
 | I-03 | **Proje/İş numarası üreteci** | Yeni | ENK/ENB + teklif no + PRJ — sonradan değişmez |
 | I-04 | Dosya deposu | `shared-backend/storage` | PDF, DWG, fotoğraf |
-| I-05 | PDF üretim tabanı | ihracatradari `document-service` | 3 şablon: teknik / ticari / iç maliyet |
+| I-05 | PDF üretim tabanı | **TeklifRota** `document-service`, `proforma-document`, `packing-document`, `workbook-export`, `streaming-export` | 3 şablon: teknik / ticari / iç maliyet |
 | I-06 | Mail gönderimi + şablon | `mail`, `emailTemplates`, `mailAccounts` | Teklif gönderimi |
 | I-07 | Bildirim | `notifications` | Stok uyarısı, görev, hatırlatma |
 | I-08 | **Denetim izi (audit)** | `admin_audit` | "Kim ne zaman değiştirdi" — maliyet için şart |
@@ -120,7 +120,9 @@ Kaynak: `sablon_proje/` + `Ensotek/packages/` deseni.
 | I-10 | **Ek/dosya + arşiv motoru** | `storage` üstüne | Teklif no bazlı otomatik klasör |
 | I-11 | Arama | Yeni | Modül eklendikçe beslenir |
 | I-12 | Ayarlar / tanımlar | `tanimlar`, `siteSettings` | Atölye, birim, vergi, sabitler |
-| I-13 | **Excel içe aktarma altyapısı** | ihracatradari `customer-import`, `import.ts` | [Veri göçü](07-excel-veri-gocu.md) |
+| I-13 | **Excel içe aktarma altyapısı** | TeklifRota `customer-import`, `import.ts`, `264_product_catalog_import.sql`, `270_product_import_audit.sql` | [Veri göçü](07-excel-veri-gocu.md) |
+| I-15 | **Müşteri portalı tabanı** (token'lı genel bağlantı) | TeklifRota `public-link-service`, `quote_delivery_public_links` | Teklifin müşteriye açılması — MOD-02 |
+| I-16 | **Navlun motoru paketi** | **`@teklifrota/freight-engine`** — bağımsız paket, 5.515 satır | `packages/` altına olduğu gibi taşınır |
 | I-14 | Yedekleme + db_admin | `db_admin` | Tek ERP → veri kaybı kabul edilemez |
 
 ### 3.3 İlk günden kurulacak veri çekirdeği
@@ -157,6 +159,22 @@ numaralandirma_sayaclari
 
 > ENK/ENB sayaçları **mevcut Excel'deki son numaradan devam etmelidir** — Ensotek'in
 > geçmiş iş numaraları canlıda kullanılıyor, sıfırlanamaz.
+
+---
+
+## 3.5 Çok kiracılılık — devralınan şemanın kararı
+
+TeklifRota'dan gelen 73 seed-SQL şemasının **45'inde `tenant_key` var**.
+Ensotek ERP tek kiracılıdır ama **`tenant_key` sökülmeyecek**:
+
+- Sabit tek değere bağlanır (`tenant_key = 'ensotek'`), sorgular ve testler olduğu gibi çalışır
+- Sökmek yüzlerce dokunuş demek; kazancı yok, kırma riski yüksek
+- İleride Ensotek'in dört sitesi/şirketi (ensotek.de, ensotek.com.tr, kompozit, kuhlturm)
+  ayrı kiracı olarak ayrışmak isterse altyapı hazır olur
+
+**Alınmayacak SaaS modülleri:** `billing`, `payments`, `entitlements`, `tenants`,
+`tenant-settings`, `auth-onboarding`, `partner-api`, `cloud-costs`.
+**Alınacaklar:** `tenant-audit` (denetim izi), `privacy` (KVKK yaşam döngüsü).
 
 ---
 
