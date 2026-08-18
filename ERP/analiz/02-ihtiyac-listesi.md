@@ -86,6 +86,10 @@
 | IHT-308 | Teklif anı maliyetin **tablo veya PDF olarak** saklanması | [H] | H-05 |
 | IHT-316 | Revizyon bazlı snapshot altyapısı (`snapshot JSON` + `totals_snapshot JSON`) | [K] TeklifRota `commercial_quote_revisions` |
 | IHT-317 | **Snapshot'a BOM maliyet kırılımının eklenmesi** — TeklifRota yalnız fiyat toplamını donduruyor, maliyet kalemlerini değil | [K] — *yeni iş* |
+| IHT-318 | **Planlanan ↔ gerçekleşen adam-gün karşılaştırması** — ürün ağacındaki adam-gün tahmini tuttu mu | [K] paspas `uretim_emri_operasyonlari` besler |
+| IHT-319 | **Fire maliyeti** — üretimdeki fire miktarının gerçekleşen maliyete yansıması | [K] paspas besler |
+| IHT-320 | Duruş süresinin dolaylı gidere yansıması | [K] paspas besler |
+| IHT-321 | **Maliyet hesap katmanı** — Paspas üretim verisini toplar ama maliyetlendirmez; bu katman **sıfırdan yazılacak** | [K] — *yeni iş* |
 | IHT-309 | **Güncel maliyet** ile teklif anı maliyetin karşılaştırılması | [H-ç] | H-05 |
 | IHT-310 | Tedarik siparişlerinden **güncel maliyetin beslenmesi** | [H] | H-03 |
 | IHT-311 | Kâr oranı belirleyip **teklif fiyatının hesaplanması** | [H] | H-03 |
@@ -125,7 +129,9 @@
 | IHT-505 | Stok takibi — bugün gözle; sistemde tutulacak | [H] | H-12 |
 | IHT-506 | Kritik kalemlerde (fan, motor, redüktör) **stok azaldı uyarısı** | [H-ç] | H-12 |
 | IHT-507 | Depo giriş/çıkış, projeye zimmetleme | [Ö] | — |
-| IHT-508 | Seri numarası / lot takibi | [Ö] | — |
+| IHT-508 | Seri numarası / lot takibi | [Ö] |
+| IHT-509 | **Birim tanımları ve birim dönüşümü** — kg / adet / m² / metre / adam-gün karışık kullanımı | [K] paspas `birimler`, `urun_birim_donusumleri` |
+| IHT-510 | **Kritik stok** eşiği ve uyarı | [K] paspas `kritik_stoklar` | — |
 
 ---
 
@@ -180,6 +186,16 @@
 | IHT-906 | Atölyelerin **iş tamamlandı** bildirimi / üretim durumu takibi | [H-ç] | H-10 |
 | IHT-907 | İş emirlerinin tablet/mobil ekrandan kapatılması | [Ö] | — |
 | IHT-908 | Barkod / QR kod | [Ö] | — |
+| IHT-909 | **Operasyon rotası** — model bazlı atölye sırası (kaynak → polyester → montaj → test → paketleme) ve süre | [K] paspas `urun_operasyonlari` |
+| IHT-910 | **İş emri operasyon kırılımı** — atölye, planlanan/üretilen/fire miktar, planlanan↔gerçek başlangıç-bitiş, durum | [K] paspas `uretim_emri_operasyonlari` |
+| IHT-911 | **Hammadde rezervasyonu** — iş emri açılınca BOM kalemleri stoktan rezerve edilir | [K] + [H] H-10 · paspas `hammadde_rezervasyonlari` |
+| IHT-912 | **Fire miktarı** kaydı ve maliyete yansıması | [K] paspas |
+| IHT-913 | Saha/operatör günlük kaydı: ek üretim, arıza, **duruş nedeni**, not | [K] paspas `operator_gunluk_kayitlari` |
+| IHT-914 | **Vardiya tanımı ve vardiya bazlı üretim analizi** (gündüz/gece, TR sabit UTC+3) | [K] paspas `vardiyalar`, `vardiya_analizi` |
+| IHT-915 | **Duruş nedenleri** tanım tablosu ve duruş kaydı | [K] paspas `durus_nedenleri` |
+| IHT-916 | **Üretim partisi** — toplu üretime aktarmada parti no ile gruplama | [K] paspas `uretim_parti` |
+| IHT-917 | İş emri ↔ sipariş kalemi **miktar bazlı tahsis** | [K] paspas `tahsis_miktar` |
+| IHT-918 | Tatil / kapalı aralık takvimi (atölye planına etkisi) | [K] paspas `tatil_makineler`, `makine_kapali_araliklar` |
 
 ---
 
@@ -324,6 +340,8 @@
 | IHT-1804 | Termin tarihi hesabı ve gecikme uyarısı | [K] |
 | IHT-1805 | Atölye bazlı performans (planlanan vs gerçekleşen adam-gün) | [K] |
 | IHT-1806 | Fabrika geneli canlı üretim durumu ekranı | [K] |
+| IHT-1807 | **Atölye kuyruğu / iş yükü** — planlanan süre, boş atölye, termin | [K] paspas `is_yukler` |
+| IHT-1808 | Planlanan ↔ gerçekleşen süre sapma raporu (atölye bazlı) | [K] paspas besler |
 
 ---
 
@@ -390,27 +408,27 @@
 
 ## Sayısal özet
 
-**Toplam 195 gereksinim satırı, 21 modül.**
+**Toplam 213 gereksinim satırı, 21 modül.**
 
 | Kaynak | Satır | Anlamı |
 |---|---:|---|
-| **[H]** Hamdi Bey teyitli | 83 | Ensotek'in kendi anlattığı süreç |
+| **[H]** Hamdi Bey teyitli | 84 | Ensotek'in kendi anlattığı süreç |
 | **[H-ç]** Anlatımdan çıkarım | 9 | Teyit edilecek |
 | **[Ö]** ChatGPT önerisi | 37 | v0.2 ile **kapsama alındı** |
-| **[K]** Orhan kapsam kararı | 74 | Firma bulma, navlun, personel, bakım, fabrika, satış, muhasebe + **TeklifRota'dan gelen 22 yetenek** |
+| **[K]** Orhan kapsam kararı | 92 | Yeni modüller + **TeklifRota'dan 22** + **Paspas'tan 18 üretim/maliyet yeteneği** |
 
 > Bir satır birden çok etiket taşıyabilir (örn. `[K] + [H]` — biz ekledik ama Ensotek'in
-> anlattığı bir ihtiyaca da denk geliyor). Bu yüzden sütun toplamı 195'i aşar.
+> anlattığı bir ihtiyaca da denk geliyor). Bu yüzden sütun toplamı 213'ü aşar.
 
 ### Modül dağılımı
 
 | Faz | Modüller | Gereksinim |
 |---|---|---:|
 | **0** | MOD-00 Altyapı | *(iskelet — [ANALİZ-06](06-mimari-iskelet.md))* |
-| **1** | MOD-01, 02, 03, 04 | 63 |
-| **2** | MOD-05, 06, 07, 08 | 26 |
-| **3** | MOD-09, 10, 11, 15 | 38 |
-| **4** | MOD-12, 16, 17, 18 | 26 |
+| **1** | MOD-01, 02, 03, 04 | 67 |
+| **2** | MOD-05, 06, 07, 08 | 28 |
+| **3** | MOD-09, 10, 11, 15 | 48 |
+| **4** | MOD-12, 16, 17, 18 | 28 |
 | **5** | MOD-14, 19, 20, 21 | 35 |
 | — | MOD-13 Sistem geneli | 7 |
 
@@ -426,10 +444,14 @@
 | **OUT-04** | **Termal seçim/hesap motorunun sıfırdan yazılması** | Mevcut seçim yazılımı entegre edilir → [S-01](04-acik-sorular.md) |
 | **OUT-05** | **Canlı taşıyıcı navlun fiyat borsası** | Navlun hesaplanır, dış fiyat servisi çekilmez |
 
-> **v0.3 notu:** Yeni eklenen 22 satırın tamamı **[K]** — TeklifRota'da hazır bulunan
-> ve Ensotek'in istemediği ama kapsamı güçlendiren yetenekler (teklif durum makinesi,
-> müşteri teklif portalı, proforma, çok modlu navlun motoru, nakliyeci RFQ, packing list).
-> Bunlar **yeni geliştirme değil, mevcut kodun devralınmasıdır**.
+> **v0.3 notu:** TeklifRota'dan 22, Paspas'tan 18 satır eklendi; tamamı **[K]**.
+> Bunlar **yeni geliştirme değil, mevcut kodun devralınmasıdır** — teklif durum makinesi,
+> müşteri teklif portalı, proforma, çok modlu navlun motoru, nakliyeci RFQ, packing list
+> (TeklifRota); operasyon rotası, iş emri kırılımı, hammadde rezervasyonu, fire, vardiya,
+> duruş, iş yükü kuyruğu (Paspas).
+>
+> **Tek istisna IHT-321:** Paspas üretim verisini *toplar* ama *maliyetlendirmez*.
+> Maliyet hesap katmanı — IHT-317, 318, 319, 320 ile birlikte — **sıfırdan yazılacaktır**.
 >
 > **Fiyat aşaması** ([ANALİZ-03 §7](03-kapsam-taslagi.md)) en sona bırakıldı.
 > Etiket ayrımı orada tekrar işe yarayacak: Ensotek'in kendi talebi ile bizim

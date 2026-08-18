@@ -14,7 +14,7 @@
 | Proje | Ne var | Durum | Not |
 |---|---|---|---|
 | **transpalet-crm** | Fastify backend, **48 modül** + admin_panel + shared-backend | Aktif | **En yakın eşleşme.** Üretim emri, reçete, stok, sevkiyat, satın alma, teklif, servis, personel, Logo entegrasyonu |
-| **paspas** (Paspas ERP) | Fastify backend, **41 modül**, teslim edildi | Bakım modu | Üretim emirleri, reçeteler, mal kabul, satış siparişleri, gantt, vardiya analizi |
+| **paspas** (Paspas ERP) | 41.930 satır backend, **41 modül**, **129 seed-SQL**, 74 test, 70 admin ekranı; teslim edildi | Bakım modu | **Üretim kırılımının tamamı**: operasyon rotası, iş emri operasyonları, planlanan↔gerçekleşen, fire, hammadde rezervasyonu, vardiya/duruş, iş yükü kuyruğu, parti. **Maliyet modülü YOK** — ama maliyetin hesaplandığı ham veri burada |
 | **fuar-teklif / TeklifRota** | 21.274 satır backend, **73 seed-SQL şeması**, 57 admin ekranı, ayrı **`@teklifrota/freight-engine`** paketi (5.515 satır) | Aktif | **En büyük tek kazanç.** *"Tekliften teslimata tek rota"* — teklif yaşam döngüsü, revizyon+snapshot, proforma, packing list, sipariş, sevkiyat, **çok modlu navlun motoru**, nakliyeci RFQ, müşteri teklif portalı |
 | **ihracatradari.com.tr** | `enrichment`, `decision-makers`, `scans`, `scoring`, `customs`, `export-profile`; `commercial` (TeklifRota'nın erken sürümü) | Aktif | **Firma bulma** için ana kaynak |
 | **osgb-yazilim** | `personel`, `calisan`, `evrak`, `atama`, `gorev`, `kpi`, `saglik`, `firma`, `taseron`, `teklif` | Aktif | **Personel yönetimi** için ana kaynak |
@@ -41,7 +41,7 @@
 | **MOD-06** Satın Alma | transpalet | `satin_alma`, `tedarikci` | 🟢 | Fiyat geçmişi → maliyeti besleme bağı |
 | **MOD-07** Sipariş / Üretime Teslim | TeklifRota + transpalet + paspas | TeklifRota `order-service` + `311_orders_shipments.sql` + `315_inventory_fulfillment.sql`; transpalet `satis_siparisleri`, `ihtiyac_formlari` | 🟢→🟡 | **ENK/ENB numaralandırma**, **avans kontrolü bloğu**, Teklif İnceleme Formu'nun dijitali |
 | **MOD-08** Mühendislik | Ensotek shared `storage` + transpalet | Dosya yönetimi, `gorevler` | 🟡 | AutoCAD/DWG bağlama, müşteri teknik soru-cevap kaydı, **malzeme listesi üretimi**, seçim yazılımı entegrasyonu |
-| **MOD-09** Üretim ve İş Emirleri | transpalet + paspas | `uretim_emirleri`, `operator`, `is_yukler`, `gantt`, `vardiya_analizi`, `makine_havuzu` | 🟢 | Atölye yönlendirme mantığı (kaynak/polyester/montaj), atölye bazlı iş emri |
+| **MOD-09** Üretim ve İş Emirleri | **paspas** (birincil) + transpalet | `uretim_emirleri` (2.675 st), `operator` (3.853 st), `is_yukler`, `gantt`, `vardiya_analizi` (1.617 st), `makine_havuzu`; tablolar: `urun_operasyonlari`, `uretim_emri_operasyonlari`, `hammadde_rezervasyonlari`, `operator_gunluk_kayitlari`, `vardiyalar`, `durus_nedenleri`, `uretim_parti` | 🟢 | Makine/kalıp/çevrim ekseni **atölye/adam-gün eksenine** çevrilecek (kaynak/polyester/montaj) |
 | **MOD-10** Kalite | — | Yok | 🔴 | Basınç testi → galvaniz → tekrar test akışı; test formu, fotoğraf, rapor |
 | **MOD-11** Sevkiyat | **TeklifRota** + transpalet | `packing-list`, `packing-document` (+snapshot), `packaging-preset-repository`, `281_packing_lists.sql`, `311_orders_shipments.sql`, `/ticari/sevkiyatlar` ekranı; transpalet `sevkiyat` | 🟢 | Palet/koli/konteyner hesabı hazır; TIR/konteyner/kamyon ayrımı ve **demonte kule paketleme** eklenir |
 | **MOD-12** Süpervizörlük ve Servis | transpalet + osgb | `servis`, `atama`, `gorev`, `personel` | 🟡 | Süpervizör seyahat/otel/harcırah, saha raporu, müşteri imzası, garanti |
@@ -49,7 +49,7 @@
 | **MOD-15** Navlun ve Lojistik | **TeklifRota `@teklifrota/freight-engine`** (ayrı paket) + `commercial` navlun katmanı | Motor: `engine.ts` (kara/deniz/hava, deterministik, gerçek boğaz-kanal geçişleri), `road-distances.ts` (2.161 satır), `toll-shares.ts`, `parameters.ts` (dizel, EUA karbon, otoyol tarifeleri, IATA 166,67, emisyon), `record.ts` (girdi-kanıt + drift tespiti), `place-resolver`. Katman: `freight-repository`, `freight-marketplace`, `freight-exchange-*` (bağlantı/OAuth/webhook/pazarlık), `freight-rate-benchmarks`, `multimodal_plans`, `route-provider`; ekranlar `/navlun-hesaplama`, `/navlun-parametreleri`, `/nakliyeci/rfq`, `/lojistik` | 🟢 | **Neredeyse hazır.** Kule ölçülerini besleyip TIR/konteyner sığdırma ve demonte sevk senaryosunu eklemek yeterli |
 | **MOD-16** Personel Yönetimi | **osgb-yazilim** + transpalet | `personel`, `calisan`, `evrak`, `atama`, `kpi`, `saglik`; transpalet `personel`, `vardiya_analizi` | 🟢 | Atölye/vardiya bağlama, adam-gün maliyetine bağlanma |
 | **MOD-17** Bakım Yönetimi (fabrika ekipmanı) | transpalet + paspas | `makine_havuzu`, `makine_verileri`, `makine_kapali_araliklar` | 🟡 | Periyodik bakım planı, arıza kaydı |
-| **MOD-18** Fabrika Yönetimi | transpalet + paspas | `is_yukler`, `gantt`, `vardiya_analizi`, `operator`, `dashboard` | 🟡 | Atölye kapasitesi, yükleme, darboğaz görünümü |
+| **MOD-18** Fabrika Yönetimi | **paspas** (birincil) + transpalet | `is_yukler` (makine kuyruğu, boş makine, planlanan süre), `gantt` (743 st), `vardiya_analizi`, `tatil_makineler`, `makine_kapali_araliklar`, `durus_nedenleri` | 🟢→🟡 | Makine kuyruğu → **atölye kuyruğu**; kapasite adam-gün cinsinden |
 | **MOD-19** Satış Yönetimi | transpalet `crm` + gzl-gelir-crm | Pipeline, fırsat, aktivite, rapor | 🟢 | Kazanma oranı, satış hedefi (prim **hariç** — OUT-01) |
 | **MOD-20** Muhasebe / Maliyet Muhasebesi | **e-fatura-service** + transpalet `logo_entegrasyon` | Fatura şemaları, kuyruk/worker; Logo entegrasyon köprüsü | 🟡 | Cari, tahsilat, ödeme planı, fatura/irsaliye; e-fatura ayrı servis olarak bağlanır |
 | **MOD-21** Yönetim ve Raporlama | transpalet + paspas | `dashboard`, `kpi`, `llm`, `page_feedback`, `test_center` | 🟢 | Ensotek KPI'ları |
@@ -58,7 +58,7 @@
 
 ## 3. Doğrulanmış tespitler
 
-### 3.1 Üretim tarafının omurgası — transpalet-crm
+### 3.1 En geniş modül seti — transpalet-crm
 48 modülün **çoğu** doğrudan karşılık buluyor: `uretim_emirleri`, `receteler`, `stoklar`,
 `satin_alma`, `tedarikci`, `sevkiyat`, `mal_kabul`, `teklifler`, `musteriler`, `servis`,
 `personel`, `gorevler`, `gantt`, `hareketler`, `tanimlar`, `operator`, `vardiya_analizi`.
@@ -175,7 +175,103 @@ bu desenin üzerine bir `status` alanı eklenerek kurulur — bkz.
 
 ---
 
-### 3.7 Tek gerçek uyarlama maliyeti — çok kiracılılık 🟡
+### 3.7 Paspas ERP — üretim kırılımının tamamı 🟢
+
+**Önce dürüst tespit: Paspas'ta maliyet modülü yok.**
+`grep -ri "maliyet\|cost" backend/src/modules/` → **sıfır sonuç**. Şemalardaki `birim_fiyat`
+alanları ürün kartındaki satış/alış fiyatıdır; maliyet kırılımı, roll-up, işçilik veya
+genel gider hesabı **yoktur**.
+
+**Ama Paspas, maliyetin hesaplandığı ham veriyi eksiksiz tutuyor** — ki Ensotek için
+bu daha değerli, çünkü Ensotek'in maliyet formülü kendine özgü (kg-bazlı CTP, adam-gün,
+çarpan, pazarlık payı, EUR kuru) ve zaten sıfırdan yazılacak.
+
+#### a) Operasyon rotası — ürün kartında
+```sql
+urun_operasyonlari (
+  urun_id, sira, operasyon_adi, kalip_id,
+  hazirlik_suresi_dk,      -- setup
+  cevrim_suresi_sn,        -- birim üretim süresi
+  montaj )
+```
+**Ensotek karşılığı:** kule modelinin atölye rotası — kaynak → polyester → montaj → test
+→ paketleme. `cevrim_suresi_sn` yerine **adam-gün**, `kalip_id` yerine **atölye**.
+Yapı birebir aynı; birim ve eksen değişiyor.
+
+#### b) İş emri operasyonları — planlanan ↔ gerçekleşen
+```sql
+uretim_emri_operasyonlari (
+  uretim_emri_id, urun_operasyon_id, sira, operasyon_adi,
+  kalip_id, makine_id, hazirlik_suresi_dk, cevrim_suresi_sn,
+  planlanan_miktar, uretilen_miktar, fire_miktar,
+  planlanan_baslangic, planlanan_bitis,
+  gercek_baslangic,    gercek_bitis,
+  durum )
+```
+> **Bu tablo Ensotek'in gerçekleşen maliyet analizinin (IHT-312 / IHT-2008) temelidir.**
+> Planlanan adam-gün ile gerçekleşen adam-gün farkı buradan çıkar. Hamdi Bey'in
+> ürün ağacına girdiği "kaç adam-gün" tahmininin **tutup tutmadığı** ancak bu veriyle
+> ölçülebilir. Paspas bunu hesaplamıyor ama **veriyi topluyor** — Ensotek'te üstüne
+> maliyet katmanı yazılacak.
+
+#### c) Hammadde rezervasyonu — BOM'dan iş emrine köprü
+```sql
+hammadde_rezervasyonlari ( uretim_emri_id, urun_id, miktar, durum )
+```
+İş emri açılınca BOM kalemleri stoktan **rezerve** ediliyor. Ensotek'in
+*"montaj atölyesi motoru fanı stoktan çeker"* (H-10) akışının tam karşılığı.
+
+#### d) Saha kaydı ve duruş
+```sql
+operator_gunluk_kayitlari ( uretim_emri_id, operator_user_id, gunluk_durum,
+                            ek_uretim_miktari, makine_arizasi, durus_nedeni, notlar )
+vardiyalar · durus_nedenleri · tatil_makineler · makine_kapali_araliklar
+```
+`vardiya_analizi/core.ts` (1.617 satır) bunları vardiya bazında analiz ediyor:
+net / fire / ek üretim, makine, kalıp, çevrim, operatör, gündüz-gece vardiyası,
+**TR sabit UTC+3** (ortam TZ'sine güvenmiyor).
+
+#### e) İş yükü kuyruğu
+`is_yukler` — makine bazlı kuyruk: `planlananSureDk`, `hazirlikSuresiDk`,
+`planlananMiktar`, `uretilenMiktar`, `fireMiktar`, `terminTarihi`, `bosMakine`.
+Ensotek'te **atölye bazlı kuyruk** olur; MOD-18'in çekirdeği.
+
+#### f) Diğer devralınacaklar
+`uretim_parti` (parti no ile toplu üretime aktarma) · `birimler` +
+`urun_birim_donusumleri` (birim dönüşümü — Ensotek'in **kg / adet / m² / adam-gün**
+karışık birim ihtiyacı için gerekli) · `kaliplar` + `kalip_uyumlu_makineler` ·
+`kritik_stoklar` · `tanimlar` (1.380 satır ortak tanım altyapısı).
+
+#### g) Teklif PDF — Türkçe şablon hazır
+`modules/teklifler/` içinde `pdf.service.ts`, `pdfTemplate.ts`, `teklif-pdf.ts`,
+`scheduler.ts` (2.029 satır toplam) + `teklif_sablonlari`, `teklif_public_token_lifecycle`,
+`teklif_karar_gecmisi`, `teklif_iskonto_revizyon` tabloları.
+TeklifRota'nın belge altyapısı daha güçlü ama **Türkçe PDF şablonu Paspas'ta hazır** —
+ikisi birleştirilir.
+
+#### ⚠️ Devralırken dikkat: ALTER zinciri
+Paspas'ın 129 seed-SQL dosyasının önemli kısmı **korumalı `ALTER TABLE`** migrasyonu
+(`121_v1_urunler_alter`, `205_uretim_parti`, `212_tahsis_miktar` …). Workspace kuralı
+`ALTER TABLE` kullanımını yasaklıyor: şemalar Ensotek ERP'ye taşınırken
+**tek bir `CREATE TABLE` tanımında birleştirilecek**, 129 migrasyon zinciri
+taşınmayacak. Bu, göç sırasında yapılacak mekanik ama gerekli bir temizlik.
+
+---
+
+### 3.8 Üç kaynağın iş bölümü
+
+| Alan | Kaynak | Neden |
+|---|---|---|
+| **Ticari zincir** — teklif, revizyon, snapshot, portal, proforma, navlun | **TeklifRota** | En olgun, testli, belgeli |
+| **Üretim zinciri** — operasyon rotası, iş emri kırılımı, planlanan↔gerçekleşen, vardiya, duruş, kuyruk | **Paspas** | Gerçek fabrikada çalışmış, teslim edilmiş |
+| **Genel ERP dokusu** — müşteri, stok, satın alma, tedarikçi, servis, personel, görev | **transpalet-crm** | En geniş modül seti, aynı dosya düzeni |
+
+Üçü de aynı stack (Fastify + MySQL + seed-SQL + `controller/repository/router/schema/service/validation`),
+bu yüzden birleştirme mimari değil **veri modeli** işi.
+
+---
+
+### 3.9 Tek gerçek uyarlama maliyeti — çok kiracılılık 🟡
 
 TeklifRota **çok kiracılı (multi-tenant) SaaS**. 73 seed-SQL dosyasının **45'inde**
 `tenant_key` var; ayrıca `tenants`, `tenant-settings`, `tenant-audit`, `entitlements`,
@@ -204,9 +300,11 @@ abonelik/faturalandırma işidir, Ensotek'in iç ERP'sinde karşılığı yok.
 | 🟡 Alınır + genişletilir | MOD-02, 03, 07, 08, 12, 14, 17, 18, 20 | **9 / 21** |
 | 🔴 Büyük ölçüde yeni | MOD-04 (BOM), MOD-10 (Kalite) | **2 / 21** |
 
-TeklifRota eklendikten sonra **MOD-02 ve MOD-07** 🟡'nin üst ucuna çıktı (iskelet hazır,
-Ensotek'e özgü kısım eklenecek), **MOD-15 Navlun** ise fiilen 🟢'nin üst ucunda: motor,
-şema, ekranlar ve testler hazır.
+TeklifRota eklendikten sonra **MOD-02 ve MOD-07** 🟡'nin üst ucuna çıktı, **MOD-15 Navlun**
+fiilen 🟢'nin üst ucunda. Paspas incelendikten sonra **MOD-09 Üretim** ve **MOD-18 Fabrika**
+da 🟢'ye oturdu: operasyon rotası, iş emri kırılımı, planlanan↔gerçekleşen, fire, vardiya,
+duruş ve kuyruk yapıları hazır — makine/kalıp/çevrim ekseni atölye/adam-gün eksenine
+çevrilecek.
 
 > Eforun büyük kısmı hâlâ **MOD-04 (Ürün Ağacı + Maliyet motoru)** ve
 > **entegrasyon/uyumlama** tarafında. "Modülü kopyaladık, bitti" değil: farklı
@@ -218,8 +316,8 @@ Ensotek'e özgü kısım eklenecek), **MOD-15 Navlun** ise fiilen 🟢'nin üst 
 | Kaynak | Beslediği modüller |
 |---|---|
 | **TeklifRota** | MOD-02 Teklif · MOD-03 Maliyet (mekanizma) · MOD-07 Sipariş · MOD-11 Sevkiyat · **MOD-15 Navlun** |
-| **transpalet-crm** | MOD-01 · MOD-05 · MOD-06 · MOD-09 · MOD-12 · MOD-17 · MOD-18 · MOD-19 · MOD-21 |
-| **paspas ERP** | MOD-09 · MOD-18 (ikincil doğrulama kaynağı) |
+| **paspas ERP** | **MOD-09 Üretim** · **MOD-18 Fabrika** (ikisinde de birincil) · MOD-02 Türkçe PDF şablonu · MOD-05 birim dönüşümü |
+| **transpalet-crm** | MOD-01 · MOD-05 · MOD-06 · MOD-12 · MOD-17 · MOD-19 · MOD-21 |
 | **ihracatradari** | **MOD-14 Firma Bulma** |
 | **osgb-yazilim** | **MOD-16 Personel** |
 | **e-fatura-service** | MOD-20 Muhasebe |

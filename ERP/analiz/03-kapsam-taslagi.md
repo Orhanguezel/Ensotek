@@ -5,10 +5,15 @@
 > **v0.1 → v0.2 (2026-08-18):** Kapsam **genişletildi**, opsiyon listesi kaldırıldı —
 > *"tamamını hatta fazlasıyla yapacağız"*.
 >
-> **v0.2 → v0.3 (2026-08-18):** **TeklifRota (`fuar-teklif`)** kaynak havuzuna eklendi.
-> Ticari omurga (teklif yaşam döngüsü, revizyon+snapshot, proforma, packing list,
-> müşteri teklif portalı) ve **çok modlu navlun motoru** hazır çıktı. OUT-05 kaldırıldı,
-> MOD-15 genişledi, Faz 3'ten Faz 1'e taşınabilir hale geldi.
+> **v0.2 → v0.3 (2026-08-18):** **TeklifRota (`fuar-teklif`)** ve **Paspas ERP** ayrıntılı
+> incelendi.
+> - TeklifRota → ticari omurga (teklif yaşam döngüsü, revizyon+snapshot, proforma,
+>   packing list, müşteri teklif portalı) ve **çok modlu navlun motoru** hazır.
+>   OUT-05 kaldırıldı; MOD-15 Faz 3'ten Faz 1'e taşınabilir.
+> - Paspas → **üretim kırılımının tamamı** hazır (operasyon rotası, iş emri kırılımı,
+>   planlanan↔gerçekleşen, fire, hammadde rezervasyonu, vardiya, duruş, iş yükü kuyruğu).
+>   MOD-09 ve MOD-18 🟢'ye oturdu. **Ama Paspas'ta maliyet modülü yok** — maliyet hesap
+>   katmanı sıfırdan yazılacak (IHT-321).
 
 **Girdiler:** [Mevcut Durum](01-mevcut-durum-as-is.md) · [İhtiyaç Listesi](02-ihtiyac-listesi.md)
 · [Yeniden Kullanım](05-modul-envanteri-yeniden-kullanim.md) · [Mimari İskelet](06-mimari-iskelet.md)
@@ -75,7 +80,7 @@ Kapsam genişledi ama sınırsız değil:
 | MOD-06 | Satın Alma | 🟢 | 2 |
 | MOD-07 | Sipariş / Üretime Teslim | 🟢→🟡 | 2 |
 | MOD-08 | Mühendislik | 🟡 | 2 |
-| MOD-09 | Üretim ve İş Emirleri | 🟢 | 3 |
+| MOD-09 | Üretim ve İş Emirleri | 🟢 **paspas** | 3 |
 | MOD-10 | **Kalite** | 🔴 | 3 |
 | MOD-11 | Sevkiyat | 🟢 | 3 |
 | MOD-12 | Süpervizörlük ve Servis | 🟡 | 4 |
@@ -83,7 +88,7 @@ Kapsam genişledi ama sınırsız değil:
 | **MOD-15** | **Navlun ve Lojistik** *(yeni)* | 🟢 **hazır motor** | 3 · *(1'e çekilebilir)* |
 | **MOD-16** | **Personel Yönetimi** *(yeni)* | 🟢 | 4 |
 | **MOD-17** | **Bakım Yönetimi — fabrika ekipmanı** *(yeni)* | 🟡 | 4 |
-| **MOD-18** | **Fabrika Yönetimi** *(yeni)* | 🟡 | 4 |
+| **MOD-18** | **Fabrika Yönetimi** *(yeni)* | 🟢→🟡 **paspas** | 4 |
 | **MOD-19** | **Satış Yönetimi** *(yeni)* | 🟢 | 5 |
 | **MOD-20** | **Muhasebe / Maliyet Muhasebesi** *(yeni)* | 🟡 | 5 |
 | MOD-21 | Yönetim ve Raporlama | 🟢 | 5 |

@@ -35,7 +35,7 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 | Dosya | İçerik |
 |---|---|
 | [analiz/01-mevcut-durum-as-is.md](analiz/01-mevcut-durum-as-is.md) | Ensotek bugün nasıl çalışıyor: teklif, üretim, ürün ağacı, stok, darboğazlar |
-| [analiz/02-ihtiyac-listesi.md](analiz/02-ihtiyac-listesi.md) | **195 gereksinim**, 21 modül, her biri kaynağına bağlı |
+| [analiz/02-ihtiyac-listesi.md](analiz/02-ihtiyac-listesi.md) | **213 gereksinim**, 21 modül, her biri kaynağına bağlı |
 | [analiz/03-kapsam-taslagi.md](analiz/03-kapsam-taslagi.md) | **SCOPE v0.3** — 21 modül, 6 faz (0–5), bağımlılık zinciri, sistem ne DEĞİL |
 | [analiz/04-acik-sorular.md](analiz/04-acik-sorular.md) | Planı netleştirmek için cevaplanacaklar |
 | [analiz/05-modul-envanteri-yeniden-kullanim.md](analiz/05-modul-envanteri-yeniden-kullanim.md) | **Hangi modül hangi projeden geliyor** — doğrulanmış eşleme |
@@ -51,7 +51,7 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 | **0** | MOD-00 Altyapı | İskelet — modül yok, taban var |
 | **1** ⭐ | MOD-01 Talep/CRM · MOD-02 Teklif · MOD-03 Maliyet · **MOD-04 Ürün Ağacı** | Ensotek'in en çok vakit kaybettiği yer |
 | **2** | MOD-05 Stok · MOD-06 Satın Alma · MOD-07 Sipariş · MOD-08 Mühendislik | Malzeme listesi darboğazı |
-| **3** | MOD-09 Üretim · MOD-10 Kalite · MOD-11 Sevkiyat · **MOD-15 Navlun** *(motor hazır — Faz 1'e çekilebilir)* | İş emri ve evrak darboğazı |
+| **3** | MOD-09 Üretim *(paspas hazır)* · MOD-10 Kalite · MOD-11 Sevkiyat · **MOD-15 Navlun** *(motor hazır — Faz 1'e çekilebilir)* | İş emri ve evrak darboğazı |
 | **4** | MOD-12 Servis · **MOD-16 Personel** · **MOD-17 Bakım** · **MOD-18 Fabrika** | Fabrika tarafının tamamlanması |
 | **5** | **MOD-14 Firma Bulma** · **MOD-19 Satış** · **MOD-20 Muhasebe** · MOD-21 Yönetim | Ticari kapanış |
 
@@ -63,14 +63,18 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 |---|---|
 | **fuar-teklif / TeklifRota** ⭐ | **Ticari omurga.** Teklif yaşam döngüsü (11 durumlu state machine), revizyon + snapshot, teklif no sayacı, olay zaman çizelgesi, onay motoru, proforma, packing list, sipariş, sevkiyat, **müşteri teklif portalı** (`/teklif/[token]`), belge üretimi, Excel içe/dışa aktarma. Ayrıca **`@teklifrota/freight-engine`** — 5.515 satırlık çok modlu (kara/deniz/hava) navlun motoru, nakliyeci RFQ, navlun borsası |
 | **transpalet-crm** (48 modül) | **Üretim omurgası.** Üretim emri, reçete, stok, satın alma, tedarikçi, sevkiyat, mal kabul, müşteri, servis, personel, görev, gantt, Logo entegrasyonu |
-| **paspas** (Paspas ERP, 41 modül) | Üretim emirleri, satış siparişleri, vardiya analizi, makine havuzu |
+| **paspas** (Paspas ERP) ⭐ | **Üretim kırılımının tamamı.** 41.930 satır, 41 modül, 129 seed-SQL, 74 test. Operasyon rotası, iş emri operasyon kırılımı (**planlanan↔gerçekleşen**, fire), hammadde rezervasyonu, operatör günlük kaydı, vardiya analizi, duruş nedenleri, iş yükü kuyruğu, üretim partisi, birim dönüşümü, Türkçe teklif PDF şablonu |
 | **ihracatradari.com.tr** | **Firma bulma** — enrichment, decision-makers, scans, scoring |
 | **osgb-yazilim** | **Personel**, çalışan, evrak, atama, KPI |
 | **e-fatura-service** | e-Fatura entegrasyonu |
 | **Ensotek/packages/shared-backend** | auth, storage, mail, notifications, userRoles, audit, db_admin, tema, ayarlar |
 
 **Yeniden kullanım oranı:** 10 modül doğrudan · 9 modül genişleterek · **2 modül büyük ölçüde yeni**
-(MOD-04 Ürün Ağacı, MOD-10 Kalite).
+(MOD-04 Ürün Ağacı, MOD-10 Kalite) — **artı hiçbir kaynakta bulunmayan maliyet hesap katmanı.**
+
+**İş bölümü:** ticari zincir → TeklifRota · üretim zinciri → Paspas · genel ERP dokusu →
+transpalet-crm. Üçü de aynı stack ve aynı modül dosya düzeninde, bu yüzden birleştirme
+mimari değil **veri modeli** işi.
 
 **Tek gerçek uyarlama maliyeti:** TeklifRota çok kiracılı SaaS (73 şemanın 45'inde
 `tenant_key`). Sökülmeyecek — sabit tek değere bağlanacak. Abonelik/faturalandırma
@@ -85,6 +89,13 @@ Mevcut `receteler` şeması **tek seviyeli ve maliyetsiz**. Ensotek'in ihtiyacı
 seviyeli patlatma + maliyet roll-up, kg-bazlı kalem (CTP gövde 270 kg × €/kg), işçilik
 satırı (adam-gün/harcırah/SGK/yemek), ~130 model için parametrik türetme, revizyon ve
 snapshot. **Şema sıfırdan tasarlanacak.**
+
+### 🔴 Maliyet hesap katmanı — hiçbir kaynakta yok
+Üç ERP kaynağının **hiçbirinde maliyet modülü yok.** Paspas üretim verisini eksiksiz
+*topluyor* (planlanan/gerçekleşen süre, fire, duruş) ama *maliyetlendirmiyor*.
+TeklifRota fiyat toplamını dondurdu ama maliyet kırılımını değil. Ensotek'in maliyet
+formülü zaten kendine özgü (kg-bazlı CTP, adam-gün, çarpan, pazarlık payı, EUR kuru) —
+**bu katman sıfırdan yazılacak** (IHT-317…321).
 
 ### 🔴 Veri göçü doğrulaması — pazarlıksız
 Her model için **ERP'nin hesapladığı maliyet, Excel'in hesapladığına birebir eşit**
