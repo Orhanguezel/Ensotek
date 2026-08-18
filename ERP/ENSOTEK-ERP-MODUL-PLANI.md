@@ -4,7 +4,7 @@
 > hangi kaynaktan alınacak, hangileri hiçbir yerde yok.
 >
 > **Durum:** Plan aşaması · Geliştirme başlamadı · **Fiyat en son aşama**
-> **Tarih:** 2026-08-18 · **Sürüm:** 1.1
+> **Tarih:** 2026-08-18 · **Sürüm:** 1.2
 
 ---
 
@@ -25,6 +25,27 @@ Ensotek'in ihtiyacına göre yazılacak.
 
 > Yani: **kod devralınır, şema yeniden yazılır.** Devralınan kodun sorguları yeni şemaya
 > göre uyarlanacak — bu, taşımanın asıl işçiliğidir.
+
+---
+
+## 1.5 Kiracı yapısı
+
+Sistem **çok kiracılıdır** — Ensotek iki ürün ailesi yönetiyor:
+
+| Kiracı | Siteler | Ürünler |
+|---|---|---|
+| `ensotek` | ensotek.de · ensotek.com.tr · kuhlturm.com | Soğutma kulesi (CC-CTP, CTP, DCTP, TCTP) + 9 yedek parça |
+| `kompozit` | karbonkompozit.com.tr | Lunapark / tema parkı kompozit ürünleri |
+
+| Ortak — fabrika tek | Kiracıya özel |
+|---|---|
+| Personel · atölyeler · makineler · bakım · vardiya | Ürünler · ürün ağaçları · maliyet |
+| Tedarikçiler · kullanıcı ve roller | Müşteriler · talepler · teklifler |
+| Birim, para birimi, kur tanımları | İş numaraları · iş emirleri · sevkiyat |
+| Doküman, bildirim, denetim izi | Satış · fuar · cari ve muhasebe |
+
+> **Atölye kuyruğu ve kapasite kiracılar arası birleşiktir** — polyester atölyesi her iki
+> ürün ailesini de üretiyor. Ayrıntı: [ANALİZ-06 §3.5](analiz/06-mimari-iskelet.md)
 
 ---
 

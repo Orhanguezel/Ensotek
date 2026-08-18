@@ -155,6 +155,51 @@ MOD-15 için:
 
 ---
 
+## 🔴 S-13 · Karbonkompozit ayrı tüzel kişilik mi? *(yeni)*
+
+Ensotek iki ürün ailesi yönetiyor: soğutma kulesi (ensotek.de / ensotek.com.tr /
+kuhlturm.com) ve **lunapark–tema parkı kompozit ürünleri** (karbonkompozit.com.tr).
+
+- Karbonkompozit **ayrı şirket mi**, aynı şirketin markası mı?
+- Ayrı fatura, ayrı cari, ayrı muhasebe mi?
+- İş numarası serisi ayrı mı? (ENK/ENB Ensotek'e özgü)
+- Aynı müşteriye iki firmadan da satış oluyor mu?
+
+**Neden kritik:** Cari ve muhasebenin ortak mı ayrı mı olacağını belirler; yanlış
+kurulursa sonradan ayırmak veri göçü demektir → [ANALİZ-06 §3.5](06-mimari-iskelet.md)
+
+---
+
+## 🔴 S-14 · Aynı fabrika, aynı atölyeler mi? *(yeni)*
+
+- Lunapark kompozit ürünleri **aynı polyester atölyesinde** mi üretiliyor?
+- Aynı personel iki ürün ailesinde de çalışıyor mu?
+- Depo ortak mı, ayrı mı?
+
+**Neden kritik:** Atölye kuyruğu ve kapasite planlamasının kiracılar arası **birleşik**
+olması gerekiyorsa (ki büyük ihtimalle öyle), bu ilk günden şemaya girer. Sonradan
+eklenmesi üretim planlamasını baştan yazmak demektir.
+
+---
+
+## 🟡 S-15 · Malzeme havuzu ortak mı? *(yeni)*
+
+Reçine, cam elyaf, jelkot her iki üründe de kullanılıyor.
+
+- Tek malzeme kartı + kiracıya özel fiyat mı?
+- Yoksa tamamen ayrı malzeme listeleri mi?
+- Satın alma ortak mı yapılıyor?
+
+---
+
+## 🟡 S-16 · Kullanıcılar hangi kiracıyı görecek? *(yeni)*
+
+- Satış ekibi ikisine de mi bakıyor, ayrı ekipler mi var?
+- Yönetici her iki kiracıyı birden görecek mi?
+- Atölye çalışanı hangi kiracının işini yaptığını seçecek mi, iş emri mi taşıyacak?
+
+---
+
 ## 🟢 S-11 · Eğitim, devreye alma, bakım
 
 - Kaç kişiye kaç gün eğitim? Faz bazlı mı, toplu mu?
@@ -189,7 +234,7 @@ MOD-15 için:
 |---|---|---|
 | **Dosya talebi** | 3 örnek ürün ağacı Excel'i, birim fiyat, CTP maliyet, serpantin, pano, Word teklif şablonu, Teklif İnceleme Formu | S-02 ve S-03 masabaşında değil, **dosyaya bakarak** cevaplanır |
 | **Toplantı 1** | S-01, S-02, S-03, S-04 | Faz 1 mimarisi kilitlenir |
-| **Toplantı 2** | S-05, S-06, S-07, S-10 | Yetki matrisi + muhasebe sınırı |
+| **Toplantı 2** | S-05, S-06, S-07, S-10, **S-13, S-14, S-16** | Yetki matrisi + muhasebe sınırı + **kiracı yapısı** |
 | **Toplantı 3** | S-08, S-09 | Yeni modüllerin sınırları |
 | **Yazışma** | S-11, S-12 | Detaylar |
 | **Sonra** | Modül bazlı efor tahmini | |
@@ -197,3 +242,6 @@ MOD-15 için:
 
 > **En acil iş soru sormak değil, Excel dosyalarını almak.** S-02 ve S-03 projenin
 > mimarisini belirliyor ve ikisi de ancak gerçek dosyalara bakılarak cevaplanabilir.
+>
+> **S-13 ve S-14 ikinci sırada:** kiracı yapısı ve atölye paylaşımı şemaya ilk günden
+> girer. Sonradan değiştirilmesi pahalıdır.

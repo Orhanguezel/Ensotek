@@ -77,6 +77,10 @@ Kapatmak da aynı şekilde tek satır — riskli bir modül anında geri alınab
 > burada modül **yok**. API rotaları hiç kayıt edilmediği için yetkisiz erişim yüzeyi de
 > oluşmaz.
 
+**Kiracı boyutu:** `status` sisteme, kiracı yetkisi kullanıcıya bakar. Bir modül `ready`
+olsa bile kullanıcının o kiracıda yetkisi yoksa görünmez. İkisi ayrı eksendir ve
+karıştırılmaz.
+
 ---
 
 ## 3. İskelet — ilk günden kurulacaklar
@@ -130,14 +134,22 @@ Kaynak: `sablon_proje/` + `Ensotek/packages/` deseni.
 Bunlar modül değil, **tüm modüllerin paylaştığı tablolar**. Sonradan değiştirmek pahalı:
 
 ```
-kullanicilar · roller · yetkiler
-firmalar (müşteri + tedarikçi + taşeron aynı tabloda, tip alanıyla)
-kisiler (firma yetkilileri)
-projeler          ← sistemin merkezi nesnesi
-urunler           ← mamul | yarı mamul | hammadde | ticari mal | hizmet
-birimler · para_birimleri · kurlar
-dosyalar · audit_log · bildirimler · gorevler
-numaralandirma_sayaclari
+ORTAK (kiracısız)
+  kiracilar                        ← ensotek · kompozit
+  kullanicilar · roller · yetkiler · kullanici_kiraci_yetkileri
+  personel · departmanlar · atolyeler
+  makineler · vardiyalar · durus_nedenleri · tatil_takvimi
+  tedarikciler
+  birimler · para_birimleri · kurlar
+  dosyalar · audit_log · bildirimler
+
+KİRACIYA ÖZEL (tenant_key)
+  firmalar (müşteri) · kisiler
+  projeler                         ← sistemin merkezi nesnesi
+  urunler                          ← mamul | yarı mamul | hammadde | ticari mal | hizmet
+  urun_agaclari · maliyet_kayitlari
+  talepler · teklifler · siparisler · is_emirleri
+  gorevler · numaralandirma_sayaclari
 ```
 
 > **Proje tablosu ilk gün kurulur** — Faz 1'de yalnız teklif alanları dolar, ama
@@ -162,19 +174,95 @@ numaralandirma_sayaclari
 
 ---
 
-## 3.5 Çok kiracılılık — devralınan şemanın kararı
+## 3.5 Çok kiracılılık — **gerçek ihtiyaç, gün birden**
 
-TeklifRota'dan gelen 73 seed-SQL şemasının **45'inde `tenant_key` var**.
-Ensotek ERP tek kiracılıdır ama **`tenant_key` sökülmeyecek**:
+> **Güncelleme (2026-08-18):** Önceki sürümde "Ensotek tek kiracılıdır, `tenant_key`
+> sabit değere bağlanır" yazıyordu. **Bu yanlıştı.** Ensotek iki ayrı ürün ailesi
+> yönetiyor ve çok kiracılılık **gerçek bir gereksinim**.
 
-- Sabit tek değere bağlanır (`tenant_key = 'ensotek'`), sorgular ve testler olduğu gibi çalışır
-- Sökmek yüzlerce dokunuş demek; kazancı yok, kırma riski yüksek
-- İleride Ensotek'in dört sitesi/şirketi (ensotek.de, ensotek.com.tr, kompozit, kuhlturm)
-  ayrı kiracı olarak ayrışmak isterse altyapı hazır olur
+### 3.5.1 Doğrulanan durum
 
-**Alınmayacak SaaS modülleri:** `billing`, `payments`, `entitlements`, `tenants`,
-`tenant-settings`, `auth-onboarding`, `partner-api`, `cloud-costs`.
-**Alınacaklar:** `tenant-audit` (denetim izi), `privacy` (KVKK yaşam döngüsü).
+Ensotek'in dört sitesi/reposu incelendi:
+
+| Repo | Alan adı | Veritabanındaki ürünler |
+|---|---|---|
+| `ensotek_de` | ensotek.de | **Soğutma kulesi:** CC-CTP (kapalı devre), CTP tek hücre, DCTP çift hücre, TCTP üç hücre + **9 yedek parça** (motor-redüktör-fan grubu, titreşim şalteri, fan, servis penceresi, su dağıtım sistemi, nozul, FRP pultruzyon profil, damla tutucu, PVC film dolgu) |
+| `ensotek_com_tr` | ensotek.com.tr | Aynı ürün ailesi — TR pazarı |
+| `kuhlturm` | kuhlturm.com | Aynı ürün ailesi — DE/EN pazarı, **ensotek DB'sini paylaşıyor** |
+| `kompozit` | karbonkompozit.com.tr | **Tamamen farklı ürün ailesi:** lunapark ve tema parkı kompozit ürünleri — kızak araç setleri, amusement ride kabini, tema park dekoru |
+
+**Karbonkompozit, Ensotek'in yeni firmasıdır.** CTP/kompozit imalat bilgisini farklı bir
+pazara taşıyor. Ürün ailesi soğutma kulesiyle **hiç örtüşmüyor**, ama üretim altyapısı
+(polyester atölyesi, reçine, cam elyaf, jelkot) büyük ölçüde **aynı**.
+
+### 3.5.2 Karar — kiracı ekseni korunur ve kullanılır
+
+`tenant_key` sabitlenmeyecek; **canlı kiracı ekseni** olarak çalışacak.
+Bu, devralınacak kod için **iyi haber**: TeklifRota zaten çok kiracılı ve
+`tenant-isolation.test.ts` dahil izolasyon testleriyle geliyor. Kodu kısıtlamak yerine
+**tasarlandığı gibi** kullanıyoruz.
+
+Başlangıç kiracıları:
+```
+ensotek     → soğutma kulesi (ensotek.de · ensotek.com.tr · kuhlturm.com)
+kompozit    → karbonkompozit (lunapark / tema parkı kompozit ürünleri)
+```
+
+### 3.5.3 Ortak mı, kiracıya özel mi
+
+Asıl tasarım kararı budur. Yanlış tarafa koyulan her tablo sonradan pahalıya patlar.
+
+**Kiracıdan bağımsız — tek havuz (fabrika bir tane)**
+
+| Alan | Gerekçe |
+|---|---|
+| Kullanıcılar, roller, yetkiler | Aynı kişi iki kiracıda da çalışıyor; kiracı bazlı yetki verilir |
+| **Personel** | Aynı fabrika, aynı insanlar |
+| **Atölyeler ve kapasite** | Polyester atölyesi hem kule hem lunapark ürünü üretiyor |
+| **Makine/ekipman ve bakım** | Tek fabrika ekipmanı |
+| Vardiya, duruş nedenleri, tatil takvimi | Fabrika geneli |
+| Tedarikçiler | Ortak satın alma gücü |
+| Birim tanımları, para birimleri, kur | Sistem sabitleri |
+| Doküman deposu, bildirim, denetim izi | Altyapı |
+
+**Kiracıya özel — ayrı**
+
+| Alan | Gerekçe |
+|---|---|
+| **Ürünler ve ürün ağaçları** | CTP-5 ile lunapark kızağının ortak noktası yok |
+| Müşteriler | Farklı pazarlar, farklı satış ekipleri |
+| Talepler, teklifler, maliyet, snapshot | Fiyatlandırma mantığı ayrı |
+| **İş numarası serileri** | ENK/ENB Ensotek'e özgü; kompozit kendi serisini kullanır |
+| İş emirleri, sevkiyat, ihracat evrakı | İşin sahibi kiracı |
+| Satış, fuar, firma bulma | Ayrı pazar, ayrı hedef kitle |
+| Cari hesap ve muhasebe | Ayrı tüzel kişilik olabilir → [S-13](04-acik-sorular.md) |
+
+### 3.5.4 Kritik nokta — atölye kuyruğu birleşik olmalı
+
+> İş emri **kiracıya özeldir**, ama **atölye kuyruğu ve kapasite kiracılar arası
+> birleşiktir.**
+
+Polyester atölyesi aynı hafta hem bir CTP gövde hem bir lunapark kabini üretiyorsa,
+kapasite planlaması ikisini **birden** görmek zorundadır. Aksi halde iki ayrı sistem aynı
+atölye için birbirinden habersiz plan yapar ve termin tarihleri tutmaz.
+
+Aynı şey **stok** için de geçerli olabilir: reçine, cam elyaf ve jelkot her iki üründe de
+kullanılıyor. Ortak malzeme havuzu mu, ayrı depo mu → [S-15](04-acik-sorular.md).
+
+### 3.5.5 Efor etkisi
+
+| Kaynak | Durum | Etki |
+|---|---|---|
+| **TeklifRota** modülleri | Zaten çok kiracılı, izolasyon testli | ✅ Kazanç — kısıtlamaya gerek yok |
+| **paspas / transpalet / osgb** modülleri | Tek kiracılı | 🟡 `tenant_key` eklenecek, sorgular kapsanacak |
+| Ortak tablolar (personel, atölye, makine, tedarikçi) | — | ✅ Zaten kiracısız; olduğu gibi kalır |
+
+Net etki **küçük ve mekanik**: kiracıya özel tablolara kolon + sorgu kapsamı + kiracı
+seçici arayüz. Mimari bir dönüşüm değil, çünkü eksen devralınan kodda zaten var.
+
+**Alınmayacak SaaS modülleri:** `billing`, `payments`, `entitlements`, `auth-onboarding`,
+`partner-api`, `cloud-costs` — abonelik/faturalandırma işidir.
+**Alınacaklar:** `tenants` ve `tenant-settings` *(artık gerekli)*, `tenant-audit`, `privacy`.
 
 ---
 
