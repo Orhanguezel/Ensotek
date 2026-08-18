@@ -1,63 +1,82 @@
-# ANALİZ-04 · Açık Sorular — fiyat vermeden önce cevaplanmalı
+# ANALİZ-04 · Açık Sorular (v0.2)
 
-> Bu listedeki her soru **kapsamı ve fiyatı doğrudan değiştirir**. Cevapsız bırakılan
-> bir madde, sonradan "bu da dahil sanıyorduk" tartışmasına dönüşür.
+> **Güncelleme (2026-08-18):** Kapsam kararıyla birlikte bazı sorular kapandı, yeni
+> sorular açıldı. **Fiyat en son aşama** — bu liste artık fiyat için değil, **planı
+> netleştirmek** için.
 >
-> **Öncelik:** 🔴 fiyatı çok etkiler · 🟡 kapsamı netleştirir · 🟢 tasarım detayı
+> **Öncelik:** 🔴 planı/mimariyi belirler · 🟡 kapsamı netleştirir · 🟢 detay
 
 ---
 
-## 🔴 S-01 · Mevcut seçim yazılımı entegre edilecek mi?
+## ✅ Kapanan sorular
+
+| # | Soru | Karar |
+|---|---|---|
+| ~~S-Tek~~ | Hangi teknoloji? | **Bizim teknoloji.** Fastify + Bun + Drizzle + MySQL + Next.js 16. ASP.NET/MSSQL önerisi reddedildi → [ANALİZ-06 §4](06-mimari-iskelet.md) |
+| ~~S-Kapsam~~ | Nereye kadar yapacağız? | **Tamamı ve fazlası.** 21 modül; firma bulma, navlun, personel, bakım, fabrika, satış, muhasebe dahil → [ANALİZ-03](03-kapsam-taslagi.md) |
+| ~~S-Excel~~ | Excel'ler ne olacak? | **Tamamen kapanacak.** Veriler ERP'ye taşınır, paralel çalışma yok → [ANALİZ-07](07-excel-veri-gocu.md) |
+| ~~S-Sıfırdan~~ | Kod sıfırdan mı yazılacak? | **Hayır.** Workspace'teki mevcut modüller birleştirilecek; 21 modülün 19'u mevcut koddan besleniyor → [ANALİZ-05](05-modul-envanteri-yeniden-kullanim.md) |
+| ~~S-Yakında~~ | Hazır olmayan modüller nasıl gösterilecek? | **Gösterilmeyecek.** "Yakında" yasak; modül `hidden` ise menüde yok, route 404, API kapalı → [ANALİZ-06 §1](06-mimari-iskelet.md) |
+
+---
+
+## 🔴 S-01 · Mevcut seçim yazılımı entegre edilecek mi? — **hâlâ açık**
 
 Hamdi Bey: *"benim daha önce yaptırdığım bir yazılım var, o da web tabanlı"* — giriş/çıkış
-sıcaklığı, yaş termometre, debi girilip **m² ve model** bulunuyor.
+sıcaklığı, yaş termometre, debi girilir; **m² ve model** çıkar.
 
-- Bu yazılımın **kaynak koduna / veritabanına / API'sine erişim var mı?**
-- Kim yaptı, hâlâ destekleniyor mu?
+- Kaynak koduna / veritabanına / API'sine **erişim var mı**? Kim yaptı, destekleniyor mu?
 - Seçenekler:
-  - **(a)** API ile entegre et → ucuz, hızlı
+  - **(a)** API ile entegre → ucuz, hızlı
   - **(b)** Seçim tablolarını ERP'ye veri olarak al, seçimi ERP yapsın → orta
-  - **(c)** Termal hesabı sıfırdan yaz → **pahalı, mühendislik doğrulaması gerekir, önerilmez**
+  - **(c)** Termal hesabı sıfırdan yaz → **pahalı, mühendislik doğrulaması gerekir; OUT-04 ile kapsam dışı bırakıldı**
 
-**Etkisi:** (c) senaryosu tek başına projenin en riskli kalemi olur.
-
----
-
-## 🔴 S-02 · Kaç model gerçekten sisteme girecek?
-
-Beyan: açık tip ~100 model (CTP1–CTP30 + hücre çeşitlemeleri), kapalı tip 30–40 model.
-
-- **~130 ürün ağacının tamamı mı** girilecek, yoksa **en çok satan N model** ile mi başlanacak?
-- Hamdi Bey'in kritik ipucu: *"iskelet aynı iskelet, sadece miktarlar/motor gücü/fan
-  çapı/adam-gün değişiyor."* → **parametrik BOM** mümkün mü, yoksa 130 ayrı kayıt mı?
-
-**Etkisi:** Parametrik yapı kurulabilirse veri girişi eforu ~10 kat azalır. Bu tek soru
-Faz 1'in süresini belirler.
+**Neden kritik:** Faz 1'in girişi bu. Model belirlenmeden teklif de maliyet de başlamaz.
 
 ---
 
-## 🔴 S-03 · Excel verisini kim taşıyacak?
+## 🔴 S-02 · Ürün ağacı parametrik kurulabilir mi? — **projenin en belirleyici sorusu**
 
-Taşınacak dosyalar: ürün ağaçları, birim fiyat listesi, serpantin maliyet analizleri,
-CTP maliyet reçeteleri, pano fiyatları, müşteri listesi, açık teklifler.
+Hamdi Bey: *"CTP5 ile CTP6'nın büyük kısmı aynı… iskelet aynı iskelet."*
+Değişen: miktarlar, motor gücü, fan çapı, adam-gün.
 
-- Veri girişi **Ensotek'te mi**, **bizde mi**?
-- Excel'ler tutarlı/temiz mi, yoksa dosya bazında farklı format mı?
-- Geçmiş teklifler sisteme aktarılacak mı, yoksa **sistem sıfırdan mı başlayacak**?
+- ~130 model için **3–5 parametrik taban + model parametre tablosu** kurulabilir mi,
+  yoksa **130 ayrı BOM** mı girilecek?
+- Excel'lerin incelenmesi gerekiyor — bu soru masabaşında cevaplanamaz.
 
-**Etkisi:** Veri göçü kolayca projenin %20–30'u kadar efor olur. Kim yapacağı yazılı olmalı.
+**Neden kritik:** Faz 1'in süresini ve MOD-04'ün (projenin kalbi) mimarisini bu belirler.
+Fark 10 kat olabilir → [ANALİZ-07 §2](07-excel-veri-gocu.md).
+
+**Sonraki adım:** Ensotek'ten **3 örnek ürün ağacı Excel'i** (bir küçük, bir orta, bir
+büyük model) + birim fiyat Excel'i + CTP maliyet Excel'i + serpantin Excel'i istenecek.
+Bu dosyalar gelmeden mimari kararı verilemez.
 
 ---
 
-## 🔴 S-04 · Stok kodu sistemini kim kuracak?
+## 🔴 S-03 · Stok kodu şemasını kim tanımlayacak?
 
-Bugün **stok kodu yok**. Hamdi Bey: *"Yapılabilir mi? Yapılabilir. Zor bir şey değil."*
+Bugün **stok kodu yok**. Hamdi Bey: *"Yapılabilir. Zor bir şey değil."*
 
-- Kodlama şemasını (MTR-001, FAN-004…) kim tanımlayacak?
-- Kaç kalem var? (motor, fan, redüktör, dolgu, profil, cıvata, reçine, boru…)
-- İlk kod setini birlikte mi kuracağız?
+- Kodlama şemasını (MTR-001, FAN-004, PVC-012…) kim kuracak?
+- Kaç tekil kalem var? (Excel normalizasyonundan çıkacak)
+- Aynı malzemenin farklı yazımları kim tarafından eşleştirilecek?
 
-**Etkisi:** Stok kodu olmadan MOD-05, MOD-06 ve MOD-09 kurulamaz.
+**Neden kritik:** MOD-04, MOD-05, MOD-06, MOD-09 hepsi buna bağlı. Ayrıca veri göçünün
+en uzun adımı bu (G-02 adım 2–3).
+
+---
+
+## 🔴 S-04 · Canlıya geçiş stratejisi — Excel bir günde mi kapanacak?
+
+Karar: paralel çalışma yok. Ama **hangi anda** kapanacak?
+
+- Faz 1 bittiğinde satış ekibi **aynı gün** Excel'i bırakacak mı?
+- O anda **açık olan teklifler** ne olacak — ERP'ye taşınacak mı, Excel'de mi bitirilecek?
+- ENK/ENB sayaçları geçiş anındaki son numaradan devralınacak → geçiş tarihi net olmalı
+- Geri dönüş planı ne? (Rakamlar tutmazsa ne yapılır)
+
+**Neden kritik:** Yanlış zamanlanmış bir geçiş, doğru yazılmış bir yazılımı bile
+kullanılmaz hale getirir.
 
 ---
 
@@ -66,90 +85,115 @@ Bugün **stok kodu yok**. Hamdi Bey: *"Yapılabilir mi? Yapılabilir. Zor bir ş
 Anlatımda geçen roller: satış, imalat müdürü, imalat mühendisi, kaynak/polyester/montaj
 atölyeleri, montajcılar, satın almacılar, otomasyoncu (pano), depo, servis.
 
-- Her rolde **kaç kişi**?
-- Mavi yakalılar sisteme **girecek mi**, yoksa iş emri kâğıt/tablet olarak mı kalacak?
-- Eş zamanlı kullanıcı sayısı?
+- Her rolde kaç kişi? Eş zamanlı kullanıcı sayısı?
+- **Mavi yakalılar sisteme girecek mi**, yoksa iş emri atölyede kâğıt/tablet mi kalacak?
+- Yönetim (patron) hangi ekranları görecek?
 
-**Etkisi:** Lisans/kullanıcı modeli, yetki matrisi ve eğitim eforu.
+**Etkisi:** Yetki matrisi, PWA kapsamı (Faz 3), eğitim planı, MOD-16 personel yapısı.
 
 ---
 
-## 🟡 S-06 · Onay mekanizması var mı?
+## 🟡 S-06 · Onay mekanizmaları var mı?
 
-Anlatımda **hiç geçmedi**. ChatGPT sordu, cevap gelmedi.
+Anlatımda hiç geçmedi.
 
-- Teklif müşteriye gitmeden önce **genel müdür onayı** gerekiyor mu?
-- Kâr oranının altına düşen fiyatlarda onay şartı olsun mu?
+- Teklif müşteriye gitmeden **genel müdür onayı** gerekiyor mu?
+- Belirli kâr oranının altında onay şartı olsun mu?
 - İş emri açmadan önce onay var mı?
+- Satın alma siparişinde tutar limiti ve onay var mı?
 
 **Etkisi:** Onay akışı varsa neredeyse her modülde durum makinesi değişir.
+ihracatradari `approval-engine` hazır — kullanılır ama **kuralları Ensotek tanımlamalı**.
 
 ---
 
-## 🟡 S-07 · Muhasebe entegrasyonu
+## 🟡 S-07 · Muhasebe sınırı nerede biter?
 
-Anlatımda fatura ve irsaliye kesimi geçiyor ama **hangi programla** kesildiği söylenmedi.
+Kapsam kararıyla muhasebe **modülü var** (MOD-20). Sınırı çizilmeli:
 
-- Logo / Netsis / Mikro / e-fatura entegratörü var mı?
-- ERP **fatura kesecek mi**, yoksa sadece "kesildi" işareti mi tutacak?
-- Cari hesap ve tahsilat takibi ERP'de mi, muhasebe programında mı?
+- Ensotek şu an hangi muhasebe programını kullanıyor? (Logo / Netsis / Mikro / mali müşavir)
+- ERP **fatura kesecek mi**, yoksa "kesildi" işareti mi tutacak?
+- Cari hesap ERP'de mi, muhasebe programında mı **asıl kayıt** olacak?
+- e-fatura: mevcut `e-fatura-service` mi bağlanacak, entegratör mü?
+- Mali müşavire hangi formatta veri gidecek?
 
-**Etkisi:** e-fatura entegrasyonu istenirse ayrı bir proje kalemi olur.
-
----
-
-## 🟡 S-08 · Nerede çalışacak, kim yönetecek?
-
-- İç ağda mı, internete açık mı? (Hamdi Bey uzaktan erişim istedi → internete açık)
-- Sunucu **Ensotek'te mi**, bizim VPS'te mi, bulutta mı?
-- Yedekleme sorumluluğu kimde?
-- Teklif PDF'leri ve AutoCAD dosyaları için ne kadar disk gerekir?
-
-**Etkisi:** Barındırma ve bakım maliyeti; güvenlik gereksinimleri.
+**Etkisi:** İki sistem arasında **çift kayıt** olursa muhasebe tarafı güvenilmez olur.
 
 ---
 
-## 🟢 S-09 · Eğitim ve devreye alma
+## 🟡 S-08 · Firma bulma — veri kaynağı ve hedef kitle *(yeni)*
 
-- Kaç kişiye, kaç gün eğitim?
-- Paralel çalışma dönemi olacak mı (Excel + ERP birlikte)?
+MOD-14 için:
+
+- Hedef kitle kim? (soğutma kulesi kullanan tesisler: enerji, kimya, gıda, çimento, AVM…)
+- Coğrafi kapsam: yurt içi mi, ihracat mı, ikisi mi?
+- Veri kaynağı: ihracatradari'nin mevcut zenginleştirme kaynakları yeterli mi,
+  Google Maps taraması mı, sektör dernek listeleri mi?
+- **KVKK:** kişisel veri toplanacaksa aydınlatma/saklama politikası gerekir
+  (ihracatradari'de politika belgesi mevcut, uyarlanır)
+
+---
+
+## 🟡 S-09 · Navlun kapsamı *(yeni)*
+
+MOD-15 için:
+
+- Navlun **kim tarafından** hesaplanıyor bugün? (nakliyeciden teklif mi alınıyor?)
+- ERP navlunu **hesaplayacak mı**, yoksa dışarıdan gelen fiyatı **kaydedecek mi**?
+- Yurt dışı sevkiyat var mı? Varsa hangi incoterm'ler kullanılıyor?
+- Konteyner/TIR sığdırma hesabı için kule **dış ölçüleri** model kartında var mı?
+
+---
+
+## 🟡 S-10 · Barındırma ve işletim
+
+- İç ağ mı, internete açık mı? (Uzaktan erişim isteniyor → internete açık)
+- Sunucu Ensotek'te mi, bizim VPS'te mi?
+- Yedekleme sorumluluğu kimde, hangi sıklıkta?
+- PDF + DWG + fotoğraf için ne kadar disk? (yıllık büyüme)
+- Tek ERP'ye geçildiği için **kesinti toleransı** nedir?
+
+---
+
+## 🟢 S-11 · Eğitim, devreye alma, bakım
+
+- Kaç kişiye kaç gün eğitim? Faz bazlı mı, toplu mu?
 - Devreye alma desteği süresi?
+- Teslim sonrası bakım/destek sözleşmesi?
+- Yeni kule modeli eklendiğinde ürün ağacını **Ensotek kendi mi** girecek?
 
 ---
 
-## 🟢 S-10 · Bakım ve destek sonrası
+## 🟢 S-12 · Teknik detaylar
 
-- Teslim sonrası **aylık bakım/destek sözleşmesi** olacak mı?
-- Yeni model eklendiğinde ürün ağacını **Ensotek kendi mi** girecek?
-- Değişiklik talepleri nasıl fiyatlanacak?
-
----
-
-## 🟢 S-11 · Teknik detaylar
-
-| # | Soru | Neden |
+| # | Soru | İlgili |
 |---|---|---|
-| S-11.1 | Euro kuru **hangi kaynaktan** okunuyor? (TCMB? banka? manuel?) | IHT-306 |
-| S-11.2 | Teklif geçerlilik süresi kaç gün? | Teklif durum akışı |
-| S-11.3 | Pano fiyatını otomasyoncu **nasıl** hesaplıyor — formül ERP'ye girer mi, dışarıda mı kalır? | IHT-207 |
-| S-11.4 | Kapalı kule serpantininde "kat sayısı" dışında değişken var mı? | IHT-405 |
-| S-11.5 | CTP kg maliyeti **hangi sıklıkla** güncelleniyor? | IHT-403 |
-| S-11.6 | Teklif numarası ile ENK/ENB iş numarası **arasında bağ var mı**, yoksa bağımsız mı? | Numaralandırma tasarımı |
-| S-11.7 | Aynı teklifte **birden fazla kule** olabiliyor mu? | BOM ve fiyatlandırma yapısı |
-| S-11.8 | Yedek parça talepleri de teklif sürecinden mi geçiyor, yoksa kısa yol var mı? | IHT-102 |
-| S-11.9 | Teklif PDF'lerinde Ensotek antetli şablon var mı — mevcut Word şablonu alınabilir mi? | PDF şablon eforu |
-| S-11.10 | Ürünler **yurt dışına** da satılıyor mu (Incoterms, EN teklif)? | OPS-07 çok dillilik |
+| S-12.1 | Euro kuru hangi kaynaktan okunuyor? (TCMB / banka / manuel) | IHT-306 |
+| S-12.2 | Teklif geçerlilik süresi kaç gün? | MOD-02 |
+| S-12.3 | Pano fiyat formülü ERP'ye girer mi, otomasyoncuda mı kalır? | IHT-207 |
+| S-12.4 | Serpantinde "kat sayısı" dışında değişken var mı? | IHT-405 |
+| S-12.5 | CTP kg maliyeti hangi sıklıkla güncelleniyor? | IHT-403 |
+| S-12.6 | Teklif no ile ENK/ENB arasında bağ var mı? | I-03 numaralandırma |
+| S-12.7 | Aynı teklifte birden fazla kule olabiliyor mu? | MOD-02/04 |
+| S-12.8 | Yedek parça talebi teklif sürecinden mi geçiyor, kısa yol var mı? | IHT-102 |
+| S-12.9 | Mevcut Word teklif şablonu alınabilir mi? (antet, madde düzeni) | G-10 |
+| S-12.10 | Yurt dışı satış var mı? (çok dillilik ve incoterm) | IHT-2107, S-09 |
+| S-12.11 | Fabrikada kaç atölye, kaç vardiya var? | MOD-18 |
+| S-12.12 | Makine/ekipman envanteri çıkarılmış mı? | MOD-17 |
 
 ---
 
-## Cevap toplama planı
+## Toplama planı
 
-| Adım | İçerik |
-|---|---|
-| **1. Toplantı** | S-01, S-02, S-03, S-04 — fiyatı belirleyen dört soru |
-| **2. Toplantı** | S-05, S-06, S-07, S-08 — kapsam sınırları |
-| **Yazışma** | S-09, S-10, S-11 |
-| **Sonra** | Efor tahmini → fiyat teklifi |
+| Adım | İçerik | Çıktı |
+|---|---|---|
+| **Dosya talebi** | 3 örnek ürün ağacı Excel'i, birim fiyat, CTP maliyet, serpantin, pano, Word teklif şablonu, Teklif İnceleme Formu | S-02 ve S-03 masabaşında değil, **dosyaya bakarak** cevaplanır |
+| **Toplantı 1** | S-01, S-02, S-03, S-04 | Faz 1 mimarisi kilitlenir |
+| **Toplantı 2** | S-05, S-06, S-07, S-10 | Yetki matrisi + muhasebe sınırı |
+| **Toplantı 3** | S-08, S-09 | Yeni modüllerin sınırları |
+| **Yazışma** | S-11, S-12 | Detaylar |
+| **Sonra** | Modül bazlı efor tahmini | |
+| **En son** | **Fiyat** | |
 
-> Dört 🔴 soru cevaplanmadan **fiyat verilmemelidir.** Özellikle S-01 ve S-02, projenin
-> toplam eforunu iki katına kadar değiştirebilir.
+> **En acil iş soru sormak değil, Excel dosyalarını almak.** S-02 ve S-03 projenin
+> mimarisini belirliyor ve ikisi de ancak gerçek dosyalara bakılarak cevaplanabilir.

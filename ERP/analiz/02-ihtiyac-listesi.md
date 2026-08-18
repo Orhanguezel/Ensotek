@@ -11,6 +11,13 @@
 | **[H-ç]** | Hamdi Bey'in anlatımından **doğrudan çıkarım** (süreç zaten böyle işliyor) | Kapsama girer, teyit edilir |
 | **[Ö]** | **ChatGPT önerisi** — Ensotek onayı YOK | Kapsam dışı sayılır, opsiyon olarak fiyatlanır |
 | **[X]** | **Açıkça istenmedi / hariç tutuldu** | Kapsam dışı |
+| **[K]** | **Orhan'ın kapsam kararı** (2026-08-18) — Ensotek anlatımında yok, biz ekliyoruz | Kapsama girer |
+
+> ⚠️ **Kapsam kararı (2026-08-18):** *"Tamamını hatta fazlasıyla yapacağız."*
+> Bu karardan sonra **[Ö] etiketli 26 madde artık opsiyon değil, kapsam içidir.**
+> Etiket, maddenin **nereden geldiğini** göstermeye devam eder — Ensotek'in kendi
+> talebi ile bizim eklediğimizi ayırt edebilmek için. Fiyat aşamasında bu ayrım
+> tekrar işe yarar.
 
 `H-09` gibi referanslar → [KAYNAK-02](../kaynak/02-hamdi-anlatimi-ham-kayit.md) blok numarası.
 
@@ -217,6 +224,140 @@
 
 ---
 
+## MOD-14 · Firma Bulma *(yeni — K)*
+
+> Kaynak: **ihracatradari.com.tr** `enrichment`, `decision-makers`, `scans`, `scoring`, `crm`, `customs` + Google-Maps-Scrapper
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-1401 | Potansiyel müşteri (soğutma kulesi kullanan tesis) keşfi ve listeye alma | [K] |
+| IHT-1402 | Firma zenginleştirme: iletişim, sektör, ölçek, web/sosyal veri | [K] |
+| IHT-1403 | **Karar verici** tespiti ve iletişim bilgisi | [K] |
+| IHT-1404 | Firma skorlama — Ensotek'e uygunluk (sektör, kapasite ihtiyacı, bölge) | [K] |
+| IHT-1405 | Bulunan firmanın **tek tuşla CRM'e / talebe dönüşmesi** | [K] |
+| IHT-1406 | Tarama işleri (scan) ve periyodik yenileme | [K] |
+| IHT-1407 | KVKK / veri yaşam döngüsü uyumu (kaynak projede politika mevcut) | [K] |
+
+---
+
+## MOD-15 · Navlun ve Lojistik *(yeni — K)*
+
+> Kaynak: **ihracatradari `commercial/calculation-engine`** — karton/palet dönüşümü, ölçü, net/brüt ağırlık, palet darası, `freight`, `defaultIncoterm: EXW|FOB|CIF`, `packing-list`
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-1501 | Kule/parça bazlı **hacim ve ağırlık** hesabı (net, brüt, dara) | [K] |
+| IHT-1502 | **TIR / konteyner sığdırma** hesabı — paket tip mi, demonte mi | [K] + [H] H-09 |
+| IHT-1503 | Demonte sevkiyatta **palet / koli / çuval** planı | [K] + [H] H-10 |
+| IHT-1504 | **Navlun maliyeti** hesabı ve teklife kalem olarak yansıtılması | [K] |
+| IHT-1505 | **Incoterm** seçimi (EXW / FOB / CIF …) ve teklifte gösterimi | [K] |
+| IHT-1506 | **Packing list** ve yükleme belgesi üretimi | [K] |
+| IHT-1507 | Nakliye kimde sorusunun (IHT-206) navlun hesabıyla bağlanması | [K] |
+| IHT-1508 | Taşıyıcı/nakliyeci kartları ve fiyat geçmişi | [K] |
+
+---
+
+## MOD-16 · Personel Yönetimi *(yeni — K)*
+
+> Kaynak: **osgb-yazilim** `personel`, `calisan`, `evrak`, `atama`, `kpi`, `saglik` + transpalet `personel`, `vardiya_analizi`
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-1601 | Personel kartı: kimlik, görev, departman, atölye | [K] |
+| IHT-1602 | Departman / atölye yapısı (satış, imalat ofisi, kaynak, polyester, montaj, depo, satın alma, servis) | [K] + [H] H-10 |
+| IHT-1603 | **Vardiya** ve devam takibi | [K] |
+| IHT-1604 | Personel evrakı (sözleşme, sertifika, İSG belgesi) ve süre takibi | [K] |
+| IHT-1605 | İşe/projeye **atama** ve kişi başı iş yükü görünümü | [K] |
+| IHT-1606 | **Adam-gün maliyetinin gerçek personel verisine bağlanması** (MOD-03 besleme) | [K] + [H] H-12 |
+| IHT-1607 | Süpervizör havuzu ve saha görevlendirmesi (MOD-12 ile ortak) | [K] |
+| IHT-1608 | Personel KPI / performans göstergeleri | [K] |
+| IHT-1609 | ❌ Maaş bordrosu hesaplama | **kapsam dışı** |
+
+---
+
+## MOD-17 · Bakım Yönetimi — fabrika ekipmanı *(yeni — K)*
+
+> Kaynak: transpalet/paspas `makine_havuzu`, `makine_verileri`, `makine_kapali_araliklar`
+> **Not:** Satılan kulenin bakımı MOD-12'de; bu modül **Ensotek'in kendi fabrika ekipmanı**.
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-1701 | Makine / ekipman envanteri | [K] |
+| IHT-1702 | **Periyodik bakım planı** ve hatırlatma | [K] |
+| IHT-1703 | Arıza kaydı, duruş süresi, kapalı aralık | [K] |
+| IHT-1704 | Bakım maliyeti → dolaylı gider olarak MOD-03'e yansıma | [K] |
+| IHT-1705 | Yedek parça stoğu (MOD-05 ile ortak) | [K] |
+
+---
+
+## MOD-18 · Fabrika Yönetimi *(yeni — K)*
+
+> Kaynak: transpalet/paspas `is_yukler`, `gantt`, `vardiya_analizi`, `operator`, `dashboard`
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-1801 | **Atölye kapasitesi** tanımı (kaynak, polyester, montaj, metal) | [K] |
+| IHT-1802 | İş yükü dağılımı ve **darboğaz görünümü** | [K] |
+| IHT-1803 | Üretim planı / **Gantt** — hangi iş hangi atölyede, ne zaman | [K] |
+| IHT-1804 | Termin tarihi hesabı ve gecikme uyarısı | [K] |
+| IHT-1805 | Atölye bazlı performans (planlanan vs gerçekleşen adam-gün) | [K] |
+| IHT-1806 | Fabrika geneli canlı üretim durumu ekranı | [K] |
+
+---
+
+## MOD-19 · Satış Yönetimi *(yeni — K)*
+
+> Kaynak: transpalet `crm` + gzl-gelir-crm pipeline
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-1901 | Satış **pipeline** ve fırsat aşamaları | [K] |
+| IHT-1902 | Satış personeli bazlı portföy ve aktivite | [K] |
+| IHT-1903 | **Kazanma / kaybetme** analizi ve kayıp nedeni | [K] + [Ö] IHT-217 |
+| IHT-1904 | Satış hedefi ve gerçekleşme | [K] |
+| IHT-1905 | Müşteri bazlı satış geçmişi ve tekrar satış fırsatı | [K] |
+| IHT-1906 | ❌ Prim / komisyon hesabı | **kapsam dışı — OUT-01** |
+
+---
+
+## MOD-20 · Muhasebe / Maliyet Muhasebesi *(yeni — K)*
+
+> Kaynak: **e-fatura-service** (ayrı servis) + transpalet `logo_entegrasyon`
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-2001 | **Cari hesap** (müşteri / tedarikçi) | [K] |
+| IHT-2002 | **Ödeme planı** ve vade takibi | [K] + [H] H-10 |
+| IHT-2003 | **Avans** kaydı ve üretime teslim bloğuyla bağı | [K] + [H] H-10 |
+| IHT-2004 | Tahsilat kaydı ve sevkiyat öncesi kontrol | [K] + [H] H-10 |
+| IHT-2005 | **Fatura + irsaliye** kesimi | [K] + [H] H-10 |
+| IHT-2006 | **e-fatura entegrasyonu** (mevcut `e-fatura-service` ile) | [K] |
+| IHT-2007 | Tedarikçi faturası ve satın alma maliyeti eşleşmesi | [K] |
+| IHT-2008 | **Gerçekleşen maliyet muhasebesi** — proje bazlı fiili maliyet | [K] + [Ö] IHT-312 |
+| IHT-2009 | Proje kârlılığı: teklif ↔ güncel ↔ gerçekleşen | [K] + [Ö] IHT-312 |
+| IHT-2010 | Kur farkı yönetimi (EUR bazlı teklif, TL maliyet) | [K] |
+| IHT-2011 | Harici muhasebe programı köprüsü (Logo vb.) → [S-07](04-acik-sorular.md) | [K] |
+| IHT-2012 | ❌ Yasal defter, beyanname, mali müşavirlik | **kapsam dışı** |
+
+---
+
+## MOD-21 · Yönetim ve Raporlama *(genişletildi)*
+
+| ID | Gereksinim | Kaynak |
+|---|---|---|
+| IHT-2101 | Yönetici dashboard'u: açık teklif, devam eden üretim, sevk bekleyen, geciken iş | [Ö] IHT-1305 |
+| IHT-2102 | Aylık satış ve kârlılık grafikleri | [K] |
+| IHT-2103 | Modül bazlı raporlar ve Excel dışa aktarma | [K] |
+| IHT-2104 | Fiyat simülasyonu (kâr senaryoları) | [Ö] IHT-313 |
+| IHT-2105 | Maliyet onay sistemi (toplu fiyat değişikliğinde yönetici onayı) | [Ö] IHT-314 |
+| IHT-2106 | Görev yönetimi | [Ö] IHT-1306 |
+| IHT-2107 | Çok dilli arayüz ve çıktı (TR/EN) | [Ö] IHT-219 |
+| IHT-2108 | PWA / mobil saha kullanımı | [Ö] IHT-1307, IHT-907 |
+| IHT-2109 | Barkod / QR kod | [Ö] IHT-908 |
+| IHT-2110 | Seri numarası ve lot takibi | [Ö] IHT-507/508 |
+
+---
+
 ## Kapsam dışı — açıkça
 
 | ID | Konu | Gerekçe |
@@ -227,13 +368,42 @@
 
 ## Sayısal özet
 
-| Kaynak | Adet |
-|---|---|
-| **[H]** — teyitli | 75 |
-| **[H-ç]** — çıkarım, teyit bekliyor | 9 |
-| **[Ö]** — öneri, onay yok | 26 |
-| **[X]** — hariç | 1 |
-| **Toplam** | **111** |
+**Toplam 173 gereksinim satırı, 21 modül.**
 
-> Fiyat, **[H] + [H-ç]** üzerinden verilir. **[Ö]** kalemleri ayrı opsiyon listesi olarak
-> sunulur — bkz. [Kapsam Taslağı](03-kapsam-taslagi.md).
+| Kaynak | Satır | Anlamı |
+|---|---:|---|
+| **[H]** Hamdi Bey teyitli | 83 | Ensotek'in kendi anlattığı süreç |
+| **[H-ç]** Anlatımdan çıkarım | 9 | Teyit edilecek |
+| **[Ö]** ChatGPT önerisi | 37 | v0.2 ile **kapsama alındı** (26'sı özgün, kalanı yeni modüllerden çapraz referans) |
+| **[K]** Orhan kapsam kararı | 52 | Firma bulma, navlun, personel, bakım, fabrika, satış, muhasebe |
+
+> Bir satır birden çok etiket taşıyabilir (örn. `[K] + [H]` — biz ekledik ama Ensotek'in
+> anlattığı bir ihtiyaca da denk geliyor). Bu yüzden sütun toplamı 173'ü aşar.
+
+### Modül dağılımı
+
+| Faz | Modüller | Gereksinim |
+|---|---|---:|
+| **0** | MOD-00 Altyapı | *(iskelet — [ANALİZ-06](06-mimari-iskelet.md))* |
+| **1** | MOD-01, 02, 03, 04 | 53 |
+| **2** | MOD-05, 06, 07, 08 | 26 |
+| **3** | MOD-09, 10, 11, 15 | 26 |
+| **4** | MOD-12, 16, 17, 18 | 26 |
+| **5** | MOD-14, 19, 20, 21 | 35 |
+| — | MOD-13 Sistem geneli | 7 |
+
+---
+
+## Kapsam dışı — açıkça
+
+| ID | Konu | Gerekçe |
+|---|---|---|
+| **OUT-01** | **Prim / komisyon hesabı** | Hamdi Bey: *"bu primi şimdilik sen sistemde tutma"* (H-10) |
+| **OUT-02** | **Maaş bordrosu hesaplama** | Personel yönetimi var, bordro motoru yok (IHT-1609) |
+| **OUT-03** | **Yasal defter, beyanname, mali müşavirlik** | Muhasebe modülü operasyonel; resmi mali işler harici (IHT-2012) |
+| **OUT-04** | **Termal seçim/hesap motorunun sıfırdan yazılması** | Mevcut seçim yazılımı entegre edilir → [S-01](04-acik-sorular.md) |
+| **OUT-05** | **Canlı taşıyıcı navlun fiyat borsası** | Navlun hesaplanır, dış fiyat servisi çekilmez |
+
+> **Fiyat aşaması** ([ANALİZ-03 §7](03-kapsam-taslagi.md)) en sona bırakıldı.
+> Etiket ayrımı orada tekrar işe yarayacak: Ensotek'in kendi talebi ile bizim
+> eklediğimiz kapsam ayrı ayrı gösterilebilir.

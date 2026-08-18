@@ -1,182 +1,210 @@
-# ANALİZ-03 · Kapsam Taslağı (SCOPE v0.1)
+# ANALİZ-03 · Kapsam (SCOPE v0.2)
 
-> **Durum:** Taslak. Ensotek onayı alınmadı. **Fiyat verilmedi.**
-> **Girdi:** [Mevcut Durum](01-mevcut-durum-as-is.md) + [İhtiyaç Listesi](02-ihtiyac-listesi.md)
-> **Karar bekleyenler:** [Açık Sorular](04-acik-sorular.md)
+> **Durum:** Plan aşaması. Geliştirme başlamadı. **Fiyat en son aşama — şimdi konuşulmuyor.**
+>
+> **v0.1 → v0.2 değişikliği (2026-08-18, Orhan kararı):** Kapsam **genişletildi**.
+> Opsiyon listesi kaldırıldı — *"tamamını hatta fazlasıyla yapacağız"*.
+
+**Girdiler:** [Mevcut Durum](01-mevcut-durum-as-is.md) · [İhtiyaç Listesi](02-ihtiyac-listesi.md)
+· [Yeniden Kullanım](05-modul-envanteri-yeniden-kullanim.md) · [Mimari İskelet](06-mimari-iskelet.md)
+· [Veri Göçü](07-excel-veri-gocu.md) · [Açık Sorular](04-acik-sorular.md)
 
 ---
 
 ## 1. Ürün tanımı
 
-**Ensotek ERP** — su soğutma kulesi üretimi için **proje bazlı** teklif, maliyet, üretim,
-sevkiyat ve servis yönetim sistemi. Web tabanlı, uzaktan erişilebilir.
+**Ensotek ERP** — su soğutma kulesi üretimi yapan bir fabrikanın **tamamını** yöneten
+kurumsal sistem: potansiyel müşteri bulmaktan teklife, maliyetten üretime, navlundan
+sevkiyata, personelden bakıma, muhasebeden servise.
 
-**Sistemin merkezindeki nesne "Proje"dir.** Bir talep geldiğinde proje açılır; teklif,
-revizyonlar, maliyet, iş numarası, malzeme listesi, iş emirleri, kalite kayıtları,
-sevkiyat, tahsilat ve servis aynı proje altında yaşar. Bugün bu bağı klasör adı ve
-insan hafızası kuruyor.
+**Merkezdeki nesne "Proje"dir.** Talep geldiğinde proje açılır; teklif, revizyonlar,
+maliyet, iş numarası, malzeme listesi, iş emirleri, kalite kayıtları, sevkiyat, tahsilat,
+kurulum ve servis aynı proje altında yaşar.
+
+**Hedef:** Ensotek'in **tüm Excel ve Word dosyalarının yerini almak.** Yanında çalışmak
+değil, yerine geçmek.
 
 ---
 
-## 2. Sistem ne DEĞİL
+## 2. Dört yapıcı karar
 
-Bunu baştan yazmak fiyatı ve beklentiyi korur.
+| # | Karar | Sonucu |
+|---|---|---|
+| **K-1** | **Kapsam tam** — teklif/maliyet/üretimin ötesinde firma bulma, navlun, personel, bakım, fabrika, satış, muhasebe da dahil | 21 modül. v0.1'deki 18 kalemlik "opsiyon listesi" **kapsama alındı** |
+| **K-2** | **Yeniden kullanım önceliklidir** — kod mümkün olduğunca sıfırdan yazılmaz, workspace'teki mevcut modüller birleştirilir | 21 modülün **19'u** mevcut koddan besleniyor → [ANALİZ-05](05-modul-envanteri-yeniden-kullanim.md) |
+| **K-3** | **İskelet baştan, modüller tek tek** — taban ilk gün kurulur, modüller sırayla açılır. **Hazır olmayan modül "yakında" denip gösterilmez; sistemde yoktur** | Modül kayıt defteri + `hidden/internal/ready` → [ANALİZ-06](06-mimari-iskelet.md) |
+| **K-4** | **Excel tamamen kapanır** — veriler ERP'ye taşınır, eski dosyalar bir daha kullanılmaz | Veri göçü zorunlu kapsam, paralel çalışma yok → [ANALİZ-07](07-excel-veri-gocu.md) |
+
+---
+
+## 3. Sistem ne DEĞİL
+
+Kapsam genişledi ama sınırsız değil:
 
 | | |
 |---|---|
-| ❌ **Muhasebe/ön muhasebe programı değil** | Fatura ve irsaliye **kesim adımı süreçte yer alır**, ama e-fatura entegrasyonu ve resmi defter kapsam dışıdır. Karar bekliyor → [S-07](04-acik-sorular.md) |
-| ❌ **Excel'in ekrana taşınmış hali değil** | Excel'ler arası manuel bağ, veritabanı ilişkisine dönüşür |
-| ❌ **Bordro / prim / İK sistemi değil** | Hamdi Bey açıkça hariç tuttu (OUT-01) |
-| ❌ **Termal seçim/hesap motoru değil** | Mevcut seçim yazılımı **entegre edilir**, sıfırdan yazılmaz → [S-01](04-acik-sorular.md) |
-| ❌ **CAD sistemi değil** | AutoCAD dosyaları **eklenir ve projeye bağlanır**, çizim yapılmaz |
+| ❌ **Resmi mali müşavirlik / defter tutma değil** | Cari, tahsilat, ödeme planı, fatura-irsaliye ERP'de; **yasal defter ve beyanname değil**. e-fatura mevcut `e-fatura-service` ile entegre edilir |
+| ❌ **Bordro/SGK hesaplama motoru değil** | Personel yönetimi var (kimlik, atama, vardiya, evrak, adam-gün); **maaş bordrosu hesaplama yok** |
+| ❌ **Prim/komisyon sistemi değil** | Hamdi Bey açıkça hariç tuttu (OUT-01) |
+| ❌ **Termal seçim motoru değil** | Mevcut seçim yazılımı **entegre edilir**, termal hesap sıfırdan yazılmaz → [S-01](04-acik-sorular.md) |
+| ❌ **CAD sistemi değil** | AutoCAD dosyaları projeye **bağlanır**, çizim yapılmaz |
+| ❌ **Gerçek zamanlı nakliye fiyat borsası değil** | Navlun **hesaplanır** (hacim, ağırlık, palet, konteyner, incoterm); canlı taşıyıcı fiyatı çekilmez |
 
 ---
 
-## 3. Modül haritası
+## 4. Modül haritası — 21 modül
 
-| Kod | Modül | Teyitli ihtiyaç | Faz |
+| Kod | Modül | Yeniden kullanım | Faz |
 |---|---|---|---|
-| MOD-01 | Talep ve CRM | 6 | **1** |
-| MOD-02 | Teklif | 15 | **1** |
-| MOD-03 | Maliyet | 11 | **1** |
-| MOD-04 | Ürün Ağacı (BOM) | 9 | **1** |
-| MOD-05 | Ürün Kataloğu ve Stok | 6 | **2** |
-| MOD-06 | Satın Alma | 3 | **2** |
-| MOD-07 | Siparişe Dönüşüm / Üretime Teslim | 8 | **2** |
-| MOD-08 | Mühendislik | 4 | **2** |
-| MOD-09 | Üretim ve İş Emirleri | 6 | **3** |
-| MOD-10 | Kalite | 3 | **3** |
-| MOD-11 | Sevkiyat ve Tahsilat | 5 | **3** |
-| MOD-12 | Süpervizörlük ve Servis | 4 | **4** |
-| MOD-13 | Sistem Geneli (yetki, proje kartı) | 4 | **1** |
+| **MOD-00** | Altyapı (auth, rol, audit, storage, mail, bildirim, ayarlar) | 🟢 | **0** |
+| MOD-01 | Talep ve CRM | 🟢 | 1 |
+| MOD-02 | Teklif | 🟡 | 1 |
+| MOD-03 | Maliyet | 🟡 | 1 |
+| MOD-04 | **Ürün Ağacı (BOM)** — *projenin kalbi* | 🔴 | 1 |
+| MOD-05 | Ürün Kataloğu ve Stok | 🟢 | 2 |
+| MOD-06 | Satın Alma | 🟢 | 2 |
+| MOD-07 | Sipariş / Üretime Teslim | 🟡 | 2 |
+| MOD-08 | Mühendislik | 🟡 | 2 |
+| MOD-09 | Üretim ve İş Emirleri | 🟢 | 3 |
+| MOD-10 | **Kalite** | 🔴 | 3 |
+| MOD-11 | Sevkiyat | 🟢 | 3 |
+| MOD-12 | Süpervizörlük ve Servis | 🟡 | 4 |
+| **MOD-14** | **Firma Bulma** *(yeni)* | 🟡 | 5 |
+| **MOD-15** | **Navlun ve Lojistik** *(yeni)* | 🟢 | 3 |
+| **MOD-16** | **Personel Yönetimi** *(yeni)* | 🟢 | 4 |
+| **MOD-17** | **Bakım Yönetimi — fabrika ekipmanı** *(yeni)* | 🟡 | 4 |
+| **MOD-18** | **Fabrika Yönetimi** *(yeni)* | 🟡 | 4 |
+| **MOD-19** | **Satış Yönetimi** *(yeni)* | 🟢 | 5 |
+| **MOD-20** | **Muhasebe / Maliyet Muhasebesi** *(yeni)* | 🟡 | 5 |
+| MOD-21 | Yönetim ve Raporlama | 🟢 | 5 |
+
+🟢 doğrudan alınır · 🟡 alınır + genişletilir · 🔴 büyük ölçüde yeni
+
+> **MOD-13** ([İhtiyaç Listesi](02-ihtiyac-listesi.md)'ndeki "Sistem Geneli") ayrı bir
+> modül değildir; **MOD-00 Altyapı** içinde eritilmiştir — web tabanlılık, yetki,
+> proje kartı ve Ensotek yazımı iskeletin parçasıdır.
 
 ---
 
-## 4. Fazlama — neden bu sıra
+## 5. Fazlama
 
-Sıra, Ensotek'in **beyan ettiği darboğazlara** göre kuruldu
-([AS-IS §6](01-mevcut-durum-as-is.md)); modül listesine göre değil.
+Sıra **Ensotek'in beyan ettiği darboğazlara** göre kuruldu ([AS-IS §6](01-mevcut-durum-as-is.md)),
+modül numarasına göre değil.
 
-### FAZ 1 — Teklif + Maliyet motoru ⭐ *en yüksek getiri*
-> Darboğaz D-1 (teklif hazırlama), D-2 (maliyet analizi), D-3 (gönderme) — üçü de burada.
-> Ensotek'in bugün **en çok vakit kaybettiği** yer. Faz 1 tek başına canlıya alınabilir
-> ve Excel'lerin çoğunu emekliye ayırır.
+### FAZ 0 — İskelet
+**Modül yok, taban var.** Ayrıntı: [ANALİZ-06 §3](06-mimari-iskelet.md).
 
-Kapsam: MOD-01, MOD-02, MOD-03, MOD-04, MOD-13
-- Talep kaydı (e-posta/telefon/WhatsApp) ve satış personeline atama
-- Teklif takip no + revizyon yönetimi
-- Model seçimi → standart değerlerin otomatik gelmesi
-- Standart dışı özelliklerin kırmızı işaretlenmesi
-- Ürün ağacı: çok seviyeli BOM, serpantin alt ağacı, CTP kg-bazlı maliyet
-- Birim fiyat kartları + işçilik (adam-gün, harcırah, SGK, yemek)
-- Çarpan + pazarlık payı + Euro kuru → fiyat
-- **Teklif anı maliyet snapshot'ı**
-- Teknik PDF / Ticari PDF / Birleşik PDF / İç maliyet PDF
-- E-posta gönderimi + otomatik arşiv
-- Kullanıcı, rol, yetki; proje kartı iskeleti
+MOD-00 · depo yapısı · 14 çekirdek servis · paylaşılan veri çekirdeği ·
+numaralandırma (ENK/ENB Excel'den devralınır) · modül kayıt defteri · deploy hattı.
 
-**Faz 1 çıktısı:** *"Müşteri → Model → Teknik veriler → Hesapla → Teklif hazır."*
-
-### FAZ 2 — Siparişe dönüşüm + Mühendislik + Satın alma
-> Darboğaz D-4 (malzeme listesi — "uzun zaman alıyor") burada çözülür.
-
-Kapsam: MOD-05, MOD-06, MOD-07, MOD-08
-- İşe dönüşüm, ENK/ENB iş numarası, ödeme planı
-- **Avans kontrolü** (avans gelmeden üretime teslim engeli)
-- Teklif İnceleme Formu'nun dijitalleşmesi → Word ve elden teslim ortadan kalkar
-- İş atama (imalat müdürü → mühendis)
-- AutoCAD dosya bağlama, müşteriye sorulan teknik soruların kaydı
-- **Malzeme listesi + otomatik stok kontrolü + eksik listesi**
-- Stok kodu sisteminin kurulması, stok kartları
-- Satın alma siparişi → maliyeti besleme
-
-### FAZ 3 — Üretim + Kalite + Sevkiyat
-> Darboğaz D-5 (iş emri hazırlama/dağıtma) ve D-6 (evrak).
-
-Kapsam: MOD-09, MOD-10, MOD-11
-- İş emri → kaynak / polyester / montaj dağıtımı ve yönlendirme mantığı
-- Atölye tamamlandı bildirimi, üretim durumu
-- Serpantin: basınç testi → galvaniz → tekrar test
-- ENB toparlama/paketleme, sevkiyat (TIR/konteyner/kamyon)
-- Sevkiyat öncesi tahsilat kontrolü, fatura/irsaliye adımı
-
-### FAZ 4 — Süpervizörlük + Servis
-> Darboğaz D-7. Servis talepleri uzun vadede geldiği için en son gelebilir,
-> ama **Faz 1'de kurulan proje geçmişi** bu modülün ön şartıdır.
-
-Kapsam: MOD-12
+> Faz 0 sonunda menüde **hiçbir modül görünmez**. Bu doğru davranıştır.
 
 ---
 
-## 5. Opsiyon listesi (ayrı fiyatlanır)
+### FAZ 1 — Teklif + Maliyet + Ürün Ağacı ⭐
+> Darboğaz **D-1, D-2, D-3** — Ensotek'in en çok vakit kaybettiği yer, üçü de burada.
 
-ChatGPT'nin önerdiği, **Ensotek'in henüz onaylamadığı** kalemler. Ana fiyata dahil değil.
+MOD-01 Talep/CRM · MOD-02 Teklif · MOD-03 Maliyet · MOD-04 BOM
 
-| Kod | Opsiyon | İlgili IHT |
-|---|---|---|
-| OPS-01 | Gerçekleşen maliyet + kârlılık analizi (teklif / güncel / fiili karşılaştırma) | IHT-312 |
-| OPS-02 | Fiyat simülasyonu (kâr senaryoları) | IHT-313 |
-| OPS-03 | Maliyet onay sistemi (toplu fiyat değişikliğinde yönetici onayı) | IHT-314 |
-| OPS-04 | Teknik teklif kilidi + ayrı teknik/ticari revizyon izleri | IHT-216 |
-| OPS-05 | Teklif durum akışı + kazanma/kaybetme analizi | IHT-217 |
-| OPS-06 | "Benzer projeden kopyala" | IHT-218 |
-| OPS-07 | **Çok dilli (TR/EN) arayüz ve teklif çıktısı** | IHT-219 |
-| OPS-08 | Tedarikçi yönetimi, fiyat geçmişi, son alış/ortalama fiyat seçimi | IHT-604 |
-| OPS-09 | Seri numarası / lot takibi, projeye zimmet | IHT-507/508 |
-| OPS-10 | Mobil / tablet iş emri kapatma (PWA) | IHT-907, IHT-1307 |
-| OPS-11 | Barkod / QR kod | IHT-908 |
-| OPS-12 | Yönetim dashboard'u ve grafikler | IHT-1305 |
-| OPS-13 | Görev yönetimi modülü | IHT-1306 |
-| OPS-14 | Doküman yönetimi (STEP/3D/CE/sertifika) | IHT-805 |
-| OPS-15 | Garanti takibi ve otomatik hatırlatma | IHT-1206 |
-| OPS-16 | Süpervizör seyahat planı, mobil rapor, müşteri imzası | IHT-1205 |
-| OPS-17 | WhatsApp entegrasyonu | IHT-108 |
-| OPS-18 | Teklif kartında birleşik iletişim geçmişi (mail/telefon/WhatsApp) | IHT-107 |
+Paralel yürüyen zorunlu iş: **G-01 → G-03/G-04 → G-02 veri göçü**
+([ANALİZ-07 §3](07-excel-veri-gocu.md)). Ürün ağaçları ve birim fiyatlar ERP'de
+doğrulanmadan bu faz kapanmaz.
+
+**Çıktı:** *Müşteri → Model → Teknik veriler → Hesapla → 3 PDF hazır → e-posta → arşiv.*
+**Kapanan Excel'ler:** ürün ağaçları, birim fiyat, CTP maliyet, serpantin maliyet,
+teklif takip, Word teklif şablonları.
 
 ---
 
-## 6. Teknoloji kararı — **öneri**
+### FAZ 2 — Sipariş + Mühendislik + Stok + Satın Alma
+> Darboğaz **D-4** — malzeme listesi oluşturma ("uzun zaman alıyor").
 
-ChatGPT görüşmede **ASP.NET Core + MSSQL + Blazor/React** önerdi. Bu bizim için
-**tavsiye değil**: workspace'te bu stack'te üretim tecrübesi ve altyapı yok.
+MOD-05 Stok · MOD-06 Satın Alma · MOD-07 Sipariş/Üretime Teslim · MOD-08 Mühendislik
 
-**Önerimiz — workspace standardı:**
+İçerir: ENK/ENB iş numarası, **avans kontrolü**, Teklif İnceleme Formu'nun dijitali
+(Word ve **elden teslim biter**), stok kodu şemasının kurulması, malzeme listesi +
+otomatik eksik tespiti, AutoCAD bağlama, müşteri teknik soru-cevap kaydı.
 
-| Katman | Seçim | Gerekçe |
-|---|---|---|
-| Frontend | **Next.js 16 + React 19 + TypeScript** | Workspace standardı; 9 canlı sitede kullanımda |
-| Backend | **Fastify + TypeScript** | Workspace standardı |
-| ORM / DB | **Drizzle ORM + MySQL** | Workspace standardı, seed-SQL disiplini kurulu |
-| PDF | Sunucu tarafı PDF üretimi (teknik/ticari/iç maliyet şablonları) | 3 farklı şablon gerekiyor |
-| Deploy | Docker + Nginx + PM2, VPS | Mevcut Ensotek VPS altyapısı |
-| Erişim | Web + PWA | "Web tabanlı olsun, uzaktan da erişelim" (H-02) |
-
-> **Not:** ERP iç ağda mı, internete açık mı çalışacak → [S-08](04-acik-sorular.md).
-> Bu karar kimlik doğrulama, yedekleme ve fiyatı doğrudan etkiler.
+**Kapanan:** iş takip Excel'i, Word inceleme formu, stok Excel'i, elden evrak.
 
 ---
 
-## 7. Hâlâ kapsanmamış alanlar
+### FAZ 3 — Üretim + Kalite + Sevkiyat + Navlun
+> Darboğaz **D-5, D-6** — iş emri dağıtımı ve evrak.
 
-Bunlar Hamdi Bey'in anlatımında **hiç geçmedi**. Fiyat vermeden önce sorulmalı:
+MOD-09 Üretim · MOD-10 Kalite · MOD-11 Sevkiyat · MOD-15 Navlun
 
-- Muhasebe/ERP entegrasyonu (Logo, Netsis, Mikro?) → [S-07](04-acik-sorular.md)
-- Mevcut Excel verilerinin **göçü** (~130 model ürün ağacı) → [S-03](04-acik-sorular.md)
-- Kullanıcı sayısı ve departman listesi → [S-05](04-acik-sorular.md)
-- Yedekleme, felaket kurtarma, eğitim, devreye alma desteği → [S-09](04-acik-sorular.md)
-- Bakım/destek sözleşmesi → [S-10](04-acik-sorular.md)
+İçerir: atölye bazlı iş emri (kaynak/polyester/montaj) ve yönlendirme mantığı, atölye
+tamamlandı bildirimi, basınç testi → galvaniz → tekrar test, ENB toparlama/paketleme,
+**navlun ve yükleme hesabı** (palet/konteyner/TIR, incoterm), sevkiyat öncesi tahsilat
+kontrolü. Saha kullanımı için PWA burada devreye girer.
 
 ---
 
-## 8. Bu belgenin durumu
+### FAZ 4 — Fabrika + Personel + Bakım + Servis
+> Darboğaz **D-7** ve fabrika tarafının tamamlanması.
+
+MOD-12 Süpervizörlük/Servis · MOD-16 Personel · MOD-17 Bakım · MOD-18 Fabrika
+
+İçerir: personel kartları, vardiya, atama, evrak; **adam-gün maliyetinin gerçek
+personel verisine bağlanması**; makine/ekipman periyodik bakımı ve arıza kaydı; atölye
+kapasitesi ve yükleme görünümü; süpervizör seyahat/harcırah/saha raporu; garanti takibi.
+
+---
+
+### FAZ 5 — Ticari kapanış
+MOD-14 Firma Bulma · MOD-19 Satış Yönetimi · MOD-20 Muhasebe · MOD-21 Yönetim/Raporlama
+
+İçerir: potansiyel müşteri keşfi ve skorlama, satış pipeline ve kazanma oranı, cari
+hesap/tahsilat/ödeme planı, fatura-irsaliye ve **e-fatura entegrasyonu**, gerçekleşen
+maliyet ve kârlılık analizi, yönetim panosu.
+
+> **Not:** Kârlılık analizi (teklif ↔ güncel ↔ gerçekleşen maliyet) Faz 5'te tamamlanır
+> ama **verisi Faz 1'den itibaren toplanır** — snapshot ilk günden yazılır. Sonradan
+> geçmişe dönük üretilemez.
+
+---
+
+## 6. Faz bağımlılıkları
+
+```
+FAZ 0  İskelet
+  │
+  ├─→ FAZ 1  Teklif + Maliyet + BOM        ← G-01,G-02,G-03,G-04 göçü zorunlu
+  │      │
+  │      ├─→ FAZ 2  Sipariş + Mühendislik + Stok + Satın Alma
+  │      │      │
+  │      │      └─→ FAZ 3  Üretim + Kalite + Sevkiyat + Navlun
+  │      │             │
+  │      │             └─→ FAZ 4  Fabrika + Personel + Bakım + Servis
+  │      │
+  │      └─→ FAZ 5  Firma Bulma + Satış + Muhasebe + Raporlama
+  │                  (Faz 1 sonrası herhangi bir noktada başlayabilir)
+  │
+  └─→ MOD-14 Firma Bulma: teknik olarak bağımsız, Faz 1'e paralel yürütülebilir
+```
+
+**Sert bağımlılıklar:**
+- MOD-03 (Maliyet) ⟵ MOD-04 (BOM) — BOM olmadan maliyet yok
+- MOD-04 ⟵ MOD-05 stok kartları — kalem kartı olmadan BOM satırı yok
+- MOD-09 (Üretim) ⟵ MOD-07 (Sipariş) + MOD-08 (Malzeme listesi)
+- MOD-20 (Muhasebe) ⟵ MOD-11 (Sevkiyat) — fatura sevkiyata bağlı
+- MOD-16 (Personel) ⟶ MOD-03 işçilik maliyetini besler (Faz 4'te gerçek veriye bağlanır)
+
+---
+
+## 7. Bu belgenin durumu
 
 | Adım | Durum |
 |---|---|
 | Kaynak toplandı | ✅ |
-| Mevcut durum (AS-IS) çıkarıldı | ✅ |
-| İhtiyaç envanteri | ✅ 111 madde |
-| Kapsam taslağı | ✅ v0.1 — **Ensotek onayı bekliyor** |
+| Mevcut durum (AS-IS) | ✅ |
+| İhtiyaç envanteri | ✅ |
+| Yeniden kullanım envanteri | ✅ 21 modül eşlendi |
+| Mimari iskelet + modül kayıt sistemi | ✅ |
+| Veri göçü planı | ✅ 13 göç işi |
+| Kapsam | ✅ v0.2 — **21 modül, 6 faz (0–5)** |
 | Açık soruların cevaplanması | ⬜ |
-| Efor tahmini | ⬜ |
-| Fiyat teklifi | ⬜ |
+| Modül bazlı efor tahmini | ⬜ |
+| **Fiyat** | ⬜ **en son aşama** |
 | Geliştirme | ⬜ **başlamadı** |
