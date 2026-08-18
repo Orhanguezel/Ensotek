@@ -1,15 +1,31 @@
 {
-  "title": "Ensotek",
-  "slug": "ensotek",
-  "summary": "B2B cooling tower platform family — a poly-repo workspace of multiple site projects (ensotek.de, ensotek.com.tr, karbonkompozit.com.tr, kuhlturm.com) sharing common backend/UI packages, each with its own repository and database.",
-  "category": "B2B PLATFORM",
+  "schemaVersion": 2,
+  "project": {
+    "key": "ensotek",
+    "title": "Ensotek",
+    "summary": "B2B cooling tower platform family — a poly-repo workspace of multiple site projects (ensotek.de, ensotek.com.tr, karbonkompozit.com.tr, kuhlturm.com) sharing common backend/UI packages, each with its own repository and database.",
+    "description": "B2B cooling tower platform family — a poly-repo workspace of multiple site projects (ensotek.de, ensotek.com.tr, karbonkompozit.com.tr, kuhlturm.com) sharing common backend/UI packages, each with its own repository and database.",
+    "category": "custom-software",
+    "status": "live",
+    "ownership": "client",
+    "owner": {
+      "id": "hamdi-yagar",
+      "name": "Hamdi Yağar",
+      "kind": "person"
+    },
+    "group": {
+      "id": "ensotek",
+      "name": "Ensotek"
+    },
+    "productType": "owned-product"
+  },
   "services": [
     "Frontend Development",
     "Backend Development",
     "Architecture & Optimization",
     "DevOps & Deployment"
   ],
-  "techs": [
+  "technologies": [
     "Next.js",
     "TypeScript",
     "Fastify",
@@ -36,24 +52,46 @@
     "Multi-language (TR/EN/DE)",
     "Swagger API docs"
   ],
-  "designHighlights": [
-    "Shared packages across frontends",
-    "Locale-aware content flows",
-    "Production deployed at ensotek.de"
+  "timeline": {
+    "startedAt": "2025-01-01",
+    "targetEndAt": null,
+    "completedAt": null,
+    "progressPercent": null
+  },
+  "links": {
+    "website": "https://www.ensotek.de",
+    "demo": "https://www.ensotek.de",
+    "repository": "https://github.com/Orhanguezel/Ensotek"
+  },
+  "media": [
+    {
+      "id": "legacy-1",
+      "role": "cover",
+      "src": "/assets/imgs/work/projects/ensotek.png",
+      "alt": "Ensotek B2B Platform",
+      "caption": "",
+      "displayPermission": true,
+      "rightsConfirmed": true
+    }
   ],
-  "featured": true,
-  "displayOrder": 2,
-  "clientName": "Own Project",
-  "status": "live",
-  "startDate": "2025-01-01",
-  "completeDate": null,
-  "completionTimeLabel": "Ongoing",
-  "repoUrl": "https://github.com/Orhanguezel/Ensotek",
-  "websiteUrl": "https://www.ensotek.de",
-  "demoUrl": "https://www.ensotek.de",
-  "featuredImage": "/assets/imgs/work/projects/ensotek.png",
-  "featuredImageAlt": "Ensotek B2B Platform",
-  "resumeTitle": "Ensotek",
-  "resumeSubtitle": "B2B Cooling Tower Platform",
-  "excludeFromPortfolio": false
+  "channels": {
+    "website": {
+      "enabled": false,
+      "disabledReason": "CRM v2 geçişinde web yayın içeriği ve izinleri kullanıcı onayı bekliyor"
+    },
+    "bionluk": {
+      "enabled": false,
+      "disabledReason": "CRM v2 geçişinde Bionluk içeriği ve ticari uygunluk kullanıcı onayı bekliyor"
+    }
+  },
+  "publication": {
+    "privacy": "public",
+    "displayPermission": true
+  },
+  "management": {
+    "priority": "normal",
+    "controlPlane": "gzl-gelir-crm",
+    "lastChangedBy": "orhan"
+  },
+  "updatedAt": "2026-08-18T15:32:14.474Z"
 }
