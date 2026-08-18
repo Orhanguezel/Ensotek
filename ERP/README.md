@@ -25,8 +25,8 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 
 | Dosya | İçerik |
 |---|---|
-| **[ENSOTEK-ERP-MODUL-PLANI.md](ENSOTEK-ERP-MODUL-PLANI.md)** | **SON SÜRÜM** — 21 modül, her birinin hazırlık durumu ve kaynağı, hiçbir yerde olmayanların listesi, maliyet muhasebesi analizi, faz planı |
-| **[MVP-PLANI.md](MVP-PLANI.md)** 🔒 | **İÇ BELGE** — MVP kapsamı, kalem kalem hazır/yeni oranı, **efor tahmini**, kritik yol, yol haritası (M0–M6), riskler. *Müşteriye gitmez.* |
+| **[ENSOTEK-ERP-MODUL-PLANI.md](ENSOTEK-ERP-MODUL-PLANI.md)** | **24 modülün tamamı** — her birinin hazırlık durumu, kaynağı, taşınacak backend/admin modülü, ne eksik. Hiçbir yerde olmayanların listesi + maliyet muhasebesi analizi |
+| **[PROGRAM-PLANI.md](PROGRAM-PLANI.md)** 🔒 | **İÇ BELGE** — 24 modülün **efor tahmini**, hazır/yeni oranı, sürüm sıralaması S1–S5, kritik yol, yol haritası M0–M10, riskler. *Müşteriye gitmez.* |
 
 ---
 
@@ -44,7 +44,7 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 | Dosya | İçerik |
 |---|---|
 | [analiz/01-mevcut-durum-as-is.md](analiz/01-mevcut-durum-as-is.md) | Ensotek bugün nasıl çalışıyor: teklif, üretim, ürün ağacı, stok, darboğazlar |
-| [analiz/02-ihtiyac-listesi.md](analiz/02-ihtiyac-listesi.md) | **213 gereksinim**, 21 modül, her biri kaynağına bağlı |
+| [analiz/02-ihtiyac-listesi.md](analiz/02-ihtiyac-listesi.md) | **213 gereksinim**, kaynağına bağlı *(Fuar/İhracat/MRP gereksinimleri eklenecek)* |
 | [analiz/03-kapsam-taslagi.md](analiz/03-kapsam-taslagi.md) | **SCOPE v0.3** — 21 modül, 6 faz (0–5), bağımlılık zinciri, sistem ne DEĞİL |
 | [analiz/04-acik-sorular.md](analiz/04-acik-sorular.md) | Planı netleştirmek için cevaplanacaklar |
 | [analiz/05-modul-envanteri-yeniden-kullanim.md](analiz/05-modul-envanteri-yeniden-kullanim.md) | **Hangi modül hangi projeden geliyor** — doğrulanmış eşleme |
@@ -55,14 +55,16 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 
 ## Modül haritası
 
-| Faz | Modüller | Odak |
+| Sürüm | Modüller | Odak |
 |---|---|---|
-| **0** | MOD-00 Altyapı | İskelet — modül yok, taban var |
-| **1** ⭐ | MOD-01 Talep/CRM · MOD-02 Teklif · MOD-03 Maliyet · **MOD-04 Ürün Ağacı** | Ensotek'in en çok vakit kaybettiği yer |
-| **2** | MOD-05 Stok · MOD-06 Satın Alma · MOD-07 Sipariş · MOD-08 Mühendislik | Malzeme listesi darboğazı |
-| **3** | MOD-09 Üretim *(paspas hazır)* · MOD-10 Kalite · MOD-11 Sevkiyat · **MOD-15 Navlun** *(motor hazır — Faz 1'e çekilebilir)* | İş emri ve evrak darboğazı |
-| **4** | MOD-12 Servis · **MOD-16 Personel** · **MOD-17 Bakım** · **MOD-18 Fabrika** | Fabrika tarafının tamamlanması |
-| **5** | **MOD-14 Firma Bulma** · **MOD-19 Satış** · **MOD-20 Muhasebe** · MOD-21 Yönetim | Ticari kapanış |
+| **S1** ⭐ | Altyapı · Talep/CRM · **Teklif** · **Maliyet** · **Ürün Ağacı** | D-1/D-2/D-3 — en çok vakit kaybedilen yer |
+| **S2** | Stok · **MRP** · Satın Alma · Sipariş/Üretime Teslim · Mühendislik | D-4 — malzeme listesi darboğazı |
+| **S3** | Üretim · Kalite · Sevkiyat · Navlun · **İhracat/Gümrük** | D-5 — iş emri ve evrak darboğazı |
+| **S4** | Personel · Fabrika · Bakım · Servis · **Fuar** | Fabrika ve insan tarafı |
+| **S5** | Muhasebe · Firma Bulma · Satış · Raporlama | Ticari kapanış |
+
+**Sürüm sırası kapsam kısıtlaması değil, bağımlılık ve darboğaz sırasıdır.**
+24 modülün tamamı programın parçası.
 
 ---
 

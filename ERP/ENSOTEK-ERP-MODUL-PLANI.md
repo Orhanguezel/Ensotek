@@ -4,7 +4,7 @@
 > hangi kaynaktan alınacak, hangileri hiçbir yerde yok.
 >
 > **Durum:** Plan aşaması · Geliştirme başlamadı · **Fiyat en son aşama**
-> **Tarih:** 2026-08-18 · **Sürüm:** 1.0
+> **Tarih:** 2026-08-18 · **Sürüm:** 1.1
 
 ---
 
@@ -65,8 +65,16 @@ Ensotek'in ihtiyacına göre yazılacak.
 | MOD-19 | Satış Yönetimi | 🟢 | transpalet `crm` pipeline + paspas CRM | 5 |
 | MOD-20 | Muhasebe / Maliyet Muhasebesi | 🟡 | e-fatura-service + `logo_entegrasyon` | 5 |
 | MOD-21 | Yönetim ve Raporlama | 🟩 | paspas/transpalet `dashboard`,`kpi` | 5 |
+| **MOD-22** | **Fuar Yönetimi** | 🟡 | paspas `admin/fuar` + `fuar_teklif` servisi | 4 |
+| **MOD-23** | **İhracat ve Gümrük** | 🟡 | ihracatradari `customs`,`export-profile` + TeklifRota | 3 |
+| **MOD-24** | **MRP — Malzeme İhtiyaç Planlama** | 🟠 | paspas `hammadde_service` *(tek emir bazlı)* | 2 |
 
-**Dağılım:** 🟩 8 · 🟢 6 · 🟡 5 · 🟠 1 · 🔴 1
+**Dağılım:** 🟩 8 · 🟢 6 · 🟡 7 · 🟠 2 · 🔴 1 — **24 modül**
+
+> **v1.1 düzeltmesi (2026-08-18):** v1.0'da **Fuar**, **İhracat/Gümrük** ve **MRP**
+> ayrı modül olarak listelenmemişti. Fuar hiç yoktu; ihracat ve MRP diğer modüllerin
+> içine eritilmişti. Üçü de kendi başına iş yükü ve kendi ekranları olan alanlar —
+> ayrıldı.
 
 ---
 
@@ -246,6 +254,52 @@ pazarlık), `freight-rate-benchmarks`, `multimodal_plans`
 
 ---
 
+### MOD-22 · Fuar Yönetimi 🟡
+**Kaynak:** paspas `admin_panel/.../admin/fuar/` — 4 ekran (müşteriler, katalog, teklifler, ürünler) + `_components`; `paspas/fuar_teklif/` bağımsız servis (448 st, kendi migrasyonları): takım/koli/palet dönüşümü, MOQ, CBM, net-brüt ağırlık, indirim, EXW/FOB/CIF toplamı; TeklifRota bu servisin büyümüş hali
+**Var olan:** Fuarda hızlı teklif hesabı ve fuar kataloğu ekranları
+**Eksik — sıfırdan:**
+- **Fuar takvimi** — katılınacak fuarlar, tarih, ülke, stand bilgisi, bütçe
+- **Fuar bazlı lead toplama** — standda görüşülen firma kaydı (mobil/tablet)
+- **Fuar sonrası takip** — leadler CRM'e düşer, kim ne zaman arayacak
+- **Fuar maliyeti ve dönüşü** — stand + seyahat gideri ↔ fuardan gelen sipariş
+- Fuar ↔ MOD-14 Firma Bulma ve MOD-19 Satış bağı
+
+---
+
+### MOD-23 · İhracat ve Gümrük 🟡
+**Kaynak:** ihracatradari `customs` (284 st — **HS/GTİP kodu arama**, ticaret verisi sorgulama), `export-profile` (113 st); TeklifRota `commercial` — incoterm (EXW/FOB/CIF), `proforma-document`, `packing-list`
+**Var olan:** GTİP kodu arama, incoterm, proforma, packing list
+**Eksik — sıfırdan:**
+- **Ürün kartına GTİP/HS kodu** ve menşe bilgisi
+- **İhracat evrak seti** — menşe şahadetnamesi, **ATR / EUR.1**, fatura, çeki listesi, konşimento
+- **Akreditif / ödeme şekli** takibi (peşin, mal mukabili, vesaik mukabili, akreditif)
+- **Gümrük beyanname** referansı ve dosya bağı
+- **İhracat dosyası** — proje altında evrak seti ve durum takibi
+- Ülke bazlı gereklilik kuralları (CE, sertifika, dil)
+
+> **Neden ayrı modül:** Ensotek yurt dışına satıyor. İhracat evrakı teklif ve sevkiyattan
+> ayrı bir zincir — eksik evrak malı gümrükte bekletir. Navlun (MOD-15) taşımayı,
+> bu modül **belgeyi** yönetir.
+
+---
+
+### MOD-24 · MRP — Malzeme İhtiyaç Planlama 🟠 — **D-4 darboğazının asıl cevabı**
+**Kaynak:** paspas `uretim_emirleri/hammadde_service.ts` + `GET /:id/hammadde-yeterlilik` +
+admin `malzeme-yeterlilik-modal.tsx`; `hammadde_rezervasyonlari`
+**Var olan:** **Tek iş emri için** stok yeterlilik kontrolü ve rezervasyon
+**Eksik — sıfırdan:**
+- **Çok iş emri üzerinden net ihtiyaç hesabı** — BOM patlatması × açık iş emirleri − stok − rezerve + emniyet stoğu
+- **Zaman fazlı ihtiyaç** — hangi malzeme hangi hafta lazım
+- **Tedarik süresi (lead time)** — malzeme kartında; ne zaman sipariş verilmeli
+- **Otomatik satın alma önerisi** — MOD-06'ya düşen sipariş taslağı
+- **Malzeme listesi çıktısı** — Hamdi Bey'in *"uzun zaman alıyor"* dediği iş
+- Kapasite ihtiyacı (atölye adam-gün) — MOD-18 ile ortak
+
+> **Bu modül, imalat tarafındaki en büyük zaman kaybının (D-4) doğrudan karşılığı.**
+> Mevcut kod tek emir bakıyor; Ensotek'in ihtiyacı tüm açık işlere birden bakmak.
+
+---
+
 ## 5. Hiçbir kaynakta olmayanlar — net liste
 
 Bu maddeler **devralınamaz, sıfırdan yazılacaktır**:
@@ -267,9 +321,12 @@ Bu maddeler **devralınamaz, sıfırdan yazılacaktır**:
 | **Y-13** | **Stok kodu şeması** — Ensotek'te hiç yok | MOD-05 | Orta *(veri işi)* |
 | **Y-14** | **Modül kayıt defteri** — `hidden/internal/ready` | MOD-00 | Küçük |
 | **Y-15** | **Excel veri göçü araçları ve doğrulaması** | Tümü | **Büyük** *(→ [ANALİZ-07](analiz/07-excel-veri-gocu.md))* |
+| **Y-16** | **MRP motoru** — çok emirli net ihtiyaç, zaman fazlı, tedarik süresi, sipariş önerisi | MOD-24 | **Orta–Büyük** |
+| **Y-17** | **İhracat evrak seti** — menşe, ATR/EUR.1, akreditif, gümrük beyanname bağı | MOD-23 | Orta |
+| **Y-18** | **Fuar yönetimi** — takvim, standda lead toplama, fuar sonrası takip, fuar ROI | MOD-22 | Orta |
 
 > Eforun ağırlık merkezi net: **Y-1 (maliyet), Y-3 (parametrik BOM), Y-15 (veri göçü).**
-> Diğerlerinin tamamı bunların yanında küçük kalır.
+> İkinci halka: **Y-16 (MRP), Y-8 (3 PDF), Y-12 (atölye eksenine çeviri), Y-17 (ihracat evrakı).**
 
 ---
 
@@ -381,9 +438,9 @@ analizi, D-3 gönderme) burada birleşiyor.
 |---|---|---|
 | **0** | MOD-00 | İskelet, numaralandırma, modül kayıt defteri, deploy hattı |
 | **1** ⭐ | MOD-01, 02, 03, 04 | **Maliyet motoru + BOM** — projenin kalbi. Excel göçü paralel yürür |
-| **2** | MOD-05, 06, 07, 08 | Stok kodu, malzeme listesi, ENK/ENB, avans kontrolü |
-| **3** | MOD-09, 10, 11, 15 | Üretim (paspas hazır), Kalite (yeni), Sevkiyat, Navlun |
-| **4** | MOD-12, 16, 17, 18 | Personel, bakım, fabrika kapasitesi, servis |
+| **2** | MOD-05, 06, 07, 08, **24** | Stok kodu, **MRP + malzeme listesi**, ENK/ENB, avans kontrolü |
+| **3** | MOD-09, 10, 11, 15, **23** | Üretim (paspas hazır), Kalite (yeni), Sevkiyat, Navlun, **İhracat/Gümrük** |
+| **4** | MOD-12, 16, 17, 18, **22** | Personel, bakım, fabrika kapasitesi, servis, **Fuar** |
 | **5** | MOD-14, 19, 20, 21 | Firma bulma, satış, muhasebe, raporlama |
 
 > **Kural:** Hazır olmayan modül **"yakında" denip gösterilmez** — menüde yok, route 404,
