@@ -9,7 +9,7 @@
 | | |
 |---|---|
 | **Kapsam** | 24 bölüm · 6 grup · **3 faz** — tamamı bu teklife dahil |
-| **Süre** | **3 ay** — her faz 1 ay |
+| **Süre** | **4 ay** — Faz 1 ve 2 birer buçuk ay, Faz 3 bir ay |
 | **Bedel** | **120.000 ₺ + KDV** |
 | **Ödeme** | **3 × 40.000 ₺ + KDV** — her faz teslimi ve onayı sonrası |
 
@@ -26,7 +26,7 @@ kârlılık analizi anlam ifade etmez. Temel önce atılır.
 
 ---
 
-## Faz 1 · Satış ve Maliyet Omurgası — 1. Ay · 40.000 ₺ + KDV
+## Faz 1 · Satış ve Maliyet Omurgası — 1.–6. hafta · 40.000 ₺ + KDV
 
 **Grup A** (Talep/Müşteri · Teklif · Maliyet · Ürün Ağacı) + **Sistem Yönetimi** — 5 bölüm
 
@@ -70,7 +70,7 @@ kapatılır, sistem canlı kullanımdadır.
 
 ---
 
-## Faz 2 · Malzeme, Üretim ve Sevkiyat — 2. Ay · 40.000 ₺ + KDV
+## Faz 2 · Malzeme, Üretim ve Sevkiyat — 7.–12. hafta · 40.000 ₺ + KDV
 
 **Grup B + C + D** — 10 bölüm
 
@@ -110,7 +110,7 @@ kapatılır, sistem canlı kullanımdadır.
 
 ---
 
-## Faz 3 · Fabrika, İnsan ve Ticaret — 3. Ay · 40.000 ₺ + KDV
+## Faz 3 · Fabrika, İnsan ve Ticaret — 13.–16. hafta · 40.000 ₺ + KDV
 
 **Grup E + F** — 9 bölüm
 
@@ -155,10 +155,10 @@ devrede.**
 
 | Faz | Bölüm | Süre | Bedel |
 |---|---:|---:|---:|
-| Faz 1 · Satış ve Maliyet Omurgası | 5 | 1. ay | 40.000 ₺ |
-| Faz 2 · Malzeme, Üretim ve Sevkiyat | 10 | 2. ay | 40.000 ₺ |
-| Faz 3 · Fabrika, İnsan ve Ticaret | 9 | 3. ay | 40.000 ₺ |
-| **Toplam · KDV hariç** | **24** | **3 ay** | **120.000 ₺** |
+| Faz 1 · Satış ve Maliyet Omurgası | 5 | 1.–6. hafta | 40.000 ₺ |
+| Faz 2 · Malzeme, Üretim ve Sevkiyat | 10 | 7.–12. hafta | 40.000 ₺ |
+| Faz 3 · Fabrika, İnsan ve Ticaret | 9 | 13.–16. hafta | 40.000 ₺ |
+| **Toplam · KDV hariç** | **24** | **4 ay** | **120.000 ₺** |
 
 ---
 
@@ -194,7 +194,9 @@ devrede.**
 - Fiyatlara KDV dahil değildir. Geçerlilik 30 gün.
 - Kaynak kod ve tüm veri **Ensotek'e aittir**.
 - Her faz teslimini takip eden **bir ay hata düzeltme desteği** ücretsizdir.
-- Bu teklif **üç fazın tamamını** kapsar: 24 bölüm, 3 ay, 120.000 ₺ + KDV.
+- Bu teklif **üç fazın tamamını** kapsar: 24 bölüm, **4 ay**, 120.000 ₺ + KDV.
+- Faz süreleri iş yüküne göre dağıtıldı: Faz 1 ve Faz 2 birer buçuk ay, Faz 3 bir ay.
+  Süreler sözleşme başlangıcından itibaren işler.
 - Ödeme **teslim ve onay sonrası**. Onaylanmayan faz için ödeme talep edilmez.
 - Faz 1'de **en çok kullanılan otuz kule modelinin** ürün ağacı aktarılır.
 - Bir fazın kapsamı, o faz altında listelenen bölümler ve maddelerle **sınırlıdır**.
@@ -217,7 +219,9 @@ devrede.**
 > yazılımı entegrasyonu, gerçekleşen maliyet karşılaştırması *(veri Faz 1'den itibaren
 > toplanıyor ama ekran sonraki fazda)*.
 >
-> **2026-08-18 fiyat kararı:** üç fazın tamamı 120.000 ₺ + KDV, 3 ay, 3 × 40.000 ₺.
+> **2026-08-18 fiyat ve süre kararı:** üç fazın tamamı 120.000 ₺ + KDV, **4 ay**,
+> 3 × 40.000 ₺. Ek ay Faz 1 ve Faz 2'ye dağıtıldı (1,5 + 1,5 + 1); Faz 2 on bölümle
+> en yüklü faz, Faz 1 ise teknik olarak en ağırı (maliyet motoru + BOM + veri göçü).
 > İç program planındaki tahmin 452–771 adam-gündü; bu, adam-gün başına ~155–265 ₺ demek.
 > Karar Orhan'ındır ve teklife böyle işlendi. Karşılığında belgeye **üç koruma** konuldu:
 > 1. **"Hiçbir fazın kapsamında olmayanlar"** bölümü — 9 kalem yazılı sınır
