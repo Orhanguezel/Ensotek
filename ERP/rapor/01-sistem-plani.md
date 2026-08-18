@@ -2,7 +2,7 @@
 ## Sistem Kapsamı ve Aşama Planı
 
 **Hazırlayan:** Güzel Web Design
-**Tarafınıza:** Ensotek — Sn. Hamdi Bey
+**Tarafınıza:** Ensotek — Sn. Hamdi Yağar
 **Tarih:** 18 Ağustos 2026
 **Belge:** Sistem planı — v1.0
 
