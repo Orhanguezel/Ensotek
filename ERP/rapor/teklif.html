@@ -1,0 +1,428 @@
+<title>Ensotek ERP — Birinci Faz Teklifi | GZL Teknoloji</title>
+<style>
+:root{
+  --paper:#F5F8F8; --surface:#FFFFFF; --surface-2:#EFF4F5;
+  --ink:#0D181D; --ink-2:#3A4D55; --muted:#6A7C84;
+  --hair:#D1DADD; --hair-2:#AEBEC3;
+  --petrol:#0D5867; --petrol-2:#107C93; --petrol-wash:#E6F0F2;
+  --copper:#9E5217; --copper-2:#C4732B; --copper-wash:#F6EDE4;
+  --ok:#1C6B47;
+  --f-sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --f-mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Mono",Menlo,Consolas,"Liberation Mono",monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#0A1317; --surface:#0F1B20; --surface-2:#152329;
+    --ink:#E3ECEE; --ink-2:#AEC0C6; --muted:#7C919A;
+    --hair:#1F3239; --hair-2:#2D454E;
+    --petrol:#5BB8CB; --petrol-2:#83D2E0; --petrol-wash:#102A31;
+    --copper:#DE9350; --copper-2:#F0AC69; --copper-wash:#2A1E13;
+    --ok:#4FC08B;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0A1317; --surface:#0F1B20; --surface-2:#152329;
+  --ink:#E3ECEE; --ink-2:#AEC0C6; --muted:#7C919A;
+  --hair:#1F3239; --hair-2:#2D454E;
+  --petrol:#5BB8CB; --petrol-2:#83D2E0; --petrol-wash:#102A31;
+  --copper:#DE9350; --copper-2:#F0AC69; --copper-wash:#2A1E13;
+  --ok:#4FC08B;
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--f-sans); font-size:16px; line-height:1.62;
+  -webkit-font-smoothing:antialiased;
+}
+.sheet{max-width:920px;margin:0 auto;padding:0 20px 96px}
+
+/* ---- antet / title block ---- */
+.antet{
+  border:1px solid var(--hair-2); border-top:3px solid var(--petrol);
+  background:var(--surface); margin-top:28px;
+  display:grid; grid-template-columns:repeat(4,1fr);
+}
+.antet div{padding:11px 14px;border-right:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.antet div:nth-child(4n){border-right:0}
+.antet div:nth-last-child(-n+4){border-bottom:0}
+.antet .k{
+  font-family:var(--f-mono); font-size:9.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--muted); display:block; margin-bottom:3px;
+}
+.antet .v{font-family:var(--f-mono);font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+.antet .v.em{color:var(--petrol);font-weight:600}
+
+/* ---- başlık ---- */
+.lede{padding:52px 0 40px;border-bottom:1px solid var(--hair)}
+.eyebrow{
+  font-family:var(--f-mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--copper);margin:0 0 18px
+}
+h1{
+  font-size:clamp(30px,4.6vw,46px); line-height:1.1; letter-spacing:-.025em;
+  font-weight:800; margin:0 0 20px; text-wrap:balance;
+}
+h1 span{color:var(--petrol)}
+.lede p{margin:0;max-width:64ch;font-size:17.5px;color:var(--ink-2)}
+
+/* ---- rakamlar ---- */
+.figures{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--hair);
+  border:1px solid var(--hair);margin:36px 0 8px}
+.fig{background:var(--surface);padding:22px 20px}
+.fig b{display:block;font-family:var(--f-mono);font-size:clamp(26px,4vw,36px);
+  font-weight:700;letter-spacing:-.02em;color:var(--petrol);font-variant-numeric:tabular-nums;line-height:1.1}
+.fig.money b{color:var(--copper)}
+.fig span{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--muted);margin-top:9px}
+
+/* ---- bölümler ---- */
+section{padding-top:52px}
+h2{
+  font-size:12px;font-family:var(--f-mono);letter-spacing:.18em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;margin:0 0 22px;padding-bottom:10px;
+  border-bottom:1px solid var(--hair)
+}
+h3{font-size:20px;letter-spacing:-.015em;margin:0 0 10px;font-weight:700;text-wrap:balance}
+p{margin:0 0 15px;max-width:70ch}
+.note{color:var(--ink-2)}
+
+/* ---- aşama kartları ---- */
+.stages{display:flex;flex-direction:column;gap:0}
+.stage{
+  display:grid;grid-template-columns:96px 1fr;gap:0;
+  border-top:1px solid var(--hair-2);
+}
+.stage:last-of-type{border-bottom:1px solid var(--hair-2)}
+.stage .rail{
+  padding:26px 0 30px;border-right:1px solid var(--hair);position:relative
+}
+.stage .no{
+  font-family:var(--f-mono);font-size:34px;font-weight:700;line-height:1;
+  color:var(--petrol);letter-spacing:-.03em;font-variant-numeric:tabular-nums
+}
+.stage .mo{
+  font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  color:var(--muted);margin-top:8px
+}
+.stage .body{padding:26px 0 30px 26px}
+.stage ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:7px}
+.stage li{position:relative;padding-left:20px;color:var(--ink-2);font-size:15.2px}
+.stage li::before{
+  content:"";position:absolute;left:0;top:.62em;width:9px;height:1px;background:var(--petrol-2)
+}
+.stage li b{color:var(--ink);font-weight:600}
+
+.gate{
+  margin-top:20px;border-left:3px solid var(--ok);background:var(--surface);
+  padding:13px 16px;
+}
+.gate .lbl{
+  font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ok);display:block;margin-bottom:4px;font-weight:600
+}
+.gate p{margin:0;font-size:14.6px;color:var(--ink)}
+
+.pay{
+  margin-top:16px;display:inline-flex;align-items:baseline;gap:10px;
+  border:1px solid var(--copper);background:var(--copper-wash);padding:9px 15px;
+}
+.pay .lbl{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--copper)}
+.pay .amt{font-family:var(--f-mono);font-size:17px;font-weight:700;color:var(--copper);
+  font-variant-numeric:tabular-nums}
+
+/* ---- tablo ---- */
+.tw{overflow-x:auto;border:1px solid var(--hair-2);background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:15px;min-width:520px}
+th,td{padding:12px 15px;text-align:left;border-bottom:1px solid var(--hair)}
+th{
+  font-family:var(--f-mono);font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);font-weight:600;background:var(--surface-2)
+}
+td.n{font-family:var(--f-mono);text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.total td{
+  border-bottom:0;border-top:2px solid var(--copper);background:var(--copper-wash);
+  font-weight:700;color:var(--copper)
+}
+tr.total td.n{font-size:17px}
+
+/* ---- kapsam dışı ---- */
+.out{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:1px;
+  background:var(--hair);border:1px solid var(--hair)}
+.out span{background:var(--surface);padding:11px 14px;font-size:14px;color:var(--muted);
+  font-family:var(--f-mono);font-size:12.5px}
+
+/* ---- sorumluluk ---- */
+.duty{display:grid;gap:0;border:1px solid var(--hair-2)}
+.duty div{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:14px 16px;
+  border-bottom:1px solid var(--hair);background:var(--surface)}
+.duty div:last-child{border-bottom:0}
+.duty .i{font-family:var(--f-mono);font-size:12px;color:var(--copper);font-weight:700;
+  font-variant-numeric:tabular-nums}
+.duty p{margin:0;font-size:14.8px;color:var(--ink-2)}
+.duty p b{color:var(--ink);font-weight:600}
+
+/* ---- koşullar ---- */
+.terms{display:grid;gap:9px;margin:0;padding:0;list-style:none}
+.terms li{padding-left:20px;position:relative;font-size:14.8px;color:var(--ink-2);max-width:74ch}
+.terms li::before{content:"";position:absolute;left:0;top:.66em;width:9px;height:1px;
+  background:var(--hair-2)}
+
+/* ---- imza ---- */
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair);
+  border:1px solid var(--hair-2);margin-top:26px}
+.sign div{background:var(--surface);padding:22px 18px 46px}
+.sign .k{font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);display:block;margin-bottom:6px}
+.sign .n{font-weight:700;font-size:15.5px}
+.sign .r{font-size:13.5px;color:var(--muted);margin-top:2px}
+
+footer{margin-top:56px;padding-top:20px;border-top:1px solid var(--hair);
+  font-family:var(--f-mono);font-size:11.5px;color:var(--muted);
+  display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+@media (max-width:640px){
+  .antet{grid-template-columns:repeat(2,1fr)}
+  .antet div:nth-child(4n){border-right:1px solid var(--hair)}
+  .antet div:nth-child(2n){border-right:0}
+  .antet div:nth-last-child(-n+2){border-bottom:0}
+  .antet div:nth-last-child(-n+4){border-bottom:1px solid var(--hair)}
+  .figures{grid-template-columns:1fr}
+  .stage{grid-template-columns:1fr}
+  .stage .rail{border-right:0;border-bottom:1px solid var(--hair);padding-bottom:14px;
+    display:flex;align-items:baseline;gap:12px}
+  .stage .mo{margin-top:0}
+  .stage .body{padding:20px 0 28px}
+  .sign{grid-template-columns:1fr}
+}
+</style>
+
+<div class="sheet">
+
+  <div class="antet">
+    <div><span class="k">Belge</span><span class="v">Teklif · ERP-2026-001</span></div>
+    <div><span class="k">Müşteri</span><span class="v">Ensotek</span></div>
+    <div><span class="k">İlgili</span><span class="v">Sn. Hamdi Bey</span></div>
+    <div><span class="k">Hazırlayan</span><span class="v em">GZL Teknoloji</span></div>
+    <div><span class="k">Tarih</span><span class="v">18.08.2026</span></div>
+    <div><span class="k">Geçerlilik</span><span class="v">30 gün</span></div>
+    <div><span class="k">Revizyon</span><span class="v">R0</span></div>
+    <div><span class="k">Sayfa</span><span class="v">1 / 1</span></div>
+  </div>
+
+  <div class="lede">
+    <p class="eyebrow">Su Soğutma Kulesi Üretim Yönetim Sistemi</p>
+    <h1>Ensotek ERP<br><span>Birinci Faz Teklifi</span></h1>
+    <p>Teklif hazırlama, maliyet analizi ve teklif takibinin Excel ve Word dosyalarından
+    çıkarılıp tek bir sistemde toplanması. Üç aşamada teslim, her aşama sonunda çalışan
+    ve kullanılabilir bir çıktı.</p>
+  </div>
+
+  <div class="figures">
+    <div class="fig"><b>3</b><span>Aşama · her biri teslimli</span></div>
+    <div class="fig"><b>3 ay</b><span>Toplam süre</span></div>
+    <div class="fig money"><b>120.000 ₺</b><span>KDV hariç</span></div>
+  </div>
+
+  <section>
+    <h2>Bu fazın kapsamı neden burası</h2>
+    <p class="note">Görüşmemizde Ensotek'te en çok zaman kaybettiren işleri sıralamıştınız:
+    <b>teklif hazırlamak</b>, <b>maliyet analizi çıkarmak</b> ve <b>teklifi gönderip takip
+    etmek</b>. Üçü de aynı zincirde ve aynı Excel dosyalarına bağlı.</p>
+    <p class="note">Birinci faz doğrudan bu zinciri hedefler. Ayrıca teknik bir zorunluluk
+    var: maliyet hesabı kurulmadan malzeme planlaması, üretim takibi ve kârlılık analizi
+    anlam ifade etmez. Temel önce atılır, üretim ve sonrası bu temelin üzerine gelir.</p>
+  </section>
+
+  <section>
+    <h2>Aşamalar</h2>
+    <div class="stages">
+
+      <div class="stage">
+        <div class="rail"><div class="no">01</div><div class="mo">1. Ay</div></div>
+        <div class="body">
+          <h3>Temel ve Ürün Ağacı</h3>
+          <p class="note">Sistemin kurulması ve kulelerinizin malzeme–işçilik yapısının
+          dijitale taşınması.</p>
+          <ul>
+            <li>Sistem kurulumu, güvenli giriş, <b>kullanıcı ve yetki tanımları</b></li>
+            <li>Müşteri ve firma kartları; <b>talep kaydı</b> — e-posta, telefon, WhatsApp</li>
+            <li>Ürün ve malzeme kartları, <b>stok kodu düzeninin kurulması</b></li>
+            <li><b>Birim fiyat yönetimi</b> — malzeme fiyatları ve işçilik (adam-gün,
+                harcırah, sigorta, yemek)</li>
+            <li><b>Çok katmanlı ürün ağacı</b> — CTP gövde kilogram bazlı, serpantin alt
+                reçetesi, fire payı</li>
+            <li>Üç örnek modelin ürün ağacının sisteme girilmesi</li>
+          </ul>
+          <div class="gate">
+            <span class="lbl">Teslim ölçütü</span>
+            <p>Üç modelin maliyeti, mevcut Excel'inizin hesapladığıyla <b>birebir aynı</b>.</p>
+          </div>
+          <div class="pay"><span class="lbl">Ödeme</span><span class="amt">40.000 ₺ + KDV</span></div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="rail"><div class="no">02</div><div class="mo">2. Ay</div></div>
+        <div class="body">
+          <h3>Maliyet Motoru ve Teklif</h3>
+          <p class="note">Excel'de yaptığınız maliyet ve fiyatlandırma işinin tamamının
+          sisteme geçmesi.</p>
+          <ul>
+            <li>Ürün ağacından <b>otomatik maliyet hesabı</b>; malzeme, işçilik ve dolaylı
+                gider katmanları ayrı ayrı</li>
+            <li><b>Çarpan, pazarlık payı ve Euro kuru</b> ile teklif fiyatının oluşması</li>
+            <li><b>Teklif anı maliyetinin dondurulması</b> — gönderdiğiniz gündeki fiyatlar
+                sonradan değişmez; teklif anı, güncel ve fark aynı ekranda</li>
+            <li>Teklif hazırlama ekranı, <b>revizyon yönetimi</b>, standart dışı özelliklerin
+                kırmızı işaretlenmesi</li>
+            <li>Kapsam ve opsiyon kalemleri — pano, su şartlandırma, süpervizörlük, nakliye,
+                vinç</li>
+            <li><b>Üç ayrı belge:</b> teknik teklif, ticari teklif, iç maliyet raporu</li>
+            <li>E-posta ile gönderim ve <b>teklif arşivinin kendiliğinden oluşması</b></li>
+          </ul>
+          <div class="gate">
+            <span class="lbl">Teslim ölçütü</span>
+            <p>Gerçek bir kule teklifi baştan sona sistemde hazırlanır, üç belgesi üretilir
+            ve müşteriye gönderilir.</p>
+          </div>
+          <div class="pay"><span class="lbl">Ödeme</span><span class="amt">40.000 ₺ + KDV</span></div>
+        </div>
+      </div>
+
+      <div class="stage">
+        <div class="rail"><div class="no">03</div><div class="mo">3. Ay</div></div>
+        <div class="body">
+          <h3>Veri Aktarımı ve Devreye Alma</h3>
+          <p class="note">Mevcut verinin taşınması, doğrulanması ve sistemin günlük
+          kullanıma geçmesi.</p>
+          <ul>
+            <li><b>Tüm kule modellerinin ürün ağaçlarının</b> sisteme aktarılması</li>
+            <li>Birim fiyat, CTP maliyet, serpantin maliyet ve pano fiyat listelerinin
+                aktarılması</li>
+            <li>Müşteri listesi ve açık tekliflerin aktarılması</li>
+            <li><b>Teklif takip zaman çizelgesi</b> ve müşteriye özel teklif bağlantısı —
+                müşteri teklifi açtığında, kabul ettiğinde veya revizyon istediğinde
+                haberiniz olur</li>
+            <li><b>Doğrulama:</b> her model için sistem maliyeti ile Excel maliyetinin
+                karşılaştırılması</li>
+            <li>Kullanıcı eğitimi, sunucu kurulumu, yedekleme</li>
+          </ul>
+          <div class="gate">
+            <span class="lbl">Teslim ölçütü</span>
+            <p>Her modelde sistem maliyeti Excel'e eşit; teklif ve maliyet Excel'leri
+            kapatılır, sistem canlı kullanımdadır.</p>
+          </div>
+          <div class="pay"><span class="lbl">Ödeme</span><span class="amt">40.000 ₺ + KDV</span></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>Ödeme planı</h2>
+    <div class="tw">
+      <table>
+        <thead>
+          <tr><th>Aşama</th><th>Teslim</th><th>Ödeme zamanı</th><th class="n" style="text-align:right">Tutar (KDV hariç)</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>01 · Temel ve Ürün Ağacı</td><td>1. ay sonu</td><td>Teslim ve onay sonrası</td><td class="n">40.000 ₺</td></tr>
+          <tr><td>02 · Maliyet Motoru ve Teklif</td><td>2. ay sonu</td><td>Teslim ve onay sonrası</td><td class="n">40.000 ₺</td></tr>
+          <tr><td>03 · Veri Aktarımı ve Devreye Alma</td><td>3. ay sonu</td><td>Teslim ve onay sonrası</td><td class="n">40.000 ₺</td></tr>
+          <tr class="total"><td colspan="3">Toplam · KDV hariç</td><td class="n">120.000 ₺</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:14px;font-size:14.6px">Her aşama sonunda teslim
+    yapılır, birlikte kontrol edilir ve onayınızın ardından o aşamanın bedeli fatura
+    edilir. Onaylamadığınız bir aşama için ödeme talep edilmez.</p>
+  </section>
+
+  <section>
+    <h2>Bu fazın dışında kalanlar</h2>
+    <p class="note">Aşağıdaki bölümler sistemin genel planının parçasıdır; bu teklifin
+    kapsamında değildir ve sonraki fazlarda ayrı olarak teklif edilir.</p>
+    <div class="out">
+      <span>Üretim ve iş emirleri</span>
+      <span>Malzeme ihtiyaç planlama</span>
+      <span>Satın alma</span>
+      <span>Kalite kontrol</span>
+      <span>Sevkiyat</span>
+      <span>Navlun ve lojistik</span>
+      <span>İhracat ve gümrük</span>
+      <span>Personel yönetimi</span>
+      <span>Fabrika yönetimi</span>
+      <span>Bakım yönetimi</span>
+      <span>Süpervizörlük ve servis</span>
+      <span>Fuar yönetimi</span>
+      <span>Firma bulma</span>
+      <span>Muhasebe ve cari</span>
+      <span>Yönetim raporları</span>
+    </div>
+    <p class="note" style="margin-top:14px;font-size:14.6px">Birinci faz, bu bölümlerin
+    hepsinin üzerine kurulacağı temeli oluşturur. Sonraki fazlar, temel hazır olduğu için
+    belirgin şekilde daha kısa sürer.</p>
+  </section>
+
+  <section>
+    <h2>Ensotek'in katkısı</h2>
+    <p class="note">Üç aylık takvim, aşağıdaki maddelerin zamanında karşılanmasına bağlıdır.</p>
+    <div class="duty">
+      <div><span class="i">01</span><p><b>Excel dosyalarının teslimi</b> — üç örnek ürün
+        ağacı (küçük, orta, büyük model), birim fiyat listesi, CTP maliyet, serpantin
+        maliyet, pano fiyat listesi. Sözleşme başlangıcında.</p></div>
+      <div><span class="i">02</span><p><b>Belge şablonları</b> — mevcut Word teklif
+        şablonunuz ve Teklif İnceleme Formu.</p></div>
+      <div><span class="i">03</span><p><b>Malzeme eşleştirme ve stok kodu onayı</b> —
+        malzemeleri siz tanıyorsunuz, yapıyı biz kuruyoruz. Birlikte yapılır.</p></div>
+      <div><span class="i">04</span><p><b>Maliyet doğrulama onayı</b> — taşınan her modelin
+        maliyetinin sizin tarafınızdan kontrol edilip onaylanması.</p></div>
+      <div><span class="i">05</span><p><b>Kullanıcı ve yetki listesi</b> — kimin hangi
+        ekranı göreceği.</p></div>
+      <div><span class="i">06</span><p><b>Haftada bir görüşme</b> — ilerlemenin birlikte
+        gözden geçirilmesi. Yaklaşık bir saat.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Koşullar</h2>
+    <ul class="terms">
+      <li>Fiyatlara <b>KDV dahil değildir</b>. Teklif geçerlilik süresi <b>30 gündür</b>.</li>
+      <li>Yazılımın <b>kaynak kodu ve tüm verisi Ensotek'e aittir</b>. Sistem Ensotek'in
+        kendi sunucusunda veya tarafımızca sağlanan sunucuda çalıştırılabilir.</li>
+      <li>Teslimden sonra <b>bir ay boyunca hata düzeltme desteği</b> ücretsizdir.</li>
+      <li>Aşama teslimlerinde kapsam dışı yeni talepler ayrıca değerlendirilir ve
+        takvimi etkilemez; sonraki fazda planlanır.</li>
+      <li>Hazır olmayan bir bölüm sistemde <b>görünmez</b> — "yakında" yazan, açılmayan
+        ekran olmaz.</li>
+      <li>Bir bölüm devreye alındığında yerini aldığı Excel dosyası kapanır. Verinin iki
+        yerde tutulması ikisini de güvenilmez hale getirir; güvence, maliyet
+        doğrulamasıyla sağlanır.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Onay</h2>
+    <div class="sign">
+      <div>
+        <span class="k">Teklifi veren</span>
+        <div class="n">GZL Teknoloji</div>
+        <div class="r">Kaşe · İmza · Tarih</div>
+      </div>
+      <div>
+        <span class="k">Teklifi kabul eden</span>
+        <div class="n">Ensotek</div>
+        <div class="r">Kaşe · İmza · Tarih</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>GZL Teknoloji · Ensotek ERP Birinci Faz Teklifi</span>
+    <span>ERP-2026-001 · R0 · 18.08.2026</span>
+  </footer>
+
+</div>
