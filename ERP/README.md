@@ -27,6 +27,7 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 |---|---|
 | **[ENSOTEK-ERP-MODUL-PLANI.md](ENSOTEK-ERP-MODUL-PLANI.md)** | **24 modülün tamamı** — her birinin hazırlık durumu, kaynağı, taşınacak backend/admin modülü, ne eksik. Hiçbir yerde olmayanların listesi + maliyet muhasebesi analizi |
 | **[PROGRAM-PLANI.md](PROGRAM-PLANI.md)** 🔒 | **İÇ BELGE** — 24 modülün **efor tahmini**, hazır/yeni oranı, sürüm sıralaması S1–S5, kritik yol, yol haritası M0–M10, riskler. *Müşteriye gitmez.* |
+| **[rapor/01-sistem-plani.md](rapor/01-sistem-plani.md)** 📤 | **MÜŞTERİ BELGESİ** — Hamdi Bey'e gidecek. 24 bölümün kapsamı iş dilinde, 5 aşamalı plan, birinci aşama detayı, Ensotek'ten beklenenler. **Teknik ayrıntı, efor, risk ve kaynak proje adı yok.** PDF'e dönüşecek |
 
 ---
 
