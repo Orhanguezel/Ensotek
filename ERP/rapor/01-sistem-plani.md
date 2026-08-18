@@ -81,23 +81,24 @@ Süpervizör raporları · Servis kayıtları · Garanti
 Bilgi tek yerde durduğu için, bir satış mühendisi izinli olduğunda başka bir arkadaşınız
 projeyi dakikalar içinde devralabilir.
 
-### İki firma, tek sistem
+### İki ürün ailesi, tek şirket
 
-Sistem **Ensotek** ve **Karbonkompozit**'i birlikte yönetir. İkisi ayrı birer çalışma
-alanı olarak kurulur:
+Sistem **Ensotek** ve **MOE Kompozit** ürünlerini birlikte yönetir. Ayrım ürün kartındaki
+marka bilgisiyle yapılır — ayrı bir şirket yapısı kurulmaz, faturalar bugünkü gibi
+Ensotek adına kesilmeye devam eder.
 
-| Her firma için ayrı | Ortak — fabrika tek |
+| Marka bazında ayrışan | Tek ve ortak |
 |---|---|
-| Ürünler ve ürün ağaçları | Personel |
-| Müşteriler ve talepler | Atölyeler ve kapasite |
-| Teklifler ve maliyet | Makineler ve bakım |
-| İş numaraları ve iş emirleri | Vardiya ve devam takibi |
-| Sevkiyat ve satış | Tedarikçiler |
+| Ürünler ve ürün ağaçları | Cari hesap, fatura, muhasebe |
+| Maliyet analizleri | Personel |
+| Teklif anteti ve belgeler | Atölyeler ve kapasite |
+| Satış ve kârlılık raporları | Makineler, bakım, depo |
+| Fuar ve hedef kitle | Tedarikçiler, iş numarası serisi |
 
-Soğutma kulesi ürünleriyle kompozit ürünlerin ürün ağacı ve maliyet yapısı birbirine
-karışmaz. Buna karşılık **polyester atölyesi her iki firmanın işini de yaptığı için,
-atölye kapasitesi ve üretim planı ikisini birden gösterir** — böylece aynı atölyeye iki
-ayrı yerden habersiz iş verilmesi önlenir.
+Soğutma kulesi ile kompozit ürünlerin ürün ağacı ve maliyeti birbirine karışmaz; buna
+karşılık **polyester atölyesi her iki ürün ailesini de ürettiği için, atölye kapasitesi
+ve üretim planı ikisini birden gösterir** — aynı atölyeye iki yerden habersiz iş
+verilmesi önlenir.
 
 ---
 
@@ -342,9 +343,9 @@ Teklifin işe dönüşmesi ve imalata devri.
 - Tüm listelerin Excel'e aktarılabilmesi
 
 #### 24. Sistem Yönetimi
-- **Çok firmalı yapı** — Ensotek ve Karbonkompozit ayrı çalışma alanı
-- Kullanıcılar, roller ve yetkiler — her departman yalnız kendi ekranını görür; kullanıcı
-  hangi firmada çalışıyorsa onu görür
+- **İki markalı ürün yapısı** — Ensotek ve MOE Kompozit; ürün, ürün ağacı, teklif anteti
+  ve raporlar marka bazında ayrışır
+- Kullanıcılar, roller ve yetkiler — her departman yalnız kendi ekranını görür
 - İşlem geçmişi: kim, ne zaman, neyi değiştirdi
 - Doküman arşivi ve dosya yönetimi
 - Bildirimler ve hatırlatmalar

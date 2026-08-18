@@ -5,9 +5,9 @@
 > **v0.1 → v0.2 (2026-08-18):** Kapsam **genişletildi**, opsiyon listesi kaldırıldı —
 > *"tamamını hatta fazlasıyla yapacağız"*.
 >
-> **v0.3 eki (2026-08-18):** Ensotek'in dört reposu incelendi. **Çok kiracılılık gerçek
-> bir gereksinim çıktı** — karbonkompozit ayrı bir ürün ailesi. `tenant_key` sabitlenmez,
-> canlı kiracı ekseni olur. Ortak/özel ayrımı [ANALİZ-06 §3.5](06-mimari-iskelet.md)'te.
+> **v0.3 eki (2026-08-18):** Ensotek'in dört reposu incelendi. Karbonkompozit ayrı bir
+> **ürün ailesi ve marka** (MOE Kompozit) — ayrı şirket değil. Sistem **tek kiracılı**;
+> ayrım ürün kartındaki marka alanıyla yapılır → [ANALİZ-06 §3.5](06-mimari-iskelet.md).
 >
 > **v0.2 → v0.3 (2026-08-18):** **TeklifRota (`fuar-teklif`)** ve **Paspas ERP** ayrıntılı
 > incelendi.
@@ -38,11 +38,12 @@ kurulum ve servis aynı proje altında yaşar.
 **Hedef:** Ensotek'in **tüm Excel ve Word dosyalarının yerini almak.** Yanında çalışmak
 değil, yerine geçmek.
 
-**Sistem çok kiracılıdır.** Ensotek iki ürün ailesi yönetiyor: soğutma kulesi
-(ensotek.de · ensotek.com.tr · kuhlturm.com) ve **karbonkompozit** — lunapark ve tema
-parkı kompozit ürünleri. Ürünler, ürün ağaçları, müşteriler, teklifler ve iş numaraları
-kiracıya özeldir; **personel, atölyeler, makineler, bakım ve tedarikçiler ortaktır** —
-çünkü fabrika tektir. Ayrıntı: [ANALİZ-06 §3.5](06-mimari-iskelet.md).
+**Sistem tek şirket, iki markadır.** Ensotek iki ürün ailesi üretiyor: **Ensotek**
+soğutma kuleleri (ensotek.de · ensotek.com.tr · kuhlturm.com) ve **MOE Kompozit**
+lunapark / tema parkı kompozit ürünleri (karbonkompozit.com.tr). Ayrım ürün kartındaki
+**marka** alanıyla yapılır — ürün, ürün ağacı, teklif anteti ve raporlar marka bazında
+ayrışır. Fatura, cari, muhasebe, personel, atölye ve depo **tektir**; şu an faturalar
+Ensotek adına kesiliyor. Ayrıntı: [ANALİZ-06 §3.5](06-mimari-iskelet.md).
 
 ---
 

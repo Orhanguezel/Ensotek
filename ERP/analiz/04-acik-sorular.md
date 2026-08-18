@@ -155,48 +155,63 @@ MOD-15 için:
 
 ---
 
-## 🔴 S-13 · Karbonkompozit ayrı tüzel kişilik mi? *(yeni)*
+## ✅ Kapanan — ürün ailesi yapısı
 
-Ensotek iki ürün ailesi yönetiyor: soğutma kulesi (ensotek.de / ensotek.com.tr /
-kuhlturm.com) ve **lunapark–tema parkı kompozit ürünleri** (karbonkompozit.com.tr).
-
-- Karbonkompozit **ayrı şirket mi**, aynı şirketin markası mı?
-- Ayrı fatura, ayrı cari, ayrı muhasebe mi?
-- İş numarası serisi ayrı mı? (ENK/ENB Ensotek'e özgü)
-- Aynı müşteriye iki firmadan da satış oluyor mu?
-
-**Neden kritik:** Cari ve muhasebenin ortak mı ayrı mı olacağını belirler; yanlış
-kurulursa sonradan ayırmak veri göçü demektir → [ANALİZ-06 §3.5](06-mimari-iskelet.md)
+| Soru | Karar (2026-08-18, Orhan) |
+|---|---|
+| Karbonkompozit ayrı şirket mi? | **Hayır.** Ayrı ürün ailesi ve marka: **MOE Kompozit**. Ayrı tenant kurulmayacak |
+| Ayrı fatura / cari / muhasebe mi? | **Hayır.** Faturalar şu an **Ensotek adına** kesiliyor |
+| Ayrı iş numarası serisi mi? | **Hayır.** ENK/ENB her iki ürün ailesi için ortak |
+| Nasıl ayrışacak? | Ürün kartındaki **marka** alanı — ürün, ürün ağacı, teklif anteti ve raporlarda kırılım |
 
 ---
 
-## 🔴 S-14 · Aynı fabrika, aynı atölyeler mi? *(yeni)*
+## 🟡 S-13 · Marka ayrımı belgelere nasıl yansıyacak? *(yeni)*
+
+- **Teklif PDF'i** MOE Kompozit logosu ve anteti ile mi çıkacak, Ensotek anteti ile mi?
+- Fatura Ensotek adına kesildiğine göre, teklif ile fatura arasında marka farkı
+  müşteride soru yaratır mı?
+- MOE Kompozit için ayrı teklif numarası öneki gerekiyor mu?
+- E-posta gönderiminde hangi imza ve alan adı kullanılacak?
+
+**Neden önemli:** Belge şablonu ayarı olarak çözülür, ama hangi belgede hangi markanın
+görüneceği baştan netleşmeli.
+
+---
+
+## 🟡 S-14 · Kompozit üretimi aynı atölyede mi? *(yeni)*
 
 - Lunapark kompozit ürünleri **aynı polyester atölyesinde** mi üretiliyor?
 - Aynı personel iki ürün ailesinde de çalışıyor mu?
-- Depo ortak mı, ayrı mı?
+- Depo ortak mı?
 
-**Neden kritik:** Atölye kuyruğu ve kapasite planlamasının kiracılar arası **birleşik**
-olması gerekiyorsa (ki büyük ihtimalle öyle), bu ilk günden şemaya girer. Sonradan
-eklenmesi üretim planlamasını baştan yazmak demektir.
+**Neden önemli:** Ortaksa, atölye kapasitesi ve üretim planı iki ürün ailesinin işini
+**birlikte** göstermeli — aynı atölyeye iki yerden habersiz iş verilmemeli.
+Tek şirket olduğu için bu doğal çözüm, ama teyit edilmeli.
 
 ---
 
-## 🟡 S-15 · Malzeme havuzu ortak mı? *(yeni)*
+## 🟡 S-15 · Malzeme kartları ortak mı? *(yeni)*
 
-Reçine, cam elyaf, jelkot her iki üründe de kullanılıyor.
+Reçine, cam elyaf, jelkot her iki ürün ailesinde de kullanılıyor.
 
-- Tek malzeme kartı + kiracıya özel fiyat mı?
-- Yoksa tamamen ayrı malzeme listeleri mi?
+- Tek malzeme kartı ve tek birim fiyat mı?
 - Satın alma ortak mı yapılıyor?
+- MOE Kompozit'e özgü malzemeler var mı?
+
+**Beklenen cevap:** tek havuz — tek şirket, tek depo, tek satın alma.
 
 ---
 
-## 🟡 S-16 · Kullanıcılar hangi kiracıyı görecek? *(yeni)*
+## 🟢 S-16 · MOE Kompozit'in ürün ağacı yapısı *(yeni)*
 
-- Satış ekibi ikisine de mi bakıyor, ayrı ekipler mi var?
-- Yönetici her iki kiracıyı birden görecek mi?
-- Atölye çalışanı hangi kiracının işini yaptığını seçecek mi, iş emri mi taşıyacak?
+- Lunapark ürünlerinin de **standart ürün ağacı** var mı, yoksa her iş projeye özel mi?
+- Kompozit ürünlerde de **kilogram bazlı maliyet** mantığı geçerli mi?
+- Adam-gün yapısı soğutma kulesiyle aynı mı?
+- Kaç MOE Kompozit modeli sisteme girecek?
+
+**Neden önemli:** Veri göçünün kapsamını etkiler. Teklifteki "otuz model" sınırı
+şu an yalnız soğutma kulesi modelleri için tanımlı.
 
 ---
 
@@ -234,7 +249,7 @@ Reçine, cam elyaf, jelkot her iki üründe de kullanılıyor.
 |---|---|---|
 | **Dosya talebi** | 3 örnek ürün ağacı Excel'i, birim fiyat, CTP maliyet, serpantin, pano, Word teklif şablonu, Teklif İnceleme Formu | S-02 ve S-03 masabaşında değil, **dosyaya bakarak** cevaplanır |
 | **Toplantı 1** | S-01, S-02, S-03, S-04 | Faz 1 mimarisi kilitlenir |
-| **Toplantı 2** | S-05, S-06, S-07, S-10, **S-13, S-14, S-16** | Yetki matrisi + muhasebe sınırı + **kiracı yapısı** |
+| **Toplantı 2** | S-05, S-06, S-07, S-10, **S-13, S-14, S-15, S-16** | Yetki matrisi + muhasebe sınırı + **marka ve MOE Kompozit ürün yapısı** |
 | **Toplantı 3** | S-08, S-09 | Yeni modüllerin sınırları |
 | **Yazışma** | S-11, S-12 | Detaylar |
 | **Sonra** | Modül bazlı efor tahmini | |
@@ -243,5 +258,5 @@ Reçine, cam elyaf, jelkot her iki üründe de kullanılıyor.
 > **En acil iş soru sormak değil, Excel dosyalarını almak.** S-02 ve S-03 projenin
 > mimarisini belirliyor ve ikisi de ancak gerçek dosyalara bakılarak cevaplanabilir.
 >
-> **S-13 ve S-14 ikinci sırada:** kiracı yapısı ve atölye paylaşımı şemaya ilk günden
-> girer. Sonradan değiştirilmesi pahalıdır.
+> **S-16 ikinci sırada:** MOE Kompozit'in kaç modeli olduğu ve ürün ağacı yapısının
+> soğutma kulesiyle aynı olup olmadığı, veri göçü kapsamını doğrudan etkiler.

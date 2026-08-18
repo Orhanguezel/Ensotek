@@ -9,7 +9,7 @@
 | | |
 |---|---|
 | **Kapsam** | 24 bölüm · 6 grup · **3 faz** — tamamı bu teklife dahil |
-| **Firma** | **Ensotek** + **Karbonkompozit** — iki ayrı çalışma alanı, ortak fabrika kaynakları |
+| **Ürün ailesi** | **Ensotek** (soğutma kulesi) + **MOE Kompozit** (lunapark/tema parkı) — marka bazında ayrışır, şirket tek |
 | **Süre** | **4 ay** — Faz 1 ve 2 birer buçuk ay, Faz 3 bir ay |
 | **Bedel** | **120.000 ₺ + KDV** |
 | **Ödeme** | **3 × 40.000 ₺ + KDV** — her faz teslimi ve onayı sonrası |

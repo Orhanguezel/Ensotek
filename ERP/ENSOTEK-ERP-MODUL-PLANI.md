@@ -4,7 +4,7 @@
 > hangi kaynaktan alınacak, hangileri hiçbir yerde yok.
 >
 > **Durum:** Plan aşaması · Geliştirme başlamadı · **Fiyat en son aşama**
-> **Tarih:** 2026-08-18 · **Sürüm:** 1.2
+> **Tarih:** 2026-08-18 · **Sürüm:** 1.3
 
 ---
 
@@ -28,24 +28,25 @@ Ensotek'in ihtiyacına göre yazılacak.
 
 ---
 
-## 1.5 Kiracı yapısı
+## 1.5 Ürün ailesi yapısı — tek şirket, iki marka
 
-Sistem **çok kiracılıdır** — Ensotek iki ürün ailesi yönetiyor:
-
-| Kiracı | Siteler | Ürünler |
+| Marka | Siteler | Ürünler |
 |---|---|---|
-| `ensotek` | ensotek.de · ensotek.com.tr · kuhlturm.com | Soğutma kulesi (CC-CTP, CTP, DCTP, TCTP) + 9 yedek parça |
-| `kompozit` | karbonkompozit.com.tr | Lunapark / tema parkı kompozit ürünleri |
+| **Ensotek** | ensotek.de · ensotek.com.tr · kuhlturm.com | Soğutma kulesi (CC-CTP, CTP, DCTP, TCTP) + 9 yedek parça |
+| **MOE Kompozit** | karbonkompozit.com.tr | Lunapark / tema parkı kompozit ürünleri |
 
-| Ortak — fabrika tek | Kiracıya özel |
+**Ayrı tenant yok.** MOE Kompozit ayrı şirket değil; Ensotek'in ikinci ürün ailesi ve
+markası. Faturalar Ensotek adına kesiliyor.
+
+| Marka bazında ayrışan | Tek ve ortak |
 |---|---|
-| Personel · atölyeler · makineler · bakım · vardiya | Ürünler · ürün ağaçları · maliyet |
-| Tedarikçiler · kullanıcı ve roller | Müşteriler · talepler · teklifler |
-| Birim, para birimi, kur tanımları | İş numaraları · iş emirleri · sevkiyat |
-| Doküman, bildirim, denetim izi | Satış · fuar · cari ve muhasebe |
+| Ürünler ve ürün ağaçları | Cari, fatura, muhasebe |
+| Teklif anteti ve belge şablonu | Personel, atölyeler, makineler, bakım |
+| Satış ve kârlılık raporları | Depo, tedarikçiler, iş numarası serisi |
 
-> **Atölye kuyruğu ve kapasite kiracılar arası birleşiktir** — polyester atölyesi her iki
-> ürün ailesini de üretiyor. Ayrıntı: [ANALİZ-06 §3.5](analiz/06-mimari-iskelet.md)
+> Ayrım ürün kartındaki **marka** alanıyla yapılır — bir enum, filtre ve rapor kırılımı.
+> Devralınan `tenant_key` sökülmez, sabit değere bağlanır.
+> Ayrıntı: [ANALİZ-06 §3.5](analiz/06-mimari-iskelet.md)
 
 ---
 

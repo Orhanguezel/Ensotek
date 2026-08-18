@@ -4,7 +4,8 @@
 >
 > **Tarih:** 2026-08-18 · **Sürüm:** 2.1 · **Durum:** Plan — geliştirme başlamadı
 >
-> **v2.1:** Kiracı yapısı tespit edildi (§0) — çok kiracılılık gerçek gereksinim.
+> **v2.1:** Ürün ailesi yapısı netleşti (§0) — tek şirket, iki marka (Ensotek /
+> MOE Kompozit). Ayrı tenant değil.
 >
 > **v1.0 → v2.0:** v1.0 yalnız MVP'yi anlatıyordu ve **Fuar, İhracat/Gümrük ve MRP**
 > modül olarak yoktu. Bu sürüm **tüm programı** gösterir: 24 modül, hepsinin hazırlık
@@ -12,27 +13,30 @@
 
 ---
 
-## 0. Kiracı yapısı — 2026-08-18 tespiti
+## 0. Ürün ailesi yapısı — 2026-08-18
 
-Ensotek'in dört reposu incelendi. **Çok kiracılılık gerçek bir gereksinim:**
+Ensotek'in dört reposu incelendi. **Tek şirket, iki marka:**
 
-| Kiracı | Siteler | Ürünler |
+| Marka | Siteler | Ürünler |
 |---|---|---|
-| **ensotek** | ensotek.de · ensotek.com.tr · kuhlturm.com | Soğutma kulesi: CC-CTP, CTP, DCTP, TCTP + 9 yedek parça |
-| **kompozit** | karbonkompozit.com.tr | Lunapark / tema parkı kompozit ürünleri — kızak araç setleri, ride kabini, park dekoru |
+| **Ensotek** | ensotek.de · ensotek.com.tr · kuhlturm.com | Soğutma kulesi: CC-CTP, CTP, DCTP, TCTP + 9 yedek parça |
+| **MOE Kompozit** | karbonkompozit.com.tr | Lunapark / tema parkı kompozit ürünleri — kızak araç setleri, ride kabini, park dekoru |
 
-**Ortak (fabrika tek):** personel · atölyeler · makineler · bakım · vardiya · tedarikçiler ·
-kullanıcı ve roller · birim/kur tanımları
-**Kiracıya özel:** ürünler · ürün ağaçları · maliyet · müşteriler · teklifler · iş
-numaraları · iş emirleri · sevkiyat · satış · cari
+**Ayrı tenant değil.** Karbonkompozit ayrı şirket değil, Ensotek'in ikinci ürün ailesi
+ve markası. Faturalar Ensotek adına kesiliyor; cari, muhasebe, personel, atölye ve depo
+tek. Ayrım ürün kartındaki **marka** alanıyla yapılır.
 
-**Efor etkisi küçük ve mekanik.** TeklifRota zaten çok kiracılı ve izolasyon testli —
-kısıtlamaya gerek kalmadı, kazanç. paspas/transpalet/osgb modüllerine `tenant_key` ve
-sorgu kapsamı eklenecek: **+8 – 14 adam-gün**, ağırlıklı olarak Faz 0 ve S1'de.
+| Marka bazında ayrışan | Tek ve ortak |
+|---|---|
+| Ürünler ve ürün ağaçları | Cari hesap, fatura, muhasebe |
+| Teklif anteti / belge şablonu | Personel, atölyeler, makineler, bakım |
+| Satış ve kârlılık raporları | Depo ve tedarikçiler |
+| Fuar ve firma bulma hedef kitlesi | İş numarası serisi (ENK/ENB) |
 
-> **Kritik tasarım kararı:** iş emri kiracıya özeldir ama **atölye kuyruğu ve kapasite
-> kiracılar arası birleşiktir**. Polyester atölyesi aynı hafta hem CTP gövde hem lunapark
-> kabini üretiyorsa, plan ikisini birden görmek zorunda. → [ANALİZ-06 §3.5](analiz/06-mimari-iskelet.md)
+**Efor etkisi:** marka ekseni bir enum alanı + liste filtresi + belge şablonunda marka
+seçimi + raporlarda kırılım. **+2 – 4 adam-gün**, tamamı S1'de.
+Devralınan `tenant_key` sökülmez, sabit değere bağlanır — maliyeti sıfır, ileride MOE
+ayrı tüzel kişiliğe dönerse altyapı hazır kalır.
 
 ---
 
@@ -98,7 +102,7 @@ Hiçbir halka kapsam dışı değil. Aşağıdaki tablo **hepsini** gösterir.
 | İş | Hazırlık | Efor (a-g) | Sürüm |
 |---|:---:|---:|:---:|
 | **Veri göçü** — araçlar + normalizasyon + 130 model + doğrulama | 🔴 | **31 – 75** | S1 |
-| **Çok kiracılılık** — devralınan tek kiracılı modüllere kiracı ekseni eklenmesi | 🟡 | **8 – 14** | S1 |
+| **Marka ekseni** — ürün ailesi alanı, filtre, belge şablonu, rapor kırılımı | 🟢 | **2 – 4** | S1 |
 | Test, kabul, eğitim, devreye alma *(sürüm başına)* | — | 14 – 24 ×5 | Hepsi |
 
 ---
@@ -107,12 +111,12 @@ Hiçbir halka kapsam dışı değil. Aşağıdaki tablo **hepsini** gösterir.
 
 | Sürüm | Kapsam | Geliştirme | +Göç/Kapanış | Toplam |
 |---|---|---:|---:|---:|
-| **S1** | Altyapı · Talep · Teklif · Maliyet · **BOM** · kiracı ekseni | 148 – 241 | 45 – 99 | **193 – 340** |
+| **S1** | Altyapı · Talep · Teklif · Maliyet · **BOM** · marka ekseni | 142 – 231 | 45 – 99 | **187 – 330** |
 | **S2** | Stok · **MRP** · Satın alma · Sipariş · Mühendislik | 61 – 101 | 10 – 16 | **71 – 117** |
 | **S3** | Üretim · Kalite · Sevkiyat · Navlun · **İhracat** | 60 – 100 | 10 – 16 | **70 – 116** |
 | **S4** | Personel · Fabrika · Bakım · Servis · **Fuar** | 54 – 92 | 10 – 16 | **64 – 108** |
 | **S5** | Muhasebe · Firma bulma · Satış · Raporlama | 52 – 88 | 10 – 16 | **62 – 104** |
-| | | | **PROGRAM** | **460 – 785** |
+| | | | **PROGRAM** | **454 – 775** |
 
 **Takvim:**
 
@@ -288,7 +292,7 @@ Paralel yürüyebilenler: iskelet · talep/müşteri · teklif devralma · göç
 | R-8 | Ensotek veri hazırlığına vakit ayıramaz | Takvim kayar | Sözleşmede Ensotek sorumlulukları yazılsın |
 | **R-9** | **Muhasebe çift kayıt** — ERP ve mevcut program aynı veriyi tutar | Muhasebe güvenilmez olur | S-07 cevaplansın: asıl kayıt hangisi |
 | **R-10** | **İhracat evrakı eksik** | Mal gümrükte bekler | MOD-23 S3'te; ülke bazlı gereklilik listesi Ensotek'ten alınır |
-| **R-11** | **Ortak/özel ayrımı yanlış konulur** — örn. atölye kuyruğu kiracıya özel yapılırsa | Üretim planlaması baştan yazılır | S-13/S-14 şema tasarımından önce cevaplansın |
+| **R-11** | **MOE Kompozit sonradan ayrı tüzel kişiliğe döner** | Cari ve muhasebenin ayrılması gerekir | `tenant_key` sökülmediği için altyapı hazır; risk düşük |
 
 ---
 
@@ -296,8 +300,8 @@ Paralel yürüyebilenler: iskelet · talep/müşteri · teklif devralma · göç
 
 1. Teknoloji **bizim stack** (Fastify + Bun + Drizzle + MySQL + Next.js 16)
 2. Backend + admin panel modülleri devralınıyor, **seed dosyaları kopyalanmıyor**
-3. Sistem **çok kiracılı**: `ensotek` ve `kompozit`. Personel/atölye/makine/tedarikçi
-   ortak, ürün-teklif-maliyet-cari kiracıya özel
+3. Sistem **tek kiracılı, iki markalı**: Ensotek ve MOE Kompozit. Ayrım ürün kartındaki
+   marka alanında; cari, fatura, personel, atölye ve depo tek
 4. S1'de yalnız satış ekibi kullanıcı — mavi yaka ve mobil S3'te
 5. Muhasebe entegrasyonu S5'te
 6. Termal seçim hesabı yazılmıyor, entegre ediliyor
