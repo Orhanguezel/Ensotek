@@ -26,6 +26,7 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 | Dosya | İçerik |
 |---|---|
 | **[ENSOTEK-ERP-MODUL-PLANI.md](ENSOTEK-ERP-MODUL-PLANI.md)** | **SON SÜRÜM** — 21 modül, her birinin hazırlık durumu ve kaynağı, hiçbir yerde olmayanların listesi, maliyet muhasebesi analizi, faz planı |
+| **[MVP-PLANI.md](MVP-PLANI.md)** 🔒 | **İÇ BELGE** — MVP kapsamı, kalem kalem hazır/yeni oranı, **efor tahmini**, kritik yol, yol haritası (M0–M6), riskler. *Müşteriye gitmez.* |
 
 ---
 
