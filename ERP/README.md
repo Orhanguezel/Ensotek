@@ -21,6 +21,14 @@ Teknoloji: **bizim teknoloji** — Fastify + Bun + Drizzle + MySQL + Next.js 16.
 
 ---
 
+## ⭐ Ana belge
+
+| Dosya | İçerik |
+|---|---|
+| **[ENSOTEK-ERP-MODUL-PLANI.md](ENSOTEK-ERP-MODUL-PLANI.md)** | **SON SÜRÜM** — 21 modül, her birinin hazırlık durumu ve kaynağı, hiçbir yerde olmayanların listesi, maliyet muhasebesi analizi, faz planı |
+
+---
+
 ## Dosyalar
 
 ### 📥 Kaynak — ham, değiştirilmez
@@ -101,6 +109,20 @@ formülü zaten kendine özgü (kg-bazlı CTP, adam-gün, çarpan, pazarlık pay
 Her model için **ERP'nin hesapladığı maliyet, Excel'in hesapladığına birebir eşit**
 olana kadar göç tamamlanmış sayılmaz. Rakamlar tutmazsa satış ekibi Excel'e geri döner
 ve proje fiilen ölür.
+
+---
+
+## Devralma kuralı
+
+| | |
+|---|---|
+| ✅ Backend modülleri | Taşınır |
+| ✅ Admin panel modülleri | Taşınır (ekran + `_components`) |
+| ✅ Testler | Taşınır |
+| ❌ **Seed / migrasyon dosyaları** | **Kopyalanmaz** — şemalar model olarak okunur, Ensotek için tek temiz `CREATE TABLE` seti yazılır |
+
+Paspas'ın 129, TeklifRota'nın 73 seed-SQL'i büyük ölçüde birikmiş `ALTER TABLE` zinciri.
+Üç projenin tarihçesi Ensotek'e taşınmayacak.
 
 ---
 
