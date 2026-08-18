@@ -132,6 +132,27 @@ tbody tr:last-child td{border-bottom:0}
 .adim .tut{font-family:var(--f-mono);font-size:15px;font-weight:700;color:var(--copper);
   font-variant-numeric:tabular-nums}
 
+tr.tot td{border-bottom:0;border-top:2px solid var(--copper);background:var(--copper-wash);color:var(--copper)}
+
+/* faz teslim şeridi */
+.olcut-blok{border-left:3px solid var(--ok);padding:2px 0 2px 14px;margin-bottom:16px}
+.olcut-lbl{display:block;font-family:var(--f-mono);font-size:9.5px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ok);font-weight:600;margin-bottom:5px}
+.olcut-blok p{margin:0;font-size:14.6px;color:var(--ink);max-width:78ch}
+.odeme-blok{display:flex;justify-content:space-between;align-items:baseline;gap:16px;
+  flex-wrap:wrap;border:1px solid var(--copper);background:var(--copper-wash);padding:13px 18px}
+.odeme-blok .l{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--copper);font-weight:600}
+.odeme-blok .r{font-family:var(--f-mono);font-size:19px;font-weight:700;color:var(--copper);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+
+/* kapsam dışı */
+.disi{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1px;
+  background:var(--hair);border:1px solid var(--hair)}
+.disi div{background:var(--surface);padding:14px 16px}
+.disi b{display:block;font-size:14.6px;margin-bottom:3px}
+.disi span{font-size:13.6px;color:var(--muted);line-height:1.5}
+
 /* toplam kutusu */
 .toplam{margin-top:22px;border:1px solid var(--copper);background:var(--copper-wash);
   display:flex;justify-content:space-between;align-items:baseline;gap:16px;padding:16px 20px;flex-wrap:wrap}
@@ -196,16 +217,16 @@ footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--hair);font-fa
     <p class="eyebrow">Su Soğutma Kulesi Üretim Yönetim Sistemi</p>
     <h1>Ensotek ERP<br><span>Sistem Planı ve Teklif</span></h1>
     <p>Talepten teklife, maliyetten üretime, sevkiyattan servise kadar Ensotek'in tüm
-    süreçlerini tek sistemde toplayan yirmi dört bölümlük plan — üç fazda teslim.
-    Bu teklif <b>Birinci Faz</b>ın bedelini içerir; ikinci ve üçüncü fazın kapsamı da
-    aynı ayrıntıda tanımlanmıştır.</p>
+    süreçlerini tek sistemde toplayan <b>yirmi dört bölümlük sistem</b> — üç fazda
+    teslim edilir. Her fazın sonunda çalışan bir çıktı teslim edilir, birlikte kontrol
+    edilir ve onayınızın ardından o fazın bedeli fatura edilir.</p>
   </div>
 
   <div class="figures">
     <div class="fig"><b>24</b><span>Bölüm · altı grup</span></div>
     <div class="fig"><b>3</b><span>Faz</span></div>
-    <div class="fig"><b>3 ay</b><span>Birinci faz süresi</span></div>
-    <div class="fig money"><b>120.000 ₺</b><span>Birinci faz · KDV hariç</span></div>
+    <div class="fig"><b>3 ay</b><span>Toplam süre</span></div>
+    <div class="fig money"><b>120.000 ₺</b><span>Tamamı · KDV hariç</span></div>
   </div>
 
   <section>
@@ -232,27 +253,33 @@ footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--hair);font-fa
           <tr>
             <td><b>Faz 1</b><br>Satış ve Maliyet Omurgası</td>
             <td>A · Satış ve Teklif<br><span class="mono" style="font-size:12.5px;color:var(--muted)">+ Sistem Yönetimi</span></td>
-            <td class="n">5</td><td class="n">3 ay</td>
-            <td><span class="tag now">120.000 ₺ + KDV</span></td>
+            <td class="n">5</td><td class="n">1. ay</td>
+            <td class="n"><b>40.000 ₺</b></td>
           </tr>
           <tr>
             <td><b>Faz 2</b><br>Malzeme, Üretim ve Sevkiyat</td>
             <td>B · Malzeme ve Tedarik<br>C · İş ve Üretim<br>D · Sevkiyat ve İhracat</td>
-            <td class="n">10</td><td class="n">—</td>
-            <td><span class="tag next">Faz 1 sonunda teklif edilir</span></td>
+            <td class="n">10</td><td class="n">2. ay</td>
+            <td class="n"><b>40.000 ₺</b></td>
           </tr>
           <tr>
             <td><b>Faz 3</b><br>Fabrika, İnsan ve Ticaret</td>
             <td>E · Fabrika ve İnsan<br>F · Ticaret ve Yönetim</td>
-            <td class="n">9</td><td class="n">—</td>
-            <td><span class="tag next">Faz 2 sonunda teklif edilir</span></td>
+            <td class="n">9</td><td class="n">3. ay</td>
+            <td class="n"><b>40.000 ₺</b></td>
+          </tr>
+          <tr class="tot">
+            <td colspan="2"><b>Toplam · KDV hariç</b></td>
+            <td class="n"><b>24</b></td><td class="n"><b>3 ay</b></td>
+            <td class="n"><b>120.000 ₺</b></td>
           </tr>
         </tbody>
       </table>
     </div>
-    <p class="note" style="margin-top:14px">Faz 2 ve Faz 3'ün süresi ve bedeli, bir önceki
-    faz tamamlandığında netleşen gerçek verilerle belirlenir. Bu iki fazın <b>kapsamı</b>
-    aşağıda eksiksiz tanımlanmıştır; ileride yeniden tartışılacak bir belirsizlik yoktur.</p>
+    <p class="note" style="margin-top:14px">Üç fazın kapsamı da aşağıda eksiksiz
+    tanımlanmıştır; ileride yeniden tartışılacak bir belirsizlik yoktur.
+    <b>Ödeme faz sonlarında, teslim ve onay sonrası yapılır.</b> Onaylamadığınız bir faz
+    için ödeme talep edilmez.</p>
   </section>
 
   <!-- ============ FAZ 1 ============ -->
@@ -261,7 +288,7 @@ footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--hair);font-fa
       <div class="fazno">Faz 1</div>
       <h3 class="fazttl">Satış ve Maliyet Omurgası
         <small>Teklif hazırlama · maliyet analizi · teklif takibi</small></h3>
-      <div class="fazmeta">3 ay · 120.000 ₺ + KDV</div>
+      <div class="fazmeta">1. Ay · 40.000 ₺ + KDV</div>
     </div>
 
     <div class="grup">
@@ -356,50 +383,23 @@ footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--hair);font-fa
     </div>
 
     <div class="teslimler">
-      <h4>Birinci fazın üç ara teslimi</h4>
-      <p>Faz bir bütün olarak sonda teslim edilmez. Her ay sonunda çalışan bir çıktı
-      teslim edilir, birlikte kontrol edilir ve onayınızın ardından o ayın bedeli fatura
-      edilir. Onaylamadığınız bir teslim için ödeme talep edilmez.</p>
-      <div class="adimlar">
-
-        <div class="adim">
-          <div class="ay">1. Ay</div>
-          <div class="ad">Temel ve Ürün Ağacı</div>
-          <div class="olcut"><span>Teslim ölçütü</span>
-            Üç modelin maliyeti mevcut Excel'inizle <b>birebir aynı</b>.</div>
-          <div class="tut">40.000 ₺ + KDV</div>
-        </div>
-
-        <div class="adim">
-          <div class="ay">2. Ay</div>
-          <div class="ad">Maliyet Motoru ve Teklif</div>
-          <div class="olcut"><span>Teslim ölçütü</span>
-            Gerçek bir kule teklifi baştan sona sistemde hazırlanır, üç belgesi üretilir
-            ve müşteriye gönderilir.</div>
-          <div class="tut">40.000 ₺ + KDV</div>
-        </div>
-
-        <div class="adim">
-          <div class="ay">3. Ay</div>
-          <div class="ad">Veri Aktarımı ve Devreye Alma</div>
-          <div class="olcut"><span>Teslim ölçütü</span>
-            Aktarılan her modelde sistem maliyeti Excel'e eşit; teklif ve maliyet
-            Excel'leri kapatılır, sistem canlı kullanımdadır.</div>
-          <div class="tut">40.000 ₺ + KDV</div>
-        </div>
-
+      <div class="olcut-blok">
+        <span class="olcut-lbl">Faz 1 teslim ölçütü</span>
+        <p>Aktarılan modellerde sistem maliyeti mevcut Excel'inizle <b>birebir aynı</b>;
+        gerçek bir kule teklifi baştan sona sistemde hazırlanır, üç belgesi üretilir ve
+        müşteriye gönderilir. <b>Teklif ve maliyet Excel'leri kapatılır.</b></p>
       </div>
-      <div class="toplam"><span class="l">Birinci faz toplamı · KDV hariç</span><span class="r">120.000 ₺</span></div>
+      <div class="odeme-blok"><span class="l">Faz 1 · teslim ve onay sonrası</span><span class="r">40.000 ₺ + KDV</span></div>
     </div>
   </div>
 
   <!-- ============ FAZ 2 ============ -->
-  <div class="faz b2">
+  <div class="faz">
     <div class="fazhead">
       <div class="fazno">Faz 2</div>
       <h3 class="fazttl">Malzeme, Üretim ve Sevkiyat
         <small>Malzeme listesi · iş emirleri · sevkiyat ve ihracat evrakı</small></h3>
-      <div class="fazmeta">10 bölüm · bedel Faz 1 sonunda</div>
+      <div class="fazmeta">2. Ay · 40.000 ₺ + KDV</div>
     </div>
 
     <div class="grup">
@@ -555,15 +555,26 @@ footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--hair);font-fa
 
       </div>
     </div>
+
+    <div class="teslimler">
+      <div class="olcut-blok">
+        <span class="olcut-lbl">Faz 2 teslim ölçütü</span>
+        <p>Bir iş, <b>teklifin işe dönüşmesinden sevkiyatına kadar</b> sistemde yürütülür:
+        iş numarası, malzeme listesi, satın alma, iş emirleri, kalite testleri, sevkiyat
+        ve ihracat evrakı dahil. <b>İş takip Excel'i ve Word Teklif İnceleme Formu
+        kapatılır.</b></p>
+      </div>
+      <div class="odeme-blok"><span class="l">Faz 2 · teslim ve onay sonrası</span><span class="r">40.000 ₺ + KDV</span></div>
+    </div>
   </div>
 
   <!-- ============ FAZ 3 ============ -->
-  <div class="faz b2">
+  <div class="faz">
     <div class="fazhead">
       <div class="fazno">Faz 3</div>
       <h3 class="fazttl">Fabrika, İnsan ve Ticaret
         <small>Kapasite · personel · servis · muhasebe ve yönetim raporları</small></h3>
-      <div class="fazmeta">9 bölüm · bedel Faz 2 sonunda</div>
+      <div class="fazmeta">3. Ay · 40.000 ₺ + KDV</div>
     </div>
 
     <div class="grup">
@@ -689,12 +700,50 @@ footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--hair);font-fa
 
       </div>
     </div>
+
+    <div class="teslimler">
+      <div class="olcut-blok">
+        <span class="olcut-lbl">Faz 3 teslim ölçütü</span>
+        <p>Atölye kapasitesi, personel, bakım ve servis kayıtları sistemde tutulur;
+        cari hesap, tahsilat ve fatura akışı ile yönetim raporları çalışır durumdadır.
+        <b>Yirmi dört bölümün tamamı devrededir.</b></p>
+      </div>
+      <div class="odeme-blok"><span class="l">Faz 3 · teslim ve onay sonrası</span><span class="r">40.000 ₺ + KDV</span></div>
+    </div>
   </div>
+
+  <div class="toplam"><span class="l">Toplam · 24 bölüm · 3 faz · KDV hariç</span><span class="r">120.000 ₺</span></div>
+
+  <section>
+    <h2 class="sec">Hiçbir fazın kapsamında olmayanlar</h2>
+    <p class="note">Sabit bedelli bir teklifin sağlıklı yürümesi için sınırın yazılı
+    olması gerekir. Aşağıdakiler bu teklifin kapsamı dışındadır; istenirse ayrıca
+    değerlendirilir.</p>
+    <div class="disi">
+      <div><b>Yasal mali işlemler</b><span>Defter tutma, beyanname, mali müşavirlik.
+        Sistem cari, tahsilat ve fatura akışını yönetir; resmi mali işler harici kalır.</span></div>
+      <div><b>Bordro ve SGK hesaplama</b><span>Personel yönetimi vardır; maaş bordrosu
+        hesaplama motoru yoktur.</span></div>
+      <div><b>Prim ve komisyon hesabı</b><span>Görüşmede kapsam dışı bırakılmıştır.</span></div>
+      <div><b>Termal seçim hesabı</b><span>Mevcut kule seçim programınız sisteme bağlanır;
+        termal hesap sıfırdan yazılmaz.</span></div>
+      <div><b>Teknik çizim yapma</b><span>AutoCAD çizimleri projeye bağlanır ve saklanır;
+        sistem içinde çizim yapılmaz.</span></div>
+      <div><b>Muhasebe programıyla çift yönlü canlı bağlantı</b><span>Veri aktarım dosyası
+        üretilir. Mevcut programınızla anlık iki yönlü entegrasyon ayrıca değerlendirilir.</span></div>
+      <div><b>Mağaza mobil uygulaması</b><span>Sistem telefon ve tabletin tarayıcısından
+        çalışır; App Store / Google Play uygulaması kapsam dışıdır.</span></div>
+      <div><b>Yabancı dil arayüz</b><span>Arayüz ve belgeler Türkçedir. İngilizce teklif
+        çıktısı istenirse ek çalışma olarak planlanır.</span></div>
+      <div><b>Otuz modelin ötesindeki ürün ağaçları</b><span>İlk aktarım en çok kullanılan
+        otuz modeli kapsar. Kalanlar aynı yapıyla sonradan eklenir.</span></div>
+    </div>
+  </section>
 
   <section>
     <h2 class="sec">Ensotek'in katkısı</h2>
-    <p class="note">Birinci fazın üç aylık takvimi, aşağıdaki maddelerin zamanında
-    karşılanmasına bağlıdır.</p>
+    <p class="note">Üç aylık takvim, aşağıdaki maddelerin zamanında karşılanmasına
+    bağlıdır. Gecikme olması hâlinde teslim tarihleri aynı süre kadar ötelenir.</p>
     <div class="duty">
       <div><span class="i">01</span><p><b>Excel dosyalarının teslimi</b> — üç örnek ürün
         ağacı (küçük, orta, büyük model), birim fiyat listesi, CTP maliyet, serpantin
@@ -716,15 +765,18 @@ footer{margin-top:54px;padding-top:18px;border-top:1px solid var(--hair);font-fa
     <h2 class="sec">Koşullar</h2>
     <ul class="terms">
       <li>Fiyatlara <b>KDV dahil değildir</b>. Teklif geçerlilik süresi <b>30 gündür</b>.</li>
-      <li>Bu teklif <b>Birinci Faz</b>ın bedelini içerir. Faz 2 ve Faz 3'ün kapsamı bu
-        belgede tanımlıdır; süre ve bedelleri bir önceki faz tamamlandığında ayrıca
-        teklif edilir.</li>
+      <li>Bu teklif <b>üç fazın tamamını</b> kapsar: 24 bölüm, 3 ay,
+        <b>120.000 ₺ + KDV</b> — her faz sonunda 40.000 ₺ + KDV.</li>
+      <li>Ödeme <b>teslim ve onay sonrası</b> yapılır. Onaylamadığınız bir faz için
+        ödeme talep edilmez.</li>
       <li>Yazılımın <b>kaynak kodu ve tüm verisi Ensotek'e aittir</b>. Sistem Ensotek'in
         kendi sunucusunda veya tarafımızca sağlanan sunucuda çalıştırılabilir.</li>
-      <li>Her ara teslimden sonra <b>bir ay hata düzeltme desteği</b> ücretsizdir.</li>
-      <li>Birinci fazda <b>en çok kullanılan otuz kule modelinin</b> ürün ağacı aktarılır;
-        kalan modeller aynı yapıyla sonraki fazda veya ek çalışmayla eklenir.</li>
-      <li>Kapsam dışı yeni talepler takvimi etkilemez; ilgili fazda planlanır.</li>
+      <li>Her faz teslimini takip eden <b>bir ay hata düzeltme desteği</b> ücretsizdir.</li>
+      <li>Faz 1'de <b>en çok kullanılan otuz kule modelinin</b> ürün ağacı aktarılır;
+        kalan modeller aynı yapıyla sonradan eklenir.</li>
+      <li>Bir fazın kapsamı, yukarıda o faz altında listelenen bölümler ve maddelerle
+        sınırlıdır. <b>Kapsam dışı yeni talepler</b> takvimi ve bedeli etkilemez; ayrı
+        çalışma olarak planlanır.</li>
       <li>Hazır olmayan bir bölüm sistemde <b>görünmez</b> — "yakında" yazan, açılmayan
         ekran olmaz.</li>
       <li>Bir bölüm devreye alındığında yerini aldığı Excel dosyası kapanır. Verinin iki

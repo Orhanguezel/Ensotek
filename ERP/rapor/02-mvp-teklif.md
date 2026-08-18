@@ -8,11 +8,10 @@
 
 | | |
 |---|---|
-| **Toplam kapsam** | 24 bölüm · 6 grup · **3 faz** |
-| **Bu teklifin kapsamı** | **Faz 1** — Satış ve Maliyet Omurgası (5 bölüm) |
-| **Faz 1 süresi** | 3 ay · üç ara teslim |
-| **Faz 1 bedeli** | **120.000 ₺ + KDV** — 3 × 40.000 ₺, her teslim ve onay sonrası |
-| **Faz 2 ve 3** | Kapsam bu belgede tanımlı; bedel bir önceki faz sonunda teklif edilir |
+| **Kapsam** | 24 bölüm · 6 grup · **3 faz** — tamamı bu teklife dahil |
+| **Süre** | **3 ay** — her faz 1 ay |
+| **Bedel** | **120.000 ₺ + KDV** |
+| **Ödeme** | **3 × 40.000 ₺ + KDV** — her faz teslimi ve onayı sonrası |
 
 ---
 
@@ -27,7 +26,9 @@ kârlılık analizi anlam ifade etmez. Temel önce atılır.
 
 ---
 
-## Faz 1 · Ara teslim 01 — Temel ve Ürün Ağacı · 1. Ay
+## Faz 1 · Satış ve Maliyet Omurgası — 1. Ay · 40.000 ₺ + KDV
+
+**Grup A** (Talep/Müşteri · Teklif · Maliyet · Ürün Ağacı) + **Sistem Yönetimi** — 5 bölüm
 
 - Sistem kurulumu, güvenli giriş, kullanıcı ve yetki tanımları
 - Müşteri ve firma kartları; talep kaydı (e-posta, telefon, WhatsApp)
@@ -36,12 +37,11 @@ kârlılık analizi anlam ifade etmez. Temel önce atılır.
 - **Çok katmanlı ürün ağacı** — CTP gövde kilogram bazlı, serpantin alt reçetesi, fire payı
 - Üç örnek modelin ürün ağacının sisteme girilmesi
 
-**Teslim ölçütü:** Üç modelin maliyeti mevcut Excel'in hesapladığıyla **birebir aynı**.
-**Ödeme:** 40.000 ₺ + KDV
+
 
 ---
 
-## Faz 1 · Ara teslim 02 — Maliyet Motoru ve Teklif · 2. Ay
+### Faz 1 içeriği — maliyet ve teklif
 
 - Ürün ağacından otomatik maliyet hesabı; malzeme / işçilik / dolaylı gider katmanları
 - Çarpan, pazarlık payı ve Euro kuru ile teklif fiyatının oluşması
@@ -51,13 +51,11 @@ kârlılık analizi anlam ifade etmez. Temel önce atılır.
 - **Üç ayrı belge:** teknik teklif · ticari teklif · iç maliyet raporu
 - E-posta ile gönderim, teklif arşivinin kendiliğinden oluşması
 
-**Teslim ölçütü:** Gerçek bir kule teklifi baştan sona sistemde hazırlanır, üç belgesi
-üretilir ve müşteriye gönderilir.
-**Ödeme:** 40.000 ₺ + KDV
+
 
 ---
 
-## Faz 1 · Ara teslim 03 — Veri Aktarımı ve Devreye Alma · 3. Ay
+### Faz 1 içeriği — veri aktarımı ve devreye alma
 
 - **En çok kullanılan otuz kule modelinin** ürün ağaçlarının aktarılması
 - Birim fiyat, CTP maliyet, serpantin maliyet ve pano fiyat listeleri
@@ -72,10 +70,9 @@ kapatılır, sistem canlı kullanımdadır.
 
 ---
 
-## Faz 2 · Malzeme, Üretim ve Sevkiyat — 10 bölüm
+## Faz 2 · Malzeme, Üretim ve Sevkiyat — 2. Ay · 40.000 ₺ + KDV
 
-> Kapsamı bu belgede tam tanımlıdır; **süre ve bedeli Faz 1 tamamlandığında** ayrıca
-> teklif edilir.
+**Grup B + C + D** — 10 bölüm
 
 ### B · Malzeme ve Tedarik
 - **05 Ürün ve Stok Yönetimi** — ürün tipleri, stok kodu sistemi, yedek parça ve yarı
@@ -113,10 +110,9 @@ kapatılır, sistem canlı kullanımdadır.
 
 ---
 
-## Faz 3 · Fabrika, İnsan ve Ticaret — 9 bölüm
+## Faz 3 · Fabrika, İnsan ve Ticaret — 3. Ay · 40.000 ₺ + KDV
 
-> Kapsamı bu belgede tam tanımlıdır; **süre ve bedeli Faz 2 tamamlandığında** ayrıca
-> teklif edilir.
+**Grup E + F** — 9 bölüm
 
 ### E · Fabrika ve İnsan
 - **15 Fabrika Yönetimi** — atölye kapasitesi, iş yükü dağılımı, üretim planı,
@@ -148,6 +144,36 @@ kapatılır, sistem canlı kullanımdadır.
 > **24 Sistem Yönetimi** Faz 1'de kurulur: kullanıcı, rol ve yetkiler, işlem geçmişi,
 > doküman arşivi, bildirimler, yedekleme.
 
+**Faz 3 teslim ölçütü:** Atölye kapasitesi, personel, bakım ve servis kayıtları sistemde;
+cari, tahsilat ve fatura akışı ile yönetim raporları çalışır durumda. **24 bölümün tamamı
+devrede.**
+**Ödeme:** 40.000 ₺ + KDV
+
+---
+
+## Toplam
+
+| Faz | Bölüm | Süre | Bedel |
+|---|---:|---:|---:|
+| Faz 1 · Satış ve Maliyet Omurgası | 5 | 1. ay | 40.000 ₺ |
+| Faz 2 · Malzeme, Üretim ve Sevkiyat | 10 | 2. ay | 40.000 ₺ |
+| Faz 3 · Fabrika, İnsan ve Ticaret | 9 | 3. ay | 40.000 ₺ |
+| **Toplam · KDV hariç** | **24** | **3 ay** | **120.000 ₺** |
+
+---
+
+## Hiçbir fazın kapsamında olmayanlar
+
+- **Yasal mali işlemler** — defter tutma, beyanname, mali müşavirlik
+- **Bordro ve SGK hesaplama** — personel yönetimi var, bordro motoru yok
+- **Prim ve komisyon hesabı** — görüşmede kapsam dışı bırakıldı
+- **Termal seçim hesabı** — mevcut seçim programı bağlanır, sıfırdan yazılmaz
+- **Teknik çizim yapma** — çizimler bağlanır ve saklanır, sistemde çizim yapılmaz
+- **Muhasebe programıyla çift yönlü canlı bağlantı** — veri aktarım dosyası üretilir
+- **Mağaza mobil uygulaması** — sistem tarayıcıdan telefon/tablette çalışır
+- **Yabancı dil arayüz** — arayüz ve belgeler Türkçe
+- **Otuz modelin ötesindeki ürün ağaçları** — kalanlar aynı yapıyla sonradan eklenir
+
 ---
 
 ## Ensotek'in katkısı
@@ -167,11 +193,13 @@ kapatılır, sistem canlı kullanımdadır.
 
 - Fiyatlara KDV dahil değildir. Geçerlilik 30 gün.
 - Kaynak kod ve tüm veri **Ensotek'e aittir**.
-- Teslimden sonra **bir ay hata düzeltme desteği** ücretsizdir.
-- Bu teklif **Faz 1**'in bedelini içerir; Faz 2 ve 3 kapsamı tanımlı, bedeli sonra.
-- Birinci fazda **en çok kullanılan otuz kule modelinin** ürün ağacı aktarılır; kalanlar
-  aynı yapıyla sonraki fazda veya ek çalışmayla eklenir.
-- Kapsam dışı yeni talepler takvimi etkilemez; ilgili fazda planlanır.
+- Her faz teslimini takip eden **bir ay hata düzeltme desteği** ücretsizdir.
+- Bu teklif **üç fazın tamamını** kapsar: 24 bölüm, 3 ay, 120.000 ₺ + KDV.
+- Ödeme **teslim ve onay sonrası**. Onaylanmayan faz için ödeme talep edilmez.
+- Faz 1'de **en çok kullanılan otuz kule modelinin** ürün ağacı aktarılır.
+- Bir fazın kapsamı, o faz altında listelenen bölümler ve maddelerle **sınırlıdır**.
+  Kapsam dışı yeni talepler takvimi ve bedeli etkilemez; ayrı çalışma olarak planlanır.
+- Ensotek kaynaklı gecikmelerde teslim tarihleri aynı süre kadar ötelenir.
 - Hazır olmayan bölüm sistemde **görünmez** — "yakında" yazan ekran olmaz.
 - Bir bölüm devreye alındığında yerini aldığı Excel kapanır; güvence maliyet
   doğrulamasıyla sağlanır.
@@ -189,9 +217,15 @@ kapatılır, sistem canlı kullanımdadır.
 > yazılımı entegrasyonu, gerçekleşen maliyet karşılaştırması *(veri Faz 1'den itibaren
 > toplanıyor ama ekran sonraki fazda)*.
 >
-> **Takvimi belirleyen tek kalem:** model göçü. Bu yüzden teklifte "tüm modeller" yerine
-> **en çok kullanılan otuz model** yazıldı ve koşullara da eklendi — açık uçlu taahhüt
-> kaldırıldı. Excel dosyaları görüldükten sonra bu sayı yukarı çekilebilir.
+> **2026-08-18 fiyat kararı:** üç fazın tamamı 120.000 ₺ + KDV, 3 ay, 3 × 40.000 ₺.
+> İç program planındaki tahmin 452–771 adam-gündü; bu, adam-gün başına ~155–265 ₺ demek.
+> Karar Orhan'ındır ve teklife böyle işlendi. Karşılığında belgeye **üç koruma** konuldu:
+> 1. **"Hiçbir fazın kapsamında olmayanlar"** bölümü — 9 kalem yazılı sınır
+> 2. **Otuz model** sınırı — açık uçlu "tüm modeller" taahhüdü kaldırıldı
+> 3. **"Bir fazın kapsamı o faz altında listelenen maddelerle sınırlıdır"** maddesi +
+>    Ensotek kaynaklı gecikmede takvimin ötelenmesi
+>
+> Sabit bedelli işte tek savunma kapsam sınırıdır; bu üç madde sözleşmeye aynen geçmelidir.
 >
 > **Faz eşlemesi:** teklifteki Faz 1 = iç plandaki S1. Teklifteki Faz 2 = iç plandaki
 > S2 + S3. Teklifteki Faz 3 = iç plandaki S4 + S5. İç plandaki 24 modül kodu ile
