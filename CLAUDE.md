@@ -52,3 +52,60 @@ Her site projesi ve `ERP/` kendi git reposudur ve **kendi veritabanına** sahipt
 - Her proje kökünde `project.portfolio.json` zorunludur (ayrıca workspace kökünde de bulunur).
 - B2B özeti, stack, servisler veya domain bilgisi değişirse önce bu dosya güncellenir.
 - Portfolio seedleri bu metadata dosyasına bağlıdır; metadata güncellenmeden iş tamamlanmış sayılmaz.
+
+## MARKA KURALI — GORUNEN TARAF KODDAN GELMEZ
+
+**Kullanici talimati (2026-08-19): "Bu projeyi Ensotek icin yapsam da, seed
+dosyalarini baska bir firma icin olusturdugumda gorunen taraf tamamen baska bir
+markaya donusmeli. Bunu en temel kural olarak yap ve denetlemeye basla."**
+
+Sirada bekleyen projeler var. Bu bir kozmetik tercih degil, **teslim edilebilirlik
+kurali**: koda gomulu tek bir marka adi, yeni musterinin ekraninda BASKA bir
+firmanin adinin gorunmesi demektir.
+
+### Kural
+
+Musteri markasi — firma adi, urun adi, slogan, logo, alan adi — **kodda yazmaz.**
+Uc kaynaktan gelir:
+
+| Kaynak | Ne icin |
+| --- | --- |
+| `tenants.branding` | Kiraciya ozel ad, alt baslik, logo |
+| `site_settings` | Kurulum geneli baslik, aciklama, logo |
+| `NEXT_PUBLIC_APP_NAME` / `APP_NAME` (.env) | Dagitim ortaminin adi |
+
+Kodda yalniz **notr bir yedek** bulunur (`ERP`, `Destek` gibi). Marka hicbir
+yerden gelmese bile ekranda baska bir firmanin adi GORUNMEZ.
+
+### Nerede gecerli
+
+- Sayfa basligi, metadata, SEO, sekme adi
+- Logo yolu ve `alt` metni — yanlis logoyu gostermektense hic logo gosterme
+- E-posta konusu, gonderen adi, imza, otomatik yanit
+- Belge/Excel uretimi (`creator`, antet, altbilgi)
+- HTTP `user-agent`, webhook baslik adlari
+- Musteriye giden her metin
+
+### Istisnalar (marka MESRU)
+
+- `backend/src/db/seed/sql/` — marka zaten burada durmali; kuralin amaci bu
+- `.env*` — dagitim yapilandirmasi
+- `*.md` — belge
+- Teknik tanimlayicilar: CSS sinifi, localStorage anahtari, paket adi, tenant
+  anahtari, PM2 sureci, veritabani adi, ssh host takma adi
+- **Proje icerigi** (`MODULE_REGISTRY` gibi bolum tanimlari) — baska firma icin
+  bastan yazilir; denetim bunlari "yeniden yazilacak" olarak RAPORLAR, bloklamaz
+
+### Denetim
+
+```bash
+node scripts/marka-denetimi.mjs      # veya: npm run marka:denetim
+```
+
+Deploy kapisidir (`scripts/deploy.sh`), secret-scan ile ayni sirada calisir.
+Yeni bir proje acildiginda bu betik kopyalanir ve `MARKALAR` listesi o projenin
+markalariyla doldurulur.
+
+**Yeni kod yazarken:** gorunen bir metne marka adi yazma durtusu geldiginde,
+once "bu baska bir firmada ne gorunmeli?" diye sor. Cevap "onun adi" ise deger
+veriden gelmelidir.
