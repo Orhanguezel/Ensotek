@@ -108,3 +108,26 @@ export function coerceLocaleByKey(key: string, locale: string | null): string | 
 
   return locale;
 }
+
+/* ── Public görünürlük politikası ─────────────────────────────────────────────
+ * 2026-07 denetimi + 2026-08-22 düzeltmesi: public /site_settings uçları tablodaki
+ * HER satırı döndürüyordu — smtp_password, telegram_bot_token ve google_client_secret
+ * dört sitede (ensotek.de, ensotek.com.tr, karbonkompozit, kuhlturm) kimliksiz
+ * okunabiliyordu. Kural iki katmanlıdır; biri atlansa diğeri tutar:
+ *   1. Sır deseni: adı sır çağrıştıran anahtar hiçbir koşulda public çıkmaz.
+ *   2. Altyapı önekleri: smtp_/telegram_/storage_ ayarlarının public uçta işi yok.
+ * Admin uçları (requireAuth + requireAdmin) bu filtreden ETKİLENMEZ; SMTP ve
+ * Telegram ekranları /admin/site-settings üzerinden okumaya devam eder. */
+
+export const SECRET_KEY_PATTERN =
+  /(password|passwd|pwd|parola|sifre|secret|token|api[_-]?key|apikey|credential|private[_-]?key|access[_-]?key|webhook|_dsn)/i;
+
+export const PUBLIC_HIDDEN_PREFIXES = ['smtp_', 'telegram_', 'storage_'] as const;
+
+/** Bu anahtar kimliksiz (public) uçtan okunabilir mi? Karar YALNIZ ad üzerinden. */
+export function isPublicSettingKey(key: unknown): boolean {
+  const k = normKey(key);
+  if (!k) return false;
+  if (SECRET_KEY_PATTERN.test(k)) return false;
+  return !PUBLIC_HIDDEN_PREFIXES.some((p) => k.startsWith(p));
+}

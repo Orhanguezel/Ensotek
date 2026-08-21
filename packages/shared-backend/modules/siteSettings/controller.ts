@@ -6,6 +6,7 @@ import { handleRouteError, normalizeLooseLocale } from '../_shared';
 
 import { buildLocaleFallbackChain, getAppLocalesMeta, getEffectiveDefaultLocale } from './service';
 import { rowToDto, repoGetAllByConditions, repoGetRowsByKey, repoGetFirstRowByFallback } from './repository';
+import { isPublicSettingKey } from './settingPolicy';
 
 type LocaleRequest = FastifyRequest & { locale?: string | null };
 type SeoPageDto = { pageKey: string } & Record<string, unknown>;
@@ -35,7 +36,8 @@ export async function listSiteSettings(req: FastifyRequest, reply: FastifyReply)
     });
 
     const map = new Map<string, ReturnType<typeof rowToDto>>();
-    const uniqueKeys = Array.from(new Set(rows.map((r) => r.key)));
+    // Sır ve altyapı anahtarları public uçtan ASLA çıkmaz (settingPolicy).
+    const uniqueKeys = Array.from(new Set(rows.map((r) => r.key))).filter(isPublicSettingKey);
 
     for (const k of uniqueKeys) {
       const cands = rows.filter((r) => r.key === k);
@@ -69,7 +71,7 @@ export async function getSiteSettingByKey(req: FastifyRequest, reply: FastifyRep
 
     const candidateKeys = Array.from(
       new Set([prefix ? `${prefix}${key}` : null, key].filter(Boolean) as string[]),
-    );
+    ).filter(isPublicSettingKey); // gizli anahtar tek-anahtar ucundan da sızmaz → 404
 
     for (const candidateKey of candidateKeys) {
       const rows = await repoGetRowsByKey(candidateKey);
