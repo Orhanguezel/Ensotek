@@ -401,3 +401,8 @@ Son DE ürün Lighthouse örneği: performans 65, erişilebilirlik/BP/SEO 100, L
 - MOE ile aynı yaklaşım: sağda 3 gerçek kule kartı (kapalı devre, açık devre tek/çift hücre), "17 ürünün tümünü gör", kategori çipleri ve "Yedek Parçalar (13)" → ürünler sayfası anchor. Sunucu bileşeni; ürün/marka adı koddan gelmez; API boşsa hero tek kolon kalır.
 - EN/TR × masaüstü/mobil canlı kabul geçti; mobil Lighthouse 94/95, LCP 2,7 sn, A11y/BP/SEO 100. Build 78 URL; rollback `.next.before-checklist-20260911T170554Z`; commit `0388f71`.
 - Sayım: **87 kapalı / 22 açık (109 madde)**. [Kanıt](output/checklist-2026-09-11-tr-hero/README.md).
+
+
+## 11 Eylül — TR11 ek: ürün slug/alt veri düzeltmesi
+
+- bbbb0002 (Açık Devre – Tek Hücre CTP) TR/DE satırlarında slug ve alt İngilizce kalmıştı; canlı DB (yedekli) ve seed 011 düzeltildi. Ürün detayı yabancı slug'ı 308'ler; eski TR adres yeni slug'a gidiyor, olmayan 404. Sayım değişmedi (87/109). [Kanıt](output/checklist-2026-09-11-tr-product-slug/README.md).
