@@ -388,3 +388,9 @@ Son DE ürün Lighthouse örneği: performans 65, erişilebilirlik/BP/SEO 100, L
 - Canlı galeri kabulü 8 kontrolle, blog kabulü tekrar geçti. DE/Kühlturm/MOE aktif dillerinde sessiz fallback bulunmadı.
 - Yerel aday notu: `--hostname 127.0.0.1` ile `/tr/galeri` sahte 308 döngüsü; `localhost` ile yok, canlıda yok.
 - Sayım: **86 kapalı / 22 açık (108 madde)**. [Kanıt](output/checklist-2026-09-11-tr-gallery-i18n/README.md).
+
+
+## 11 Eylül — MOE mobil boşluk ve tema düğmesi (kullanıcı geri bildirimi)
+
+- Mobilde header ile hero metni arasındaki boşluk 44 px'ten 7 px'e; hero mobil aralıkları sıkılaştırıldı. Tema ve dil düğmeleri mobil menünün üst şeridine taşındı.
+- Yerel aday ve canlıda 390 px kabul, K13 odak ve K22 kaydırılmış menü kabulleri geçti. Rollback `standalone.before-checklist-20260911T164747Z`. Yeni checklist maddesi sayılmadı; K23 kanıtına eklendi. [Kanıt](output/checklist-2026-09-11-moe-mobile-spacing/README.md).

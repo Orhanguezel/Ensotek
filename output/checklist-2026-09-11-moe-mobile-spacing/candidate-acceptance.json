@@ -1,0 +1,29 @@
+{
+ "base": "http://127.0.0.1:3320",
+ "dark": {
+  "headerBottom": 89,
+  "eyebrowTop": 96,
+  "gapHeaderEyebrow": 7,
+  "gapCtaShowcase": 24,
+  "themeMode": "dark"
+ },
+ "menuTop": {
+  "barTop": 0,
+  "barHeight": 857,
+  "controls": [],
+  "themeInMenuTopBar": false,
+  "langInMenuTopBar": false
+ },
+ "toggled": {
+  "before": "dark",
+  "after": "light"
+ },
+ "afterToggle": {
+  "headerBottom": 89,
+  "eyebrowTop": 96,
+  "gapHeaderEyebrow": 7,
+  "gapCtaShowcase": 24,
+  "themeMode": "light"
+ },
+ "pass": false
+}
