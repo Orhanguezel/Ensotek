@@ -1,0 +1,103 @@
+{
+ "base": "http://localhost:3321",
+ "list_tr": {
+  "lang": "tr",
+  "h1": "Soğutma Kulesi Bilgi Bankası",
+  "links": [
+   "/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+   "/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+   "/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+   "/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+   "/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+   "/tr/blog/sogutma-kulelerinde-legionella-onleme",
+   "/tr/blog/sogutma-kulesi-secim-rehberi",
+   "/tr/blog/su-sogutma-kulesi-temelleri",
+   "/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri"
+  ],
+  "h2": [
+   "Soğutma Kulesi Seçim Rehberi",
+   "Soğutma Kulelerinde Legionella Önleme",
+   "CTP ve FRP Soğutma Kulesi Gövdeleri Karşılaştırması",
+   "Su Soğutma Kulesi Temelleri: Tipler, Çalışma Prensibi ve Tasarım Parametreleri",
+   "Ensotek Soğutma Kulelerimizin Özellikleri",
+   "Açık Tip Su Soğutma Kulesi Çalışma Prensibi",
+   "Kapalı Çevrim Su Soğutma Kulesi Çalışma Prensibi",
+   "Kule Seçimi İçin Gerekli Bilgiler",
+   "Türkiye Yaz Kuru ve Yaş Termometre Tasarım Değerleri"
+  ],
+  "status": 200
+ },
+ "list_en": {
+  "lang": "en",
+  "h1": "Cooling Tower Knowledge Base",
+  "links": [
+   "/en/blog/closed-circuit-cooling-tower-working-principle",
+   "/en/blog/cooling-tower-selection-guide",
+   "/en/blog/features-of-ensotek-cooling-towers",
+   "/en/blog/grp-frp-cooling-tower-shells-compared",
+   "/en/blog/legionella-prevention-in-cooling-towers",
+   "/en/blog/open-circuit-cooling-tower-working-principle",
+   "/en/blog/required-data-for-cooling-tower-selection",
+   "/en/blog/turkey-summer-design-dry-wet-bulb-values",
+   "/en/blog/what-is-a-cooling-tower-types-and-how-it-works"
+  ],
+  "h2": [
+   "Cooling Tower Selection Guide",
+   "Legionella Prevention in Cooling Towers",
+   "GRP and FRP Cooling Tower Shells Compared",
+   "Cooling Tower Basics: Types, Working Principle, Losses, and Design Parameters",
+   "Features of Ensotek Cooling Towers",
+   "Open-Circuit Cooling Tower Working Principle",
+   "Closed-Circuit Cooling Tower Working Principle",
+   "Required Data for Cooling Tower Selection",
+   "Turkey Summer Design Dry-Bulb and Wet-Bulb Values"
+  ],
+  "status": 200
+ },
+ "en_list_has_turkish_titles": [],
+ "checks": {
+  "en_detail": {
+   "status": 200,
+   "lang": "en",
+   "h1": "Cooling Tower Selection Guide"
+  },
+  "en_with_tr_slug": {
+   "status": 308,
+   "location": "/en/blog/cooling-tower-selection-guide"
+  },
+  "tr_with_en_slug": {
+   "status": 308,
+   "location": "/tr/blog/sogutma-kulesi-secim-rehberi"
+  },
+  "tr_detail": {
+   "status": 200,
+   "lang": "tr",
+   "h1": "Soğutma Kulesi Seçim Rehberi"
+  },
+  "en_missing": {
+   "status": 404
+  },
+  "en_detail_hreflang": [
+   [
+    "tr",
+    "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri"
+   ],
+   [
+    "en",
+    "https://www.ensotek.com.tr/en/blog/features-of-ensotek-cooling-towers"
+   ],
+   [
+    "x-default",
+    "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri"
+   ]
+  ]
+ },
+ "sitemap": {
+  "status": 200,
+  "tr_blog": 9,
+  "en_blog": 9,
+  "en_entries_with_tr_slug": [],
+  "hreflang_count": 234
+ },
+ "pass": true
+}

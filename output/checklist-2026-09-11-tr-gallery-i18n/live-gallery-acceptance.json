@@ -1,0 +1,66 @@
+{
+ "base": "https://www.ensotek.com.tr",
+ "list_tr": {
+  "lang": "tr",
+  "h1": "Proje Galerimiz",
+  "links": [
+   "/tr/galeri/acik-devre-sogutma-kuleleri",
+   "/tr/galeri/kapali-devre-sogutma-kuleleri",
+   "/tr/galeri/saha-uygulamalari",
+   "/tr/galeri/yedek-parca-ve-bilesenler"
+  ],
+  "status": 200
+ },
+ "list_en": {
+  "lang": "en",
+  "h1": "Project Gallery",
+  "links": [
+   "/en/gallery/closed-circuit-cooling-towers",
+   "/en/gallery/field-installations",
+   "/en/gallery/open-circuit-cooling-towers",
+   "/en/gallery/spare-parts-and-components"
+  ],
+  "status": 200
+ },
+ "checks": {
+  "en_detail": {
+   "status": 200,
+   "lang": "en",
+   "h1": "Field Installations",
+   "links": []
+  },
+  "en_with_tr_slug": {
+   "status": 308,
+   "location": "/en/gallery/field-installations"
+  },
+  "tr_with_en_slug": {
+   "status": 308,
+   "location": "/tr/galeri/saha-uygulamalari"
+  },
+  "en_missing": {
+   "status": 404
+  },
+  "en_detail_hreflang": [
+   [
+    "tr",
+    "https://www.ensotek.com.tr/tr/galeri/acik-devre-sogutma-kuleleri"
+   ],
+   [
+    "en",
+    "https://www.ensotek.com.tr/en/gallery/open-circuit-cooling-towers"
+   ],
+   [
+    "x-default",
+    "https://www.ensotek.com.tr/tr/galeri/acik-devre-sogutma-kuleleri"
+   ]
+  ]
+ },
+ "sitemap": {
+  "status": 200,
+  "tr_gallery": 4,
+  "en_gallery": 4,
+  "total": 78,
+  "en_with_tr_slug": []
+ },
+ "pass": true
+}

@@ -1,6 +1,6 @@
 # Ensotek checklist uygulaması — 9 Eylül 2026
 
-**11 Eylül güncel durum: 85/107 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
+**11 Eylül güncel durum: 86/108 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
 
 Dört sitenin frontend düzeltmeleri ve Tanitio GTM bağlantı testi canlıya alındı. Bu rapor tam checklist kapanışı değildir. Kabulü biten maddeler [ana checklist](ENSOTEK-AILESI-TUM-PROJELER-CHECKLIST-2026-09-09.md) üzerinde işaretlendi; kısmi uygulamalar ayrı notlandı.
 
@@ -380,3 +380,11 @@ Son DE ürün Lighthouse örneği: performans 65, erişilebilirlik/BP/SEO 100, L
 - Düzeltme: 017 seed ile 9 EN satırı (6 ensotek.de kütüphanesinin mevcut EN metni, 3 çeviri) canlı DB'ye yedekli uygulandı; liste/sitemap/hreflang envanteri `locale` filtreli; yabancı slug aynı içerik kimliğinin doğru slug'ına 308, karşılığı yoksa 404; kök layout dili next-intl başlığından alıyor.
 - Kabul yerel aday ve canlıda 8 kontrolle geçti (EN liste, TR liste, EN/TR detay, çapraz slug 308'ler, 404, hreflang, sitemap 9+9). Build 74 URL; rollback `.next.before-checklist-20260911T161958Z`; commit `814ab1f`.
 - Sayım: **85 kapalı / 22 açık (107 madde)**. [Kanıt](output/checklist-2026-09-11-tr-blog-i18n/README.md).
+
+
+## 11 Eylül — TR10 galeri EN ve aile dil filtresi doğrulaması
+
+- `/en/gallery` boştu (yalnız TR satırları). 4 EN galeri satırı seed + canlı DB'ye yedekli uygulandı. Blog/galeri detayı ortak yardımcıyla yabancı slug'ı 308'ler, karşılığı yoksa 404. Sitemap 300 sn ISR; 74 → 78 URL.
+- Canlı galeri kabulü 8 kontrolle, blog kabulü tekrar geçti. DE/Kühlturm/MOE aktif dillerinde sessiz fallback bulunmadı.
+- Yerel aday notu: `--hostname 127.0.0.1` ile `/tr/galeri` sahte 308 döngüsü; `localhost` ile yok, canlıda yok.
+- Sayım: **86 kapalı / 22 açık (108 madde)**. [Kanıt](output/checklist-2026-09-11-tr-gallery-i18n/README.md).
