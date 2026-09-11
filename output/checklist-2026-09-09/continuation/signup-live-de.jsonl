@@ -1,0 +1,3 @@
+{"site":"ensotek_de","liveLegacyToken":[{"me":401,"update":401},{"me":401,"update":401}],"confirm":400}
+{"site":"ensotek_de","realDatabase":true,"requestedRole":"editor","createdRole":"user","signup":200,"login":200,"liveAdminStatus":403,"externalMessages":0}
+{"site":"ensotek_de","testUserRemoved":true}

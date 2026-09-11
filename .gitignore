@@ -175,3 +175,7 @@ ensotek_com/
 
 # GZL private project manifest
 project.portfolio.private.json
+
+# Oturum/kanit artiklari
+.playwright-cli/
+output/**/*.zip

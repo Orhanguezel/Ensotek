@@ -1,0 +1,160 @@
+[
+  {
+    "locale": "tr",
+    "source": "https://www.karbonkompozit.com.tr/api/products?locale=tr&item_type=kompozit&is_active=1&limit=100",
+    "products": [
+      {
+        "id": "kd040006-9206-4206-9206-bbbbbbbb0006",
+        "title": "Kompozit Tren Parçaları",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/tren-parcalari.jpg"
+      },
+      {
+        "id": "kd040007-9207-4207-9207-bbbbbbbb0007",
+        "title": "Savunma Sanayi Kompozit Parçaları",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/savunma-sanayi-kompozit-parcalari.jpg"
+      },
+      {
+        "id": "kd040001-9201-4201-9201-bbbbbbbb0001",
+        "title": "CTP Çöp Konteyneri",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/cop-konteyneri.jpg"
+      },
+      {
+        "id": "kd040002-9202-4202-9202-bbbbbbbb0002",
+        "title": "Kompozit Tabut",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/tabut.jpg"
+      },
+      {
+        "id": "kd040003-9203-4203-9203-bbbbbbbb0003",
+        "title": "Kompozit Çöp Kutusu",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/cop-kutusu.jpg"
+      },
+      {
+        "id": "kd040004-9204-4204-9204-bbbbbbbb0004",
+        "title": "Belediye Çöp Konteyneri",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/belediye-cop-konteyneri.jpg"
+      },
+      {
+        "id": "kd040005-9205-4205-9205-bbbbbbbb0005",
+        "title": "CTP Su Deposu",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/su-deposu.jpg"
+      },
+      {
+        "id": "a3885fb1-f1fe-4297-aac8-2eab77e0f4f3",
+        "title": "Lunapark Oyuncakları",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/lunapark-01-renkli.jpg"
+      },
+      {
+        "id": "kd030001-9001-4001-9001-ffffffff0001",
+        "title": "Dekoratif Kompozit Saksı ve Vazo Ürünleri",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/urunler-11.jpeg"
+      },
+      {
+        "id": "kd010001-7001-4001-9001-dddddddd0001",
+        "title": "Karbon Fiber Panel Prototipi",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/karbon-fiber-panel-prototipi",
+        "image": "https://www.karbonkompozit.com.tr/media/kompozit/karbon-fiber-panel-01.jpg"
+      },
+      {
+        "id": "kd010002-7002-4002-9002-dddddddd0002",
+        "title": "CTP Koruyucu Govde Paneli",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-koruyucu-govde-paneli",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/ctp-koruyucu-govde-paneli.jpg"
+      },
+      {
+        "id": "kd010003-7003-4003-9003-dddddddd0003",
+        "title": "Cam Elyaf Servis Kapagi",
+        "url": "https://www.karbonkompozit.com.tr/tr/products/cam-elyaf-servis-kapagi",
+        "image": "https://www.karbonkompozit.com.tr/media/kompozit/karbon-fiber-doku-01.jpg"
+      }
+    ],
+    "html": "/tmp/moe-portfolio-20260910/tr.html"
+  },
+  {
+    "locale": "en",
+    "source": "https://www.karbonkompozit.com.tr/api/products?locale=en&item_type=kompozit&is_active=1&limit=100",
+    "products": [
+      {
+        "id": "kd040006-9206-4206-9206-bbbbbbbb0006",
+        "title": "Composite Train Parts",
+        "url": "https://www.karbonkompozit.com.tr/en/products/composite-train-parts",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/tren-parcalari.jpg"
+      },
+      {
+        "id": "kd040007-9207-4207-9207-bbbbbbbb0007",
+        "title": "Defense Industry Composite Parts",
+        "url": "https://www.karbonkompozit.com.tr/en/products/defense-industry-composite-parts",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/savunma-sanayi-kompozit-parcalari.jpg"
+      },
+      {
+        "id": "kd040001-9201-4201-9201-bbbbbbbb0001",
+        "title": "FRP Waste Container",
+        "url": "https://www.karbonkompozit.com.tr/en/products/frp-waste-container",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/cop-konteyneri.jpg"
+      },
+      {
+        "id": "kd040002-9202-4202-9202-bbbbbbbb0002",
+        "title": "Composite Coffin",
+        "url": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/tabut.jpg"
+      },
+      {
+        "id": "kd040003-9203-4203-9203-bbbbbbbb0003",
+        "title": "Composite Litter Bin",
+        "url": "https://www.karbonkompozit.com.tr/en/products/composite-litter-bin",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/cop-kutusu.jpg"
+      },
+      {
+        "id": "kd040004-9204-4204-9204-bbbbbbbb0004",
+        "title": "Municipal Garbage Container",
+        "url": "https://www.karbonkompozit.com.tr/en/products/municipal-garbage-container",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/belediye-cop-konteyneri.jpg"
+      },
+      {
+        "id": "kd040005-9205-4205-9205-bbbbbbbb0005",
+        "title": "FRP Water Storage Tank",
+        "url": "https://www.karbonkompozit.com.tr/en/products/frp-water-storage-tank",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/su-deposu.jpg"
+      },
+      {
+        "id": "a3885fb1-f1fe-4297-aac8-2eab77e0f4f3",
+        "title": "Amusement Ride Cabins and Theme Park Products",
+        "url": "https://www.karbonkompozit.com.tr/en/products/lunapark-oyuncaklari-kabini",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/lunapark-01-renkli.jpg"
+      },
+      {
+        "id": "kd030001-9001-4001-9001-ffffffff0001",
+        "title": "Decorative Composite Planters and Vases",
+        "url": "https://www.karbonkompozit.com.tr/en/products/decorative-composite-planters-vases",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/urunler-11.jpeg"
+      },
+      {
+        "id": "kd010001-7001-4001-9001-dddddddd0001",
+        "title": "Carbon Fiber Panel Prototype",
+        "url": "https://www.karbonkompozit.com.tr/en/products/carbon-fiber-panel-prototype",
+        "image": "https://www.karbonkompozit.com.tr/media/kompozit/karbon-fiber-panel-01.jpg"
+      },
+      {
+        "id": "kd010002-7002-4002-9002-dddddddd0002",
+        "title": "FRP Protective Enclosure Panel",
+        "url": "https://www.karbonkompozit.com.tr/en/products/frp-protective-enclosure-panel",
+        "image": "https://www.karbonkompozit.com.tr/uploads/kompozit/ctp-koruyucu-govde-paneli.jpg"
+      },
+      {
+        "id": "kd010003-7003-4003-9003-dddddddd0003",
+        "title": "Fiberglass Service Cover",
+        "url": "https://www.karbonkompozit.com.tr/en/products/fiberglass-service-cover",
+        "image": "https://www.karbonkompozit.com.tr/media/kompozit/karbon-fiber-doku-01.jpg"
+      }
+    ],
+    "html": "/tmp/moe-portfolio-20260910/en.html"
+  }
+]

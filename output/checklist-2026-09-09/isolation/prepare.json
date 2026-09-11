@@ -1,0 +1,1 @@
+{"prepared": true, "sourceDatabase": "ensotek", "targetDatabase": "kuhlturm_live", "oldKuhlturmDatabasePreserved": true, "backup": "/var/backups/ensotek-kuhlturm-isolation-20260909", "crossDatabaseAccessDenied": true, "uploadsCopied": true}

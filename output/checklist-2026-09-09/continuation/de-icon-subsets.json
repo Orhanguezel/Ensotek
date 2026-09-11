@@ -1,0 +1,21 @@
+{
+  "sourceIconClasses": 53,
+  "oldProFiles": "Three old Pro WOFF2 files fail Brotli decoding; no longer referenced by active stylesheet",
+  "source": "Font Awesome Free 6.x official repository",
+  "license": "SIL OFL 1.1; LICENSE.txt retained; subset internal names renamed",
+  "fallback": "Full valid Free fonts for additional CMS icons; grid-2 maps to grid",
+  "fonts": [
+    {
+      "file": "ensotek_de/frontend/public/fonts/fontawesome-free/fa-solid-900.subset-b3d88aef.woff2",
+      "glyphs": 40,
+      "fullBytes": 158220,
+      "subsetBytes": 4148
+    },
+    {
+      "file": "ensotek_de/frontend/public/fonts/fontawesome-free/fa-brands-400.subset-28de422d.woff2",
+      "glyphs": 10,
+      "fullBytes": 118680,
+      "subsetBytes": 1824
+    }
+  ]
+}

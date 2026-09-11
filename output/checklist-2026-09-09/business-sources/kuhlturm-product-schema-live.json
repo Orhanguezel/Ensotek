@@ -1,0 +1,274 @@
+[
+  {
+    "url": "https://kuhlturm.com/de/product/offene-kuehltuerme-dreifachzelle-tctp-serie",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/product/offene-kuehltuerme-doppelzelle-dctp-serie",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/product/offene-kuehltuerme-einzelzelle-ctp-serie",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/product/geschlossene-kuehltuerme-cc-ctp-cc-dctp",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/lufteinlasslamellen",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/raschig-ringe-pp",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/spritzgitter-fuellung-splash-grid",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/pp-spritzring-fuellung-bigudi",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/pvc-folienfuellung-filmfuellung",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/drift-eliminator-tropfenabscheider",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/frp-pultrusionsprofil",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/kuehlturmduese",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/wasserverteilungssystem",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/servicefenster",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/axialventilator-fuer-kuehltuerme",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/vibrationsschalter",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/sparepart/wasserkuehlturmmotor-getriebe-luefter",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/product/open-circuit-cooling-towers-double-cell-dctp-series",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/product/open-circuit-cooling-towers-single-cell-ctp-series",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/product/closed-circuit-cooling-towers-cc-ctp-cc-dctp",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/air-inlet-louvers",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/raschig-rings-pp",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/splash-grid-fill",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/pp-ring-fill-spritzring",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/pvc-film-fill",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/drift-eliminators",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/frp-pultrusion-profiles",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/nozzle",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/water-distribution-system",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/service-window",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/cooling-tower-axial-fan",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/vibration-switch",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  },
+  {
+    "url": "https://kuhlturm.com/en/sparepart/motor-and-reducer-fan-group",
+    "status": 200,
+    "schemaValid": true,
+    "h1": 1,
+    "hasPhone": true,
+    "hasWhatsapp": true
+  }
+]

@@ -1,0 +1,138 @@
+[
+  {
+    "googleCanonical": "https://karbonkompozit.com.tr/en/legal/privacy",
+    "expected": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+    "canonical": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/blog/endustriyel-kompozit-gelecek",
+    "expected": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/blog/kompozit-kalite-kontrol",
+    "expected": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/blog/ctp-fiberglass-farklari",
+    "expected": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/blog/karbon-fiber-nedir",
+    "expected": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/gallery/ctp-govde-paneli-uretim-galerisi",
+    "expected": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+    "expected": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/en/products/kompozit-tabut",
+    "expected": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/lunapark-oyuncaklari-kabini",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/ctp-su-deposu",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/belediye-cop-konteyneri",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/kompozit-cop-kutusu",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/kompozit-tabut",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/ctp-cop-konteyneri",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/savunma-sanayi-kompozit-parcalari",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+    "reconciled": true
+  },
+  {
+    "googleCanonical": "https://www.karbonkompozit.com.tr/products/kompozit-tren-parcalari",
+    "expected": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+    "status": 200,
+    "finalUrl": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+    "reconciled": true
+  }
+]

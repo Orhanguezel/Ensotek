@@ -1,0 +1,17 @@
+### Result
+{"formCodeLoadedOnOpen":true,"newChunksOnOpen":5,"modalEmailField":true,"escapeCloses":true,"focusReturned":true,"secondOpen":true,"requestsSubmitted":0}
+### Ran Playwright code
+```js
+await (async (page) => {
+ const context=await page.context().browser().newContext({viewport:{width:390,height:844}});
+ await context.addInitScript(()=>localStorage.setItem('ensotek.analytics-consent.v1',JSON.stringify({value:'denied',expires:Date.now()+86400000})));
+ const p=await context.newPage();const chunks=new Set();p.on('request',r=>{if(r.url().includes('/_next/')&&r.url().includes('.js'))chunks.add(r.url());});
+ try{
+  await p.goto('https://ensotek.de/de/product/offene-kuehltuerme-einzelzelle-ctp-serie');const button=p.locator('.ens-sticky-widgets button');await button.waitFor();await p.waitForFunction(()=>document.readyState==='complete');const before=[...chunks];
+  await button.click();await p.getByRole('dialog').waitFor();await p.getByRole('dialog').locator('input[type=email]').waitFor();const opened=[...chunks].filter(x=>!before.includes(x));
+  await p.keyboard.press('Escape');await p.getByRole('dialog').waitFor({state:'hidden'});await p.waitForFunction(()=>document.activeElement===document.querySelector('.ens-sticky-widgets button'),null,{timeout:3000});const focusReturned=await button.evaluate(el=>el===document.activeElement);
+  await button.click();await p.getByRole('dialog').waitFor();await p.keyboard.press('Escape');
+  return {formCodeLoadedOnOpen:opened.length>0,newChunksOnOpen:opened.length,modalEmailField:true,escapeCloses:true,focusReturned,secondOpen:true,requestsSubmitted:0};
+ }finally{await context.close();}
+})(page);
+```

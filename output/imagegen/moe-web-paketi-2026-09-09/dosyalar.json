@@ -1,0 +1,266 @@
+[
+  {
+    "file": "logo-1/icons/apple-touch-icon.png",
+    "width": 180,
+    "height": 180,
+    "bytes": 36179
+  },
+  {
+    "file": "logo-1/icons/favicon-16x16.png",
+    "width": 16,
+    "height": 16,
+    "bytes": 788
+  },
+  {
+    "file": "logo-1/icons/favicon-32x32.png",
+    "width": 32,
+    "height": 32,
+    "bytes": 1745
+  },
+  {
+    "file": "logo-1/icons/favicon-48x48.png",
+    "width": 48,
+    "height": 48,
+    "bytes": 3443
+  },
+  {
+    "file": "logo-1/icons/icon-192.png",
+    "width": 192,
+    "height": 192,
+    "bytes": 40985
+  },
+  {
+    "file": "logo-1/icons/icon-512.png",
+    "width": 512,
+    "height": 512,
+    "bytes": 260034
+  },
+  {
+    "file": "logo-1/logo-1-en-dark-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 433415
+  },
+  {
+    "file": "logo-1/logo-1-en-dark-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 279678
+  },
+  {
+    "file": "logo-1/logo-1-en-dark-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 126255
+  },
+  {
+    "file": "logo-1/logo-1-en-dark-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 83258
+  },
+  {
+    "file": "logo-1/logo-1-en-light-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 426368
+  },
+  {
+    "file": "logo-1/logo-1-en-light-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 279646
+  },
+  {
+    "file": "logo-1/logo-1-en-light-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 123899
+  },
+  {
+    "file": "logo-1/logo-1-en-light-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 81224
+  },
+  {
+    "file": "logo-1/logo-1-tr-dark-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 477153
+  },
+  {
+    "file": "logo-1/logo-1-tr-dark-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 314650
+  },
+  {
+    "file": "logo-1/logo-1-tr-dark-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 129319
+  },
+  {
+    "file": "logo-1/logo-1-tr-dark-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 84784
+  },
+  {
+    "file": "logo-1/logo-1-tr-light-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 421993
+  },
+  {
+    "file": "logo-1/logo-1-tr-light-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 280644
+  },
+  {
+    "file": "logo-1/logo-1-tr-light-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 113574
+  },
+  {
+    "file": "logo-1/logo-1-tr-light-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 75662
+  },
+  {
+    "file": "logo-2/icons/apple-touch-icon.png",
+    "width": 180,
+    "height": 180,
+    "bytes": 26882
+  },
+  {
+    "file": "logo-2/icons/favicon-16x16.png",
+    "width": 16,
+    "height": 16,
+    "bytes": 599
+  },
+  {
+    "file": "logo-2/icons/favicon-32x32.png",
+    "width": 32,
+    "height": 32,
+    "bytes": 1354
+  },
+  {
+    "file": "logo-2/icons/favicon-48x48.png",
+    "width": 48,
+    "height": 48,
+    "bytes": 2623
+  },
+  {
+    "file": "logo-2/icons/icon-192.png",
+    "width": 192,
+    "height": 192,
+    "bytes": 29946
+  },
+  {
+    "file": "logo-2/icons/icon-512.png",
+    "width": 512,
+    "height": 512,
+    "bytes": 159966
+  },
+  {
+    "file": "logo-2/logo-2-en-dark-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 484839
+  },
+  {
+    "file": "logo-2/logo-2-en-dark-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 318022
+  },
+  {
+    "file": "logo-2/logo-2-en-dark-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 139773
+  },
+  {
+    "file": "logo-2/logo-2-en-dark-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 91990
+  },
+  {
+    "file": "logo-2/logo-2-en-light-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 427275
+  },
+  {
+    "file": "logo-2/logo-2-en-light-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 280110
+  },
+  {
+    "file": "logo-2/logo-2-en-light-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 122055
+  },
+  {
+    "file": "logo-2/logo-2-en-light-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 80012
+  },
+  {
+    "file": "logo-2/logo-2-tr-dark-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 462971
+  },
+  {
+    "file": "logo-2/logo-2-tr-dark-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 305620
+  },
+  {
+    "file": "logo-2/logo-2-tr-dark-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 130889
+  },
+  {
+    "file": "logo-2/logo-2-tr-dark-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 85506
+  },
+  {
+    "file": "logo-2/logo-2-tr-light-1200.png",
+    "width": 1200,
+    "height": 440,
+    "bytes": 421692
+  },
+  {
+    "file": "logo-2/logo-2-tr-light-1200.webp",
+    "width": 1200,
+    "height": 440,
+    "bytes": 274818
+  },
+  {
+    "file": "logo-2/logo-2-tr-light-600.png",
+    "width": 600,
+    "height": 220,
+    "bytes": 118904
+  },
+  {
+    "file": "logo-2/logo-2-tr-light-600.webp",
+    "width": 600,
+    "height": 220,
+    "bytes": 78348
+  }
+]

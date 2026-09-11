@@ -96,7 +96,8 @@
     "./modules/userRoles/*": "./modules/userRoles/*.ts",
     "./modules/wallet": "./modules/wallet/index.ts",
     "./modules/wallet/*": "./modules/wallet/*.ts",
-    "./types": "./types.d.ts"
+    "./types": "./types.d.ts",
+    "./integrations/*": "./integrations/*.ts"
   },
   "dependencies": {
     "@fastify/cookie": "^11.0.0",

@@ -1,0 +1,17 @@
+[
+  {
+    "file": "ensotek_de/frontend/src/features/products/products.action.ts",
+    "sha256": "0e465892439e3731fdc6ed8ab0d77b9fe45a00e0c111d911f7079c29869050ae",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/features/services/services.action.ts",
+    "sha256": "b478fd1d59dfa66429e42758028d3f1ed8003cc90fdcf08bd7ad7357a99c0371",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/components/containers/offer/OfferForm.tsx",
+    "sha256": "0e847da4634b568eedc0f37d805f616bdf23f9d77e4aacd3ec36f71ab236fb0c",
+    "matches": true
+  }
+]

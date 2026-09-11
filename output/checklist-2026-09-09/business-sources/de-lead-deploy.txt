@@ -1,0 +1,1 @@
+DEPLOYED ensotek_de backup=/var/www/Ensotek/ensotek_de/frontend/.next/standalone.before-checklist-20260909T232142Z

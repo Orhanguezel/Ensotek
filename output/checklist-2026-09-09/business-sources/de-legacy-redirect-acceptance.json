@@ -1,0 +1,26 @@
+[
+  {
+    "url": "https://ensotek.de/tr/about/kalite-belgelerimiz-kalite-standartlarimiz",
+    "final": "https://ensotek.de/tr/quality/kalite-belgelerimiz-kalite-standartlarimiz",
+    "status": 200
+  },
+  {
+    "url": "https://ensotek.de/contact",
+    "final": "https://ensotek.de/de/contact",
+    "status": 200
+  },
+  {
+    "url": "https://ensotek.de/en/nutzungsbedingungen",
+    "final": "https://ensotek.de/en/legal/terms-of-use",
+    "status": 200
+  },
+  {
+    "url": "https://ensotek.de/en/product/geschlossene-kuehltuerme-cc-ctp-cc-dctp",
+    "final": "https://ensotek.de/en/product/closed-circuit-cooling-towers-cc-ctp-cc-dctp",
+    "status": 200
+  },
+  {
+    "url": "https://ensotek.de/de/blog/never-existed-checklist-20260910",
+    "status": 404
+  }
+]

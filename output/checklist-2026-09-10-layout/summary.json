@@ -1,0 +1,17 @@
+{
+  "fetchTime": "2026-09-10T09:36:13.214Z",
+  "categories": {
+    "performance": 83,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "largest-contentful-paint": 3720.59,
+    "total-blocking-time": 168.5,
+    "cumulative-layout-shift": 0
+  },
+  "jsFiles": 17,
+  "jsTransferBytes": 279281,
+  "fieldCWV": "not established"
+}

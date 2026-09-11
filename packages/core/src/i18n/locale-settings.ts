@@ -53,6 +53,7 @@ export async function getRuntimeLocaleSettings(
   apiBaseUrl: string,
   availableLocales: string[],
   fallbackLocale: string,
+  fetchOptions: RequestInit & { next?: { revalidate: number } } = { cache: 'no-store' },
 ): Promise<LocaleSettings> {
   const fallback: LocaleSettings = {
     activeLocales: availableLocales,
@@ -63,8 +64,8 @@ export async function getRuntimeLocaleSettings(
     const base = apiBaseUrl.endsWith('/api') ? apiBaseUrl : `${apiBaseUrl}/api`;
 
     const [localesRes, defaultRes] = await Promise.all([
-      fetch(`${base}/site_settings/app-locales`, { cache: 'no-store' }),
-      fetch(`${base}/site_settings/default-locale`, { cache: 'no-store' }),
+      fetch(`${base}/site_settings/app-locales`, fetchOptions),
+      fetch(`${base}/site_settings/default-locale`, fetchOptions),
     ]);
 
     const localesPayload = localesRes.ok ? await localesRes.json() : [];

@@ -1,0 +1,4 @@
+ensotek-backend health=true
+ensotek-com-tr-backend health=true
+kuhlturm-backend health=true
+kompozit-backend health=true

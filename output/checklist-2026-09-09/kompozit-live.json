@@ -1,0 +1,30 @@
+[
+  {
+    "path": "/en/blog/karbon-fiber-nedir",
+    "status": 308,
+    "location": "/en/blog/what-is-carbon-fiber",
+    "title": null,
+    "canonical": null
+  },
+  {
+    "path": "/tr/blog/karbon-fiber-nedir",
+    "status": 200,
+    "location": null,
+    "title": "Karbon Fiber Nedir? Özellikleri ve Kullanımı - MOE Kompozit",
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir"
+  },
+  {
+    "path": "/en/blog",
+    "status": 200,
+    "location": null,
+    "title": "Blog — Composite Engineering and Production Insights - MOE Ko...",
+    "canonical": "https://www.karbonkompozit.com.tr/en/blog"
+  },
+  {
+    "path": "/sitemap.xml",
+    "status": 200,
+    "location": null,
+    "title": null,
+    "canonical": null
+  }
+]

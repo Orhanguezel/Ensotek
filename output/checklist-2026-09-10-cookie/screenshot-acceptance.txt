@@ -1,0 +1,6 @@
+### Result
+{"h1":"COOLING TOWER SYSTEMS","fixedCookieButtons":0}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.locator("h1").waitFor();await page.waitForFunction(()=>{const el=document.querySelector("h1");if(!el)return false;for(let p=el;p;p=p.parentElement)if(Number(getComputedStyle(p).opacity)<0.9)return false;return true;});await page.screenshot({path:"/home/orhan/Documents/Projeler/Ensotek/output/checklist-2026-09-10-cookie/tr-products-no-floating-cookie.png"});return{h1:await page.locator("h1").innerText(),fixedCookieButtons:await page.evaluate(()=>[...document.querySelectorAll("button")].filter(el=>el.textContent.trim()==="Cookie preferences"&&getComputedStyle(el).position==="fixed").length)};})(page);
+```

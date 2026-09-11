@@ -1,0 +1,2 @@
+{"mode":"apply","tenants":4,"runs":9,"results":2597,"corrections":49,"byTenant":[{"tenant":"ensotek","corrections":6},{"tenant":"ensotek-9d0af55c","corrections":43},{"tenant":"kuhlturm","corrections":0},{"tenant":"moe-kompozit-4de92704","corrections":0}],"rawHash":"cdd7a494bc7cbc155ad4cd8d223c5ea2d0ad3829e6d8ef3d6b2157f75f4f6685","runsHash":"31149ebfb1a4d5dbf44091c7c3b5cc133ab1aa43a394612627091c1cd3497ee0"}
+{"committed":true,"rawHistoryUnchanged":true,"backup":"/var/backups/ensotek-discovery-domain-correction-20260909.json"}

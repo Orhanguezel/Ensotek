@@ -1,0 +1,662 @@
+[
+  {
+    "path": "/de",
+    "icons": [
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-light fa-arrow-right-long ml-10",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-xmark",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-globe",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-location-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-magnifying-glass",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      }
+    ],
+    "styles": [
+      "https://ensotek.de/app/css/fontawesome-pro.subset-20260910.css"
+    ],
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "path": "/en",
+    "icons": [
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-light fa-arrow-right-long ml-10",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-xmark",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-globe",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-location-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-magnifying-glass",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      }
+    ],
+    "styles": [
+      "https://ensotek.de/app/css/fontawesome-pro.subset-20260910.css"
+    ],
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "path": "/tr",
+    "icons": [
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-light fa-arrow-right-long ml-10",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-gears",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-xmark",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-arrow-right",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-globe",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-location-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-magnifying-glass",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      }
+    ],
+    "styles": [
+      "https://ensotek.de/app/css/fontawesome-pro.subset-20260910.css"
+    ],
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "path": "/de/product/offene-kuehltuerme-einzelzelle-ctp-serie",
+    "icons": [
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-linkedin-in",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-whatsapp",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-light fa-arrow-left-long mr-10",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-circle-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-circle-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-circle-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-hashtag",
+        "content": "\"#\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-light fa-xmark",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-globe",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-location-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-magnifying-glass",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      }
+    ],
+    "styles": [
+      "https://ensotek.de/app/css/fontawesome-pro.subset-20260910.css"
+    ],
+    "overflow": false,
+    "errors": []
+  },
+  {
+    "path": "/de/contact",
+    "icons": [
+      {
+        "class": "fa fa-clock text-white",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa fa-envelope text-white",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa fa-envelope text-white",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa fa-industry me-2",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa fa-map-marker-alt me-2",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-facebook-f",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-instagram",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-twitter",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-whatsapp me-2",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-whatsapp",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-whatsapp",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-brands fa-youtube",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Brands\""
+      },
+      {
+        "class": "fa-light fa-xmark",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-globe",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-location-dot",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-magnifying-glass",
+        "content": "\"\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      },
+      {
+        "class": "fa-regular fa-plus",
+        "content": "\"+\"",
+        "family": "\"Font Awesome 6 Pro\""
+      }
+    ],
+    "styles": [
+      "https://ensotek.de/app/css/fontawesome-pro.subset-20260910.css"
+    ],
+    "overflow": false,
+    "errors": []
+  }
+]

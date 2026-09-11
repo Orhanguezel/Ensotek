@@ -1,0 +1,66 @@
+[
+  {
+    "locale": "de",
+    "initialListRequests": 0,
+    "requests": [
+      {
+        "path": "/api/products",
+        "query": "?limit=100&locale=de"
+      },
+      {
+        "path": "/api/services",
+        "query": "?locale=de"
+      }
+    ],
+    "productOptions": 5,
+    "serviceOptions": 10,
+    "cacheReused": true,
+    "inputPreserved": true,
+    "postRequests": 0,
+    "errors": []
+  },
+  {
+    "locale": "en",
+    "initialListRequests": 0,
+    "requests": [
+      {
+        "path": "/api/products",
+        "query": "?limit=100&locale=en"
+      },
+      {
+        "path": "/api/services",
+        "query": "?locale=en"
+      }
+    ],
+    "productOptions": 5,
+    "serviceOptions": 10,
+    "cacheReused": true,
+    "inputPreserved": true,
+    "postRequests": 0,
+    "errors": []
+  },
+  {
+    "locale": "tr",
+    "initialListRequests": 0,
+    "requests": [
+      {
+        "path": "/api/products",
+        "query": "?limit=100&locale=tr"
+      },
+      {
+        "path": "/api/services",
+        "query": "?locale=tr"
+      }
+    ],
+    "productOptions": 5,
+    "serviceOptions": 10,
+    "cacheReused": true,
+    "inputPreserved": true,
+    "postRequests": 0,
+    "errors": []
+  },
+  {
+    "productPreselection": true,
+    "serviceRequests": 0
+  }
+]

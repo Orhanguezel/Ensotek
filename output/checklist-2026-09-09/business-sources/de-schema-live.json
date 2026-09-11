@@ -1,0 +1,134 @@
+[
+  {
+    "path": "/de",
+    "schemas": [
+      {
+        "type": [
+          "Organization",
+          "LocalBusiness"
+        ],
+        "items": 0,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+          "addressCountry": "TR"
+        },
+        "headline": null
+      },
+      {
+        "type": "WebSite",
+        "items": 0,
+        "address": null,
+        "headline": null
+      }
+    ]
+  },
+  {
+    "path": "/en/faqs",
+    "schemas": [
+      {
+        "type": [
+          "Organization",
+          "LocalBusiness"
+        ],
+        "items": 0,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+          "addressCountry": "TR"
+        },
+        "headline": null
+      },
+      {
+        "type": "WebSite",
+        "items": 0,
+        "address": null,
+        "headline": null
+      },
+      {
+        "type": "BreadcrumbList",
+        "items": 0,
+        "address": null,
+        "headline": null
+      },
+      {
+        "type": "FAQPage",
+        "items": 8,
+        "address": null,
+        "headline": null
+      }
+    ]
+  },
+  {
+    "path": "/tr/faqs",
+    "schemas": [
+      {
+        "type": [
+          "Organization",
+          "LocalBusiness"
+        ],
+        "items": 0,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+          "addressCountry": "TR"
+        },
+        "headline": null
+      },
+      {
+        "type": "WebSite",
+        "items": 0,
+        "address": null,
+        "headline": null
+      },
+      {
+        "type": "BreadcrumbList",
+        "items": 0,
+        "address": null,
+        "headline": null
+      },
+      {
+        "type": "FAQPage",
+        "items": 8,
+        "address": null,
+        "headline": null
+      }
+    ]
+  },
+  {
+    "path": "/de/blog/regelmaessige-wartung-wasserkuehltuerme",
+    "schemas": [
+      {
+        "type": [
+          "Organization",
+          "LocalBusiness"
+        ],
+        "items": 0,
+        "address": {
+          "@type": "PostalAddress",
+          "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+          "addressCountry": "TR"
+        },
+        "headline": null
+      },
+      {
+        "type": "WebSite",
+        "items": 0,
+        "address": null,
+        "headline": null
+      },
+      {
+        "type": "Article",
+        "items": 0,
+        "address": null,
+        "headline": "Regelmaessige Wartung von Wasserkuehltuermen"
+      },
+      {
+        "type": "BreadcrumbList",
+        "items": 0,
+        "address": null,
+        "headline": null
+      }
+    ]
+  }
+]

@@ -1,0 +1,23 @@
+{
+ "opened": {
+  "inert": false,
+  "ariaHidden": "false",
+  "focusInside": true,
+  "locked": true,
+  "expanded": "true"
+ },
+ "tabStaysInside": true,
+ "closed": {
+  "inert": true,
+  "ariaHidden": "true",
+  "focusReturned": true,
+  "unlocked": true,
+  "scrollKept": true
+ },
+ "linkNavigation": {
+  "href": "/tr",
+  "url": "https://www.karbonkompozit.com.tr/tr",
+  "menuClosedAfterNav": true
+ },
+ "pass": true
+}

@@ -1,0 +1,1 @@
+DEPLOYED kuhlturm backup=/var/www/Ensotek/kuhlturm/frontend/.next/standalone.before-checklist-20260910T083356Z

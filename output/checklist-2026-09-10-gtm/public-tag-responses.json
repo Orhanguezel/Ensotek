@@ -1,0 +1,16 @@
+[
+  {
+    "measurementId": "G-XECX77LB6M",
+    "status": 404
+  },
+  {
+    "measurementId": "G-7S6TW9CNRJ",
+    "status": 200,
+    "bytes": 589923,
+    "sha256": "80b22c297aab1c878d17300c4ff88b0f8966d6c4c0f4645a5253296a969c9d2c",
+    "contentType": "application/javascript; charset=UTF-8",
+    "measurementIdsInScript": [
+      "G-7S6TW9CNRJ"
+    ]
+  }
+]

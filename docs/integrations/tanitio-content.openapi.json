@@ -1,0 +1,595 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Ensotek family Tanitio content API",
+    "version": "1.0.0",
+    "description": "Read-only published content. Separate bearer keys per site. Offset pagination; no deletion tombstones. See TANITIO-CONTENT-API-v1.md."
+  },
+  "servers": [
+    {
+      "url": "https://ensotek.de/api/integrations/tanitio"
+    },
+    {
+      "url": "https://www.ensotek.com.tr/api/integrations/tanitio"
+    },
+    {
+      "url": "https://kuhlturm.com/api/integrations/tanitio"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/api/integrations/tanitio"
+    }
+  ],
+  "security": [
+    {
+      "SiteBearer": []
+    }
+  ],
+  "paths": {
+    "/": {
+      "get": {
+        "summary": "Contract handshake",
+        "responses": {
+          "200": {
+            "description": "Contract ID, site identity, locales, resources and capabilities"
+          },
+          "401": {
+            "description": "Missing or invalid bearer key"
+          },
+          "503": {
+            "description": "Integration not configured"
+          }
+        }
+      }
+    },
+    "/articles": {
+      "get": {
+        "summary": "List published articles",
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tr",
+                "en",
+                "de"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "default": 24
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "default": 0
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          {
+            "name": "updated_since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "recent",
+                "popular"
+              ]
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "page"
+              ]
+            },
+            "description": "Select corporate pages through the article adapter."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query"
+          },
+          "401": {
+            "description": "Invalid bearer key"
+          },
+          "503": {
+            "description": "Integration not configured"
+          }
+        }
+      }
+    },
+    "/articles/{id}": {
+      "get": {
+        "summary": "Get published articles detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tr",
+                "en",
+                "de"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query/id"
+          },
+          "401": {
+            "description": "Invalid bearer key"
+          },
+          "404": {
+            "description": "Published translation not found"
+          },
+          "503": {
+            "description": "Integration not configured"
+          }
+        }
+      }
+    },
+    "/products": {
+      "get": {
+        "summary": "List published products",
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tr",
+                "en",
+                "de"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "default": 24
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "default": 0
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          {
+            "name": "updated_since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "recent",
+                "popular"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query"
+          },
+          "401": {
+            "description": "Invalid bearer key"
+          },
+          "503": {
+            "description": "Integration not configured"
+          }
+        }
+      }
+    },
+    "/products/{id}": {
+      "get": {
+        "summary": "Get published products detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tr",
+                "en",
+                "de"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query/id"
+          },
+          "401": {
+            "description": "Invalid bearer key"
+          },
+          "404": {
+            "description": "Published translation not found"
+          },
+          "503": {
+            "description": "Integration not configured"
+          }
+        }
+      }
+    },
+    "/pages": {
+      "get": {
+        "summary": "List published pages",
+        "parameters": [
+          {
+            "name": "locale",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tr",
+                "en",
+                "de"
+              ]
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "default": 24
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 100000,
+              "default": 0
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 256
+            }
+          },
+          {
+            "name": "updated_since",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "recent",
+                "popular"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query"
+          },
+          "401": {
+            "description": "Invalid bearer key"
+          },
+          "503": {
+            "description": "Integration not configured"
+          }
+        }
+      }
+    },
+    "/pages/{id}": {
+      "get": {
+        "summary": "Get published pages detail",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "locale",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "tr",
+                "en",
+                "de"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Full content",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContentItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid query/id"
+          },
+          "401": {
+            "description": "Invalid bearer key"
+          },
+          "404": {
+            "description": "Published translation not found"
+          },
+          "503": {
+            "description": "Integration not configured"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "SiteBearer": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    },
+    "schemas": {
+      "ContentItem": {
+        "type": "object",
+        "required": [
+          "id",
+          "kind",
+          "locale",
+          "title",
+          "url",
+          "contentHtml"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "article",
+              "product"
+            ]
+          },
+          "contentType": {
+            "type": "string"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "image_url": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrls": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          },
+          "excerpt": {
+            "type": "string",
+            "nullable": true
+          },
+          "contentHtml": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true,
+            "description": "Source creation timestamp, not an exact publication transition timestamp."
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "price": {
+            "type": "number",
+            "nullable": true
+          },
+          "popularity": {
+            "type": "number",
+            "nullable": true
+          }
+        }
+      },
+      "ContentPage": {
+        "type": "object",
+        "required": [
+          "contract",
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "hasMore"
+        ],
+        "properties": {
+          "contract": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContentItem"
+            }
+          },
+          "total": {
+            "type": "integer"
+          },
+          "limit": {
+            "type": "integer"
+          },
+          "offset": {
+            "type": "integer"
+          },
+          "hasMore": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

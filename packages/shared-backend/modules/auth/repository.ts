@@ -1,6 +1,6 @@
 import { db } from '../../db/client';
 import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 import { hash as argonHash } from 'argon2';
 import { users, refresh_tokens } from './schema';
 import { userRoles } from '../userRoles';
@@ -59,6 +59,13 @@ export async function repoUpdateUserEmail(userId: string, email: string) {
 export async function repoUpdateUserPassword(userId: string, password: string) {
   const password_hash = await argonHash(password);
   await db.update(users).set({ password_hash, updated_at: new Date() }).where(eq(users.id, userId));
+}
+
+export async function repoConsumePasswordReset(user: {id:string; email:string|null; password_hash:string}, password: string) {
+  const password_hash = await argonHash(password);
+  const [result] = await db.update(users).set({password_hash, updated_at:new Date()})
+    .where(and(eq(users.id,user.id),eq(users.password_hash,user.password_hash),eq(users.email,user.email!)));
+  return result.affectedRows === 1;
 }
 
 export async function repoUpdateLastSignIn(userId: string) {

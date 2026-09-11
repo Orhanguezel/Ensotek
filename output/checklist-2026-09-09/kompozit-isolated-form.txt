@@ -1,0 +1,12 @@
+### Result
+[{"locale":"en","marketing":false,"sentMarketing":false,"sentTerms":true,"message":"Your message was sent. Thank you!"},{"locale":"en","marketing":true,"sentMarketing":true,"sentTerms":true,"message":"Your message could not be sent. Please try again."},{"locale":"tr","marketing":false,"sentMarketing":false,"sentTerms":true,"message":"Mesajınız başarıyla iletildi. Teşekkürler!"},{"locale":"tr","marketing":true,"sentMarketing":true,"sentTerms":true,"message":"Mesaj gönderilemedi. Lütfen tekrar deneyin."}]
+### Ran Playwright code
+```js
+await (async(page)=>{const out=[];for(const locale of ['en','tr']) {await page.goto('https://www.karbonkompozit.com.tr/'+locale);let payload;let status=200;await page.route('**/offers',async route=>{if(route.request().method()==='POST'){payload=route.request().postDataJSON();await route.fulfill({status,contentType:'application/json',body:JSON.stringify({id:'isolated-browser-response'})});}else await route.continue();});const form=page.locator('#contact form');for(const marketing of [false,true]) {await form.locator('[name=name]').fill('Checklist isolated browser');await form.locator('[name=email]').fill('checklist@example.invalid');await form.locator('[name=message]').fill('Isolated UI test: network intercepted, no delivery.');await form.locator('[name=consent_terms]').check();await form.locator('[name=consent_marketing]').setChecked(marketing);await form.locator('[type=submit]').click();await page.waitForTimeout(500);out.push({locale,marketing,sentMarketing:payload?.consent_marketing,sentTerms:payload?.consent_terms,message:await form.locator('[role=status]').innerText()});status=500;}await page.unroute('**/offers');}return out;})(page);
+```
+### Page
+- Page URL: https://www.karbonkompozit.com.tr/tr
+- Page Title: Karbon Fiber, CTP ve Cam Elyaf Kompozit Üretimi - MOE Kompozit
+- Console: 2 errors, 0 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T19-22-00-827Z.log#L5-L42

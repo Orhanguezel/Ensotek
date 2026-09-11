@@ -1,0 +1,16 @@
+{
+  "fetchTime": "2026-09-10T09:10:41.762Z",
+  "url": "https://ensotek.de/de/product/offene-kuehltuerme-einzelzelle-ctp-serie",
+  "categories": {
+    "performance": 70,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "largest-contentful-paint": 4386.281,
+    "total-blocking-time": 471,
+    "cumulative-layout-shift": 0
+  },
+  "fieldCWV": "not established"
+}

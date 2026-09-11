@@ -1,0 +1,9 @@
+### Result
+{"headDescription":1,"bodyDescription":0,"h1":["Offene Kühltürme – Einzelzelle (CTP-Serie)"],"overflow":false,"image":null}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.setViewportSize({width:390,height:844});await page.goto('https://ensotek.de/de/product/offene-kuehltuerme-einzelzelle-ctp-serie',{waitUntil:'networkidle'});return {headDescription:await page.locator('head meta[name="description"]').count(),bodyDescription:await page.locator('body meta[name="description"]').count(),h1:await page.locator('h1').allTextContents(),overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),image:await page.locator('.technical__thumb img').first().getAttribute('fetchpriority')};})(page);
+```
+### Page
+- Page URL: https://ensotek.de/de/product/offene-kuehltuerme-einzelzelle-ctp-serie
+- Page Title: Offene Kühltürme | Einzelzelle CTP-Serie | Ensotek – Ensotek

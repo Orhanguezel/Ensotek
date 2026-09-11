@@ -1,0 +1,47 @@
+[
+  {
+    "profile": "mobile",
+    "h1": "Offene Kühltürme – Einzelzelle (CTP-Serie)",
+    "overflow": false,
+    "animationInitialized": false,
+    "footerPreferences": 1,
+    "logos": 1,
+    "settingsRequests": [
+      "?key_in=site_logo,site_logo_light,site_logo_dark,company_brand,company_profile,socials,site_title&locale=de"
+    ],
+    "layoutKeys": 7,
+    "layoutBytes": 2377,
+    "errors": [],
+    "aosChunkRequested": false
+  },
+  {
+    "profile": "desktop",
+    "h1": "Offene Kühltürme – Einzelzelle (CTP-Serie)",
+    "overflow": false,
+    "animationInitialized": true,
+    "footerPreferences": 1,
+    "logos": 1,
+    "settingsRequests": [
+      "?key_in=site_logo,site_logo_light,site_logo_dark,company_brand,company_profile,socials,site_title&locale=de"
+    ],
+    "layoutKeys": 7,
+    "layoutBytes": 2377,
+    "errors": [],
+    "aosChunkRequested": true
+  },
+  {
+    "profile": "reduced-motion",
+    "h1": "Offene Kühltürme – Einzelzelle (CTP-Serie)",
+    "overflow": false,
+    "animationInitialized": false,
+    "footerPreferences": 1,
+    "logos": 1,
+    "settingsRequests": [
+      "?key_in=site_logo,site_logo_light,site_logo_dark,company_brand,company_profile,socials,site_title&locale=de"
+    ],
+    "layoutKeys": 7,
+    "layoutBytes": 2377,
+    "errors": [],
+    "aosChunkRequested": false
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "url": "https://kuhlturm.com/en",
+    "status": 200,
+    "h1": 1
+  },
+  {
+    "url": "https://ensotek.de/en",
+    "status": 200,
+    "h1": 1
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr",
+    "status": 200,
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en",
+    "status": 200,
+    "h1": 1
+  }
+]

@@ -1,0 +1,28 @@
+### Result
+[{"site":"moe","title":"Carbon Fiber, FRP and Fiberglass Composite Manufacturing - MO...","h1":["Carbon Fiber, FRP and Fiberglass Composite Solutions"],"logoAlts":["MOE Kompozit","MOE Kompozit","","","","","","MOE Kompozit","MOE Kompozit"],"heroPriority":["high"],"germanLibraryText":false,"overflow":false},{"site":"kuhl","title":"Knowledge base | Kühlturm","h1":["How can we help you?"],"logoAlts":["Ensotek — Kühlturm"],"heroPriority":[],"germanLibraryText":false,"overflow":false},{"site":"kuhl_catalog","englishLabels":true,"privacy":"/en/legal/privacy-policy","successEnglish":true}]
+### Ran Playwright code
+```js
+await (async (page) => {
+ const result=[];
+ await page.setViewportSize({width:1280,height:900});
+ for(const [site,url] of [['moe','https://www.karbonkompozit.com.tr/en'],['kuhl','https://kuhlturm.com/en/library']]){
+  await page.goto(url);await page.waitForLoadState('domcontentloaded');
+  const data=await page.evaluate(()=>({title:document.title,h1:[...document.querySelectorAll('h1')].map(x=>x.textContent),logoAlts:[...document.querySelectorAll('header img')].map(x=>x.getAttribute('alt')),heroPriority:[...document.images].filter(x=>x.src.includes('composite-materials')).map(x=>x.fetchPriority),germanLibraryText:/Wie können wir Ihnen|Häufige Themen|Technischen Support kontaktieren|Alle Beiträge ansehen/.test(document.body.innerText),overflow:document.documentElement.scrollWidth>innerWidth}));
+  result.push({site,...data});
+ }
+ await page.getByRole('button',{name:/Catalog|catalog/}).first().click();
+ const modal=page.getByRole('dialog');await modal.waitFor();
+ const text=await modal.innerText();
+ const privacy=await modal.getByRole('link',{name:'privacy information'}).getAttribute('href');
+ await modal.getByRole('textbox',{name:'Full name',exact:true}).fill('CHECKLIST TEST');
+ await modal.getByRole('textbox',{name:'Email',exact:true}).fill('catalog-browser@example.invalid');
+ await modal.getByRole('checkbox').first().check();
+ await page.route('**/api/catalog-requests',route=>route.fulfill({status:201,contentType:'application/json',body:'{"id":"isolated-catalog-ui"}'}));
+ await modal.getByRole('button',{name:'Request catalog',exact:true}).click();
+ await modal.getByText('Thank you!',{exact:true}).waitFor();
+ await page.unroute('**/api/catalog-requests');
+ result.push({site:'kuhl_catalog',englishLabels:!(/Katalog anfordern|Unternehmen|Nachricht|Vielen Dank/.test(text)),privacy,successEnglish:true});
+ await page.setViewportSize({width:390,height:844});await page.screenshot({path:'output/checklist-2026-09-09/business-sources/kuhl-catalog-en-mobile.png'});
+ return result;
+})(page);
+```

@@ -1,0 +1,1 @@
+{"results":[{"url":"/[locale]/product/[slug]","status":400},{"url":"/en/product/%5Bslug%5D","status":400}],"concreteAccepted":true,"mode":"Live invalid admin inputs, no records expected"}

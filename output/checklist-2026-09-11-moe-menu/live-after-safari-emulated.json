@@ -1,0 +1,32 @@
+{
+ "base": "https://www.karbonkompozit.com.tr",
+ "plain": {
+  "scrollY": 1787,
+  "headerBackdrop": "none",
+  "headerHeight": 69,
+  "navInsideHeader": false,
+  "navRect": {
+   "top": 0,
+   "height": 857
+  },
+  "vh": 857,
+  "menuLinks": 15,
+  "visibleLinks": 15,
+  "closeVisible": true
+ },
+ "safariEmulated": {
+  "scrollY": 1787,
+  "headerBackdrop": "blur(20px)",
+  "headerHeight": 69,
+  "navInsideHeader": false,
+  "navRect": {
+   "top": 0,
+   "height": 857
+  },
+  "vh": 857,
+  "menuLinks": 15,
+  "visibleLinks": 15,
+  "closeVisible": true
+ },
+ "pass": true
+}

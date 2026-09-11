@@ -1,0 +1,32 @@
+[
+  {
+    "file": "ensotek_de/frontend/src/features/site-settings/siteSettings.service.ts",
+    "sha256": "e39c2df0d336654e6902a66453ce70d988a77bf4af0b65c550ab5783e75cd485",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/lib/query-client.ts",
+    "sha256": "c137ea8dfacf1360fb7560fc4aea8295950706b43b8242c44ee233d3b51ba299",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/components/layout/SiteLogo.tsx",
+    "sha256": "2db731988dc61b911e7c7c314f623090d78d117a9808498288e145477cdf94bd",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/components/layout/header/Header.tsx",
+    "sha256": "74db4219035bb459305438ce869876f21b66587e29e1452c3734d4e5098e11ca",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/components/layout/footer/Footer.tsx",
+    "sha256": "679b57d06473c0fab6b076764a71420a38b27abc8580ebeafd724451d37a6fe8",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/providers/AosProvider.tsx",
+    "sha256": "06fbe5470b6c8653ce106ac114b965a0c23c0053dd5849309b4901f43dcdd632",
+    "matches": true
+  }
+]

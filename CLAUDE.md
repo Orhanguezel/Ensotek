@@ -10,7 +10,7 @@ Ensotek, soğutma kulesi çözümleri için geliştirilen bir B2B platform ailes
 - `ensotek_de/` — ensotek.de — `frontend` + `backend` + `admin_panel` — repo: `Orhanguezel/ensotek_de`
 - `ensotek_com_tr/` — ensotek.com.tr — `frontend` + `backend` + `admin_panel` — repo: `Orhanguezel/ensotek_com_tr`
 - `kompozit/` — karbonkompozit.com.tr — `frontend` + `backend` + `admin_panel` — repo: `Orhanguezel/kompozit`
-- `kuhlturm/` — kuhlturm.com — `frontend` (backend planlanıyor) — repo: `Orhanguezel/kuhlturm`
+- `kuhlturm/` — kuhlturm.com — `frontend` + `backend` + `admin_panel` — repo: `Orhanguezel/kuhlturm`
 - `ensotek_com/` — ensotek.com — planlanıyor
 - `docs/` — workspace dökümantasyonu, planlar, görseller
 - `ERP/` — **Ensotek ERP** — su soğutma kulesi üretim yönetim sistemi. **Kendi git
@@ -41,7 +41,7 @@ Her site projesi ve `ERP/` kendi git reposudur ve **kendi veritabanına** sahipt
 - **Deploy:** Her proje kendi reposundan deploy edilir. `.github/workflows/deploy.yml` poly-repo modeline göre güncellendi (`workflow_dispatch`).
 - **GitHub Secrets:** `VPS_HOST`, `VPS_USER`, `VPS_KEY`
 
-> ⚠️ **VPS migration bekliyor:** Canlı server hâlâ eski flat yapıda (`backend/`, `de_frontend/`, `admin_panel/`, `kuhlturm-frontend/` + `kompozit_backend/`). Yeni poly-repo yapısına taşınması, PM2 `cwd` değerlerinin güncellenmesi ve her dizinin ilgili proje reposuna bağlanması gerekiyor. Migration tamamlanana kadar eski deploy mantığı çalıştırılmamalı.
+> **10 Eylül 2026:** Dört web projesinin canlı dizinleri poly-repo yapıdadır. Kühlturm API 8089, admin 3023, frontend 3025; bağımsız DB `kuhlturm_live`. Eski flat migration uyarısı geçersizdir. Ayrıntı: `kuhlturm/docs/runtime-isolation-2026-09-10.md`. ERP kapsamı bu web denetiminde yeniden doğrulanmamıştır.
 
 ## DB Schema Kuralı
 

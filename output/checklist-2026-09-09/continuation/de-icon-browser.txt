@@ -1,0 +1,11 @@
+### Result
+{"fonts":[{"url":"https://ensotek.de/fonts/fontawesome-free/fa-solid-900.subset-b3d88aef.woff2","bytes":4448},{"url":"https://ensotek.de/fonts/fontawesome-free/fa-solid-900.subset-b3d88aef.woff2","bytes":300},{"url":"https://ensotek.de/fonts/fontawesome-free/fa-brands-400.subset-28de422d.woff2","bytes":2124},{"url":"https://ensotek.de/fonts/fontawesome-free/fa-solid-900.subset-b3d88aef.woff2","bytes":300}],"selects":[{"label":"Produkt auswählen"}],"fontErrors":[],"description":1,"imagePriority":"high","h1":1}
+### Ran Playwright code
+```js
+await (async(page)=>{const errors=[];const onConsole=m=>{if(/font|OTS|decode/i.test(m.text()))errors.push(m.text());};page.on('console',onConsole);await page.setViewportSize({width:390,height:844});await page.goto('https://ensotek.de/de/product/offene-kuehltuerme-einzelzelle-ctp-serie',{waitUntil:'networkidle'});await page.evaluate(()=>document.fonts.ready);const fonts=await page.evaluate(()=>performance.getEntriesByType('resource').filter(x=>x.name.includes('.woff2')).map(x=>({url:x.name,bytes:x.transferSize})));const selects=await page.locator('select').evaluateAll(xs=>xs.map(x=>({label:x.getAttribute('aria-label')})));await page.screenshot({path:'/home/orhan/Documents/Projeler/Ensotek/output/checklist-2026-09-09/continuation/de-product-mobile-final.png'});page.off('console',onConsole);if(errors.length||selects.some(x=>!x.label))throw Error(JSON.stringify({errors,selects}));return {fonts,selects,fontErrors:errors,description:await page.locator('head meta[name="description"]').count(),imagePriority:await page.locator('.technical__thumb img').first().getAttribute('fetchpriority'),h1:await page.locator('h1').count()};})(page);
+```
+### Page
+- Page URL: https://ensotek.de/de/product/offene-kuehltuerme-einzelzelle-ctp-serie
+- Page Title: Offene Kühltürme | Einzelzelle CTP-Serie | Ensotek – Ensotek
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T22-59-26-380Z.log#L64-L65

@@ -1,0 +1,38 @@
+[
+  {
+    "url": "https://kuhlturm.com/de/services/maintenance-repair",
+    "status": 308,
+    "target": "https://kuhlturm.com/de/service/maintenance-repair",
+    "targetStatus": 200
+  },
+  {
+    "url": "https://kuhlturm.com/de/service/regelmaessige-wartung-reparatur-kuehltuerme",
+    "status": 308,
+    "target": "https://kuhlturm.com/de/service/maintenance-repair",
+    "targetStatus": 200
+  },
+  {
+    "url": "https://kuhlturm.com/de/service/cooling-tower-maintenance-repair",
+    "status": 308,
+    "target": "https://kuhlturm.com/de/service/maintenance-repair",
+    "targetStatus": 200
+  },
+  {
+    "url": "https://kuhlturm.com/en/services/maintenance-repair",
+    "status": 308,
+    "target": "https://kuhlturm.com/en/service/maintenance-repair",
+    "targetStatus": 200
+  },
+  {
+    "url": "https://kuhlturm.com/en/service/regelmaessige-wartung-reparatur-kuehltuerme",
+    "status": 308,
+    "target": "https://kuhlturm.com/en/service/maintenance-repair",
+    "targetStatus": 200
+  },
+  {
+    "url": "https://kuhlturm.com/en/service/cooling-tower-maintenance-repair",
+    "status": 308,
+    "target": "https://kuhlturm.com/en/service/maintenance-repair",
+    "targetStatus": 200
+  }
+]

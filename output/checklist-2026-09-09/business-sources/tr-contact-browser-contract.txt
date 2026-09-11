@@ -1,0 +1,32 @@
+### Result
+{"mode":"Browser interception; no server writes or messages","results":[{"responseStatus":400,"responseHasId":false,"request":{"url":"https://www.ensotek.com.tr/api/contacts","payload":{"name":"Checklist Test","company":"","email":"checklist@example.invalid","phone":"+900000000000","message":"Kontrollü sözleşme testi; gerçek talep değildir.","locale":"tr","subject":"Web sitesi iletişim talebi"},"locale":"tr"},"success":false},{"responseStatus":201,"responseHasId":false,"request":{"url":"https://www.ensotek.com.tr/api/contacts","payload":{"name":"Checklist Test","company":"","email":"checklist@example.invalid","phone":"+900000000000","message":"Kontrollü sözleşme testi; gerçek talep değildir.","locale":"tr","subject":"Web sitesi iletişim talebi"},"locale":"tr"},"success":false},{"responseStatus":201,"responseHasId":true,"request":{"url":"https://www.ensotek.com.tr/api/contacts","payload":{"name":"Checklist Test","company":"","email":"checklist@example.invalid","phone":"+900000000000","message":"Kontrollü sözleşme testi; gerçek talep değildir.","locale":"tr","subject":"Web sitesi iletişim talebi"},"locale":"tr"},"success":true}]}
+### Ran Playwright code
+```js
+await (async page => {
+  const results=[];
+  for (const [status,body] of [[400,{error:'INVALID_BODY'}],[201,{ok:true}],[201,{id:'00000000-0000-4000-8000-000000000001'}]]) {
+    await page.goto('https://www.ensotek.com.tr/tr/iletisim');
+    let request;
+    await page.route('**/api/contacts',async route=>{
+      request={url:route.request().url(),payload:route.request().postDataJSON(),locale:route.request().headers()['accept-language']};
+      await route.fulfill({status,contentType:'application/json',body:JSON.stringify(body)});
+    });
+    await page.getByRole('textbox',{name:'Ad Soyad *',exact:true}).fill('Checklist Test');
+    await page.getByRole('textbox',{name:'E-posta *',exact:true}).fill('checklist@example.invalid');
+    await page.getByRole('textbox',{name:'Telefon',exact:true}).fill('+900000000000');
+    await page.getByRole('textbox',{name:'Mesajınız *',exact:true}).fill('Kontrollü sözleşme testi; gerçek talep değildir.');
+    await page.getByRole('button',{name:'Gönder',exact:true}).click();
+    await page.waitForTimeout(500);
+    const success=await page.getByRole('heading',{name:'Mesajınız Alındı',exact:false}).count();
+    results.push({responseStatus:status,responseHasId:!!body.id,request,success:success>0});
+    await page.unroute('**/api/contacts');
+  }
+  if(results[0].success||results[1].success||!results[2].success)throw Error('Contact acceptance failed');
+  return {mode:'Browser interception; no server writes or messages',results};
+})(page);
+```
+### Page
+- Page URL: https://www.ensotek.com.tr/tr/iletisim
+- Page Title: İletişim — Ensotek — Ensotek
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T22-59-26-380Z.log#L13

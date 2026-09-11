@@ -1,0 +1,16 @@
+### Result
+{"before":{"cookies":[],"tracking":[]},"slides":[{"cta":true,"href":"/en/offer"},{"cta":true,"href":"/en/solutions/water-cooling-towers"},{"cta":true,"href":"/en/service/site-survey-engineering"},{"cta":true,"href":"/en/service/maintenance-repair"},{"cta":true,"href":"/en/service/automation-scada"},{"cta":true,"href":"/en/service/spare-parts-components"},{"cta":true,"href":"/en/service/modernization-retrofit"},{"cta":true,"href":"/en/service/engineering-support"}],"after":["_ga_KXDKCDY0ET","_ga"]}
+### Ran Playwright code
+```js
+await (async (page) => {
+  await page.setViewportSize({width:390,height:844});
+  const before={cookies:(await page.context().cookies()).map(c=>c.name),tracking:await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/google-analytics|googletagmanager/.test(r.name)).map(r=>r.name.split('?')[0]))};
+  await page.getByRole('button',{name:'Reject',exact:true}).click();
+  const slides=await page.locator('section[aria-label="Hero slider"]').evaluate(s=>Array.from(s.querySelectorAll('[inert], [aria-hidden="false"]')).filter(n=>n.querySelector('a')).map(n=>{const a=n.querySelector('a').getBoundingClientRect(),b=n.getBoundingClientRect();return {cta:a.bottom<=b.bottom,href:n.querySelector('a').getAttribute('href')};}));
+  await page.screenshot({path:'output/playwright/kuhlturm-live-checklist-mobile.png',fullPage:false});
+  await page.getByRole('button',{name:'Cookie preferences',exact:true}).click();
+  await page.getByRole('button',{name:'Allow analytics',exact:true}).click();
+  await page.waitForTimeout(5000);
+  return {before,slides,after:(await page.context().cookies()).map(c=>c.name)};
+})(page);
+```

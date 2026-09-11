@@ -1,0 +1,402 @@
+[
+  {
+    "tenant": "ensotek",
+    "endpoint": "gsc/analytics",
+    "http": 200,
+    "error": null,
+    "errors": {},
+    "status": "ok",
+    "range": {
+      "startDate": "2026-08-10",
+      "endDate": "2026-09-06",
+      "range": 28
+    },
+    "totals": {
+      "current": {
+        "clicks": 0,
+        "impressions": 211,
+        "ctr": 0,
+        "position": 10.180094786729859
+      },
+      "previous": {
+        "clicks": 3,
+        "impressions": 183,
+        "ctr": 0.01639344262295082,
+        "position": 28.508196721311474
+      },
+      "comparable": true,
+      "source": "ungrouped",
+      "aggregation": "byProperty",
+      "deltaPct": {
+        "clicks": -100,
+        "impressions": 15.300546448087433,
+        "ctr": -100,
+        "position": -64.29063933349504
+      }
+    },
+    "queryType": {
+      "branded": {
+        "queries": 1,
+        "clicks": 0,
+        "impressions": 12
+      },
+      "nonBranded": {
+        "queries": 10,
+        "clicks": 0,
+        "impressions": 26
+      }
+    },
+    "reliableBands": 0,
+    "opportunities": 0
+  },
+  {
+    "tenant": "ensotek",
+    "endpoint": "ga4/report",
+    "http": 200,
+    "error": null,
+    "errors": null,
+    "property": "properties/504406901",
+    "range": 28,
+    "dateRangeMeta": {
+      "current": {
+        "startDate": "27daysAgo",
+        "endDate": "today",
+        "dayCount": 28
+      },
+      "previous": {
+        "startDate": "55daysAgo",
+        "endDate": "28daysAgo",
+        "dayCount": 28
+      },
+      "includesToday": true,
+      "note": "Bugun dahil; GA4 gec islenen event ve gelir metrikleri gun icinde eksik gorunebilir."
+    },
+    "metrics": {
+      "activeUsers": {
+        "current": 2,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "sessions": {
+        "current": 2,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "screenPageViews": {
+        "current": 3,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "conversions": {
+        "current": 0,
+        "previous": 0,
+        "deltaPct": null
+      }
+    },
+    "reportErrors": {
+      "dailyComparisonError": null,
+      "ecommerceError": null
+    },
+    "sourceRows": 3
+  },
+  {
+    "tenant": "moe-kompozit-4de92704",
+    "endpoint": "gsc/analytics",
+    "http": 200,
+    "error": null,
+    "errors": {},
+    "status": "ok",
+    "range": {
+      "startDate": "2026-08-10",
+      "endDate": "2026-09-06",
+      "range": 28
+    },
+    "totals": {
+      "current": {
+        "clicks": 24,
+        "impressions": 1268,
+        "ctr": 0.01892744479495268,
+        "position": 9.824921135646688
+      },
+      "previous": {
+        "clicks": 8,
+        "impressions": 538,
+        "ctr": 0.01486988847583643,
+        "position": 9.327137546468402
+      },
+      "comparable": true,
+      "source": "ungrouped",
+      "aggregation": "byProperty",
+      "deltaPct": {
+        "clicks": 200,
+        "impressions": 135.68773234200745,
+        "ctr": 27.28706624605679,
+        "position": 5.336938441170152
+      }
+    },
+    "queryType": {
+      "branded": {
+        "queries": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "nonBranded": {
+        "queries": 49,
+        "clicks": 3,
+        "impressions": 395
+      }
+    },
+    "reliableBands": 0,
+    "opportunities": 0
+  },
+  {
+    "tenant": "moe-kompozit-4de92704",
+    "endpoint": "ga4/report",
+    "http": 200,
+    "error": null,
+    "errors": null,
+    "property": "properties/547431151",
+    "range": 28,
+    "dateRangeMeta": {
+      "current": {
+        "startDate": "27daysAgo",
+        "endDate": "today",
+        "dayCount": 28
+      },
+      "previous": {
+        "startDate": "55daysAgo",
+        "endDate": "28daysAgo",
+        "dayCount": 28
+      },
+      "includesToday": true,
+      "note": "Bugun dahil; GA4 gec islenen event ve gelir metrikleri gun icinde eksik gorunebilir."
+    },
+    "metrics": {
+      "activeUsers": {
+        "current": 68,
+        "previous": 36,
+        "deltaPct": 88.88888888888889
+      },
+      "sessions": {
+        "current": 86,
+        "previous": 50,
+        "deltaPct": 72
+      },
+      "screenPageViews": {
+        "current": 178,
+        "previous": 86,
+        "deltaPct": 106.9767441860465
+      },
+      "conversions": {
+        "current": 0,
+        "previous": 0,
+        "deltaPct": null
+      }
+    },
+    "reportErrors": {
+      "dailyComparisonError": null,
+      "ecommerceError": null
+    },
+    "sourceRows": 10
+  },
+  {
+    "tenant": "ensotek-9d0af55c",
+    "endpoint": "gsc/analytics",
+    "http": 200,
+    "error": null,
+    "errors": {},
+    "status": "ok",
+    "range": {
+      "startDate": "2026-08-10",
+      "endDate": "2026-09-06",
+      "range": 28
+    },
+    "totals": {
+      "current": {
+        "clicks": 56,
+        "impressions": 999,
+        "ctr": 0.056056056056056056,
+        "position": 8.23923923923924
+      },
+      "previous": {
+        "clicks": 41,
+        "impressions": 886,
+        "ctr": 0.046275395033860044,
+        "position": 6.867945823927765
+      },
+      "comparable": true,
+      "source": "ungrouped",
+      "aggregation": "byProperty",
+      "deltaPct": {
+        "clicks": 36.58536585365854,
+        "impressions": 12.75395033860045,
+        "ctr": 21.135769916257725,
+        "position": 19.966572982185156
+      }
+    },
+    "queryType": {
+      "branded": {
+        "queries": 3,
+        "clicks": 34,
+        "impressions": 292
+      },
+      "nonBranded": {
+        "queries": 28,
+        "clicks": 2,
+        "impressions": 120
+      }
+    },
+    "reliableBands": 0,
+    "opportunities": 0
+  },
+  {
+    "tenant": "ensotek-9d0af55c",
+    "endpoint": "ga4/report",
+    "http": 200,
+    "error": null,
+    "errors": null,
+    "property": "properties/553429329",
+    "range": 28,
+    "dateRangeMeta": {
+      "current": {
+        "startDate": "27daysAgo",
+        "endDate": "today",
+        "dayCount": 28
+      },
+      "previous": {
+        "startDate": "55daysAgo",
+        "endDate": "28daysAgo",
+        "dayCount": 28
+      },
+      "includesToday": true,
+      "note": "Bugun dahil; GA4 gec islenen event ve gelir metrikleri gun icinde eksik gorunebilir."
+    },
+    "metrics": {
+      "activeUsers": {
+        "current": 3,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "sessions": {
+        "current": 3,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "screenPageViews": {
+        "current": 3,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "conversions": {
+        "current": 0,
+        "previous": 0,
+        "deltaPct": null
+      }
+    },
+    "reportErrors": {
+      "dailyComparisonError": null,
+      "ecommerceError": null
+    },
+    "sourceRows": 2
+  },
+  {
+    "tenant": "kuhlturm",
+    "endpoint": "gsc/analytics",
+    "http": 200,
+    "error": null,
+    "errors": {},
+    "status": "ok",
+    "range": {
+      "startDate": "2026-08-10",
+      "endDate": "2026-09-06",
+      "range": 28
+    },
+    "totals": {
+      "current": {
+        "clicks": 1,
+        "impressions": 101,
+        "ctr": 0.009900990099009901,
+        "position": 22.89108910891089
+      },
+      "previous": {
+        "clicks": 0,
+        "impressions": 156,
+        "ctr": 0,
+        "position": 35.61538461538461
+      },
+      "comparable": true,
+      "source": "ungrouped",
+      "aggregation": "byProperty",
+      "deltaPct": {
+        "clicks": null,
+        "impressions": -35.256410256410255,
+        "ctr": null,
+        "position": -35.72696362508821
+      }
+    },
+    "queryType": {
+      "branded": {
+        "queries": 0,
+        "clicks": 0,
+        "impressions": 0
+      },
+      "nonBranded": {
+        "queries": 14,
+        "clicks": 0,
+        "impressions": 64
+      }
+    },
+    "reliableBands": 0,
+    "opportunities": 0
+  },
+  {
+    "tenant": "kuhlturm",
+    "endpoint": "ga4/report",
+    "http": 200,
+    "error": null,
+    "errors": null,
+    "property": "properties/553360294",
+    "range": 28,
+    "dateRangeMeta": {
+      "current": {
+        "startDate": "27daysAgo",
+        "endDate": "today",
+        "dayCount": 28
+      },
+      "previous": {
+        "startDate": "55daysAgo",
+        "endDate": "28daysAgo",
+        "dayCount": 28
+      },
+      "includesToday": true,
+      "note": "Bugun dahil; GA4 gec islenen event ve gelir metrikleri gun icinde eksik gorunebilir."
+    },
+    "metrics": {
+      "activeUsers": {
+        "current": 3,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "sessions": {
+        "current": 3,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "screenPageViews": {
+        "current": 4,
+        "previous": 0,
+        "deltaPct": null
+      },
+      "conversions": {
+        "current": 0,
+        "previous": 0,
+        "deltaPct": null
+      }
+    },
+    "reportErrors": {
+      "dailyComparisonError": null,
+      "ecommerceError": null
+    },
+    "sourceRows": 2
+  }
+]

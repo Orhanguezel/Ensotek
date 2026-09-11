@@ -1,0 +1,11 @@
+### Result
+{"summary":"46 rakip grubu / 48 alan adı.","ctp":"CTP Mühendislik: susogutmakulesi.com.tr, susogutmakuleleri.com, ctpmuhendislik.com","policy":"Marka kapsamı: ensotek.com.tr, ensotek.de, ensotek.com, kuhlturm.com. Şirket gruplaması güncel eşlemeye dayanır; ham sıra ve sorgular korunur."}
+### Ran Playwright code
+```js
+await (async(page)=>{const r=await page.request.get('http://127.0.0.1:38641/session-7f329a1681ab');const {token}=await r.json();await page.context().addCookies([{name:'access_token',value:token,domain:'panel.tanitio.com',path:'/',httpOnly:true,secure:true,sameSite:'Lax'}]);await page.route('https://panel.tanitio.com/**',async route=>{const path=route.request().url().replace('https://panel.tanitio.com','');if(path.startsWith('/api/'))return route.continue();const response=await route.fetch({url:'http://127.0.0.1:3434'+path});await route.fulfill({response});});await page.goto('https://panel.tanitio.com/rakip-kesfi?tenantKey=ensotek-9d0af55c');await page.getByText(/rakip grubu \/ /).waitFor();return {summary:await page.getByText(/rakip grubu \/ /).innerText(),ctp:await page.getByText('CTP Mühendislik:',{exact:true}).locator('..').innerText(),policy:await page.getByText(/Marka kapsamı:/).innerText()};})(page);
+```
+### Page
+- Page URL: https://panel.tanitio.com/rakip-kesfi?tenantKey=ensotek-9d0af55c
+- Page Title: Tanitio — AI Destekli Pazarlama Operasyon Merkezi
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T20-47-56-263Z.log#L32-L53

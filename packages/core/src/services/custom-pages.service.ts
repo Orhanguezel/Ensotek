@@ -9,7 +9,7 @@ export function getCustomPages(
   return apiFetch<CustomPage[]>(
     baseUrl,
     API_ENDPOINTS.PUBLIC.CUSTOM_PAGES.LIST,
-    params as Record<string, unknown>,
+    { ...params, locale: params?.language } as Record<string, unknown>,
   );
 }
 
@@ -21,7 +21,7 @@ export function getCustomPageBySlug(
   return apiFetch<CustomPage>(
     baseUrl,
     API_ENDPOINTS.PUBLIC.CUSTOM_PAGES.BY_SLUG(slug),
-    { language: locale },
+    { locale, language: locale },
   );
 }
 

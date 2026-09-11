@@ -28,6 +28,7 @@ const authPlugin: FastifyPluginAsync = async (app) => {
     try {
       // fastify-jwt header veya cookie'den token’ı doğrular
       await req.jwtVerify();
+      if ((req.user as {purpose?:unknown})?.purpose) throw new Error('invalid_access_token');
     } catch {
       return reply.code(401).send({ error: { message: "invalid_token" } });
     }

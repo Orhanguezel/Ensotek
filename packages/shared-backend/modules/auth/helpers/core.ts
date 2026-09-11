@@ -5,7 +5,7 @@ import { verify as argonVerify } from 'argon2';
 import { env } from '../../../core/env';
 import { repoCreateRefreshToken } from '../repository';
 
-export type Role = 'admin' | 'editor' | 'carrier' | 'customer' | 'dealer';
+export type Role = 'admin' | 'editor' | 'carrier' | 'customer' | 'dealer' | 'user';
 
 export interface JWTPayload {
   sub: string;

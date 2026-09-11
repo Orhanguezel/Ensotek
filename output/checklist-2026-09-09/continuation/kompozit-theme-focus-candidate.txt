@@ -1,0 +1,12 @@
+### Result
+{"opened":{"inert":false,"focusInside":true,"locked":true},"tabStaysInside":true,"closed":{"inert":true,"focusReturned":true,"scrollUnlocked":true},"light":{"mode":"light","overlay":"#050505","onMedia":"#fffaf0"},"dark":{"mode":"dark","overlay":"#050505","onMedia":"#fffaf0"}}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.getByRole('button',{name:'Reject',exact:true}).click();await page.setViewportSize({width:390,height:844});const opener=page.getByRole('button',{name:'Open menu',exact:true});await opener.click();await page.waitForTimeout(800);const menu=page.locator('#mobile-site-navigation');const opened=await menu.evaluate(n=>({inert:n.inert,focusInside:n.contains(document.activeElement),locked:document.body.style.overflow==='hidden'}));const fields=menu.locator('a[href],button:not([disabled])');await fields.last().focus();await page.keyboard.press('Tab');const wrap=await menu.evaluate(n=>n.contains(document.activeElement));await page.keyboard.press('Escape');const closed=await menu.evaluate(n=>({inert:n.inert,focusReturned:document.activeElement?.getAttribute('aria-controls')===n.id,scrollUnlocked:document.body.style.overflow!=='hidden'}));await page.setViewportSize({width:1280,height:900});await page.getByRole('button',{name:'Switch to light mode'}).click();await page.waitForTimeout(500);const light=await page.evaluate(()=>({mode:document.documentElement.dataset.themeMode,overlay:getComputedStyle(document.documentElement).getPropertyValue('--color-media-overlay').trim(),onMedia:getComputedStyle(document.documentElement).getPropertyValue('--color-on-media').trim()}));await page.screenshot({path:'output/playwright/remaining-kompozit-light.png'});await page.getByRole('button',{name:'Switch to dark mode'}).click();await page.waitForTimeout(500);const dark=await page.evaluate(()=>({mode:document.documentElement.dataset.themeMode,overlay:getComputedStyle(document.documentElement).getPropertyValue('--color-media-overlay').trim(),onMedia:getComputedStyle(document.documentElement).getPropertyValue('--color-on-media').trim()}));await page.screenshot({path:'output/playwright/remaining-kompozit-dark.png'});return {opened,tabStaysInside:wrap,closed,light,dark};})(page);
+```
+### Page
+- Page URL: http://127.0.0.1:3430/en
+- Page Title: Carbon Fiber, FRP and Fiberglass Composite Manufacturing - MO...
+- Console: 5 errors, 0 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T20-22-06-903Z.log#L2-L5

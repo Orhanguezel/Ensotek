@@ -1,0 +1,9 @@
+### Result
+{"region":{"top":73,"bottom":593,"height":520},"firstCTA":{"text":"Angebot anfordern","top":610.5,"bottom":660.09375},"h2":"Ihr Partner für industrielle Kühlturmlösungen"}
+### Ran Playwright code
+```js
+await (async (page) => {await page.setViewportSize({width:390,height:844});await page.goto("https://kuhlturm.com/de");await page.waitForTimeout(800);return await page.evaluate(()=>{const region=document.querySelector("[aria-label=\"Hero slider\"]");const a=region?.querySelector("a");const h=region?.querySelector("h2");const r=region?.getBoundingClientRect();const ar=a?.getBoundingClientRect();return {region:r?{top:r.top,bottom:r.bottom,height:r.height}:null,firstCTA:ar?{text:a.innerText,top:ar.top,bottom:ar.bottom}:null,h2:h?.innerText};});})(page);
+```
+### Page
+- Page URL: https://kuhlturm.com/de
+- Page Title: Kühlturm — Professionelle Kühllösungen

@@ -32,7 +32,7 @@ export async function requireAuth(req: FastifyRequest, _reply: FastifyReply) {
     try {
       await req.jwtVerify<JwtUser>();
       const u = (req as unknown as { user?: JwtUser }).user;
-      if (!u) throw authError("invalid_token");
+      if (!u || u.purpose) throw authError("invalid_token");
       if (u.sub) setSentryUserContext(String(u.sub));
       return;
     } catch (err) {
@@ -48,6 +48,7 @@ export async function requireAuth(req: FastifyRequest, _reply: FastifyReply) {
   if (cookieToken) {
     try {
       const payload = (await req.server.jwt.verify(cookieToken)) as JwtUser;
+      if (payload.purpose) throw new Error('invalid_access_token');
       (req as unknown as { user: JwtUser }).user = payload;
       if (payload.sub) setSentryUserContext(String(payload.sub));
       return;

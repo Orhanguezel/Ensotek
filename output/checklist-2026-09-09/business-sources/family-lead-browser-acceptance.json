@@ -1,0 +1,277 @@
+{
+  "mode": "Production UI and compiled tracking; form and GA delivery intercepted; no production test lead events sent",
+  "results": [
+    {
+      "site": "https://www.ensotek.com.tr",
+      "phase": "denied",
+      "requestObserved": true,
+      "leadEvents": []
+    },
+    {
+      "site": "https://www.ensotek.com.tr",
+      "phase": "granted",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/tr/blog/sogutma-kulesi-secim-rehberi",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": [
+        {
+          "name": "generate_lead",
+          "params": {
+            "form_name": "contact_request",
+            "send_to": "G-6FRMLLS0J9",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    },
+    {
+      "site": "https://www.ensotek.com.tr",
+      "phase": "error",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/tr/blog/sogutma-kulesi-secim-rehberi",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://www.ensotek.com.tr",
+      "phase": "honeypot",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/tr/blog/sogutma-kulesi-secim-rehberi",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://www.ensotek.com.tr",
+      "microEvents": [
+        {
+          "name": "click_phone",
+          "params": {
+            "send_to": "G-6FRMLLS0J9",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    },
+    {
+      "site": "https://ensotek.de",
+      "phase": "denied",
+      "requestObserved": true,
+      "leadEvents": []
+    },
+    {
+      "site": "https://ensotek.de",
+      "phase": "granted",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": [
+        {
+          "name": "generate_lead",
+          "params": {
+            "form_name": "contact_request",
+            "send_to": "G-7S6TW9CNRJ",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    },
+    {
+      "site": "https://ensotek.de",
+      "phase": "error",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://ensotek.de",
+      "phase": "honeypot",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://ensotek.de",
+      "microEvents": [
+        {
+          "name": "click_phone",
+          "params": {
+            "send_to": "G-7S6TW9CNRJ",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    },
+    {
+      "site": "https://kuhlturm.com",
+      "phase": "denied",
+      "requestObserved": true,
+      "leadEvents": []
+    },
+    {
+      "site": "https://kuhlturm.com",
+      "phase": "granted",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": [
+        {
+          "name": "generate_lead",
+          "params": {
+            "form_name": "contact_request",
+            "send_to": "G-KXDKCDY0ET",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    },
+    {
+      "site": "https://kuhlturm.com",
+      "phase": "error",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://kuhlturm.com",
+      "phase": "honeypot",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://kuhlturm.com",
+      "microEvents": [
+        {
+          "name": "click_phone",
+          "params": {
+            "send_to": "G-KXDKCDY0ET",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    },
+    {
+      "site": "https://www.karbonkompozit.com.tr",
+      "phase": "denied",
+      "requestObserved": true,
+      "leadEvents": []
+    },
+    {
+      "site": "https://www.karbonkompozit.com.tr",
+      "phase": "granted",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/products/composite-train-parts",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": [
+        {
+          "name": "generate_lead",
+          "params": {
+            "form_name": "contact_request",
+            "send_to": "G-S8V8GTJHZV",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    },
+    {
+      "site": "https://www.karbonkompozit.com.tr",
+      "phase": "error",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/products/composite-train-parts",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://www.karbonkompozit.com.tr",
+      "phase": "honeypot",
+      "requestObserved": true,
+      "attribution": {
+        "analytics_consent": true,
+        "landing_path": "/en/products/composite-train-parts",
+        "utm_source": "instagram",
+        "utm_medium": "social",
+        "utm_campaign": "checklist_browser"
+      },
+      "leadEvents": []
+    },
+    {
+      "site": "https://www.karbonkompozit.com.tr",
+      "microEvents": [
+        {
+          "name": "click_phone",
+          "params": {
+            "send_to": "G-S8V8GTJHZV",
+            "language": "en",
+            "page_path": "/en/contact"
+          }
+        }
+      ]
+    }
+  ]
+}

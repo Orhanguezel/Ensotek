@@ -1,0 +1,20 @@
+[
+  {
+    "url": "https://kuhlturm.com/logo/ensotek-logo-main.png",
+    "status": 200,
+    "mime": "image/png",
+    "bytes": 7945
+  },
+  {
+    "url": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+    "status": 200,
+    "mime": "image/png",
+    "bytes": 32427
+  },
+  {
+    "url": "https://ensotek.de/logo/ensotek-logo-main.png",
+    "status": 200,
+    "mime": "image/png",
+    "bytes": 7945
+  }
+]

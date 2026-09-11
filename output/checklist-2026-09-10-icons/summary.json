@@ -1,0 +1,22 @@
+{
+  "fetchTime": "2026-09-10T09:29:06.571Z",
+  "categories": {
+    "performance": 65,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "largest-contentful-paint": 4308.9529999999995,
+    "total-blocking-time": 645,
+    "cumulative-layout-shift": 0
+  },
+  "fieldCWV": "not established",
+  "iconResources": [
+    {
+      "url": "https://ensotek.de/app/css/fontawesome-core-e74b8f1227cc.css",
+      "transferSize": 4277,
+      "resourceSize": 29531
+    }
+  ]
+}

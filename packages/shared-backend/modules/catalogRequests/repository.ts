@@ -20,7 +20,7 @@ export async function resolveCatalogUrl(locale?: string | null): Promise<string>
     .where(eq(siteSettings.key, 'catalog_pdf'));
   const byLocale = new Map(rows.map((row) => [row.locale, row.value]));
   const raw = candidates.map((key) => byLocale.get(key)).find((value) => typeof value === 'string' && value.trim());
-  if (!raw) return 'https://www.ensotek.de/uploads/ensotek/catalog/ensotek-katalog.pdf';
+  if (!raw) throw new Error('catalog_not_configured');
   try {
     const parsed = JSON.parse(raw);
     return typeof parsed === 'string' ? parsed : String(parsed?.url ?? parsed?.href ?? raw);
@@ -143,15 +143,16 @@ export async function repoMarkCatalogVerificationMailSent(id: string): Promise<C
   return repoGetCatalogRequest(id);
 }
 
-export async function repoMarkCatalogEmailVerified(id: string): Promise<CatalogRequestRow | null> {
-  await db.update(leadCatalogDownloads).set({
+export async function repoMarkCatalogEmailVerified(id: string, expectedHash: string): Promise<boolean> {
+  const result = await db.update(leadCatalogDownloads).set({
     email_verified_at: new Date(),
     verification_token_hash: null,
     verification_expires_at: null,
     failure_reason: null,
     updated_at: new Date(),
-  }).where(eq(leadCatalogDownloads.id, id));
-  return repoGetCatalogRequest(id);
+  }).where(and(eq(leadCatalogDownloads.id, id), eq(leadCatalogDownloads.verification_token_hash, expectedHash), gte(leadCatalogDownloads.verification_expires_at, new Date()))).execute();
+  const header = Array.isArray(result) ? result[0] : result;
+  return Number((header as { affectedRows?: number }).affectedRows) === 1;
 }
 
 export async function repoDeleteCatalogRequest(id: string): Promise<boolean> {

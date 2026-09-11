@@ -1,0 +1,2 @@
+### Error
+Error: Rejected/footer acceptance failed https://www.karbonkompozit.com.tr {"saved":"denied","dialogs":0,"footerButtons":1,"fixedPreferences":0,"overflow":true}

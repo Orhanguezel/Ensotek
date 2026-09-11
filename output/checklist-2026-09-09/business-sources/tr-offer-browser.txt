@@ -1,0 +1,33 @@
+### Result
+{"mode":"Live offer UI; form response and analytics delivery intercepted","results":[{"marketingRequested":false,"payload":{"customer_name":"Checklist Browser","company_name":null,"email":"browser@example.com","phone":"+900000000000","subject":"Website quote request","message":"Browser contract acceptance; intercepted request.","consent_terms":true,"consent_marketing":false,"locale":"en","source":"ensotek_com_tr","form_data":{"source":"frontend_offer_page","attribution":{"analytics_consent":true,"landing_path":"/tr/blog/sogutma-kulesi-secim-rehberi","utm_source":"instagram","utm_medium":"social","utm_campaign":"checklist_browser"}}},"events":[{"form_name":"quote_request","send_to":"G-6FRMLLS0J9","language":"en","page_path":"/en/offer"}]},{"marketingRequested":true,"payload":{"customer_name":"Checklist Browser","company_name":null,"email":"browser@example.com","phone":"+900000000000","subject":"Website quote request","message":"Browser contract acceptance; intercepted request.","consent_terms":true,"consent_marketing":true,"locale":"en","source":"ensotek_com_tr","form_data":{"source":"frontend_offer_page","attribution":{"analytics_consent":true,"landing_path":"/tr/blog/sogutma-kulesi-secim-rehberi","utm_source":"instagram","utm_medium":"social","utm_campaign":"checklist_browser"}}},"events":[{"form_name":"quote_request","send_to":"G-6FRMLLS0J9","language":"en","page_path":"/en/offer"}]}]}
+### Ran Playwright code
+```js
+await (async page => {
+ const results=[];
+ await page.route(/https:\/\/[^/]*(google-analytics\.com|analytics\.google\.com)\/.*collect/,r=>r.fulfill({status:204}));
+ for(const marketing of [false,true]){
+  await page.goto('https://www.ensotek.com.tr/en/offer');await page.waitForTimeout(600);
+  let payload;
+  await page.route('**/api/offers',async route=>{payload=route.request().postDataJSON();await route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({id:'browser-offer-'+marketing})});});
+  await page.locator('[name="customer_name"]').fill('Checklist Browser');
+  await page.locator('[name="email"]').fill('browser@example.com');
+  await page.locator('[name="phone"]').fill('+900000000000');
+  await page.locator('[name="message"]').fill('Browser contract acceptance; intercepted request.');
+  await page.locator('[name="consent_terms"]').check();
+  if(marketing)await page.locator('[name="consent_marketing"]').check();
+  await page.locator('form').filter({has:page.locator('[name="customer_name"]')}).locator('button[type="submit"]').click();
+  await page.waitForTimeout(600);
+  const events=await page.evaluate(()=>(window.dataLayer||[]).filter(x=>x?.[0]==='event'&&x[1]==='generate_lead').map(x=>x[2]));
+  if(!payload||payload.consent_marketing!==marketing||!payload.consent_terms||events.length!==1||events[0].form_name!=='quote_request')throw Error('Offer contract failure');
+  results.push({marketingRequested:marketing,payload,events});
+  await page.unroute('**/api/offers');
+ }
+ await page.unroute(/https:\/\/[^/]*(google-analytics\.com|analytics\.google\.com)\/.*collect/);
+ return {mode:'Live offer UI; form response and analytics delivery intercepted',results};
+})(page);
+```
+### Page
+- Page URL: https://www.ensotek.com.tr/en/offer
+- Page Title: Get a Quote — Ensotek — Ensotek
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T22-59-26-380Z.log#L40-L41

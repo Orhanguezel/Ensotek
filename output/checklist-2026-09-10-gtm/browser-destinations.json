@@ -1,0 +1,46 @@
+{
+  "url": "https://ensotek.de/en",
+  "denied": {
+    "scripts": 0,
+    "events": 0
+  },
+  "granted": {
+    "scripts": [
+      {
+        "path": "/gtm.js",
+        "id": "GTM-WV5FRN93"
+      },
+      {
+        "path": "/gtag/js",
+        "id": "G-XECX77LB6M"
+      },
+      {
+        "path": "/gtag/js",
+        "id": "G-7S6TW9CNRJ"
+      }
+    ],
+    "responses": [
+      {
+        "path": "/gtm.js",
+        "id": "GTM-WV5FRN93",
+        "status": 200
+      },
+      {
+        "path": "/gtag/js",
+        "id": "G-7S6TW9CNRJ",
+        "status": 200
+      }
+    ],
+    "events": [
+      {
+        "measurementId": "G-7S6TW9CNRJ",
+        "event": "page_view",
+        "host": "region1.google-analytics.com",
+        "method": "POST",
+        "blocked": true
+      }
+    ]
+  },
+  "observationMs": 5000,
+  "allCollectionRequestsBlocked": true
+}

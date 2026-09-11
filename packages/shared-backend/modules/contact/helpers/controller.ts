@@ -19,7 +19,8 @@ export function escapeContactHtml(str: string): string {
 }
 
 export function getContactRequestLocale(req: FastifyRequest): string | null {
-  return (req as LocaleRequest).locale ?? null;
+  const header = req.headers['x-locale'];
+  return (req as LocaleRequest).locale ?? (typeof header === 'string' ? header : null);
 }
 
 export function getContactRequestMeta(req: FastifyRequest) {

@@ -1,0 +1,260 @@
+[
+  {
+    "path": "/api/products?locale=de&item_type=product&limit=200",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameIds": true,
+    "sourceCount": 4,
+    "candidateCount": 4
+  },
+  {
+    "path": "/api/products/by-slug/offene-kuehltuerme-dreifachzelle-tctp-serie?locale=de",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/offene-kuehltuerme-doppelzelle-dctp-serie?locale=de",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/offene-kuehltuerme-einzelzelle-ctp-serie?locale=de",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/geschlossene-kuehltuerme-cc-ctp-cc-dctp?locale=de",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products?locale=de&item_type=sparepart&limit=200",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameIds": true,
+    "sourceCount": 13,
+    "candidateCount": 13
+  },
+  {
+    "path": "/api/products/by-slug/lufteinlasslamellen?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/raschig-ringe-pp?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/spritzgitter-fuellung-splash-grid?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/pp-spritzring-fuellung-bigudi?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/pvc-folienfuellung-filmfuellung?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/drift-eliminator-tropfenabscheider?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/frp-pultrusionsprofil?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/kuehlturmduese?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/wasserverteilungssystem?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/servicefenster?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/axialventilator-fuer-kuehltuerme?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/vibrationsschalter?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/wasserkuehlturmmotor-getriebe-luefter?locale=de",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/services?locale=de&limit=200",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products?locale=en&item_type=product&limit=200",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameIds": true,
+    "sourceCount": 4,
+    "candidateCount": 4
+  },
+  {
+    "path": "/api/products/by-slug/open-circuit-cooling-towers-triple-cell-tctp-series?locale=en",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/open-circuit-cooling-towers-double-cell-dctp-series?locale=en",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/open-circuit-cooling-towers-single-cell-ctp-series?locale=en",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/closed-circuit-cooling-towers-cc-ctp-cc-dctp?locale=en",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products?locale=en&item_type=sparepart&limit=200",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameIds": true,
+    "sourceCount": 13,
+    "candidateCount": 13
+  },
+  {
+    "path": "/api/products/by-slug/air-inlet-louvers?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/raschig-rings-pp?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/splash-grid-fill?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/pp-ring-fill-spritzring?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/pvc-film-fill?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/drift-eliminators?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/frp-pultrusion-profiles?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/nozzle?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/water-distribution-system?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/service-window?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/cooling-tower-axial-fan?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/vibration-switch?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/products/by-slug/motor-and-reducer-fan-group?locale=en",
+    "sourceStatus": 404,
+    "candidateStatus": 404,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/services?locale=en&limit=200",
+    "sourceStatus": 200,
+    "candidateStatus": 200,
+    "sameDetail": true
+  },
+  {
+    "path": "/api/admin/products",
+    "candidateStatus": 401,
+    "anonymousDenied": true
+  },
+  {
+    "path": "/api/admin/services",
+    "candidateStatus": 401,
+    "anonymousDenied": true
+  }
+]

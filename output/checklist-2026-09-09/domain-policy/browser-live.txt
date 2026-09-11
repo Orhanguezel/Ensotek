@@ -1,0 +1,9 @@
+### Result
+{"url":"https://panel.tanitio.com/rakip-kesfi?tenantKey=ensotek-9d0af55c","summary":"46 rakip grubu / 48 alan adı.","ctp":"CTP Mühendislik: susogutmakulesi.com.tr, susogutmakuleleri.com, ctpmuhendislik.com","policy":"Marka kapsamı: ensotek.com.tr, ensotek.de, ensotek.com, kuhlturm.com. Şirket gruplaması güncel eşlemeye dayanır; ham sıra ve sorgular korunur."}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.unrouteAll({behavior:'ignoreErrors'});await page.goto('https://panel.tanitio.com/rakip-kesfi?tenantKey=ensotek-9d0af55c');await page.getByText('46 rakip grubu / 48 alan adı.',{exact:true}).waitFor();const summary=await page.getByText(/rakip grubu \/ /).innerText();const ctp=await page.getByText('CTP Mühendislik:',{exact:true}).locator('..').innerText();return {url:page.url(),summary,ctp,policy:await page.getByText(/Marka kapsamı:/).innerText()};})(page);
+```
+### Page
+- Page URL: https://panel.tanitio.com/rakip-kesfi?tenantKey=ensotek-9d0af55c
+- Page Title: Tanitio — AI Destekli Pazarlama Operasyon Merkezi

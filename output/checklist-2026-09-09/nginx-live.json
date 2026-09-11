@@ -1,0 +1,12 @@
+{
+  "hostRedirect": {
+    "status": 301,
+    "location": "https://kuhlturm.com/en/product?check=1"
+  },
+  "css": {
+    "path": "/_next/static/chunks/32ea04861577a165.css",
+    "status": 200,
+    "encoding": "gzip",
+    "vary": "Accept-Encoding"
+  }
+}

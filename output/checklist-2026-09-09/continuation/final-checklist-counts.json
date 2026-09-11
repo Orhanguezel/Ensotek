@@ -1,0 +1,32 @@
+{
+  "total": 104,
+  "completed": 81,
+  "open": 23,
+  "closedSince62": 39,
+  "openIds": [
+    "ORT05",
+    "ORT07",
+    "ORT10",
+    "ORT14",
+    "TR07",
+    "TR08",
+    "DE09",
+    "DE11",
+    "DE13",
+    "DE14",
+    "DE15",
+    "DE16",
+    "K19",
+    "K20",
+    "K21",
+    "T22",
+    "T25",
+    "T26",
+    "TAN03",
+    "TAN04",
+    "TAN08",
+    "TAN10",
+    "TAN12"
+  ],
+  "allOpenItemsHaveAcceptanceConditions": true
+}

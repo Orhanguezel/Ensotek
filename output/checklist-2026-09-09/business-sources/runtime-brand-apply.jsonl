@@ -1,0 +1,4 @@
+{"site": "ensotek_de", "siteName": "Ensotek", "backup": "/var/backups/ensotek-runtime-brand-20260909T232954Z/ensotek_de.env"}
+{"site": "ensotek_com_tr", "siteName": "Ensotek", "backup": "/var/backups/ensotek-runtime-brand-20260909T232954Z/ensotek_com_tr.env"}
+{"site": "kuhlturm", "siteName": "Kühlturm — Ensotek", "backup": "/var/backups/ensotek-runtime-brand-20260909T232954Z/kuhlturm.env"}
+{"site": "kompozit", "siteName": "MOE Kompozit", "backup": "/var/backups/ensotek-runtime-brand-20260909T232954Z/kompozit.env"}

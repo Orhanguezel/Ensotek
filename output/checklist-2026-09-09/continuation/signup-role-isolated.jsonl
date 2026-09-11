@@ -1,0 +1,3 @@
+{"isolatedDatabase":true,"seedLogin":200,"wrongPassword":401,"adminAccess":200,"anonymousAdmin":401,"role":"admin","externalMessages":0}
+{"isolatedDatabase":true,"checks":[{"route":"/api/auth/signup","allowlisted":true,"requestedRole":null,"signup":200,"role":"user","admin":403,"login":200},{"route":"/api/auth/register","allowlisted":false,"requestedRole":"editor","signup":200,"role":"user","admin":403,"login":200},{"route":"/native/signup","allowlisted":true,"requestedRole":null,"signup":200,"role":"user","admin":403,"login":200}],"externalMessages":0,"notificationsCaptured":3}
+{"isolatedDatabaseRemoved": true}

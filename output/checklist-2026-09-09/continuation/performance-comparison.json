@@ -1,0 +1,76 @@
+[
+  {
+    "site": "kompozit",
+    "before": {
+      "time": "2026-09-09T17:57:17.139Z",
+      "version": "12.8.2",
+      "url": "https://www.karbonkompozit.com.tr/tr",
+      "hostUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+      "benchmarkIndex": 2653,
+      "scores": {
+        "performance": 49,
+        "accessibility": 97,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "lcpMs": 8764,
+      "tbtMs": 505,
+      "cls": 0
+    },
+    "after": {
+      "time": "2026-09-09T20:25:41.509Z",
+      "version": "12.8.2",
+      "url": "https://www.karbonkompozit.com.tr/tr",
+      "hostUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+      "benchmarkIndex": 3005,
+      "scores": {
+        "performance": 87,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "lcpMs": 3351,
+      "tbtMs": 230.5,
+      "cls": 0
+    },
+    "sameThrottling": true,
+    "sameScreen": true
+  },
+  {
+    "site": "kuhlturm",
+    "before": {
+      "time": "2026-09-09T17:57:17.068Z",
+      "version": "12.8.2",
+      "url": "https://kuhlturm.com/de",
+      "hostUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+      "benchmarkIndex": 2257,
+      "scores": {
+        "performance": 69,
+        "accessibility": 96,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "lcpMs": 5556,
+      "tbtMs": 337.5,
+      "cls": 0
+    },
+    "after": {
+      "time": "2026-09-09T20:24:49.712Z",
+      "version": "12.8.2",
+      "url": "https://kuhlturm.com/de",
+      "hostUserAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+      "benchmarkIndex": 2313,
+      "scores": {
+        "performance": 83,
+        "accessibility": 100,
+        "best-practices": 100,
+        "seo": 100
+      },
+      "lcpMs": 4112,
+      "tbtMs": 52,
+      "cls": 0
+    },
+    "sameThrottling": true,
+    "sameScreen": true
+  }
+]

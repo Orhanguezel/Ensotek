@@ -4,11 +4,22 @@
 import { z } from "zod";
 
 export const ContactCreateSchema = z.object({
-  name: z.string().min(2).max(255),
-  email: z.string().email().max(255),
-  phone: z.string().min(5).max(64),
-  subject: z.string().min(2).max(255),
-  message: z.string().min(10).max(5000),
+  name: z.string().trim().min(2).max(255),
+  email: z.string().trim().email().max(255),
+  phone: z.string().trim().min(5).max(64),
+  subject: z.string().trim().min(2).max(255),
+  message: z.string().trim().min(10).max(5000),
+  company: z.string().trim().max(255).optional().nullable(),
+  attribution: z.object({
+    analytics_consent: z.literal(true),
+    landing_path: z.string().max(512),
+    source_host: z.string().max(255).optional(),
+    utm_source: z.string().max(160).optional(),
+    utm_medium: z.string().max(160).optional(),
+    utm_campaign: z.string().max(160).optional(),
+    utm_content: z.string().max(160).optional(),
+    utm_term: z.string().max(160).optional(),
+  }).optional(),
   // Opsiyonel antispam alanları (honeypot)
   website: z.string().max(255).optional().nullable(),
 });

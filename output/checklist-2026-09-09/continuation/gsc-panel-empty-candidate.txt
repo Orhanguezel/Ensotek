@@ -1,0 +1,6 @@
+### Result
+{"scenario":"browser-only empty API response","cards":"DİZİNDE\n\n—\n\nPASS\n\nDİZİNDE DEĞİL\n\n—\n\nCrawled/Discovered\n\nİNCELEME GEREKLİ\n\n—\n\nNoindex/Duplicate\n\nDOĞRULANAMADI\n\n—\n\nKontrol gerekli\n\n","evidence":"Bu sayılar yalnızca listelenen 0 URL denetimini kapsar; sitenin Google’daki toplam indeks sayısı değildir. 24 saatten yeni kayıtlar yeniden sorgulanmaz."}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.route('**/api/v1/marketing/gsc/index?*',route=>route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({configured:true,items:[],summary:{indexed:0,not_indexed:0,issue:0,unknown:0},errors:[],errorCount:0})})); await page.reload(); await page.getByText(/Henüz tarama yok/).waitFor(); const body=await page.locator('main').innerText(); const cards=body.slice(body.indexOf('DİZİNDE'),body.indexOf('İndexlenmeyen Sayfalar')); if((cards.match(/—/g)||[]).length!==4)throw Error('Empty index metrics are not unknown');return {scenario:'browser-only empty API response',cards,evidence:await page.getByText(/Bu sayılar yalnızca listelenen/).innerText()};})(page);
+```

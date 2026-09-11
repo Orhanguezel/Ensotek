@@ -1,0 +1,26 @@
+[
+  {
+    "locale": "de",
+    "allBytes": 83965,
+    "layoutBytes": 2377,
+    "allKeys": 129,
+    "layoutKeys": 7,
+    "valuesIdentical": true
+  },
+  {
+    "locale": "en",
+    "allBytes": 80639,
+    "layoutBytes": 2387,
+    "allKeys": 129,
+    "layoutKeys": 7,
+    "valuesIdentical": true
+  },
+  {
+    "locale": "tr",
+    "allBytes": 83317,
+    "layoutBytes": 2627,
+    "allKeys": 129,
+    "layoutKeys": 7,
+    "valuesIdentical": true
+  }
+]

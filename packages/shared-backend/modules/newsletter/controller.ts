@@ -64,7 +64,7 @@ export const subscribeNewsletterPublic: RouteHandler = async (req, reply) => {
   const body = parsed.data;
   const email = body.email.trim().toLowerCase();
   const requestLocale = (req as any).locale as string | undefined;
-  const finalLocale = body.locale ?? requestLocale ?? req.defaultLocale;
+  const finalLocale = body.locale ?? requestLocale ?? (req as typeof req & { defaultLocale?: string }).defaultLocale ?? "tr";
   const metaStr = body.meta ? JSON.stringify(body.meta) : "{}";
   const now = new Date();
 

@@ -1,0 +1,12 @@
+[
+  {
+    "file": "ensotek_de/frontend/src/app/[locale]/layout.tsx",
+    "sha256": "f5c57f44f9d44207c638802c5e57a54bf63fbe938b8df2aea8cd35ab4042ac05",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/styles/bootstrap-theme.scss",
+    "sha256": "8e991beb834f97646096bac5146da34c4870a6d185dd051c16f8e781baa13f4d",
+    "matches": true
+  }
+]

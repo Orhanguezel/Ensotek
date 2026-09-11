@@ -1,0 +1,12 @@
+### Result
+{"actual":"https://kuhlturm.com/en/legal/privacy-policy","expected":"https://kuhlturm.com/en/legal/privacy-policy","match":true}
+### Ran Playwright code
+```js
+await (async(page)=>{const expected=await page.locator("link[hreflang=en]").getAttribute("href");await page.getByRole("button",{name:"🇩🇪",exact:true}).click();await page.getByRole("button",{name:/English/}).click();await page.waitForTimeout(2000);return {actual:page.url(),expected,match:page.url()===expected};})(page);
+```
+### Page
+- Page URL: https://kuhlturm.com/en/legal/privacy-policy
+- Page Title: Privacy Policy | Ensotek | Kühlturm
+- Console: 0 errors, 2 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T19-06-40-922Z.log#L96

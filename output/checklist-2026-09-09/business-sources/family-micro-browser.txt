@@ -1,0 +1,30 @@
+### Result
+{"mode":"Production click handler; navigations prevented; analytics delivery intercepted","rows":[{"origin":"https://www.ensotek.com.tr","found":{"phone":true,"whatsapp":true,"email":true},"events":[{"name":"click_phone","params":{"send_to":"G-6FRMLLS0J9","language":"en","page_path":"/en/contact"}},{"name":"click_whatsapp","params":{"send_to":"G-6FRMLLS0J9","language":"en","page_path":"/en/contact"}},{"name":"click_email","params":{"send_to":"G-6FRMLLS0J9","language":"en","page_path":"/en/contact"}}]},{"origin":"https://ensotek.de","found":{"phone":true,"whatsapp":true,"email":true},"events":[{"name":"click_phone","params":{"send_to":"G-7S6TW9CNRJ","language":"en","page_path":"/en/contact"}},{"name":"click_whatsapp","params":{"send_to":"G-7S6TW9CNRJ","language":"en","page_path":"/en/contact"}},{"name":"click_email","params":{"send_to":"G-7S6TW9CNRJ","language":"en","page_path":"/en/contact"}}]},{"origin":"https://kuhlturm.com","found":{"phone":true,"whatsapp":true,"email":true},"events":[{"name":"click_phone","params":{"send_to":"G-KXDKCDY0ET","language":"en","page_path":"/en/contact"}},{"name":"click_whatsapp","params":{"send_to":"G-KXDKCDY0ET","language":"en","page_path":"/en/contact"}},{"name":"click_email","params":{"send_to":"G-KXDKCDY0ET","language":"en","page_path":"/en/contact"}}]},{"origin":"https://www.karbonkompozit.com.tr","found":{"phone":true,"whatsapp":true,"email":true},"events":[{"name":"click_phone","params":{"send_to":"G-S8V8GTJHZV","language":"en","page_path":"/en/contact"}},{"name":"click_whatsapp","params":{"send_to":"G-S8V8GTJHZV","language":"en","page_path":"/en/contact"}},{"name":"click_email","params":{"send_to":"G-S8V8GTJHZV","language":"en","page_path":"/en/contact"}}]}]}
+### Ran Playwright code
+```js
+await (async page => {
+ const rows=[];
+ await page.route(/https:\/\/[^/]*(google-analytics\.com|analytics\.google\.com)\/.*collect/,r=>r.fulfill({status:204}));
+ for(const origin of ['https://www.ensotek.com.tr','https://ensotek.de','https://kuhlturm.com','https://www.karbonkompozit.com.tr']){
+  await page.goto(origin+'/en/contact');await page.locator('a[href^="https://wa.me/"]').first().waitFor({timeout:15000});await page.waitForTimeout(300);
+  const counts=await page.evaluate(()=>{
+   const found={};
+   for(const [kind,selector] of [['phone','a[href^="tel:"]'],['whatsapp','a[href^="https://wa.me/"]'],['email','a[href^="mailto:"]']]){
+    const link=document.querySelector(selector);found[kind]=!!link;
+    if(link){link.addEventListener('click',e=>e.preventDefault(),{once:true});link.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true}));}
+   }
+   return {found,events:(window.dataLayer||[]).filter(x=>x?.[0]==='event').map(x=>({name:x[1],params:x[2]}))};
+  });
+  if(!counts.found.whatsapp||!counts.events.some(x=>x.name==='click_whatsapp'))throw Error('Missing WhatsApp '+origin);
+  rows.push({origin,...counts});
+ }
+ await page.unroute(/https:\/\/[^/]*(google-analytics\.com|analytics\.google\.com)\/.*collect/);
+ return {mode:'Production click handler; navigations prevented; analytics delivery intercepted',rows};
+})(page);
+```
+### Page
+- Page URL: https://www.karbonkompozit.com.tr/en/contact
+- Page Title: Contact — Technical Contact for Sampling and Quotes - MOE Kom...
+- Console: 0 errors, 1 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T22-59-26-380Z.log#L39

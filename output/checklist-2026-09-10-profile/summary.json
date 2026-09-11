@@ -1,0 +1,16 @@
+{
+  "fetchTime": "2026-09-10T10:10:44.865Z",
+  "categories": {
+    "performance": 86,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "largest-contentful-paint": 3567.451,
+    "total-blocking-time": 188.5,
+    "cumulative-layout-shift": 0.0003781845156575685
+  },
+  "fieldCWV": "not established",
+  "serviceListRequests": []
+}

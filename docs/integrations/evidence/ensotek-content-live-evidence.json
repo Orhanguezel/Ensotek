@@ -1,0 +1,102 @@
+[
+  {
+    "site": "ensotek_de",
+    "resources": {
+      "articles": {
+        "total": 7,
+        "returned": 7,
+        "hasBody": true,
+        "firstUrl": "https://ensotek.de/de/news/hotel-tech-antalya-messe-erfolgreich-abgeschlossen"
+      },
+      "products": {
+        "total": 17,
+        "returned": 17,
+        "hasBody": true,
+        "firstUrl": "https://ensotek.de/de/product/geschlossene-kuehltuerme-cc-ctp-cc-dctp"
+      },
+      "pages": {
+        "total": 18,
+        "returned": 18,
+        "hasBody": false,
+        "firstUrl": "https://ensotek.de/de/team/hamdi-yagar-operations-management"
+      }
+    },
+    "unauthorized": 401,
+    "wrongKey": 401
+  },
+  {
+    "site": "ensotek_com_tr",
+    "resources": {
+      "articles": {
+        "total": 9,
+        "returned": 9,
+        "hasBody": true,
+        "firstUrl": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri"
+      },
+      "products": {
+        "total": 17,
+        "returned": 17,
+        "hasBody": true,
+        "firstUrl": "https://www.ensotek.com.tr/tr/urunler/uc-hucrelli-acik-tip-su-sogutma-kuleleri-tctp-serisi"
+      },
+      "pages": {
+        "total": 4,
+        "returned": 4,
+        "hasBody": true,
+        "firstUrl": "https://www.ensotek.com.tr/tr/kurumsal"
+      }
+    },
+    "unauthorized": 401,
+    "wrongKey": 401
+  },
+  {
+    "site": "kuhlturm",
+    "resources": {
+      "articles": {
+        "total": 7,
+        "returned": 7,
+        "hasBody": true,
+        "firstUrl": "https://kuhlturm.com/de/news/hotel-tech-antalya-messe-erfolgreich-abgeschlossen"
+      },
+      "products": {
+        "total": 17,
+        "returned": 17,
+        "hasBody": true,
+        "firstUrl": "https://kuhlturm.com/de/product/geschlossene-kuehltuerme-cc-ctp-cc-dctp"
+      },
+      "pages": {
+        "total": 18,
+        "returned": 18,
+        "hasBody": false,
+        "firstUrl": "https://kuhlturm.com/de/team/hamdi-yagar-operations-management"
+      }
+    },
+    "unauthorized": 401,
+    "wrongKey": 401
+  },
+  {
+    "site": "kompozit",
+    "resources": {
+      "articles": {
+        "total": 4,
+        "returned": 4,
+        "hasBody": true,
+        "firstUrl": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir"
+      },
+      "products": {
+        "total": 12,
+        "returned": 12,
+        "hasBody": true,
+        "firstUrl": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini"
+      },
+      "pages": {
+        "total": 9,
+        "returned": 9,
+        "hasBody": true,
+        "firstUrl": "https://www.karbonkompozit.com.tr/tr/solutions/solution-storage-tanks"
+      }
+    },
+    "unauthorized": 401,
+    "wrongKey": 401
+  }
+]

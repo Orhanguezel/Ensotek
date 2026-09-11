@@ -1,0 +1,1 @@
+DEPLOYED ensotek_com_tr backup=/var/www/Ensotek/ensotek_com_tr/frontend/.next.before-checklist-20260910T083445Z

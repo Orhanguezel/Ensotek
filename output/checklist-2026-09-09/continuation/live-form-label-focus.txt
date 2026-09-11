@@ -1,0 +1,9 @@
+### Result
+[{"url":"https://www.karbonkompozit.com.tr/en/offer","labelClicks":14,"focusFailures":[],"unnamed":[]},{"url":"https://www.karbonkompozit.com.tr/tr/offer","labelClicks":14,"focusFailures":[],"unnamed":[]},{"url":"https://kuhlturm.com/en/contact","labelClicks":5,"focusFailures":[],"unnamed":[]},{"url":"https://kuhlturm.com/de/contact","labelClicks":5,"focusFailures":[],"unnamed":[]},{"url":"https://kuhlturm.com/en/offer","labelClicks":6,"focusFailures":[],"unnamed":[]},{"url":"https://kuhlturm.com/de/offer","labelClicks":6,"focusFailures":[],"unnamed":[]}]
+### Ran Playwright code
+```js
+await (async(page)=>{const result=[];for(const url of ['https://www.karbonkompozit.com.tr/en/offer','https://www.karbonkompozit.com.tr/tr/offer','https://kuhlturm.com/en/contact','https://kuhlturm.com/de/contact','https://kuhlturm.com/en/offer','https://kuhlturm.com/de/offer']){await page.goto(url);if(await page.getByRole('button',{name:'Reject',exact:true}).count())await page.getByRole('button',{name:'Reject',exact:true}).click();const labels=page.locator('form label[for]');const checks=[];for(let i=0;i<await labels.count();i++){const label=labels.nth(i);if(!await label.isVisible())continue;const id=await label.getAttribute('for');await label.click();checks.push({id,focused:await page.evaluate(id=>document.activeElement?.id===id,id)});}const fields=page.locator('form input,form textarea,form select');const names=await fields.evaluateAll(nodes=>nodes.filter(n=>n.getClientRects().length&&n.tabIndex>=0&&n.type!=='hidden').map(n=>({type:n.type,named:!!(n.labels?.length||n.getAttribute('aria-label')||n.getAttribute('aria-labelledby'))})));result.push({url,labelClicks:checks.length,focusFailures:checks.filter(c=>!c.focused),unnamed:names.filter(n=>!n.named)});}return result;})(page);
+```
+### Page
+- Page URL: https://kuhlturm.com/de/offer
+- Page Title: Angebot anfordern | Kühlturm

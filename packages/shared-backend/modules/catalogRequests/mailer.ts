@@ -2,45 +2,29 @@ import { SITE_NAME, escapeMailHtml, sendMailRaw, wrapMailBody } from '../mail';
 import { getAdminNotificationEmails } from '../_shared';
 import type { CatalogRequestRow } from './schema';
 
-export async function sendCatalogRequestMail(row: CatalogRequestRow) {
-  const catalogUrl = row.catalog_url || 'https://www.ensotek.com.tr/uploads/catalog/ensotek-katalog.pdf';
-  const name = row.customer_name || 'Musterimiz';
-  const subject = `Katalog indirme bağlantınız — ${SITE_NAME}`;
-  const html = wrapMailBody(`
-    <h2 style="font-size:18px;">Katalog talebiniz alindi</h2>
-    <p>Merhaba <strong>${escapeMailHtml(name)}</strong>,</p>
-    <p>${escapeMailHtml(SITE_NAME)} katalog baglantiniz asagidadir:</p>
-    <p><a href="${escapeMailHtml(catalogUrl)}" target="_blank" rel="noopener noreferrer">${escapeMailHtml(catalogUrl)}</a></p>
-    <p>Teknik secim veya teklif icin bu e-postayi yanitlayabilirsiniz.</p>
-    <p>${escapeMailHtml(SITE_NAME)} Ekibi</p>
-  `);
-  const text = `Merhaba ${name},\n\nKatalog baglantiniz:\n${catalogUrl}\n\nTeknik secim veya teklif icin bu e-postayi yanitlayabilirsiniz.\n\n${SITE_NAME} Ekibi`;
-  await sendMailRaw({ to: row.email, subject, html, text });
+const copy = {
+  tr: { customer: 'Müşterimiz', hello: 'Merhaba', download: 'Katalog indirme bağlantınız', received: 'Katalog talebiniz alındı', link: 'Katalog bağlantınız', reply: 'Projeniz veya teklif için bu e-postayı yanıtlayabilirsiniz.', confirm: 'Katalog talebinizi doğrulayın', confirmTitle: 'E-posta adresinizi doğrulayın', confirmText: 'Kataloğu almak için e-posta adresinizi doğrulayın.', action: 'Doğrula ve kataloğu al', expiry: 'Bu bağlantı 24 saat geçerlidir. Talebi siz oluşturmadıysanız bu e-postayı yok sayabilirsiniz.' },
+  en: { customer: 'Customer', hello: 'Hello', download: 'Your catalog download link', received: 'We received your catalog request', link: 'Your catalog link', reply: 'Reply to this email to discuss your project or request a quote.', confirm: 'Confirm your catalog request', confirmTitle: 'Confirm your email address', confirmText: 'Confirm your email address to receive the catalog.', action: 'Confirm and receive catalog', expiry: 'This link is valid for 24 hours. If you did not request it, you can ignore this email.' },
+  de: { customer: 'Kundin oder Kunde', hello: 'Guten Tag', download: 'Ihr Katalog-Downloadlink', received: 'Ihre Kataloganfrage ist eingegangen', link: 'Ihr Kataloglink', reply: 'Antworten Sie auf diese E-Mail, um Ihr Projekt zu besprechen oder ein Angebot anzufragen.', confirm: 'Bestätigen Sie Ihre Kataloganfrage', confirmTitle: 'E-Mail-Adresse bestätigen', confirmText: 'Bestätigen Sie Ihre E-Mail-Adresse, um den Katalog zu erhalten.', action: 'Bestätigen und Katalog erhalten', expiry: 'Dieser Link ist 24 Stunden gültig. Falls Sie die Anfrage nicht gestellt haben, können Sie diese E-Mail ignorieren.' },
+};
+function language(locale?: string | null) { const value = String(locale || 'tr').slice(0, 2).toLowerCase(); return value === 'de' || value === 'en' ? value : 'tr'; }
+
+export async function sendCatalogRequestMail(row: CatalogRequestRow, options?: { attachmentFilename?: string }) {
+  if (!row.catalog_url) throw new Error('catalog_url_missing');
+  const locale = language(row.locale), t = copy[locale];
+  const name = row.customer_name || t.customer;
+  const subject = `${t.download} — ${SITE_NAME}`;
+  const html = wrapMailBody(`<h2>${t.received}</h2><p>${t.hello} <strong>${escapeMailHtml(name)}</strong>,</p><p>${t.link}:</p><p><a href="${escapeMailHtml(row.catalog_url)}">${escapeMailHtml(row.catalog_url)}</a></p><p>${t.reply}</p>`, locale);
+  const text = `${t.hello} ${name},\n\n${t.link}:\n${row.catalog_url}\n\n${t.reply}\n\n${SITE_NAME}`;
+  await sendMailRaw({ to: row.email, subject, html, text, ...(options?.attachmentFilename ? { attachments: [{ filename: options.attachmentFilename, path: row.catalog_url, contentType: "application/pdf" }] } : {}) });
 }
 
 export async function sendCatalogVerificationMail(row: CatalogRequestRow, verificationUrl: string) {
-  const locale = String(row.locale || 'tr').toLowerCase();
-  const name = row.customer_name || (locale.startsWith('en') ? 'Customer' : 'Müşterimiz');
-  const isEnglish = locale.startsWith('en');
-  const subject = isEnglish
-    ? `Confirm your catalog request — ${SITE_NAME}`
-    : `Katalog talebinizi doğrulayın — ${SITE_NAME}`;
-  const html = wrapMailBody(isEnglish ? `
-    <h2 style="font-size:18px;">Confirm your email address</h2>
-    <p>Hello <strong>${escapeMailHtml(name)}</strong>,</p>
-    <p>Please confirm your email address to receive the ${escapeMailHtml(SITE_NAME)} product catalog automatically.</p>
-    <p><a href="${escapeMailHtml(verificationUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:12px 18px;background:#07365d;color:#fff;text-decoration:none;border-radius:5px;">Confirm and receive catalog</a></p>
-    <p>This link is valid for 24 hours. If you did not make this request, you can ignore this email.</p>
-  ` : `
-    <h2 style="font-size:18px;">E-posta adresinizi doğrulayın</h2>
-    <p>Merhaba <strong>${escapeMailHtml(name)}</strong>,</p>
-    <p>${escapeMailHtml(SITE_NAME)} ürün kataloğunu otomatik almak için e-posta adresinizi doğrulayın.</p>
-    <p><a href="${escapeMailHtml(verificationUrl)}" target="_blank" rel="noopener noreferrer" style="display:inline-block;padding:12px 18px;background:#07365d;color:#fff;text-decoration:none;border-radius:5px;">Doğrula ve kataloğu al</a></p>
-    <p>Bu bağlantı 24 saat geçerlidir. Talebi siz oluşturmadıysanız bu e-postayı yok sayabilirsiniz.</p>
-  `);
-  const text = isEnglish
-    ? `Hello ${name},\n\nConfirm your email address to receive the catalog:\n${verificationUrl}\n\nThis link is valid for 24 hours.`
-    : `Merhaba ${name},\n\nKataloğu almak için e-posta adresinizi doğrulayın:\n${verificationUrl}\n\nBu bağlantı 24 saat geçerlidir.`;
+  const locale = language(row.locale), t = copy[locale];
+  const name = row.customer_name || t.customer;
+  const subject = `${t.confirm} — ${SITE_NAME}`;
+  const html = wrapMailBody(`<h2>${t.confirmTitle}</h2><p>${t.hello} <strong>${escapeMailHtml(name)}</strong>,</p><p>${t.confirmText}</p><p><a href="${escapeMailHtml(verificationUrl)}" style="display:inline-block;padding:12px 18px;background:#07365d;color:white;">${t.action}</a></p><p>${t.expiry}</p>`, locale);
+  const text = `${t.hello} ${name},\n\n${t.confirmText}\n${verificationUrl}\n\n${t.expiry}`;
   await sendMailRaw({ to: row.email, subject, html, text });
 }
 

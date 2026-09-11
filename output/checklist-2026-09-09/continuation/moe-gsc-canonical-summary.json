@@ -1,0 +1,150 @@
+{
+  "inspected": 72,
+  "successful": 72,
+  "summary": {
+    "indexed": 38,
+    "not_indexed": 18,
+    "issue": 16,
+    "unknown": 0
+  },
+  "canonicalMismatchCount": 17,
+  "canonicalMismatches": [
+    {
+      "url": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Alternate page with proper canonical tag",
+      "google_canonical": "https://karbonkompozit.com.tr/en/legal/privacy",
+      "user_canonical": "https://karbonkompozit.com.tr/en/legal/privacy",
+      "checked_at": "2026-09-09T20:50:42.425Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/blog/endustriyel-kompozit-gelecek",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+      "checked_at": "2026-09-09T20:50:42.237Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/blog/kompozit-kalite-kontrol",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+      "checked_at": "2026-09-09T20:50:42.230Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/blog/ctp-fiberglass-farklari",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+      "checked_at": "2026-09-09T20:50:42.220Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/blog/karbon-fiber-nedir",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+      "checked_at": "2026-09-09T20:50:42.213Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/gallery/ctp-govde-paneli-uretim-galerisi",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+      "checked_at": "2026-09-09T20:50:42.167Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+      "checked_at": "2026-09-09T20:50:42.151Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate without user-selected canonical",
+      "google_canonical": "https://www.karbonkompozit.com.tr/en/products/kompozit-tabut",
+      "user_canonical": null,
+      "checked_at": "2026-09-09T20:50:41.990Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+      "checked_at": "2026-09-09T20:50:41.891Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/lunapark-oyuncaklari-kabini",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+      "checked_at": "2026-09-09T20:50:41.877Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/ctp-su-deposu",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+      "checked_at": "2026-09-09T20:50:41.865Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/belediye-cop-konteyneri",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+      "checked_at": "2026-09-09T20:50:41.857Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/kompozit-cop-kutusu",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+      "checked_at": "2026-09-09T20:50:41.843Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/kompozit-tabut",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+      "checked_at": "2026-09-09T20:50:41.832Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/ctp-cop-konteyneri",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+      "checked_at": "2026-09-09T20:50:41.823Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/savunma-sanayi-kompozit-parcalari",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+      "checked_at": "2026-09-09T20:50:41.811Z"
+    },
+    {
+      "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+      "verdict": "NEUTRAL",
+      "coverage_state": "Duplicate, Google chose different canonical than user",
+      "google_canonical": "https://www.karbonkompozit.com.tr/products/kompozit-tren-parcalari",
+      "user_canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+      "checked_at": "2026-09-09T20:50:41.800Z"
+    }
+  ],
+  "note": "Google Inspection son tarama verisidir; mevcut HTML canonical kabulünden farklı bir zaman dilimini yansıtabilir."
+}

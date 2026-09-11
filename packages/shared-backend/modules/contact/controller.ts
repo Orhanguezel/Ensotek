@@ -19,8 +19,7 @@ import { telegramNotify } from '../telegram';
 async function sendContactEmails(contact: ContactView, locale: string | null) {
   const adminEmails = await getAdminNotificationEmails(locale).catch(() => []);
 
-  for (const to of adminEmails) {
-    await sendMailRaw({
+  const deliveries = adminEmails.map((to) => sendMailRaw({
       to,
       subject: `[İletişim] ${escapeContactHtml(contact.subject)} — ${escapeContactHtml(contact.name)}`,
       html: `<p><strong>Ad:</strong> ${escapeContactHtml(contact.name)}</p>
@@ -29,17 +28,23 @@ async function sendContactEmails(contact: ContactView, locale: string | null) {
              <p><strong>Konu:</strong> ${escapeContactHtml(contact.subject)}</p>
              <p><strong>Mesaj:</strong><br/>${escapeContactHtml(contact.message).replace(/\n/g, '<br/>')}</p>`,
       text: `Ad: ${contact.name}\nE-posta: ${contact.email}\nTelefon: ${contact.phone ?? ''}\nKonu: ${contact.subject}\n\n${contact.message}`,
-    });
-  }
+    }));
 
-  await sendMailRaw({
+  const language = locale?.toLowerCase().slice(0, 2);
+  const copy = language === 'de'
+    ? { subject: 'Wir haben Ihre Nachricht erhalten', greeting: 'Guten Tag', confirmation: 'Ihre Nachricht ist bei uns eingegangen. Wir melden uns so bald wie möglich bei Ihnen.', closing: 'Mit freundlichen Grüßen', team: 'Team' }
+    : language === 'en'
+    ? { subject: 'We received your message', greeting: 'Hello', confirmation: 'We have received your message and will get back to you shortly.', closing: 'Best regards', team: 'Team' }
+    : { subject: 'Mesajınız alındı', greeting: 'Merhaba', confirmation: 'Mesajınız tarafımıza ulaştı. En kısa sürede yanıt vereceğiz.', closing: 'İyi günler', team: 'Ekibi' };
+  deliveries.push(sendMailRaw({
     to: contact.email,
-    subject: `Mesajınız alındı — ${escapeContactHtml(contact.subject)}`,
-    html: `<p>Merhaba <strong>${escapeContactHtml(contact.name)}</strong>,</p>
-           <p>Mesajınız tarafımıza ulaştı. En kısa sürede yanıt vereceğiz.</p>
-           <p>Iyi gunler,<br/>${SITE_NAME} Ekibi</p>`,
-    text: `Merhaba ${contact.name},\n\nMesajiniz tarafimiza ulasti. En kisa surede yanit verecegiz.\n\nIyi gunler,\n${SITE_NAME} Ekibi`,
-  });
+    subject: `${copy.subject} — ${contact.subject}`,
+    html: `<p>${copy.greeting} <strong>${escapeContactHtml(contact.name)}</strong>,</p><p>${copy.confirmation}</p><p>${copy.closing},<br/>${escapeContactHtml(SITE_NAME)} ${copy.team}</p>`,
+    text: `${copy.greeting} ${contact.name},\n\n${copy.confirmation}\n\n${copy.closing},\n${SITE_NAME} ${copy.team}`,
+  }));
+  const results = await Promise.allSettled(deliveries);
+  const failed = results.find((result) => result.status === 'rejected');
+  if (failed?.status === 'rejected') throw failed.reason;
 }
 
 /** POST /contacts */
@@ -72,7 +77,7 @@ export async function createContactPublic(req: FastifyRequest, reply: FastifyRep
           customer_name: created.name,
           customer_email: created.email,
           customer_phone: created.phone ?? '',
-          company_name: '',
+          company_name: parsed.data.company ?? '',
           subject: created.subject ?? '',
           message: created.message,
           created_at: created.created_at instanceof Date ? created.created_at.toISOString() : new Date().toISOString(),

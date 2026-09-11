@@ -1,0 +1,1 @@
+DEPLOYED kompozit backup=/var/www/Ensotek/kompozit/frontend/.next/standalone.before-checklist-20260910T084225Z

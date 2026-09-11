@@ -1,9 +1,10 @@
+import {createResetToken, resetSubject, verifyResetToken, resetLink, resetResponse} from './password-reset';
 import type { FastifyRequest, FastifyReply } from 'fastify';
 import { randomUUID } from 'crypto';
 import { hash as argonHash } from 'argon2';
 import { handleRouteError } from '../_shared';
 import { getPrimaryRole } from '../userRoles';
-import { sendWelcomeMail, sendPasswordChangedMail } from '../mail';
+import { sendWelcomeMail, sendPasswordChangedMail, sendMailRaw, escapeMailHtml } from '../mail';
 import { telegramNotify } from '../telegram';
 import {
   signupBody,
@@ -18,6 +19,7 @@ import {
   repoCreateUser,
   repoUpdateUserEmail,
   repoUpdateUserPassword,
+  repoConsumePasswordReset,
   repoUpdateLastSignIn,
   repoAssignRole,
   repoEnsureProfileRow,
@@ -64,7 +66,8 @@ export async function signup(req: FastifyRequest, reply: FastifyReply) {
     await repoCreateUser({ id, email, password_hash, full_name, phone, rules_accepted_at: rulesAccepted ? new Date() : undefined });
 
     const isAdmin = adminEmails.has(email.toLowerCase());
-    const assignedRole: Role = isAdmin ? 'admin' : requestedRole;
+    // These public sites use the existing non-privileged DB role; request metadata cannot elevate it.
+    const assignedRole: Role = process.env.AUTH_PUBLIC_SIGNUP_ROLE === 'user' ? 'user' : isAdmin ? 'admin' : requestedRole;
     await repoAssignRole(id, assignedRole);
     await repoEnsureProfileRow(id, { full_name: full_name ?? null, phone: phone ?? null });
 
@@ -170,12 +173,14 @@ export async function passwordResetRequest(req: FastifyRequest, reply: FastifyRe
     const parsed = passwordResetRequestBody.safeParse(req.body);
     if (!parsed.success) return reply.status(400).send({ success: false, error: 'invalid_body' });
 
-    const jwt = getJWTFromReq(req);
     const u = await repoGetUserByEmail(parsed.data.email.toLowerCase());
-    if (!u) return reply.send({ success: true, message: 'Eğer bu e-posta ile bir hesap varsa, şifre sıfırlama bağlantısı gönderildi.' });
-
-    const resetToken = jwt.sign({ sub: u.id, email: u.email ?? undefined, purpose: 'password_reset' as const }, { expiresIn: '1h' });
-    return reply.send({ success: true, token: resetToken });
+    if (u?.email) {
+      try {
+        const link = resetLink(createResetToken(u));
+        await sendMailRaw({to:u.email,subject:'Password reset / Şifre sıfırlama / Passwort zurücksetzen',text:`${link}\nThis link expires in one hour and can be used once.`,html:`<p><a href="${escapeMailHtml(link)}">Password reset / Şifre sıfırlama / Passwort zurücksetzen</a></p><p>1 hour / 1 saat / 1 Stunde</p>`});
+      } catch { req.log.error('password_reset_delivery_failed'); }
+    }
+    return reply.send(resetResponse);
   } catch (e) {
     return handleRouteError(reply, req, e, 'auth_password_reset_request');
   }
@@ -187,23 +192,12 @@ export async function passwordResetConfirm(req: FastifyRequest, reply: FastifyRe
     const parsed = passwordResetConfirmBody.safeParse(req.body);
     if (!parsed.success) return reply.status(400).send({ success: false, error: 'invalid_body' });
 
-    const jwt = getJWTFromReq(req);
-    let payload: JWTPayload;
-    try {
-      payload = jwt.verify(parsed.data.token);
-    } catch {
-      return reply.status(400).send({ success: false, error: 'invalid_or_expired_token' });
+    const id = resetSubject(parsed.data.token);
+    const u = id ? await repoGetUserById(id) : null;
+    if (!u || !verifyResetToken(parsed.data.token,u) || !await repoConsumePasswordReset(u,parsed.data.password)) {
+      return reply.status(400).send({success:false,error:'invalid_or_expired_token'});
     }
-
-    if (payload.purpose !== 'password_reset' || !payload.sub) {
-      return reply.status(400).send({ success: false, error: 'invalid_token_payload' });
-    }
-
-    const u = await repoGetUserById(payload.sub);
-    if (!u) return reply.status(404).send({ success: false, error: 'user_not_found' });
-
     await repoRevokeAllUserRefreshTokens(u.id);
-    await repoUpdateUserPassword(u.id, parsed.data.password);
 
     try { await repoCreatePasswordChangedNotification(u.id); } catch (err) { req.log.error({ err }, 'password_change_notification_failed'); }
 
@@ -225,6 +219,7 @@ export async function me(req: FastifyRequest, reply: FastifyReply) {
     if (!t) return reply.status(401).send({ error: { message: 'no_token' } });
 
     const p = jwt.verify(t);
+    if (p.purpose) throw new Error('invalid_access_token');
     const u = await repoGetUserById(p.sub);
     if (!u) return reply.status(401).send({ error: { message: 'invalid_token' } });
     const role = await getPrimaryRole(p.sub);
@@ -253,6 +248,7 @@ export async function status(req: FastifyRequest, reply: FastifyReply) {
 
   try {
     const p = jwt.verify(t);
+    if (p.purpose) throw new Error('invalid_access_token');
     const role = await getPrimaryRole(p.sub);
     return reply.send({ authenticated: true, is_admin: role === 'admin', user: { id: p.sub, email: p.email ?? null, role } });
   } catch {
@@ -268,7 +264,7 @@ export async function update(req: FastifyRequest, reply: FastifyReply) {
     if (!t) return reply.status(401).send({ error: { message: 'no_token' } });
 
     let p: JWTPayload;
-    try { p = jwt.verify(t); } catch { return reply.status(401).send({ error: { message: 'invalid_token' } }); }
+    try { p = jwt.verify(t); if (p.purpose) throw new Error('invalid_access_token'); } catch { return reply.status(401).send({ error: { message: 'invalid_token' } }); }
 
     const parsed = updateBody.safeParse(req.body);
     if (!parsed.success) return reply.status(400).send({ error: { message: 'invalid_body' } });

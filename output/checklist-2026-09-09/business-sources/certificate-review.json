@@ -1,0 +1,32 @@
+[
+  {
+    "document": "iso9001",
+    "sha256": "5c63c4258ba07596b8d65157e39a73e9da18d5faa02191681443224cfa50c623",
+    "reviewed": "2026-09-10",
+    "status": "date-and-scope-transcribed"
+  },
+  {
+    "document": "iso10002",
+    "sha256": "6eac5cc456ced89742a9530fc609a5c87d88f8cc9a847b4615e889b20f3aa5e4",
+    "reviewed": "2026-09-10",
+    "status": "date-and-scope-transcribed"
+  },
+  {
+    "document": "iso14001",
+    "sha256": "6d4bbf9284ea084d3a1fb49b616fea4f03fe5393ea4bd64433e73a3d91bebf78",
+    "reviewed": "2026-09-10",
+    "status": "historical"
+  },
+  {
+    "document": "iso45001",
+    "sha256": "5027da7f938850c744fd245f85d007e0946162373fdb12c94297d177c90e65f8",
+    "reviewed": "2026-09-10",
+    "status": "historical"
+  },
+  {
+    "document": "ce",
+    "sha256": "b49d7caa07e57296d0f4118204dd8c949cc5966a6b5ecda056b4e17c216d129e",
+    "reviewed": "2026-09-10",
+    "status": "date-and-scope-transcribed"
+  }
+]

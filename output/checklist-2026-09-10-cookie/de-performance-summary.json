@@ -1,0 +1,13 @@
+{
+  "scores": {
+    "performance": 65,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "LCPms": 4860.285,
+  "TBTms": 453,
+  "CLS": 0,
+  "fetchTime": "2026-09-10T08:49:02.351Z",
+  "fieldCWV": "not established"
+}

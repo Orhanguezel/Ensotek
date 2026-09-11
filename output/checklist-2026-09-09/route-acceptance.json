@@ -1,0 +1,747 @@
+{
+  "counts": {
+    "3425": 1086,
+    "3420": 72
+  },
+  "checked": 82,
+  "rows": [
+    {
+      "port": 3425,
+      "path": "/de",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/de/about",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/about",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/service",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/service",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/product",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/product",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/projects",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/projects",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/solutions",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/solutions",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/references",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/references",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/library",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/library",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/de/news",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/news",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/blog",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/blog",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/sparepart",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/sparepart",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/contact",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/contact",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/offer",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/offer",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/team",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/team",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/faqs",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/faqs",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3425,
+      "path": "/en",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/en/about",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/about",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/service",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/service",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/product",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/product",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/projects",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/projects",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/solutions",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/solutions",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/references",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/references",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/library",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/library",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/en/news",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/news",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/blog",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/blog",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/sparepart",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/sparepart",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/contact",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/contact",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/offer",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/offer",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/team",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/team",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/faqs",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/faqs",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3425,
+      "path": "/de/product/offene-kuehltuerme-dreifachzelle-tctp-serie",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/product/offene-kuehltuerme-dreifachzelle-tctp-serie",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/product/open-circuit-cooling-towers-triple-cell-tctp-series",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/sparepart/lufteinlasslamellen",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/sparepart/lufteinlasslamellen",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/sparepart/air-inlet-louvers",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/sparepart/air-inlet-louvers",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/service/maintenance-repair",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/service/maintenance-repair",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/service/maintenance-repair",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/service/maintenance-repair",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/projects/istanbul-hochhaus-plaza-frp-kuehlturm-offener-kreislauf-130m",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/projects/istanbul-hochhaus-plaza-frp-kuehlturm-offener-kreislauf-130m",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/projects/istanbul-plaza-rooftop-frp-canopy-open-type-cooling-tower-130m",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/projects/istanbul-plaza-rooftop-frp-canopy-open-type-cooling-tower-130m",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/references/abc-salca",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/references/abc-salca",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/references/abc-salca",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/references/abc-salca",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/library/was-ist-ein-kuehlturm-arten-und-funktionsweise",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/library/was-ist-ein-kuehlturm-arten-und-funktionsweise",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/en/library/what-is-a-cooling-tower-types-and-how-it-works",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/library/what-is-a-cooling-tower-types-and-how-it-works",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/de/about/unsere-mission",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/about/unsere-mission",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/en/about/our-mission",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/about/our-mission",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3425,
+      "path": "/de/solutions/loesungen",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/solutions/loesungen",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/solutions/solutions",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/solutions/solutions",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/news/egypt-hvacr-messe-erfolgreich-abgeschlossen",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/news/egypt-hvacr-messe-erfolgreich-abgeschlossen",
+      "canonical_ok": true,
+      "h1": 2,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/news/we-successfully-completed-the-egypt-hvacr-fair",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/news/we-successfully-completed-the-egypt-hvacr-fair",
+      "canonical_ok": true,
+      "h1": 2,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/blog/regelmaessige-wartung-wasserkuehltuerme",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/blog/regelmaessige-wartung-wasserkuehltuerme",
+      "canonical_ok": true,
+      "h1": 2,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/blog/periodic-maintenance-water-cooling-towers",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/blog/periodic-maintenance-water-cooling-towers",
+      "canonical_ok": true,
+      "h1": 2,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/team/ibrahim-yagar-geschaeftsfuehrer-und-gruender",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/team/ibrahim-yagar-geschaeftsfuehrer-und-gruender",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/team/ibrahim-yagar-founder-managing-director",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/team/ibrahim-yagar-founder-managing-director",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/de/legal/datenschutzerklaerung",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/de/legal/datenschutzerklaerung",
+      "canonical_ok": true,
+      "h1": 2,
+      "schema": 2
+    },
+    {
+      "port": 3425,
+      "path": "/en/legal/privacy-policy",
+      "status": 200,
+      "canonical": "https://kuhlturm.com/en/legal/privacy-policy",
+      "canonical_ok": true,
+      "h1": 2,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/products",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/products",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/solutions",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/solutions",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/references",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/references",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/gallery",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/gallery",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/blog",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/blog",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/about",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/about",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/contact",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/contact",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/offer",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/offer",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/products",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/products",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/solutions",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/solutions",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/references",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/references",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/gallery",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/gallery",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/blog",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/blog",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/about",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/about",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/contact",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/contact",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/en/offer",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/offer",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 2
+    },
+    {
+      "port": 3420,
+      "path": "/tr/products/kompozit-tren-parcalari",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/en/products/composite-train-parts",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/products/composite-train-parts",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/tr/gallery/moe-kompozit-urun-galerisi",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/gallery/moe-kompozit-urun-galerisi",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/en/gallery/moe-kompozit-product-gallery",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/gallery/moe-kompozit-product-gallery",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/tr/blog/karbon-fiber-nedir",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/en/blog/what-is-carbon-fiber",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/blog/what-is-carbon-fiber",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/tr/solutions/solution-planters",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/solutions/solution-planters",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/en/solutions/solution-planters",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/solutions/solution-planters",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 3
+    },
+    {
+      "port": 3420,
+      "path": "/tr/legal/privacy",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/tr/legal/privacy",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    },
+    {
+      "port": 3420,
+      "path": "/en/legal/privacy",
+      "status": 200,
+      "canonical": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+      "canonical_ok": true,
+      "h1": 1,
+      "schema": 1
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import { db } from "../../db/client";
 import { userRoles } from "./schema";
 import { eq } from "drizzle-orm";
 
-export type RoleName = "admin" | "editor" | "carrier" | "customer" | "dealer";
+export type RoleName = "admin" | "editor" | "carrier" | "customer" | "dealer" | "user";
 
 const ROLE_WEIGHT: Record<RoleName, number> = {
   admin:  10,
@@ -11,6 +11,7 @@ const ROLE_WEIGHT: Record<RoleName, number> = {
   editor: 3,
   carrier: 2,
   customer: 1,
+  user: 1,
 };
 
 /** Kullanicinin rollerini cekip en yuksek oncelikli olani dondurur. */

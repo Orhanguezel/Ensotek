@@ -1,0 +1,26 @@
+### Result
+[{"base":"https://www.karbonkompozit.com.tr","before":{"cookies":[],"tracking":[]},"after":{"cookies":["_ga_S8V8GTJHZV","_ga"],"tracking":["https://www.googletagmanager.com/gtag/js","https://region1.google-analytics.com/g/collect"]},"withdrawn":{"cookies":[],"tracking":[]}},{"base":"https://www.ensotek.com.tr","before":{"cookies":[],"tracking":[]},"after":{"cookies":["_ga_6FRMLLS0J9","_ga"],"tracking":["https://www.googletagmanager.com/gtag/js","https://region1.google-analytics.com/g/collect"]},"withdrawn":{"cookies":[],"tracking":[]}},{"base":"https://ensotek.de","before":{"cookies":[],"tracking":[]},"after":{"cookies":["_ga_7S6TW9CNRJ","_ga"],"tracking":["https://www.googletagmanager.com/gtm.js","https://www.googletagmanager.com/gtag/js","https://www.googletagmanager.com/gtag/js","https://region1.google-analytics.com/g/collect"]},"withdrawn":{"cookies":[],"tracking":[]}}]
+### Ran Playwright code
+```js
+await (async (page) => {
+ const rows=[];
+ for (const base of ['https://www.karbonkompozit.com.tr','https://www.ensotek.com.tr','https://ensotek.de']) {
+  await page.goto(base+'/en',{waitUntil:'networkidle'});
+  const before={cookies:(await page.context().cookies()).filter(c=>c.domain.includes(base.split('/')[2].replace('www.',''))).map(c=>c.name),tracking:await page.evaluate(()=>performance.getEntriesByType('resource').filter(r=>/google-analytics|googletagmanager/.test(r.name)).map(r=>r.name.split('?')[0]))};
+  await page.getByRole('button',{name:'Allow analytics',exact:true}).click();
+  await page.waitForTimeout(5500);
+  const after=await page.evaluate(()=>({cookies:document.cookie.split(';').map(s=>s.split('=')[0].trim()).filter(Boolean),tracking:performance.getEntriesByType('resource').filter(r=>/google-analytics|googletagmanager/.test(r.name)).map(r=>r.name.split('?')[0])}));
+  await page.getByRole('button',{name:'Cookie preferences',exact:true}).click();
+  await page.getByRole('button',{name:'Reject',exact:true}).click();
+  await page.waitForTimeout(1500);
+  const withdrawn=await page.evaluate(()=>({cookies:document.cookie.split(';').map(s=>s.split('=')[0].trim()).filter(Boolean),tracking:performance.getEntriesByType('resource').filter(r=>/google-analytics|googletagmanager/.test(r.name)).map(r=>r.name.split('?')[0])}));
+  rows.push({base,before,after,withdrawn});
+ }
+ return rows;
+})(page);
+```
+### Page
+- Page URL: https://ensotek.de/en
+- Page Title: Ensotek - Industrial Cooling and HVAC Solutions
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T19-22-00-827Z.log#L1-L4

@@ -1,0 +1,37 @@
+[
+  {
+    "port": 3411,
+    "path": "/de",
+    "status": 200,
+    "title": "Ensotek – Industrielle Kühlsysteme",
+    "hasConsentText": false
+  },
+  {
+    "port": 3411,
+    "path": "/en",
+    "status": 200,
+    "title": "Ensotek – Industrial Cooling Systems",
+    "hasConsentText": false
+  },
+  {
+    "port": 3411,
+    "path": "/tr",
+    "status": 200,
+    "title": "Su Soğutma Kuleleri",
+    "hasConsentText": false
+  },
+  {
+    "port": 3421,
+    "path": "/tr",
+    "status": 200,
+    "title": "Ensotek — Endüstriyel Soğutma Kulesi Sistemleri — Ensotek",
+    "hasConsentText": true
+  },
+  {
+    "port": 3421,
+    "path": "/en",
+    "status": 200,
+    "title": "Ensotek — Industrial Cooling Tower Systems — Ensotek",
+    "hasConsentText": true
+  }
+]

@@ -1,0 +1,3616 @@
+[
+  {
+    "url": "https://www.ensotek.com.tr/tr",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr",
+    "canonical": "https://www.ensotek.com.tr/tr",
+    "h1": 1,
+    "description": "Counterflow, crossflow ve kapalı devre soğutma kulesi sistemleri. ISO 9001 sertifikalı, 25+ yıl deneyim, 40+ ülke.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr",
+      "en": "https://www.ensotek.com.tr/en",
+      "x-default": "https://www.ensotek.com.tr/tr"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "url": "https://www.ensotek.com.tr/tr#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Legionella riski nasıl yönetilir?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Soğutma kulelerinde Legionella riski; biyosit dozajlaması, düzenli bakım ve su analiziyle minimize edilir. Ensotek, TSE ve REHVA standartlarına uygun bakım programları sunar."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Hangi kule tipi projem için doğru?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Kapasite, mevcut alan, su kalitesi ve bütçe gereksinimlerine göre ücretsiz teknik danışmanlık sunuyoruz. Uzman ekibimiz en uygun çözümü belirler."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "CTP gövdenin avantajları nelerdir?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Cam elyaf takviyeli polyester (CTP) korozyona dayanıklı, hafif ve uzun ömürlüdür. Metal gövdelere kıyasla %40 daha uzun servis ömrü sunar ve boya gerektirmez."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Kapasite nasıl hesaplanır?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Soğutma kapasitesi; proses yükü, giriş/çıkış sıcaklıkları ve yaklaşım değerlerine göre termodinamik hesaplamayla belirlenir. Ücretsiz hesaplama için ekibimizle iletişime geçin."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Bakım ne sıklıkta yapılmalıdır?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Mevsimlik bakım ve yılda 1-2 tam bakım önerilir. Kritik tesisler için sürekli izleme sistemleri kurulabilir."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Kiralık soğutma kulesi hizmeti var mı?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Evet, geçici veya mevsimsel ihtiyaçlar için kiralık soğutma kulesi sistemleri sunuyoruz. Kurulum, devreye alma ve bakım hizmetleri dahildir."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Ankara fabrikası hakkında bilgi verir misiniz?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "2021 yılında faaliyete geçen Ankara (Kahramankazan) fabrikamız, Türkiye'nin en büyük soğutma kulesi üretim tesisidir. Modern CNC ve kompozit üretim ekipmanlarıyla donatılmıştır."
+            }
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/urunler",
+      "/tr/iletisim",
+      "#about",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/urunler/kapali-tip-su-sogutma-kuleleri-cc-ctp-cc-dctp",
+      "/tr/urunler/open-circuit-cooling-towers-ctp-series",
+      "/tr/urunler/acik-tip-su-sogutma-kuleleri-iki-hucreli-dctp-serisi",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+905318803151",
+      "https://wa.me/905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "mailto:export@ensotek.com.tr",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/urunler",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/urunler",
+    "canonical": "https://www.ensotek.com.tr/tr/products",
+    "h1": 0,
+    "description": "Ensotek soğutma kulesi ürün kataloğu. Counterflow, crossflow ve kapalı devre modelleri.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/products",
+      "en": "https://www.ensotek.com.tr/en/products",
+      "x-default": "https://www.ensotek.com.tr/tr/products"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/urunler/kapali-tip-su-sogutma-kuleleri-cc-ctp-cc-dctp",
+      "/tr/urunler/open-circuit-cooling-towers-ctp-series",
+      "/tr/urunler/acik-tip-su-sogutma-kuleleri-iki-hucreli-dctp-serisi",
+      "/tr/urunler/uc-hucrelli-acik-tip-su-so%C4%9Futma-kuleleri-tctp-serisi",
+      "/tr/urunler/motor-ve-reduktor-fan-grubu",
+      "/tr/urunler/sogutma-kulesi-aksiyal-fan",
+      "/tr/urunler/su-dagitim-sistemi",
+      "/tr/urunler/pvc-petek-dolgu-film-tipi",
+      "/tr/urunler/hava-girisi",
+      "/tr/urunler/rashing-halkasi-pp-raschig-ring",
+      "/tr/urunler/splash-grid-dolgu",
+      "/tr/urunler/pp-bigudi-dolgu-spritzring",
+      "/tr/urunler/damlaliklar-drift-eliminator",
+      "/tr/urunler/ctp-profiller-pultruzyon",
+      "/tr/urunler/nozul",
+      "/tr/urunler/servis-penceresi",
+      "/tr/urunler/titresim-salteri",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog",
+    "canonical": "https://www.ensotek.com.tr/tr/blog",
+    "h1": 0,
+    "description": "Soğutma kulesi seçimi, Legionella önleme, CTP/FRP gövde ve endüstriyel bakım rehberleri.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog",
+      "en": "https://www.ensotek.com.tr/en/blog",
+      "x-default": "https://www.ensotek.com.tr/tr/blog"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog/sogutma-kulesi-secim-rehberi",
+      "/tr/blog/sogutma-kulelerinde-legionella-onleme",
+      "/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+      "/tr/blog/su-sogutma-kulesi-temelleri",
+      "/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+      "/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+      "/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+      "/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+      "/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/galeri",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/galeri",
+    "canonical": "https://www.ensotek.com.tr/tr/gallery",
+    "h1": 0,
+    "description": "Ensotek tamamlanan projeler ve kurulum galerileri.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/gallery",
+      "en": "https://www.ensotek.com.tr/en/gallery",
+      "x-default": "https://www.ensotek.com.tr/tr/gallery"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/galeri/acik-devre-sogutma-kuleleri",
+      "/tr/galeri/kapali-devre-sogutma-kuleleri",
+      "/tr/galeri/saha-uygulamalari",
+      "/tr/galeri/yedek-parca-ve-bilesenler",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/referanslar",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/referanslar",
+    "canonical": "https://www.ensotek.com.tr/tr/references",
+    "h1": 0,
+    "description": "Ensotek müşteri referansları ve tamamlanan projeler.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/references",
+      "en": "https://www.ensotek.com.tr/en/references",
+      "x-default": "https://www.ensotek.com.tr/tr/references"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/iletisim",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/iletisim",
+    "canonical": "https://www.ensotek.com.tr/tr/iletisim",
+    "h1": 0,
+    "description": "Soğutma kulesi projeleriniz için Ensotek ile iletişime geçin.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/iletisim",
+      "en": "https://www.ensotek.com.tr/en/contact",
+      "x-default": "https://www.ensotek.com.tr/tr/iletisim"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "tel:+905318803151",
+      "https://wa.me/905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "mailto:export@ensotek.com.tr",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/hesap-makinesi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/hesap-makinesi",
+    "canonical": "https://www.ensotek.com.tr/tr/hesap-makinesi",
+    "h1": 1,
+    "description": "Debi, giriş sıcaklığı, çıkış sıcaklığı ve yaş termometre değerleriyle soğutma kulesi kapasitesini yaklaşık olarak hesaplayın.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/hesap-makinesi",
+      "en": "https://www.ensotek.com.tr/en/hesap-makinesi",
+      "x-default": "https://www.ensotek.com.tr/tr/hesap-makinesi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/iletisim?source=capacity-calculator&capacity_kw=698&flow_m3h=120&inlet_c=35&outlet_c=30&wet_bulb_c=24",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi",
+    "h1": 0,
+    "description": "Endüstriyel tesisler için soğutma kulesi seçerken kapasite, yaklaşım sıcaklığı, su kalitesi, bakım ve enerji verimliliği kriterleri.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi",
+      "en": "https://www.ensotek.com.tr/en/blog/sogutma-kulesi-secim-rehberi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Soğutma Kulesi Seçim Rehberi",
+        "description": "Endüstriyel tesisler için soğutma kulesi seçerken kapasite, yaklaşım sıcaklığı, su kalitesi, bakım ve enerji verimliliği kriterleri.",
+        "datePublished": "2026-05-01T14:16:41.665Z",
+        "dateModified": "2026-05-01T14:16:41.665Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme",
+    "h1": 0,
+    "description": "Soğutma kulelerinde Legionella riskini azaltmak için bakım, temizlik, su şartlandırma ve izleme uygulamaları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme",
+      "en": "https://www.ensotek.com.tr/en/blog/sogutma-kulelerinde-legionella-onleme",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Soğutma Kulelerinde Legionella Önleme",
+        "description": "Soğutma kulelerinde Legionella riskini azaltmak için bakım, temizlik, su şartlandırma ve izleme uygulamaları.",
+        "datePublished": "2026-05-01T14:16:41.665Z",
+        "dateModified": "2026-05-01T14:16:41.665Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+    "h1": 0,
+    "description": "CTP ve FRP soğutma kulesi gövdelerinin korozyon, bakım, ağırlık ve servis ömrü açısından avantajları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+      "en": "https://www.ensotek.com.tr/en/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "CTP ve FRP Soğutma Kulesi Gövdeleri Karşılaştırması",
+        "description": "CTP ve FRP soğutma kulesi gövdelerinin korozyon, bakım, ağırlık ve servis ömrü açısından avantajları.",
+        "datePublished": "2026-05-01T14:16:41.665Z",
+        "dateModified": "2026-05-01T14:16:41.665Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri",
+    "h1": 0,
+    "description": "Su soğutma kulelerinin çalışma prensibi, açık/kapalı devre sınıflandırması, kritik parametreler ve su kayıpları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri",
+      "en": "https://www.ensotek.com.tr/en/blog/su-sogutma-kulesi-temelleri",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Su Soğutma Kulesi Temelleri: Tipler, Çalışma Prensibi ve Tasarım Parametreleri",
+        "description": "Su soğutma kulelerinin çalışma prensibi, açık/kapalı devre sınıflandırması, kritik parametreler ve su kayıpları.",
+        "datePublished": "2026-05-01T14:16:41.704Z",
+        "dateModified": "2026-05-01T14:16:41.704Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+    "h1": 0,
+    "description": "Ensotek soğutma kulelerinin CTP/GFK malzeme yapısı, dolgu seçenekleri, enerji verimliliği ve işletme avantajları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+      "en": "https://www.ensotek.com.tr/en/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Ensotek Soğutma Kulelerimizin Özellikleri",
+        "description": "Ensotek soğutma kulelerinin CTP/GFK malzeme yapısı, dolgu seçenekleri, enerji verimliliği ve işletme avantajları.",
+        "datePublished": "2026-05-01T14:16:41.707Z",
+        "dateModified": "2026-06-19T21:42:48.845Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+    "h1": 0,
+    "description": "Açık tip (açık devre) kule çalışma prensibi: adımlar, bileşenler, performans terimleri ve su kayıpları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+      "en": "https://www.ensotek.com.tr/en/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Açık Tip Su Soğutma Kulesi Çalışma Prensibi",
+        "description": "Açık tip (açık devre) kule çalışma prensibi: adımlar, bileşenler, performans terimleri ve su kayıpları.",
+        "datePublished": "2026-05-01T14:16:41.710Z",
+        "dateModified": "2026-06-19T21:42:48.845Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+    "h1": 0,
+    "description": "Kapalı devre kulelerde serpantin üzerinden dolaylı soğutma, sprey devresi, free cooling, donma riskine karşı önlemler ve enerji tüketimi.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+      "en": "https://www.ensotek.com.tr/en/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Kapalı Çevrim Su Soğutma Kulesi Çalışma Prensibi",
+        "description": "Kapalı devre kulelerde serpantin üzerinden dolaylı soğutma, sprey devresi, free cooling, donma riskine karşı önlemler ve enerji tüketimi.",
+        "datePublished": "2026-05-01T14:16:41.711Z",
+        "dateModified": "2026-05-01T14:16:41.711Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+    "h1": 0,
+    "description": "Soğutma kulesi seçimi için gerekli proses (debi/sıcaklıklar), iklim verileri (yaş termometre), range/approach ve su kalitesi.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+      "en": "https://www.ensotek.com.tr/en/blog/kule-secimi-icin-gerekli-bilgiler",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Kule Seçimi İçin Gerekli Bilgiler",
+        "description": "Soğutma kulesi seçimi için gerekli proses (debi/sıcaklıklar), iklim verileri (yaş termometre), range/approach ve su kalitesi.",
+        "datePublished": "2026-05-01T14:16:41.713Z",
+        "dateModified": "2026-05-01T14:16:41.713Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+    "canonical": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+    "h1": 0,
+    "description": "Türkiye illerine göre yaz tasarım kuru ve yaş termometre sıcaklık değerleri. Soğutma kulesi ve HVAC tasarımı için referans.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+      "en": "https://www.ensotek.com.tr/en/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "İstanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Türkiye Yaz Kuru ve Yaş Termometre Tasarım Değerleri",
+        "description": "Türkiye illerine göre yaz tasarım kuru ve yaş termometre sıcaklık değerleri. Soğutma kulesi ve HVAC tasarımı için referans.",
+        "datePublished": "2026-05-01T14:16:41.714Z",
+        "dateModified": "2026-05-01T14:16:41.714Z",
+        "inLanguage": "tr",
+        "url": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/tr",
+      "/tr/kurumsal",
+      "/tr/urunler",
+      "/tr/blog",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/iletisim",
+      "/tr/teklif-al",
+      "/tr/blog",
+      "/tr",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/urunler",
+      "/tr/galeri",
+      "/tr/referanslar",
+      "/tr/blog",
+      "/tr/iletisim",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/tr/legal/kvkk",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en",
+    "canonical": "https://www.ensotek.com.tr/en",
+    "h1": 1,
+    "description": "Counterflow, crossflow and closed-circuit cooling tower systems. ISO 9001 certified, 25+ years experience, 40+ countries.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr",
+      "en": "https://www.ensotek.com.tr/en",
+      "x-default": "https://www.ensotek.com.tr/tr"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "url": "https://www.ensotek.com.tr/en#faq",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "How is Legionella risk managed?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Legionella risk is minimized in cooling towers through biocide dosing, regular maintenance and water analysis. Ensotek provides maintenance programs compliant with TSE and REHVA standards."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Which tower type is right for my project?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "We offer free technical consultancy based on capacity, available space, water quality and budget requirements. Our expert team determines the most suitable solution."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What are the advantages of FRP body?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Fiberglass reinforced polyester (FRP) is corrosion-resistant, lightweight and long-lasting. It offers 40% longer service life compared to metal bodies and requires no painting."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How is capacity calculated?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Cooling capacity is determined by thermodynamic calculation based on process load, inlet/outlet temperatures and approach values. Contact our team for a free calculation."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "How often should maintenance be performed?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Seasonal maintenance and 1-2 full maintenance per year is recommended. Continuous monitoring systems can be installed for critical facilities."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Is rental cooling tower service available?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Yes, we offer rental cooling tower systems for temporary or seasonal needs. Installation, commissioning and maintenance services are included."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Tell me about the Ankara factory.",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Our Ankara (Kahramankazan) factory, commissioned in 2021, is Turkey's largest cooling tower production facility, equipped with modern CNC and composite manufacturing equipment."
+            }
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/products",
+      "/en/contact",
+      "#about",
+      "/en/about",
+      "/en/products",
+      "/en/products/closed-circuit-cooling-towers-cc-ctp-cc-dctp",
+      "/en/products/open-circuit-cooling-towers-ctp-series",
+      "/en/products/open-circuit-cooling-towers-double-cell-dctp-series",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+905318803151",
+      "https://wa.me/905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "mailto:export@ensotek.com.tr",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/products",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/products",
+    "canonical": "https://www.ensotek.com.tr/en/products",
+    "h1": 0,
+    "description": "Ensotek cooling tower product catalog. Counterflow, crossflow and closed-circuit models.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/products",
+      "en": "https://www.ensotek.com.tr/en/products",
+      "x-default": "https://www.ensotek.com.tr/tr/products"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/products/closed-circuit-cooling-towers-cc-ctp-cc-dctp",
+      "/en/products/open-circuit-cooling-towers-ctp-series",
+      "/en/products/open-circuit-cooling-towers-double-cell-dctp-series",
+      "/en/products/high-performance-open-circuit-cooling-towers-tctp-series",
+      "/en/products/motor-and-reducer-fan-group",
+      "/en/products/cooling-tower-axial-fan",
+      "/en/products/water-distribution-system",
+      "/en/products/pvc-film-fill",
+      "/en/products/air-inlet-louvers",
+      "/en/products/raschig-rings-pp",
+      "/en/products/splash-grid-fill",
+      "/en/products/pp-ring-fill-spritzring",
+      "/en/products/drift-eliminators",
+      "/en/products/frp-pultrusion-profiles",
+      "/en/products/nozzle",
+      "/en/products/service-window",
+      "/en/products/vibration-switch",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog",
+    "canonical": "https://www.ensotek.com.tr/en/blog",
+    "h1": 0,
+    "description": "Cooling tower selection, Legionella prevention, CTP/FRP body and industrial maintenance guides.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog",
+      "en": "https://www.ensotek.com.tr/en/blog",
+      "x-default": "https://www.ensotek.com.tr/tr/blog"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog/sogutma-kulesi-secim-rehberi",
+      "/en/blog/sogutma-kulelerinde-legionella-onleme",
+      "/en/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+      "/en/blog/su-sogutma-kulesi-temelleri",
+      "/en/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+      "/en/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+      "/en/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+      "/en/blog/kule-secimi-icin-gerekli-bilgiler",
+      "/en/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/gallery",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/gallery",
+    "canonical": "https://www.ensotek.com.tr/en/gallery",
+    "h1": 0,
+    "description": "Ensotek completed projects and installation galleries.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/gallery",
+      "en": "https://www.ensotek.com.tr/en/gallery",
+      "x-default": "https://www.ensotek.com.tr/tr/gallery"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/references",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/references",
+    "canonical": "https://www.ensotek.com.tr/en/references",
+    "h1": 0,
+    "description": "Ensotek customer references and completed projects.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/references",
+      "en": "https://www.ensotek.com.tr/en/references",
+      "x-default": "https://www.ensotek.com.tr/tr/references"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/contact",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/contact",
+    "canonical": "https://www.ensotek.com.tr/en/contact",
+    "h1": 0,
+    "description": "Contact Ensotek for your cooling tower projects.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/iletisim",
+      "en": "https://www.ensotek.com.tr/en/contact",
+      "x-default": "https://www.ensotek.com.tr/tr/iletisim"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "tel:+905318803151",
+      "https://wa.me/905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "mailto:export@ensotek.com.tr",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/hesap-makinesi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/capacity-calculator",
+    "canonical": "https://www.ensotek.com.tr/en/hesap-makinesi",
+    "h1": 1,
+    "description": "Estimate cooling tower heat rejection capacity from flow rate, inlet temperature, outlet temperature and wet bulb temperature.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/hesap-makinesi",
+      "en": "https://www.ensotek.com.tr/en/hesap-makinesi",
+      "x-default": "https://www.ensotek.com.tr/tr/hesap-makinesi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/contact?source=capacity-calculator&capacity_kw=698&flow_m3h=120&inlet_c=35&outlet_c=30&wet_bulb_c=24",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/sogutma-kulesi-secim-rehberi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/sogutma-kulesi-secim-rehberi",
+    "canonical": "https://www.ensotek.com.tr/en/blog/sogutma-kulesi-secim-rehberi",
+    "h1": 0,
+    "description": "Endüstriyel tesisler için soğutma kulesi seçerken kapasite, yaklaşım sıcaklığı, su kalitesi, bakım ve enerji verimliliği kriterleri.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi",
+      "en": "https://www.ensotek.com.tr/en/blog/sogutma-kulesi-secim-rehberi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/sogutma-kulesi-secim-rehberi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Soğutma Kulesi Seçim Rehberi",
+        "description": "Endüstriyel tesisler için soğutma kulesi seçerken kapasite, yaklaşım sıcaklığı, su kalitesi, bakım ve enerji verimliliği kriterleri.",
+        "datePublished": "2026-05-01T14:16:41.665Z",
+        "dateModified": "2026-05-01T14:16:41.665Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/sogutma-kulesi-secim-rehberi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/sogutma-kulelerinde-legionella-onleme",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/sogutma-kulelerinde-legionella-onleme",
+    "canonical": "https://www.ensotek.com.tr/en/blog/sogutma-kulelerinde-legionella-onleme",
+    "h1": 0,
+    "description": "Soğutma kulelerinde Legionella riskini azaltmak için bakım, temizlik, su şartlandırma ve izleme uygulamaları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme",
+      "en": "https://www.ensotek.com.tr/en/blog/sogutma-kulelerinde-legionella-onleme",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/sogutma-kulelerinde-legionella-onleme"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Soğutma Kulelerinde Legionella Önleme",
+        "description": "Soğutma kulelerinde Legionella riskini azaltmak için bakım, temizlik, su şartlandırma ve izleme uygulamaları.",
+        "datePublished": "2026-05-01T14:16:41.665Z",
+        "dateModified": "2026-05-01T14:16:41.665Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/sogutma-kulelerinde-legionella-onleme",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+    "canonical": "https://www.ensotek.com.tr/en/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+    "h1": 0,
+    "description": "CTP ve FRP soğutma kulesi gövdelerinin korozyon, bakım, ağırlık ve servis ömrü açısından avantajları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+      "en": "https://www.ensotek.com.tr/en/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "CTP ve FRP Soğutma Kulesi Gövdeleri Karşılaştırması",
+        "description": "CTP ve FRP soğutma kulesi gövdelerinin korozyon, bakım, ağırlık ve servis ömrü açısından avantajları.",
+        "datePublished": "2026-05-01T14:16:41.665Z",
+        "dateModified": "2026-05-01T14:16:41.665Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/ctp-frp-sogutma-kulesi-govdeleri-karsilastirmasi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/su-sogutma-kulesi-temelleri",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/su-sogutma-kulesi-temelleri",
+    "canonical": "https://www.ensotek.com.tr/en/blog/su-sogutma-kulesi-temelleri",
+    "h1": 0,
+    "description": "Su soğutma kulelerinin çalışma prensibi, açık/kapalı devre sınıflandırması, kritik parametreler ve su kayıpları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri",
+      "en": "https://www.ensotek.com.tr/en/blog/su-sogutma-kulesi-temelleri",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/su-sogutma-kulesi-temelleri"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Su Soğutma Kulesi Temelleri: Tipler, Çalışma Prensibi ve Tasarım Parametreleri",
+        "description": "Su soğutma kulelerinin çalışma prensibi, açık/kapalı devre sınıflandırması, kritik parametreler ve su kayıpları.",
+        "datePublished": "2026-05-01T14:16:41.704Z",
+        "dateModified": "2026-05-01T14:16:41.704Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/su-sogutma-kulesi-temelleri",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+    "canonical": "https://www.ensotek.com.tr/en/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+    "h1": 0,
+    "description": "Ensotek soğutma kulelerinin CTP/GFK malzeme yapısı, dolgu seçenekleri, enerji verimliliği ve işletme avantajları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+      "en": "https://www.ensotek.com.tr/en/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/ensotek-sogutma-kulelerinin-ozellikleri"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Ensotek Soğutma Kulelerimizin Özellikleri",
+        "description": "Ensotek soğutma kulelerinin CTP/GFK malzeme yapısı, dolgu seçenekleri, enerji verimliliği ve işletme avantajları.",
+        "datePublished": "2026-05-01T14:16:41.707Z",
+        "dateModified": "2026-06-19T21:42:48.845Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/ensotek-sogutma-kulelerinin-ozellikleri",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+    "canonical": "https://www.ensotek.com.tr/en/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+    "h1": 0,
+    "description": "Açık tip (açık devre) kule çalışma prensibi: adımlar, bileşenler, performans terimleri ve su kayıpları.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+      "en": "https://www.ensotek.com.tr/en/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Açık Tip Su Soğutma Kulesi Çalışma Prensibi",
+        "description": "Açık tip (açık devre) kule çalışma prensibi: adımlar, bileşenler, performans terimleri ve su kayıpları.",
+        "datePublished": "2026-05-01T14:16:41.710Z",
+        "dateModified": "2026-06-19T21:42:48.845Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/acik-tip-su-sogutma-kulesi-calisma-prensibi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+    "canonical": "https://www.ensotek.com.tr/en/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+    "h1": 0,
+    "description": "Kapalı devre kulelerde serpantin üzerinden dolaylı soğutma, sprey devresi, free cooling, donma riskine karşı önlemler ve enerji tüketimi.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+      "en": "https://www.ensotek.com.tr/en/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Kapalı Çevrim Su Soğutma Kulesi Çalışma Prensibi",
+        "description": "Kapalı devre kulelerde serpantin üzerinden dolaylı soğutma, sprey devresi, free cooling, donma riskine karşı önlemler ve enerji tüketimi.",
+        "datePublished": "2026-05-01T14:16:41.711Z",
+        "dateModified": "2026-05-01T14:16:41.711Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/kapali-cevrim-su-sogutma-kulesi-calisma-prensibi",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/kule-secimi-icin-gerekli-bilgiler",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/kule-secimi-icin-gerekli-bilgiler",
+    "canonical": "https://www.ensotek.com.tr/en/blog/kule-secimi-icin-gerekli-bilgiler",
+    "h1": 0,
+    "description": "Soğutma kulesi seçimi için gerekli proses (debi/sıcaklıklar), iklim verileri (yaş termometre), range/approach ve su kalitesi.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler",
+      "en": "https://www.ensotek.com.tr/en/blog/kule-secimi-icin-gerekli-bilgiler",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/kule-secimi-icin-gerekli-bilgiler"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Kule Seçimi İçin Gerekli Bilgiler",
+        "description": "Soğutma kulesi seçimi için gerekli proses (debi/sıcaklıklar), iklim verileri (yaş termometre), range/approach ve su kalitesi.",
+        "datePublished": "2026-05-01T14:16:41.713Z",
+        "dateModified": "2026-05-01T14:16:41.713Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/kule-secimi-icin-gerekli-bilgiler",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/en/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+    "status": 200,
+    "final": "https://www.ensotek.com.tr/en/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+    "canonical": "https://www.ensotek.com.tr/en/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+    "h1": 0,
+    "description": "Türkiye illerine göre yaz tasarım kuru ve yaş termometre sıcaklık değerleri. Soğutma kulesi ve HVAC tasarımı için referans.",
+    "robots": "index, follow",
+    "alternates": {
+      "tr": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+      "en": "https://www.ensotek.com.tr/en/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+      "x-default": "https://www.ensotek.com.tr/tr/blog/yaz-kuru-yas-termometre-tasarim-degerleri"
+    },
+    "schemas": [
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.ensotek.com.tr/#org",
+            "name": "Ensotek",
+            "legalName": "ENSOTEK CTP Su Soğutma Kuleleri ve Teknolojileri Mühendislik Sanayi Ticaret Limited Şirketi",
+            "url": "https://www.ensotek.com.tr",
+            "logo": "https://www.ensotek.com.tr/ensotek_icon_512.png",
+            "description": "Endüstriyel soğutma kuleleri, CTP/FRP kule üretimi, mühendislik, montaj, bakım ve modernizasyon hizmetleri.",
+            "telephone": "+90 531 880 31 51",
+            "email": "ensotek@ensotek.com.tr",
+            "address": {
+              "@type": "PostalAddress",
+              "streetAddress": "Oruçreis Mah. Tekstilkent Sit. A17 Blok No:41 34235 Esenler / İstanbul, Türkiye",
+              "addressLocality": "Istanbul",
+              "addressCountry": "Türkiye"
+            },
+            "sameAs": [
+              "https://www.instagram.com/ensotek_tr/",
+              "https://www.facebook.com/Ensotek/",
+              "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+              "https://twitter.com/Ensotek_Cooling"
+            ],
+            "knowsAbout": [
+              "Soğutma kulesi",
+              "CTP soğutma kulesi",
+              "FRP cooling tower",
+              "Kapalı devre soğutma",
+              "Endüstriyel proses soğutma"
+            ]
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.ensotek.com.tr/#website",
+            "name": "Ensotek Türkiye",
+            "url": "https://www.ensotek.com.tr",
+            "publisher": {
+              "@id": "https://www.ensotek.com.tr/#org"
+            },
+            "inLanguage": [
+              "tr",
+              "en"
+            ]
+          }
+        ]
+      },
+      {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "Türkiye Yaz Kuru ve Yaş Termometre Tasarım Değerleri",
+        "description": "Türkiye illerine göre yaz tasarım kuru ve yaş termometre sıcaklık değerleri. Soğutma kulesi ve HVAC tasarımı için referans.",
+        "datePublished": "2026-05-01T14:16:41.714Z",
+        "dateModified": "2026-05-01T14:16:41.714Z",
+        "inLanguage": "en",
+        "url": "https://www.ensotek.com.tr/en/blog/yaz-kuru-yas-termometre-tasarim-degerleri",
+        "author": {
+          "@type": "Organization",
+          "name": "Ensotek"
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": "Ensotek",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://www.ensotek.com.tr/ensotek_icon_512.png"
+          }
+        }
+      }
+    ],
+    "links": [
+      "/en",
+      "/en/about",
+      "/en/products",
+      "/en/blog",
+      "/en/gallery",
+      "/en/references",
+      "/en/contact",
+      "/en/offer",
+      "/en/blog",
+      "/en",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/products",
+      "/en/gallery",
+      "/en/references",
+      "/en/blog",
+      "/en/contact",
+      "tel:+905318803151",
+      "tel:+902126133301",
+      "mailto:ensotek@ensotek.com.tr",
+      "https://ensotek.de/en/legal/privacy-policy",
+      "https://www.instagram.com/ensotek_tr/",
+      "https://www.facebook.com/Ensotek/",
+      "https://www.youtube.com/channel/UCX22ErWzyT4wDqDRGN9zYmg",
+      "https://twitter.com/Ensotek_Cooling",
+      "https://guezelwebdesign.com"
+    ],
+    "loadingBody": false
+  }
+]

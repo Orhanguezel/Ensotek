@@ -85,7 +85,7 @@ export async function uploadToBucket(req: FastifyRequest, reply: FastifyReply) {
     const cleanName = desired.split("/").pop()!.replace(/[^\w.\-]+/g, "_");
     const folderRaw = desired.includes("/") ? desired.split("/").slice(0, -1).join("/") : undefined;
     const folder = folderRaw || bucket; // bucket'ı her zaman folder olarak kullan
-    const publicIdBase = cleanName.replace(/\.[^.]+$/, "");
+    const publicIdBase = cfg.driver === "local" ? cleanName : cleanName.replace(/\.[^.]+$/, "");
 
     const up = await uploadBufferAuto(cfg, buf, { folder, publicId: publicIdBase, mime: mp.mimetype });
 

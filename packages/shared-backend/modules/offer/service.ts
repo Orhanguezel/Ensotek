@@ -121,7 +121,7 @@ function buildLocaleCandidates(rawLocale?: string | null): string[] {
 // -------------------------------------------------------------
 
 async function getSiteSettingValue(key: string, locale?: string | null): Promise<unknown | null> {
-  const candidates = buildLocaleCandidates(locale);
+  const candidates = [...buildLocaleCandidates(locale), '*'];
 
   // locale zorunlu olduğu için: aynı key için candidate locale’leri çek
   const rows = await db
@@ -781,16 +781,19 @@ Teklif ID: ${offer.id}`;
 
   try {
     await telegramNotify({
-      title: 'Yeni Teklif Talebi',
-      message: [
-        `Müşteri: ${offer.customer_name}`,
-        `E-posta: ${offer.email}`,
-        `Telefon: ${offer.phone ?? '-'}`,
-        `Firma: ${offer.company_name ?? '-'}`,
-        `Konu: ${offer.subject ?? '-'}`,
-        `Mesaj: ${offer.message ?? '-'}`,
-      ].join('\n'),
-      type: 'new_offer_request',
+      event: 'new_offer_request',
+      data: {
+        customer_name: offer.customer_name,
+        customer_email: offer.email,
+        customer_phone: offer.phone ?? '',
+        company_name: offer.company_name ?? '',
+        subject: offer.subject ?? '',
+        product_service: offer.subject ?? '',
+        message: offer.message ?? '',
+        offer_id: offer.id,
+        offer_no: offer.offer_no ?? '',
+        created_at: offer.created_at,
+      },
     });
   } catch (err) {
     console.error('offer_request_telegram_failed', err);

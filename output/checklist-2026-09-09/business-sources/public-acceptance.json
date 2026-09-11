@@ -1,0 +1,58 @@
+[
+  {
+    "url": "https://ensotek.de/de/quality/qualitaetszertifikate-qualitaetsstandards",
+    "status": 200,
+    "qualityBody": true,
+    "oldYoutube": false,
+    "newYoutube": true,
+    "newInstagram": true
+  },
+  {
+    "url": "https://ensotek.de/en/quality/quality-certificates-quality-standards",
+    "status": 200,
+    "qualityBody": true,
+    "oldYoutube": false,
+    "newYoutube": true,
+    "newInstagram": true
+  },
+  {
+    "url": "https://kuhlturm.com/de/about/qualitaetszertifikate-qualitaetsstandards",
+    "status": 200,
+    "qualityBody": false,
+    "oldYoutube": true,
+    "newYoutube": false,
+    "newInstagram": false
+  },
+  {
+    "url": "https://kuhlturm.com/en/about/quality-certificates-quality-standards",
+    "status": 200,
+    "qualityBody": false,
+    "oldYoutube": true,
+    "newYoutube": false,
+    "newInstagram": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr",
+    "status": 200,
+    "qualityBody": false,
+    "oldYoutube": false,
+    "newYoutube": false,
+    "newInstagram": false
+  },
+  {
+    "url": "https://ensotek.de/de",
+    "status": 200,
+    "qualityBody": false,
+    "oldYoutube": false,
+    "newYoutube": true,
+    "newInstagram": true
+  },
+  {
+    "url": "https://kuhlturm.com/de",
+    "status": 200,
+    "qualityBody": false,
+    "oldYoutube": true,
+    "newYoutube": false,
+    "newInstagram": false
+  }
+]

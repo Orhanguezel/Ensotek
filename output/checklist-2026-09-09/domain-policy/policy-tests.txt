@@ -1,0 +1,16 @@
+bun test v1.2.15 (df017990)
+
+backend/src/modules/competitor-discovery/domain-policy.test.ts:
+(pass) discovery domain boundaries > normalizes URL, www, uppercase and terminal dot
+(pass) discovery domain boundaries > rejects credentials, script and malformed hosts
+(pass) discovery domain boundaries > includes main host and explicit family subdomains [1.00ms]
+(pass) discovery domain boundaries > does not match lookalikes or reverse suffixes
+(pass) discovery domain boundaries > tenant without configured family stays isolated
+(pass) discovery domain boundaries > groups verified domains once without touching original rank records [1.00ms]
+(pass) discovery domain boundaries > conflicting group memberships remain unverified
+(pass) discovery domain boundaries > requires source evidence for company grouping
+
+ 8 pass
+ 0 fail
+ 19 expect() calls
+Ran 8 tests across 1 files. [76.00ms]

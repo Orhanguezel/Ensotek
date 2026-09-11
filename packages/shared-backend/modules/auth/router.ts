@@ -1,3 +1,4 @@
+import {registerPasswordResetPage} from './password-reset-page';
 import type { FastifyInstance } from 'fastify';
 import { authSecurity, fromZodSchema } from '../_shared';
 import {
@@ -10,6 +11,7 @@ import {
 import { signup, token, refresh, passwordResetRequest, passwordResetConfirm, me, status, update, logout } from './controller';
 
 export async function registerAuth(app: FastifyInstance) {
+  registerPasswordResetPage(app);
   const B = '/auth';
 
   app.post(`${B}/signup`, {

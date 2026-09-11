@@ -1,0 +1,53 @@
+[
+  {
+    "site": "kompozit",
+    "before": {
+      "performance": 49,
+      "LCPms": 8764,
+      "TBTms": 505
+    },
+    "after": {
+      "performance": 90.0,
+      "LCPms": 3172.7725,
+      "TBTms": 194,
+      "CLS": 0
+    },
+    "fetchTime": "2026-09-10T00:35:49.486Z",
+    "fieldCWV": "not established",
+    "method": "Same Lighthouse mobile profile, final idle deployment sample; cold/intermediate reports retained. Multiple changes; no single-change attribution."
+  },
+  {
+    "site": "kuhlturm",
+    "before": {
+      "performance": 69,
+      "LCPms": 5556,
+      "TBTms": 337.5
+    },
+    "after": {
+      "performance": 87.0,
+      "LCPms": 3383.64,
+      "TBTms": 179,
+      "CLS": 0
+    },
+    "fetchTime": "2026-09-10T00:29:45.332Z",
+    "fieldCWV": "not established",
+    "method": "Same Lighthouse mobile profile, final idle deployment sample; cold/intermediate reports retained. Multiple changes; no single-change attribution."
+  },
+  {
+    "site": "ensotek_de",
+    "before": {
+      "performance": 58,
+      "LCPms": 9977,
+      "TBTms": 118.5
+    },
+    "after": {
+      "performance": 65.0,
+      "LCPms": 5699.127,
+      "TBTms": 328.00000000000045,
+      "CLS": 0
+    },
+    "fetchTime": "2026-09-10T08:14:53.484Z",
+    "fieldCWV": "not established",
+    "method": "Final idle mobile Lighthouse sample on actual product URL; layout splitting did not improve the sample and was reverted. All earlier samples retained; no claim of good field CWV."
+  }
+]

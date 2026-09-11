@@ -1,0 +1,820 @@
+[
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr",
+    "title": "Karbon Fiber, CTP ve Cam Elyaf Kompozit Üretimi - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr",
+      "en": "https://www.karbonkompozit.com.tr/en",
+      "x-default": "https://www.karbonkompozit.com.tr/tr"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products",
+    "title": "Ürünlerimiz — Karbon Fiber, CTP ve Cam Elyaf Parçalar - MOE K...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products",
+      "en": "https://www.karbonkompozit.com.tr/en/products",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/products"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/solutions",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/solutions",
+    "title": "Çözümler - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions",
+      "en": "https://www.karbonkompozit.com.tr/en/solutions",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/solutions"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/references",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/references",
+    "title": "Referanslar — Kurumsal İş Birliği ve Teslim Disiplini - MOE K...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/references",
+      "en": "https://www.karbonkompozit.com.tr/en/references",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/references"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/gallery",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/gallery",
+    "title": "Galeri — Kompozit Üretim ve Proje Görselleri - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery",
+      "en": "https://www.karbonkompozit.com.tr/en/gallery",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/gallery"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/blog",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog",
+    "title": "Blog — Kompozit Mühendislik ve Üretim Notları - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog",
+      "en": "https://www.karbonkompozit.com.tr/en/blog",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/blog"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/about",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/about",
+    "title": "Hakkımızda - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/about",
+      "en": "https://www.karbonkompozit.com.tr/en/about",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/about"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/contact",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/contact",
+    "title": "İletişim — Numune ve Teklif İçin Teknik İletişim - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/contact",
+      "en": "https://www.karbonkompozit.com.tr/en/contact",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/contact"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/offer",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/offer",
+    "title": "Teklif Talebi — Kompozit Teklif, Uygunluk ve Termin - MOE Kom...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/offer",
+      "en": "https://www.karbonkompozit.com.tr/en/offer",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/offer"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en",
+    "title": "Carbon Fiber, FRP and Fiberglass Composite Manufacturing - MO...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr",
+      "en": "https://www.karbonkompozit.com.tr/en",
+      "x-default": "https://www.karbonkompozit.com.tr/tr"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products",
+    "title": "Our Products — Carbon Fiber, FRP and Fiberglass Parts - MOE K...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products",
+      "en": "https://www.karbonkompozit.com.tr/en/products",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/products"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/solutions",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/solutions",
+    "title": "Solutions - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions",
+      "en": "https://www.karbonkompozit.com.tr/en/solutions",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/solutions"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/references",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/references",
+    "title": "References — Enterprise Collaboration and Delivery Discipline...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/references",
+      "en": "https://www.karbonkompozit.com.tr/en/references",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/references"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/gallery",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/gallery",
+    "title": "Gallery — Composite Production and Project Visuals - MOE Komp...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery",
+      "en": "https://www.karbonkompozit.com.tr/en/gallery",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/gallery"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/blog",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/blog",
+    "title": "Blog — Composite Engineering and Production Insights - MOE Ko...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog",
+      "en": "https://www.karbonkompozit.com.tr/en/blog",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/blog"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/about",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/about",
+    "title": "About Us - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/about",
+      "en": "https://www.karbonkompozit.com.tr/en/about",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/about"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/contact",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/contact",
+    "title": "Contact — Technical Contact for Sampling and Quotes - MOE Kom...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/contact",
+      "en": "https://www.karbonkompozit.com.tr/en/contact",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/contact"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/offer",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/offer",
+    "title": "Quote Request — Composite Quote, Feasibility and Lead Time -...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/offer",
+      "en": "https://www.karbonkompozit.com.tr/en/offer",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/offer"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+    "title": "Kompozit Tren Parçaları Raylı Sistem CTP Panel Üretimi MOE Ko...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari",
+      "en": "https://www.karbonkompozit.com.tr/en/products/composite-train-parts"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+    "title": "Savunma Sanayi Kompozit Parçaları Karbon Fiber CTP Muhafaza M...",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari",
+      "en": "https://www.karbonkompozit.com.tr/en/products/defense-industry-composite-parts"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+    "title": "CTP Çöp Konteyneri Kompozit Atık Konteyneri MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri",
+      "en": "https://www.karbonkompozit.com.tr/en/products/frp-waste-container"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+    "title": "Kompozit Tabut CTP Defin Grubu Ürünü MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut",
+      "en": "https://www.karbonkompozit.com.tr/en/products/composite-coffin"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+    "title": "Kompozit Çöp Kutusu CTP Park ve Belediye Çöp Kutusu MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu",
+      "en": "https://www.karbonkompozit.com.tr/en/products/composite-litter-bin"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+    "title": "Belediye Çöp Konteyneri CTP Tekerlekli Konteyner MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri",
+      "en": "https://www.karbonkompozit.com.tr/en/products/municipal-garbage-container"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+    "title": "CTP Su Deposu FRP Kompozit Su Tankı MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu",
+      "en": "https://www.karbonkompozit.com.tr/en/products/frp-water-storage-tank"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+    "title": "Kompozit Lunapark Oyuncakları ve Kabinleri MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini",
+      "en": "https://www.karbonkompozit.com.tr/en/products/lunapark-oyuncaklari-kabini"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+    "title": "Dekoratif Kompozit Saksı ve Vazo Ürünleri MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri",
+      "en": "https://www.karbonkompozit.com.tr/en/products/decorative-composite-planters-vases"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/karbon-fiber-panel-prototipi",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/karbon-fiber-panel-prototipi",
+    "title": "Karbon Fiber Panel Prototipi MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/karbon-fiber-panel-prototipi",
+      "en": "https://www.karbonkompozit.com.tr/en/products/carbon-fiber-panel-prototype"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/ctp-koruyucu-govde-paneli",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/ctp-koruyucu-govde-paneli",
+    "title": "CTP Koruyucu Govde Paneli MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/ctp-koruyucu-govde-paneli",
+      "en": "https://www.karbonkompozit.com.tr/en/products/frp-protective-enclosure-panel"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/products/cam-elyaf-servis-kapagi",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/products/cam-elyaf-servis-kapagi",
+    "title": "Cam Elyaf Servis Kapagi MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/cam-elyaf-servis-kapagi",
+      "en": "https://www.karbonkompozit.com.tr/en/products/fiberglass-service-cover"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/composite-train-parts",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/composite-train-parts",
+    "title": "Composite Train Parts Rail System FRP Panel Manufacturing MOE...",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/composite-train-parts",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tren-parcalari"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/defense-industry-composite-parts",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/defense-industry-composite-parts",
+    "title": "Defense Industry Composite Parts Carbon Fiber FRP Enclosures...",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/defense-industry-composite-parts",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/savunma-sanayi-kompozit-parcalari"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/frp-waste-container",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/frp-waste-container",
+    "title": "FRP Waste Container Composite Waste Bin MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/frp-waste-container",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/ctp-cop-konteyneri"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+    "title": "Composite Coffin FRP Funeral Product MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/composite-coffin",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/kompozit-tabut"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/composite-litter-bin",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/composite-litter-bin",
+    "title": "Composite Litter Bin FRP Park and Municipal Trash Bin MOE Kom...",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/composite-litter-bin",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/kompozit-cop-kutusu"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/municipal-garbage-container",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/municipal-garbage-container",
+    "title": "Municipal Garbage Container FRP Wheeled Waste Container MOE K...",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/municipal-garbage-container",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/belediye-cop-konteyneri"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/frp-water-storage-tank",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/frp-water-storage-tank",
+    "title": "FRP Water Storage Tank Composite GRP Tank MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/frp-water-storage-tank",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/ctp-su-deposu"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/lunapark-oyuncaklari-kabini",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/lunapark-oyuncaklari-kabini",
+    "title": "Composite Amusement Ride Cabins and Bodies MOE Composite - MO...",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/lunapark-oyuncaklari-kabini",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/lunapark-oyuncaklari-kabini"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/decorative-composite-planters-vases",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/decorative-composite-planters-vases",
+    "title": "Decorative Composite Planters and Vases MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/decorative-composite-planters-vases",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/dekoratif-kompozit-saksi-vazo-urunleri"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/carbon-fiber-panel-prototype",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/carbon-fiber-panel-prototype",
+    "title": "Carbon Fiber Panel Prototype MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/carbon-fiber-panel-prototype",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/karbon-fiber-panel-prototipi"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/frp-protective-enclosure-panel",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/frp-protective-enclosure-panel",
+    "title": "FRP Protective Enclosure Panel MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/frp-protective-enclosure-panel",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/ctp-koruyucu-govde-paneli"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/products/fiberglass-service-cover",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/products/fiberglass-service-cover",
+    "title": "Fiberglass Service Cover MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/products/fiberglass-service-cover",
+      "tr": "https://www.karbonkompozit.com.tr/tr/products/cam-elyaf-servis-kapagi"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/gallery/moe-kompozit-urun-galerisi",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/gallery/moe-kompozit-urun-galerisi",
+    "title": "MOE Kompozit Ürün Galerisi",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery/moe-kompozit-urun-galerisi",
+      "en": "https://www.karbonkompozit.com.tr/en/gallery/moe-kompozit-product-gallery"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+    "title": "Karbon Fiber Panel Uygulama Galerisi MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi",
+      "en": "https://www.karbonkompozit.com.tr/en/gallery/carbon-fiber-panel-application-gallery"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+    "title": "CTP Govde Paneli Uretim Galerisi MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi",
+      "en": "https://www.karbonkompozit.com.tr/en/gallery/frp-enclosure-panel-production-gallery"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/gallery/moe-kompozit-product-gallery",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/gallery/moe-kompozit-product-gallery",
+    "title": "MOE Kompozit Product Gallery",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/gallery/moe-kompozit-product-gallery",
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery/moe-kompozit-urun-galerisi"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/gallery/carbon-fiber-panel-application-gallery",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/gallery/carbon-fiber-panel-application-gallery",
+    "title": "Carbon Fiber Panel Application Gallery MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/gallery/carbon-fiber-panel-application-gallery",
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery/karbon-fiber-panel-uygulama-galerisi"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/gallery/frp-enclosure-panel-production-gallery",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/gallery/frp-enclosure-panel-production-gallery",
+    "title": "FRP Enclosure Panel Production Gallery MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/gallery/frp-enclosure-panel-production-gallery",
+      "tr": "https://www.karbonkompozit.com.tr/tr/gallery/ctp-govde-paneli-uretim-galerisi"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+    "title": "Karbon Fiber Nedir? Özellikleri ve Kullanımı - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir",
+      "en": "https://www.karbonkompozit.com.tr/en/blog/what-is-carbon-fiber"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+    "title": "CTP ve Fiberglass Farkları: Teknik Karşılaştırma - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari",
+      "en": "https://www.karbonkompozit.com.tr/en/blog/frp-fiberglass-differences"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+    "title": "Kompozit Kalite Kontrol Süreçleri ve Testleri - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol",
+      "en": "https://www.karbonkompozit.com.tr/en/blog/composite-quality-control"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+    "title": "Endüstriyel Kompozit Çözümlerin Geleceği - MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek",
+      "en": "https://www.karbonkompozit.com.tr/en/blog/industrial-composite-future"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/blog/what-is-carbon-fiber",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/blog/what-is-carbon-fiber",
+    "title": "What is Carbon Fiber? Properties and Uses - MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/blog/what-is-carbon-fiber",
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/karbon-fiber-nedir"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/blog/frp-fiberglass-differences",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/blog/frp-fiberglass-differences",
+    "title": "FRP vs Fiberglass: A Technical Comparison - MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/blog/frp-fiberglass-differences",
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/ctp-fiberglass-farklari"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/blog/composite-quality-control",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/blog/composite-quality-control",
+    "title": "Composite Quality Control Processes and Testing - MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/blog/composite-quality-control",
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/kompozit-kalite-kontrol"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/blog/industrial-composite-future",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/blog/industrial-composite-future",
+    "title": "The Future of Industrial Composite Solutions - MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/blog/industrial-composite-future",
+      "tr": "https://www.karbonkompozit.com.tr/tr/blog/endustriyel-kompozit-gelecek"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/solutions/solution-planters",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/solutions/solution-planters",
+    "title": "Kompozit Saksı ve Peyzaj MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-planters",
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-planters"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/solutions/solution-coffins",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/solutions/solution-coffins",
+    "title": "Kompozit Tabut İmalatı MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-coffins",
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-coffins"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/solutions/solution-storage-tanks",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/solutions/solution-storage-tanks",
+    "title": "Kompozit Depo ve Tank MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-storage-tanks",
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-storage-tanks"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/solutions/solution-custom-b2b",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/solutions/solution-custom-b2b",
+    "title": "Özel B2B Kompozit İmalat MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-custom-b2b",
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-custom-b2b"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/solutions/solution-planters",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/solutions/solution-planters",
+    "title": "Composite Planters & Landscape MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-planters",
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-planters"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/solutions/solution-coffins",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/solutions/solution-coffins",
+    "title": "Composite Coffins MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-coffins",
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-coffins"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/solutions/solution-storage-tanks",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/solutions/solution-storage-tanks",
+    "title": "Composite Storage Tanks MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-storage-tanks",
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-storage-tanks"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/solutions/solution-custom-b2b",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/solutions/solution-custom-b2b",
+    "title": "Custom B2B Composite Manufacturing MOE Kompozit",
+    "hreflang": {
+      "en": "https://www.karbonkompozit.com.tr/en/solutions/solution-custom-b2b",
+      "tr": "https://www.karbonkompozit.com.tr/tr/solutions/solution-custom-b2b"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/legal/privacy",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/legal/privacy",
+    "title": "Gizlilik Politikası MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/privacy",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/privacy"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/legal/terms",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/legal/terms",
+    "title": "Kullanım Koşulları MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/terms",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/terms",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/terms"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/legal/kvkk-aydinlatma-metni",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/legal/kvkk-aydinlatma-metni",
+    "title": "KVKK Aydınlatma Metni MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/kvkk-aydinlatma-metni",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/kvkk-aydinlatma-metni",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/kvkk-aydinlatma-metni"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/tr/legal/cookies",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/tr/legal/cookies",
+    "title": "Çerez Politikası MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/cookies",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/cookies",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/cookies"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+    "title": "Privacy Policy MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/privacy",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/privacy",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/privacy"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/legal/terms",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/legal/terms",
+    "title": "Terms of Use MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/terms",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/terms",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/terms"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/legal/pdpl-information-notice",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/legal/pdpl-information-notice",
+    "title": "PDPL Information Notice MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/pdpl-information-notice",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/pdpl-information-notice",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/pdpl-information-notice"
+    },
+    "h1": 1
+  },
+  {
+    "url": "https://www.karbonkompozit.com.tr/en/legal/cookies",
+    "status": 200,
+    "canonical": "https://www.karbonkompozit.com.tr/en/legal/cookies",
+    "title": "Cookie Policy MOE Kompozit",
+    "hreflang": {
+      "tr": "https://www.karbonkompozit.com.tr/tr/legal/cookies",
+      "en": "https://www.karbonkompozit.com.tr/en/legal/cookies",
+      "x-default": "https://www.karbonkompozit.com.tr/tr/legal/cookies"
+    },
+    "h1": 1
+  }
+]

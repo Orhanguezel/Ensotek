@@ -2,7 +2,7 @@
 // FILE: src/modules/storage/_util.ts
 // =============================================================
 
-import { env } from "@/core/env";
+import { env } from "../../core/env";
 
 const encSeg = (s: string) => encodeURIComponent(s);
 const encPath = (p: string) => p.split("/").map(encSeg).join("/");

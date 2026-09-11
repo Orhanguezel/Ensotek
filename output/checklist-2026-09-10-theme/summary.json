@@ -1,0 +1,25 @@
+{
+  "fetchTime": "2026-09-10T09:50:01.666Z",
+  "categories": {
+    "performance": 90,
+    "accessibility": 100,
+    "best-practices": 100,
+    "seo": 100
+  },
+  "metrics": {
+    "largest-contentful-paint": 2186.0855,
+    "total-blocking-time": 369,
+    "cumulative-layout-shift": 0.00037818451565756856
+  },
+  "cssBefore": {
+    "files": 4,
+    "transferBytes": 84413,
+    "resourceBytes": 592789
+  },
+  "cssAfter": {
+    "files": 3,
+    "transferBytes": 58062,
+    "resourceBytes": 388783
+  },
+  "fieldCWV": "not established"
+}

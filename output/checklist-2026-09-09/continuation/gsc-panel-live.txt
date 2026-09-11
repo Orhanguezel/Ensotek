@@ -1,0 +1,9 @@
+### Result
+{"url":"https://panel.tanitio.com/search-console?tenantKey=moe-kompozit-4de92704&view=index","cards":"DİZİNDE\n\n38\n\nPASS\n\nDİZİNDE DEĞİL\n\n18\n\nCrawled/Discovered\n\nİNCELEME GEREKLİ\n\n16\n\nNoindex/Duplicate\n\nDOĞRULANAMADI\n\n0\n\nKontrol gerekli\n\n","evidence":"Bu sayılar yalnızca listelenen 72 URL denetimini kapsar; sitenin Google’daki toplam indeks sayısı değildir. 24 saatten yeni kayıtlar yeniden sorgulanmaz."}
+### Ran Playwright code
+```js
+await (async(page)=>{await page.unrouteAll({behavior:'ignoreErrors'});await page.goto('https://panel.tanitio.com/search-console?tenantKey=moe-kompozit-4de92704&view=index'); await page.getByText(/Bu sayılar yalnızca listelenen 72/).waitFor(); const body=await page.locator('main').innerText(); const cards=body.slice(body.indexOf('DİZİNDE'),body.indexOf('İndexlenmeyen Sayfalar')); for(const n of ['38','18','16'])if(!cards.includes(n))throw Error('Live metric missing: '+n);return {url:page.url(),cards,evidence:await page.getByText(/Bu sayılar yalnızca listelenen/).innerText()};})(page);
+```
+### Page
+- Page URL: https://panel.tanitio.com/search-console?tenantKey=moe-kompozit-4de92704&view=index
+- Page Title: Tanitio — AI Destekli Pazarlama Operasyon Merkezi

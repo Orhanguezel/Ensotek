@@ -63,8 +63,8 @@ export const API_ENDPOINTS = {
       DEFAULT_LOCALE: '/site_settings/default-locale',
     },
     CUSTOM_PAGES: {
-      LIST: '/custom_pages',
-      BY_SLUG: (slug: string) => `/custom_pages/by-slug/${slug}`,
+      LIST: '/custom-pages',
+      BY_SLUG: (slug: string) => `/custom-pages/by-slug/${encodeURIComponent(slug)}`,
     },
     LIBRARY: {
       LIST: '/library',

@@ -33,12 +33,16 @@ export function escapeMailHtml(str: string): string {
     .replace(/"/g, "&quot;");
 }
 
-export function wrapMailBody(body: string): string {
-  return `<div style="font-family:'DM Sans',system-ui,sans-serif;font-size:14px;color:#0F172A;line-height:1.6;max-width:560px;margin:0 auto;">${body}<p style="margin-top:24px;color:#64748B;font-size:12px;">Bu e-posta ${SITE_NAME} tarafindan gonderilmistir.</p></div>`;
+export function wrapMailBody(body: string, locale = 'tr'): string {
+  const name = escapeMailHtml(SITE_NAME);
+  const footer = locale.startsWith('de') ? `Diese E-Mail wurde von ${name} gesendet.` : locale.startsWith('en') ? `This email was sent by ${name}.` : `Bu e-posta ${name} tarafından gönderilmiştir.`;
+  return `<div style="font-family:system-ui,sans-serif;font-size:14px;color:#0F172A;line-height:1.6;max-width:560px;margin:0 auto;">${body}<p style="margin-top:24px;color:#64748B;font-size:12px;">${footer}</p></div>`;
 }
 
-export function sendMailWithTransport(transporter: Transporter, from: string, data: SendMailInput) {
-  return transporter.sendMail({ from, to: data.to, subject: data.subject, text: data.text, html: data.html });
+export async function sendMailWithTransport(transporter: Transporter, from: string, data: SendMailInput) {
+  const result = await transporter.sendMail({ from, to: data.to, subject: data.subject, text: data.text, html: data.html });
+  console.info('mail_delivery_accepted', { message_id: result.messageId, accepted_count: result.accepted?.length ?? 0, rejected_count: result.rejected?.length ?? 0 });
+  return result;
 }
 
 export const welcomeMailSchema = z.object({

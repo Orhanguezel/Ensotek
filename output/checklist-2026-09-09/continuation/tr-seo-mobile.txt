@@ -1,0 +1,12 @@
+### Result
+[{"path":"/tr/urunler/uc-hucrelli-acik-tip-su-so%C4%9Futma-kuleleri-tctp-serisi","status":200,"h1":1,"overflow":false,"canonical":"https://www.ensotek.com.tr/tr/urunler/uc-hucrelli-acik-tip-su-so%C4%9Futma-kuleleri-tctp-serisi"},{"path":"/tr/galeri/acik-devre-sogutma-kuleleri","status":200,"h1":1,"overflow":false,"canonical":"https://www.ensotek.com.tr/tr/galeri/acik-devre-sogutma-kuleleri"},{"path":"/en/offer","status":200,"h1":1,"overflow":false,"canonical":"https://www.ensotek.com.tr/en/offer"},{"path":"/tr/iletisim","status":200,"h1":1,"overflow":false,"canonical":"https://www.ensotek.com.tr/tr/iletisim"}]
+### Ran Playwright code
+```js
+await (async(page)=>{const paths=['/tr/urunler/uc-hucrelli-acik-tip-su-so%C4%9Futma-kuleleri-tctp-serisi','/tr/galeri/acik-devre-sogutma-kuleleri','/en/offer','/tr/iletisim'];const rows=[];await page.setViewportSize({width:390,height:844});for(const path of paths){const response=await page.goto('https://www.ensotek.com.tr'+path,{waitUntil:'networkidle'});const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);const h1=await page.locator('h1').count();const canonical=await page.locator('link[rel="canonical"]').getAttribute('href');if(response.status()!==200||h1!==1||overflow)throw Error(JSON.stringify({path,status:response.status(),h1,overflow}));rows.push({path,status:response.status(),h1,overflow,canonical});}return rows;})(page);
+```
+### Page
+- Page URL: https://www.ensotek.com.tr/tr/iletisim
+- Page Title: İletişim — Ensotek — Ensotek
+- Console: 0 errors, 4 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T22-59-26-380Z.log#L60-L63

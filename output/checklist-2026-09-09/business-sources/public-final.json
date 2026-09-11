@@ -1,0 +1,34 @@
+[
+  {
+    "url": "https://ensotek.de/de",
+    "status": 200,
+    "newYoutube": true,
+    "oldYoutube": false,
+    "newInstagram": true,
+    "qualityBody": false
+  },
+  {
+    "url": "https://www.ensotek.com.tr/tr",
+    "status": 200,
+    "newYoutube": true,
+    "oldYoutube": false,
+    "newInstagram": true,
+    "qualityBody": false
+  },
+  {
+    "url": "https://kuhlturm.com/de",
+    "status": 200,
+    "newYoutube": true,
+    "oldYoutube": false,
+    "newInstagram": true,
+    "qualityBody": false
+  },
+  {
+    "url": "https://kuhlturm.com/en/about/quality-certificates-quality-standards",
+    "status": 200,
+    "newYoutube": true,
+    "oldYoutube": false,
+    "newInstagram": true,
+    "qualityBody": true
+  }
+]

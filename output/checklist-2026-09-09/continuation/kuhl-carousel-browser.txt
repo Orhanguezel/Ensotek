@@ -1,0 +1,27 @@
+### Result
+{"initialImages":1,"afterNextImages":2,"defaultAutoplay":false,"playPause":true,"mobileOverflow":false}
+### Ran Playwright code
+```js
+await (async (page) => {
+ await page.setViewportSize({width:390,height:844});
+ await page.goto('https://kuhlturm.com/en',{waitUntil:'networkidle'});
+ const hero=page.locator('section[aria-label="Hero slider"]');
+ const initial=await hero.locator('img').count();
+ if(initial!==1) throw new Error(`initial images ${initial}`);
+ const play=page.getByRole('button',{name:'Play slideshow',exact:true});
+ if(await play.getAttribute('aria-pressed')!=='false')throw new Error('autoplay enabled');
+ await page.getByRole('button',{name:'Next slide',exact:true}).click();
+ await page.waitForTimeout(500);
+ const next=await hero.locator('img').count();
+ if(next!==2)throw new Error(`next images ${next}`);
+ await play.click();
+ if(await page.getByRole('button',{name:'Pause slideshow',exact:true}).getAttribute('aria-pressed')!=='true')throw new Error('play failed');
+ await page.getByRole('button',{name:'Pause slideshow',exact:true}).click();
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+ if(overflow)throw new Error('mobile overflow');
+ return {initialImages:initial,afterNextImages:next,defaultAutoplay:false,playPause:true,mobileOverflow:overflow};
+})(page);
+```
+### Page
+- Page URL: https://kuhlturm.com/en
+- Page Title: Industrial Cooling Towers — Ensotek

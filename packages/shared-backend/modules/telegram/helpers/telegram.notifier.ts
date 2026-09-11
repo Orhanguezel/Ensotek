@@ -56,8 +56,8 @@ async function sendTelegramMessage(opts: {
   const parseMode = opts.parseMode === undefined ? 'Markdown' : opts.parseMode;
   const payload = {
     chat_id: opts.chatId,
-    text: opts.text,
-    ...(parseMode ? { parse_mode: parseMode } : {}),
+    text: opts.text.length > 4000 ? `${opts.text.slice(0, 3900)}\n\n[Mesajın tamamı yönetim panelinde / Full message in admin panel]` : opts.text,
+    ...(parseMode && opts.text.length <= 4000 ? { parse_mode: parseMode } : {}),
     disable_web_page_preview: true,
   };
 
@@ -65,12 +65,14 @@ async function sendTelegramMessage(opts: {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(10_000),
   });
 
-  if (!r.ok) {
-    const body = await r.text().catch(() => '');
-    throw new Error(`telegram_send_failed status=${r.status} body=${body}`);
+  const result = await r.json() as { ok?: boolean; description?: string; result?: { message_id?: number } };
+  if (!r.ok || !result.ok) {
+    throw new Error(`telegram_send_failed status=${r.status} reason=${result.description ?? 'unknown'}`);
   }
+  console.info('telegram_notification_delivered', { message_id: result.result?.message_id });
 }
 
 /**
@@ -168,7 +170,7 @@ export async function telegramNotify(input: TelegramNotifyInput): Promise<void> 
       const tpl = (cfg.templates?.[event] ?? '').trim();
       const text = tpl
         ? renderTemplate(tpl, dataWithSite)
-        : renderTemplate(`🌐 {{site_name}}\n*${event}*\n\n{{message}}`, {
+        : renderTemplate(`🌐 {{site_name}}\n*${event}*\n\n{{customer_name}}\n{{customer_email}}\n{{customer_phone}}\n{{company_name}}\n{{subject}}\n\n{{message}}`, {
             ...dataWithSite,
             message: (input.data as Record<string, unknown>)?.message ?? '',
           });

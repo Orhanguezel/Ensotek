@@ -1,0 +1,16 @@
+[
+  "package.json",
+  "lighthouserc.js",
+  "scripts/check-theme-tokens.mjs",
+  "scripts/check-release-html.mjs",
+  "scripts/check-seo-inventory.mjs",
+  "scripts/check-admin-content-flow.mjs",
+  "scripts/crawl-seo-report.mjs",
+  "scripts/prepare-standalone.mjs",
+  "src/styles/globals.css",
+  "src/components/layout/Header.tsx",
+  "src/components/patterns/MediaOverlayCard.tsx",
+  "src/components/sections/GalleryShowcase.tsx",
+  "src/components/sections/ContactForm.tsx",
+  "src/components/sections/OfferForm.tsx"
+]

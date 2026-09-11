@@ -91,7 +91,12 @@ export function buildContactInsert(
     email: body.email.trim(),
     phone: body.phone.trim(),
     subject: body.subject.trim(),
-    message: body.message,
+    // Existing admin/message contracts remain compatible across shared-backend consumers.
+    message: [
+      body.company ? `Firma / Company: ${body.company}` : '',
+      body.message,
+      body.attribution ? `Kaynak / Attribution (analytics consent): ${JSON.stringify(body.attribution)}` : '',
+    ].filter(Boolean).join('\n\n'),
     status: "new",
     is_resolved: false,
     admin_note: null,

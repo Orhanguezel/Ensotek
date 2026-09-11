@@ -1,0 +1,31 @@
+### Result
+{"initialDisabled":true,"errorVisible":true,"successVisible":true,"payload":{"email":"newsletter-browser@example.invalid","locale":"en","meta":{"source":"website_footer","marketing_consent":true,"consent_text_version":"newsletter-20260910"}},"overflow":false,"mode":"Live UI, intercepted subscribe only; no real subscriber or external notification"}
+### Ran Playwright code
+```js
+await (async (page) => {
+ await page.goto('https://www.ensotek.com.tr/en');
+ const form=page.getByRole('form',{name:'Technical newsletter'});
+ await form.scrollIntoViewIfNeeded();
+ const button=form.getByRole('button',{name:'Subscribe',exact:true});
+ const initialDisabled=await button.isDisabled();
+ await form.getByLabel('Email address',{exact:true}).fill('newsletter-browser@example.invalid');
+ await form.getByRole('checkbox').check();
+ let payload;
+ await page.route('**/api/newsletter/subscribe',async route=>{payload=route.request().postDataJSON();await route.fulfill({status:400,contentType:'application/json',body:'{"error":"test"}'});});
+ await button.click();await form.getByRole('status').filter({hasText:'could not be saved'}).waitFor();
+ await page.unroute('**/api/newsletter/subscribe');
+ await page.route('**/api/newsletter/subscribe',async route=>{payload=route.request().postDataJSON();await route.fulfill({status:201,contentType:'application/json',body:'{"id":"isolated-browser-test"}'});});
+ await button.click();await form.getByRole('status').filter({hasText:'has been saved'}).waitFor();
+ await page.unroute('**/api/newsletter/subscribe');
+ await page.setViewportSize({width:390,height:844});await form.scrollIntoViewIfNeeded();
+ const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+ await page.screenshot({path:'output/checklist-2026-09-09/business-sources/tr-newsletter-mobile.png'});
+ return {initialDisabled,errorVisible:true,successVisible:true,payload,overflow,mode:'Live UI, intercepted subscribe only; no real subscriber or external notification'};
+})(page);
+```
+### Page
+- Page URL: https://www.ensotek.com.tr/en
+- Page Title: Ensotek — Industrial Cooling Tower Systems — Ensotek
+- Console: 1 errors, 0 warnings
+### Events
+- New console entries: .playwright-cli/console-2026-09-09T22-59-26-380Z.log#L42-L48

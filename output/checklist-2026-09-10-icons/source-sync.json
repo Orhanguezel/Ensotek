@@ -1,0 +1,17 @@
+[
+  {
+    "file": "ensotek_de/frontend/src/components/FontAwesomeLoader.tsx",
+    "sha256": "6b886626de8f872f32a836c07eed47fad19245a27db091c2b137c8ee5b215c33",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/src/components/icon-css-manifest.json",
+    "sha256": "932de269fb85dee5502e56969276c6cb4cbaa10fc02b36e1a25d8661a26c7add",
+    "matches": true
+  },
+  {
+    "file": "ensotek_de/frontend/public/app/css/fontawesome-core-e74b8f1227cc.css",
+    "sha256": "e74b8f1227cc64051cbbb46cb99c2ae35a4cb193c6c6356d6438deef500c3c60",
+    "matches": true
+  }
+]
