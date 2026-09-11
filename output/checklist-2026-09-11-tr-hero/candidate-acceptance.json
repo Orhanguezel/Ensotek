@@ -1,0 +1,236 @@
+{
+ "base": "http://localhost:3321",
+ "desktop_en": {
+  "present": true,
+  "heading": "Our Product Range",
+  "viewAll": "See all 17 products",
+  "tiles": [
+   {
+    "href": "/en/products/closed-circuit-cooling-towers-cc-ctp-cc-dctp",
+    "alt": "Closed circuit cooling tower – CC CTP / ",
+    "fp": "high",
+    "complete": true,
+    "w": 310,
+    "h": 480
+   },
+   {
+    "href": "/en/products/open-circuit-cooling-towers-ctp-series",
+    "alt": "Open circuit cooling tower – single cell",
+    "fp": "auto",
+    "complete": true,
+    "w": 238,
+    "h": 234
+   },
+   {
+    "href": "/en/products/open-circuit-cooling-towers-double-cell-dctp-series",
+    "alt": "Open circuit cooling tower – double cell",
+    "fp": "auto",
+    "complete": true,
+    "w": 238,
+    "h": 234
+   }
+  ],
+  "chips": [
+   {
+    "text": "CLOSED CIRCUIT COOLING TOWERS",
+    "href": "/en/products"
+   },
+   {
+    "text": "OPEN CIRCUIT COOLING TOWERS",
+    "href": "/en/products"
+   },
+   {
+    "text": "Spare Parts (13)",
+    "href": "/en/products#spare-parts"
+   }
+  ],
+  "h1Width": 608,
+  "h1Height": 222,
+  "overflowX": false,
+  "heroH": 900,
+  "linkStatuses": [
+   200,
+   200,
+   200,
+   200,
+   200,
+   200
+  ],
+  "jsErrors": []
+ },
+ "desktop_tr": {
+  "present": true,
+  "heading": "Ürün Gruplarımız",
+  "viewAll": "17 ürünün tümünü gör",
+  "tiles": [
+   {
+    "href": "/tr/urunler/kapali-tip-su-sogutma-kuleleri-cc-ctp-cc-dctp",
+    "alt": "Kapalı tip su soğutma kulesi (closed cir",
+    "fp": "high",
+    "complete": true,
+    "w": 310,
+    "h": 480
+   },
+   {
+    "href": "/tr/urunler/open-circuit-cooling-towers-ctp-series",
+    "alt": "Open circuit cooling tower – single cell",
+    "fp": "auto",
+    "complete": true,
+    "w": 238,
+    "h": 234
+   },
+   {
+    "href": "/tr/urunler/acik-tip-su-sogutma-kuleleri-iki-hucreli-dctp-serisi",
+    "alt": "Açık tip su soğutma kulesi – İki hücreli",
+    "fp": "auto",
+    "complete": true,
+    "w": 238,
+    "h": 234
+   }
+  ],
+  "chips": [
+   {
+    "text": "KAPALI DEVRE SOĞUTMA KULELERİ",
+    "href": "/tr/urunler"
+   },
+   {
+    "text": "AÇIK DEVRE SOĞUTMA KULELERİ",
+    "href": "/tr/urunler"
+   },
+   {
+    "text": "Yedek Parçalar (13)",
+    "href": "/tr/urunler#spare-parts"
+   }
+  ],
+  "h1Width": 608,
+  "h1Height": 222,
+  "overflowX": false,
+  "heroH": 900,
+  "linkStatuses": [
+   200,
+   200,
+   200,
+   200,
+   200,
+   200
+  ],
+  "jsErrors": []
+ },
+ "mobile_en": {
+  "present": true,
+  "heading": "Our Product Range",
+  "viewAll": "See all 17 products",
+  "tiles": [
+   {
+    "href": "/en/products/closed-circuit-cooling-towers-cc-ctp-cc-dctp",
+    "alt": "Closed circuit cooling tower – CC CTP / ",
+    "fp": "high",
+    "complete": true,
+    "w": 342,
+    "h": 214
+   },
+   {
+    "href": "/en/products/open-circuit-cooling-towers-ctp-series",
+    "alt": "Open circuit cooling tower – single cell",
+    "fp": "auto",
+    "complete": true,
+    "w": 166,
+    "h": 166
+   },
+   {
+    "href": "/en/products/open-circuit-cooling-towers-double-cell-dctp-series",
+    "alt": "Open circuit cooling tower – double cell",
+    "fp": "auto",
+    "complete": true,
+    "w": 166,
+    "h": 166
+   }
+  ],
+  "chips": [
+   {
+    "text": "CLOSED CIRCUIT COOLING TOWERS",
+    "href": "/en/products"
+   },
+   {
+    "text": "OPEN CIRCUIT COOLING TOWERS",
+    "href": "/en/products"
+   },
+   {
+    "text": "Spare Parts (13)",
+    "href": "/en/products#spare-parts"
+   }
+  ],
+  "h1Width": 342,
+  "h1Height": 132,
+  "overflowX": false,
+  "heroH": 1505,
+  "linkStatuses": [
+   200,
+   200,
+   200,
+   200,
+   200,
+   200
+  ],
+  "jsErrors": []
+ },
+ "mobile_tr": {
+  "present": true,
+  "heading": "Ürün Gruplarımız",
+  "viewAll": "17 ürünün tümünü gör",
+  "tiles": [
+   {
+    "href": "/tr/urunler/kapali-tip-su-sogutma-kuleleri-cc-ctp-cc-dctp",
+    "alt": "Kapalı tip su soğutma kulesi (closed cir",
+    "fp": "high",
+    "complete": true,
+    "w": 342,
+    "h": 214
+   },
+   {
+    "href": "/tr/urunler/open-circuit-cooling-towers-ctp-series",
+    "alt": "Open circuit cooling tower – single cell",
+    "fp": "auto",
+    "complete": true,
+    "w": 166,
+    "h": 166
+   },
+   {
+    "href": "/tr/urunler/acik-tip-su-sogutma-kuleleri-iki-hucreli-dctp-serisi",
+    "alt": "Açık tip su soğutma kulesi – İki hücreli",
+    "fp": "auto",
+    "complete": true,
+    "w": 166,
+    "h": 166
+   }
+  ],
+  "chips": [
+   {
+    "text": "KAPALI DEVRE SOĞUTMA KULELERİ",
+    "href": "/tr/urunler"
+   },
+   {
+    "text": "AÇIK DEVRE SOĞUTMA KULELERİ",
+    "href": "/tr/urunler"
+   },
+   {
+    "text": "Yedek Parçalar (13)",
+    "href": "/tr/urunler#spare-parts"
+   }
+  ],
+  "h1Width": 342,
+  "h1Height": 132,
+  "overflowX": false,
+  "heroH": 1521,
+  "linkStatuses": [
+   200,
+   200,
+   200,
+   200,
+   200,
+   200
+  ],
+  "jsErrors": []
+ },
+ "pass": true
+}

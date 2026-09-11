@@ -1,6 +1,6 @@
 # Ensotek checklist uygulaması — 9 Eylül 2026
 
-**11 Eylül güncel durum: 86/108 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
+**11 Eylül güncel durum: 87/109 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
 
 Dört sitenin frontend düzeltmeleri ve Tanitio GTM bağlantı testi canlıya alındı. Bu rapor tam checklist kapanışı değildir. Kabulü biten maddeler [ana checklist](ENSOTEK-AILESI-TUM-PROJELER-CHECKLIST-2026-09-09.md) üzerinde işaretlendi; kısmi uygulamalar ayrı notlandı.
 
@@ -394,3 +394,10 @@ Son DE ürün Lighthouse örneği: performans 65, erişilebilirlik/BP/SEO 100, L
 
 - Mobilde header ile hero metni arasındaki boşluk 44 px'ten 7 px'e; hero mobil aralıkları sıkılaştırıldı. Tema ve dil düğmeleri mobil menünün üst şeridine taşındı.
 - Yerel aday ve canlıda 390 px kabul, K13 odak ve K22 kaydırılmış menü kabulleri geçti. Rollback `standalone.before-checklist-20260911T164747Z`. Yeni checklist maddesi sayılmadı; K23 kanıtına eklendi. [Kanıt](output/checklist-2026-09-11-moe-mobile-spacing/README.md).
+
+
+## 11 Eylül — TR11 ensotek.com.tr hero ürün mozaiği (kullanıcı isteği)
+
+- MOE ile aynı yaklaşım: sağda 3 gerçek kule kartı (kapalı devre, açık devre tek/çift hücre), "17 ürünün tümünü gör", kategori çipleri ve "Yedek Parçalar (13)" → ürünler sayfası anchor. Sunucu bileşeni; ürün/marka adı koddan gelmez; API boşsa hero tek kolon kalır.
+- EN/TR × masaüstü/mobil canlı kabul geçti; mobil Lighthouse 94/95, LCP 2,7 sn, A11y/BP/SEO 100. Build 78 URL; rollback `.next.before-checklist-20260911T170554Z`; commit `0388f71`.
+- Sayım: **87 kapalı / 22 açık (109 madde)**. [Kanıt](output/checklist-2026-09-11-tr-hero/README.md).
