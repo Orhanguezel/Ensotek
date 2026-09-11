@@ -1,0 +1,158 @@
+{
+ "base": "http://127.0.0.1:3320",
+ "desktop": {
+  "present": true,
+  "heading": "Ürün Gruplarımız",
+  "viewAll": "12 ürünün tümünü gör",
+  "tiles": [
+   {
+    "href": "/tr/products/lunapark-oyuncaklari-kabini",
+    "alt": "Renkli ve ham kompozit lunapark kabinleri, gövdeleri ve tema parkı ürünleri",
+    "fetchpriority": "high",
+    "loading": null,
+    "src": "http://127.0.0.1:3320/_next/image?url=%2Fuploads%2Fkompozit%2Flunapark-01-renkli.jpg&w=640",
+    "complete": false,
+    "w": 386,
+    "h": 582,
+    "top": 182
+   },
+   {
+    "href": "/tr/products/savunma-sanayi-kompozit-parcalari",
+    "alt": "Savunma sanayi için teknik kompozit muhafaza ve panel parçaları ürün görseli",
+    "fetchpriority": "auto",
+    "loading": "lazy",
+    "src": "http://127.0.0.1:3320/_next/image?url=%2Fuploads%2Fkompozit%2Fsavunma-sanayi-kompozit-parc",
+    "complete": false,
+    "w": 286,
+    "h": 284,
+    "top": 182
+   },
+   {
+    "href": "/tr/products/ctp-su-deposu",
+    "alt": "Yatay CTP su deposu ürün görseli",
+    "fetchpriority": "auto",
+    "loading": "lazy",
+    "src": "http://127.0.0.1:3320/_next/image?url=%2Fuploads%2Fkompozit%2Fsu-deposu.jpg&w=384&q=75",
+    "complete": false,
+    "w": 286,
+    "h": 284,
+    "top": 481
+   }
+  ],
+  "chips": [
+   {
+    "text": "Lunapark Ürünleri",
+    "href": "/tr/products?category=lunapark-urunleri"
+   },
+   {
+    "text": "Özel Üretim",
+    "href": "/tr/products?category=ozel-uretim"
+   },
+   {
+    "text": "Belediyeler İçin Ürünler",
+    "href": "/tr/products?category=belediyeler-icin-kompozit-ctp-polyester-urunler"
+   },
+   {
+    "text": "Peyzaj Ürünleri",
+    "href": "/tr/products?category=peyzaj-urunleri-ctp"
+   },
+   {
+    "text": "Karbon Fiber Ürünler",
+    "href": "/tr/products?category=karbon-fiber-urunler"
+   }
+  ],
+  "heroHeight": 804,
+  "overflowX": false,
+  "h1": "Karbon Fiber, CTP ve Cam Elyaf Kompozit ",
+  "lightMode": "light",
+  "jsErrors": [],
+  "linkStatuses": [
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200
+  ]
+ },
+ "mobile": {
+  "present": true,
+  "heading": "Ürün Gruplarımız",
+  "viewAll": "12 ürünün tümünü gör",
+  "tiles": [
+   {
+    "href": "/tr/products/lunapark-oyuncaklari-kabini",
+    "alt": "Renkli ve ham kompozit lunapark kabinleri, gövdeleri ve tema parkı ürünleri",
+    "fetchpriority": "high",
+    "loading": null,
+    "src": "http://127.0.0.1:3320/_next/image?url=%2Fuploads%2Fkompozit%2Flunapark-01-renkli.jpg&w=750",
+    "complete": false,
+    "w": 342,
+    "h": 214,
+    "top": 657
+   },
+   {
+    "href": "/tr/products/savunma-sanayi-kompozit-parcalari",
+    "alt": "Savunma sanayi için teknik kompozit muhafaza ve panel parçaları ürün görseli",
+    "fetchpriority": "auto",
+    "loading": "lazy",
+    "src": "http://127.0.0.1:3320/_next/image?url=%2Fuploads%2Fkompozit%2Fsavunma-sanayi-kompozit-parc",
+    "complete": false,
+    "w": 166,
+    "h": 166,
+    "top": 881
+   },
+   {
+    "href": "/tr/products/ctp-su-deposu",
+    "alt": "Yatay CTP su deposu ürün görseli",
+    "fetchpriority": "auto",
+    "loading": "lazy",
+    "src": "http://127.0.0.1:3320/_next/image?url=%2Fuploads%2Fkompozit%2Fsu-deposu.jpg&w=384&q=75",
+    "complete": false,
+    "w": 166,
+    "h": 166,
+    "top": 881
+   }
+  ],
+  "chips": [
+   {
+    "text": "Lunapark Ürünleri",
+    "href": "/tr/products?category=lunapark-urunleri"
+   },
+   {
+    "text": "Özel Üretim",
+    "href": "/tr/products?category=ozel-uretim"
+   },
+   {
+    "text": "Belediyeler İçin Ürünler",
+    "href": "/tr/products?category=belediyeler-icin-kompozit-ctp-polyester-urunler"
+   },
+   {
+    "text": "Peyzaj Ürünleri",
+    "href": "/tr/products?category=peyzaj-urunleri-ctp"
+   },
+   {
+    "text": "Karbon Fiber Ürünler",
+    "href": "/tr/products?category=karbon-fiber-urunler"
+   }
+  ],
+  "heroHeight": 1130,
+  "overflowX": false,
+  "h1": "Karbon Fiber, CTP ve Cam Elyaf Kompozit ",
+  "lightMode": null,
+  "jsErrors": [],
+  "linkStatuses": [
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200,
+   200
+  ]
+ },
+ "pass": false
+}

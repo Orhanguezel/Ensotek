@@ -1,6 +1,6 @@
 # Ensotek checklist uygulaması — 9 Eylül 2026
 
-**11 Eylül güncel durum: 83/105 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
+**11 Eylül güncel durum: 84/106 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
 
 Dört sitenin frontend düzeltmeleri ve Tanitio GTM bağlantı testi canlıya alındı. Bu rapor tam checklist kapanışı değildir. Kabulü biten maddeler [ana checklist](ENSOTEK-AILESI-TUM-PROJELER-CHECKLIST-2026-09-09.md) üzerinde işaretlendi; kısmi uygulamalar ayrı notlandı.
 
@@ -364,3 +364,11 @@ Son DE ürün Lighthouse örneği: performans 65, erişilebilirlik/BP/SEO 100, L
 - Dört canlı backend `STORAGE_DRIVER=local`; MOE env'inde Cloudinary anahtarı boş, DE/TR/K env'inde eski çift duruyor ama aktif yükleme yolu değil. Tanitio env'lerinde Cloudinary yok; Tanitio depolama ayarı `file_storage_config` tablosunda şifreli tutulur.
 - **Kullanıcı kararı:** Cloudinary sızıntısı önemsiz, uğraşılmayacak; işletme belgeleri sonra. Bu kararla geçmiş yeniden yazımı ve force push yapılmadı. ORT14 kapandı.
 - Sayım: **83 kapalı / 22 açık (105 madde)**.
+
+
+## 11 Eylül — K23 MOE hero ürün mozaiği (kullanıcı isteği)
+
+- Stok karbon kumaş görseli yerine gerçek ürünler: farklı kategorilerden öne çıkan 3 ürün kartı, "12 ürünün tümünü gör", 5 kategori çipi. Sunucu bileşeni; ürün/marka adı koddan gelmez; API boşsa fallback, 2'den az ürünse eski görsel.
+- Görseller `next/image` optimizer ile AVIF; ilk kart LCP öncelikli. Yerel adayda `/uploads` olmadığı için kabul betiği görsel isteklerini canlıya yönlendirir.
+- Canlı masaüstü/mobil, koyu/açık kabul geçti; build (72 URL), tsc, lint, tema, release kapıları geçti. Rollback `standalone.before-checklist-20260911T140020Z`; kaynaklar canlıyla hash eşit; commit `c43e9d0` `[skip ci]`.
+- Sayım: **84 kapalı / 22 açık (106 madde)**. [Kanıt](output/checklist-2026-09-11-moe-hero/README.md).
