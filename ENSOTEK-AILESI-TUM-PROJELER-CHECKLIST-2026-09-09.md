@@ -19,7 +19,7 @@ Bu dosya dört projenin **ortak takip noktasıdır**. Site denetimleri ile Tanit
 - Bir iş ancak ilgili kaynak düzeltmesi ve gerçek hedef URL/akış kabulüyle kapanır. Yerel başarı, canlıya alındı anlamına gelmez. Yayın/hesap/plan kararları bu checklist’in yazılmasıyla alınmış olmaz.
 - Eski fresh-seed önerileri canlı DB’de otomatik uygulanacak adım değildir. Özellikle ensotek.de/Kühlturm ortak DB gerçeği çözülmeden ayrı site sanılarak reset yapılmaz.
 
-**Takip özeti:** 22 açık iş/karar/doğrulama, 84 tamamlanmış veya kullanıcı kararıyla kapsamdan çıkarılmış kabul (106 madde; K23 hero ürün mozaiği 11 Eylül'de eklendi ve kapandı; K22 11 Eylül'de eklendi ve kapandı, ORT14 11 Eylül'de kullanıcı kararıyla kapandı). Açık öncelikler: P0: 0, P1: 11, P2: 10, P3: 1.
+**Takip özeti:** 22 açık iş/karar/doğrulama, 85 tamamlanmış veya kullanıcı kararıyla kapsamdan çıkarılmış kabul (107 madde; TR09 blog i18n 11 Eylül'de eklendi ve kapandı; K23 hero ürün mozaiği 11 Eylül'de eklendi ve kapandı; K22 11 Eylül'de eklendi ve kapandı, ORT14 11 Eylül'de kullanıcı kararıyla kapandı). Açık öncelikler: P0: 0, P1: 11, P2: 10, P3: 1.
 
 **10 Eylül son durum:** [23 açık maddenin somut kapanış koşulları](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Başlangıçtaki 62 açıktan 39 kabul kapandı; kaynakta olmayan işletme verileri ve gelecek dönemler tamamlanmış sayılmadı.
 
@@ -98,6 +98,8 @@ Ortak bağımlılıklar: ORT04–ORT14; Tanitio bağlantı/test işleri TAN01–
 - [ ] **TR07 · P2 · ensotek_com_tr / Tanitio / içerik · Plan, hesap kararına bağlı — LinkedIn ve Instagram taslak paketi** Öneri haftada 2 LinkedIn + 2 Instagram. Gerçek üretim görseli, teknik uzman kontrolü, doğru Reel kapağı ve editoryal onay; yayın otomatik kabul edilmiş değildir. Kaynak: [S3], TAN04. **10 Eylül:** 8 TR Instagram taslağı tek Ensotek yayıncısında; görseller ve kapaklar hazır, LinkedIn kullanıcı kararıyla atlandı. Uzman/görsel/gerçek video kabulü açık. [Paket](docs/content/social-first-month-2026-09-10/README.md).
 
 - [ ] **TR08 · P2 · ensotek_com_tr / Tanitio / analitik · Açık ölçüm — Tarihli sosyal başlangıç ve 28 gün karşılaştırması** İlk gönderi örneklemini al; 56 tıklama/999 gösterim GSC başlangıcını tarihli referans olarak koru. Eksik takipçi/etkileşimi sıfır veya tahmin yazma. Kaynak: [S3], TAN08.
+
+- [x] **TR09 · P1 · ensotek_com_tr / içerik + frontend / i18n · Kullanıcı bulgusu 11 Eylül — /en/blog Türkçe içerik ve slug gösteriyordu** 9 Bilgi Bankası yazısının yalnız TR çevirisi vardı; ortak backend sessizce TR'ye düşüyor, frontend `locale` alanına bakmıyordu, kök layout `lang="tr"` sabitti. **11 Eylül kabulü:** 9 EN satırı seed + canlı DB (6 ensotek.de kütüphanesinden, 3 çeviri); liste/sitemap/hreflang yalnız istenen dildeki kayıtlar; yabancı slug 308, karşılığı yoksa 404; `<html lang>` istekten. Canlı kabul 8 kontrolde geçti; rollback `.next.before-checklist-20260911T161958Z`. Aynı fallback DE/Kühlturm/MOE'de ayrıca doğrulanmalı. [Kanıt](output/checklist-2026-09-11-tr-blog-i18n/README.md).
 
 ## 3. ensotek_de — site ve içerik checklist’i
 

@@ -1,6 +1,6 @@
 # Ensotek checklist uygulaması — 9 Eylül 2026
 
-**11 Eylül güncel durum: 84/106 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
+**11 Eylül güncel durum: 85/107 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
 
 Dört sitenin frontend düzeltmeleri ve Tanitio GTM bağlantı testi canlıya alındı. Bu rapor tam checklist kapanışı değildir. Kabulü biten maddeler [ana checklist](ENSOTEK-AILESI-TUM-PROJELER-CHECKLIST-2026-09-09.md) üzerinde işaretlendi; kısmi uygulamalar ayrı notlandı.
 
@@ -372,3 +372,11 @@ Son DE ürün Lighthouse örneği: performans 65, erişilebilirlik/BP/SEO 100, L
 - Görseller `next/image` optimizer ile AVIF; ilk kart LCP öncelikli. Yerel adayda `/uploads` olmadığı için kabul betiği görsel isteklerini canlıya yönlendirir.
 - Canlı masaüstü/mobil, koyu/açık kabul geçti; build (72 URL), tsc, lint, tema, release kapıları geçti. Rollback `standalone.before-checklist-20260911T140020Z`; kaynaklar canlıyla hash eşit; commit `c43e9d0` `[skip ci]`.
 - Sayım: **84 kapalı / 22 açık (106 madde)**. [Kanıt](output/checklist-2026-09-11-moe-hero/README.md).
+
+
+## 11 Eylül — TR09 ensotek.com.tr Bilgi Bankası dil sorunu (kullanıcı bildirimi)
+
+- `/en/blog` TR başlık ve TR slug basıyordu. Üç katmanlı neden: 9 yazının yalnız TR i18n satırı; ortak backend istenen dil yoksa sessizce TR döndürür; frontend yanıttaki `locale`'e bakmıyordu, `<html lang>` sabit "tr".
+- Düzeltme: 017 seed ile 9 EN satırı (6 ensotek.de kütüphanesinin mevcut EN metni, 3 çeviri) canlı DB'ye yedekli uygulandı; liste/sitemap/hreflang envanteri `locale` filtreli; yabancı slug aynı içerik kimliğinin doğru slug'ına 308, karşılığı yoksa 404; kök layout dili next-intl başlığından alıyor.
+- Kabul yerel aday ve canlıda 8 kontrolle geçti (EN liste, TR liste, EN/TR detay, çapraz slug 308'ler, 404, hreflang, sitemap 9+9). Build 74 URL; rollback `.next.before-checklist-20260911T161958Z`; commit `814ab1f`.
+- Sayım: **85 kapalı / 22 açık (107 madde)**. [Kanıt](output/checklist-2026-09-11-tr-blog-i18n/README.md).

@@ -1,6 +1,6 @@
 # Ensotek ailesi — kalan kabul koşulları
 
-10 Eylül 2026; 11 Eylül güncellemesi. Ana checklist: **106 madde, 84 kabul tamamlandı/kapsamdan çıkarıldı, 22 açık** (K22 MOE mobil menü 11 Eylül'de eklendi ve kapandı; ORT14 11 Eylül'de kullanıcı kararıyla kapandı: Cloudinary sızıntısı kapsam dışı, geçmişte başka gerçek sır yok). Kullanıcının devam talebindeki 62 açık maddeden 39'u kapandı. Bu dosya yeni veya ikinci bir checkbox sayacı değildir; açık kimliklerin somut kapanış koşuludur.
+10 Eylül 2026; 11 Eylül güncellemesi. Ana checklist: **107 madde, 85 kabul tamamlandı/kapsamdan çıkarıldı, 22 açık** (K22 MOE mobil menü 11 Eylül'de eklendi ve kapandı; ORT14 11 Eylül'de kullanıcı kararıyla kapandı: Cloudinary sızıntısı kapsam dışı, geçmişte başka gerçek sır yok). Kullanıcının devam talebindeki 62 açık maddeden 39'u kapandı. Bu dosya yeni veya ikinci bir checkbox sayacı değildir; açık kimliklerin somut kapanış koşuludur.
 
 Kühlturm Ensotek alt markası ve tek sosyal yayıncı `ensotek` olarak korunur. DE/EN/TR indekslenebilir içerik korunur. İşletme belgeleri mevcut Ensotek kaynaklarından alındı; bulunmayan sosyal kanallar kullanıcı kararıyla atlandı. Ensotek belgeleri MOE sertifikası/kapasitesi olarak kullanılmadı.
 
