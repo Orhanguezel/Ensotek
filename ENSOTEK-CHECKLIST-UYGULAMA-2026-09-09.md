@@ -1,6 +1,6 @@
 # Ensotek checklist uygulaması — 9 Eylül 2026
 
-**11 Eylül güncel durum: 82/105 kabul tamamlandı; 23 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
+**11 Eylül güncel durum: 83/105 kabul tamamlandı; 22 açık.** K22 (MOE mobil menü) kullanıcı bildirimiyle eklendi ve aynı gün kapandı. [Kalan koşullar](ENSOTEK-KALAN-KABULLER-2026-09-10.md). Önceki ara sayılar aşağıda tarihsel kayıttır.
 
 Dört sitenin frontend düzeltmeleri ve Tanitio GTM bağlantı testi canlıya alındı. Bu rapor tam checklist kapanışı değildir. Kabulü biten maddeler [ana checklist](ENSOTEK-AILESI-TUM-PROJELER-CHECKLIST-2026-09-09.md) üzerinde işaretlendi; kısmi uygulamalar ayrı notlandı.
 
@@ -355,3 +355,12 @@ Son DE ürün Lighthouse örneği: performans 65, erişilebilirlik/BP/SEO 100, L
 - Kabul: Chromium'a `backdrop-filter` enjekte ederek Safari taklidi. Canlı önce nav 68 px (hata), yerel aday ve canlı sonra 857 px tam ekran. K13 regresyonu canlıda geçti. Build (72 URL), tema, release kapıları geçti; lint 0 hata/2 eski uyarı.
 - Canlı rollback `.next/standalone.before-checklist-20260911T112616Z`; `Header.tsx` canlı kaynakla hash eşit. Gerçek iPhone kabulü kullanıcıda. Diğer üç sitede aynı kalıp bulunmadı. [Kanıt](output/checklist-2026-09-11-moe-menu/README.md).
 - Sayım: **82 kapalı / 23 açık (105 madde)**.
+
+
+## 11 Eylül — ORT14 kapanışı ve Cloudinary kararı
+
+- Beş repo (root, DE, TR, MOE, Kühlturm) commit+push edildi; MOE `[skip ci]` ile, push tetikli deploy workflow'u çalışmadı (o workflow Haziran'dan beri her koşuda başarısız).
+- Tam Git geçmişi taraması: canlı ortamla eşleşen tek gerçek sır eski Cloudinary anahtar/sır çifti; root 5 uzak commit (seed SQL + DB snapshot), DE 1, MOE 3 (eski `.env.production` + seed), Kühlturm 1 (seed); TR temiz. MOE'nin geçmişteki `.env.production` dosyalarında DB/JWT/SMTP/Google alanları `change-me` yer tutucu. Root'ta yalnız yerel `refs/stash` içinde eski Kühlturm DB parolası var; uzakta yok ve DB `kuhlturm_live`'a taşındı.
+- Dört canlı backend `STORAGE_DRIVER=local`; MOE env'inde Cloudinary anahtarı boş, DE/TR/K env'inde eski çift duruyor ama aktif yükleme yolu değil. Tanitio env'lerinde Cloudinary yok; Tanitio depolama ayarı `file_storage_config` tablosunda şifreli tutulur.
+- **Kullanıcı kararı:** Cloudinary sızıntısı önemsiz, uğraşılmayacak; işletme belgeleri sonra. Bu kararla geçmiş yeniden yazımı ve force push yapılmadı. ORT14 kapandı.
+- Sayım: **83 kapalı / 22 açık (105 madde)**.
